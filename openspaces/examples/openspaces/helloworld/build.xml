@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+
+<project name="openspaces" default="usage" basedir=".">
+
+    <property name="pulocation" value="${basedir}/pu/helloworld"/>
+    <property name="puclasses" value="${pulocation}/classes"/>
+
+    <path id="all-libs">
+
+        <fileset dir="../../../lib">
+            <include name="**/*.jar"/>
+            <exclude name="JSpaces-1.4.jar"/>
+        </fileset>
+
+        <fileset dir="">
+
+        </fileset>
+    </path>
+
+    <target name="usage">
+        <echo message=""/>
+        <echo message="OpenSpaces build script"/>
+        <echo message="-----------------------------------------"/>
+        <echo message=""/>
+        <echo message="Among the available targets are:"/>
+        <echo message=""/>
+        <echo message="clean    --> Cleans all output dirs"/>
+        <echo message="build    --> build all; don't create JARs"/>
+        <echo message="dist     --> build the distribution"/>
+        <echo message=""/>
+    </target>
+
+    <target name="clean">
+        <delete dir="${puclasses}"/>
+    </target>
+
+    <target name="build">
+        <mkdir dir="${puclasses}"/>
+
+        <javac destdir="${puclasses}" source="1.5" target="1.5" debug="on"
+               deprecation="false" optimize="false" failonerror="true">
+            <src path="src"/>
+            <classpath refid="all-libs"/>
+        </javac>
+
+        <copy todir="${puclasses}" preservelastmodified="true">
+            <fileset dir="src">
+                <include name="**/*.properties"/>
+                <include name="**/*.handlers"/>
+                <include name="**/*.schemas"/>
+                <include name="**/*.xml"/>
+                <include name="**/*.dtd"/>
+                <include name="**/*.xsd"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="dist" depends="build">
+        <jar basedir="${pulocation}" jarfile="${basedir}/pu/helloworld.pu"/>
+    </target>
+
+</project>
