@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+    <!--sample SLA, not used yet-->
+    <bean id="SLA" class="org.openspaces.pu.container.servicegrid.sla.SLA">
+        <property name="totalMembers" value="2"/>
+        <property name="numbeOfBackups" value="1"/>
+        <property name="policy">
+            <bean class="org.openspaces.pu.container.servicegrid.sla.ScaleUpPolicy">
+                <property name="watch" value="backlog"/>
+                <property name="high" value="500"/>
+                <property name="scaleTo" value="5"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
+        <property name="url" value="/./space"/>
+    </bean>
+
+    <bean id="gigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
+        <property name="space" ref="space"/>
+    </bean>
+
+
+</beans>

@@ -56,7 +56,7 @@
     <target name="clean" description="Clean all output dirs (dist, javadocs, classes, test-classes, etc)">
         <!-- Just kill target dir (it's safer). No need at this point to keep it. -->
         <delete dir="${target.dir}"/>
-        <delete dir="${lib.dir}/${name}" />
+        <delete dir="${lib.dir}/${name}"/>
     </target>
 
     <!--
@@ -133,15 +133,15 @@
 
 
     <target name="dist" depends="fulljar" description="Creates the OpenSpaces distribution">
-        <delete file="${dist.dir}/${name}-${openspaces-version}.zip" />
+        <delete file="${dist.dir}/${name}-${openspaces-version}.zip"/>
         <zip zipfile="${dist.dir}/${name}-${openspaces-version}.zip">
             <zipfileset dir="${basedir}">
-                <include name="bin/pu*" />
+                <include name="bin/pu*"/>
 
-                <include name="examples/**" />
-                <exclude name="examples/**/*.iml" />
+                <include name="examples/**"/>
+                <exclude name="examples/**/*.iml"/>
 
-                <include name="lib/${name}/**" />
+                <include name="lib/${name}/**"/>
 
             </zipfileset>
         </zip>
@@ -307,4 +307,19 @@
     </target>
 
     <target name="clean_tests" depends="clean,tests"/>
+
+    <target name="puservicebeanjars" depends="puservicebean.jar, puservicebean-dl.jar"/>
+
+    <target name="puservicebean.jar" depends="buildmain">
+        <jar destfile="/Users/ming/GigaSpacesEE5.2/ServiceGrid/deploy/puservicebean.jar"
+             basedir="${target.classes.dir}"
+
+                />
+    </target>
+
+    <target name="puservicebean-dl.jar" depends="buildmain">
+        <jar destfile="/Users/ming/GigaSpacesEE5.2/ServiceGrid/deploy/puservicebean-dl.jar"
+             basedir="${target.classes.dir}"
+             includes="**/PUServiceBean.class"/>
+    </target>
 </project>
