@@ -8,17 +8,13 @@
         <property name="url" value="/./space"/>
     </bean>
 
-    <bean id="txManager" class="org.openspaces.core.transaction.LocalTransactionManagerFactoryBean">
+    <bean id="localTxManager" class="org.openspaces.core.transaction.LocalJiniTransactionManager">
         <property name="space" ref="space"/>
-    </bean>
-
-    <bean id="gsTxManager" class="org.openspaces.core.transaction.GigaSpaceTransactionManager">
-        <property name="transactionManager" ref="txManager"/>
     </bean>
 
     <bean id="gigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
         <property name="space" ref="space"/>
-        <property name="transactionManager" ref="gsTxManager"/>
+        <property name="transactionManager" ref="localTxManager"/>
     </bean>
 
 </beans>

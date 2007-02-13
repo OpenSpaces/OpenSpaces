@@ -1,12 +1,12 @@
 package org.openspaces.itest.transaction.local;
 
 import org.openspaces.core.GigaSpace;
-import org.openspaces.core.transaction.GigaSpaceTransactionManager;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
-import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * @author kimchy
@@ -15,7 +15,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
 
     protected GigaSpace gigaSpace;
 
-    protected GigaSpaceTransactionManager gsTxManager;
+    protected PlatformTransactionManager localTxManager;
 
     public SimpleLocalTransactionTests() {
         setPopulateProtectedVariables(true);
@@ -34,7 +34,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
     }
 
     public void testSimpleCommit() {
-        TransactionTemplate txTemplate = new TransactionTemplate(gsTxManager);
+        TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
         assertNull(gigaSpace.read(new Object()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
@@ -47,7 +47,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
     }
 
     public void testSimpleRollback() {
-        TransactionTemplate txTemplate = new TransactionTemplate(gsTxManager);
+        TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
         assertNull(gigaSpace.read(new Object()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
@@ -61,7 +61,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
     }
 
     public void testPropogationRequiredWithCommit() {
-        TransactionTemplate txTemplate = new TransactionTemplate(gsTxManager);
+        TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
         assertNull(gigaSpace.read(new Object()));
         assertNull(gigaSpace.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -74,7 +74,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
                 assertNotNull(gigaSpace.read(new Object()));
                 assertNull(gigaSpace.read(new TestData1()));
 
-                TransactionTemplate innerTxTemplate = new TransactionTemplate(gsTxManager);
+                TransactionTemplate innerTxTemplate = new TransactionTemplate(localTxManager);
                 innerTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
                 innerTxTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -91,7 +91,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
     }
 
     public void testPropogationRequiredWithRollback() {
-        TransactionTemplate txTemplate = new TransactionTemplate(gsTxManager);
+        TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
         assertNull(gigaSpace.read(new Object()));
         assertNull(gigaSpace.read(new TestData1()));
         try {
@@ -105,7 +105,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
                     assertNotNull(gigaSpace.read(new Object()));
                     assertNull(gigaSpace.read(new TestData1()));
 
-                    TransactionTemplate innerTxTemplate = new TransactionTemplate(gsTxManager);
+                    TransactionTemplate innerTxTemplate = new TransactionTemplate(localTxManager);
                     innerTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
                     innerTxTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -126,7 +126,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
     }
 
     public void testPropogationRequiresNewWithCommit() {
-        TransactionTemplate txTemplate = new TransactionTemplate(gsTxManager);
+        TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
         assertNull(gigaSpace.read(new Object()));
         assertNull(gigaSpace.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -139,7 +139,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
                 assertNotNull(gigaSpace.read(new Object()));
                 assertNull(gigaSpace.read(new TestData1()));
 
-                TransactionTemplate innerTxTemplate = new TransactionTemplate(gsTxManager);
+                TransactionTemplate innerTxTemplate = new TransactionTemplate(localTxManager);
                 innerTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
                 innerTxTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -156,7 +156,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
     }
 
     public void testPropogationRequiresNewWithRollback() {
-        TransactionTemplate txTemplate = new TransactionTemplate(gsTxManager);
+        TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
         assertNull(gigaSpace.read(new Object()));
         assertNull(gigaSpace.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -169,7 +169,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
                 assertNotNull(gigaSpace.read(new Object()));
                 assertNull(gigaSpace.read(new TestData1()));
 
-                TransactionTemplate innerTxTemplate = new TransactionTemplate(gsTxManager);
+                TransactionTemplate innerTxTemplate = new TransactionTemplate(localTxManager);
                 innerTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
                 innerTxTemplate.execute(new TransactionCallbackWithoutResult() {
