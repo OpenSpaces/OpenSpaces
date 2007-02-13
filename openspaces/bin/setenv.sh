@@ -156,12 +156,6 @@ do
 done
 export XML_JARS
 
-for i in ${JSHOMEDIR}/lib/ui/*.jar
-do
-    UI_JARS=${UI_JARS}$CPS$i
-done
-export UI_JARS
-
 for i in ${JSHOMEDIR}/lib/jmx/*.jar
 do
     JMX_JARS=${JMX_JARS}$CPS$i
@@ -186,12 +180,6 @@ do
 done
 export SPRING_JARS
 
-for i in ${JSHOMEDIR}/lib/rio/*.jar
-do
-    RIO_JARS=${RIO_JARS}$CPS$i
-done
-export RIO_JARS
-
 for i in ${JSHOMEDIR}/lib/ext/*.*
 do
     EXT_JARS=${EXT_JARS}$CPS$i
@@ -201,13 +189,13 @@ export EXT_JARS
 # The GS_JARS contains the same list as defined in the Class-Path entry of the JSpaces.jar manifest file.
 # These jars are required for client application and starting a Space from within your application.
 # Note - Do not set the GS_JARS variable together with the GS_JINI_START_CLASSPATH variable (which is used only for the ServiceStarter).
-GS_JARS=${EXT_JARS}$CPS${JSHOMEDIR}$CPS${JSHOMEDIR}/lib/JSpaces.jar$CPS${JSHOMEDIR}/lib/jini/jsk-platform.jar$CPS${JSHOMEDIR}/lib/jini/jsk-lib.jar$CPS${JSHOMEDIR}/lib/jini/start.jar$CPS${JSHOMEDIR}/lib/rio/webster.jar$CPS${JSHOMEDIR}/lib/rio/boot.jar$CPS${JSHOMEDIR}/lib/common/backport-util-concurrent.jar
+GS_JARS=${EXT_JARS}$CPS${JSHOMEDIR}$CPS${JSHOMEDIR}/lib/JSpaces.jar$CPS${JSHOMEDIR}/lib/jini/jsk-platform.jar$CPS${JSHOMEDIR}/lib/jini/jsk-lib.jar$CPS${JSHOMEDIR}/lib/jini/start.jar$CPS${JSHOMEDIR}/lib/ServiceGrid/gs-lib.jar$CPS${JSHOMEDIR}/lib/common/backport-util-concurrent.jar
 
-PLATFORM_VERSION=5.1; export PLATFORM_VERSION
+PLATFORM_VERSION=6.0; export PLATFORM_VERSION
 POLICY=${JSHOMEDIR}/policy/policy.all; export POLICY
 
 if [ "${LOOKUPGROUPS}" = "" ] ; then
-LOOKUPGROUPS="gigaspaces-5.2EE"; export LOOKUPGROUPS
+LOOKUPGROUPS="gigaspaces-6.0EE"; export LOOKUPGROUPS
 fi
 LOOKUP_GROUPS_PROP=-Dcom.gs.jini_lus.groups=${LOOKUPGROUPS}; export LOOKUP_GROUPS_PROP
 
@@ -231,7 +219,7 @@ fi
 export RMI_OPTIONS
 
 # Note - Do not set the GS_JARS variable together with the GS_JINI_START_CLASSPATH variable (which is used only for the ServiceStarter).
-GS_JINI_START_CLASSPATH="${EXT_JARS}$CPS${JSHOMEDIR}$CPS${JSHOMEDIR}/lib/jini/start.jar$CPS${JSHOMEDIR}/lib/rio/boot.jar"; export GS_JINI_START_CLASSPATH
+GS_JINI_START_CLASSPATH="${EXT_JARS}$CPS${JSHOMEDIR}$CPS${JSHOMEDIR}/lib/jini/start.jar$CPS${JSHOMEDIR}/lib/ServiceGrid/gs-lib.jar"; export GS_JINI_START_CLASSPATH
 
 # For remote Eclipse debugging add the ${ECLIPSE_REMOTE_DEBUG} variable to the command line:
 ECLIPSE_REMOTE_DEBUG="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000"; export ECLIPSE_REMOTE_DEBUG
@@ -279,8 +267,6 @@ if $VERBOSE; then
 	echo COMMON_JARS: ${COMMON_JARS}
 	echo
 	echo SPRING_JARS: ${SPRING_JARS}
-	echo
-	echo RIO_JARS: ${RIO_JARS}
 	echo
 	echo EXT_JARS: ${EXT_JARS}
 	echo

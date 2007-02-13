@@ -80,7 +80,9 @@
           <root url="jar://$MODULE_DIR$/../../lib/JSpaces-1.4.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../../../product/gigaspaces/src/java" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">
