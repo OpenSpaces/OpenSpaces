@@ -1,27 +1,27 @@
 package org.openspaces.pu.container.standalone;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.config.BeanLevelProperties;
 import org.openspaces.core.config.BeanLevelPropertiesAware;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.ProcessingUnitContainerProvider;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Enumeration;
-import java.util.jar.JarFile;
+import java.util.List;
 import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * @author kimchy
@@ -157,6 +157,7 @@ public class StandaloneProcessingUnitContainerProvider implements ProcessingUnit
             parentClassLoader = this.getClass().getClassLoader();
         }
         URL[] classLoaderUrls = (URL[]) urls.toArray(new URL[urls.size()]);
+        // TODO need to probably implement our own class loader so we can control what gets propogated to the parent class loader
         URLClassLoader classLoader = new URLClassLoader(classLoaderUrls, parentClassLoader);
         StandaloneContainerRunnable containerRunnable = new StandaloneContainerRunnable(beanLevelProperties, configLocations);
         Thread standaloneContainerThread = new Thread(containerRunnable, "Standalone Container Thread");
