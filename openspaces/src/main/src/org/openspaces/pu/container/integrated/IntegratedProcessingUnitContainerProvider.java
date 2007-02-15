@@ -1,9 +1,12 @@
 package org.openspaces.pu.container.integrated;
 
+import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.cluster.ClusterInfoAware;
+import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
 import org.openspaces.core.config.BeanLevelProperties;
+import org.openspaces.core.config.BeanLevelPropertiesAware;
 import org.openspaces.core.config.BeanLevelPropertyBeanPostProcessor;
 import org.openspaces.core.config.BeanLevelPropertyPlaceholderConfigurer;
-import org.openspaces.core.config.BeanLevelPropertiesAware;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.ProcessingUnitContainerProvider;
@@ -19,13 +22,16 @@ import java.util.List;
 /**
  * @author kimchy
  */
-public class IntegratedProcessingUnitContainerProvider implements ProcessingUnitContainerProvider, BeanLevelPropertiesAware {
+public class IntegratedProcessingUnitContainerProvider implements ProcessingUnitContainerProvider,
+        BeanLevelPropertiesAware, ClusterInfoAware {
 
     private ApplicationContext parentContext;
 
     private List configResources = new ArrayList();
 
     private BeanLevelProperties beanLevelProperties;
+
+    private ClusterInfo clusterInfo;
 
     public IntegratedProcessingUnitContainerProvider() {
 
@@ -37,6 +43,10 @@ public class IntegratedProcessingUnitContainerProvider implements ProcessingUnit
 
     public void setBeanLevelProperties(BeanLevelProperties beanLevelProperties) {
         this.beanLevelProperties = beanLevelProperties;
+    }
+
+    public void setClusterInfo(ClusterInfo clusterInfo) {
+        this.clusterInfo = clusterInfo;
     }
 
     public void addConfigLocation(Resource resource) {
@@ -68,6 +78,9 @@ public class IntegratedProcessingUnitContainerProvider implements ProcessingUnit
         if (beanLevelProperties != null) {
             applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties));
             applicationContext.addBeanPostProcessor(new BeanLevelPropertyBeanPostProcessor(beanLevelProperties));
+        }
+        if (clusterInfo != null) {
+            applicationContext.addBeanPostProcessor(new ClusterInfoBeanPostProcessor(clusterInfo));
         }
         // "start" the application context
         applicationContext.refresh();

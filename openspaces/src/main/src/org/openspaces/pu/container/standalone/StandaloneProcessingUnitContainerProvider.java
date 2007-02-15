@@ -2,6 +2,8 @@ package org.openspaces.pu.container.standalone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.core.config.BeanLevelProperties;
 import org.openspaces.core.config.BeanLevelPropertiesAware;
 import org.openspaces.pu.container.CannotCreateContainerException;
@@ -26,7 +28,8 @@ import java.util.jar.JarFile;
 /**
  * @author kimchy
  */
-public class StandaloneProcessingUnitContainerProvider implements ProcessingUnitContainerProvider, BeanLevelPropertiesAware {
+public class StandaloneProcessingUnitContainerProvider implements ProcessingUnitContainerProvider,
+        BeanLevelPropertiesAware, ClusterInfoAware {
 
     private static Log logger = LogFactory.getLog(StandaloneProcessingUnitContainerProvider.class);
 
@@ -36,12 +39,18 @@ public class StandaloneProcessingUnitContainerProvider implements ProcessingUnit
 
     private BeanLevelProperties beanLevelProperties;
 
+    private ClusterInfo clusterInfo;
+
     public StandaloneProcessingUnitContainerProvider(String location) {
         this.location = location;
     }
 
     public void setBeanLevelProperties(BeanLevelProperties beanLevelProperties) {
         this.beanLevelProperties = beanLevelProperties;
+    }
+
+    public void setClusterInfo(ClusterInfo clusterInfo) {
+        this.clusterInfo = clusterInfo;
     }
 
     public void addConfigLocation(String configLocation) {
@@ -159,7 +168,7 @@ public class StandaloneProcessingUnitContainerProvider implements ProcessingUnit
         URL[] classLoaderUrls = (URL[]) urls.toArray(new URL[urls.size()]);
         // TODO need to probably implement our own class loader so we can control what gets propogated to the parent class loader
         URLClassLoader classLoader = new URLClassLoader(classLoaderUrls, parentClassLoader);
-        StandaloneContainerRunnable containerRunnable = new StandaloneContainerRunnable(beanLevelProperties, configLocations);
+        StandaloneContainerRunnable containerRunnable = new StandaloneContainerRunnable(beanLevelProperties, clusterInfo, configLocations);
         Thread standaloneContainerThread = new Thread(containerRunnable, "Standalone Container Thread");
         standaloneContainerThread.setDaemon(false);
         standaloneContainerThread.setContextClassLoader(classLoader);

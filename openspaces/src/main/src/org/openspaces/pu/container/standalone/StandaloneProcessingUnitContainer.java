@@ -1,11 +1,12 @@
 package org.openspaces.pu.container.standalone;
 
-import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.CannotCloseContainerException;
-import org.openspaces.pu.container.support.CommandLineParser;
+import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.openspaces.pu.container.support.ClusterInfoParser;
+import org.openspaces.pu.container.support.CommandLineParser;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * @author kimchy
@@ -44,6 +45,7 @@ public class StandaloneProcessingUnitContainer implements ProcessingUnitContaine
         StandaloneProcessingUnitContainerProvider provider = new StandaloneProcessingUnitContainerProvider(puLocation);
 
         provider.setBeanLevelProperties(BeanLevelPropertiesParser.parse(params));
+        provider.setClusterInfo(ClusterInfoParser.parse(params));
 
         // parse the config location parameters
         for (int i = 0; i < params.length; i++) {

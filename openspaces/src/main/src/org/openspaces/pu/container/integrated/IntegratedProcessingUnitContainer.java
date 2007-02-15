@@ -1,10 +1,10 @@
 package org.openspaces.pu.container.integrated;
 
-import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.CannotCloseContainerException;
-import org.openspaces.pu.container.support.CommandLineParser;
+import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
-import org.openspaces.core.config.BeanLevelProperties;
+import org.openspaces.pu.container.support.ClusterInfoParser;
+import org.openspaces.pu.container.support.CommandLineParser;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -39,6 +39,7 @@ public class IntegratedProcessingUnitContainer implements ProcessingUnitContaine
 
         IntegratedProcessingUnitContainerProvider provider = new IntegratedProcessingUnitContainerProvider();
         provider.setBeanLevelProperties(BeanLevelPropertiesParser.parse(params));
+        provider.setClusterInfo(ClusterInfoParser.parse(params));
 
         // parse the config location parameters
         for (int i = 0; i < params.length; i++) {

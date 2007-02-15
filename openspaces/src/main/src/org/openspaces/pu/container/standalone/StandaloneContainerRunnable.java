@@ -1,5 +1,7 @@
 package org.openspaces.pu.container.standalone;
 
+import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
 import org.openspaces.core.config.BeanLevelProperties;
 import org.openspaces.core.config.BeanLevelPropertyBeanPostProcessor;
 import org.openspaces.core.config.BeanLevelPropertyPlaceholderConfigurer;
@@ -21,6 +23,8 @@ public class StandaloneContainerRunnable implements Runnable {
 
     private BeanLevelProperties beanLevelProperties;
 
+    private ClusterInfo clusterInfo;
+
     private List configLocations;
 
     private boolean running;
@@ -29,8 +33,9 @@ public class StandaloneContainerRunnable implements Runnable {
 
     private ResourceApplicationContext applicationContext;
 
-    public StandaloneContainerRunnable(BeanLevelProperties beanLevelProperties, List configLocations) {
+    public StandaloneContainerRunnable(BeanLevelProperties beanLevelProperties, ClusterInfo clusterInfo, List configLocations) {
         this.beanLevelProperties = beanLevelProperties;
+        this.clusterInfo = clusterInfo;
         this.configLocations = configLocations;
     }
 
@@ -65,6 +70,9 @@ public class StandaloneContainerRunnable implements Runnable {
             if (beanLevelProperties != null) {
                 applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties));
                 applicationContext.addBeanPostProcessor(new BeanLevelPropertyBeanPostProcessor(beanLevelProperties));
+            }
+            if (clusterInfo != null) {
+                applicationContext.addBeanPostProcessor(new ClusterInfoBeanPostProcessor(clusterInfo));
             }
             // "start" the application context
             applicationContext.refresh();
