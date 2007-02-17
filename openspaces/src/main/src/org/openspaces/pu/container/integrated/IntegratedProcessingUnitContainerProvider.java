@@ -33,6 +33,8 @@ public class IntegratedProcessingUnitContainerProvider implements ProcessingUnit
 
     private ClusterInfo clusterInfo;
 
+    private ClassLoader classLoader;
+
     public IntegratedProcessingUnitContainerProvider() {
 
     }
@@ -47,6 +49,10 @@ public class IntegratedProcessingUnitContainerProvider implements ProcessingUnit
 
     public void setClusterInfo(ClusterInfo clusterInfo) {
         this.clusterInfo = clusterInfo;
+    }
+
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
     }
 
     public void addConfigLocation(Resource resource) {
@@ -81,6 +87,9 @@ public class IntegratedProcessingUnitContainerProvider implements ProcessingUnit
         }
         if (clusterInfo != null) {
             applicationContext.addBeanPostProcessor(new ClusterInfoBeanPostProcessor(clusterInfo));
+        }
+        if (classLoader != null) {
+            applicationContext.setClassLoader(classLoader);
         }
         // "start" the application context
         applicationContext.refresh();
