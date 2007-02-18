@@ -1,4 +1,4 @@
-package org.openspaces.event;
+package org.openspaces.events;
 
 import org.openspaces.core.GigaSpaceException;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;

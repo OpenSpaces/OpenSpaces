@@ -1,4 +1,4 @@
-package org.openspaces.event.adapter;
+package org.openspaces.events.adapter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

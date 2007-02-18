@@ -1,4 +1,4 @@
-package org.openspaces.event.adapter;
+package org.openspaces.events.adapter;
 
 import org.springframework.util.ReflectionUtils;
 

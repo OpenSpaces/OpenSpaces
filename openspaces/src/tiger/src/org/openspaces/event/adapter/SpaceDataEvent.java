@@ -1,4 +1,4 @@
-package org.openspaces.event.adapter;
+package org.openspaces.events.adapter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

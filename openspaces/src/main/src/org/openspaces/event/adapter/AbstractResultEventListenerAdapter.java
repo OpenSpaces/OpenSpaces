@@ -1,8 +1,8 @@
-package org.openspaces.event.adapter;
+package org.openspaces.events.adapter;
 
 import net.jini.core.lease.Lease;
 import org.openspaces.core.GigaSpace;
-import org.openspaces.event.SpaceDataEventListener;
+import org.openspaces.events.SpaceDataEventListener;
 
 /**
  * @author kimchy
