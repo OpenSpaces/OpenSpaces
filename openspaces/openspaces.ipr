@@ -288,6 +288,9 @@
   </component>
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/examples/openspaces/data/common/examples-data-common.iml" filepath="$PROJECT_DIR$/examples/openspaces/data/common/examples-data-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/examples/openspaces/data/feeder/examples-data-feeder.iml" filepath="$PROJECT_DIR$/examples/openspaces/data/feeder/examples-data-feeder.iml" />
+      <module fileurl="file://$PROJECT_DIR$/examples/openspaces/data/processor/examples-data-processor.iml" filepath="$PROJECT_DIR$/examples/openspaces/data/processor/examples-data-processor.iml" />
       <module fileurl="file://$PROJECT_DIR$/examples/openspaces/helloworld/examples-helloworld.iml" filepath="$PROJECT_DIR$/examples/openspaces/helloworld/examples-helloworld.iml" />
       <module fileurl="file://$PROJECT_DIR$/openspaces.iml" filepath="$PROJECT_DIR$/openspaces.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/main/source-main.iml" filepath="$PROJECT_DIR$/src/main/source-main.iml" />
@@ -317,6 +320,90 @@
       </RunnerSettings>
       <RunnerSettings RunnerId="Run" />
       <ConfigurationWrapper RunnerId="Debug" />
+      <ConfigurationWrapper RunnerId="Run" />
+      <method>
+        <option name="Make" value="true" />
+      </method>
+    </configuration>
+    <configuration default="false" name="Example Data Processor" type="Application" factoryName="Application" enabled="false" merge="false">
+      <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
+      <option name="VM_PARAMETERS" value="-Djava.security.policy=policy/policy.all" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" value="" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <module name="examples-data-processor" />
+      <RunnerSettings RunnerId="Debug">
+        <option name="DEBUG_PORT" value="54867" />
+        <option name="TRANSPORT" value="0" />
+        <option name="LOCAL" value="true" />
+      </RunnerSettings>
+      <RunnerSettings RunnerId="Profile ">
+        <option name="myExternalizedOptions" value="&#10;snapshots-dir=&#10;" />
+      </RunnerSettings>
+      <RunnerSettings RunnerId="Run" />
+      <ConfigurationWrapper RunnerId="Debug" />
+      <ConfigurationWrapper RunnerId="Run" />
+      <method>
+        <option name="Make" value="true" />
+      </method>
+    </configuration>
+    <configuration default="false" name="Example Data Feeder" type="Application" factoryName="Application" enabled="false" merge="false">
+      <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
+      <option name="VM_PARAMETERS" value="-Djava.security.policy=policy/policy.all" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" value="" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <module name="examples-data-feeder" />
+      <RunnerSettings RunnerId="Debug">
+        <option name="DEBUG_PORT" value="56134" />
+        <option name="TRANSPORT" value="0" />
+        <option name="LOCAL" value="true" />
+      </RunnerSettings>
+      <RunnerSettings RunnerId="Profile ">
+        <option name="myExternalizedOptions" value="&#10;snapshots-dir=&#10;" />
+      </RunnerSettings>
+      <RunnerSettings RunnerId="Run" />
+      <ConfigurationWrapper RunnerId="Debug" />
+      <ConfigurationWrapper RunnerId="Run" />
+      <method>
+        <option name="Make" value="true" />
+      </method>
+    </configuration>
+    <configuration default="false" name="Example Data Processor Primary" type="Application" factoryName="Application" enabled="false" merge="false">
+      <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
+      <option name="VM_PARAMETERS" value="-Djava.security.policy=policy/policy.all" />
+      <option name="PROGRAM_PARAMETERS" value="-cluster schema primary_backup -cluster totalMembers 1,1 -cluster instanceId 1" />
+      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" value="" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <module name="examples-data-processor" />
+      <RunnerSettings RunnerId="Profile ">
+        <option name="myExternalizedOptions" value="&#10;snapshots-dir=&#10;" />
+      </RunnerSettings>
+      <RunnerSettings RunnerId="Run" />
+      <ConfigurationWrapper RunnerId="Run" />
+      <method>
+        <option name="Make" value="true" />
+      </method>
+    </configuration>
+    <configuration default="false" name="Example Data Processor Backup" type="Application" factoryName="Application" enabled="false" merge="false">
+      <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
+      <option name="VM_PARAMETERS" value="-Djava.security.policy=policy/policy.all" />
+      <option name="PROGRAM_PARAMETERS" value="-cluster schema primary_backup -cluster totalMembers 1,1 -cluster instanceId 1 -cluster backupId 1" />
+      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" value="" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <module name="examples-data-processor" />
+      <RunnerSettings RunnerId="Profile ">
+        <option name="myExternalizedOptions" value="&#10;snapshots-dir=&#10;" />
+      </RunnerSettings>
+      <RunnerSettings RunnerId="Run" />
       <ConfigurationWrapper RunnerId="Run" />
       <method>
         <option name="Make" value="true" />

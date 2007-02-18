@@ -2,7 +2,7 @@
   <j_spaces>
         <kernel>
         	<!-- can also be set via system property using -Dcom.gs.licensekey -->
-            <licensekey>Feb 18, 2007~GigaSpaces-Eval@P9NPKfQGeBMvPyjPCGzY#EE^5.0EE%UNBOUND</licensekey>
+            <licensekey>Apr 16, 2007~GigaSpaces-Eval@EkNQBQOPR3YN9JZ3SRFN#EE^5.0EE%UNBOUND</licensekey>
        </kernel>
   </j_spaces>
 </com>
