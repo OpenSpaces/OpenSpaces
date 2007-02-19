@@ -8,7 +8,7 @@ import org.openspaces.core.cluster.ClusterInfo;
 public abstract class ClusterInfoParser {
 
     public static final String CLUSTER_PARAMETER_TOTALMEMBERS = "totalMembers";
-    public static final String CLUSTER_PARAMETER_INSTANCEID = "instanceId";
+    public static final String CLUSTER_PARAMETER_INSTANCEID = "id";
     public static final String CLUSTER_PARAMETER_BACKUPID = "backupId";
     public static final String CLUSTER_PARAMETER_CLUSTERSCHEMA = "schema";
 
@@ -23,31 +23,37 @@ public abstract class ClusterInfoParser {
                 clusterInfo = new ClusterInfo();
             }
 
-            if (params[i].getArguments().length != 2) {
-                throw new IllegalArgumentException("deploy parameter should have two parameres, the deploy property name and its value");
+            if (params[i].getArguments().length == 0) {
+                throw new IllegalArgumentException("cluster parameter should have two parameresat least one parameter");
             }
 
-            String name = params[i].getArguments()[0];
-            String value = params[i].getArguments()[1];
-
-            if (CLUSTER_PARAMETER_TOTALMEMBERS.equalsIgnoreCase(name)) {
-                int commaIndex = value.indexOf(',');
-                if (commaIndex == -1) {
-                    clusterInfo.setNumberOfInstances(Integer.valueOf(value));
-                } else {
-                    String numberOfInstances = value.substring(0, commaIndex);
-                    String numberOfBackups = value.substring(commaIndex + 1);
-                    clusterInfo.setNumberOfInstances(Integer.valueOf(numberOfInstances));
-                    clusterInfo.setNumberOfBackups(Integer.valueOf(numberOfBackups));
+            for (int j = 0; j < params[i].getArguments().length; j++) {
+                String clusterParameter = params[i].getArguments()[j];
+                int equalsIndex = clusterParameter.indexOf("=");
+                if (equalsIndex == -1) {
+                    throw new IllegalArgumentException("Cluster paramter [" + clusterParameter + "] is mailformed, must have a name=value syntax");
                 }
-            } else if (CLUSTER_PARAMETER_INSTANCEID.equalsIgnoreCase(name)) {
-                clusterInfo.setInstanceId(Integer.valueOf(value));
-            } else if (CLUSTER_PARAMETER_BACKUPID.equalsIgnoreCase(name)) {
-                clusterInfo.setBackupId(Integer.valueOf(value));
-            } else if (CLUSTER_PARAMETER_CLUSTERSCHEMA.equalsIgnoreCase(name)) {
-                clusterInfo.setSchema(value);
-            } else {
-                throw new IllegalArgumentException("deploy parameter property name [" + name + "] is invalid");
+                String clusterParamName = clusterParameter.substring(0, equalsIndex);
+                String clusterParamValue = clusterParameter.substring(equalsIndex + 1);
+                if (CLUSTER_PARAMETER_TOTALMEMBERS.equalsIgnoreCase(clusterParamName)) {
+                    int commaIndex = clusterParamValue.indexOf(',');
+                    if (commaIndex == -1) {
+                        clusterInfo.setNumberOfInstances(Integer.valueOf(clusterParamValue));
+                    } else {
+                        String numberOfInstances = clusterParamValue.substring(0, commaIndex);
+                        String numberOfBackups = clusterParamValue.substring(commaIndex + 1);
+                        clusterInfo.setNumberOfInstances(Integer.valueOf(numberOfInstances));
+                        clusterInfo.setNumberOfBackups(Integer.valueOf(numberOfBackups));
+                    }
+                } else if (CLUSTER_PARAMETER_INSTANCEID.equalsIgnoreCase(clusterParamName)) {
+                    clusterInfo.setInstanceId(Integer.valueOf(clusterParamValue));
+                } else if (CLUSTER_PARAMETER_BACKUPID.equalsIgnoreCase(clusterParamName)) {
+                    clusterInfo.setBackupId(Integer.valueOf(clusterParamValue));
+                } else if (CLUSTER_PARAMETER_CLUSTERSCHEMA.equalsIgnoreCase(clusterParamName)) {
+                    clusterInfo.setSchema(clusterParamValue);
+                } else {
+                    throw new IllegalArgumentException("deploy parameter property name [" + clusterParamName + "] is invalid");
+                }
             }
         }
         return clusterInfo;
