@@ -11,10 +11,6 @@
             <include name="**/*.jar"/>
             <exclude name="JSpaces-1.4.jar"/>
         </fileset>
-
-        <fileset dir="">
-
-        </fileset>
     </path>
 
     <target name="usage">
