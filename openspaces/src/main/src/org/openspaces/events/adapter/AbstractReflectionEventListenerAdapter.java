@@ -114,7 +114,7 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
         if (listenerMethods.length == 1) {
             // single method, use the already obtainer Method to invoke the listener
             try {
-                listenerMethod.invoke(delegate, listenerArguments);
+                result = listenerMethod.invoke(delegate, listenerArguments);
             } catch (IllegalAccessException ex) {
                 throw new GigaSpaceException("Failed to invoke method [" + listenerMethod.getName() + "]", ex);
             } catch (InvocationTargetException ex) {
@@ -129,7 +129,7 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
             methodInvoker.setArguments(listenerArguments);
             try {
                 methodInvoker.prepare();
-                return methodInvoker.invoke();
+                result = methodInvoker.invoke();
             } catch (InvocationTargetException ex) {
                 throw new org.springframework.jms.listener.adapter.ListenerExecutionFailedException(
                         "Listener method '" + listenerMethod.getName() + "' threw exception", ex.getTargetException());

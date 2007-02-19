@@ -1,4 +1,4 @@
-package org.openspaces.events;
+package org.openspaces.events.polling;
 
 import org.openspaces.core.GigaSpaceException;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -46,13 +46,13 @@ import java.util.Set;
  *
  * @author kimchy
  */
-public class PollingEventListenerContainer extends AbstractPollingEventListenerContainer {
+public class SimplePollingEventListenerContainer extends AbstractPollingEventListenerContainer {
 
     /**
      * Default thread name prefix: "DefaultPollingEventListenerContainer-".
      */
     public static final String DEFAULT_THREAD_NAME_PREFIX =
-            ClassUtils.getShortName(PollingEventListenerContainer.class) + "-";
+            ClassUtils.getShortName(SimplePollingEventListenerContainer.class) + "-";
 
     /**
      * The default recovery interval: 5000 ms = 5 seconds.

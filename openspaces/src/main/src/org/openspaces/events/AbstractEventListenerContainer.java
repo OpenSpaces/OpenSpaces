@@ -41,6 +41,19 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
     //-------------------------------------------------------------------------
 
     /**
+     * Executes the given listener if the container is running ({@link #isRunning()}.
+     *
+     * @param eventData The event data object
+     * @param source    An optional source (or additional event information)
+     */
+    protected void executeListener(Object eventData, Object source) throws GigaSpaceException {
+        if (!isRunning()) {
+            return;
+        }
+        invokeListener(eventData, source);
+    }
+
+    /**
      * Invokes the configured {@link org.openspaces.events.SpaceDataEventListener} basde on
      * the provided data. Currently simply delegates to
      * {@link org.openspaces.events.SpaceDataEventListener#onEvent(Object,org.openspaces.core.GigaSpace,Object)}.

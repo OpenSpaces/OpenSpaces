@@ -33,7 +33,7 @@ import java.util.List;
  *
  * <p>For a concrete listener programming model, check out the
  * {@link org.openspaces.events.AbstractEventListenerContainer} subclass. For a concrete listener
- * invoker mechanism, check out the {@link org.openspaces.events.PollingEventListenerContainer} class.
+ * invoker mechanism, check out the {@link org.openspaces.events.polling.SimplePollingEventListenerContainer} class.
  *
  * @author kimchy
  */

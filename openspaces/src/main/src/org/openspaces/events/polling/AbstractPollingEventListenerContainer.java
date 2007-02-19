@@ -1,6 +1,7 @@
-package org.openspaces.events;
+package org.openspaces.events.polling;
 
 import org.openspaces.core.GigaSpaceException;
+import org.openspaces.events.AbstractEventListenerContainer;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -24,7 +25,7 @@ import org.springframework.util.Assert;
  * be a {@link org.openspaces.core.transaction.manager.LocalJiniTransactionManager}.
  *
  * <p>This base class does not assume any specific mechanism for asynchronous
- * execution of polling invokers. Check out {@link org.openspaces.events.PollingEventListenerContainer}
+ * execution of polling invokers. Check out {@link SimplePollingEventListenerContainer}
  * for a concrete implementation which is based on Spring's
  * {@link org.springframework.core.task.TaskExecutor} abstraction,
  * including dynamic scaling of concurrent consumers and automatic self recovery.
