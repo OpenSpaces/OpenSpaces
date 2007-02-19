@@ -24,7 +24,7 @@ import org.springframework.util.Assert;
  * be a {@link org.openspaces.core.transaction.manager.LocalJiniTransactionManager}.
  *
  * <p>This base class does not assume any specific mechanism for asynchronous
- * execution of polling invokers. Check out {@link org.openspaces.events.DefaultPollingEventListenerContainer}
+ * execution of polling invokers. Check out {@link org.openspaces.events.PollingEventListenerContainer}
  * for a concrete implementation which is based on Spring's
  * {@link org.springframework.core.task.TaskExecutor} abstraction,
  * including dynamic scaling of concurrent consumers and automatic self recovery.

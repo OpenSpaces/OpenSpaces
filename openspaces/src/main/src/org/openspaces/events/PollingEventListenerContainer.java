@@ -46,13 +46,13 @@ import java.util.Set;
  *
  * @author kimchy
  */
-public class DefaultPollingEventListenerContainer extends AbstractPollingEventListenerContainer {
+public class PollingEventListenerContainer extends AbstractPollingEventListenerContainer {
 
     /**
      * Default thread name prefix: "DefaultPollingEventListenerContainer-".
      */
     public static final String DEFAULT_THREAD_NAME_PREFIX =
-            ClassUtils.getShortName(DefaultPollingEventListenerContainer.class) + "-";
+            ClassUtils.getShortName(PollingEventListenerContainer.class) + "-";
 
     /**
      * The default recovery interval: 5000 ms = 5 seconds.

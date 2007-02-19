@@ -21,7 +21,7 @@
 
     <bean id="dataProcessor" class="org.openspaces.example.data.processor.DataProcessor" />
 
-    <bean id="dataProcessorPollingEventContainer" class="org.openspaces.events.DefaultPollingEventListenerContainer">
+    <bean id="dataProcessorPollingEventContainer" class="org.openspaces.events.PollingEventListenerContainer">
         <property name="gigaSpace" ref="gigaSpace" />
         <property name="template">
             <bean class="org.openspaces.example.data.common.Data">
