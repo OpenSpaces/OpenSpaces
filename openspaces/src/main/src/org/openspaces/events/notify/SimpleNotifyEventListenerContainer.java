@@ -50,7 +50,7 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
 
     protected void registerListener() throws GigaSpaceException {
         if (dataEventSession != null) {
-            throw new IllegalStateException("registerListenres should only be called when dataEventSession is null");
+            // we already registered the listener, just return.
         }
         EventSessionFactory factory = createEventSessionFactory();
         dataEventSession = createDataEventSession(factory);

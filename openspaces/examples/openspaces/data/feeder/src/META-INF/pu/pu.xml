@@ -5,7 +5,7 @@
 
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
 
-    <bean id="gigaSpaceContext" class="org.openspaces.core.context.GigaSpaceContextBeanPostProcessor" />
+    <bean id="gigaSpaceContextProcessor" class="org.openspaces.core.context.GigaSpaceContextBeanPostProcessor" />
 
     <bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
         <property name="url" value="jini://*/*/space"/>

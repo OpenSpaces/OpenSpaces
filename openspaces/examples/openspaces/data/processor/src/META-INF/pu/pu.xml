@@ -4,7 +4,9 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
-    
+
+    <bean id="gigaSpaceContextProcessor" class="org.openspaces.core.context.GigaSpaceContextBeanPostProcessor" />
+                                                                                
     <bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
         <property name="url" value="/./space"/>
         <property name="urlProperties">
@@ -58,5 +60,9 @@
                 </property>
             </bean>
         </property>
+    </bean>
+
+    <bean id="spaceModeContextLoader" class="org.openspaces.core.space.mode.SpaceModeContextLoader">
+        <property name="location" value="classpath:/META-INF/pu/mode/mode.xml" />
     </bean>
 </beans>
