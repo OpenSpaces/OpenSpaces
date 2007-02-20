@@ -25,7 +25,10 @@ import java.util.List;
  * <p>Provide lifecycle support for containers using {@link #doStart()} and {@link #doStop()}.
  * By default, the container lifecycle will be bound to the space mode, starting when the space
  * mode is <code>PRIMARY</code> and stopping otherwise. This behviour is controlled by
- * {@link #setActiveWhenPrimary(boolean)}.
+ * {@link #setActiveWhenPrimary(boolean)}. Note that most operations can not be performed directly
+ * against a backup space cluster member (when working with the {@link org.openspaces.core.GigaSpaceFactoryBean#setClustered(boolean)}
+ * flag set to <code>false</code>) so setting this flag to <code>false</code> (which means this container
+ * will operate when the space is in <code>BACKUP</code> mode as well) needs to be done with care.
  *
  * <p>This base class does not assume any specific listener programming model
  * or listener invoker mechanism. It just provides the general runtime
