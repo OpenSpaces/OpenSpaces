@@ -39,7 +39,7 @@ LOOKUPLOCATORS=""; export LOOKUPLOCATORS
 fi
 LOOKUP_LOCATORS_PROP="-Dcom.gs.jini_lus.locators=${LOOKUPLOCATORS}"; export LOOKUP_LOCATORS_PROP
 
-COMMAND_LINE="${JAVACMD} ${JAVA_OPTIONS} ${RMI_OPTIONS} ${LOOKUP_LOCATORS_PROP} ${LOOKUP_GROUPS_PROP} -Djava.security.policy=${POLICY} -Dcom.gs.home=${JSHOMEDIR} -classpath "${COMMON_JARS}${CPS}${SPRING_JARS}${CPS}${EXT_JARS}$CPS${JSHOMEDIR}${CPS}${JSHOMEDIR}/lib/JSpaces.jar$CPS${OPENSPACES_JARS}" org.openspaces.pu.container.standalone.StandaloneProcessingUnitContainer $1 $2 $3 $4 $5 $6 $7 $8 $9"
+COMMAND_LINE="${JAVACMD} ${JAVA_OPTIONS} ${RMI_OPTIONS} ${LOOKUP_LOCATORS_PROP} ${LOOKUP_GROUPS_PROP} -Djava.security.policy=${POLICY} -Dcom.gs.home=${JSHOMEDIR} -classpath "${COMMON_JARS}${CPS}${SPRING_JARS}${CPS}${EXT_JARS}$CPS${JSHOMEDIR}${CPS}${JSHOMEDIR}/lib/JSpaces.jar$CPS${OPENSPACES_JARS}" org.openspaces.pu.container.standalone.StandaloneProcessingUnitContainer $*"
 
 echo
 echo
