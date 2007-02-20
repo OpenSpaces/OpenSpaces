@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <!DOCTYPE gs-deployment SYSTEM "java://gs-deploy-desc.dtd">
 <gs-deployment Name="PU ServiceBean">
-    <Codebase Adaptive="yes">file:///Users/ming/GigaSpacesEE5.2/ServiceGrid/deploy/</Codebase>
+    <Codebase>$[com.gigaspaces.system.codeserver]</Codebase>
     <!-- Declare attributes for the Hello example -->
     <ServiceBean Name="PU">
         <Interfaces>
-            <Interface>org.openspaces.pu.container.servicegrid.puservicebean.PUServiceBean</Interface>
+            <Interface>org.openspaces.pu.container.servicegrid.PUServiceBean</Interface>
             <Resources>
                 <JAR>puservicebean-dl.jar</JAR>
                 <JAR>JSpaces.jar</JAR>
             </Resources>
         </Interfaces>
-        <ImplementationClass>org.openspaces.pu.container.servicegrid.puservicebean.PUServiceBeanImpl
+        <ImplementationClass>org.openspaces.pu.container.servicegrid.PUServiceBeanImpl
             <Resources>
                 <JAR>puservicebean.jar</JAR>
             </Resources>

@@ -2,7 +2,7 @@
  * Copyright GigaSpaces Technologies Inc. 2006
  */
 
-package org.openspaces.pu.container.servicegrid.puservicebean;
+package org.openspaces.pu.container.servicegrid;
 
 /**
  * Created by IntelliJ IDEA.

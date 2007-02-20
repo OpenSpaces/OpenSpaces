@@ -311,14 +311,14 @@
     <target name="puservicebeanjars" depends="puservicebean.jar, puservicebean-dl.jar"/>
 
     <target name="puservicebean.jar" depends="buildmain">
-        <jar destfile="/Users/ming/GigaSpacesEE5.2/ServiceGrid/deploy/puservicebean.jar"
+        <jar destfile="/Users/ming/Gigaspaces/cvs/gigaspaces/lib/ServiceGrid/puservicebean.jar"
              basedir="${target.classes.dir}"
 
                 />
     </target>
 
     <target name="puservicebean-dl.jar" depends="buildmain">
-        <jar destfile="/Users/ming/GigaSpacesEE5.2/ServiceGrid/deploy/puservicebean-dl.jar"
+        <jar destfile="/Users/ming/Gigaspaces/cvs/gigaspaces/lib/ServiceGrid/puservicebean-dl.jar"
              basedir="${target.classes.dir}"
              includes="**/PUServiceBean.class"/>
     </target>

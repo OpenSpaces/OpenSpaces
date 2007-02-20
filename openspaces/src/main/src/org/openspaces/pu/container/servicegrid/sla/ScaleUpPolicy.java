@@ -12,7 +12,7 @@ public class ScaleUpPolicy implements Policy {
     String watch;
     int low;
     int high;
-    int scaleTo;
+    int scaleUpTo;
 
 // --------------------- GETTER / SETTER METHODS ---------------------
 
@@ -32,12 +32,12 @@ public class ScaleUpPolicy implements Policy {
         this.low = low;
     }
 
-    public int getScaleTo() {
-        return scaleTo;
+    public int getScaleUpTo() {
+        return scaleUpTo;
     }
 
-    public void setScaleTo(int scaleTo) {
-        this.scaleTo = scaleTo;
+    public void setScaleUpTo(int scaleUpTo) {
+        this.scaleUpTo = scaleUpTo;
     }
 
     public String getWatch() {

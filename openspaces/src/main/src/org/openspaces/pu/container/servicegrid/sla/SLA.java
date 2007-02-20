@@ -7,22 +7,43 @@ package org.openspaces.pu.container.servicegrid.sla;
  * Time: 12:50:39 AM
  */
 public class SLA {
+
 // ------------------------------ FIELDS ------------------------------
 
-    int totalMembers;
+    int numberOfInstances = 1;
 
-    int numbeOfBackups;
+    int numberOfBackups = 0;
+
+    boolean isPartitioned = false;
+
+    String clusterSchema;
 
     Policy policy;
 
 // --------------------- GETTER / SETTER METHODS ---------------------
 
-    public int getNumbeOfBackups() {
-        return numbeOfBackups;
+    public String getClusterSchema() {
+        return clusterSchema;
     }
 
-    public void setNumbeOfBackups(int numbeOfBackups) {
-        this.numbeOfBackups = numbeOfBackups;
+    public void setClusterSchema(String clusterSchema) {
+        this.clusterSchema = clusterSchema;
+    }
+
+    public int getNumberOfBackups() {
+        return numberOfBackups;
+    }
+
+    public void setNumberOfBackups(int numberOfBackups) {
+        this.numberOfBackups = numberOfBackups;
+    }
+
+    public int getNumberOfInstances() {
+        return numberOfInstances;
+    }
+
+    public void setNumberOfInstances(int numberOfInstances) {
+        this.numberOfInstances = numberOfInstances;
     }
 
     public Policy getPolicy() {
@@ -33,11 +54,25 @@ public class SLA {
         this.policy = policy;
     }
 
-    public int getTotalMembers() {
-        return totalMembers;
+// ------------------------ CANONICAL METHODS ------------------------
+
+    public String toString() {
+        return "SLA{" +
+                "\n\tnumberOfInstances=" + numberOfInstances +
+                "\n\tnumberOfBackups=" + numberOfBackups +
+                "\n\tclusterSchema='" + clusterSchema + '\'' +
+                "\n\tisPartitioned=" + isPartitioned +
+                "\n\tpolicy=" + policy +
+                "\n}";
     }
 
-    public void setTotalMembers(int totalMembers) {
-        this.totalMembers = totalMembers;
+// -------------------------- OTHER METHODS --------------------------
+
+    public boolean isPartitioned() {
+        return isPartitioned;
+    }
+
+    public void setPartitioned(boolean partitioned) {
+        isPartitioned = partitioned;
     }
 }
