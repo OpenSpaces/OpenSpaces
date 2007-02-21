@@ -123,10 +123,12 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     private void stopPU() {
-        try {
-            integratedContainer.close();
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, e.toString(), e);
+        if (integratedContainer != null) {
+            try {
+                integratedContainer.close();
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, e.toString(), e);
+            }
         }
     }
 }

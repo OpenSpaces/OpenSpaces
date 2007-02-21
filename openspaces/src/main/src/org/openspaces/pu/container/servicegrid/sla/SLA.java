@@ -1,5 +1,7 @@
 package org.openspaces.pu.container.servicegrid.sla;
 
+import java.util.List;
+
 /**
  * Created by IntelliJ IDEA.
  * User: ming
@@ -7,7 +9,6 @@ package org.openspaces.pu.container.servicegrid.sla;
  * Time: 12:50:39 AM
  */
 public class SLA {
-
 // ------------------------------ FIELDS ------------------------------
 
     int numberOfInstances = 1;
@@ -20,6 +21,10 @@ public class SLA {
 
     Policy policy;
 
+    List requirements;
+
+    int maxInstancesPerVM;
+
 // --------------------- GETTER / SETTER METHODS ---------------------
 
     public String getClusterSchema() {
@@ -28,6 +33,14 @@ public class SLA {
 
     public void setClusterSchema(String clusterSchema) {
         this.clusterSchema = clusterSchema;
+    }
+
+    public int getMaxInstancesPerVM() {
+        return maxInstancesPerVM;
+    }
+
+    public void setMaxInstancesPerVM(int maxInstancesPerVM) {
+        this.maxInstancesPerVM = maxInstancesPerVM;
     }
 
     public int getNumberOfBackups() {
@@ -52,6 +65,14 @@ public class SLA {
 
     public void setPolicy(Policy policy) {
         this.policy = policy;
+    }
+
+    public List getRequirements() {
+        return requirements;
+    }
+
+    public void setRequirements(List requirements) {
+        this.requirements = requirements;
     }
 
 // ------------------------ CANONICAL METHODS ------------------------

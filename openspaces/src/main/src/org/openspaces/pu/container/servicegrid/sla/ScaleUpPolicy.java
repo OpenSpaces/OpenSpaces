@@ -6,31 +6,12 @@ package org.openspaces.pu.container.servicegrid.sla;
  * Date: Feb 13, 2007
  * Time: 1:08:08 AM
  */
-public class ScaleUpPolicy implements Policy {
+public class ScaleUpPolicy extends AbstractPolicy {
 // ------------------------------ FIELDS ------------------------------
 
-    String watch;
-    int low;
-    int high;
     int scaleUpTo;
 
 // --------------------- GETTER / SETTER METHODS ---------------------
-
-    public int getHigh() {
-        return high;
-    }
-
-    public void setHigh(int high) {
-        this.high = high;
-    }
-
-    public int getLow() {
-        return low;
-    }
-
-    public void setLow(int low) {
-        this.low = low;
-    }
 
     public int getScaleUpTo() {
         return scaleUpTo;
@@ -40,11 +21,14 @@ public class ScaleUpPolicy implements Policy {
         this.scaleUpTo = scaleUpTo;
     }
 
-    public String getWatch() {
-        return watch;
-    }
+// ------------------------ CANONICAL METHODS ------------------------
 
-    public void setWatch(String watch) {
-        this.watch = watch;
+    public String toString() {
+        return "ScaleUpPolicy{" +
+                "\n\twatch='" + monitor + '\'' +
+                "\n\tlow=" + low +
+                "\n\thigh=" + high +
+                "\n\tscaleUpTo=" + scaleUpTo +
+                "\n}";
     }
 }

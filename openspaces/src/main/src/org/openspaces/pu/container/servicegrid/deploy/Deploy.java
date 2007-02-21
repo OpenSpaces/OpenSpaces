@@ -4,6 +4,8 @@ import com.gigaspaces.grid.gsm.GSM;
 import org.jini.rio.core.ClassBundle;
 import org.jini.rio.core.OperationalString;
 import org.jini.rio.core.ServiceElement;
+import org.jini.rio.core.ServiceLevelAgreements;
+import org.jini.rio.core.ThresholdValues;
 import org.jini.rio.monitor.DeployAdmin;
 import org.jini.rio.opstring.OpString;
 import org.jini.rio.opstring.OpStringLoader;
@@ -12,7 +14,13 @@ import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
 import org.openspaces.pu.container.servicegrid.SLAUtil;
+import org.openspaces.pu.container.servicegrid.sla.Generic;
+import org.openspaces.pu.container.servicegrid.sla.Host;
+import org.openspaces.pu.container.servicegrid.sla.Policy;
+import org.openspaces.pu.container.servicegrid.sla.RangeRequirement;
+import org.openspaces.pu.container.servicegrid.sla.RelocationPolicy;
 import org.openspaces.pu.container.servicegrid.sla.SLA;
+import org.openspaces.pu.container.servicegrid.sla.ScaleUpPolicy;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 
@@ -24,7 +32,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -52,12 +62,71 @@ public class Deploy {
         opStringLoader.setCodebaseOverride(codeserver);
         opString = opStringLoader.parseOperationalString(opstringURL)[0];
         ((OpString) opString).setName(puName);
+
         //this opstring should only have one servicebean
         ServiceElement[] serviceElements = opString.getServices();
         ServiceElement element = serviceElements[0];
+
         //put the entire pu spring xml as parameter to servicebean
         element.getServiceBeanConfig().addInitParameter("pu", puString);
-        element.setPlanned(sla.getNumberOfInstances() + sla.getNumberOfBackups());
+
+        //sla
+        element.setPlanned(sla.getNumberOfInstances());
+        Policy policy = sla.getPolicy();
+        String type;
+        if (policy instanceof ScaleUpPolicy) {
+            type = "scaling";
+        } else if (policy instanceof RelocationPolicy) {
+            type = "relocation";
+        } else {
+            throw new IllegalArgumentException("Unknown SLA Policy:" + policy);
+        }
+
+        String max = String.valueOf(sla.getNumberOfInstances());
+        //todo: make sure max is greater then num of instances
+        if (policy instanceof ScaleUpPolicy) {
+            max = String.valueOf(((ScaleUpPolicy) policy).getScaleUpTo());
+        }
+        //todo:300 is hard coded for now
+        String[] configParms = getSLAConfigArgs(type, max, "3000", "3000");
+        org.jini.rio.core.SLA slaElement = new org.jini.rio.core.SLA(
+                policy.getMonitor(),
+                new double[]{policy.getLow(), policy.getHigh()},
+                configParms,
+                null);
+        element.getServiceLevelAgreements().addServiceSLA(slaElement);
+
+        //requirements
+        List hosts = new ArrayList();
+        if (sla.getRequirements() != null) {
+            for (int i = 0; i < sla.getRequirements().size(); i++) {
+                Object requirement = sla.getRequirements().get(i);
+                if (requirement instanceof RangeRequirement) {
+                    RangeRequirement rangeRequirement = (RangeRequirement) requirement;
+                    ThresholdValues thresholdValues = new ThresholdValues(rangeRequirement.getLow(), rangeRequirement.getHigh());
+                    element.getServiceLevelAgreements().addSystemThreshold(rangeRequirement.getWatch(), thresholdValues);
+                } else if (requirement instanceof Host) {
+                    hosts.add(((Host) requirement).getHost());
+                } else if (requirement instanceof Generic) {
+                    Generic generic = (Generic) requirement;
+                    ServiceLevelAgreements.SystemRequirement systemRequirement = new ServiceLevelAgreements.SystemRequirement(
+                            generic.getName(),
+                            null,
+                            generic.getAttributes()
+                    );
+                    element.getServiceLevelAgreements().addSystemRequirement(systemRequirement);
+                }
+            }
+        }
+        //put hosts as cluster
+        if (hosts.size() > 0) {
+            element.setCluster((String[]) hosts.toArray(new String[hosts.size()]));
+        }
+
+        if (sla.getMaxInstancesPerVM() > 0) {
+            element.setMaxPerMachine(sla.getMaxInstancesPerVM());
+        }
+
         //put jars
         ClassBundle classBundle = element.getComponentBundle();
         classBundle.addJAR(puPath + "/" + "classes/");
@@ -67,7 +136,62 @@ public class Deploy {
             classBundle.addJAR(path);
             System.out.println("added jar:" + path);
         }
+
+        System.out.println(element);
+
         return (opString);
+    }
+
+    //copied from opstringloader
+    static String[] getSLAConfigArgs(String type,
+                                     String max,
+                                     String lowerDampener,
+                                     String upperDampener) {
+        String[] args = null;
+        String handler = "org.jini.rio.qos.";
+        int handlerType;
+        if (type.equals("scaling")) {
+            handler = handler + "ScalingPolicyHandler";
+            handlerType = 1;
+        } else if (type.equals("relocation")) {
+            handler = handler + "RelocationPolicyHandler";
+            handlerType = 2;
+        } else {
+            handler = handler + "SLAPolicyHandler";
+            handlerType = 3;
+        }
+
+        String slaPolicyHandler =
+                "org.jini.rio.qos.SLAPolicyHandler.slaPolicyHandler";
+        switch (handlerType) {
+            case 1:
+                args = new String[5];
+                args[0] = "-";
+                args[1] = slaPolicyHandler + "=" +
+                        "new " + handler + "((org.jini.rio.core.SLA)$data)";
+                args[2] = handler + ".MaxServices=" + max;
+                args[3] = handler + ".LowerThresholdDampeningFactor=" +
+                        lowerDampener;
+                args[4] = handler + ".UpperThresholdDampeningFactor=" +
+                        upperDampener;
+                break;
+            case 2:
+                args = new String[4];
+                args[0] = "-";
+                args[1] = slaPolicyHandler + "=" +
+                        "new " + handler + "((org.jini.rio.core.SLA)$data)";
+                args[2] = handler + ".LowerThresholdDampeningFactor=" +
+                        lowerDampener;
+                args[3] = handler + ".UpperThresholdDampeningFactor=" +
+                        upperDampener;
+                break;
+            default:
+                args = new String[2];
+                args[0] = "-";
+                args[1] = slaPolicyHandler + "=" +
+                        "new " + handler + "((org.jini.rio.core.SLA)$data)";
+        }
+        return (args);
     }
 
     private static String readPUFile(URL root, String puPath) throws IOException {
@@ -110,6 +234,12 @@ public class Deploy {
     public static void main(String[] args) throws Exception {
         //these must be manually changed to reflect your environment, for now
 //        String puFilename = "/Users/ming/Gigaspaces/cvs/openspaces/config/pu/pu.xml";
+        if (args.length < 1) {
+            printUsage();
+            System.exit(-1);
+        }
+        String puPath = args[0];
+
         String jiniGroup = System.getProperty("com.gs.jini_lus.groups");
         System.out.println("jiniGroup = " + jiniGroup);
 
@@ -128,7 +258,6 @@ public class Deploy {
         System.out.println("codeserver = " + codeserver);
 
         //get pu xml
-        String puPath = "helloworld";
         int index = puPath.lastIndexOf('/');
         index = index == -1 ? 0 : index;
         String puName = puPath.substring(index);
@@ -153,5 +282,9 @@ public class Deploy {
 //        System.out.println("result = " + result);
 
 //        deployLocal(sla, puString);
+    }
+
+    private static void printUsage() {
+        System.out.println("Usage: Deploy [PU Name]");
     }
 }

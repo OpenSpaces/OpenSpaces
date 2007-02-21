@@ -15,6 +15,13 @@
                 <property name="scaleUpTo" value="5"/>
             </bean>
         </property>
+        <property name="requirements">
+            <list>
+                <bean class="org.openspaces.pu.container.servicegrid.sla.CPURequirement">
+                    <property name="high" value="0.8"/>
+                </bean>
+            </list>
+        </property>
     </bean>
 
     <bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
