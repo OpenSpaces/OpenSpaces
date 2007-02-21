@@ -114,6 +114,15 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
         this.receiveTimeout = receiveTimeout;
     }
 
+
+    /**
+     * Returns the timeout used for receive calls, in <b>millisecond</b>.
+     * The default is 1000 ms, that is, 1 second.
+     */
+    protected long getReceiveTimeout() {
+        return receiveTimeout;
+    }
+
     public void initialize() {
         // Use bean name as default transaction name.
         if (this.transactionDefinition.getName() == null) {
