@@ -73,28 +73,30 @@ public class Deploy {
         //sla
         element.setPlanned(sla.getNumberOfInstances());
         Policy policy = sla.getPolicy();
-        String type;
-        if (policy instanceof ScaleUpPolicy) {
-            type = "scaling";
-        } else if (policy instanceof RelocationPolicy) {
-            type = "relocation";
-        } else {
-            throw new IllegalArgumentException("Unknown SLA Policy:" + policy);
-        }
+        if (policy != null) {
+            String type;
+            if (policy instanceof ScaleUpPolicy) {
+                type = "scaling";
+            } else if (policy instanceof RelocationPolicy) {
+                type = "relocation";
+            } else {
+                throw new IllegalArgumentException("Unknown SLA Policy:" + policy);
+            }
 
-        String max = String.valueOf(sla.getNumberOfInstances());
-        //todo: make sure max is greater then num of instances
-        if (policy instanceof ScaleUpPolicy) {
-            max = String.valueOf(((ScaleUpPolicy) policy).getScaleUpTo());
+            String max = String.valueOf(sla.getNumberOfInstances());
+            //todo: make sure max is greater then num of instances
+            if (policy instanceof ScaleUpPolicy) {
+                max = String.valueOf(((ScaleUpPolicy) policy).getScaleUpTo());
+            }
+            //todo:300 is hard coded for now
+            String[] configParms = getSLAConfigArgs(type, max, "3000", "3000");
+            org.jini.rio.core.SLA slaElement = new org.jini.rio.core.SLA(
+                    policy.getMonitor(),
+                    new double[]{policy.getLow(), policy.getHigh()},
+                    configParms,
+                    null);
+            element.getServiceLevelAgreements().addServiceSLA(slaElement);
         }
-        //todo:300 is hard coded for now
-        String[] configParms = getSLAConfigArgs(type, max, "3000", "3000");
-        org.jini.rio.core.SLA slaElement = new org.jini.rio.core.SLA(
-                policy.getMonitor(),
-                new double[]{policy.getLow(), policy.getHigh()},
-                configParms,
-                null);
-        element.getServiceLevelAgreements().addServiceSLA(slaElement);
 
         //requirements
         List hosts = new ArrayList();
