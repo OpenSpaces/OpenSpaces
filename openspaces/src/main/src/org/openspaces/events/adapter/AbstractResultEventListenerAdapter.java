@@ -1,7 +1,10 @@
 package org.openspaces.events.adapter;
 
+import com.j_spaces.core.client.UpdateModifiers;
 import net.jini.core.lease.Lease;
+import net.jini.space.JavaSpace;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.core.GigaSpaceException;
 import org.openspaces.events.SpaceDataEventListener;
 
 /**
@@ -12,9 +15,14 @@ import org.openspaces.events.SpaceDataEventListener;
  *
  * @author kimchy
  */
+//TODO support result of an array type by using writeMultiple
 public abstract class AbstractResultEventListenerAdapter implements SpaceDataEventListener {
 
     private long writeLease = Lease.FOREVER;
+
+    private boolean updateOrWrite = false;
+
+    private long updateTimeout = JavaSpace.NO_WAIT;
 
     /**
      * The lease time the result will be written under (in milliseconds). Defaults to
@@ -24,6 +32,22 @@ public abstract class AbstractResultEventListenerAdapter implements SpaceDataEve
      */
     public void setWriteLease(long writeLease) {
         this.writeLease = writeLease;
+    }
+
+    /**
+     * Sets if the write operation will perform an update in case the entry result already exists
+     * in the space. Default to <code>false</code>.
+     */
+    public void setUpdateOrWrite(boolean updateOrWrite) {
+        this.updateOrWrite = updateOrWrite;
+    }
+
+    /**
+     * Sets the update timeout in case the flag {@link #setUpdateOrWrite(boolean)} is set to
+     * <code>true</code>.
+     */
+    public void setUpdateTimeout(long updateTimeout) {
+        this.updateTimeout = updateTimeout;
     }
 
     /**
@@ -44,9 +68,13 @@ public abstract class AbstractResultEventListenerAdapter implements SpaceDataEve
      * @param result    The result to write back to the space
      * @param gigaSpace The GigaSpace instance to operate against the space
      */
-    protected void handleResult(Object result, GigaSpace gigaSpace) {
+    protected void handleResult(Object result, GigaSpace gigaSpace) throws GigaSpaceException {
         if (result != null) {
-            gigaSpace.write(result, writeLease);
+            if (updateOrWrite) {
+                gigaSpace.write(result, writeLease, updateTimeout, UpdateModifiers.UPDATE_OR_WRITE);
+            } else {
+                gigaSpace.write(result, writeLease, updateTimeout, UpdateModifiers.WRITE_ONLY);
+            }
         }
     }
 
