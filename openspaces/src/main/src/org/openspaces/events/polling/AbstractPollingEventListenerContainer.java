@@ -2,6 +2,7 @@ package org.openspaces.events.polling;
 
 import org.openspaces.core.GigaSpaceException;
 import org.openspaces.events.AbstractEventListenerContainer;
+import org.openspaces.events.EventTemplateProvider;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -29,6 +30,13 @@ import org.springframework.util.Assert;
  * for a concrete implementation which is based on Spring's
  * {@link org.springframework.core.task.TaskExecutor} abstraction,
  * including dynamic scaling of concurrent consumers and automatic self recovery.
+ *
+ * <p>The {@link #setTemplate(Object)} parameter is required in order to perform matching on which
+ * events to receive. If the {@link #setEventListener(org.openspaces.events.SpaceDataEventListener)}
+ * implements {@link org.openspaces.events.EventTemplateProvider} and the template is directly set,
+ * the event listener will be used to get the template. This feature helps when event listeners
+ * directly can only work with a certain template and removes the requirement of configuring the
+ * template as well.
  *
  * @author kimchy
  */
@@ -127,6 +135,9 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
         // Use bean name as default transaction name.
         if (this.transactionDefinition.getName() == null) {
             this.transactionDefinition.setName(getBeanName());
+        }
+        if (getEventListener() != null && getEventListener() instanceof EventTemplateProvider && template != null) {
+            setTemplate(((EventTemplateProvider) getEventListener()).getTemplate());
         }
 
         // Proceed with superclass initialization.
