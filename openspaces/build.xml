@@ -140,6 +140,7 @@
 
                 <include name="examples/**"/>
                 <exclude name="examples/**/*.iml"/>
+                <exclude name="examples/**/.cvsignore"/>
 
                 <include name="lib/${name}/**"/>
 

@@ -195,7 +195,7 @@ PLATFORM_VERSION=6.0; export PLATFORM_VERSION
 POLICY=${JSHOMEDIR}/policy/policy.all; export POLICY
 
 if [ "${LOOKUPGROUPS}" = "" ] ; then
-LOOKUPGROUPS="gigaspaces-6.0EE"; export LOOKUPGROUPS
+LOOKUPGROUPS=""; export LOOKUPGROUPS
 fi
 LOOKUP_GROUPS_PROP=-Dcom.gs.jini_lus.groups=${LOOKUPGROUPS}; export LOOKUP_GROUPS_PROP
 
