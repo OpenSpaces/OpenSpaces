@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
 
 /**
  * <p>Base class for reflection driven invocation of event listener methods. Handles cases where a single
- * event listener method is configured, or sevearl event listeners are configured (all must have the same name).
+ * event listener method is configured, or several event listeners are configured (all must have the same name).
  * The event listener methods are found and delegated to an object configured using {@link #setDelegate(Object)}.
  *
  * <p>Subclasses must implement the {@link #doGetListenerMethods()} in order to list all the possible event
@@ -23,16 +23,18 @@ import java.lang.reflect.Method;
  *
  * <p>For best performance a single event listener method should be used. If a single event listener is found
  * (by subclasses), caching of the method can be done in order to perform the reflection execution faster. If
- * more than one event listnere method is found - dynamic discovery of the appropiate method is done for each
+ * more than one event listener method is found - dynamic discovery of the appropiate method is done for each
  * listener invocation.
  *
  * <p>Event listening methods can have no parameters or one or more parameres mapping to
- * {@link org.openspaces.events.SpaceDataEventListener#onEvent(Object,org.openspaces.core.GigaSpace,Object)} in order.
+ * {@link org.openspaces.events.SpaceDataEventListener#onEvent(Object,org.openspaces.core.GigaSpace,Object)} parameters order.
  * If the method has a return value it will be handled thanks to {@link org.openspaces.events.adapter.AbstractResultEventListenerAdapter}.
  *
  * <p>Having more than one event listening method allows for writing specifc listener methods handling different
- * data event types (usually different types within the same inheritacne tree). This allow to remove the need for
- * <code>instnaceof</code> checks within the listener code.
+ * data event types (usually different types within the same inheritance tree). This allows to remove the need for
+ * <code>instnaceof</code> checks within the listener code. If a single listening method is used, it can still have
+ * a specific class type for the event data object thanks to Java refection, though if the event listener will
+ * be invoked with a different type a reflection exception will be thrown.
  *
  * @author kimchy
  */
