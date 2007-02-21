@@ -35,10 +35,6 @@ public class IntegratedProcessingUnitContainerProvider implements ProcessingUnit
 
     private ClassLoader classLoader;
 
-    public IntegratedProcessingUnitContainerProvider() {
-
-    }
-
     public void setParentContext(ApplicationContext parentContext) {
         this.parentContext = parentContext;
     }

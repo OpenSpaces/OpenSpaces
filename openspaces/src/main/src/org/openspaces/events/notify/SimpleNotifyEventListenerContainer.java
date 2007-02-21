@@ -12,13 +12,24 @@ import org.openspaces.core.GigaSpaceException;
 import java.rmi.RemoteException;
 
 /**
+ * <p>A simple notification based container allowing to register a {@link org.openspaces.events.SpaceDataEventListener}
+ * that will be triggered by notifications. Uses {@link org.openspaces.events.notify.AbstractNotifyEventListenerContainer}
+ * for configuration of different notification registration parameters.
+ *
+ * <p>Allows to control using {@link #setRegisterOnStartup(boolean)} if the listener will be registered for
+ * notification on startup or registration will be controlled by the {@link #doStart()} and {@link #doStop()}
+ * callbacks (which by default are triggered based on the current space mode - <code>PRIMARY</code> or <code>BACKUP</code>).
+ * Default is <code>false</code> which means registration will occur when the space moves into <code>PRIMARY</code>
+ * mode (assuming that {@link #setActiveWhenPrimary(boolean)} is set to <code>true</code>, which is the default).
+ *
  * @author kimchy
  */
 public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListenerContainer {
 
-    private DataEventSession dataEventSession;
-
     private boolean registerOnStartup = false;
+
+
+    private DataEventSession dataEventSession;
 
     public void setRegisterOnStartup(boolean registerOnStartup) {
         this.registerOnStartup = registerOnStartup;
@@ -78,6 +89,10 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
         }
     }
 
+    /**
+     * A simple remote listener delgate that delegates remote events to invocations of
+     * the registered {@link org.openspaces.events.SpaceDataEventListener#onEvent(Object,org.openspaces.core.GigaSpace,Object)}.
+     */
     private class NotifyListenerDelegate implements RemoteEventListener {
 
         public void notify(RemoteEvent remoteEvent) throws UnknownEventException, RemoteException {
