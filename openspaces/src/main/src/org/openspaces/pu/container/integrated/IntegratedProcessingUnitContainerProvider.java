@@ -1,15 +1,13 @@
 package org.openspaces.pu.container.integrated;
 
 import org.openspaces.core.cluster.ClusterInfo;
-import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
 import org.openspaces.core.config.BeanLevelProperties;
-import org.openspaces.core.config.BeanLevelPropertiesAware;
 import org.openspaces.core.config.BeanLevelPropertyBeanPostProcessor;
 import org.openspaces.core.config.BeanLevelPropertyPlaceholderConfigurer;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
-import org.openspaces.pu.container.ProcessingUnitContainerProvider;
+import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
@@ -40,8 +38,7 @@ import java.util.List;
  *
  * @author kimchy
  */
-public class IntegratedProcessingUnitContainerProvider implements ProcessingUnitContainerProvider,
-        BeanLevelPropertiesAware, ClusterInfoAware {
+public class IntegratedProcessingUnitContainerProvider implements ApplicationContextProcessingUnitContainerProvider {
 
     private ApplicationContext parentContext;
 

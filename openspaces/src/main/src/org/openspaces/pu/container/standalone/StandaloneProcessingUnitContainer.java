@@ -1,10 +1,11 @@
 package org.openspaces.pu.container.standalone;
 
 import org.openspaces.pu.container.CannotCloseContainerException;
-import org.openspaces.pu.container.ProcessingUnitContainer;
+import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.CommandLineParser;
+import org.openspaces.pu.container.support.ConfigLocationParser;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -13,7 +14,7 @@ import java.rmi.RMISecurityManager;
 /**
  * @author kimchy
  */
-public class StandaloneProcessingUnitContainer implements ProcessingUnitContainer {
+public class StandaloneProcessingUnitContainer implements ApplicationContextProcessingUnitContainer {
 
     private StandaloneContainerRunnable containerRunnable;
 
@@ -56,15 +57,7 @@ public class StandaloneProcessingUnitContainer implements ProcessingUnitContaine
 
         provider.setBeanLevelProperties(BeanLevelPropertiesParser.parse(params));
         provider.setClusterInfo(ClusterInfoParser.parse(params));
-
-        // parse the config location parameters
-        for (int i = 0; i < params.length; i++) {
-            if (params[i].getName().equalsIgnoreCase("config")) {
-                for (int j = 0; j < params[i].getArguments().length; j++) {
-                    provider.addConfigLocation(params[i].getArguments()[j]);
-                }
-            }
-        }
+        ConfigLocationParser.parse(provider, params);
 
         StandaloneProcessingUnitContainer container = (StandaloneProcessingUnitContainer) provider.createContainer();
         ((ConfigurableApplicationContext) container.getApplicationContext()).registerShutdownHook();

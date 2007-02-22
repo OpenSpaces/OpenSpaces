@@ -3,12 +3,10 @@ package org.openspaces.pu.container.standalone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.cluster.ClusterInfo;
-import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.core.config.BeanLevelProperties;
-import org.openspaces.core.config.BeanLevelPropertiesAware;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
-import org.openspaces.pu.container.ProcessingUnitContainerProvider;
+import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.File;
@@ -28,8 +26,7 @@ import java.util.jar.JarFile;
 /**
  * @author kimchy
  */
-public class StandaloneProcessingUnitContainerProvider implements ProcessingUnitContainerProvider,
-        BeanLevelPropertiesAware, ClusterInfoAware {
+public class StandaloneProcessingUnitContainerProvider implements ApplicationContextProcessingUnitContainerProvider {
 
     private static Log logger = LogFactory.getLog(StandaloneProcessingUnitContainerProvider.class);
 
