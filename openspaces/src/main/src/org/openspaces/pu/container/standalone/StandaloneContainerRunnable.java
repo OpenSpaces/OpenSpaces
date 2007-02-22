@@ -17,6 +17,16 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
+ * <p>A standalone container runnable allowing to start a Spring based application context based on the provided
+ * parameters ({@link org.openspaces.core.config.BeanLevelProperties}, {@link org.openspaces.core.cluster.ClusterInfo},
+ * and a list of config locations).
+ *
+ * <p>This runnable allows to start a processing unit container within a running thread, mainly allowing for custom
+ * class loader created based on the processing unit structure to be scoped only within the running thread. When
+ * using {@link org.openspaces.pu.container.standalone.StandaloneProcessingUnitContainer#main(String[])} this feature
+ * is not requried but when integrating the standalone container within another application this allows not to corrupt
+ * the external environment thread context class loader.
+ *
  * @author kimchy
  */
 public class StandaloneContainerRunnable implements Runnable {
@@ -33,12 +43,24 @@ public class StandaloneContainerRunnable implements Runnable {
 
     private ResourceApplicationContext applicationContext;
 
+    /**
+     * Constructs a new standalone container runnable based on the provided configuraion set parameters.
+     *
+     * @param beanLevelProperties The properties based configuration for Spring context
+     * @param clusterInfo         The cluster info configuration
+     * @param configLocations     List of config locations (string based)
+     */
     public StandaloneContainerRunnable(BeanLevelProperties beanLevelProperties, ClusterInfo clusterInfo, List configLocations) {
         this.beanLevelProperties = beanLevelProperties;
         this.clusterInfo = clusterInfo;
         this.configLocations = configLocations;
     }
 
+    /**
+     * Constructs a new Spring {@link org.springframework.context.ApplicationContext} based on the configured list
+     * of config locations. Also uses the provided {@link org.openspaces.core.cluster.ClusterInfo} and
+     * {@link org.openspaces.core.config.BeanLevelProperties} in order to further config the application context.
+     */
     public void run() {
         try {
             Resource[] resources;
@@ -80,6 +102,7 @@ public class StandaloneContainerRunnable implements Runnable {
             initialized = true;
         }
 
+        // Just hang in there until we get stopped
         while (isRunning() && !Thread.currentThread().isInterrupted()) {
             try {
                 Thread.sleep(10000);
@@ -87,21 +110,34 @@ public class StandaloneContainerRunnable implements Runnable {
                 // do nothing, the while clause will simply exit
             }
         }
+        applicationContext.destroy();
     }
 
+    /**
+     * Returns <code>true</code> if the application context initialized successfully.
+     */
     public synchronized boolean isInitialized() {
         return initialized;
     }
 
+    /**
+     * Return <code>true</code> if this runnable is currently running.
+     */
     public synchronized boolean isRunning() {
         return this.running;
     }
 
+    /**
+     * Stop this currently running container runnable.
+     */
     public synchronized void stop() {
         this.running = true;
         Thread.currentThread().interrupt();
     }
 
+    /**
+     * Returns Spring application context used as the backend for this container.
+     */
     public ApplicationContext getApplicationContext() {
         return applicationContext;
     }
