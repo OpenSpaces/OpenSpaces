@@ -5,12 +5,23 @@ import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer
 import java.io.IOException;
 
 /**
+ * Parses multiple -config parameter by adding it to
+ * {@link org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider#addConfigLocation(String)}.
+ *
  * @author kimchy
  */
 public abstract class ConfigLocationParser {
 
     public static final String CONFIG_PARAMETER = "config";
 
+    /**
+     * Parses multiple -config parameter by adding it to
+     * {@link org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider#addConfigLocation(String)}.
+     *
+     * @param containerProvider The container provider to add the config location to
+     * @param params            The parameteres to parse for -config options
+     * @throws IOException
+     */
     public static void parse(ApplicationContextProcessingUnitContainerProvider containerProvider,
                              CommandLineParser.Parameter[] params) throws IOException {
         // parse the config location parameters

@@ -3,6 +3,13 @@ package org.openspaces.pu.container.support;
 import org.openspaces.core.cluster.ClusterInfo;
 
 /**
+ * <p>{@link org.openspaces.core.cluster.ClusterInfo} parser that parses -cluster paramter and transforms it
+ * into a cluster info.
+ *
+ * <p>The following arguments to the -cluster paramters are allowed: <code>totalMembers=1,1</code>
+ * (1,1 is an example value), <code>id=1</code> (1 is an example value), <code>backupId=1</code>
+ * (1 is an example value) and <code>schema=primary_backup</code> (primary_backup is an example value).
+ *
  * @author kimchy
  */
 public abstract class ClusterInfoParser {
