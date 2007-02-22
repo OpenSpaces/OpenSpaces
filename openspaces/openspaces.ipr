@@ -303,7 +303,7 @@
   <component name="ProjectRunConfigurationManager">
     <configuration default="false" name="Example Hello World" type="Application" factoryName="Application" enabled="false" merge="false">
       <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
-      <option name="VM_PARAMETERS" value="-Djava.security.policy=policy/policy.all" />
+      <option name="VM_PARAMETERS" value="" />
       <option name="PROGRAM_PARAMETERS" value="-cluster totalMembers=2,1 id=1 backupId=1 schema=partitioned-sync2backup" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -327,7 +327,7 @@
     </configuration>
     <configuration default="false" name="Example Data Processor" type="Application" factoryName="Application" enabled="false" merge="false">
       <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
-      <option name="VM_PARAMETERS" value="-Djava.security.policy=policy/policy.all" />
+      <option name="VM_PARAMETERS" value="" />
       <option name="PROGRAM_PARAMETERS" value="" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -351,7 +351,7 @@
     </configuration>
     <configuration default="false" name="Example Data Feeder" type="Application" factoryName="Application" enabled="false" merge="false">
       <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
-      <option name="VM_PARAMETERS" value="-Djava.security.policy=policy/policy.all" />
+      <option name="VM_PARAMETERS" value="" />
       <option name="PROGRAM_PARAMETERS" value="" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -375,7 +375,7 @@
     </configuration>
     <configuration default="false" name="Example Data Processor Primary" type="Application" factoryName="Application" enabled="false" merge="false">
       <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
-      <option name="VM_PARAMETERS" value="-Djava.security.policy=policy/policy.all" />
+      <option name="VM_PARAMETERS" value="" />
       <option name="PROGRAM_PARAMETERS" value="-cluster schema=primary_backup totalMembers=1,1 id=1" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -393,7 +393,7 @@
     </configuration>
     <configuration default="false" name="Example Data Processor Backup" type="Application" factoryName="Application" enabled="false" merge="false">
       <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
-      <option name="VM_PARAMETERS" value="-Djava.security.policy=policy/policy.all" />
+      <option name="VM_PARAMETERS" value="" />
       <option name="PROGRAM_PARAMETERS" value="-cluster schema=primary_backup totalMembers=1,1 id=1 backupId=1" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />

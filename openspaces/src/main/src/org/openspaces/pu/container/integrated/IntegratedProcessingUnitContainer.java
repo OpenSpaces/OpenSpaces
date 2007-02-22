@@ -9,6 +9,8 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.rmi.RMISecurityManager;
+
 /**
  * @author kimchy
  */
@@ -35,6 +37,15 @@ public class IntegratedProcessingUnitContainer implements ProcessingUnitContaine
     }
 
     public static void main(String[] args) throws Exception {
+        // disable security manager (for now)
+        System.setSecurityManager(new RMISecurityManager() {
+            public void checkPermission(java.security.Permission perm) {
+            }
+
+            public void checkPermission(java.security.Permission perm, Object context) {
+            }
+        });
+
         CommandLineParser.Parameter[] params = CommandLineParser.parse(args);
 
         IntegratedProcessingUnitContainerProvider provider = new IntegratedProcessingUnitContainerProvider();
