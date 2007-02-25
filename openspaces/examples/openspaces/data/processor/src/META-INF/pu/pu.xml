@@ -3,10 +3,10 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
-    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
+    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
-    <bean id="gigaSpaceContextProcessor" class="org.openspaces.core.context.GigaSpaceContextBeanPostProcessor" />
-                                                                                
+    <bean id="gigaSpaceContextProcessor" class="org.openspaces.core.context.GigaSpaceContextBeanPostProcessor"/>
+
     <bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
         <property name="url" value="/./space"/>
         <property name="urlProperties">
@@ -17,52 +17,62 @@
     </bean>
 
     <bean id="gigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
-        <property name="space" ref="space" />
-        <property name="clustered" value="true" />
+        <property name="space" ref="space"/>
+        <property name="clustered" value="true"/>
     </bean>
 
-    <bean id="dataProcessor" class="org.openspaces.example.data.processor.DataProcessor" />
+    <bean id="dataProcessor" class="org.openspaces.example.data.processor.DataProcessor"/>
 
-    <bean id="dataProcessorPollingEventContainer" class="org.openspaces.events.polling.SimplePollingEventListenerContainer">
-        <property name="gigaSpace" ref="gigaSpace" />
+    <bean id="dataProcessorPollingEventContainer"
+          class="org.openspaces.events.polling.SimplePollingEventListenerContainer">
+        <property name="gigaSpace" ref="gigaSpace"/>
 
         <property name="template">
             <bean class="org.openspaces.example.data.common.Data">
-                <property name="processed" value="false" />
+                <property name="processed" value="false"/>
             </bean>
         </property>
-        
+
+        <!-- Can be enabled to allow for take multiple receive operations
+        <property name="receiveOperationHandler">
+            <bean class="org.openspaces.events.polling.receive.DefaultTakeReceiveOperationHandler">
+                <property name="maxEntries" value="100" />
+            </bean>
+        </property>
+        -->
+
         <property name="eventListener">
             <bean class="org.openspaces.events.adapter.AnnotationEventListenerAdapter">
-                <property name="delegate" ref="dataProcessor" />
+                <property name="delegate" ref="dataProcessor"/>
             </bean>
         </property>
     </bean>
 
-    <bean id="dataProcessedCounterNotifyContainer" class="org.openspaces.events.notify.SimpleNotifyEventListenerContainer">
-        <property name="gigaSpace" ref="gigaSpace" />
+    <bean id="dataProcessedCounterNotifyContainer"
+          class="org.openspaces.events.notify.SimpleNotifyEventListenerContainer">
+        <property name="gigaSpace" ref="gigaSpace"/>
 
-        <property name="notifyWrite" value="true" />
-        <property name="notifyUpdate" value="true" />
+        <property name="notifyWrite" value="true"/>
+        <property name="notifyUpdate" value="true"/>
 
-        <property name="comTypeName" value="unicast" />
-        
+        <property name="comTypeName" value="unicast"/>
+
         <property name="template">
             <bean class="org.openspaces.example.data.common.Data">
-                <property name="processed" value="true" />
+                <property name="processed" value="true"/>
             </bean>
         </property>
-        
+
         <property name="eventListener">
             <bean class="org.openspaces.events.adapter.AnnotationEventListenerAdapter">
                 <property name="delegate">
-                    <bean class="org.openspaces.example.data.processor.DataProcessedCounter" />
+                    <bean class="org.openspaces.example.data.processor.DataProcessedCounter"/>
                 </property>
             </bean>
         </property>
     </bean>
 
     <bean id="spaceModeContextLoader" class="org.openspaces.core.space.mode.SpaceModeContextLoader">
-        <property name="location" value="classpath:/META-INF/pu/mode/mode.xml" />
+        <property name="location" value="classpath:/META-INF/pu/mode/mode.xml"/>
     </bean>
 </beans>

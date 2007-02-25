@@ -3,6 +3,8 @@ package org.openspaces.events.polling;
 import org.openspaces.core.GigaSpaceException;
 import org.openspaces.events.AbstractEventListenerContainer;
 import org.openspaces.events.EventTemplateProvider;
+import org.openspaces.events.polling.receive.ReceiveOperationHandler;
+import org.openspaces.events.polling.receive.SingleTakeReceiveOperationHandler;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -16,9 +18,13 @@ import org.springframework.util.Assert;
  * each invoking the {@link #receiveAndExecute} method. The receive timeout for each
  * attempt can be configured through the {@link #setReceiveTimeout "receiveTimeout"} property.
  *
- * <p>The container allows to set the template object used for the take operations. Note, this
+ * <p>The container allows to set the template object used for the operations. Note, this
  * can be a Pojo based template, or one of GigaSpace's query classes such as
  * {@link com.j_spaces.core.client.SQLQuery}.
+ *
+ * <p>A pluggable recieve operation handler can be provided by setting
+ * {@link #setReceiveOperationHandler(org.openspaces.events.polling.receive.ReceiveOperationHandler)}.
+ * The default handler used it {@link org.openspaces.events.polling.receive.SingleTakeReceiveOperationHandler}.
  *
  * <p>Event reception and listener execution can automatically be wrapped
  * in transactions through passing a Spring {@link org.springframework.transaction.PlatformTransactionManager}
@@ -54,6 +60,8 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
     private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
 
     private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
+
+    private ReceiveOperationHandler receiveOperationHandler = new SingleTakeReceiveOperationHandler();
 
 
     /**
@@ -131,6 +139,14 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
         return receiveTimeout;
     }
 
+    /**
+     * Allows to set a receive operation handler that will perform the actual receive operation.
+     * Defaults to {@link org.openspaces.events.polling.receive.SingleTakeReceiveOperationHandler}.
+     */
+    public void setReceiveOperationHandler(ReceiveOperationHandler receiveOperationHandler) {
+        this.receiveOperationHandler = receiveOperationHandler;
+    }
+
     public void initialize() {
         // Use bean name as default transaction name.
         if (this.transactionDefinition.getName() == null) {
@@ -182,21 +198,46 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
     protected boolean doReceiveAndExecute(TransactionStatus status) {
         Object dataEvent = receiveEvent();
         if (dataEvent != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Received event [" + dataEvent + "]");
-            }
-            eventReceived(dataEvent);
-            try {
-                invokeListener(dataEvent, null);
-            }
-            catch (Throwable ex) {
-                if (status != null) {
+            if (dataEvent.getClass().isArray()) {
+                Object[] dataEvents = (Object[]) dataEvent;
+                for (int i = 0; i < dataEvents.length; i++) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Rolling back transaction because of listener exception thrown: " + ex);
+                        logger.debug("Received event [" + dataEvent + "]");
                     }
-                    status.setRollbackOnly();
+                    eventReceived(dataEvents[i]);
+                    try {
+                        invokeListener(dataEvents[i], null);
+                    } catch (Throwable ex) {
+                        if (status != null) {
+                            // in case of en exception, we rollback the transaction and return (since we rolled back)
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Rolling back transaction because of listener exception thrown: " + ex);
+                            }
+                            status.setRollbackOnly();
+                            handleListenerException(ex);
+                            return true;
+                        } else {
+                            // in case we do not work within a transaction, just handle the exception and continue
+                            handleListenerException(ex);
+                        }
+                    }
                 }
-                handleListenerException(ex);
+            } else {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Received event [" + dataEvent + "]");
+                }
+                eventReceived(dataEvent);
+                try {
+                    invokeListener(dataEvent, null);
+                } catch (Throwable ex) {
+                    if (status != null) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Rolling back transaction because of listener exception thrown: " + ex);
+                        }
+                        status.setRollbackOnly();
+                    }
+                    handleListenerException(ex);
+                }
             }
             return true;
         } else {
@@ -229,7 +270,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
      * Receive an event
      */
     protected Object receiveEvent() throws GigaSpaceException {
-        return getGigaSpace().take(getTemplate(), receiveTimeout);
+        return receiveOperationHandler.receive(getTemplate(), getGigaSpace(), getReceiveTimeout());
     }
 
     /**
