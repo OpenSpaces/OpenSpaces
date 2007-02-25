@@ -11,13 +11,13 @@
     <property name="feeder-pu" value="${basedir}/feeder/pu/data-feeder"/>
     <property name="feeder-pujar" value="${basedir}/feeder/pu/data-feeder.pu"/>
     <property name="feeder-classes" value="${feeder-pu}/classes"/>
-    <property name="feeder-lib" value="${feeder-pu}/lib"/>
+    <property name="feeder-lib" value="${feeder-pu}/shared-lib"/>
 
     <property name="processor-src" value="${basedir}/processor/src"/>
     <property name="processor-pu" value="${basedir}/processor/pu/data-processor"/>
     <property name="processor-pujar" value="${basedir}/processor/pu/data-processor.pu"/>
     <property name="processor-classes" value="${processor-pu}/classes"/>
-    <property name="processor-lib" value="${processor-pu}/lib"/>
+    <property name="processor-lib" value="${processor-pu}/shared-lib"/>
 
     <path id="all-libs">
         <fileset dir="../../../lib">

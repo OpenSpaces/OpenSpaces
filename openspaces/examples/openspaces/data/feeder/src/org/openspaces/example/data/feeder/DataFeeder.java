@@ -3,8 +3,8 @@ package org.openspaces.example.data.feeder;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.context.GigaSpaceContext;
 import org.openspaces.example.data.common.Data;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -30,6 +30,7 @@ public class DataFeeder implements InitializingBean, DisposableBean {
     }
 
     public void afterPropertiesSet() throws Exception {
+        System.out.println("--- STARTING FEEDER WITH CYCLE [" + defaultDelay + "]");
         executorService = Executors.newScheduledThreadPool(1);
         sf = executorService.scheduleAtFixedRate(new DataFeederTask(), defaultDelay, defaultDelay, TimeUnit.MILLISECONDS);
     }
@@ -50,7 +51,7 @@ public class DataFeeder implements InitializingBean, DisposableBean {
                 long time = System.currentTimeMillis();
                 Data data = new Data(Data.TYPES[counter++ % Data.TYPES.length], "FEEDER " + Long.toString(time));
                 gigaSpace.write(data);
-                System.out.println("WROTE " + data);
+                System.out.println("--- WROTE " + data);
             } catch (Exception e) {
                 e.printStackTrace();
             }

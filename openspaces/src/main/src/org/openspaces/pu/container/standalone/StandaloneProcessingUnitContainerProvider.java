@@ -145,20 +145,8 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
                     throw new CannotCreateContainerException("Failed to add classes to class loader with location [" + location + "]", e);
                 }
             }
-            File libLocation = new File(fileLocation, "lib");
-            if (libLocation.exists()) {
-                File[] jarFiles = libLocation.listFiles();
-                for (int i = 0; i < jarFiles.length; i++) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Adding jar [" + jarFiles[i].getAbsolutePath() + "] with pu directory location [" + location + "]");
-                    }
-                    try {
-                        urls.add(jarFiles[i].toURL());
-                    } catch (MalformedURLException e) {
-                        throw new CannotCreateContainerException("Failed to add jar file [" + jarFiles[i].getAbsolutePath() + "] to classs loader", e);
-                    }
-                }
-            }
+            addJarsLocation(fileLocation, urls, "lib");
+            addJarsLocation(fileLocation, urls, "shared-lib");
         } else {
             JarFile jarFile;
             try {
@@ -177,7 +165,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
                     } catch (MalformedURLException e) {
                         throw new CannotCreateContainerException("Failed to add pu entry [" + jarEntry.getName() + "] with location [" + location + "]", e);
                     }
-                } else if (jarEntry.getName().startsWith("lib/") && jarEntry.getName().length() > "lib/".length()) {
+                } else if (isWithinDir(jarEntry, "lib") || isWithinDir(jarEntry, "shared-lib")) {
                     // extract the jar into a temp location
                     if (logger.isDebugEnabled()) {
                         logger.debug("Adding jar [" + jarEntry.getName() + "] with pu location [" + location + "]");
@@ -254,6 +242,27 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
         }
 
         return new StandaloneProcessingUnitContainer(containerRunnable);
+    }
+
+    private boolean isWithinDir(JarEntry jarEntry, String dir) {
+        return jarEntry.getName().startsWith(dir + "/") && jarEntry.getName().length() > (dir + "/").length();
+    }
+
+    private void addJarsLocation(File fileLocation, List urls, String dir) {
+        File libLocation = new File(fileLocation, dir);
+        if (libLocation.exists()) {
+            File[] jarFiles = libLocation.listFiles();
+            for (int i = 0; i < jarFiles.length; i++) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Adding jar [" + jarFiles[i].getAbsolutePath() + "] with pu directory location [" + location + "]");
+                }
+                try {
+                    urls.add(jarFiles[i].toURL());
+                } catch (MalformedURLException e) {
+                    throw new CannotCreateContainerException("Failed to add jar file [" + jarFiles[i].getAbsolutePath() + "] to classs loader", e);
+                }
+            }
+        }
     }
 
 }

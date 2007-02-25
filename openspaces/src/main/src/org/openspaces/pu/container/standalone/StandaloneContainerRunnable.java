@@ -88,7 +88,7 @@ public class StandaloneContainerRunnable implements Runnable {
             }
             // create the Spring application context
             applicationContext = new ResourceApplicationContext(resources, null);
-            // add config information if provided
+            // add config information if provided   
             if (beanLevelProperties != null) {
                 applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties));
                 applicationContext.addBeanPostProcessor(new BeanLevelPropertyBeanPostProcessor(beanLevelProperties));
@@ -98,6 +98,10 @@ public class StandaloneContainerRunnable implements Runnable {
             }
             // "start" the application context
             applicationContext.refresh();
+            this.running = true;
+        } catch (Throwable t) {
+            // TODO handle it better
+            t.printStackTrace();
         } finally {
             initialized = true;
         }
@@ -131,7 +135,7 @@ public class StandaloneContainerRunnable implements Runnable {
      * Stop this currently running container runnable.
      */
     public synchronized void stop() {
-        this.running = true;
+        this.running = false;
         Thread.currentThread().interrupt();
     }
 
