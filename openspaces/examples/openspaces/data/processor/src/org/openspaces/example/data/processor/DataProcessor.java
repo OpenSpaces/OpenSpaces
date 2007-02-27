@@ -2,11 +2,12 @@ package org.openspaces.example.data.processor;
 
 import org.openspaces.events.adapter.SpaceDataEvent;
 import org.openspaces.example.data.common.Data;
+import org.openspaces.example.data.common.IDataProcessor;
 
 /**
  * @author kimchy
  */
-public class DataProcessor {
+public class DataProcessor implements IDataProcessor {
 
     private long workDuration = 1000;
 

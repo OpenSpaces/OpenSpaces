@@ -3,9 +3,9 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
-    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
+    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
-    <bean id="gigaSpaceContextProcessor" class="org.openspaces.core.context.GigaSpaceContextBeanPostProcessor" />
+    <bean id="gigaSpaceContextProcessor" class="org.openspaces.core.context.GigaSpaceContextBeanPostProcessor"/>
 
     <bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
         <property name="url" value="jini://*/*/space"/>
@@ -17,9 +17,20 @@
     </bean>
 
     <bean id="gigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
-        <property name="space" ref="space" />
+        <property name="space" ref="space"/>
     </bean>
 
-    <bean id="dataFeeder" class="org.openspaces.example.data.feeder.DataFeeder" />
+    <bean id="dataFeeder" class="org.openspaces.example.data.feeder.DataFeeder"/>
+
+    <!-- Remoting Example -->
+
+    <bean id="dataProcessor" class="org.openspaces.remoting.SpaceRemotingProxyFactoryBean">
+        <property name="gigaSpace" ref="gigaSpace"/>
+        <property name="serviceInterface" value="org.openspaces.example.data.common.IDataProcessor"/>
+    </bean>
+
+    <bean id="dataRemoting" class="org.openspaces.example.data.feeder.DataRemoting">
+        <property name="dataProcessor" ref="dataProcessor"/>
+    </bean>
 
 </beans>

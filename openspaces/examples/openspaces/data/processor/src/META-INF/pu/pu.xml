@@ -18,7 +18,7 @@
 
     <bean id="gigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
         <property name="space" ref="space"/>
-        <property name="clustered" value="true"/>
+        <property name="clustered" value="false"/>
     </bean>
 
     <bean id="dataProcessor" class="org.openspaces.example.data.processor.DataProcessor"/>
@@ -74,5 +74,28 @@
 
     <bean id="spaceModeContextLoader" class="org.openspaces.core.space.mode.SpaceModeContextLoader">
         <property name="location" value="classpath:/META-INF/pu/mode/mode.xml"/>
+    </bean>
+
+    <!-- Remoting Support -->
+    <bean id="remotingContainer" class="org.openspaces.events.polling.SimplePollingEventListenerContainer">
+        <property name="gigaSpace" ref="gigaSpace"/>
+
+        <!-- Can be enabled to allow for take multiple receive operations
+        <property name="receiveOperationHandler">
+            <bean class="org.openspaces.events.polling.receive.DefaultTakeReceiveOperationHandler">
+                <property name="maxEntries" value="100" />
+            </bean>
+        </property>
+        -->
+
+        <property name="eventListener">
+            <bean class="org.openspaces.remoting.SpaceRemotingServiceExporter">
+                <property name="services">
+                    <list>
+                        <ref bean="dataProcessor"/>
+                    </list>
+                </property>
+            </bean>
+        </property>
     </bean>
 </beans>
