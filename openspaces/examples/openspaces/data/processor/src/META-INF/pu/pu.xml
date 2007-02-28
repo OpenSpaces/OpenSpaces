@@ -77,25 +77,16 @@
     </bean>
 
     <!-- Remoting Support -->
-    <bean id="remotingContainer" class="org.openspaces.events.polling.SimplePollingEventListenerContainer">
-        <property name="gigaSpace" ref="gigaSpace"/>
-
-        <!-- Can be enabled to allow for take multiple receive operations
-        <property name="receiveOperationHandler">
-            <bean class="org.openspaces.events.polling.receive.DefaultTakeReceiveOperationHandler">
-                <property name="maxEntries" value="100" />
-            </bean>
-        </property>
-        -->
-
-        <property name="eventListener">
-            <bean class="org.openspaces.remoting.SpaceRemotingServiceExporter">
-                <property name="services">
-                    <list>
-                        <ref bean="dataProcessor"/>
-                    </list>
-                </property>
-            </bean>
-        </property>
-    </bean>
+    <!--<bean id="remotingContainer" class="org.openspaces.events.polling.SimplePollingEventListenerContainer">-->
+        <!--<property name="gigaSpace" ref="gigaSpace"/>-->
+        <!--<property name="eventListener">-->
+            <!--<bean class="org.openspaces.remoting.SpaceRemotingServiceExporter">-->
+                <!--<property name="services">-->
+                    <!--<list>-->
+                        <!--<ref bean="dataProcessor"/>-->
+                    <!--</list>-->
+                <!--</property>-->
+            <!--</bean>-->
+        <!--</property>-->
+    <!--</bean>-->
 </beans>

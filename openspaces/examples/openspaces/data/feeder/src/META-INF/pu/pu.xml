@@ -29,8 +29,8 @@
         <property name="serviceInterface" value="org.openspaces.example.data.common.IDataProcessor"/>
     </bean>
 
-    <bean id="dataRemoting" class="org.openspaces.example.data.feeder.DataRemoting">
-        <property name="dataProcessor" ref="dataProcessor"/>
-    </bean>
+    <!--<bean id="dataRemoting" class="org.openspaces.example.data.feeder.DataRemoting">-->
+        <!--<property name="dataProcessor" ref="dataProcessor"/>-->
+    <!--</bean>-->
 
 </beans>
