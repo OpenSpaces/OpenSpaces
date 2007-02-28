@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module version="4" relativePaths="true" type="JAVA_MODULE">
   <component name="ModuleRootManager" />
-  <component name="NewModuleRootManager" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_5" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/pu/data-feeder/classes" />
     <exclude-output />
     <output-test url="file://$MODULE_DIR$/pu/data-feeder/classes" />
@@ -10,6 +10,15 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../../lib/JSpaces.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntry type="module" module-name="source-main" />
     <orderEntry type="module" module-name="source-tiger" />
     <orderEntry type="module" module-name="examples-data-common" />
@@ -17,15 +26,6 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/../../../../lib/spring/spring.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../../lib/JSpaces.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

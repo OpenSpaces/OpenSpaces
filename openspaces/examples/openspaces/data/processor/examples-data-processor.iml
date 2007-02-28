@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module version="4" relativePaths="true" type="JAVA_MODULE">
   <component name="ModuleRootManager" />
-  <component name="NewModuleRootManager" inherit-compiler-output="true">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_5" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/pu/data-processor/classes" />
     <exclude-output />
+    <output-test url="file://$MODULE_DIR$/pu/data-processor/classes" />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="source-main" />
-    <orderEntry type="module" module-name="source-tiger" />
-    <orderEntry type="module" module-name="examples-data-common" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -20,6 +19,9 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="source-main" />
+    <orderEntry type="module" module-name="source-tiger" />
+    <orderEntry type="module" module-name="examples-data-common" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
