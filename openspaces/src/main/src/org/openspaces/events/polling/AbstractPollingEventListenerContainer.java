@@ -147,13 +147,17 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
         this.receiveOperationHandler = receiveOperationHandler;
     }
 
+    public void afterPropertiesSet() {
+        if (getEventListener() != null && getEventListener() instanceof EventTemplateProvider && template == null) {
+            setTemplate(((EventTemplateProvider) getEventListener()).getTemplate());
+        }
+        super.afterPropertiesSet();
+    }
+
     public void initialize() {
         // Use bean name as default transaction name.
         if (this.transactionDefinition.getName() == null) {
             this.transactionDefinition.setName(getBeanName());
-        }
-        if (getEventListener() != null && getEventListener() instanceof EventTemplateProvider && template != null) {
-            setTemplate(((EventTemplateProvider) getEventListener()).getTemplate());
         }
 
         // Proceed with superclass initialization.

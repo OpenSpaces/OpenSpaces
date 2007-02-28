@@ -239,11 +239,14 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
     }
 
 
-    public void initialize() throws GigaSpaceException {
-        if (getEventListener() != null && getEventListener() instanceof EventTemplateProvider && template != null) {
+    public void afterPropertiesSet() {
+        if (getEventListener() != null && getEventListener() instanceof EventTemplateProvider && template == null) {
             setTemplate(((EventTemplateProvider) getEventListener()).getTemplate());
         }
+        super.afterPropertiesSet();
+    }
 
+    public void initialize() throws GigaSpaceException {
         if (!replicateNotifyTemplate && triggerNotifyTemplate) {
             if (logger.isDebugEnabled()) {
                 logger.debug("triggerNotifyTemplate is set, automatically setting replicateNotifyTemplate to true");
