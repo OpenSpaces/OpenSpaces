@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" output="examples/openspaces/helloworld/pu/helloworld/classes" path="examples/openspaces/helloworld/src"/>
 	<classpathentry kind="src" output="target/tiger-test-classes" path="src/tiger/test"/>
 	<classpathentry kind="src" output="target/classes" path="src/tiger/src"/>
 	<classpathentry kind="src" output="target/classes" path="src/main/src"/>
