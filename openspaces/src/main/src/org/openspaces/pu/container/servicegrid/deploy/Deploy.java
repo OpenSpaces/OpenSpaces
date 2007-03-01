@@ -25,15 +25,20 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -51,7 +56,9 @@ public class Deploy {
 
 // -------------------------- STATIC METHODS --------------------------
 
-    static OperationalString loadDeployment(String puString, String codeserver, String jiniGroup, SLA sla, File[] jars, String puPath, String puName) throws Exception {
+    static OperationalString loadDeployment(
+            String puString, String codeserver, String jiniGroup, SLA sla, File[] jars, String puPath, String puName, File[] sharedJars)
+            throws Exception {
         URL opstringURL = Deploy.class.getResource("/org/openspaces/pu/container/servicegrid/puservicebean.xml");
         System.out.println("opstringURL = " + opstringURL);
         OperationalString opString = null;
@@ -71,7 +78,6 @@ public class Deploy {
         element.getServiceBeanConfig().addInitParameter("pu", puString);
 
         //sla
-        element.setPlanned(sla.getNumberOfInstances());
         Policy policy = sla.getPolicy();
         if (policy != null) {
             String type;
@@ -139,9 +145,54 @@ public class Deploy {
             System.out.println("added jar:" + path);
         }
 
+        //shared-lib as sharedComponents
+        String[] sharedJarPaths = new String[sharedJars.length];
+        for (int i = 0; i < sharedJars.length; i++) {
+            File sharedJar = sharedJars[i];
+            String path = sharedJar.getPath();
+            sharedJarPaths[i] = path;
+        }
+        Map jarsMap = new HashMap();
+        jarsMap.put("hack", sharedJarPaths);
+        classBundle.addSharedComponents(jarsMap);
+
+        //this is the MOST IMPORTANT part
+        boolean hasBackups = sla.getNumberOfBackups() > 0;
+        if (hasBackups) {
+            //the extra one is the primary
+            element.setPlanned(sla.getNumberOfBackups() + 1);
+            String name = element.getName();
+            opString.removeService(element);
+            for (int i = 1; i <= sla.getNumberOfInstances(); i++) {
+                ServiceElement clone = deepCopy(element);
+                clone.getServiceBeanConfig().setName(name + "." + i);
+                clone.getServiceBeanConfig().addInitParameter("clusterGroup", String.valueOf(i));
+                opString.addService(clone);
+            }
+        } else {
+            element.setPlanned(sla.getNumberOfInstances());
+            element.getServiceBeanConfig().addInitParameter("clusterGroup", String.valueOf(1));
+        }
+
+
         System.out.println(element);
 
         return (opString);
+    }
+
+    private static ServiceElement deepCopy(ServiceElement element) throws IOException, ClassNotFoundException {
+        //write
+        byte[] writtenBytes;
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+        objectOutputStream.writeObject(element);
+        writtenBytes = byteArrayOutputStream.toByteArray();
+
+        //read
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(writtenBytes);
+        ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+        Object readObject = objectInputStream.readObject();
+        return (ServiceElement) readObject;
     }
 
     //copied from opstringloader
@@ -268,9 +319,14 @@ public class Deploy {
         URL root = new URL(codeserver);
         HTTPFileSystemView view = new HTTPFileSystemView(root);
         File puHome = view.createFileObject(puPath);
+        //get list of all jars
         File lib = view.createFileObject(puHome, "lib");
         File[] jars = view.getFiles(lib, false);
         System.out.println("jars = " + Arrays.asList(jars));
+        //get list of all shared
+        File shared = view.createFileObject(puHome, "shared-lib");
+        File[] sharedJars = view.getFiles(shared, false);
+        System.out.println("sharedJars = " + Arrays.asList(sharedJars));
 
         //read pu xml
         String puString = readPUFile(root, puPath);
@@ -279,7 +335,7 @@ public class Deploy {
         System.out.println("sla = " + sla);
 
         //deploy to sg
-        OperationalString opString = loadDeployment(puString, codeserver, jiniGroup, sla, jars, puPath, puName);
+        OperationalString opString = loadDeployment(puString, codeserver, jiniGroup, sla, jars, puPath, puName, sharedJars);
         Map result = deployAdmin.deploy(opString);
 //        System.out.println("result = " + result);
 
