@@ -67,7 +67,7 @@ public class StandaloneContainerRunnable implements Runnable {
             PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
             if (configLocations.size() == 0) {
                 try {
-                    resources = pathMatchingResourcePatternResolver.getResources("classpath*:/META-INF/pu/*.xml");
+                    resources = pathMatchingResourcePatternResolver.getResources("classpath*:/META-INF/spring/*.xml");
                 } catch (IOException e) {
                     throw new CannotCreateContainerException("Failed to parse pu xml", e);
                 }

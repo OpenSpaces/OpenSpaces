@@ -3,14 +3,16 @@
 <project name="openspaces" default="usage" basedir=".">
 
     <property name="pulocation" value="${basedir}/pu/helloworld"/>
-    <property name="puclasses" value="${pulocation}/classes"/>
 
     <path id="all-libs">
 
         <fileset dir="../../../lib">
             <include name="**/*.jar"/>
-            <include name="${pulocation}/lib/*.jar" />
             <exclude name="JSpaces-1.4.jar"/>
+        </fileset>
+
+        <fileset dir="${pulocation}">
+            <include name="lib/*.jar" />
         </fileset>
     </path>
 
@@ -28,19 +30,19 @@
     </target>
 
     <target name="clean">
-        <delete dir="${puclasses}"/>
+        <delete dir="${pulocation}/org"/>
     </target>
 
     <target name="build">
-        <mkdir dir="${puclasses}"/>
+        <mkdir dir="${pulocation}"/>
 
-        <javac destdir="${puclasses}" source="1.5" target="1.5" debug="on"
+        <javac destdir="${pulocation}" source="1.5" target="1.5" debug="on"
                deprecation="false" optimize="false" failonerror="true">
             <src path="src"/>
             <classpath refid="all-libs"/>
         </javac>
 
-        <copy todir="${puclasses}" preservelastmodified="true">
+        <copy todir="${pulocation}" preservelastmodified="true">
             <fileset dir="src">
                 <include name="**/*.properties"/>
                 <include name="**/*.handlers"/>
@@ -53,7 +55,7 @@
     </target>
 
     <target name="dist" depends="build">
-        <jar basedir="${pulocation}" jarfile="${basedir}/pu/helloworld.pu"/>
+        <jar basedir="${pulocation}" jarfile="${basedir}/pu/helloworld.jar"/>
     </target>
 
 </project>

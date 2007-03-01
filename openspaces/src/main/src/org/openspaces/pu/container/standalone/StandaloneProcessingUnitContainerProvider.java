@@ -40,7 +40,7 @@ import java.util.jar.JarFile;
  *
  * <p>The provider allows for programmatic configuration of different processing unit aspects. It allows to configure
  * where the processing unit Spring context xml descriptors are located (by default it uses
- * <code>classpath*:/META-INF/pu/*.xml</code>). It also allows to set {@link org.openspaces.core.config.BeanLevelProperties}
+ * <code>classpath*:/META-INF/spring/*.xml</code>). It also allows to set {@link org.openspaces.core.config.BeanLevelProperties}
  * and {@link org.openspaces.core.cluster.ClusterInfo} that will be injected to beans configured within the processing
  * unit.
  *
@@ -113,7 +113,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
      *
      * <p>If {@link #addConfigLocation(String)} is used, the Spring xml context will be read based on the provided
      * locations. If no config location was provided the default config location will be
-     * <code>classpath*:/META-INF/pu/*.xml</code>.
+     * <code>classpath*:/META-INF/spring/*.xml</code>.
      *
      * <p>If {@link #setBeanLevelProperties(org.openspaces.core.config.BeanLevelProperties)} is set will use
      * the configured bean level properties in order to configure the application context and specific beans
@@ -134,13 +134,12 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
         }
         List urls = new ArrayList();
         if (fileLocation.isDirectory()) {
-            File classesLocation = new File(fileLocation, "classes");
-            if (classesLocation.exists()) {
+            if (fileLocation.exists()) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Adding classes directory with pu directory location [" + location + "]");
+                    logger.debug("Adding pu directory location [" + location + "] to classpath");
                 }
                 try {
-                    urls.add(classesLocation.toURL());
+                    urls.add(fileLocation.toURL());
                 } catch (MalformedURLException e) {
                     throw new CannotCreateContainerException("Failed to add classes to class loader with location [" + location + "]", e);
                 }
@@ -154,18 +153,16 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
             } catch (IOException e) {
                 throw new CannotCreateContainerException("Failed to open pu file [" + location + "]", e);
             }
+            // add the root to the classpath
+            try {
+                urls.add(new URL("jar:" + fileLocation.toURL() + "!/"));
+            } catch (MalformedURLException e) {
+                throw new CannotCreateContainerException("Failed to add pu location [" + location + "] to classpath", e);
+            }
+            // add jars in lib and shared-lib to the classpath
             for (Enumeration entries = jarFile.entries(); entries.hasMoreElements();) {
                 JarEntry jarEntry = (JarEntry) entries.nextElement();
-                if (jarEntry.getName().equals("classes/")) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Adding classes directory with pu location [" + location + "]");
-                    }
-                    try {
-                        urls.add(new URL("jar:" + fileLocation.toURL() + "!/" + jarEntry.getName()));
-                    } catch (MalformedURLException e) {
-                        throw new CannotCreateContainerException("Failed to add pu entry [" + jarEntry.getName() + "] with location [" + location + "]", e);
-                    }
-                } else if (isWithinDir(jarEntry, "lib") || isWithinDir(jarEntry, "shared-lib")) {
+                if (isWithinDir(jarEntry, "lib") || isWithinDir(jarEntry, "shared-lib")) {
                     // extract the jar into a temp location
                     if (logger.isDebugEnabled()) {
                         logger.debug("Adding jar [" + jarEntry.getName() + "] with pu location [" + location + "]");
@@ -254,7 +251,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
             File[] jarFiles = libLocation.listFiles();
             for (int i = 0; i < jarFiles.length; i++) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Adding jar [" + jarFiles[i].getAbsolutePath() + "] with pu directory location [" + location + "]");
+                    logger.debug("Adding jar [" + jarFiles[i].getAbsolutePath() + "] with pu directory location [" + location + "] to classpath");
                 }
                 try {
                     urls.add(jarFiles[i].toURL());

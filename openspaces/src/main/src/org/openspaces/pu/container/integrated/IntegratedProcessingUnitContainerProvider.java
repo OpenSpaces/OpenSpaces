@@ -29,7 +29,7 @@ import java.util.List;
  *
  * <p>The provider allows for programmatic configuration of different processing unit aspects. It allows to configure
  * where the processing unit Spring context xml descriptors are located (by default it uses
- * <code>classpath*:/META-INF/pu/*.xml</code>). It also allows to set {@link org.openspaces.core.config.BeanLevelProperties}
+ * <code>classpath*:/META-INF/spring/*.xml</code>). It also allows to set {@link org.openspaces.core.config.BeanLevelProperties}
  * and {@link org.openspaces.core.cluster.ClusterInfo} that will be injected to beans configured within the processing
  * unit.
  *
@@ -91,7 +91,7 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
      * config location represents a Spring xml context.
      *
      * <p>Note, once a config location is added that default location used when no config location is defined
-     * won't be used (the default location is <code>classpath*:/META-INF/pu/*.xml</code>).
+     * won't be used (the default location is <code>classpath*:/META-INF/spring/*.xml</code>).
      */
     public void addConfigLocation(Resource resource) {
         this.configResources.add(resource);
@@ -117,7 +117,7 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
      * <p>If {@link #addConfigLocation(org.springframework.core.io.Resource)} or
      * {@link #addConfigLocation(String)} were used, the Spring xml context will be read based on the provided
      * locations. If no config location was provided the default config location will be
-     * <code>classpath*:/META-INF/pu/*.xml</code>.
+     * <code>classpath*:/META-INF/spring/*.xml</code>.
      *
      * <p>If {@link #setBeanLevelProperties(org.openspaces.core.config.BeanLevelProperties)} is set will use
      * the configured bean level properties in order to configure the application context and specific beans
@@ -134,7 +134,7 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
     public ProcessingUnitContainer createContainer() throws CannotCreateContainerException {
         if (configResources.size() == 0) {
             try {
-                addConfigLocation("classpath*:/META-INF/pu/*.xml");
+                addConfigLocation("classpath*:/META-INF/spring/*.xml");
             } catch (IOException e) {
                 throw new CannotCreateContainerException("Failed to read config files from [/META_INF/pu/*.xml]", e);
             }

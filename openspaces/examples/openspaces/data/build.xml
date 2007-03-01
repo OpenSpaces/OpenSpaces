@@ -9,14 +9,12 @@
 
     <property name="feeder-src" value="${basedir}/feeder/src"/>
     <property name="feeder-pu" value="${basedir}/feeder/pu/data-feeder"/>
-    <property name="feeder-pujar" value="${basedir}/feeder/pu/data-feeder.pu"/>
-    <property name="feeder-classes" value="${feeder-pu}/classes"/>
+    <property name="feeder-pujar" value="${basedir}/feeder/pu/data-feeder.jar"/>
     <property name="feeder-lib" value="${feeder-pu}/shared-lib"/>
 
     <property name="processor-src" value="${basedir}/processor/src"/>
     <property name="processor-pu" value="${basedir}/processor/pu/data-processor"/>
-    <property name="processor-pujar" value="${basedir}/processor/pu/data-processor.pu"/>
-    <property name="processor-classes" value="${processor-pu}/classes"/>
+    <property name="processor-pujar" value="${basedir}/processor/pu/data-processor.jar"/>
     <property name="processor-lib" value="${processor-pu}/shared-lib"/>
 
     <path id="all-libs">
@@ -42,16 +40,16 @@
     <target name="clean">
         <delete dir="${common-classes}"/>
         <delete dir="${common-dist}"/>
-        <delete dir="${feeder-classes}"/>
-        <delete dir="${processor-classes}"/>
+        <delete dir="${feeder-pu}/org"/>
+        <delete dir="${processor-pu}/org"/>
         <delete file="${processor-pujar}"/>
         <delete file="${feeder-pujar}"/>
     </target>
 
     <target name="build">
         <build src="${common-src}" classes="${common-classes}" additional-classpath="" />
-        <build src="${feeder-src}" classes="${feeder-classes}" additional-classpath="${common-classes}" />
-        <build src="${processor-src}" classes="${processor-classes}" additional-classpath="${common-classes}" />
+        <build src="${feeder-src}" classes="${feeder-pu}" additional-classpath="${common-classes}" />
+        <build src="${processor-src}" classes="${processor-pu}" additional-classpath="${common-classes}" />
     </target>
 
     <target name="dist" depends="build">
