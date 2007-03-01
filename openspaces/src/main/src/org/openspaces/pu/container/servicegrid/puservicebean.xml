@@ -2,7 +2,7 @@
 <!DOCTYPE gs-deployment SYSTEM "java://gs-deploy-desc.dtd">
 <gs-deployment Name="PU ServiceBean">
     <Codebase>$[com.gigaspaces.system.codeserver]</Codebase>
-    <!-- Declare attributes for the Hello example -->
+
     <ServiceBean Name="PU">
 
         <Interfaces>
@@ -17,15 +17,6 @@
                 <JAR>puservicebean.jar</JAR>
             </Resources>
         </ImplementationClass>
-
-        <!--
-                <ServiceLevelAgreements>
-                    <SLA ID="Swing" Low="10" High="80">
-                        <PolicyHandler type="scaling" max="3"
-                                       lowerDampener="3000" upperDampener="3000"/>
-                    </SLA>
-                </ServiceLevelAgreements>
-        -->
 
         <Maintain>1</Maintain>
     </ServiceBean>
