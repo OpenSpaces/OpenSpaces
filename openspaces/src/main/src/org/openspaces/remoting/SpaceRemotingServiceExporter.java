@@ -80,7 +80,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
         } catch (InvocationTargetException e) {
             writeResponse(gigaSpace, remoteInvocation, e.getTargetException());
         } catch (IllegalAccessException e) {
-            writeResponse(gigaSpace, remoteInvocation, new SpaceRemotingException("Failed to access method", e));
+            writeResponse(gigaSpace, remoteInvocation, new ServiceMethodNotFoundSpaceRemotingException(remoteInvocation.getMethodName(), e));
         }
     }
 
