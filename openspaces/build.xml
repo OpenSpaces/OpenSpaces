@@ -131,8 +131,22 @@
 
     </target>
 
+    <target name="srczip" description="Create source ZIP (containing Java sources)">
 
-    <target name="dist" depends="fulljar" description="Creates the OpenSpaces distribution">
+        <delete file="lib/${name}/openspaces-src.zip"/>
+
+        <zip zipfile="lib/${name}/openspaces-src.zip">
+            <fileset dir="${main.src.dir}">
+                <include name="org/openspaces/**"/>
+            </fileset>
+            <fileset dir="${tiger.src.dir}">
+                <include name="org/springframework/**"/>
+            </fileset>
+        </zip>
+
+    </target>
+
+    <target name="dist" depends="fulljar, srczip" description="Creates the OpenSpaces distribution">
         <delete file="${dist.dir}/${name}-${openspaces-version}.zip"/>
         <zip zipfile="${dist.dir}/${name}-${openspaces-version}.zip">
             <zipfileset dir="${basedir}">
