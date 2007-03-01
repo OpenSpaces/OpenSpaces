@@ -9,7 +9,7 @@
     </bean>
 
     <bean id="localTxManager" class="org.openspaces.core.transaction.manager.LocalJiniTransactionManager">
-        <property name="space" ref="space"/>
+        <property name="gigaSpace" ref="gigaSpace"/>
     </bean>
 
     <bean id="gigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">

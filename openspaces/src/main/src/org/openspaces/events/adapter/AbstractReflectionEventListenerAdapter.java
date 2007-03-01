@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.Assert;
 import org.springframework.util.MethodInvoker;
 import org.springframework.util.ObjectUtils;
@@ -27,7 +28,7 @@ import java.lang.reflect.Method;
  * listener invocation.
  *
  * <p>Event listening methods can have no parameters or one or more parameres mapping to
- * {@link org.openspaces.events.SpaceDataEventListener#onEvent(Object,org.openspaces.core.GigaSpace,Object)} parameters order.
+ * {@link org.openspaces.events.SpaceDataEventListener#onEvent(Object,org.openspaces.core.GigaSpace,org.springframework.transaction.TransactionStatus,Object)} parameters order.
  * If the method has a return value it will be handled thanks to {@link org.openspaces.events.adapter.AbstractResultEventListenerAdapter}.
  *
  * <p>Having more than one event listening method allows for writing specifc listener methods handling different
@@ -99,7 +100,7 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
      * the cached reflection Method. If more than one event listener delegate method is configured
      * uses reflection to dynamically find the relevant event listener method.
      */
-    protected Object onEventWithResult(Object data, GigaSpace gigaSpace, Object source) {
+    protected Object onEventWithResult(Object data, GigaSpace gigaSpace, TransactionStatus txStatus, Object source) {
         Method listenerMethod = listenerMethods[0];
         int numberOfParameters = listenerMethod.getParameterTypes().length;
 
@@ -109,7 +110,9 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
         } else if (numberOfParameters == 2) {
             listenerArguments = new Object[]{data, gigaSpace};
         } else if (numberOfParameters == 3) {
-            listenerArguments = new Object[]{data, gigaSpace, source};
+            listenerArguments = new Object[]{data, gigaSpace, txStatus};
+        } else if (numberOfParameters == 4) {
+            listenerArguments = new Object[]{data, gigaSpace, txStatus, source};
         }
 
         Object result = null;

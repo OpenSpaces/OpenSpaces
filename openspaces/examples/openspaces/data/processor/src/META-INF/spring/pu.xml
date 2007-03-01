@@ -18,7 +18,11 @@
 
     <bean id="gigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
         <property name="space" ref="space"/>
-        <property name="clustered" value="false"/>
+        <property name="clustered" value="true"/>
+    </bean>
+
+    <bean id="transactionManager" class="org.openspaces.core.transaction.manager.LocalJiniTransactionManager">
+        <property name="gigaSpace" ref="gigaSpace" />
     </bean>
 
     <bean id="dataProcessor" class="org.openspaces.example.data.processor.DataProcessor"/>
@@ -26,6 +30,9 @@
     <bean id="dataProcessorPollingEventContainer"
           class="org.openspaces.events.polling.SimplePollingEventListenerContainer">
         <property name="gigaSpace" ref="gigaSpace"/>
+
+        <!-- make the reception transactional -->
+        <property name="transactionManager" ref="transactionManager" />
 
         <property name="template">
             <bean class="org.openspaces.example.data.common.Data">
@@ -56,6 +63,8 @@
         <property name="notifyUpdate" value="true"/>
 
         <property name="comTypeName" value="unicast"/>
+
+        <property name="performTakeOnNotify" value="true" />
 
         <property name="template">
             <bean class="org.openspaces.example.data.common.Data">

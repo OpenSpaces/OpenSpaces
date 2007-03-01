@@ -11,6 +11,9 @@ import org.openspaces.core.GigaSpaceException;
 import org.openspaces.events.AbstractEventListenerContainer;
 import org.openspaces.events.EventTemplateProvider;
 import org.springframework.core.Constants;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.Assert;
 
 import java.rmi.RemoteException;
@@ -54,6 +57,11 @@ import java.rmi.RemoteException;
  * the event listener will be used to get the template. This feature helps when event listeners
  * directly can only work with a certain template and removes the requirement of configuring the
  * template as well.
+ *
+ * <p>Provides {@link #invokeListenerWithTransaction(Object,Object,boolean)} allowing to execute the lisetner
+ * within a transactional context. Also allows for the performTakeOnNotify to control if a take
+ * operation will be perfomed against the space with the given event data in order to remove it
+ * from the space.
  *
  * @author kimchy
  * @see com.gigaspaces.events.EventSessionConfig
@@ -116,6 +124,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
 
     private boolean replicateNotifyTemplate = false;
 
+    private PlatformTransactionManager transactionManager;
+
+    private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
 
     public void setComType(int comType) {
         this.comType = comType;
@@ -238,6 +249,43 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
         this.replicateNotifyTemplate = replicateNotifyTemplate;
     }
 
+    /**
+     * <p>Specify the Spring {@link org.springframework.transaction.PlatformTransactionManager}
+     * to use for transactional wrapping of listener execution.
+     *
+     * <p>Default is none, not performing any transactional wrapping.
+     */
+    public void setTransactionManager(PlatformTransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
+    }
+
+    /**
+     * Return the Spring PlatformTransactionManager to use for transactional
+     * wrapping of message reception plus listener execution.
+     */
+    protected final PlatformTransactionManager getTransactionManager() {
+        return this.transactionManager;
+    }
+
+    /**
+     * Specify the transaction name to use for transactional wrapping.
+     * Default is the bean name of this listener container, if any.
+     *
+     * @see org.springframework.transaction.TransactionDefinition#getName()
+     */
+    public void setTransactionName(String transactionName) {
+        this.transactionDefinition.setName(transactionName);
+    }
+
+    /**
+     * Specify the transaction timeout to use for transactional wrapping, in <b>seconds</b>.
+     * Default is none, using the transaction manager's default timeout.
+     *
+     * @see org.springframework.transaction.TransactionDefinition#getTimeout()
+     */
+    public void setTransactionTimeout(int transactionTimeout) {
+        this.transactionDefinition.setTimeout(transactionTimeout);
+    }
 
     public void afterPropertiesSet() {
         if (getEventListener() != null && getEventListener() instanceof EventTemplateProvider && template == null) {
@@ -341,4 +389,74 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
             throw new NotifyListenerRegistrationException("Failed to register notify listener", e);
         }
     }
+
+    /**
+     * <p>Executes the given listener. If a {@link #setTransactionManager(org.springframework.transaction.PlatformTransactionManager)}
+     * is provided will perform the listener execution within a transaction, if not, the listener execution is performed
+     * without a transaction.
+     *
+     * <p>If the performTakeOnNotify flag is set to <code>true</code> will also perform take operation with the given
+     * event data (i.e. remove it from the space).
+     *
+     * @param eventData           The event data object
+     * @param source              The remote notify event
+     * @param performTakeOnNotify A flag indicating whether to perform take operation with the given event data
+     * @throws GigaSpaceException
+     */
+    protected void invokeListenerWithTransaction(Object eventData, Object source, boolean performTakeOnNotify) throws GigaSpaceException {
+        if (this.transactionManager != null) {
+            // Execute receive within transaction.
+            TransactionStatus status = this.transactionManager.getTransaction(this.transactionDefinition);
+            try {
+                if (performTakeOnNotify) {
+                    getGigaSpace().take(eventData, 0);
+                }
+                try {
+                    invokeListener(eventData, status, source);
+                } catch (Throwable t) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Rolling back transaction because of listener exception thrown: " + t);
+                    }
+                    status.setRollbackOnly();
+                    handleListenerException(t);
+                }
+            } catch (RuntimeException ex) {
+                rollbackOnException(status, ex);
+                throw ex;
+            } catch (Error err) {
+                rollbackOnException(status, err);
+                throw err;
+            }
+            this.transactionManager.commit(status);
+        } else {
+            if (performTakeOnNotify) {
+                getGigaSpace().take(eventData, 0);
+            }
+            try {
+                invokeListener(eventData, null, source);
+            } catch (Throwable t) {
+                handleListenerException(t);
+            }
+        }
+    }
+
+    /**
+     * Perform a rollback, handling rollback exceptions properly.
+     *
+     * @param status object representing the transaction
+     * @param ex     the thrown application exception or error
+     */
+    private void rollbackOnException(TransactionStatus status, Throwable ex) {
+        logger.debug("Initiating transaction rollback on application exception", ex);
+        try {
+            this.transactionManager.rollback(status);
+        } catch (RuntimeException ex2) {
+            logger.error("Application exception overridden by rollback exception", ex);
+            throw ex2;
+        } catch (Error err) {
+            logger.error("Application exception overridden by rollback error", ex);
+            throw err;
+        }
+    }
+
 }

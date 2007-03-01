@@ -1,6 +1,8 @@
 package org.openspaces.remoting;
 
 /**
+ * A Space remoting exception caused by not finding the method within the service to invoke.
+ *
  * @author kimchy
  */
 public class ServiceMethodNotFoundSpaceRemotingException extends SpaceRemotingException {

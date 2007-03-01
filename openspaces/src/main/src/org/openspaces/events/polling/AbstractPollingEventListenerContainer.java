@@ -210,10 +210,10 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
                     }
                     eventReceived(dataEvents[i]);
                     try {
-                        invokeListener(dataEvents[i], null);
+                        invokeListener(dataEvents[i], status, null);
                     } catch (Throwable ex) {
                         if (status != null) {
-                            // in case of en exception, we rollback the transaction and return (since we rolled back)
+                            // in case of an exception, we rollback the transaction and return (since we rolled back)
                             if (logger.isDebugEnabled()) {
                                 logger.debug("Rolling back transaction because of listener exception thrown: " + ex);
                             }
@@ -232,7 +232,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
                 }
                 eventReceived(dataEvent);
                 try {
-                    invokeListener(dataEvent, null);
+                    invokeListener(dataEvent, status, null);
                 } catch (Throwable ex) {
                     if (status != null) {
                         if (logger.isDebugEnabled()) {
@@ -259,12 +259,10 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
         logger.debug("Initiating transaction rollback on application exception", ex);
         try {
             this.transactionManager.rollback(status);
-        }
-        catch (RuntimeException ex2) {
+        } catch (RuntimeException ex2) {
             logger.error("Application exception overridden by rollback exception", ex);
             throw ex2;
-        }
-        catch (Error err) {
+        } catch (Error err) {
             logger.error("Application exception overridden by rollback error", ex);
             throw err;
         }

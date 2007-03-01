@@ -60,6 +60,20 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
         assertNull(gigaSpace.read(new Object()));
     }
 
+    public void testTakeRollback() {
+        TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
+        assertNull(gigaSpace.read(new Object()));
+        gigaSpace.write(new Object());
+        assertNotNull(gigaSpace.read(new Object()));
+        txTemplate.execute(new TransactionCallbackWithoutResult() {
+            protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+                assertNotNull(gigaSpace.take(new Object()));
+                transactionStatus.setRollbackOnly();
+            }
+        });
+        assertNotNull(gigaSpace.take(new Object()));
+    }
+
     public void testPropogationRequiredWithCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
         assertNull(gigaSpace.read(new Object()));

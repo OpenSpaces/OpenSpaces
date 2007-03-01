@@ -1,12 +1,13 @@
 package org.openspaces.events;
 
 import org.openspaces.core.GigaSpaceException;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.Assert;
 
 /**
  * <p>A simple based class for {@link org.openspaces.events.SpaceDataEventListener} based containers.
  * Allowing to register a listener and provides several support methods like
- * {@link #invokeListener(Object,Object)} in order to simplify event listener based containers.
+ * {@link #invokeListener(Object, org.springframework.transaction.TransactionStatus, Object)} in order to simplify event listener based containers.
  *
  * @author kimchy
  */
@@ -44,26 +45,28 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
      * Executes the given listener if the container is running ({@link #isRunning()}.
      *
      * @param eventData The event data object
+     * @param txStatus  An optional transaction status allowing to rollback a transaction programmatically
      * @param source    An optional source (or additional event information)
      */
-    protected void executeListener(Object eventData, Object source) throws GigaSpaceException {
+    protected void executeListener(Object eventData, TransactionStatus txStatus, Object source) throws GigaSpaceException {
         if (!isRunning()) {
             return;
         }
-        invokeListener(eventData, source);
+        invokeListener(eventData, txStatus, source);
     }
 
     /**
      * Invokes the configured {@link org.openspaces.events.SpaceDataEventListener} basde on
      * the provided data. Currently simply delegates to
-     * {@link org.openspaces.events.SpaceDataEventListener#onEvent(Object,org.openspaces.core.GigaSpace,Object)}.
+     * {@link org.openspaces.events.SpaceDataEventListener#onEvent(Object,org.openspaces.core.GigaSpace,org.springframework.transaction.TransactionStatus,Object)}.
      *
      * @param eventData The event data object
+     * @param txStatus  An optional transaction status allowing to rollback a transaction programmatically
      * @param source    An optional source (or additional event information)
      * @throws GigaSpaceException
      */
-    protected void invokeListener(Object eventData, Object source) throws GigaSpaceException {
-        eventListener.onEvent(eventData, getGigaSpace(), source);
+    protected void invokeListener(Object eventData, TransactionStatus txStatus, Object source) throws GigaSpaceException {
+        eventListener.onEvent(eventData, getGigaSpace(), txStatus, source);
     }
 
     /**
@@ -78,7 +81,7 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
         }
         if (isActive()) {
             // Regular case: failed while active. Log at error level.
-            logger.error("Execution of JMS message listener failed", ex);
+            logger.error("Execution of event listener failed", ex);
         } else {
             // Rare case: listener thread failed after container shutdown.
             // Log at debug level, to avoid spamming the shutdown log.

@@ -6,11 +6,12 @@ import net.jini.space.JavaSpace;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceException;
 import org.openspaces.events.SpaceDataEventListener;
+import org.springframework.transaction.TransactionStatus;
 
 /**
  * <p>A base class event listener allowing for event listneres result handling by writing it
  * back to the space. Subclasses should implement
- * {@link #onEventWithResult(Object,org.openspaces.core.GigaSpace,Object)} with the result
+ * {@link #onEventWithResult(Object, org.openspaces.core.GigaSpace, org.springframework.transaction.TransactionStatus, Object)} with the result
  * being writting to back to the space. The write lease can be controlled using {@link #setWriteLease(long)}.
  *
  * @author kimchy
@@ -52,12 +53,12 @@ public abstract class AbstractResultEventListenerAdapter implements SpaceDataEve
 
     /**
      * Implements the {@link org.openspaces.events.SpaceDataEventListener} by delegating to
-     * {@link #onEventWithResult(Object,org.openspaces.core.GigaSpace,Object)} and writing
+     * {@link #onEventWithResult(Object, org.openspaces.core.GigaSpace, org.springframework.transaction.TransactionStatus, Object)} and writing
      * the result back to the space (if it is not <code>null</code>) using
      * {@link #handleResult(Object,org.openspaces.core.GigaSpace)}.
      */
-    public void onEvent(Object data, GigaSpace gigaSpace, Object source) {
-        Object result = onEventWithResult(data, gigaSpace, source);
+    public void onEvent(Object data, GigaSpace gigaSpace, TransactionStatus txStatus, Object source) {
+        Object result = onEventWithResult(data, gigaSpace, txStatus, source);
         handleResult(result, gigaSpace);
     }
 
@@ -84,8 +85,9 @@ public abstract class AbstractResultEventListenerAdapter implements SpaceDataEve
      *
      * @param data      The event data object
      * @param gigaSpace A GigaSpace instance that can be used to perofrm additional operations against the space
+     * @param txStatus  An optional transaction status allowing to rollback a transaction programmatically
      * @param source    Optional additional data or the actual source event data object (where relevant)
      * @return A result object that will be written back to the space
      */
-    protected abstract Object onEventWithResult(Object data, GigaSpace gigaSpace, Object source);
+    protected abstract Object onEventWithResult(Object data, GigaSpace gigaSpace, TransactionStatus txStatus, Object source);
 }
