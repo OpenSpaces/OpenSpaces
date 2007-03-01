@@ -94,7 +94,6 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      *
      * @see #setConcurrentConsumers
      * @see org.springframework.core.task.SimpleAsyncTaskExecutor
-     * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
      */
     public void setTaskExecutor(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;

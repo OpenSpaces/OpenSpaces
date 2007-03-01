@@ -146,7 +146,45 @@
 
     </target>
 
-    <target name="dist" depends="fulljar, srczip" description="Creates the OpenSpaces distribution">
+    <!--
+        Generate javadoc for the main and JDK 1.5 sources.
+    -->
+    <target name="javadoc" description="Generate framework Javadocs">
+
+        <delete dir="${target.javadoc.dir}" failonerror="false"/>
+        <mkdir dir="${target.javadoc.dir}"/>
+
+        <javadoc sourcepath="${main.src.dir}" destdir="${target.javadoc.dir}" windowtitle="GigaSpaces - Open Spaces"
+                 source="1.5" access="protected" author="true" version="true" use="true"
+                 defaultexcludes="true"
+                 header='&lt;a href=\"http://www.gigaspaces.com/\" target=\"_top\"&gt;GigaSpaces - Open Spaces&lt;/a&gt;'>
+            <arg value="-breakiterator"/>
+            <arg value="-J-Xmx128m"/>
+            <arg value="-J-XX:MaxPermSize=128m"/>
+            <doctitle><![CDATA[<h1>GigaSpaces Open Spaces</h1>]]></doctitle>
+            <bottom>
+                <![CDATA[<i>Copyright &copy; <a href="http://www.gigaspaces.com/" target="_top">GigaSpaces</a>.</i>]]></bottom>
+            <classpath refid="all-libs-1.5"/>
+            <packageset dir="${main.src.dir}">
+                <include name="org/openspaces/**"/>
+            </packageset>
+            <packageset dir="${tiger.src.dir}">
+                <include name="org/openspaces/**"/>
+            </packageset>
+            <link href="../../../docs/JavaDoc" />
+            <link href="http://java.sun.com/j2ee/1.4/docs/api"/>
+            <link href="http://java.sun.com/j2se/1.5.0/docs/api"/>
+            <link href="http://static.springframework.org/spring/docs/2.0.x/api/"/>
+            <link href="http://aopalliance.sourceforge.net/doc"/>
+            <!-- Caucho Burlap/Hessian -->
+            <link href="http://cglib.sourceforge.net/apidocs"/>
+            <link href="http://jakarta.apache.org/commons/logging/apidocs/"/>
+            <link href="http://jakarta.apache.org/commons/pool/apidocs/"/>
+        </javadoc>
+
+    </target>
+
+    <target name="dist" depends="fulljar, srczip, javadoc" description="Creates the OpenSpaces distribution">
         <delete file="${dist.dir}/${name}-${openspaces-version}.zip"/>
         <zip zipfile="${dist.dir}/${name}-${openspaces-version}.zip">
             <zipfileset dir="${basedir}">
