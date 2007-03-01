@@ -74,6 +74,7 @@ public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements Fac
         if (remoteInvocation.getRouting() == null) {
             remoteInvocation.setRouting(new Integer(remoteInvocation.hashCode()));
         }
+        // check if this invocation will be a one way invocation
         if (globalOneWay) {
             remoteInvocation.oneWay = Boolean.TRUE;
         } else {
@@ -83,6 +84,16 @@ public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements Fac
         }
 
         gigaSpace.write(remoteInvocation);
+
+        // if this is a one way invocation, simply return null
+        if (remoteInvocation.oneWay != null && remoteInvocation.oneWay.booleanValue()) {
+            return null;
+        }
+
+        // if the return value is a future, return the future
+        if (RemoteFuture.class.isAssignableFrom(methodInvocation.getMethod().getReturnType())) {
+            return new DefaultRemoteFuture(gigaSpace, remoteInvocation);
+        }
 
         Object value = gigaSpace.take(new SpaceRemoteResult(remoteInvocation), timeout);
         SpaceRemoteResult invokeResult = (SpaceRemoteResult) value;

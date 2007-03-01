@@ -95,7 +95,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
     }
 
     private void writeResponse(GigaSpace gigaSpace, SpaceRemoteInvocation remoteInvocation, Object retVal) {
-        if (remoteInvocation.oneWay == null || remoteInvocation.oneWay.booleanValue()) {
+        if (remoteInvocation.oneWay == null || !remoteInvocation.oneWay.booleanValue()) {
             gigaSpace.write(new SpaceRemoteResult(remoteInvocation, retVal));
         }
     }

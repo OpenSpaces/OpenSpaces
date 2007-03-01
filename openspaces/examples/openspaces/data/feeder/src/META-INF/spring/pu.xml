@@ -30,6 +30,7 @@
         <property name="remoteRoutingHandler">
             <bean class="org.openspaces.example.data.feeder.support.DataRemoteRoutingHandler" />
         </property>
+        <property name="voidOneWay" value="true" />
     </bean>
 
     <bean id="dataRemoting" class="org.openspaces.example.data.feeder.DataRemoting">
