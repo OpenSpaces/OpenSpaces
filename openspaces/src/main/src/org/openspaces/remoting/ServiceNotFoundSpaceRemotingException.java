@@ -1,11 +1,9 @@
 package org.openspaces.remoting;
 
-import org.openspaces.core.GigaSpaceException;
-
 /**
  * @author kimchy
  */
-public class ServiceNotFoundSpaceRemotingException extends GigaSpaceException {
+public class ServiceNotFoundSpaceRemotingException extends SpaceRemotingException {
 
     private String serviceName;
 

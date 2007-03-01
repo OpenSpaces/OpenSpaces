@@ -34,4 +34,8 @@ public class DataProcessor implements IDataProcessor {
         data.setId(null);
         return data;
     }
+
+    public void sayData(Data data) {
+        System.out.println(" ++++ SAYING : " + data);
+    }
 }

@@ -15,6 +15,8 @@ public class SpaceRemoteInvocation extends MetaDataEntry {
 
     public Integer routing;
 
+    public Boolean oneWay;
+
     public SpaceRemoteInvocation() {
 
     }

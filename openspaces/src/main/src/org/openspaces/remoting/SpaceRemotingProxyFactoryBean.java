@@ -20,8 +20,11 @@ public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements Fac
 
     private RemoteRoutingHandler remoteRoutingHandler;
 
-    private Object serviceProxy;
+    private boolean globalOneWay = false;
 
+    private boolean voidOneWay = false;
+
+    private Object serviceProxy;
 
     public void setGigaSpace(GigaSpace gigaSpace) {
         this.gigaSpace = gigaSpace;
@@ -33,6 +36,14 @@ public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements Fac
 
     public void setRemoteRoutingHandler(RemoteRoutingHandler remoteRoutingHandler) {
         this.remoteRoutingHandler = remoteRoutingHandler;
+    }
+
+    public void setGlobalOneWay(boolean globalOneWay) {
+        this.globalOneWay = globalOneWay;
+    }
+
+    public void setVoidOneWay(boolean voidOneWay) {
+        this.voidOneWay = voidOneWay;
     }
 
     public void afterPropertiesSet() {
@@ -62,6 +73,13 @@ public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements Fac
         }
         if (remoteInvocation.getRouting() == null) {
             remoteInvocation.setRouting(new Integer(remoteInvocation.hashCode()));
+        }
+        if (globalOneWay) {
+            remoteInvocation.oneWay = Boolean.TRUE;
+        } else {
+            if (voidOneWay && methodInvocation.getMethod().getReturnType() == void.class) {
+                remoteInvocation.oneWay = Boolean.TRUE;
+            }
         }
 
         gigaSpace.write(remoteInvocation);

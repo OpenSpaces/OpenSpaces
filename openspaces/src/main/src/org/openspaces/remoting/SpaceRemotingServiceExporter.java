@@ -1,5 +1,7 @@
 package org.openspaces.remoting;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.events.EventTemplateProvider;
 import org.openspaces.events.SpaceDataEventListener;
@@ -18,6 +20,8 @@ import java.util.Map;
  * @author kimchy
  */
 public class SpaceRemotingServiceExporter implements SpaceDataEventListener, InitializingBean, EventTemplateProvider {
+
+    private static final Log logger = LogFactory.getLog(SpaceRemotingServiceExporter.class);
 
     private List services;
 
@@ -49,7 +53,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
 
         Object service = interfaceToService.get(remoteInvocation.getLookupName());
         if (service == null) {
-            gigaSpace.write(new SpaceRemoteResult(remoteInvocation, new ServiceNotFoundSpaceRemotingException(remoteInvocation.getLookupName())));
+            writeResponse(gigaSpace, remoteInvocation, new ServiceNotFoundSpaceRemotingException(remoteInvocation.getLookupName()));
             return;
         }
 
@@ -67,16 +71,32 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
         try {
             method = service.getClass().getMethod(remoteInvocation.getMethodName(), argumentTypes);
         } catch (Exception e) {
-            gigaSpace.write(new SpaceRemoteResult(remoteInvocation, new ServiceMethodNotFoundSpaceRemotingException(remoteInvocation.getMethodName(), e)));
+            writeResponse(gigaSpace, remoteInvocation, new ServiceMethodNotFoundSpaceRemotingException(remoteInvocation.getMethodName(), e));
             return;
         }
         try {
             Object retVal = method.invoke(service, arguments);
-            gigaSpace.write(new SpaceRemoteResult(remoteInvocation, retVal));
+            writeResponse(gigaSpace, remoteInvocation, retVal);
         } catch (InvocationTargetException e) {
-            gigaSpace.write(new SpaceRemoteResult(remoteInvocation, e.getTargetException()));
+            writeResponse(gigaSpace, remoteInvocation, e.getTargetException());
         } catch (IllegalAccessException e) {
-            gigaSpace.write(new SpaceRemoteResult(remoteInvocation, new SpaceRemotingException("Failed to access method", e)));
+            writeResponse(gigaSpace, remoteInvocation, new SpaceRemotingException("Failed to access method", e));
+        }
+    }
+
+    private void writeResponse(GigaSpace gigaSpace, SpaceRemoteInvocation remoteInvocation, SpaceRemotingException e) {
+        if (remoteInvocation.oneWay == null || !remoteInvocation.oneWay.booleanValue()) {
+            gigaSpace.write(new SpaceRemoteResult(remoteInvocation, e));
+        } else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Remoting execution is configured as one way and an exception was thrown", e);
+            }
+        }
+    }
+
+    private void writeResponse(GigaSpace gigaSpace, SpaceRemoteInvocation remoteInvocation, Object retVal) {
+        if (remoteInvocation.oneWay == null || remoteInvocation.oneWay.booleanValue()) {
+            gigaSpace.write(new SpaceRemoteResult(remoteInvocation, retVal));
         }
     }
 }

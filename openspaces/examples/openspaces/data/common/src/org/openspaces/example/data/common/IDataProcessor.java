@@ -6,4 +6,6 @@ package org.openspaces.example.data.common;
 public interface IDataProcessor {
 
     Data processData(Data data);
+
+    void sayData(Data data);
 }
