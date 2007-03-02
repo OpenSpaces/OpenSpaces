@@ -137,7 +137,7 @@ public class Deploy {
 
         //put jars
         ClassBundle classBundle = element.getComponentBundle();
-        classBundle.addJAR(puPath + "/" + "classes/");
+        classBundle.addJAR(puPath + "/");
         for (int i = 0; i < jars.length; i++) {
             File jar = jars[i];
             String path = jar.getPath();
@@ -248,7 +248,7 @@ public class Deploy {
     }
 
     private static String readPUFile(URL root, String puPath) throws IOException {
-        URL puURL = new URL(root, puPath + "/classes/META-INF/pu/pu.xml");
+        URL puURL = new URL(root, puPath + "/META-INF/spring/pu.xml");
         BufferedReader reader = new BufferedReader(new InputStreamReader(puURL.openStream()));
 
         StringBuffer buffer = new StringBuffer();
