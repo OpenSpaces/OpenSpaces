@@ -28,7 +28,7 @@ import java.util.Map;
  * space. The remote result can either hold the return value (or <code>null</code> in case of
  * void return value) or an exception that was thrown by the service.
  *
- * <p>The exported implements {@link org.openspaces.events.SpaceDataEventListener} which means
+ * <p>The exporter implements {@link org.openspaces.events.SpaceDataEventListener} which means
  * that it acts as a listener to data events and should be used with the differnet event containers
  * such as {@link org.openspaces.events.polling.SimplePollingEventListenerContainer}.
  *
@@ -53,6 +53,11 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
 
     private Map interfaceToService = new HashMap();
 
+    /**
+     * Sets the list of services that will be exported as remoted services. Each service will have
+     * all of its interfaces regsitered as lookups (mapping to {@link SpaceRemoteInvocation#getLookupName()})
+     * which will then be used to invoke the correct service.
+     */
     public void setServices(List services) {
         this.services = services;
     }
@@ -73,11 +78,27 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
         }
     }
 
+    /**
+     * The template used for receiving events. Defaults to all objects that are of type
+     * {@link org.openspaces.remoting.SpaceRemoteInvocation}.
+     */
     public Object getTemplate() {
         return new SpaceRemoteInvocation();
     }
 
-    public void onEvent(Object data, GigaSpace gigaSpace, TransactionStatus txStatus, Object source) {
+    /**
+     * Receives a {@link org.openspaces.remoting.SpaceRemoteInvocation} which holds all the relevant
+     * invocation inforamtion. Looks up (based on {@link SpaceRemoteInvocation#getLookupName()}) the
+     * interface the service is registered against (which is the interface the service implements)
+     * and then invokes the relevant method within it using the provided method name and arguments.
+     * Write the result value or inocation exception back to the space using {@link org.openspaces.remoting.SpaceRemoteResult}.
+     *
+     * @param data      The data event of type {@link org.openspaces.remoting.SpaceRemoteInvocation}
+     * @param gigaSpace The GigaSpace interface
+     * @param txStatus  A transactional status
+     * @param source    An optional source event information
+     */
+    public void onEvent(Object data, GigaSpace gigaSpace, TransactionStatus txStatus, Object source) throws SpaceRemotingException {
         SpaceRemoteInvocation remoteInvocation = (SpaceRemoteInvocation) data;
 
         Object service = interfaceToService.get(remoteInvocation.lookupName);
