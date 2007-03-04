@@ -18,7 +18,7 @@
 
     <bean id="gigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
         <property name="space" ref="space"/>
-        <property name="clustered" value="true"/>
+        <property name="clustered" value="false"/>
     </bean>
 
     <bean id="transactionManager" class="org.openspaces.core.transaction.manager.LocalJiniTransactionManager">
