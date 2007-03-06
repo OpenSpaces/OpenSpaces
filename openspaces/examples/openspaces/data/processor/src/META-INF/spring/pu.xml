@@ -9,11 +9,7 @@
 
     <bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
         <property name="url" value="/./space"/>
-        <property name="urlProperties">
-            <props>
-                <prop key="groups">${user.name}</prop>
-            </props>
-        </property>
+        <property name="lookupGroups" value="${user.name}" />
     </bean>
 
     <bean id="gigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
