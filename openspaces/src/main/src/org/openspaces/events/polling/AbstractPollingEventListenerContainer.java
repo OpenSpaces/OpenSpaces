@@ -117,6 +117,24 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
     }
 
     /**
+     * Specify the transaciton isolation to use for transactional wrapping.
+     *
+     * @see org.springframework.transaction.support.DefaultTransactionDefinition#setIsolationLevel(int)
+     */
+    public void setTransactionIsolationLevel(int transactionIsolationLevel) {
+        this.transactionDefinition.setIsolationLevel(transactionIsolationLevel);
+    }
+
+    /**
+     * Specify the transaciton isolation to use for transactional wrapping.
+     *
+     * @see org.springframework.transaction.support.DefaultTransactionDefinition#setIsolationLevelName(String) 
+     */
+    public void setTransactionIsolationLevelName(String transactionIsolationLevelName) {
+        this.transactionDefinition.setIsolationLevelName(transactionIsolationLevelName);
+    }
+
+    /**
      * <p>Set the timeout to use for receive calls, in <b>milliseconds</b>.
      * The default is 1000 ms, that is, 1 second.
      *

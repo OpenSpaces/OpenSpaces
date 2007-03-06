@@ -298,6 +298,24 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
         this.transactionDefinition.setTimeout(transactionTimeout);
     }
 
+    /**
+     * Specify the transaciton isolation to use for transactional wrapping.
+     *
+     * @see org.springframework.transaction.support.DefaultTransactionDefinition#setIsolationLevel(int)
+     */
+    public void setTransactionIsolationLevel(int transactionIsolationLevel) {
+        this.transactionDefinition.setIsolationLevel(transactionIsolationLevel);
+    }
+
+    /**
+     * Specify the transaciton isolation to use for transactional wrapping.
+     *
+     * @see org.springframework.transaction.support.DefaultTransactionDefinition#setIsolationLevelName(String)
+     */
+    public void setTransactionIsolationLevelName(String transactionIsolationLevelName) {
+        this.transactionDefinition.setIsolationLevelName(transactionIsolationLevelName);
+    }
+
     public void afterPropertiesSet() {
         if (getEventListener() != null && getEventListener() instanceof EventTemplateProvider && template == null) {
             setTemplate(((EventTemplateProvider) getEventListener()).getTemplate());
