@@ -21,7 +21,7 @@ public abstract class AbstractResultEventListenerAdapter implements SpaceDataEve
 
     private long writeLease = Lease.FOREVER;
 
-    private boolean updateOrWrite = false;
+    private boolean updateOrWrite = true;
 
     private long updateTimeout = JavaSpace.NO_WAIT;
 
@@ -37,7 +37,7 @@ public abstract class AbstractResultEventListenerAdapter implements SpaceDataEve
 
     /**
      * Sets if the write operation will perform an update in case the entry result already exists
-     * in the space. Default to <code>false</code>.
+     * in the space. Default to <code>true</code>.
      */
     public void setUpdateOrWrite(boolean updateOrWrite) {
         this.updateOrWrite = updateOrWrite;
