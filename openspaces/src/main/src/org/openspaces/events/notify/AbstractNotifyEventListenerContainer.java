@@ -120,6 +120,8 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
 
     private boolean notifyLeaseExpire = false;
 
+    private boolean notifyAll = false;
+
     private boolean triggerNotifyTemplate = false;
 
     private boolean replicateNotifyTemplate = false;
@@ -202,24 +204,33 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
     }
 
     /**
-     * Turns on notification for write operations. Defaults to <code>false</code>.
+     * Turns on notifications for write operations. Defaults to <code>false</code>.
      */
     public void setNotifyWrite(boolean notifyWrite) {
         this.notifyWrite = notifyWrite;
     }
 
     /**
-     * Turns on notification for update operations. Defaults to <code>false</code>.
+     * Turns on notifications for update operations. Defaults to <code>false</code>.
      */
     public void setNotifyUpdate(boolean notifyUpdate) {
         this.notifyUpdate = notifyUpdate;
     }
 
     /**
-     * Turns on notification for take operations. Defaults to <code>false</code>.
+     * Turns on notifications for take operations. Defaults to <code>false</code>.
      */
     public void setNotifyTake(boolean notifyTake) {
         this.notifyTake = notifyTake;
+    }
+
+
+    /**
+     * Turns on notifications for all operations. This flag will override all the other
+     * notify flags (if set). Defaults to <code>false</code>.
+     */
+    public void setNotifyAll(boolean notifyAll) {
+        this.notifyAll = notifyAll;
     }
 
     /**
@@ -314,6 +325,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
             throw new IllegalArgumentException("batchSize has value [" + batchSize + "] which enables batching. batchTime must have a value as well");
         }
         Assert.notNull(template, "template property is required");
+        if (!notifyAll && !notifyTake && !notifyUpdate && !notifyWrite && !notifyLeaseExpire) {
+            throw new IllegalArgumentException("No notification flag is set, at least one of the notify flags must be set");
+        }
     }
 
     /**
@@ -382,6 +396,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
         }
         if (notifyLeaseExpire) {
             notifyType = notifyType.or(NotifyActionType.NOTIFY_LEASE_EXPIRATION);
+        }
+        if (notifyAll) {
+            notifyType = notifyType.or(NotifyActionType.NOTIFY_ALL);
         }
         try {
             dataEventSession.addListener(template, listener, listenerLease, null, notifyFilter, notifyType);
