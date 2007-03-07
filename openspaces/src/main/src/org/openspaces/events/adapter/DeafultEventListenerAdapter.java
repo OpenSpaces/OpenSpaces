@@ -35,7 +35,7 @@ public class DeafultEventListenerAdapter extends AbstractReflectionEventListener
      * Returns a list of all the methods names that match the configured {@link #setMethodName(String)}.
      */
     protected Method[] doGetListenerMethods() throws Exception {
-        final List methods = new ArrayList();
+        final List<Method> methods = new ArrayList<Method>();
         ReflectionUtils.doWithMethods(getDelegate().getClass(),
                 new ReflectionUtils.MethodCallback() {
                     public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
