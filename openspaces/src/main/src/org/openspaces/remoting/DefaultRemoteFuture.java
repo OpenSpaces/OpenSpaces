@@ -5,7 +5,7 @@ import org.openspaces.core.GigaSpace;
 /**
  * @author kimchy
  */
-public class DefaultRemoteFuture implements RemoteFuture {
+public class DefaultRemoteFuture<T> implements RemoteFuture<T> {
 
     private GigaSpace gigaSpace;
 
@@ -13,14 +13,14 @@ public class DefaultRemoteFuture implements RemoteFuture {
 
     private boolean cancelled;
 
-    private SpaceRemoteResult remoteResult;
+    private SpaceRemoteResult<T> remoteResult;
 
-    private SpaceRemoteResult template;
+    private SpaceRemoteResult<T> template;
 
     public DefaultRemoteFuture(GigaSpace gigaSpace, SpaceRemoteInvocation remoteInvocation) {
         this.gigaSpace = gigaSpace;
         this.remoteInvocation = remoteInvocation;
-        this.template = new SpaceRemoteResult(remoteInvocation);
+        this.template = new SpaceRemoteResult<T>(remoteInvocation);
     }
 
     public void cancel() throws SpaceRemotingException {
@@ -34,25 +34,25 @@ public class DefaultRemoteFuture implements RemoteFuture {
         return this.cancelled;
     }
 
-    public Object get() throws Exception {
-        Object retVal = handleResult();
+    public T get() throws Exception {
+        T retVal = handleResult();
         if (retVal != null) {
             return retVal;
         }
-        remoteResult = (SpaceRemoteResult) gigaSpace.take(template, Integer.MAX_VALUE);
+        remoteResult = gigaSpace.take(template, Integer.MAX_VALUE);
         return handleResult();
     }
 
-    public Object get(long timeout) throws Exception {
-        Object retVal = handleResult();
+    public T get(long timeout) throws Exception {
+        T retVal = handleResult();
         if (retVal != null) {
             return retVal;
         }
-        remoteResult = (SpaceRemoteResult) gigaSpace.take(template, timeout);
+        remoteResult = gigaSpace.take(template, timeout);
         return handleResult();
     }
 
-    private Object handleResult() throws Exception {
+    private T handleResult() throws Exception {
         if (remoteResult == null) {
             return null;
         }

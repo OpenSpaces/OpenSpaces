@@ -8,11 +8,11 @@ import net.jini.core.entry.Entry;
  *
  * @author kimchy
  */
-public class SpaceRemoteResult implements Entry {
+public class SpaceRemoteResult<T> implements Entry {
 
     public String invocationId;
 
-    public Object result;
+    public T result;
 
     public Exception ex;
 
@@ -51,7 +51,7 @@ public class SpaceRemoteResult implements Entry {
      * invocation to initalize the {@link #invocationId} and {@link #routing} (acts as the correlation
      * ids).
      */
-    public SpaceRemoteResult(SpaceRemoteInvocation remoteInvocation, Object result) {
+    public SpaceRemoteResult(SpaceRemoteInvocation remoteInvocation, T result) {
         this.invocationId = remoteInvocation.__getEntryInfo().m_UID;
         this.result = result;
         this.routing = remoteInvocation.routing;
@@ -61,7 +61,7 @@ public class SpaceRemoteResult implements Entry {
      * Returns the result of the remote invocation. Can be <code>null</code> if the remote service
      * methods has a void return value or if an exception occured during the invocation.
      */
-    public Object getResult() {
+    public T getResult() {
         return result;
     }
 

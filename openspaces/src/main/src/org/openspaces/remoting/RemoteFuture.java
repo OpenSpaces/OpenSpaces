@@ -3,13 +3,13 @@ package org.openspaces.remoting;
 /**
  * @author kimchy
  */
-public interface RemoteFuture {
+public interface RemoteFuture<V> {
 
     void cancel() throws SpaceRemotingException;
 
     boolean isCancelled();
 
-    Object get() throws Exception;
+    V get() throws Exception;
 
-    Object get(long timeout) throws Exception;
+    V get(long timeout) throws Exception;
 }
