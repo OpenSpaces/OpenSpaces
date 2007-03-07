@@ -13,7 +13,6 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -35,7 +34,7 @@ public class StandaloneContainerRunnable implements Runnable {
 
     private ClusterInfo clusterInfo;
 
-    private List configLocations;
+    private List<String> configLocations;
 
     private boolean running;
 
@@ -50,7 +49,7 @@ public class StandaloneContainerRunnable implements Runnable {
      * @param clusterInfo         The cluster info configuration
      * @param configLocations     List of config locations (string based)
      */
-    public StandaloneContainerRunnable(BeanLevelProperties beanLevelProperties, ClusterInfo clusterInfo, List configLocations) {
+    public StandaloneContainerRunnable(BeanLevelProperties beanLevelProperties, ClusterInfo clusterInfo, List<String> configLocations) {
         this.beanLevelProperties = beanLevelProperties;
         this.clusterInfo = clusterInfo;
         this.configLocations = configLocations;
@@ -72,19 +71,18 @@ public class StandaloneContainerRunnable implements Runnable {
                     throw new CannotCreateContainerException("Failed to parse pu xml", e);
                 }
             } else {
-                List tempResourcesList = new ArrayList();
-                for (Iterator it = configLocations.iterator(); it.hasNext();) {
-                    String configLocation = (String) it.next();
+                List<Resource> tempResourcesList = new ArrayList<Resource>();
+                for (String configLocation : configLocations) {
                     try {
                         Resource[] tempResources = pathMatchingResourcePatternResolver.getResources(configLocation);
-                        for (int i = 0; i < tempResources.length; i++) {
-                            tempResourcesList.add(tempResources[i]);
+                        for (Resource tempResource : tempResources) {
+                            tempResourcesList.add(tempResource);
                         }
                     } catch (IOException e) {
                         throw new CannotCreateContainerException("Failed to parse pu xml from location [" + configLocation + "]");
                     }
                 }
-                resources = (Resource[]) tempResourcesList.toArray(new Resource[tempResourcesList.size()]);
+                resources = tempResourcesList.toArray(new Resource[tempResourcesList.size()]);
             }
             // create the Spring application context
             applicationContext = new ResourceApplicationContext(resources, null);

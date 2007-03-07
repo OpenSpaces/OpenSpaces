@@ -55,7 +55,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
 
     private String location;
 
-    private List configLocations = new ArrayList();
+    private List<String> configLocations = new ArrayList<String>();
 
     private BeanLevelProperties beanLevelProperties;
 
@@ -132,7 +132,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
         if (!fileLocation.exists()) {
             throw new CannotCreateContainerException("Failed to locate pu location [" + location + "]");
         }
-        List urls = new ArrayList();
+        List<URL> urls = new ArrayList<URL>();
         if (fileLocation.isDirectory()) {
             if (fileLocation.exists()) {
                 if (logger.isDebugEnabled()) {
@@ -220,7 +220,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
         if (parentClassLoader == null) {
             parentClassLoader = this.getClass().getClassLoader();
         }
-        URL[] classLoaderUrls = (URL[]) urls.toArray(new URL[urls.size()]);
+        URL[] classLoaderUrls = urls.toArray(new URL[urls.size()]);
         // TODO need to probably implement our own class loader so we can control what gets propogated to the parent class loader
         URLClassLoader classLoader = new URLClassLoader(classLoaderUrls, parentClassLoader);
         StandaloneContainerRunnable containerRunnable = new StandaloneContainerRunnable(beanLevelProperties, clusterInfo, configLocations);
@@ -245,18 +245,18 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
         return jarEntry.getName().startsWith(dir + "/") && jarEntry.getName().length() > (dir + "/").length();
     }
 
-    private void addJarsLocation(File fileLocation, List urls, String dir) {
+    private void addJarsLocation(File fileLocation, List<URL> urls, String dir) {
         File libLocation = new File(fileLocation, dir);
         if (libLocation.exists()) {
             File[] jarFiles = libLocation.listFiles();
-            for (int i = 0; i < jarFiles.length; i++) {
+            for (File jarFile : jarFiles) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Adding jar [" + jarFiles[i].getAbsolutePath() + "] with pu directory location [" + location + "] to classpath");
+                    logger.debug("Adding jar [" + jarFile.getAbsolutePath() + "] with pu directory location [" + location + "] to classpath");
                 }
                 try {
-                    urls.add(jarFiles[i].toURL());
+                    urls.add(jarFile.toURL());
                 } catch (MalformedURLException e) {
-                    throw new CannotCreateContainerException("Failed to add jar file [" + jarFiles[i].getAbsolutePath() + "] to classs loader", e);
+                    throw new CannotCreateContainerException("Failed to add jar file [" + jarFile.getAbsolutePath() + "] to classs loader", e);
                 }
             }
         }
