@@ -5,39 +5,17 @@
     <property file="project.properties"/>
     <property file="build.properties"/>
 
-
-    <!--
-        Set up properties that indicate whether we're building on JDK 1.5.
-        Currently simply checks whether the Java version is not 1.3 or 1.4,
-        due to the lack of a greater-than comparator in Ant.
-    -->
-
-    <condition property="tiger.available">
-        <not>
-            <or>
-                <equals arg1="${ant.java.version}" arg2="1.3"/>
-                <equals arg1="${ant.java.version}" arg2="1.4"/>
-            </or>
-        </not>
-    </condition>
-
-    <path id="all-libs-1.4">
+    <path id="all-libs">
 
         <fileset dir="${lib.dir}">
             <include name="**/*.jar"/>
-            <exclude name="JSpaces.jar"/>
         </fileset>
 
     </path>
 
-    <path id="all-libs-1.5">
-
-        <fileset dir="${lib.dir}">
-            <include name="**/*.jar"/>
-            <exclude name="JSpaces-1.4.jar"/>
-        </fileset>
-
-    </path>
+    <taskdef name="retrotranslator" classname="net.sf.retrotranslator.transformer.RetrotranslatorTask">
+        <classpath refid="all-libs" />
+    </taskdef>
 
     <target name="usage">
         <echo message=""/>
@@ -68,10 +46,10 @@
         <mkdir dir="${target.classes.dir}"/>
         <mkdir dir="${target.classes.dir}/META-INF"/>
 
-        <javac destdir="${target.classes.dir}" source="1.4" target="1.4" debug="${debug}"
+        <javac destdir="${target.classes.dir}" source="1.5" target="1.5" debug="${debug}"
                deprecation="false" optimize="false" failonerror="true">
             <src path="${main.src.dir}"/>
-            <classpath refid="all-libs-1.4"/>
+            <classpath refid="all-libs"/>
         </javac>
 
         <copy todir="${target.classes.dir}" preservelastmodified="true">
@@ -87,32 +65,13 @@
 
     </target>
 
-    <!--
-         Compile the JDK 1.5 source tree.
-     -->
-    <target name="buildtiger" depends="buildmain" description="Compile JDK 1.5 source tree java files into class files">
+    <target name="build_1_5" depends="clean, buildmain" description="Compile main sources"/>
 
-        <javac destdir="${target.classes.dir}" source="1.5" target="1.5" debug="${debug}"
-               deprecation="false" optimize="false" failonerror="true">
-            <src path="${tiger.src.dir}"/>
-            <classpath refid="all-libs-1.5"/>
-        </javac>
-
-        <copy todir="${target.classes.dir}" preservelastmodified="true">
-            <fileset dir="${tiger.src.dir}">
-                <include name="**/*.properties"/>
-                <include name="**/*.handlers"/>
-                <include name="**/*.schemas"/>
-                <include name="**/*.xml"/>
-                <include name="**/*.dtd"/>
-                <include name="**/*.xsd"/>
-            </fileset>
-        </copy>
+    <target name="build_1_4" depends="clean, buildmain" description="Compile main sources">
+        <retrotranslator srcdir="${target.classes.dir}" verify="true" />
     </target>
 
-    <target name="build" depends="buildmain,buildtiger" description="Compile main, and JDK 1.5 sources"/>
-
-    <target name="fulljar" depends="build" description="Create full JAR file with all OpenSpaces classes">
+    <target name="fulljar" description="Create full JAR file with all OpenSpaces classes">
 
         <mkdir dir="${lib.dir}/${name}"/>
         <delete file="${lib.dir}/${name}/${name}.jar"/>
@@ -139,9 +98,6 @@
             <fileset dir="${main.src.dir}">
                 <include name="org/openspaces/**"/>
             </fileset>
-            <fileset dir="${tiger.src.dir}">
-                <include name="org/springframework/**"/>
-            </fileset>
         </zip>
 
     </target>
@@ -164,11 +120,8 @@
             <doctitle><![CDATA[<h1>GigaSpaces Open Spaces</h1>]]></doctitle>
             <bottom>
                 <![CDATA[<i>Copyright &copy; <a href="http://www.gigaspaces.com/" target="_top">GigaSpaces</a>.</i>]]></bottom>
-            <classpath refid="all-libs-1.5"/>
+            <classpath refid="all-libs"/>
             <packageset dir="${main.src.dir}">
-                <include name="org/openspaces/**"/>
-            </packageset>
-            <packageset dir="${tiger.src.dir}">
                 <include name="org/openspaces/**"/>
             </packageset>
             <link href="../../../docs/JavaDoc" />
@@ -184,9 +137,9 @@
 
     </target>
 
-    <target name="dist" depends="fulljar, srczip, javadoc" description="Creates the OpenSpaces distribution">
-        <delete file="${dist.dir}/${name}-${openspaces-version}.zip"/>
-        <zip zipfile="${dist.dir}/${name}-${openspaces-version}.zip">
+    <target name="dist_1_4" depends="build_1_4, fulljar, srczip, javadoc" description="Creates the OpenSpaces distribution">
+        <delete file="${dist.dir}/${name}-${openspaces-version}-1.4.zip"/>
+        <zip zipfile="${dist.dir}/${name}-${openspaces-version}-1.4.zip">
             <zipfileset dir="${basedir}">
                 <include name="bin/pu*"/>
 
@@ -200,6 +153,27 @@
         </zip>
     </target>
 
+    <target name="dist_1_5" depends="build_1_5, fulljar, srczip, javadoc" description="Creates the OpenSpaces distribution">
+        <delete file="${dist.dir}/${name}-${openspaces-version}-1.5.zip"/>
+        <zip zipfile="${dist.dir}/${name}-${openspaces-version}-1.5.zip">
+            <zipfileset dir="${basedir}">
+                <include name="bin/pu*"/>
+
+                <include name="examples/**"/>
+                <exclude name="examples/**/*.iml"/>
+                <exclude name="examples/**/.cvsignore"/>
+
+                <include name="lib/${name}/**"/>
+
+            </zipfileset>
+        </zip>
+    </target>
+
+    <target name="dist">
+    	<antcall target="dist_1_5" />
+    	<antcall target="dist_1_4" />
+    </target>
+    
     <!--
     ########### TEST TARGETS ###########
     -->
@@ -207,15 +181,15 @@
     <!--
          Compile the main test tree.
      -->
-    <target name="buildmaintests" depends="build"
+    <target name="buildmaintests" depends="build_1_5"
             description="Compile test source tree java files into class files">
 
         <mkdir dir="${target.testclasses.dir}"/>
 
-        <javac destdir="${target.testclasses.dir}" source="1.4" target="1.4" debug="${debug}"
+        <javac destdir="${target.testclasses.dir}" source="1.5" target="1.5" debug="${debug}"
                deprecation="false" optimize="false" failonerror="true">
             <src path="${main.test.dir}"/>
-            <classpath refid="all-libs-1.4"/>
+            <classpath refid="all-libs"/>
             <classpath location="${target.classes.dir}"/>
         </javac>
 
@@ -230,32 +204,7 @@
     </target>
 
 
-    <target name="buildtigertests" depends="buildmaintests"
-            description="Compile JDK 1.5 test java files into class files">
-
-        <mkdir dir="${target.tigertestclasses.dir}"/>
-
-        <javac destdir="${target.tigertestclasses.dir}" source="1.5" target="1.5" debug="${debug}"
-               deprecation="false" optimize="false" failonerror="true">
-            <src path="${tiger.test.dir}"/>
-            <classpath refid="all-libs-1.5"/>
-            <classpath location="${target.classes.dir}"/>
-            <classpath location="${target.testclasses.dir}"/>
-        </javac>
-
-        <!-- Pick up config files from test directory -->
-        <copy todir="${target.tigertestclasses.dir}" preservelastmodified="true">
-            <fileset dir="${tiger.test.dir}">
-                <include name="**/*.properties"/>
-                <include name="**/*.xml"/>
-            </fileset>
-        </copy>
-
-    </target>
-
-
-    <target name="buildtests" depends="buildmaintests,buildtigertests"
-            description="Compile main, and JDK 1.5 test sources"/>
+    <target name="buildtests" depends="buildmaintests" description="Compile main test sources"/>
 
 
     <target name="maintests" depends="buildtests" description="Run main tests">
@@ -272,7 +221,7 @@
             <!-- Need files loaded as resources -->
             <classpath location="${main.test.dir}"/>
 
-            <classpath refid="all-libs-1.4"/>
+            <classpath refid="all-libs"/>
 
             <formatter type="plain" usefile="false"/>
 
@@ -285,36 +234,7 @@
     </target>
 
 
-    <target name="tigertests" depends="buildtests" if="tiger.available" description="Run JDK 1.5 tests">
-
-        <mkdir dir="${target.junit.reports.dir}"/>
-
-        <junit forkmode="${junit.forkmode}" printsummary="yes" haltonfailure="yes" haltonerror="yes">
-
-            <jvmarg line="-Djava.security.policy=policy/policy.all -Djava.awt.headless=true -Xmx128m -XX:MaxPermSize=128m"/>
-
-            <!-- Must go first to ensure any jndi.properties files etc take precedence  -->
-            <classpath location="${target.tigertestclasses.dir}"/>
-            <classpath location="${target.testclasses.dir}"/>
-            <classpath location="${target.classes.dir}"/>
-
-            <!-- Need files loaded as resources -->
-            <classpath location="${tiger.test.dir}"/>
-
-            <classpath refid="all-libs-1.5"/>
-
-            <formatter type="plain" usefile="false"/>
-
-            <batchtest fork="yes" todir="${target.junit.reports.dir}">
-                <fileset dir="${target.tigertestclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
-            </batchtest>
-
-        </junit>
-
-    </target>
-
-
-    <target name="tests" depends="maintests,tigertests" description="Run tests"/>
+    <target name="tests" depends="maintests" description="Run tests"/>
 
 
     <!--
@@ -331,21 +251,19 @@
             <jvmarg line="-Djava.awt.headless=true"/>
 
             <!-- Must go first to ensure any jndi.properties files etc take precedence  -->
-            <classpath location="${target.tigertestclasses.dir}"/>
             <classpath location="${target.testclasses.dir}"/>
             <classpath location="${target.classes.dir}"/>
 
             <!-- Need files loaded as resources -->
             <classpath location="${main.test.dir}"/>
 
-            <classpath refid="all-libs-1.5"/>
+            <classpath refid="all-libs"/>
 
             <formatter type="plain" usefile="false"/>
             <formatter type="xml"/>
 
             <batchtest fork="yes" todir="${target.junit.reports.dir}">
                 <fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
-                <fileset dir="${target.tigertestclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
             </batchtest>
 
         </junit>

@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceException;
 import org.openspaces.core.space.mode.AfterSpaceModeChangeEvent;
+import org.openspaces.core.space.mode.BeforeSpaceModeChangeEvent;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -183,7 +184,10 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
                 AfterSpaceModeChangeEvent spEvent = (AfterSpaceModeChangeEvent) applicationEvent;
                 if (spEvent.isPrimary()) {
                     doStart();
-                } else {
+                }
+            } else if (applicationEvent instanceof BeforeSpaceModeChangeEvent) {
+                BeforeSpaceModeChangeEvent spEvent = (BeforeSpaceModeChangeEvent) applicationEvent;
+                if (!spEvent.isPrimary()) {
                     doStop();
                 }
             }
