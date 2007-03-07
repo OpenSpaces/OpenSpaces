@@ -15,7 +15,6 @@ import org.springframework.util.ClassUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +50,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
 
     private ApplicationContext applicationContext;
 
-    private Map interfaceToService = new HashMap();
+    private Map<String, Object> interfaceToService = new HashMap<String, Object>();
 
     /**
      * Sets the list of services that will be exported as remoted services. Each service will have
@@ -69,11 +68,10 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(services, "services property is required");
         // go over the services and create the inteface to service lookup
-        for (Iterator it = services.iterator(); it.hasNext();) {
-            Object service = it.next();
+        for (Object service : services) {
             Class[] interfaces = ClassUtils.getAllInterfaces(service);
-            for (int j = 0; j < interfaces.length; j++) {
-                interfaceToService.put(interfaces[j].getName(), service);
+            for (Class anInterface : interfaces) {
+                interfaceToService.put(anInterface.getName(), service);
             }
         }
     }
@@ -139,7 +137,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
     }
 
     private void writeResponse(GigaSpace gigaSpace, SpaceRemoteInvocation remoteInvocation, SpaceRemotingException e) {
-        if (remoteInvocation.oneWay == null || !remoteInvocation.oneWay.booleanValue()) {
+        if (remoteInvocation.oneWay == null || !remoteInvocation.oneWay) {
             gigaSpace.write(new SpaceRemoteResult(remoteInvocation, e));
         } else {
             if (logger.isDebugEnabled()) {
@@ -149,7 +147,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
     }
 
     private void writeResponse(GigaSpace gigaSpace, SpaceRemoteInvocation remoteInvocation, Object retVal) {
-        if (remoteInvocation.oneWay == null || !remoteInvocation.oneWay.booleanValue()) {
+        if (remoteInvocation.oneWay == null || !remoteInvocation.oneWay) {
             gigaSpace.write(new SpaceRemoteResult(remoteInvocation, retVal));
         }
     }

@@ -20,7 +20,6 @@
       </library>
     </orderEntry>
     <orderEntry type="module" module-name="source-main" />
-    <orderEntry type="module" module-name="source-tiger" />
     <orderEntry type="module" module-name="examples-data-common" />
     <orderEntry type="module-library">
       <library>

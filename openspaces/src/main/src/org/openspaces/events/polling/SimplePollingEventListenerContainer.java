@@ -10,7 +10,6 @@ import org.springframework.util.ClassUtils;
 
 import java.rmi.RemoteException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -72,7 +71,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
 
     private int idleTaskExecutionLimit = 1;
 
-    private final Set scheduledInvokers = new HashSet();
+    private final Set<AsyncEventListenerInvoker> scheduledInvokers = new HashSet<AsyncEventListenerInvoker>();
 
     private int activeInvokerCount = 0;
 
@@ -375,8 +374,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      * idle instances among its scheduled invokers.
      */
     private boolean hasIdleInvokers() {
-        for (Iterator it = this.scheduledInvokers.iterator(); it.hasNext();) {
-            AsyncEventListenerInvoker invoker = (AsyncEventListenerInvoker) it.next();
+        for (AsyncEventListenerInvoker invoker : this.scheduledInvokers) {
             if (invoker.isIdle()) {
                 return true;
             }
