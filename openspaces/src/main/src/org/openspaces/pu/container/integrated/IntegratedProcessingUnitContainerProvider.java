@@ -42,7 +42,7 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
 
     private ApplicationContext parentContext;
 
-    private List configResources = new ArrayList();
+    private List<Resource> configResources = new ArrayList<Resource>();
 
     private BeanLevelProperties beanLevelProperties;
 
@@ -105,8 +105,8 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
      */
     public void addConfigLocation(String path) throws IOException {
         Resource[] resources = new PathMatchingResourcePatternResolver().getResources(path);
-        for (int i = 0; i < resources.length; i++) {
-            addConfigLocation(resources[i]);
+        for (Resource resource : resources) {
+            addConfigLocation(resource);
         }
     }
 
@@ -139,7 +139,7 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
                 throw new CannotCreateContainerException("Failed to read config files from [/META_INF/pu/*.xml]", e);
             }
         }
-        Resource[] resources = (Resource[]) configResources.toArray(new Resource[configResources.size()]);
+        Resource[] resources = configResources.toArray(new Resource[configResources.size()]);
         // create the Spring application context
         ResourceApplicationContext applicationContext = new ResourceApplicationContext(resources, parentContext);
         // add config information if provided

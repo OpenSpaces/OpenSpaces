@@ -8,7 +8,6 @@
 
         <fileset dir="../../../lib">
             <include name="**/*.jar"/>
-            <exclude name="JSpaces-1.4.jar"/>
         </fileset>
 
         <fileset dir="${pulocation}">

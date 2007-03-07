@@ -294,7 +294,6 @@
       <module fileurl="file://$PROJECT_DIR$/examples/openspaces/helloworld/examples-helloworld.iml" filepath="$PROJECT_DIR$/examples/openspaces/helloworld/examples-helloworld.iml" />
       <module fileurl="file://$PROJECT_DIR$/openspaces.iml" filepath="$PROJECT_DIR$/openspaces.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/main/source-main.iml" filepath="$PROJECT_DIR$/src/main/source-main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/src/tiger/source-tiger.iml" filepath="$PROJECT_DIR$/src/tiger/source-tiger.iml" />
     </modules>
   </component>
   <component name="ProjectRootManager" version="2" assert-keyword="true" jdk-15="true" project-jdk-name="1.5" project-jdk-type="JavaSDK">
