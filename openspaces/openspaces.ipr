@@ -384,7 +384,7 @@
     <configuration default="false" enabled="false" factoryName="Application" merge="false" name="Example Data Processor Primary" type="Application">
       <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
       <option name="VM_PARAMETERS" value="" />
-      <option name="PROGRAM_PARAMETERS" value="-cluster schema=primary_backup totalMembers=1,1 id=1" />
+      <option name="PROGRAM_PARAMETERS" value="-cluster schema=primary_backup total_members=1,1 id=1" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
@@ -402,7 +402,7 @@
     <configuration default="false" enabled="false" factoryName="Application" merge="false" name="Example Data Processor Backup" type="Application">
       <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
       <option name="VM_PARAMETERS" value="" />
-      <option name="PROGRAM_PARAMETERS" value="-cluster schema=primary_backup totalMembers=1,1 id=1 backupId=1" />
+      <option name="PROGRAM_PARAMETERS" value="-cluster schema=primary_backup total_members=1,1 id=1 backup_id=1" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
@@ -485,10 +485,6 @@
       <SOURCES />
     </library>
   </component>
-  <component name="uidesigner-configuration">
-    <option name="INSTRUMENT_CLASSES" value="true" />
-    <option name="COPY_FORMS_RUNTIME_TO_OUTPUT" value="true" />
-    <option name="DEFAULT_LAYOUT_MANAGER" value="GridLayoutManager" />
-  </component>
+  <component name="uidesigner-configuration" />
 </project>
 

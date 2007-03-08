@@ -2,7 +2,10 @@
 <classpath>
 	<classpathentry kind="src" output="target/classes" path="src/main/src"/>
 	<classpathentry kind="src" output="target/main-test-classes" path="src/main/test"/>
-	<classpathentry kind="lib" path="examples/openspaces/helloworld/pu/helloworld/lib/commons-math-1.1.jar"/>
+	<classpathentry kind="src" output="examples/openspaces/helloworld/pu/helloworld" path="examples/openspaces/helloworld/src"/>
+	<classpathentry kind="src" output="examples/openspaces/data/common/classes" path="examples/openspaces/data/common/src"/>
+	<classpathentry kind="src" output="examples/openspaces/data/processor/pu/data-processor" path="examples/openspaces/data/processor/src"/>
+	<classpathentry kind="src" output="examples/openspaces/data/feeder/pu/data-feeder" path="examples/openspaces/data/feeder/src"/>
 	<classpathentry kind="lib" path="lib/ant/ant-junit.jar"/>
 	<classpathentry kind="lib" path="lib/ant/ant-launcher.jar"/>
 	<classpathentry kind="lib" path="lib/ant/ant-trax.jar"/>
@@ -24,5 +27,7 @@
 	<classpathentry kind="lib" path="lib/ServiceGrid/gs-service.jar"/>
 	<classpathentry kind="lib" path="lib/ServiceGrid/gs-lib.jar"/>
 	<classpathentry kind="lib" path="lib/jmx/jmxri.jar"/>
+	<classpathentry kind="lib" path="lib/common/commons-math-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/ServiceGrid/gs-boot.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

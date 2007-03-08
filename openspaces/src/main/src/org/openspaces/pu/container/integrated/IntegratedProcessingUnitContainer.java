@@ -80,8 +80,8 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
      * lookup based on URL syntax or Spring extended <code>classpath</code> prefix (see {@link org.springframework.core.io.DefaultResourceLoader}).</li>
      * <li><b>-cluster [cluster parameters]</b>: Allows to configure {@link org.openspaces.core.cluster.ClusterInfo}, see
      * {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider#setClusterInfo(org.openspaces.core.cluster.ClusterInfo)}.</li>
-     * The following parameters are allowed: <code>totalMembers=1,1</code> (1,1 is an example value),
-     * <code>id=1</code> (1 is an example value), <code>backupId=1</code> (1 is an example value) and
+     * The following parameters are allowed: <code>total_members=1,1</code> (1,1 is an example value),
+     * <code>id=1</code> (1 is an example value), <code>backup_id=1</code> (1 is an example value) and
      * <code>schema=primary_backup</code> (primary_backup is an example value). No parameter is required. For more
      * information regarding the Space meaning of this parameters please consult GigaSpaces reference documentation
      * within the Space URL section.
