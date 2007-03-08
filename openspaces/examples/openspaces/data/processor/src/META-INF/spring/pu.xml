@@ -77,6 +77,7 @@
 
     <!-- Print out processed data using local view of all the processed data element -->
 
+    <!-- DISABLED FOR NOW since it does not work with primary backup
     <bean id="processedViewSpace" class="org.openspaces.core.space.cache.LocalViewSpaceFactoryBean">
         <property name="space" ref="space"/>
         <property name="localViews">
@@ -98,6 +99,7 @@
     <bean id="spaceModeContextLoader" class="org.openspaces.core.space.mode.SpaceModeContextLoader">
         <property name="location" value="classpath:/META-INF/spring/mode/mode.xml"/>
     </bean>
+    -->
 
     <!-- Remoting Support -->
     <bean id="remotingContainer" class="org.openspaces.events.polling.SimplePollingEventListenerContainer">
