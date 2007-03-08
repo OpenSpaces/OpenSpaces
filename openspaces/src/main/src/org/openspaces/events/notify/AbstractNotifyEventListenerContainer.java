@@ -7,6 +7,7 @@ import com.gigaspaces.events.NotifyActionType;
 import com.j_spaces.core.client.INotifyDelegatorFilter;
 import net.jini.core.event.RemoteEventListener;
 import net.jini.core.lease.Lease;
+import net.jini.lease.LeaseListener;
 import org.openspaces.core.GigaSpaceException;
 import org.openspaces.events.AbstractEventListenerContainer;
 import org.openspaces.events.EventTemplateProvider;
@@ -104,7 +105,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
 
     private Integer batchTime;
 
-    private boolean renew = false;
+    private boolean autoRenew = false;
+
+    private LeaseListener leaseListener;
 
     private Object template;
 
@@ -174,8 +177,16 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
      *
      * @see #setListenerLease(long)
      */
-    public void setRenew(boolean renew) {
-        this.renew = renew;
+    public void setAutoRenew(boolean autoRenew) {
+        this.autoRenew = autoRenew;
+    }
+
+    /**
+     * If {@link #setAutoRenew(boolean)} is set to <code>true</code> sets the lease listener
+     * for it.
+     */
+    public void setLeaseListener(LeaseListener leaseListener) {
+        this.leaseListener = leaseListener;
     }
 
     /**
@@ -188,7 +199,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
     /**
      * Controls the lease associated with the registered listener. Defaults to {@link net.jini.core.lease.Lease#FOREVER}.
      *
-     * @see #setRenew(boolean)
+     * @see #setAutoRenew(boolean)
      */
     public void setListenerLease(long listenerLease) {
         this.listenerLease = listenerLease;
@@ -376,9 +387,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
         }
         eventSessionConfig.setFifo(fifo);
         if (batchSize != null && batchTime != null) {
-            eventSessionConfig.setBatch(batchSize.intValue(), batchTime.intValue());
+            eventSessionConfig.setBatch(batchSize, batchTime);
         }
-        eventSessionConfig.setRenew(renew);
+        eventSessionConfig.setAutoRenew(autoRenew, leaseListener);
         eventSessionConfig.setTriggerNotifyTemplate(triggerNotifyTemplate);
         eventSessionConfig.setReplicateNotifyTemplate(replicateNotifyTemplate);
         return eventSessionConfig;

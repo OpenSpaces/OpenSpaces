@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author kimchy
  */
-public class DataFeeder implements InitializingBean, DisposableBean {
+public class ViewDataCounter implements InitializingBean, DisposableBean {
 
     private ScheduledExecutorService executorService;
 
@@ -22,7 +22,7 @@ public class DataFeeder implements InitializingBean, DisposableBean {
 
     private long defaultDelay = 1000;
 
-    @GigaSpaceContext(name = "gigaSpace")
+    @GigaSpaceContext(name = "processedViewGigaSpace")
     private GigaSpace gigaSpace;
 
     public void setDefaultDelay(long defaultDelay) {
@@ -30,9 +30,9 @@ public class DataFeeder implements InitializingBean, DisposableBean {
     }
 
     public void afterPropertiesSet() throws Exception {
-        System.out.println("--- STARTING FEEDER WITH CYCLE [" + defaultDelay + "]");
+        System.out.println("--- STARTING VIEW COUNTER WITH CYCLE [" + defaultDelay + "]");
         executorService = Executors.newScheduledThreadPool(1);
-        sf = executorService.scheduleAtFixedRate(new DataFeederTask(), defaultDelay, defaultDelay, TimeUnit.MILLISECONDS);
+        sf = executorService.scheduleAtFixedRate(new ViewCounterTask(), defaultDelay, defaultDelay, TimeUnit.MILLISECONDS);
     }
 
 
@@ -42,17 +42,17 @@ public class DataFeeder implements InitializingBean, DisposableBean {
         executorService.shutdown();
     }
 
-    public class DataFeederTask implements Runnable {
+    public class ViewCounterTask implements Runnable {
 
-        private int counter;
+        private int latestCount = -1;
 
         public void run() {
             try {
-                long time = System.currentTimeMillis();
-                Data data = new Data(Data.TYPES[counter++ % Data.TYPES.length], "FEEDER " + Long.toString(time));
-                data.setProcessed(false);
-                gigaSpace.write(data);
-                System.out.println("--- WROTE " + data);
+                int count = gigaSpace.count(new Data());
+                if (latestCount != count) {
+                    System.out.println("---- VIEW COUNT IS [" + count + "]");
+                    latestCount = count;
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -10,15 +10,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../../lib/JSpaces.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
+    <orderEntry type="module" module-name="source-main" />
+    <orderEntry type="library" name="GigaSpaces" level="project" />
+    <orderEntry type="library" name="Spring" level="project" />
     <orderEntryProperties />
   </component>
 </module>

@@ -9,11 +9,11 @@ import org.openspaces.example.data.common.IDataProcessor;
  */
 public class DataProcessor implements IDataProcessor {
 
-    private long workDuration = 1000;
+    private long workDuration = 100;
 
 
     /**
-     * Sets the simulated work duration (in milliseconds). Defaut to 1000 (1 second).
+     * Sets the simulated work duration (in milliseconds). Defaut to 100.
      */
     public void setWorkDuration(long workDuration) {
         this.workDuration = workDuration;

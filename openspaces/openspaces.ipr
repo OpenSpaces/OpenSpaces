@@ -449,7 +449,23 @@
       </value>
     </option>
   </component>
-  <component name="libraryTable" />
+  <component name="libraryTable">
+    <library name="GigaSpaces">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/JSpaces.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="Spring">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/spring/spring.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/spring/spring-mock.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+  </component>
   <component name="uidesigner-configuration">
     <option name="INSTRUMENT_CLASSES" value="true" />
     <option name="COPY_FORMS_RUNTIME_TO_OUTPUT" value="true" />

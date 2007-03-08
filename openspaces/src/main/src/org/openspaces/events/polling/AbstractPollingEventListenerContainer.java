@@ -222,13 +222,13 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
         if (dataEvent != null) {
             if (dataEvent.getClass().isArray()) {
                 Object[] dataEvents = (Object[]) dataEvent;
-                for (int i = 0; i < dataEvents.length; i++) {
+                for (Object dataEvent1 : dataEvents) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Received event [" + dataEvent + "]");
                     }
-                    eventReceived(dataEvents[i]);
+                    eventReceived(dataEvent1);
                     try {
-                        invokeListener(dataEvents[i], status, null);
+                        invokeListener(dataEvent1, status, null);
                     } catch (Throwable ex) {
                         if (status != null) {
                             // in case of an exception, we rollback the transaction and return (since we rolled back)

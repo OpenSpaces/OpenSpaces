@@ -33,4 +33,24 @@
         <property name="dataProcessor" ref="dataProcessor"/>
     </bean>
 
+    <!-- Local View Example ("client side") -->
+
+    <bean id="processedViewSpace" class="org.openspaces.core.space.cache.LocalViewSpaceFactoryBean">
+        <property name="space" ref="space"/>
+        <property name="localViews">
+            <list>
+                <bean class="com.j_spaces.core.client.view.View">
+                    <constructor-arg index="0" value="org.openspaces.example.data.common.Data"/>
+                    <constructor-arg index="1" value="processed = true"/>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="processedViewGigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
+        <property name="space" ref="processedViewSpace" />
+    </bean>
+
+    <bean id="viewDataCounter" class="org.openspaces.example.data.feeder.ViewDataCounter"/>
+
 </beans>

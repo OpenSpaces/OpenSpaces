@@ -13,7 +13,7 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class SpaceModeContextBean implements InitializingBean, DisposableBean {
 
-    @GigaSpaceContext
+    @GigaSpaceContext(name = "gigaSpace")
     private GigaSpace gigaSpace;
 
     public void afterPropertiesSet() throws Exception {

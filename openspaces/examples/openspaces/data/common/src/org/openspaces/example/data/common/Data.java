@@ -22,7 +22,7 @@ public class Data implements Serializable {
 
     private String data;
 
-    private boolean processed;
+    private Boolean processed;
 
     public Data() {
 
@@ -67,11 +67,11 @@ public class Data implements Serializable {
         this.data = data;
     }
 
-    public boolean isProcessed() {
+    public Boolean isProcessed() {
         return processed;
     }
 
-    public void setProcessed(boolean processed) {
+    public void setProcessed(Boolean processed) {
         this.processed = processed;
     }
 

@@ -53,6 +53,7 @@ public class DataRemoting implements InitializingBean, DisposableBean {
             try {
                 long time = System.currentTimeMillis();
                 Data data = new Data(Data.TYPES[counter++ % Data.TYPES.length], "REMOTING " + Long.toString(time));
+                data.setProcessed(false);
                 System.out.println("--- REMOTING PARAMTER " + data);
                 dataProcessor.sayData(data);
                 data = dataProcessor.processData(data);
