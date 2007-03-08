@@ -17,7 +17,7 @@ set LOOKUPLOCATORS=""
 )
 set LOOKUP_LOCATORS_PROP=-Dcom.gs.jini_lus.locators=%LOOKUPLOCATORS%
 
-set COMMAND_LINE=%JAVACMD% %JAVA_OPTIONS% %LOOKUP_LOCATORS_PROP% %LOOKUP_GROUPS_PROP% %RMI_OPTIONS% "-Dcom.gs.home=%JSHOMEDIR%" -Djava.security.policy=%POLICY% -classpath "%COMMON_JARS%;%SPRING_JARS%;%EXT_JARS%;%JSHOMEDIR%;%JSHOMEDIR%\lib\JSpaces.jar;%OPENSPACES_JARS%" org.openspaces.pu.container.standalone.StandaloneProcessingUnitContainer $*
+set COMMAND_LINE=%JAVACMD% %JAVA_OPTIONS% %LOOKUP_LOCATORS_PROP% %LOOKUP_GROUPS_PROP% %RMI_OPTIONS% "-Dcom.gs.home=%JSHOMEDIR%" -Djava.security.policy=%POLICY% -classpath "%COMMON_JARS%;%SPRING_JARS%;%EXT_JARS%;%JSHOMEDIR%;%JSHOMEDIR%\lib\JSpaces.jar;%OPENSPACES_JARS%" org.openspaces.pu.container.standalone.StandaloneProcessingUnitContainer %*
 
 set TITLE="PU Instance ["%*"] started on [%computername%]"
 @title %TITLE%
