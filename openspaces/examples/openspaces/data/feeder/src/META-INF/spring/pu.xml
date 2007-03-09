@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+       xmlns:gs-core="http://www.openspaces.org/schema/core"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd">
 
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
     <bean id="gigaSpaceContextProcessor" class="org.openspaces.core.context.GigaSpaceContextBeanPostProcessor"/>
 
-    <bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
-        <property name="url" value="jini://*/*/space"/>
-        <property name="lookupGroups" value="${user.name}" />
-    </bean>
+    <gs-core:space id="space" url="jini://*/*/space1" lookup-groups="${user.name}"/>
 
     <bean id="gigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
         <property name="space" ref="space"/>
@@ -24,9 +23,9 @@
         <property name="gigaSpace" ref="gigaSpace"/>
         <property name="serviceInterface" value="org.openspaces.example.data.common.IDataProcessor"/>
         <property name="remoteRoutingHandler">
-            <bean class="org.openspaces.example.data.feeder.support.DataRemoteRoutingHandler" />
+            <bean class="org.openspaces.example.data.feeder.support.DataRemoteRoutingHandler"/>
         </property>
-        <property name="voidOneWay" value="true" />
+        <property name="voidOneWay" value="true"/>
     </bean>
 
     <bean id="dataRemoting" class="org.openspaces.example.data.feeder.DataRemoting">
@@ -48,7 +47,7 @@
     </bean>
 
     <bean id="processedViewGigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
-        <property name="space" ref="processedViewSpace" />
+        <property name="space" ref="processedViewSpace"/>
     </bean>
 
     <bean id="viewDataCounter" class="org.openspaces.example.data.feeder.ViewDataCounter"/>
