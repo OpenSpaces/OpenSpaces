@@ -1,6 +1,6 @@
 package org.openspaces.itest.pu.container.integrated.simple;
 
-import org.openspaces.core.config.BeanLevelMergedPropertiesAware;
+import org.openspaces.core.properties.BeanLevelMergedPropertiesAware;
 
 import java.util.Properties;
 

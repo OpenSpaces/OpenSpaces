@@ -2,9 +2,9 @@ package org.openspaces.pu.container.standalone;
 
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
-import org.openspaces.core.config.BeanLevelProperties;
-import org.openspaces.core.config.BeanLevelPropertyBeanPostProcessor;
-import org.openspaces.core.config.BeanLevelPropertyPlaceholderConfigurer;
+import org.openspaces.core.properties.BeanLevelProperties;
+import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
+import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
 import org.springframework.context.ApplicationContext;
@@ -17,7 +17,7 @@ import java.util.List;
 
 /**
  * <p>A standalone container runnable allowing to start a Spring based application context based on the provided
- * parameters ({@link org.openspaces.core.config.BeanLevelProperties}, {@link org.openspaces.core.cluster.ClusterInfo},
+ * parameters ({@link org.openspaces.core.properties.BeanLevelProperties}, {@link org.openspaces.core.cluster.ClusterInfo},
  * and a list of config locations).
  *
  * <p>This runnable allows to start a processing unit container within a running thread, mainly allowing for custom
@@ -58,7 +58,7 @@ public class StandaloneContainerRunnable implements Runnable {
     /**
      * Constructs a new Spring {@link org.springframework.context.ApplicationContext} based on the configured list
      * of config locations. Also uses the provided {@link org.openspaces.core.cluster.ClusterInfo} and
-     * {@link org.openspaces.core.config.BeanLevelProperties} in order to further config the application context.
+     * {@link org.openspaces.core.properties.BeanLevelProperties} in order to further config the application context.
      */
     public void run() {
         try {

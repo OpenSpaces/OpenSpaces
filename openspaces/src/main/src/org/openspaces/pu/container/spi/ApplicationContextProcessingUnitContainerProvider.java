@@ -1,7 +1,7 @@
 package org.openspaces.pu.container.spi;
 
 import org.openspaces.core.cluster.ClusterInfoAware;
-import org.openspaces.core.config.BeanLevelPropertiesAware;
+import org.openspaces.core.properties.BeanLevelPropertiesAware;
 import org.openspaces.pu.container.ProcessingUnitContainerProvider;
 
 import java.io.IOException;

@@ -1,7 +1,7 @@
 package org.openspaces.itest.pu.container.integrated.simple;
 
 import junit.framework.TestCase;
-import org.openspaces.core.config.BeanLevelProperties;
+import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
 

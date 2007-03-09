@@ -53,11 +53,11 @@ public class StandaloneProcessingUnitContainer implements ApplicationContextProc
      * <li><b>-conifg [configLocation]</b>: Allows to add a Spring application context config location. See
      * {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider#addConfigLocation(String)}. This is
      * an optional paramter and it can be provided multiple times.</li>
-     * <li><b>-properties [beanName] [propreties]</b>: Allows to inject {@link org.openspaces.core.config.BeanLevelProperties}, see
-     * {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider#setBeanLevelProperties(org.openspaces.core.config.BeanLevelProperties)}.
-     * [beanName] is optional, if not used, the properties will set the {@link org.openspaces.core.config.BeanLevelProperties#setContextProperties(java.util.Properties)}.
+     * <li><b>-properties [beanName] [propreties]</b>: Allows to inject {@link org.openspaces.core.properties.BeanLevelProperties}, see
+     * {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider#setBeanLevelProperties(org.openspaces.core.properties.BeanLevelProperties)}.
+     * [beanName] is optional, if not used, the properties will set the {@link org.openspaces.core.properties.BeanLevelProperties#setContextProperties(java.util.Properties)}.
      * If used, will inject properties only to the bean registered under the provided beanName within the Spring context (see
-     * {@link org.openspaces.core.config.BeanLevelProperties#setBeanProperties(String,java.util.Properties)}). The [properties] can
+     * {@link org.openspaces.core.properties.BeanLevelProperties#setBeanProperties(String,java.util.Properties)}). The [properties] can
      * either start with <code>embed://</code> which mean they will be provided within the command line (for example:
      * <code>embed://propName1=propVal1;propName2=propVal2</code>) or they can follow Spring {@link org.springframework.core.io.Resource}
      * lookup based on URL syntax or Spring extended <code>classpath</code> prefix (see {@link org.springframework.core.io.DefaultResourceLoader}).</li>
