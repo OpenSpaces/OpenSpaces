@@ -24,7 +24,7 @@
                         </xsd:choice>
                         <xsd:element name="receive-operation-handler" type="receiveOperationHandlerType" minOccurs="0" maxOccurs="1" />
                     </xsd:sequence>
-                    <xsd:attribute name="tx-manager" type="xsd:string" />
+                    <xsd:attribute name="tx-manager" type="gs-core:txManagerType" />
                     <xsd:attribute name="tx-name" type="xsd:string" />
                     <xsd:attribute name="tx-timeout" type="xsd:nonNegativeInteger" />
                     <xsd:attribute name="tx-isolation" default="DEFAULT">

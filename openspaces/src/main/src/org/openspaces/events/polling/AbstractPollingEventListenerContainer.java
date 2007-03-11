@@ -49,9 +49,9 @@ import org.springframework.util.Assert;
 public abstract class AbstractPollingEventListenerContainer extends AbstractEventListenerContainer {
 
     /**
-     * The default receive timeout: 1000 ms = 1 second.
+     * The default receive timeout: 60000 ms = 60 second = 1 minute.
      */
-    public static final long DEFAULT_RECEIVE_TIMEOUT = 1000;
+    public static final long DEFAULT_RECEIVE_TIMEOUT = 60000;
 
     private Object template;
 
@@ -136,7 +136,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
 
     /**
      * <p>Set the timeout to use for receive calls, in <b>milliseconds</b>.
-     * The default is 1000 ms, that is, 1 second.
+     * The default is 60000 ms, that is, 1 minute.
      *
      * <p><b>NOTE:</b> This value needs to be smaller than the transaction
      * timeout used by the transaction manager (in the appropriate unit,
@@ -151,7 +151,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
 
     /**
      * Returns the timeout used for receive calls, in <b>millisecond</b>.
-     * The default is 1000 ms, that is, 1 second.
+     * The default is 60000 ms, that is, 1 minute.
      */
     protected long getReceiveTimeout() {
         return receiveTimeout;
