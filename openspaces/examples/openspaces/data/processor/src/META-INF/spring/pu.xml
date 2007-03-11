@@ -2,48 +2,35 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:gs-core="http://www.openspaces.org/schema/core"
+       xmlns:gs-events="http://www.openspaces.org/schema/events"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd">
+       http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
+       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd">
 
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
-    <gs-core:giga-space-context />
+    <gs-core:giga-space-context/>
 
-    <gs-core:space id="space" url="/./space" lookup-groups="${user.name}" />
+    <gs-core:space id="space" url="/./space" lookup-groups="${user.name}"/>
 
-    <gs-core:giga-space id="gigaSpace" space="space" />
+    <gs-core:giga-space id="gigaSpace" space="space"/>
 
-    <gs-core:local-tx-manager id="transactionManager" giga-space="gigaSpace" />
+    <gs-core:local-tx-manager id="transactionManager" giga-space="gigaSpace"/>
 
     <bean id="dataProcessor" class="org.openspaces.example.data.processor.DataProcessor"/>
 
-    <bean id="dataProcessorPollingEventContainer"
-          class="org.openspaces.events.polling.SimplePollingEventListenerContainer">
-        <property name="gigaSpace" ref="gigaSpace"/>
-
-        <!-- make the reception transactional -->
-        <property name="transactionManager" ref="transactionManager"/>
-
-        <property name="template">
+    <gs-events:polling-container id="dataProcessorPollingEventContainer" giga-space="gigaSpace" tx-manager="transactionManager">
+        <gs-core:template>
             <bean class="org.openspaces.example.data.common.Data">
                 <property name="processed" value="false"/>
             </bean>
-        </property>
-
-        <!-- Can be enabled to allow for take multiple receive operations
-        <property name="receiveOperationHandler">
-            <bean class="org.openspaces.events.polling.receive.DefaultTakeReceiveOperationHandler">
-                <property name="maxEntries" value="100" />
-            </bean>
-        </property>
-        -->
-
-        <property name="eventListener">
+        </gs-core:template>
+        <gs-events:listener>
             <bean class="org.openspaces.events.adapter.AnnotationEventListenerAdapter">
                 <property name="delegate" ref="dataProcessor"/>
             </bean>
-        </property>
-    </bean>
+        </gs-events:listener>
+    </gs-events:polling-container>
 
     <!-- Print out all the processed data event using notifications with processed true -->
     <bean id="dataProcessedCounterNotifyContainer"
@@ -70,35 +57,11 @@
         </property>
     </bean>
 
-    <!-- Print out processed data using local view of all the processed data element -->
-
-    <!-- DISABLED FOR NOW since it does not work with primary backup
-    <bean id="processedViewSpace" class="org.openspaces.core.space.cache.LocalViewSpaceFactoryBean">
-        <property name="space" ref="space"/>
-        <property name="localViews">
-            <list>
-                <bean class="com.j_spaces.core.client.view.View">
-                    <constructor-arg index="0" value="org.openspaces.example.data.common.Data"/>
-                    <constructor-arg index="1" value="processed = true"/>
-                </bean>
-            </list>
-        </property>
-    </bean>
-
-    <bean id="processedViewGigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
-        <property name="space" ref="processedViewSpace" />
-    </bean>
-
-    <bean id="viewDataCounter" class="org.openspaces.example.data.processor.ViewDataCounter"/>
-
-    -->
-    <gs-core:context-loader id="modeExample" location="classpath:/META-INF/spring/mode/mode.xml" />
+    <gs-core:context-loader id="modeExample" location="classpath:/META-INF/spring/mode/mode.xml"/>
 
     <!-- Remoting Support -->
-    <bean id="remotingContainer" class="org.openspaces.events.polling.SimplePollingEventListenerContainer">
-        <property name="gigaSpace" ref="gigaSpace"/>
-        <property name="concurrentConsumers" value="2"/>
-        <property name="eventListener">
+    <gs-events:polling-container id="remotingContainer" giga-space="gigaSpace" concurrent-consumers="2">
+        <gs-events:listener>
             <bean class="org.openspaces.remoting.SpaceRemotingServiceExporter">
                 <property name="services">
                     <list>
@@ -106,6 +69,6 @@
                     </list>
                 </property>
             </bean>
-        </property>
-    </bean>
+        </gs-events:listener>
+    </gs-events:polling-container>
 </beans>

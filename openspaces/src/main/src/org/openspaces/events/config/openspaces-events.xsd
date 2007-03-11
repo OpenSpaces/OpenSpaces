@@ -16,32 +16,15 @@
     <xsd:element name="polling-container">
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="baseEventContainer">
+                <xsd:extension base="baseTransactionalEventContainer">
                     <xsd:sequence>
                         <xsd:choice>
-                            <xsd:element name="template" type="gs-core:templateType" minOccurs="1" maxOccurs="1" />
-                            <xsd:element ref="gs-core:sql-query" minOccurs="1" maxOccurs="1" />
+                            <xsd:element ref="gs-core:template" minOccurs="0" maxOccurs="1" />
+                            <xsd:element ref="gs-core:sql-query" minOccurs="0" maxOccurs="1" />
                         </xsd:choice>
+                        <xsd:element name="listener" type="spaceDataEventListenerType" minOccurs="1" maxOccurs="1" />
                         <xsd:element name="receive-operation-handler" type="receiveOperationHandlerType" minOccurs="0" maxOccurs="1" />
                     </xsd:sequence>
-                    <xsd:attribute name="tx-manager" type="gs-core:txManagerType" />
-                    <xsd:attribute name="tx-name" type="xsd:string" />
-                    <xsd:attribute name="tx-timeout" type="xsd:nonNegativeInteger" />
-                    <xsd:attribute name="tx-isolation" default="DEFAULT">
-                        <xsd:simpleType>
-                            <xsd:annotation>
-                                <xsd:documentation source="java:org.springframework.transaction.annotation.Isolation">
-                                    <![CDATA[The transaction isolation level.]]>
-                                </xsd:documentation>
-                            </xsd:annotation>
-                            <xsd:restriction base="xsd:string">
-                                <xsd:enumeration value="DEFAULT"/>
-                                <xsd:enumeration value="READ_UNCOMMITTED"/>
-                                <xsd:enumeration value="READ_COMMITTED"/>
-                                <xsd:enumeration value="REPEATABLE_READ"/>
-                            </xsd:restriction>
-                        </xsd:simpleType>
-                    </xsd:attribute>
                     <xsd:attribute name="receive-timeout" type="xsd:nonNegativeInteger" />
                     <xsd:attribute name="recovery-interval" type="xsd:nonNegativeInteger" />
                     <xsd:attribute name="concurrent-consumers" type="xsd:nonNegativeInteger" />
@@ -53,14 +36,34 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:complexType name="baseTransactionalEventContainer" abstract="true">
+        <xsd:complexContent>
+            <xsd:extension base="baseEventContainer">
+                <xsd:attribute name="tx-manager" type="gs-core:txManagerType" />
+                <xsd:attribute name="tx-name" type="xsd:string" />
+                <xsd:attribute name="tx-timeout" type="xsd:nonNegativeInteger" />
+                <xsd:attribute name="tx-isolation" default="DEFAULT">
+                    <xsd:simpleType>
+                        <xsd:annotation>
+                            <xsd:documentation source="java:org.springframework.transaction.annotation.Isolation">
+                                <![CDATA[The transaction isolation level.]]>
+                            </xsd:documentation>
+                        </xsd:annotation>
+                        <xsd:restriction base="xsd:string">
+                            <xsd:enumeration value="DEFAULT"/>
+                            <xsd:enumeration value="READ_UNCOMMITTED"/>
+                            <xsd:enumeration value="READ_COMMITTED"/>
+                            <xsd:enumeration value="REPEATABLE_READ"/>
+                        </xsd:restriction>
+                    </xsd:simpleType>
+                </xsd:attribute>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
     <xsd:complexType name="baseEventContainer" abstract="true">
         <xsd:complexContent>
             <xsd:extension base="beans:identifiedType">
-                <xsd:sequence>
-                    <xsd:choice>
-                        <xsd:element name="listener" type="spaceDataEventListenerType" minOccurs="1" maxOccurs="1" />
-                    </xsd:choice>
-                </xsd:sequence>
                 <xsd:attribute name="giga-space" type="gs-core:gigaSpaceRefType" use="required"/>
                 <xsd:attribute name="active-when-primary" type="xsd:boolean"/>
             </xsd:extension>
