@@ -29,10 +29,9 @@ import java.rmi.RemoteException;
  * <p>The container allows to set the template object used for the notify registration. Note, this
  * can be a Pojo based template, or one of GigaSpace's query classes such as {@link com.j_spaces.core.client.SQLQuery}.
  *
- * <p>Masking of which operations will cause notifications can be set using {@link #setNotifyWrite(boolean)},
- * {@link #setNotifyUpdate(boolean)}, {@link #setNotifyTake(boolean)} and {@link #setNotifyLeaseExpire(boolean)}.
- * Note, all this flags are set to <code>false</code> by default, so at least one of them should be set to
- * <code>true</code> in order to receive any notifications.
+ * <p>Masking of which operations will cause notifications can be set using {@link #setNotifyWrite(Boolean)},
+ * {@link #setNotifyUpdate(Boolean)}, {@link #setNotifyTake(Boolean)} and {@link #setNotifyLeaseExpire(Boolean)}.
+ * Note, if no flag is set, notifications will be send for <b>write</b> operations.
  *
  * <p>Batching of notifications can be turned on by setting both {@link #setBatchSize(Integer)} and
  * {@link #setBatchTime(Integer)}.
@@ -115,15 +114,15 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
 
     private INotifyDelegatorFilter notifyFilter;
 
-    private boolean notifyWrite = false;
+    private Boolean notifyWrite = false;
 
-    private boolean notifyUpdate = false;
+    private Boolean notifyUpdate = false;
 
-    private boolean notifyTake = false;
+    private Boolean notifyTake = false;
 
-    private boolean notifyLeaseExpire = false;
+    private Boolean notifyLeaseExpire = false;
 
-    private boolean notifyAll = false;
+    private Boolean notifyAll = false;
 
     private boolean triggerNotifyTemplate = false;
 
@@ -217,21 +216,21 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
     /**
      * Turns on notifications for write operations. Defaults to <code>false</code>.
      */
-    public void setNotifyWrite(boolean notifyWrite) {
+    public void setNotifyWrite(Boolean notifyWrite) {
         this.notifyWrite = notifyWrite;
     }
 
     /**
      * Turns on notifications for update operations. Defaults to <code>false</code>.
      */
-    public void setNotifyUpdate(boolean notifyUpdate) {
+    public void setNotifyUpdate(Boolean notifyUpdate) {
         this.notifyUpdate = notifyUpdate;
     }
 
     /**
      * Turns on notifications for take operations. Defaults to <code>false</code>.
      */
-    public void setNotifyTake(boolean notifyTake) {
+    public void setNotifyTake(Boolean notifyTake) {
         this.notifyTake = notifyTake;
     }
 
@@ -240,14 +239,14 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
      * Turns on notifications for all operations. This flag will override all the other
      * notify flags (if set). Defaults to <code>false</code>.
      */
-    public void setNotifyAll(boolean notifyAll) {
+    public void setNotifyAll(Boolean notifyAll) {
         this.notifyAll = notifyAll;
     }
 
     /**
      * Turns on notification for least expiration. Defaults to <code>false</code>.
      */
-    public void setNotifyLeaseExpire(boolean notifyLeaseExpire) {
+    public void setNotifyLeaseExpire(Boolean notifyLeaseExpire) {
         this.notifyLeaseExpire = notifyLeaseExpire;
     }
 
@@ -354,8 +353,8 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
             throw new IllegalArgumentException("batchSize has value [" + batchSize + "] which enables batching. batchTime must have a value as well");
         }
         Assert.notNull(template, "template property is required");
-        if (!notifyAll && !notifyTake && !notifyUpdate && !notifyWrite && !notifyLeaseExpire) {
-            throw new IllegalArgumentException("No notification flag is set, at least one of the notify flags must be set");
+        if (notifyAll == null && notifyTake == null && notifyUpdate == null && notifyWrite == null && notifyLeaseExpire == null) {
+            notifyWrite = true;
         }
     }
 
@@ -414,19 +413,19 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
      */
     protected void registerListener(DataEventSession dataEventSession, RemoteEventListener listener) throws NotifyListenerRegistrationException {
         NotifyActionType notifyType = NotifyActionType.NOTIFY_NONE;
-        if (notifyWrite) {
+        if (notifyWrite != null && notifyWrite) {
             notifyType = notifyType.or(NotifyActionType.NOTIFY_WRITE);
         }
-        if (notifyUpdate) {
+        if (notifyUpdate != null && notifyUpdate) {
             notifyType = notifyType.or(NotifyActionType.NOTIFY_UPDATE);
         }
-        if (notifyTake) {
+        if (notifyTake != null && notifyTake) {
             notifyType = notifyType.or(NotifyActionType.NOTIFY_TAKE);
         }
-        if (notifyLeaseExpire) {
+        if (notifyLeaseExpire != null && notifyLeaseExpire) {
             notifyType = notifyType.or(NotifyActionType.NOTIFY_LEASE_EXPIRATION);
         }
-        if (notifyAll) {
+        if (notifyAll != null && notifyAll) {
             notifyType = notifyType.or(NotifyActionType.NOTIFY_ALL);
         }
         try {
