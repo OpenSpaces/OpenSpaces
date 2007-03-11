@@ -4,6 +4,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.StringUtils;
+import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
 /**
@@ -22,24 +23,27 @@ public abstract class AbstarctTxEventContainerBeanDefinitionParser extends Absta
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
         super.doParse(element, parserContext, builder);
 
-        String txManager = element.getAttribute(TX_MANAGER);
-        if (StringUtils.hasLength(txManager)) {
-            builder.addPropertyReference("transactionManager", txManager);
-        }
+        Element txElement = DomUtils.getChildElementByTagName(element, "tx-support");
+        if (txElement != null) {
+            String txManager = txElement.getAttribute(TX_MANAGER);
+            if (StringUtils.hasLength(txManager)) {
+                builder.addPropertyReference("transactionManager", txManager);
+            }
 
-        String txName = element.getAttribute(TX_NAME);
-        if (StringUtils.hasLength(txName)) {
-            builder.addPropertyValue("transactionName", txName);
-        }
+            String txName = txElement.getAttribute(TX_NAME);
+            if (StringUtils.hasLength(txName)) {
+                builder.addPropertyValue("transactionName", txName);
+            }
 
-        String txTimeout = element.getAttribute(TX_TIMEOUT);
-        if (StringUtils.hasLength(txTimeout)) {
-            builder.addPropertyValue("transactionTimeout", txTimeout);
-        }
+            String txTimeout = txElement.getAttribute(TX_TIMEOUT);
+            if (StringUtils.hasLength(txTimeout)) {
+                builder.addPropertyValue("transactionTimeout", txTimeout);
+            }
 
-        String txIsolation = element.getAttribute(TX_ISOLATION);
-        if (StringUtils.hasLength(txIsolation)) {
-            builder.addPropertyValue("transactionIsolationLevelName", DefaultTransactionDefinition.PREFIX_ISOLATION + txIsolation);
+            String txIsolation = txElement.getAttribute(TX_ISOLATION);
+            if (StringUtils.hasLength(txIsolation)) {
+                builder.addPropertyValue("transactionIsolationLevelName", DefaultTransactionDefinition.PREFIX_ISOLATION + txIsolation);
+            }
         }
     }
 }

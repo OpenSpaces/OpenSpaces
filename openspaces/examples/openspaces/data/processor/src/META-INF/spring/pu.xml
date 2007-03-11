@@ -19,7 +19,8 @@
 
     <bean id="dataProcessor" class="org.openspaces.example.data.processor.DataProcessor"/>
 
-    <gs-events:polling-container id="dataProcessorPollingEventContainer" giga-space="gigaSpace" tx-manager="transactionManager">
+    <gs-events:polling-container id="dataProcessorPollingEventContainer" giga-space="gigaSpace">
+        <gs-events:tx-support tx-manager="transactionManager" />
         <gs-core:template>
             <bean class="org.openspaces.example.data.common.Data">
                 <property name="processed" value="false"/>
