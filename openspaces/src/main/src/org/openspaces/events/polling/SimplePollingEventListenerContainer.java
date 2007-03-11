@@ -70,6 +70,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
     private int maxEventsPerTask = Integer.MIN_VALUE;
 
     private int idleTaskExecutionLimit = 1;
+    
 
     private final Set<AsyncEventListenerInvoker> scheduledInvokers = new HashSet<AsyncEventListenerInvoker>();
 

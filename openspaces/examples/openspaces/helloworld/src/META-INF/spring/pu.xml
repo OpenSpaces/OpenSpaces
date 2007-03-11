@@ -12,9 +12,4 @@
     <bean id="gigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
         <property name="space" ref="space"/>
     </bean>
-
-    <bean id="helloWorldBean" class="org.openspaces.example.helloworld.HellowWorldBean">
-        <property name="gigaSpace" ref="gigaSpace"/>
-    </bean>
-
 </beans>

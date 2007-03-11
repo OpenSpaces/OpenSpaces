@@ -49,6 +49,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
     private GigaSpace gigaSpace;
 
     private boolean activeWhenPrimary = true;
+    
 
     private String beanName;
 

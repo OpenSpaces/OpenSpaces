@@ -9,7 +9,7 @@
 
     <gs-core:giga-space-context />
 
-    <gs-core:space id="space" url="/./space1" lookup-groups="${user.name}"/>
+    <gs-core:space id="space" url="/./space" lookup-groups="${user.name}"/>
 
     <gs-core:giga-space id="gigaSpace" space="space" />
 
