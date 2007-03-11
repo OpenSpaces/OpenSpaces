@@ -75,15 +75,7 @@
                 </tool:annotation>
             </xsd:appinfo>
         </xsd:annotation>
-        <xsd:sequence>
-            <xsd:element ref="beans:description" minOccurs="0"/>
-            <xsd:choice minOccurs="0" maxOccurs="1">
-                <xsd:element ref="beans:bean"/>
-                <xsd:element ref="beans:ref"/>
-                <xsd:element ref="beans:idref"/>
-                <xsd:element ref="beans:null"/>
-            </xsd:choice>
-        </xsd:sequence>
+        <xsd:group ref="beans:collectionElements"/>
         <xsd:attribute name="ref" type="xsd:string">
             <xsd:annotation>
                 <xsd:documentation><![CDATA[
@@ -101,15 +93,7 @@
                 </tool:annotation>
             </xsd:appinfo>
         </xsd:annotation>
-        <xsd:sequence>
-            <xsd:element ref="beans:description" minOccurs="0"/>
-            <xsd:choice minOccurs="0" maxOccurs="1">
-                <xsd:element ref="beans:bean"/>
-                <xsd:element ref="beans:ref"/>
-                <xsd:element ref="beans:idref"/>
-                <xsd:element ref="beans:null"/>
-            </xsd:choice>
-        </xsd:sequence>
+        <xsd:group ref="beans:collectionElements"/>
         <xsd:attribute name="ref" type="xsd:string">
             <xsd:annotation>
                 <xsd:documentation><![CDATA[

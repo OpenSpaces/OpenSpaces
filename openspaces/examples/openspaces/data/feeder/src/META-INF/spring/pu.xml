@@ -9,9 +9,9 @@
 
     <gs-core:giga-space-context/>
 
-    <gs-core:space id="space" url="jini://*/*/space" lookup-groups="${user.name}"/>
+    <gs-core:space id="space" url="jini://*/*/space" lookup-groups="${user.name}" />
 
-    <gs-core:giga-space id="gigaSpace" space="space"/>
+    <gs-core:giga-space id="gigaSpace" space="space" />
 
     <bean id="dataFeeder" class="org.openspaces.example.data.feeder.DataFeeder"/>
 
@@ -33,7 +33,11 @@
     <!-- Local View Example ("client side") -->
 
     <gs-core:local-view id="processedViewSpace" space="space">
-        <gs-core:view-query where="processed = true" class="org.openspaces.example.data.common.Data" />
+        <gs-core:view-query where="processed = true" class="org.openspaces.example.data.common.Data">
+            <gs-core:template>
+                <bean class="org.openspaces.example.data.common.Data" />
+            </gs-core:template>
+        </gs-core:view-query>
     </gs-core:local-view>
 
     <gs-core:giga-space id="processedViewGigaSpace" space="processedViewSpace"/>
