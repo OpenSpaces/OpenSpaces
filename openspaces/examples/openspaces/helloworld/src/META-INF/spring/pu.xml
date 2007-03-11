@@ -7,9 +7,7 @@
 
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
-    <gs-core:space id="space" url="/./space1" lookup-groups="${user.name}"/>
+    <gs-core:space id="space" url="/./space" lookup-groups="${user.name}"/>
 
-    <bean id="gigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
-        <property name="space" ref="space"/>
-    </bean>
+    <gs-core:giga-space space="space" />
 </beans>

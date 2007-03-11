@@ -1,15 +1,15 @@
 package org.openspaces.example.helloworld;
 
+import org.apache.commons.math.random.RandomData;
+import org.apache.commons.math.random.RandomDataImpl;
+import org.openspaces.core.GigaSpace;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
-import org.openspaces.core.GigaSpace;
-import org.apache.commons.math.random.RandomDataImpl;
-import org.apache.commons.math.random.RandomData;
 
 /**
  * @author kimchy
  */
-public class HellowWorldBean implements InitializingBean {
+public class HelloWorldBean implements InitializingBean {
 
     private GigaSpace gigaSpace;
 
