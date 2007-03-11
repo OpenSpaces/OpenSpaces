@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author kimchy
  */
-public class DeafultEventListenerAdapter extends AbstractReflectionEventListenerAdapter {
+public class MethodEventListenerAdapter extends AbstractReflectionEventListenerAdapter {
 
     /**
      * Default method name to delegate to: <code>handleEvent</code>.
