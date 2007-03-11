@@ -4,13 +4,13 @@ import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceException;
 
 /**
- * First tries and perform a {@link org.openspaces.core.GigaSpace#takeMultiple(Object,int)} using the provided
+ * First tries and perform a {@link org.openspaces.core.GigaSpace#readMultiple(Object,int)} using the provided
  * template and configured maxEntries (defaults to <code>50</code>). If no values are returned, will perform a
- * blocking take operation using {@link org.openspaces.core.GigaSpace#take(Object,long)}.
+ * blocking read operation using {@link org.openspaces.core.GigaSpace#read(Object,long)}.
  *
  * @author kimchy
  */
-public class DefaultTakeReceiveOperationHandler implements ReceiveOperationHandler {
+public class MultiReadReceiveOperationHandler implements ReceiveOperationHandler {
 
     private static final int DEFAULT_MAX_ENTRIES = 50;
 
@@ -24,15 +24,15 @@ public class DefaultTakeReceiveOperationHandler implements ReceiveOperationHandl
     }
 
     /**
-     * First tries and perform a {@link org.openspaces.core.GigaSpace#takeMultiple(Object,int)} using the provided
+     * First tries and perform a {@link org.openspaces.core.GigaSpace#readMultiple(Object,int)} using the provided
      * template and configured maxEntries (defaults to <code>50</code>). If no values are returned, will perform a
-     * blocking take operation using {@link org.openspaces.core.GigaSpace#take(Object,long)}.
+     * blocking read operation using {@link org.openspaces.core.GigaSpace#read(Object,long)}.
      */
     public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws GigaSpaceException {
-        Object[] results = gigaSpace.takeMultiple(template, maxEntries);
+        Object[] results = gigaSpace.readMultiple(template, maxEntries);
         if (results != null && results.length > 0) {
             return results;
         }
-        return gigaSpace.take(template, receiveTimeout);
+        return gigaSpace.read(template, receiveTimeout);
     }
 }

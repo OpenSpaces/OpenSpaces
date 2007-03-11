@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module relativePaths="true" type="JAVA_MODULE" version="4">
+<module version="4" relativePaths="true" type="JAVA_MODULE">
   <component name="ModuleRootManager" />
-  <component LANGUAGE_LEVEL="JDK_1_5" inherit-compiler-output="false" name="NewModuleRootManager">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_5" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/pu/data-processor" />
     <exclude-output />
     <output-test url="file://$MODULE_DIR$/pu/data-processor" />
     <content url="file://$MODULE_DIR$">
-      <sourceFolder isTestSource="false" url="file://$MODULE_DIR$/src" />
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
-    <orderEntry forTests="false" type="sourceFolder" />
-    <orderEntry module-name="source-main" type="module" />
-    <orderEntry module-name="examples-data-common" type="module" />
-    <orderEntry level="project" name="GigaSpaces" type="library" />
-    <orderEntry level="project" name="Spring" type="library" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="source-main" />
+    <orderEntry type="module" module-name="examples-data-common" />
+    <orderEntry type="library" name="GigaSpaces" level="project" />
+    <orderEntry type="library" name="Spring" level="project" />
     <orderEntryProperties />
   </component>
 </module>
