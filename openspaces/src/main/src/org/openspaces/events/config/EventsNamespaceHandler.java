@@ -9,5 +9,6 @@ public class EventsNamespaceHandler extends NamespaceHandlerSupport {
 
     public void init() {
         registerBeanDefinitionParser("polling-container", new PollingContainerBeanDefinitionParser());
+        registerBeanDefinitionParser("notify-container", new NotifyContainerBeanDefinitionParser());
     }
 }

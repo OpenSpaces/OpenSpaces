@@ -34,29 +34,19 @@
     </gs-events:polling-container>
 
     <!-- Print out all the processed data event using notifications with processed true -->
-    <bean id="dataProcessedCounterNotifyContainer"
-          class="org.openspaces.events.notify.SimpleNotifyEventListenerContainer">
-        <property name="gigaSpace" ref="gigaSpace"/>
-
-        <property name="notifyWrite" value="true"/>
-        <property name="notifyUpdate" value="true"/>
-
-        <property name="comTypeName" value="unicast"/>
-
-        <property name="template">
-            <bean class="org.openspaces.example.data.common.Data">
-                <property name="processed" value="true"/>
-            </bean>
-        </property>
-
-        <property name="eventListener">
+    <gs-events:notify-container id="dataProcessedCounterNotifyContainer" giga-space="gigaSpace" com-type="UNICAST">
+        <gs-events:notify write="true" update="true" />
+        <gs-events:batch size="10" time="5000" />
+        <gs-core:sql-query where="processed = true" class="org.openspaces.example.data.common.Data" />
+        <gs-events:listener>
             <bean class="org.openspaces.events.adapter.AnnotationEventListenerAdapter">
                 <property name="delegate">
                     <bean class="org.openspaces.example.data.processor.DataProcessedCounter"/>
                 </property>
             </bean>
-        </property>
-    </bean>
+        </gs-events:listener>
+    </gs-events:notify-container>
+
 
     <gs-core:context-loader id="modeExample" location="classpath:/META-INF/spring/mode/mode.xml"/>
 

@@ -70,7 +70,7 @@ import java.rmi.RemoteException;
  */
 public abstract class AbstractNotifyEventListenerContainer extends AbstractEventListenerContainer {
 
-    private static final String COM_TYPE_PREFIX = "COM_TYPE_";
+    public static final String COM_TYPE_PREFIX = "COM_TYPE_";
 
     /**
      * Controls how notification are propogated from the space to the listener. Unicast propogation
@@ -114,15 +114,15 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
 
     private INotifyDelegatorFilter notifyFilter;
 
-    private Boolean notifyWrite = false;
+    private Boolean notifyWrite;
 
-    private Boolean notifyUpdate = false;
+    private Boolean notifyUpdate;
 
-    private Boolean notifyTake = false;
+    private Boolean notifyTake;
 
-    private Boolean notifyLeaseExpire = false;
+    private Boolean notifyLeaseExpire;
 
-    private Boolean notifyAll = false;
+    private Boolean notifyAll;
 
     private boolean triggerNotifyTemplate = false;
 
