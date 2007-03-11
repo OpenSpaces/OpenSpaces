@@ -33,9 +33,7 @@
     <!-- Local View Example ("client side") -->
 
     <gs-core:local-view id="processedViewSpace" space="space">
-        <gs-core:view-query where="processed = true">
-            <gs-core:template><bean class="org.openspaces.example.data.common.Data"/></gs-core:template>
-        </gs-core:view-query>
+        <gs-core:view-query where="processed = true" class="org.openspaces.example.data.common.Data" />
     </gs-core:local-view>
 
     <gs-core:giga-space id="processedViewGigaSpace" space="processedViewSpace"/>
