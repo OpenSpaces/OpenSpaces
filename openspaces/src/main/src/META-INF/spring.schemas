@@ -1,1 +1,2 @@
 http\://www.openspaces.org/schema/core/openspaces-core.xsd=org/openspaces/core/config/openspaces-core.xsd
+http\://www.openspaces.org/schema/events/openspaces-events.xsd=org/openspaces/events/config/openspaces-events.xsd

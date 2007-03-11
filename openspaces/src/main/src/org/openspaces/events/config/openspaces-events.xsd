@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<xsd:schema xmlns="http://www.openspaces.org/schema/events"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:beans="http://www.springframework.org/schema/beans"
+            xmlns:tool="http://www.springframework.org/schema/tool"
+            xmlns:gs-core="http://www.openspaces.org/schema/core"
+            targetNamespace="http://www.openspaces.org/schema/events"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+    <xsd:import namespace="http://www.springframework.org/schema/beans"/>
+    <xsd:import namespace="http://www.springframework.org/schema/tool"/>
+    <xsd:import namespace="http://www.openspaces.org/schema/core"/>
+
+    <xsd:element name="polling-container">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="baseEventContainer">
+                    <xsd:sequence>
+                        <xsd:choice>
+                            <xsd:element ref="gs-core:template" minOccurs="1" maxOccurs="1" />
+                            <xsd:element ref="gs-core:sql-query" minOccurs="1" maxOccurs="1" />
+                        </xsd:choice>
+                        <xsd:element name="receive-operation-handler" type="receiveOperationHandlerType" minOccurs="0" maxOccurs="1" />
+                    </xsd:sequence>
+                    <xsd:attribute name="tx-manager" type="xsd:string" />
+                    <xsd:attribute name="tx-name" type="xsd:string" />
+                    <xsd:attribute name="tx-timeout" type="xsd:nonNegativeInteger" />
+                    <xsd:attribute name="tx-isolation" default="DEFAULT">
+                        <xsd:simpleType>
+                            <xsd:annotation>
+                                <xsd:documentation source="java:org.springframework.transaction.annotation.Isolation">
+                                    <![CDATA[The transaction isolation level.]]>
+                                </xsd:documentation>
+                            </xsd:annotation>
+                            <xsd:restriction base="xsd:string">
+                                <xsd:enumeration value="DEFAULT"/>
+                                <xsd:enumeration value="READ_UNCOMMITTED"/>
+                                <xsd:enumeration value="READ_COMMITTED"/>
+                                <xsd:enumeration value="REPEATABLE_READ"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:attribute>
+                    <xsd:attribute name="receive-timeout" type="xsd:nonNegativeInteger" />
+                    <xsd:attribute name="recovery-interval" type="xsd:nonNegativeInteger" />
+                    <xsd:attribute name="concurrent-consumers" type="xsd:nonNegativeInteger" />
+                    <xsd:attribute name="max-concurrent-consumers" type="xsd:nonNegativeInteger" />
+                    <xsd:attribute name="max-events-per-task" type="xsd:nonNegativeInteger" />
+                    <xsd:attribute name="idle-task-execution-limit" type="xsd:nonNegativeInteger" />
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:complexType name="baseEventContainer" abstract="true">
+        <xsd:complexContent>
+            <xsd:extension base="beans:identifiedType">
+                <xsd:sequence>
+                    <xsd:choice>
+                        <xsd:element name="listener" type="spaceDataEventListenerType" minOccurs="1" maxOccurs="1" />
+                    </xsd:choice>
+                </xsd:sequence>
+                <xsd:attribute name="giga-space" type="gs-core:gigaSpaceRefType" use="required"/>
+                <xsd:attribute name="active-when-primary" type="xsd:boolean"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="spaceDataEventListenerType">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <tool:annotation kind="ref">
+                    <tool:expected-type type="org.openspaces.events.SpaceDataEventListener"/>
+                </tool:annotation>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="beans:identifiedType">
+                <xsd:group ref="beans:beanElements"/>
+                <xsd:attributeGroup ref="beans:beanAttributes"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="receiveOperationHandlerType">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <tool:annotation kind="ref">
+                    <tool:expected-type type="org.openspaces.events.polling.receive.ReceiveOperationHandler"/>
+                </tool:annotation>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="beans:identifiedType">
+                <xsd:group ref="beans:beanElements"/>
+                <xsd:attributeGroup ref="beans:beanAttributes"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+</xsd:schema>

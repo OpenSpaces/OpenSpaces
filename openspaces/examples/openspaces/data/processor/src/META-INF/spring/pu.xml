@@ -7,17 +7,13 @@
 
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
-    <bean id="gigaSpaceContextProcessor" class="org.openspaces.core.context.GigaSpaceContextBeanPostProcessor"/>
+    <gs-core:giga-space-context />
 
     <gs-core:space id="space" url="/./space1" lookup-groups="${user.name}"/>
 
-    <bean id="gigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
-        <property name="space" ref="space"/>
-    </bean>
+    <gs-core:giga-space id="gigaSpace" space="space" />
 
-    <bean id="transactionManager" class="org.openspaces.core.transaction.manager.LocalJiniTransactionManager">
-        <property name="gigaSpace" ref="gigaSpace"/>
-    </bean>
+    <gs-core:local-tx-manager id="transactionManager" giga-space="gigaSpace" />
 
     <bean id="dataProcessor" class="org.openspaces.example.data.processor.DataProcessor"/>
 
@@ -95,10 +91,8 @@
 
     <bean id="viewDataCounter" class="org.openspaces.example.data.processor.ViewDataCounter"/>
 
-    <bean id="spaceModeContextLoader" class="org.openspaces.core.space.mode.SpaceModeContextLoader">
-        <property name="location" value="classpath:/META-INF/spring/mode/mode.xml"/>
-    </bean>
     -->
+    <gs-core:context-loader id="modeExample" location="classpath:/META-INF/spring/mode/mode.xml" />
 
     <!-- Remoting Support -->
     <bean id="remotingContainer" class="org.openspaces.events.polling.SimplePollingEventListenerContainer">

@@ -137,7 +137,16 @@
 
     </target>
 
-    <target name="dist_1_4" depends="build_1_4, fulljar, srczip, javadoc" description="Creates the OpenSpaces distribution">
+    <target name="schema" description="Copy over schema files">
+        <delete dir="lib/${name}/schema" />
+        <copy todir="lib/${name}/schema" flatten="true">
+            <fileset dir="${main.src.dir}">
+                <include name="**/*.xsd"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="dist_1_4" depends="build_1_4, fulljar, srczip, javadoc, schema" description="Creates the OpenSpaces distribution">
         <delete file="${dist.dir}/${name}-${openspaces-version}-1.4.zip"/>
         <zip zipfile="${dist.dir}/${name}-${openspaces-version}-1.4.zip">
             <zipfileset dir="${basedir}">
@@ -153,7 +162,7 @@
         </zip>
     </target>
 
-    <target name="dist_1_5" depends="build_1_5, fulljar, srczip, javadoc" description="Creates the OpenSpaces distribution">
+    <target name="dist_1_5" depends="build_1_5, fulljar, srczip, javadoc, schema" description="Creates the OpenSpaces distribution">
         <delete file="${dist.dir}/${name}-${openspaces-version}-1.5.zip"/>
         <zip zipfile="${dist.dir}/${name}-${openspaces-version}-1.5.zip">
             <zipfileset dir="${basedir}">

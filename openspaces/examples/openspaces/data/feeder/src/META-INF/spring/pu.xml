@@ -7,13 +7,11 @@
 
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
-    <bean id="gigaSpaceContextProcessor" class="org.openspaces.core.context.GigaSpaceContextBeanPostProcessor"/>
+    <gs-core:giga-space-context />
 
     <gs-core:space id="space" url="jini://*/*/space1" lookup-groups="${user.name}"/>
 
-    <bean id="gigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
-        <property name="space" ref="space"/>
-    </bean>
+    <gs-core:giga-space id="gigaSpace" space="space"/>
 
     <bean id="dataFeeder" class="org.openspaces.example.data.feeder.DataFeeder"/>
 
@@ -34,21 +32,11 @@
 
     <!-- Local View Example ("client side") -->
 
-    <bean id="processedViewSpace" class="org.openspaces.core.space.cache.LocalViewSpaceFactoryBean">
-        <property name="space" ref="space"/>
-        <property name="localViews">
-            <list>
-                <bean class="com.j_spaces.core.client.view.View">
-                    <constructor-arg index="0" value="org.openspaces.example.data.common.Data"/>
-                    <constructor-arg index="1" value="processed = true"/>
-                </bean>
-            </list>
-        </property>
-    </bean>
+    <gs-core:local-view id="processedViewSpace" space="space">
+        <gs-core:view-query where="processed = true" class="org.openspaces.example.data.common.Data"/>
+    </gs-core:local-view>
 
-    <bean id="processedViewGigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
-        <property name="space" ref="processedViewSpace"/>
-    </bean>
+    <gs-core:giga-space id="processedViewGigaSpace" space="processedViewSpace"/>
 
     <bean id="viewDataCounter" class="org.openspaces.example.data.feeder.ViewDataCounter"/>
 
