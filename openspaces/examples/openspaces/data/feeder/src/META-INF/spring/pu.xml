@@ -2,8 +2,12 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:gs-core="http://www.openspaces.org/schema/core"
+       xmlns:gs-events="http://www.openspaces.org/schema/events"
+       xmlns:gs-remoting="http://www.openspaces.org/schema/remoting"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd">
+       http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
+       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
+       http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/remoting/openspaces-remoting.xsd">
 
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
@@ -17,14 +21,11 @@
 
     <!-- Remoting Example -->
 
-    <bean id="dataProcessor" class="org.openspaces.remoting.SpaceRemotingProxyFactoryBean">
-        <property name="gigaSpace" ref="gigaSpace"/>
-        <property name="serviceInterface" value="org.openspaces.example.data.common.IDataProcessor"/>
-        <property name="remoteRoutingHandler">
+    <gs-remoting:proxy id="dataProcessor" giga-space="gigaSpace" interface="org.openspaces.example.data.common.IDataProcessor">
+        <gs-remoting:routing-handler>
             <bean class="org.openspaces.example.data.feeder.support.DataRemoteRoutingHandler"/>
-        </property>
-        <property name="voidOneWay" value="true"/>
-    </bean>
+        </gs-remoting:routing-handler>
+    </gs-remoting:proxy>
 
     <bean id="dataRemoting" class="org.openspaces.example.data.feeder.DataRemoting">
         <property name="dataProcessor" ref="dataProcessor"/>

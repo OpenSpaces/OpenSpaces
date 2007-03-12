@@ -3,9 +3,11 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:gs-core="http://www.openspaces.org/schema/core"
        xmlns:gs-events="http://www.openspaces.org/schema/events"
+       xmlns:gs-remoting="http://www.openspaces.org/schema/remoting"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
-       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd">
+       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
+       http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/remoting/openspaces-remoting.xsd">
 
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
@@ -53,13 +55,9 @@
     <!-- Remoting Support -->
     <gs-events:polling-container id="remotingContainer" giga-space="gigaSpace" concurrent-consumers="2">
         <gs-events:listener>
-            <bean class="org.openspaces.remoting.SpaceRemotingServiceExporter">
-                <property name="services">
-                    <list>
-                        <ref bean="dataProcessor"/>
-                    </list>
-                </property>
-            </bean>
+            <gs-remoting:service-exporter>
+                <gs-remoting:service ref="dataProcessor" />
+            </gs-remoting:service-exporter>
         </gs-events:listener>
     </gs-events:polling-container>
 </beans>
