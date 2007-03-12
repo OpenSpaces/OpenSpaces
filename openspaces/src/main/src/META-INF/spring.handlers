@@ -1,3 +1,4 @@
 http\://www.openspaces.org/schema/core=org.openspaces.core.config.CoreNamespaceHandler
 http\://www.openspaces.org/schema/events=org.openspaces.events.config.EventsNamespaceHandler
 http\://www.openspaces.org/schema/remoting=org.openspaces.remoting.config.RemotingNamespaceHandler
+http\://www.openspaces.org/schema/jdbc=org.openspaces.jdbc.config.JdbcNamespaceHandler

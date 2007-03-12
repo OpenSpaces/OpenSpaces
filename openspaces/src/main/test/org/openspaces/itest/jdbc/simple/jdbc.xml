@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:gs-core="http://www.openspaces.org/schema/core"
+       xmlns:gs-jdbc="http://www.openspaces.org/schema/jdbc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
+       http://www.openspaces.org/schema/jdbc http://www.openspaces.org/schema/jdbc/openspaces-jdbc.xsd">
+
+
+    <gs-core:space id="space" url="/./space" />
+
+    <gs-jdbc:driver-data-source id="dataSource" space="space" />
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+</beans>
