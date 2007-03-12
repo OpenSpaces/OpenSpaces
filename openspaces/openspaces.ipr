@@ -291,7 +291,7 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
-      <module name="" />
+      <module name="examples-helloworld" />
       <RunnerSettings RunnerId="Debug">
         <option name="DEBUG_PORT" value="61020" />
         <option name="TRANSPORT" value="0" />
@@ -315,7 +315,7 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
-      <module name="" />
+      <module name="examples-data-processor" />
       <RunnerSettings RunnerId="Debug">
         <option name="DEBUG_PORT" value="54867" />
         <option name="TRANSPORT" value="0" />
@@ -339,7 +339,7 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
-      <module name="" />
+      <module name="examples-data-feeder" />
       <RunnerSettings RunnerId="Debug">
         <option name="DEBUG_PORT" value="56134" />
         <option name="TRANSPORT" value="0" />
@@ -363,7 +363,7 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
-      <module name="" />
+      <module name="examples-data-processor" />
       <RunnerSettings RunnerId="Profile ">
         <option name="myExternalizedOptions" value="&#10;snapshots-dir=&#10;" />
       </RunnerSettings>
@@ -381,7 +381,7 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
-      <module name="" />
+      <module name="examples-data-processor" />
       <RunnerSettings RunnerId="Profile ">
         <option name="myExternalizedOptions" value="&#10;snapshots-dir=&#10;" />
       </RunnerSettings>
@@ -459,10 +459,6 @@
       <SOURCES />
     </library>
   </component>
-  <component name="uidesigner-configuration">
-    <option name="INSTRUMENT_CLASSES" value="true" />
-    <option name="COPY_FORMS_RUNTIME_TO_OUTPUT" value="true" />
-    <option name="DEFAULT_LAYOUT_MANAGER" value="GridLayoutManager" />
-  </component>
+  <component name="uidesigner-configuration" />
 </project>
 

@@ -37,7 +37,7 @@ public abstract class AbstractResultEventAdapterFactoryBean implements FactoryBe
         if (writeLease != null) {
             adapter.setWriteLease(writeLease);
         }
-        if (updateOrWrite) {
+        if (updateOrWrite != null) {
             adapter.setUpdateOrWrite(updateOrWrite);
         }
         if (updateTimeout != null) {

@@ -20,30 +20,30 @@
     <bean id="dataProcessor" class="org.openspaces.example.data.processor.DataProcessor"/>
 
     <gs-events:polling-container id="dataProcessorPollingEventContainer" giga-space="gigaSpace">
-        <gs-events:tx-support tx-manager="transactionManager" />
+        <gs-events:tx-support tx-manager="transactionManager"/>
         <gs-core:template>
             <bean class="org.openspaces.example.data.common.Data">
                 <property name="processed" value="false"/>
             </bean>
         </gs-core:template>
         <gs-events:listener>
-            <bean class="org.openspaces.events.adapter.AnnotationEventListenerAdapter">
-                <property name="delegate" ref="dataProcessor"/>
-            </bean>
+            <gs-events:annotation-adapter>
+                <gs-events:delegate ref="dataProcessor"/>
+            </gs-events:annotation-adapter>
         </gs-events:listener>
     </gs-events:polling-container>
 
     <!-- Print out all the processed data event using notifications with processed true -->
     <gs-events:notify-container id="dataProcessedCounterNotifyContainer" giga-space="gigaSpace" com-type="UNICAST">
-        <gs-events:notify write="true" update="true" />
-        <gs-events:batch size="10" time="5000" />
-        <gs-core:sql-query where="processed = true" class="org.openspaces.example.data.common.Data" />
+        <gs-events:notify write="true" update="true"/>
+        <gs-events:batch size="10" time="5000"/>
+        <gs-core:sql-query where="processed = true" class="org.openspaces.example.data.common.Data"/>
         <gs-events:listener>
-            <bean class="org.openspaces.events.adapter.AnnotationEventListenerAdapter">
-                <property name="delegate">
+            <gs-events:annotation-adapter>
+                <gs-events:delegate>
                     <bean class="org.openspaces.example.data.processor.DataProcessedCounter"/>
-                </property>
-            </bean>
+                </gs-events:delegate>
+            </gs-events:annotation-adapter>
         </gs-events:listener>
     </gs-events:notify-container>
 

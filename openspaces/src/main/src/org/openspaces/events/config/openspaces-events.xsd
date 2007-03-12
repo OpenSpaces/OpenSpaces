@@ -188,4 +188,28 @@
             </xsd:complexContent>
         </xsd:complexType>
     </xsd:element>
+
+    <xsd:element name="method-adapter">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="baseResultEventAdapter">
+                    <xsd:sequence>
+                        <xsd:element name="delegate">
+                            <xsd:complexType>
+                                <xsd:group ref="beans:collectionElements"/>
+                                <xsd:attribute name="ref" type="xsd:string">
+                                    <xsd:annotation>
+                                        <xsd:documentation><![CDATA[
+                        A short-cut alternative to a nested "<ref bean='...'/>".
+                                    ]]></xsd:documentation>
+                                    </xsd:annotation>
+                                </xsd:attribute>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                    <xsd:attribute name="method-name" type="xsd:string"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
 </xsd:schema>

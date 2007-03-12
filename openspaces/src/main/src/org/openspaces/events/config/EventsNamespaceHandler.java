@@ -11,5 +11,6 @@ public class EventsNamespaceHandler extends NamespaceHandlerSupport {
         registerBeanDefinitionParser("polling-container", new PollingContainerBeanDefinitionParser());
         registerBeanDefinitionParser("notify-container", new NotifyContainerBeanDefinitionParser());
         registerBeanDefinitionParser("annotation-adapter", new AnnotationEventAdapterBeanDefinitionParser());
+        registerBeanDefinitionParser("method-adapter", new MethodEventAdapterBeanDefinitionParser());
     }
 }
