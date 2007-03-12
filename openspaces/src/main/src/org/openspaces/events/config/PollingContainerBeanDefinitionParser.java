@@ -18,6 +18,8 @@ public class PollingContainerBeanDefinitionParser extends AbstarctTxEventContain
 
     private static final String RECEIVE_OPERATION_HANDLER = "receive-operation-handler";
 
+    private static final String TRIGGER_OPERATION_HANDLER = "trigger-operation-handler";
+
     private static final String RECEIVE_TIMEOUT = "receive-timeout";
 
     private static final String RECOVERY_INTERVAL = "recovery-interval";
@@ -49,6 +51,12 @@ public class PollingContainerBeanDefinitionParser extends AbstarctTxEventContain
         if (receiveOperationHandlerEle != null) {
             builder.addPropertyValue("receiveOperationHandler",
                     parserContext.getDelegate().parsePropertyValue(receiveOperationHandlerEle, builder.getRawBeanDefinition(), "receiveOperationHandler"));
+        }
+
+        Element triggerOperationHandlerEle = DomUtils.getChildElementByTagName(element, TRIGGER_OPERATION_HANDLER);
+        if (receiveOperationHandlerEle != null) {
+            builder.addPropertyValue("triggerOperationHandler",
+                    parserContext.getDelegate().parsePropertyValue(triggerOperationHandlerEle, builder.getRawBeanDefinition(), "triggerOperationHandler"));
         }
 
         String receiveTimeout = element.getAttribute(RECEIVE_TIMEOUT);

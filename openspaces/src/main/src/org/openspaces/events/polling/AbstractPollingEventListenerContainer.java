@@ -5,6 +5,7 @@ import org.openspaces.events.AbstractEventListenerContainer;
 import org.openspaces.events.EventTemplateProvider;
 import org.openspaces.events.polling.receive.ReceiveOperationHandler;
 import org.openspaces.events.polling.receive.SingleTakeReceiveOperationHandler;
+import org.openspaces.events.polling.trigger.TriggerOperationHandler;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -44,6 +45,12 @@ import org.springframework.util.Assert;
  * directly can only work with a certain template and removes the requirement of configuring the
  * template as well.
  *
+ * <p>An advance feature allows for pluggable
+ * {@link #setTriggerOperationHandler(org.openspaces.events.polling.trigger.TriggerOperationHandler) triggerOperationHandler}
+ * which mainly makes sense when using transactions. The trigger operations handler allows to perform a trigger receive
+ * outside of a transaction scope, and if it returned a value, perform the take within a transaction. A useful
+ * implementation of it is {@link org.openspaces.events.polling.trigger.ReadTriggerOperationHandler}.
+ *
  * @author kimchy
  */
 public abstract class AbstractPollingEventListenerContainer extends AbstractEventListenerContainer {
@@ -63,6 +70,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
 
     private ReceiveOperationHandler receiveOperationHandler = new SingleTakeReceiveOperationHandler();
 
+    private TriggerOperationHandler triggerOperationHandler;
 
     /**
      * Sets the specified template to be used with the polling space operation.
@@ -128,7 +136,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
     /**
      * Specify the transaciton isolation to use for transactional wrapping.
      *
-     * @see org.springframework.transaction.support.DefaultTransactionDefinition#setIsolationLevelName(String) 
+     * @see org.springframework.transaction.support.DefaultTransactionDefinition#setIsolationLevelName(String)
      */
     public void setTransactionIsolationLevelName(String transactionIsolationLevelName) {
         this.transactionDefinition.setIsolationLevelName(transactionIsolationLevelName);
@@ -165,6 +173,17 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
         this.receiveOperationHandler = receiveOperationHandler;
     }
 
+    /**
+     * <p>An advance feature allows for pluggable {@link TriggerOperationHandler triggerOperationHandler}
+     * which mainly makes sense when using transactions. The trigger operations handler allows to perform a trigger receive
+     * outside of a transaction scope, and if it returned a value, perform the take within a transaction. A useful
+     * implementation of it is {@link org.openspaces.events.polling.trigger.ReadTriggerOperationHandler}. Defaults
+     * to <code>null</code>.
+     */
+    public void setTriggerOperationHandler(TriggerOperationHandler triggerOperationHandler) {
+        this.triggerOperationHandler = triggerOperationHandler;
+    }
+
     public void afterPropertiesSet() {
         if (getEventListener() != null && getEventListener() instanceof EventTemplateProvider && template == null) {
             setTemplate(((EventTemplateProvider) getEventListener()).getTemplate());
@@ -196,12 +215,24 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
      * @see #doReceiveAndExecute
      */
     protected boolean receiveAndExecute() throws GigaSpaceException {
+        Object template = getTemplate();
+        // if trigger is configure, work using trigger outside of a possible transaction
+        if (triggerOperationHandler != null) {
+            Object trigger = triggerOperationHandler.triggerReceive(this.template, getGigaSpace(), receiveTimeout);
+            if (trigger == null) {
+                return false;
+            }
+            // if we are going to use the trigger result as a template
+            if (triggerOperationHandler.isUseTriggerAsTemplate()) {
+                template = trigger;
+            }
+        }
         if (this.transactionManager != null) {
             // Execute receive within transaction.
             TransactionStatus status = this.transactionManager.getTransaction(this.transactionDefinition);
             boolean messageReceived;
             try {
-                messageReceived = doReceiveAndExecute(status);
+                messageReceived = doReceiveAndExecute(template, status);
             } catch (RuntimeException ex) {
                 rollbackOnException(status, ex);
                 throw ex;
@@ -213,12 +244,12 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
             return messageReceived;
         } else {
             // Execute receive outside of transaction.
-            return doReceiveAndExecute(null);
+            return doReceiveAndExecute(template, null);
         }
     }
 
-    protected boolean doReceiveAndExecute(TransactionStatus status) {
-        Object dataEvent = receiveEvent();
+    protected boolean doReceiveAndExecute(Object template, TransactionStatus status) {
+        Object dataEvent = receiveEvent(template);
         if (dataEvent != null) {
             if (dataEvent.getClass().isArray()) {
                 Object[] dataEvents = (Object[]) dataEvent;
@@ -289,8 +320,8 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
     /**
      * Receive an event
      */
-    protected Object receiveEvent() throws GigaSpaceException {
-        return receiveOperationHandler.receive(getTemplate(), getGigaSpace(), getReceiveTimeout());
+    protected Object receiveEvent(Object template) throws GigaSpaceException {
+        return receiveOperationHandler.receive(template, getGigaSpace(), getReceiveTimeout());
     }
 
     /**

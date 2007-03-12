@@ -26,6 +26,8 @@
                         <xsd:element name="listener" type="spaceDataEventListenerType" minOccurs="1" maxOccurs="1"/>
                         <xsd:element name="receive-operation-handler" type="receiveOperationHandlerType" minOccurs="0"
                                      maxOccurs="1"/>
+                        <xsd:element name="trigger-operation-handler" type="triggerOperationHandlerType" minOccurs="0"
+                                     maxOccurs="1"/>
                     </xsd:sequence>
                     <xsd:attribute name="receive-timeout" type="xsd:nonNegativeInteger"/>
                     <xsd:attribute name="recovery-interval" type="xsd:nonNegativeInteger"/>
@@ -143,6 +145,24 @@
             <xsd:appinfo>
                 <tool:annotation kind="ref">
                     <tool:expected-type type="org.openspaces.events.polling.receive.ReceiveOperationHandler"/>
+                </tool:annotation>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:group ref="beans:collectionElements"/>
+        <xsd:attribute name="ref" type="xsd:string">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[
+    A short-cut alternative to a nested "<ref bean='...'/>".
+                ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="triggerOperationHandlerType">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <tool:annotation kind="ref">
+                    <tool:expected-type type="org.openspaces.events.polling.trigger.TriggerOperationHandler"/>
                 </tool:annotation>
             </xsd:appinfo>
         </xsd:annotation>
