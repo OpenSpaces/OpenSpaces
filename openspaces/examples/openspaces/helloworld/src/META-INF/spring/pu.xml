@@ -9,5 +9,5 @@
 
     <gs-core:space id="space" url="/./space" lookup-groups="${user.name}"/>
 
-    <gs-core:giga-space space="space" />
+    <gs-core:giga-space id="gigaSpace" space="space" />
 </beans>
