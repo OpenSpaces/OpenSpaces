@@ -6,15 +6,14 @@
     <ServiceBean Name="PU">
 
         <Interfaces>
-            <Interface>org.openspaces.pu.container.servicegrid.PUServiceBean</Interface>
+            <Interface>org.jini.rio.resources.servicecore.Service</Interface>
             <Resources>
-                <JAR>puservicebean-dl.jar</JAR>
-                <JAR>JSpaces.jar</JAR>
+                <JAR>gs-dl.jar</JAR>
             </Resources>
         </Interfaces>
         <ImplementationClass>org.openspaces.pu.container.servicegrid.PUServiceBeanImpl
             <Resources>
-                <JAR>puservicebean.jar</JAR>
+                <JAR>openspaces/openspaces.jar</JAR>
             </Resources>
         </ImplementationClass>
 

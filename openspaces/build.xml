@@ -14,7 +14,7 @@
     </path>
 
     <taskdef name="retrotranslator" classname="net.sf.retrotranslator.transformer.RetrotranslatorTask">
-        <classpath refid="all-libs" />
+        <classpath refid="all-libs"/>
     </taskdef>
 
     <target name="usage">
@@ -68,7 +68,7 @@
     <target name="build_1_5" depends="clean, buildmain" description="Compile main sources"/>
 
     <target name="build_1_4" depends="clean, buildmain" description="Compile main sources">
-        <retrotranslator srcdir="${target.classes.dir}" verify="true" />
+        <retrotranslator srcdir="${target.classes.dir}" verify="true"/>
     </target>
 
     <target name="fulljar" description="Create full JAR file with all OpenSpaces classes">
@@ -124,7 +124,7 @@
             <packageset dir="${main.src.dir}">
                 <include name="org/openspaces/**"/>
             </packageset>
-            <link href="../../../docs/JavaDoc" />
+            <link href="../../../docs/JavaDoc"/>
             <link href="http://java.sun.com/j2ee/1.4/docs/api"/>
             <link href="http://java.sun.com/j2se/1.5.0/docs/api"/>
             <link href="http://static.springframework.org/spring/docs/2.0.x/api/"/>
@@ -138,7 +138,7 @@
     </target>
 
     <target name="schema" description="Copy over schema files">
-        <delete dir="lib/${name}/schema" />
+        <delete dir="lib/${name}/schema"/>
         <copy todir="lib/${name}/schema" flatten="true">
             <fileset dir="${main.src.dir}">
                 <include name="**/*.xsd"/>
@@ -146,8 +146,9 @@
         </copy>
     </target>
 
-    <target name="dist_1_4" depends="build_1_4, fulljar, srczip, javadoc, schema" description="Creates the OpenSpaces distribution">
-        <mkdir dir="${dist.dir}" />
+    <target name="dist_1_4" depends="build_1_4, fulljar, srczip, javadoc, schema"
+            description="Creates the OpenSpaces distribution">
+        <mkdir dir="${dist.dir}"/>
         <delete file="${dist.dir}/${name}-${openspaces-version}-1.4.zip"/>
         <zip zipfile="${dist.dir}/${name}-${openspaces-version}-1.4.zip">
             <zipfileset dir="${basedir}">
@@ -163,8 +164,9 @@
         </zip>
     </target>
 
-    <target name="dist_1_5" depends="build_1_5, fulljar, srczip, javadoc, schema" description="Creates the OpenSpaces distribution">
-        <mkdir dir="${dist.dir}" />
+    <target name="dist_1_5" depends="build_1_5, fulljar, srczip, javadoc, schema"
+            description="Creates the OpenSpaces distribution">
+        <mkdir dir="${dist.dir}"/>
         <delete file="${dist.dir}/${name}-${openspaces-version}-1.5.zip"/>
         <zip zipfile="${dist.dir}/${name}-${openspaces-version}-1.5.zip">
             <zipfileset dir="${basedir}">
@@ -181,10 +183,10 @@
     </target>
 
     <target name="dist">
-    	<antcall target="dist_1_5" />
-    	<antcall target="dist_1_4" />
+        <antcall target="dist_1_5"/>
+        <antcall target="dist_1_4"/>
     </target>
-    
+
     <!--
     ########### TEST TARGETS ###########
     -->
@@ -290,18 +292,4 @@
 
     <target name="clean_tests" depends="clean,tests"/>
 
-    <target name="puservicebeanjars" depends="puservicebean.jar, puservicebean-dl.jar"/>
-
-    <target name="puservicebean.jar" depends="buildmain">
-        <jar destfile="${gshome.dir}/lib/ServiceGrid/puservicebean.jar"
-             basedir="${target.classes.dir}"
-
-                />
-    </target>
-
-    <target name="puservicebean-dl.jar" depends="buildmain">
-        <jar destfile="${gshome.dir}/lib/ServiceGrid/puservicebean-dl.jar"
-             basedir="${target.classes.dir}"
-             includes="**/PUServiceBean.class"/>
-    </target>
 </project>
