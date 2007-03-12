@@ -391,6 +391,36 @@
         <option name="Make" value="true" />
       </method>
     </configuration>
+    <configuration default="false" enabled="false" factoryName="Application" merge="false" name="Example Data Processor Part1" type="Application">
+      <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
+      <option name="VM_PARAMETERS" value="" />
+      <option name="PROGRAM_PARAMETERS" value="-cluster schema=partitioned total_members=2 id=1" />
+      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" value="" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <module name="examples-data-processor" />
+      <RunnerSettings RunnerId="Run" />
+      <ConfigurationWrapper RunnerId="Run" />
+      <method>
+        <option name="Make" value="true" />
+      </method>
+    </configuration>
+    <configuration default="false" enabled="false" factoryName="Application" merge="false" name="Example Data Processor Part2" type="Application">
+      <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
+      <option name="VM_PARAMETERS" value="" />
+      <option name="PROGRAM_PARAMETERS" value="-cluster schema=partitioned total_members=2 id=2" />
+      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" value="" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <module name="examples-data-processor" />
+      <RunnerSettings RunnerId="Run" />
+      <ConfigurationWrapper RunnerId="Run" />
+      <method>
+        <option name="Make" value="true" />
+      </method>
+    </configuration>
     <configuration default="false" enabled="false" factoryName="JUnit" merge="false" name="OpenSpaces Tests" type="JUnit">
       <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
