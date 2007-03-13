@@ -67,7 +67,7 @@
                                 <!-- TODO LeaseListener configuration -->
                             </xsd:complexType>
                         </xsd:element>
-                        <!-- TODO add notifyFilter -->
+                        <xsd:element name="notify-filter" type="notifyFilterType" minOccurs="0" maxOccurs="1" />
                         <xsd:choice>
                             <xsd:element ref="gs-core:template" minOccurs="0" maxOccurs="1"/>
                             <xsd:element ref="gs-core:sql-query" minOccurs="0" maxOccurs="1"/>
@@ -119,6 +119,24 @@
                     <xsd:enumeration value="REPEATABLE_READ"/>
                 </xsd:restriction>
             </xsd:simpleType>
+        </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="notifyFilterType">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <tool:annotation kind="ref">
+                    <tool:expected-type type="com.j_spaces.core.client.INotifyDelegatorFilter"/>
+                </tool:annotation>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:group ref="beans:collectionElements"/>
+        <xsd:attribute name="ref" type="xsd:string">
+            <xsd:annotation>
+                <xsd:documentation><![CDATA[
+    A short-cut alternative to a nested "<ref bean='...'/>".
+                ]]></xsd:documentation>
+            </xsd:annotation>
         </xsd:attribute>
     </xsd:complexType>
 

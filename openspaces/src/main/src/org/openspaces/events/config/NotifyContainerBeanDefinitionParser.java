@@ -38,6 +38,8 @@ public class NotifyContainerBeanDefinitionParser extends AbstarctTxEventContaine
 
     private static final String LEASE_TIMEOUT = "timeout";
 
+    private static final String NOTIFY_FILTER = "notify-filter";
+
     private static final String NOTIFY = "notify";
 
     protected Class getBeanClass(Element element) {
@@ -97,6 +99,11 @@ public class NotifyContainerBeanDefinitionParser extends AbstarctTxEventContaine
             if (StringUtils.hasLength(timeout)) {
                 builder.addPropertyValue("listenerLease", timeout);
             }
+        }
+
+        Element notifyFilterEle = DomUtils.getChildElementByTagName(element, NOTIFY_FILTER);
+        if (notifyFilterEle != null) {
+            builder.addPropertyValue("notifyFilter", parserContext.getDelegate().parsePropertySubElement(notifyFilterEle, builder.getRawBeanDefinition(), "notifyFilter"));
         }
 
         String comType = element.getAttribute(COM_TYPE);
