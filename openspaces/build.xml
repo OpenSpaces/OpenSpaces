@@ -187,6 +187,10 @@
         <antcall target="dist_1_4"/>
     </target>
 
+    <target name="install_1_5" depends="dist_1_5">
+        <unzip src="${dist.dir}/${name}-${openspaces-version}-1.5.zip" dest="${gshome.dir}" />
+    </target>
+
     <!--
     ########### TEST TARGETS ###########
     -->
