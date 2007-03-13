@@ -8,6 +8,6 @@
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
     <gs-core:space id="space" url="/./space" lookup-groups="${user.name}"/>
-
+    
     <gs-core:giga-space id="gigaSpace" space="space" />
 </beans>
