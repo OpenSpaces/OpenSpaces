@@ -20,7 +20,6 @@ import org.springframework.util.Assert;
 import java.rmi.RemoteException;
 
 /**
- * <p>
  * Base class for notifications based containers allowing to register listener that will be
  * triggered by the space if notifications occur. Provides all the necessary parameters that are
  * used by {@link com.gigaspaces.events.EventSessionConfig} and support methods for creating
@@ -452,10 +451,8 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
     }
 
     /**
-     * <p>
-     * Executes the given listener. If a
-     * {@link #setTransactionManager(org.springframework.transaction.PlatformTransactionManager)} is
-     * provided will perform the listener execution within a transaction, if not, the listener
+     * Executes the given listener. If a {@link #setTransactionManager(PlatformTransactionManager)}
+     * is provided will perform the listener execution within a transaction, if not, the listener
      * execution is performed without a transaction.
      * 
      * <p>
@@ -470,17 +467,23 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
      *            A flag indicating whether to perform take operation with the given event data
      * @throws GigaSpaceException
      */
-    protected void invokeListenerWithTransaction(Object eventData, Object source, boolean performTakeOnNotify)
-            throws GigaSpaceException {
+    protected void invokeListenerWithTransaction(Object eventData, Object source, boolean performTakeOnNotify,
+            boolean ignoreEventOnNullTake) throws GigaSpaceException {
+        boolean invokeListener = true;
         if (this.transactionManager != null) {
             // Execute receive within transaction.
             TransactionStatus status = this.transactionManager.getTransaction(this.transactionDefinition);
             try {
                 if (performTakeOnNotify) {
-                    getGigaSpace().take(eventData, 0);
+                    Object takeVal = getGigaSpace().take(eventData, 0);
+                    if (ignoreEventOnNullTake && takeVal == null) {
+                        invokeListener = false;
+                    }
                 }
                 try {
-                    invokeListener(eventData, status, source);
+                    if (invokeListener) {
+                        invokeListener(eventData, status, source);
+                    }
                 } catch (Throwable t) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Rolling back transaction because of listener exception thrown: " + t);
@@ -498,10 +501,15 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
             this.transactionManager.commit(status);
         } else {
             if (performTakeOnNotify) {
-                getGigaSpace().take(eventData, 0);
+                Object takeVal = getGigaSpace().take(eventData, 0);
+                if (ignoreEventOnNullTake && takeVal == null) {
+                    invokeListener = false;
+                }
             }
             try {
-                invokeListener(eventData, null, source);
+                if (invokeListener) {
+                    invokeListener(eventData, null, source);
+                }
             } catch (Throwable t) {
                 handleListenerException(t);
             }

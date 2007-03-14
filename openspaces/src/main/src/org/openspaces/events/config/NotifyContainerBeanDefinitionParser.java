@@ -25,6 +25,8 @@ public class NotifyContainerBeanDefinitionParser extends AbstarctTxEventContaine
     private static final String REPLICATE_NOTIFY_TEMPLATE = "replicate-notify-template";
 
     private static final String PERFORM_TAKE_ON_NOTIFY = "perform-take-on-notify";
+    
+    private static final String IGNORE_EVENT_ON_NULL_TAKE = "ignore-event-on-null-take";
 
     private static final String BATCH = "batch";
 
@@ -130,5 +132,10 @@ public class NotifyContainerBeanDefinitionParser extends AbstarctTxEventContaine
         if (StringUtils.hasLength(performTakeOnNotify)) {
             builder.addPropertyValue("performTakeOnNotify", performTakeOnNotify);
         }
-    }
+
+        String ignoreEventOnNullTake = element.getAttribute(IGNORE_EVENT_ON_NULL_TAKE);
+        if (StringUtils.hasLength(ignoreEventOnNullTake)) {
+            builder.addPropertyValue("ignoreEventOnNullTake", ignoreEventOnNullTake);
+        }
+}
 }

@@ -87,6 +87,7 @@
                     <xsd:attribute name="trigger-notify-template" type="xsd:boolean"/>
                     <xsd:attribute name="replicate-notify-template" type="xsd:boolean"/>
                     <xsd:attribute name="perform-take-on-notify" type="xsd:boolean"/>
+                    <xsd:attribute name="ignore-event-on-null-take" type="xsd:boolean"/>
                 </xsd:extension>
             </xsd:complexContent>
         </xsd:complexType>
