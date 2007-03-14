@@ -15,10 +15,8 @@ public abstract class AbstractResultEventAdapterFactoryBean implements FactoryBe
 
     private Long updateTimeout;
 
-
     private AbstractResultEventListenerAdapter adapter;
 
-    
     public void setWriteLease(Long writeLease) {
         this.writeLease = writeLease;
     }
@@ -30,7 +28,6 @@ public abstract class AbstractResultEventAdapterFactoryBean implements FactoryBe
     public void setUpdateTimeout(Long updateTimeout) {
         this.updateTimeout = updateTimeout;
     }
-    
 
     public void afterPropertiesSet() throws Exception {
         adapter = createAdapter();
@@ -54,7 +51,7 @@ public abstract class AbstractResultEventAdapterFactoryBean implements FactoryBe
         return this.adapter;
     }
 
-    public Class getObjectType() {
+    public Class<?> getObjectType() {
         return this.adapter.getClass();
     }
 

@@ -25,7 +25,7 @@ public class NotifyContainerBeanDefinitionParser extends AbstarctTxEventContaine
     private static final String REPLICATE_NOTIFY_TEMPLATE = "replicate-notify-template";
 
     private static final String PERFORM_TAKE_ON_NOTIFY = "perform-take-on-notify";
-    
+
     private static final String IGNORE_EVENT_ON_NULL_TAKE = "ignore-event-on-null-take";
 
     private static final String BATCH = "batch";
@@ -44,7 +44,7 @@ public class NotifyContainerBeanDefinitionParser extends AbstarctTxEventContaine
 
     private static final String NOTIFY = "notify";
 
-    protected Class getBeanClass(Element element) {
+    protected Class<SimpleNotifyEventListenerContainer> getBeanClass(Element element) {
         return SimpleNotifyEventListenerContainer.class;
     }
 
@@ -53,12 +53,14 @@ public class NotifyContainerBeanDefinitionParser extends AbstarctTxEventContaine
 
         Element templateEle = DomUtils.getChildElementByTagName(element, TEMPLATE);
         if (templateEle != null) {
-            Object template = parserContext.getDelegate().parsePropertyValue(templateEle, builder.getRawBeanDefinition(), "template");
+            Object template = parserContext.getDelegate().parsePropertyValue(templateEle,
+                    builder.getRawBeanDefinition(), "template");
             builder.addPropertyValue("template", template);
         }
         Element sqlQueryEle = DomUtils.getChildElementByTagName(element, SQL_QUERY);
         if (sqlQueryEle != null) {
-            builder.addPropertyValue("template", parserContext.getDelegate().parsePropertySubElement(sqlQueryEle, builder.getRawBeanDefinition(), null));
+            builder.addPropertyValue("template", parserContext.getDelegate().parsePropertySubElement(sqlQueryEle,
+                    builder.getRawBeanDefinition(), null));
         }
 
         Element notifyEle = DomUtils.getChildElementByTagName(element, NOTIFY);
@@ -105,7 +107,8 @@ public class NotifyContainerBeanDefinitionParser extends AbstarctTxEventContaine
 
         Element notifyFilterEle = DomUtils.getChildElementByTagName(element, NOTIFY_FILTER);
         if (notifyFilterEle != null) {
-            builder.addPropertyValue("notifyFilter", parserContext.getDelegate().parsePropertySubElement(notifyFilterEle, builder.getRawBeanDefinition(), "notifyFilter"));
+            builder.addPropertyValue("notifyFilter", parserContext.getDelegate().parsePropertySubElement(
+                    notifyFilterEle, builder.getRawBeanDefinition(), "notifyFilter"));
         }
 
         String comType = element.getAttribute(COM_TYPE);
@@ -137,5 +140,5 @@ public class NotifyContainerBeanDefinitionParser extends AbstarctTxEventContaine
         if (StringUtils.hasLength(ignoreEventOnNullTake)) {
             builder.addPropertyValue("ignoreEventOnNullTake", ignoreEventOnNullTake);
         }
-}
+    }
 }

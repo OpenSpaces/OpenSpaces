@@ -12,14 +12,14 @@ public class AnnotationEventAdapterBeanDefinitionParser extends AbstractResultEv
 
     public static final String DELEGATE = "delegate";
 
-    protected Class getBeanClass(Element element) {
+    protected Class<AnnotationEventAdapterFactoryBean> getBeanClass(Element element) {
         return AnnotationEventAdapterFactoryBean.class;
     }
-
 
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
         super.doParse(element, parserContext, builder);
         Element delegateEle = DomUtils.getChildElementByTagName(element, DELEGATE);
-        builder.addPropertyValue("delegate", parserContext.getDelegate().parsePropertyValue(delegateEle, builder.getRawBeanDefinition(), "delegate"));
+        builder.addPropertyValue("delegate", parserContext.getDelegate().parsePropertyValue(delegateEle,
+                builder.getRawBeanDefinition(), "delegate"));
     }
 }

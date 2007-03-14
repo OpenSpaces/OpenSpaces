@@ -17,6 +17,6 @@ public class AnnotationEventAdapterFactoryBean extends AbstractResultEventAdapte
     protected AbstractResultEventListenerAdapter createAdapter() {
         AnnotationEventListenerAdapter adapter = new AnnotationEventListenerAdapter();
         adapter.setDelegate(delegate);
-        return adapter; 
+        return adapter;
     }
 }

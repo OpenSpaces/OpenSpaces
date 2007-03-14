@@ -30,7 +30,7 @@ public class PollingContainerBeanDefinitionParser extends AbstarctTxEventContain
 
     private static final String IDLE_TASK_EXECUTION_LIMIT = "idle-task-execution-limit";
 
-    protected Class getBeanClass(Element element) {
+    protected Class<SimplePollingEventListenerContainer> getBeanClass(Element element) {
         return SimplePollingEventListenerContainer.class;
     }
 

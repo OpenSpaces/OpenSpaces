@@ -42,7 +42,8 @@ public abstract class AbstarctTxEventContainerBeanDefinitionParser extends Absta
 
             String txIsolation = txElement.getAttribute(TX_ISOLATION);
             if (StringUtils.hasLength(txIsolation)) {
-                builder.addPropertyValue("transactionIsolationLevelName", DefaultTransactionDefinition.PREFIX_ISOLATION + txIsolation);
+                builder.addPropertyValue("transactionIsolationLevelName", DefaultTransactionDefinition.PREFIX_ISOLATION
+                        + txIsolation);
             }
         }
     }
