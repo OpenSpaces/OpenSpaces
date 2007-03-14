@@ -1,7 +1,7 @@
 package org.openspaces.events.polling.receive;
 
 import org.openspaces.core.GigaSpace;
-import org.openspaces.core.GigaSpaceException;
+import org.springframework.dao.DataAccessException;
 
 /**
  * Performs single take operation using {@link org.openspaces.core.GigaSpace#read(Object,long)}.
@@ -13,7 +13,7 @@ public class SingleReadReceiveOperationHandler implements ReceiveOperationHandle
     /**
      * Performs single take operation using {@link org.openspaces.core.GigaSpace#read(Object,long)}.
      */
-    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws GigaSpaceException {
+    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         return gigaSpace.read(template, receiveTimeout);
     }
 }

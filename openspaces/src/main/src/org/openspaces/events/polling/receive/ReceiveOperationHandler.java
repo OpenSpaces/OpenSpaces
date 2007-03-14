@@ -1,7 +1,7 @@
 package org.openspaces.events.polling.receive;
 
 import org.openspaces.core.GigaSpace;
-import org.openspaces.core.GigaSpaceException;
+import org.springframework.dao.DataAccessException;
 
 /**
  * Perform the actual receive operations for
@@ -25,7 +25,7 @@ public interface ReceiveOperationHandler {
      *            Receive timeout value
      * @return The receive result. <code>null</code> indicating no receive occured. Single object
      *         or an array of objects indicating the receive operation result.
-     * @throws GigaSpaceException
+     * @throws DataAccessException
      */
-    Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws GigaSpaceException;
+    Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException;
 }

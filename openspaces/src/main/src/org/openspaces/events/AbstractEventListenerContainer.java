@@ -1,6 +1,6 @@
 package org.openspaces.events;
 
-import org.openspaces.core.GigaSpaceException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.Assert;
 
@@ -54,7 +54,7 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
      *            An optional source (or additional event information)
      */
     protected void executeListener(Object eventData, TransactionStatus txStatus, Object source)
-            throws GigaSpaceException {
+            throws DataAccessException {
         if (!isRunning()) {
             return;
         }
@@ -75,7 +75,7 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
      * @throws GigaSpaceException
      */
     protected void invokeListener(Object eventData, TransactionStatus txStatus, Object source)
-            throws GigaSpaceException {
+            throws DataAccessException {
         eventListener.onEvent(eventData, getGigaSpace(), txStatus, source);
     }
 

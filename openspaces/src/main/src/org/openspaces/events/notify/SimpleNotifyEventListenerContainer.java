@@ -3,13 +3,13 @@ package org.openspaces.events.notify;
 import com.gigaspaces.events.DataEventSession;
 import com.gigaspaces.events.EventSessionFactory;
 import com.j_spaces.core.client.EntryArrivedRemoteEvent;
-import net.jini.core.entry.UnusableEntryException;
 import net.jini.core.event.RemoteEvent;
 import net.jini.core.event.RemoteEventListener;
 import net.jini.core.event.UnknownEventException;
 
 import org.openspaces.core.GigaSpace;
-import org.openspaces.core.GigaSpaceException;
+import org.openspaces.core.UnusableEntryException;
+import org.springframework.dao.DataAccessException;
 
 import java.rmi.RemoteException;
 
@@ -67,31 +67,31 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
         this.ignoreEventOnNullTake = ignoreEventOnNullTake;
     }
 
-    protected void doInitialize() throws GigaSpaceException {
+    protected void doInitialize() throws DataAccessException {
         if (registerOnStartup) {
             registerListener();
         }
     }
 
-    protected void doShutdown() throws GigaSpaceException {
+    protected void doShutdown() throws DataAccessException {
         closeSession();
     }
 
-    protected void doStart() throws GigaSpaceException {
+    protected void doStart() throws DataAccessException {
         super.doStart();
         if (!registerOnStartup) {
             registerListener();
         }
     }
 
-    protected void doStop() throws GigaSpaceException {
+    protected void doStop() throws DataAccessException {
         if (!registerOnStartup) {
             closeSession();
         }
         super.doStop();
     }
 
-    protected void registerListener() throws GigaSpaceException {
+    protected void registerListener() throws DataAccessException {
         if (dataEventSession != null) {
             // we already registered the listener, just return.
             return;
@@ -144,8 +144,8 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
             Object eventData;
             try {
                 eventData = ((EntryArrivedRemoteEvent) remoteEvent).getObject();
-            } catch (UnusableEntryException e) {
-                throw new GigaSpaceException("Unusable entry", e);
+            } catch (net.jini.core.entry.UnusableEntryException e) {
+                throw new UnusableEntryException("Failute to get object from event [" + remoteEvent + "]", e);
             }
             invokeListenerWithTransaction(eventData, remoteEvent, performTakeOnNotify, ignoreEventOnNullTake);
         }

@@ -1,7 +1,7 @@
 package org.openspaces.events.polling.receive;
 
 import org.openspaces.core.GigaSpace;
-import org.openspaces.core.GigaSpaceException;
+import org.springframework.dao.DataAccessException;
 
 /**
  * First tries and perform a {@link org.openspaces.core.GigaSpace#takeMultiple(Object,int)} using
@@ -30,7 +30,7 @@ public class MultiTakeReceiveOperationHandler implements ReceiveOperationHandler
      * values are returned, will perform a blocking take operation using
      * {@link org.openspaces.core.GigaSpace#take(Object,long)}.
      */
-    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws GigaSpaceException {
+    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         Object[] results = gigaSpace.takeMultiple(template, maxEntries);
         if (results != null && results.length > 0) {
             return results;

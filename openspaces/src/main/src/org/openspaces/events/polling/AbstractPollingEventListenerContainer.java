@@ -1,12 +1,13 @@
 package org.openspaces.events.polling;
 
-import org.openspaces.core.GigaSpaceException;
 import org.openspaces.events.AbstractEventListenerContainer;
 import org.openspaces.events.EventTemplateProvider;
 import org.openspaces.events.polling.receive.ReceiveOperationHandler;
 import org.openspaces.events.polling.receive.SingleTakeReceiveOperationHandler;
 import org.openspaces.events.polling.trigger.TriggerOperationHandler;
+import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.Assert;
@@ -223,7 +224,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
      * 
      * @see #doReceiveAndExecute
      */
-    protected boolean receiveAndExecute() throws GigaSpaceException {
+    protected boolean receiveAndExecute() throws DataAccessException, TransactionException {
         Object template = getTemplate();
         // if trigger is configure, work using trigger outside of a possible transaction
         if (triggerOperationHandler != null) {
@@ -333,7 +334,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
     /**
      * Receive an event
      */
-    protected Object receiveEvent(Object template) throws GigaSpaceException {
+    protected Object receiveEvent(Object template) throws DataAccessException {
         return receiveOperationHandler.receive(template, getGigaSpace(), getReceiveTimeout());
     }
 

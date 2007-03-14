@@ -6,8 +6,8 @@ import net.jini.core.lease.Lease;
 import net.jini.space.JavaSpace;
 
 import org.openspaces.core.GigaSpace;
-import org.openspaces.core.GigaSpaceException;
 import org.openspaces.events.SpaceDataEventListener;
+import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.TransactionStatus;
 
 import com.j_spaces.core.client.UpdateModifiers;
@@ -81,7 +81,7 @@ public abstract class AbstractResultEventListenerAdapter implements SpaceDataEve
      * @param gigaSpace
      *            The GigaSpace instance to operate against the space
      */
-    protected void handleResult(Object result, GigaSpace gigaSpace) throws GigaSpaceException {
+    protected void handleResult(Object result, GigaSpace gigaSpace) throws DataAccessException {
         if (result != null) {
             if (result.getClass().isArray()) {
                 Object[] resultArr = (Object[]) result;

@@ -1,6 +1,8 @@
 package org.openspaces.remoting;
 
 import org.openspaces.core.GigaSpace;
+import org.springframework.dao.DataAccessException;
+import org.springframework.remoting.RemoteAccessException;
 
 /**
  * @author kimchy
@@ -23,7 +25,7 @@ public class DefaultRemoteFuture<T> implements RemoteFuture<T> {
         this.template = new SpaceRemoteResult<T>(remoteInvocation);
     }
 
-    public void cancel() throws SpaceRemotingException {
+    public void cancel() throws RemoteAccessException, DataAccessException {
         Object retVal = gigaSpace.take(remoteInvocation, 0);
         if (retVal != null) {
             cancelled = true;

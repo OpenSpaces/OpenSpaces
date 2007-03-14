@@ -1,7 +1,7 @@
 package org.openspaces.events.polling.trigger;
 
 import org.openspaces.core.GigaSpace;
-import org.openspaces.core.GigaSpaceException;
+import org.springframework.dao.DataAccessException;
 
 /**
  * Allows to perform a trigger receive operation which control if the active receive operation will
@@ -47,7 +47,7 @@ public interface TriggerOperationHandler {
      * @throws org.openspaces.core.GigaSpaceException
      * 
      */
-    Object triggerReceive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws GigaSpaceException;
+    Object triggerReceive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException;
 
     /**
      * Controls if the object returned from

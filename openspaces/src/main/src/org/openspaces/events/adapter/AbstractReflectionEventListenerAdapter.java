@@ -6,9 +6,9 @@ import java.lang.reflect.Method;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.GigaSpace;
-import org.openspaces.core.GigaSpaceException;
 import org.openspaces.events.SpaceDataEventListener;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.Assert;
 import org.springframework.util.MethodInvoker;
@@ -131,7 +131,8 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
             try {
                 result = listenerMethod.invoke(delegate, listenerArguments);
             } catch (IllegalAccessException ex) {
-                throw new GigaSpaceException("Failed to invoke event method [" + listenerMethod.getName() + "]", ex);
+                throw new PermissionDeniedDataAccessException("Failed to invoke event method ["
+                        + listenerMethod.getName() + "]", ex);
             } catch (InvocationTargetException ex) {
                 throw new ListenerExecutionFailedException("Listener event method '" + listenerMethod.getName()
                         + "' threw exception", ex.getTargetException());

@@ -1,7 +1,7 @@
 package org.openspaces.events.polling.trigger;
 
 import org.openspaces.core.GigaSpace;
-import org.openspaces.core.GigaSpaceException;
+import org.springframework.dao.DataAccessException;
 
 /**
  * A trigger operation handler that performa read based on the provided template and returns its
@@ -35,7 +35,7 @@ public class ReadTriggerOperationHandler implements TriggerOperationHandler {
     /**
      * Uses {@link org.openspaces.core.GigaSpace#read(Object,long)} and returns its result.
      */
-    public Object triggerReceive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws GigaSpaceException {
+    public Object triggerReceive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         return gigaSpace.read(template, receiveTimeout);
     }
 

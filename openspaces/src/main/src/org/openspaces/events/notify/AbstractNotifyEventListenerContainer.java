@@ -1,23 +1,25 @@
 package org.openspaces.events.notify;
 
-import com.gigaspaces.events.DataEventSession;
-import com.gigaspaces.events.EventSessionConfig;
-import com.gigaspaces.events.EventSessionFactory;
-import com.gigaspaces.events.NotifyActionType;
-import com.j_spaces.core.client.INotifyDelegatorFilter;
+import java.rmi.RemoteException;
+
 import net.jini.core.event.RemoteEventListener;
 import net.jini.core.lease.Lease;
 import net.jini.lease.LeaseListener;
-import org.openspaces.core.GigaSpaceException;
+
 import org.openspaces.events.AbstractEventListenerContainer;
 import org.openspaces.events.EventTemplateProvider;
 import org.springframework.core.Constants;
+import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.Assert;
 
-import java.rmi.RemoteException;
+import com.gigaspaces.events.DataEventSession;
+import com.gigaspaces.events.EventSessionConfig;
+import com.gigaspaces.events.EventSessionFactory;
+import com.gigaspaces.events.NotifyActionType;
+import com.j_spaces.core.client.INotifyDelegatorFilter;
 
 /**
  * Base class for notifications based containers allowing to register listener that will be
@@ -344,7 +346,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
         super.afterPropertiesSet();
     }
 
-    public void initialize() throws GigaSpaceException {
+    public void initialize() throws DataAccessException {
         if (!replicateNotifyTemplate && triggerNotifyTemplate) {
             if (logger.isDebugEnabled()) {
                 logger.debug("triggerNotifyTemplate is set, automatically setting replicateNotifyTemplate to true");
@@ -412,7 +414,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
      * Creates a new {@link com.gigaspaces.events.DataEventSession} based on the provided factory.
      * Uses {@link #createEventSessionConfig()} in order to create the session configuration.
      */
-    protected DataEventSession createDataEventSession(EventSessionFactory factory) throws GigaSpaceException {
+    protected DataEventSession createDataEventSession(EventSessionFactory factory) throws DataAccessException {
         EventSessionConfig config = createEventSessionConfig();
         try {
             return factory.newDataEventSession(config, null);
@@ -468,7 +470,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
      * @throws GigaSpaceException
      */
     protected void invokeListenerWithTransaction(Object eventData, Object source, boolean performTakeOnNotify,
-            boolean ignoreEventOnNullTake) throws GigaSpaceException {
+            boolean ignoreEventOnNullTake) throws DataAccessException {
         boolean invokeListener = true;
         if (this.transactionManager != null) {
             // Execute receive within transaction.

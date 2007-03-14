@@ -1,13 +1,13 @@
 package org.openspaces.events.adapter;
 
-import org.openspaces.core.GigaSpaceException;
+import org.springframework.dao.DataAccessException;
 
 /**
  * Represents a listener execution failure.
  * 
  * @author kimchy
  */
-public class ListenerExecutionFailedException extends GigaSpaceException {
+public class ListenerExecutionFailedException extends DataAccessException {
 
     private static final long serialVersionUID = 7502177620008347109L;
 

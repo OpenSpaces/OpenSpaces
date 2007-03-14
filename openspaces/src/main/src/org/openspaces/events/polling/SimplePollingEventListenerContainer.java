@@ -1,8 +1,8 @@
 package org.openspaces.events.polling;
 
-import org.openspaces.core.GigaSpaceException;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
@@ -319,7 +319,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      * @see #scheduleNewInvoker
      * @see #setTaskExecutor
      */
-    protected void doInitialize() throws GigaSpaceException {
+    protected void doInitialize() throws DataAccessException {
         synchronized (this.activeInvokerMonitor) {
             for (int i = 0; i < this.concurrentConsumers; i++) {
                 scheduleNewInvoker();
@@ -522,7 +522,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
     /**
      * Destroy the container by waiting for all the current event listeners to shutdown.
      */
-    protected void doShutdown() throws GigaSpaceException {
+    protected void doShutdown() throws DataAccessException {
         logger.debug("Waiting for shutdown of event listener invokers");
         synchronized (this.activeInvokerMonitor) {
             while (this.activeInvokerCount > 0) {
@@ -622,7 +622,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
             }
         }
 
-        private boolean invokeListener() throws GigaSpaceException {
+        private boolean invokeListener() throws DataAccessException {
             initResourcesIfNecessary();
             boolean eventReceived = receiveAndExecute();
             this.lastEventSucceeded = true;

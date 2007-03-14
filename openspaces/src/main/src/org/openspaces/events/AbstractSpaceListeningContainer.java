@@ -1,9 +1,12 @@
 package org.openspaces.events;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.GigaSpace;
-import org.openspaces.core.GigaSpaceException;
 import org.openspaces.core.space.mode.AfterSpaceModeChangeEvent;
 import org.openspaces.core.space.mode.BeforeSpaceModeChangeEvent;
 import org.springframework.beans.factory.BeanNameAware;
@@ -12,12 +15,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.Lifecycle;
+import org.springframework.dao.DataAccessException;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Common base class for all containers which need to implement listening based on Space events.
@@ -125,7 +125,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      * 
      * @see #onApplicationEvent(org.springframework.context.ApplicationEvent)
      */
-    public void initialize() throws GigaSpaceException {
+    public void initialize() throws DataAccessException {
         synchronized (this.lifecycleMonitor) {
             this.active = true;
             this.lifecycleMonitor.notifyAll();
@@ -150,7 +150,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
     /**
      * Stop container, call {@link #doShutdown()}, and close this container.
      */
-    public void shutdown() throws GigaSpaceException {
+    public void shutdown() throws DataAccessException {
         logger.debug("Shutting down Space Event listener container [" + getBeanName() + "]");
         synchronized (this.lifecycleMonitor) {
             this.running = false;
@@ -210,14 +210,14 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      * 
      * @see #doStart
      */
-    public void start() throws GigaSpaceException {
+    public void start() throws DataAccessException {
         doStart();
     }
 
     /**
      * Notify all invoker tasks.
      */
-    protected void doStart() throws GigaSpaceException {
+    protected void doStart() throws DataAccessException {
         synchronized (this.lifecycleMonitor) {
             this.running = true;
             this.lifecycleMonitor.notifyAll();
@@ -233,14 +233,14 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      * 
      * @see #doStop
      */
-    public void stop() throws GigaSpaceException {
+    public void stop() throws DataAccessException {
         doStop();
     }
 
     /**
      * Notify all invoker tasks to stop
      */
-    protected void doStop() throws GigaSpaceException {
+    protected void doStop() throws DataAccessException {
         synchronized (this.lifecycleMonitor) {
             this.running = false;
             this.lifecycleMonitor.notifyAll();
@@ -331,7 +331,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      * <p>
      * Subclasses need to implement this method for their specific invoker management process.
      */
-    protected abstract void doInitialize() throws GigaSpaceException;
+    protected abstract void doInitialize() throws DataAccessException;
 
     /**
      * Close the registered invokers.
@@ -341,6 +341,6 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      * 
      * @see #shutdown()
      */
-    protected abstract void doShutdown() throws GigaSpaceException;
+    protected abstract void doShutdown() throws DataAccessException;
 
 }

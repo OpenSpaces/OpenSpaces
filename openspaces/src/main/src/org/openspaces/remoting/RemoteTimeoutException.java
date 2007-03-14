@@ -1,22 +1,24 @@
 package org.openspaces.remoting;
 
+import org.springframework.remoting.RemoteAccessException;
+
 /**
  * A Space remoting exception caused by a timeout waiting for a result.
  * 
  * @author kimchy
  */
-public class SpaceRemotingTimeoutException extends SpaceRemotingException {
+public class RemoteTimeoutException extends RemoteAccessException {
 
     private static final long serialVersionUID = -392552156381478754L;
 
     private long timeout;
 
-    public SpaceRemotingTimeoutException(String message, long timeout) {
+    public RemoteTimeoutException(String message, long timeout) {
         super(message);
         this.timeout = timeout;
     }
 
-    public SpaceRemotingTimeoutException(String message, long timeout, Throwable cause) {
+    public RemoteTimeoutException(String message, long timeout, Throwable cause) {
         super(message, cause);
         this.timeout = timeout;
     }

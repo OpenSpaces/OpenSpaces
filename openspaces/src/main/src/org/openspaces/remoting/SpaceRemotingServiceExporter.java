@@ -14,6 +14,8 @@ import org.openspaces.events.SpaceDataEventListener;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.remoting.RemoteAccessException;
+import org.springframework.remoting.RemoteLookupFailureException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -105,7 +107,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
      *            An optional source event information
      */
     public void onEvent(Object data, GigaSpace gigaSpace, TransactionStatus txStatus, Object source)
-            throws SpaceRemotingException {
+            throws RemoteAccessException {
         SpaceRemoteInvocation remoteInvocation = (SpaceRemoteInvocation) data;
 
         Object service = interfaceToService.get(remoteInvocation.lookupName);
@@ -113,8 +115,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
             // we did not get an interface, maybe it is a bean name?
             service = applicationContext.getBean(remoteInvocation.lookupName);
             if (service == null) {
-                writeResponse(gigaSpace, remoteInvocation, new ServiceNotFoundSpaceRemotingException(
-                        remoteInvocation.getLookupName()));
+                writeResponse(gigaSpace, remoteInvocation, new RemoteLookupFailureException(
+                        "Failed to find service for lookup [" + remoteInvocation.getLookupName() + "]"));
                 return;
             }
         }
@@ -133,8 +135,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
         try {
             method = service.getClass().getMethod(remoteInvocation.getMethodName(), argumentTypes);
         } catch (Exception e) {
-            writeResponse(gigaSpace, remoteInvocation, new ServiceMethodNotFoundSpaceRemotingException(
-                    remoteInvocation.getMethodName(), e));
+            writeResponse(gigaSpace, remoteInvocation, new RemoteLookupFailureException("Failed to find method ["
+                    + remoteInvocation.getMethodName() + "] for lookup [" + remoteInvocation.getLookupName() + "]", e));
             return;
         }
         try {
@@ -143,13 +145,13 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
         } catch (InvocationTargetException e) {
             writeResponse(gigaSpace, remoteInvocation, e.getTargetException());
         } catch (IllegalAccessException e) {
-            writeResponse(gigaSpace, remoteInvocation, new ServiceMethodNotFoundSpaceRemotingException(
-                    remoteInvocation.getMethodName(), e));
+            writeResponse(gigaSpace, remoteInvocation, new RemoteLookupFailureException("Failed to access method ["
+                    + remoteInvocation.getMethodName() + "] for lookup [" + remoteInvocation.getLookupName() + "]", e));
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void writeResponse(GigaSpace gigaSpace, SpaceRemoteInvocation remoteInvocation, SpaceRemotingException e) {
+    private void writeResponse(GigaSpace gigaSpace, SpaceRemoteInvocation remoteInvocation, RemoteAccessException e) {
         if (remoteInvocation.oneWay == null || !remoteInvocation.oneWay) {
             gigaSpace.write(new SpaceRemoteResult(remoteInvocation, e));
         } else {
