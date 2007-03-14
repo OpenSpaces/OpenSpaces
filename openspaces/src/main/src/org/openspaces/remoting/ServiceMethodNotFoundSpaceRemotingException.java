@@ -2,10 +2,12 @@ package org.openspaces.remoting;
 
 /**
  * A Space remoting exception caused by not finding the method within the service to invoke.
- *
+ * 
  * @author kimchy
  */
 public class ServiceMethodNotFoundSpaceRemotingException extends SpaceRemotingException {
+
+    private static final long serialVersionUID = 2471358257471257661L;
 
     private String serviceMethodName;
 

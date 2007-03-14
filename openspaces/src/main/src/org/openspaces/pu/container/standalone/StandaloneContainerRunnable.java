@@ -16,16 +16,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>A standalone container runnable allowing to start a Spring based application context based on the provided
- * parameters ({@link org.openspaces.core.properties.BeanLevelProperties}, {@link org.openspaces.core.cluster.ClusterInfo},
- * and a list of config locations).
- *
- * <p>This runnable allows to start a processing unit container within a running thread, mainly allowing for custom
- * class loader created based on the processing unit structure to be scoped only within the running thread. When
- * using {@link org.openspaces.pu.container.standalone.StandaloneProcessingUnitContainer#main(String[])} this feature
- * is not requried but when integrating the standalone container within another application this allows not to corrupt
- * the external environment thread context class loader.
- *
+ * A standalone container runnable allowing to start a Spring based application context based on the
+ * provided parameters ({@link org.openspaces.core.properties.BeanLevelProperties},
+ * {@link org.openspaces.core.cluster.ClusterInfo}, and a list of config locations).
+ * 
+ * <p>
+ * This runnable allows to start a processing unit container within a running thread, mainly
+ * allowing for custom class loader created based on the processing unit structure to be scoped only
+ * within the running thread. When using {@link StandaloneProcessingUnitContainer#main(String[])}
+ * this feature is not requried but when integrating the standalone container within another
+ * application this allows not to corrupt the external environment thread context class loader.
+ * 
  * @author kimchy
  */
 public class StandaloneContainerRunnable implements Runnable {
@@ -43,22 +44,29 @@ public class StandaloneContainerRunnable implements Runnable {
     private ResourceApplicationContext applicationContext;
 
     /**
-     * Constructs a new standalone container runnable based on the provided configuraion set parameters.
-     *
-     * @param beanLevelProperties The properties based configuration for Spring context
-     * @param clusterInfo         The cluster info configuration
-     * @param configLocations     List of config locations (string based)
+     * Constructs a new standalone container runnable based on the provided configuraion set
+     * parameters.
+     * 
+     * @param beanLevelProperties
+     *            The properties based configuration for Spring context
+     * @param clusterInfo
+     *            The cluster info configuration
+     * @param configLocations
+     *            List of config locations (string based)
      */
-    public StandaloneContainerRunnable(BeanLevelProperties beanLevelProperties, ClusterInfo clusterInfo, List<String> configLocations) {
+    public StandaloneContainerRunnable(BeanLevelProperties beanLevelProperties, ClusterInfo clusterInfo,
+            List<String> configLocations) {
         this.beanLevelProperties = beanLevelProperties;
         this.clusterInfo = clusterInfo;
         this.configLocations = configLocations;
     }
 
     /**
-     * Constructs a new Spring {@link org.springframework.context.ApplicationContext} based on the configured list
-     * of config locations. Also uses the provided {@link org.openspaces.core.cluster.ClusterInfo} and
-     * {@link org.openspaces.core.properties.BeanLevelProperties} in order to further config the application context.
+     * Constructs a new Spring {@link org.springframework.context.ApplicationContext} based on the
+     * configured list of config locations. Also uses the provided
+     * {@link org.openspaces.core.cluster.ClusterInfo} and
+     * {@link org.openspaces.core.properties.BeanLevelProperties} in order to further config the
+     * application context.
      */
     public void run() {
         try {
@@ -79,16 +87,18 @@ public class StandaloneContainerRunnable implements Runnable {
                             tempResourcesList.add(tempResource);
                         }
                     } catch (IOException e) {
-                        throw new CannotCreateContainerException("Failed to parse pu xml from location [" + configLocation + "]");
+                        throw new CannotCreateContainerException("Failed to parse pu xml from location ["
+                                + configLocation + "]");
                     }
                 }
                 resources = tempResourcesList.toArray(new Resource[tempResourcesList.size()]);
             }
             // create the Spring application context
             applicationContext = new ResourceApplicationContext(resources, null);
-            // add config information if provided   
+            // add config information if provided
             if (beanLevelProperties != null) {
-                applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties));
+                applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(
+                        beanLevelProperties));
                 applicationContext.addBeanPostProcessor(new BeanLevelPropertyBeanPostProcessor(beanLevelProperties));
             }
             if (clusterInfo != null) {

@@ -24,29 +24,37 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /**
- * <p>A {@link StandaloneProcessingUnitContainer} provider. A standalone processing unit container is a container
- * that understands a processing unit archive structure (both when working with an "exploded" directory and when
- * working with a zip/jar archive of it). It is provided with the location of the processing unit using
- * {@link org.openspaces.pu.container.standalone.StandaloneProcessingUnitContainerProvider#StandaloneProcessingUnitContainerProvider(String)}.
+ * A {@link StandaloneProcessingUnitContainer} provider. A standalone processing unit container is a
+ * container that understands a processing unit archive structure (both when working with an
+ * "exploded" directory and when working with a zip/jar archive of it). It is provided with the
+ * location of the processing unit using
+ * {@link StandaloneProcessingUnitContainerProvider#StandaloneProcessingUnitContainerProvider(String)}.
  * The location itself follows Spring resource loader syntax.
- *
- * <p>When creating the container a thread is started with {@link org.openspaces.pu.container.standalone.StandaloneContainerRunnable}.
- * This is done since a custom class loader is created taking into account the processing unit archive structure, and
- * in order to allows using the standlone container within other environemnts, the new class loader is only set on
- * the newly created thread context.
- *
- * <p>At its core the integrated processing unit container is built around Spring
- * {@link org.springframework.context.ApplicationContext} configured based on a set of config locations.
- *
- * <p>The provider allows for programmatic configuration of different processing unit aspects. It allows to configure
- * where the processing unit Spring context xml descriptors are located (by default it uses
- * <code>classpath*:/META-INF/spring/*.xml</code>). It also allows to set {@link org.openspaces.core.properties.BeanLevelProperties}
- * and {@link org.openspaces.core.cluster.ClusterInfo} that will be injected to beans configured within the processing
- * unit.
- *
- * <p>For a runnable "main" processing unit container please see
+ * 
+ * <p>
+ * When creating the container a thread is started with
+ * {@link org.openspaces.pu.container.standalone.StandaloneContainerRunnable}. This is done since a
+ * custom class loader is created taking into account the processing unit archive structure, and in
+ * order to allows using the standlone container within other environemnts, the new class loader is
+ * only set on the newly created thread context.
+ * 
+ * <p>
+ * At its core the integrated processing unit container is built around Spring
+ * {@link org.springframework.context.ApplicationContext} configured based on a set of config
+ * locations.
+ * 
+ * <p>
+ * The provider allows for programmatic configuration of different processing unit aspects. It
+ * allows to configure where the processing unit Spring context xml descriptors are located (by
+ * default it uses <code>classpath*:/META-INF/spring/*.xml</code>). It also allows to set
+ * {@link org.openspaces.core.properties.BeanLevelProperties} and
+ * {@link org.openspaces.core.cluster.ClusterInfo} that will be injected to beans configured within
+ * the processing unit.
+ * 
+ * <p>
+ * For a runnable "main" processing unit container please see
  * {@link StandaloneProcessingUnitContainer#main(String[])}.
- *
+ * 
  * @author kimchy
  */
 public class StandaloneProcessingUnitContainerProvider implements ApplicationContextProcessingUnitContainerProvider {
@@ -62,22 +70,24 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
     private ClusterInfo clusterInfo;
 
     /**
-     * Constructs a new standalone container provider using the provided location as the location of the processing
-     * unit archive (either an exploded archive or a jar/zip archive). The location syntax follows Spring
-     * {@link org.springframework.core.io.Resource} syntax.
-     *
-     * @param location The location of the processing unit archive
+     * Constructs a new standalone container provider using the provided location as the location of
+     * the processing unit archive (either an exploded archive or a jar/zip archive). The location
+     * syntax follows Spring {@link org.springframework.core.io.Resource} syntax.
+     * 
+     * @param location
+     *            The location of the processing unit archive
      */
     public StandaloneProcessingUnitContainerProvider(String location) {
         this.location = location;
     }
 
     /**
-     * Sets the {@link org.openspaces.core.properties.BeanLevelProperties} that will be used to configure this
-     * processing unit. When constructing the container this provider will automatically add to the
-     * application context both {@link org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor} and
-     * {@link org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer} based on this bean level
-     * properties.
+     * Sets the {@link org.openspaces.core.properties.BeanLevelProperties} that will be used to
+     * configure this processing unit. When constructing the container this provider will
+     * automatically add to the application context both
+     * {@link org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor} and
+     * {@link org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer} based on this
+     * bean level properties.
      */
     public void setBeanLevelProperties(BeanLevelProperties beanLevelProperties) {
         this.beanLevelProperties = beanLevelProperties;
@@ -86,8 +96,9 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
     /**
      * Sets the {@link org.openspaces.core.cluster.ClusterInfo} that will be used to configure this
      * processing unit. When constructing the container this provider will automatically add to the
-     * application context the {@link org.openspaces.core.cluster.ClusterInfoBeanPostProcessor} in order
-     * to allow injection of cluster info into beans that implement {@link org.openspaces.core.cluster.ClusterInfoAware}.
+     * application context the {@link org.openspaces.core.cluster.ClusterInfoBeanPostProcessor} in
+     * order to allow injection of cluster info into beans that implement
+     * {@link org.openspaces.core.cluster.ClusterInfoAware}.
      */
     public void setClusterInfo(ClusterInfo clusterInfo) {
         this.clusterInfo = clusterInfo;
@@ -96,7 +107,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
     /**
      * Adds a config location based on a String description using Springs
      * {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver}.
-     *
+     * 
      * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
      */
     public void addConfigLocation(String configLocation) {
@@ -104,26 +115,32 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
     }
 
     /**
-     * <p>Creates a new {@link StandaloneProcessingUnitContainer} based on
-     * the configured parameters. A standalone processing unit container is a container that understands a processing
-     * unit archive structure (both when working with an "exploded" directory and when working with a zip/jar archive
-     * of it). It is provided with the location of the processing unit using
+     * <p>
+     * Creates a new {@link StandaloneProcessingUnitContainer} based on the configured parameters. A
+     * standalone processing unit container is a container that understands a processing unit
+     * archive structure (both when working with an "exploded" directory and when working with a
+     * zip/jar archive of it). It is provided with the location of the processing unit using
      * {@link org.openspaces.pu.container.standalone.StandaloneProcessingUnitContainerProvider#StandaloneProcessingUnitContainerProvider(String)}.
      * The location itself follows Spring resource loader syntax.
-     *
-     * <p>If {@link #addConfigLocation(String)} is used, the Spring xml context will be read based on the provided
-     * locations. If no config location was provided the default config location will be
-     * <code>classpath*:/META-INF/spring/*.xml</code>.
-     *
-     * <p>If {@link #setBeanLevelProperties(org.openspaces.core.properties.BeanLevelProperties)} is set will use
-     * the configured bean level properties in order to configure the application context and specific beans
-     * within it based on properties. This is done by adding {@link org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor}
-     * and {@link org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer} to the application context.
-     *
-     * <p>If {@link #setClusterInfo(org.openspaces.core.cluster.ClusterInfo)} is set will use it to inject
-     * {@link org.openspaces.core.cluster.ClusterInfo} into beans that implement
+     * 
+     * <p>
+     * If {@link #addConfigLocation(String)} is used, the Spring xml context will be read based on
+     * the provided locations. If no config location was provided the default config location will
+     * be <code>classpath*:/META-INF/spring/*.xml</code>.
+     * 
+     * <p>
+     * If {@link #setBeanLevelProperties(org.openspaces.core.properties.BeanLevelProperties)} is set
+     * will use the configured bean level properties in order to configure the application context
+     * and specific beans within it based on properties. This is done by adding
+     * {@link org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor} and
+     * {@link org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer} to the
+     * application context.
+     * 
+     * <p>
+     * If {@link #setClusterInfo(org.openspaces.core.cluster.ClusterInfo)} is set will use it to
+     * inject {@link org.openspaces.core.cluster.ClusterInfo} into beans that implement
      * {@link org.openspaces.core.cluster.ClusterInfoAware}.
-     *
+     * 
      * @return An {@link StandaloneProcessingUnitContainer} instance
      * @throws CannotCreateContainerException
      */
@@ -141,7 +158,8 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
                 try {
                     urls.add(fileLocation.toURL());
                 } catch (MalformedURLException e) {
-                    throw new CannotCreateContainerException("Failed to add classes to class loader with location [" + location + "]", e);
+                    throw new CannotCreateContainerException("Failed to add classes to class loader with location ["
+                            + location + "]", e);
                 }
             }
             addJarsLocation(fileLocation, urls, "lib");
@@ -160,8 +178,8 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
                 throw new CannotCreateContainerException("Failed to add pu location [" + location + "] to classpath", e);
             }
             // add jars in lib and shared-lib to the classpath
-            for (Enumeration entries = jarFile.entries(); entries.hasMoreElements();) {
-                JarEntry jarEntry = (JarEntry) entries.nextElement();
+            for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
+                JarEntry jarEntry = entries.nextElement();
                 if (isWithinDir(jarEntry, "lib") || isWithinDir(jarEntry, "shared-lib")) {
                     // extract the jar into a temp location
                     if (logger.isDebugEnabled()) {
@@ -173,25 +191,29 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
                     try {
                         tempJar = File.createTempFile("openspaces-", ".jar", tempLocation);
                     } catch (IOException e) {
-                        throw new CannotCreateContainerException("Failed to create temp jar at location [" + tempLocation + "]");
+                        throw new CannotCreateContainerException("Failed to create temp jar at location ["
+                                + tempLocation + "]");
                     }
                     tempJar.deleteOnExit();
                     if (logger.isTraceEnabled()) {
-                        logger.trace("Extracting jar [" + jarEntry.getName() + "] to temporary jar [" + tempJar.getAbsolutePath() + "]");
+                        logger.trace("Extracting jar [" + jarEntry.getName() + "] to temporary jar ["
+                                + tempJar.getAbsolutePath() + "]");
                     }
 
                     FileOutputStream fos;
                     try {
                         fos = new FileOutputStream(tempJar);
                     } catch (FileNotFoundException e) {
-                        throw new CannotCreateContainerException("Failed to find temp jar [" + tempJar.getAbsolutePath() + "]", e);
+                        throw new CannotCreateContainerException("Failed to find temp jar ["
+                                + tempJar.getAbsolutePath() + "]", e);
                     }
                     InputStream is = null;
                     try {
                         is = jarFile.getInputStream(jarEntry);
                         FileCopyUtils.copy(is, fos);
                     } catch (IOException e) {
-                        throw new CannotCreateContainerException("Failed to create temp jar [" + tempJar.getAbsolutePath() + "]");
+                        throw new CannotCreateContainerException("Failed to create temp jar ["
+                                + tempJar.getAbsolutePath() + "]");
                     } finally {
                         if (is != null) {
                             try {
@@ -210,7 +232,8 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
                     try {
                         urls.add(tempJar.toURL());
                     } catch (MalformedURLException e) {
-                        throw new CannotCreateContainerException("Failed to add pu entry [" + jarEntry.getName() + "] with location [" + location + "]", e);
+                        throw new CannotCreateContainerException("Failed to add pu entry [" + jarEntry.getName()
+                                + "] with location [" + location + "]", e);
                     }
                 }
             }
@@ -221,9 +244,11 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
             parentClassLoader = this.getClass().getClassLoader();
         }
         URL[] classLoaderUrls = urls.toArray(new URL[urls.size()]);
-        // TODO need to probably implement our own class loader so we can control what gets propogated to the parent class loader
+        // TODO need to probably implement our own class loader so we can control what gets
+        // propogated to the parent class loader
         URLClassLoader classLoader = new URLClassLoader(classLoaderUrls, parentClassLoader);
-        StandaloneContainerRunnable containerRunnable = new StandaloneContainerRunnable(beanLevelProperties, clusterInfo, configLocations);
+        StandaloneContainerRunnable containerRunnable = new StandaloneContainerRunnable(beanLevelProperties,
+                clusterInfo, configLocations);
         Thread standaloneContainerThread = new Thread(containerRunnable, "Standalone Container Thread");
         standaloneContainerThread.setDaemon(false);
         standaloneContainerThread.setContextClassLoader(classLoader);
@@ -251,12 +276,14 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
             File[] jarFiles = libLocation.listFiles();
             for (File jarFile : jarFiles) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Adding jar [" + jarFile.getAbsolutePath() + "] with pu directory location [" + location + "] to classpath");
+                    logger.debug("Adding jar [" + jarFile.getAbsolutePath() + "] with pu directory location ["
+                            + location + "] to classpath");
                 }
                 try {
                     urls.add(jarFile.toURL());
                 } catch (MalformedURLException e) {
-                    throw new CannotCreateContainerException("Failed to add jar file [" + jarFile.getAbsolutePath() + "] to classs loader", e);
+                    throw new CannotCreateContainerException("Failed to add jar file [" + jarFile.getAbsolutePath()
+                            + "] to classs loader", e);
                 }
             }
         }

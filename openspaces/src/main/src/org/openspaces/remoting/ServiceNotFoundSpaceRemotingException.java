@@ -7,6 +7,8 @@ package org.openspaces.remoting;
  */
 public class ServiceNotFoundSpaceRemotingException extends SpaceRemotingException {
 
+    private static final long serialVersionUID = -5510148905847566143L;
+
     private String serviceName;
 
     public ServiceNotFoundSpaceRemotingException(String serviceName) {

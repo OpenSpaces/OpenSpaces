@@ -9,6 +9,8 @@ import org.openspaces.core.GigaSpaceException;
  */
 public class SpaceRemotingException extends GigaSpaceException {
 
+    private static final long serialVersionUID = -3895585887561945840L;
+
     public SpaceRemotingException(String message) {
         super(message);
     }

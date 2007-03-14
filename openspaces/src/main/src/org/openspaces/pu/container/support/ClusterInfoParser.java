@@ -3,13 +3,15 @@ package org.openspaces.pu.container.support;
 import org.openspaces.core.cluster.ClusterInfo;
 
 /**
- * <p>{@link org.openspaces.core.cluster.ClusterInfo} parser that parses -cluster paramter and transforms it
- * into a cluster info.
- *
- * <p>The following arguments to the -cluster paramters are allowed: <code>total_members=1,1</code>
+ * {@link org.openspaces.core.cluster.ClusterInfo} parser that parses -cluster paramter and
+ * transforms it into a cluster info.
+ * 
+ * <p>
+ * The following arguments to the -cluster paramters are allowed: <code>total_members=1,1</code>
  * (1,1 is an example value), <code>id=1</code> (1 is an example value), <code>backupid=1</code>
- * (1 is an example value) and <code>schema=primary_backup</code> (primary_backup is an example value).
- *
+ * (1 is an example value) and <code>schema=primary_backup</code> (primary_backup is an example
+ * value).
+ * 
  * @author kimchy
  */
 public abstract class ClusterInfoParser {
@@ -38,7 +40,8 @@ public abstract class ClusterInfoParser {
                 String clusterParameter = params[i].getArguments()[j];
                 int equalsIndex = clusterParameter.indexOf("=");
                 if (equalsIndex == -1) {
-                    throw new IllegalArgumentException("Cluster paramter [" + clusterParameter + "] is mailformed, must have a name=value syntax");
+                    throw new IllegalArgumentException("Cluster paramter [" + clusterParameter
+                            + "] is mailformed, must have a name=value syntax");
                 }
                 String clusterParamName = clusterParameter.substring(0, equalsIndex);
                 String clusterParamValue = clusterParameter.substring(equalsIndex + 1);
@@ -59,7 +62,8 @@ public abstract class ClusterInfoParser {
                 } else if (CLUSTER_PARAMETER_CLUSTERSCHEMA.equalsIgnoreCase(clusterParamName)) {
                     clusterInfo.setSchema(clusterParamValue);
                 } else {
-                    throw new IllegalArgumentException("deploy parameter property name [" + clusterParamName + "] is invalid");
+                    throw new IllegalArgumentException("deploy parameter property name [" + clusterParamName
+                            + "] is invalid");
                 }
             }
         }

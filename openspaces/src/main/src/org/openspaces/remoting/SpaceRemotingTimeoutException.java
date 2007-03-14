@@ -2,10 +2,12 @@ package org.openspaces.remoting;
 
 /**
  * A Space remoting exception caused by a timeout waiting for a result.
- *
+ * 
  * @author kimchy
  */
 public class SpaceRemotingTimeoutException extends SpaceRemotingException {
+
+    private static final long serialVersionUID = -392552156381478754L;
 
     private long timeout;
 

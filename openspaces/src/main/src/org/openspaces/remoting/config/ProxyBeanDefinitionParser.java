@@ -9,6 +9,8 @@ import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
 /**
+ * A bean definition builder for {@link SpaceRemotingProxyFactoryBean}.
+ * 
  * @author kimchy
  */
 public class ProxyBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
@@ -25,7 +27,7 @@ public class ProxyBeanDefinitionParser extends AbstractSingleBeanDefinitionParse
 
     private static final String ROUTING_HANDLER = "routing-handler";
 
-    protected Class getBeanClass(Element element) {
+    protected Class<SpaceRemotingProxyFactoryBean> getBeanClass(Element element) {
         return SpaceRemotingProxyFactoryBean.class;
     }
 

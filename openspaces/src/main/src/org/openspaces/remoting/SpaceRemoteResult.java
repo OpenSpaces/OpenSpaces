@@ -3,12 +3,14 @@ package org.openspaces.remoting;
 import net.jini.core.entry.Entry;
 
 /**
- * Represents a Space remote inocation result. Either holds the remote inocation result or
- * and exception that occured during the invocation.
- *
+ * Represents a Space remote inocation result. Either holds the remote inocation result or and
+ * exception that occured during the invocation.
+ * 
  * @author kimchy
  */
 public class SpaceRemoteResult<T> implements Entry {
+
+    private static final long serialVersionUID = -5466117072163590804L;
 
     public String invocationId;
 
@@ -27,8 +29,8 @@ public class SpaceRemoteResult<T> implements Entry {
 
     /**
      * Constructs a new remote invocation result based on the remote invocation. Uses the remote
-     * invocation to initalize the {@link #invocationId} and {@link #routing} (acts as the correlation
-     * ids).
+     * invocation to initalize the {@link #invocationId} and {@link #routing} (acts as the
+     * correlation ids).
      */
     public SpaceRemoteResult(SpaceRemoteInvocation remoteInvocation) {
         this.invocationId = remoteInvocation.__getEntryInfo().m_UID;
@@ -36,9 +38,9 @@ public class SpaceRemoteResult<T> implements Entry {
     }
 
     /**
-     * Constructs a new remote invocation result based on the remote invocation and an exception. Uses the remote
-     * invocation to initalize the {@link #invocationId} and {@link #routing} (acts as the correlation
-     * ids).
+     * Constructs a new remote invocation result based on the remote invocation and an exception.
+     * Uses the remote invocation to initalize the {@link #invocationId} and {@link #routing} (acts
+     * as the correlation ids).
      */
     public SpaceRemoteResult(SpaceRemoteInvocation remoteInvocation, Exception ex) {
         this.invocationId = remoteInvocation.__getEntryInfo().m_UID;
@@ -47,9 +49,9 @@ public class SpaceRemoteResult<T> implements Entry {
     }
 
     /**
-     * Constructs a new remote invocation result based on the remote invocation and a result. Uses the remote
-     * invocation to initalize the {@link #invocationId} and {@link #routing} (acts as the correlation
-     * ids).
+     * Constructs a new remote invocation result based on the remote invocation and a result. Uses
+     * the remote invocation to initalize the {@link #invocationId} and {@link #routing} (acts as
+     * the correlation ids).
      */
     public SpaceRemoteResult(SpaceRemoteInvocation remoteInvocation, T result) {
         this.invocationId = remoteInvocation.__getEntryInfo().m_UID;
@@ -74,6 +76,6 @@ public class SpaceRemoteResult<T> implements Entry {
     }
 
     public static String[] __getSpaceIndexedFields() {
-        return new String[]{"routing", "invocationId"};
+        return new String[] { "routing", "invocationId" };
     }
 }

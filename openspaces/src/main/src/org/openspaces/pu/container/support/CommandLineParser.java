@@ -5,9 +5,9 @@ import java.util.List;
 
 /**
  * A simple command line parser transforming a list of string arguments into
- * {@link org.openspaces.pu.container.support.CommandLineParser.Parameter} arguments. The arguments are in the
- * form of -param1 arg1 arg2 -parm2 arg1.
- *
+ * {@link org.openspaces.pu.container.support.CommandLineParser.Parameter} arguments. The arguments
+ * are in the form of -param1 arg1 arg2 -parm2 arg1.
+ * 
  * @author kimchy
  */
 public abstract class CommandLineParser {
@@ -39,18 +39,19 @@ public abstract class CommandLineParser {
         if (args.length == 1) {
             throw new IllegalArgumentException("Command line structure is incorrect, only one parameter");
         }
-        List params = new ArrayList();
+        List<Parameter> params = new ArrayList<Parameter>();
         int index = 0;
         while (index < args.length) {
             if (!args[index].startsWith("-")) {
-                throw new IllegalArgumentException("Command line argument [" + args[index] + "] is supposed to start with -");
+                throw new IllegalArgumentException("Command line argument [" + args[index]
+                        + "] is supposed to start with -");
             }
             if ((index + 1) == args.length) {
                 throw new IllegalArgumentException("Command line argument [" + args[index] + "] has no argument");
             }
             String name = args[index].substring(1, args[index].length());
             index += 1;
-            List arguments = new ArrayList();
+            List<String> arguments = new ArrayList<String>();
             for (; index < args.length; index++) {
                 if (args[index].startsWith("-")) {
                     break;

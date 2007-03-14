@@ -10,17 +10,22 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 /**
- * <p>A {@link org.openspaces.core.properties.BeanLevelProperties} parser that parses -properties parameter(s) and
- * transforms it into bean level properties. The format of the command is <code>-properties [beanName] [properties]</code>.
- *
- * <p>[beanName] is optional, if not used, the properties will set the
+ * A {@link org.openspaces.core.properties.BeanLevelProperties} parser that parses -properties
+ * parameter(s) and transforms it into bean level properties. The format of the command is
+ * <code>-properties [beanName] [properties]</code>.
+ * 
+ * <p>
+ * [beanName] is optional, if not used, the properties will set the
  * {@link org.openspaces.core.properties.BeanLevelProperties#setContextProperties(java.util.Properties)}.
- * If used, will inject properties only to the bean registered under the provided beanName within the Spring context (see
- * {@link org.openspaces.core.properties.BeanLevelProperties#setBeanProperties(String,java.util.Properties)}). The [properties] can
- * either start with <code>embed://</code> which mean they will be provided within the command line (for example:
- * <code>embed://propName1=propVal1;propName2=propVal2</code>) or they can follow Spring {@link org.springframework.core.io.Resource}
- * lookup based on URL syntax or Spring extended <code>classpath</code> prefix (see {@link org.springframework.core.io.DefaultResourceLoader}).
- *
+ * If used, will inject properties only to the bean registered under the provided beanName within
+ * the Spring context (see
+ * {@link org.openspaces.core.properties.BeanLevelProperties#setBeanProperties(String,java.util.Properties)}).
+ * The [properties] can either start with <code>embed://</code> which mean they will be provided
+ * within the command line (for example: <code>embed://propName1=propVal1;propName2=propVal2</code>)
+ * or they can follow Spring {@link org.springframework.core.io.Resource} lookup based on URL syntax
+ * or Spring extended <code>classpath</code> prefix (see
+ * {@link org.springframework.core.io.DefaultResourceLoader}).
+ * 
  * @author kimchy
  */
 public abstract class BeanLevelPropertiesParser {

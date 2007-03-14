@@ -1,5 +1,9 @@
 package org.openspaces.pu.container.integrated;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
 import org.openspaces.core.properties.BeanLevelProperties;
@@ -13,29 +17,30 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * <p>An {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer} provider. An integrated
- * processing unit container can be used to run a processing unit within an existing environemnt. An example
- * of what this existing environment will provide is the classpath that the processing unit will run with. Examples
- * for using the integrated processing unit container can be integration tests or running the processing
- * unit from within an IDE.
- *
- * <p>At its core the integrated processing unit container is built around Spring
- * {@link org.springframework.context.ApplicationContext} configured based on a set of config locations.
- *
- * <p>The provider allows for programmatic configuration of different processing unit aspects. It allows to configure
- * where the processing unit Spring context xml descriptors are located (by default it uses
- * <code>classpath*:/META-INF/spring/*.xml</code>). It also allows to set {@link org.openspaces.core.properties.BeanLevelProperties}
- * and {@link org.openspaces.core.cluster.ClusterInfo} that will be injected to beans configured within the processing
- * unit.
- *
- * <p>For a runnable "main" processing unit container please see
+ * An {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer} provider. An
+ * integrated processing unit container can be used to run a processing unit within an existing
+ * environemnt. An example of what this existing environment will provide is the classpath that the
+ * processing unit will run with. Examples for using the integrated processing unit container can be
+ * integration tests or running the processing unit from within an IDE.
+ * 
+ * <p>
+ * At its core the integrated processing unit container is built around Spring
+ * {@link org.springframework.context.ApplicationContext} configured based on a set of config
+ * locations.
+ * 
+ * <p>
+ * The provider allows for programmatic configuration of different processing unit aspects. It
+ * allows to configure where the processing unit Spring context xml descriptors are located (by
+ * default it uses <code>classpath*:/META-INF/spring/*.xml</code>). It also allows to set
+ * {@link org.openspaces.core.properties.BeanLevelProperties} and
+ * {@link org.openspaces.core.cluster.ClusterInfo} that will be injected to beans configured within
+ * the processing unit.
+ * 
+ * <p>
+ * For a runnable "main" processing unit container please see
  * {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer#main(String[])}.
- *
+ * 
  * @author kimchy
  */
 public class IntegratedProcessingUnitContainerProvider implements ApplicationContextProcessingUnitContainerProvider {
@@ -59,11 +64,12 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
     }
 
     /**
-     * Sets the {@link org.openspaces.core.properties.BeanLevelProperties} that will be used to configure this
-     * processing unit. When constructing the container this provider will automatically add to the
-     * application context both {@link org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor} and
-     * {@link org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer} based on this bean level
-     * properties.
+     * Sets the {@link org.openspaces.core.properties.BeanLevelProperties} that will be used to
+     * configure this processing unit. When constructing the container this provider will
+     * automatically add to the application context both
+     * {@link org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor} and
+     * {@link org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer} based on this
+     * bean level properties.
      */
     public void setBeanLevelProperties(BeanLevelProperties beanLevelProperties) {
         this.beanLevelProperties = beanLevelProperties;
@@ -72,8 +78,9 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
     /**
      * Sets the {@link org.openspaces.core.cluster.ClusterInfo} that will be used to configure this
      * processing unit. When constructing the container this provider will automatically add to the
-     * application context the {@link org.openspaces.core.cluster.ClusterInfoBeanPostProcessor} in order
-     * to allow injection of cluster info into beans that implement {@link org.openspaces.core.cluster.ClusterInfoAware}.
+     * application context the {@link org.openspaces.core.cluster.ClusterInfoBeanPostProcessor} in
+     * order to allow injection of cluster info into beans that implement
+     * {@link org.openspaces.core.cluster.ClusterInfoAware}.
      */
     public void setClusterInfo(ClusterInfo clusterInfo) {
         this.clusterInfo = clusterInfo;
@@ -87,11 +94,12 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
     }
 
     /**
-     * <p>Adds a config location using Springs {@link org.springframework.core.io.Resource} abstraction. This
-     * config location represents a Spring xml context.
-     *
-     * <p>Note, once a config location is added that default location used when no config location is defined
-     * won't be used (the default location is <code>classpath*:/META-INF/spring/*.xml</code>).
+     * Adds a config location using Springs {@link org.springframework.core.io.Resource}
+     * abstraction. This config location represents a Spring xml context.
+     * 
+     * <p>
+     * Note, once a config location is added that default location used when no config location is
+     * defined won't be used (the default location is <code>classpath*:/META-INF/spring/*.xml</code>).
      */
     public void addConfigLocation(Resource resource) {
         this.configResources.add(resource);
@@ -100,7 +108,7 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
     /**
      * Adds a config location based on a String description using Springs
      * {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver}.
-     *
+     * 
      * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
      */
     public void addConfigLocation(String path) throws IOException {
@@ -111,24 +119,28 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
     }
 
     /**
-     * <p>Creates a new {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer} based on
-     * the configured parameters.
-     *
-     * <p>If {@link #addConfigLocation(org.springframework.core.io.Resource)} or
-     * {@link #addConfigLocation(String)} were used, the Spring xml context will be read based on the provided
-     * locations. If no config location was provided the default config location will be
-     * <code>classpath*:/META-INF/spring/*.xml</code>.
-     *
-     * <p>If {@link #setBeanLevelProperties(org.openspaces.core.properties.BeanLevelProperties)} is set will use
-     * the configured bean level properties in order to configure the application context and specific beans
-     * within it based on properties. This is done by adding {@link org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor}
-     * and {@link org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer} to the application context.
-     *
-     * <p>If {@link #setClusterInfo(org.openspaces.core.cluster.ClusterInfo)} is set will use it to inject
-     * {@link org.openspaces.core.cluster.ClusterInfo} into beans that implement
+     * Creates a new {@link IntegratedProcessingUnitContainer} based on the configured parameters.
+     * 
+     * <p>
+     * If {@link #addConfigLocation(org.springframework.core.io.Resource)} or
+     * {@link #addConfigLocation(String)} were used, the Spring xml context will be read based on
+     * the provided locations. If no config location was provided the default config location will
+     * be <code>classpath*:/META-INF/spring/*.xml</code>.
+     * 
+     * <p>
+     * If {@link #setBeanLevelProperties(org.openspaces.core.properties.BeanLevelProperties)} is set
+     * will use the configured bean level properties in order to configure the application context
+     * and specific beans within it based on properties. This is done by adding
+     * {@link org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor} and
+     * {@link org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer} to the
+     * application context.
+     * 
+     * <p>
+     * If {@link #setClusterInfo(org.openspaces.core.cluster.ClusterInfo)} is set will use it to
+     * inject {@link org.openspaces.core.cluster.ClusterInfo} into beans that implement
      * {@link org.openspaces.core.cluster.ClusterInfoAware}.
-     *
-     * @return An {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer} instance
+     * 
+     * @return An {@link IntegratedProcessingUnitContainer} instance
      * @throws CannotCreateContainerException
      */
     public ProcessingUnitContainer createContainer() throws CannotCreateContainerException {
@@ -144,7 +156,8 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
         ResourceApplicationContext applicationContext = new ResourceApplicationContext(resources, parentContext);
         // add config information if provided
         if (beanLevelProperties != null) {
-            applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties));
+            applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(
+                    beanLevelProperties));
             applicationContext.addBeanPostProcessor(new BeanLevelPropertyBeanPostProcessor(beanLevelProperties));
         }
         if (clusterInfo != null) {
