@@ -22,7 +22,11 @@
 	<classpathentry kind="lib" path="lib/junit/junit.jar"/>
 	<classpathentry kind="lib" path="lib/spring/cglib-nodep-2.1_3.jar"/>
 	<classpathentry kind="lib" path="lib/spring/spring-mock.jar"/>
-	<classpathentry kind="lib" path="lib/spring/spring.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://static.springframework.org/spring/docs/2.0.x/api/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/ServiceGrid/gs-service.jar"/>
 	<classpathentry kind="lib" path="lib/ServiceGrid/gs-lib.jar"/>
