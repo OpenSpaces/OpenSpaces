@@ -18,7 +18,7 @@ public class ViewDataCounter implements InitializingBean, DisposableBean {
 
     private ScheduledExecutorService executorService;
 
-    private ScheduledFuture sf;
+    private ScheduledFuture<?> sf;
 
     private long defaultDelay = 1000;
 
@@ -32,9 +32,9 @@ public class ViewDataCounter implements InitializingBean, DisposableBean {
     public void afterPropertiesSet() throws Exception {
         System.out.println("--- STARTING VIEW COUNTER WITH CYCLE [" + defaultDelay + "]");
         executorService = Executors.newScheduledThreadPool(1);
-        sf = executorService.scheduleAtFixedRate(new ViewCounterTask(), defaultDelay, defaultDelay, TimeUnit.MILLISECONDS);
+        sf = executorService.scheduleAtFixedRate(new ViewCounterTask(), defaultDelay, defaultDelay,
+                TimeUnit.MILLISECONDS);
     }
-
 
     public void destroy() throws Exception {
         sf.cancel(true);

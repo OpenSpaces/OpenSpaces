@@ -19,10 +19,9 @@ public class DataRemoting implements InitializingBean, DisposableBean {
 
     private IDataProcessor dataProcessor;
 
-
     private ScheduledExecutorService executorService;
 
-    private ScheduledFuture sf;
+    private ScheduledFuture<?> sf;
 
     public void setDataProcessor(IDataProcessor dataProcessor) {
         this.dataProcessor = dataProcessor;
@@ -35,9 +34,9 @@ public class DataRemoting implements InitializingBean, DisposableBean {
     public void afterPropertiesSet() throws Exception {
         System.out.println("--- STARTING REMOTING WITH CYCLE [" + defaultDelay + "]");
         executorService = Executors.newScheduledThreadPool(1);
-        sf = executorService.scheduleAtFixedRate(new DataFeederTask(), defaultDelay, defaultDelay, TimeUnit.MILLISECONDS);
+        sf = executorService.scheduleAtFixedRate(new DataFeederTask(), defaultDelay, defaultDelay,
+                TimeUnit.MILLISECONDS);
     }
-
 
     public void destroy() throws Exception {
         sf.cancel(true);
