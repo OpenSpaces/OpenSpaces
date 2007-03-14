@@ -1,5 +1,7 @@
 package org.openspaces.events.adapter;
 
+import java.util.Arrays;
+
 import net.jini.core.lease.Lease;
 import net.jini.space.JavaSpace;
 
@@ -19,7 +21,6 @@ import com.j_spaces.core.client.UpdateModifiers;
  * 
  * @author kimchy
  */
-// TODO support result of an array type by using writeMultiple
 public abstract class AbstractResultEventListenerAdapter implements SpaceDataEventListener {
 
     private long writeLease = Lease.FOREVER;
@@ -70,6 +71,11 @@ public abstract class AbstractResultEventListenerAdapter implements SpaceDataEve
      * Writes the result back to the space (if not <code>null</code>) under the configured write
      * lease. Allows to be overriden in order to implement more advance result handling.
      * 
+     * <p>
+     * By default handles both single object and array of objects. Takes into account the
+     * {@link #setUpdateOrWrite(boolean) 'updateOrWrite'} flag when writing/updating the result back
+     * to the space.
+     * 
      * @param result
      *            The result to write back to the space
      * @param gigaSpace
@@ -78,9 +84,14 @@ public abstract class AbstractResultEventListenerAdapter implements SpaceDataEve
     protected void handleResult(Object result, GigaSpace gigaSpace) throws GigaSpaceException {
         if (result != null) {
             if (result.getClass().isArray()) {
-                // TODO support update or write
                 Object[] resultArr = (Object[]) result;
-                gigaSpace.writeMultiple(resultArr, writeLease);
+                if (updateOrWrite) {
+                    long[] leases = new long[resultArr.length];
+                    Arrays.fill(leases, writeLease);
+                    gigaSpace.updateMultiple(resultArr, leases, UpdateModifiers.UPDATE_OR_WRITE);
+                } else {
+                    gigaSpace.writeMultiple(resultArr, writeLease);
+                }
             } else {
                 if (updateOrWrite) {
                     gigaSpace.write(result, writeLease, updateTimeout, UpdateModifiers.UPDATE_OR_WRITE);
