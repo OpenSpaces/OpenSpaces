@@ -5,7 +5,7 @@ import org.openspaces.core.GigaSpaceException;
 
 /**
  * Performs single take operation using {@link org.openspaces.core.GigaSpace#take(Object,long)}.
- *
+ * 
  * @author kimchy
  */
 public class SingleTakeReceiveOperationHandler implements ReceiveOperationHandler {

@@ -4,10 +4,11 @@ import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceException;
 
 /**
- * First tries and perform a {@link org.openspaces.core.GigaSpace#readMultiple(Object,int)} using the provided
- * template and configured maxEntries (defaults to <code>50</code>). If no values are returned, will perform a
- * blocking read operation using {@link org.openspaces.core.GigaSpace#read(Object,long)}.
- *
+ * First tries and perform a {@link org.openspaces.core.GigaSpace#readMultiple(Object,int)} using
+ * the provided template and configured maxEntries (defaults to <code>50</code>). If no values
+ * are returned, will perform a blocking read operation using
+ * {@link org.openspaces.core.GigaSpace#read(Object,long)}.
+ * 
  * @author kimchy
  */
 public class MultiReadReceiveOperationHandler implements ReceiveOperationHandler {
@@ -24,9 +25,10 @@ public class MultiReadReceiveOperationHandler implements ReceiveOperationHandler
     }
 
     /**
-     * First tries and perform a {@link org.openspaces.core.GigaSpace#readMultiple(Object,int)} using the provided
-     * template and configured maxEntries (defaults to <code>50</code>). If no values are returned, will perform a
-     * blocking read operation using {@link org.openspaces.core.GigaSpace#read(Object,long)}.
+     * First tries and perform a {@link org.openspaces.core.GigaSpace#readMultiple(Object,int)}
+     * using the provided template and configured maxEntries (defaults to <code>50</code>). If no
+     * values are returned, will perform a blocking read operation using
+     * {@link org.openspaces.core.GigaSpace#read(Object,long)}.
      */
     public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws GigaSpaceException {
         Object[] results = gigaSpace.readMultiple(template, maxEntries);

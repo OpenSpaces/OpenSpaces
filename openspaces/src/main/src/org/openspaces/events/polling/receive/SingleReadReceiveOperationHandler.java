@@ -5,7 +5,7 @@ import org.openspaces.core.GigaSpaceException;
 
 /**
  * Performs single take operation using {@link org.openspaces.core.GigaSpace#read(Object,long)}.
- *
+ * 
  * @author kimchy
  */
 public class SingleReadReceiveOperationHandler implements ReceiveOperationHandler {

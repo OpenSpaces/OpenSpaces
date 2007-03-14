@@ -4,9 +4,9 @@ import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceException;
 
 /**
- * A trigger operation handler that performa  read based on the provided template and returns
- * its result.
- *
+ * A trigger operation handler that performa read based on the provided template and returns its
+ * result.
+ * 
  * @author kimchy
  */
 public class ReadTriggerOperationHandler implements TriggerOperationHandler {
@@ -18,7 +18,7 @@ public class ReadTriggerOperationHandler implements TriggerOperationHandler {
      * {@link #triggerReceive(Object,org.openspaces.core.GigaSpace,long)} will be used as the
      * template for the receive operation by returnning <code>true</code>. If <code>false</code>
      * is returned, the actual template configured in the polling event container will be used.
-     *
+     * 
      * @see TriggerOperationHandler#isUseTriggerAsTemplate()
      */
     public void setUseTriggerAsTemplate(boolean useTriggerAsTemplate) {

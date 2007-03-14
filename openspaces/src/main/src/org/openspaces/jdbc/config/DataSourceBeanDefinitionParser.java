@@ -6,11 +6,13 @@ import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.w3c.dom.Element;
 
 /**
+ * A bean definition builder for {@link SpaceDriverManagerDataSource}.
+ * 
  * @author kimchy
  */
 public class DataSourceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
-    protected Class getBeanClass(Element element) {
+    protected Class<SpaceDriverManagerDataSource> getBeanClass(Element element) {
         return SpaceDriverManagerDataSource.class;
     }
 

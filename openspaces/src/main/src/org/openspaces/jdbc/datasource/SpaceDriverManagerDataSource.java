@@ -12,7 +12,7 @@ import java.sql.SQLException;
 /**
  * A simple Jdbc {@link javax.sql.DataSource} based on a {@link com.j_spaces.core.IJSpace space}.
  * Returns a new Jdbc {@link java.sql.Connection} for each <code>getConnection</code>.
- *
+ * 
  * @author kimchy
  */
 public class SpaceDriverManagerDataSource extends AbstractDataSource implements InitializingBean {

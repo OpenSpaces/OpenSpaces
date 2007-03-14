@@ -50,8 +50,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
     /**
      * Default thread name prefix: "DefaultPollingEventListenerContainer-".
      */
-    public static final String DEFAULT_THREAD_NAME_PREFIX = ClassUtils
-            .getShortName(SimplePollingEventListenerContainer.class)
+    public static final String DEFAULT_THREAD_NAME_PREFIX = ClassUtils.getShortName(SimplePollingEventListenerContainer.class)
             + "-";
 
     /**
@@ -82,7 +81,6 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
     private final Object recoveryMonitor = new Object();
 
     /**
-     * <p>
      * Set the Spring {@link org.springframework.core.task.TaskExecutor} to use for running the
      * listener threads. Default is {@link org.springframework.core.task.SimpleAsyncTaskExecutor},
      * starting up a number of new threads, according to the specified number of concurrent
@@ -178,8 +176,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
     public void setMaxConcurrentConsumers(int maxConcurrentConsumers) {
         Assert.isTrue(maxConcurrentConsumers > 0, "'maxConcurrentConsumers' value must be at least 1 (one)");
         synchronized (this.activeInvokerMonitor) {
-            this.maxConcurrentConsumers = (maxConcurrentConsumers > this.concurrentConsumers ? maxConcurrentConsumers
-                    : this.concurrentConsumers);
+            this.maxConcurrentConsumers = (maxConcurrentConsumers > this.concurrentConsumers ? maxConcurrentConsumers : this.concurrentConsumers);
         }
     }
 
@@ -501,9 +498,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
                 break;
             } catch (RemoteException ex) {
                 if (logger.isInfoEnabled()) {
-                    logger
-                            .info("Could not refresh Space Connection - retrying in " + this.recoveryInterval + " ms",
-                                ex);
+                    logger.info("Could not refresh Space Connection - retrying in " + this.recoveryInterval + " ms", ex);
                 }
             }
             sleepInbetweenRecoveryAttempts();
