@@ -1,4 +1,5 @@
-#Tue Mar 13 21:09:48 CAT 2007
+#Tue Mar 13 23:17:39 CAT 2007
 eclipse.preferences.version=1
 formatter_profile=_Mine
 formatter_settings_version=11
+org.eclipse.jdt.ui.text.custom_code_templates=<?xml version\="1.0" encoding\="UTF-8"?><templates/>
