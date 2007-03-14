@@ -515,7 +515,9 @@
         <root url="jar://$PROJECT_DIR$/lib/spring/spring-mock.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES />
+      <SOURCES>
+        <root url="jar://$PROJECT_DIR$/lib/spring/spring-src.zip!/" />
+      </SOURCES>
     </library>
   </component>
   <component name="uidesigner-configuration" />
