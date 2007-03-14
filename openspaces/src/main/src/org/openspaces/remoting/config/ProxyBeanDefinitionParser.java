@@ -57,7 +57,8 @@ public class ProxyBeanDefinitionParser extends AbstractSingleBeanDefinitionParse
 
         Element routingHandlerEle = DomUtils.getChildElementByTagName(element, ROUTING_HANDLER);
         if (routingHandlerEle != null) {
-            builder.addPropertyValue("remoteRoutingHandler", parserContext.getDelegate().parsePropertyValue(routingHandlerEle, builder.getRawBeanDefinition(), "remoteRoutingHandler"));
+            builder.addPropertyValue("remoteRoutingHandler", parserContext.getDelegate().parsePropertyValue(
+                    routingHandlerEle, builder.getRawBeanDefinition(), "remoteRoutingHandler"));
         }
 
     }
