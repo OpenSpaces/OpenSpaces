@@ -67,7 +67,7 @@
                                 <!-- TODO LeaseListener configuration -->
                             </xsd:complexType>
                         </xsd:element>
-                        <xsd:element name="notify-filter" type="notifyFilterType" minOccurs="0" maxOccurs="1" />
+                        <xsd:element name="notify-filter" type="notifyFilterType" minOccurs="0" maxOccurs="1"/>
                         <xsd:choice>
                             <xsd:element ref="gs-core:template" minOccurs="0" maxOccurs="1"/>
                             <xsd:element ref="gs-core:sql-query" minOccurs="0" maxOccurs="1"/>
