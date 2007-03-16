@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:gs-core="http://www.openspaces.org/schema/core"
-       xmlns:gs-events="http://www.openspaces.org/schema/events"
-       xmlns:gs-remoting="http://www.openspaces.org/schema/remoting"
+       xmlns:os-core="http://www.openspaces.org/schema/core"
+       xmlns:os-events="http://www.openspaces.org/schema/events"
+       xmlns:os-remoting="http://www.openspaces.org/schema/remoting"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
        http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
@@ -11,21 +11,21 @@
 
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
-    <gs-core:giga-space-context/>
+    <os-core:giga-space-context/>
 
-    <gs-core:space id="space" url="jini://*/*/space" lookup-groups="${user.name}" />
+    <os-core:space id="space" url="jini://*/*/space" lookup-groups="${user.name}" />
 
-    <gs-core:giga-space id="gigaSpace" space="space" />
+    <os-core:giga-space id="gigaSpace" space="space" />
 
     <bean id="dataFeeder" class="org.openspaces.example.data.feeder.DataFeeder"/>
 
     <!-- Remoting Example -->
 
-    <gs-remoting:proxy id="dataProcessor" giga-space="gigaSpace" interface="org.openspaces.example.data.common.IDataProcessor">
-        <gs-remoting:routing-handler>
+    <os-remoting:proxy id="dataProcessor" giga-space="gigaSpace" interface="org.openspaces.example.data.common.IDataProcessor">
+        <os-remoting:routing-handler>
             <bean class="org.openspaces.example.data.feeder.support.DataRemoteRoutingHandler"/>
-        </gs-remoting:routing-handler>
-    </gs-remoting:proxy>
+        </os-remoting:routing-handler>
+    </os-remoting:proxy>
 
     <bean id="dataRemoting" class="org.openspaces.example.data.feeder.DataRemoting">
         <property name="dataProcessor" ref="dataProcessor"/>
@@ -33,15 +33,15 @@
 
     <!-- Local View Example ("client side") -->
 
-    <gs-core:local-view id="processedViewSpace" space="space">
-        <gs-core:view-query where="processed = true" class="org.openspaces.example.data.common.Data">
-            <gs-core:template>
+    <os-core:local-view id="processedViewSpace" space="space">
+        <os-core:view-query where="processed = true" class="org.openspaces.example.data.common.Data">
+            <os-core:template>
                 <bean class="org.openspaces.example.data.common.Data" />
-            </gs-core:template>
-        </gs-core:view-query>
-    </gs-core:local-view>
+            </os-core:template>
+        </os-core:view-query>
+    </os-core:local-view>
 
-    <gs-core:giga-space id="processedViewGigaSpace" space="processedViewSpace"/>
+    <os-core:giga-space id="processedViewGigaSpace" space="processedViewSpace"/>
 
     <bean id="viewDataCounter" class="org.openspaces.example.data.feeder.ViewDataCounter"/>
 

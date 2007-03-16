@@ -4,7 +4,7 @@
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:beans="http://www.springframework.org/schema/beans"
             xmlns:tool="http://www.springframework.org/schema/tool"
-            xmlns:gs-core="http://www.openspaces.org/schema/core"
+            xmlns:os-core="http://www.openspaces.org/schema/core"
             targetNamespace="http://www.openspaces.org/schema/events"
             elementFormDefault="qualified"
             attributeFormDefault="unqualified">
@@ -20,8 +20,8 @@
                     <xsd:sequence>
                         <xsd:element name="tx-support" type="txEventSupport" minOccurs="0" maxOccurs="1"/>
                         <xsd:choice>
-                            <xsd:element ref="gs-core:template" minOccurs="0" maxOccurs="1"/>
-                            <xsd:element ref="gs-core:sql-query" minOccurs="0" maxOccurs="1"/>
+                            <xsd:element ref="os-core:template" minOccurs="0" maxOccurs="1"/>
+                            <xsd:element ref="os-core:sql-query" minOccurs="0" maxOccurs="1"/>
                         </xsd:choice>
                         <xsd:element name="listener" type="spaceDataEventListenerType" minOccurs="1" maxOccurs="1"/>
                         <xsd:element name="receive-operation-handler" type="receiveOperationHandlerType" minOccurs="0"
@@ -69,8 +69,8 @@
                         </xsd:element>
                         <xsd:element name="notify-filter" type="notifyFilterType" minOccurs="0" maxOccurs="1"/>
                         <xsd:choice>
-                            <xsd:element ref="gs-core:template" minOccurs="0" maxOccurs="1"/>
-                            <xsd:element ref="gs-core:sql-query" minOccurs="0" maxOccurs="1"/>
+                            <xsd:element ref="os-core:template" minOccurs="0" maxOccurs="1"/>
+                            <xsd:element ref="os-core:sql-query" minOccurs="0" maxOccurs="1"/>
                         </xsd:choice>
                         <xsd:element name="listener" type="spaceDataEventListenerType" minOccurs="1" maxOccurs="1"/>
                     </xsd:sequence>
@@ -96,14 +96,14 @@
     <xsd:complexType name="baseEventContainer" abstract="true">
         <xsd:complexContent>
             <xsd:extension base="beans:identifiedType">
-                <xsd:attribute name="giga-space" type="gs-core:gigaSpaceRefType" use="required"/>
+                <xsd:attribute name="giga-space" type="os-core:gigaSpaceRefType" use="required"/>
                 <xsd:attribute name="active-when-primary" type="xsd:boolean"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
 
     <xsd:complexType name="txEventSupport">
-        <xsd:attribute name="tx-manager" type="gs-core:txManagerType" use="required"/>
+        <xsd:attribute name="tx-manager" type="os-core:txManagerType" use="required"/>
         <xsd:attribute name="tx-name" type="xsd:string"/>
         <xsd:attribute name="tx-timeout" type="xsd:nonNegativeInteger"/>
         <xsd:attribute name="tx-isolation" default="DEFAULT">

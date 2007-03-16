@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:gs-core="http://www.openspaces.org/schema/core"
-       xmlns:gs-events="http://www.openspaces.org/schema/events"
-       xmlns:gs-remoting="http://www.openspaces.org/schema/remoting"
+       xmlns:os-core="http://www.openspaces.org/schema/core"
+       xmlns:os-events="http://www.openspaces.org/schema/events"
+       xmlns:os-remoting="http://www.openspaces.org/schema/remoting"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
        http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
@@ -11,53 +11,53 @@
 
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
-    <gs-core:giga-space-context/>
+    <os-core:giga-space-context/>
 
-    <gs-core:space id="space" url="/./space" lookup-groups="${user.name}"/>
+    <os-core:space id="space" url="/./space" lookup-groups="${user.name}"/>
 
-    <gs-core:giga-space id="gigaSpace" space="space"/>
+    <os-core:giga-space id="gigaSpace" space="space"/>
 
-    <gs-core:local-tx-manager id="transactionManager" giga-space="gigaSpace"/>
+    <os-core:local-tx-manager id="transactionManager" giga-space="gigaSpace"/>
 
     <bean id="dataProcessor" class="org.openspaces.example.data.processor.DataProcessor"/>
 
-    <gs-events:polling-container id="dataProcessorPollingEventContainer" giga-space="gigaSpace">
-        <gs-events:tx-support tx-manager="transactionManager"/>
-        <gs-core:template>
+    <os-events:polling-container id="dataProcessorPollingEventContainer" giga-space="gigaSpace">
+        <os-events:tx-support tx-manager="transactionManager"/>
+        <os-core:template>
             <bean class="org.openspaces.example.data.common.Data">
                 <property name="processed" value="false"/>
             </bean>
-        </gs-core:template>
-        <gs-events:listener>
-            <gs-events:annotation-adapter>
-                <gs-events:delegate ref="dataProcessor"/>
-            </gs-events:annotation-adapter>
-        </gs-events:listener>
-    </gs-events:polling-container>
+        </os-core:template>
+        <os-events:listener>
+            <os-events:annotation-adapter>
+                <os-events:delegate ref="dataProcessor"/>
+            </os-events:annotation-adapter>
+        </os-events:listener>
+    </os-events:polling-container>
 
     <!-- Print out all the processed data event using notifications with processed true -->
-    <gs-events:notify-container id="dataProcessedCounterNotifyContainer" giga-space="gigaSpace" com-type="UNICAST">
-        <gs-events:notify write="true" update="true"/>
-        <gs-events:batch size="10" time="5000"/>
-        <gs-core:sql-query where="processed = true" class="org.openspaces.example.data.common.Data"/>
-        <gs-events:listener>
-            <gs-events:annotation-adapter>
-                <gs-events:delegate>
+    <os-events:notify-container id="dataProcessedCounterNotifyContainer" giga-space="gigaSpace" com-type="UNICAST">
+        <os-events:notify write="true" update="true"/>
+        <os-events:batch size="10" time="5000"/>
+        <os-core:sql-query where="processed = true" class="org.openspaces.example.data.common.Data"/>
+        <os-events:listener>
+            <os-events:annotation-adapter>
+                <os-events:delegate>
                     <bean class="org.openspaces.example.data.processor.DataProcessedCounter"/>
-                </gs-events:delegate>
-            </gs-events:annotation-adapter>
-        </gs-events:listener>
-    </gs-events:notify-container>
+                </os-events:delegate>
+            </os-events:annotation-adapter>
+        </os-events:listener>
+    </os-events:notify-container>
 
 
-    <gs-core:context-loader id="modeExample" location="classpath:/META-INF/spring/mode/mode.xml"/>
+    <os-core:context-loader id="modeExample" location="classpath:/META-INF/spring/mode/mode.xml"/>
 
     <!-- Remoting Support -->
-    <gs-events:polling-container id="remotingContainer" giga-space="gigaSpace" concurrent-consumers="2">
-        <gs-events:listener>
-            <gs-remoting:service-exporter>
-                <gs-remoting:service ref="dataProcessor" />
-            </gs-remoting:service-exporter>
-        </gs-events:listener>
-    </gs-events:polling-container>
+    <os-events:polling-container id="remotingContainer" giga-space="gigaSpace" concurrent-consumers="2">
+        <os-events:listener>
+            <os-remoting:service-exporter>
+                <os-remoting:service ref="dataProcessor" />
+            </os-remoting:service-exporter>
+        </os-events:listener>
+    </os-events:polling-container>
 </beans>

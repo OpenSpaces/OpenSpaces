@@ -2,7 +2,7 @@
 
 <xsd:schema xmlns="http://www.openspaces.org/schema/remoting" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:beans="http://www.springframework.org/schema/beans" xmlns:tool="http://www.springframework.org/schema/tool"
-    xmlns:gs-core="http://www.openspaces.org/schema/core" targetNamespace="http://www.openspaces.org/schema/remoting"
+    xmlns:os-core="http://www.openspaces.org/schema/core" targetNamespace="http://www.openspaces.org/schema/remoting"
     elementFormDefault="qualified" attributeFormDefault="unqualified">
 
     <xsd:import namespace="http://www.springframework.org/schema/beans" />
@@ -59,8 +59,8 @@
                             </xsd:complexType>
                         </xsd:element>
                     </xsd:sequence>
-                    <xsd:attribute name="giga-space" type="gs-core:gigaSpaceRefType" use="required" />
-                    <xsd:attribute name="interface" type="gs-core:classType" use="required" />
+                    <xsd:attribute name="giga-space" type="os-core:gigaSpaceRefType" use="required" />
+                    <xsd:attribute name="interface" type="os-core:classType" use="required" />
                     <xsd:attribute name="void-one-way" type="xsd:boolean" />
                     <xsd:attribute name="global-one-way" type="xsd:boolean" />
                     <xsd:attribute name="timeout" type="xsd:nonNegativeInteger" />

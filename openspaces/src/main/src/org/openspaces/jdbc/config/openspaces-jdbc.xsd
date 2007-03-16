@@ -4,7 +4,7 @@
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:beans="http://www.springframework.org/schema/beans"
             xmlns:tool="http://www.springframework.org/schema/tool"
-            xmlns:gs-core="http://www.openspaces.org/schema/core"
+            xmlns:os-core="http://www.openspaces.org/schema/core"
             targetNamespace="http://www.openspaces.org/schema/jdbc"
             elementFormDefault="qualified"
             attributeFormDefault="unqualified">
@@ -17,7 +17,7 @@
         <xsd:complexType>
             <xsd:complexContent>
                 <xsd:extension base="beans:identifiedType">
-                    <xsd:attribute name="space" type="gs-core:spaceRefType" use="required"/>
+                    <xsd:attribute name="space" type="os-core:spaceRefType" use="required"/>
                 </xsd:extension>
             </xsd:complexContent>
         </xsd:complexType>
