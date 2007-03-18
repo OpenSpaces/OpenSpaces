@@ -9,6 +9,12 @@
        http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
        http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/remoting/openspaces-remoting.xsd">
 
+    <bean id="SLA" class="org.openspaces.pu.container.servicegrid.sla.SLA">
+        <property name="numberOfInstances" value="2"/>
+        <property name="numberOfBackups" value="1"/>
+        <property name="clusterSchema" value="partitioned_sync2backup"/>
+    </bean>
+
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
     <os-core:giga-space-context/>
