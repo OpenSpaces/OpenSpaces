@@ -15,8 +15,6 @@ public class SLA {
 
     int numberOfBackups = 0;
 
-    boolean isPartitioned = false;
-
     String clusterSchema;
 
     Policy policy;
@@ -82,18 +80,10 @@ public class SLA {
                 "\n\tnumberOfInstances=" + numberOfInstances +
                 "\n\tnumberOfBackups=" + numberOfBackups +
                 "\n\tclusterSchema='" + clusterSchema + '\'' +
-                "\n\tisPartitioned=" + isPartitioned +
                 "\n\tpolicy=" + policy +
                 "\n}";
     }
 
 // -------------------------- OTHER METHODS --------------------------
 
-    public boolean isPartitioned() {
-        return isPartitioned;
-    }
-
-    public void setPartitioned(boolean partitioned) {
-        isPartitioned = partitioned;
-    }
 }
