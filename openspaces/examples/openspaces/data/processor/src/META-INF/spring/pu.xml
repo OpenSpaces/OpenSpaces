@@ -12,7 +12,7 @@
     <bean id="SLA" class="org.openspaces.pu.container.servicegrid.sla.SLA">
         <property name="numberOfInstances" value="2"/>
         <property name="numberOfBackups" value="1"/>
-        <property name="clusterSchema" value="partitioned_sync2backup"/>
+        <property name="clusterSchema" value="partitioned-sync2backup"/>
     </bean>
 
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
