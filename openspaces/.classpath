@@ -33,5 +33,8 @@
 	<classpathentry kind="lib" path="lib/jmx/jmxri.jar"/>
 	<classpathentry kind="lib" path="lib/common/commons-math-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/ServiceGrid/gs-boot.jar"/>
+	<classpathentry kind="lib" path="lib/common/commons-collections.jar"/>
+	<classpathentry kind="lib" path="lib/common/commons-dbcp.jar"/>
+	<classpathentry kind="lib" path="lib/common/commons-pool.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
