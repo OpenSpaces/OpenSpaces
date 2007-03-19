@@ -4,6 +4,12 @@
 
     <property name="pulocation" value="${basedir}/pu/helloworld"/>
 
+    <condition property="gshome.dir" value="../../../">
+        <not>
+            <isset property="gshome.dir"/>
+        </not>
+    </condition>
+
     <path id="all-libs">
 
         <fileset dir="../../../lib">
@@ -11,7 +17,7 @@
         </fileset>
 
         <fileset dir="${pulocation}">
-            <include name="lib/*.jar" />
+            <include name="lib/*.jar"/>
         </fileset>
     </path>
 
@@ -22,9 +28,10 @@
         <echo message=""/>
         <echo message="Among the available targets are:"/>
         <echo message=""/>
-        <echo message="clean    --> Cleans all output dirs"/>
-        <echo message="build    --> build all; don't create JARs"/>
-        <echo message="dist     --> build the distribution"/>
+        <echo message="clean                    --> Cleans all output dirs"/>
+        <echo message="build                    --> build all; don't create JARs"/>
+        <echo message="dist                     --> build the distribution"/>
+        <echo message="deploy-local-helloworld  --> Deploy hello world on the service grid"/>
         <echo message=""/>
     </target>
 
@@ -56,5 +63,26 @@
     <target name="dist" depends="build">
         <jar basedir="${pulocation}" jarfile="${basedir}/pu/helloworld.jar"/>
     </target>
+
+    <target name="deploy-local-helloworld" depends="dist">
+        <delete dir="${gshome.dir}/deploy/hello-world"/>
+        <mkdir dir="${gshome.dir}/deploy/hello-world"/>
+        <copy todir="${gshome.dir}/deploy/hello-world">
+            <fileset dir="${pulocation}"/>
+        </copy>
+        <deploy name="hello-world" lookup-group="${user.name}"/>
+    </target>
+
+    <macrodef name="deploy">
+        <attribute name="name"/>
+        <attribute name="lookup-group"/>
+        <sequential>
+            <java classname="org.openspaces.pu.container.servicegrid.deploy.Deploy" fork="true">
+                <classpath refid="all-libs"/>
+                <sysproperty key="com.gs.jini_lus.groups" value="@{lookup-group}"/>
+                <arg value="@{name}"/>
+            </java>
+        </sequential>
+    </macrodef>
 
 </project>

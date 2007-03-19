@@ -17,6 +17,12 @@
     <property name="processor-pujar" value="${basedir}/processor/pu/data-processor.jar"/>
     <property name="processor-lib" value="${processor-pu}/shared-lib"/>
 
+    <condition property="gshome.dir" value="../../../">
+        <not>
+            <isset property="gshome.dir"/>
+        </not>
+    </condition>
+
     <path id="all-libs">
         <fileset dir="../../../lib">
             <include name="**/*.jar"/>
@@ -30,9 +36,11 @@
         <echo message=""/>
         <echo message="Among the available targets are:"/>
         <echo message=""/>
-        <echo message="clean    --> Cleans all output dirs"/>
-        <echo message="build    --> build all; don't create JARs"/>
-        <echo message="dist     --> build the distribution"/>
+        <echo message="clean                    --> Cleans all output dirs"/>
+        <echo message="build                    --> build all; don't create JARs"/>
+        <echo message="dist                     --> build the distribution"/>
+        <echo message="deploy-local-procssor    --> Deploy data processor on the service grid"/>
+        <echo message="deploy-local-feeder      --> Deploy data feeder on the service grid"/>
         <echo message=""/>
     </target>
 
@@ -46,29 +54,47 @@
     </target>
 
     <target name="build">
-        <build src="${common-src}" classes="${common-classes}" additional-classpath="" />
-        <build src="${feeder-src}" classes="${feeder-pu}" additional-classpath="${common-classes}" />
-        <build src="${processor-src}" classes="${processor-pu}" additional-classpath="${common-classes}" />
+        <build src="${common-src}" classes="${common-classes}" additional-classpath=""/>
+        <build src="${feeder-src}" classes="${feeder-pu}" additional-classpath="${common-classes}"/>
+        <build src="${processor-src}" classes="${processor-pu}" additional-classpath="${common-classes}"/>
     </target>
 
     <target name="dist" depends="build">
         <!-- Build the common jar file -->
-        <mkdir dir="${common-dist}" />
+        <mkdir dir="${common-dist}"/>
         <jar basedir="${common-classes}" jarfile="${common-jar}"/>
         <!-- Copy over the common jar file to the processor and feeder libs -->
         <mkdir dir="${processor-lib}"/>
-        <copy todir="${processor-lib}" file="${common-jar}" />
-        <mkdir dir="${feeder-lib}" />
-        <copy todir="${feeder-lib}" file="${common-jar}" />
+        <copy todir="${processor-lib}" file="${common-jar}"/>
+        <mkdir dir="${feeder-lib}"/>
+        <copy todir="${feeder-lib}" file="${common-jar}"/>
         <!-- Build the pu jar files -->
         <jar basedir="${processor-pu}" jarfile="${processor-pujar}"/>
         <jar basedir="${feeder-pu}" jarfile="${feeder-pujar}"/>
     </target>
 
+    <target name="deploy-local-processor" depends="dist">
+        <delete dir="${gshome.dir}/deploy/data-processor"/>
+        <mkdir dir="${gshome.dir}/deploy/data-processor"/>
+        <copy todir="${gshome.dir}/deploy/data-processor">
+            <fileset dir="${processor-pu}"/>
+        </copy>
+        <deploy name="data-processor" lookup-group="${user.name}"/>
+    </target>
+
+    <target name="deploy-local-feeder" depends="dist">
+        <delete dir="${gshome.dir}/deploy/data-feeder"/>
+        <mkdir dir="${gshome.dir}/deploy/data-feeder"/>
+        <copy todir="${gshome.dir}/deploy/data-feeder">
+            <fileset dir="${feeder-pu}"/>
+        </copy>
+        <deploy name="data-feeder" lookup-group="${user.name}"/>
+    </target>
+
     <macrodef name="build">
-        <attribute name="src" />
-        <attribute name="classes" />
-        <attribute name="additional-classpath" />
+        <attribute name="src"/>
+        <attribute name="classes"/>
+        <attribute name="additional-classpath"/>
         <sequential>
             <mkdir dir="@{classes}"/>
 
@@ -76,7 +102,7 @@
                    deprecation="false" optimize="false" failonerror="true">
                 <src path="@{src}"/>
                 <classpath refid="all-libs"/>
-                <classpath location="@{additional-classpath}" />
+                <classpath location="@{additional-classpath}"/>
             </javac>
 
             <copy todir="@{classes}" preservelastmodified="true">
@@ -92,4 +118,15 @@
         </sequential>
     </macrodef>
 
+    <macrodef name="deploy">
+        <attribute name="name"/>
+        <attribute name="lookup-group"/>
+        <sequential>
+            <java classname="org.openspaces.pu.container.servicegrid.deploy.Deploy" fork="true">
+                <classpath refid="all-libs"/>
+                <sysproperty key="com.gs.jini_lus.groups" value="@{lookup-group}"/>
+                <arg value="@{name}"/>
+            </java>
+        </sequential>
+    </macrodef>
 </project>
