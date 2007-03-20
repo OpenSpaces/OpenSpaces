@@ -6,7 +6,6 @@ import com.j_spaces.core.client.EntryArrivedRemoteEvent;
 import net.jini.core.event.RemoteEvent;
 import net.jini.core.event.RemoteEventListener;
 import net.jini.core.event.UnknownEventException;
-
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.UnusableEntryException;
 import org.springframework.dao.DataAccessException;
@@ -113,7 +112,7 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
                 dataEventSession.close();
             } catch (Exception e) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn("Failed to close data event session", e);
+                    logger.warn(message("Failed to close data event session"), e);
                 }
             } finally {
                 dataEventSession = null;
@@ -126,9 +125,8 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
      * registered
      * {@link org.openspaces.events.SpaceDataEventListener#onEvent(Object,org.openspaces.core.GigaSpace,org.springframework.transaction.TransactionStatus,Object)} .
      * 
-     * <p>
-     * Calls
-     * {@link AbstractNotifyEventListenerContainer#invokeListenerWithTransaction(Object,Object,boolean)}
+     * <p>Calls
+     * {@link org.openspaces.events.notify.AbstractNotifyEventListenerContainer#invokeListenerWithTransaction(Object, Object, boolean, boolean)} 
      * for a possible listener execution within a transaction and passed the
      * {@link org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setPerformTakeOnNotify(boolean)}
      * flag.
@@ -146,6 +144,9 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
                 eventData = ((EntryArrivedRemoteEvent) remoteEvent).getObject();
             } catch (net.jini.core.entry.UnusableEntryException e) {
                 throw new UnusableEntryException("Failute to get object from event [" + remoteEvent + "]", e);
+            }
+            if (logger.isTraceEnabled()) {
+                logger.trace(message("Received event [" + eventData + "]"));
             }
             invokeListenerWithTransaction(eventData, remoteEvent, performTakeOnNotify, ignoreEventOnNullTake);
         }

@@ -22,7 +22,7 @@ import java.util.List;
 
 /**
  * Common base class for all containers which need to implement listening based on Space events.
- * 
+ *
  * <p>
  * Provide lifecycle support for containers using {@link #doStart()} and {@link #doStop()}. By
  * default, the container lifecycle will be bound to the space mode, starting when the space mode is
@@ -32,18 +32,18 @@ import java.util.List;
  * {@link org.openspaces.core.GigaSpaceFactoryBean#setClustered(boolean)} flag set to
  * <code>false</code>) so setting this flag to <code>false</code> (which means this container
  * will operate when the space is in <code>BACKUP</code> mode as well) needs to be done with care.
- * 
+ *
  * <p>
  * This base class does not assume any specific listener programming model or listener invoker
  * mechanism. It just provides the general runtime lifecycle management needed for any kind of Space
  * event listening mechanism.
- * 
+ *
  * <p>
  * For a concrete listener programming model, check out the
  * {@link org.openspaces.events.AbstractEventListenerContainer} subclass. For a concrete listener
  * invoker mechanism, check out the
  * {@link org.openspaces.events.polling.SimplePollingEventListenerContainer} class.
- * 
+ *
  * @author kimchy
  */
 public abstract class AbstractSpaceListeningContainer implements Lifecycle, BeanNameAware, InitializingBean,
@@ -122,7 +122,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      * lifecycle of the container will be controlled by the current space mode).
      * {@link #doInitialize()} will be called for additional initialization after the possible
      * {@link #doStart()} call.
-     * 
+     *
      * @see #onApplicationEvent(org.springframework.context.ApplicationEvent)
      */
     public void initialize() throws DataAccessException {
@@ -140,7 +140,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
 
     /**
      * Calls {@link #shutdown()} when the BeanFactory destroys the container instance.
-     * 
+     *
      * @see #shutdown()
      */
     public void destroy() {
@@ -151,7 +151,9 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      * Stop container, call {@link #doShutdown()}, and close this container.
      */
     public void shutdown() throws DataAccessException {
-        logger.debug("Shutting down Space Event listener container [" + getBeanName() + "]");
+        if (logger.isDebugEnabled()) {
+            logger.debug(message("Shutting down Space Event listener container"));
+        }
         synchronized (this.lifecycleMonitor) {
             this.running = false;
             this.active = false;
@@ -177,7 +179,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      * the container lifecycle will be controlled by the space mode. The container will start when
      * the space is in <code>PRIMARY</code> mode, and will stop when the space is in
      * <code>BACKUP</code> mode.
-     * 
+     *
      * <p>Note, this might cause {@link #doStart()} or {@link #doStop()} to be called several times in
      * a row, and sub classes should take this into account.
      */
@@ -186,11 +188,17 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
             if (applicationEvent instanceof AfterSpaceModeChangeEvent) {
                 AfterSpaceModeChangeEvent spEvent = (AfterSpaceModeChangeEvent) applicationEvent;
                 if (spEvent.isPrimary() && SpaceUtils.isSameSpace(spEvent.getSpace(), gigaSpace.getSpace())) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace(message("Space [" + getGigaSpace() + "] became primary, starting the container"));
+                    }
                     doStart();
                 }
             } else if (applicationEvent instanceof BeforeSpaceModeChangeEvent) {
                 BeforeSpaceModeChangeEvent spEvent = (BeforeSpaceModeChangeEvent) applicationEvent;
                 if (!spEvent.isPrimary() && SpaceUtils.isSameSpace(spEvent.getSpace(), gigaSpace.getSpace())) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace(message("Space [" + getGigaSpace() + "] became backup, stopping the container"));
+                    }
                     doStop();
                 }
             }
@@ -203,7 +211,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
 
     /**
      * Start this container.
-     * 
+     *
      * @see #doStart
      */
     public void start() throws DataAccessException {
@@ -226,7 +234,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
 
     /**
      * Stop this container.
-     * 
+     *
      * @see #doStop
      */
     public void stop() throws DataAccessException {
@@ -255,9 +263,8 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
 
     /**
      * Wait while this container is not running.
-     * 
-     * <p>
-     * To be called by asynchronous tasks that want to block while the container is in stopped
+     *
+     * <p>To be called by asynchronous tasks that want to block while the container is in stopped
      * state.
      */
     protected final void waitWhileNotRunning() {
@@ -276,12 +283,10 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
     /**
      * Take the given task object and reschedule it, either immediately if this container is
      * currently running, or later once this container has been restarted.
-     * 
-     * <p>
-     * If this container has already been shut down, the task will not get rescheduled at all.
-     * 
-     * @param task
-     *            the task object to reschedule
+     *
+     * <p>If this container has already been shut down, the task will not get rescheduled at all.
+     *
+     * @param task the task object to reschedule
      * @return whether the task has been rescheduled (either immediately or for a restart of this
      *         container)
      * @see #doRescheduleTask
@@ -303,18 +308,20 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
 
     /**
      * Reschedule the given task object immediately.
-     * 
-     * <p>
-     * To be implemented by subclasses if they ever call <code>rescheduleTaskIfNecessary</code>.
+     *
+     * <p>To be implemented by subclasses if they ever call <code>rescheduleTaskIfNecessary</code>.
      * This implementation throws an UnsupportedOperationException.
-     * 
-     * @param task
-     *            the task object to reschedule
+     *
+     * @param task the task object to reschedule
      * @see #rescheduleTaskIfNecessary
      */
     protected void doRescheduleTask(Object task) {
         throw new UnsupportedOperationException(ClassUtils.getShortName(getClass())
                 + " does not support rescheduling of tasks");
+    }
+
+    protected String message(String message) {
+        return "[" + getBeanName() + "] " + message;
     }
 
     // -------------------------------------------------------------------------
@@ -323,18 +330,16 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
 
     /**
      * Register any invokers within this container.
-     * 
-     * <p>
-     * Subclasses need to implement this method for their specific invoker management process.
+     *
+     * <p>Subclasses need to implement this method for their specific invoker management process.
      */
     protected abstract void doInitialize() throws DataAccessException;
 
     /**
      * Close the registered invokers.
-     * 
-     * <p>
-     * Subclasses need to implement this method for their specific invoker management process.
-     * 
+     *
+     * <p>Subclasses need to implement this method for their specific invoker management process.
+     *
      * @see #shutdown()
      */
     protected abstract void doShutdown() throws DataAccessException;

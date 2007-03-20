@@ -339,7 +339,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
     public void initialize() throws DataAccessException {
         if (!replicateNotifyTemplate && triggerNotifyTemplate) {
             if (logger.isDebugEnabled()) {
-                logger.debug("triggerNotifyTemplate is set, automatically setting replicateNotifyTemplate to true");
+                logger.debug(message("triggerNotifyTemplate is set, automatically setting replicateNotifyTemplate to true"));
             }
             replicateNotifyTemplate = true;
         }
@@ -454,7 +454,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
      * @param eventData           The event data object
      * @param source              The remote notify event
      * @param performTakeOnNotify A flag indicating whether to perform take operation with the given event data
-     * @throws GigaSpaceException
+     * @throws DataAccessException
      */
     protected void invokeListenerWithTransaction(Object eventData, Object source, boolean performTakeOnNotify,
                                                  boolean ignoreEventOnNullTake) throws DataAccessException {
@@ -468,14 +468,17 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
                     if (ignoreEventOnNullTake && takeVal == null) {
                         invokeListener = false;
                     }
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Performed take on notify, invoke listener is [" + invokeListener + "]");
+                    }
                 }
                 try {
                     if (invokeListener) {
                         invokeListener(eventData, status, source);
                     }
                 } catch (Throwable t) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Rolling back transaction because of listener exception thrown: " + t);
+                    if (logger.isTraceEnabled()) {
+                        logger.trace(message("Rolling back transaction because of listener exception thrown: " + t));
                     }
                     status.setRollbackOnly();
                     handleListenerException(t);
@@ -512,14 +515,16 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
      * @param ex     the thrown application exception or error
      */
     private void rollbackOnException(TransactionStatus status, Throwable ex) {
-        logger.debug("Initiating transaction rollback on application exception", ex);
+        if (logger.isDebugEnabled()) {
+            logger.debug(message("Initiating transaction rollback on application exception"), ex);
+        }
         try {
             this.transactionManager.rollback(status);
         } catch (RuntimeException ex2) {
-            logger.error("Application exception overridden by rollback exception", ex);
+            logger.error(message("Application exception overridden by rollback exception"), ex);
             throw ex2;
         } catch (Error err) {
-            logger.error("Application exception overridden by rollback error", ex);
+            logger.error(message("Application exception overridden by rollback error"), ex);
             throw err;
         }
     }

@@ -98,8 +98,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
      * Specify the Spring {@link org.springframework.transaction.PlatformTransactionManager} to use
      * for transactional wrapping of event reception plus listener execution.
      * 
-     * <p>
-     * Default is none, not performing any transactional wrapping.
+     * <p>Default is none, not performing any transactional wrapping.
      */
     public void setTransactionManager(PlatformTransactionManager transactionManager) {
         this.transactionManager = transactionManager;
@@ -156,8 +155,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
      * Set the timeout to use for receive calls, in <b>milliseconds</b>. The default is 60000 ms,
      * that is, 1 minute.
      * 
-     * <p>
-     * <b>NOTE:</b> This value needs to be smaller than the transaction timeout used by the
+     * <p><b>NOTE:</b> This value needs to be smaller than the transaction timeout used by the
      * transaction manager (in the appropriate unit, of course).
      * 
      * @see org.openspaces.core.GigaSpace#take(Object,long)
@@ -229,6 +227,9 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
         // if trigger is configure, work using trigger outside of a possible transaction
         if (triggerOperationHandler != null) {
             Object trigger = triggerOperationHandler.triggerReceive(this.template, getGigaSpace(), receiveTimeout);
+            if (logger.isTraceEnabled()) {
+                logger.trace(message("Trigger operation handler returned [" + trigger + "]"));
+            }
             if (trigger == null) {
                 return false;
             }
@@ -264,8 +265,8 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
             if (dataEvent.getClass().isArray()) {
                 Object[] dataEvents = (Object[]) dataEvent;
                 for (Object dataEvent1 : dataEvents) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Received event [" + dataEvent + "]");
+                    if (logger.isTraceEnabled()) {
+                        logger.trace(message("Received event [" + dataEvent + "]"));
                     }
                     eventReceived(dataEvent1);
                     try {
@@ -274,8 +275,8 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
                         if (status != null) {
                             // in case of an exception, we rollback the transaction and return
                             // (since we rolled back)
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Rolling back transaction because of listener exception thrown: " + ex);
+                            if (logger.isTraceEnabled()) {
+                                logger.trace(message("Rolling back transaction because of listener exception thrown: " + ex));
                             }
                             status.setRollbackOnly();
                             handleListenerException(ex);
@@ -288,16 +289,16 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
                     }
                 }
             } else {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Received event [" + dataEvent + "]");
+                if (logger.isTraceEnabled()) {
+                    logger.trace(message("Received event [" + dataEvent + "]"));
                 }
                 eventReceived(dataEvent);
                 try {
                     invokeListener(dataEvent, status, null);
                 } catch (Throwable ex) {
                     if (status != null) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Rolling back transaction because of listener exception thrown: " + ex);
+                        if (logger.isTraceEnabled()) {
+                            logger.trace(message("Rolling back transaction because of listener exception thrown: " + ex));
                         }
                         status.setRollbackOnly();
                     }
@@ -319,14 +320,14 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
      *            the thrown application exception or error
      */
     private void rollbackOnException(TransactionStatus status, Throwable ex) {
-        logger.debug("Initiating transaction rollback on application exception", ex);
+        logger.trace(message("Initiating transaction rollback on application exception"), ex);
         try {
             this.transactionManager.rollback(status);
         } catch (RuntimeException ex2) {
-            logger.error("Application exception overridden by rollback exception", ex);
+            logger.error(message("Application exception overridden by rollback exception"), ex);
             throw ex2;
         } catch (Error err) {
-            logger.error("Application exception overridden by rollback error", ex);
+            logger.error(message("Application exception overridden by rollback error"), ex);
             throw err;
         }
     }

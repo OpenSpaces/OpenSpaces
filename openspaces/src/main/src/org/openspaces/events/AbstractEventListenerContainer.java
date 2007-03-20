@@ -91,11 +91,11 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
         }
         if (isActive()) {
             // Regular case: failed while active. Log at error level.
-            logger.error("Execution of event listener failed", ex);
+            logger.error(message("Execution of event listener failed"), ex);
         } else {
             // Rare case: listener thread failed after container shutdown.
             // Log at debug level, to avoid spamming the shutdown log.
-            logger.debug("Listener exception after container shutdown", ex);
+            logger.debug(message("Listener exception after container shutdown"), ex);
         }
     }
 

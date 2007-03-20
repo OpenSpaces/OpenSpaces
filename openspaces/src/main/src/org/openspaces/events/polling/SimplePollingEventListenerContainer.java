@@ -16,7 +16,7 @@ import java.util.Set;
  * Event listener container variant that uses plain Space take API, specifically a loop of
  * {@link org.openspaces.core.GigaSpace#take(Object,long)} calls that also allow for transactional
  * reception of messages.
- * 
+ *
  * <p>
  * Actual event listener execution happens in asynchronous work units which are created through
  * Spring's {@link org.springframework.core.task.TaskExecutor} abstraction. By default, the
@@ -25,13 +25,13 @@ import java.util.Set;
  * TaskExecutor to integrate with an existing thread pool facility (such as a J2EE server's), for
  * example using a
  * {@link org.springframework.scheduling.commonj.WorkManagerTaskExecutor CommonJ WorkManager}.
- * 
+ *
  * <p>
  * Event reception and listener execution can automatically be wrapped in transactions through
  * passing a Spring {@link org.springframework.transaction.PlatformTransactionManager} into the
  * {@link #setTransactionManager "transactionManager"} property. This will usually be a
  * {@link org.openspaces.core.transaction.manager.LocalJiniTransactionManager}.
- * 
+ *
  * <p>
  * Dynamic scaling of the number of concurrent invokers can be activated through specifying a
  * {@link #setMaxConcurrentConsumers "maxConcurrentConsumers"} value that is higher than the
@@ -42,7 +42,7 @@ import java.util.Set;
  * {@link #setIdleTaskExecutionLimit "idleTaskExecutionLimit"} setting to control the lifespan of
  * each new task, to avoid frequent scaling up and down. Note that using more than one consumer
  * might break fifo behviour if fifo is configured by the space or the specific class type.
- * 
+ *
  * @author kimchy
  */
 public class SimplePollingEventListenerContainer extends AbstractPollingEventListenerContainer {
@@ -85,13 +85,13 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      * listener threads. Default is {@link org.springframework.core.task.SimpleAsyncTaskExecutor},
      * starting up a number of new threads, according to the specified number of concurrent
      * consumers.
-     * 
+     *
      * <p>
      * Specify an alternative TaskExecutor for integration with an existing thread pool. Note that
      * this really only adds value if the threads are managed in a specific fashion, for example
      * within a J2EE environment. A plain thread pool does not add much value, as this listener
      * container will occupy a number of threads for its entire lifetime.
-     * 
+     *
      * @see #setConcurrentConsumers
      * @see org.springframework.core.task.SimpleAsyncTaskExecutor
      */
@@ -102,7 +102,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
     /**
      * Specify the interval between recovery attempts, in <b>milliseconds</b>. The default is 5000
      * ms, that is, 5 seconds.
-     * 
+     *
      * @see #handleListenerSetupFailure
      */
     public void setRecoveryInterval(long recoveryInterval) {
@@ -111,21 +111,21 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
 
     /**
      * Specify the number of concurrent consumers to create. Default is 1.
-     * 
+     *
      * <p>
      * Specifying a higher value for this setting will increase the standard level of scheduled
      * concurrent consumers at runtime: This is effectively the minimum number of concurrent
      * consumers which will be scheduled at any given time. This is a static setting; for dynamic
      * scaling, consider specifying the "maxConcurrentConsumers" setting instead.
-     * 
+     *
      * <p>
      * Raising the number of concurrent consumers is recommendable in order to scale the consumption
      * of events. However, note that any ordering guarantees are lost once multiple consumers are
      * registered. In general, stick with 1 consumer for low-volume events.
-     * 
+     *
      * <p>
      * <b>This setting can be modified at runtime, for example through JMX.</b>
-     * 
+     *
      * @see #setMaxConcurrentConsumers
      */
     public void setConcurrentConsumers(int concurrentConsumers) {
@@ -140,11 +140,11 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
 
     /**
      * Return the "concurrentConsumer" setting.
-     * 
+     *
      * <p>
      * This returns the currently configured "concurrentConsumers" value; the number of currently
      * scheduled/active consumers might differ.
-     * 
+     *
      * @see #getScheduledConsumerCount()
      * @see #getActiveConsumerCount()
      */
@@ -156,21 +156,21 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
 
     /**
      * Specify the maximum number of concurrent consumers to create. Default is 1.
-     * 
+     *
      * <p>
      * If this setting is higher than "concurrentConsumers", the listener container will dynamically
      * schedule new consumers at runtime, provided that enough incoming messages are encountered.
      * Once the load goes down again, the number of consumers will be reduced to the standard level
      * ("concurrentConsumers") again.
-     * 
+     *
      * <p>
      * Raising the number of concurrent consumers is recommendable in order to scale the consumption
      * of events. However, note that any ordering guarantees are lost once multiple consumers are
      * registered. In general, stick with 1 consumer for low-volume events.
-     * 
+     *
      * <p>
      * <b>This setting can be modified at runtime, for example through JMX.</b>
-     * 
+     *
      * @see #setConcurrentConsumers
      */
     public void setMaxConcurrentConsumers(int maxConcurrentConsumers) {
@@ -182,11 +182,11 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
 
     /**
      * Return the "maxConcurrentConsumer" setting.
-     * 
+     *
      * <p>
      * This returns the currently configured "maxConcurrentConsumers" value; the number of currently
      * scheduled/active consumers might differ.
-     * 
+     *
      * @see #getScheduledConsumerCount()
      * @see #getActiveConsumerCount()
      */
@@ -200,21 +200,21 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      * Specify the maximum number of events to process in one task. More concretely, this limits the
      * number of event reception attempts per task, which includes receive iterations that did not
      * actually pick up a event until they hit their timeout (see "receiveTimeout" property).
-     * 
+     *
      * <p>
      * Default is unlimited (-1) in case of a standard TaskExecutor, and 1 in case of a
      * SchedulingTaskExecutor that indicates a preference for short-lived tasks. Specify a number of
      * 10 to 100 messages to balance between extremely long-lived and extremely short-lived tasks
      * here.
-     * 
+     *
      * <p>
      * Long-lived tasks avoid frequent thread context switches through sticking with the same thread
      * all the way through, while short-lived tasks allow thread pools to control the scheduling.
      * Hence, thread pools will usually prefer short-lived tasks.
-     * 
+     *
      * <p>
      * <b>This setting can be modified at runtime, for example through JMX.</b>
-     * 
+     *
      * @see #setTaskExecutor
      * @see #setReceiveTimeout
      * @see org.springframework.scheduling.SchedulingTaskExecutor#prefersShortLivedTasks()
@@ -240,7 +240,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      * its execution. If this limit is reached, the task will shut down and leave receiving to other
      * executing tasks (in case of dynamic scheduling; see the "maxConcurrentConsumers" setting).
      * Default is 1.
-     * 
+     *
      * <p>
      * Within each task execution, a number of event reception attempts (according to the
      * "maxEventsPerTask" setting) will each wait for an incoming event (according to the
@@ -248,17 +248,17 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      * event, the task is considered idle with respect to received events. Such a task may still be
      * rescheduled; however, once it reached the specified "idleTaskExecutionLimit", it will shut
      * down (in case of dynamic scaling).
-     * 
+     *
      * <p>
      * Raise this limit if you encounter too frequent scaling up and down. With this limit being
      * higher, an idle consumer will be kept around longer, avoiding the restart of a consumer once
      * a new load of messages comes in. Alternatively, specify a higher "maxMessagePerTask" and/or
      * "receiveTimeout" value, which will also lead to idle consumers being kept around for a longer
      * time (while also increasing the average execution time of each scheduled task).
-     * 
+     *
      * <p>
      * <b>This setting can be modified at runtime, for example through JMX.</b>
-     * 
+     *
      * @see #setMaxEventsPerTask
      * @see #setReceiveTimeout
      */
@@ -299,12 +299,12 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
 
     /**
      * Create a default TaskExecutor. Called if no explicit TaskExecutor has been specified.
-     * 
+     *
      * <p>
      * The default implementation builds a
      * {@link org.springframework.core.task.SimpleAsyncTaskExecutor} with the specified bean name
      * (or the class name, if no bean name specified) as thread name prefix.
-     * 
+     *
      * @see org.springframework.core.task.SimpleAsyncTaskExecutor#SimpleAsyncTaskExecutor(String)
      */
     protected TaskExecutor createDefaultTaskExecutor() {
@@ -315,7 +315,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
 
     /**
      * Creates the specified number of concurrent consumers, each running in a separate thread.
-     * 
+     *
      * @see #scheduleNewInvoker
      * @see #setTaskExecutor
      */
@@ -329,7 +329,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
 
     /**
      * Re-executes the given task via this listener container's TaskExecutor.
-     * 
+     *
      * @see #setTaskExecutor
      */
     protected void doRescheduleTask(Object task) {
@@ -345,11 +345,11 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      * container, but only if the specified "maxConcurrentConsumers" limit has not been reached yet,
      * and only if this listener container does not currently have idle invokers that are waiting
      * for new messages already.
-     * 
+     *
      * <p>
      * Called once an event has been received, to scale up while processing the event in the invoker
      * that originally received it.
-     * 
+     *
      * @see #setTaskExecutor
      * @see #getMaxConcurrentConsumers()
      */
@@ -359,7 +359,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
                 if (this.scheduledInvokers.size() < this.maxConcurrentConsumers && !hasIdleInvokers()) {
                     scheduleNewInvoker();
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Raised scheduled invoker count [" + scheduledInvokers.size() + "]");
+                        logger.debug(message("Raised scheduled invoker count [" + scheduledInvokers.size() + "]"));
                     }
                 }
             }
@@ -393,10 +393,9 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
     /**
      * Determine whether the current invoker should be rescheduled, given that it might not have
      * received a message in a while.
-     * 
-     * @param idleTaskExecutionCount
-     *            the number of idle executions that this invoker task has already accumulated (in a
-     *            row)
+     *
+     * @param idleTaskExecutionCount the number of idle executions that this invoker task has already accumulated (in a
+     *                               row)
      */
     private boolean shouldRescheduleInvoker(int idleTaskExecutionCount) {
         synchronized (this.activeInvokerMonitor) {
@@ -407,12 +406,12 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
 
     /**
      * Return the number of currently scheduled consumers.
-     * 
+     *
      * <p>
      * This number will always be inbetween "concurrentConsumers" and "maxConcurrentConsumers", but
      * might be higher than "activeConsumerCount" (in case of some consumers being scheduled but not
      * executed at the moment).
-     * 
+     *
      * @see #getConcurrentConsumers()
      * @see #getMaxConcurrentConsumers()
      * @see #getActiveConsumerCount()
@@ -425,12 +424,12 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
 
     /**
      * Return the number of currently active consumers.
-     * 
+     *
      * <p>
      * This number will always be inbetween "concurrentConsumers" and "maxConcurrentConsumers", but
      * might be lower than "scheduledConsumerCount". (in case of some consumers being scheduled but
      * not executed at the moment).
-     * 
+     *
      * @see #getConcurrentConsumers()
      * @see #getMaxConcurrentConsumers()
      * @see #getActiveConsumerCount()
@@ -444,17 +443,15 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
     /**
      * Handle the given exception that arose during setup of a listener. Called for every such
      * exception in every concurrent listener.
-     * 
+     *
      * <p>
      * The default implementation logs the exception at error level if not recovered yet, and at
      * debug level if already recovered. Can be overridden in subclasses.
-     * 
-     * @param ex
-     *            the exception to handle
-     * @param alreadyRecovered
-     *            whether a previously executing listener already recovered from the present
-     *            listener setup failure (this usually indicates a follow-up failure than be ignored
-     *            other than for debug log purposes)
+     *
+     * @param ex               the exception to handle
+     * @param alreadyRecovered whether a previously executing listener already recovered from the present
+     *                         listener setup failure (this usually indicates a follow-up failure than be ignored
+     *                         other than for debug log purposes)
      * @see #recoverAfterListenerSetupFailure()
      */
     protected void handleListenerSetupFailure(Throwable ex, boolean alreadyRecovered) {
@@ -462,20 +459,20 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
             invokeExceptionListener((Exception) ex);
         }
         if (alreadyRecovered) {
-            logger.debug("Setup of evetn listener invoker failed - already recovered by other invoker", ex);
+            logger.debug(message("Setup of event listener invoker failed - already recovered by other invoker"), ex);
         } else {
-            logger.error("Setup of event listener invoker failed - trying to recover", ex);
+            logger.error(message("Setup of event listener invoker failed - trying to recover"), ex);
         }
     }
 
     /**
      * Recover this listener container after a listener failed to set itself up, for example
      * reestablishing the underlying Connection.
-     * 
+     *
      * <p>
      * The default implementation delegates to <code>refreshConnectionUntilSuccessful</code> which
      * pings the space until it is avilable.
-     * 
+     *
      * @see #refreshConnectionUntilSuccessful()
      */
     protected void recoverAfterListenerSetupFailure() {
@@ -484,21 +481,21 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
 
     /**
      * Refresh the underlying Connection, not returning before an attempt has been successful.
-     * 
+     *
      * <p>
      * The default implementation pings the space until a sucessful ping has been established.
-     * 
+     *
      * @see #setRecoveryInterval
      */
     protected void refreshConnectionUntilSuccessful() {
         while (isActive()) {
             try {
                 getGigaSpace().getSpace().ping();
-                logger.info("Successfully refreshed Space Connection");
+                logger.info(message("Successfully refreshed Space Connection"));
                 break;
             } catch (RemoteException ex) {
                 if (logger.isInfoEnabled()) {
-                    logger.info("Could not refresh Space Connection - retrying in " + this.recoveryInterval + " ms", ex);
+                    logger.info(message("Could not refresh Space Connection - retrying in " + this.recoveryInterval + " ms"), ex);
                 }
             }
             sleepInbetweenRecoveryAttempts();
@@ -523,12 +520,11 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      * Destroy the container by waiting for all the current event listeners to shutdown.
      */
     protected void doShutdown() throws DataAccessException {
-        logger.debug("Waiting for shutdown of event listener invokers");
+        logger.debug(message("Waiting for shutdown of event listener invokers"));
         synchronized (this.activeInvokerMonitor) {
             while (this.activeInvokerCount > 0) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Still waiting for shutdown of [" + this.activeInvokerCount
-                            + "] event listener invokers");
+                    logger.debug(message("Still waiting for shutdown of [" + this.activeInvokerCount + "] event listener invokers"));
                 }
                 try {
                     this.activeInvokerMonitor.wait();
@@ -614,7 +610,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
                 synchronized (activeInvokerMonitor) {
                     scheduledInvokers.remove(this);
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Lowered scheduled invoker count [" + scheduledInvokers.size() + "]");
+                        logger.debug(message("Lowered scheduled invoker count [" + scheduledInvokers.size() + "]"));
                     }
                     activeInvokerMonitor.notifyAll();
                 }
