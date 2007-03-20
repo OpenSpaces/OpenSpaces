@@ -72,7 +72,7 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
      *            An optional transaction status allowing to rollback a transaction programmatically
      * @param source
      *            An optional source (or additional event information)
-     * @throws GigaSpaceException
+     * @throws DataAccessException
      */
     protected void invokeListener(Object eventData, TransactionStatus txStatus, Object source)
             throws DataAccessException {

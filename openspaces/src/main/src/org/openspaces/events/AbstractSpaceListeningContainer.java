@@ -1,14 +1,11 @@
 package org.openspaces.events;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.space.mode.AfterSpaceModeChangeEvent;
 import org.openspaces.core.space.mode.BeforeSpaceModeChangeEvent;
+import org.openspaces.core.util.SpaceUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -18,6 +15,10 @@ import org.springframework.context.Lifecycle;
 import org.springframework.dao.DataAccessException;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Common base class for all containers which need to implement listening based on Space events.
@@ -79,10 +80,9 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
     }
 
     /**
-     * <p>
      * Set whether this container will start only when it is primary (space mode).
-     * <p>
-     * Default is <code>true</code>. Set to <code>false</code> in order for this container to
+     *
+     * <p>Default is <code>true</code>. Set to <code>false</code> in order for this container to
      * always start regardless of the space mode.
      */
     public void setActiveWhenPrimary(boolean activeWhenPrimary) {
@@ -173,28 +173,24 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
     }
 
     /**
-     * <p>
      * If the {@link #setActiveWhenPrimary(boolean)} is set to <code>true</code> (the default),
      * the container lifecycle will be controlled by the space mode. The container will start when
      * the space is in <code>PRIMARY</code> mode, and will stop when the space is in
      * <code>BACKUP</code> mode.
      * 
-     * <p>
-     * Note, this might cause {@link #doStart()} or {@link #doStop()} to be called several times in
+     * <p>Note, this might cause {@link #doStart()} or {@link #doStop()} to be called several times in
      * a row, and sub classes should take this into account.
      */
     public void onApplicationEvent(ApplicationEvent applicationEvent) {
-        // TODO maybe match on the space itself, and verify that we are not being notified of the
-        // wrong space
         if (activeWhenPrimary) {
             if (applicationEvent instanceof AfterSpaceModeChangeEvent) {
                 AfterSpaceModeChangeEvent spEvent = (AfterSpaceModeChangeEvent) applicationEvent;
-                if (spEvent.isPrimary()) {
+                if (spEvent.isPrimary() && SpaceUtils.isSameSpace(spEvent.getSpace(), gigaSpace.getSpace())) {
                     doStart();
                 }
             } else if (applicationEvent instanceof BeforeSpaceModeChangeEvent) {
                 BeforeSpaceModeChangeEvent spEvent = (BeforeSpaceModeChangeEvent) applicationEvent;
-                if (!spEvent.isPrimary()) {
+                if (!spEvent.isPrimary() && SpaceUtils.isSameSpace(spEvent.getSpace(), gigaSpace.getSpace())) {
                     doStop();
                 }
             }
