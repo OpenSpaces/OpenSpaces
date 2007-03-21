@@ -13,6 +13,7 @@
         <property name="numberOfInstances" value="2"/>
         <property name="numberOfBackups" value="1"/>
         <property name="clusterSchema" value="partitioned-sync2backup"/>
+        <property name="maxInstancesPerVM" value="1" />
     </bean>
 
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>

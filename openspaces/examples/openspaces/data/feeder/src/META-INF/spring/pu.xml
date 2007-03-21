@@ -34,11 +34,7 @@
     <!-- Local View Example ("client side") -->
 
     <os-core:local-view id="processedViewSpace" space="space">
-        <os-core:view-query where="processed = true" class="org.openspaces.example.data.common.Data">
-            <os-core:template>
-                <bean class="org.openspaces.example.data.common.Data" />
-            </os-core:template>
-        </os-core:view-query>
+        <os-core:view-query where="processed = true" class="org.openspaces.example.data.common.Data" />
     </os-core:local-view>
 
     <os-core:giga-space id="processedViewGigaSpace" space="processedViewSpace"/>
