@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,6 +21,8 @@ import java.util.StringTokenizer;
  * Time: 6:13:28 PM
  */
 public class HTTPFileSystemView extends FileSystemView {
+    private static final Logger LOGGER = Logger.getLogger(HTTPFileSystemView.class.getName());
+
     private File lastDir;
     private File[] lastResults;
 
@@ -36,7 +40,7 @@ public class HTTPFileSystemView extends FileSystemView {
     public File[] getFiles(File dir, boolean useFileHiding) {
         //check cache
         if (lastDir != null && lastDir.equals(dir)) {
-            System.out.println("cached " + dir);
+//            System.out.println("cached " + dir);
             return lastResults;
         }
 
@@ -52,14 +56,15 @@ public class HTTPFileSystemView extends FileSystemView {
                 String type = tokenizer.nextToken();
                 String size = tokenizer.nextToken();
                 long time = Long.parseLong(tokenizer.nextToken());
-                System.out.println("name = " + name + "\t\t type = " + type + "\t\ttime = " + time);
+//                System.out.println("name = " + name + "\t\t type = " + type + "\t\ttime = " + time);
                 File add = new HTTPFile(dir, name, time, type.equals("d"));
                 filesList.add(add);
             }
             reader.close();
             files = (File[]) filesList.toArray(new File[filesList.size()]);
         } catch (Exception e) {
-            System.out.println("line = " + line);
+//            System.out.println("line = " + line);
+            LOGGER.log(Level.WARNING, "Error getting file list:" + e.toString());
         }
         //saved for cache
         lastDir = dir;
