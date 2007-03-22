@@ -21,7 +21,7 @@
 
     <!-- Remoting Example -->
 
-    <os-remoting:proxy id="dataProcessor" giga-space="gigaSpace" interface="org.openspaces.example.data.common.IDataProcessor">
+    <os-remoting:proxy id="dataProcessor" giga-space="gigaSpace" interface="org.openspaces.example.data.common.IDataProcessor" timeout="15000">
         <os-remoting:routing-handler>
             <bean class="org.openspaces.example.data.feeder.support.DataRemoteRoutingHandler"/>
         </os-remoting:routing-handler>
@@ -33,12 +33,12 @@
 
     <!-- Local View Example ("client side") -->
 
-    <os-core:local-view id="processedViewSpace" space="space">
-        <os-core:view-query where="processed = true" class="org.openspaces.example.data.common.Data" />
-    </os-core:local-view>
+    <!--<os-core:local-view id="processedViewSpace" space="space">-->
+        <!--<os-core:view-query where="processed = true" class="org.openspaces.example.data.common.Data" />-->
+    <!--</os-core:local-view>-->
 
-    <os-core:giga-space id="processedViewGigaSpace" space="processedViewSpace"/>
+    <!--<os-core:giga-space id="processedViewGigaSpace" space="processedViewSpace"/>-->
 
-    <bean id="viewDataCounter" class="org.openspaces.example.data.feeder.ViewDataCounter"/>
+    <!--<bean id="viewDataCounter" class="org.openspaces.example.data.feeder.ViewDataCounter"/>-->
 
 </beans>
