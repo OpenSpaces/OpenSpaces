@@ -65,7 +65,14 @@
 
     </target>
 
-    <target name="build_1_5" depends="clean, buildmain" description="Compile main sources"/>
+    <target name="buildexamples" description="Build the examples that come with OpenSpaces">
+
+        <ant antfile="build.xml" dir="examples/openspaces/helloworld/" target="dist" />
+        <ant antfile="build.xml" dir="examples/openspaces/data/" target="dist" />
+
+    </target>
+
+    <target name="build_1_5" depends="clean, buildmain, buildexamples" description="Compile main sources"/>
 
     <target name="build_1_4" depends="clean, buildmain" description="Compile main sources">
         <retrotranslator srcdir="${target.classes.dir}" verify="true"/>
