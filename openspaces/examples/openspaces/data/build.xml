@@ -2,6 +2,8 @@
 
 <project name="openspaces-examples-data" default="usage" basedir=".">
 
+    <property file="../../../build.properties"/>
+
     <property name="common-src" value="${basedir}/common/src"/>
     <property name="common-classes" value="${basedir}/common/classes"/>
     <property name="common-dist" value="${basedir}/common/dist"/>
