@@ -10,4 +10,8 @@
     <os-core:space id="space" url="/./space" lookup-groups="${user.name}"/>
     
     <os-core:giga-space id="gigaSpace" space="space" />
+
+    <bean id="helloworld" class="org.openspaces.example.helloworld.HelloWorldBean">
+        <property name="gigaSpace" ref="gigaSpace" />
+    </bean>
 </beans>
