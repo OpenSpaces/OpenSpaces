@@ -30,6 +30,8 @@ public class PollingContainerBeanDefinitionParser extends AbstarctTxEventContain
 
     private static final String IDLE_TASK_EXECUTION_LIMIT = "idle-task-execution-limit";
 
+    private static final String PERFORM_SNAPSHOT = "perform-snapshot";
+
     protected Class<SimplePollingEventListenerContainer> getBeanClass(Element element) {
         return SimplePollingEventListenerContainer.class;
     }
@@ -82,6 +84,11 @@ public class PollingContainerBeanDefinitionParser extends AbstarctTxEventContain
         String idleTaskExecutionLimit = element.getAttribute(IDLE_TASK_EXECUTION_LIMIT);
         if (StringUtils.hasLength(idleTaskExecutionLimit)) {
             builder.addPropertyValue("idleTaskExecutionLimit", idleTaskExecutionLimit);
+        }
+
+        String performSnapshot = element.getAttribute(PERFORM_SNAPSHOT);
+        if (StringUtils.hasLength(performSnapshot)) {
+            builder.addPropertyValue("performSnapshot", performSnapshot);
         }
     }
 }

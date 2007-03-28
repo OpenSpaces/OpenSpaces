@@ -71,6 +71,8 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
 
     private Object template;
 
+    private boolean performSnapshot = true;
+    
     private PlatformTransactionManager transactionManager;
 
     private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
@@ -81,6 +83,9 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
 
     private TriggerOperationHandler triggerOperationHandler;
 
+
+    private Object receiveTemplate;
+
     /**
      * Sets the specified template to be used with the polling space operation.
      * 
@@ -90,8 +95,23 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
         this.template = template;
     }
 
-    protected Object getTemplate() {
-        return template;
+    /**
+     * Returns the template to be used for receive operations. If
+     * {@link #setPerformSnapshot(boolean)} is set to <code>true</code> (the default)
+     * will return the snapshot of the provided template.
+     */
+    protected Object getReceiveTemplate() {
+        return receiveTemplate;
+    }
+
+    /**
+     * If set to <code>true</code> will perform snaphot operation on the provided template
+     * before invoking the receive operation. Defaults to <code>true</code>.
+     *
+     * @see org.openspaces.core.GigaSpace#snapshot(Object) 
+     */
+    public void setPerformSnapshot(boolean performSnapshot) {
+        this.performSnapshot = performSnapshot;
     }
 
     /**
@@ -205,7 +225,14 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
         if (this.transactionDefinition.getName() == null) {
             this.transactionDefinition.setName(getBeanName());
         }
-
+        if (performSnapshot) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(message("Performing snapshot on template [" + template + "]"));
+            }
+            receiveTemplate = getGigaSpace().snapshot(template);
+        } else {
+            receiveTemplate = template;
+        }
         // Proceed with superclass initialization.
         super.initialize();
     }
@@ -223,7 +250,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
      * @see #doReceiveAndExecute
      */
     protected boolean receiveAndExecute() throws DataAccessException, TransactionException {
-        Object template = getTemplate();
+        Object template = getReceiveTemplate();
         // if trigger is configure, work using trigger outside of a possible transaction
         if (triggerOperationHandler != null) {
             Object trigger = triggerOperationHandler.triggerReceive(this.template, getGigaSpace(), receiveTimeout);

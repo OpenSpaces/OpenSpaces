@@ -35,6 +35,7 @@
                     <xsd:attribute name="max-concurrent-consumers" type="xsd:nonNegativeInteger"/>
                     <xsd:attribute name="max-events-per-task" type="xsd:nonNegativeInteger"/>
                     <xsd:attribute name="idle-task-execution-limit" type="xsd:nonNegativeInteger"/>
+                    <xsd:attribute name="perform-snapshot" type="xsd:boolean"/>
                 </xsd:extension>
             </xsd:complexContent>
         </xsd:complexType>
