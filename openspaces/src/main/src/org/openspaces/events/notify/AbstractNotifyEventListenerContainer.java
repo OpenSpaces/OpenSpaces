@@ -111,6 +111,8 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
 
     private Object template;
 
+    private boolean performSnapshot = true;
+
     private long listenerLease = Lease.FOREVER;
 
     private INotifyDelegatorFilter notifyFilter;
@@ -133,6 +135,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
 
     private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
 
+
+    private Object receiveTemplate;
+    
     public void setComType(int comType) {
         this.comType = comType;
     }
@@ -196,6 +201,25 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
         this.template = template;
     }
 
+    /**
+     * Returns the template to be used for receive operations. If
+     * {@link #setPerformSnapshot(boolean)} is set to <code>true</code> (the default)
+     * will return the snapshot of the provided template.
+     */
+    protected Object getReceiveTemplate() {
+        return receiveTemplate;
+    }
+
+    /**
+     * If set to <code>true</code> will perform snaphot operation on the provided template
+     * before invoking registering as an event listener.
+     *
+     * @see org.openspaces.core.GigaSpace#snapshot(Object)
+     */
+    public void setPerformSnapshot(boolean performSnapshot) {
+        this.performSnapshot = performSnapshot;
+    }
+    
     /**
      * Controls the lease associated with the registered listener. Defaults to
      * {@link net.jini.core.lease.Lease#FOREVER}.
@@ -344,6 +368,15 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
             replicateNotifyTemplate = true;
         }
 
+        if (performSnapshot) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(message("Performing snapshot on template [" + template + "]"));
+            }
+            receiveTemplate = getGigaSpace().snapshot(template);
+        } else {
+            receiveTemplate = template;
+        }
+        
         super.initialize();
     }
 
@@ -436,7 +469,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
             notifyType = notifyType.or(NotifyActionType.NOTIFY_ALL);
         }
         try {
-            dataEventSession.addListener(template, listener, listenerLease, null, notifyFilter, notifyType);
+            dataEventSession.addListener(getReceiveTemplate(), listener, listenerLease, null, notifyFilter, notifyType);
         } catch (Exception e) {
             throw new NotifyListenerRegistrationException("Failed to register notify listener", e);
         }

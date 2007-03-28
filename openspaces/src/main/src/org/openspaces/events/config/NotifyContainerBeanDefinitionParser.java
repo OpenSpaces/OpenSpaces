@@ -44,6 +44,8 @@ public class NotifyContainerBeanDefinitionParser extends AbstarctTxEventContaine
 
     private static final String NOTIFY = "notify";
 
+    private static final String PERFORM_SNAPSHOT = "perform-snapshot";
+    
     protected Class<SimpleNotifyEventListenerContainer> getBeanClass(Element element) {
         return SimpleNotifyEventListenerContainer.class;
     }
@@ -139,6 +141,11 @@ public class NotifyContainerBeanDefinitionParser extends AbstarctTxEventContaine
         String ignoreEventOnNullTake = element.getAttribute(IGNORE_EVENT_ON_NULL_TAKE);
         if (StringUtils.hasLength(ignoreEventOnNullTake)) {
             builder.addPropertyValue("ignoreEventOnNullTake", ignoreEventOnNullTake);
+        }
+
+        String performSnapshot = element.getAttribute(PERFORM_SNAPSHOT);
+        if (StringUtils.hasLength(performSnapshot)) {
+            builder.addPropertyValue("performSnapshot", performSnapshot);
         }
     }
 }
