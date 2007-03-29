@@ -139,7 +139,7 @@ public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements Fac
             remoteRoutingHandler.setRemoteInvocationRouting(remoteInvocation);
         }
         if (remoteInvocation.getRouting() == null) {
-            remoteInvocation.setRouting(new Integer(remoteInvocation.hashCode()));
+            remoteInvocation.setRouting(remoteInvocation.hashCode());
         }
         // check if this invocation will be a one way invocation
         if (globalOneWay) {
@@ -153,7 +153,7 @@ public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements Fac
         gigaSpace.write(remoteInvocation);
 
         // if this is a one way invocation, simply return null
-        if (remoteInvocation.oneWay != null && remoteInvocation.oneWay.booleanValue()) {
+        if (remoteInvocation.oneWay != null && remoteInvocation.oneWay) {
             return null;
         }
 
