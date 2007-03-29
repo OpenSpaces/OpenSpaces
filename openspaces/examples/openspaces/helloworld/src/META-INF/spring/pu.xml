@@ -5,12 +5,25 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd">
 
+    <!--
+        Spring propery configurer which allows us to use system properties (such as user.name).
+    -->
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
+    <!--
+        A bean representing a space (an IJSpace implementation).
+    -->
     <os-core:space id="space" url="/./space" lookup-groups="${user.name}"/>
-    
+
+    <!--
+        OpenSpaces simplified space API built on top of IJSpace/JavaSpace.
+    -->
     <os-core:giga-space id="gigaSpace" space="space" />
 
+    <!--
+        Creates a simple bean that writes and takes a message from the space when
+        it starts up.
+    -->
     <bean id="helloworld" class="org.openspaces.example.helloworld.HelloWorldBean">
         <property name="gigaSpace" ref="gigaSpace" />
     </bean>
