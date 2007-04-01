@@ -1,5 +1,6 @@
 package org.openspaces.enhancer.entry;
 
+import org.openspaces.enhancer.Enhancer;
 import org.openspaces.enhancer.support.BinaryFormatHelper;
 import org.openspaces.enhancer.support.CommonTypes;
 import org.openspaces.enhancer.support.TypeHelper;
@@ -21,7 +22,7 @@ import java.util.List;
 /**
  * @author kimchy
  */
-public class EntryEnhancer {
+public class EntryEnhancer implements Enhancer {
 
     private static final String BINARY_FIELD_NAME = "__payload";
 
@@ -29,13 +30,29 @@ public class EntryEnhancer {
         if (classNode.interfaces.contains("org/openspaces/enhancer/entry/EnhancedEntry")) {
             return false;
         }
+        return hasEntryAnnotation(classNode) || hasExternalizableAnnotation(classNode);
+    }
+
+    private boolean hasEntryAnnotation(ClassNode classNode) {
         if (classNode.visibleAnnotations == null) {
             return false;
         }
         for (Object objAnn : classNode.visibleAnnotations) {
             AnnotationNode annNode = (AnnotationNode) objAnn;
-            if (annNode.desc.equals("Lorg/openspaces/enhancer/entry/Entry;") ||
-                    annNode.desc.equals("Lorg/openspaces/enhancer/entry/Externalizable;")) {
+            if (annNode.desc.equals("Lorg/openspaces/enhancer/entry/Entry;")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasExternalizableAnnotation(ClassNode classNode) {
+        if (classNode.visibleAnnotations == null) {
+            return false;
+        }
+        for (Object objAnn : classNode.visibleAnnotations) {
+            AnnotationNode annNode = (AnnotationNode) objAnn;
+            if (annNode.desc.equals("Lorg/openspaces/enhancer/entry/Externalizable;")) {
                 return true;
             }
         }
@@ -50,8 +67,10 @@ public class EntryEnhancer {
         System.out.println("OpenSpaces enhancing class [" + classNode.name + "] with Entry information");
 
         classNode.version = (classNode.version & 0xFF) < Opcodes.V1_5 ? Opcodes.V1_5 : classNode.version;
-        classNode.interfaces.add("net/jini/core/entry/Entry");
-        classNode.interfaces.add("org/openspaces/enhancer/entry/EnhancedEntry");
+        if (hasEntryAnnotation(classNode)) {
+            classNode.interfaces.add("net/jini/core/entry/Entry");
+            classNode.interfaces.add("org/openspaces/enhancer/entry/EnhancedEntry");
+        }
 
         // add the binary field. Note, we add it before we iterate on the public fields
         List<FieldNode> binaryFields = findBinaryFields(classNode);
@@ -62,23 +81,27 @@ public class EntryEnhancer {
 
         List<FieldNode> publicFields = new ArrayList<FieldNode>();
         // move all non tranisient fields to public and mark them
+        boolean isEntry = hasEntryAnnotation(classNode);
         for (Object obj : classNode.fields) {
             FieldNode fieldNode = (FieldNode) obj;
             if ((fieldNode.access & Opcodes.ACC_TRANSIENT) == 0) {
-                fieldNode.access = fieldNode.access | Opcodes.ACC_PUBLIC;
-                fieldNode.access = fieldNode.access & ~Opcodes.ACC_PRIVATE;
-                fieldNode.access = fieldNode.access & ~Opcodes.ACC_PROTECTED;
+                if (isEntry) {
+                    fieldNode.access = fieldNode.access | Opcodes.ACC_PUBLIC;
+                    fieldNode.access = fieldNode.access & ~Opcodes.ACC_PRIVATE;
+                    fieldNode.access = fieldNode.access & ~Opcodes.ACC_PROTECTED;
+                }
                 publicFields.add(fieldNode);
             }
         }
 
         try {
+            addExternalizableMethods(classNode, publicFields);
             // here we know that we might add empty pack/unpack
             addBinaryMethods(classNode, binaryFields);
-
-            addExternalizableMethods(classNode, publicFields);
-            addEntryInfo(classNode, publicFields);
-            addSpaceIndexesFields(classNode, publicFields);
+            if (hasEntryAnnotation(classNode)) {
+                addEntryInfo(classNode, publicFields);
+                addSpaceIndexesFields(classNode, publicFields);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
