@@ -297,28 +297,12 @@ public class EntryEnhancer {
                 writeGa.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeLong(long)"));
             }
 
-            // handle write for each field
-            Label lblIsNull = null;
-            for (FieldNode fieldNode : binaryFields) {
-                Type fieldType = Type.getType(fieldNode.desc);
-
-                if (!TypeHelper.isPrimitive(fieldType)) {
-                    writeGa.loadThis();
-                    writeGa.getField(classType, fieldNode.name, fieldType);
-                    lblIsNull = writeGa.newLabel();
-                    writeGa.ifNull(lblIsNull);
+            writeValues(binaryFields, classType, writeGa, new LoadStream() {
+                public void load() {
+                    writeGa.loadLocal(objectStream);
                 }
+            });
 
-
-                writeValue(classType, writeGa, fieldNode, fieldType, new LoadStream() {
-                    public void load() {
-                        writeGa.loadLocal(objectStream);
-                    }
-                });
-                if (!TypeHelper.isPrimitive(fieldType)) {
-                    writeGa.visitLabel(lblIsNull);
-                }
-            }
 
             writeGa.loadLocal(objectStream);
             writeGa.invokeVirtual(CommonTypes.OBJECT_OUTPUT_STREAM_TYPE, Method.getMethod("void close()"));
@@ -441,27 +425,11 @@ public class EntryEnhancer {
         }
 
         // handle write for each field
-        Label lblIsNull = null;
-        for (FieldNode fieldNode : publicFields) {
-            Type fieldType = Type.getType(fieldNode.desc);
-
-            if (!TypeHelper.isPrimitive(fieldType)) {
-                writeGa.loadThis();
-                writeGa.getField(classType, fieldNode.name, fieldType);
-                lblIsNull = writeGa.newLabel();
-                writeGa.ifNull(lblIsNull);
+        writeValues(publicFields, classType, writeGa, new LoadStream() {
+            public void load() {
+                writeGa.loadArg(0);
             }
-
-            writeValue(classType, writeGa, fieldNode, fieldType, new LoadStream() {
-                public void load() {
-                    writeGa.loadArg(0);
-                }
-            });
-
-            if (!TypeHelper.isPrimitive(fieldType)) {
-                writeGa.visitLabel(lblIsNull);
-            }
-        }
+        });
 
         writeGa.returnValue();
         writeGa.endMethod();
@@ -598,6 +566,28 @@ public class EntryEnhancer {
         } else {
             ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("Object readObject()"));
             ga.checkCast(fieldType);
+        }
+    }
+
+    private void writeValues(List<FieldNode> fields, Type classType, final GeneratorAdapter writeGa,
+                             LoadStream loadStream) {
+        // handle write for each field
+        Label lblIsNull = null;
+        for (FieldNode fieldNode : fields) {
+            Type fieldType = Type.getType(fieldNode.desc);
+
+            if (!TypeHelper.isPrimitive(fieldType)) {
+                writeGa.loadThis();
+                writeGa.getField(classType, fieldNode.name, fieldType);
+                lblIsNull = writeGa.newLabel();
+                writeGa.ifNull(lblIsNull);
+            }
+
+
+            writeValue(classType, writeGa, fieldNode, fieldType, loadStream);
+            if (!TypeHelper.isPrimitive(fieldType)) {
+                writeGa.visitLabel(lblIsNull);
+            }
         }
     }
 
