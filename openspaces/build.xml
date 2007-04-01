@@ -72,7 +72,7 @@
 
     </target>
 
-    <target name="build_1_5" depends="clean, buildmain, buildexamples" description="Compile main sources"/>
+    <target name="build_1_5" depends="clean, buildmain" description="Compile main sources"/>
 
     <target name="build_1_4" depends="clean, buildmain" description="Compile main sources">
         <retrotranslator srcdir="${target.classes.dir}" verify="true"/>
@@ -171,7 +171,7 @@
         </zip>
     </target>
 
-    <target name="dist_1_5" depends="build_1_5, fulljar, srczip, javadoc, schema"
+    <target name="dist_1_5" depends="build_1_5, fulljar, buildexamples, srczip, javadoc, schema"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}"/>
         <delete file="${dist.dir}/${name}-${openspaces-version}-1.5.zip"/>
