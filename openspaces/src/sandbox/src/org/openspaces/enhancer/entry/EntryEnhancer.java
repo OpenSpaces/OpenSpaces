@@ -285,23 +285,14 @@ public class EntryEnhancer {
             writeGa.storeLocal(objectStream);
 
 
-            Type nullValueType = findNullValueType(binaryFields);
-            int nullValueId = writeNullHolder(binaryFields, classType, writeGa, nullValueType);
-            writeGa.loadLocal(objectStream);
-            writeGa.loadLocal(nullValueId);
-            if (nullValueType == Type.SHORT_TYPE) {
-                writeGa.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeShort(int)"));
-            } else if (nullValueType == Type.INT_TYPE) {
-                writeGa.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeInt(int)"));
-            } else {
-                writeGa.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeLong(long)"));
-            }
-
-            writeValues(binaryFields, classType, writeGa, new LoadStream() {
-                public void load() {
+            LoadStream loadStream = new LoadStream() {
+                public void loadOutputStream() {
                     writeGa.loadLocal(objectStream);
                 }
-            });
+            };
+
+            writeNullHeader(binaryFields, classType, writeGa, loadStream);
+            writeValues(binaryFields, classType, writeGa, loadStream);
 
 
             writeGa.loadLocal(objectStream);
@@ -374,7 +365,7 @@ public class EntryEnhancer {
 
                 readGa.loadThis();
                 readValue(readGa, fieldType, new LoadStream() {
-                    public void load() {
+                    public void loadOutputStream() {
                         readGa.loadLocal(objectStream);
                     }
                 });
@@ -411,25 +402,14 @@ public class EntryEnhancer {
             writeGa.invokeInsn(Opcodes.INVOKESPECIAL, Type.getObjectType(classNode.superName), Method.getMethod("void writeExternal(java.io.ObjectOutput)"));
         }
 
-        // a new local variable for null values
-        Type nullValueType = findNullValueType(publicFields);
-        int nullValueId = writeNullHolder(publicFields, classType, writeGa, nullValueType);
-        writeGa.loadArg(0);
-        writeGa.loadLocal(nullValueId);
-        if (nullValueType == Type.SHORT_TYPE) {
-            writeGa.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeShort(int)"));
-        } else if (nullValueType == Type.INT_TYPE) {
-            writeGa.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeInt(int)"));
-        } else {
-            writeGa.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeLong(long)"));
-        }
-
-        // handle write for each field
-        writeValues(publicFields, classType, writeGa, new LoadStream() {
-            public void load() {
+        LoadStream loadStream = new LoadStream() {
+            public void loadOutputStream() {
                 writeGa.loadArg(0);
             }
-        });
+        };
+
+        writeNullHeader(publicFields, classType, writeGa, loadStream);
+        writeValues(publicFields, classType, writeGa, loadStream);
 
         writeGa.returnValue();
         writeGa.endMethod();
@@ -445,7 +425,7 @@ public class EntryEnhancer {
         }
 
         // read null values
-        nullValueType = findNullValueType(publicFields);
+        Type nullValueType = findNullValueType(publicFields);
         readGa.loadArg(0);
         if (nullValueType == Type.SHORT_TYPE) {
             readGa.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("short readShort()"));
@@ -454,7 +434,7 @@ public class EntryEnhancer {
         } else {
             readGa.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("long readLong()"));
         }
-        nullValueId = readGa.newLocal(nullValueType);
+        int nullValueId = readGa.newLocal(nullValueType);
         readGa.storeLocal(nullValueId);
 
         // read different values
@@ -479,7 +459,7 @@ public class EntryEnhancer {
 
             readGa.loadThis();
             readValue(readGa, fieldType, new LoadStream() {
-                public void load() {
+                public void loadOutputStream() {
                     readGa.loadArg(0);
                 }
             });
@@ -494,7 +474,7 @@ public class EntryEnhancer {
     }
 
     private void readValue(GeneratorAdapter ga, Type fieldType, LoadStream loadStream) {
-        loadStream.load();
+        loadStream.loadOutputStream();
         if (fieldType.equals(Type.BYTE_TYPE)) {
             ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("byte readByte()"));
         } else if (fieldType.equals(Type.BOOLEAN_TYPE)) {
@@ -557,7 +537,7 @@ public class EntryEnhancer {
             ga.arrayLength();
             ga.ifZCmp(GeneratorAdapter.EQ, lblZeroLengh);
 
-            loadStream.load();
+            loadStream.loadOutputStream();
             ga.loadLocal(byteLocal);
             ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("void readFully(byte[])"));
 
@@ -583,7 +563,6 @@ public class EntryEnhancer {
                 writeGa.ifNull(lblIsNull);
             }
 
-
             writeValue(classType, writeGa, fieldNode, fieldType, loadStream);
             if (!TypeHelper.isPrimitive(fieldType)) {
                 writeGa.visitLabel(lblIsNull);
@@ -592,7 +571,7 @@ public class EntryEnhancer {
     }
 
     private void writeValue(Type classType, GeneratorAdapter ga, FieldNode fieldNode, Type fieldType, LoadStream loadStream) {
-        loadStream.load();
+        loadStream.loadOutputStream();
         ga.loadThis();
         ga.getField(classType, fieldNode.name, fieldType);
 
@@ -648,7 +627,7 @@ public class EntryEnhancer {
             // write the size, then write the array
             ga.arrayLength();
             ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeInt(int)"));
-            loadStream.load();
+            loadStream.loadOutputStream();
             ga.loadThis();
             ga.getField(classType, fieldNode.name, fieldType);
             ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void write(byte[])"));
@@ -659,13 +638,28 @@ public class EntryEnhancer {
         }
     }
 
-    private int writeNullHolder(List<FieldNode> publicFields, Type classType, GeneratorAdapter ga, Type nullValueType) {
+    private void writeNullHeader(List<FieldNode> fields, Type classType, GeneratorAdapter writeGa, LoadStream loadStream) {
+        // a new local variable for null values
+        Type nullValueType = findNullValueType(fields);
+        int nullValueId = writeNullHolder(fields, classType, writeGa, nullValueType);
+        loadStream.loadOutputStream();
+        writeGa.loadLocal(nullValueId);
+        if (nullValueType == Type.SHORT_TYPE) {
+            writeGa.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeShort(int)"));
+        } else if (nullValueType == Type.INT_TYPE) {
+            writeGa.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeInt(int)"));
+        } else {
+            writeGa.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeLong(long)"));
+        }
+    }
+
+    private int writeNullHolder(List<FieldNode> fields, Type classType, GeneratorAdapter ga, Type nullValueType) {
         // handle null values
         int nullValueId = ga.newLocal(nullValueType);
         ga.push(0);
         ga.storeLocal(nullValueId);
-        for (int i = 0; i < publicFields.size(); i++) {
-            FieldNode fieldNode = publicFields.get(i);
+        for (int i = 0; i < fields.size(); i++) {
+            FieldNode fieldNode = fields.get(i);
             Type fieldType = Type.getType(fieldNode.desc);
             if (TypeHelper.isPrimitive(fieldType)) {
                 continue;
@@ -689,9 +683,9 @@ public class EntryEnhancer {
         return nullValueId;
     }
 
-    private Type findNullValueType(List<FieldNode> publicFields) {
+    private Type findNullValueType(List<FieldNode> fields) {
         List<FieldNode> temp = new ArrayList<FieldNode>();
-        for (FieldNode fieldNode : publicFields) {
+        for (FieldNode fieldNode : fields) {
             Type fieldType = Type.getType(fieldNode.desc);
             if (!TypeHelper.isPrimitive(fieldType)) {
                 temp.add(fieldNode);
@@ -730,6 +724,6 @@ public class EntryEnhancer {
 
     private interface LoadStream {
 
-        void load();
+        void loadOutputStream();
     }
 }
