@@ -198,6 +198,7 @@
         <unzip src="${dist.dir}/${name}-${openspaces-version}-1.5.zip" dest="${gshome.dir}" />
     </target>
 
+
     <!--
     ########### TEST TARGETS ###########
     -->
@@ -262,7 +263,7 @@
 
 
     <!--
-         Run test suite and generate test summary, for both main and tiger tests.
+         Run test suite and generate test summary, for both main and sandbox tests.
          Does not halt on failure or error, in contrast to the "tests" target above.
      -->
     <target name="testsummary" depends="buildtests" description="Run tests and generate test summary">
@@ -302,5 +303,72 @@
     </target>
 
     <target name="clean_tests" depends="clean,tests"/>
+
+
+    <!-- SANDBOX -->
+
+    <target name="buildsandbox" description="Compile the sandbox source tree java files into class files">
+
+        <mkdir dir="${target.sandbox-classes.dir}"/>
+        <mkdir dir="${target.sandbox-classes.dir}/META-INF"/>
+
+        <javac destdir="${target.sandbox-classes.dir}" source="1.5" target="1.5" debug="${debug}"
+               deprecation="false" optimize="false" failonerror="true">
+            <src path="${sandbox.src.dir}"/>
+            <classpath refid="all-libs"/>
+        </javac>
+
+        <copy todir="${target.sandbox-classes.dir}" preservelastmodified="true">
+            <fileset dir="${main.src.dir}">
+                <include name="**/*.properties"/>
+                <include name="**/*.handlers"/>
+                <include name="**/*.schemas"/>
+                <include name="**/*.xml"/>
+                <include name="**/*.dtd"/>
+                <include name="**/*.xsd"/>
+            </fileset>
+        </copy>
+
+    </target>
+
+    <target name="sandboxjar" description="Create full sandbox JAR file with all OpenSpaces classes" depends="buildsandbox">
+
+        <mkdir dir="${lib.dir}/${name}"/>
+        <delete file="${lib.dir}/${name}/${name}-sandbox.jar"/>
+
+        <jar jarfile="${lib.dir}/${name}/${name}-sandbox.jar">
+            <fileset dir="${target.sandbox-classes.dir}">
+                <include name="META-INF/**"/>
+                <include name="org/openspaces/**"/>
+            </fileset>
+            <manifest>
+                <attribute name="Implementation-Title" value="${openspaces-title}"/>
+                <attribute name="Implementation-Version" value="${openspaces-version}"/>
+                <attribute name="OpenSpaces-Version" value="${openspaces-version}"/>
+            </manifest>
+        </jar>
+
+    </target>
+
+    <target name="agentjar" description="Create agent JAR file with all OpenSpaces classes" depends="buildsandbox">
+
+        <mkdir dir="${lib.dir}/${name}"/>
+        <delete file="${lib.dir}/${name}/${name}-agent.jar"/>
+
+        <jar jarfile="${lib.dir}/${name}/${name}-agent.jar">
+            <fileset dir="${target.sandbox-classes.dir}">
+                <include name="org/openspaces/enhancer/**"/>
+                <include name="org/openspaces/libraries/asm/**"/>
+            </fileset>
+            <manifest>
+                <attribute name="Implementation-Title" value="${openspaces-title}"/>
+                <attribute name="Implementation-Version" value="${openspaces-version}"/>
+                <attribute name="OpenSpaces-Version" value="${openspaces-version}"/>
+                <attribute name="Premain-Class" value="org.openspaces.enhancer.EnhancerAgent"/>
+            </manifest>
+        </jar>
+
+    </target>
+
 
 </project>

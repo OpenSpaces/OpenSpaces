@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" output="target/classes" path="src/main/src"/>
+	<classpathentry kind="src" output="target/sandbox-classes" path="src/sandbox/src"/>
+	<classpathentry kind="src" output="target/sandbox-test-classes" path="src/sandbox/test"/>
 	<classpathentry kind="src" output="target/main-test-classes" path="src/main/test"/>
 	<classpathentry kind="src" output="examples/openspaces/helloworld/pu/helloworld" path="examples/openspaces/helloworld/src"/>
 	<classpathentry kind="src" output="examples/openspaces/data/common/classes" path="examples/openspaces/data/common/src"/>
