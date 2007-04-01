@@ -7,6 +7,7 @@ import org.openspaces.enhancer.support.ExternalizableHelper;
 import java.io.Externalizable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
 import java.util.Calendar;
 
 /**
@@ -51,6 +52,7 @@ public class SimpleEntryEnhancerTests extends TestCase {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2000, 1, 1);
         origData.setDate(calendar.getTime());
+        origData.setBigDecimal(BigDecimal.TEN);
 
         Data newData = new Data();
         ExternalizableHelper.externalize((Externalizable) origData, (Externalizable) newData);
@@ -66,6 +68,7 @@ public class SimpleEntryEnhancerTests extends TestCase {
         assertEquals(2, newData.getBytes().length);
         assertEquals(1, newData.getBytes()[0]);
         assertEquals(calendar.getTime(), newData.getDate());
+        assertEquals(BigDecimal.TEN, newData.getBigDecimal());
     }
 
 

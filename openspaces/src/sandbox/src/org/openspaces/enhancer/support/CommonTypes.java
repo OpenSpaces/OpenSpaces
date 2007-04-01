@@ -29,6 +29,8 @@ public abstract class CommonTypes {
 
     public final static Type OBJECT_TYPE = Type.getObjectType("java/lang/Object");
 
+    public final static Type BIG_DECIMAL_TYPE = Type.getObjectType("java/math/BigDecimal");
+
     public final static Type OBJECT_INPUT_TYPE = Type.getObjectType("java/io/ObjectInput");
 
     public final static Type OBJECT_OUTPUT_TYPE = Type.getObjectType("java/io/ObjectOutput");

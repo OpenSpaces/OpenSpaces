@@ -2,6 +2,7 @@ package org.openspaces.utest.enhancer.entry.simple;
 
 import org.openspaces.enhancer.entry.Entry;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -29,6 +30,8 @@ public class Data {
     private byte[] bytes;
 
     private Date date;
+
+    private BigDecimal bigDecimal;
 
     public Integer getHidden() throws Exception {
         return hidden;
@@ -108,5 +111,13 @@ public class Data {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public BigDecimal getBigDecimal() {
+        return bigDecimal;
+    }
+
+    public void setBigDecimal(BigDecimal bigDecimal) {
+        this.bigDecimal = bigDecimal;
     }
 }

@@ -499,6 +499,9 @@ public class EntryEnhancer {
             ga.invokeStatic(CommonTypes.DOUBLE_TYPE, Method.getMethod("Double valueOf(double)"));
 
 
+        } else if (fieldType.equals(CommonTypes.BIG_DECIMAL_TYPE)) {
+            BinaryFormatHelper.readBigDecimal(ga);
+
         } else if (fieldType.equals(CommonTypes.STRING_TYPE)) {
             BinaryFormatHelper.readString(ga);
 
@@ -599,6 +602,9 @@ public class EntryEnhancer {
             BinaryFormatHelper.writeDouble(ga);
 
 
+        } else if (fieldType.equals(CommonTypes.BIG_DECIMAL_TYPE)) {
+            BinaryFormatHelper.writeBigDecimal(ga);
+            
         } else if (fieldType.equals(CommonTypes.STRING_TYPE)) {
             BinaryFormatHelper.writeString(ga);
 

@@ -90,4 +90,12 @@ public abstract class BinaryFormatHelper {
     public static void readByteArray(GeneratorAdapter ga) {
         ga.invokeStatic(binaryFormatType, Method.getMethod("byte[] readByteArray(java.io.ObjectInput)"));
     }
+
+    public static void writeBigDecimal(GeneratorAdapter ga) {
+        ga.invokeStatic(binaryFormatType, Method.getMethod("void writeDecimal(java.io.ObjectOutput, java.math.BigDecimal)"));
+    }
+
+    public static void readBigDecimal(GeneratorAdapter ga) {
+        ga.invokeStatic(binaryFormatType, Method.getMethod("java.math.BigDecimal readDecimal(java.io.ObjectInput)"));
+    }
 }
