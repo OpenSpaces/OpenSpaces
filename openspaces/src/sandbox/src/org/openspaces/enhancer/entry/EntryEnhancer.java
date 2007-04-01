@@ -1,5 +1,6 @@
 package org.openspaces.enhancer.entry;
 
+import org.openspaces.enhancer.support.BinaryFormatHelper;
 import org.openspaces.enhancer.support.CommonTypes;
 import org.openspaces.enhancer.support.TypeHelper;
 import org.openspaces.libraries.asm.Label;
@@ -455,51 +456,51 @@ public class EntryEnhancer {
     private void readValue(GeneratorAdapter ga, Type fieldType, LoadStream loadStream) {
         loadStream.loadOutputStream();
         if (fieldType.equals(Type.BYTE_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("byte readByte()"));
+            BinaryFormatHelper.readByte(ga);
         } else if (fieldType.equals(Type.BOOLEAN_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("boolean readBoolean()"));
+            BinaryFormatHelper.readBoolean(ga);
         } else if (fieldType.equals(Type.SHORT_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("short readShort()"));
+            BinaryFormatHelper.readShort(ga);
         } else if (fieldType.equals(Type.CHAR_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("char readChar()"));
+            BinaryFormatHelper.readChar(ga);
         } else if (fieldType.equals(Type.INT_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("int readInt()"));
+            BinaryFormatHelper.readInt(ga);
         } else if (fieldType.equals(Type.FLOAT_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("float readFloat()"));
+            BinaryFormatHelper.readFloat(ga);
         } else if (fieldType.equals(Type.LONG_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("long readLong()"));
+            BinaryFormatHelper.readLong(ga);
         } else if (fieldType.equals(Type.DOUBLE_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("double readDouble()"));
+            BinaryFormatHelper.readDouble(ga);
 
 
         } else if (fieldType.equals(CommonTypes.BYTE_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("byte readByte()"));
+            BinaryFormatHelper.readByte(ga);
             ga.invokeStatic(CommonTypes.BYTE_TYPE, Method.getMethod("Byte valueOf(byte)"));
         } else if (fieldType.equals(CommonTypes.BOOLEAN_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("boolean readBoolean()"));
+            BinaryFormatHelper.readBoolean(ga);
             ga.invokeStatic(CommonTypes.BOOLEAN_TYPE, Method.getMethod("Boolean valueOf(boolean)"));
         } else if (fieldType.equals(CommonTypes.SHORT_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("short readShort()"));
+            BinaryFormatHelper.readShort(ga);
             ga.invokeStatic(CommonTypes.SHORT_TYPE, Method.getMethod("Short valueOf(short)"));
         } else if (fieldType.equals(CommonTypes.CHARACTER_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("char readChar()"));
+            BinaryFormatHelper.readChar(ga);
             ga.invokeStatic(CommonTypes.CHARACTER_TYPE, Method.getMethod("Charecter valueOf(char)"));
         } else if (fieldType.equals(CommonTypes.INTEGER_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("int readInt()"));
+            BinaryFormatHelper.readInt(ga);
             ga.invokeStatic(CommonTypes.INTEGER_TYPE, Method.getMethod("Integer valueOf(int)"));
         } else if (fieldType.equals(CommonTypes.FLOAT_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("float readFloat()"));
+            BinaryFormatHelper.readFloat(ga);
             ga.invokeStatic(CommonTypes.FLOAT_TYPE, Method.getMethod("Float valueOf(float)"));
         } else if (fieldType.equals(CommonTypes.LONG_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("long readLong()"));
+            BinaryFormatHelper.readLong(ga);
             ga.invokeStatic(CommonTypes.LONG_TYPE, Method.getMethod("Long valueOf(long)"));
         } else if (fieldType.equals(CommonTypes.DOUBLE_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("double readDouble()"));
+            BinaryFormatHelper.readDouble(ga);
             ga.invokeStatic(CommonTypes.DOUBLE_TYPE, Method.getMethod("Double valueOf(double)"));
 
 
         } else if (fieldType.equals(CommonTypes.STRING_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("String readUTF()"));
+            BinaryFormatHelper.readString(ga);
 
 
         } else if (fieldType.getDescriptor().equals("[B")) {
@@ -555,51 +556,51 @@ public class EntryEnhancer {
         ga.getField(classType, fieldNode.name, fieldType);
 
         if (fieldType.equals(Type.BYTE_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeByte(int)"));
+            BinaryFormatHelper.writeByte(ga);
         } else if (fieldType.equals(Type.BOOLEAN_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeBoolean(boolean)"));
+            BinaryFormatHelper.writeBoolean(ga);
         } else if (fieldType.equals(Type.SHORT_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeShort(int)"));
+            BinaryFormatHelper.writeShort(ga);
         } else if (fieldType.equals(Type.CHAR_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeChar(int)"));
+            BinaryFormatHelper.writeChar(ga);
         } else if (fieldType.equals(Type.INT_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeInt(int)"));
+            BinaryFormatHelper.writeInt(ga);
         } else if (fieldType.equals(Type.FLOAT_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeFloat(float)"));
+            BinaryFormatHelper.writeFloat(ga);
         } else if (fieldType.equals(Type.LONG_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeLong(long)"));
+            BinaryFormatHelper.writeLong(ga);
         } else if (fieldType.equals(Type.DOUBLE_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeDouble(double)"));
+            BinaryFormatHelper.writeDouble(ga);
 
 
         } else if (fieldType.equals(CommonTypes.BYTE_TYPE)) {
             ga.unbox(Type.BYTE_TYPE);
-            ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeByte(int)"));
+            BinaryFormatHelper.writeByte(ga);
         } else if (fieldType.equals(CommonTypes.BOOLEAN_TYPE)) {
             ga.unbox(Type.BOOLEAN_TYPE);
-            ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeBoolean(boolean)"));
+            BinaryFormatHelper.writeBoolean(ga);
         } else if (fieldType.equals(CommonTypes.SHORT_TYPE)) {
             ga.unbox(Type.SHORT_TYPE);
-            ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeShort(int)"));
+            BinaryFormatHelper.writeShort(ga);
         } else if (fieldType.equals(CommonTypes.CHARACTER_TYPE)) {
             ga.unbox(Type.CHAR_TYPE);
-            ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeChar(int)"));
+            BinaryFormatHelper.writeChar(ga);
         } else if (fieldType.equals(CommonTypes.INTEGER_TYPE)) {
             ga.unbox(Type.INT_TYPE);
-            ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeInt(int)"));
+            BinaryFormatHelper.writeInt(ga);
         } else if (fieldType.equals(CommonTypes.FLOAT_TYPE)) {
             ga.unbox(Type.FLOAT_TYPE);
-            ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeFloat(float)"));
+            BinaryFormatHelper.writeFloat(ga);
         } else if (fieldType.equals(CommonTypes.LONG_TYPE)) {
             ga.unbox(Type.LONG_TYPE);
-            ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeLong(long)"));
+            BinaryFormatHelper.writeLong(ga);
         } else if (fieldType.equals(CommonTypes.DOUBLE_TYPE)) {
             ga.unbox(Type.DOUBLE_TYPE);
-            ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeDouble(double)"));
+            BinaryFormatHelper.writeDouble(ga);
 
 
         } else if (fieldType.equals(CommonTypes.STRING_TYPE)) {
-            ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeUTF(String)"));
+            BinaryFormatHelper.writeString(ga);
 
 
         } else if (fieldType.getDescriptor().equals("[B")) {
@@ -610,9 +611,9 @@ public class EntryEnhancer {
             ga.loadThis();
             ga.getField(classType, fieldNode.name, fieldType);
             ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void write(byte[])"));
+
+
         } else {
-
-
             ga.invokeInterface(CommonTypes.OBJECT_OUTPUT_TYPE, Method.getMethod("void writeObject(Object)"));
         }
     }
