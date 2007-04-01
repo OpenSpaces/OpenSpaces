@@ -330,18 +330,15 @@ public class EntryEnhancer {
             final int objectStream = readGa.newLocal(CommonTypes.OBJECT_INPUT_STEAM_TYPE);
             readGa.storeLocal(objectStream);
 
+            LoadStream loadStream = new LoadStream() {
+                public void loadOutputStream() {
+                    readGa.loadLocal(objectStream);
+                }
+            };
+
             // read null values
             Type nullValueType = findNullValueType(binaryFields);
-            readGa.loadLocal(objectStream);
-            if (nullValueType == Type.SHORT_TYPE) {
-                readGa.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("short readShort()"));
-            } else if (nullValueType == Type.INT_TYPE) {
-                readGa.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("int readInt()"));
-            } else {
-                readGa.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("long readLong()"));
-            }
-            int nullValueId = readGa.newLocal(nullValueType);
-            readGa.storeLocal(nullValueId);
+            int nullValueId = readNullHeader(loadStream, readGa, nullValueType);
 
             // read different values
             for (int i = 0; i < binaryFields.size(); i++) {
@@ -364,11 +361,7 @@ public class EntryEnhancer {
                 }
 
                 readGa.loadThis();
-                readValue(readGa, fieldType, new LoadStream() {
-                    public void loadOutputStream() {
-                        readGa.loadLocal(objectStream);
-                    }
-                });
+                readValue(readGa, fieldType, loadStream);
                 readGa.putField(classType, fieldNode.name, fieldType);
 
                 if (!TypeHelper.isPrimitive(fieldType)) {
@@ -424,18 +417,15 @@ public class EntryEnhancer {
             readGa.invokeInsn(Opcodes.INVOKESPECIAL, Type.getObjectType(classNode.superName), Method.getMethod("void readExternal(java.io.ObjectInput)"));
         }
 
+        loadStream = new LoadStream() {
+            public void loadOutputStream() {
+                readGa.loadArg(0);
+            }
+        };
+
         // read null values
         Type nullValueType = findNullValueType(publicFields);
-        readGa.loadArg(0);
-        if (nullValueType == Type.SHORT_TYPE) {
-            readGa.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("short readShort()"));
-        } else if (nullValueType == Type.INT_TYPE) {
-            readGa.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("int readInt()"));
-        } else {
-            readGa.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("long readLong()"));
-        }
-        int nullValueId = readGa.newLocal(nullValueType);
-        readGa.storeLocal(nullValueId);
+        int nullValueId = readNullHeader(loadStream, readGa, nullValueType);
 
         // read different values
         for (int i = 0; i < publicFields.size(); i++) {
@@ -458,11 +448,7 @@ public class EntryEnhancer {
             }
 
             readGa.loadThis();
-            readValue(readGa, fieldType, new LoadStream() {
-                public void loadOutputStream() {
-                    readGa.loadArg(0);
-                }
-            });
+            readValue(readGa, fieldType, loadStream);
             readGa.putField(classType, fieldNode.name, fieldType);
 
             if (!TypeHelper.isPrimitive(fieldType)) {
@@ -471,6 +457,20 @@ public class EntryEnhancer {
         }
         readGa.returnValue();
         readGa.endMethod();
+    }
+
+    private int readNullHeader(LoadStream loadStream, GeneratorAdapter readGa, Type nullValueType) {
+        loadStream.loadOutputStream();
+        if (nullValueType == Type.SHORT_TYPE) {
+            readGa.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("short readShort()"));
+        } else if (nullValueType == Type.INT_TYPE) {
+            readGa.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("int readInt()"));
+        } else {
+            readGa.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("long readLong()"));
+        }
+        int nullValueId = readGa.newLocal(nullValueType);
+        readGa.storeLocal(nullValueId);
+        return nullValueId;
     }
 
     private void readValue(GeneratorAdapter ga, Type fieldType, LoadStream loadStream) {
