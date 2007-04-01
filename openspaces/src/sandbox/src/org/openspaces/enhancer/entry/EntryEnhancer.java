@@ -582,12 +582,19 @@ public class EntryEnhancer {
             ga.newArray(Type.BYTE_TYPE);
             int byteLocal = ga.newLocal(Type.getType("[B"));
             ga.storeLocal(byteLocal);
+
+            // if zero lengh array don't try to read
+            Label lblZeroLengh = ga.newLabel();
+            ga.loadLocal(byteLocal);
+            ga.arrayLength();
+            ga.ifZCmp(GeneratorAdapter.EQ, lblZeroLengh);
+
             loadStream.load();
             ga.loadLocal(byteLocal);
             ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("void readFully(byte[])"));
+
+            ga.visitLabel(lblZeroLengh);
             ga.loadLocal(byteLocal);
-
-
         } else {
             ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("Object readObject()"));
             ga.checkCast(fieldType);
