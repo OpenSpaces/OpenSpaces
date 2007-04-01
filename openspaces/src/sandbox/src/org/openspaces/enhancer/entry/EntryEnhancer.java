@@ -26,6 +26,9 @@ public class EntryEnhancer {
     private static final String BINARY_FIELD_NAME = "__payload";
 
     public boolean shouldTransform(ClassNode classNode) {
+        if (classNode.interfaces.contains("org/openspaces/enhancer/entry/EnhancedEntry")) {
+            return false;
+        }
         if (classNode.visibleAnnotations == null) {
             return false;
         }
@@ -48,6 +51,7 @@ public class EntryEnhancer {
 
         classNode.version = (classNode.version & 0xFF) < Opcodes.V1_5 ? Opcodes.V1_5 : classNode.version;
         classNode.interfaces.add("net/jini/core/entry/Entry");
+        classNode.interfaces.add("org/openspaces/enhancer/entry/EnhancedEntry");
 
         // add the binary field. Note, we add it before we iterate on the public fields
         List<FieldNode> binaryFields = findBinaryFields(classNode);
@@ -604,7 +608,7 @@ public class EntryEnhancer {
 
         } else if (fieldType.equals(CommonTypes.BIG_DECIMAL_TYPE)) {
             BinaryFormatHelper.writeBigDecimal(ga);
-            
+
         } else if (fieldType.equals(CommonTypes.STRING_TYPE)) {
             BinaryFormatHelper.writeString(ga);
 
