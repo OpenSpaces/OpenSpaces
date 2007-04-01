@@ -341,33 +341,7 @@ public class EntryEnhancer {
             int nullValueId = readNullHeader(loadStream, readGa, nullValueType);
 
             // read different values
-            for (int i = 0; i < binaryFields.size(); i++) {
-                FieldNode fieldNode = binaryFields.get(i);
-                Type fieldType = Type.getType(fieldNode.desc);
-
-                Label lblNull = null;
-                if (!TypeHelper.isPrimitive(fieldType)) {
-                    readGa.loadLocal(nullValueId);
-                    if (nullValueType == Type.SHORT_TYPE) {
-                        readGa.push(1 << i);
-                    } else if (nullValueType == Type.INT_TYPE) {
-                        readGa.push(1 << i);
-                    } else {
-                        readGa.push(1l << i);
-                    }
-                    readGa.math(GeneratorAdapter.AND, nullValueType);
-                    lblNull = readGa.newLabel();
-                    readGa.ifZCmp(GeneratorAdapter.NE, lblNull);
-                }
-
-                readGa.loadThis();
-                readValue(readGa, fieldType, loadStream);
-                readGa.putField(classType, fieldNode.name, fieldType);
-
-                if (!TypeHelper.isPrimitive(fieldType)) {
-                    readGa.visitLabel(lblNull);
-                }
-            }
+            readValues(binaryFields, classType, loadStream, readGa, nullValueType, nullValueId);
 
             readGa.loadLocal(objectStream);
             readGa.invokeVirtual(CommonTypes.OBJECT_INPUT_STEAM_TYPE, Method.getMethod("void close()"));
@@ -428,8 +402,15 @@ public class EntryEnhancer {
         int nullValueId = readNullHeader(loadStream, readGa, nullValueType);
 
         // read different values
-        for (int i = 0; i < publicFields.size(); i++) {
-            FieldNode fieldNode = publicFields.get(i);
+        readValues(publicFields, classType, loadStream, readGa, nullValueType, nullValueId);
+        readGa.returnValue();
+        readGa.endMethod();
+    }
+
+    private void readValues(List<FieldNode> fields, Type classType, LoadStream loadStream,
+                            GeneratorAdapter readGa, Type nullValueType, int nullValueId) {
+        for (int i = 0; i < fields.size(); i++) {
+            FieldNode fieldNode = fields.get(i);
             Type fieldType = Type.getType(fieldNode.desc);
 
             Label lblNull = null;
@@ -455,8 +436,6 @@ public class EntryEnhancer {
                 readGa.visitLabel(lblNull);
             }
         }
-        readGa.returnValue();
-        readGa.endMethod();
     }
 
     private int readNullHeader(LoadStream loadStream, GeneratorAdapter readGa, Type nullValueType) {
