@@ -25,7 +25,7 @@
 	
 	<target name="full-dist" depends="dist">
 		<exec executable="smbclient">
-			<arg line='--user=ca -W=GSPACES -c "lcd ${dist.dir}; prompt; recurse; mput ${new.version}" ${backup_srv_folder} password' />
+			<arg line='--user=ca -W=GSPACES -c "lcd ${dist.dir}; prompt; recurse; mput ${openspaces-version}" ${backup_srv_folder} password' />
 		</exec>
 	</target>
 </project>
