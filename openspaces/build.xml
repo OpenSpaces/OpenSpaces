@@ -33,8 +33,8 @@
 
     <target name="clean" description="Clean all output dirs (dist, javadocs, classes, test-classes, etc)">
         <!-- Just kill target dir (it's safer). No need at this point to keep it. -->
-        <delete dir="${target.dir}"/>
-        <delete dir="${lib.dir}/${name}"/>
+        <delete dir="${target.dir}" failonerror="false"/>
+        <delete dir="${lib.dir}/${name}" failonerror="false"/>
     </target>
 
     <!--
@@ -156,8 +156,8 @@
     <target name="dist_1_4" depends="build_1_4, fulljar, srczip, javadoc, schema"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}"/>
-        <delete file="${dist.dir}/${name}-${openspaces-version}-1.4.zip"/>
-        <zip zipfile="${dist.dir}/${name}-${openspaces-version}-1.4.zip">
+        <delete file="${dist.dir}/${openspaces-version}/${name}-${openspaces-version}-1.4.zip"/>
+        <zip zipfile="${dist.dir}/${openspaces-version}/${name}-${openspaces-version}-1.4.zip">
             <zipfileset dir="${basedir}">
                 <include name="bin/pu*"/>
 
@@ -174,8 +174,8 @@
     <target name="dist_1_5" depends="build_1_5, fulljar, buildexamples, srczip, javadoc, schema"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}"/>
-        <delete file="${dist.dir}/${name}-${openspaces-version}-1.5.zip"/>
-        <zip zipfile="${dist.dir}/${name}-${openspaces-version}-1.5.zip">
+        <delete file="${dist.dir}/${openspaces-version}/${name}-${openspaces-version}-1.5.zip"/>
+        <zip zipfile="${dist.dir}/${openspaces-version}/${name}-${openspaces-version}-1.5.zip">
             <zipfileset dir="${basedir}">
                 <include name="bin/pu*"/>
 
@@ -193,9 +193,12 @@
         <antcall target="dist_1_5"/>
         <antcall target="dist_1_4"/>
     </target>
+    
+    <target name="dist_quickbuild">
+    </target>
 
     <target name="install_1_5" depends="dist_1_5">
-        <unzip src="${dist.dir}/${name}-${openspaces-version}-1.5.zip" dest="${gshome.dir}" />
+        <unzip src="${dist.dir}/${openspaces-version}/${name}-${openspaces-version}-1.5.zip" dest="${gshome.dir}" />
     </target>
 
 
