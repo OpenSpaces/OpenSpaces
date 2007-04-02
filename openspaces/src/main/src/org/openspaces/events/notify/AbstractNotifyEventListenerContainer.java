@@ -376,7 +376,31 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
         } else {
             receiveTemplate = template;
         }
-        
+
+        if (template instanceof NotifyTypeProvider) {
+            NotifyTypeProvider notifyTypeProvider = (NotifyTypeProvider) template;
+            if (notifyTypeProvider.isLeaseExpire() != null && notifyLeaseExpire == null) {
+                notifyLeaseExpire = notifyTypeProvider.isLeaseExpire();
+            }
+            if (notifyTypeProvider.isTake() != null && notifyTake == null) {
+                notifyTake = notifyTypeProvider.isTake();
+            }
+            if (notifyTypeProvider.isUpdate() != null && notifyUpdate == null) {
+                notifyUpdate = notifyTypeProvider.isUpdate();
+            }
+            if (notifyTypeProvider.isWrite() != null && notifyWrite == null) {
+                notifyWrite = notifyTypeProvider.isWrite();
+            }
+        }
+
+        if (notifyAll == null && notifyTake == null && notifyUpdate == null && notifyWrite == null
+                && notifyLeaseExpire == null) {
+            notifyWrite = true;
+            if (logger.isDebugEnabled()) {
+                logger.debug(message("No notify flag is set, setting write notify to true by default"));
+            }
+        }
+
         super.initialize();
     }
 
@@ -391,11 +415,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
                     + "] which enables batching. batchTime must have a value as well");
         }
         Assert.notNull(template, "template property is required");
-        if (notifyAll == null && notifyTake == null && notifyUpdate == null && notifyWrite == null
-                && notifyLeaseExpire == null) {
-            notifyWrite = true;
-        }
     }
+
+
 
     /**
      * Creates a new event session factory based on the space provided.
