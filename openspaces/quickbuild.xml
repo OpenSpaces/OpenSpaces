@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+
+<project name="openspaces-quickbuild" default="usage" basedir=".">
+
+    <import file="build.xml" />
+	
+	<property name="backup_srv_folder" value="//backup-srv/openspaces" />
+	<property name="project.properties.file" value="project.properties" />
+	
+	
+	<target name="update_version" depends="replace_version">
+		<cvs cvsRoot="${cvs.root}"
+			command='ci -m "GS-803 platform version advanced to ${openspaces-version}" ${project.properties.file}'
+	    	reallyquiet="false" 
+			failonerror="true"
+		/>
+	</target> 
+	
+	<target name="replace_version">
+		<property name="openspaces.version" value="openspaces-version" />
+		<replaceregexp file="${project.properties.file}"
+                         match="${openspaces.version}=(.*)"
+                         replace='${openspaces.version}=${new.version};'/>
+	</target>
+	
+	<target name="full-dist" depends="dist">
+		<exec executable="smbclient">
+			<arg line='--user=ca -W=GSPACES -c "lcd ${dist.dir}; prompt; recurse; mput ${dist.dir}" ${backup_srv_folder} password' />
+		</exec>
+	</target>
+</project>
