@@ -2,7 +2,6 @@
 
 <project name="openspaces-quickbuild" default="usage" basedir=".">
 
-    <import file="build.xml" />
 	
 	<property name="backup_srv_folder" value="//backup-srv/openspaces" />
 	<property name="project.properties.file" value="project.properties" />
@@ -24,6 +23,7 @@
 	</target>
 	
 	<target name="full-dist" depends="dist">
+		<import file="build.xml" />
 		<exec executable="smbclient">
 			<arg line='--user=ca -W=GSPACES -c "lcd ${dist.dir}; prompt; recurse; mput ${openspaces-version}" ${backup_srv_folder} password' />
 		</exec>
