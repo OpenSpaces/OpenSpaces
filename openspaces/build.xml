@@ -156,8 +156,8 @@
     <target name="dist_1_4" depends="build_1_4, fulljar, srczip, javadoc, schema"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}/${openspaces-version}"/>
-        <delete file="${dist.dir}/${openspaces-version}/${name}-${openspaces-version}-1.4.zip"/>
-        <zip zipfile="${dist.dir}/${openspaces-version}/${name}-${openspaces-version}-1.4.zip">
+        <delete file="${dist.dir}/${openspaces-version}/${name}-1.4.zip"/>
+        <zip zipfile="${dist.dir}/${openspaces-version}/${name}-1.4.zip">
             <zipfileset dir="${basedir}">
                 <include name="bin/pu*"/>
 
@@ -174,8 +174,8 @@
     <target name="dist_1_5" depends="build_1_5, fulljar, buildexamples, srczip, javadoc, schema"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}/${openspaces-version}"/>
-        <delete file="${dist.dir}/${openspaces-version}/${name}-${openspaces-version}-1.5.zip"/>
-        <zip zipfile="${dist.dir}/${openspaces-version}/${name}-${openspaces-version}-1.5.zip">
+        <delete file="${dist.dir}/${openspaces-version}/${name}-1.5.zip"/>
+        <zip zipfile="${dist.dir}/${openspaces-version}/${name}-1.5.zip">
             <zipfileset dir="${basedir}">
                 <include name="bin/pu*"/>
 
@@ -195,7 +195,7 @@
     </target>
     
     <target name="install_1_5" depends="dist_1_5">
-        <unzip src="${dist.dir}/${openspaces-version}/${name}-${openspaces-version}-1.5.zip" dest="${gshome.dir}" />
+        <unzip src="${dist.dir}/${openspaces-version}/${name}-1.5.zip" dest="${gshome.dir}" />
     </target>
 
 
