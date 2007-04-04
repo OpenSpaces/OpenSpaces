@@ -1,4 +1,4 @@
-package org.openspaces.enhancer.entry.enhancedentry;
+package org.openspaces.utest.enhancer.entry.enhancedentry;
 
 import junit.framework.TestCase;
 import net.jini.core.entry.Entry;

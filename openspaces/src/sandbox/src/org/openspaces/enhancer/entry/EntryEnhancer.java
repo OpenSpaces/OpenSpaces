@@ -530,12 +530,16 @@ public class EntryEnhancer implements Enhancer {
             BinaryFormatHelper.readBigDecimal(ga);
 
         } else if (fieldType.equals(CommonTypes.STRING_TYPE)) {
+            // TODO use UTF
             BinaryFormatHelper.readString(ga);
 
+            // TODO Support Date
+            // TODO Support Calendar
+            // TODO Support other array types
 
         } else if (fieldType.getDescriptor().equals("[B")) {
             // read the size, create the array and read it
-            // TODO there has to be a faster way to do it
+            // TODO there has to be a faster way to do it - why BinaryFormat.readByteArray does not work?
             ga.invokeInterface(CommonTypes.OBJECT_INPUT_TYPE, Method.getMethod("int readInt()"));
             ga.newArray(Type.BYTE_TYPE);
             int byteLocal = ga.newLocal(Type.getType("[B"));

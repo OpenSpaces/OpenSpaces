@@ -61,6 +61,12 @@
     </target>
 
     <target name="dist" depends="build">
+        <mkdir dir="${pulocation}/lib" />
+        <copy todir="${pulocation}/lib">
+            <fileset dir="../../../lib/common">
+                <include name="commons-math-*.jar"/>
+            </fileset>
+        </copy>
         <jar basedir="${pulocation}" jarfile="${basedir}/pu/helloworld.jar"/>
     </target>
 
