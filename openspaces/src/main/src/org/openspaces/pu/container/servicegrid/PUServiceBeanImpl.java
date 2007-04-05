@@ -78,20 +78,20 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         return (count);
     }
 
-    private int getTotalMembers(ServiceBeanContext context) {
+    private int getSLAMax(ServiceBeanContext context) {
+        int max = -1;
         ServiceLevelAgreements slas =
                 context.getServiceElement().getServiceLevelAgreements();
         SLA[] spaceSLAs = slas.getServiceSLAs();
-        int memberCount = context.getServiceElement().getPlanned();
         for (int i = 0; i < spaceSLAs.length; i++) {
             int count =
                     getMaxServiceCount(spaceSLAs[i].getConfigArgs());
             if (count != -1) {
-                memberCount = count;
+                max = count;
                 break;
             }
         }
-        return memberCount;
+        return max;
     }
 
     private void startPU(String springXml) throws MalformedURLException {
@@ -120,8 +120,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         String clusterSchema = sla.getClusterSchema();
         if (clusterSchema != null) {
             clusterInfo.setSchema(clusterSchema);
-            int memberCount = getTotalMembers(context);
-            clusterInfo.setNumberOfInstances(new Integer(memberCount));
+            int slaMax = getSLAMax(context);
+            int numberOfInstances = Math.max(slaMax, sla.getNumberOfInstances());
+            clusterInfo.setNumberOfInstances(new Integer(numberOfInstances));
         }
         clusterInfo.setNumberOfBackups(new Integer(sla.getNumberOfBackups()));
         clusterInfo.setInstanceId(instanceId);
