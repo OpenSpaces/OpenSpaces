@@ -41,7 +41,7 @@
         <echo message="clean                    --> Cleans all output dirs"/>
         <echo message="build                    --> build all; don't create JARs"/>
         <echo message="dist                     --> build the distribution"/>
-        <echo message="deploy-local-procssor    --> Deploy data processor on the service grid"/>
+        <echo message="deploy-local-processor   --> Deploy data processor on the service grid"/>
         <echo message="deploy-local-feeder      --> Deploy data feeder on the service grid"/>
         <echo message=""/>
     </target>
