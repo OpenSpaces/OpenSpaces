@@ -30,7 +30,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 // ------------------------------ FIELDS ------------------------------
 
     private static final Logger LOGGER = Logger.getLogger(PUServiceBeanImpl.class.getName());
-    private static final String SPACE_PROPERTY_PREFIX = "gs.space.url.arg.";
 
     private IntegratedProcessingUnitContainer integratedContainer;
     private int clusterGroup;
@@ -116,8 +115,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             instanceId = new Integer((context.getServiceBeanConfig().getInstanceID().intValue()));
         }
 
-        LOGGER.log(Level.INFO, "id=" + instanceId + ", bid=" + backupId);
-
         //set cluster info
         ClusterInfo clusterInfo = new ClusterInfo();
         String clusterSchema = sla.getClusterSchema();
@@ -129,6 +126,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         clusterInfo.setNumberOfBackups(new Integer(sla.getNumberOfBackups()));
         clusterInfo.setInstanceId(instanceId);
         clusterInfo.setBackupId(backupId);
+
+        // TODO add printout of the service name
+        LOGGER.log(Level.INFO, "ClusterInfo: " + clusterInfo + "");
 
         //create PU Container
         Resource resource = new ByteArrayResource(springXml.getBytes());
