@@ -11,6 +11,16 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * A bean that uses OpenSpaces Remoting support to invoke IDataProcessor implementation
+ * exposed by another processing unit.
+ *
+ * <p>Stats up a scheduled taks that invokes both IDataProcessor APIs periodically. Uses
+ * java.util.concurrent Scheduled Executor Service.
+ *
+ * <p>Note, this bean simply uses IDataProcessor, OpenSpaces Remoting hides the fact that
+ * this interface will actually cause a remote invocation, with the Space as the transport
+ * layer, directed into a serivce exposed by another processing unit.
+ *
  * @author kimchy
  */
 public class DataRemoting implements InitializingBean, DisposableBean {

@@ -12,6 +12,15 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * A data counter that periodically performs a count on the space and updates
+ * its count of data objects.
+ *
+ * <p>Note, since we simply use the GigaSpace API, with a "null" Data object
+ * template, we simply count how many data objects are in the space. In our
+ * example, we show how a Local View can be used to holds all the processed
+ * data objects, and the count is executed on it. The Local View expoess the
+ * same API as the Space.
+ *
  * @author kimchy
  */
 public class ViewDataCounter implements InitializingBean, DisposableBean {

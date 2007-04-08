@@ -12,6 +12,14 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * A feeder bean started a scheduled task that writes a new Data object to the space.
+ *
+ * <p>The space is injected into this bean using OpenSpaces support for @GigaSpaceContext
+ * annoation.
+ *
+ * <p>The scheduled support uses the java.util.concurrent Scheduled Executor Service. It
+ * is started and stopped based on Spring lifeceycle events.
+ *
  * @author kimchy
  */
 public class DataFeeder implements InitializingBean, DisposableBean {

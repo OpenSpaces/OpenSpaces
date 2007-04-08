@@ -7,7 +7,9 @@ import org.springframework.beans.factory.InitializingBean;
 
 /**
  * A simple bean printing out messages when it is loaded and when it is destroyed. Used
- * to demonstrate {@link org.openspaces.core.space.mode.SpaceModeContextLoader}.
+ * to demonstrate {@link org.openspaces.core.space.mode.SpaceModeContextLoader} which
+ * loads a spring context only if the specific processing unit became primary in a
+ * primary backup cluster topologies.
  *
  * @author kimchy
  */
