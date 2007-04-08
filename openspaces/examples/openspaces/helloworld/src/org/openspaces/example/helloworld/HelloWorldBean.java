@@ -26,10 +26,19 @@ public class HelloWorldBean implements InitializingBean {
 
     private GigaSpace gigaSpace;
 
+    /**
+     * A GigaSpace interface used to interact with the space. Injected
+     * by Spring.
+     */
     public void setGigaSpace(GigaSpace gigaSpace) {
         this.gigaSpace = gigaSpace;
     }
 
+    /**
+     * A spring callback invoked when the container starts. Uses
+     * the injected GigaSpace to write and then take a single Message
+     * object.
+     */
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(gigaSpace, "gigaSpace property is required");
 
