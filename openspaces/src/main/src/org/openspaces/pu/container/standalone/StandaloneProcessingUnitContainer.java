@@ -15,13 +15,13 @@ import java.rmi.RMISecurityManager;
  * A {@link StandaloneProcessingUnitContainer} provider. A standalone processing unit container is a
  * container that understands a processing unit archive structure (both when working with an
  * "exploded" directory and when working with a zip/jar archive of it).
- * 
+ *
  * <p>
  * The standalone processing unit container also provides a a main method ({@link #main(String[])}
  * which uses the {@link StandaloneProcessingUnitContainerProvider} and the provided parameters
  * create itself. Please see the javadoc for the main method for a full list of the possible
  * paramters values.
- * 
+ *
  * @author kimchy
  */
 public class StandaloneProcessingUnitContainer implements ApplicationContextProcessingUnitContainer {
@@ -45,7 +45,7 @@ public class StandaloneProcessingUnitContainer implements ApplicationContextProc
      * Allows to run the standalone processing unit container. Uses the
      * {@link StandaloneProcessingUnitContainerProvider} and the parameters provided in order to
      * configure it.
-     * 
+     *
      * <p>
      * The following parameters are allowed:
      * <ul>
@@ -93,10 +93,13 @@ public class StandaloneProcessingUnitContainer implements ApplicationContextProc
         if (params.length == 0) {
             throw new IllegalArgumentException("-pu parameter must be defined");
         }
+        if (params.length == 1) {
+            throw new IllegalArgumentException("-pu parameter must be defined, please prefix the location with -pu");
+        }
         String puLocation = null;
-        for (int i = 0; i < params.length; i++) {
-            if (params[i].getName().equalsIgnoreCase("pu")) {
-                puLocation = params[i].getArguments()[0];
+        for (CommandLineParser.Parameter param : params) {
+            if (param.getName().equalsIgnoreCase("pu")) {
+                puLocation = param.getArguments()[0];
             }
         }
         if (puLocation == null) {

@@ -6,6 +6,7 @@ import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
 import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
 import org.openspaces.pu.container.CannotCreateContainerException;
+import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
@@ -74,7 +75,7 @@ public class StandaloneContainerRunnable implements Runnable {
             PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
             if (configLocations.size() == 0) {
                 try {
-                    resources = pathMatchingResourcePatternResolver.getResources("classpath*:/META-INF/spring/*.xml");
+                    resources = pathMatchingResourcePatternResolver.getResources(ApplicationContextProcessingUnitContainerProvider.DEFAULT_PU_CONTEXT_LOCATION);
                 } catch (IOException e) {
                     throw new CannotCreateContainerException("Failed to parse pu xml", e);
                 }

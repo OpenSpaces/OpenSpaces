@@ -14,22 +14,20 @@ import java.rmi.RMISecurityManager;
 
 /**
  * The integrated procesing unit container wraps Spring
- * {@link org.springframework.context.ApplicationContext}. It is created using
- * {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider}.
- * 
- * <p>
- * An integrated processing unit container can be used to run a processing unit within an existing
+ * {@link org.springframework.context.ApplicationContext ApplicationContext}. It is created using
+ * {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider IntegratedProcessingUnitContainerProvider}.
+ *
+ * <p>An integrated processing unit container can be used to run a processing unit within an existing
  * environemnt. An example of what this existing environment will provide is the classpath that the
  * processing unit will run with. Examples for using the integrated processing unit container can be
  * integration tests or running the processing unit from within an IDE.
- * 
- * <p>
- * The integrated processing unit container also provides a a main method ({@link #main(String[])}
+ *
+ * <p>The integrated processing unit container also provides a a main method ({@link #main(String[])}
  * which uses the
  * {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider} and the
  * provided parameters create itself. Please see the javadoc for the main method for a full list of
  * the possible paramters values.
- * 
+ *
  * @author kimchy
  */
 public class IntegratedProcessingUnitContainer implements ApplicationContextProcessingUnitContainer {
@@ -69,7 +67,7 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
      * Allows to run the integrated processing unit container. Uses the
      * {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider} and
      * the parameters provided in order to configure it.
-     * 
+     *
      * <p>
      * The following parameters are allowed:
      * <ul>

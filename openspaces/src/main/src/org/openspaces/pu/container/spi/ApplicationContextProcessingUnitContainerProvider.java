@@ -12,5 +12,7 @@ import java.io.IOException;
 public interface ApplicationContextProcessingUnitContainerProvider extends ProcessingUnitContainerProvider,
         ClusterInfoAware, BeanLevelPropertiesAware {
 
+    static final String DEFAULT_PU_CONTEXT_LOCATION = "classpath*:/META-INF/spring/pu.xml";
+    
     void addConfigLocation(String configLocation) throws IOException;
 }

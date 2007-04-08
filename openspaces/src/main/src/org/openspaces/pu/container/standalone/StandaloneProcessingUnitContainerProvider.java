@@ -46,7 +46,7 @@ import java.util.jar.JarFile;
  * <p>
  * The provider allows for programmatic configuration of different processing unit aspects. It
  * allows to configure where the processing unit Spring context xml descriptors are located (by
- * default it uses <code>classpath*:/META-INF/spring/*.xml</code>). It also allows to set
+ * default it uses <code>classpath*:/META-INF/spring/pu.xml</code>). It also allows to set
  * {@link org.openspaces.core.properties.BeanLevelProperties} and
  * {@link org.openspaces.core.cluster.ClusterInfo} that will be injected to beans configured within
  * the processing unit.
@@ -126,7 +126,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
      * <p>
      * If {@link #addConfigLocation(String)} is used, the Spring xml context will be read based on
      * the provided locations. If no config location was provided the default config location will
-     * be <code>classpath*:/META-INF/spring/*.xml</code>.
+     * be <code>classpath*:/META-INF/spring/pu.xml</code>.
      * 
      * <p>
      * If {@link #setBeanLevelProperties(org.openspaces.core.properties.BeanLevelProperties)} is set
