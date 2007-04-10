@@ -76,16 +76,14 @@
         <copy todir="${gshome.dir}/deploy/hello-world">
             <fileset dir="${pulocation}"/>
         </copy>
-        <deploy name="hello-world" lookup-group="${user.name}"/>
+        <deploy name="hello-world" />
     </target>
 
     <macrodef name="deploy">
         <attribute name="name"/>
-        <attribute name="lookup-group"/>
         <sequential>
-            <java classname="org.openspaces.pu.container.servicegrid.deploy.Deploy" fork="true">
+            <java classname="org.openspaces.pu.container.servicegrid.deploy.Deploy" fork="false">
                 <classpath refid="all-libs"/>
-                <sysproperty key="com.gs.jini_lus.groups" value="@{lookup-group}"/>
                 <arg value="@{name}"/>
             </java>
         </sequential>

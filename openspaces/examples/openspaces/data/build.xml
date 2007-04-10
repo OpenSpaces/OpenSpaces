@@ -81,7 +81,7 @@
         <copy todir="${gshome.dir}/deploy/data-processor">
             <fileset dir="${processor-pu}"/>
         </copy>
-        <deploy name="data-processor" lookup-group="${user.name}"/>
+        <deploy name="data-processor"/>
     </target>
 
     <target name="deploy-local-feeder" depends="dist">
@@ -90,7 +90,7 @@
         <copy todir="${gshome.dir}/deploy/data-feeder">
             <fileset dir="${feeder-pu}"/>
         </copy>
-        <deploy name="data-feeder" lookup-group="${user.name}"/>
+        <deploy name="data-feeder"/>
     </target>
 
     <macrodef name="build">
@@ -122,11 +122,9 @@
 
     <macrodef name="deploy">
         <attribute name="name"/>
-        <attribute name="lookup-group"/>
         <sequential>
-            <java classname="org.openspaces.pu.container.servicegrid.deploy.Deploy" fork="true">
+            <java classname="org.openspaces.pu.container.servicegrid.deploy.Deploy" fork="false">
                 <classpath refid="all-libs"/>
-                <sysproperty key="com.gs.jini_lus.groups" value="@{lookup-group}"/>
                 <arg value="@{name}"/>
             </java>
         </sequential>
