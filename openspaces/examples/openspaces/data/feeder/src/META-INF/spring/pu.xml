@@ -24,7 +24,7 @@
 
         Note, we perform a lookup on the space since we are working against a remote space.
     -->
-    <os-core:space id="space" url="jini://*/*/space" lookup-groups="${user.name}"/>
+    <os-core:space id="space" url="jini://*/*/space" />
 
     <!--
         OpenSpaces simplified space API built on top of IJSpace/JavaSpace.

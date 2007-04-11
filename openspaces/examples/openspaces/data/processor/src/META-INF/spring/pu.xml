@@ -41,7 +41,7 @@
         Note, we do not specify here the cluster topology of the space. It is declated outside of
         the processing unit or within the SLA bean.
     -->
-    <os-core:space id="space" url="/./space" lookup-groups="${user.name}"/>
+    <os-core:space id="space" url="/./space" />
 
     <!--
         OpenSpaces simplified space API built on top of IJSpace/JavaSpace.
