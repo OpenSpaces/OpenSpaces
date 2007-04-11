@@ -1,5 +1,8 @@
 package org.openspaces.pu.container.servicegrid.deploy;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import javax.swing.filechooser.FileSystemView;
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,43 +14,37 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
- * Created by IntelliJ IDEA.
- * User: ming
- * Date: Feb 14, 2007
- * Time: 6:13:28 PM
  */
 public class HTTPFileSystemView extends FileSystemView {
-    private static final Logger LOGGER = Logger.getLogger(HTTPFileSystemView.class.getName());
+
+    private static final Log logger = LogFactory.getLog(HTTPFileSystemView.class);
 
     private File lastDir;
+
     private File[] lastResults;
 
-    public File createNewFolder(File containingDir) throws IOException {
-        throw new IOException("Not Supported");
-    }
-
-    URL root;
-
+    private URL root;
 
     public HTTPFileSystemView(URL root) {
         this.root = root;
     }
 
+    public File createNewFolder(File containingDir) throws IOException {
+        throw new IOException("Not Supported");
+    }
+
     public File[] getFiles(File dir, boolean useFileHiding) {
         //check cache
         if (lastDir != null && lastDir.equals(dir)) {
-//            System.out.println("cached " + dir);
             return lastResults;
         }
 
         File[] files = new File[0];
-        String line = null;
+        String line;
         try {
-            List filesList = new ArrayList();
+            List<File> filesList = new ArrayList<File>();
             URL url = new URL(root, dir.getPath());
             BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
             while ((line = reader.readLine()) != null) {
@@ -56,15 +53,13 @@ public class HTTPFileSystemView extends FileSystemView {
                 String type = tokenizer.nextToken();
                 String size = tokenizer.nextToken();
                 long time = Long.parseLong(tokenizer.nextToken());
-//                System.out.println("name = " + name + "\t\t type = " + type + "\t\ttime = " + time);
                 File add = new HTTPFile(dir, name, time, type.equals("d"));
                 filesList.add(add);
             }
             reader.close();
-            files = (File[]) filesList.toArray(new File[filesList.size()]);
+            files = filesList.toArray(new File[filesList.size()]);
         } catch (Exception e) {
-//            System.out.println("line = " + line);
-            LOGGER.log(Level.WARNING, "Error getting file list:" + e.toString());
+            logger.debug("Error getting file list:" + e.toString());
         }
         //saved for cache
         lastDir = dir;

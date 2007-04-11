@@ -1,6 +1,8 @@
 package org.openspaces.pu.container.servicegrid.deploy;
 
 import com.gigaspaces.grid.gsm.GSM;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jini.rio.core.ClassBundle;
 import org.jini.rio.core.OperationalString;
 import org.jini.rio.core.ServiceElement;
@@ -10,9 +12,6 @@ import org.jini.rio.monitor.DeployAdmin;
 import org.jini.rio.opstring.OpString;
 import org.jini.rio.opstring.OpStringLoader;
 import org.jini.rio.resources.servicecore.ServiceAdmin;
-import org.openspaces.core.cluster.ClusterInfo;
-import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer;
-import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
 import org.openspaces.pu.container.servicegrid.SLAUtil;
 import org.openspaces.pu.container.servicegrid.sla.Generic;
 import org.openspaces.pu.container.servicegrid.sla.Host;
@@ -21,8 +20,6 @@ import org.openspaces.pu.container.servicegrid.sla.RangeRequirement;
 import org.openspaces.pu.container.servicegrid.sla.RelocationPolicy;
 import org.openspaces.pu.container.servicegrid.sla.SLA;
 import org.openspaces.pu.container.servicegrid.sla.ScaleUpPolicy;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -42,45 +39,114 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
- * Created by IntelliJ IDEA.
- * User: ming
- * Date: Jan 28, 2007
- * Time: 11:24:32 AM
  */
 public class Deploy {
 // ------------------------------ FIELDS ------------------------------
 
-    private static final Logger LOGGER = Logger.getLogger(Deploy.class.getName());
+    private static final Log logger = LogFactory.getLog(Deploy.class);
+
     private DeployAdmin deployAdmin;
+
     private String[] groups;
 
-// -------------------------- STATIC METHODS --------------------------
+    public DeployAdmin getDeployAdmin() {
+        if (deployAdmin == null) {
+            GSM gsm = ProvisionerFinder.find(null, 5000, getGroups());
+            if (gsm == null) {
+                // TODO add an explicit exception here
+                throw new RuntimeException("GSM Not Found!");
+            }
+            try {
+                deployAdmin = (DeployAdmin) gsm.getAdmin();
+            } catch (RemoteException e) {
+                logger.warn("Failed to get Deploy Admin", e);
+            }
+        }
 
-    private static ServiceElement deepCopy(ServiceElement element) throws IOException, ClassNotFoundException {
-        //write
-        byte[] writtenBytes;
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-        objectOutputStream.writeObject(element);
-        writtenBytes = byteArrayOutputStream.toByteArray();
+        return deployAdmin;
+    }
 
-        //read
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(writtenBytes);
-        ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-        Object readObject = objectInputStream.readObject();
-        return (ServiceElement) readObject;
+    public void setDeployAdmin(DeployAdmin deployAdmin) {
+        this.deployAdmin = deployAdmin;
+    }
+
+    public String[] getGroups() {
+        if (groups == null) {
+            String groupsProperty = System.getProperty("com.gs.jini_lus.groups");
+            if (groupsProperty != null) {
+                StringTokenizer tokenizer = new StringTokenizer(groupsProperty);
+                int count = tokenizer.countTokens();
+                groups = new String[count];
+                for (int i = 0; i < count; i++) {
+                    groups[i] = tokenizer.nextToken();
+                }
+            }
+        }
+        return groups;
+    }
+
+    public void setGroups(String[] groups) {
+        this.groups = groups;
+    }
+
+    public void deploy(String[] args) throws Exception {
+        String puPath = args[0];
+        int index = puPath.lastIndexOf('/');
+        index = index == -1 ? 0 : index;
+        String puName = puPath.substring(index);
+
+        String[] groups = getGroups();
+        if (logger.isInfoEnabled()) {
+            logger.info("Deploying [" + puName + "] with groups " + Arrays.asList(groups));
+        }
+        //get codebase from service
+        String codeserver = getCodebase(getDeployAdmin());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Usign codeserver [" + codeserver + "]");
+        }
+
+        //list remote files, only works with webster
+        URL root = new URL(codeserver);
+        HTTPFileSystemView view = new HTTPFileSystemView(root);
+        File puHome = view.createFileObject(puPath);
+
+        //get list of all jars
+        File lib = view.createFileObject(puHome, "lib");
+        File[] jars = view.getFiles(lib, false);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Using lib " + Arrays.asList(jars));
+        }
+
+        //get list of all shared
+        File shared = view.createFileObject(puHome, "shared-lib");
+        File[] sharedJars = view.getFiles(shared, false);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Using shared-lib " + Arrays.asList(sharedJars));
+        }
+
+        //read pu xml
+        String puString = readPUFile(root, puPath);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Using PU xml [" + puString + "]");
+        }
+
+        //get sla from pu string
+        SLA sla = SLAUtil.loadSLA(puString);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Using SLA " + sla);
+        }
+
+        //deploy to sg
+        OperationalString opString = loadDeployment(puString, codeserver, sla, jars, puPath, puName, sharedJars);
+        /* Map result = */
+        deployAdmin.deploy(opString);
     }
 
     //copied from opstringloader
-    static String[] getSLAConfigArgs(String type,
-                                     String max,
-                                     String lowerDampener,
-                                     String upperDampener) {
-        String[] args = null;
+    private String[] getSLAConfigArgs(String type, String max, String lowerDampener, String upperDampener) {
+        String[] args;
         String handler = "org.jini.rio.qos.";
         int handlerType;
         if (type.equals("scaling")) {
@@ -137,86 +203,18 @@ public class Deploy {
             buffer.append(line);
         }
         reader.close();
-        String puString = buffer.toString();
-        return puString;
+        return buffer.toString();
     }
 
     private static String getCodebase(DeployAdmin deployAdmin) throws MalformedURLException, RemoteException {
         URL url = ((ServiceAdmin) deployAdmin).getServiceElement().getExportURLs()[0];
-        String codeserver = url.getProtocol() + "://" + url.getHost() + ":" + url.getPort() + "/";
-        return codeserver;
+        return url.getProtocol() + "://" + url.getHost() + ":" + url.getPort() + "/";
     }
 
-    private static void deployLocal(SLA sla, String puString) {
-        ClusterInfo clusterInfo = new ClusterInfo();
-        clusterInfo.setNumberOfInstances(new Integer(sla.getNumberOfInstances()));
-        clusterInfo.setNumberOfBackups(new Integer(sla.getNumberOfBackups()));
-        clusterInfo.setSchema(sla.getClusterSchema());
-
-        clusterInfo.setInstanceId(new Integer(1));
-        //create PU Container
-        Resource resource = new ByteArrayResource(puString.getBytes());
-        IntegratedProcessingUnitContainerProvider factory = new IntegratedProcessingUnitContainerProvider();
-        factory.addConfigLocation(resource);
-        factory.setClusterInfo(clusterInfo);
-        IntegratedProcessingUnitContainer integratedContainer = (IntegratedProcessingUnitContainer) factory.createContainer();
-    }
-
-    private static void printUsage() {
-        System.out.println("Usage: Deploy [PU Name]");
-    }
-
-// --------------------- GETTER / SETTER METHODS ---------------------
-
-    public DeployAdmin getDeployAdmin() {
-        if (deployAdmin == null) {
-            //find gsm and codebase
-            GSM gsm = ProvisionerFinder.find(null, 5000, getGroups());
-            if (gsm == null) {
-                throw new RuntimeException("GSM Not Found!");
-            }
-            try {
-                deployAdmin = (DeployAdmin) gsm.getAdmin();
-            } catch (RemoteException e) {
-                LOGGER.log(Level.WARNING, e.toString(), e);
-            }
-        }
-
-        return deployAdmin;
-    }
-
-    public void setDeployAdmin(DeployAdmin deployAdmin) {
-        this.deployAdmin = deployAdmin;
-    }
-
-    public String[] getGroups() {
-        if (groups == null) {
-            String groupsProperty = System.getProperty("com.gs.jini_lus.groups");
-            System.out.println("JINI Groups = " + groupsProperty);
-            if (groupsProperty != null) {
-                StringTokenizer tokenizer = new StringTokenizer(groupsProperty);
-                int count = tokenizer.countTokens();
-                groups = new String[count];
-                for (int i = 0; i < count; i++) {
-                    groups[i] = tokenizer.nextToken();
-                }
-            }
-        }
-        return groups;
-    }
-
-    public void setGroups(String[] groups) {
-        this.groups = groups;
-    }
-
-// -------------------------- OTHER METHODS --------------------------
-
-    OperationalString loadDeployment(
-            String puString, String codeserver, SLA sla, File[] jars, String puPath, String puName, File[] sharedJars)
-            throws Exception {
+    private OperationalString loadDeployment(String puString, String codeserver, SLA sla, File[] jars, String puPath,
+                                             String puName, File[] sharedJars) throws Exception {
         URL opstringURL = Deploy.class.getResource("/org/openspaces/pu/container/servicegrid/puservicebean.xml");
-        //System.out.println("opstringURL = " + opstringURL);
-        OperationalString opString = null;
+        OperationalString opString;
 
         //load the servicebean opstring
         OpStringLoader opStringLoader = new OpStringLoader();
@@ -260,7 +258,7 @@ public class Deploy {
         }
 
         //requirements
-        List hosts = new ArrayList();
+        List<String> hosts = new ArrayList<String>();
         if (sla.getRequirements() != null) {
             for (int i = 0; i < sla.getRequirements().size(); i++) {
                 Object requirement = sla.getRequirements().get(i);
@@ -283,7 +281,7 @@ public class Deploy {
         }
         //put hosts as cluster
         if (hosts.size() > 0) {
-            element.setCluster((String[]) hosts.toArray(new String[hosts.size()]));
+            element.setCluster(hosts.toArray(new String[hosts.size()]));
         }
 
         if (sla.getMaxInstancesPerVM() > 0) {
@@ -293,11 +291,9 @@ public class Deploy {
         //put jars
         ClassBundle classBundle = element.getComponentBundle();
         classBundle.addJAR(puPath + "/");
-        for (int i = 0; i < jars.length; i++) {
-            File jar = jars[i];
+        for (File jar : jars) {
             String path = jar.getPath();
             classBundle.addJAR(path);
-//            System.out.println("added jar:" + path);
         }
 
         //shared-lib as sharedComponents
@@ -307,9 +303,12 @@ public class Deploy {
             String path = sharedJar.getPath();
             sharedJarPaths[i] = path;
         }
-        Map jarsMap = new HashMap();
+        Map<String, String[]> jarsMap = new HashMap<String, String[]>();
         jarsMap.put("hack", sharedJarPaths);
         classBundle.addSharedComponents(jarsMap);
+
+        // set the each servive to have the operation string name
+        element.getServiceBeanConfig().setName(element.getOperationalStringName().replace(' ', '_') + "." + element.getName());
 
         //this is the MOST IMPORTANT part
         boolean hasBackups = sla.getNumberOfBackups() > 0;
@@ -323,76 +322,37 @@ public class Deploy {
                 clone.getServiceBeanConfig().setName(name + "." + i);
                 clone.getServiceBeanConfig().addInitParameter("clusterGroup", String.valueOf(i));
                 opString.addService(clone);
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Using Service Element " + element.toString());
+                }
             }
         } else {
             element.setPlanned(sla.getNumberOfInstances());
             element.getServiceBeanConfig().addInitParameter("clusterGroup", String.valueOf(1));
-        }
-
-        if (LOGGER.isLoggable(Level.FINE)) {
-            LOGGER.log(Level.FINE, element.toString());
+            if (logger.isTraceEnabled()) {
+                logger.trace("Using Service Element " + element.toString());
+            }
         }
 
         return (opString);
     }
 
-    public void deploy(String[] args) throws Exception {
-        //get codebase from service
-        String codeserver = getCodebase(getDeployAdmin());
-        if (LOGGER.isLoggable(Level.FINE)) {
-            LOGGER.log(Level.FINE, "codeserver = " + codeserver);
-        }
+    private ServiceElement deepCopy(ServiceElement element) throws IOException, ClassNotFoundException {
+        //write
+        byte[] writtenBytes;
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+        objectOutputStream.writeObject(element);
+        writtenBytes = byteArrayOutputStream.toByteArray();
 
-        //get pu xml
-        String puPath = args[0];
-        int index = puPath.lastIndexOf('/');
-        index = index == -1 ? 0 : index;
-        String puName = puPath.substring(index);
-
-        //list remote files, only works with webster
-        URL root = new URL(codeserver);
-        HTTPFileSystemView view = new HTTPFileSystemView(root);
-        File puHome = view.createFileObject(puPath);
-
-        //get list of all jars
-        File lib = view.createFileObject(puHome, "lib");
-        File[] jars = view.getFiles(lib, false);
-        if (LOGGER.isLoggable(Level.FINE)) {
-            LOGGER.log(Level.FINE, "jars = " + Arrays.asList(jars));
-        }
-
-        //get list of all shared
-        File shared = view.createFileObject(puHome, "shared-lib");
-        File[] sharedJars = view.getFiles(shared, false);
-        if (LOGGER.isLoggable(Level.FINE)) {
-            LOGGER.log(Level.FINE, "sharedJars = " + Arrays.asList(sharedJars));
-        }
-
-        //read pu xml
-        String puString = readPUFile(root, puPath);
-        if (LOGGER.isLoggable(Level.FINE)) {
-            LOGGER.log(Level.FINE, "puString = " + puString);
-        }
-
-        //get sla from pu string
-        SLA sla = SLAUtil.loadSLA(puString);
-        if (LOGGER.isLoggable(Level.FINE)) {
-            LOGGER.log(Level.FINE, "sla = " + sla);
-        }
-
-        //deploy to sg
-        OperationalString opString = loadDeployment(puString, codeserver, sla, jars, puPath, puName, sharedJars);
-        Map result = deployAdmin.deploy(opString);
-//        System.out.println("result = " + result);
-
-//        deployLocal(sla, puString);
+        //read
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(writtenBytes);
+        ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+        Object readObject = objectInputStream.readObject();
+        return (ServiceElement) readObject;
     }
 
-// --------------------------- main() method ---------------------------
-
     public static void main(String[] args) throws Exception {
-        //these must be manually changed to reflect your environment, for now
-//        String puFilename = "/Users/ming/Gigaspaces/cvs/openspaces/config/pu/pu.xml";
         if (args.length < 1) {
             printUsage();
             System.exit(-1);
@@ -410,4 +370,9 @@ public class Deploy {
         Deploy deployer = new Deploy();
         deployer.deploy(args);
     }
+
+    private static void printUsage() {
+        System.out.println("Usage: Deploy [PU Name]");
+    }
+
 }
