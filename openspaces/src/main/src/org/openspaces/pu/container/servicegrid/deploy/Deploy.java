@@ -1,6 +1,7 @@
 package org.openspaces.pu.container.servicegrid.deploy;
 
 import com.gigaspaces.grid.gsm.GSM;
+import net.jini.core.lookup.ServiceItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.core.ClassBundle;
@@ -31,6 +32,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.rmi.MarshalledObject;
 import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -51,17 +53,27 @@ public class Deploy {
 
     private String[] groups;
 
-    public DeployAdmin getDeployAdmin() {
+    public DeployAdmin getDeployAdmin() throws GSMNotFoundException {
         if (deployAdmin == null) {
-            GSM gsm = ProvisionerFinder.find(null, 5000, getGroups());
+            GSM gsm = null;
+            // TODO add the timeout as a paremeter to deploy
+            long timeout = 5000;
+            ServiceItem result = ServiceFinder.find(null, GSM.class, timeout, getGroups());
+            if (result != null) {
+                try {
+                    result = (ServiceItem) new MarshalledObject(result).get();
+                    gsm = (GSM) result.service;
+                } catch (Exception e) {
+                    throw new GSMNotFoundException(getGroups(), timeout, e);
+                }
+            }
             if (gsm == null) {
-                // TODO add an explicit exception here
-                throw new RuntimeException("GSM Not Found!");
+                throw new GSMNotFoundException(getGroups(), timeout);
             }
             try {
                 deployAdmin = (DeployAdmin) gsm.getAdmin();
             } catch (RemoteException e) {
-                logger.warn("Failed to get Deploy Admin", e);
+                throw new GSMNotFoundException(getGroups(), timeout);
             }
         }
 
@@ -206,7 +218,7 @@ public class Deploy {
         return buffer.toString();
     }
 
-    private static String getCodebase(DeployAdmin deployAdmin) throws MalformedURLException, RemoteException {
+    private String getCodebase(DeployAdmin deployAdmin) throws MalformedURLException, RemoteException {
         URL url = ((ServiceAdmin) deployAdmin).getServiceElement().getExportURLs()[0];
         return url.getProtocol() + "://" + url.getHost() + ":" + url.getPort() + "/";
     }

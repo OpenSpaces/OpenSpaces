@@ -1,19 +1,14 @@
 package org.openspaces.pu.container.servicegrid.sla;
 
 /**
- * Created by IntelliJ IDEA.
- * User: ming
- * Date: Feb 20, 2007
- * Time: 11:50:07 PM
  */
 public class RangeRequirement extends Requirement {
-// ------------------------------ FIELDS ------------------------------
 
-    String watch;
-    double low;
-    double high;
+    private String watch;
 
-// --------------------- GETTER / SETTER METHODS ---------------------
+    private double low;
+
+    private double high;
 
     public double getHigh() {
         return high;

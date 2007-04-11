@@ -3,18 +3,12 @@ package org.openspaces.pu.container.servicegrid.sla;
 import java.util.Map;
 
 /**
- * Created by IntelliJ IDEA.
- * User: ming
- * Date: Feb 21, 2007
- * Time: 12:54:49 AM
  */
 public class Generic extends Requirement {
-// ------------------------------ FIELDS ------------------------------
 
     String name;
-    Map attributes;
 
-// --------------------- GETTER / SETTER METHODS ---------------------
+    Map attributes;
 
     public Map getAttributes() {
         return attributes;

@@ -1,19 +1,14 @@
 package org.openspaces.pu.container.servicegrid.sla;
 
 /**
- * Created by IntelliJ IDEA.
- * User: ming
- * Date: Feb 20, 2007
- * Time: 7:21:29 PM
  */
 public abstract class AbstractPolicy implements Policy {
-// ------------------------------ FIELDS ------------------------------
 
-    String monitor;
-    int low;
-    int high;
+    private String monitor;
 
-// --------------------- GETTER / SETTER METHODS ---------------------
+    private int low;
+
+    private int high;
 
     public int getHigh() {
         return high;
