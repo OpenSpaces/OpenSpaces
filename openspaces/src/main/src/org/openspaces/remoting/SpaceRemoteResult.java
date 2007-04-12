@@ -2,13 +2,18 @@ package org.openspaces.remoting;
 
 import net.jini.core.entry.Entry;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 /**
  * Represents a Space remote inocation result. Either holds the remote inocation result or and
  * exception that occured during the invocation.
- * 
+ *
  * @author kimchy
  */
-public class SpaceRemoteResult<T> implements Entry {
+public class SpaceRemoteResult<T> implements Entry, Externalizable {
 
     private static final long serialVersionUID = -5466117072163590804L;
 
@@ -76,6 +81,35 @@ public class SpaceRemoteResult<T> implements Entry {
     }
 
     public static String[] __getSpaceIndexedFields() {
-        return new String[] { "routing", "invocationId" };
+        return new String[]{"routing"};
+    }
+
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(invocationId);
+        if (result != null) {
+            out.writeBoolean(true);
+            out.writeObject(result);
+        } else {
+            out.writeBoolean(false);
+        }
+        if (ex != null) {
+            out.writeBoolean(true);
+            out.writeObject(ex);
+        } else {
+            out.writeBoolean(false);
+        }
+        out.writeInt(routing);
+    }
+
+    @SuppressWarnings({"unchecked"})
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        invocationId = in.readUTF();
+        if (in.readBoolean()) {
+            result = (T) in.readObject();
+        }
+        if (in.readBoolean()) {
+            ex = (Exception) in.readObject();
+        }
+        routing = in.readInt();
     }
 }
