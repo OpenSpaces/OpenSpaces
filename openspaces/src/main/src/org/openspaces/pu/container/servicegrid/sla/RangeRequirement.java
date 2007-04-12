@@ -2,7 +2,7 @@ package org.openspaces.pu.container.servicegrid.sla;
 
 /**
  */
-public class RangeRequirement extends Requirement {
+public class RangeRequirement implements Requirement {
 
     private String watch;
 

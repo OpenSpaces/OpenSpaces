@@ -4,11 +4,11 @@ import java.util.Map;
 
 /**
  */
-public class Generic extends Requirement {
+public class Generic implements Requirement {
 
-    String name;
+    private String name;
 
-    Map attributes;
+    private Map attributes;
 
     public Map getAttributes() {
         return attributes;

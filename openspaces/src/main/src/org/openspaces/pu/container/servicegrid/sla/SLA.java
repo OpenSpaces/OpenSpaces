@@ -1,10 +1,11 @@
 package org.openspaces.pu.container.servicegrid.sla;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  */
-public class SLA {
+public class SLA implements Serializable {
 
     private int numberOfInstances = 1;
 

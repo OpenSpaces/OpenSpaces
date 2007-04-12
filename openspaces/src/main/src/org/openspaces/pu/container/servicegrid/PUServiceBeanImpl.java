@@ -17,7 +17,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.rmi.MarshalledObject;
 import java.util.StringTokenizer;
 
 /**
@@ -51,12 +51,14 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         stopPU();
     }
 
-    private void startPU(String springXml) throws MalformedURLException {
+    private void startPU(String springXml) throws IOException, ClassNotFoundException {
         if (logger.isDebugEnabled()) {
             logger.debug(logMessage("Starting PU with [" + springXml + "]"));
         }
 
-        org.openspaces.pu.container.servicegrid.sla.SLA sla = SLAUtil.loadSLA(springXml);
+        MarshalledObject slaMarshObj = (MarshalledObject) getServiceBeanContext().getInitParameter("sla");
+        org.openspaces.pu.container.servicegrid.sla.SLA sla =
+                (org.openspaces.pu.container.servicegrid.sla.SLA) slaMarshObj.get();
 
         //this is the MOST IMPORTANT part
         Integer instanceId;

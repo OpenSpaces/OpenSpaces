@@ -2,7 +2,6 @@ package org.openspaces.remoting;
 
 import net.jini.core.entry.Entry;
 
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -13,7 +12,7 @@ import java.io.ObjectOutput;
  *
  * @author kimchy
  */
-public class SpaceRemoteResult<T> implements Entry, Externalizable {
+public class SpaceRemoteResult<T> implements Entry/*, Externalizable*/ {
 
     private static final long serialVersionUID = -5466117072163590804L;
 

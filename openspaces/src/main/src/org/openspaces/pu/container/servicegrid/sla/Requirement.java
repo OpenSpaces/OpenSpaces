@@ -1,6 +1,6 @@
 package org.openspaces.pu.container.servicegrid.sla;
 
-/**
- */
-public class Requirement {
+import java.io.Serializable;
+
+public interface Requirement extends Serializable {
 }

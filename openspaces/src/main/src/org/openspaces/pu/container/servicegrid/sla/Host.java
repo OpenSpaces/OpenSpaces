@@ -2,9 +2,9 @@ package org.openspaces.pu.container.servicegrid.sla;
 
 /**
  */
-public class Host extends Requirement {
+public class Host implements Requirement {
 
-    String host;
+    private String host;
 
     public String getHost() {
         return host;

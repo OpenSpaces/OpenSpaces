@@ -2,7 +2,6 @@ package org.openspaces.remoting;
 
 import com.j_spaces.core.client.MetaDataEntry;
 
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -13,7 +12,7 @@ import java.io.ObjectOutput;
  *
  * @author kimchy
  */
-public class SpaceRemoteInvocation extends MetaDataEntry implements Externalizable {
+public class SpaceRemoteInvocation extends MetaDataEntry/* implements Externalizable*/ {
 
     private static final long serialVersionUID = 5027397265383711691L;
 

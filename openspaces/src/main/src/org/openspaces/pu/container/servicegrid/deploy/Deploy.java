@@ -322,6 +322,9 @@ public class Deploy {
         // set the each servive to have the operation string name
         element.getServiceBeanConfig().setName(element.getOperationalStringName().replace(' ', '-') + "." + element.getName());
 
+        // pass the SLA as an init parameter so the GSC won't need to parse the XML again
+        element.getServiceBeanConfig().addInitParameter("sla", new MarshalledObject(sla));
+
         //this is the MOST IMPORTANT part
         boolean hasBackups = sla.getNumberOfBackups() > 0;
         if (hasBackups) {
