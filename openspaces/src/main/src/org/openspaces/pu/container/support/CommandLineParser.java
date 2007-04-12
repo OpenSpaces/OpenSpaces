@@ -33,26 +33,30 @@ public abstract class CommandLineParser {
     }
 
     public static Parameter[] parse(String[] args) throws IllegalArgumentException {
-        if (args.length == 0) {
+        return parse(args, args.length);
+    }
+
+    public static Parameter[] parse(String[] args, int length) throws IllegalArgumentException {
+        if (length == 0) {
             return new Parameter[0];
         }
-        if (args.length == 1) {
+        if (length == 1) {
             throw new IllegalArgumentException("Command line structure is incorrect, only one parameter");
         }
         List<Parameter> params = new ArrayList<Parameter>();
         int index = 0;
-        while (index < args.length) {
+        while (index < length) {
             if (!args[index].startsWith("-")) {
                 throw new IllegalArgumentException("Command line argument [" + args[index]
                         + "] is supposed to start with -");
             }
-            if ((index + 1) == args.length) {
+            if ((index + 1) == length) {
                 throw new IllegalArgumentException("Command line argument [" + args[index] + "] has no argument");
             }
             String name = args[index].substring(1, args[index].length());
             index += 1;
             List<String> arguments = new ArrayList<String>();
-            for (; index < args.length; index++) {
+            for (; index < length; index++) {
                 if (args[index].startsWith("-")) {
                     break;
                 }

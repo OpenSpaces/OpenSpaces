@@ -49,9 +49,9 @@ public class StandaloneProcessingUnitContainer implements ApplicationContextProc
      * <p>
      * The following parameters are allowed:
      * <ul>
-     * <li><b>-pu [location]</b>: The location of the procesing unit archive. See
+     * <li><b>[location]</b>: The location of the procesing unit archive. See
      * {@link org.openspaces.pu.container.standalone.StandaloneProcessingUnitContainerProvider#StandaloneProcessingUnitContainerProvider(String)}.
-     * This parameter is required.</li>
+     * This parameter is required and must be at the end of the command line.</li>
      * <li><b>-conifg [configLocation]</b>: Allows to add a Spring application context config
      * location. See
      * {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider#addConfigLocation(String)}.
@@ -89,21 +89,13 @@ public class StandaloneProcessingUnitContainer implements ApplicationContextProc
             public void checkPermission(java.security.Permission perm, Object context) {
             }
         });
-        CommandLineParser.Parameter[] params = CommandLineParser.parse(args);
-        if (params.length == 0) {
-            throw new IllegalArgumentException("-pu parameter must be defined");
+
+        if (args.length == 0) {
+            throw new IllegalArgumentException("The pu location must be defined");
         }
-        String puLocation = null;
-        for (CommandLineParser.Parameter param : params) {
-            if (param.getName().equalsIgnoreCase("pu")) {
-                if (param.getArguments().length == 1) {
-                    puLocation = param.getArguments()[0];
-                }
-            }
-        }
-        if (puLocation == null) {
-            throw new IllegalArgumentException("-pu parameter must be defined");
-        }
+        String puLocation = args[args.length - 1];
+
+        CommandLineParser.Parameter[] params = CommandLineParser.parse(args, args.length - 1);
         StandaloneProcessingUnitContainerProvider provider = new StandaloneProcessingUnitContainerProvider(puLocation);
 
         provider.setBeanLevelProperties(BeanLevelPropertiesParser.parse(params));
