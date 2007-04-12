@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The default event listener adapter allows to configure the method name (using
+ * The method event listener adapter allows to configure the method name (using
  * {@link #setMethodName(String)} that the event will be delegated to. The default method name is
  * <code>handleEvent</code>.
  * 
