@@ -7,7 +7,7 @@ import java.util.List;
  * A simple command line parser transforming a list of string arguments into
  * {@link org.openspaces.pu.container.support.CommandLineParser.Parameter} arguments. The arguments
  * are in the form of -param1 arg1 arg2 -parm2 arg1.
- * 
+ *
  * @author kimchy
  */
 public abstract class CommandLineParser {
@@ -58,9 +58,9 @@ public abstract class CommandLineParser {
                 }
                 arguments.add(args[index]);
             }
-            Parameter parameter = new Parameter(name, (String[]) arguments.toArray(new String[arguments.size()]));
+            Parameter parameter = new Parameter(name, arguments.toArray(new String[arguments.size()]));
             params.add(parameter);
         }
-        return (Parameter[]) params.toArray(new Parameter[params.size()]);
+        return params.toArray(new Parameter[params.size()]);
     }
 }

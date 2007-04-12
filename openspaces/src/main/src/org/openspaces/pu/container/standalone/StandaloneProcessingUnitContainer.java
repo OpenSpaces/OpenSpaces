@@ -93,13 +93,12 @@ public class StandaloneProcessingUnitContainer implements ApplicationContextProc
         if (params.length == 0) {
             throw new IllegalArgumentException("-pu parameter must be defined");
         }
-        if (params.length == 1) {
-            throw new IllegalArgumentException("-pu parameter must be defined, please prefix the location with -pu");
-        }
         String puLocation = null;
         for (CommandLineParser.Parameter param : params) {
             if (param.getName().equalsIgnoreCase("pu")) {
-                puLocation = param.getArguments()[0];
+                if (param.getArguments().length == 1) {
+                    puLocation = param.getArguments()[0];
+                }
             }
         }
         if (puLocation == null) {
