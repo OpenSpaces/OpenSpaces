@@ -14,6 +14,7 @@ import org.jini.rio.opstring.OpString;
 import org.jini.rio.opstring.OpStringLoader;
 import org.jini.rio.resources.servicecore.ServiceAdmin;
 import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.servicegrid.SLAUtil;
 import org.openspaces.pu.container.servicegrid.sla.Generic;
 import org.openspaces.pu.container.servicegrid.sla.Host;
@@ -22,6 +23,7 @@ import org.openspaces.pu.container.servicegrid.sla.RangeRequirement;
 import org.openspaces.pu.container.servicegrid.sla.RelocationPolicy;
 import org.openspaces.pu.container.servicegrid.sla.SLA;
 import org.openspaces.pu.container.servicegrid.sla.ScaleUpPolicy;
+import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.CommandLineParser;
 
@@ -184,7 +186,8 @@ public class Deploy {
         }
 
         //deploy to sg
-        OperationalString opString = loadDeployment(puString, codeserver, sla, jars, puPath, puName, sharedJars);
+        OperationalString opString = loadDeployment(puString, codeserver, sla, jars, puPath, puName, sharedJars,
+                BeanLevelPropertiesParser.parse(params));
         /* Map result = */
         deployAdmin.deploy(opString);
     }
@@ -257,7 +260,8 @@ public class Deploy {
     }
 
     private OperationalString loadDeployment(String puString, String codeserver, SLA sla, File[] jars, String puPath,
-                                             String puName, File[] sharedJars) throws Exception {
+                                             String puName, File[] sharedJars,
+                                             BeanLevelProperties beanLevelProperties) throws Exception {
         URL opstringURL = Deploy.class.getResource("/org/openspaces/pu/container/servicegrid/puservicebean.xml");
         OperationalString opString;
 
@@ -274,6 +278,10 @@ public class Deploy {
 
         //put the entire pu spring xml as parameter to servicebean
         element.getServiceBeanConfig().addInitParameter("pu", puString);
+
+        if (beanLevelProperties != null) {
+            element.getServiceBeanConfig().addInitParameter("beanLevelProperties", new MarshalledObject(beanLevelProperties));
+        }
 
         //sla
         Policy policy = sla.getPolicy();

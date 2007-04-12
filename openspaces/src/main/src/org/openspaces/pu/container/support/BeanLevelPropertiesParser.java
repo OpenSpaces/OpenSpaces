@@ -13,7 +13,7 @@ import java.util.StringTokenizer;
  * A {@link org.openspaces.core.properties.BeanLevelProperties} parser that parses -properties
  * parameter(s) and transforms it into bean level properties. The format of the command is
  * <code>-properties [beanName] [properties]</code>.
- * 
+ *
  * <p>
  * [beanName] is optional, if not used, the properties will set the
  * {@link org.openspaces.core.properties.BeanLevelProperties#setContextProperties(java.util.Properties)}.
@@ -25,7 +25,7 @@ import java.util.StringTokenizer;
  * or they can follow Spring {@link org.springframework.core.io.Resource} lookup based on URL syntax
  * or Spring extended <code>classpath</code> prefix (see
  * {@link org.springframework.core.io.DefaultResourceLoader}).
- * 
+ *
  * @author kimchy
  */
 public abstract class BeanLevelPropertiesParser {
@@ -34,8 +34,8 @@ public abstract class BeanLevelPropertiesParser {
 
     public static BeanLevelProperties parse(CommandLineParser.Parameter[] params) throws IllegalArgumentException {
         BeanLevelProperties beanLevelProperties = null;
-        for (int i = 0; i < params.length; i++) {
-            if (!params[i].getName().equalsIgnoreCase("properties")) {
+        for (CommandLineParser.Parameter param : params) {
+            if (!param.getName().equalsIgnoreCase("properties")) {
                 continue;
             }
 
@@ -44,11 +44,11 @@ public abstract class BeanLevelPropertiesParser {
             }
             String name = null;
             String properties;
-            if (params[i].getArguments().length == 1) {
-                properties = params[i].getArguments()[0];
-            } else if (params[i].getArguments().length == 2) {
-                name = params[i].getArguments()[0];
-                properties = params[i].getArguments()[1];
+            if (param.getArguments().length == 1) {
+                properties = param.getArguments()[0];
+            } else if (param.getArguments().length == 2) {
+                name = param.getArguments()[0];
+                properties = param.getArguments()[1];
             } else {
                 throw new IllegalArgumentException("-config can accept only one or two values, not more and not less");
             }

@@ -11,6 +11,7 @@ import org.jini.rio.core.ServiceLevelAgreements;
 import org.jini.rio.core.jsb.ServiceBeanContext;
 import org.jini.rio.jsb.ServiceBeanAdapter;
 import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
 import org.springframework.core.io.ByteArrayResource;
@@ -94,6 +95,15 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         IntegratedProcessingUnitContainerProvider factory = new IntegratedProcessingUnitContainerProvider();
         factory.addConfigLocation(resource);
         factory.setClusterInfo(clusterInfo);
+
+        MarshalledObject beanLevelPropertiesMarshObj =
+                (MarshalledObject) getServiceBeanContext().getInitParameter("beanLevelProperties");
+        if (beanLevelPropertiesMarshObj != null) {
+            BeanLevelProperties beanLevelProperties = (BeanLevelProperties) beanLevelPropertiesMarshObj.get();
+            factory.setBeanLevelProperties(beanLevelProperties);
+            logger.info(logMessage("BeanLevelProperties " + beanLevelProperties));
+        }
+
         integratedContainer = (IntegratedProcessingUnitContainer) factory.createContainer();
     }
 
