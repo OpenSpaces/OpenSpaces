@@ -13,6 +13,7 @@ import org.jini.rio.monitor.DeployAdmin;
 import org.jini.rio.opstring.OpString;
 import org.jini.rio.opstring.OpStringLoader;
 import org.jini.rio.resources.servicecore.ServiceAdmin;
+import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.pu.container.servicegrid.SLAUtil;
 import org.openspaces.pu.container.servicegrid.sla.Generic;
 import org.openspaces.pu.container.servicegrid.sla.Host;
@@ -21,6 +22,8 @@ import org.openspaces.pu.container.servicegrid.sla.RangeRequirement;
 import org.openspaces.pu.container.servicegrid.sla.RelocationPolicy;
 import org.openspaces.pu.container.servicegrid.sla.SLA;
 import org.openspaces.pu.container.servicegrid.sla.ScaleUpPolicy;
+import org.openspaces.pu.container.support.ClusterInfoParser;
+import org.openspaces.pu.container.support.CommandLineParser;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -104,10 +107,16 @@ public class Deploy {
     }
 
     public void deploy(String[] args) throws Exception {
-        String puPath = args[0];
+
+        if (args.length == 0) {
+            throw new IllegalArgumentException("The pu location must be defined");
+        }
+        String puPath = args[args.length - 1];
         int index = puPath.lastIndexOf('/');
         index = index == -1 ? 0 : index;
         String puName = puPath.substring(index);
+
+        CommandLineParser.Parameter[] params = CommandLineParser.parse(args, args.length - 1);
 
         String[] groups = getGroups();
         if (logger.isInfoEnabled()) {
@@ -146,6 +155,30 @@ public class Deploy {
 
         //get sla from pu string
         SLA sla = SLAUtil.loadSLA(puString);
+        ClusterInfo clusterInfo = ClusterInfoParser.parse(params);
+        if (clusterInfo != null) {
+            // override specific cluster info parameters on the SLA
+            if (clusterInfo.getSchema() != null) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("Overrding SLA cluster schema with [" + clusterInfo.getSchema() + "]");
+                }
+                sla.setClusterSchema(clusterInfo.getSchema());
+            }
+            if (clusterInfo.getNumberOfInstances() != null) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("Overrding SLA numberOfInstances with [" + clusterInfo.getNumberOfInstances() + "]");
+                }
+                sla.setNumberOfInstances(clusterInfo.getNumberOfInstances());
+                if (logger.isInfoEnabled()) {
+                    logger.info("Overrding SLA numberOfBaskups with [" + clusterInfo.getNumberOfBackups() + "]");
+                }
+                if (clusterInfo.getNumberOfBackups() == null) {
+                    sla.setNumberOfBackups(0);
+                } else {
+                    sla.setNumberOfBackups(clusterInfo.getNumberOfBackups());
+                }
+            }
+        }
         if (logger.isDebugEnabled()) {
             logger.debug("Using SLA " + sla);
         }

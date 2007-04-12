@@ -23,8 +23,8 @@ public abstract class ClusterInfoParser {
 
     public static ClusterInfo parse(CommandLineParser.Parameter[] params) throws IllegalArgumentException {
         ClusterInfo clusterInfo = null;
-        for (int i = 0; i < params.length; i++) {
-            if (!params[i].getName().equalsIgnoreCase("cluster")) {
+        for (CommandLineParser.Parameter param : params) {
+            if (!param.getName().equalsIgnoreCase("cluster")) {
                 continue;
             }
 
@@ -32,12 +32,12 @@ public abstract class ClusterInfoParser {
                 clusterInfo = new ClusterInfo();
             }
 
-            if (params[i].getArguments().length == 0) {
+            if (param.getArguments().length == 0) {
                 throw new IllegalArgumentException("cluster parameter should have two parameresat least one parameter");
             }
 
-            for (int j = 0; j < params[i].getArguments().length; j++) {
-                String clusterParameter = params[i].getArguments()[j];
+            for (int j = 0; j < param.getArguments().length; j++) {
+                String clusterParameter = param.getArguments()[j];
                 int equalsIndex = clusterParameter.indexOf("=");
                 if (equalsIndex == -1) {
                     throw new IllegalArgumentException("Cluster paramter [" + clusterParameter
