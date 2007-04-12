@@ -320,7 +320,7 @@ public class Deploy {
         classBundle.addSharedComponents(jarsMap);
 
         // set the each servive to have the operation string name
-        element.getServiceBeanConfig().setName(element.getOperationalStringName().replace(' ', '_') + "." + element.getName());
+        element.getServiceBeanConfig().setName(element.getOperationalStringName().replace(' ', '-') + "." + element.getName());
 
         //this is the MOST IMPORTANT part
         boolean hasBackups = sla.getNumberOfBackups() > 0;
