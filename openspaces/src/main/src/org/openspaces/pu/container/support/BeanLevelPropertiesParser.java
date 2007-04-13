@@ -2,6 +2,7 @@ package org.openspaces.pu.container.support;
 
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
@@ -66,7 +67,12 @@ public abstract class BeanLevelPropertiesParser {
                     }
                 }
             } else {
-                Resource resource = new DefaultResourceLoader().getResource(properties);
+                Resource resource = new DefaultResourceLoader() {
+                    // override the default load from the classpath to load from the file system
+                    protected Resource getResourceByPath(String path) {
+                        return new FileSystemResource(path);
+                    }
+                }.getResource(properties);
                 try {
                     InputStream is = resource.getInputStream();
                     props.load(is);

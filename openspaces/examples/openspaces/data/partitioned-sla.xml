@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--
+        This file exists in this location mainly to show the ability to deploy a Processing Unit while
+        providing the SLA externally using the -sla [location] paramter to the deploy command.
+    -->
+
+    <!--
+        The SLA bean used when deploying this processing unit to the Service Grid.
+
+        The SLA uses a partitioned schema with primary and backup. It will create 2
+        partitions.
+    -->
+    <bean id="SLA" class="org.openspaces.pu.container.servicegrid.sla.SLA">
+        <property name="numberOfInstances" value="2"/>
+        <property name="numberOfBackups" value="1"/>
+        <property name="clusterSchema" value="partitioned"/>
+        <property name="maxInstancesPerVM" value="1"/>
+    </bean>
+    
+</beans>

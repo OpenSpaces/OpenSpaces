@@ -26,6 +26,10 @@ import org.openspaces.pu.container.servicegrid.sla.ScaleUpPolicy;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.CommandLineParser;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.util.FileCopyUtils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -155,8 +159,29 @@ public class Deploy {
             logger.debug("Using PU xml [" + puString + "]");
         }
 
+        // check to see if sla was passed as a parameter
+        String slaString = puString;
+        for (CommandLineParser.Parameter param : params) {
+            if (param.getName().equalsIgnoreCase("sla")) {
+                String slaLocation = param.getArguments()[0];
+                if (logger.isInfoEnabled()) {
+                    logger.info("Loading SLA from [" + slaLocation + "]");
+                }
+                Resource resource = new DefaultResourceLoader() {
+                    // override the default load from the classpath to load from the file system
+                    protected Resource getResourceByPath(String path) {
+                        return new FileSystemResource(path);
+                    }
+                }.getResource(slaLocation);
+                InputStreamReader reader = new InputStreamReader(resource.getInputStream());
+                slaString = FileCopyUtils.copyToString(reader);
+                reader.close();
+            }
+        }
+
         //get sla from pu string
-        SLA sla = SLAUtil.loadSLA(puString);
+        SLA sla = SLAUtil.loadSLA(slaString);
+
         ClusterInfo clusterInfo = ClusterInfoParser.parse(params);
         if (clusterInfo != null) {
             // override specific cluster info parameters on the SLA
