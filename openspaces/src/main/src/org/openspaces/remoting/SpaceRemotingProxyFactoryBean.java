@@ -165,8 +165,7 @@ public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements Fac
         Object value = gigaSpace.take(new SpaceRemoteResult(remoteInvocation), timeout);
         SpaceRemoteResult invokeResult = (SpaceRemoteResult) value;
         if (invokeResult == null) {
-            throw new RemoteTimeoutException("Timeout waiting for result with invocation [" + remoteInvocation
-                    + "]", timeout);
+            throw new RemoteTimeoutException("Timeout waiting for result with invocation [" + remoteInvocation + "]", timeout);
         }
         if (invokeResult.getEx() != null) {
             throw invokeResult.getEx();

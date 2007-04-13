@@ -13,7 +13,10 @@
         </Interfaces>
         <ImplementationClass>org.openspaces.pu.container.servicegrid.PUServiceBeanImpl
             <Resources>
-                <JAR>openspaces/openspaces.jar</JAR>
+                <SharedComponent>
+                    <ClassName>OpenSpaces</ClassName>
+                    <JAR>openspaces/openspaces.jar</JAR>
+                </SharedComponent>
             </Resources>
         </ImplementationClass>
 

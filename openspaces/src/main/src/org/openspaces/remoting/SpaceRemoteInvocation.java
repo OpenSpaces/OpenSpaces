@@ -2,6 +2,7 @@ package org.openspaces.remoting;
 
 import com.j_spaces.core.client.MetaDataEntry;
 
+import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -12,7 +13,7 @@ import java.io.ObjectOutput;
  *
  * @author kimchy
  */
-public class SpaceRemoteInvocation extends MetaDataEntry/* implements Externalizable*/ {
+public class SpaceRemoteInvocation extends MetaDataEntry implements Externalizable {
 
     private static final long serialVersionUID = 5027397265383711691L;
 
@@ -30,7 +31,7 @@ public class SpaceRemoteInvocation extends MetaDataEntry/* implements Externaliz
      * Constructs a new remote invocation.
      */
     public SpaceRemoteInvocation() {
-
+        setNOWriteLeaseMode(true);
     }
 
     /**
@@ -41,6 +42,7 @@ public class SpaceRemoteInvocation extends MetaDataEntry/* implements Externaliz
      * @param arguments  The arguments to pass to the service
      */
     public SpaceRemoteInvocation(String lookupName, String methodName, Object[] arguments) {
+        setNOWriteLeaseMode(true);
         this.lookupName = lookupName;
         this.methodName = methodName;
         this.arguments = arguments;

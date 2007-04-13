@@ -1,22 +1,25 @@
 package org.openspaces.remoting;
 
-import net.jini.core.entry.Entry;
+import com.j_spaces.core.client.EntryInfo;
+import com.j_spaces.core.client.MetaDataEntry;
 
+import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * Represents a Space remote inocation result. Either holds the remote inocation result or and
+ * Represents a Space remote inocation result. Either holds the remote inocation result or an
  * exception that occured during the invocation.
+ *
+ * <p>The result has the a routing field (used in partitioned spaces) that reflects the same
+ * value to remoting invocation holds.
  *
  * @author kimchy
  */
-public class SpaceRemoteResult<T> implements Entry/*, Externalizable*/ {
+public class SpaceRemoteResult<T> extends MetaDataEntry implements Externalizable {
 
     private static final long serialVersionUID = -5466117072163590804L;
-
-    public String invocationId;
 
     public T result;
 
@@ -28,37 +31,40 @@ public class SpaceRemoteResult<T> implements Entry/*, Externalizable*/ {
      * Constructs a new remote invocation result.
      */
     public SpaceRemoteResult() {
-
+        setNOWriteLeaseMode(true);
     }
 
     /**
      * Constructs a new remote invocation result based on the remote invocation. Uses the remote
-     * invocation to initalize the {@link #invocationId} and {@link #routing} (acts as the
-     * correlation ids).
+     * invocation to initalize the the {@link #routing} field and the result UID (acts as the
+     * correlation id).
      */
     public SpaceRemoteResult(SpaceRemoteInvocation remoteInvocation) {
-        this.invocationId = remoteInvocation.__getEntryInfo().m_UID;
+        setNOWriteLeaseMode(true);
+        __setEntryInfo(new EntryInfo(remoteInvocation.__getEntryInfo().m_UID + "Result", 0));
         this.routing = remoteInvocation.routing;
     }
 
     /**
      * Constructs a new remote invocation result based on the remote invocation and an exception.
-     * Uses the remote invocation to initalize the {@link #invocationId} and {@link #routing} (acts
-     * as the correlation ids).
+     * Uses the remote invocation to initalize the the {@link #routing} field and the result UID
+     * (acts as the correlation id).
      */
     public SpaceRemoteResult(SpaceRemoteInvocation remoteInvocation, Exception ex) {
-        this.invocationId = remoteInvocation.__getEntryInfo().m_UID;
+        setNOWriteLeaseMode(true);
+        __setEntryInfo(new EntryInfo(remoteInvocation.__getEntryInfo().m_UID + "Result", 0));
         this.ex = ex;
         this.routing = remoteInvocation.routing;
     }
 
     /**
      * Constructs a new remote invocation result based on the remote invocation and a result. Uses
-     * the remote invocation to initalize the {@link #invocationId} and {@link #routing} (acts as
-     * the correlation ids).
+     * the remote invocation to initalize the the {@link #routing} field and the result UID (acts
+     * as the correlation id).
      */
     public SpaceRemoteResult(SpaceRemoteInvocation remoteInvocation, T result) {
-        this.invocationId = remoteInvocation.__getEntryInfo().m_UID;
+        setNOWriteLeaseMode(true);
+        __setEntryInfo(new EntryInfo(remoteInvocation.__getEntryInfo().m_UID + "Result", 0));
         this.result = result;
         this.routing = remoteInvocation.routing;
     }
@@ -84,7 +90,7 @@ public class SpaceRemoteResult<T> implements Entry/*, Externalizable*/ {
     }
 
     public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeUTF(invocationId);
+        super._writeExternal(out);
         if (result != null) {
             out.writeBoolean(true);
             out.writeObject(result);
@@ -102,7 +108,7 @@ public class SpaceRemoteResult<T> implements Entry/*, Externalizable*/ {
 
     @SuppressWarnings({"unchecked"})
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        invocationId = in.readUTF();
+        super._readExternal(in);
         if (in.readBoolean()) {
             result = (T) in.readObject();
         }
