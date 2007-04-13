@@ -15,7 +15,7 @@ public class SLA implements Serializable {
 
     private Policy policy;
 
-    private List requirements;
+    private List<Requirement> requirements;
 
     private int maxInstancesPerVM;
 
@@ -59,11 +59,11 @@ public class SLA implements Serializable {
         this.policy = policy;
     }
 
-    public List getRequirements() {
+    public List<Requirement> getRequirements() {
         return requirements;
     }
 
-    public void setRequirements(List requirements) {
+    public void setRequirements(List<Requirement> requirements) {
         this.requirements = requirements;
     }
 
