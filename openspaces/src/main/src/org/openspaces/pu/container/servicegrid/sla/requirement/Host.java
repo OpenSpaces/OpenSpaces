@@ -1,4 +1,4 @@
-package org.openspaces.pu.container.servicegrid.sla;
+package org.openspaces.pu.container.servicegrid.sla.requirement;
 
 /**
  */

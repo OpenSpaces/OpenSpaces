@@ -16,13 +16,13 @@ import org.jini.rio.resources.servicecore.ServiceAdmin;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.servicegrid.SLAUtil;
-import org.openspaces.pu.container.servicegrid.sla.Generic;
-import org.openspaces.pu.container.servicegrid.sla.Host;
 import org.openspaces.pu.container.servicegrid.sla.Policy;
-import org.openspaces.pu.container.servicegrid.sla.RangeRequirement;
 import org.openspaces.pu.container.servicegrid.sla.RelocationPolicy;
 import org.openspaces.pu.container.servicegrid.sla.SLA;
 import org.openspaces.pu.container.servicegrid.sla.ScaleUpPolicy;
+import org.openspaces.pu.container.servicegrid.sla.requirement.Generic;
+import org.openspaces.pu.container.servicegrid.sla.requirement.Host;
+import org.openspaces.pu.container.servicegrid.sla.requirement.Range;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.CommandLineParser;
@@ -340,10 +340,10 @@ public class Deploy {
         if (sla.getRequirements() != null) {
             for (int i = 0; i < sla.getRequirements().size(); i++) {
                 Object requirement = sla.getRequirements().get(i);
-                if (requirement instanceof RangeRequirement) {
-                    RangeRequirement rangeRequirement = (RangeRequirement) requirement;
-                    ThresholdValues thresholdValues = new ThresholdValues(rangeRequirement.getLow(), rangeRequirement.getHigh());
-                    element.getServiceLevelAgreements().addSystemThreshold(rangeRequirement.getWatch(), thresholdValues);
+                if (requirement instanceof Range) {
+                    Range range = (Range) requirement;
+                    ThresholdValues thresholdValues = new ThresholdValues(range.getLow(), range.getHigh());
+                    element.getServiceLevelAgreements().addSystemThreshold(range.getWatch(), thresholdValues);
                 } else if (requirement instanceof Host) {
                     hosts.add(((Host) requirement).getHost());
                 } else if (requirement instanceof Generic) {

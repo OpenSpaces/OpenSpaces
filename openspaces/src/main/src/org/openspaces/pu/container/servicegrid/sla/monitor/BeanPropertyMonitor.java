@@ -10,11 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * @author kimchy
  */
-public class BeanPropertyMonitor implements ApplicationContextMonitor {
-
-    private String name;
-
-    private long period = 5000;
+public class BeanPropertyMonitor extends AbstractMonitor implements ApplicationContextMonitor {
 
     private String ref;
 
@@ -22,22 +18,6 @@ public class BeanPropertyMonitor implements ApplicationContextMonitor {
 
 
     private transient MethodInvoker methodInvoker;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public long getPeriod() {
-        return period;
-    }
-
-    public void setPeriod(long period) {
-        this.period = period;
-    }
 
     public void setRef(String ref) {
         this.ref = ref;

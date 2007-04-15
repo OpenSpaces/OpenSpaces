@@ -1,8 +1,8 @@
-package org.openspaces.pu.container.servicegrid.sla;
+package org.openspaces.pu.container.servicegrid.sla.requirement;
 
 /**
  */
-public class RangeRequirement implements Requirement {
+public class Range implements Requirement {
 
     private String watch;
 

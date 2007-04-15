@@ -1,6 +1,7 @@
 package org.openspaces.pu.container.servicegrid.sla;
 
 import org.openspaces.pu.container.servicegrid.sla.monitor.Monitor;
+import org.openspaces.pu.container.servicegrid.sla.requirement.Requirement;
 
 import java.io.Serializable;
 import java.util.List;
