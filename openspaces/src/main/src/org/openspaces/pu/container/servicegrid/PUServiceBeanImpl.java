@@ -10,16 +10,26 @@ import org.jini.rio.core.SLA;
 import org.jini.rio.core.ServiceLevelAgreements;
 import org.jini.rio.core.jsb.ServiceBeanContext;
 import org.jini.rio.jsb.ServiceBeanAdapter;
+import org.jini.rio.watch.Calculable;
+import org.jini.rio.watch.GaugeWatch;
+import org.jini.rio.watch.Watch;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
+import org.openspaces.pu.container.servicegrid.sla.monitor.ApplicationContextMonitor;
+import org.openspaces.pu.container.servicegrid.sla.monitor.Monitor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.rmi.MarshalledObject;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -31,6 +41,43 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private IntegratedProcessingUnitContainer integratedContainer;
 
     private int clusterGroup;
+
+    private List<WatchTask> watchTasks = new ArrayList<WatchTask>();
+
+    private ScheduledExecutorService executorService;
+
+    public void initialize(ServiceBeanContext context) throws Exception {
+        org.openspaces.pu.container.servicegrid.sla.SLA sla = getSLA(context);
+        if (sla.getMonitors() != null) {
+            for (Monitor monitor : sla.getMonitors()) {
+                // create a specific name for the watch, including the instnace id
+                String watchName = context.getServiceElement().getName() + "/" + monitor.getName() + "-"
+                        + context.getServiceBeanConfig().getInstanceID();
+                Watch watch = new GaugeWatch(watchName);
+                watchRegistry.register(watch);
+                watchTasks.add(new WatchTask(monitor, watch));
+
+                // go over the SLAs defined, if one matches the monitor, set its identifier to be
+                // the specific name for the watch we created. We can change the SLA at this stage
+                // since they are read only later in the service bean construction
+                SLA[] slas = context.getServiceElement().getServiceLevelAgreements().getServiceSLAs();
+                for (SLA sgSla : slas) {
+                    if (sgSla.getIdentifier().equals(monitor.getName())) {
+                        sgSla.setIdentifier(watchName);
+                    }
+                }
+            }
+        }
+        super.initialize(context);
+    }
+
+    public void destroy() {
+        for (WatchTask watchTask : watchTasks) {
+            watchRegistry.deregister(watchTask.getWatch());
+        }
+        watchTasks.clear();
+        super.destroy();
+    }
 
     public void advertise() throws IOException {
         String springXML = (String) context.getInitParameter("pu");
@@ -57,9 +104,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             logger.debug(logMessage("Starting PU with [" + springXml + "]"));
         }
 
-        MarshalledObject slaMarshObj = (MarshalledObject) getServiceBeanContext().getInitParameter("sla");
-        org.openspaces.pu.container.servicegrid.sla.SLA sla =
-                (org.openspaces.pu.container.servicegrid.sla.SLA) slaMarshObj.get();
+        org.openspaces.pu.container.servicegrid.sla.SLA sla = getSLA(getServiceBeanContext());
 
         //this is the MOST IMPORTANT part
         Integer instanceId;
@@ -105,9 +150,32 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
 
         integratedContainer = (IntegratedProcessingUnitContainer) factory.createContainer();
+
+        // inject the application context to all the monitors and schedule them
+        // currently use the number of threads in relation to the number of monitors
+        int numberOfThreads = watchTasks.size() / 5;
+        if (numberOfThreads == 0) {
+            numberOfThreads = 1;
+        }
+        executorService = Executors.newScheduledThreadPool(numberOfThreads);
+        for (WatchTask watchTask : watchTasks) {
+            if (watchTask.getMonitor() instanceof ApplicationContextMonitor) {
+                ((ApplicationContextMonitor) watchTask.getMonitor()).setApplicationContext(integratedContainer.getApplicationContext());
+            }
+            executorService.scheduleAtFixedRate(watchTask, watchTask.getMonitor().getPeriod(), watchTask.getMonitor().getPeriod(), TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private org.openspaces.pu.container.servicegrid.sla.SLA getSLA(ServiceBeanContext context) throws IOException, ClassNotFoundException {
+        MarshalledObject slaMarshObj = (MarshalledObject) context.getInitParameter("sla");
+        return (org.openspaces.pu.container.servicegrid.sla.SLA) slaMarshObj.get();
     }
 
     private void stopPU() {
+        if (executorService != null) {
+            executorService.shutdown();
+            executorService = null;
+        }
         if (integratedContainer != null) {
             try {
                 integratedContainer.close();
@@ -154,5 +222,29 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private String logMessage(String message) {
         return "[" + getServiceBeanContext().getServiceElement().getName() + "] " + message;
+    }
+
+    private class WatchTask implements Runnable {
+
+        private Monitor monitor;
+
+        private Watch watch;
+
+        public WatchTask(Monitor monitor, Watch watch) {
+            this.monitor = monitor;
+            this.watch = watch;
+        }
+
+        public Monitor getMonitor() {
+            return monitor;
+        }
+
+        public Watch getWatch() {
+            return watch;
+        }
+
+        public void run() {
+            watch.addWatchRecord(new Calculable(watch.getId(), monitor.getValue(), System.currentTimeMillis()));
+        }
     }
 }

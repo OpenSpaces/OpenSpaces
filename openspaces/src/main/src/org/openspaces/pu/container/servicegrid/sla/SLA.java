@@ -1,5 +1,7 @@
 package org.openspaces.pu.container.servicegrid.sla;
 
+import org.openspaces.pu.container.servicegrid.sla.monitor.Monitor;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -16,6 +18,8 @@ public class SLA implements Serializable {
     private Policy policy;
 
     private List<Requirement> requirements;
+
+    private List<Monitor> monitors;
 
     private int maxInstancesPerVM;
 
@@ -65,6 +69,14 @@ public class SLA implements Serializable {
 
     public void setRequirements(List<Requirement> requirements) {
         this.requirements = requirements;
+    }
+
+    public List<Monitor> getMonitors() {
+        return monitors;
+    }
+
+    public void setMonitors(List<Monitor> monitors) {
+        this.monitors = monitors;
     }
 
     public String toString() {

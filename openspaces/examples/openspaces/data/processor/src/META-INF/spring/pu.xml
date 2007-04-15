@@ -23,6 +23,15 @@
         <property name="numberOfBackups" value="1"/>
         <property name="clusterSchema" value="partitioned-sync2backup"/>
         <property name="maxInstancesPerVM" value="1"/>
+        <property name="monitors">
+            <list>
+                <bean class="org.openspaces.pu.container.servicegrid.sla.monitor.BeanPropertyMonitor">
+                    <property name="name" value="ProcessedDataCount"/>
+                    <property name="ref" value="dataProcessedCounter"/>
+                    <property name="propertyName" value="processedDataCount"/>
+                </bean>
+            </list>
+        </property>
     </bean>
 
     <!--
@@ -41,7 +50,7 @@
         Note, we do not specify here the cluster topology of the space. It is declated outside of
         the processing unit or within the SLA bean.
     -->
-    <os-core:space id="space" url="/./space" />
+    <os-core:space id="space" url="/./space"/>
 
     <!--
         OpenSpaces simplified space API built on top of IJSpace/JavaSpace.
@@ -78,6 +87,8 @@
         </os-events:listener>
     </os-events:polling-container>
 
+    <bean id="dataProcessedCounter" class="org.openspaces.example.data.processor.DataProcessedCounter"/>
+
     <!--
         A notified event container counting all the processed data objects using notifications basde on
         an sql template.
@@ -88,9 +99,7 @@
         <os-core:sql-query where="processed = true" class="org.openspaces.example.data.common.Data"/>
         <os-events:listener>
             <os-events:annotation-adapter>
-                <os-events:delegate>
-                    <bean class="org.openspaces.example.data.processor.DataProcessedCounter"/>
-                </os-events:delegate>
+                <os-events:delegate ref="dataProcessedCounter"/>
             </os-events:annotation-adapter>
         </os-events:listener>
     </os-events:notify-container>

@@ -3,6 +3,8 @@ package org.openspaces.example.data.processor;
 import org.openspaces.events.adapter.SpaceDataEvent;
 import org.openspaces.example.data.common.Data;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * A simple bean counting the number of processed data. Holds a simple
  * counter that is incremented each time a matching event occurs.
@@ -23,11 +25,15 @@ import org.openspaces.example.data.common.Data;
  */
 public class DataProcessedCounter {
 
-    int processedDataCount = 0;
+    AtomicInteger processedDataCount = new AtomicInteger(0);
 
     @SpaceDataEvent
     public void dataProcessed(Data data) {
-        processedDataCount++;
+        processedDataCount.incrementAndGet();
         System.out.println("*** PROCESSED DATA COUNT [" + processedDataCount + "] DATA [" + data + "]");
+    }
+
+    public int getProcessedDataCount() {
+        return processedDataCount.intValue();
     }
 }

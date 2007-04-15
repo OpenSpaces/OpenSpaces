@@ -16,9 +16,24 @@
     -->
     <bean id="SLA" class="org.openspaces.pu.container.servicegrid.sla.SLA">
         <property name="numberOfInstances" value="2"/>
-        <property name="numberOfBackups" value="1"/>
+        <property name="numberOfBackups" value="0"/>
         <property name="clusterSchema" value="partitioned"/>
         <property name="maxInstancesPerVM" value="1"/>
+        <property name="monitors">
+            <list>
+                <bean class="org.openspaces.pu.container.servicegrid.sla.monitor.BeanPropertyMonitor">
+                    <property name="name" value="ProcessedDataCount"/>
+                    <property name="ref" value="dataProcessedCounter"/>
+                    <property name="propertyName" value="processedDataCount"/>
+                </bean>
+            </list>
+        </property>
+        <property name="policy">
+            <bean class="org.openspaces.pu.container.servicegrid.sla.RelocationPolicy">
+                <property name="monitor" value="ProcessedDataCount" />
+                <property name="high" value="10" />
+            </bean>
+        </property>
     </bean>
     
 </beans>
