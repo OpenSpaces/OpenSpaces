@@ -1,4 +1,4 @@
-package org.openspaces.enhancer.support;
+package org.openspaces.enhancer.io;
 
 import org.openspaces.libraries.asm.Type;
 import org.openspaces.libraries.asm.commons.GeneratorAdapter;
@@ -9,9 +9,9 @@ import org.openspaces.libraries.asm.commons.Method;
  */
 public abstract class ObjectInputOutputHelper {
 
-    private static final Type OBJECT_COMPRESSOR_TYPE = Type.getObjectType("org/openspaces/enhancer/support/ObjectInputOutputCompressor");
+    private static final Type OBJECT_COMPRESSOR_TYPE = Type.getObjectType("org/openspaces/enhancer/io/ObjectInputOutputCompressor");
 
-    private static final Type OBJECT_IO_TYPE = Type.getObjectType("org/openspaces/enhancer/support/ObjectInputOutput");
+    private static final Type OBJECT_IO_TYPE = Type.getObjectType("org/openspaces/enhancer/io/ObjectInputOutput");
 
     public static void writeBoolean(GeneratorAdapter ga) {
         ga.invokeStatic(OBJECT_COMPRESSOR_TYPE, Method.getMethod("void writeBoolean(java.io.ObjectOutput, boolean)"));

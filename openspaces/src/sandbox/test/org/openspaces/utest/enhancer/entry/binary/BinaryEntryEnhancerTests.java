@@ -1,7 +1,7 @@
 package org.openspaces.utest.enhancer.entry.binary;
 
 import junit.framework.TestCase;
-import org.openspaces.enhancer.entry.BinaryEntry;
+import org.openspaces.enhancer.io.BinaryEntry;
 
 /**
  * @author kimchy

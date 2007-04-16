@@ -1,7 +1,7 @@
 package org.openspaces.utest.enhancer.entry.binary;
 
-import org.openspaces.enhancer.entry.Binary;
 import org.openspaces.enhancer.entry.Entry;
+import org.openspaces.enhancer.io.Binary;
 
 /**
  * @author kimchy

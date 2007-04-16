@@ -1,4 +1,4 @@
-package org.openspaces.enhancer.entry;
+package org.openspaces.enhancer.io;
 
 import java.io.IOException;
 
