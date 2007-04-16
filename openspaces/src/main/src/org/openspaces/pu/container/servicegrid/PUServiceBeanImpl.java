@@ -50,22 +50,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         org.openspaces.pu.container.servicegrid.sla.SLA sla = getSLA(context);
         if (sla.getMonitors() != null) {
             for (Monitor monitor : sla.getMonitors()) {
-                // create a specific name for the watch, including the instnace id
-                String watchName = context.getServiceElement().getName() + "/" + monitor.getName() + "-"
-                        + context.getServiceBeanConfig().getInstanceID();
+                String watchName = monitor.getName();
                 Watch watch = new GaugeWatch(watchName);
                 watchRegistry.register(watch);
                 watchTasks.add(new WatchTask(monitor, watch));
-
-                // go over the SLAs defined, if one matches the monitor, set its identifier to be
-                // the specific name for the watch we created. We can change the SLA at this stage
-                // since they are read only later in the service bean construction
-                SLA[] slas = context.getServiceElement().getServiceLevelAgreements().getServiceSLAs();
-                for (SLA sgSla : slas) {
-                    if (sgSla.getIdentifier().equals(monitor.getName())) {
-                        sgSla.setIdentifier(watchName);
-                    }
-                }
             }
         }
         super.initialize(context);
