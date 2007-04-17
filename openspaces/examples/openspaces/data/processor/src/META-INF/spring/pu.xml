@@ -17,6 +17,8 @@
 
         The SLA bean also mandates that a primary and a backup won't run under the same
         GSC by setting the maxInstancesPerVM to 1.
+
+        Within the SLA several Monitors can be defined which can then be viewed
     -->
     <bean id="SLA" class="org.openspaces.pu.container.servicegrid.sla.SLA">
         <property name="numberOfInstances" value="2"/>
@@ -26,7 +28,7 @@
         <property name="monitors">
             <list>
                 <bean class="org.openspaces.pu.container.servicegrid.sla.monitor.BeanPropertyMonitor">
-                    <property name="name" value="ProcessedDataCount"/>
+                    <property name="name" value="Processed Data"/>
                     <property name="ref" value="dataProcessedCounter"/>
                     <property name="propertyName" value="processedDataCount"/>
                 </bean>

@@ -9,6 +9,7 @@ public abstract class AbstractMonitor implements Monitor {
 
     private long period = 5000;
 
+    private int historySize = 100;
 
     public String getName() {
         return name;
@@ -26,4 +27,11 @@ public abstract class AbstractMonitor implements Monitor {
         this.period = period;
     }
 
+    public int getHistorySize() {
+        return historySize;
+    }
+
+    public void setHistorySize(int historySize) {
+        this.historySize = historySize;
+    }
 }

@@ -12,4 +12,6 @@ public interface Monitor extends Serializable {
     long getPeriod();
 
     double getValue();
+
+    int getHistorySize();
 }
