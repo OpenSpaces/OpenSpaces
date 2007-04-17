@@ -26,6 +26,8 @@ import org.openspaces.pu.container.servicegrid.sla.requirement.Range;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.CommandLineParser;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -159,6 +161,10 @@ public class Deploy {
             logger.debug("Using PU xml [" + puString + "]");
         }
 
+        // just call this to validate the xml before we deploy it
+        Resource resource = new ByteArrayResource(puString.getBytes());
+        new XmlBeanFactory(resource);
+
         // check to see if sla was passed as a parameter
         String slaString = puString;
         for (CommandLineParser.Parameter param : params) {
@@ -167,7 +173,7 @@ public class Deploy {
                 if (logger.isInfoEnabled()) {
                     logger.info("Loading SLA from [" + slaLocation + "]");
                 }
-                Resource resource = new DefaultResourceLoader() {
+                resource = new DefaultResourceLoader() {
                     // override the default load from the classpath to load from the file system
                     protected Resource getResourceByPath(String path) {
                         return new FileSystemResource(path);

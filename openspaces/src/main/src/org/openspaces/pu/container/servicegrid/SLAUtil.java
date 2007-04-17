@@ -13,9 +13,9 @@ import org.springframework.core.io.Resource;
 public class SLAUtil {
     private static final Log logger = LogFactory.getLog(SLAUtil.class);
 
-    public static SLA loadSLA(String puString) {
+    public static SLA loadSLA(String slaString) {
         //read sla
-        Resource resource = new ByteArrayResource(puString.getBytes());
+        Resource resource = new ByteArrayResource(slaString.getBytes());
         XmlBeanFactory xmlBeanFactory = new XmlBeanFactory(resource);
         SLA sla;
         try {
