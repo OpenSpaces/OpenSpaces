@@ -9,6 +9,39 @@
        http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
        http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/remoting/openspaces-remoting.xsd">
 
+
+    <!--
+        Simply use SLA to add a monitor that uses the viewDataCounter bean to count the globaly
+        processed Data objects (using LocalView) and count the number of feeds written.
+
+        Based on the feed count monitor we add a relocation policy that will relocate this feeder
+        each time 50 feeds has been written to the space (commented out).
+     -->
+    <bean id="SLA" class="org.openspaces.pu.container.servicegrid.sla.SLA">
+        <!--
+        <property name="policy">
+            <bean class="org.openspaces.pu.container.servicegrid.sla.RelocationPolicy">
+                <property name="monitor" value="Feed Count" />
+                <property name="high" value="50" />
+            </bean>
+        </property>
+        -->
+        <property name="monitors">
+            <list>
+                <bean class="org.openspaces.pu.container.servicegrid.sla.monitor.BeanPropertyMonitor">
+                    <property name="name" value="Processed Data"/>
+                    <property name="ref" value="viewDataCounter"/>
+                    <property name="propertyName" value="processedDataCount"/>
+                </bean>
+                <bean class="org.openspaces.pu.container.servicegrid.sla.monitor.BeanPropertyMonitor">
+                    <property name="name" value="Feed Count"/>
+                    <property name="ref" value="dataFeeder"/>
+                    <property name="propertyName" value="feedCount"/>
+                </bean>
+            </list>
+        </property>
+    </bean>
+    
     <!--
         Spring propery configurer which allows us to use system properties (such as user.name).
     -->

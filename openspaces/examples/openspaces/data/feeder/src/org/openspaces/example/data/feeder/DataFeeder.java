@@ -30,6 +30,8 @@ public class DataFeeder implements InitializingBean, DisposableBean {
 
     private long defaultDelay = 1000;
 
+    private DataFeederTask dataFeederTask;
+
     @GigaSpaceContext(name = "gigaSpace")
     private GigaSpace gigaSpace;
 
@@ -40,7 +42,8 @@ public class DataFeeder implements InitializingBean, DisposableBean {
     public void afterPropertiesSet() throws Exception {
         System.out.println("--- STARTING FEEDER WITH CYCLE [" + defaultDelay + "]");
         executorService = Executors.newScheduledThreadPool(1);
-        sf = executorService.scheduleAtFixedRate(new DataFeederTask(), defaultDelay, defaultDelay,
+        dataFeederTask = new DataFeederTask();
+        sf = executorService.scheduleAtFixedRate(dataFeederTask, defaultDelay, defaultDelay,
                 TimeUnit.MILLISECONDS);
     }
 
@@ -65,5 +68,13 @@ public class DataFeeder implements InitializingBean, DisposableBean {
                 e.printStackTrace();
             }
         }
+
+        public int getCounter() {
+            return counter;
+        }
+    }
+
+    public int getFeedCount() {
+        return dataFeederTask.getCounter();
     }
 }

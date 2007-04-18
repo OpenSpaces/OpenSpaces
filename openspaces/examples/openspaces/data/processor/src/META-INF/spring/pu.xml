@@ -18,7 +18,11 @@
         The SLA bean also mandates that a primary and a backup won't run under the same
         GSC by setting the maxInstancesPerVM to 1.
 
-        Within the SLA several Monitors can be defined which can then be viewed
+        Within the SLA several Monitors can be defined which can then be viewed within the UI.
+        This monitors (on top of the built in monitors such as CPU and Memory) can be used
+        with a policy handler (not shown here).
+
+        NOTE: The id of the SLA bean must be SLA (capital letters) for it to be identified.
     -->
     <bean id="SLA" class="org.openspaces.pu.container.servicegrid.sla.SLA">
         <property name="numberOfInstances" value="2"/>

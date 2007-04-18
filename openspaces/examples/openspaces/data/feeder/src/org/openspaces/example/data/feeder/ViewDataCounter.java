@@ -17,9 +17,14 @@ import java.util.concurrent.TimeUnit;
  *
  * <p>Note, since we simply use the GigaSpace API, with a "null" Data object
  * template, we simply count how many data objects are in the space. In our
- * example, we show how a Local View can be used to holds all the processed
+ * example, we show how a Local View can be used to hold all the processed
  * data objects, and the count is executed on it. The Local View expoess the
  * same API as the Space.
+ *
+ * <p>Also note, this of course can be implemented in many different ways,
+ * one of them is using notifications (using the notify container), and another
+ * would be to execute the count against the actual space (without a view).
+ * This bean is here to show how LocalView can be used.
  *
  * @author kimchy
  */
@@ -28,6 +33,8 @@ public class ViewDataCounter implements InitializingBean, DisposableBean {
     private ScheduledExecutorService executorService;
 
     private ScheduledFuture<?> sf;
+
+    private ViewCounterTask viewCounterTask;
 
     private long defaultDelay = 1000;
 
@@ -40,8 +47,9 @@ public class ViewDataCounter implements InitializingBean, DisposableBean {
 
     public void afterPropertiesSet() throws Exception {
         System.out.println("--- STARTING VIEW COUNTER WITH CYCLE [" + defaultDelay + "]");
+        viewCounterTask = new ViewCounterTask();
         executorService = Executors.newScheduledThreadPool(1);
-        sf = executorService.scheduleAtFixedRate(new ViewCounterTask(), defaultDelay, defaultDelay,
+        sf = executorService.scheduleAtFixedRate(viewCounterTask, defaultDelay, defaultDelay,
                 TimeUnit.MILLISECONDS);
     }
 
@@ -66,5 +74,13 @@ public class ViewDataCounter implements InitializingBean, DisposableBean {
                 e.printStackTrace();
             }
         }
+
+        public int getLatestCount() {
+            return latestCount;
+        }
+    }
+
+    public int getProcessedDataCount() {
+        return viewCounterTask.getLatestCount();
     }
 }
