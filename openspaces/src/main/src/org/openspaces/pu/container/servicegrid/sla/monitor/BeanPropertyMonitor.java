@@ -28,8 +28,8 @@ public class BeanPropertyMonitor extends AbstractMonitor implements ApplicationC
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) {
-        Assert.notNull("name", "name property is required");
-        Assert.notNull("ref", "ref property is required");
+        Assert.notNull(getName(), "name property is required");
+        Assert.notNull(ref, "ref property is required");
         Assert.notNull(propertyName, "propertyName property is required");
         Object bean = applicationContext.getBean(ref);
         if (bean == null) {
