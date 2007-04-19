@@ -160,7 +160,7 @@
         <zip zipfile="${dist.dir}/${name}-1.4.zip">
             <zipfileset dir="${basedir}">
                 <include name="bin/pu*"/>
-                <include name="docs/openspaces-javadoc"/>
+                <include name="docs/openspaces-javadoc/**"/>
 
                 <include name="examples/**"/>
                 <exclude name="examples/**/*.iml"/>
@@ -179,7 +179,7 @@
         <zip zipfile="${dist.dir}/${name}-1.5.zip">
             <zipfileset dir="${basedir}">
                 <include name="bin/pu*"/>
-                <include name="docs/openspaces-javadoc"/>
+                <include name="docs/openspaces-javadoc/**"/>
 
                 <include name="examples/**"/>
                 <exclude name="examples/**/*.iml"/>
