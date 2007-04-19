@@ -15,7 +15,6 @@ import org.jini.rio.opstring.OpStringLoader;
 import org.jini.rio.resources.servicecore.ServiceAdmin;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.properties.BeanLevelProperties;
-import org.openspaces.pu.container.servicegrid.SLAUtil;
 import org.openspaces.pu.container.servicegrid.sla.Policy;
 import org.openspaces.pu.container.servicegrid.sla.RelocationPolicy;
 import org.openspaces.pu.container.servicegrid.sla.SLA;
@@ -26,6 +25,7 @@ import org.openspaces.pu.container.servicegrid.sla.requirement.Range;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.CommandLineParser;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -186,7 +186,15 @@ public class Deploy {
         }
 
         //get sla from pu string
-        SLA sla = SLAUtil.loadSLA(slaString);
+        resource = new ByteArrayResource(slaString.getBytes());
+        XmlBeanFactory xmlBeanFactory = new XmlBeanFactory(resource);
+        SLA sla;
+        try {
+            sla = (SLA) xmlBeanFactory.getBean("SLA");
+        } catch (NoSuchBeanDefinitionException e) {
+            logger.info("SLA Not Found in PU.  Using Default SLA.");
+            sla = new SLA();
+        }
 
         ClusterInfo clusterInfo = ClusterInfoParser.parse(params);
         if (clusterInfo != null) {
