@@ -131,7 +131,7 @@
             <packageset dir="${main.src.dir}">
                 <include name="org/openspaces/**"/>
             </packageset>
-            <link href="../../../docs/JavaDoc"/>
+            <link href="../JavaDoc"/>
             <link href="http://java.sun.com/j2ee/1.4/docs/api"/>
             <link href="http://java.sun.com/j2se/1.5.0/docs/api"/>
             <link href="http://static.springframework.org/spring/docs/2.0.x/api/"/>
