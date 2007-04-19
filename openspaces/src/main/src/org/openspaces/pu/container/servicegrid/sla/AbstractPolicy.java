@@ -6,23 +6,23 @@ public abstract class AbstractPolicy implements Policy {
 
     private String monitor;
 
-    private int low;
+    private double low;
 
-    private int high;
+    private double high;
 
-    public int getHigh() {
+    public double getHigh() {
         return high;
     }
 
-    public void setHigh(int high) {
+    public void setHigh(double high) {
         this.high = high;
     }
 
-    public int getLow() {
+    public double getLow() {
         return low;
     }
 
-    public void setLow(int low) {
+    public void setLow(double low) {
         this.low = low;
     }
 
