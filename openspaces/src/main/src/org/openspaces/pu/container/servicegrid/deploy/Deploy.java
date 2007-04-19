@@ -56,7 +56,6 @@ import java.util.StringTokenizer;
 /**
  */
 public class Deploy {
-// ------------------------------ FIELDS ------------------------------
 
     private static final Log logger = LogFactory.getLog(Deploy.class);
 

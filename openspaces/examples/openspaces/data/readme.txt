@@ -54,7 +54,7 @@ Another option to deploy the example can be using the GS CLI using the pudeploy 
 example of externally providing the SLA that applies to the deployed processing unit can be running
 'gs.(sh/bat) pudeploy -sla ../examples/openspaces/data/partitioned-sla.xml data-processor'. This allows to 
 deploy the data-processor example using a partitioned space (and not a partitioned-sync2backup) which
-is defined in the pu.xml.
+is defined in the pu.xml. In order to run the feeder using the GS CLI please execute 'gs.(sh/bat) pudeploy data-feeder'.
 
 Some ways to play with the examples can be:
 
