@@ -485,6 +485,11 @@
       <option name="TEST_SEARCH_SCOPE">
         <value defaultName="wholeProject" />
       </option>
+      <RunnerSettings RunnerId="JProfiler">
+        <option name="WINDOW" value="false" />
+        <option name="JVMPI" value="false" />
+        <option name="INTERPRETED" value="false" />
+      </RunnerSettings>
       <RunnerSettings RunnerId="Profile ">
         <option name="myExternalizedOptions" value="&#10;snapshots-dir=&#10;" />
       </RunnerSettings>

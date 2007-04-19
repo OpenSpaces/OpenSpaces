@@ -50,9 +50,9 @@ deployed (two partitions, each with one backup). Once it has been deployed, the 
 be deployed using 'build.(sh/bat) deploy-local-feeder'. This will cause the feeder to be deployed
 into one of the GSC and start feeding unprocessed data into the two processing units.
 
-Another option to deploy the example can be using the GS CLI using the pudeploy option. An intersting
+Another option to deploy the example can be using the GS CLI using the pudeploy option. An interesting
 example of externally providing the SLA that applies to the deployed processing unit can be running
-'gs.(sh/bat) -sla ../examples/openspaces/data/partitioned-sla.xml data-processor'. This allows to 
+'gs.(sh/bat) pudeploy -sla ../examples/openspaces/data/partitioned-sla.xml data-processor'. This allows to 
 deploy the data-processor example using a partitioned space (and not a partitioned-sync2backup) which
 is defined in the pu.xml.
 
