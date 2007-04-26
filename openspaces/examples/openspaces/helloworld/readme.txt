@@ -33,7 +33,9 @@ and not the shared-lib directory.
 There are two options running/deploying the processing unit example. The first is by using
 the puInstance script located under the bin directory of the product installation. In order
 to use it please navigate to the bin directory and execute: 
-'puInstance.(sh/bat) ../examples/opensapces/helloworld/pu/helloworld'. This will start a standalone
+	in Windows: puInstance.bat ..\examples\opensapces\helloworld\pu\helloworld 
+	in Unix: puInstance.sh ../examples/opensapces/helloworld/pu/helloworld
+This will start a standalone
 processing unit container that will run the processing unit.
 
 Another option for deploying the hello world example is to use the Service Grid. The ant build
