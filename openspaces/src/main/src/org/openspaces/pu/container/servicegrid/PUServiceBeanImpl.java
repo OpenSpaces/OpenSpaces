@@ -17,8 +17,8 @@ import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
-import org.openspaces.pu.container.servicegrid.sla.monitor.ApplicationContextMonitor;
-import org.openspaces.pu.container.servicegrid.sla.monitor.Monitor;
+import org.openspaces.pu.sla.monitor.ApplicationContextMonitor;
+import org.openspaces.pu.sla.monitor.Monitor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 
@@ -47,7 +47,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private ScheduledExecutorService executorService;
 
     public void initialize(ServiceBeanContext context) throws Exception {
-        org.openspaces.pu.container.servicegrid.sla.SLA sla = getSLA(context);
+        org.openspaces.pu.sla.SLA sla = getSLA(context);
         if (sla.getMonitors() != null) {
             for (Monitor monitor : sla.getMonitors()) {
                 String watchName = monitor.getName();
@@ -93,7 +93,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             logger.debug(logMessage("Starting PU with [" + springXml + "]"));
         }
 
-        org.openspaces.pu.container.servicegrid.sla.SLA sla = getSLA(getServiceBeanContext());
+        org.openspaces.pu.sla.SLA sla = getSLA(getServiceBeanContext());
 
         //this is the MOST IMPORTANT part
         Integer instanceId;
@@ -155,9 +155,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
     }
 
-    private org.openspaces.pu.container.servicegrid.sla.SLA getSLA(ServiceBeanContext context) throws IOException, ClassNotFoundException {
+    private org.openspaces.pu.sla.SLA getSLA(ServiceBeanContext context) throws IOException, ClassNotFoundException {
         MarshalledObject slaMarshObj = (MarshalledObject) context.getInitParameter("sla");
-        return (org.openspaces.pu.container.servicegrid.sla.SLA) slaMarshObj.get();
+        return (org.openspaces.pu.sla.SLA) slaMarshObj.get();
     }
 
     private void stopPU() {

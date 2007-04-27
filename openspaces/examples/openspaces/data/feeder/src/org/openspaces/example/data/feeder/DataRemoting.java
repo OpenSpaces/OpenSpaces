@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  * A bean that uses OpenSpaces Remoting support to invoke IDataProcessor implementation
  * exposed by another processing unit.
  *
- * <p>Stats up a scheduled taks that invokes both IDataProcessor APIs periodically. Uses
+ * <p>Starts up a scheduled taks that invokes both IDataProcessor APIs periodically. Uses
  * java.util.concurrent Scheduled Executor Service.
  *
  * <p>Note, this bean simply uses IDataProcessor, OpenSpaces Remoting hides the fact that

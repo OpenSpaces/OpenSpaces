@@ -15,16 +15,16 @@ import org.jini.rio.opstring.OpStringLoader;
 import org.jini.rio.resources.servicecore.ServiceAdmin;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.properties.BeanLevelProperties;
-import org.openspaces.pu.container.servicegrid.sla.Policy;
-import org.openspaces.pu.container.servicegrid.sla.RelocationPolicy;
-import org.openspaces.pu.container.servicegrid.sla.SLA;
-import org.openspaces.pu.container.servicegrid.sla.ScaleUpPolicy;
-import org.openspaces.pu.container.servicegrid.sla.requirement.Generic;
-import org.openspaces.pu.container.servicegrid.sla.requirement.Host;
-import org.openspaces.pu.container.servicegrid.sla.requirement.Range;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.CommandLineParser;
+import org.openspaces.pu.sla.Policy;
+import org.openspaces.pu.sla.RelocationPolicy;
+import org.openspaces.pu.sla.SLA;
+import org.openspaces.pu.sla.ScaleUpPolicy;
+import org.openspaces.pu.sla.requirement.HostRequirement;
+import org.openspaces.pu.sla.requirement.RangeRequirement;
+import org.openspaces.pu.sla.requirement.SystemRequirement;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ByteArrayResource;
@@ -96,7 +96,7 @@ public class Deploy {
 
     public String[] getGroups() {
         if (groups == null) {
-            String groupsProperty = System.getProperty("com.gs.jini_lus.groups");
+            String groupsProperty = java.lang.System.getProperty("com.gs.jini_lus.groups");
             if (groupsProperty != null) {
                 StringTokenizer tokenizer = new StringTokenizer(groupsProperty);
                 int count = tokenizer.countTokens();
@@ -336,7 +336,7 @@ public class Deploy {
             String max = String.valueOf(sla.getNumberOfInstances());
             //todo: make sure max is greater then num of instances
             if (policy instanceof ScaleUpPolicy) {
-                max = String.valueOf(((ScaleUpPolicy) policy).getScaleUpTo());
+                max = String.valueOf(((ScaleUpPolicy) policy).getMaxInstances());
             }
             //todo:300 is hard coded for now
             String[] configParms = getSLAConfigArgs(type, max, "3000", "3000");
@@ -353,18 +353,18 @@ public class Deploy {
         if (sla.getRequirements() != null) {
             for (int i = 0; i < sla.getRequirements().size(); i++) {
                 Object requirement = sla.getRequirements().get(i);
-                if (requirement instanceof Range) {
-                    Range range = (Range) requirement;
+                if (requirement instanceof RangeRequirement) {
+                    RangeRequirement range = (RangeRequirement) requirement;
                     ThresholdValues thresholdValues = new ThresholdValues(range.getLow(), range.getHigh());
                     element.getServiceLevelAgreements().addSystemThreshold(range.getWatch(), thresholdValues);
-                } else if (requirement instanceof Host) {
-                    hosts.add(((Host) requirement).getHost());
-                } else if (requirement instanceof Generic) {
-                    Generic generic = (Generic) requirement;
+                } else if (requirement instanceof HostRequirement) {
+                    hosts.add(((HostRequirement) requirement).getHost());
+                } else if (requirement instanceof SystemRequirement) {
+                    SystemRequirement systemAttributes = (SystemRequirement) requirement;
                     ServiceLevelAgreements.SystemRequirement systemRequirement = new ServiceLevelAgreements.SystemRequirement(
-                            generic.getName(),
+                            systemAttributes.getName(),
                             null,
-                            generic.getAttributes()
+                            systemAttributes.getAttributes()
                     );
                     element.getServiceLevelAgreements().addSystemRequirement(systemRequirement);
                 }
@@ -449,11 +449,11 @@ public class Deploy {
     public static void main(String[] args) throws Exception {
         if (args.length < 1) {
             printUsage();
-            System.exit(-1);
+            java.lang.System.exit(-1);
         }
 
 
-        System.setSecurityManager(new RMISecurityManager() {
+        java.lang.System.setSecurityManager(new RMISecurityManager() {
             public void checkPermission(java.security.Permission perm) {
             }
 
@@ -466,7 +466,7 @@ public class Deploy {
     }
 
     private static void printUsage() {
-        System.out.println("Usage: Deploy [PU Name]");
+        java.lang.System.out.println("Usage: Deploy [PU Name]");
     }
 
 }

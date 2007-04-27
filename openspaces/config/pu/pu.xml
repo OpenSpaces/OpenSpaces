@@ -4,12 +4,12 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
     <!--sample SLA, not used yet-->
-    <bean id="SLA" class="org.openspaces.pu.container.servicegrid.sla.SLA">
+    <bean id="SLA" class="org.openspaces.pu.sla.SLA">
         <property name="numberOfInstances" value="2"/>
         <property name="numberOfBackups" value="0"/>
         <property name="clusterSchema" value="partitioned"/>
         <property name="policy">
-            <bean class="org.openspaces.pu.container.servicegrid.sla.ScaleUpPolicy">
+            <bean class="org.openspaces.pu.sla.ScaleUpPolicy">
                 <property name="watch" value="backlog"/>
                 <property name="high" value="500"/>
                 <property name="scaleUpTo" value="5"/>
@@ -17,7 +17,7 @@
         </property>
         <property name="requirements">
             <list>
-                <bean class="org.openspaces.pu.container.servicegrid.sla.CPURequirement">
+                <bean class="org.openspaces.pu.sla.CPURequirement">
                     <property name="high" value="0.8"/>
                 </bean>
             </list>

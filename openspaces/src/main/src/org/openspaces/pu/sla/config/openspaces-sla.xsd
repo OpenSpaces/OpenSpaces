@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<xsd:schema xmlns="http://www.openspaces.org/schema/sla"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:beans="http://www.springframework.org/schema/beans"
+            xmlns:tool="http://www.springframework.org/schema/tool"
+            targetNamespace="http://www.openspaces.org/schema/sla"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+    <xsd:import namespace="http://www.springframework.org/schema/beans"/>
+    <xsd:import namespace="http://www.springframework.org/schema/tool"/>
+
+    <xsd:element name="sla">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:choice minOccurs="0" maxOccurs="1">
+                    <xsd:element name="scale-up-policy">
+                        <xsd:complexType>
+                            <xsd:attribute name="monitor" type="xsd:string" use="required"/>
+                            <xsd:attribute name="low" type="xsd:double" use="optional"/>
+                            <xsd:attribute name="high" type="xsd:double" use="required"/>
+                            <xsd:attribute name="max-instances" type="xsd:positiveInteger" use="required"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="relocation-policy">
+                        <xsd:complexType>
+                            <xsd:attribute name="monitor" type="xsd:string" use="required"/>
+                            <xsd:attribute name="low" type="xsd:double" use="optional"/>
+                            <xsd:attribute name="high" type="xsd:double" use="required"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
+                <xsd:element name="requirements" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                            <xsd:element name="host">
+                                <xsd:complexType>
+                                    <xsd:attribute name="name" type="xsd:string" use="required"/>
+                                </xsd:complexType>
+                            </xsd:element>
+                            <xsd:element name="range">
+                                <xsd:complexType>
+                                    <xsd:attribute name="monitor" type="xsd:string" use="required"/>
+                                    <xsd:attribute name="low" type="xsd:double" use="optional"/>
+                                    <xsd:attribute name="high" type="xsd:double" use="required"/>
+                                </xsd:complexType>
+                            </xsd:element>
+                            <xsd:element name="cpu">
+                                <xsd:complexType>
+                                    <xsd:attribute name="low" type="xsd:double" use="optional"/>
+                                    <xsd:attribute name="high" type="xsd:double" use="required"/>
+                                </xsd:complexType>
+                            </xsd:element>
+                            <xsd:element name="memory">
+                                <xsd:complexType>
+                                    <xsd:attribute name="low" type="xsd:double" use="optional"/>
+                                    <xsd:attribute name="high" type="xsd:double" use="required"/>
+                                </xsd:complexType>
+                            </xsd:element>
+                            <xsd:element name="system">
+                                <xsd:complexType>
+                                    <xsd:sequence>
+                                        <xsd:element name="attributes" type="beans:mapType">
+                                        </xsd:element>
+                                    </xsd:sequence>
+                                    <xsd:attribute name="name" type="xsd:string" use="required"/>
+                                </xsd:complexType>
+                            </xsd:element>
+                        </xsd:choice>
+                    </xsd:complexType>
+                </xsd:element>
+                <xsd:element name="monitors" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                            <xsd:element name="bean-property-monitor" minOccurs="0" maxOccurs="unbounded">
+                                <xsd:complexType>
+                                    <xsd:attribute name="name" type="xsd:string" use="required"/>
+                                    <xsd:attribute name="bean-ref" type="xsd:string" use="required"/>
+                                    <xsd:attribute name="property-name" type="xsd:string" use="required"/>
+                                    <xsd:attribute name="period" type="xsd:positiveInteger" use="optional"/>
+                                    <xsd:attribute name="history-size" type="xsd:positiveInteger" use="optional"/>
+                                </xsd:complexType>
+                            </xsd:element>
+                        </xsd:choice>
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:sequence>
+            <xsd:attribute name="number-of-instances" type="xsd:positiveInteger" default="1" use="optional"/>
+            <xsd:attribute name="number-of-backups" type="xsd:positiveInteger" use="optional"/>
+            <xsd:attribute name="cluster-schema" type="xsd:string" use="optional"/>
+            <xsd:attribute name="max-instances-per-vm" type="xsd:positiveInteger" use="optional"/>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>
