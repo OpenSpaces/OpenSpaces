@@ -19,6 +19,8 @@
                     <entry key="entry1" value="value1" />
                 </os-sla:attributes>
             </os-sla:system>
+            <os-sla:cpu high=".9" />
+            <os-sla:memory high=".8" />
         </os-sla:requirements>
     </os-sla:sla>
 </beans>
