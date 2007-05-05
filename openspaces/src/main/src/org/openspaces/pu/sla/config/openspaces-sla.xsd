@@ -31,7 +31,7 @@
                         </xsd:complexType>
                     </xsd:element>
                 </xsd:choice>
-                <xsd:element name="requirements" minOccurs="0" maxOccurs="unbounded">
+                <xsd:element name="requirements" minOccurs="0" maxOccurs="1">
                     <xsd:complexType>
                         <xsd:choice minOccurs="0" maxOccurs="unbounded">
                             <xsd:element name="host">
@@ -70,7 +70,7 @@
                         </xsd:choice>
                     </xsd:complexType>
                 </xsd:element>
-                <xsd:element name="monitors" minOccurs="0" maxOccurs="unbounded">
+                <xsd:element name="monitors" minOccurs="0" maxOccurs="1">
                     <xsd:complexType>
                         <xsd:choice minOccurs="0" maxOccurs="unbounded">
                             <xsd:element name="bean-property-monitor" minOccurs="0" maxOccurs="unbounded">
