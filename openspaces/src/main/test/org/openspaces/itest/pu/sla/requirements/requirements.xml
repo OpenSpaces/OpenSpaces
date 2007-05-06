@@ -13,7 +13,7 @@
 
     <os-sla:sla>
         <os-sla:requirements>
-            <os-sla:host name="test" />
+            <os-sla:host ip="test" />
             <os-sla:system name="test2">
                 <os-sla:attributes>
                     <entry key="entry1" value="value1" />

@@ -36,7 +36,7 @@
                         <xsd:choice minOccurs="0" maxOccurs="unbounded">
                             <xsd:element name="host">
                                 <xsd:complexType>
-                                    <xsd:attribute name="name" type="xsd:string" use="required"/>
+                                    <xsd:attribute name="ip" type="xsd:string" use="required"/>
                                 </xsd:complexType>
                             </xsd:element>
                             <xsd:element name="range">

@@ -26,7 +26,7 @@ public class RequirementsSlaSchameTests extends AbstractDependencyInjectionSprin
         assertNotNull(sla.getRequirements());
         assertEquals(4, sla.getRequirements().size());
         HostRequirement host = (HostRequirement) sla.getRequirements().get(0);
-        assertEquals("test", host.getHost());
+        assertEquals("test", host.getIp());
         SystemRequirement system = (SystemRequirement) sla.getRequirements().get(1);
         assertEquals("test2", system.getName());
         assertNotNull(system.getAttributes());

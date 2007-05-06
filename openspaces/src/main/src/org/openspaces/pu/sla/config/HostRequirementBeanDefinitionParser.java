@@ -17,7 +17,7 @@ public class HostRequirementBeanDefinitionParser extends AbstractSingleBeanDefin
     }
 
     protected void doParse(Element element, BeanDefinitionBuilder builder) {
-        String name = element.getAttribute("name");
-        builder.addPropertyValue("host", name);
+        String ip = element.getAttribute("ip");
+        builder.addPropertyValue("ip", ip);
     }
 }

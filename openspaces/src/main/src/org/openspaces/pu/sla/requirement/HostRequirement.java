@@ -4,13 +4,13 @@ package org.openspaces.pu.sla.requirement;
  */
 public class HostRequirement implements Requirement {
 
-    private String host;
+    private String ip;
 
-    public String getHost() {
-        return host;
+    public String getIp() {
+        return ip;
     }
 
-    public void setHost(String host) {
-        this.host = host;
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 }

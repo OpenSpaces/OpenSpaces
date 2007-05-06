@@ -358,7 +358,7 @@ public class Deploy {
                     ThresholdValues thresholdValues = new ThresholdValues(range.getLow(), range.getHigh());
                     element.getServiceLevelAgreements().addSystemThreshold(range.getWatch(), thresholdValues);
                 } else if (requirement instanceof HostRequirement) {
-                    hosts.add(((HostRequirement) requirement).getHost());
+                    hosts.add(((HostRequirement) requirement).getIp());
                 } else if (requirement instanceof SystemRequirement) {
                     SystemRequirement systemAttributes = (SystemRequirement) requirement;
                     ServiceLevelAgreements.SystemRequirement systemRequirement = new ServiceLevelAgreements.SystemRequirement(
