@@ -12,7 +12,7 @@
 
     <path id="all-libs">
 
-        <fileset dir="../../../lib">
+        <fileset dir="${gshome.dir}/lib">
             <include name="**/*.jar"/>
         </fileset>
 
@@ -61,12 +61,11 @@
     </target>
 
     <target name="dist" depends="build">
-        <mkdir dir="${pulocation}/lib" />
-        <copy todir="${pulocation}/lib">
-            <fileset dir="../../../lib/common">
-                <include name="commons-math-*.jar"/>
-            </fileset>
-        </copy>
+        <!-- Build a common jar file with the Message object to include under shared-lib -->
+        <mkdir dir="${pulocation}/shared-lib" />
+        <jar basedir="${pulocation}" jarfile="${pulocation}/shared-lib/common.jar" includes="org/**/Message.class" />
+        <!-- Now delete it from the pu location -->
+        <delete file="${pulocation}/org/openspaces/example/helloworld/Message.class" />
         <jar basedir="${pulocation}" jarfile="${basedir}/pu/helloworld.jar"/>
     </target>
 
