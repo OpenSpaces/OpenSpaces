@@ -16,7 +16,7 @@
             <include name="**/*.jar"/>
         </fileset>
 
-        <fileset dir="${pulocation}">
+        <fileset dir="${basedir}">
             <include name="lib/*.jar"/>
         </fileset>
     </path>
@@ -66,6 +66,12 @@
         <jar basedir="${pulocation}" jarfile="${pulocation}/shared-lib/common.jar" includes="org/**/Message.class" />
         <!-- Now delete it from the pu location -->
         <delete file="${pulocation}/org/openspaces/example/helloworld/Message.class" />
+
+        <mkdir dir="${pulocation}/lib" />
+        <copy todir="${pulocation}/lib">
+            <fileset dir="${basedir}/lib" />
+        </copy>
+
         <jar basedir="${pulocation}" jarfile="${basedir}/pu/helloworld.jar"/>
     </target>
 
