@@ -30,7 +30,7 @@ public class ScaleUpPolicyBeanDefinitionParser extends AbstractSingleBeanDefinit
         }
         String maxInstances = element.getAttribute("max-instances");
         if (StringUtils.hasLength(maxInstances)) {
-            builder.addPropertyValue("scaleUpTo", maxInstances);
+            builder.addPropertyValue("maxInstances", maxInstances);
         }
     }
 }
