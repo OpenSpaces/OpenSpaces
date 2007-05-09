@@ -1,5 +1,6 @@
 package org.openspaces.pu.container.standalone;
 
+import com.gigaspaces.logger.GSLogConfigLoader;
 import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
@@ -89,6 +90,8 @@ public class StandaloneProcessingUnitContainer implements ApplicationContextProc
             public void checkPermission(java.security.Permission perm, Object context) {
             }
         });
+        // init GigaSpace logger
+        GSLogConfigLoader.getLoader();
 
         if (args.length == 0) {
             throw new IllegalArgumentException("The pu location must be defined");

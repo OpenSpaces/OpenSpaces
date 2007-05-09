@@ -560,6 +560,7 @@
     <library name="GigaSpaces">
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/lib/JSpaces.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/ServiceGrid/gs-boot.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />

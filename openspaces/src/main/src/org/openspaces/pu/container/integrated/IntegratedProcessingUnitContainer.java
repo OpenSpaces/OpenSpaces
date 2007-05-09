@@ -1,5 +1,6 @@
 package org.openspaces.pu.container.integrated;
 
+import com.gigaspaces.logger.GSLogConfigLoader;
 import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
@@ -108,6 +109,8 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
             public void checkPermission(java.security.Permission perm, Object context) {
             }
         });
+        // init GigaSpace logger
+        GSLogConfigLoader.getLoader();
 
         CommandLineParser.Parameter[] params = CommandLineParser.parse(args);
 
