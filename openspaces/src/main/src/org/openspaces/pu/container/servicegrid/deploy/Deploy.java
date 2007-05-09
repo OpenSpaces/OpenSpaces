@@ -448,7 +448,7 @@ public class Deploy {
 
     public static void main(String[] args) throws Exception {
         if (args.length < 1) {
-            printUsage();
+            System.out.println(getUsage());
             java.lang.System.exit(-1);
         }
 
@@ -465,24 +465,25 @@ public class Deploy {
         deployer.deploy(args);
     }
 
-    public static void printUsage() {
-        System.out.println("Usage: Deploy [-sla ...] [-cluster ...] [-properties ...] PU_Name");
-        System.out.println("    PU_Name: The name of the processing unit under the deploy directory");
-        System.out.println("    -sla [sla-location]          : Location of an optional xml file holding the SLA element");
-        System.out.println("    -config [cluster properties] : Allows to override the cluster parameters of the SLA elements");
-        System.out.println("             schema=partitioned  : The cluster schema to override");
-        System.out.println("             total_members=1,1   : The number of instances and number of backups to override");
-        System.out.println("    -proeprties [properties-loc] : Location of context level properties");
-        System.out.println("    -proeprties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
-        System.out.println("");
-        System.out.println("");
-        System.out.println("Some Examples:");
-        System.out.println("1. Deploy data-processor");
-        System.out.println("    - Deploys a processing unit called data-processor");
-        System.out.println("2. Deploy -sla file://config/sla.xml data-processor");
-        System.out.println("    - Deploys a processing unit called data-processor using an SLA element read from sla.xml");
-        System.out.println("3. Deploy -properties file://config/context.properties -properties space1 file://config/space1.properties data-processor");
-        System.out.println("    - Deploys a processing unit called data-processor using context level properties called context.proeprties and bean level properties called space1.properties applied to bean named space1");
+    public static String getUsage() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Usage: Deploy [-sla ...] [-cluster ...] [-properties ...] PU_Name");
+        sb.append("\n    PU_Name: The name of the processing unit under the deploy directory");
+        sb.append("\n    -sla [sla-location]          : Location of an optional xml file holding the SLA element");
+        sb.append("\n    -config [cluster properties] : Allows to override the cluster parameters of the SLA elements");
+        sb.append("\n             schema=partitioned  : The cluster schema to override");
+        sb.append("\n             total_members=1,1   : The number of instances and number of backups to override");
+        sb.append("\n    -proeprties [properties-loc] : Location of context level properties");
+        sb.append("\n    -proeprties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
+        sb.append("\n");
+        sb.append("\n");
+        sb.append("\nSome Examples:");
+        sb.append("\n1. Deploy data-processor");
+        sb.append("\n    - Deploys a processing unit called data-processor");
+        sb.append("\n2. Deploy -sla file://config/sla.xml data-processor");
+        sb.append("\n    - Deploys a processing unit called data-processor using an SLA element read from sla.xml");
+        sb.append("\n3. Deploy -properties file://config/context.properties -properties space1 file://config/space1.properties data-processor");
+        sb.append("\n    - Deploys a processing unit called data-processor using context level properties called context.proeprties and bean level properties called space1.properties applied to bean named space1");
+        return sb.toString();
     }
-
 }
