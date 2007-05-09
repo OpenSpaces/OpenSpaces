@@ -51,7 +51,7 @@ public abstract class BeanLevelPropertiesParser {
                 name = param.getArguments()[0];
                 properties = param.getArguments()[1];
             } else {
-                throw new IllegalArgumentException("-config can accept only one or two values, not more and not less");
+                throw new IllegalArgumentException("-properties can accept only one or two values, not more and not less");
             }
             Properties props = new Properties();
             if (properties.startsWith(EMBEDDED_PROPERTIES_PREFIX)) {
