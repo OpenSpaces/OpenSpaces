@@ -10,13 +10,11 @@ import org.springframework.dao.DataAccessException;
  * transaction thus reducing the creation of transactions did not perform the actual receive
  * operation.
  * 
- * <p>
- * If the {@link #triggerReceive(Object,org.openspaces.core.GigaSpace,long)} returns a non
+ * <p>If the {@link #triggerReceive(Object,org.openspaces.core.GigaSpace,long)} returns a non
  * <code>null</code> value, it means that the receive operation should take place. If it returns a
  * <code>null</code> value, no receive operation will be attempted.
  * 
- * <p>
- * A trigger operation handler can also control if the object returned from
+ * <p>A trigger operation handler can also control if the object returned from
  * {@link #triggerReceive(Object,org.openspaces.core.GigaSpace,long)} will be used as the template
  * for the receive operation by returnning <code>true</code> in {@link #isUseTriggerAsTemplate()}.
  * If <code>false</code> is returned, the actual template configured in the polling event
@@ -33,8 +31,7 @@ public interface TriggerOperationHandler {
      * outside of a transaction thus reducing the creation of transactions did not perform the
      * actual receive operation.
      * 
-     * <p>
-     * If this operation returns a non <code>null</code> value, it means that the receive
+     * <p>If this operation returns a non <code>null</code> value, it means that the receive
      * operation should take place. If it returns a <code>null</code> value, no receive operation
      * will be attempted.
      * 
@@ -44,7 +41,7 @@ public interface TriggerOperationHandler {
      *            The GigaSpace interface to perform the receive operations with
      * @param receiveTimeout
      *            Receive timeout value
-     * @throws org.openspaces.core.GigaSpaceException
+     * @throws DataAccessException
      * 
      */
     Object triggerReceive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException;
