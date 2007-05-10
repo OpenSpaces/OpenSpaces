@@ -26,12 +26,6 @@ else
 fi
 export CPS
 
-for i in ${JSHOMEDIR}/lib/openspaces/*.jar
-do
-    OPENSPACES_JARS=${UI_JARS}$CPS$i
-done
-export OPENSPACES_JARS
-
 LOOKUP_GROUPS_PROP=-Dcom.gs.jini_lus.groups=${LOOKUPGROUPS}; export LOOKUP_GROUPS_PROP
 
 if [ "${LOOKUPLOCATORS}" = "" ] ; then

@@ -6,10 +6,6 @@
 @echo Starting a Processing Unit Instance
 @set JSHOMEDIR=%~dp0\..
 
-set LCP=.
-for %%i in ("%JSHOMEDIR%\lib\openspaces\*.jar") do call %JSHOMEDIR%\bin\lcp %%i
-set OPENSPACES_JARS=%LCP%
-
 set LOOKUP_GROUPS_PROP=-Dcom.gs.jini_lus.groups=%LOOKUPGROUPS%
 
 if "%LOOKUPLOCATORS%" == ""  (

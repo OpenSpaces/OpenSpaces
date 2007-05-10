@@ -33,7 +33,7 @@
 #  NIC_ADDR 	- The Network Interface card IP Address
 # 
 #   For additional information, refer to the GigaSpaces OnLine Documentation
-#   at http://www.gigaspaces.com/docs.htm
+#   at http://www.gigaspaces.com/wiki/display/GS/System+Environment
 #  *************************************************************************
 
 # Set VERBOSE=true for debugging output
@@ -83,6 +83,27 @@ if [ -z "${PRODUCTION_MODE}" -o -z "${JAVA_VENDOR}" ]; then
   # echo PRODUCTION_MODE environment variable is set to ${PRODUCTION_MODE} in "<GigaSpaces Root>\bin\setenv.sh"
 fi
 export JAVA_HOME JAVA_VENDOR PRODUCTION_MODE
+
+# The following parameters have been found optimal when using Solaris 10 on Sun CoolThreads Servers T1000/T2000 (Niagara) 
+# during extensive tests, using Sun JVM 1.5.0_06 and JVM 6.
+# In order to apply these VM switches, please add them to the JAVA_OPTIONS variable:
+
+# Optimal performance has been achieved with 2GB heap, it should be adjusted to real RAM size
+# -Xms2g �Xmx2g
+# -XX:+UseParallelOldGC
+# GC Threads quantity is, by default, equal to quantity of CPUs; 
+# On single/dual CPU systems recommended to be set as 4 - 8
+# -XX:ParallelGCThreads=32
+
+# Bundle of JVM options planned as default for upcoming release. 
+# Provides boost about 7-8%.
+# -XX:+AggressiveOpts
+# -XX:NewRatio=2                  
+# -XX:SurvivorRatio=32 
+# -XX:MaxTenuringThreshold=4
+# Relevant to Solaris 10
+# -XX:LargePageSizeInBytes=256m
+
 
 # Set up JVM options base on value of JAVA_VENDOR
 if [ "$PRODUCTION_MODE" = "true" ]; then
@@ -182,20 +203,30 @@ export SPRING_JARS
 
 for i in ${JSHOMEDIR}/lib/ext/*.*
 do
-    EXT_JARS=${EXT_JARS}$CPS$i
+    if [ "$i" != "${JSHOMEDIR}/lib/ext/*.*" ] ; then
+        EXT_JARS=${EXT_JARS}$CPS$i
+    fi
 done
 export EXT_JARS
 
+#Openspaces
+for i in ${JSHOMEDIR}/lib/openspaces/*.*
+do
+    if [ "$i" != "${JSHOMEDIR}/lib/openspaces/*.*" ] ; then
+        OPENSPACES_JARS=${OPENSPACES_JARS}$CPS$i
+    fi
+done
+export OPENSPACES_JARS
+
 # The GS_JARS contains the same list as defined in the Class-Path entry of the JSpaces.jar manifest file.
 # These jars are required for client application and starting a Space from within your application.
-# Note - Do not set the GS_JARS variable together with the GS_JINI_START_CLASSPATH variable (which is used only for the ServiceStarter).
-GS_JARS=${EXT_JARS}$CPS${JSHOMEDIR}$CPS${JSHOMEDIR}/lib/JSpaces.jar$CPS${JSHOMEDIR}/lib/jini/jsk-platform.jar$CPS${JSHOMEDIR}/lib/jini/jsk-lib.jar$CPS${JSHOMEDIR}/lib/jini/start.jar$CPS${JSHOMEDIR}/lib/ServiceGrid/gs-lib.jar$CPS${JSHOMEDIR}/lib/common/backport-util-concurrent.jar
+GS_JARS=${EXT_JARS}$CPS${JSHOMEDIR}$CPS${JSHOMEDIR}/lib/JSpaces.jar$CPS${JSHOMEDIR}/lib/jini/jsk-platform.jar$CPS${JSHOMEDIR}/lib/jini/jsk-lib.jar$CPS${JSHOMEDIR}/lib/jini/start.jar$CPS${JSHOMEDIR}/lib/ServiceGrid/gs-lib.jar$CPS${JSHOMEDIR}/lib/ServiceGrid/gs-boot.jar$CPS${JSHOMEDIR}/lib/common/backport-util-concurrent.jar
 
 PLATFORM_VERSION=6.0; export PLATFORM_VERSION
 POLICY=${JSHOMEDIR}/policy/policy.all; export POLICY
 
 if [ "${LOOKUPGROUPS}" = "" ] ; then
-LOOKUPGROUPS=""; export LOOKUPGROUPS
+LOOKUPGROUPS="gigaspaces-6.0EE"; export LOOKUPGROUPS
 fi
 LOOKUP_GROUPS_PROP=-Dcom.gs.jini_lus.groups=${LOOKUPGROUPS}; export LOOKUP_GROUPS_PROP
 
@@ -218,16 +249,19 @@ if [ "${RMI_OPTIONS}" = "" ] ; then
 fi
 export RMI_OPTIONS
 
-# Note - Do not set the GS_JARS variable together with the GS_JINI_START_CLASSPATH variable (which is used only for the ServiceStarter).
-GS_JINI_START_CLASSPATH="${EXT_JARS}$CPS${JSHOMEDIR}$CPS${JSHOMEDIR}/lib/jini/start.jar$CPS${JSHOMEDIR}/lib/ServiceGrid/gs-lib.jar"; export GS_JINI_START_CLASSPATH
-
 # For remote Eclipse debugging add the ${ECLIPSE_REMOTE_DEBUG} variable to the command line:
-ECLIPSE_REMOTE_DEBUG="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000"; export ECLIPSE_REMOTE_DEBUG
+ECLIPSE_REMOTE_DEBUG="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y"; export ECLIPSE_REMOTE_DEBUG
 
 # Set and add the system property -Djava.util.logging.config.file to the command line. It indicates file path to 
 # the Java logging file location. Use it to enable finest logging troubleshooting of various Jini Services and GS modules.
 # Setting this property will redirect all Jini services and GS modules output messages to a file.
-GS_LOGGING_CONFIG_FILE_PROP="-Djava.util.logging.config.file=${JSHOMEDIR}/config/gs_logging.properties"; export GS_LOGGING_CONFIG_FILE_PROP
+# Specific logging settings can be provided by setting the following before calling setenv:
+# export GS_LOGGING_CONFIG_FILE=/somepath/my_logging.properties
+if [ "${GS_LOGGING_CONFIG_FILE}" = "" ] ; then
+  GS_LOGGING_CONFIG_FILE="${JSHOMEDIR}/config/gs_logging.properties"; export GS_LOGGING_CONFIG_FILE 
+fi
+GS_LOGGING_CONFIG_FILE_PROP=-Djava.util.logging.config.file=${GS_LOGGING_CONFIG_FILE}; export GS_LOGGING_CONFIG_FILE_PROP
+
 
 # Enable monitoring and management from remote systems using JMX jconsole.
 REMOTE_JMX="-Dcom.sun.management.jmxremote.port=5001 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false"; export REMOTE_JMX
@@ -247,8 +281,6 @@ if $VERBOSE; then
 	echo RMI_OPTIONS: ${RMI_OPTIONS}
 	echo
 	echo GS_JARS: ${GS_JARS}
-	echo
-	echo GS_JINI_START_CLASSPATH: ${GS_JINI_START_CLASSPATH}
 	echo
 	echo LOOKUPGROUPS: ${LOOKUPGROUPS}  LOOKUP_LOCATORS_PROP: ${LOOKUP_LOCATORS_PROP}
 	echo
