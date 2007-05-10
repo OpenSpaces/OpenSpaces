@@ -470,7 +470,7 @@ public class Deploy {
         sb.append("Usage: Deploy [-sla ...] [-cluster ...] [-properties ...] PU_Name");
         sb.append("\n    PU_Name: The name of the processing unit under the deploy directory");
         sb.append("\n    -sla [sla-location]          : Location of an optional xml file holding the SLA element");
-        sb.append("\n    -config [cluster properties] : Allows to override the cluster parameters of the SLA elements");
+        sb.append("\n    -cluster [cluster properties]: Allows to override the cluster parameters of the SLA elements");
         sb.append("\n             schema=partitioned  : The cluster schema to override");
         sb.append("\n             total_members=1,1   : The number of instances and number of backups to override");
         sb.append("\n    -proeprties [properties-loc] : Location of context level properties");
@@ -484,6 +484,8 @@ public class Deploy {
         sb.append("\n    - Deploys a processing unit called data-processor using an SLA element read from sla.xml");
         sb.append("\n3. Deploy -properties file://config/context.properties -properties space1 file://config/space1.properties data-processor");
         sb.append("\n    - Deploys a processing unit called data-processor using context level properties called context.proeprties and bean level properties called space1.properties applied to bean named space1");
+        sb.append("\n4. Deploy -properties embed://prop1=value1 -properties space1 embed://prop2=value2;prop3=value3");
+        sb.append("\n    - Deploys a processing unit called data-processor using context level properties with a single property called prop1 with value1 and bean level properties with two properties");
         return sb.toString();
     }
 }

@@ -112,14 +112,44 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
         // init GigaSpace logger
         GSLogConfigLoader.getLoader();
 
-        CommandLineParser.Parameter[] params = CommandLineParser.parse(args);
+        try {
+            CommandLineParser.Parameter[] params = CommandLineParser.parse(args);
 
-        IntegratedProcessingUnitContainerProvider provider = new IntegratedProcessingUnitContainerProvider();
-        provider.setBeanLevelProperties(BeanLevelPropertiesParser.parse(params));
-        provider.setClusterInfo(ClusterInfoParser.parse(params));
-        ConfigLocationParser.parse(provider, params);
+            IntegratedProcessingUnitContainerProvider provider = new IntegratedProcessingUnitContainerProvider();
+            provider.setBeanLevelProperties(BeanLevelPropertiesParser.parse(params));
+            provider.setClusterInfo(ClusterInfoParser.parse(params));
+            ConfigLocationParser.parse(provider, params);
 
-        IntegratedProcessingUnitContainer container = (IntegratedProcessingUnitContainer) provider.createContainer();
-        ((ConfigurableApplicationContext) container.getApplicationContext()).registerShutdownHook();
+            IntegratedProcessingUnitContainer container = (IntegratedProcessingUnitContainer) provider.createContainer();
+            ((ConfigurableApplicationContext) container.getApplicationContext()).registerShutdownHook();
+        } catch (Exception e) {
+            printUsage();
+            e.printStackTrace(System.err);
+            System.exit(1);
+        }
+    }
+
+    public static void printUsage() {
+        System.out.println("Usage: [-cluster ...] [-properties ...]");
+        System.out.println("    -cluster [cluster properties]: Allows specify cluster parameters");
+        System.out.println("             schema=partitioned  : The cluster schema to use");
+        System.out.println("             total_members=1,1   : The number of instances and number of backups to use");
+        System.out.println("             id=1                : The instance id of this processing unit");
+        System.out.println("             backup_id=1         : The backup id of this processing unit");
+        System.out.println("    -proeprties [properties-loc] : Location of context level properties");
+        System.out.println("    -proeprties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
+        System.out.println("");
+        System.out.println("");
+        System.out.println("Some Examples:");
+        System.out.println("1. -cluster schema=partitioned total_members=2 id=1");
+        System.out.println("    - Starts a processing unit with a partitioned cluster schema of two members with instance id 1");
+        System.out.println("2. -cluster schema=partitioned total_members=2 id=2");
+        System.out.println("    - Starts a processing unit with a partitioned cluster schema of two members with instance id 2");
+        System.out.println("3. -cluster schema=partitioned-sync2backup total_members=2,1 id=1 backup_id=1");
+        System.out.println("    - Starts a processing unit with a partitioned sync2backup cluster schema of two members with two members each with one backup with instance id of 1 and backup id of 1");
+        System.out.println("4. -properties file://config/context.properties -properties space1 file://config/space1.properties");
+        System.out.println("    - Starts a processing unit called data-processor using context level properties called context.proeprties and bean level properties called space1.properties applied to bean named space1");
+        System.out.println("5. -properties embed://prop1=value1 -properties space1 embed://prop2=value2;prop3=value3");
+        System.out.println("    - Starts a processing unit called data-processor using context level properties with a single property called prop1 with value1 and bean level properties with two properties");
     }
 }
