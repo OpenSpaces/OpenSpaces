@@ -2,6 +2,7 @@ package org.openspaces.pu.container.integrated;
 
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
+import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
 import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
@@ -156,6 +157,7 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
         }
         if (clusterInfo != null) {
             applicationContext.addBeanPostProcessor(new ClusterInfoBeanPostProcessor(clusterInfo));
+            applicationContext.addBeanFactoryPostProcessor(new ClusterInfoPropertyPlaceholderConfigurer(clusterInfo));
         }
         if (classLoader != null) {
             applicationContext.setClassLoader(classLoader);

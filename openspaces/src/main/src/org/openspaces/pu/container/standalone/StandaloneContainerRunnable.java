@@ -2,6 +2,7 @@ package org.openspaces.pu.container.standalone;
 
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
+import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
 import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
@@ -98,12 +99,12 @@ public class StandaloneContainerRunnable implements Runnable {
             applicationContext = new ResourceApplicationContext(resources, null);
             // add config information if provided
             if (beanLevelProperties != null) {
-                applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(
-                        beanLevelProperties));
+                applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties));
                 applicationContext.addBeanPostProcessor(new BeanLevelPropertyBeanPostProcessor(beanLevelProperties));
             }
             if (clusterInfo != null) {
                 applicationContext.addBeanPostProcessor(new ClusterInfoBeanPostProcessor(clusterInfo));
+                applicationContext.addBeanFactoryPostProcessor(new ClusterInfoPropertyPlaceholderConfigurer(clusterInfo));
             }
             // "start" the application context
             applicationContext.refresh();
