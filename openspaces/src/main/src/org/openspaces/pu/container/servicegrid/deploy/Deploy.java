@@ -8,6 +8,7 @@ import org.jini.rio.core.ClassBundle;
 import org.jini.rio.core.OperationalString;
 import org.jini.rio.core.ServiceElement;
 import org.jini.rio.core.ServiceLevelAgreements;
+import org.jini.rio.core.ServiceProvisionListener;
 import org.jini.rio.core.ThresholdValues;
 import org.jini.rio.monitor.DeployAdmin;
 import org.jini.rio.opstring.OpString;
@@ -114,6 +115,10 @@ public class Deploy {
     }
 
     public void deploy(String[] args) throws Exception {
+        deploy(args, null);
+    }
+
+    public void deploy(String[] args, ServiceProvisionListener listener) throws Exception {
 
         if (args.length == 0) {
             throw new IllegalArgumentException("The pu name must be defined");
@@ -227,7 +232,11 @@ public class Deploy {
         OperationalString opString = loadDeployment(puString, codeserver, sla, jars, puPath, puName, sharedJars,
                 BeanLevelPropertiesParser.parse(params));
         /* Map result = */
-        deployAdmin.deploy(opString);
+        if (listener != null) {
+            deployAdmin.deploy(opString, listener);
+        } else {
+            deployAdmin.deploy(opString);
+        }
     }
 
     //copied from opstringloader
