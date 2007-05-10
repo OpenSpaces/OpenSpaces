@@ -23,8 +23,6 @@
         Within the SLA several Monitors can be defined which can then be viewed within the UI.
         This monitors (on top of the built in monitors such as CPU and Memory) can be used
         with a policy handler (not shown here).
-
-        NOTE: The id of the SLA bean must be SLA (capital letters) for it to be identified.
     -->
     <os-sla:sla cluster-schema="partitioned-sync2backup" number-of-instances="2" number-of-backups="1"
             max-instances-per-vm="1">

@@ -20,7 +20,7 @@
         each time 50 feeds has been written to the space (commented out).
      -->
     <os-sla:sla>
-        <os-sla:relocation-policy monitor="Feed Count" high="50" />
+        <!--<os-sla:relocation-policy monitor="Feed Count" high="50" />-->
         <os-sla:monitors>
             <os-sla:bean-property-monitor name="Processed Data" bean-ref="viewDataCounter" property-name="processedDataCount" />
             <os-sla:bean-property-monitor name="Feed Count" bean-ref="dataFeeder" property-name="feedCount" />
