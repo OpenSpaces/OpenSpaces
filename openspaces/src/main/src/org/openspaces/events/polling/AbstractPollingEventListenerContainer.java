@@ -16,44 +16,37 @@ import org.springframework.util.Assert;
  * Base class for listener container implementations which are based on polling. Provides support
  * for listener handling based on Space take operations.
  *
- * <p>
- * This listener container variant is built for repeated polling attempts, each invoking the
+ * <p>This listener container variant is built for repeated polling attempts, each invoking the
  * {@link #receiveAndExecute} method. The receive timeout for each attempt can be configured through
  * the {@link #setReceiveTimeout "receiveTimeout"} property.
  *
- * <p>
- * The container allows to set the template object used for the operations. Note, this can be a Pojo
+ * <p>The container allows to set the template object used for the operations. Note, this can be a Pojo
  * based template, or one of GigaSpace's query classes such as
  * {@link com.j_spaces.core.client.SQLQuery}.
  *
- * <p>
- * A pluggable recieve operation handler can be provided by setting
+ * <p>A pluggable recieve operation handler can be provided by setting
  * {@link #setReceiveOperationHandler(org.openspaces.events.polling.receive.ReceiveOperationHandler)}.
  * The default handler used it
  * {@link org.openspaces.events.polling.receive.SingleTakeReceiveOperationHandler}.
  *
- * <p>
- * Event reception and listener execution can automatically be wrapped in transactions through
+ * <p>Event reception and listener execution can automatically be wrapped in transactions through
  * passing a Spring {@link org.springframework.transaction.PlatformTransactionManager} into the
  * {@link #setTransactionManager transactionManager} property. This will usually be a
  * {@link org.openspaces.core.transaction.manager.LocalJiniTransactionManager LocalJiniTransactionManager}.
  *
- * <p>
- * This base class does not assume any specific mechanism for asynchronous execution of polling
+ * <p>This base class does not assume any specific mechanism for asynchronous execution of polling
  * invokers. Check out {@link SimplePollingEventListenerContainer} for a concrete implementation
  * which is based on Spring's {@link org.springframework.core.task.TaskExecutor} abstraction,
  * including dynamic scaling of concurrent consumers and automatic self recovery.
  *
- * <p>
- * The {@link #setTemplate(Object)} parameter is required in order to perform matching on which
+ * <p>The {@link #setTemplate(Object)} parameter is required in order to perform matching on which
  * events to receive. If the {@link #setEventListener(org.openspaces.events.SpaceDataEventListener)}
  * implements {@link org.openspaces.events.EventTemplateProvider} and the template is directly set,
  * the event listener will be used to get the template. This feature helps when event listeners
  * directly can only work with a certain template and removes the requirement of configuring the
  * template as well.
  *
- * <p>
- * An advance feature allows for pluggable
+ * <p>An advance feature allows for pluggable
  * {@link #setTriggerOperationHandler(org.openspaces.events.polling.trigger.TriggerOperationHandler) triggerOperationHandler}
  * which mainly makes sense when using transactions. The trigger operations handler allows to
  * perform a trigger receive outside of a transaction scope, and if it returned a value, perform the

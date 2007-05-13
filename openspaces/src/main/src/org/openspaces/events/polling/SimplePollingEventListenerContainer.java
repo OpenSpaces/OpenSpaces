@@ -201,19 +201,16 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      * number of event reception attempts per task, which includes receive iterations that did not
      * actually pick up a event until they hit their timeout (see "receiveTimeout" property).
      *
-     * <p>
-     * Default is unlimited (-1) in case of a standard TaskExecutor, and 1 in case of a
+     * <p>Default is unlimited (-1) in case of a standard TaskExecutor, and 1 in case of a
      * SchedulingTaskExecutor that indicates a preference for short-lived tasks. Specify a number of
      * 10 to 100 messages to balance between extremely long-lived and extremely short-lived tasks
      * here.
      *
-     * <p>
-     * Long-lived tasks avoid frequent thread context switches through sticking with the same thread
+     * <p>Long-lived tasks avoid frequent thread context switches through sticking with the same thread
      * all the way through, while short-lived tasks allow thread pools to control the scheduling.
      * Hence, thread pools will usually prefer short-lived tasks.
      *
-     * <p>
-     * <b>This setting can be modified at runtime, for example through JMX.</b>
+     * <p><b>This setting can be modified at runtime, for example through JMX.</b>
      *
      * @see #setTaskExecutor
      * @see #setReceiveTimeout
@@ -241,23 +238,20 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      * executing tasks (in case of dynamic scheduling; see the "maxConcurrentConsumers" setting).
      * Default is 1.
      *
-     * <p>
-     * Within each task execution, a number of event reception attempts (according to the
+     * <p>Within each task execution, a number of event reception attempts (according to the
      * "maxEventsPerTask" setting) will each wait for an incoming event (according to the
      * "receiveTimeout" setting). If all of those receive attempts in a given task return without an
      * event, the task is considered idle with respect to received events. Such a task may still be
      * rescheduled; however, once it reached the specified "idleTaskExecutionLimit", it will shut
      * down (in case of dynamic scaling).
      *
-     * <p>
-     * Raise this limit if you encounter too frequent scaling up and down. With this limit being
+     * <p>Raise this limit if you encounter too frequent scaling up and down. With this limit being
      * higher, an idle consumer will be kept around longer, avoiding the restart of a consumer once
      * a new load of messages comes in. Alternatively, specify a higher "maxMessagePerTask" and/or
      * "receiveTimeout" value, which will also lead to idle consumers being kept around for a longer
      * time (while also increasing the average execution time of each scheduled task).
      *
-     * <p>
-     * <b>This setting can be modified at runtime, for example through JMX.</b>
+     * <p><b>This setting can be modified at runtime, for example through JMX.</b>
      *
      * @see #setMaxEventsPerTask
      * @see #setReceiveTimeout
