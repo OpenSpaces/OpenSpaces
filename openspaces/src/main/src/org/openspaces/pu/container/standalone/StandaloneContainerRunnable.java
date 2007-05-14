@@ -104,8 +104,8 @@ public class StandaloneContainerRunnable implements Runnable {
             }
             if (clusterInfo != null) {
                 applicationContext.addBeanPostProcessor(new ClusterInfoBeanPostProcessor(clusterInfo));
-                applicationContext.addBeanFactoryPostProcessor(new ClusterInfoPropertyPlaceholderConfigurer(clusterInfo));
             }
+            applicationContext.addBeanFactoryPostProcessor(new ClusterInfoPropertyPlaceholderConfigurer(clusterInfo));
             // "start" the application context
             applicationContext.refresh();
             this.running = true;

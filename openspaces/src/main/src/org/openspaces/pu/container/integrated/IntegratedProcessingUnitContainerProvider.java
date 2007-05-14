@@ -157,8 +157,8 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
         }
         if (clusterInfo != null) {
             applicationContext.addBeanPostProcessor(new ClusterInfoBeanPostProcessor(clusterInfo));
-            applicationContext.addBeanFactoryPostProcessor(new ClusterInfoPropertyPlaceholderConfigurer(clusterInfo));
         }
+        applicationContext.addBeanFactoryPostProcessor(new ClusterInfoPropertyPlaceholderConfigurer(clusterInfo));
         if (classLoader != null) {
             applicationContext.setClassLoader(classLoader);
         }
