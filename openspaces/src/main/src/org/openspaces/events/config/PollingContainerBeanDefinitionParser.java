@@ -56,7 +56,7 @@ public class PollingContainerBeanDefinitionParser extends AbstarctTxEventContain
         }
 
         Element triggerOperationHandlerEle = DomUtils.getChildElementByTagName(element, TRIGGER_OPERATION_HANDLER);
-        if (receiveOperationHandlerEle != null) {
+        if (triggerOperationHandlerEle != null) {
             builder.addPropertyValue("triggerOperationHandler",
                     parserContext.getDelegate().parsePropertyValue(triggerOperationHandlerEle, builder.getRawBeanDefinition(), "triggerOperationHandler"));
         }

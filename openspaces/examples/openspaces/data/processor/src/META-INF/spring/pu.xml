@@ -71,7 +71,7 @@
         Once a match is found, the data processor bean event listener is triggered using the
         annotation adapter.
     -->
-    <os-events:polling-container id="dataProcessorPollingEventContainer" giga-space="gigaSpace">
+    <os-events:polling-container id="dataProcessorPollingEventContainer" giga-space="gigaSpace" concurrent-consumers="10">
         <os-events:tx-support tx-manager="transactionManager"/>
         <os-core:template>
             <bean class="org.openspaces.example.data.common.Data">

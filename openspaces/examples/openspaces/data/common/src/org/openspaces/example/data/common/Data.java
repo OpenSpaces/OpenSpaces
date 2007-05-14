@@ -24,9 +24,9 @@ public class Data implements Serializable {
      * Static values representing the differnet values the type propery
      * can have.
      */
-    public static long[] TYPES = {1, 2, 3, 4};
+    public static long[] TYPES = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
-    private String id;
+    private Long id;
 
     private Long type;
 
@@ -53,11 +53,10 @@ public class Data implements Serializable {
     }
 
     /**
-     * The id of this object. Its value will be auto generated when it is written
-     * to the space.
+     * The id of this object.
      */
-    @SpaceId(autoGenerate = true)
-    public String getId() {
+    @SpaceId
+    public Long getId() {
         return id;
     }
 
@@ -65,7 +64,7 @@ public class Data implements Serializable {
      * The id of this object. Its value will be auto generated when it is written
      * to the space.
      */
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

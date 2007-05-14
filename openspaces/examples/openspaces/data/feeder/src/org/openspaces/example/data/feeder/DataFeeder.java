@@ -32,6 +32,10 @@ public class DataFeeder implements InitializingBean, DisposableBean {
 
     private DataFeederTask dataFeederTask;
 
+    private Long instanceId;
+
+    private long startIdFrom = 0;
+
     @GigaSpaceContext(name = "gigaSpace")
     private GigaSpace gigaSpace;
 
@@ -39,8 +43,16 @@ public class DataFeeder implements InitializingBean, DisposableBean {
         this.defaultDelay = defaultDelay;
     }
 
+    public void setInstanceId(Long instanceId) {
+        this.instanceId = instanceId;
+    }
+
     public void afterPropertiesSet() throws Exception {
         System.out.println("--- STARTING FEEDER WITH CYCLE [" + defaultDelay + "]");
+        if (instanceId != null) {
+            // have a range of ids based on the instance id of the procesing unit
+            startIdFrom = instanceId * 10000000;
+        }
         executorService = Executors.newScheduledThreadPool(1);
         dataFeederTask = new DataFeederTask();
         sf = executorService.scheduleAtFixedRate(dataFeederTask, defaultDelay, defaultDelay,
@@ -55,12 +67,13 @@ public class DataFeeder implements InitializingBean, DisposableBean {
 
     public class DataFeederTask implements Runnable {
 
-        private int counter;
+        private long counter;
 
         public void run() {
             try {
                 long time = System.currentTimeMillis();
-                Data data = new Data(Data.TYPES[counter++ % Data.TYPES.length], "FEEDER " + Long.toString(time));
+                Data data = new Data(Data.TYPES[(int) (counter++ % Data.TYPES.length)], "FEEDER " + Long.toString(time));
+                data.setId(startIdFrom + counter);
                 data.setProcessed(false);
                 gigaSpace.write(data);
                 System.out.println("--- WROTE " + data);
@@ -69,12 +82,12 @@ public class DataFeeder implements InitializingBean, DisposableBean {
             }
         }
 
-        public int getCounter() {
+        public long getCounter() {
             return counter;
         }
     }
 
-    public int getFeedCount() {
+    public long getFeedCount() {
         return dataFeederTask.getCounter();
     }
 }

@@ -60,8 +60,6 @@ public class DataProcessor implements IDataProcessor {
         data.setProcessed(true);
         data.setData("PROCESSED : " + data.getRawData());
         System.out.println(" ------ PROCESSED : " + data);
-        // reset the id as we use auto generate true
-        data.setId(null);
         return data;
     }
 

@@ -52,7 +52,9 @@
     <!--
         The Data feeder bean, writing new Data objects to the space in a constant interval.
     -->
-    <bean id="dataFeeder" class="org.openspaces.example.data.feeder.DataFeeder"/>
+    <bean id="dataFeeder" class="org.openspaces.example.data.feeder.DataFeeder">
+        <property name="instanceId" value="${clusterInfo.instanceId}" />
+    </bean>
 
     <!-- Remoting Example -->
 
