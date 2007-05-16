@@ -19,7 +19,7 @@ import java.rmi.RMISecurityManager;
  *
  * <p>
  * The standalone processing unit container also provides a a main method ({@link #main(String[])}
- * which uses the {@link StandaloneProcessingUnitContainerProvider} and the provided parameters
+ * which uses the {@link StandaloneProcessingUnitContainerProvider} and the provided parameters to
  * create itself. Please see the javadoc for the main method for a full list of the possible
  * paramters values.
  *
