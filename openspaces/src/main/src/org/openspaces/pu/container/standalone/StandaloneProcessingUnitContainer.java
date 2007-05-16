@@ -138,7 +138,7 @@ public class StandaloneProcessingUnitContainer implements ApplicationContextProc
         System.out.println("    - Starts a processing unit with a partitioned sync2backup cluster schema of two members with two members each with one backup with instance id of 1 and backup id of 1");
         System.out.println("4. puInstance -properties file://config/context.properties -properties space1 file://config/space1.properties examples/data-processor");
         System.out.println("    - Starts a processing unit called data-processor using context level properties called context.proeprties and bean level properties called space1.properties applied to bean named space1");
-        System.out.println("4. puInstance -properties embed://prop1=value1 -properties space1 embed://prop2=value2;prop3=value3 examples/data-processor");
+        System.out.println("5. puInstance -properties embed://prop1=value1 -properties space1 embed://prop2=value2;prop3=value3 examples/data-processor");
         System.out.println("    - Starts a processing unit called data-processor using context level properties with a single property called prop1 with value1 and bean level properties with two properties");
     }
 }
