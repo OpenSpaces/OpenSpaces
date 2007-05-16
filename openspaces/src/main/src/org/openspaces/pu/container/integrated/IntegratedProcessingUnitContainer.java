@@ -72,7 +72,7 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
      * <p>
      * The following parameters are allowed:
      * <ul>
-     * <li><b>-conifg [configLocation]</b>: Allows to add a Spring application context config
+     * <li><b>-config [configLocation]</b>: Allows to add a Spring application context config
      * location. See
      * {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider#addConfigLocation(String)}.
      * This is an optional paramter and it can be provided multiple times.</li>
