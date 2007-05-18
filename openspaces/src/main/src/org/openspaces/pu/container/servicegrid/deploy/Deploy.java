@@ -493,11 +493,13 @@ public class Deploy {
         StringBuilder sb = new StringBuilder();
         sb.append("Usage: Deploy [-sla ...] [-cluster ...] [-properties ...] PU_Name");
         sb.append("\n    PU_Name: The name of the processing unit under the deploy directory");
-        sb.append("\n    -sla [sla-location]          : Location of an optional xml file holding the SLA element");
-        sb.append("\n    -cluster [cluster properties]: Allows to override the cluster parameters of the SLA elements");
-        sb.append("\n             schema=partitioned  : The cluster schema to override");
-        sb.append("\n             total_members=1,1   : The number of instances and number of backups to override");
-        sb.append("\n    -proeprties [properties-loc] : Location of context level properties");
+        sb.append("\n    -sla [sla-location]                      : Location of an optional xml file holding the SLA element");
+        sb.append("\n    -cluster [cluster properties]            : Allows to override the cluster parameters of the SLA elements");
+        sb.append("\n             schema=partitioned              : The cluster schema to override");
+        sb.append("\n             total_members=1,1               : The number of instances and number of backups to override");
+        sb.append("\n    -groups [groupName] [groupName] ...      : The lookup groups used to look up the GSM");
+        sb.append("\n    -timeout [timeout value]                 : The timeout value of GSM lookup (defaults to 5000) in milliseconds");
+        sb.append("\n    -proeprties [properties-loc]             : Location of context level properties");
         sb.append("\n    -proeprties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
         sb.append("\n");
         sb.append("\n");
