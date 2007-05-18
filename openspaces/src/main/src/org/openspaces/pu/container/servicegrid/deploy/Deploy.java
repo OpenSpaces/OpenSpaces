@@ -64,27 +64,28 @@ public class Deploy {
 
     private String[] groups;
 
+    private int lookupTimeout = 5000;
+
     public DeployAdmin getDeployAdmin() throws GSMNotFoundException {
         if (deployAdmin == null) {
             GSM gsm = null;
             // TODO add the timeout as a paremeter to deploy
-            long timeout = 5000;
-            ServiceItem result = ServiceFinder.find(null, GSM.class, timeout, getGroups());
+            ServiceItem result = ServiceFinder.find(null, GSM.class, lookupTimeout, getGroups());
             if (result != null) {
                 try {
                     result = (ServiceItem) new MarshalledObject(result).get();
                     gsm = (GSM) result.service;
                 } catch (Exception e) {
-                    throw new GSMNotFoundException(getGroups(), timeout, e);
+                    throw new GSMNotFoundException(getGroups(), lookupTimeout, e);
                 }
             }
             if (gsm == null) {
-                throw new GSMNotFoundException(getGroups(), timeout);
+                throw new GSMNotFoundException(getGroups(), lookupTimeout);
             }
             try {
                 deployAdmin = (DeployAdmin) gsm.getAdmin();
             } catch (RemoteException e) {
-                throw new GSMNotFoundException(getGroups(), timeout);
+                throw new GSMNotFoundException(getGroups(), lookupTimeout);
             }
         }
 
@@ -114,6 +115,10 @@ public class Deploy {
         this.groups = groups;
     }
 
+    public void setLookupTimeout(int lookupTimeout) {
+        this.lookupTimeout = lookupTimeout;
+    }
+
     public void deploy(String[] args) throws Exception {
         deploy(args, null);
     }
@@ -129,6 +134,16 @@ public class Deploy {
         String puName = puPath.substring(index);
 
         CommandLineParser.Parameter[] params = CommandLineParser.parse(args, args.length - 1);
+
+        // check if we have a groups parameter and timeout parameter
+        for (CommandLineParser.Parameter param : params) {
+            if (param.getName().equalsIgnoreCase("groups")) {
+                setGroups(param.getArguments());
+            }
+            if (param.getName().equalsIgnoreCase("timeout")) {
+                setLookupTimeout(Integer.valueOf(param.getArguments()[0]));
+            }
+        }
 
         String[] groups = getGroups();
         if (logger.isInfoEnabled()) {
