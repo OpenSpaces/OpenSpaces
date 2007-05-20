@@ -16,7 +16,7 @@ import org.springframework.util.Assert;
  *
  * <p>The bean writes and takes a {@link org.openspaces.example.helloworld.Message}
  * object from the space using the injected {@link org.openspaces.core.GigaSpace}
- * when the bean starts up (using Spings {@link org.springframework.beans.factory.InitializingBean}
+ * when the bean starts up (using Spring {@link org.springframework.beans.factory.InitializingBean}
  * callback). This means that spring context is started or the processing unit is
  * deployed, this code will be executed.
  *
