@@ -14,8 +14,8 @@ public class MethodEventAdapterBeanDefinitionParser extends AbstractResultEventA
 
     public static final String METHOD_NAME = "method-name";
 
-    protected Class<AnnotationEventAdapterFactoryBean> getBeanClass(Element element) {
-        return AnnotationEventAdapterFactoryBean.class;
+    protected Class<MethodEventAdapterFactoryBean> getBeanClass(Element element) {
+        return MethodEventAdapterFactoryBean.class;
     }
 
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
