@@ -147,7 +147,11 @@ public class Deploy {
 
         String[] groups = getGroups();
         if (logger.isInfoEnabled()) {
-            logger.info("Deploying [" + puName + "] with groups " + Arrays.asList(groups));
+            if (groups != null) {
+                logger.info("Deploying [" + puName + "] with groups " + Arrays.asList(groups));
+            } else {
+                logger.info("Deploying [" + puName + "] with default groups");
+            }
         }
         //get codebase from service
         String codeserver = getCodebase(getDeployAdmin());
