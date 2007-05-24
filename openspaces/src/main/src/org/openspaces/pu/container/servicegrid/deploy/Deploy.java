@@ -1,6 +1,9 @@
 package org.openspaces.pu.container.servicegrid.deploy;
 
 import com.gigaspaces.grid.gsm.GSM;
+import com.gigaspaces.logger.GSLogConfigLoader;
+import com.j_spaces.core.Constants;
+import com.j_spaces.kernel.SecurityPolicyLoader;
 import net.jini.core.lookup.ServiceItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,7 +48,6 @@ import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.MarshalledObject;
-import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -480,14 +482,11 @@ public class Deploy {
             java.lang.System.exit(-1);
         }
 
-
-        java.lang.System.setSecurityManager(new RMISecurityManager() {
-            public void checkPermission(java.security.Permission perm) {
-            }
-
-            public void checkPermission(java.security.Permission perm, Object context) {
-            }
-        });
+        if (System.getProperty("java.security.policy") == null) {
+            SecurityPolicyLoader.loadPolicy(Constants.System.SYSTEM_GS_POLICY);
+        }
+        // init GigaSpace logger
+        GSLogConfigLoader.getLoader();
 
         Deploy deployer = new Deploy();
         deployer.deploy(args);

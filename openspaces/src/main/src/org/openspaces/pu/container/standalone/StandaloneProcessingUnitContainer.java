@@ -1,6 +1,8 @@
 package org.openspaces.pu.container.standalone;
 
 import com.gigaspaces.logger.GSLogConfigLoader;
+import com.j_spaces.core.Constants;
+import com.j_spaces.kernel.SecurityPolicyLoader;
 import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
@@ -9,8 +11,6 @@ import org.openspaces.pu.container.support.CommandLineParser;
 import org.openspaces.pu.container.support.ConfigLocationParser;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
-
-import java.rmi.RMISecurityManager;
 
 /**
  * A {@link StandaloneProcessingUnitContainer} provider. A standalone processing unit container is a
@@ -82,14 +82,9 @@ public class StandaloneProcessingUnitContainer implements ApplicationContextProc
      * </ul>
      */
     public static void main(String[] args) throws Exception {
-        // disable security manager (for now)
-        System.setSecurityManager(new RMISecurityManager() {
-            public void checkPermission(java.security.Permission perm) {
-            }
-
-            public void checkPermission(java.security.Permission perm, Object context) {
-            }
-        });
+        if (System.getProperty("java.security.policy") == null) {
+            SecurityPolicyLoader.loadPolicy(Constants.System.SYSTEM_GS_POLICY);
+        }
         // init GigaSpace logger
         GSLogConfigLoader.getLoader();
 
