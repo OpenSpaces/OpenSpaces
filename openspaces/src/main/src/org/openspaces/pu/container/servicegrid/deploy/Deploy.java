@@ -230,7 +230,7 @@ public class Deploy {
                 }
                 sla.setNumberOfInstances(clusterInfo.getNumberOfInstances());
                 if (logger.isInfoEnabled()) {
-                    logger.info("Overrding SLA numberOfBaskups with [" + clusterInfo.getNumberOfBackups() + "]");
+                    logger.info("Overrding SLA numberOfBackups with [" + clusterInfo.getNumberOfBackups() + "]");
                 }
                 if (clusterInfo.getNumberOfBackups() == null) {
                     sla.setNumberOfBackups(0);
