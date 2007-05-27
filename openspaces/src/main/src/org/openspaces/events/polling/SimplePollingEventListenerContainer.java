@@ -516,6 +516,9 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
     protected void doShutdown() throws DataAccessException {
         logger.debug(message("Waiting for shutdown of event listener invokers"));
         synchronized (this.activeInvokerMonitor) {
+            for (AsyncEventListenerInvoker invoker : scheduledInvokers) {
+                invoker.interrupt();
+            }
             while (this.activeInvokerCount > 0) {
                 if (logger.isDebugEnabled()) {
                     logger.debug(message("Still waiting for shutdown of [" + this.activeInvokerCount + "] event listener invokers"));
@@ -547,8 +550,11 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
 
         private volatile boolean idle = true;
 
+        private Thread invokerThread;
+
         public void run() {
             synchronized (activeInvokerMonitor) {
+                invokerThread = Thread.currentThread();
                 activeInvokerCount++;
                 activeInvokerMonitor.notifyAll();
             }
@@ -639,6 +645,12 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
 
         public boolean isIdle() {
             return this.idle;
+        }
+
+        public void interrupt() {
+            if (invokerThread != null) {
+                invokerThread.interrupt();
+            }
         }
     }
 }

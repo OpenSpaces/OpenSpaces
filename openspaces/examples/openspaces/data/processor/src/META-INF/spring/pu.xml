@@ -25,10 +25,10 @@
         with a policy handler (not shown here).
     -->
     <os-sla:sla cluster-schema="partitioned-sync2backup" number-of-instances="2" number-of-backups="1"
-            max-instances-per-vm="1">
+                max-instances-per-vm="1">
         <os-sla:monitors>
             <os-sla:bean-property-monitor name="Processed Data"
-                                          bean-ref="dataProcessedCounter" property-name="processedDataCount" />
+                                          bean-ref="dataProcessedCounter" property-name="processedDataCount"/>
         </os-sla:monitors>
     </os-sla:sla>
 
@@ -71,7 +71,7 @@
         Once a match is found, the data processor bean event listener is triggered using the
         annotation adapter.
     -->
-    <os-events:polling-container id="dataProcessorPollingEventContainer" giga-space="gigaSpace" concurrent-consumers="10">
+    <os-events:polling-container id="dataProcessorPollingEventContainer" giga-space="gigaSpace">
         <os-events:tx-support tx-manager="transactionManager"/>
         <os-core:template>
             <bean class="org.openspaces.example.data.common.Data">
