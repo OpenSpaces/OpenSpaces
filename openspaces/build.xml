@@ -153,7 +153,12 @@
         </copy>
     </target>
 
-    <target name="dist_1_4" depends="build_1_4, fulljar, srczip, javadoc, schema"
+    <target name="license" description="Copy over license files">
+        <copy todir="lib/${name}" file="${basedir}/openspaces.license.txt" />
+        <copy todir="lib/${name}" file="${basedir}/openspaces.notice.txt" />
+    </target>
+
+    <target name="dist_1_4" depends="build_1_4, fulljar, srczip, javadoc, schema, license"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}"/>
         <delete file="${dist.dir}/${name}-1.4.zip"/>
@@ -172,7 +177,7 @@
         </zip>
     </target>
 
-    <target name="dist_1_5" depends="build_1_5, fulljar, buildexamples, srczip, javadoc, schema"
+    <target name="dist_1_5" depends="build_1_5, fulljar, buildexamples, srczip, javadoc, schema, license"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}"/>
         <delete file="${dist.dir}/${name}-1.5.zip"/>
