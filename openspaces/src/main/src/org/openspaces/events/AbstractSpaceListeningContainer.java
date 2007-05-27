@@ -188,16 +188,16 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
             if (applicationEvent instanceof AfterSpaceModeChangeEvent) {
                 AfterSpaceModeChangeEvent spEvent = (AfterSpaceModeChangeEvent) applicationEvent;
                 if (spEvent.isPrimary() && SpaceUtils.isSameSpace(spEvent.getSpace(), gigaSpace.getSpace())) {
-                    if (logger.isTraceEnabled()) {
-                        logger.trace(message("Space [" + getGigaSpace() + "] became primary, starting the container"));
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(message("Space [" + getGigaSpace() + "] became primary, starting the container"));
                     }
                     doStart();
                 }
             } else if (applicationEvent instanceof BeforeSpaceModeChangeEvent) {
                 BeforeSpaceModeChangeEvent spEvent = (BeforeSpaceModeChangeEvent) applicationEvent;
                 if (!spEvent.isPrimary() && SpaceUtils.isSameSpace(spEvent.getSpace(), gigaSpace.getSpace())) {
-                    if (logger.isTraceEnabled()) {
-                        logger.trace(message("Space [" + getGigaSpace() + "] became backup, stopping the container"));
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(message("Space [" + getGigaSpace() + "] became backup, stopping the container"));
                     }
                     doStop();
                 }
