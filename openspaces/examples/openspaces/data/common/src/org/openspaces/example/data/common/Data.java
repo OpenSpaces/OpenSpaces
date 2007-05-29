@@ -36,12 +36,6 @@ import java.io.Serializable;
 @SpaceClass
 public class Data implements Serializable {
 
-    /**
-     * Static values representing the differnet values the type propery
-     * can have.
-     */
-    public static long[] TYPES = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-
     private Long id;
 
     private Long type;

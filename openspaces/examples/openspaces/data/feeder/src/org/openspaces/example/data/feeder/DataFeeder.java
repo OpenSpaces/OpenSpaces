@@ -44,6 +44,8 @@ public class DataFeeder implements InitializingBean, DisposableBean {
 
     private ScheduledFuture<?> sf;
 
+    private long numberOfTypes = 10;
+
     private long defaultDelay = 1000;
 
     private DataFeederTask dataFeederTask;
@@ -54,6 +56,16 @@ public class DataFeeder implements InitializingBean, DisposableBean {
 
     @GigaSpaceContext(name = "gigaSpace")
     private GigaSpace gigaSpace;
+
+    /**
+     * Sets the number of types that will be used to set {@link org.openspaces.example.data.common.Data#setType(Long)}.
+     *
+     * <p>The type is used as the routing index for partitioned space. This will affect the distribution of Data
+     * objects over a partitioned space.
+     */
+    public void setNumberOfTypes(long numberOfTypes) {
+        this.numberOfTypes = numberOfTypes;
+    }
 
     public void setDefaultDelay(long defaultDelay) {
         this.defaultDelay = defaultDelay;
@@ -88,7 +100,7 @@ public class DataFeeder implements InitializingBean, DisposableBean {
         public void run() {
             try {
                 long time = System.currentTimeMillis();
-                Data data = new Data(Data.TYPES[(int) (counter++ % Data.TYPES.length)], "FEEDER " + Long.toString(time));
+                Data data = new Data((counter++ % numberOfTypes), "FEEDER " + Long.toString(time));
                 data.setId(startIdFrom + counter);
                 data.setProcessed(false);
                 gigaSpace.write(data);

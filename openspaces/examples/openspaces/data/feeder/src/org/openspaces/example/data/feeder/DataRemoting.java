@@ -41,6 +41,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class DataRemoting implements InitializingBean, DisposableBean {
 
+    private long numberOfTypes = 10;
+    
     private long defaultDelay = 1000;
 
     private IDataProcessor dataProcessor;
@@ -53,6 +55,16 @@ public class DataRemoting implements InitializingBean, DisposableBean {
         this.dataProcessor = dataProcessor;
     }
 
+    /**
+     * Sets the number of types that will be used to set {@link org.openspaces.example.data.common.Data#setType(Long)}.
+     *
+     * <p>The type is used as the routing index for partitioned space. This will affect the distribution of Data
+     * objects over a partitioned space.
+     */
+    public void setNumberOfTypes(long numberOfTypes) {
+        this.numberOfTypes = numberOfTypes;
+    }
+
     public void setDefaultDelay(long defaultDelay) {
         this.defaultDelay = defaultDelay;
     }
@@ -60,8 +72,7 @@ public class DataRemoting implements InitializingBean, DisposableBean {
     public void afterPropertiesSet() throws Exception {
         System.out.println("--- STARTING REMOTING WITH CYCLE [" + defaultDelay + "]");
         executorService = Executors.newScheduledThreadPool(1);
-        sf = executorService.scheduleAtFixedRate(new DataFeederTask(), defaultDelay, defaultDelay,
-                TimeUnit.MILLISECONDS);
+        sf = executorService.scheduleAtFixedRate(new DataFeederTask(), defaultDelay, defaultDelay, TimeUnit.MILLISECONDS);
     }
 
     public void destroy() throws Exception {
@@ -77,7 +88,7 @@ public class DataRemoting implements InitializingBean, DisposableBean {
         public void run() {
             try {
                 long time = System.currentTimeMillis();
-                Data data = new Data(Data.TYPES[counter++ % Data.TYPES.length], "REMOTING " + Long.toString(time));
+                Data data = new Data((counter++ % numberOfTypes), "FEEDER " + Long.toString(time));
                 data.setProcessed(false);
                 System.out.println("--- REMOTING PARAMTER " + data);
                 dataProcessor.sayData(data);

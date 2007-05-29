@@ -30,7 +30,13 @@
     <!--
         Spring propery configurer which allows us to use system properties (such as user.name).
     -->
-    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
+    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="properties">
+            <props>
+                <prop key="numberOfTypes">100</prop>
+            </props>
+        </property>
+    </bean>
 
     <!--
         Enables the usage of @GigaSpaceContext annotation based injection.
@@ -54,6 +60,7 @@
     -->
     <bean id="dataFeeder" class="org.openspaces.example.data.feeder.DataFeeder">
         <property name="instanceId" value="${clusterInfo.instanceId}" />
+        <property name="numberOfTypes" value="${numberOfTypes}" />
     </bean>
 
     <!-- Remoting Example -->
@@ -75,6 +82,7 @@
     -->
     <bean id="dataRemoting" class="org.openspaces.example.data.feeder.DataRemoting">
         <property name="dataProcessor" ref="dataProcessor"/>
+        <property name="numberOfTypes" value="${numberOfTypes}" />
     </bean>
 
     <!-- Local View Example ("client side") -->
