@@ -133,6 +133,21 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
 
             IntegratedProcessingUnitContainer container = (IntegratedProcessingUnitContainer) provider.createContainer();
             ((ConfigurableApplicationContext) container.getApplicationContext()).registerShutdownHook();
+            
+            // Use the MAIN thread as the non daemon thread to keep it alive
+            final Thread mainThread = Thread.currentThread();
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                    mainThread.interrupt();
+                }
+            });
+            while (!mainThread.isInterrupted()) {
+                try {
+                    Thread.sleep(Long.MAX_VALUE);
+                } catch (InterruptedException e) {
+                    // do nothing, simply exit
+                }
+            }
         } catch (Exception e) {
             printUsage();
             e.printStackTrace(System.err);
