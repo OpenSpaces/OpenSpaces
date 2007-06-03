@@ -24,6 +24,9 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.support.RemoteAccessor;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+
+import java.util.concurrent.Future;
 
 /**
  * A space remoting proxy that forware the service execution to a remote service with the space as
@@ -31,43 +34,44 @@ import org.springframework.util.Assert;
  * {@link org.openspaces.remoting.SpaceRemotingServiceExporter}. This proxy builds a representation
  * of the remote invocation using {@link org.openspaces.remoting.SpaceRemoteInvocation} and waits
  * for a remoting response represented by {@link org.openspaces.remoting.SpaceRemoteResult}.
- * 
- * <p>
- * The proxy requires a {@link #setGigaSpace(org.openspaces.core.GigaSpace)} interface to be set in
+ *
+ * <p>The proxy requires a {@link #setGigaSpace(org.openspaces.core.GigaSpace)} interface to be set in
  * order to write the remote invocation and wait for a response using the space API. It also
  * requires a {@link #setServiceInterface(Class)} which represents the interface that will be
  * proxied.
- * 
- * <p>
- * Allows for one way invocations (i.e. not waiting for a response). The one way invocation can be
+ *
+ * <p>Allows for one way invocations (i.e. not waiting for a response). The one way invocation can be
  * set globablly for all of the service methods by setting {@link #setGlobalOneWay(boolean)} or can
  * be enabled only for methods that return <code>void</code> by setting
  * {@link #setVoidOneWay(boolean)}. Note, if using one way invocation and an exception is raised by
  * the remote service, it won't be raised by this proxy.
- * 
- * <p>
- * A timeout which controls how long the proxy will wait for the response can be set using
+ *
+ * <p>A timeout which controls how long the proxy will wait for the response can be set using
  * {@link #setTimeout(long)}. The timeout value if in <b>milliseconds</b>.
- * 
- * <p>
- * The space remote proxy supports a future based invocation. This means that if, on the clien side,
- * one of the service interface methods returns {@link org.openspaces.remoting.RemoteFuture}, it
+ *
+ * <p>The space remote proxy supports a future based invocation. This means that if, on the clien side,
+ * one of the service interface methods returns {@link java.util.concurrent.Future}, it
  * can be used for async execution. Note, this means that in terms of interfaces there will have to
  * be two different service interfaces (under the same package and with the same name). One for the
  * server side service that returns the actual value, and one on the client side that for the same
- * method simply returns the future.
- * 
+ * method simply returns the future. Another option is not having two different interfaces, but having
+ * the same interface with async methods (returning <code>Future</code>). The async methods should start
+ * with a specified prefix (defaults to <code>async</code>) and should have no implementation on the server
+ * side (simply return <code>null</code>).
+ *
  * <p>
  * In case of remote invocation over a partitioned space the default partitioned routing index will
  * be random (the hashCode of the newly created
  * {@link org.openspaces.remoting.SpaceRemoteInvocation} class). The proxy allows for a pluggable
  * routing handler implementation by setting {@link #setRemoteRoutingHandler(RemoteRoutingHandler)}.
- * 
+ *
  * @author kimchy
  * @see org.openspaces.remoting.SpaceRemotingServiceExporter
  */
 public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements FactoryBean, InitializingBean,
         MethodInterceptor {
+
+    public static final String DEFAULT_ASYNC_METHOD_PREFIX = "async";
 
     private GigaSpace gigaSpace;
 
@@ -78,6 +82,8 @@ public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements Fac
     private boolean globalOneWay = false;
 
     private boolean voidOneWay = false;
+
+    private String asyncMethodPrefix = DEFAULT_ASYNC_METHOD_PREFIX;
 
     private Object serviceProxy;
 
@@ -128,6 +134,13 @@ public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements Fac
         this.voidOneWay = voidOneWay;
     }
 
+    /**
+     * Sets the async method prefix. Defaults to {@link #DEFAULT_ASYNC_METHOD_PREFIX}.
+     */
+    public void setAsyncMethodPrefix(String asyncMethodPrefix) {
+        this.asyncMethodPrefix = asyncMethodPrefix;
+    }
+
     public void afterPropertiesSet() {
         Assert.notNull(getServiceInterface(), "serviceInterface property is required");
         Assert.notNull(gigaSpace, "gigaSpace property is required");
@@ -148,8 +161,19 @@ public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements Fac
 
     @SuppressWarnings("unchecked")
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+
+        String methodName = methodInvocation.getMethod().getName();
+
+        boolean asyncExecution = false;
+        if (Future.class.isAssignableFrom(methodInvocation.getMethod().getReturnType())) {
+            asyncExecution = true;
+            if (methodName.startsWith(asyncMethodPrefix)) {
+                methodName = StringUtils.uncapitalize(methodName.substring(asyncMethodPrefix.length()));
+            }
+        }
+
         SpaceRemoteInvocation remoteInvocation = new SpaceRemoteInvocation(getServiceInterface().getName(),
-                methodInvocation.getMethod().getName(), methodInvocation.getArguments());
+                methodName, methodInvocation.getArguments());
 
         if (remoteRoutingHandler != null) {
             remoteRoutingHandler.setRemoteInvocationRouting(remoteInvocation);
@@ -174,7 +198,7 @@ public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements Fac
         }
 
         // if the return value is a future, return the future
-        if (RemoteFuture.class.isAssignableFrom(methodInvocation.getMethod().getReturnType())) {
+        if (asyncExecution) {
             return new DefaultRemoteFuture(gigaSpace, remoteInvocation);
         }
 

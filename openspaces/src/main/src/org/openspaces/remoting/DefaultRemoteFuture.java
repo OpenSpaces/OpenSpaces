@@ -17,19 +17,25 @@
 package org.openspaces.remoting;
 
 import org.openspaces.core.GigaSpace;
-import org.springframework.dao.DataAccessException;
-import org.springframework.remoting.RemoteAccessException;
+
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
+ * A Space remoting future implementation.
+ *
  * @author kimchy
  */
-public class DefaultRemoteFuture<T> implements RemoteFuture<T> {
+public class DefaultRemoteFuture<T> implements Future<T> {
 
     private GigaSpace gigaSpace;
 
     private SpaceRemoteInvocation remoteInvocation;
 
-    private boolean cancelled;
+    private Boolean cancelled;
 
     private SpaceRemoteResult<T> remoteResult;
 
@@ -41,18 +47,72 @@ public class DefaultRemoteFuture<T> implements RemoteFuture<T> {
         this.template = new SpaceRemoteResult<T>(remoteInvocation);
     }
 
-    public void cancel() throws RemoteAccessException, DataAccessException {
-        Object retVal = gigaSpace.take(remoteInvocation, 0);
-        if (retVal != null) {
-            cancelled = true;
+    /**
+     * Attempts to cancel execution of this task.  This attempt will
+     * fail if the task has already completed, already been cancelled,
+     * or could not be cancelled for some other reason. If successful,
+     * and this task has not started when <code>cancel</code> is called,
+     * this task should never run.
+     *
+     * @param mayInterruptIfRunning Has no affect when using Space Remoting
+     * @return <code>false</code> if the task could not be cancelled,
+     *         typically because it has already completed normally;
+     *         <code>true</code> otherwise
+     */
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        if (cancelled != null) {
+            return cancelled;
         }
+        Object retVal = gigaSpace.take(remoteInvocation, 0);
+        cancelled = retVal != null;
+        return cancelled;
     }
 
+    /**
+     * Returns <code>true</code> if this task was cancelled before it completed
+     * normally.
+     *
+     * @return <code>true</code> if task was cancelled before it completed
+     */
     public boolean isCancelled() {
-        return this.cancelled;
+        return cancelled != null && cancelled;
     }
 
-    public T get() throws Exception {
+    /**
+     * Returns <code>true</code> if this task completed.
+     *
+     * <p>Completion may be due to normal termination, an exception, or
+     * cancellation -- in all of these cases, this method will return
+     * <code>true</code>.
+     *
+     * @return <code>true</code> if this task completed.
+     */
+    public boolean isDone() {
+        if (cancelled != null) {
+            return true;
+        }
+        if (remoteResult != null) {
+            return true;
+        }
+        remoteResult = gigaSpace.take(template, 0);
+        return remoteResult != null;
+    }
+
+    /**
+     * Waits if necessary for the computation to complete, and then
+     * retrieves its result.
+     *
+     * @return the computed result
+     * @throws CancellationException if the computation was cancelled
+     * @throws ExecutionException    if the computation threw an
+     *                               exception
+     * @throws InterruptedException  if the current thread was interrupted
+     *                               while waiting
+     */
+    public T get() throws InterruptedException, ExecutionException {
+        if (cancelled != null) {
+            throw new CancellationException();
+        }
         T retVal = handleResult();
         if (retVal != null) {
             return retVal;
@@ -61,21 +121,45 @@ public class DefaultRemoteFuture<T> implements RemoteFuture<T> {
         return handleResult();
     }
 
-    public T get(long timeout) throws Exception {
+    /**
+     * Waits if necessary for at most the given time for the computation
+     * to complete, and then retrieves its result, if available.
+     *
+     * @param timeout the maximum time to wait
+     * @param unit    the time unit of the timeout argument
+     * @return the computed result
+     * @throws CancellationException if the computation was cancelled
+     * @throws ExecutionException    if the computation threw an
+     *                               exception
+     * @throws InterruptedException  if the current thread was interrupted
+     *                               while waiting
+     * @throws TimeoutException      if the wait timed out
+     */
+    public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        if (cancelled != null) {
+            throw new CancellationException();
+        }
         T retVal = handleResult();
         if (retVal != null) {
             return retVal;
         }
-        remoteResult = gigaSpace.take(template, timeout);
+        remoteResult = gigaSpace.take(template, unit.toMillis(timeout));
+        if (remoteResult == null) {
+            throw new TimeoutException("Timeout waiting for remote invocation [" + remoteInvocation + "] for [" + unit.toMillis(timeout) + "] milliseconds");
+        }
         return handleResult();
     }
 
-    private T handleResult() throws Exception {
+    private T handleResult() throws ExecutionException {
         if (remoteResult == null) {
             return null;
         }
         if (remoteResult.getEx() != null) {
-            throw remoteResult.getEx();
+            try {
+                throw remoteResult.getEx();
+            } catch (Exception e) {
+                throw new SpaceRemoteExecutionException(remoteInvocation, remoteResult);
+            }
         }
         return remoteResult.getResult();
     }
