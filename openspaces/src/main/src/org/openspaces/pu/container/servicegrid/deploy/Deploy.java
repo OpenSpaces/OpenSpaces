@@ -150,6 +150,8 @@ public class Deploy {
         int index = puPath.lastIndexOf('/');
         index = index == -1 ? 0 : index;
         String puName = puPath.substring(index);
+        // override pu name allows to change the actual pu name deployed from the on under deploy directory
+        String overridePuName = puName;
 
         CommandLineParser.Parameter[] params = CommandLineParser.parse(args, args.length - 1);
 
@@ -161,14 +163,17 @@ public class Deploy {
             if (param.getName().equalsIgnoreCase("timeout")) {
                 setLookupTimeout(Integer.valueOf(param.getArguments()[0]));
             }
+            if (param.getName().equalsIgnoreCase("override-name")) {
+                overridePuName = param.getArguments()[0];
+            }
         }
 
         String[] groups = getGroups();
         if (logger.isInfoEnabled()) {
             if (groups != null) {
-                logger.info("Deploying [" + puName + "] with groups " + Arrays.asList(groups));
+                logger.info("Deploying [" + puName + "] with name [" + overridePuName + "] and groups " + Arrays.asList(groups));
             } else {
-                logger.info("Deploying [" + puName + "] with default groups");
+                logger.info("Deploying [" + puName + "] with name [" + overridePuName + "] and default groups");
             }
         }
         //get codebase from service
@@ -266,7 +271,7 @@ public class Deploy {
         }
 
         //deploy to sg
-        OperationalString opString = loadDeployment(puString, codeserver, sla, jars, puPath, puName, sharedJars,
+        OperationalString opString = loadDeployment(puString, codeserver, sla, jars, puPath, overridePuName, sharedJars,
                 BeanLevelPropertiesParser.parse(params));
         /* Map result = */
         if (listener != null) {
@@ -520,6 +525,7 @@ public class Deploy {
         sb.append("\n    -timeout [timeout value]                 : The timeout value of GSM lookup (defaults to 5000) in milliseconds");
         sb.append("\n    -proeprties [properties-loc]             : Location of context level properties");
         sb.append("\n    -proeprties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
+        sb.append("\n    -override-name [override pu name]        : An override pu name, useful when using pu as a template");
         sb.append("\n");
         sb.append("\n");
         sb.append("\nSome Examples:");
