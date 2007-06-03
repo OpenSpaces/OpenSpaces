@@ -18,6 +18,7 @@ package org.openspaces.events.polling;
 
 import org.openspaces.events.AbstractEventListenerContainer;
 import org.openspaces.events.EventTemplateProvider;
+import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.events.polling.receive.ReceiveOperationHandler;
 import org.openspaces.events.polling.receive.SingleTakeReceiveOperationHandler;
 import org.openspaces.events.polling.trigger.TriggerOperationHandler;
@@ -223,8 +224,11 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
     }
 
     public void afterPropertiesSet() {
-        if (getEventListener() != null && getEventListener() instanceof EventTemplateProvider && template == null) {
-            setTemplate(((EventTemplateProvider) getEventListener()).getTemplate());
+        if (template == null) {
+            SpaceDataEventListener eventListener = getEventListener();
+            if (eventListener != null && eventListener instanceof EventTemplateProvider) {
+                setTemplate(((EventTemplateProvider) eventListener).getTemplate());
+            }
         }
         super.afterPropertiesSet();
     }
