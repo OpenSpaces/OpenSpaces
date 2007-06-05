@@ -434,7 +434,7 @@ public class Deploy {
         ClassBundle classBundle = element.getComponentBundle();
         classBundle.addJAR(puPath + "/");
         for (File jar : jars) {
-            String path = jar.getPath();
+            String path = jar.getPath().replace('\\', '/');
             classBundle.addJAR(path);
         }
 
@@ -442,7 +442,7 @@ public class Deploy {
         String[] sharedJarPaths = new String[sharedJars.length];
         for (int i = 0; i < sharedJars.length; i++) {
             File sharedJar = sharedJars[i];
-            String path = sharedJar.getPath();
+            String path = sharedJar.getPath().replace('\\', '/');
             sharedJarPaths[i] = path;
         }
         Map<String, String[]> jarsMap = new HashMap<String, String[]>();

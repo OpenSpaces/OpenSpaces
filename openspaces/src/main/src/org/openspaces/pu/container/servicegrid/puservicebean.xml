@@ -12,12 +12,6 @@
             </Resources>
         </Interfaces>
         <ImplementationClass>org.openspaces.pu.container.servicegrid.PUServiceBeanImpl
-            <Resources>
-                <SharedComponent>
-                    <ClassName>OpenSpaces</ClassName>
-                    <JAR>openspaces/openspaces.jar</JAR>
-                </SharedComponent>
-            </Resources>
         </ImplementationClass>
 
         <Maintain>1</Maintain>

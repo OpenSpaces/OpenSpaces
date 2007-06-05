@@ -61,7 +61,7 @@ public class HTTPFileSystemView extends FileSystemView {
         String line;
         try {
             List<File> filesList = new ArrayList<File>();
-            URL url = new URL(root, dir.getPath());
+            URL url = new URL(root, dir.getPath().replace('\\', '/'));
             BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
             while ((line = reader.readLine()) != null) {
                 StringTokenizer tokenizer = new StringTokenizer(line, "\t");
