@@ -26,7 +26,7 @@ import org.w3c.dom.Element;
 /**
  * @author kimchy
  */
-public abstract class AbstarctTxEventContainerBeanDefinitionParser extends AbstarctEventContainerBeanDefinitionParser {
+public abstract class AbstractTxEventContainerBeanDefinitionParser extends AbstractEventContainerBeanDefinitionParser {
 
     private static final String TX_MANAGER = "tx-manager";
 

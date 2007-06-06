@@ -26,7 +26,7 @@ import org.w3c.dom.Element;
 /**
  * @author kimchy
  */
-public class NotifyContainerBeanDefinitionParser extends AbstarctTxEventContainerBeanDefinitionParser {
+public class NotifyContainerBeanDefinitionParser extends AbstractTxEventContainerBeanDefinitionParser {
 
     private static final String TEMPLATE = "template";
 

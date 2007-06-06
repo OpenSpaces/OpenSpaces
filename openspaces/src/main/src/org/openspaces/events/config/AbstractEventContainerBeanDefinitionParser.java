@@ -26,7 +26,7 @@ import org.w3c.dom.Element;
 /**
  * @author kimchy
  */
-public abstract class AbstarctEventContainerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
+public abstract class AbstractEventContainerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
     private static final String LISTENER = "listener";
 
