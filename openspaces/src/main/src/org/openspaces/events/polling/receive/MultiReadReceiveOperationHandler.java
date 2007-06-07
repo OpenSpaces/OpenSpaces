@@ -46,7 +46,7 @@ public class MultiReadReceiveOperationHandler implements ReceiveOperationHandler
      * values are returned, will perform a blocking read operation using
      * {@link org.openspaces.core.GigaSpace#read(Object,long)}.
      */
-    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException, InterruptedException {
+    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         Object[] results = gigaSpace.readMultiple(template, maxEntries);
         if (results != null && results.length > 0) {
             return results;

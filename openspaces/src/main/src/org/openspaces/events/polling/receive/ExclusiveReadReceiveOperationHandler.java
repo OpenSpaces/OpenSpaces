@@ -40,7 +40,7 @@ public class ExclusiveReadReceiveOperationHandler implements ReceiveOperationHan
      *
      * Note, this receive operation handler must be perfomed under a transaction.
      */
-    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException, InterruptedException {
+    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException{
         return gigaSpace.read(template, receiveTimeout, gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK);
     }
 }

@@ -29,7 +29,7 @@ public class SingleTakeReceiveOperationHandler implements ReceiveOperationHandle
     /**
      * Performs single take operation using {@link org.openspaces.core.GigaSpace#take(Object,long)}.
      */
-    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException, InterruptedException {
+    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         return gigaSpace.take(template, receiveTimeout);
     }
 }

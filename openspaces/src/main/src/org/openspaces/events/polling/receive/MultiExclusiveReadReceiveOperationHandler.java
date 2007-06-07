@@ -53,7 +53,7 @@ public class MultiExclusiveReadReceiveOperationHandler implements ReceiveOperati
      * <p>Read operations are performed under an exclusive read lock which mimics the similar behaviour
      * as take without actually taking the entry from the space.
      */
-    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException, InterruptedException {
+    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         Object[] results = gigaSpace.readMultiple(template, maxEntries, gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK);
         if (results != null && results.length > 0) {
             return results;
