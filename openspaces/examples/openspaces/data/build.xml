@@ -39,10 +39,12 @@
         <echo message="Among the available targets are:"/>
         <echo message=""/>
         <echo message="clean                    --> Cleans all output dirs"/>
-        <echo message="build                    --> build all; don't create JARs"/>
-        <echo message="dist                     --> build the distribution"/>
-        <echo message="deploy-local-processor   --> Deploy data processor on the service grid"/>
-        <echo message="deploy-local-feeder      --> Deploy data feeder on the service grid"/>
+        <echo message="build                    --> Build all; don't create JARs"/>
+        <echo message="dist                     --> Build the distribution"/>
+        <echo message="copy-local-processor     --> Build and copies the processor into the local deploy directory"/>
+        <echo message="copy-local-feeder        --> Build and copies the feeder world into the local deploy directory"/>
+        <echo message="deploy-local-processor   --> Build, copies and deploys the data processor on the service grid"/>
+        <echo message="deploy-local-feeder      --> Build, copies and deploys the data feeder on the service grid"/>
         <echo message=""/>
     </target>
 
@@ -75,21 +77,27 @@
         <jar basedir="${feeder-pu}" jarfile="${feeder-pujar}"/>
     </target>
 
-    <target name="deploy-local-processor" depends="dist">
+    <target name="copy-local-processor" depends="dist">
         <delete dir="${gshome.dir}/deploy/data-processor"/>
         <mkdir dir="${gshome.dir}/deploy/data-processor"/>
         <copy todir="${gshome.dir}/deploy/data-processor">
             <fileset dir="${processor-pu}"/>
         </copy>
+    </target>
+
+    <target name="deploy-local-processor" depends="copy-local-processor">
         <deploy name="data-processor"/>
     </target>
 
-    <target name="deploy-local-feeder" depends="dist">
+    <target name="copy-local-feeder" depends="dist">
         <delete dir="${gshome.dir}/deploy/data-feeder"/>
         <mkdir dir="${gshome.dir}/deploy/data-feeder"/>
         <copy todir="${gshome.dir}/deploy/data-feeder">
             <fileset dir="${feeder-pu}"/>
         </copy>
+    </target>
+
+    <target name="deploy-local-feeder" depends="copy-local-feeder">
         <deploy name="data-feeder"/>
     </target>
 

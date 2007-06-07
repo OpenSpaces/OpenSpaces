@@ -29,9 +29,10 @@
         <echo message="Among the available targets are:"/>
         <echo message=""/>
         <echo message="clean                    --> Cleans all output dirs"/>
-        <echo message="build                    --> build all; don't create JARs"/>
-        <echo message="dist                     --> build the distribution"/>
-        <echo message="deploy-local-helloworld  --> Deploy hello world on the service grid"/>
+        <echo message="build                    --> Build all; don't create JARs"/>
+        <echo message="dist                     --> Build the distribution"/>
+        <echo message="copy-local-helloworld    --> Build and copies the hellow world into the local deploy directory"/>
+        <echo message="deploy-local-helloworld  --> Build, copies and deploys the hello world on the service grid"/>
         <echo message=""/>
     </target>
 
@@ -75,12 +76,15 @@
         <jar basedir="${pulocation}" jarfile="${basedir}/pu/helloworld.jar"/>
     </target>
 
-    <target name="deploy-local-helloworld" depends="dist">
+    <target name="copy-local-helloworld" depends="dist">
         <delete dir="${gshome.dir}/deploy/hello-world"/>
         <mkdir dir="${gshome.dir}/deploy/hello-world"/>
         <copy todir="${gshome.dir}/deploy/hello-world">
             <fileset dir="${pulocation}"/>
         </copy>
+    </target>
+
+    <target name="deploy-local-helloworld" depends="copy-local-helloworld">
         <deploy name="hello-world" />
     </target>
 
