@@ -46,7 +46,7 @@ public class MultiTakeReceiveOperationHandler implements ReceiveOperationHandler
      * values are returned, will perform a blocking take operation using
      * {@link org.openspaces.core.GigaSpace#take(Object,long)}.
      */
-    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
+    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException, InterruptedException {
         Object[] results = gigaSpace.takeMultiple(template, maxEntries);
         if (results != null && results.length > 0) {
             return results;

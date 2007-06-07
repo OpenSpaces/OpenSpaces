@@ -29,7 +29,7 @@ public class SingleReadReceiveOperationHandler implements ReceiveOperationHandle
     /**
      * Performs single read operation using {@link org.openspaces.core.GigaSpace#read(Object,long)}.
      */
-    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
+    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException, InterruptedException {
         return gigaSpace.read(template, receiveTimeout);
     }
 }

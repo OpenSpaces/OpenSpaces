@@ -16,6 +16,7 @@
 
 package org.openspaces.events.polling;
 
+import org.openspaces.core.SpaceInterruptedException;
 import org.openspaces.events.AbstractEventListenerContainer;
 import org.openspaces.events.EventTemplateProvider;
 import org.openspaces.events.SpaceDataEventListener;
@@ -381,7 +382,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
     protected Object receiveEvent(Object template) throws DataAccessException {
         try {
             return receiveOperationHandler.receive(template, getGigaSpace(), getReceiveTimeout());
-        } catch (InterruptedException e) {
+        } catch (SpaceInterruptedException e) {
             // we got an interrupted exception, it means no receive operation so return null.
             return null;
         }
