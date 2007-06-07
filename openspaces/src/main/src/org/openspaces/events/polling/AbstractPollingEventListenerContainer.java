@@ -379,7 +379,12 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
      * Receive an event
      */
     protected Object receiveEvent(Object template) throws DataAccessException {
-        return receiveOperationHandler.receive(template, getGigaSpace(), getReceiveTimeout());
+        try {
+            return receiveOperationHandler.receive(template, getGigaSpace(), getReceiveTimeout());
+        } catch (InterruptedException e) {
+            // we got an interrupted exception, it means no receive operation so return null.
+            return null;
+        }
     }
 
     /**

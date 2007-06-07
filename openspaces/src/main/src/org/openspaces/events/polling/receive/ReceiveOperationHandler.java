@@ -43,5 +43,5 @@ public interface ReceiveOperationHandler {
      *         or an array of objects indicating the receive operation result.
      * @throws DataAccessException
      */
-    Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException;
+    Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException, InterruptedException;
 }
