@@ -32,13 +32,13 @@ public class GSMNotFoundException extends NestedRuntimeException {
     private long timeout;
 
     public GSMNotFoundException(String[] groups, long timeout, Exception e) {
-        super("Failed to find GSM with groups " + Arrays.asList(groups) + " and timeout [" + timeout + "]", e);
+        super("Failed to find GSM with groups " + toGroups(groups) + " and timeout [" + timeout + "]", e);
         this.groups = groups;
         this.timeout = timeout;
     }
 
     public GSMNotFoundException(String[] groups, long timeout) {
-        super("Failed to find GSM with groups " + Arrays.asList(groups) + " and timeout [" + timeout + "]");
+        super("Failed to find GSM with groups " + toGroups(groups) + " and timeout [" + timeout + "]");
         this.groups = groups;
         this.timeout = timeout;
     }
@@ -49,5 +49,12 @@ public class GSMNotFoundException extends NestedRuntimeException {
 
     public long getTimeout() {
         return timeout;
+    }
+
+    private static String toGroups(String[] groups) {
+        if (groups == null) {
+            return "default groups";
+        }
+        return Arrays.asList(groups).toString();
     }
 }
