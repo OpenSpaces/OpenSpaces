@@ -106,6 +106,7 @@ public class StandaloneProcessingUnitContainer implements ApplicationContextProc
 
         if (args.length == 0) {
             printUsage();
+            System.exit(1);
         }
         String puLocation = args[args.length - 1];
 
