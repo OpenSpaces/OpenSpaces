@@ -137,12 +137,21 @@ public class Deploy {
         this.lookupTimeout = lookupTimeout;
     }
 
-    public OperationalString deploy(String[] args) throws Exception {
-        return deploy(args, null);
+    public void deploy(String[] args) throws Exception {
+        deploy(args, null);
     }
 
-    public OperationalString deploy(String[] args, ServiceProvisionListener listener) throws Exception {
+    public void deploy(String[] args, ServiceProvisionListener listener) throws Exception {
+        OperationalString opString = buildOperationalString(args);
+        /* Map result = */
+        if (listener != null) {
+            deployAdmin.deploy(opString, listener);
+        } else {
+            deployAdmin.deploy(opString);
+        }
+    }
 
+    public OperationalString buildOperationalString(String[] args) throws Exception {
         if (args.length == 0) {
             throw new IllegalArgumentException("The pu name must be defined");
         }
@@ -271,16 +280,7 @@ public class Deploy {
         }
 
         //deploy to sg
-        OperationalString opString = loadDeployment(puString, codeserver, sla, jars, puPath, overridePuName, sharedJars,
-                BeanLevelPropertiesParser.parse(params));
-        /* Map result = */
-        if (listener != null) {
-            deployAdmin.deploy(opString, listener);
-        } else {
-            deployAdmin.deploy(opString);
-        }
-
-        return opString;
+        return loadDeployment(puString, codeserver, sla, jars, puPath, overridePuName, sharedJars, BeanLevelPropertiesParser.parse(params));
     }
 
     //copied from opstringloader
