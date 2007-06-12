@@ -137,11 +137,11 @@ public class Deploy {
         this.lookupTimeout = lookupTimeout;
     }
 
-    public void deploy(String[] args) throws Exception {
-        deploy(args, null);
+    public OperationalString deploy(String[] args) throws Exception {
+        return deploy(args, null);
     }
 
-    public void deploy(String[] args, ServiceProvisionListener listener) throws Exception {
+    public OperationalString deploy(String[] args, ServiceProvisionListener listener) throws Exception {
 
         if (args.length == 0) {
             throw new IllegalArgumentException("The pu name must be defined");
@@ -279,6 +279,8 @@ public class Deploy {
         } else {
             deployAdmin.deploy(opString);
         }
+
+        return opString;
     }
 
     //copied from opstringloader
