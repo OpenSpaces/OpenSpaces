@@ -29,6 +29,10 @@ public abstract class AbstractPolicy implements Policy {
 
     private double high;
 
+    private long lowerDampener = 3000;
+
+    private long upperDampener = 3000;
+
     /**
      * @see Policy#getHigh()
      */
@@ -69,5 +73,30 @@ public abstract class AbstractPolicy implements Policy {
      */
     public void setMonitor(String monitor) {
         this.monitor = monitor;
+    }
+
+    /**
+     * Returns the lower dampener for this policy. If the lower
+     */
+    public long getLowerDampener() {
+        return lowerDampener;
+    }
+
+    /**
+     * Sets the lower dampener for this policy.
+     */
+    public void setLowerDampener(long lowerDampener) {
+        this.lowerDampener = lowerDampener;
+    }
+
+    /**
+     * Returns the lower dampener for this policy.
+     */
+    public long getUpperDampener() {
+        return upperDampener;
+    }
+
+    public void setUpperDampener(long upperDampener) {
+        this.upperDampener = upperDampener;
     }
 }

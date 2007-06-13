@@ -44,6 +44,14 @@ public class ScaleUpPolicyBeanDefinitionParser extends AbstractSingleBeanDefinit
         if (StringUtils.hasLength(high)) {
             builder.addPropertyValue("high", high);
         }
+        String lowerDampener = element.getAttribute("lower-dampener");
+        if (StringUtils.hasLength(lowerDampener)) {
+            builder.addPropertyValue("lowerDampener", lowerDampener);
+        }
+        String upperDampener = element.getAttribute("upper-dampener");
+        if (StringUtils.hasLength(upperDampener)) {
+            builder.addPropertyValue("upperDampener", upperDampener);
+        }
         String maxInstances = element.getAttribute("max-instances");
         if (StringUtils.hasLength(maxInstances)) {
             builder.addPropertyValue("maxInstances", maxInstances);

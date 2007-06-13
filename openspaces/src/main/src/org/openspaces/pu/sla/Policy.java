@@ -65,4 +65,32 @@ public interface Policy extends Serializable {
      * The low threshold value of the policy.
      */
     void setLow(double low);
+
+    /**
+     * The lower dampener acts as a time window where if the lower threshold
+     * has been cleared (after it has been breached), it won't cause the policy action to happen.
+     * Set in <b>milliseconds</b>, defaults to <code>3000</code>.
+     */
+    long getLowerDampener();
+
+    /**
+     * The lower dampener acts as a time window where if the lower threshold
+     * has been cleared (after it has been breached), it won't cause the policy action to happen.
+     * Set in <b>milliseconds</b>, defaults to <code>3000</code>.
+     */
+    void setLowerDampener(long lowerDampener);
+
+    /**
+     * The upper dampener acts as a time window where if the upper threshold
+     * has been cleared (after it has been breached), it won't cause the policy action to happen.
+     * Set in <b>milliseconds</b>, defaults to <code>3000</code>.
+     */
+    long getUpperDampener();
+
+    /**
+     * The upper dampener acts as a time window where if the upper threshold
+     * has been cleared (after it has been breached), it won't cause the policy action to happen.
+     * Set in <b>milliseconds</b>, defaults to <code>3000</code>.
+     */
+    void setUpperDampener(long upperDampener);
 }

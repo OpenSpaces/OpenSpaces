@@ -20,6 +20,8 @@
                             <xsd:attribute name="monitor" type="xsd:string" use="required"/>
                             <xsd:attribute name="low" type="xsd:double" use="optional"/>
                             <xsd:attribute name="high" type="xsd:double" use="required"/>
+                            <xsd:attribute name="lower-dampener" type="xsd:long" use="optional"/>
+                            <xsd:attribute name="upper-dampener" type="xsd:long" use="optional"/>
                             <xsd:attribute name="max-instances" type="xsd:positiveInteger" use="required"/>
                         </xsd:complexType>
                     </xsd:element>
@@ -28,6 +30,8 @@
                             <xsd:attribute name="monitor" type="xsd:string" use="required"/>
                             <xsd:attribute name="low" type="xsd:double" use="optional"/>
                             <xsd:attribute name="high" type="xsd:double" use="required"/>
+                            <xsd:attribute name="lower-dampener" type="xsd:long" use="optional"/>
+                            <xsd:attribute name="upper-dampener" type="xsd:long" use="optional"/>
                         </xsd:complexType>
                     </xsd:element>
                 </xsd:choice>

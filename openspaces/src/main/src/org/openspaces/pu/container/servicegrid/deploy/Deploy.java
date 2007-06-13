@@ -284,7 +284,7 @@ public class Deploy {
     }
 
     //copied from opstringloader
-    private String[] getSLAConfigArgs(String type, String max, String lowerDampener, String upperDampener) {
+    private String[] getSLAConfigArgs(String type, String max, long lowerDampener, long upperDampener) {
         String[] args;
         String handler = "org.jini.rio.qos.";
         int handlerType;
@@ -305,23 +305,17 @@ public class Deploy {
             case 1:
                 args = new String[5];
                 args[0] = "-";
-                args[1] = slaPolicyHandler + "=" +
-                        "new " + handler + "((org.jini.rio.core.SLA)$data)";
+                args[1] = slaPolicyHandler + "=" + "new " + handler + "((org.jini.rio.core.SLA)$data)";
                 args[2] = handler + ".MaxServices=" + max;
-                args[3] = handler + ".LowerThresholdDampeningFactor=" +
-                        lowerDampener;
-                args[4] = handler + ".UpperThresholdDampeningFactor=" +
-                        upperDampener;
+                args[3] = handler + ".LowerThresholdDampeningFactor=" + lowerDampener;
+                args[4] = handler + ".UpperThresholdDampeningFactor=" + upperDampener;
                 break;
             case 2:
                 args = new String[4];
                 args[0] = "-";
-                args[1] = slaPolicyHandler + "=" +
-                        "new " + handler + "((org.jini.rio.core.SLA)$data)";
-                args[2] = handler + ".LowerThresholdDampeningFactor=" +
-                        lowerDampener;
-                args[3] = handler + ".UpperThresholdDampeningFactor=" +
-                        upperDampener;
+                args[1] = slaPolicyHandler + "=" + "new " + handler + "((org.jini.rio.core.SLA)$data)";
+                args[2] = handler + ".LowerThresholdDampeningFactor=" + lowerDampener;
+                args[3] = handler + ".UpperThresholdDampeningFactor=" + upperDampener;
                 break;
             default:
                 args = new String[2];
@@ -392,7 +386,7 @@ public class Deploy {
                 max = String.valueOf(((ScaleUpPolicy) policy).getMaxInstances());
             }
             //todo:300 is hard coded for now
-            String[] configParms = getSLAConfigArgs(type, max, "3000", "3000");
+            String[] configParms = getSLAConfigArgs(type, max, policy.getLowerDampener(), policy.getUpperDampener());
             org.jini.rio.core.SLA slaElement = new org.jini.rio.core.SLA(
                     policy.getMonitor(),
                     new double[]{policy.getLow(), policy.getHigh()},
