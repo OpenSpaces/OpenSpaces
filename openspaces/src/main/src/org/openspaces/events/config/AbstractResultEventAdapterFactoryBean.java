@@ -68,7 +68,7 @@ public abstract class AbstractResultEventAdapterFactoryBean implements FactoryBe
     }
 
     public Class<?> getObjectType() {
-        return this.adapter.getClass();
+        return adapter == null ? AbstractResultEventListenerAdapter.class : adapter.getClass();
     }
 
     public boolean isSingleton() {

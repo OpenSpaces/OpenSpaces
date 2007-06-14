@@ -51,5 +51,9 @@ public abstract class AbstractResultEventAdapterBeanDefinitionParser extends Abs
             builder.addPropertyValue("updateTimeout", Boolean.valueOf(updateTimeout));
         }
 
+        String scope = element.getAttribute("scope");
+        if (StringUtils.hasLength(scope)) {
+            builder.setScope(scope);
+        }
     }
 }

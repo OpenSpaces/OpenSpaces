@@ -226,9 +226,9 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
 
     public void afterPropertiesSet() {
         if (template == null) {
-            SpaceDataEventListener eventListener = getEventListener();
-            if (eventListener != null && eventListener instanceof EventTemplateProvider) {
-                setTemplate(((EventTemplateProvider) eventListener).getTemplate());
+            Class eventListenerType = getEventListenerClass();
+            if (EventTemplateProvider.class.isAssignableFrom(eventListenerType)) {
+                setTemplate(((EventTemplateProvider) getEventListener()).getTemplate());
             }
         }
         super.afterPropertiesSet();
@@ -263,7 +263,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
      *
      * @see #doReceiveAndExecute
      */
-    protected boolean receiveAndExecute() throws DataAccessException, TransactionException {
+    protected boolean receiveAndExecute(SpaceDataEventListener eventListener) throws DataAccessException, TransactionException {
         Object template = getReceiveTemplate();
         // if trigger is configure, work using trigger outside of a possible transaction
         if (triggerOperationHandler != null) {
@@ -284,7 +284,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
             TransactionStatus status = this.transactionManager.getTransaction(this.transactionDefinition);
             boolean messageReceived;
             try {
-                messageReceived = doReceiveAndExecute(template, status);
+                messageReceived = doReceiveAndExecute(eventListener, template, status);
             } catch (RuntimeException ex) {
                 rollbackOnException(status, ex);
                 throw ex;
@@ -301,11 +301,11 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
             return messageReceived;
         } else {
             // Execute receive outside of transaction.
-            return doReceiveAndExecute(template, null);
+            return doReceiveAndExecute(eventListener, template, null);
         }
     }
 
-    protected boolean doReceiveAndExecute(Object template, TransactionStatus status) {
+    protected boolean doReceiveAndExecute(SpaceDataEventListener eventListener, Object template, TransactionStatus status) {
         Object dataEvent = receiveEvent(template);
         if (dataEvent != null) {
             if (dataEvent.getClass().isArray()) {
@@ -316,7 +316,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
                     }
                     eventReceived(dataEvent1);
                     try {
-                        invokeListener(dataEvent1, status, null);
+                        invokeListener(eventListener, dataEvent1, status, null);
                     } catch (Throwable ex) {
                         if (status != null) {
                             // in case of an exception, we rollback the transaction and return
@@ -340,7 +340,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
                 }
                 eventReceived(dataEvent);
                 try {
-                    invokeListener(dataEvent, status, null);
+                    invokeListener(eventListener, dataEvent, status, null);
                 } catch (Throwable ex) {
                     if (status != null) {
                         if (logger.isTraceEnabled()) {

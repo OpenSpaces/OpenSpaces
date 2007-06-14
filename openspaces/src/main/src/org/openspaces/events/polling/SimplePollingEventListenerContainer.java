@@ -16,6 +16,7 @@
 
 package org.openspaces.events.polling;
 
+import org.openspaces.events.SpaceDataEventListener;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.dao.DataAccessException;
@@ -568,6 +569,9 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
 
         private Thread invokerThread;
 
+        // use the getEventListener to possibly get a proptotyped listener per thread
+        private SpaceDataEventListener eventListener = getEventListener();
+
         public void run() {
             synchronized (activeInvokerMonitor) {
                 invokerThread = Thread.currentThread();
@@ -636,7 +640,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
 
         private boolean invokeListener() throws DataAccessException {
             initResourcesIfNecessary();
-            boolean eventReceived = receiveAndExecute();
+            boolean eventReceived = receiveAndExecute(eventListener);
             this.lastEventSucceeded = true;
             this.idle = !eventReceived;
             return eventReceived;

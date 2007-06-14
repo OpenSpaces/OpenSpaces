@@ -203,6 +203,7 @@
                 <xsd:attribute name="write-lease" type="xsd:nonNegativeInteger"/>
                 <xsd:attribute name="update-or-write" type="xsd:boolean"/>
                 <xsd:attribute name="update-timeout" type="xsd:nonNegativeInteger"/>
+                <xsd:attribute name="scope" type="xsd:string" />
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>

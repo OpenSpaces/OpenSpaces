@@ -24,7 +24,7 @@ import org.springframework.transaction.TransactionStatus;
 /**
  * A simple based class for {@link SpaceDataEventListener} based containers. Allowing to register a
  * listener and provides several support methods like
- * {@link #invokeListener(Object,org.springframework.transaction.TransactionStatus,Object)} in
+ * {@link #invokeListener(SpaceDataEventListener, Object, org.springframework.transaction.TransactionStatus, Object)} in
  * order to simplify event listener based containers.
  *
  * @author kimchy
@@ -47,6 +47,12 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
         this.eventListener = eventListener;
     }
 
+    /**
+     * Sets an event listener bean reference name that will be used to lookup the actual listener
+     * bean (based on its name). Mainly used when configuring a listener with specific scope setting
+     * (such as prototype) allowing to scope to take affect by using <code>getBean</code> for each
+     * request of the listener.
+     */
     public void setEventListenerRef(String eventListenerRef) {
         this.eventListenerRef = eventListenerRef;
     }

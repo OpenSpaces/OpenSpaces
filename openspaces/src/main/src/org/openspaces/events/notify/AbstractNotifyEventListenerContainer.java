@@ -26,7 +26,6 @@ import net.jini.core.lease.Lease;
 import net.jini.lease.LeaseListener;
 import org.openspaces.events.AbstractEventListenerContainer;
 import org.openspaces.events.EventTemplateProvider;
-import org.openspaces.events.SpaceDataEventListener;
 import org.springframework.core.Constants;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -372,9 +371,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
 
     public void afterPropertiesSet() {
         if (template == null) {
-            SpaceDataEventListener eventListener = getEventListener();
-            if (eventListener != null && eventListener instanceof EventTemplateProvider) {
-                setTemplate(((EventTemplateProvider) eventListener).getTemplate());
+            Class eventListenerType = getEventListenerClass();
+            if (EventTemplateProvider.class.isAssignableFrom(eventListenerType)) {
+                setTemplate(((EventTemplateProvider) getEventListener()).getTemplate());
             }
         }
         super.afterPropertiesSet();
@@ -549,7 +548,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
                 }
                 try {
                     if (invokeListener) {
-                        invokeListener(eventData, status, source);
+                        invokeListener(getEventListener(), eventData, status, source);
                     }
                 } catch (Throwable t) {
                     if (logger.isTraceEnabled()) {
@@ -575,7 +574,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
             }
             try {
                 if (invokeListener) {
-                    invokeListener(eventData, null, source);
+                    invokeListener(getEventListener(), eventData, null, source);
                 }
             } catch (Throwable t) {
                 handleListenerException(t);
