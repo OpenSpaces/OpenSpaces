@@ -37,8 +37,14 @@ public abstract class AbstractEventContainerBeanDefinitionParser extends Abstrac
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
         super.doParse(element, parserContext, builder);
         Element listenerEle = DomUtils.getChildElementByTagName(element, LISTENER);
-        builder.addPropertyValue("eventListener", parserContext.getDelegate().parsePropertyValue(listenerEle,
-                builder.getRawBeanDefinition(), "eventListener"));
+
+        String listenerRef = listenerEle.getAttribute("ref");
+        if (StringUtils.hasLength(listenerRef)) {
+            builder.addPropertyValue("eventListenerRef", listenerRef);
+        } else {
+            builder.addPropertyValue("eventListener", parserContext.getDelegate().parsePropertyValue(listenerEle,
+                    builder.getRawBeanDefinition(), "eventListener"));
+        }
 
         String gigaSpace = element.getAttribute(GIGA_SPACE);
         builder.addPropertyReference("gigaSpace", gigaSpace);

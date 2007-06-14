@@ -16,35 +16,62 @@
 
 package org.openspaces.events;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.Assert;
 
 /**
  * A simple based class for {@link SpaceDataEventListener} based containers. Allowing to register a
  * listener and provides several support methods like
- * {@link #invokeListener(Object, org.springframework.transaction.TransactionStatus, Object)} in
+ * {@link #invokeListener(Object,org.springframework.transaction.TransactionStatus,Object)} in
  * order to simplify event listener based containers.
- * 
+ *
  * @author kimchy
  */
-public abstract class AbstractEventListenerContainer extends AbstractSpaceListeningContainer {
+public abstract class AbstractEventListenerContainer extends AbstractSpaceListeningContainer implements ApplicationContextAware {
 
     private SpaceDataEventListener eventListener;
+
+    private String eventListenerRef;
+
+    private ApplicationContext applicationContext;
 
     /**
      * Sets the event listener implementation that will be used to delegate events to. Also see
      * different adapter classes provided for simpler event listeners integration.
-     * 
-     * @param eventListener
-     *            The event listener used
+     *
+     * @param eventListener The event listener used
      */
     public void setEventListener(SpaceDataEventListener eventListener) {
         this.eventListener = eventListener;
     }
 
+    public void setEventListenerRef(String eventListenerRef) {
+        this.eventListenerRef = eventListenerRef;
+    }
+
     protected SpaceDataEventListener getEventListener() {
-        return eventListener;
+        if (eventListener != null) {
+            return eventListener;
+        }
+        return (SpaceDataEventListener) applicationContext.getBean(eventListenerRef);
+    }
+
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
+
+
+    protected ApplicationContext getApplicationContext() {
+        return applicationContext;
+    }
+
+    protected Class getEventListenerClass() {
+        if (eventListener != null) {
+            return eventListener.getClass();
+        }
+        return applicationContext.getType(eventListenerRef);
     }
 
     /**
@@ -52,7 +79,9 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
      */
     protected void validateConfiguration() {
         super.validateConfiguration();
-        Assert.notNull(eventListener, "eventListener must be specified");
+        if (eventListener == null && eventListenerRef == null) {
+            throw new IllegalArgumentException("eventListener or eventListenerRef must be defined");
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -61,45 +90,38 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
 
     /**
      * Executes the given listener if the container is running ({@link #isRunning()}.
-     * 
-     * @param eventData
-     *            The event data object
-     * @param txStatus
-     *            An optional transaction status allowing to rollback a transaction programmatically
-     * @param source
-     *            An optional source (or additional event information)
+     *
+     * @param eventData The event data object
+     * @param txStatus  An optional transaction status allowing to rollback a transaction programmatically
+     * @param source    An optional source (or additional event information)
      */
-    protected void executeListener(Object eventData, TransactionStatus txStatus, Object source)
+    protected void executeListener(SpaceDataEventListener eventListener, Object eventData, TransactionStatus txStatus, Object source)
             throws DataAccessException {
         if (!isRunning()) {
             return;
         }
-        invokeListener(eventData, txStatus, source);
+        invokeListener(eventListener, eventData, txStatus, source);
     }
 
     /**
      * Invokes the configured {@link org.openspaces.events.SpaceDataEventListener} basde on the
      * provided data. Currently simply delegates to
      * {@link org.openspaces.events.SpaceDataEventListener#onEvent(Object,org.openspaces.core.GigaSpace,org.springframework.transaction.TransactionStatus,Object)}.
-     * 
-     * @param eventData
-     *            The event data object
-     * @param txStatus
-     *            An optional transaction status allowing to rollback a transaction programmatically
-     * @param source
-     *            An optional source (or additional event information)
+     *
+     * @param eventData The event data object
+     * @param txStatus  An optional transaction status allowing to rollback a transaction programmatically
+     * @param source    An optional source (or additional event information)
      * @throws DataAccessException
      */
-    protected void invokeListener(Object eventData, TransactionStatus txStatus, Object source)
+    protected void invokeListener(SpaceDataEventListener eventListener, Object eventData, TransactionStatus txStatus, Object source)
             throws DataAccessException {
         eventListener.onEvent(eventData, getGigaSpace(), txStatus, source);
     }
 
     /**
      * Handles exception that occurs during the event listening process. Currently simply logs it.
-     * 
-     * @param ex
-     *            the exception to handle
+     *
+     * @param ex the exception to handle
      */
     protected void handleListenerException(Throwable ex) {
         if (ex instanceof Exception) {
