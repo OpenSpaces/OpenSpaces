@@ -36,8 +36,12 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.rmi.MarshalledObject;
+import java.security.SecureClassLoader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.concurrent.Executors;
@@ -45,7 +49,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- *
+ * @author kimchy
  */
 public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBean {
 
@@ -58,6 +62,12 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private List<WatchTask> watchTasks = new ArrayList<WatchTask>();
 
     private ScheduledExecutorService executorService;
+
+    private ClassLoader contextClassLoader;
+
+    public PUServiceBeanImpl() {
+        contextClassLoader = Thread.currentThread().getContextClassLoader();
+    }
 
     public void initialize(ServiceBeanContext context) throws Exception {
         org.openspaces.pu.sla.SLA sla = getSLA(context);
@@ -84,7 +94,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     public void advertise() throws IOException {
         String springXML = (String) context.getInitParameter("pu");
         clusterGroup = Integer.parseInt((String) context.getInitParameter("clusterGroup"));
+
+        ClassLoader origClassLoader = Thread.currentThread().getContextClassLoader();
         try {
+            Thread.currentThread().setContextClassLoader(contextClassLoader);
             startPU(springXML);
         } catch (Exception e) {
             try {
@@ -95,9 +108,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             logger.error(logMessage("Failed to start PU with xml [" + springXML + "]"), e);
             // TODO create explciit exception here
             throw new RuntimeException(e.getMessage());
+        } finally {
+            Thread.currentThread().setContextClassLoader(origClassLoader);
         }
-
-        super.advertise();
     }
 
     public void unadvertise() {
@@ -256,4 +269,77 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             watch.addWatchRecord(new Calculable(watch.getId(), monitor.getValue(), System.currentTimeMillis()));
         }
     }
+
+
+    /**
+     * Utility method that displays the class loader delegation tree for
+     * the current context class loader. For each class loader in the tree,
+     * this method displays the locations from which that class loader
+     * will retrieve and load requested classes.
+     * <p>
+     * This method can be useful when debugging problems related to the
+     * receipt of exceptions such as <code>ClassNotFoundException</code>.
+     */
+    public static void displayContextClassLoaderTree() {
+        Thread curThread = Thread.currentThread();
+        ClassLoader curClassLoader = curThread.getContextClassLoader();
+        displayClassLoaderTree(curClassLoader);
+    }//end displayCurClassLoaderTree
+
+    /**
+     * Utility method that displays the class loader delegation tree for
+     * the given class loader. For each class loader in the tree, this
+     * method displays the locations from which that class loader will
+     * retrieve and load requested classes.
+     * <p>
+     * This method can be useful when debugging problems related to the
+     * receipt of exceptions such as <code>ClassNotFoundException</code>.
+     *
+     * @param classloader <code>ClassLoader</code> instance whose delegation
+     *                    tree is to be displayed
+     */
+    public static void displayClassLoaderTree(ClassLoader classloader) {
+        ArrayList loaderList = getClassLoaderTree(classloader);
+        System.out.println("");
+        System.out.println("ClassLoader Tree has "
+                + loaderList.size() + " levels");
+        System.out.println("  cl0 -- Boot ClassLoader ");
+        ClassLoader curClassLoader = null;
+        for (int i = 1; i < loaderList.size(); i++) {
+            System.out.println("   |");
+            curClassLoader = (ClassLoader) loaderList.get(i);
+            System.out.print("  cl" + i + " -- ClassLoader "
+                    + curClassLoader + ": ");
+            if (curClassLoader instanceof URLClassLoader) {
+                URL[] urls = ((URLClassLoader) (curClassLoader)).getURLs();
+                if (urls != null) {
+                    System.out.print(urls[0]);
+                    for (int j = 1; j < urls.length; j++) {
+                        System.out.print(", " + urls[j]);
+                    }
+                } else {//urls == null
+                    System.out.print("null search path");
+                }//endif
+            } else {
+                if (curClassLoader instanceof SecureClassLoader) {
+                    System.out.print("is instance of SecureClassLoader");
+                } else {
+                    System.out.print("is unknown ClassLoader type");
+                }
+            }//endif
+            System.out.println("");
+        }//end loop
+        System.out.println("");
+    }//end displayClassLoaderTree
+
+    private static ArrayList getClassLoaderTree(ClassLoader classloader) {
+        ArrayList loaderList = new ArrayList();
+        while (classloader != null) {
+            loaderList.add(classloader);
+            classloader = classloader.getParent();
+        }//end loop
+        loaderList.add(null); //Append boot classloader
+        Collections.reverse(loaderList);
+        return loaderList;
+    }//end getClassLoaderTree
 }
