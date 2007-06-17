@@ -116,7 +116,13 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     public void unadvertise() {
         super.unadvertise();
 
-        stopPU();
+        ClassLoader origClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(contextClassLoader);
+            stopPU();
+        } finally {
+            Thread.currentThread().setContextClassLoader(origClassLoader);
+        }
     }
 
     private void startPU(String springXml) throws IOException, ClassNotFoundException {
