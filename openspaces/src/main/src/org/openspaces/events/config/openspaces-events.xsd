@@ -151,7 +151,13 @@
                 </tool:annotation>
             </xsd:appinfo>
         </xsd:annotation>
-        <xsd:group ref="beans:collectionElements"/>
+        <xsd:sequence>
+            <xsd:choice minOccurs="0" maxOccurs="1">
+                <xsd:element ref="annotation-adapter"/>
+                <xsd:element ref="method-adapter" />
+                <xsd:any namespace="##other" processContents="strict" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:choice>
+        </xsd:sequence>
         <xsd:attribute name="ref" type="xsd:string">
             <xsd:annotation>
                 <xsd:documentation><![CDATA[
