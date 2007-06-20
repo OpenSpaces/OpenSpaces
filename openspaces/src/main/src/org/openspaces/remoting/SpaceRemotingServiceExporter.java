@@ -86,6 +86,14 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
         this.services = services;
     }
 
+    /**
+     * For async based execution of remote services, this is one of the options to enalbe this by
+     * using two different interfaces. The first is the actual "server side" interface (sync), and
+     * the other has the same interface name just with an "async suffix" to it. The exporter will
+     * identify the async suffix, and will perform the invocation on the actual interface.
+     *
+     * <p>This setter allows to set the async suffix which by default is <code>Async</code>.
+     */
     public void setAsyncInterfaceSuffix(String asyncInterfaceSuffix) {
         this.asyncInterfaceSuffix = asyncInterfaceSuffix;
     }
