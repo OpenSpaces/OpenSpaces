@@ -64,6 +64,8 @@ import java.util.Map;
 public class SpaceRemotingServiceExporter implements SpaceDataEventListener, InitializingBean, ApplicationContextAware,
         EventTemplateProvider {
 
+    public static final String DEFAULT_ASYNC_INTERFACE_SUFFIX = "Async";
+
     private static final Log logger = LogFactory.getLog(SpaceRemotingServiceExporter.class);
 
     private List<Object> services;
@@ -71,6 +73,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
     private ApplicationContext applicationContext;
 
     private Map<String, Object> interfaceToService = new HashMap<String, Object>();
+
+    private String asyncInterfaceSuffix = DEFAULT_ASYNC_INTERFACE_SUFFIX;
 
     /**
      * Sets the list of services that will be exported as remoted services. Each service will have
@@ -80,6 +84,10 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
      */
     public void setServices(List<Object> services) {
         this.services = services;
+    }
+
+    public void setAsyncInterfaceSuffix(String asyncInterfaceSuffix) {
+        this.asyncInterfaceSuffix = asyncInterfaceSuffix;
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) {
@@ -126,10 +134,15 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
             throws RemoteAccessException {
         SpaceRemoteInvocation remoteInvocation = (SpaceRemoteInvocation) data;
 
-        Object service = interfaceToService.get(remoteInvocation.lookupName);
+        String lookupName = remoteInvocation.lookupName;
+        if (lookupName.endsWith(asyncInterfaceSuffix)) {
+            lookupName = lookupName.substring(0, lookupName.length() - asyncInterfaceSuffix.length());
+        }
+
+        Object service = interfaceToService.get(lookupName);
         if (service == null) {
             // we did not get an interface, maybe it is a bean name?
-            service = applicationContext.getBean(remoteInvocation.lookupName);
+            service = applicationContext.getBean(lookupName);
             if (service == null) {
                 writeResponse(gigaSpace, remoteInvocation, new RemoteLookupFailureException(
                         "Failed to find service for lookup [" + remoteInvocation.getLookupName() + "]"));
