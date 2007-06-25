@@ -146,7 +146,7 @@ public class NotifyContainerBeanDefinitionParser extends AbstractTxEventContaine
 
         String replicateNotifyTemplate = element.getAttribute(REPLICATE_NOTIFY_TEMPLATE);
         if (StringUtils.hasLength(replicateNotifyTemplate)) {
-            builder.addPropertyValue("triggerNotifyTemplate", replicateNotifyTemplate);
+            builder.addPropertyValue("replicateNotifyTemplate", replicateNotifyTemplate);
         }
 
         String performTakeOnNotify = element.getAttribute(PERFORM_TAKE_ON_NOTIFY);
