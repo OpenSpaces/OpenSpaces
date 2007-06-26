@@ -122,9 +122,9 @@
     -->
     <os-events:polling-container id="remotingContainer" giga-space="gigaSpace" concurrent-consumers="2">
         <os-events:listener>
-            <os-remoting:service-exporter>
+            <os-remoting:async-service-exporter>
                 <os-remoting:service ref="dataProcessor"/>
-            </os-remoting:service-exporter>
+            </os-remoting:async-service-exporter>
         </os-events:listener>
     </os-events:polling-container>
 </beans>

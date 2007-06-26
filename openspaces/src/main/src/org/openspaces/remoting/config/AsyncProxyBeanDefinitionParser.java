@@ -16,7 +16,7 @@
 
 package org.openspaces.remoting.config;
 
-import org.openspaces.remoting.SpaceRemotingProxyFactoryBean;
+import org.openspaces.remoting.async.SpaceRemotingProxyFactoryBean;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -29,7 +29,7 @@ import org.w3c.dom.Element;
  * 
  * @author kimchy
  */
-public class ProxyBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
+public class AsyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
     private static final String GIGA_SPACE = "giga-space";
 

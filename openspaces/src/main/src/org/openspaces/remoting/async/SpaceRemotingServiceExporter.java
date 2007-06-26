@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.remoting;
+package org.openspaces.remoting.async;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,7 +41,7 @@ import java.util.Map;
  * the interfaces each service implements are regsitered as lookup names (matching
  * {@link SpaceRemoteInvocation#getLookupName()} which are then used to lookup the actual service
  * when a remote invocation is received. The correct service and its method are then executed and a
- * {@link org.openspaces.remoting.SpaceRemoteResult} is written back to the space. The remote result
+ * {@link SpaceRemoteResult} is written back to the space. The remote result
  * can either hold the return value (or <code>null</code> in case of void return value) or an
  * exception that was thrown by the service.
  * 
@@ -57,9 +57,9 @@ import java.util.Map;
  * 
  * @author kimchy
  * @see org.openspaces.events.polling.SimplePollingEventListenerContainer
- * @see org.openspaces.remoting.SpaceRemoteInvocation
- * @see org.openspaces.remoting.SpaceRemoteResult
- * @see org.openspaces.remoting.SpaceRemotingProxyFactoryBean
+ * @see SpaceRemoteInvocation
+ * @see SpaceRemoteResult
+ * @see SpaceRemotingProxyFactoryBean
  */
 public class SpaceRemotingServiceExporter implements SpaceDataEventListener<SpaceRemoteInvocation>, InitializingBean, ApplicationContextAware,
         EventTemplateProvider {
@@ -115,19 +115,19 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Spac
 
     /**
      * The template used for receiving events. Defaults to all objects that are of type
-     * {@link org.openspaces.remoting.SpaceRemoteInvocation}.
+     * {@link SpaceRemoteInvocation}.
      */
     public Object getTemplate() {
         return new SpaceRemoteInvocation();
     }
 
     /**
-     * Receives a {@link org.openspaces.remoting.SpaceRemoteInvocation} which holds all the relevant
+     * Receives a {@link SpaceRemoteInvocation} which holds all the relevant
      * invocation inforamtion. Looks up (based on {@link SpaceRemoteInvocation#getLookupName()})
      * the interface the service is registered against (which is the interface the service
      * implements) and then invokes the relevant method within it using the provided method name and
      * arguments. Write the result value or inocation exception back to the space using
-     * {@link org.openspaces.remoting.SpaceRemoteResult}.
+     * {@link SpaceRemoteResult}.
      * 
      * @param remoteInvocation
      *            The remote invocation

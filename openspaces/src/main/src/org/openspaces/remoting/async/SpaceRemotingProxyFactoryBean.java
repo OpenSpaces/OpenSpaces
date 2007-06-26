@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.remoting;
+package org.openspaces.remoting.async;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -31,9 +31,9 @@ import java.util.concurrent.Future;
 /**
  * A space remoting proxy that forware the service execution to a remote service with the space as
  * the transport layer. Services are remotly exported in the "server side" using the
- * {@link org.openspaces.remoting.SpaceRemotingServiceExporter}. This proxy builds a representation
- * of the remote invocation using {@link org.openspaces.remoting.SpaceRemoteInvocation} and waits
- * for a remoting response represented by {@link org.openspaces.remoting.SpaceRemoteResult}.
+ * {@link SpaceRemotingServiceExporter}. This proxy builds a representation
+ * of the remote invocation using {@link SpaceRemoteInvocation} and waits
+ * for a remoting response represented by {@link SpaceRemoteResult}.
  *
  * <p>The proxy requires a {@link #setGigaSpace(org.openspaces.core.GigaSpace)} interface to be set in
  * order to write the remote invocation and wait for a response using the space API. It also
@@ -62,11 +62,11 @@ import java.util.concurrent.Future;
  * <p>
  * In case of remote invocation over a partitioned space the default partitioned routing index will
  * be random (the hashCode of the newly created
- * {@link org.openspaces.remoting.SpaceRemoteInvocation} class). The proxy allows for a pluggable
+ * {@link SpaceRemoteInvocation} class). The proxy allows for a pluggable
  * routing handler implementation by setting {@link #setRemoteRoutingHandler(RemoteRoutingHandler)}.
  *
  * @author kimchy
- * @see org.openspaces.remoting.SpaceRemotingServiceExporter
+ * @see SpaceRemotingServiceExporter
  */
 public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements FactoryBean, InitializingBean,
         MethodInterceptor {
@@ -89,8 +89,8 @@ public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements Fac
 
     /**
      * Sets the GigaSpace interface that will be used to work with the space as the transport layer
-     * for both {@link org.openspaces.remoting.SpaceRemoteInvocation} and
-     * {@link org.openspaces.remoting.SpaceRemoteResult}.
+     * for both {@link SpaceRemoteInvocation} and
+     * {@link SpaceRemoteResult}.
      */
     public void setGigaSpace(GigaSpace gigaSpace) {
         this.gigaSpace = gigaSpace;
@@ -107,8 +107,8 @@ public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements Fac
     /**
      * In case of remote invocation over a partitioned space the default partitioned routing index
      * will be random (the hashCode of the newly created
-     * {@link org.openspaces.remoting.SpaceRemoteInvocation} class). This
-     * {@link org.openspaces.remoting.RemoteRoutingHandler} allows for custom routing computation
+     * {@link SpaceRemoteInvocation} class). This
+     * {@link RemoteRoutingHandler} allows for custom routing computation
      * (for example, based on one of the service method parameters).
      */
     public void setRemoteRoutingHandler(RemoteRoutingHandler remoteRoutingHandler) {

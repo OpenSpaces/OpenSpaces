@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.remoting;
+package org.openspaces.remoting.async;
 
 import com.j_spaces.core.client.EntryInfo;
 import com.j_spaces.core.client.MetaDataEntry;

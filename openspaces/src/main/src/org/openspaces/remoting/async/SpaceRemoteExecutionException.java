@@ -1,11 +1,11 @@
-package org.openspaces.remoting;
+package org.openspaces.remoting.async;
 
 import java.util.concurrent.ExecutionException;
 
 /**
  * An extension for {@link java.util.concurrent.ExecutionException} holding both the
- * {@link org.openspaces.remoting.SpaceRemoteInvocation remoteInvocation} and the
- * {@link org.openspaces.remoting.SpaceRemoteResult} remote result.
+ * {@link SpaceRemoteInvocation remoteInvocation} and the
+ * {@link SpaceRemoteResult} remote result.
  *
  * @author kimchy
  */

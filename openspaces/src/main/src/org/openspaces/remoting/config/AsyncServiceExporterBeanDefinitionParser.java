@@ -16,7 +16,7 @@
 
 package org.openspaces.remoting.config;
 
-import org.openspaces.remoting.SpaceRemotingServiceExporter;
+import org.openspaces.remoting.async.SpaceRemotingServiceExporter;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * @author kimchy
  */
-public class ServiceExporterBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
+public class AsyncServiceExporterBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
     private static final String SERVICE = "service";
 

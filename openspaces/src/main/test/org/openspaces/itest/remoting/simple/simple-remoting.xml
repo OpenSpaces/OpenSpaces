@@ -17,17 +17,17 @@
 
     <os-events:polling-container id="remotingContainer" giga-space="gigaSpace">
         <os-events:listener>
-            <os-remoting:service-exporter>
+            <os-remoting:async-service-exporter>
                 <os-remoting:service ref="simpleServiceServer"/>
-            </os-remoting:service-exporter>
+            </os-remoting:async-service-exporter>
         </os-events:listener>
     </os-events:polling-container>
 
 
-    <os-remoting:proxy id="simpleService" giga-space="gigaSpace"
+    <os-remoting:async-proxy id="simpleService" giga-space="gigaSpace"
                        interface="org.openspaces.itest.remoting.simple.SimpleService" timeout="15000" />
 
 
-    <os-remoting:proxy id="simpleServiceAsync" giga-space="gigaSpace"
+    <os-remoting:async-proxy id="simpleServiceAsync" giga-space="gigaSpace"
                        interface="org.openspaces.itest.remoting.simple.SimpleServiceAsync" timeout="15000" />
 </beans>

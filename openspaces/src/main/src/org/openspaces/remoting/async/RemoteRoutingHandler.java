@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.remoting;
+package org.openspaces.remoting.async;
 
 /**
  * A general interface allowing for pluggable computation of the remoting invocation routing field.
@@ -27,7 +27,7 @@ public interface RemoteRoutingHandler {
 
     /**
      * Sets the routing field using
-     * {@link org.openspaces.remoting.SpaceRemoteInvocation#setRouting(Integer)} based on the
+     * {@link SpaceRemoteInvocation#setRouting(Integer)} based on the
      * remoting invocation.
      */
     void setRemoteInvocationRouting(SpaceRemoteInvocation remoteInvocation);

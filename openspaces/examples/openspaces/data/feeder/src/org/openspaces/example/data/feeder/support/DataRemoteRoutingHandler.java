@@ -17,8 +17,8 @@
 package org.openspaces.example.data.feeder.support;
 
 import org.openspaces.example.data.common.Data;
-import org.openspaces.remoting.RemoteRoutingHandler;
-import org.openspaces.remoting.SpaceRemoteInvocation;
+import org.openspaces.remoting.async.RemoteRoutingHandler;
+import org.openspaces.remoting.async.SpaceRemoteInvocation;
 
 /**
  * An intenral interface of OpenSpaces Remoting support allows to control the

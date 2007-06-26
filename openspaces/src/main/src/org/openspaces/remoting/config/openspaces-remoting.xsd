@@ -9,12 +9,12 @@
     <xsd:import namespace="http://www.springframework.org/schema/tool" />
     <xsd:import namespace="http://www.openspaces.org/schema/core" />
 
-    <xsd:element name="service-exporter">
+    <xsd:element name="async-service-exporter">
         <xsd:annotation>
-            <xsd:documentation source="java:org.openspaces.remoting.SpaceRemotingServiceExporter"></xsd:documentation>
+            <xsd:documentation source="java:org.openspaces.remoting.async.SpaceRemotingServiceExporter"></xsd:documentation>
             <xsd:appinfo>
                 <tool:annotation>
-                    <tool:exports type="org.openspaces.remoting.SpaceRemotingServiceExporter" />
+                    <tool:exports type="org.openspaces.remoting.async.SpaceRemotingServiceExporter" />
                 </tool:annotation>
             </xsd:appinfo>
         </xsd:annotation>
@@ -41,7 +41,7 @@
     </xsd:element>
 
 
-    <xsd:element name="proxy">
+    <xsd:element name="async-proxy">
         <xsd:complexType>
             <xsd:complexContent>
                 <xsd:extension base="beans:identifiedType">

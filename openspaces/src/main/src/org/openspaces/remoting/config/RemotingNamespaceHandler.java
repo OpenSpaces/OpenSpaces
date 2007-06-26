@@ -24,7 +24,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 public class RemotingNamespaceHandler extends NamespaceHandlerSupport {
 
     public void init() {
-        registerBeanDefinitionParser("service-exporter", new ServiceExporterBeanDefinitionParser());
-        registerBeanDefinitionParser("proxy", new ProxyBeanDefinitionParser());
+        registerBeanDefinitionParser("async-service-exporter", new AsyncServiceExporterBeanDefinitionParser());
+        registerBeanDefinitionParser("async-proxy", new AsyncProxyBeanDefinitionParser());
     }
 }

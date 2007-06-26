@@ -69,12 +69,12 @@
         The OpenSpaces Remoting proxy based on the IDataProcessor interface. Uses the space as the
         transport layer.
     -->
-    <os-remoting:proxy id="dataProcessor" giga-space="gigaSpace"
+    <os-remoting:async-proxy id="dataProcessor" giga-space="gigaSpace"
                        interface="org.openspaces.example.data.common.IDataProcessor" timeout="15000">
         <os-remoting:routing-handler>
             <bean class="org.openspaces.example.data.feeder.support.DataRemoteRoutingHandler"/>
         </os-remoting:routing-handler>
-    </os-remoting:proxy>
+    </os-remoting:async-proxy>
 
     <!--
         The DataRemoting bean, uses the proxied dataProcessor without any knowledge of the remoting

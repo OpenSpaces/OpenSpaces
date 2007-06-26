@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.remoting;
+package org.openspaces.remoting.async;
 
 import org.openspaces.core.GigaSpace;
 
