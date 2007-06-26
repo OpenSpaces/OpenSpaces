@@ -61,7 +61,7 @@ import java.util.Map;
  * @see org.openspaces.remoting.SpaceRemoteResult
  * @see org.openspaces.remoting.SpaceRemotingProxyFactoryBean
  */
-public class SpaceRemotingServiceExporter implements SpaceDataEventListener, InitializingBean, ApplicationContextAware,
+public class SpaceRemotingServiceExporter implements SpaceDataEventListener<SpaceRemoteInvocation>, InitializingBean, ApplicationContextAware,
         EventTemplateProvider {
 
     public static final String DEFAULT_ASYNC_INTERFACE_SUFFIX = "Async";
@@ -129,8 +129,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
      * arguments. Write the result value or inocation exception back to the space using
      * {@link org.openspaces.remoting.SpaceRemoteResult}.
      * 
-     * @param data
-     *            The data event of type {@link org.openspaces.remoting.SpaceRemoteInvocation}
+     * @param remoteInvocation
+     *            The remote invocation
      * @param gigaSpace
      *            The GigaSpace interface
      * @param txStatus
@@ -138,9 +138,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener, Ini
      * @param source
      *            An optional source event information
      */
-    public void onEvent(Object data, GigaSpace gigaSpace, TransactionStatus txStatus, Object source)
+    public void onEvent(SpaceRemoteInvocation remoteInvocation, GigaSpace gigaSpace, TransactionStatus txStatus, Object source)
             throws RemoteAccessException {
-        SpaceRemoteInvocation remoteInvocation = (SpaceRemoteInvocation) data;
 
         String lookupName = remoteInvocation.lookupName;
         if (lookupName.endsWith(asyncInterfaceSuffix)) {

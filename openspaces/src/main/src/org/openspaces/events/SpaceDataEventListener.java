@@ -29,7 +29,7 @@ import org.springframework.transaction.TransactionStatus;
  * @see org.openspaces.events.adapter.MethodEventListenerAdapter
  * @see org.openspaces.events.adapter.AnnotationEventListenerAdapter
  */
-public interface SpaceDataEventListener {
+public interface SpaceDataEventListener<T> {
 
     /**
      * An event callback with the actual data object of the event.
@@ -44,5 +44,5 @@ public interface SpaceDataEventListener {
      * @param source
      *            Optional additional data or the actual source event data object (where relevant)
      */
-    void onEvent(Object data, GigaSpace gigaSpace, TransactionStatus txStatus, Object source);
+    void onEvent(T data, GigaSpace gigaSpace, TransactionStatus txStatus, Object source);
 }
