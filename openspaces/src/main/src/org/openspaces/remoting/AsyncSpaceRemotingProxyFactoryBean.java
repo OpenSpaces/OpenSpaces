@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.remoting.async;
+package org.openspaces.remoting;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -29,11 +29,11 @@ import org.springframework.util.StringUtils;
 import java.util.concurrent.Future;
 
 /**
- * A space remoting proxy that forware the service execution to a remote service with the space as
+ * A space <b>async</b> remoting proxy that forward the service execution to a remote service with the space as
  * the transport layer. Services are remotly exported in the "server side" using the
  * {@link SpaceRemotingServiceExporter}. This proxy builds a representation
- * of the remote invocation using {@link SpaceRemoteInvocation} and waits
- * for a remoting response represented by {@link SpaceRemoteResult}.
+ * of the remote invocation using {@link org.openspaces.remoting.AsyncSpaceRemotingEntry} and waits
+ * for a remoting response represented by {@link org.openspaces.remoting.AsyncSpaceRemotingEntry}.
  *
  * <p>The proxy requires a {@link #setGigaSpace(org.openspaces.core.GigaSpace)} interface to be set in
  * order to write the remote invocation and wait for a response using the space API. It also
@@ -59,16 +59,15 @@ import java.util.concurrent.Future;
  * with a specified prefix (defaults to <code>async</code>) and should have no implementation on the server
  * side (simply return <code>null</code>).
  *
- * <p>
- * In case of remote invocation over a partitioned space the default partitioned routing index will
- * be random (the hashCode of the newly created
- * {@link SpaceRemoteInvocation} class). The proxy allows for a pluggable
- * routing handler implementation by setting {@link #setRemoteRoutingHandler(RemoteRoutingHandler)}.
+ * <p>In case of remote invocation over a partitioned space the default partitioned routing index will
+ * be random (the hashCode of the newly created {@link org.openspaces.remoting.AsyncSpaceRemotingEntry} class).
+ * The proxy allows for a pluggable routing handler implementation by setting
+ * {@link #setRemoteRoutingHandler(RemoteRoutingHandler)}.
  *
  * @author kimchy
  * @see SpaceRemotingServiceExporter
  */
-public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements FactoryBean, InitializingBean,
+public class AsyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements FactoryBean, InitializingBean,
         MethodInterceptor {
 
     public static final String DEFAULT_ASYNC_METHOD_PREFIX = "async";
@@ -89,8 +88,7 @@ public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements Fac
 
     /**
      * Sets the GigaSpace interface that will be used to work with the space as the transport layer
-     * for both {@link SpaceRemoteInvocation} and
-     * {@link SpaceRemoteResult}.
+     * for both writing and taking {@link org.openspaces.remoting.AsyncSpaceRemotingEntry}.
      */
     public void setGigaSpace(GigaSpace gigaSpace) {
         this.gigaSpace = gigaSpace;
@@ -107,7 +105,7 @@ public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements Fac
     /**
      * In case of remote invocation over a partitioned space the default partitioned routing index
      * will be random (the hashCode of the newly created
-     * {@link SpaceRemoteInvocation} class). This
+     * {@link org.openspaces.remoting.AsyncSpaceRemotingEntry} class). This
      * {@link RemoteRoutingHandler} allows for custom routing computation
      * (for example, based on one of the service method parameters).
      */
@@ -162,6 +160,7 @@ public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements Fac
     @SuppressWarnings("unchecked")
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 
+        String lookupName = getServiceInterface().getName();
         String methodName = methodInvocation.getMethod().getName();
 
         boolean asyncExecution = false;
@@ -172,43 +171,43 @@ public class SpaceRemotingProxyFactoryBean extends RemoteAccessor implements Fac
             }
         }
 
-        SpaceRemoteInvocation remoteInvocation = new SpaceRemoteInvocation(getServiceInterface().getName(),
-                methodName, methodInvocation.getArguments());
+        AsyncSpaceRemotingEntry remotingEntry = new AsyncSpaceRemotingEntry().buildInvocation(lookupName, methodName,
+                methodInvocation.getArguments());
 
         if (remoteRoutingHandler != null) {
-            remoteRoutingHandler.setRemoteInvocationRouting(remoteInvocation);
+            remoteRoutingHandler.setRemoteInvocationRouting(remotingEntry);
         }
-        if (remoteInvocation.getRouting() == null) {
-            remoteInvocation.setRouting(remoteInvocation.hashCode());
+        if (remotingEntry.routing == null) {
+            remotingEntry.routing = remotingEntry.hashCode();
         }
         // check if this invocation will be a one way invocation
         if (globalOneWay) {
-            remoteInvocation.oneWay = Boolean.TRUE;
+            remotingEntry.oneWay = Boolean.TRUE;
         } else {
             if (voidOneWay && methodInvocation.getMethod().getReturnType() == void.class) {
-                remoteInvocation.oneWay = Boolean.TRUE;
+                remotingEntry.oneWay = Boolean.TRUE;
             }
         }
 
-        gigaSpace.write(remoteInvocation);
+        gigaSpace.write(remotingEntry);
 
         // if this is a one way invocation, simply return null
-        if (remoteInvocation.oneWay != null && remoteInvocation.oneWay) {
+        if (remotingEntry.oneWay != null && remotingEntry.oneWay) {
             return null;
         }
 
         // if the return value is a future, return the future
         if (asyncExecution) {
-            return new DefaultRemoteFuture(gigaSpace, remoteInvocation);
+            return new DefaultRemoteFuture(gigaSpace, remotingEntry);
         }
 
-        Object value = gigaSpace.take(new SpaceRemoteResult(remoteInvocation), timeout);
-        SpaceRemoteResult invokeResult = (SpaceRemoteResult) value;
+        AsyncSpaceRemotingEntry invokeResult = gigaSpace.take(remotingEntry.buildResultTemplate(), timeout);
         if (invokeResult == null) {
-            throw new RemoteTimeoutException("Timeout waiting for result with invocation [" + remoteInvocation + "]", timeout);
+            throw new RemoteTimeoutException("Timeout waiting for result for [" + lookupName +
+                    "] and method [" + methodName + "]", timeout);
         }
-        if (invokeResult.getEx() != null) {
-            throw invokeResult.getEx();
+        if (invokeResult.getException() != null) {
+            throw invokeResult.getException();
         }
         return invokeResult.getResult();
     }

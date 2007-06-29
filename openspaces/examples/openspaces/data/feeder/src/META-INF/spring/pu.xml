@@ -70,7 +70,7 @@
         transport layer.
     -->
     <os-remoting:async-proxy id="dataProcessor" giga-space="gigaSpace"
-                       interface="org.openspaces.example.data.common.IDataProcessor" timeout="15000">
+                       interface="org.openspaces.example.data.common.IDataProcessor">
         <os-remoting:routing-handler>
             <bean class="org.openspaces.example.data.feeder.support.DataRemoteRoutingHandler"/>
         </os-remoting:routing-handler>

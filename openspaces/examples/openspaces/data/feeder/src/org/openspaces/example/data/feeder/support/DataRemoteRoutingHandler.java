@@ -17,8 +17,8 @@
 package org.openspaces.example.data.feeder.support;
 
 import org.openspaces.example.data.common.Data;
-import org.openspaces.remoting.async.RemoteRoutingHandler;
-import org.openspaces.remoting.async.SpaceRemoteInvocation;
+import org.openspaces.remoting.RemoteRoutingHandler;
+import org.openspaces.remoting.SpaceRemotingInvocation;
 
 /**
  * An intenral interface of OpenSpaces Remoting support allows to control the
@@ -31,10 +31,10 @@ import org.openspaces.remoting.async.SpaceRemoteInvocation;
  */
 public class DataRemoteRoutingHandler implements RemoteRoutingHandler {
 
-    public void setRemoteInvocationRouting(SpaceRemoteInvocation remoteInvocation) {
-        if (remoteInvocation.getMethodName().equals("processData")) {
-            Data data = (Data) remoteInvocation.getArguments()[0];
-            remoteInvocation.setRouting(data.getType().intValue());
+    public void setRemoteInvocationRouting(SpaceRemotingInvocation remotingEntry) {
+        if (remotingEntry.getMethodName().equals("processData")) {
+            Data data = (Data) remotingEntry.getArguments()[0];
+            remotingEntry.setRouting(data.getType().intValue());
         }
     }
 }

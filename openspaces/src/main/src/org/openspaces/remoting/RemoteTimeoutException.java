@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.remoting.async;
+package org.openspaces.remoting;
 
 import org.springframework.remoting.RemoteAccessException;
 

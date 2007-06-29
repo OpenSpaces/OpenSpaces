@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.remoting.async;
+package org.openspaces.remoting;
 
 import org.openspaces.core.GigaSpace;
 
@@ -33,18 +33,22 @@ public class DefaultRemoteFuture<T> implements Future<T> {
 
     private GigaSpace gigaSpace;
 
-    private SpaceRemoteInvocation remoteInvocation;
+    private AsyncSpaceRemotingEntry remotingEntry;
 
     private Boolean cancelled;
 
-    private SpaceRemoteResult<T> remoteResult;
+    private SpaceRemotingResult remoteResult;
 
-    private SpaceRemoteResult<T> template;
+    private AsyncSpaceRemotingEntry template;
 
-    public DefaultRemoteFuture(GigaSpace gigaSpace, SpaceRemoteInvocation remoteInvocation) {
+    public DefaultRemoteFuture(GigaSpace gigaSpace, AsyncSpaceRemotingEntry remotingEntry) {
         this.gigaSpace = gigaSpace;
-        this.remoteInvocation = remoteInvocation;
-        this.template = new SpaceRemoteResult<T>(remoteInvocation);
+        this.remotingEntry = remotingEntry;
+        try {
+            this.template = ((AsyncSpaceRemotingEntry) remotingEntry.clone()).buildResultTemplate();
+        } catch (CloneNotSupportedException e) {
+            // won't happen
+        }
     }
 
     /**
@@ -63,7 +67,7 @@ public class DefaultRemoteFuture<T> implements Future<T> {
         if (cancelled != null) {
             return cancelled;
         }
-        Object retVal = gigaSpace.take(remoteInvocation, 0);
+        Object retVal = gigaSpace.take(remotingEntry, 0);
         cancelled = retVal != null;
         return cancelled;
     }
@@ -145,7 +149,7 @@ public class DefaultRemoteFuture<T> implements Future<T> {
         }
         remoteResult = gigaSpace.take(template, unit.toMillis(timeout));
         if (remoteResult == null) {
-            throw new TimeoutException("Timeout waiting for remote invocation [" + remoteInvocation + "] for [" + unit.toMillis(timeout) + "] milliseconds");
+            throw new TimeoutException("Timeout waiting for remote invocation [" + remotingEntry + "] for [" + unit.toMillis(timeout) + "] milliseconds");
         }
         return handleResult();
     }
@@ -154,13 +158,14 @@ public class DefaultRemoteFuture<T> implements Future<T> {
         if (remoteResult == null) {
             return null;
         }
-        if (remoteResult.getEx() != null) {
+        if (remoteResult.getException() != null) {
             try {
-                throw remoteResult.getEx();
+                throw remoteResult.getException();
             } catch (Exception e) {
-                throw new SpaceRemoteExecutionException(remoteInvocation, remoteResult);
+                throw new SpaceRemoteExecutionException(remotingEntry, remoteResult);
             }
         }
-        return remoteResult.getResult();
+        //noinspection unchecked
+        return (T) remoteResult.getResult();
     }
 }

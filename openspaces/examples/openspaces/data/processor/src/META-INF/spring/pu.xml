@@ -48,7 +48,9 @@
         Note, we do not specify here the cluster topology of the space. It is declated outside of
         the processing unit or within the SLA bean.
     -->
-    <os-core:space id="space" url="/./space"/>
+    <os-core:space id="space" url="/./space">
+        <os-core:filter-provider ref="remotingServiceExporter" />
+    </os-core:space>
 
     <!--
         OpenSpaces simplified space API built on top of IJSpace/JavaSpace.
@@ -110,6 +112,10 @@
     -->
     <os-core:context-loader id="modeExample" location="classpath:/META-INF/spring/mode/mode.xml"/>
 
+    <os-remoting:service-exporter id="remotingServiceExporter">
+        <os-remoting:service ref="dataProcessor"/>
+    </os-remoting:service-exporter>
+
     <!--
         Remoting supprt exporting the data processor for remoting invocation using OpenSpaces Remoting.
 
@@ -121,10 +127,6 @@
         perform-take-on-notify and ignore-event-on-null-take.
     -->
     <os-events:polling-container id="remotingContainer" giga-space="gigaSpace" concurrent-consumers="2">
-        <os-events:listener>
-            <os-remoting:async-service-exporter>
-                <os-remoting:service ref="dataProcessor"/>
-            </os-remoting:async-service-exporter>
-        </os-events:listener>
+        <os-events:listener ref="remotingServiceExporter" />
     </os-events:polling-container>
 </beans>

@@ -31,6 +31,8 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
 
     protected SimpleServiceAsync simpleServiceAsync;
 
+    protected SimpleService simpleServiceSync;
+
     protected GigaSpace gigaSpace;
 
     public SimpleRemotingTests() {
@@ -42,7 +44,7 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
     }
 
 
-    public void testSyncExecution() {
+    public void testAsyncSyncExecution() {
         String reply = simpleService.say("test");
         assertEquals("SAY test", reply);
     }
@@ -63,5 +65,10 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
     public void testAsyncExecutionGetWithAsyncInterface() throws ExecutionException, InterruptedException {
         Future result = simpleServiceAsync.say("test");
         assertEquals("SAY test", result.get());
+    }
+
+    public void testSyncSyncExecution() {
+        String reply = simpleServiceSync.say("test");
+        assertEquals("SAY test", reply);
     }
 }

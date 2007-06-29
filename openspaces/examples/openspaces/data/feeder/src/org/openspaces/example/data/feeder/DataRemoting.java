@@ -72,7 +72,7 @@ public class DataRemoting implements InitializingBean, DisposableBean {
     public void afterPropertiesSet() throws Exception {
         System.out.println("--- STARTING REMOTING WITH CYCLE [" + defaultDelay + "]");
         executorService = Executors.newScheduledThreadPool(1);
-        sf = executorService.scheduleAtFixedRate(new DataFeederTask(), defaultDelay, defaultDelay, TimeUnit.MILLISECONDS);
+        sf = executorService.scheduleAtFixedRate(new DataFeederTask(), 0, defaultDelay, TimeUnit.MILLISECONDS);
     }
 
     public void destroy() throws Exception {

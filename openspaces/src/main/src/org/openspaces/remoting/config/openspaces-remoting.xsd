@@ -9,12 +9,12 @@
     <xsd:import namespace="http://www.springframework.org/schema/tool" />
     <xsd:import namespace="http://www.openspaces.org/schema/core" />
 
-    <xsd:element name="async-service-exporter">
+    <xsd:element name="service-exporter">
         <xsd:annotation>
-            <xsd:documentation source="java:org.openspaces.remoting.async.SpaceRemotingServiceExporter"></xsd:documentation>
+            <xsd:documentation source="java:org.openspaces.remoting.SpaceRemotingServiceExporter"></xsd:documentation>
             <xsd:appinfo>
                 <tool:annotation>
-                    <tool:exports type="org.openspaces.remoting.async.SpaceRemotingServiceExporter" />
+                    <tool:exports type="org.openspaces.remoting.SpaceRemotingServiceExporter" />
                 </tool:annotation>
             </xsd:appinfo>
         </xsd:annotation>
@@ -64,6 +64,46 @@
                     <xsd:attribute name="void-one-way" type="xsd:boolean" />
                     <xsd:attribute name="global-one-way" type="xsd:boolean" />
                     <xsd:attribute name="timeout" type="xsd:nonNegativeInteger" />
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="sync-proxy">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:sequence>
+                        <xsd:element name="routing-handler" minOccurs="0" maxOccurs="1">
+                            <xsd:complexType>
+                                <xsd:group ref="beans:collectionElements" />
+                                <xsd:attribute name="ref" type="xsd:string">
+                                    <xsd:annotation>
+                                        <xsd:documentation>
+                                            <![CDATA[A short-cut alternative to a nested "<ref bean='...'/>".]]>
+                                        </xsd:documentation>
+                                    </xsd:annotation>
+                                </xsd:attribute>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element name="result-reducer" minOccurs="0" maxOccurs="1">
+                            <xsd:complexType>
+                                <xsd:group ref="beans:collectionElements" />
+                                <xsd:attribute name="ref" type="xsd:string">
+                                    <xsd:annotation>
+                                        <xsd:documentation>
+                                            <![CDATA[A short-cut alternative to a nested "<ref bean='...'/>".]]>
+                                        </xsd:documentation>
+                                    </xsd:annotation>
+                                </xsd:attribute>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                    <xsd:attribute name="giga-space" type="os-core:gigaSpaceRefType" use="required" />
+                    <xsd:attribute name="interface" type="os-core:classType" use="required" />
+                    <xsd:attribute name="void-one-way" type="xsd:boolean" />
+                    <xsd:attribute name="global-one-way" type="xsd:boolean" />
+                    <xsd:attribute name="broadcast" type="xsd:boolean" />
                 </xsd:extension>
             </xsd:complexContent>
         </xsd:complexType>

@@ -16,7 +16,7 @@
 
 package org.openspaces.remoting.config;
 
-import org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean;
+import org.openspaces.remoting.SyncSpaceRemotingProxyFactoryBean;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -25,11 +25,11 @@ import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
 /**
- * A bean definition builder for {@link AsyncSpaceRemotingProxyFactoryBean}.
- * 
+ * A bean definition builder for {@link org.openspaces.remoting.SyncSpaceRemotingProxyFactoryBean}.
+ *
  * @author kimchy
  */
-public class AsyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
+public class SyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
     private static final String GIGA_SPACE = "giga-space";
 
@@ -39,12 +39,14 @@ public class AsyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinition
 
     private static final String GLOBAL_ONE_WAY = "global-one-way";
 
-    private static final String TIMEOUT = "timeout";
+    private static final String BROADCAST = "broadcast";
 
     private static final String ROUTING_HANDLER = "routing-handler";
 
-    protected Class<AsyncSpaceRemotingProxyFactoryBean> getBeanClass(Element element) {
-        return AsyncSpaceRemotingProxyFactoryBean.class;
+    private static final String RESULT_REDUCER = "result-reducer";
+
+    protected Class<SyncSpaceRemotingProxyFactoryBean> getBeanClass(Element element) {
+        return SyncSpaceRemotingProxyFactoryBean.class;
     }
 
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
@@ -66,9 +68,9 @@ public class AsyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinition
             builder.addPropertyValue("globalOneWay", globalOneWay);
         }
 
-        String timeout = element.getAttribute(TIMEOUT);
-        if (StringUtils.hasLength(timeout)) {
-            builder.addPropertyValue("timeout", timeout);
+        String broadcast = element.getAttribute(BROADCAST);
+        if (StringUtils.hasLength(broadcast)) {
+            builder.addPropertyValue("broadcast", broadcast);
         }
 
         Element routingHandlerEle = DomUtils.getChildElementByTagName(element, ROUTING_HANDLER);
@@ -77,5 +79,10 @@ public class AsyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinition
                     routingHandlerEle, builder.getRawBeanDefinition(), "remoteRoutingHandler"));
         }
 
+        Element resultReducerEle = DomUtils.getChildElementByTagName(element, RESULT_REDUCER);
+        if (resultReducerEle != null) {
+            builder.addPropertyValue("resultReducer", parserContext.getDelegate().parsePropertyValue(
+                    resultReducerEle, builder.getRawBeanDefinition(), "resultReducer"));
+        }
     }
 }
