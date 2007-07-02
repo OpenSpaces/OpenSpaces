@@ -32,12 +32,6 @@ import java.io.ObjectOutput;
 public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemotingInvocation, SpaceRemotingResult,
         Cloneable, Externalizable {
 
-    /**
-     * A derived field mapped to {@link com.j_spaces.core.client.EntryInfo#m_UID}
-     */
-    // TODO once we have ISpaceFilterEntry#setUID we can remove this duplication
-    public String uid;
-
     public Boolean isInvocation;
 
     public String lookupName;
@@ -124,14 +118,6 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
         return this;
     }
 
-    public void syncUids() {
-        if (__getEntryInfo() == null) {
-            this.uid = null;
-            return;
-        }
-        this.uid = __getEntryInfo().m_UID;
-    }
-
     private void clearResultData() {
         this.result = null;
         this.ex = null;
@@ -148,7 +134,6 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
         if (__getEntryInfo() != null && __getEntryInfo().m_UID != null) {
             __getEntryInfo().m_UID += "Result";
         }
-        syncUids();
     }
 
     protected Object clone() throws CloneNotSupportedException {
@@ -216,7 +201,6 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
             }
             routing = in.readInt();
         }
-        syncUids();
     }
 
     public String toString() {
