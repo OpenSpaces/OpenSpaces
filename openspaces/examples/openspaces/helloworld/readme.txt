@@ -13,7 +13,7 @@ This simple OpenSpaces application illustrates a couple of OpenSpaces core featu
 - The definition of the GigaSpace simplified interface based on a Space.
 - The definition of a simple bean that interacts with the Space using the GigaSpace API.
 
-3. BUILD AND DEPLOYMENT
+2. BUILD AND DEPLOYMENT
 
 The example uses ant as its build tool and uses a standard build.xml file. It comes with
 a build script that runs ant automatically. Running the build script with no parameters within
