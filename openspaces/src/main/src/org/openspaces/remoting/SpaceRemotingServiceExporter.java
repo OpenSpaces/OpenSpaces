@@ -87,6 +87,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
     private String asyncInterfaceSuffix = DEFAULT_ASYNC_INTERFACE_SUFFIX;
 
+    private boolean fifo = false;
+
     // sync execution fields
 
     private FilterProvider filterProvider;
@@ -111,6 +113,16 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
      */
     public void setAsyncInterfaceSuffix(String asyncInterfaceSuffix) {
         this.asyncInterfaceSuffix = asyncInterfaceSuffix;
+    }
+
+    /**
+     * Sets the template used to read async invocation (the {@link org.openspaces.remoting.AsyncSpaceRemotingEntry})
+     * to be fifo. Works in with setting the {@link org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean}
+     * fifo flag to <code>true</code> and allows for remoting to work in fifo mode without needing to set the whole
+     * Space to work in fifo mode.
+     */
+    public void setFifo(boolean fifo) {
+        this.fifo = fifo;
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) {
@@ -141,6 +153,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
     public Object getTemplate() {
         AsyncSpaceRemotingEntry remotingEntry = new AsyncSpaceRemotingEntry();
         remotingEntry.isInvocation = true;
+        remotingEntry.setFifo(fifo);
         return remotingEntry;
     }
 

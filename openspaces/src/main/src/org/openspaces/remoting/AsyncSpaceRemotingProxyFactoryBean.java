@@ -82,6 +82,8 @@ public class AsyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implement
 
     private boolean voidOneWay = false;
 
+    private boolean fifo = false;
+
     private String asyncMethodPrefix = DEFAULT_ASYNC_METHOD_PREFIX;
 
     private Object serviceProxy;
@@ -131,6 +133,17 @@ public class AsyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implement
     public void setVoidOneWay(boolean voidOneWay) {
         this.voidOneWay = voidOneWay;
     }
+
+    /**
+     * Sets the remote invocation objects written to the Space to work in FIFO.
+     * Note, when setting this setting make sure to set it on the
+     * {@link org.openspaces.remoting.SpaceRemotingServiceExporter}. This allows for remoting
+     * to work in fifo mode without needing to set the whole Space to work in fifo mode.
+     */
+    public void setFifo(boolean fifo) {
+        this.fifo = fifo;
+    }
+
 
     /**
      * Sets the async method prefix. Defaults to {@link #DEFAULT_ASYNC_METHOD_PREFIX}.
@@ -188,6 +201,7 @@ public class AsyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implement
                 remotingEntry.oneWay = Boolean.TRUE;
             }
         }
+        remotingEntry.setFifo(fifo);
 
         gigaSpace.write(remotingEntry);
 

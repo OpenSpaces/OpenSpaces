@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * @author kimchy
  */
-public class AsyncServiceExporterBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
+public class ServiceExporterBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
     private static final String SERVICE = "service";
 

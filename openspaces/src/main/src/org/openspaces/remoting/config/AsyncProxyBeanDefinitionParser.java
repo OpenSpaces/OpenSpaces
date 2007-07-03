@@ -39,6 +39,8 @@ public class AsyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinition
 
     private static final String GLOBAL_ONE_WAY = "global-one-way";
 
+    private static final String FIFO = "fifo";
+
     private static final String TIMEOUT = "timeout";
 
     private static final String ROUTING_HANDLER = "routing-handler";
@@ -64,6 +66,11 @@ public class AsyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinition
         String globalOneWay = element.getAttribute(GLOBAL_ONE_WAY);
         if (StringUtils.hasLength(globalOneWay)) {
             builder.addPropertyValue("globalOneWay", globalOneWay);
+        }
+
+        String fifo = element.getAttribute(FIFO);
+        if (StringUtils.hasLength(fifo)) {
+            builder.addPropertyValue("fifo", fifo);
         }
 
         String timeout = element.getAttribute(TIMEOUT);
