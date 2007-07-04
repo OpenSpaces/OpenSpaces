@@ -77,6 +77,8 @@ public class SLA implements Serializable {
 
     private int maxInstancesPerVM;
 
+    private List<InstanceSLA> instanceSLAs;
+
     /**
      * Returns the cluster schema the processing unit will use. Usually maps to the space
      * cluster schema. Can have <code>null</code> value which means that it was not set.
@@ -209,6 +211,14 @@ public class SLA implements Serializable {
      */
     public void setMonitors(List<Monitor> monitors) {
         this.monitors = monitors;
+    }
+
+    public List<InstanceSLA> getInstanceSLAs() {
+        return instanceSLAs;
+    }
+
+    public void setInstanceSLAs(List<InstanceSLA> instanceSLAs) {
+        this.instanceSLAs = instanceSLAs;
     }
 
     public String toString() {

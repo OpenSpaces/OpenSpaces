@@ -55,6 +55,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private int clusterGroup;
 
+    Integer instanceId;
+
+    Integer backupId;
+
     private List<WatchTask> watchTasks = new ArrayList<WatchTask>();
 
     private ScheduledExecutorService executorService;
@@ -90,6 +94,14 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     public void advertise() throws IOException {
         String springXML = (String) context.getInitParameter("pu");
         clusterGroup = Integer.parseInt((String) context.getInitParameter("clusterGroup"));
+        String sInstanceId = (String) context.getInitParameter("instanceId");
+        if (sInstanceId != null) {
+            instanceId = Integer.valueOf(sInstanceId);
+        }
+        String sBackupId = (String) context.getInitParameter("backupId");
+        if (sBackupId != null) {
+            backupId = Integer.valueOf(sBackupId);
+        }
 
         ClassLoader origClassLoader = Thread.currentThread().getContextClassLoader();
         try {
@@ -128,18 +140,21 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         org.openspaces.pu.sla.SLA sla = getSLA(getServiceBeanContext());
 
-        //this is the MOST IMPORTANT part
-        Integer instanceId;
-        Integer backupId = null;
-        boolean hasBackups = sla.getNumberOfBackups() > 0;
-        if (hasBackups) {
-            instanceId = clusterGroup;
-            //the first instance is primary so no backupid
-            if (context.getServiceBeanConfig().getInstanceID().intValue() > 1) {
-                backupId = (context.getServiceBeanConfig().getInstanceID().intValue() - 1);
+        Integer instanceId = this.instanceId;
+        Integer backupId = this.backupId;
+
+        // Derive instanceId and backupId if not explicitly set
+        if (instanceId == null) {
+            boolean hasBackups = sla.getNumberOfBackups() > 0;
+            if (hasBackups) {
+                instanceId = clusterGroup;
+                //the first instance is primary so no backupid
+                if (context.getServiceBeanConfig().getInstanceID().intValue() > 1) {
+                    backupId = (context.getServiceBeanConfig().getInstanceID().intValue() - 1);
+                }
+            } else {
+                instanceId = context.getServiceBeanConfig().getInstanceID().intValue();
             }
-        } else {
-            instanceId = context.getServiceBeanConfig().getInstanceID().intValue();
         }
 
         //set cluster info

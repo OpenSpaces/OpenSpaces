@@ -16,6 +16,7 @@
 
 package org.openspaces.itest.pu.sla.requirements;
 
+import org.openspaces.pu.sla.InstanceSLA;
 import org.openspaces.pu.sla.SLA;
 import org.openspaces.pu.sla.requirement.CpuRequirement;
 import org.openspaces.pu.sla.requirement.HostRequirement;
@@ -50,5 +51,16 @@ public class RequirementsSlaSchameTests extends AbstractDependencyInjectionSprin
         assertEquals(.9, cpuRequirement.getHigh());
         MemoryRequirement memoryRequirement = (MemoryRequirement) sla.getRequirements().get(3);
         assertEquals(.8, memoryRequirement.getHigh());
+
+        // verify instance SLA
+        assertNotNull(sla.getInstanceSLAs());
+        assertEquals(1, sla.getInstanceSLAs().size());
+        InstanceSLA instanceSLA = sla.getInstanceSLAs().get(0);
+        assertEquals(1, instanceSLA.getInstanceId().intValue());
+        assertEquals(2, instanceSLA.getBackupId().intValue());
+        assertNotNull(instanceSLA.getRequirements());
+        assertEquals(1, instanceSLA.getRequirements().size());
+        host = (HostRequirement) instanceSLA.getRequirements().get(0);
+        assertEquals("test1", host.getIp());
     }
 }

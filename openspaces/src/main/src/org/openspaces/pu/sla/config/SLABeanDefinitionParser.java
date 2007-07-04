@@ -92,5 +92,11 @@ public class SLABeanDefinitionParser extends AbstractSingleBeanDefinitionParser 
             List requirements = parserContext.getDelegate().parseListElement(requirementsEle, builder.getRawBeanDefinition());
             builder.addPropertyValue("requirements", requirements);
         }
+
+        Element instanceSLAsEle = DomUtils.getChildElementByTagName(element, "instance-SLAs");
+        if (instanceSLAsEle != null) {
+            List instanceSLAs = parserContext.getDelegate().parseListElement(instanceSLAsEle, builder.getRawBeanDefinition());
+            builder.addPropertyValue("instanceSLAs", instanceSLAs);
+        }
     }
 }

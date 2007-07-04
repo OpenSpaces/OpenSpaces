@@ -38,6 +38,7 @@ import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.CommandLineParser;
+import org.openspaces.pu.sla.InstanceSLA;
 import org.openspaces.pu.sla.Policy;
 import org.openspaces.pu.sla.RelocationPolicy;
 import org.openspaces.pu.sla.SLA;
@@ -386,7 +387,6 @@ public class Deploy {
             if (policy instanceof ScaleUpPolicy) {
                 max = String.valueOf(((ScaleUpPolicy) policy).getMaxInstances());
             }
-            //todo:300 is hard coded for now
             String[] configParms = getSLAConfigArgs(type, max, policy.getLowerDampener(), policy.getUpperDampener());
             org.jini.rio.core.SLA slaElement = new org.jini.rio.core.SLA(
                     policy.getMonitor(),
@@ -429,30 +429,80 @@ public class Deploy {
         element.getServiceBeanConfig().addInitParameter("sla", new MarshalledObject(sla));
 
         //this is the MOST IMPORTANT part
-        boolean hasBackups = sla.getNumberOfBackups() > 0;
-        if (hasBackups) {
-            //the extra one is the primary
-            element.setPlanned(sla.getNumberOfBackups() + 1);
+        if (sla.getInstanceSLAs() != null && sla.getInstanceSLAs().size() > 0) {
+            element.setPlanned(1);
             String name = element.getName();
             opString.removeService(element);
-            for (int i = 1; i <= sla.getNumberOfInstances(); i++) {
+            for (int instanceId = 1; instanceId <= sla.getNumberOfInstances(); instanceId++) {
                 ServiceElement clone = deepCopy(element);
-                clone.getServiceBeanConfig().setName(name + "." + i);
-                clone.getServiceBeanConfig().addInitParameter("clusterGroup", String.valueOf(i));
+                clone.getServiceBeanConfig().setName(name + "." + instanceId);
+                clone.getServiceBeanConfig().addInitParameter("clusterGroup", String.valueOf(instanceId));
+                clone.getServiceBeanConfig().addInitParameter("instanceId", String.valueOf(instanceId));
+                InstanceSLA instanceSLA = findInstanceSLA(instanceId, null, sla.getInstanceSLAs());
+                if (instanceSLA != null) {
+                    applyRequirements(clone, instanceSLA.getRequirements());
+                }
                 opString.addService(clone);
                 if (logger.isTraceEnabled()) {
                     logger.trace("Using Service Element " + element.toString());
                 }
+                for (int backupId = 1; backupId <= sla.getNumberOfBackups(); backupId++) {
+                    clone = deepCopy(element);
+                    clone.getServiceBeanConfig().setName(name + "." + instanceId + "_" + backupId);
+                    clone.getServiceBeanConfig().addInitParameter("clusterGroup", String.valueOf(instanceId));
+                    clone.getServiceBeanConfig().addInitParameter("instanceId", String.valueOf(instanceId));
+                    clone.getServiceBeanConfig().addInitParameter("backupId", String.valueOf(backupId));
+                    instanceSLA = findInstanceSLA(instanceId, backupId, sla.getInstanceSLAs());
+                    if (instanceSLA != null) {
+                        applyRequirements(clone, instanceSLA.getRequirements());
+                    }
+                    opString.addService(clone);
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Using Service Element " + element.toString());
+                    }
+                }
             }
         } else {
-            element.setPlanned(sla.getNumberOfInstances());
-            element.getServiceBeanConfig().addInitParameter("clusterGroup", String.valueOf(1));
-            if (logger.isTraceEnabled()) {
-                logger.trace("Using Service Element " + element.toString());
+            boolean hasBackups = sla.getNumberOfBackups() > 0;
+            if (hasBackups) {
+                //the extra one is the primary
+                element.setPlanned(sla.getNumberOfBackups() + 1);
+                String name = element.getName();
+                opString.removeService(element);
+                for (int i = 1; i <= sla.getNumberOfInstances(); i++) {
+                    ServiceElement clone = deepCopy(element);
+                    clone.getServiceBeanConfig().setName(name + "." + i);
+                    clone.getServiceBeanConfig().addInitParameter("clusterGroup", String.valueOf(i));
+                    opString.addService(clone);
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Using Service Element " + element.toString());
+                    }
+                }
+            } else {
+                element.setPlanned(sla.getNumberOfInstances());
+                element.getServiceBeanConfig().addInitParameter("clusterGroup", String.valueOf(1));
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Using Service Element " + element.toString());
+                }
             }
         }
 
         return (opString);
+    }
+
+    private InstanceSLA findInstanceSLA(Integer instanceId, Integer backupId, List<InstanceSLA> instanceSLAs) {
+        for (InstanceSLA instanceSLA : instanceSLAs) {
+            if (instanceId.equals(instanceSLA.getInstanceId())) {
+                if (backupId != null) {
+                    if (backupId.equals(instanceSLA.getBackupId())) {
+                        return instanceSLA;
+                    }
+                } else {
+                    return instanceSLA;
+                }
+            }
+        }
+        return null;
     }
 
     private void applyRequirements(ServiceElement element, List<Requirement> requirements) {

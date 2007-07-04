@@ -22,5 +22,12 @@
             <os-sla:cpu high=".9" />
             <os-sla:memory high=".8" />
         </os-sla:requirements>
+        <os-sla:instance-SLAs>
+            <os-sla:instance-SLA instance-id="1" backup-id="2">
+                <os-sla:requirements>
+                    <os-sla:host ip="test1" />
+                </os-sla:requirements>
+            </os-sla:instance-SLA>
+        </os-sla:instance-SLAs>
     </os-sla:sla>
 </beans>

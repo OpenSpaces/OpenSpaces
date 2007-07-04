@@ -35,45 +35,7 @@
                         </xsd:complexType>
                     </xsd:element>
                 </xsd:choice>
-                <xsd:element name="requirements" minOccurs="0" maxOccurs="1">
-                    <xsd:complexType>
-                        <xsd:choice minOccurs="0" maxOccurs="unbounded">
-                            <xsd:element name="host">
-                                <xsd:complexType>
-                                    <xsd:attribute name="ip" type="xsd:string" use="required"/>
-                                </xsd:complexType>
-                            </xsd:element>
-                            <xsd:element name="range">
-                                <xsd:complexType>
-                                    <xsd:attribute name="monitor" type="xsd:string" use="required"/>
-                                    <xsd:attribute name="low" type="xsd:double" use="optional"/>
-                                    <xsd:attribute name="high" type="xsd:double" use="required"/>
-                                </xsd:complexType>
-                            </xsd:element>
-                            <xsd:element name="cpu">
-                                <xsd:complexType>
-                                    <xsd:attribute name="low" type="xsd:double" use="optional"/>
-                                    <xsd:attribute name="high" type="xsd:double" use="required"/>
-                                </xsd:complexType>
-                            </xsd:element>
-                            <xsd:element name="memory">
-                                <xsd:complexType>
-                                    <xsd:attribute name="low" type="xsd:double" use="optional"/>
-                                    <xsd:attribute name="high" type="xsd:double" use="required"/>
-                                </xsd:complexType>
-                            </xsd:element>
-                            <xsd:element name="system">
-                                <xsd:complexType>
-                                    <xsd:sequence>
-                                        <xsd:element name="attributes" type="beans:mapType">
-                                        </xsd:element>
-                                    </xsd:sequence>
-                                    <xsd:attribute name="name" type="xsd:string" use="required"/>
-                                </xsd:complexType>
-                            </xsd:element>
-                        </xsd:choice>
-                    </xsd:complexType>
-                </xsd:element>
+                <xsd:element name="requirements" type="requirementsType" minOccurs="0" maxOccurs="1" />
                 <xsd:element name="monitors" minOccurs="0" maxOccurs="1">
                     <xsd:complexType>
                         <xsd:choice minOccurs="0" maxOccurs="unbounded">
@@ -89,6 +51,21 @@
                         </xsd:choice>
                     </xsd:complexType>
                 </xsd:element>
+                <xsd:element name="instance-SLAs" minOccurs="0" maxOccurs="1">
+                    <xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:element name="instance-SLA" minOccurs="1" maxOccurs="unbounded">
+                                <xsd:complexType>
+                                    <xsd:sequence>
+                                        <xsd:element name="requirements" type="requirementsType" minOccurs="0" maxOccurs="1" />
+                                    </xsd:sequence>
+                                    <xsd:attribute name="instance-id" type="xsd:nonNegativeInteger" use="required" />
+                                    <xsd:attribute name="backup-id" type="xsd:nonNegativeInteger" use="optional" />
+                                </xsd:complexType>
+                            </xsd:element>
+                        </xsd:sequence>
+                    </xsd:complexType>
+                </xsd:element>
             </xsd:sequence>
             <xsd:attribute name="number-of-instances" type="xsd:positiveInteger" default="1" use="optional"/>
             <xsd:attribute name="number-of-backups" type="xsd:positiveInteger" use="optional"/>
@@ -96,4 +73,43 @@
             <xsd:attribute name="max-instances-per-vm" type="xsd:positiveInteger" use="optional"/>
         </xsd:complexType>
     </xsd:element>
+
+    <xsd:complexType name="requirementsType">
+        <xsd:choice minOccurs="0" maxOccurs="unbounded">
+            <xsd:element name="host">
+                <xsd:complexType>
+                    <xsd:attribute name="ip" type="xsd:string" use="required"/>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="range">
+                <xsd:complexType>
+                    <xsd:attribute name="monitor" type="xsd:string" use="required"/>
+                    <xsd:attribute name="low" type="xsd:double" use="optional"/>
+                    <xsd:attribute name="high" type="xsd:double" use="required"/>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="cpu">
+                <xsd:complexType>
+                    <xsd:attribute name="low" type="xsd:double" use="optional"/>
+                    <xsd:attribute name="high" type="xsd:double" use="required"/>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="memory">
+                <xsd:complexType>
+                    <xsd:attribute name="low" type="xsd:double" use="optional"/>
+                    <xsd:attribute name="high" type="xsd:double" use="required"/>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="system">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="attributes" type="beans:mapType">
+                        </xsd:element>
+                    </xsd:sequence>
+                    <xsd:attribute name="name" type="xsd:string" use="required"/>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:choice>
+    </xsd:complexType>
+
 </xsd:schema>
