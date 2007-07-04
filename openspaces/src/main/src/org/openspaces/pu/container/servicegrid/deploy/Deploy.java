@@ -44,6 +44,7 @@ import org.openspaces.pu.sla.SLA;
 import org.openspaces.pu.sla.ScaleUpPolicy;
 import org.openspaces.pu.sla.requirement.HostRequirement;
 import org.openspaces.pu.sla.requirement.RangeRequirement;
+import org.openspaces.pu.sla.requirement.Requirement;
 import org.openspaces.pu.sla.requirement.SystemRequirement;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
@@ -396,31 +397,7 @@ public class Deploy {
         }
 
         //requirements
-        List<String> hosts = new ArrayList<String>();
-        if (sla.getRequirements() != null) {
-            for (int i = 0; i < sla.getRequirements().size(); i++) {
-                Object requirement = sla.getRequirements().get(i);
-                if (requirement instanceof RangeRequirement) {
-                    RangeRequirement range = (RangeRequirement) requirement;
-                    ThresholdValues thresholdValues = new ThresholdValues(range.getLow(), range.getHigh());
-                    element.getServiceLevelAgreements().addSystemThreshold(range.getWatch(), thresholdValues);
-                } else if (requirement instanceof HostRequirement) {
-                    hosts.add(((HostRequirement) requirement).getIp());
-                } else if (requirement instanceof SystemRequirement) {
-                    SystemRequirement systemAttributes = (SystemRequirement) requirement;
-                    ServiceLevelAgreements.SystemRequirement systemRequirement = new ServiceLevelAgreements.SystemRequirement(
-                            systemAttributes.getName(),
-                            null,
-                            systemAttributes.getAttributes()
-                    );
-                    element.getServiceLevelAgreements().addSystemRequirement(systemRequirement);
-                }
-            }
-        }
-        //put hosts as cluster
-        if (hosts.size() > 0) {
-            element.setCluster(hosts.toArray(new String[hosts.size()]));
-        }
+        applyRequirements(element, sla.getRequirements());
 
         if (sla.getMaxInstancesPerVM() > 0) {
             element.setMaxPerMachine(sla.getMaxInstancesPerVM());
@@ -476,6 +453,34 @@ public class Deploy {
         }
 
         return (opString);
+    }
+
+    private void applyRequirements(ServiceElement element, List<Requirement> requirements) {
+        if (requirements == null) {
+            return;
+        }
+        List<String> hosts = new ArrayList<String>();
+        for (Requirement requirement : requirements) {
+            if (requirement instanceof RangeRequirement) {
+                RangeRequirement range = (RangeRequirement) requirement;
+                ThresholdValues thresholdValues = new ThresholdValues(range.getLow(), range.getHigh());
+                element.getServiceLevelAgreements().addSystemThreshold(range.getWatch(), thresholdValues);
+            } else if (requirement instanceof HostRequirement) {
+                hosts.add(((HostRequirement) requirement).getIp());
+            } else if (requirement instanceof SystemRequirement) {
+                SystemRequirement systemAttributes = (SystemRequirement) requirement;
+                ServiceLevelAgreements.SystemRequirement systemRequirement = new ServiceLevelAgreements.SystemRequirement(
+                        systemAttributes.getName(),
+                        null,
+                        systemAttributes.getAttributes()
+                );
+                element.getServiceLevelAgreements().addSystemRequirement(systemRequirement);
+            }
+        }
+        //put hosts as cluster
+        if (hosts.size() > 0) {
+            element.setCluster(hosts.toArray(new String[hosts.size()]));
+        }
     }
 
     private ServiceElement deepCopy(ServiceElement element) throws IOException, ClassNotFoundException {
