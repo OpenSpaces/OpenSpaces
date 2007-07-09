@@ -126,6 +126,8 @@ public class Deploy {
                 for (int i = 0; i < count; i++) {
                     groups[i] = tokenizer.nextToken();
                 }
+            } else {
+                groups = new String[]{Constants.LookupManager.LOOKUP_GROUP_DEFAULT};
             }
         }
         return groups;
