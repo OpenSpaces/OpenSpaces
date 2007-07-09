@@ -55,9 +55,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private int clusterGroup;
 
-    Integer instanceId;
+    private Integer instanceId;
 
-    Integer backupId;
+    private Integer backupId;
 
     private List<WatchTask> watchTasks = new ArrayList<WatchTask>();
 
