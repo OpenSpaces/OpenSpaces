@@ -1,0 +1,140 @@
+<?xml version="1.0"?>
+
+<project name="openspaces-examples-data" default="usage" basedir=".">
+
+    <property file="../../../build.properties"/>
+
+    <property name="common-src" value="${basedir}/common/src"/>
+    <property name="common-classes" value="${basedir}/common/classes"/>
+    <property name="common-dist" value="${basedir}/common/dist"/>
+    <property name="common-jar" value="${common-dist}/data-common.jar"/>
+
+    <property name="feeder-src" value="${basedir}/feeder/src"/>
+    <property name="feeder-pu" value="${basedir}/feeder/pu/data-feeder"/>
+    <property name="feeder-pujar" value="${basedir}/feeder/pu/data-feeder.jar"/>
+    <property name="feeder-lib" value="${feeder-pu}/shared-lib"/>
+
+    <property name="processor-src" value="${basedir}/processor/src"/>
+    <property name="processor-pu" value="${basedir}/processor/pu/data-processor"/>
+    <property name="processor-pujar" value="${basedir}/processor/pu/data-processor.jar"/>
+    <property name="processor-lib" value="${processor-pu}/shared-lib"/>
+
+    <condition property="gshome.dir" value="../../../">
+        <not>
+            <isset property="gshome.dir"/>
+        </not>
+    </condition>
+
+    <path id="all-libs">
+        <fileset dir="../../../lib">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="usage">
+        <echo message=""/>
+        <echo message="OpenSpaces build script"/>
+        <echo message="-----------------------------------------"/>
+        <echo message=""/>
+        <echo message="Among the available targets are:"/>
+        <echo message=""/>
+        <echo message="clean                    --> Cleans all output dirs"/>
+        <echo message="build                    --> Build all; don't create JARs"/>
+        <echo message="dist                     --> Build the distribution"/>
+        <echo message="copy-local-processor     --> Build and copies the processor into the local deploy directory"/>
+        <echo message="copy-local-feeder        --> Build and copies the feeder world into the local deploy directory"/>
+        <echo message="deploy-local-processor   --> Build, copies and deploys the data processor on the service grid"/>
+        <echo message="deploy-local-feeder      --> Build, copies and deploys the data feeder on the service grid"/>
+        <echo message=""/>
+    </target>
+
+    <target name="clean">
+        <delete dir="${common-classes}"/>
+        <delete dir="${common-dist}"/>
+        <delete dir="${feeder-pu}/org"/>
+        <delete dir="${processor-pu}/org"/>
+        <delete file="${processor-pujar}"/>
+        <delete file="${feeder-pujar}"/>
+    </target>
+
+    <target name="build">
+        <build src="${common-src}" classes="${common-classes}" additional-classpath=""/>
+        <build src="${feeder-src}" classes="${feeder-pu}" additional-classpath="${common-classes}"/>
+        <build src="${processor-src}" classes="${processor-pu}" additional-classpath="${common-classes}"/>
+    </target>
+
+    <target name="dist" depends="build">
+        <!-- Build the common jar file -->
+        <mkdir dir="${common-dist}"/>
+        <jar basedir="${common-classes}" jarfile="${common-jar}"/>
+        <!-- Copy over the common jar file to the processor and feeder libs -->
+        <mkdir dir="${processor-lib}"/>
+        <copy todir="${processor-lib}" file="${common-jar}"/>
+        <mkdir dir="${feeder-lib}"/>
+        <copy todir="${feeder-lib}" file="${common-jar}"/>
+        <!-- Build the pu jar files -->
+        <jar basedir="${processor-pu}" jarfile="${processor-pujar}"/>
+        <jar basedir="${feeder-pu}" jarfile="${feeder-pujar}"/>
+    </target>
+
+    <target name="copy-local-processor" depends="dist">
+        <delete dir="${gshome.dir}/deploy/data-processor"/>
+        <mkdir dir="${gshome.dir}/deploy/data-processor"/>
+        <copy todir="${gshome.dir}/deploy/data-processor">
+            <fileset dir="${processor-pu}"/>
+        </copy>
+    </target>
+
+    <target name="deploy-local-processor" depends="copy-local-processor">
+        <deploy name="data-processor"/>
+    </target>
+
+    <target name="copy-local-feeder" depends="dist">
+        <delete dir="${gshome.dir}/deploy/data-feeder"/>
+        <mkdir dir="${gshome.dir}/deploy/data-feeder"/>
+        <copy todir="${gshome.dir}/deploy/data-feeder">
+            <fileset dir="${feeder-pu}"/>
+        </copy>
+    </target>
+
+    <target name="deploy-local-feeder" depends="copy-local-feeder">
+        <deploy name="data-feeder"/>
+    </target>
+
+    <macrodef name="build">
+        <attribute name="src"/>
+        <attribute name="classes"/>
+        <attribute name="additional-classpath"/>
+        <sequential>
+            <mkdir dir="@{classes}"/>
+
+            <javac destdir="@{classes}" source="1.4" target="1.4" debug="on"
+                   deprecation="false" optimize="false" failonerror="true">
+                <src path="@{src}"/>
+                <classpath refid="all-libs"/>
+                <classpath location="@{additional-classpath}"/>
+            </javac>
+
+            <copy todir="@{classes}" preservelastmodified="true">
+                <fileset dir="@{src}">
+                    <include name="**/*.properties"/>
+                    <include name="**/*.handlers"/>
+                    <include name="**/*.schemas"/>
+                    <include name="**/*.xml"/>
+                    <include name="**/*.dtd"/>
+                    <include name="**/*.xsd"/>
+                </fileset>
+            </copy>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="deploy">
+        <attribute name="name"/>
+        <sequential>
+            <java classname="org.openspaces.pu.container.servicegrid.deploy.Deploy" fork="false">
+                <classpath refid="all-libs"/>
+                <arg value="@{name}"/>
+            </java>
+        </sequential>
+    </macrodef>
+</project>

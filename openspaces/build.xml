@@ -69,6 +69,7 @@
 
         <ant antfile="build.xml" dir="examples/openspaces/helloworld/" target="dist" />
         <ant antfile="build.xml" dir="examples/openspaces/data/" target="dist" />
+        <ant antfile="build.xml" dir="examples/openspaces/data-1.4/" target="dist" />
 
     </target>
 
@@ -158,7 +159,7 @@
         <copy todir="lib/${name}" file="${basedir}/openspaces.notice.txt" />
     </target>
 
-    <target name="dist_1_4" depends="build_1_4, fulljar, srczip, javadoc, schema, license"
+    <target name="dist_1_4" depends="build_1_4, fulljar, buildexamples, srczip, javadoc, schema, license"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}"/>
         <delete file="${dist.dir}/${name}-1.4.zip"/>
@@ -169,12 +170,22 @@
                 <include name="docs/openspaces-javadoc/**"/>
 
                 <include name="examples/**"/>
+                <exclude name="examples/openspaces/data/**"/>
                 <exclude name="examples/**/*.iml"/>
                 <exclude name="examples/**/.cvsignore"/>
 
                 <include name="lib/${name}/**"/>
 
             </zipfileset>
+        </zip>
+        <delete dir="${target.dir}/temp" />
+        <mkdir dir="${target.dir}/temp" />
+        <unzip src="${dist.dir}/${name}-1.4.zip" dest="${target.dir}/temp" />
+        <move todir="${target.dir}/temp/examples/openspaces/data">
+            <fileset dir="${target.dir}/temp/examples/openspaces/data-1.4" />
+        </move>
+        <zip zipfile="${dist.dir}/${name}-1.4.zip">
+            <zipfileset dir="${target.dir}/temp" />
         </zip>
     </target>
 
@@ -189,6 +200,7 @@
                 <include name="docs/openspaces-javadoc/**"/>
 
                 <include name="examples/**"/>
+                <exclude name="examples/openspaces/data-1.4/**"/>
                 <exclude name="examples/**/*.iml"/>
                 <exclude name="examples/**/.cvsignore"/>
 
