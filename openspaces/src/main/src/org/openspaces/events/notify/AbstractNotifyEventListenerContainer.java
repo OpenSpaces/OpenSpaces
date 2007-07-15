@@ -77,8 +77,8 @@ import java.rmi.RemoteException;
  * template as well.
  *
  * <p>Provides {@link #invokeListenerWithTransaction(Object,Object,boolean,boolean)} allowing to execute the
- * lisetner within a transactional context. Also allows for the performTakeOnNotify to control if a
- * take operation will be perfomed against the space with the given event data in order to remove it
+ * listener within a transactional context. Also allows for the performTakeOnNotify to control if a
+ * take operation will be performed against the space with the given event data in order to remove it
  * from the space.
  *
  * @author kimchy
@@ -91,22 +91,22 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
     public static final String COM_TYPE_PREFIX = "COM_TYPE_";
 
     /**
-     * Controls how notification are propogated from the space to the listener. Unicast propogation
+     * Controls how notification are propagated from the space to the listener. Unicast propagation
      * uses TCP unicast communication which is usually best for small amount of registered clients.
      * This is the default communication type.
      */
     public static final int COM_TYPE_UNICAST = 0;
 
     /**
-     * Controls how notification are propogated from the space to the listener. Same as unicast ({@link #COM_TYPE_UNICAST})
+     * Controls how notification are propagated from the space to the listener. Same as unicast ({@link #COM_TYPE_UNICAST})
      * in terms of communication protocol but uses a single client side multiplexer which handles
      * all the dispatching to the different notification listeners.
      */
     public static final int COM_TYPE_MULTIPLEX = 1;
 
     /**
-     * Controls how notification are propogated from the space to the listener. Multicast
-     * propogation uses UDP multicast communication which is usually best for large amount of
+     * Controls how notification are propagated from the space to the listener. Multicast
+     * propagation uses UDP multicast communication which is usually best for large amount of
      * registered clients.
      */
     public static final int COM_TYPE_MULTICAST = 2;
@@ -173,7 +173,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
     }
 
     /**
-     * If set, turns batching event notifications where the server space accumaltes notifications to
+     * If set, turns batching event notifications where the server space accumalates notifications to
      * be sent and then send them in batch. The batch size controls the number of notifications that
      * will be batched before they are sent. Note, if setting this property the
      * {@link #setBatchTime(Integer)} must be set as well.
@@ -183,7 +183,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
     }
 
     /**
-     * If set, turns batching event notifications where the server space accumaltes notifications to
+     * If set, turns batching event notifications where the server space accumalates notifications to
      * be sent and then send them in batch. The batch time controls the elapsed time until the batch
      * buffer is cleared and sent. The time is in <b>milliseconds</b>. Note, if setting this
      * property the {@link #setBatchSize(Integer)} must be set as well.
@@ -227,7 +227,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
     }
 
     /**
-     * If set to <code>true</code> will perform snaphot operation on the provided template
+     * If set to <code>true</code> will perform snapshot operation on the provided template
      * before invoking registering as an event listener.
      *
      * @see org.openspaces.core.GigaSpace#snapshot(Object)
@@ -352,7 +352,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
     }
 
     /**
-     * Specify the transaciton isolation to use for transactional wrapping.
+     * Specify the transaction isolation to use for transactional wrapping.
      *
      * @see org.springframework.transaction.support.DefaultTransactionDefinition#setIsolationLevel(int)
      */
@@ -361,7 +361,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
     }
 
     /**
-     * Specify the transaciton isolation to use for transactional wrapping.
+     * Specify the transaction isolation to use for transactional wrapping.
      *
      * @see org.springframework.transaction.support.DefaultTransactionDefinition#setIsolationLevelName(String)
      */

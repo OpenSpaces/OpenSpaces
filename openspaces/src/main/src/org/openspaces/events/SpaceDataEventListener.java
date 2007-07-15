@@ -21,7 +21,7 @@ import org.springframework.transaction.TransactionStatus;
 
 /**
  * A Space data event listener interface allowing for reception of events triggered by different
- * container types. Note, changing the container typs should be just a matter of configuration, with
+ * container types. Note, changing the container types should be just a matter of configuration, with
  * the event handling code remaining the same. For simplified, Pojo like, event listeners see the
  * adapter package.
  * 

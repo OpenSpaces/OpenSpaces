@@ -38,7 +38,7 @@ public class MultiExclusiveReadReceiveOperationHandler implements ReceiveOperati
     private int maxEntries = DEFAULT_MAX_ENTRIES;
 
     /**
-     * Sets the max entries the inital take multiple operation will perform.
+     * Sets the max entries the initial take multiple operation will perform.
      */
     public void setMaxEntries(int maxEntries) {
         this.maxEntries = maxEntries;

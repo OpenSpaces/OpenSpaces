@@ -30,7 +30,7 @@ import java.util.List;
  * Spring {@link org.springframework.core.io.Resource} for config locations.
  * 
  * <p>
- * By default this applicaiton does not "start" and requires explicit call to {@link #refresh()}.
+ * By default this application does not "start" and requires explicit call to {@link #refresh()}.
  * 
  * @author kimchy
  */
@@ -55,7 +55,7 @@ public class ResourceApplicationContext extends AbstractXmlApplicationContext {
     }
 
     /**
-     * Returns the config resources this applicaiton context uses.
+     * Returns the config resources this application context uses.
      */
     protected Resource[] getConfigResources() {
         return this.resources;

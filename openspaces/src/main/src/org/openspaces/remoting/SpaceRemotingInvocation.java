@@ -36,7 +36,7 @@ public interface SpaceRemotingInvocation {
     String getMethodName();
 
     /**
-     * The arguemnts for the service method execution.
+     * The arguments for the service method execution.
      */
     Object[] getArguments();
 

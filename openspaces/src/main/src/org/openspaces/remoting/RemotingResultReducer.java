@@ -3,7 +3,7 @@ package org.openspaces.remoting;
 /**
  * A remoting result reducer (ala Map Reduce) used when working with
  * {@link org.openspaces.remoting.SyncSpaceRemotingProxyFactoryBean} in
- * brodcast mode in order to reduce the brodcast results into a "client
+ * broadcast mode in order to reduce the broadcast results into a "client
  * side" result value.
  *
  * @author kimchy

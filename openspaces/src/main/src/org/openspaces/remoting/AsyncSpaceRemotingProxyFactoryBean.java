@@ -30,7 +30,7 @@ import java.util.concurrent.Future;
 
 /**
  * A space <b>async</b> remoting proxy that forward the service execution to a remote service with the space as
- * the transport layer. Services are remotly exported in the "server side" using the
+ * the transport layer. Services are remotely exported in the "server side" using the
  * {@link SpaceRemotingServiceExporter}. This proxy builds a representation
  * of the remote invocation using {@link org.openspaces.remoting.AsyncSpaceRemotingEntry} and waits
  * for a remoting response represented by {@link org.openspaces.remoting.AsyncSpaceRemotingEntry}.
@@ -41,7 +41,7 @@ import java.util.concurrent.Future;
  * proxied.
  *
  * <p>Allows for one way invocations (i.e. not waiting for a response). The one way invocation can be
- * set globablly for all of the service methods by setting {@link #setGlobalOneWay(boolean)} or can
+ * set globally for all of the service methods by setting {@link #setGlobalOneWay(boolean)} or can
  * be enabled only for methods that return <code>void</code> by setting
  * {@link #setVoidOneWay(boolean)}. Note, if using one way invocation and an exception is raised by
  * the remote service, it won't be raised by this proxy.
@@ -49,7 +49,7 @@ import java.util.concurrent.Future;
  * <p>A timeout which controls how long the proxy will wait for the response can be set using
  * {@link #setTimeout(long)}. The timeout value if in <b>milliseconds</b>.
  *
- * <p>The space remote proxy supports a future based invocation. This means that if, on the clien side,
+ * <p>The space remote proxy supports a future based invocation. This means that if, on the client side,
  * one of the service interface methods returns {@link java.util.concurrent.Future}, it
  * can be used for async execution. Note, this means that in terms of interfaces there will have to
  * be two different service interfaces (under the same package and with the same name). One for the
@@ -97,7 +97,7 @@ public class AsyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implement
     }
 
     /**
-     * Sets the timeout that will be used to wait for the remote inovocation response. The timeout
+     * Sets the timeout that will be used to wait for the remote invocation response. The timeout
      * value is in <b>milliseconds</b> and defaults to <code>5000</code> (5 seconds).
      */
     public void setTimeout(long timeout) {

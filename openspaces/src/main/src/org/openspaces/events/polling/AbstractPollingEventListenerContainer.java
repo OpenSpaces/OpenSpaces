@@ -42,7 +42,7 @@ import org.springframework.util.Assert;
  * based template, or one of GigaSpace's query classes such as
  * {@link com.j_spaces.core.client.SQLQuery}.
  *
- * <p>A pluggable recieve operation handler can be provided by setting
+ * <p>A pluggable receive operation handler can be provided by setting
  * {@link #setReceiveOperationHandler(org.openspaces.events.polling.receive.ReceiveOperationHandler)}.
  * The default handler used it
  * {@link org.openspaces.events.polling.receive.SingleTakeReceiveOperationHandler}.
@@ -116,7 +116,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
     }
 
     /**
-     * If set to <code>true</code> will perform snaphot operation on the provided template
+     * If set to <code>true</code> will perform snapshot operation on the provided template
      * before invoking the receive operation. Defaults to <code>true</code>.
      *
      * @see org.openspaces.core.GigaSpace#snapshot(Object)
@@ -165,7 +165,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
     }
 
     /**
-     * Specify the transaciton isolation to use for transactional wrapping.
+     * Specify the transaction isolation to use for transactional wrapping.
      *
      * @see org.springframework.transaction.support.DefaultTransactionDefinition#setIsolationLevel(int)
      */
@@ -174,7 +174,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
     }
 
     /**
-     * Specify the transaciton isolation to use for transactional wrapping.
+     * Specify the transaction isolation to use for transactional wrapping.
      *
      * @see org.springframework.transaction.support.DefaultTransactionDefinition#setIsolationLevelName(String)
      */
@@ -292,7 +292,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
                 rollbackOnException(status, err);
                 throw err;
             }
-            // if no message is received, rollback the transaction (for better performace).
+            // if no message is received, rollback the transaction (for better performance).
             if (!messageReceived) {
                 this.transactionManager.rollback(status);
             } else {

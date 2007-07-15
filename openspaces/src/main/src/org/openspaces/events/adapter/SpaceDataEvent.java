@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  * occurs.
  * 
  * <p>
- * Note, methods can have no parameters. They can also have one or more paramerers ordered based on
+ * Note, methods can have no parameters. They can also have one or more parameters ordered based on
  * {@link org.openspaces.events.SpaceDataEventListener#onEvent(Object, org.openspaces.core.GigaSpace, org.springframework.transaction.TransactionStatus, Object)}.
  * 
  * @author kimchy

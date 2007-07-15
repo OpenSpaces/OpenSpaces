@@ -18,5 +18,10 @@ package org.openspaces.pu.sla.requirement;
 
 import java.io.Serializable;
 
+/**
+ * A marker interface for requirements.
+ *
+ * @author kimchy
+ */
 public interface Requirement extends Serializable {
 }

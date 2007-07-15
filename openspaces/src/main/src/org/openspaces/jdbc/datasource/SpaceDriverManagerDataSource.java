@@ -48,7 +48,7 @@ public class SpaceDriverManagerDataSource extends AbstractDataSource implements 
     }
 
     public void afterPropertiesSet() throws Exception {
-        Assert.notNull(space, "space proeprty must be set");
+        Assert.notNull(space, "space property must be set");
     }
 
     public Connection getConnection() throws SQLException {

@@ -17,7 +17,7 @@
 package org.openspaces.remoting;
 
 /**
- * A remote invocation result holding either an exception (that occured during the execution of
+ * A remote invocation result holding either an exception (that occurred during the execution of
  * remote service) or the actual result data.
  *
  * <p>In order to correctly handle results, first check {@link #getException()} for possible
@@ -33,7 +33,7 @@ public interface SpaceRemotingResult {
     /**
      * The result of the remote invocation. Note, <code>null</code> value
      * might mean that remote service returned null/void, but it also might
-     * mena that there might be an {@link #getException()}.
+     * means that there might be an {@link #getException()}.
      */
     Object getResult();
 

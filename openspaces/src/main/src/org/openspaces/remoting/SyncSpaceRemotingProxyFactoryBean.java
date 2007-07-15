@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
 
 /**
  * A space <b>sync</b> remoting proxy that forward the service execution to a remote service with the space as
- * the transport layer. Services are remotly exported in the "server side" using the
+ * the transport layer. Services are remotely exported in the "server side" using the
  * {@link SpaceRemotingServiceExporter}. This proxy uses the fact that the service exporter is defined as a filter
  * within the remote Space, causing the call to be sync. Either a <code>takeMultiple</code> (in case of an
  * invocation with a result) or <code>readMultiple</code> (in case the invocation is one way) is invoked on the
@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
  * order to write execute.
  *
  * <p>Allows for one way invocations (i.e. not waiting for a response). The one way invocation can be
- * set globablly for all of the service methods by setting {@link #setGlobalOneWay(boolean)} or can
+ * set globally for all of the service methods by setting {@link #setGlobalOneWay(boolean)} or can
  * be enabled only for methods that return <code>void</code> by setting
  * {@link #setVoidOneWay(boolean)}. Note, if using one way invocation and an exception is raised by
  * the remote service, it won't be raised by this proxy.
@@ -53,7 +53,7 @@ import org.springframework.util.Assert;
  * <p>The proxy allows to perform broadcast the remote invocation to all different cluster members (partitions
  * for example) by setting the {@link #setBroadcast(boolean) broadcast} flag to <code>true</code>/ In such cases,
  * a custom {@link #setRemotingResultReducer(RemotingResultReducer)} can be plugged to reduce the results of
- * all different services into a single response (assuming that the serice has a return value).
+ * all different services into a single response (assuming that the service has a return value).
  *
  * @author kimchy
  * @see org.openspaces.remoting.SpaceRemotingServiceExporter

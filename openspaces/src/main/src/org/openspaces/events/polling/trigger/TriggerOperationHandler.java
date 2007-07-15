@@ -21,8 +21,8 @@ import org.springframework.dao.DataAccessException;
 
 /**
  * Allows to perform a trigger receive operation which control if the active receive operation will
- * be perfomed in a polling event container. This feature is mainly used when having polling event
- * operations with transactions where the trigger receive operation is perfomed outside of a
+ * be performed in a polling event container. This feature is mainly used when having polling event
+ * operations with transactions where the trigger receive operation is performed outside of a
  * transaction thus reducing the creation of transactions did not perform the actual receive
  * operation.
  * 
@@ -32,7 +32,7 @@ import org.springframework.dao.DataAccessException;
  * 
  * <p>A trigger operation handler can also control if the object returned from
  * {@link #triggerReceive(Object,org.openspaces.core.GigaSpace,long)} will be used as the template
- * for the receive operation by returnning <code>true</code> in {@link #isUseTriggerAsTemplate()}.
+ * for the receive operation by returning <code>true</code> in {@link #isUseTriggerAsTemplate()}.
  * If <code>false</code> is returned, the actual template configured in the polling event
  * container will be used.
  * 
@@ -42,8 +42,8 @@ public interface TriggerOperationHandler {
 
     /**
      * Allows to perform a trigger receive operation which control if the active receive operation
-     * will be perfomed in a polling event container. This feature is mainly used when having
-     * polling event operations with transactions where the trigger receive operation is perfomed
+     * will be performed in a polling event container. This feature is mainly used when having
+     * polling event operations with transactions where the trigger receive operation is performed
      * outside of a transaction thus reducing the creation of transactions did not perform the
      * actual receive operation.
      * 
@@ -65,7 +65,7 @@ public interface TriggerOperationHandler {
     /**
      * Controls if the object returned from
      * {@link #triggerReceive(Object,org.openspaces.core.GigaSpace,long)} will be used as the
-     * template for the receive operation by returnning <code>true</code>. If <code>false</code>
+     * template for the receive operation by returning <code>true</code>. If <code>false</code>
      * is returned, the actual template configured in the polling event container will be used.
      */
     boolean isUseTriggerAsTemplate();

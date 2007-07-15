@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
  * <p>Note, since we simply use the GigaSpace API, with a "null" Data object
  * template, we simply count how many data objects are in the space. In our
  * example, we show how a Local View can be used to hold all the processed
- * data objects, and the count is executed on it. The Local View expoess the
+ * data objects, and the count is executed on it. The Local View exposes the
  * same API as the Space.
  *
  * <p>Also note, this of course can be implemented in many different ways,

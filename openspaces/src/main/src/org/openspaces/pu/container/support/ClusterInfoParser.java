@@ -19,11 +19,11 @@ package org.openspaces.pu.container.support;
 import org.openspaces.core.cluster.ClusterInfo;
 
 /**
- * {@link org.openspaces.core.cluster.ClusterInfo} parser that parses -cluster paramter and
+ * {@link org.openspaces.core.cluster.ClusterInfo} parser that parses -cluster parameter and
  * transforms it into a cluster info.
  * 
  * <p>
- * The following arguments to the -cluster paramters are allowed: <code>total_members=1,1</code>
+ * The following arguments to the -cluster parameters are allowed: <code>total_members=1,1</code>
  * (1,1 is an example value), <code>id=1</code> (1 is an example value), <code>backupid=1</code>
  * (1 is an example value) and <code>schema=primary_backup</code> (primary_backup is an example
  * value).
@@ -49,7 +49,7 @@ public abstract class ClusterInfoParser {
             }
 
             if (param.getArguments().length == 0) {
-                throw new IllegalArgumentException("cluster parameter should have two parameresat least one parameter");
+                throw new IllegalArgumentException("cluster parameter should have at least one parameter");
             }
 
             for (int j = 0; j < param.getArguments().length; j++) {

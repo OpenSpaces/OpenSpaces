@@ -42,7 +42,7 @@ import java.util.List;
  * This runnable allows to start a processing unit container within a running thread, mainly
  * allowing for custom class loader created based on the processing unit structure to be scoped only
  * within the running thread. When using {@link StandaloneProcessingUnitContainer#main(String[])}
- * this feature is not requried but when integrating the standalone container within another
+ * this feature is not required but when integrating the standalone container within another
  * application this allows not to corrupt the external environment thread context class loader.
  * 
  * @author kimchy
@@ -62,7 +62,7 @@ public class StandaloneContainerRunnable implements Runnable {
     private ResourceApplicationContext applicationContext;
 
     /**
-     * Constructs a new standalone container runnable based on the provided configuraion set
+     * Constructs a new standalone container runnable based on the provided configuration set
      * parameters.
      * 
      * @param beanLevelProperties

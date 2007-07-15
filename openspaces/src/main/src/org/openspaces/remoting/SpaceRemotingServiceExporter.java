@@ -48,7 +48,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Exports a list of services (beans) as remote services with the Space as the transport layer. All
- * the interfaces each service implements are regsitered as lookup names (matching
+ * the interfaces each service implements are registered as lookup names (matching
  * {@link AsyncSpaceRemotingEntry#getLookupName()} which are then used to lookup the actual service
  * when a remote invocation is received. The correct service and its method are then executed and a
  * {@link org.openspaces.remoting.AsyncSpaceRemotingEntry} is written back to the space. The remote result
@@ -56,7 +56,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * exception that was thrown by the service.
  *
  * <p>The exporter implements {@link org.openspaces.events.SpaceDataEventListener} which means that it
- * acts as a listener to data events and should be used with the differnet event containers such as
+ * acts as a listener to data events and should be used with the different event containers such as
  * {@link org.openspaces.events.polling.SimplePollingEventListenerContainer}. This method of execution
  * is called <b>async</b> remote execution.
  *
@@ -94,8 +94,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
     private FilterProvider filterProvider;
 
     /**
-     * Sets the list of services that will be exported as remoted services. Each service will have
-     * all of its interfaces regsitered as lookups (mapping to
+     * Sets the list of services that will be exported as remote services. Each service will have
+     * all of its interfaces registered as lookups (mapping to
      * {@link AsyncSpaceRemotingEntry#getLookupName()} which will then be used to invoke the correct
      * service.
      */
@@ -104,7 +104,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
     }
 
     /**
-     * For async based execution of remote services, this is one of the options to enalbe this by
+     * For async based execution of remote services, this is one of the options to enable this by
      * using two different interfaces. The first is the actual "server side" interface (sync), and
      * the other has the same interface name just with an "async suffix" to it. The exporter will
      * identify the async suffix, and will perform the invocation on the actual interface.
@@ -131,7 +131,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(services, "services property is required");
-        // go over the services and create the inteface to service lookup
+        // go over the services and create the interface to service lookup
         for (Object service : services) {
             Class<?>[] interfaces = ClassUtils.getAllInterfaces(service);
             for (Class<?> anInterface : interfaces) {
@@ -159,10 +159,10 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
     /**
      * Receives a {@link org.openspaces.remoting.AsyncSpaceRemotingEntry} which holds all the relevant
-     * invocation inforamtion. Looks up (based on {@link AsyncSpaceRemotingEntry#getLookupName()}
+     * invocation information. Looks up (based on {@link AsyncSpaceRemotingEntry#getLookupName()}
      * the interface the service is registered against (which is the interface the service
      * implements) and then invokes the relevant method within it using the provided method name and
-     * arguments. Write the result value or inocation exception back to the space using
+     * arguments. Write the result value or invocation exception back to the space using
      * {@link org.openspaces.remoting.AsyncSpaceRemotingEntry}.
      *
      * @param remotingEntry The remote entry object
@@ -250,7 +250,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
      * execution including broadcast execution. The filter registers for
      * {@link com.j_spaces.core.filters.FilterOperationCodes#BEFORE_READ_MULTIPLE} and
      * {@link com.j_spaces.core.filters.FilterOperationCodes#BEFORE_TAKE_MULTIPLE} operations and uses the
-     * read or take multiple temlate as an entry holding the actual invocation information (the template is
+     * read or take multiple template as an entry holding the actual invocation information (the template is
      * {@link org.openspaces.remoting.SyncSpaceRemotingEntry}). The filter executes the service required
      * and if it is not one way, it will write back the result as {@link org.openspaces.remoting.SyncSpaceRemotingEntry}
      * back to the Space. It also changes the provided template to match against a unique id generated when writing
@@ -351,7 +351,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                     space.write(remotingEntry, null, Lease.FOREVER);
                 } catch (Exception e1) {
                     if (logger.isErrorEnabled()) {
-                        logger.error("Failed to write remoting entry with excetion [" + e.getMessage() + "]", e1);
+                        logger.error("Failed to write remoting entry with exception [" + e.getMessage() + "]", e1);
                     }
                     if (logger.isDebugEnabled()) {
                         logger.debug("The actual exception is", e);

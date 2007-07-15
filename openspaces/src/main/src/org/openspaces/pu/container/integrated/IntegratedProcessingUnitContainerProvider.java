@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * An {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer} provider. An
  * integrated processing unit container can be used to run a processing unit within an existing
- * environemnt. An example of what this existing environment will provide is the classpath that the
+ * environment. An example of what this existing environment will provide is the classpath that the
  * processing unit will run with. Examples for using the integrated processing unit container can be
  * integration tests or running the processing unit from within an IDE.
  *

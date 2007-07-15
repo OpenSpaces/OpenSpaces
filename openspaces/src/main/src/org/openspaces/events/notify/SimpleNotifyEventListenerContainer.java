@@ -32,8 +32,8 @@ import java.rmi.RemoteException;
  * A simple notification based container allowing to register a
  * {@link org.openspaces.events.SpaceDataEventListener} that will be triggered by notifications.
  * Uses {@link AbstractNotifyEventListenerContainer} for configuration of different notification
- * registration parameters and transactional sematics.
- * 
+ * registration parameters and transactional semantics.
+ *
  * <p>
  * Allows to control using {@link #setRegisterOnStartup(boolean)} if the listener will be registered
  * for notification on startup or registration will be controlled by the {@link #doStart()} and
@@ -41,14 +41,14 @@ import java.rmi.RemoteException;
  * <code>PRIMARY</code> or <code>BACKUP</code>). Default is <code>false</code> which means
  * registration will occur when the space moves into <code>PRIMARY</code> mode (assuming that
  * {@link #setActiveWhenPrimary(boolean)} is set to <code>true</code>, which is the default).
- * 
+ *
  * <p>
- * The contaier can automatically take the notified event data (using {@link GigaSpace#take(Object)})
+ * The container can automatically take the notified event data (using {@link GigaSpace#take(Object)})
  * if the {@link #setPerformTakeOnNotify(boolean)} is set to <code>true</code>. Defaults to
  * <code>false</code>. If the flag is set to <code>true</code>, {@link #setIgnoreEventOnNullTake(boolean)}
- * can control of the event will be propogated to the event listener if the take operation returned
+ * can control of the event will be propagated to the event listener if the take operation returned
  * null.
- * 
+ *
  * @author kimchy
  */
 public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListenerContainer {
@@ -74,7 +74,7 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
     }
 
     /**
-     * If set to <code>true</code>, will not propogate the event if the take operation returned
+     * If set to <code>true</code>, will not propagate the event if the take operation returned
      * <code>null</code>. This flag only makes sense when
      * {@link #setPerformTakeOnNotify(boolean)} is set to <code>true</code>.
      */
@@ -137,12 +137,12 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
     }
 
     /**
-     * A simple remote listener delgate that delegates remote events to invocations of the
+     * A simple remote listener delegate that delegates remote events to invocations of the
      * registered
      * {@link org.openspaces.events.SpaceDataEventListener#onEvent(Object,org.openspaces.core.GigaSpace,org.springframework.transaction.TransactionStatus,Object)} .
-     * 
+     *
      * <p>Calls
-     * {@link org.openspaces.events.notify.AbstractNotifyEventListenerContainer#invokeListenerWithTransaction(Object, Object, boolean, boolean)} 
+     * {@link org.openspaces.events.notify.AbstractNotifyEventListenerContainer#invokeListenerWithTransaction(Object,Object,boolean,boolean)}
      * for a possible listener execution within a transaction and passed the
      * {@link org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setPerformTakeOnNotify(boolean)}
      * flag.

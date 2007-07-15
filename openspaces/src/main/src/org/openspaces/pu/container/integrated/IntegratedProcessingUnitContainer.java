@@ -30,12 +30,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
- * The integrated procesing unit container wraps Spring
+ * The integrated processing unit container wraps Spring
  * {@link org.springframework.context.ApplicationContext ApplicationContext}. It is created using
  * {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider IntegratedProcessingUnitContainerProvider}.
  *
  * <p>An integrated processing unit container can be used to run a processing unit within an existing
- * environemnt. An example of what this existing environment will provide is the classpath that the
+ * environment. An example of what this existing environment will provide is the classpath that the
  * processing unit will run with. Examples for using the integrated processing unit container can be
  * integration tests or running the processing unit from within an IDE.
  *
@@ -43,7 +43,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * which uses the
  * {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider} and the
  * provided parameters create itself. Please see the javadoc for the main method for a full list of
- * the possible paramters values.
+ * the possible parameters values.
  *
  * @author kimchy
  */
@@ -91,8 +91,8 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
      * <li><b>-config [configLocation]</b>: Allows to add a Spring application context config
      * location. See
      * {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider#addConfigLocation(String)}.
-     * This is an optional paramter and it can be provided multiple times.</li>
-     * <li><b>-properties [beanName] [propreties]</b>: Allows to inject
+     * This is an optional parameter and it can be provided multiple times.</li>
+     * <li><b>-properties [beanName] [properties]</b>: Allows to inject
      * {@link org.openspaces.core.properties.BeanLevelProperties}, see
      * {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider#setBeanLevelProperties(org.openspaces.core.properties.BeanLevelProperties)}.
      * [beanName] is optional, if not used, the properties will set the
@@ -162,8 +162,8 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
         System.out.println("             total_members=1,1   : The number of instances and number of backups to use");
         System.out.println("             id=1                : The instance id of this processing unit");
         System.out.println("             backup_id=1         : The backup id of this processing unit");
-        System.out.println("    -proeprties [properties-loc] : Location of context level properties");
-        System.out.println("    -proeprties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
+        System.out.println("    -properties [properties-loc] : Location of context level properties");
+        System.out.println("    -properties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
         System.out.println("");
         System.out.println("");
         System.out.println("Some Examples:");
@@ -174,7 +174,7 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
         System.out.println("3. -cluster schema=partitioned-sync2backup total_members=2,1 id=1 backup_id=1");
         System.out.println("    - Starts a processing unit with a partitioned sync2backup cluster schema of two members with two members each with one backup with instance id of 1 and backup id of 1");
         System.out.println("4. -properties file://config/context.properties -properties space1 file://config/space1.properties");
-        System.out.println("    - Starts a processing unit called data-processor using context level properties called context.proeprties and bean level properties called space1.properties applied to bean named space1");
+        System.out.println("    - Starts a processing unit called data-processor using context level properties called context.properties and bean level properties called space1.properties applied to bean named space1");
         System.out.println("5. -properties embed://prop1=value1 -properties space1 embed://prop2=value2;prop3=value3");
         System.out.println("    - Starts a processing unit called data-processor using context level properties with a single property called prop1 with value1 and bean level properties with two properties");
     }

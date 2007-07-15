@@ -58,7 +58,7 @@ import java.util.Set;
  * to the standard number of consumers once the load decreases. Consider adapting the
  * {@link #setIdleTaskExecutionLimit "idleTaskExecutionLimit"} setting to control the lifespan of
  * each new task, to avoid frequent scaling up and down. Note that using more than one consumer
- * might break fifo behviour if fifo is configured by the space or the specific class type.
+ * might break fifo behaviour if fifo is configured by the space or the specific class type.
  *
  * @author kimchy
  */
@@ -482,7 +482,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      *
      * <p>
      * The default implementation delegates to <code>refreshConnectionUntilSuccessful</code> which
-     * pings the space until it is avilable.
+     * pings the space until it is available.
      *
      * @see #refreshConnectionUntilSuccessful()
      */
@@ -494,7 +494,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      * Refresh the underlying Connection, not returning before an attempt has been successful.
      *
      * <p>
-     * The default implementation pings the space until a sucessful ping has been established.
+     * The default implementation pings the space until a successful ping has been established.
      *
      * @see #setRecoveryInterval
      */

@@ -51,7 +51,7 @@ import java.util.jar.JarFile;
  * When creating the container a thread is started with
  * {@link org.openspaces.pu.container.standalone.StandaloneContainerRunnable}. This is done since a
  * custom class loader is created taking into account the processing unit archive structure, and in
- * order to allows using the standlone container within other environemnts, the new class loader is
+ * order to allows using the standlone container within other environments, the new class loader is
  * only set on the newly created thread context.
  * 
  * <p>
@@ -261,7 +261,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
         }
         URL[] classLoaderUrls = urls.toArray(new URL[urls.size()]);
         // TODO need to probably implement our own class loader so we can control what gets
-        // propogated to the parent class loader
+        // propagated to the parent class loader
         URLClassLoader classLoader = new URLClassLoader(classLoaderUrls, parentClassLoader);
         StandaloneContainerRunnable containerRunnable = new StandaloneContainerRunnable(beanLevelProperties,
                 clusterInfo, configLocations);
@@ -275,7 +275,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
-                logger.warn("Interrupted while waiting for standalone container to initalize");
+                logger.warn("Interrupted while waiting for standalone container to initialize");
             }
         }
 

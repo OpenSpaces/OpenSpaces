@@ -17,6 +17,8 @@
 package org.openspaces.pu.sla.monitor;
 
 /**
+ * A base class for monitor classes.
+ *
  * @author kimchy
  */
 public abstract class AbstractMonitor implements Monitor {
@@ -27,6 +29,9 @@ public abstract class AbstractMonitor implements Monitor {
 
     private int historySize = 100;
 
+    /**
+     * Returns the name of the monitor.
+     */
     public String getName() {
         return name;
     }

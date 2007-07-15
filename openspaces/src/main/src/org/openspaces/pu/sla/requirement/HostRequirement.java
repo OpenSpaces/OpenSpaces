@@ -17,6 +17,7 @@
 package org.openspaces.pu.sla.requirement;
 
 /**
+ * @author kimchy
  */
 public class HostRequirement implements Requirement {
 

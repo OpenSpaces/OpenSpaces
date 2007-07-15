@@ -27,10 +27,10 @@ import org.springframework.transaction.TransactionStatus;
 import java.util.Arrays;
 
 /**
- * A base class event listener allowing for event listneres result handling by writing it back to
+ * A base class event listener allowing for event listeners result handling by writing it back to
  * the space. Subclasses should implement
  * {@link #onEventWithResult(Object, GigaSpace, TransactionStatus, Object)} with the result being
- * writting to back to the space. The write lease can be controlled using
+ * writing to back to the space. The write lease can be controlled using
  * {@link #setWriteLease(long)}.
  * 
  * @author kimchy
@@ -83,7 +83,7 @@ public abstract class AbstractResultEventListenerAdapter implements SpaceDataEve
 
     /**
      * Writes the result back to the space (if not <code>null</code>) under the configured write
-     * lease. Allows to be overriden in order to implement more advance result handling.
+     * lease. Allows to be overridden in order to implement more advance result handling.
      * 
      * <p>
      * By default handles both single object and array of objects. Takes into account the
@@ -117,12 +117,12 @@ public abstract class AbstractResultEventListenerAdapter implements SpaceDataEve
     }
 
     /**
-     * An event listner callback allowing to return a result that will be written back to the space.
+     * An event listener callback allowing to return a result that will be written back to the space.
      * 
      * @param data
      *            The event data object
      * @param gigaSpace
-     *            A GigaSpace instance that can be used to perofrm additional operations against the
+     *            A GigaSpace instance that can be used to perform additional operations against the
      *            space
      * @param txStatus
      *            An optional transaction status allowing to rollback a transaction programmatically

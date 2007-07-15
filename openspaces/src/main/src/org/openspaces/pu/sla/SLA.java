@@ -35,14 +35,14 @@ import java.util.List;
  * schema, the number of backups should not be set (or set to 0).
  *
  * <p>The SLA is translated into one or more service bean definitions, each can have
- * one or more instances. When having one or more backups, a service bean defintiion
- * will be created for each primary and its backups group. So, in case of 2 instnaces
+ * one or more instances. When having one or more backups, a service bean definition
+ * will be created for each primary and its backups group. So, in case of 2 instances
  * with 1 backup, two service bean definition will be created, one for the first instance
  * and its backup, and the second for the second instance and its backup.
  *
  * <p>Max instances per VM can also be set which using {@link #setMaxInstancesPerVM(int)}.
- * It controls how many instnaces of a specific deployment will be created within a
- * grid container. This is very benefitial when using primary with backup where we would
+ * It controls how many instances of a specific deployment will be created within a
+ * grid container. This is very beneficial when using primary with backup where we would
  * not want the primary to run in the same VM as the backup.
  *
  * <p>A list of {@link org.openspaces.pu.sla.monitor.Monitor monitor}s
@@ -141,7 +141,7 @@ public class SLA implements Serializable {
      * Returns the maximum number of instances of the processing unit allowed to run within
      * the same grid container.
      *
-     * <p>Note, when using numebr of backups higher than 0, this value only applies to a
+     * <p>Note, when using number of backups higher than 0, this value only applies to a
      * primary with its backups group.
      */
     public int getMaxInstancesPerVM() {
@@ -152,7 +152,7 @@ public class SLA implements Serializable {
      * Sets the maximum number of instances of the processing unit allowed to run within
      * the same grid container.
      *
-     * <p>Note, when using numebr of backups higher than 0, this value only applies to a
+     * <p>Note, when using number of backups higher than 0, this value only applies to a
      * primary with its backups group.
      */
     public void setMaxInstancesPerVM(int maxInstancesPerVM) {
@@ -162,7 +162,7 @@ public class SLA implements Serializable {
     /**
      * Returns the policy associated with the SLA controlling the runtime policy on the
      * action needed to be taken when the monitor associated with the policy breaks the
-     * policy threasholds.
+     * policy thresholds.
      */
     public Policy getPolicy() {
         return policy;
@@ -171,7 +171,7 @@ public class SLA implements Serializable {
     /**
      * Sets the policy associated with the SLA controlling the runtime policy on the
      * action needed to be taken when the monitor associated with the policy breaks the
-     * policy threasholds.
+     * policy thresholds.
      */
     public void setPolicy(Policy policy) {
         this.policy = policy;

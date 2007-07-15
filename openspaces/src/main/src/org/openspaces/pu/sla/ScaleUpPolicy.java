@@ -18,7 +18,7 @@ package org.openspaces.pu.sla;
 
 /**
  * Scale up policy will cause a processing unit instance to be created
- * when the policy associated monitor breaches its threashold values.
+ * when the policy associated monitor breaches its threshold values.
  *
  * @author kimchy
  */

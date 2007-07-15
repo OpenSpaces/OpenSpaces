@@ -334,7 +334,7 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
 
     /**
      * The minimum amount of time an object may sit idle in the pool before it
-     * is eligable for eviction by the idle object evictor (if any).
+     * is eligible for eviction by the idle object evictor (if any).
      */
     protected long minEvictableIdleTimeMillis =
             GenericObjectPool.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;

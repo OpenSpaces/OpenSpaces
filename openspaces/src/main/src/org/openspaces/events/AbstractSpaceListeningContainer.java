@@ -42,7 +42,7 @@ import java.util.List;
  * <p>
  * Provide lifecycle support for containers using {@link #doStart()} and {@link #doStop()}. By
  * default, the container lifecycle will be bound to the space mode, starting when the space mode is
- * <code>PRIMARY</code> and stopping otherwise. This behviour is controlled by
+ * <code>PRIMARY</code> and stopping otherwise. This behaviour is controlled by
  * {@link #setActiveWhenPrimary(boolean)}. Note that most operations can not be performed directly
  * against a backup space cluster member (when working with the
  * {@link org.openspaces.core.GigaSpaceFactoryBean#setClustered(boolean)} flag set to
@@ -129,7 +129,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      * Validate the configuration of this container.
      */
     protected void validateConfiguration() {
-        Assert.notNull(gigaSpace, "gigaSpace property is requried");
+        Assert.notNull(gigaSpace, "gigaSpace property is required");
     }
 
     /**

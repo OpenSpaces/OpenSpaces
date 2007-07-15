@@ -20,17 +20,17 @@ import org.openspaces.events.SpaceDataEventListener;
 
 /**
  * An extension of space event listener allowing the listener to control
- * programmatically (without the user having to configure it withing the
+ * programmatically (without the user having to configure it within the
  * notify container) which notifications this listener will be invoked on.
  *
  * <p>All markers return <code>Boolean</code> value. <code>null</code> means
- * that it will have no affect on the flag appropiate flag.
+ * that it will have no affect on the flag appropriate flag.
  *
- * <p>Note, all flags will only take place if it is not overriden by the user
+ * <p>Note, all flags will only take place if it is not overridden by the user
  * when configuring the notify container. If the user has set, for example, the
  * write notify flag, then this provider {@link #isWrite()} will not be taken
- * into account. This allows for advance users to futher configure a "recommended"
- * notifucation types for a specific listener that implements this interface.
+ * into account. This allows for advance users to further configure a "recommended"
+ * notifications types for a specific listener that implements this interface.
  *
  * @author kimchy
  */

@@ -94,7 +94,7 @@ public abstract class BeanLevelPropertiesParser {
                     props.load(is);
                     is.close();
                 } catch (IOException e) {
-                    throw new IllegalArgumentException("Failed to load resoruce [" + properties + "] " + e.getMessage());
+                    throw new IllegalArgumentException("Failed to load resource [" + properties + "] " + e.getMessage());
                 }
             }
             if (name == null) {

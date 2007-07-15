@@ -31,10 +31,10 @@ import java.util.concurrent.TimeUnit;
  * A feeder bean started a scheduled task that writes a new Data object to the space.
  *
  * <p>The space is injected into this bean using OpenSpaces support for @GigaSpaceContext
- * annoation.
+ * annotation.
  *
  * <p>The scheduled support uses the java.util.concurrent Scheduled Executor Service. It
- * is started and stopped based on Spring lifeceycle events.
+ * is started and stopped based on Spring lifecycle events.
  *
  * @author kimchy
  */
@@ -78,7 +78,7 @@ public class DataFeeder implements InitializingBean, DisposableBean {
     public void afterPropertiesSet() throws Exception {
         System.out.println("--- STARTING FEEDER WITH CYCLE [" + defaultDelay + "]");
         if (instanceId != null) {
-            // have a range of ids based on the instance id of the procesing unit
+            // have a range of ids based on the instance id of the processing unit
             startIdFrom = instanceId * 10000000;
         }
         executorService = Executors.newScheduledThreadPool(1);

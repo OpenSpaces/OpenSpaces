@@ -45,16 +45,16 @@ import java.lang.reflect.Method;
  * For best performance a single event listener method should be used. If a single event listener is
  * found (by subclasses), caching of the method can be done in order to perform the reflection
  * execution faster. If more than one event listener method is found - dynamic discovery of the
- * appropiate method is done for each listener invocation.
+ * appropriate method is done for each listener invocation.
  * 
  * <p>
- * Event listening methods can have no parameters or one or more parameres mapping to
+ * Event listening methods can have no parameters or one or more parameters mapping to
  * {@link SpaceDataEventListener#onEvent(Object,org.openspaces.core.GigaSpace,org.springframework.transaction.TransactionStatus,Object)}
  * parameters order. If the method has a return value it will be handled thanks to
  * {@link org.openspaces.events.adapter.AbstractResultEventListenerAdapter}.
  * 
  * <p>
- * Having more than one event listening method allows for writing specifc listener methods handling
+ * Having more than one event listening method allows for writing specific listener methods handling
  * different data event types (usually different types within the same inheritance tree). This
  * allows to remove the need for <code>instnaceof</code> checks within the listener code. If a
  * single listening method is used, it can still have a specific class type for the event data
@@ -120,7 +120,7 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
     }
 
     /**
-     * Delegates the event listener invocation to the appropiate method of the configured
+     * Delegates the event listener invocation to the appropriate method of the configured
      * {@link #setDelegate(Object)}. If a single event listener delegate method is found, uses the
      * cached reflection Method. If more than one event listener delegate method is configured uses
      * reflection to dynamically find the relevant event listener method.

@@ -39,7 +39,7 @@ public interface ReceiveOperationHandler {
      *            The GigaSpace interface to perform the receive operations with
      * @param receiveTimeout
      *            Receive timeout value
-     * @return The receive result. <code>null</code> indicating no receive occured. Single object
+     * @return The receive result. <code>null</code> indicating no receive occurred. Single object
      *         or an array of objects indicating the receive operation result.
      * @throws DataAccessException
      */

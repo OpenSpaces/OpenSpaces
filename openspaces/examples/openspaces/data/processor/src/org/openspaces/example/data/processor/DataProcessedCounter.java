@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>Also note, the processed data that will be counted depends on the
  * configuration. For example, this example uses the "non clustered" view
  * of the space while running within an embedded space. This means this
- * coutner will count only the relevant partition processed data. It is
+ * counter will count only the relevant partition processed data. It is
  * just a matter of configuration to count the number of processed data
  * across a cluster.
  *

@@ -37,7 +37,7 @@ public abstract class ConfigLocationParser {
      * @param containerProvider
      *            The container provider to add the config location to
      * @param params
-     *            The parameteres to parse for -config options
+     *            The parameters to parse for -config options
      * @throws IOException
      */
     public static void parse(ApplicationContextProcessingUnitContainerProvider containerProvider,

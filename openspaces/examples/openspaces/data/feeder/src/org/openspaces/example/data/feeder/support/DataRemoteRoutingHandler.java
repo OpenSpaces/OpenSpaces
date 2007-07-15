@@ -21,10 +21,10 @@ import org.openspaces.remoting.RemoteRoutingHandler;
 import org.openspaces.remoting.SpaceRemotingInvocation;
 
 /**
- * An intenral interface of OpenSpaces Remoting support allows to control the
+ * An internal interface of OpenSpaces Remoting support allows to control the
  * routing field used when working against a partitioned space. In this case,
  * when processData API is invoked, we set the routing field to be the Data
- * object type property. In case of sayData API, wil do nothing, which will
+ * object type property. In case of sayData API, will do nothing, which will
  * use OpenSpaces Remoting default routing calculation.
  *
  * @author kimchy

@@ -19,15 +19,30 @@ package org.openspaces.pu.sla.monitor;
 import java.io.Serializable;
 
 /**
+ * A monitor bean. Used to monitor different beans within a processing unit.
+ *
  * @author kimchy
  */
 public interface Monitor extends Serializable {
 
+    /**
+     * Returns the name of the monitor. Used in different UI handlers and
+     * SLA references.
+     */
     String getName();
 
+    /**
+     * A period (in <b>milliseconds</b>) when this value will be checked.
+     */
     long getPeriod();
 
+    /**
+     * The value of the monitor.
+     */
     double getValue();
 
+    /**
+     * The size of the history of values saved.
+     */
     int getHistorySize();
 }

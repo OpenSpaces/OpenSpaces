@@ -110,7 +110,7 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
     }
 
     /**
-     * Invokes the configured {@link org.openspaces.events.SpaceDataEventListener} basde on the
+     * Invokes the configured {@link org.openspaces.events.SpaceDataEventListener} based on the
      * provided data. Currently simply delegates to
      * {@link org.openspaces.events.SpaceDataEventListener#onEvent(Object,org.openspaces.core.GigaSpace,org.springframework.transaction.TransactionStatus,Object)}.
      *
