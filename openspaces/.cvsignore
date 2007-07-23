@@ -4,3 +4,7 @@ openspaces.iws
 logs
 build.properties
 docs
+ObjectStore
+tm*
+junit*
+192.168.*

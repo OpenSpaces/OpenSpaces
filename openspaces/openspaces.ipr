@@ -13,7 +13,6 @@
   <component name="BuildJarProjectSettings">
     <option name="BUILD_JARS_ON_MAKE" value="false" />
   </component>
-  <component name="ClearCase" />
   <component name="CodeStyleProjectProfileManger">
     <option name="PROJECT_PROFILE" />
     <option name="USE_PROJECT_LEVEL_SETTINGS" value="false" />
@@ -59,11 +58,12 @@
       <entry name="*.xsd" />
     </wildcardResourcePatterns>
   </component>
-  <component name="DataSourceManagerImpl" />
   <component name="DependenciesAnalyzeManager">
     <option name="myForwardDirection" value="false" />
   </component>
-  <component name="DependencyValidationManager" />
+  <component name="DependencyValidationManager">
+    <option name="SKIP_IMPORT_STATEMENTS" value="false" />
+  </component>
   <component name="EclipseCompilerSettings">
     <option name="DEBUGGING_INFO" value="true" />
     <option name="GENERATE_NO_WARNINGS" value="true" />
@@ -86,7 +86,6 @@
     <option name="OPEN_IN_BROWSER" value="false" />
     <option name="OUTPUT_DIRECTORY" />
   </component>
-  <component name="GUI Designer component loader factory" />
   <component name="IdProvider" IDEtalkID="81465954B2F44585E547D6FA2A88192E" />
   <component name="InspectionProjectProfileManager">
     <option name="PROJECT_PROFILE" value="Project Default" />
@@ -305,6 +304,7 @@
       </item>
     </group>
   </component>
+  <component name="ProjectFileVersion" converted="true" />
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/examples/openspaces/data/common/examples-data-common.iml" filepath="$PROJECT_DIR$/examples/openspaces/data/common/examples-data-common.iml" />
@@ -328,6 +328,7 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
       <module name="examples-helloworld" />
       <RunnerSettings RunnerId="Debug">
         <option name="DEBUG_PORT" value="61020" />
@@ -357,6 +358,7 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
       <module name="examples-data-processor" />
       <RunnerSettings RunnerId="Debug">
         <option name="DEBUG_PORT" value="54867" />
@@ -387,6 +389,7 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
       <module name="examples-data-feeder" />
       <RunnerSettings RunnerId="Debug">
         <option name="DEBUG_PORT" value="56134" />
@@ -416,6 +419,7 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
       <module name="examples-data-processor" />
       <RunnerSettings RunnerId="Debug">
         <option name="DEBUG_PORT" value="59876" />
@@ -445,6 +449,7 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
       <module name="examples-data-processor" />
       <RunnerSettings RunnerId="Debug">
         <option name="DEBUG_PORT" value="59925" />
@@ -474,6 +479,7 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
       <module name="examples-data-processor" />
       <RunnerSettings RunnerId="JProfiler">
         <option name="WINDOW" value="false" />
@@ -497,6 +503,7 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
       <module name="examples-data-processor" />
       <RunnerSettings RunnerId="JProfiler">
         <option name="WINDOW" value="false" />
@@ -520,9 +527,10 @@
       <option name="MAIN_CLASS_NAME" value="" />
       <option name="METHOD_NAME" value="" />
       <option name="TEST_OBJECT" value="package" />
-      <option name="VM_PARAMETERS" value="-javaagent:lib/openspaces/openspaces-agent.jar -Djava.security.policy=policy/policy.all" />
+      <option name="VM_PARAMETERS" value="-javaagent:lib/openspaces/openspaces-agent.jar -Xmx1024 -Djava.security.policy=policy/policy.all" />
       <option name="PARAMETERS" value="" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+      <option name="ENV_VARIABLES" />
       <option name="ADDITIONAL_CLASS_PATH" />
       <option name="TEST_SEARCH_SCOPE">
         <value defaultName="wholeProject" />
@@ -562,11 +570,9 @@
     <option name="GENERATE_IIOP_STUBS" value="false" />
     <option name="ADDITIONAL_OPTIONS_STRING" value="" />
   </component>
-  <component name="StarteamVcsAdapter" />
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="CVS" />
   </component>
-  <component name="VssVcs" />
   <component name="com.intellij.jsf.UserDefinedFacesConfigs">
     <option name="USER_DEFINED_CONFIGS">
       <value>
@@ -587,13 +593,44 @@
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/lib/spring/spring.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/spring/spring-mock.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/spring/jta.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/spring/connector.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
         <root url="jar://$PROJECT_DIR$/lib/spring/spring-src.zip!/" />
       </SOURCES>
     </library>
+    <library name="Jotm">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/jotm/jotm_jrmp_stubs.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/jotm/jotm.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/jotm/xapool.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/jotm/ow_carol.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/jotm/howl.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="JBossTS">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/jbossts/jbossjts.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/jbossts/jbossts-common.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/jbossts/concurrent.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="Atomikos">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/atomikos/transactions-jta.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/atomikos/atomikos-util.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/atomikos/transactions-api.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/atomikos/transactions.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
   </component>
-  <component name="uidesigner-configuration" />
 </project>
 

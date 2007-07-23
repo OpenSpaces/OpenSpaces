@@ -259,7 +259,7 @@
 
         <junit forkmode="${junit.forkmode}" printsummary="yes" haltonfailure="yes" haltonerror="yes">
 
-            <jvmarg line="-Djava.security.policy=policy/policy.all -Djava.awt.headless=true -Xmx128m -XX:MaxPermSize=128m"/>
+            <jvmarg line="-Djava.security.policy=policy/policy.all -Djava.awt.headless=true -Xmx512m -XX:MaxPermSize=128m"/>
 
             <classpath location="${target.testclasses.dir}"/>
             <classpath location="${target.classes.dir}"/>
@@ -294,7 +294,7 @@
 
         <junit forkmode="${junit.forkmode}" printsummary="yes" haltonfailure="no" haltonerror="no">
 
-            <jvmarg line="-Djava.security.policy=policy/policy.all -Djava.awt.headless=true -Xmx256m -XX:MaxPermSize=128m"/>
+            <jvmarg line="-Djava.security.policy=policy/policy.all -Djava.awt.headless=true -Xmx512m -XX:MaxPermSize=128m"/>
 
             <!-- Must go first to ensure any jndi.properties files etc take precedence  -->
             <classpath location="${target.testclasses.dir}"/>
