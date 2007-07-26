@@ -131,7 +131,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
      * If set to <code>true</code> will pass an array value returned from a
      * {@link org.openspaces.events.polling.receive.ReceiveOperationHandler}
      * directly to the listener without "serializing" it as one array element
-     * each time.
+     * each time. Defaults to <code>false</code>
      */
     public void setPassArrayAsIs(boolean passArrayAsIs) {
         this.passArrayAsIs = passArrayAsIs;
