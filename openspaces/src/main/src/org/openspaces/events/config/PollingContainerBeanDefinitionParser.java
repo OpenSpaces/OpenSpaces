@@ -48,6 +48,8 @@ public class PollingContainerBeanDefinitionParser extends AbstractTxEventContain
 
     private static final String PERFORM_SNAPSHOT = "perform-snapshot";
 
+    private static final String PASS_ARRAY_AS_IS = "pass-array-as-is";
+
     protected Class<SimplePollingEventListenerContainer> getBeanClass(Element element) {
         return SimplePollingEventListenerContainer.class;
     }
@@ -105,6 +107,11 @@ public class PollingContainerBeanDefinitionParser extends AbstractTxEventContain
         String performSnapshot = element.getAttribute(PERFORM_SNAPSHOT);
         if (StringUtils.hasLength(performSnapshot)) {
             builder.addPropertyValue("performSnapshot", performSnapshot);
+        }
+
+        String passArrayAsIs = element.getAttribute(PASS_ARRAY_AS_IS);
+        if (StringUtils.hasLength(passArrayAsIs)) {
+            builder.addPropertyValue("passArrayAsIs", passArrayAsIs);
         }
     }
 }

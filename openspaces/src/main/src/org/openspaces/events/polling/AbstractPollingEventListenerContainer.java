@@ -84,6 +84,8 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
 
     private boolean performSnapshot = true;
 
+    private boolean passArrayAsIs = false;
+
     private PlatformTransactionManager transactionManager;
 
     private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
@@ -123,6 +125,16 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
      */
     public void setPerformSnapshot(boolean performSnapshot) {
         this.performSnapshot = performSnapshot;
+    }
+
+    /**
+     * If set to <code>true</code> will pass an array value returned from a
+     * {@link org.openspaces.events.polling.receive.ReceiveOperationHandler}
+     * directly to the listener without "serializing" it as one array element
+     * each time.
+     */
+    public void setPassArrayAsIs(boolean passArrayAsIs) {
+        this.passArrayAsIs = passArrayAsIs;
     }
 
     /**
@@ -308,7 +320,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
     protected boolean doReceiveAndExecute(SpaceDataEventListener eventListener, Object template, TransactionStatus status) {
         Object dataEvent = receiveEvent(template);
         if (dataEvent != null) {
-            if (dataEvent.getClass().isArray()) {
+            if (dataEvent instanceof Object[] && !passArrayAsIs) {
                 Object[] dataEvents = (Object[]) dataEvent;
                 for (Object dataEvent1 : dataEvents) {
                     if (logger.isTraceEnabled()) {

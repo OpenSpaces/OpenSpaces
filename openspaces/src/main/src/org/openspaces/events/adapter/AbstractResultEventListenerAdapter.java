@@ -94,7 +94,7 @@ public abstract class AbstractResultEventListenerAdapter implements SpaceDataEve
      */
     protected void handleResult(Object result, GigaSpace gigaSpace) throws DataAccessException {
         if (result != null) {
-            if (result.getClass().isArray()) {
+            if (result instanceof Object[]) {
                 Object[] resultArr = (Object[]) result;
                 if (updateOrWrite) {
                     long[] leases = new long[resultArr.length];
