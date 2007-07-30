@@ -11,12 +11,10 @@
 
     <property name="feeder-src" value="${basedir}/feeder/src"/>
     <property name="feeder-pu" value="${basedir}/feeder/pu/data-feeder"/>
-    <property name="feeder-pujar" value="${basedir}/feeder/pu/data-feeder.jar"/>
     <property name="feeder-lib" value="${feeder-pu}/shared-lib"/>
 
     <property name="processor-src" value="${basedir}/processor/src"/>
     <property name="processor-pu" value="${basedir}/processor/pu/data-processor"/>
-    <property name="processor-pujar" value="${basedir}/processor/pu/data-processor.jar"/>
     <property name="processor-lib" value="${processor-pu}/shared-lib"/>
 
     <condition property="gshome.dir" value="../../../">
@@ -53,8 +51,6 @@
         <delete dir="${common-dist}"/>
         <delete dir="${feeder-pu}/org"/>
         <delete dir="${processor-pu}/org"/>
-        <delete file="${processor-pujar}"/>
-        <delete file="${feeder-pujar}"/>
     </target>
 
     <target name="build">
@@ -72,9 +68,6 @@
         <copy todir="${processor-lib}" file="${common-jar}"/>
         <mkdir dir="${feeder-lib}"/>
         <copy todir="${feeder-lib}" file="${common-jar}"/>
-        <!-- Build the pu jar files -->
-        <jar basedir="${processor-pu}" jarfile="${processor-pujar}"/>
-        <jar basedir="${feeder-pu}" jarfile="${feeder-pujar}"/>
     </target>
 
     <target name="copy-local-processor" depends="dist">
