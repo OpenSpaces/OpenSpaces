@@ -41,6 +41,8 @@ public class SyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinitionP
 
     private static final String BROADCAST = "broadcast";
 
+    private static final String RETURN_FIRST_RESULT = "return-first-result";
+
     private static final String ROUTING_HANDLER = "routing-handler";
 
     private static final String RESULT_REDUCER = "result-reducer";
@@ -71,6 +73,11 @@ public class SyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinitionP
         String broadcast = element.getAttribute(BROADCAST);
         if (StringUtils.hasLength(broadcast)) {
             builder.addPropertyValue("broadcast", broadcast);
+        }
+
+        String returnFirstResult = element.getAttribute(RETURN_FIRST_RESULT);
+        if (StringUtils.hasLength(returnFirstResult)) {
+            builder.addPropertyValue("returnFirstResult", returnFirstResult);
         }
 
         Element routingHandlerEle = DomUtils.getChildElementByTagName(element, ROUTING_HANDLER);

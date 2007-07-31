@@ -71,6 +71,8 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
 
     private boolean broadcast = false;
 
+    private boolean returnFirstResult = true;
+
     private RemotingResultReducer remotingResultReducer;
 
     private Object serviceProxy;
@@ -112,12 +114,28 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
         this.voidOneWay = voidOneWay;
     }
 
+    /**
+     * If set the <code>true</code> (defaults to <code>false</code>) causes the remote invocation
+     * to be called on all active (primary) cluster memebers.
+     */
     public void setBroadcast(boolean broadcast) {
         this.broadcast = broadcast;
     }
 
+    /**
+     * When using broadcast set to <code>true</code>, allows to plug a custom reducer that can
+     * reduce the array of result objects into another response object.
+     */
     public void setRemotingResultReducer(RemotingResultReducer remotingResultReducer) {
         this.remotingResultReducer = remotingResultReducer;
+    }
+
+    /**
+     * When set to <code>true</code> (defaults to <code>true</code>) will return the first result
+     * when using broadcast. If set to <code>false</code>, an array of results will be retuned.
+     */
+    public void setReturnFirstResult(boolean returnFirstResult) {
+        this.returnFirstResult = returnFirstResult;
     }
 
     public void afterPropertiesSet() {
@@ -178,12 +196,23 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
             SpaceRemotingResult[] results = new SpaceRemotingResult[result.length];
             System.arraycopy(result, 0, results, 0, result.length);
             return remotingResultReducer.reduce(results, remotingEntry);
-        } else {
+        } else if (returnFirstResult) {
             SyncSpaceRemotingEntry resultEntry = (SyncSpaceRemotingEntry) result[0];
             if (resultEntry.ex != null) {
                 throw resultEntry.ex;
             }
             return resultEntry.result;
+        } else {
+            Object[] retVals = new Object[result.length];
+            for (int i = 0; i < result.length; i++) {
+                SpaceRemotingResult spaceRemotingResult = (SpaceRemotingResult) result[i];
+                if (spaceRemotingResult.getException() != null) {
+                    retVals[i] = spaceRemotingResult.getException();
+                } else {
+                    retVals[i] = ((SpaceRemotingResult) retVals[i]).getResult();
+                }
+            }
+            return retVals;
         }
     }
 }
