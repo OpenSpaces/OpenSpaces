@@ -44,11 +44,11 @@ public interface SpaceRemotingInvocation {
      * Routing field controls the partition the invocation will be directed to when working with a
      * partitioned space.
      */
-    Integer getRouting();
+    Object getRouting();
 
     /**
      * Routing field controls the partition the invocation will be directed to when working with a
      * partitioned space.
      */
-    void setRouting(Integer routing);
+    void setRouting(Object routing);
 }
