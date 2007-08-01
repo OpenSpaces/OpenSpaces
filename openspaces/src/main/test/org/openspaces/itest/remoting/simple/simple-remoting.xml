@@ -9,7 +9,9 @@
        http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
        http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/remoting/openspaces-remoting.xsd">
 
-    <os-core:space id="space" url="/./spaceSimpleRemoting">
+    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
+
+    <os-core:space id="space" url="/./spaceSimpleRemoting" lookup-groups="${user.name}">
         <os-core:filter-provider ref="serviceExporter"/>
     </os-core:space>
 

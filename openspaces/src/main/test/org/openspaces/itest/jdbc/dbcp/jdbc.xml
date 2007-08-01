@@ -7,8 +7,9 @@
        http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
        http://www.openspaces.org/schema/jdbc http://www.openspaces.org/schema/jdbc/openspaces-jdbc.xsd">
 
+    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
-    <os-core:space id="space" url="/./spaceDbcp" />
+    <os-core:space id="space" url="/./spaceDbcp" lookup-groups="${user.name}" />
 
     <bean id="dataSource" class="org.openspaces.jdbc.datasource.DbcpBasicDataSource">
         <property name="space" ref="space" />
