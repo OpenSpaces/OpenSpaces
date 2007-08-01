@@ -36,7 +36,7 @@ public class SyncSpaceRemotingEntry implements Entry, SpaceRemotingInvocation, S
 
     public Boolean oneWay;
 
-    public Object routing;
+    public Integer routing;
 
     public Object result;
 
@@ -57,12 +57,12 @@ public class SyncSpaceRemotingEntry implements Entry, SpaceRemotingInvocation, S
         return arguments;
     }
 
-    public Object getRouting() {
+    public Integer getRouting() {
         return routing;
     }
 
     public void setRouting(Object routing) {
-        this.routing = routing;
+        this.routing = routing.hashCode();
     }
 
     public Object getResult() {

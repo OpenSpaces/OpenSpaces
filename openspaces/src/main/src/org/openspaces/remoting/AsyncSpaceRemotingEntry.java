@@ -42,7 +42,7 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
 
     public Boolean oneWay;
 
-    public Object routing;
+    public Integer routing;
 
     public Object result;
 
@@ -64,12 +64,12 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
         return arguments;
     }
 
-    public Object getRouting() {
+    public Integer getRouting() {
         return routing;
     }
 
     public void setRouting(Object routing) {
-        this.routing = routing;
+        this.routing = routing.hashCode();
     }
 
     public Object getResult() {
@@ -146,7 +146,7 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
         if (isInvocation) {
             out.writeUTF(lookupName);
             out.writeUTF(methodName);
-            out.writeObject(routing);
+            out.writeInt(routing);
             if (oneWay != null && oneWay) {
                 out.writeBoolean(true);
             } else {
@@ -173,7 +173,7 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
             } else {
                 out.writeBoolean(false);
             }
-            out.writeObject(routing);
+            out.writeInt(routing);
         }
     }
 
@@ -199,7 +199,7 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
             if (in.readBoolean()) {
                 ex = (Exception) in.readObject();
             }
-            routing = in.readObject();
+            routing = in.readInt();
         }
     }
 

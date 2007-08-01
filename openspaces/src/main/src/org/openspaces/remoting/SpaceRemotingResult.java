@@ -28,7 +28,7 @@ package org.openspaces.remoting;
  */
 public interface SpaceRemotingResult {
 
-    Object getRouting();
+    Integer getRouting();
 
     /**
      * The result of the remote invocation. Note, <code>null</code> value
