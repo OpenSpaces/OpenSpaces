@@ -2,13 +2,17 @@
 
 <project name="openspaces" default="usage" basedir=".">
 
-    <property name="pulocation" value="${basedir}/pu/helloworld"/>
+    <!-- Two options to have custom build properties file (for example, to set the gshome.dir) -->
+    <property file="../../../build.properties"/>
+    <property file="${basedir}/build.properties" />
 
     <condition property="gshome.dir" value="../../../">
         <not>
             <isset property="gshome.dir"/>
         </not>
     </condition>
+
+    <property name="pulocation" value="${basedir}/pu/helloworld"/>
 
     <path id="all-libs">
 
