@@ -2,20 +2,9 @@
 
 <project name="openspaces-examples-data" default="usage" basedir=".">
 
+	<!-- Two options to have custom build properties file (for example, to set the gshome.dir) -->
     <property file="../../../build.properties"/>
-
-    <property name="common-src" value="${basedir}/common/src"/>
-    <property name="common-classes" value="${basedir}/common/classes"/>
-    <property name="common-dist" value="${basedir}/common/dist"/>
-    <property name="common-jar" value="${common-dist}/data-common.jar"/>
-
-    <property name="feeder-src" value="${basedir}/feeder/src"/>
-    <property name="feeder-pu" value="${basedir}/feeder/pu/data-feeder"/>
-    <property name="feeder-lib" value="${feeder-pu}/shared-lib"/>
-
-    <property name="processor-src" value="${basedir}/processor/src"/>
-    <property name="processor-pu" value="${basedir}/processor/pu/data-processor"/>
-    <property name="processor-lib" value="${processor-pu}/shared-lib"/>
+	<property file="${basedir}/build.properties" />
 
     <condition property="gshome.dir" value="../../../">
         <not>
@@ -23,8 +12,27 @@
         </not>
     </condition>
 
+    <property name="common.dir" location="${basedir}/common"/>
+    <property name="feeder.dir" location="${basedir}/feeder"/>
+    <property name="processor.dir" location="${basedir}/processor"/>
+
+    <property name="common-src" value="${common.dir}/src"/>
+    <property name="common-classes" value="${common.dir}/classes"/>
+    <property name="common-dist" value="${common.dir}/dist"/>
+    <property name="common-jar" value="${common-dist}/data-common.jar"/>
+
+    <property name="feeder-src" value="${feeder.dir}/src"/>
+    <property name="feeder-pu" value="${feeder.dir}/pu/data-feeder"/>
+    <property name="feeder-pujar" value="${feeder.dir}/pu/data-feeder.jar"/>
+    <property name="feeder-lib" value="${feeder-pu}/shared-lib"/>
+
+    <property name="processor-src" value="${processor.dir}/src"/>
+    <property name="processor-pu" value="${processor.dir}/pu/data-processor"/>
+    <property name="processor-pujar" value="${processor.dir}/pu/data-processor.jar"/>
+    <property name="processor-lib" value="${processor-pu}/shared-lib"/>
+
     <path id="all-libs">
-        <fileset dir="../../../lib">
+        <fileset dir="${gshome.dir}/lib">
             <include name="**/*.jar"/>
         </fileset>
     </path>
@@ -51,6 +59,8 @@
         <delete dir="${common-dist}"/>
         <delete dir="${feeder-pu}/org"/>
         <delete dir="${processor-pu}/org"/>
+        <delete file="${processor-pujar}"/>
+        <delete file="${feeder-pujar}"/>
     </target>
 
     <target name="build">
@@ -68,6 +78,9 @@
         <copy todir="${processor-lib}" file="${common-jar}"/>
         <mkdir dir="${feeder-lib}"/>
         <copy todir="${feeder-lib}" file="${common-jar}"/>
+        <!-- Build the pu jar files -->
+        <jar basedir="${processor-pu}" jarfile="${processor-pujar}"/>
+        <jar basedir="${feeder-pu}" jarfile="${feeder-pujar}"/>
     </target>
 
     <target name="copy-local-processor" depends="dist">
