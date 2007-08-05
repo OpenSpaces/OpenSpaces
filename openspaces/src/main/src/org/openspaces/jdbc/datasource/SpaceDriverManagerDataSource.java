@@ -18,6 +18,7 @@ package org.openspaces.jdbc.datasource;
 
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.jdbc.driver.GConnection;
+import org.openspaces.core.GigaSpace;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.datasource.AbstractDataSource;
 import org.springframework.util.Assert;
@@ -46,6 +47,11 @@ public class SpaceDriverManagerDataSource extends AbstractDataSource implements 
     public void setSpace(IJSpace space) {
         this.space = space;
     }
+
+    public void setGigaSpace(GigaSpace gigaSpace) {
+        this.space = gigaSpace.getSpace();
+    }
+
 
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(space, "space property must be set");

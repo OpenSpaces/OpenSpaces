@@ -26,6 +26,7 @@ import org.apache.commons.dbcp.SQLNestedException;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.commons.pool.impl.GenericKeyedObjectPoolFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
+import org.openspaces.core.GigaSpace;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
@@ -52,6 +53,10 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
 
     public void setSpace(IJSpace space) {
         this.space = space;
+    }
+
+    public void setGigaSpace(GigaSpace gigaSpace) {
+        this.space = gigaSpace.getSpace();
     }
 
     public void afterPropertiesSet() throws Exception {
