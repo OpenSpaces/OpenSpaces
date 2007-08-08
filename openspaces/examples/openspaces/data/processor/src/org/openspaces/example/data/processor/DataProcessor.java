@@ -16,6 +16,8 @@
 
 package org.openspaces.example.data.processor;
 
+import org.openspaces.core.GigaSpace;
+import org.openspaces.core.context.GigaSpaceLateContext;
 import org.openspaces.events.adapter.SpaceDataEvent;
 import org.openspaces.example.data.common.Data;
 import org.openspaces.example.data.common.IDataProcessor;
@@ -51,6 +53,11 @@ public class DataProcessor implements IDataProcessor {
 
     private long workDuration = 100;
 
+    /**
+     * We use late context injection here since it is created *before* the space.
+     */
+    @GigaSpaceLateContext
+    private GigaSpace gigaSpace;
 
     /**
      * Sets the simulated work duration (in milliseconds). Defaut to 100.
@@ -85,5 +92,13 @@ public class DataProcessor implements IDataProcessor {
      */
     public void sayData(Data data) {
         System.out.println(" ++++ SAYING : " + data);
+    }
+
+    public long countDataProcessed() {
+        Data template = new Data();
+        template.setProcessed(true);
+        long retVal = gigaSpace.count(template);
+        System.out.println(" ***** COUNT DATA PROCESSED CALLED : " + retVal);
+        return retVal;
     }
 }

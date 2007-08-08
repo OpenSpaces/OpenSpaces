@@ -88,8 +88,8 @@ public class SyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinitionP
 
         Element resultReducerEle = DomUtils.getChildElementByTagName(element, RESULT_REDUCER);
         if (resultReducerEle != null) {
-            builder.addPropertyValue("resultReducer", parserContext.getDelegate().parsePropertyValue(
-                    resultReducerEle, builder.getRawBeanDefinition(), "resultReducer"));
+            builder.addPropertyValue("remoteResultReducer", parserContext.getDelegate().parsePropertyValue(
+                    resultReducerEle, builder.getRawBeanDefinition(), "remoteResultReducer"));
         }
     }
 }

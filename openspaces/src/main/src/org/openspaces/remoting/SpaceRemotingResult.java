@@ -41,5 +41,5 @@ public interface SpaceRemotingResult {
      * An exception that occured during the remote invocation. <code>null</code>
      * value means there was no exception.
      */
-    Exception getException();
+    Throwable getException();
 }

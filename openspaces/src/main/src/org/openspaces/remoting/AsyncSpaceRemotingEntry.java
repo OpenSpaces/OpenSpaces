@@ -46,7 +46,7 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
 
     public Object result;
 
-    public Exception ex;
+    public Throwable ex;
 
     public AsyncSpaceRemotingEntry() {
         setNOWriteLeaseMode(true);
@@ -76,7 +76,7 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
         return result;
     }
 
-    public Exception getException() {
+    public Throwable getException() {
         return ex;
     }
 
@@ -102,7 +102,7 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
         return this;
     }
 
-    public AsyncSpaceRemotingEntry buildResult(Exception e) {
+    public AsyncSpaceRemotingEntry buildResult(Throwable e) {
         clearInvocationData();
         buildResultUID();
         this.isInvocation = false;

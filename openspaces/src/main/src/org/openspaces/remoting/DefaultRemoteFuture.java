@@ -159,11 +159,7 @@ public class DefaultRemoteFuture<T> implements Future<T> {
             return null;
         }
         if (remoteResult.getException() != null) {
-            try {
-                throw remoteResult.getException();
-            } catch (Exception e) {
-                throw new SpaceRemoteExecutionException(remotingEntry, remoteResult);
-            }
+            throw new SpaceRemoteExecutionException(remotingEntry, remoteResult);
         }
         //noinspection unchecked
         return (T) remoteResult.getResult();

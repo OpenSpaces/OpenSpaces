@@ -40,7 +40,7 @@ public class SyncSpaceRemotingEntry implements Entry, SpaceRemotingInvocation, S
 
     public Object result;
 
-    public Exception ex;
+    public Throwable ex;
 
     public SyncSpaceRemotingEntry() {
     }
@@ -69,7 +69,7 @@ public class SyncSpaceRemotingEntry implements Entry, SpaceRemotingInvocation, S
         return result;
     }
 
-    public Exception getException() {
+    public Throwable getException() {
         return ex;
     }
 
@@ -86,7 +86,7 @@ public class SyncSpaceRemotingEntry implements Entry, SpaceRemotingInvocation, S
         return this;
     }
 
-    public SyncSpaceRemotingEntry buildResult(Exception e) {
+    public SyncSpaceRemotingEntry buildResult(Throwable e) {
         clearInvocationData();
         this.ex = e;
         return this;

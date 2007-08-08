@@ -41,6 +41,10 @@
         Enables the usage of @GigaSpaceContext annotation based injection.
     -->
     <os-core:giga-space-context/>
+    <!--
+        Enables the usage of @GigaSpaceLateContext annotation based injection.
+    -->
+    <os-core:giga-space-late-context/>
 
     <!--
         A bean representing a space (an IJSpace implementation).

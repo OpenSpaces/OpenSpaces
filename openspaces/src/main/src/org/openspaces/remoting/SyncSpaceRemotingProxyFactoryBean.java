@@ -52,7 +52,7 @@ import org.springframework.util.Assert;
  *
  * <p>The proxy allows to perform broadcast the remote invocation to all different cluster members (partitions
  * for example) by setting the {@link #setBroadcast(boolean) broadcast} flag to <code>true</code>/ In such cases,
- * a custom {@link #setRemotingResultReducer(RemotingResultReducer)} can be plugged to reduce the results of
+ * a custom {@link #setRemotingResultReducer(RemoteResultReducer)} can be plugged to reduce the results of
  * all different services into a single response (assuming that the service has a return value).
  *
  * @author kimchy
@@ -73,7 +73,7 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
 
     private boolean returnFirstResult = true;
 
-    private RemotingResultReducer remotingResultReducer;
+    private RemoteResultReducer remoteResultReducer;
 
     private Object serviceProxy;
 
@@ -126,8 +126,8 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
      * When using broadcast set to <code>true</code>, allows to plug a custom reducer that can
      * reduce the array of result objects into another response object.
      */
-    public void setRemotingResultReducer(RemotingResultReducer remotingResultReducer) {
-        this.remotingResultReducer = remotingResultReducer;
+    public void setRemoteResultReducer(RemoteResultReducer remoteResultReducer) {
+        this.remoteResultReducer = remoteResultReducer;
     }
 
     /**
@@ -192,10 +192,10 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
         if (result == null || result.length == 0) {
             throw new RemoteAccessException("Failed to invoke remoting service [" + remotingEntry + "], no return value");
         }
-        if (remotingResultReducer != null) {
+        if (remoteResultReducer != null) {
             SpaceRemotingResult[] results = new SpaceRemotingResult[result.length];
             System.arraycopy(result, 0, results, 0, result.length);
-            return remotingResultReducer.reduce(results, remotingEntry);
+            return remoteResultReducer.reduce(results, remotingEntry);
         } else if (returnFirstResult) {
             SyncSpaceRemotingEntry resultEntry = (SyncSpaceRemotingEntry) result[0];
             if (resultEntry.ex != null) {

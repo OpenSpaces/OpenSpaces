@@ -8,7 +8,7 @@ package org.openspaces.remoting;
  *
  * @author kimchy
  */
-public interface RemotingResultReducer {
+public interface RemoteResultReducer {
 
     /**
      * Reduces a list of Space remoting invocation results to an Object value. Can use

@@ -85,6 +85,26 @@
         <property name="numberOfTypes" value="${numberOfTypes}" />
     </bean>
 
+    <!--
+        A sync remoting proxy based on the IDataProcessor interface. Configured to broadcast the
+        execution of the method (perfomed on all the active cluster members) and reduce the results
+        using a custom reducer implementation.
+    -->
+    <os-remoting:sync-proxy id="syncDataProcessor" giga-space="gigaSpace"
+                       interface="org.openspaces.example.data.common.IDataProcessor" broadcast="true">
+        <os-remoting:result-reducer>
+            <bean class="org.openspaces.example.data.feeder.support.SyncBroadcastCounterReducer" />
+        </os-remoting:result-reducer>
+    </os-remoting:sync-proxy>
+
+    <!--
+        Uses the sync remoting proxoed bean to call count without any knownaled of the remoting
+        invocation.
+    -->
+    <bean id="syncBroadcastDataCounter" class="org.openspaces.example.data.feeder.SyncBroadcastDataCounter">
+        <property name="dataProcessor" ref="syncDataProcessor"/>
+    </bean>
+
     <!-- Local View Example ("client side") -->
 
     <!--

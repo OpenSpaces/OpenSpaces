@@ -219,7 +219,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
     }
 
     @SuppressWarnings("unchecked")
-    private void writeResponse(GigaSpace gigaSpace, AsyncSpaceRemotingEntry remotingEntry, RemoteAccessException e) {
+    private void writeResponse(GigaSpace gigaSpace, AsyncSpaceRemotingEntry remotingEntry, Throwable e) {
         if (remotingEntry.oneWay == null || !remotingEntry.oneWay) {
             gigaSpace.write(remotingEntry.buildResult(e));
         } else {
@@ -343,7 +343,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
         }
 
         @SuppressWarnings("unchecked")
-        private void writeResponse(IJSpace space, ISpaceFilterEntry entry, SyncSpaceRemotingEntry remotingEntry, RemoteAccessException e) {
+        private void writeResponse(IJSpace space, ISpaceFilterEntry entry, SyncSpaceRemotingEntry remotingEntry, Throwable e) {
             if (remotingEntry.oneWay == null || !remotingEntry.oneWay) {
                 try {
                     remotingEntry = remotingEntry.buildResult(e);

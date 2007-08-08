@@ -32,4 +32,9 @@ public interface IDataProcessor {
      * Simply says (prints out) the Data object passed as a parameter.
      */
     void sayData(Data data);
+
+    /**
+     * Counts the processed data.
+     */
+    long countDataProcessed();
 }
