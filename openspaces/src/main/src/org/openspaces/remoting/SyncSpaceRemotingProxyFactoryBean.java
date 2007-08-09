@@ -52,7 +52,7 @@ import org.springframework.util.Assert;
  *
  * <p>The proxy allows to perform broadcast the remote invocation to all different cluster members (partitions
  * for example) by setting the {@link #setBroadcast(boolean) broadcast} flag to <code>true</code>/ In such cases,
- * a custom {@link #setRemotingResultReducer(RemoteResultReducer)} can be plugged to reduce the results of
+ * a custom {@link #setRemoteResultReducer(RemoteResultReducer)}  can be plugged to reduce the results of
  * all different services into a single response (assuming that the service has a return value).
  *
  * @author kimchy
