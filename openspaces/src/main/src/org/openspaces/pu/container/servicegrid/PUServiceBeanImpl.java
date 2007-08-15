@@ -114,8 +114,11 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             } catch (Exception e1) {
                 logger.debug(logMessage("Failed to destroy PU after failed start, ignoring"), e1);
             }
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
             // TODO create explicit exception here
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e.getMessage(), e);
         } finally {
             Thread.currentThread().setContextClassLoader(origClassLoader);
         }
