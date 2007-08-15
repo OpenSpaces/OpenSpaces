@@ -28,6 +28,10 @@ package org.openspaces.remoting;
  */
 public interface SpaceRemotingResult {
 
+    /**
+     * Returns the routing index for the given result in cases where the remote
+     * invocation was directed to a specific cluster instance.
+     */
     Integer getRouting();
 
     /**
