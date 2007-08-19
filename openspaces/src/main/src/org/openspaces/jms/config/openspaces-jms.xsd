@@ -27,4 +27,16 @@
             <xsd:attribute name="message-converter" use="optional" />
         </xsd:complexType>
     </xsd:element>
+
+    <xsd:element name="queue">
+        <xsd:complexType>
+            <xsd:attribute name="name" use="required" />
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="topic">
+        <xsd:complexType>
+            <xsd:attribute name="name" use="required" />
+        </xsd:complexType>
+    </xsd:element>
 </xsd:schema>

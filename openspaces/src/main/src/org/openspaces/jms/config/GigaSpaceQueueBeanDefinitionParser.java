@@ -16,19 +16,18 @@
 
 package org.openspaces.jms.config;
 
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import org.openspaces.jms.GigaSpaceQueue;
+import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
+import org.w3c.dom.Element;
 
 /**
- * A namespace handler for <code>jms</code> namespace.
+ * A bean definition parser for {@link org.openspaces.jms.GigaSpaceQueue}.
  *
  * @author kimchy
  */
-public class JmsNamespaceHandler extends NamespaceHandlerSupport {
+public class GigaSpaceQueueBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 
-    public void init() {
-        registerBeanDefinitionParser("connection-factory", new GigaSpaceConnectionFactoryBeanDefinitionParser());
-        registerBeanDefinitionParser("xa-connection-factory", new GigaSpaceXAConnectionFactoryBeanDefinitionParser());
-        registerBeanDefinitionParser("queue", new GigaSpaceQueueBeanDefinitionParser());
-        registerBeanDefinitionParser("topic", new GigaSpaceTopicBeanDefinitionParser());
+    protected Class getBeanClass(Element element) {
+        return GigaSpaceQueue.class;
     }
 }
