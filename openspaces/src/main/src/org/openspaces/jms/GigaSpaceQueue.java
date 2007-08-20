@@ -37,7 +37,7 @@ public class GigaSpaceQueue implements FactoryBean, InitializingBean {
     /**
      * The queue name for this JMS queue.
      */
-    public void setQueueName(String queueName) {
+    public void setName(String queueName) {
         this.queueName = queueName;
     }
 

@@ -37,7 +37,7 @@ public class GigaSpaceTopic implements FactoryBean, InitializingBean {
     /**
      * The topic name for this JMS topic.
      */
-    public void setTopicName(String topicName) {
+    public void setName(String topicName) {
         this.topicName = topicName;
     }
 
