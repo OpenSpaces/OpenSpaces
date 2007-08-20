@@ -1,0 +1,298 @@
+/*
+ * Copyright 2006-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openspaces.events.notify;
+
+import com.j_spaces.core.client.INotifyDelegatorFilter;
+import net.jini.lease.LeaseListener;
+import org.openspaces.core.GigaSpace;
+import org.openspaces.events.SpaceDataEventListener;
+import org.openspaces.events.adapter.AnnotationEventListenerAdapter;
+import org.openspaces.events.adapter.MethodEventListenerAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
+
+/**
+ * A simplified programmatic configuration that for {@link org.openspaces.events.notify.SimpleNotifyEventListenerContainer}.
+ *
+ * <p>Sample usage:
+ * <pre>
+ * UrlSpaceConfigurer urlSpaceConfigurerPrimary = new UrlSpaceConfigurer("/./space");
+ * GigaSpace gigaSpace = new GigaSpaceConfigurer(urlSpaceConfigurerPrimary.space()).gigaSpace();
+ * SimpleNotifyEventListenerContainer notifyEventListenerContainer = new SimpleNotifyContainerConfigurer(gigaSpace)
+ *              .template(new TestMessage())
+ *              .eventListenerAnnotation(new Object() {
+ *                  @SpaceDataEvent public void gotMeselfAnEvent() {
+ *                      // do something
+ *                  }
+ *              }).notifyContainer();
+ *
+ * ...
+ *
+ * notifyEventListenerContainer.destroy();
+ * urlSpaceConfigurerPrimary.destroy();
+ * </pre>
+ *
+ * @author kimchy
+ */
+public class SimpleNotifyContainerConfigurer {
+
+    private SimpleNotifyEventListenerContainer notifyEventListenerContainer;
+
+    private boolean initialized = false;
+
+    public SimpleNotifyContainerConfigurer(GigaSpace gigaSpace) {
+        notifyEventListenerContainer = new SimpleNotifyEventListenerContainer();
+        notifyEventListenerContainer.setGigaSpace(gigaSpace);
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setPerformTakeOnNotify(boolean)
+     */
+    public SimpleNotifyContainerConfigurer performTakeOnNotify(boolean performTakeOnNotify) {
+        notifyEventListenerContainer.setPerformTakeOnNotify(performTakeOnNotify);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setIgnoreEventOnNullTake(boolean)
+     */
+    public SimpleNotifyContainerConfigurer ignoreEventOnNullTake(boolean ignoreEventOnNullTake) {
+        notifyEventListenerContainer.setIgnoreEventOnNullTake(ignoreEventOnNullTake);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setComType(int)
+     */
+    public SimpleNotifyContainerConfigurer comType(int comType) {
+        notifyEventListenerContainer.setComType(comType);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setFifo(boolean)
+     */
+    public SimpleNotifyContainerConfigurer fifo(boolean fifo) {
+        notifyEventListenerContainer.setFifo(fifo);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setBatchSize(Integer)
+     */
+    public SimpleNotifyContainerConfigurer batchSize(Integer batchSize) {
+        notifyEventListenerContainer.setBatchSize(batchSize);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setBatchTime(Integer)
+     */
+    public SimpleNotifyContainerConfigurer batchTime(Integer batchTime) {
+        notifyEventListenerContainer.setBatchTime(batchTime);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setAutoRenew(boolean)
+     */
+    public SimpleNotifyContainerConfigurer autoRenew(boolean autoRenew) {
+        notifyEventListenerContainer.setAutoRenew(autoRenew);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setLeaseListener(net.jini.lease.LeaseListener)
+     */
+    public SimpleNotifyContainerConfigurer leaseListener(LeaseListener leaseListener) {
+        notifyEventListenerContainer.setLeaseListener(leaseListener);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setTemplate(Object)
+     */
+    public SimpleNotifyContainerConfigurer template(Object template) {
+        notifyEventListenerContainer.setTemplate(template);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setPerformSnapshot(boolean)
+     */
+    public SimpleNotifyContainerConfigurer performSnapshot(boolean performSnapshot) {
+        notifyEventListenerContainer.setPerformSnapshot(performSnapshot);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setListenerLease(long)
+     */
+    public SimpleNotifyContainerConfigurer listenerLease(long listenerLease) {
+        notifyEventListenerContainer.setListenerLease(listenerLease);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyFilter(com.j_spaces.core.client.INotifyDelegatorFilter)
+     */
+    public SimpleNotifyContainerConfigurer notifyFilter(INotifyDelegatorFilter notifyFilter) {
+        notifyEventListenerContainer.setNotifyFilter(notifyFilter);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyWrite(Boolean)
+     */
+    public SimpleNotifyContainerConfigurer notifyWrite(boolean notifyWrite) {
+        notifyEventListenerContainer.setNotifyWrite(notifyWrite);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyUpdate(Boolean)
+     */
+    public SimpleNotifyContainerConfigurer notifyUpdate(boolean notifyUpdate) {
+        notifyEventListenerContainer.setNotifyUpdate(notifyUpdate);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyTake(Boolean)
+     */
+    public SimpleNotifyContainerConfigurer notifyTake(boolean notifyTake) {
+        notifyEventListenerContainer.setNotifyTake(notifyTake);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyAll(Boolean)
+     */
+    public SimpleNotifyContainerConfigurer notifyAll(boolean notifyAll) {
+        notifyEventListenerContainer.setNotifyAll(notifyAll);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyLeaseExpire(Boolean)
+     */
+    public SimpleNotifyContainerConfigurer notifyLeaseExpire(boolean notifyLeaseExpire) {
+        notifyEventListenerContainer.setNotifyLeaseExpire(notifyLeaseExpire);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setTriggerNotifyTemplate(boolean)
+     */
+    public SimpleNotifyContainerConfigurer triggerNotifyTemplate(boolean triggerNotifyTemplate) {
+        notifyEventListenerContainer.setTriggerNotifyTemplate(triggerNotifyTemplate);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setReplicateNotifyTemplate(boolean)
+     */
+    public SimpleNotifyContainerConfigurer replicateNotifyTemplate(boolean replicateNotifyTemplate) {
+        notifyEventListenerContainer.setReplicateNotifyTemplate(replicateNotifyTemplate);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setTransactionManager(org.springframework.transaction.PlatformTransactionManager)
+     */
+    public SimpleNotifyContainerConfigurer transactionManager(PlatformTransactionManager transactionManager) {
+        notifyEventListenerContainer.setTransactionManager(transactionManager);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setTransactionName(String)
+     */
+    public SimpleNotifyContainerConfigurer transactionName(String transactionName) {
+        notifyEventListenerContainer.setTransactionName(transactionName);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setTransactionTimeout(int)
+     */
+    public SimpleNotifyContainerConfigurer transactionTimeout(int transactionTimeout) {
+        notifyEventListenerContainer.setTransactionTimeout(transactionTimeout);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setTransactionIsolationLevel(int)
+     */
+    public SimpleNotifyContainerConfigurer transactionIsolationLevel(int transactionIsolationLevel) {
+        notifyEventListenerContainer.setTransactionIsolationLevel(transactionIsolationLevel);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setEventListener(org.openspaces.events.SpaceDataEventListener)
+     */
+    public SimpleNotifyContainerConfigurer eventListener(SpaceDataEventListener eventListener) {
+        notifyEventListenerContainer.setEventListener(eventListener);
+        return this;
+    }
+
+    /**
+     * Sets an event listener that uses annotations
+     *
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setEventListener(org.openspaces.events.SpaceDataEventListener)
+     * @see org.openspaces.events.adapter.AnnotationEventListenerAdapter
+     */
+    public SimpleNotifyContainerConfigurer eventListenerAnnotation(Object eventListener) {
+        AnnotationEventListenerAdapter annotationEventListenerAdapter = new AnnotationEventListenerAdapter();
+        annotationEventListenerAdapter.setDelegate(eventListener);
+        annotationEventListenerAdapter.afterPropertiesSet();
+        notifyEventListenerContainer.setEventListener(annotationEventListenerAdapter);
+        return this;
+    }
+
+    /**
+     * Sets an event listener that uses method name as an adapter
+     *
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setEventListener(org.openspaces.events.SpaceDataEventListener)
+     * @see org.openspaces.events.adapter.MethodEventListenerAdapter
+     */
+    public SimpleNotifyContainerConfigurer eventListenerMethod(Object eventListener, String methodName) {
+        MethodEventListenerAdapter methodEventListenerAdapter = new MethodEventListenerAdapter();
+        methodEventListenerAdapter.setDelegate(eventListener);
+        methodEventListenerAdapter.setMethodName(methodName);
+        methodEventListenerAdapter.afterPropertiesSet();
+        notifyEventListenerContainer.setEventListener(methodEventListenerAdapter);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setActiveWhenPrimary(boolean)
+     */
+    public SimpleNotifyContainerConfigurer activeWhenPrimary(boolean activeWhenPrimary) {
+        notifyEventListenerContainer.setActiveWhenPrimary(activeWhenPrimary);
+        return this;
+    }
+
+    public SimpleNotifyEventListenerContainer notifyContainer() {
+        if (!initialized) {
+            notifyEventListenerContainer.setRegisterSpaceModeListener(true);
+            notifyEventListenerContainer.afterPropertiesSet();
+            initialized = true;
+        }
+        return notifyEventListenerContainer;
+    }
+}

@@ -34,7 +34,7 @@ public class AnnotationEventListenerAdapter extends AbstractReflectionEventListe
      * Goes over all the methods in the delegate and adds them as event listeners if they have
      * {@link SpaceDataEvent} annotation.
      */
-    protected Method[] doGetListenerMethods() throws Exception {
+    protected Method[] doGetListenerMethods() {
         final List<Method> methods = new ArrayList<Method>();
         ReflectionUtils.doWithMethods(getDelegate().getClass(), new ReflectionUtils.MethodCallback() {
             public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {

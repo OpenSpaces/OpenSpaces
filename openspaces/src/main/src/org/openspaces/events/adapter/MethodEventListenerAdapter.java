@@ -52,7 +52,7 @@ public class MethodEventListenerAdapter extends AbstractReflectionEventListenerA
      * Returns a list of all the methods names that match the configured
      * {@link #setMethodName(String)}.
      */
-    protected Method[] doGetListenerMethods() throws Exception {
+    protected Method[] doGetListenerMethods() {
         final List<Method> methods = new ArrayList<Method>();
         ReflectionUtils.doWithMethods(getDelegate().getClass(), new ReflectionUtils.MethodCallback() {
             public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
@@ -63,6 +63,6 @@ public class MethodEventListenerAdapter extends AbstractReflectionEventListenerA
                 return method.getName().equals(methodName);
             }
         });
-        return (Method[]) methods.toArray(new Method[methods.size()]);
+        return methods.toArray(new Method[methods.size()]);
     }
 }

@@ -16,6 +16,10 @@
 
 package org.openspaces.events;
 
+import com.gigaspaces.cluster.activeelection.ISpaceModeListener;
+import com.gigaspaces.cluster.activeelection.SpaceMode;
+import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.GigaSpace;
@@ -29,9 +33,11 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.Lifecycle;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
+import java.rmi.RemoteException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -71,6 +77,8 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
 
     private boolean activeWhenPrimary = true;
 
+    private boolean registerSpaceModeListener = false;
+
     private String beanName;
 
     private boolean active = false;
@@ -80,6 +88,8 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
     private final List<Object> pausedTasks = new LinkedList<Object>();
 
     private final Object lifecycleMonitor = new Object();
+
+    private PrimaryBackupListener primaryBackupListener;
 
     /**
      * Sets the GigaSpace instance to be used for space event listening operations.
@@ -118,6 +128,12 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
     }
 
     /**
+     */
+    public void setRegisterSpaceModeListener(boolean registerSpaceModeListener) {
+        this.registerSpaceModeListener = registerSpaceModeListener;
+    }
+
+    /**
      * Delegates to {@link #validateConfiguration()} and {@link #initialize()}.
      */
     public void afterPropertiesSet() {
@@ -151,6 +167,24 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
             doStart();
         }
 
+        if (registerSpaceModeListener) {
+            SpaceMode currentMode = SpaceMode.PRIMARY;
+            if (!SpaceUtils.isRemoteProtocol(gigaSpace.getSpace())) {
+                primaryBackupListener = new PrimaryBackupListener();
+                try {
+                    IJSpace clusterMemberSpace = SpaceUtils.getClusterMemberSpace(gigaSpace.getSpace());
+                    ISpaceModeListener remoteListener = (ISpaceModeListener) clusterMemberSpace.getStubHandler()
+                            .exportObject(primaryBackupListener);
+                    currentMode = ((IInternalRemoteJSpaceAdmin) clusterMemberSpace.getAdmin()).addSpaceModeListener(remoteListener);
+                } catch (RemoteException e) {
+                    throw new InvalidDataAccessResourceUsageException("Failed to register space mode listener with space [" + gigaSpace.getSpace()
+                            + "]", e);
+                }
+            }
+            onApplicationEvent(new BeforeSpaceModeChangeEvent(gigaSpace.getSpace(), currentMode));
+            onApplicationEvent(new AfterSpaceModeChangeEvent(gigaSpace.getSpace(), currentMode));
+        }
+
         doInitialize();
     }
 
@@ -174,6 +208,19 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
             this.running = false;
             this.active = false;
             this.lifecycleMonitor.notifyAll();
+        }
+
+        if (registerSpaceModeListener) {
+            if (!SpaceUtils.isRemoteProtocol(gigaSpace.getSpace())) {
+                IJSpace clusterMemberSpace = SpaceUtils.getClusterMemberSpace(gigaSpace.getSpace());
+                try {
+                    ISpaceModeListener remoteListener = (ISpaceModeListener) clusterMemberSpace.getStubHandler()
+                            .exportObject(primaryBackupListener);
+                    ((IInternalRemoteJSpaceAdmin) clusterMemberSpace.getAdmin()).removeSpaceModeListener(remoteListener);
+                } catch (RemoteException e) {
+                    logger.warn("Failed to unregister space mode listener with space [" + gigaSpace.getSpace() + "]", e);
+                }
+            }
         }
 
         // Shut down the invokers.
@@ -360,4 +407,14 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      */
     protected abstract void doShutdown() throws DataAccessException;
 
+    private class PrimaryBackupListener implements ISpaceModeListener {
+
+        public void beforeSpaceModeChange(SpaceMode spaceMode) throws RemoteException {
+            onApplicationEvent(new BeforeSpaceModeChangeEvent(gigaSpace.getSpace(), spaceMode));
+        }
+
+        public void afterSpaceModeChange(SpaceMode spaceMode) throws RemoteException {
+            onApplicationEvent(new AfterSpaceModeChangeEvent(gigaSpace.getSpace(), spaceMode));
+        }
+    }
 }

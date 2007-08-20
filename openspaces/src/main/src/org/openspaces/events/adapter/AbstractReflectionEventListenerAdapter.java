@@ -90,7 +90,7 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
         return this.delegate;
     }
 
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         Assert.notNull(delegate, "delegate property is required");
         listenerMethods = doGetListenerMethods();
         if (listenerMethods == null || listenerMethods.length == 0) {
@@ -180,7 +180,6 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
      * listener delegate methods.
      * 
      * @return A list of all the event listener delegate methods
-     * @throws Exception
      */
-    protected abstract Method[] doGetListenerMethods() throws Exception;
+    protected abstract Method[] doGetListenerMethods();
 }
