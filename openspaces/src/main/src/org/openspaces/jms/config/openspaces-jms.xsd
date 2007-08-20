@@ -16,27 +16,43 @@
 
     <xsd:element name="connection-factory">
         <xsd:complexType>
-            <xsd:attribute name="giga-space" use="required" />
-            <xsd:attribute name="message-converter" use="optional" />
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute name="giga-space" use="required"/>
+                    <xsd:attribute name="message-converter" use="optional"/>
+                </xsd:extension>
+            </xsd:complexContent>
         </xsd:complexType>
     </xsd:element>
 
     <xsd:element name="xa-connection-factory">
         <xsd:complexType>
-            <xsd:attribute name="giga-space" use="required" />
-            <xsd:attribute name="message-converter" use="optional" />
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute name="giga-space" use="required"/>
+                    <xsd:attribute name="message-converter" use="optional"/>
+                </xsd:extension>
+            </xsd:complexContent>
         </xsd:complexType>
     </xsd:element>
 
     <xsd:element name="queue">
         <xsd:complexType>
-            <xsd:attribute name="name" use="required" />
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute name="name" use="required"/>
+                </xsd:extension>
+            </xsd:complexContent>
         </xsd:complexType>
     </xsd:element>
 
     <xsd:element name="topic">
         <xsd:complexType>
-            <xsd:attribute name="name" use="required" />
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute name="name" use="required"/>
+                </xsd:extension>
+            </xsd:complexContent>
         </xsd:complexType>
     </xsd:element>
 </xsd:schema>
