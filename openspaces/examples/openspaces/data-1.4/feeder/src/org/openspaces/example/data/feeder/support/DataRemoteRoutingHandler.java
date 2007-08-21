@@ -31,7 +31,7 @@ import org.openspaces.remoting.SpaceRemotingInvocation;
  */
 public class DataRemoteRoutingHandler implements RemoteRoutingHandler {
 
-    public Long computeRouting(SpaceRemotingInvocation remotingEntry) {
+    public Object computeRouting(SpaceRemotingInvocation remotingEntry) {
         if (remotingEntry.getMethodName().equals("processData")) {
             Data data = (Data) remotingEntry.getArguments()[0];
             return data.getType();
