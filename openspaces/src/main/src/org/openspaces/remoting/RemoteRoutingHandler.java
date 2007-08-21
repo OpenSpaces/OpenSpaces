@@ -27,7 +27,7 @@ public interface RemoteRoutingHandler {
 
     /**
      * Sets the routing field using
-     * {@link SpaceRemotingInvocation#setRouting(Integer)} based on the
+     * {@link SpaceRemotingInvocation#setRouting(Object)} based on the
      * remoting invocation.
      */
     void setRemoteInvocationRouting(SpaceRemotingInvocation remotingEntry);
