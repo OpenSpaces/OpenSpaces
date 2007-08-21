@@ -207,7 +207,7 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
             for (int i = 0; i < result.length; i++) {
                 SpaceRemotingResult spaceRemotingResult = (SpaceRemotingResult) result[i];
                 if (spaceRemotingResult.getException() != null) {
-                    retVals[i] = spaceRemotingResult.getException();
+                    throw spaceRemotingResult.getException();
                 } else {
                     retVals[i] = ((SpaceRemotingResult) retVals[i]).getResult();
                 }
