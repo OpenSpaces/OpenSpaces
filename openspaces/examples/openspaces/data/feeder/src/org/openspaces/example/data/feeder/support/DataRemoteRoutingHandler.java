@@ -29,12 +29,13 @@ import org.openspaces.remoting.SpaceRemotingInvocation;
  *
  * @author kimchy
  */
-public class DataRemoteRoutingHandler implements RemoteRoutingHandler {
+public class DataRemoteRoutingHandler implements RemoteRoutingHandler<Long> {
 
-    public void setRemoteInvocationRouting(SpaceRemotingInvocation remotingEntry) {
+    public Long computeRouting(SpaceRemotingInvocation remotingEntry) {
         if (remotingEntry.getMethodName().equals("processData")) {
             Data data = (Data) remotingEntry.getArguments()[0];
-            remotingEntry.setRouting(data.getType().intValue());
+            return data.getType();
         }
+        return null;
     }
 }

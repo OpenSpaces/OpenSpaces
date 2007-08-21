@@ -167,7 +167,7 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
 
         if (!broadcast) {
             if (remoteRoutingHandler != null) {
-                remoteRoutingHandler.setRemoteInvocationRouting(remotingEntry);
+                remotingEntry.setRouting(remoteRoutingHandler.computeRouting(remotingEntry));
             }
             if (remotingEntry.routing == null) {
                 remotingEntry.routing = remotingEntry.hashCode();

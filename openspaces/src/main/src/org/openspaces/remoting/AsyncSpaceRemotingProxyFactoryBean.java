@@ -188,7 +188,7 @@ public class AsyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implement
                 methodInvocation.getArguments());
 
         if (remoteRoutingHandler != null) {
-            remoteRoutingHandler.setRemoteInvocationRouting(remotingEntry);
+            remotingEntry.setRouting(remoteRoutingHandler.computeRouting(remotingEntry));
         }
         if (remotingEntry.routing == null) {
             remotingEntry.routing = remotingEntry.hashCode();

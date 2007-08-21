@@ -23,12 +23,11 @@ package org.openspaces.remoting;
  *
  * @author kimchy
  */
-public interface RemoteRoutingHandler {
+public interface RemoteRoutingHandler<T> {
 
     /**
-     * Sets the routing field using
-     * {@link SpaceRemotingInvocation#setRouting(Object)} based on the
-     * remoting invocation.
+     * Returns the routing field value based on the remoting invocation. If <code>null</code>
+     * is returned, will use internal calcualtion of the routing index.
      */
-    void setRemoteInvocationRouting(SpaceRemotingInvocation remotingEntry);
+    T computeRouting(SpaceRemotingInvocation remotingEntry);
 }
