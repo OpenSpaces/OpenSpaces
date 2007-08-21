@@ -27,6 +27,8 @@ import net.jini.core.lease.Lease;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.core.space.filter.FilterProviderFactory;
 import org.openspaces.events.EventTemplateProvider;
 import org.openspaces.events.SpaceDataEventListener;
@@ -73,7 +75,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @see AsyncSpaceRemotingProxyFactoryBean
  */
 public class SpaceRemotingServiceExporter implements SpaceDataEventListener<AsyncSpaceRemotingEntry>, InitializingBean, ApplicationContextAware,
-        EventTemplateProvider, FilterProviderFactory {
+        EventTemplateProvider, FilterProviderFactory, ClusterInfoAware {
 
     public static final String DEFAULT_ASYNC_INTERFACE_SUFFIX = "Async";
 
@@ -92,6 +94,9 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
     // sync execution fields
 
     private FilterProvider filterProvider;
+
+
+    private ClusterInfo clusterInfo;
 
     /**
      * Sets the list of services that will be exported as remote services. Each service will have
@@ -125,8 +130,18 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
         this.fifo = fifo;
     }
 
+    /**
+     * Application context injected by Spring
+     */
     public void setApplicationContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
+    }
+
+    /**
+     * Cluster Info injected
+     */
+    public void setClusterInfo(ClusterInfo clusterInfo) {
+        this.clusterInfo = clusterInfo;
     }
 
     public void afterPropertiesSet() throws Exception {
@@ -221,7 +236,11 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
     @SuppressWarnings("unchecked")
     private void writeResponse(GigaSpace gigaSpace, AsyncSpaceRemotingEntry remotingEntry, Throwable e) {
         if (remotingEntry.oneWay == null || !remotingEntry.oneWay) {
-            gigaSpace.write(remotingEntry.buildResult(e));
+            AsyncSpaceRemotingEntry result = remotingEntry.buildResult(e);
+            if (clusterInfo != null) {
+                result.instanceId = clusterInfo.getInstanceId();
+            }
+            gigaSpace.write(result);
         } else {
             if (logger.isDebugEnabled()) {
                 logger.debug("Remoting execution is configured as one way and an exception was thrown", e);
@@ -231,7 +250,11 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
     private void writeResponse(GigaSpace gigaSpace, AsyncSpaceRemotingEntry remotingEntry, Object retVal) {
         if (remotingEntry.oneWay == null || !remotingEntry.oneWay) {
-            gigaSpace.write(remotingEntry.buildResult(retVal));
+            AsyncSpaceRemotingEntry result = remotingEntry.buildResult(retVal);
+            if (clusterInfo != null) {
+                result.instanceId = clusterInfo.getInstanceId();
+            }
+            gigaSpace.write(result);
         }
     }
 
@@ -348,6 +371,9 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                 try {
                     remotingEntry = remotingEntry.buildResult(e);
                     setGeneraterdUID(remotingEntry, entry);
+                    if (clusterInfo != null) {
+                        remotingEntry.instanceId = clusterInfo.getInstanceId();
+                    }
                     space.write(remotingEntry, null, Lease.FOREVER);
                 } catch (Exception e1) {
                     if (logger.isErrorEnabled()) {
@@ -369,6 +395,9 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                 try {
                     remotingEntry = remotingEntry.buildResult(retVal);
                     setGeneraterdUID(remotingEntry, entry);
+                    if (clusterInfo != null) {
+                        remotingEntry.instanceId = clusterInfo.getInstanceId();
+                    }
                     space.write(remotingEntry, null, Lease.FOREVER);
                 } catch (Exception e1) {
                     if (logger.isErrorEnabled()) {

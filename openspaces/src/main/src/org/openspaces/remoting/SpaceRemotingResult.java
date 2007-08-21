@@ -46,4 +46,9 @@ public interface SpaceRemotingResult {
      * value means there was no exception.
      */
     Throwable getException();
+
+    /**
+     * The cluster instance id this result was executed on. 
+     */
+    Integer getInstanceId();
 }

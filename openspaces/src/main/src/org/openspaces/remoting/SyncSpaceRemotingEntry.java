@@ -42,6 +42,8 @@ public class SyncSpaceRemotingEntry implements Entry, SpaceRemotingInvocation, S
 
     public Throwable ex;
 
+    public Integer instanceId;
+
     public SyncSpaceRemotingEntry() {
     }
 
@@ -66,11 +68,15 @@ public class SyncSpaceRemotingEntry implements Entry, SpaceRemotingInvocation, S
     }
 
     public Object getResult() {
-        return result;
+        return this.result;
     }
 
     public Throwable getException() {
-        return ex;
+        return this.ex;
+    }
+
+    public Integer getInstanceId() {
+        return this.instanceId;
     }
 
     public static String[] __getSpaceIndexedFields() {
@@ -129,6 +135,7 @@ public class SyncSpaceRemotingEntry implements Entry, SpaceRemotingInvocation, S
                 sb.append("ex").append(ex).append("]");
             }
             sb.append(" routing[").append(routing).append("]");
+            sb.append(" instanceId[").append(instanceId).append("]");
         }
         return sb.toString();
     }

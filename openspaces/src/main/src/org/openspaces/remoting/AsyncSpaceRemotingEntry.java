@@ -48,6 +48,8 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
 
     public Throwable ex;
 
+    public Integer instanceId;
+
     public AsyncSpaceRemotingEntry() {
         setNOWriteLeaseMode(true);
     }
@@ -73,11 +75,15 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
     }
 
     public Object getResult() {
-        return result;
+        return this.result;
     }
 
     public Throwable getException() {
-        return ex;
+        return this.ex;
+    }
+
+    public Integer getInstanceId() {
+        return this.instanceId;
     }
 
     public static String[] __getSpaceIndexedFields() {
@@ -174,6 +180,11 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
                 out.writeBoolean(false);
             }
             out.writeInt(routing);
+            if (instanceId != null) {
+                out.writeInt(instanceId);
+            } else {
+                out.writeInt(-1);
+            }
         }
     }
 
@@ -200,6 +211,7 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
                 ex = (Exception) in.readObject();
             }
             routing = in.readInt();
+            instanceId = in.readInt();
         }
     }
 
@@ -218,6 +230,7 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
                 sb.append("ex").append(ex).append("]");
             }
             sb.append(" routing[").append(routing).append("]");
+            sb.append(" instnaceId[").append(instanceId).append("]");
         }
         return sb.toString();
     }
