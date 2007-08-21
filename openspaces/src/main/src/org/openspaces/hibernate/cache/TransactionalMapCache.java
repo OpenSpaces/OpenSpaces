@@ -19,6 +19,7 @@ package org.openspaces.hibernate.cache;
 import com.j_spaces.core.client.ISpaceProxy;
 import com.j_spaces.core.client.LocalTransactionManager;
 import com.j_spaces.core.client.XAResourceImpl;
+import com.j_spaces.map.Envelope;
 import com.j_spaces.map.IMap;
 import net.jini.core.transaction.Transaction;
 import org.hibernate.TransactionException;
@@ -114,7 +115,12 @@ public class TransactionalMapCache implements Cache {
     public void clear() throws CacheException {
         // TODO we only need to clear the specific region
         verifyTransaction();
-        map.clear(true);
+        map.clear();
+        try {
+            map.getMasterSpace().clear(new Envelope(new CacheKey(regionName, null), null), null);
+        } catch (Exception e) {
+            throw new CacheException("Failed to clear master space with region [" + regionName + "]", e);
+        }
     }
 
     /**

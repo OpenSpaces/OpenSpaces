@@ -16,6 +16,7 @@
 
 package org.openspaces.hibernate.cache;
 
+import com.j_spaces.map.Envelope;
 import org.hibernate.cache.Cache;
 import org.hibernate.cache.CacheException;
 import org.hibernate.cache.Timestamper;
@@ -86,8 +87,12 @@ public class GigaMapCache implements Cache {
      * Clear the cache
      */
     public void clear() throws CacheException {
-        // TODO we only need to clear the specific region
-        gigaMap.clear(true);
+        gigaMap.clear();
+        try {
+            gigaMap.getMap().getMasterSpace().clear(new Envelope(new CacheKey(regionName, null), null), null);
+        } catch (Exception e) {
+            throw new CacheException("Failed to clear master space with region [" + regionName + "]", e);
+        }
     }
 
     /**

@@ -16,6 +16,7 @@
 
 package org.openspaces.hibernate.cache;
 
+import com.j_spaces.map.Envelope;
 import com.j_spaces.map.IMap;
 import org.hibernate.cache.Cache;
 import org.hibernate.cache.CacheException;
@@ -79,8 +80,12 @@ public class SimpleMapCache implements Cache {
      * Clear the cache
      */
     public void clear() throws CacheException {
-        // TODO we only need to clear the specific region
-        map.clear(true);
+        map.clear();
+        try {
+            map.getMasterSpace().clear(new Envelope(new CacheKey(regionName, null), null), null);
+        } catch (Exception e) {
+            throw new CacheException("Failed to clear master space with region [" + regionName + "]", e);
+        }
     }
 
     /**
