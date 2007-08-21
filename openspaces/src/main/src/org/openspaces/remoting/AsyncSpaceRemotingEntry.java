@@ -52,6 +52,7 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
 
     public AsyncSpaceRemotingEntry() {
         setNOWriteLeaseMode(true);
+        makeTransient();
     }
 
     public String getLookupName() {

@@ -89,7 +89,6 @@ public class Deploy {
     public DeployAdmin getDeployAdmin() throws GSMNotFoundException {
         if (deployAdmin == null) {
             GSM gsm = null;
-            // TODO add the timeout as a paremeter to deploy
             ServiceItem result = ServiceFinder.find(null, GSM.class, lookupTimeout, getGroups());
             if (result != null) {
                 try {
