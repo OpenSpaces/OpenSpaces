@@ -282,9 +282,9 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             }
             SyncSpaceRemotingEntry remotingEntry;
             try {
-                remotingEntry = (SyncSpaceRemotingEntry) entry.getEntry(space);
+                remotingEntry = (SyncSpaceRemotingEntry) entry.getObject(space);
             } catch (UnusableEntryException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                logger.error("Faied to get actual object for [" + entry.getClassName() + "], ignoring sync remoting invocation", e);
                 return;
             }
 
