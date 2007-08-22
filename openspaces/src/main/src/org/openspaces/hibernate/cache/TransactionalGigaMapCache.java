@@ -30,17 +30,17 @@ import java.util.Map;
  * <p>A note on transactions: Since {@link org.openspaces.core.GigaMap} automatically joins
  * on going Spring mangaged transactions, it will work in a non transactional environment,
  * a Space local transaction managed environment, and a JTA one automatically. Make sure
- * to configure the second level cache accordingly within Hibernate. 
+ * to configure the second level cache accordingly within Hibernate.
  *
  * @author kimchy
  */
-public class GigaMapCache implements Cache {
+public class TransactionalGigaMapCache implements Cache {
 
     private String regionName;
 
     private GigaMap gigaMap;
 
-    public GigaMapCache(String regionName, GigaMap gigaMap) {
+    public TransactionalGigaMapCache(String regionName, GigaMap gigaMap) {
         this.regionName = regionName;
         this.gigaMap = gigaMap;
     }

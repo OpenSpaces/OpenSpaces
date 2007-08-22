@@ -34,11 +34,11 @@ import java.util.Properties;
  * is configured within Spring, a bean with this cache provider should configured
  * calling {@link #setMapContext(org.openspaces.core.GigaMap)}.
  *
- * <p>Builds {@link org.openspaces.hibernate.cache.GigaMapCache} as the cache implementation.
+ * <p>Builds {@link TransactionalGigaMapCache} as the cache implementation.
  *
  * @author kimchy
  */
-public class GigaMapCacheProvider implements CacheProvider {
+public class TransactionalGigaMapCacheProvider implements CacheProvider {
 
     private static ThreadLocal<GigaMap> mapContext = new ThreadLocal<GigaMap>();
 
@@ -66,7 +66,7 @@ public class GigaMapCacheProvider implements CacheProvider {
     }
 
     public Cache buildCache(String regionName, Properties properties) throws CacheException {
-        return new GigaMapCache(regionName, gigaMap);
+        return new TransactionalGigaMapCache(regionName, gigaMap);
     }
 
     public long nextTimestamp() {

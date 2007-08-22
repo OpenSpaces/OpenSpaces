@@ -21,11 +21,14 @@ import com.j_spaces.map.IMap;
 import org.hibernate.cache.Cache;
 import org.hibernate.cache.CacheException;
 import org.hibernate.cache.Timestamper;
+import org.openspaces.core.map.LockHandle;
+import org.openspaces.core.map.LockManager;
 
 import java.util.Map;
 
 /**
- * Simple map cache implements Hibenrate second level cache non-transactionally.
+ * Simple map cache implements Hibenrate second level cache non-transactionally. Supports
+ * concurrency strategies of <code>read-only</code>, <code>read-write</code>.
  *
  * @author kimchy
  */
@@ -35,9 +38,14 @@ public class SimpleMapCache implements Cache {
 
     private IMap map;
 
+    private LockManager lockManager;
+
+    private static final ThreadLocal<LockHandle> lockHandlerContext = new ThreadLocal<LockHandle>();
+
     public SimpleMapCache(String regionName, IMap map) {
         this.regionName = regionName;
         this.map = map;
+        this.lockManager = new LockManager(map);
     }
 
     /**
@@ -59,7 +67,12 @@ public class SimpleMapCache implements Cache {
      * failfast semantics
      */
     public void put(Object key, Object value) throws CacheException {
-        map.put(new CacheKey(regionName, key), value);
+        LockHandle lockHandle = lockHandlerContext.get();
+        if (lockHandle != null) {
+            map.put(new CacheKey(regionName, key), value, lockHandle.getTransaction(), Integer.MAX_VALUE);
+        } else {
+            map.put(new CacheKey(regionName, key), value);
+        }
     }
 
     /**
@@ -99,12 +112,16 @@ public class SimpleMapCache implements Cache {
      * If this is a clustered cache, lock the item
      */
     public void lock(Object key) throws CacheException {
+        LockHandle lockHandle = lockManager.lock(key, getTimeout(), getTimeout());
+        lockHandlerContext.set(lockHandle);
     }
 
     /**
      * If this is a clustered cache, unlock the item
      */
     public void unlock(Object key) throws CacheException {
+        lockHandlerContext.remove();
+        lockManager.unlock(key);
     }
 
     /**
