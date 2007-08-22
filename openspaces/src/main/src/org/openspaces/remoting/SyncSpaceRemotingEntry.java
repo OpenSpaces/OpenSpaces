@@ -16,7 +16,7 @@
 
 package org.openspaces.remoting;
 
-import net.jini.core.entry.Entry;
+import com.j_spaces.core.client.MetaDataEntry;
 
 /**
  * Default implementation of a remoting entry that acts both as a remote invocation and a remote
@@ -24,7 +24,7 @@ import net.jini.core.entry.Entry;
  *
  * @author kimchy
  */
-public class SyncSpaceRemotingEntry implements Entry, SpaceRemotingInvocation, SpaceRemotingResult, Cloneable {
+public class SyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemotingInvocation, SpaceRemotingResult, Cloneable {
 
     public Long uid;
 
@@ -45,6 +45,7 @@ public class SyncSpaceRemotingEntry implements Entry, SpaceRemotingInvocation, S
     public Integer instanceId;
 
     public SyncSpaceRemotingEntry() {
+        makeTransient();
     }
 
     public String getLookupName() {
