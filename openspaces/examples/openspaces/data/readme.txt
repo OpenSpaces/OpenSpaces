@@ -13,6 +13,8 @@ The data example is an abstract example showing off most of OpenSpaces features,
 - Show cases for OpenSpaces Events module, including the polling container and notify container.
 - Usage of OpenSpaces Remoting.
 - Usage of GigaSpaces local view within a the processing unit.
+- Usage of GigaSpaces JMS in OpenSpaces
+- Usage of the MessageConverter JMS feature that allows writing POJOs to the space by using the JMS API.
 
 2. STRUCTURE
 
@@ -22,9 +24,11 @@ The example has three modules:
 	    the feeder and the processor modules.
 	b. The Processor module is a processing unit with the main task of processing unprocessed data objects.
 	    The processing of data objects is done both using event container and remoting.
-	c. The Feeder module is a processing unit (though it does not have to be one) that feeds unprocessed
-	    data objects which are in turn processed by the processor module. It feeds unprocessed data objects
-	    both by directly writing them to the space and by using OpenSpaces Remoting.
+	c. The Feeder module is a processing unit that contains two feeders, a standard space feeder and a
+	    JMS feeder, that feeds unprocessed data objects which are in turn processed by the processor module.
+	    The standard space feeder feeds unprocessed data objects both by directly writing them to the space
+	    and by using OpenSpaces Remoting. The JMS feeder uses JMS API to feed unprocessed data objects. It
+	    does so by using a MessageConverter that converts JMS ObjectMessages to the data objects.
 	    
 3. BUILD AND DEPLOYMENT
 
