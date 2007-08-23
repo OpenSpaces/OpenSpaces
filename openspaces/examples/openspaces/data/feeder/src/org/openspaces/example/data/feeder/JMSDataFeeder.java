@@ -135,15 +135,15 @@ public class JMSDataFeeder implements InitializingBean, DisposableBean {
         public void run() {
             try {
                 long time = System.currentTimeMillis();
-                Data data = new Data((counter++ % numberOfTypes), "FEEDER " + Long.toString(time));
+                Data data = new Data((counter++ % numberOfTypes), "JMS_FEEDER " + Long.toString(time));
                 data.setId(startIdFrom + counter);
                 data.setProcessed(false);
                 
                 // send to space using JMS API
                 Message m = session.createObjectMessage(data);
-                System.out.println("--- SENDING with JMS" + data);
+                System.out.println("--- SENDING with JMS: " + data);
                 messageProducer.send(m);
-                System.out.println("--- WROTE with JMS" + data);
+                System.out.println("--- WROTE with JMS: " + data);
             } catch (Exception e) {
                 e.printStackTrace();
             }
