@@ -17,7 +17,7 @@
         <xsd:complexType>
             <xsd:complexContent>
                 <xsd:extension base="baseEventContainer">
-                    <xsd:sequence>
+                    <xsd:choice minOccurs="1" maxOccurs="unbounded">
                         <xsd:element name="tx-support" type="txEventSupport" minOccurs="0" maxOccurs="1"/>
                         <xsd:element name="trigger-operation-handler" type="triggerOperationHandlerType" minOccurs="0"
                                      maxOccurs="1"/>
@@ -28,7 +28,7 @@
                             <xsd:element ref="os-core:sql-query" minOccurs="0" maxOccurs="1"/>
                         </xsd:choice>
                         <xsd:element name="listener" type="spaceDataEventListenerType" minOccurs="1" maxOccurs="1"/>
-                    </xsd:sequence>
+                    </xsd:choice>
                     <xsd:attribute name="receive-timeout" type="xsd:nonNegativeInteger"/>
                     <xsd:attribute name="recovery-interval" type="xsd:nonNegativeInteger"/>
                     <xsd:attribute name="concurrent-consumers" type="xsd:nonNegativeInteger"/>
@@ -46,7 +46,7 @@
         <xsd:complexType>
             <xsd:complexContent>
                 <xsd:extension base="baseEventContainer">
-                    <xsd:sequence>
+                    <xsd:choice minOccurs="1" maxOccurs="unbounded">
                         <xsd:element name="tx-support" type="txEventSupport" minOccurs="0" maxOccurs="1"/>
                         <xsd:element name="notify" minOccurs="0" maxOccurs="1">
                             <xsd:complexType>
@@ -75,7 +75,7 @@
                             <xsd:element ref="os-core:sql-query" minOccurs="0" maxOccurs="1"/>
                         </xsd:choice>
                         <xsd:element name="listener" type="spaceDataEventListenerType" minOccurs="1" maxOccurs="1"/>
-                    </xsd:sequence>
+                    </xsd:choice>
                     <xsd:attribute name="com-type">
                         <xsd:simpleType>
                             <xsd:restriction base="xsd:string">
