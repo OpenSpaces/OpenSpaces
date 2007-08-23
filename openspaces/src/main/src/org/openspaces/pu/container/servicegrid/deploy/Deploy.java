@@ -201,14 +201,14 @@ public class Deploy {
 
         //get list of all jars
         File lib = view.createFileObject(puHome, "lib");
-        File[] jars = view.getFiles(lib, false);
+        File[] jars = view.getFiles(lib);
         if (logger.isDebugEnabled()) {
             logger.debug("Using lib " + Arrays.asList(jars));
         }
 
         //get list of all shared
         File shared = view.createFileObject(puHome, "shared-lib");
-        File[] sharedJars = view.getFiles(shared, false);
+        File[] sharedJars = view.getFiles(shared);
         if (logger.isDebugEnabled()) {
             logger.debug("Using shared-lib " + Arrays.asList(sharedJars));
         }

@@ -19,21 +19,17 @@ package org.openspaces.pu.container.servicegrid.deploy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.swing.filechooser.FileSystemView;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
 /**
  */
-public class HTTPFileSystemView extends FileSystemView {
+public class HTTPFileSystemView {
 
     private static final Log logger = LogFactory.getLog(HTTPFileSystemView.class);
 
@@ -47,11 +43,22 @@ public class HTTPFileSystemView extends FileSystemView {
         this.root = root;
     }
 
-    public File createNewFolder(File containingDir) throws IOException {
-        throw new IOException("Not Supported");
+    public File createFileObject(String path) {
+        return new File(path);
     }
 
-    public File[] getFiles(File dir, boolean useFileHiding) {
+    /**
+     * Returns a File object constructed in dir from the given filename.
+     */
+    public File createFileObject(File dir, String filename) {
+        if (dir == null) {
+            return new File(filename);
+        } else {
+            return new File(dir, filename);
+        }
+    }
+
+    public File[] getFiles(File dir) {
         //check cache
         if (lastDir != null && lastDir.equals(dir)) {
             return lastResults;
@@ -100,22 +107,6 @@ public class HTTPFileSystemView extends FileSystemView {
     public boolean isRoot(File f) {
         return f.equals(getRoots()[0]);
     }
-
-    public static void main(String[] args) throws MalformedURLException {
-        HTTPFileSystemView view = new HTTPFileSystemView(new URL("http://192.168.1.133:8080"));
-        File helloworld = view.createFileObject("helloworld");
-        File lib = view.createFileObject(helloworld, "lib");
-        File[] jars = view.getFiles(lib, false);
-        System.out.println("jars = " + Arrays.asList(jars));
-
-        File classes = view.createFileObject(helloworld, "classes");
-        System.out.println("classes = " + classes);
-
-//        JFileChooser jFileChooser = new JFileChooser("/", view);
-//
-//        jFileChooser.showOpenDialog(null);
-    }
-
 
     class HTTPFile extends File {
         private long time;
