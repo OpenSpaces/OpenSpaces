@@ -315,6 +315,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             entry.setFieldValue("lookupName", null);
             entry.setFieldValue("methodName", null);
             entry.setFieldValue("arguments", null);
+            entry.setFieldValue("oneWay", null);
 
 
             Object service = interfaceToService.get(remotingEntry.lookupName);
@@ -354,7 +355,6 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                 writeResponse(space, entry, remotingEntry, new RemoteLookupFailureException("Failed to access method ["
                         + remotingEntry.getMethodName() + "] for lookup [" + remotingEntry.getLookupName() + "]", e));
             }
-
         }
 
         public void process(SpaceContext context, ISpaceFilterEntry[] entries, int operationCode) throws RuntimeException {
