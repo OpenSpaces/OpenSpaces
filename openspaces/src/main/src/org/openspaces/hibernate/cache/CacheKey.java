@@ -45,7 +45,10 @@ public class CacheKey implements Externalizable {
 
     public int hashCode() {
         if (hashCode == Integer.MIN_VALUE) {
-            hashCode = 7 * regionName.hashCode() + key.hashCode();
+            hashCode = 7 * regionName.hashCode();
+            if (key != null) {
+                hashCode += key.hashCode();
+            }
         }
         return hashCode;
     }
