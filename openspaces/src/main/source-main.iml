@@ -159,6 +159,7 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="Groovy" level="project" />
     <orderEntryProperties />
   </component>
   <component name="copyright">

@@ -631,6 +631,13 @@
       <JAVADOC />
       <SOURCES />
     </library>
+    <library name="Groovy">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/groovy/groovy-all-1.0.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
   </component>
 </project>
 
