@@ -67,17 +67,27 @@
     </bean>
     
     <!--
-        The JMS Data feeder bean, writing new Data objects to the space in a constant interval, using JMS API and a MessageConverter.
+        The JMS Data feeder bean, writing new Data objects to the space in a constant interval, using Spring's JmsTemplate.
+        Writing Data objects this way is possible thanks to the MessageConverter injected to the ConnectionFactory used by the JmsTemplate.
+        It is important to understand that the MessageConverter is not the standard JmsTemplate's MessageConverter, but the GigaSpaces's
+        implementation of MessageConverter.
     -->
     <bean id="jmsDataFeeder" class="org.openspaces.example.data.feeder.JMSDataFeeder">
         <property name="instanceId" value="${clusterInfo.instanceId}" />
         <property name="numberOfTypes" value="${numberOfTypes}" />
-        <property name="connectionFactory" ref="connectionFactory" />
-		<property name="destination" ref="destination" />
+        <property name="jmsTemplate" ref="jmsTemplate" />
+    </bean>
+
+     <!--
+        The Spring's JmsTemplate, used by the JmsDataFeeder.
+    -->
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="defaultDestination" ref="destination" />
     </bean>
     
     <!--
-        The MessageConverter used by the JMS layer to convert JMS message to any POJO/s before sending
+        The MessageConverter used by the JMS layer to convert JMS message to any POJO/s before sending.
     -->
     <bean id="messageConverter" class="com.j_spaces.jms.utils.ObjectMessage2ObjectConverter" />
 
