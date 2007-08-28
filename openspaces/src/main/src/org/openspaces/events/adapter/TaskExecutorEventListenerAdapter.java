@@ -48,6 +48,11 @@ public class TaskExecutorEventListenerAdapter implements SpaceDataEventListener,
         this.delegate = delegate;
     }
 
+    /**
+     * Initializes the task executor adapter. Expects the delegate to be set. If no
+     * {@link #setTaskExecutor(org.springframework.core.task.TaskExecutor) taskExecutor} is
+     * provided will create a default one using {@link org.springframework.core.task.SimpleAsyncTaskExecutor}. 
+     */
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(delegate, "delegate SpaceDataEventListener must not be null");
         if (taskExecutor == null) {
@@ -57,6 +62,10 @@ public class TaskExecutorEventListenerAdapter implements SpaceDataEventListener,
         }
     }
 
+    /**
+     * Listens for events and and delegates them to the {@link #setDelegate(org.openspaces.events.SpaceDataEventListener)}
+     * to be executed using the provided {@link #setTaskExecutor(org.springframework.core.task.TaskExecutor)}.
+     */
     public void onEvent(final Object data, final GigaSpace gigaSpace, final TransactionStatus txStatus, final Object source) {
         taskExecutor.execute(new Runnable() {
             public void run() {
