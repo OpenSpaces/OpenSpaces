@@ -104,7 +104,7 @@ public class DataFeeder implements InitializingBean, DisposableBean {
                 data.setId(startIdFrom + counter);
                 data.setProcessed(false);
                 gigaSpace.write(data);
-                System.out.println("--- WROTE " + data);
+                System.out.println("--- FEEDER WROTE " + data);
             } catch (Exception e) {
                 e.printStackTrace();
             }

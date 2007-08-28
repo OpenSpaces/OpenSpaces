@@ -22,18 +22,17 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Session;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
-
 /**
  * A JMS feeder bean starts a scheduled task that uses Spring's JmsTemplate to write Data objects into the space.
- * 
+ *
  * The JmsTemplate's JMS ConnectionFactory is injected with a MessageConverter that converts the JMS ObjectMessages
  * to the Data objects before writing them to the space. It is important to understand that the MessageConverter is not
  * the standard JmsTemplate's MessageConverter, but the GigaSpaces's implementation of MessageConverter.
@@ -58,8 +57,10 @@ public class JMSDataFeeder implements InitializingBean, DisposableBean {
     private Long instanceId;
 
     private long startIdFrom = 0;
-    
-    /** The bean's JmsTemplate */
+
+    /**
+     * The bean's JmsTemplate
+     */
     private JmsTemplate jmsTemplate;
 
 
@@ -80,19 +81,20 @@ public class JMSDataFeeder implements InitializingBean, DisposableBean {
     public void setInstanceId(Long instanceId) {
         this.instanceId = instanceId;
     }
-    
-    /** Sets the JmsTemplate */
-    public void setJmsTemplate(JmsTemplate jmsTemplate)
-    {
+
+    /**
+     * Sets the JmsTemplate
+     */
+    public void setJmsTemplate(JmsTemplate jmsTemplate) {
         this.jmsTemplate = jmsTemplate;
     }
-    
-   
+
+
     public void afterPropertiesSet() throws Exception {
         System.out.println("--- STARTING FEEDER WITH CYCLE [" + defaultDelay + "]");
         if (instanceId != null) {
             // have a range of ids based on the instance id of the processing unit
-            startIdFrom = instanceId * 10000000;
+            startIdFrom = instanceId * 100000000;
         }
         executorService = Executors.newScheduledThreadPool(1);
         dataFeederTask = new JMSDataFeederTask();
@@ -116,17 +118,16 @@ public class JMSDataFeeder implements InitializingBean, DisposableBean {
                 final Data data = new Data((counter++ % numberOfTypes), "JMS_FEEDER " + Long.toString(time));
                 data.setId(startIdFrom + counter);
                 data.setProcessed(false);
-                
+
                 // Send to space using JmsTemplate. Because the ObjectMessage2ObjectConverter (MessageConverter)
                 // is injected to the Connectionfactory, used by the JmsTemplate, what actually is written to the space
                 // are the Data objects and not JMS ObjectMessages.
-                System.out.println("--- SENDING with JmsTemplate: " + data);
-                jmsTemplate.send(new MessageCreator(){
+                jmsTemplate.send(new MessageCreator() {
                     public Message createMessage(Session session) throws JMSException {
                         return session.createObjectMessage(data);
                     }
                 });
-                System.out.println("--- WROTE with JmsTemplate: " + data);
+                System.out.println("--- JMS WROTE" + data);
             } catch (Exception e) {
                 e.printStackTrace();
             }

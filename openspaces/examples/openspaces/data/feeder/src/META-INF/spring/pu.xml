@@ -75,17 +75,19 @@
     <bean id="jmsDataFeeder" class="org.openspaces.example.data.feeder.JMSDataFeeder">
         <property name="instanceId" value="${clusterInfo.instanceId}" />
         <property name="numberOfTypes" value="${numberOfTypes}" />
-        <property name="jmsTemplate" ref="jmsTemplate" />
+        <property name="jmsTemplate">
+            <bean class="org.springframework.jms.core.JmsTemplate">
+                <property name="connectionFactory" ref="connectionFactory"/>
+                <property name="defaultDestination" ref="destination" />
+            </bean>
+        </property>
     </bean>
 
-     <!--
-        The Spring's JmsTemplate, used by the JmsDataFeeder.
+    <!--
+        The JMS ConnectionFactory used by the JMS feeder
     -->
-    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
-        <property name="connectionFactory" ref="connectionFactory"/>
-        <property name="defaultDestination" ref="destination" />
-    </bean>
-    
+    <os-jms:connection-factory id="connectionFactory" giga-space="gigaSpace" message-converter="messageConverter" />
+
     <!--
         The MessageConverter used by the JMS layer to convert JMS message to any POJO/s before sending.
     -->
@@ -95,12 +97,7 @@
         A JMS destination used when sending messages
     -->
     <os-jms:queue id="destination" name="MyQueue" />
-	
-    <!--
-        The JMS ConnectionFactory used by the JMS feeder
-    -->
-    <os-jms:connection-factory id="connectionFactory" giga-space="gigaSpace" message-converter="messageConverter" />
-	
+
 	<!-- Remoting Example -->
 	
     <!--
