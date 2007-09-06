@@ -219,7 +219,6 @@ public class Deploy {
             logger.debug("Using PU xml [" + puString + "]");
         }
 
-        // just call this to validate the xml before we deploy it
         Resource resource;
 
         // check to see if sla was passed as a parameter
