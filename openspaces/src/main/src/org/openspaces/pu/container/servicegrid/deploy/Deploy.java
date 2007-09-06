@@ -219,10 +219,6 @@ public class Deploy {
             logger.debug("Using PU xml [" + puString + "]");
         }
 
-        // just call this to validate the xml before we deploy it
-        Resource resource = new ByteArrayResource(puString.getBytes());
-        new XmlBeanFactory(resource);
-
         // check to see if sla was passed as a parameter
         String slaString = puString;
         for (CommandLineParser.Parameter param : params) {
