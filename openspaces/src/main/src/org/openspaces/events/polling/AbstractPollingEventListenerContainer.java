@@ -76,7 +76,7 @@ import org.springframework.util.Assert;
 public abstract class AbstractPollingEventListenerContainer extends AbstractEventListenerContainer {
 
     /**
-     * The default receive timeout: 60000 ms = 60 second = 1 minute.
+     * The default receive timeout: 60000 ms = 60 seconds = 1 minute.
      */
     public static final long DEFAULT_RECEIVE_TIMEOUT = 60000;
 

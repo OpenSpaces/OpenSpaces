@@ -153,11 +153,25 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
 
 
     private Object receiveTemplate;
-    
+
+    /**
+     * See {@link #setComTypeName(String)}.
+     *
+     * @see #COM_TYPE_MULTICAST
+     * @see #COM_TYPE_MULTIPLEX
+     * @see #COM_TYPE_UNICAST
+     */
     public void setComType(int comType) {
         this.comType = comType;
     }
 
+    /**
+     * Sets the communication protocol for the notification registration.
+     *
+     * @see #COM_TYPE_MULTICAST
+     * @see #COM_TYPE_MULTIPLEX
+     * @see #COM_TYPE_UNICAST
+     */
     public void setComTypeName(String comTypeName) {
         Assert.notNull(comTypeName, "comTypeName cannot be null");
         setComType(constants.asNumber(COM_TYPE_PREFIX + comTypeName).intValue());

@@ -34,16 +34,14 @@ import java.rmi.RemoteException;
  * Uses {@link AbstractNotifyEventListenerContainer} for configuration of different notification
  * registration parameters and transactional semantics.
  *
- * <p>
- * Allows to control using {@link #setRegisterOnStartup(boolean)} if the listener will be registered
+ * <p>Allows to control using {@link #setRegisterOnStartup(boolean)} if the listener will be registered
  * for notification on startup or registration will be controlled by the {@link #doStart()} and
  * {@link #doStop()} callbacks (which by default are triggered based on the current space mode -
  * <code>PRIMARY</code> or <code>BACKUP</code>). Default is <code>false</code> which means
  * registration will occur when the space moves into <code>PRIMARY</code> mode (assuming that
  * {@link #setActiveWhenPrimary(boolean)} is set to <code>true</code>, which is the default).
  *
- * <p>
- * The container can automatically take the notified event data (using {@link GigaSpace#take(Object)})
+ * <p>The container can automatically take the notified event data (using {@link GigaSpace#take(Object)})
  * if the {@link #setPerformTakeOnNotify(boolean)} is set to <code>true</code>. Defaults to
  * <code>false</code>. If the flag is set to <code>true</code>, {@link #setIgnoreEventOnNullTake(boolean)}
  * can control of the event will be propagated to the event listener if the take operation returned

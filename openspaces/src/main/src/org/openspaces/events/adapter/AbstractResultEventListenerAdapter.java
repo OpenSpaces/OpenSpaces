@@ -62,7 +62,7 @@ public abstract class AbstractResultEventListenerAdapter implements SpaceDataEve
     }
 
     /**
-     * Sets the update timeout in case the flag {@link #setUpdateOrWrite(boolean)} is set to
+     * Sets the update timeout (im milliseconds) in case the flag {@link #setUpdateOrWrite(boolean)} is set to
      * <code>true</code>.
      */
     public void setUpdateTimeout(long updateTimeout) {
