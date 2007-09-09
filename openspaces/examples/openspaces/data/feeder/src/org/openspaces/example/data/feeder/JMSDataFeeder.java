@@ -110,13 +110,13 @@ public class JMSDataFeeder implements InitializingBean, DisposableBean {
 
     public class JMSDataFeederTask implements Runnable {
 
-        private long counter;
+        private long counter = 1;
 
         public void run() {
             try {
                 long time = System.currentTimeMillis();
                 final Data data = new Data((counter++ % numberOfTypes), "JMS_FEEDER " + Long.toString(time));
-                data.setId(startIdFrom + counter);
+                data.setId(-(startIdFrom + counter));
                 data.setProcessed(false);
 
                 // Send to space using JmsTemplate. Because the ObjectMessage2ObjectConverter (MessageConverter)
@@ -127,7 +127,7 @@ public class JMSDataFeeder implements InitializingBean, DisposableBean {
                         return session.createObjectMessage(data);
                     }
                 });
-                System.out.println("--- JMS WROTE" + data);
+                System.out.println("--- JMS WROTE " + data);
             } catch (Exception e) {
                 e.printStackTrace();
             }

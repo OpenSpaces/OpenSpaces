@@ -79,7 +79,7 @@ public class DataFeeder implements InitializingBean, DisposableBean {
         System.out.println("--- STARTING FEEDER WITH CYCLE [" + defaultDelay + "]");
         if (instanceId != null) {
             // have a range of ids based on the instance id of the processing unit
-            startIdFrom = instanceId * 10000000;
+            startIdFrom = instanceId * 100000000;
         }
         executorService = Executors.newScheduledThreadPool(1);
         dataFeederTask = new DataFeederTask();
@@ -95,7 +95,7 @@ public class DataFeeder implements InitializingBean, DisposableBean {
 
     public class DataFeederTask implements Runnable {
 
-        private long counter;
+        private long counter = 1;
 
         public void run() {
             try {
