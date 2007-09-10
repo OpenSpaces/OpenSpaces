@@ -27,7 +27,7 @@ import org.springframework.dao.DataAccessException;
  * 
  * @author kimchy
  */
-public class MultiTakeReceiveOperationHandler implements ReceiveOperationHandler {
+public class MultiTakeReceiveOperationHandler extends AbstractNonBlockingReceiveOperationHandler {
 
     private static final int DEFAULT_MAX_ENTRIES = 50;
 
@@ -46,11 +46,22 @@ public class MultiTakeReceiveOperationHandler implements ReceiveOperationHandler
      * values are returned, will perform a blocking take operation using
      * {@link org.openspaces.core.GigaSpace#take(Object,long)}.
      */
-    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
+    protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         Object[] results = gigaSpace.takeMultiple(template, maxEntries);
         if (results != null && results.length > 0) {
             return results;
         }
         return gigaSpace.take(template, receiveTimeout);
+    }
+
+    /**
+     * Performs a non blocking {@link org.openspaces.core.GigaSpace#takeMultiple(Object, int)}.
+     */
+    protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
+        Object[] results = gigaSpace.takeMultiple(template, maxEntries);
+        if (results != null && results.length > 0) {
+            return results;
+        }
+        return null;
     }
 }

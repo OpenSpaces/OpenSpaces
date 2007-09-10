@@ -30,7 +30,7 @@ import org.springframework.dao.DataAccessException;
  *
  * @author kimchy
  */
-public class ExclusiveReadReceiveOperationHandler implements ReceiveOperationHandler {
+public class ExclusiveReadReceiveOperationHandler extends AbstractNonBlockingReceiveOperationHandler {
 
     /**
      * Performs single read operation using {@link org.openspaces.core.GigaSpace#read(Object,long)}
@@ -40,7 +40,19 @@ public class ExclusiveReadReceiveOperationHandler implements ReceiveOperationHan
      *
      * Note, this receive operation handler must be performed under a transaction.
      */
-    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException{
+    protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         return gigaSpace.read(template, receiveTimeout, gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK);
+    }
+
+    /**
+     * Performs single read operation using {@link org.openspaces.core.GigaSpace#read(Object,long)}
+     * under an exclusive read lock with no timeout. This receive operation handler allows to lock entries so other
+     * receive operations won't be able to obtain it (mimics the take operation) but without actually
+     * performing a take from the Space.
+     *
+     * Note, this receive operation handler must be performed under a transaction.
+     */
+    protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
+        return gigaSpace.read(template, 0, gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK);
     }
 }

@@ -21,15 +21,24 @@ import org.springframework.dao.DataAccessException;
 
 /**
  * Performs single take operation using {@link org.openspaces.core.GigaSpace#take(Object,long)}.
- * 
+ *
  * @author kimchy
  */
-public class SingleTakeReceiveOperationHandler implements ReceiveOperationHandler {
+public class SingleTakeReceiveOperationHandler extends AbstractNonBlockingReceiveOperationHandler {
 
     /**
-     * Performs single take operation using {@link org.openspaces.core.GigaSpace#take(Object,long)}.
+     * Performs a single take operation using {@link org.openspaces.core.GigaSpace#take(Object, long)} with
+     * the given timeout.
      */
-    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
+    protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         return gigaSpace.take(template, receiveTimeout);
+    }
+
+    /**
+     * Performs a single take operation using {@link org.openspaces.core.GigaSpace#take(Object, long)} with
+     * no timeout.
+     */
+    protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
+        return gigaSpace.take(template, 0);
     }
 }

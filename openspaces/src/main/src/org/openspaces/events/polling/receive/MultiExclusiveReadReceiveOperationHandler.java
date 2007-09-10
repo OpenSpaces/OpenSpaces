@@ -31,7 +31,7 @@ import org.springframework.dao.DataAccessException;
  *
  * @author kimchy
  */
-public class MultiExclusiveReadReceiveOperationHandler implements ReceiveOperationHandler {
+public class MultiExclusiveReadReceiveOperationHandler extends AbstractNonBlockingReceiveOperationHandler {
 
     private static final int DEFAULT_MAX_ENTRIES = 50;
 
@@ -53,11 +53,26 @@ public class MultiExclusiveReadReceiveOperationHandler implements ReceiveOperati
      * <p>Read operations are performed under an exclusive read lock which mimics the similar behaviour
      * as take without actually taking the entry from the space.
      */
-    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
+    protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         Object[] results = gigaSpace.readMultiple(template, maxEntries, gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK);
         if (results != null && results.length > 0) {
             return results;
         }
         return gigaSpace.read(template, receiveTimeout, gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK);
+    }
+
+    /**
+     * Perform a {@link org.openspaces.core.GigaSpace#readMultiple(Object,int)}
+     * using the provided template and configured maxEntries (defaults to <code>50</code>).
+     *
+     * <p>Read operations are performed under an exclusive read lock which mimics the similar behaviour
+     * as take without actually taking the entry from the space.
+     */
+    protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
+        Object[] results = gigaSpace.readMultiple(template, maxEntries, gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK);
+        if (results != null && results.length > 0) {
+            return results;
+        }
+        return null;
     }
 }

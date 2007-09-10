@@ -24,10 +24,10 @@ import org.springframework.dao.DataAccessException;
  * the provided template and configured maxEntries (defaults to <code>50</code>). If no values
  * are returned, will perform a blocking read operation using
  * {@link org.openspaces.core.GigaSpace#read(Object,long)}.
- * 
+ *
  * @author kimchy
  */
-public class MultiReadReceiveOperationHandler implements ReceiveOperationHandler {
+public class MultiReadReceiveOperationHandler extends AbstractNonBlockingReceiveOperationHandler {
 
     private static final int DEFAULT_MAX_ENTRIES = 50;
 
@@ -46,11 +46,24 @@ public class MultiReadReceiveOperationHandler implements ReceiveOperationHandler
      * values are returned, will perform a blocking read operation using
      * {@link org.openspaces.core.GigaSpace#read(Object,long)}.
      */
-    public Object receive(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
+    protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         Object[] results = gigaSpace.readMultiple(template, maxEntries);
         if (results != null && results.length > 0) {
             return results;
         }
         return gigaSpace.read(template, receiveTimeout);
+    }
+
+    /**
+     * Perform a {@link org.openspaces.core.GigaSpace#readMultiple(Object,int)}
+     * using the provided template and configured maxEntries (defaults to <code>50</code>). This is a non
+     * blocking operation.
+     */
+    protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
+        Object[] results = gigaSpace.readMultiple(template, maxEntries);
+        if (results != null && results.length > 0) {
+            return results;
+        }
+        return null;
     }
 }
