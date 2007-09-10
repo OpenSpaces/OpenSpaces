@@ -253,38 +253,125 @@
     </xsd:element>
 
     <xsd:complexType name="requirementsType">
+        <xsd:annotation>
+            <xsd:documentation>
+                Allows to define a set of requirements that control where a processing unit can be deployed.
+            </xsd:documentation>
+        </xsd:annotation>
         <xsd:choice minOccurs="0" maxOccurs="unbounded">
             <xsd:element name="host">
                 <xsd:complexType>
-                    <xsd:attribute name="ip" type="xsd:string" use="required"/>
+                    <xsd:attribute name="ip" type="xsd:string" use="required">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                Controls the ip of the machine a processing unit can be deployed to.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
                 </xsd:complexType>
             </xsd:element>
             <xsd:element name="range">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Controls based on the value of built in monitor if a processing unit can be deployed to.
+                    </xsd:documentation>
+                </xsd:annotation>
                 <xsd:complexType>
-                    <xsd:attribute name="monitor" type="xsd:string" use="required"/>
-                    <xsd:attribute name="low" type="xsd:double" use="optional"/>
-                    <xsd:attribute name="high" type="xsd:double" use="required"/>
+                    <xsd:attribute name="monitor" type="xsd:string" use="required">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                The monitor name to get the value from.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="low" type="xsd:double" use="optional">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                The lower threshold where value beneath it will cause the processing unit not to deploy.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="high" type="xsd:double" use="required">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                The high threshold where value above it will cause the processing unit not to deploy.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
                 </xsd:complexType>
             </xsd:element>
             <xsd:element name="cpu">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        A CPU monitor that controls if a processing unit can deploy to.
+                    </xsd:documentation>
+                </xsd:annotation>
                 <xsd:complexType>
-                    <xsd:attribute name="low" type="xsd:double" use="optional"/>
-                    <xsd:attribute name="high" type="xsd:double" use="required"/>
+                    <xsd:attribute name="low" type="xsd:double" use="optional">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                Lower values of the CPU beneath this value will cause the processing unit not to deploy.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="high" type="xsd:double" use="required">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                High values of the CPU above this value will cause the processing unit not to deploy.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
                 </xsd:complexType>
             </xsd:element>
             <xsd:element name="memory">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        A memory monitor that controls if a processing unit can deploy to.
+                    </xsd:documentation>
+                </xsd:annotation>
                 <xsd:complexType>
-                    <xsd:attribute name="low" type="xsd:double" use="optional"/>
-                    <xsd:attribute name="high" type="xsd:double" use="required"/>
+                    <xsd:attribute name="low" type="xsd:double" use="optional">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                Lower values of the Memory beneath this value will cause the processing unit not to
+                                deploy.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="high" type="xsd:double" use="required">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                High values of the Memory above this value will cause the processing unit not to deploy.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
                 </xsd:complexType>
             </xsd:element>
             <xsd:element name="system">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        System reqreuiemtns use custom attributes specified in the processing unit container that can
+                        then be referenced by this deployment if it can be deployed to.
+                    </xsd:documentation>
+                </xsd:annotation>
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element name="attributes" type="beans:mapType">
+                            <xsd:annotation>
+                                <xsd:documentation>
+                                    A set of one or more key value pairs (configured similar to Map) of attributes to
+                                    match against.
+                                </xsd:documentation>
+                            </xsd:annotation>
                         </xsd:element>
                     </xsd:sequence>
-                    <xsd:attribute name="name" type="xsd:string" use="required"/>
+                    <xsd:attribute name="name" type="xsd:string" use="required">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                The name of the system attribute.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
                 </xsd:complexType>
             </xsd:element>
         </xsd:choice>
