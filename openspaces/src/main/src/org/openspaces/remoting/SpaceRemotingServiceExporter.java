@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Exports a list of services (beans) as remote services with the Space as the transport layer. All
  * the interfaces each service implements are registered as lookup names (matching
- * {@link AsyncSpaceRemotingEntry#getLookupName()} which are then used to lookup the actual service
+ * {@link SpaceRemotingInvocation#getLookupName()} which are then used to lookup the actual service
  * when a remote invocation is received. The correct service and its method are then executed and a
  * {@link org.openspaces.remoting.AsyncSpaceRemotingEntry} is written back to the space. The remote result
  * can either hold the return value (or <code>null</code> in case of void return value) or an
