@@ -36,22 +36,37 @@ public abstract class AbstractMonitor implements Monitor {
         return name;
     }
 
+    /**
+     * Sets the name of the monitor.
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * The period this monitor will be sampled (in milliseconds). Defaults to 5 seconds.
+     */
     public long getPeriod() {
         return period;
     }
 
+    /**
+     * The period this monitor will be sampled (in milliseconds). Defaults to 5 seconds.
+     */
     public void setPeriod(long period) {
         this.period = period;
     }
 
+    /**
+     * The history log size that will be kept for this monitor. Defaults to 100.
+     */
     public int getHistorySize() {
         return historySize;
     }
 
+    /**
+     * The history log size that will be kept for this monitor. Defaults to 100.
+     */
     public void setHistorySize(int historySize) {
         this.historySize = historySize;
     }

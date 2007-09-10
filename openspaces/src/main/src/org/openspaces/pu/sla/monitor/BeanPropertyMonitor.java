@@ -24,6 +24,9 @@ import org.springframework.util.StringUtils;
 import java.lang.reflect.InvocationTargetException;
 
 /**
+ * The bean property monitor allows to register a Spring bean reference and a proeprty name which will
+ * be monitored at a scheduled interval by invoking it.
+ *
  * @author kimchy
  */
 public class BeanPropertyMonitor extends AbstractMonitor implements ApplicationContextMonitor {
@@ -35,18 +38,30 @@ public class BeanPropertyMonitor extends AbstractMonitor implements ApplicationC
 
     private transient MethodInvoker methodInvoker;
 
+    /**
+     * Sets the registered bean reference that will be monitored.
+     */
     public void setRef(String ref) {
         this.ref = ref;
     }
 
+    /**
+     * The registered bean reference that will be monitored.
+     */
     public String getRef() {
         return ref;
     }
 
+    /**
+     * Sets the property name of the given bean that will be monitored.
+     */
     public void setPropertyName(String propertyName) {
         this.propertyName = propertyName;
     }
 
+    /**
+     * The property name of the given bean that will be monitored.
+     */
     public String getPropertyName() {
         return propertyName;
     }
