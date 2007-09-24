@@ -38,7 +38,7 @@ public abstract class AbstractResultEventAdapterBeanDefinitionParser extends Abs
 
         String writeLease = element.getAttribute(WRITE_LEASE);
         if (StringUtils.hasLength(writeLease)) {
-            builder.addPropertyValue("writeLease", Boolean.valueOf(writeLease));
+            builder.addPropertyValue("writeLease", Long.valueOf(writeLease));
         }
 
         String updateOrWrite = element.getAttribute(UPDATE_OR_WRITE);
@@ -48,7 +48,7 @@ public abstract class AbstractResultEventAdapterBeanDefinitionParser extends Abs
 
         String updateTimeout = element.getAttribute(UPDATE_TIMEOUT);
         if (StringUtils.hasLength(updateTimeout)) {
-            builder.addPropertyValue("updateTimeout", Boolean.valueOf(updateTimeout));
+            builder.addPropertyValue("updateTimeout", Long.valueOf(updateTimeout));
         }
 
         String scope = element.getAttribute("scope");
