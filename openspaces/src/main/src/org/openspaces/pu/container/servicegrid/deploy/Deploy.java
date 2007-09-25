@@ -413,6 +413,10 @@ public class Deploy {
             element.setMaxPerMachine(sla.getMaxInstancesPerVM());
         }
 
+        if (sla.getMaxInstancesPerMachine() > 0) {
+            element.setMaxPerPhysicalMachine(sla.getMaxInstancesPerMachine());
+        }
+
         //put jars
         ClassBundle classBundle = element.getComponentBundle();
         classBundle.addJAR(puPath + "/");

@@ -249,6 +249,16 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:attribute>
+            <xsd:attribute name="max-instances-per-machine" type="xsd:positiveInteger" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Controls how many instances can be deployed per machine. When using a topology without backups,
+                        will control the number of instances based on all the processing unit instances. When working
+                        with a topology that has backups will control the number of a partition and its backups per
+                        machine.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
         </xsd:complexType>
     </xsd:element>
 

@@ -77,6 +77,8 @@ public class SLA implements Serializable {
 
     private int maxInstancesPerVM;
 
+    private int maxInstancesPerMachine;
+
     private List<InstanceSLA> instanceSLAs;
 
     /**
@@ -157,6 +159,28 @@ public class SLA implements Serializable {
      */
     public void setMaxInstancesPerVM(int maxInstancesPerVM) {
         this.maxInstancesPerVM = maxInstancesPerVM;
+    }
+
+    /**
+     * Returns the maximum number of instances of the processing unit allowed to run
+     * on the same machine, regardless of the number of grid containers running on it.
+     *
+     * <p>Note, when using number of backups higher than 0, this value only applies to a
+     * primary with its backups group.
+     */
+    public int getMaxInstancesPerMachine() {
+        return maxInstancesPerMachine;
+    }
+
+    /**
+     * Sets the maximum number of instances of the processing unit allowed to run
+     * on the same machine, regardless of the number of grid containers running on it.
+     *
+     * <p>Note, when using number of backups higher than 0, this value only applies to a
+     * primary with its backups group.
+     */
+    public void setMaxInstancesPerMachine(int maxInstancesPerMachine) {
+        this.maxInstancesPerMachine = maxInstancesPerMachine;
     }
 
     /**
