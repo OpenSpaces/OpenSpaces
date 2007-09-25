@@ -285,6 +285,13 @@ public class Deploy {
                     logger.info("Overrding SLA maxInstancesPerVM with [" + maxInstancePerVm + "]");
                 }
             }
+            if (param.getName().equalsIgnoreCase("max-instances-per-machine")) {
+                String maxInstancePerMachine = param.getArguments()[0];
+                sla.setMaxInstancesPerMachine(Integer.valueOf(maxInstancePerMachine));
+                if (logger.isInfoEnabled()) {
+                    logger.info("Overrding SLA maxInstancesPerMachine with [" + maxInstancePerMachine + "]");
+                }
+            }
         }
 
         if (logger.isDebugEnabled()) {
@@ -592,6 +599,7 @@ public class Deploy {
         sb.append("\n    -proeprties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
         sb.append("\n    -override-name [override pu name]        : An override pu name, useful when using pu as a template");
         sb.append("\n    -max-instances-per-vm [number]           : Allows to set the SLA number of instances per VM");
+        sb.append("\n    -max-instances-per-machine [number]      : Allows to set the SLA number of instances per machine");
         sb.append("\n");
         sb.append("\n");
         sb.append("\nSome Examples:");
