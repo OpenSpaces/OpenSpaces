@@ -121,6 +121,10 @@ public class NotifyContainerBeanDefinitionParser extends AbstractTxEventContaine
             if (StringUtils.hasLength(timeout)) {
                 builder.addPropertyValue("listenerLease", timeout);
             }
+            String listener = leaseEle.getAttribute("listener");
+            if (StringUtils.hasLength(listener)) {
+                builder.addPropertyReference("leaseListener", listener);
+            }
         }
 
         Element notifyFilterEle = DomUtils.getChildElementByTagName(element, NOTIFY_FILTER);

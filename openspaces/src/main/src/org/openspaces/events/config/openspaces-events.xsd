@@ -319,7 +319,13 @@
                                         </xsd:documentation>
                                     </xsd:annotation>
                                 </xsd:attribute>
-                                <!-- TODO LeaseListener configuration -->
+                                <xsd:attribute name="listener" type="xsd:string">
+                                    <xsd:annotation>
+                                        <xsd:documentation>
+                                            Sets a reference to a bean that is a lease renew listener.
+                                        </xsd:documentation>
+                                    </xsd:annotation>
+                                </xsd:attribute>
                             </xsd:complexType>
                         </xsd:element>
                         <xsd:element name="notify-filter" type="notifyFilterType" minOccurs="0" maxOccurs="1">
