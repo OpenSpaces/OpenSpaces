@@ -112,7 +112,7 @@ public class SimpleMapCache implements Cache {
      * If this is a clustered cache, lock the item
      */
     public void lock(Object key) throws CacheException {
-        LockHandle lockHandle = lockManager.lock(key, getTimeout(), getTimeout());
+        LockHandle lockHandle = lockManager.lock(new CacheKey(regionName, key), getTimeout(), getTimeout());
         lockHandlerContext.set(lockHandle);
     }
 
@@ -121,7 +121,7 @@ public class SimpleMapCache implements Cache {
      */
     public void unlock(Object key) throws CacheException {
         lockHandlerContext.remove();
-        lockManager.unlock(key);
+        lockManager.unlock(new CacheKey(regionName, key));
     }
 
     /**

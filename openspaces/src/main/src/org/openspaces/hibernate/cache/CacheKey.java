@@ -71,6 +71,10 @@ public class CacheKey implements Externalizable {
         return false;
     }
 
+    public String toString() {
+        return "CacheKey region[" + regionName + "] key [" + key + "]";
+    }
+
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeUTF(regionName);
         out.writeObject(key);
