@@ -24,6 +24,7 @@ import com.j_spaces.core.client.INotifyDelegatorFilter;
 import net.jini.core.event.RemoteEventListener;
 import net.jini.core.lease.Lease;
 import net.jini.lease.LeaseListener;
+import org.openspaces.core.util.SpaceUtils;
 import org.openspaces.events.AbstractEventListenerContainer;
 import org.openspaces.events.EventTemplateProvider;
 import org.springframework.core.Constants;
@@ -143,9 +144,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
 
     private Boolean notifyAll;
 
-    private boolean triggerNotifyTemplate = false;
+    private Boolean triggerNotifyTemplate;
 
-    private boolean replicateNotifyTemplate = false;
+    private Boolean replicateNotifyTemplate;
 
     private PlatformTransactionManager transactionManager;
 
@@ -249,7 +250,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
     public void setPerformSnapshot(boolean performSnapshot) {
         this.performSnapshot = performSnapshot;
     }
-    
+
     /**
      * Controls the lease associated with the registered listener. Defaults to
      * {@link net.jini.core.lease.Lease#FOREVER}.
@@ -319,6 +320,10 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
      * If using a replicated space controls if the listener will be replicated between all the
      * replicated cluster members.
      *
+     * <p>If working directly with a cluster memeber, the default value will be <code>false</code>.
+     * Otherwise, the default value will be based on the cluster schema (which is true for clusters
+     * with backups).
+     *
      * @see #setTriggerNotifyTemplate(boolean)
      */
     public void setReplicateNotifyTemplate(boolean replicateNotifyTemplate) {
@@ -326,7 +331,6 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
     }
 
     /**
-     * <p>
      * Specify the Spring {@link org.springframework.transaction.PlatformTransactionManager} to use
      * for transactional wrapping of listener execution.
      *
@@ -394,7 +398,15 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
     }
 
     public void initialize() throws DataAccessException {
-        if (!replicateNotifyTemplate && triggerNotifyTemplate) {
+        // if we are using a Space that was started in embedded mode, no need to replicate notify template
+        // by default
+        if (replicateNotifyTemplate == null && !SpaceUtils.isRemoteProtocol(getGigaSpace().getSpace())) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(message("Setting replicateNotifyTemplate to true since working with an embedded Space"));
+            }
+            replicateNotifyTemplate = false;
+        }
+        if (replicateNotifyTemplate == null && triggerNotifyTemplate != null && triggerNotifyTemplate) {
             if (logger.isDebugEnabled()) {
                 logger.debug(message("triggerNotifyTemplate is set, automatically setting replicateNotifyTemplate to true"));
             }
@@ -451,7 +463,6 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
     }
 
 
-
     /**
      * Creates a new event session factory based on the space provided.
      */
@@ -483,8 +494,12 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
             eventSessionConfig.setBatch(batchSize, batchTime);
         }
         eventSessionConfig.setAutoRenew(autoRenew, leaseListener);
-        eventSessionConfig.setTriggerNotifyTemplate(triggerNotifyTemplate);
-        eventSessionConfig.setReplicateNotifyTemplate(replicateNotifyTemplate);
+        if (triggerNotifyTemplate != null) {
+            eventSessionConfig.setTriggerNotifyTemplate(triggerNotifyTemplate);
+        }
+        if (replicateNotifyTemplate != null) {
+            eventSessionConfig.setReplicateNotifyTemplate(replicateNotifyTemplate);
+        }
         return eventSessionConfig;
     }
 
