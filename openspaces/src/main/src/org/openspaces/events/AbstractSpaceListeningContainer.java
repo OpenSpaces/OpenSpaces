@@ -81,9 +81,9 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
 
     private String beanName;
 
-    private boolean active = false;
+    private volatile boolean active = false;
 
-    private boolean running = false;
+    private volatile boolean running = false;
 
     private final List<Object> pausedTasks = new LinkedList<Object>();
 
@@ -205,8 +205,8 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
             logger.debug(message("Shutting down Space Event listener container"));
         }
         synchronized (this.lifecycleMonitor) {
-            this.running = false;
             this.active = false;
+            this.running = false;
             this.lifecycleMonitor.notifyAll();
         }
 
@@ -232,9 +232,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      * not shut down yet.
      */
     public final boolean isActive() {
-        synchronized (this.lifecycleMonitor) {
-            return this.active;
-        }
+        return this.active;
     }
 
     /**
@@ -319,9 +317,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      * not stopped yet.
      */
     public final boolean isRunning() {
-        synchronized (this.lifecycleMonitor) {
-            return this.running;
-        }
+        return this.running;
     }
 
     /**
@@ -331,13 +327,15 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      * state.
      */
     protected final void waitWhileNotRunning() {
-        synchronized (this.lifecycleMonitor) {
-            while (this.active && !this.running) {
-                try {
-                    this.lifecycleMonitor.wait();
-                } catch (InterruptedException ex) {
-                    // Re-interrupt current thread, to allow other threads to react.
-                    Thread.currentThread().interrupt();
+        while (this.active && !this.running) {
+            synchronized (this.lifecycleMonitor) {
+                if (this.active && !this.running) {
+                    try {
+                        this.lifecycleMonitor.wait();
+                    } catch (InterruptedException ex) {
+                        // Re-interrupt current thread, to allow other threads to react.
+                        Thread.currentThread().interrupt();
+                    }
                 }
             }
         }
@@ -356,16 +354,20 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      */
     protected final boolean rescheduleTaskIfNecessary(Object task) {
         Assert.notNull(task, "Task object must not be null");
-        synchronized (this.lifecycleMonitor) {
-            if (this.running) {
-                doRescheduleTask(task);
-                return true;
-            } else if (this.active) {
+        if (this.running) {
+            doRescheduleTask(task);
+            return true;
+        } else if (this.active) {
+            synchronized (lifecycleMonitor) {
+                if (this.running) {
+                    doRescheduleTask(task);
+                    return true;
+                }
                 this.pausedTasks.add(task);
                 return true;
-            } else {
-                return false;
             }
+        } else {
+            return false;
         }
     }
 
