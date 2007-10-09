@@ -9,6 +9,7 @@
             <Interface>org.jini.rio.resources.servicecore.Service</Interface>
             <Resources>
                 <JAR>gs-dl.jar</JAR>
+                <JAR>JSpaces.jar</JAR>
             </Resources>
         </Interfaces>
         <ImplementationClass>org.openspaces.pu.container.servicegrid.PUServiceBeanImpl
