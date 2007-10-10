@@ -43,6 +43,7 @@ import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,6 +99,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
     private ClusterInfo clusterInfo;
 
+    private MethodInvocationCache methodInvocationCache = new MethodInvocationCache();
+
     /**
      * Sets the list of services that will be exported as remote services. Each service will have
      * all of its interfaces registered as lookups (mapping to
@@ -151,6 +154,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             Class<?>[] interfaces = ClassUtils.getAllInterfaces(service);
             for (Class<?> anInterface : interfaces) {
                 interfaceToService.put(anInterface.getName(), service);
+                methodInvocationCache.addService(anInterface);
             }
         }
 
@@ -204,26 +208,16 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             }
         }
 
-        // TODO could so some caching of the method invoker for better performance
-        Object[] arguments = remotingEntry.arguments;
-        if (arguments == null) {
-            arguments = new Object[0];
-        }
-        Class<?>[] argumentTypes = new Class<?>[arguments.length];
-        for (int i = 0; i < arguments.length; i++) {
-            argumentTypes[i] = (arguments[i] != null ? arguments[i].getClass() : Object.class);
-        }
-
         Method method;
         try {
-            method = service.getClass().getMethod(remotingEntry.methodName, argumentTypes);
+            method = methodInvocationCache.findMethod(lookupName, service, remotingEntry.methodName, remotingEntry.arguments);
         } catch (Exception e) {
             writeResponse(gigaSpace, remotingEntry, new RemoteLookupFailureException("Failed to find method ["
                     + remotingEntry.methodName + "] for lookup [" + remotingEntry.lookupName + "]", e));
             return;
         }
         try {
-            Object retVal = method.invoke(service, arguments);
+            Object retVal = method.invoke(service, remotingEntry.arguments);
             writeResponse(gigaSpace, remotingEntry, retVal);
         } catch (InvocationTargetException e) {
             writeResponse(gigaSpace, remotingEntry, e.getTargetException());
@@ -329,25 +323,16 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                 }
             }
 
-            Object[] arguments = remotingEntry.arguments;
-            if (arguments == null) {
-                arguments = new Object[0];
-            }
-            Class<?>[] argumentTypes = new Class<?>[arguments.length];
-            for (int i = 0; i < arguments.length; i++) {
-                argumentTypes[i] = (arguments[i] != null ? arguments[i].getClass() : Object.class);
-            }
-
             Method method;
             try {
-                method = service.getClass().getMethod(remotingEntry.methodName, argumentTypes);
+                method = methodInvocationCache.findMethod(remotingEntry.lookupName, service, remotingEntry.methodName, remotingEntry.arguments);
             } catch (Exception e) {
                 writeResponse(space, entry, remotingEntry, new RemoteLookupFailureException("Failed to find method ["
                         + remotingEntry.getMethodName() + "] for lookup [" + remotingEntry.getLookupName() + "]", e));
                 return;
             }
             try {
-                Object retVal = method.invoke(service, arguments);
+                Object retVal = method.invoke(service, remotingEntry.arguments);
                 writeResponse(space, entry, remotingEntry, retVal);
             } catch (InvocationTargetException e) {
                 writeResponse(space, entry, remotingEntry, e.getTargetException());
@@ -410,6 +395,99 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
         private void setGeneraterdUID(SyncSpaceRemotingEntry remotingEntry, ISpaceFilterEntry entry) {
             remotingEntry.uid = idGenerator.incrementAndGet();
             entry.setFieldValue("uid", remotingEntry.uid);
+        }
+    }
+
+    /**
+     * Holds a cache of method reflection information per service (interface). If there is a single method
+     * within the interface with the same name and number of parameters, then the cached version will be used.
+     * If there are more than one method with the name and number of parameteres, then the Java reflection
+     * <code>getMethod</code> will be used.
+     *
+     * <p>Note, as a side effect, if we are using cached methods, we support executing interfaces that declare
+     * a super type as a parameter, and invocation will be done using a sub type. This does not work with
+     * Java reflection getMethod as it only returns exact match for argument types.
+     *
+     * <p>Also note, this cache is *not* thread safe. The idea here is that this cache is initlaized at startup
+     * and then never updated. 
+     */
+    private class MethodInvocationCache {
+
+        private Map<String, MethodsCacheEntry> serviceToMethodCacheMap = new HashMap<String, MethodsCacheEntry>();
+
+        public Method findMethod(String lookupName, Object service, String methodName, Object[] arguments) throws NoSuchMethodException {
+            int numberOfParameters = 0;
+            if (arguments != null) {
+                numberOfParameters = arguments.length;
+            }
+            Method invocationMethod = null;
+            Method[] methods = serviceToMethodCacheMap.get(lookupName).getMethodCacheEntry(methodName).getMethod(numberOfParameters);
+            if (methods != null && methods.length == 1) {
+                //we can do caching
+                invocationMethod = methods[0];
+            } else {
+                if (arguments == null) {
+                    arguments = new Object[0];
+                }
+                Class<?>[] argumentTypes = new Class<?>[arguments.length];
+                for (int i = 0; i < arguments.length; i++) {
+                    argumentTypes[i] = (arguments[i] != null ? arguments[i].getClass() : Object.class);
+                }
+
+                invocationMethod = service.getClass().getMethod(methodName, argumentTypes);
+            }
+            return invocationMethod;
+        }
+
+        public void addService(Class service) {
+            MethodsCacheEntry methodsCacheEntry = serviceToMethodCacheMap.get(service.getName());
+            if (methodsCacheEntry == null) {
+                methodsCacheEntry = new MethodsCacheEntry();
+                serviceToMethodCacheMap.put(service.getName(), methodsCacheEntry);
+            }
+            methodsCacheEntry.addService(service);
+        }
+
+        private class MethodsCacheEntry {
+
+            private Map<String, MethodCacheEntry> methodNameMap = new HashMap<String, MethodCacheEntry>();
+
+            public MethodCacheEntry getMethodCacheEntry(String methodName) {
+                return methodNameMap.get(methodName);
+            }
+
+            public void addService(Class service) {
+                Method[] methods = service.getMethods();
+                for (Method method : methods) {
+                    MethodCacheEntry methodCacheEntry = methodNameMap.get(method.getName());
+                    if (methodCacheEntry == null) {
+                        methodCacheEntry = new MethodCacheEntry();
+                        methodNameMap.put(method.getName(), methodCacheEntry);
+                    }
+                    methodCacheEntry.addMethod(method);
+                }
+            }
+        }
+
+        private class MethodCacheEntry {
+
+            private Map<Integer, Method[]> parametersPerMethodMap = new HashMap<Integer, Method[]>();
+
+            public Method[] getMethod(int numberOfParams) {
+                return parametersPerMethodMap.get(numberOfParams);
+            }
+
+            public void addMethod(Method method) {
+                Method[] list = parametersPerMethodMap.get(method.getParameterTypes().length);
+                if (list == null) {
+                    list = new Method[] {method};
+                } else {
+                    List<Method> templList = Arrays.asList(list);
+                    templList.add(method);
+                    list = templList.toArray(new Method[templList.size()]);
+                }
+                parametersPerMethodMap.put(method.getParameterTypes().length, list);
+            }
         }
     }
 }
