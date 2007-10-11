@@ -61,6 +61,6 @@ public class TransactionalMapCacheProvider extends AbstractMapCacheProvider {
      * Returns {@link org.openspaces.hibernate.cache.TransactionalMapCache}.
      */
     public Cache buildCache(String regionName, Properties properties) throws CacheException {
-        return new TransactionalMapCache(regionName, getMap(), transactionManager, localTransactionManager);
+        return new TransactionalMapCache(regionName, getMap(), getTimeToLive(), transactionManager, localTransactionManager);
     }
 }

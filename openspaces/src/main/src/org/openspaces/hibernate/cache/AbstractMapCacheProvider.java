@@ -21,6 +21,9 @@ import java.util.Properties;
  * the cache using Hibernate cache proeprties (for example, have "xpath" configuration set
  * there).
  *
+ * <p>Allows to configure the time to live of cache entries within the Space using the
+ * <code>gigaspace.hibernate.cache.timeToLive</code> property. Defaults to <code>Long.MAX_VALUE</code>.
+ *
  * <p>Stops the local cache when this cache provider stops. Also stops the master Space if it
  * was started in an embedded mode.
  *
@@ -32,7 +35,11 @@ public abstract class AbstractMapCacheProvider implements CacheProvider {
 
     public static final String CACHE_URL_PROPERTY = "gigaspace.hibernate.cache.url";
 
+    public static final String TIME_TO_LIVE_PROPERTY = "gigaspace.hibernate.cache.timeToLive";
+
     private IMap map;
+
+    private long timeToLive;
 
     /**
      * Starts the pure GigaSpace Hibernate cache provider. Uses <code>gigaspace.hibernate.cache.url</code>
@@ -51,6 +58,11 @@ public abstract class AbstractMapCacheProvider implements CacheProvider {
             map = (IMap) CacheFinder.find(url, properties);
         } catch (FinderException e) {
             throw new CacheException("Failed to find/create cache [" + url + "]", e);
+        }
+        timeToLive = Long.MAX_VALUE;
+        String timeToLiveProp = properties.getProperty(TIME_TO_LIVE_PROPERTY);
+        if (timeToLiveProp != null) {
+            timeToLive = Long.parseLong(timeToLiveProp);
         }
         doStart(properties);
     }
@@ -96,5 +108,9 @@ public abstract class AbstractMapCacheProvider implements CacheProvider {
 
     protected IMap getMap() {
         return this.map;
+    }
+
+    protected long getTimeToLive() {
+        return this.timeToLive;
     }
 }

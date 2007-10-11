@@ -38,14 +38,17 @@ public class SimpleMapCache implements Cache {
 
     private IMap map;
 
+    private long timeToLive;
+
     private LockManager lockManager;
 
     private static final ThreadLocal<LockHandle> lockHandlerContext = new ThreadLocal<LockHandle>();
 
-    public SimpleMapCache(String regionName, IMap map) {
+    public SimpleMapCache(String regionName, IMap map, long timeToLive) {
         this.regionName = regionName;
         this.map = map;
         this.lockManager = new LockManager(map);
+        this.timeToLive = timeToLive;
     }
 
     /**
@@ -69,9 +72,9 @@ public class SimpleMapCache implements Cache {
     public void put(Object key, Object value) throws CacheException {
         LockHandle lockHandle = lockHandlerContext.get();
         if (lockHandle != null) {
-            map.put(new CacheKey(regionName, key), value, lockHandle.getTransaction(), Integer.MAX_VALUE);
+            map.put(new CacheKey(regionName, key), value, lockHandle.getTransaction(), timeToLive);
         } else {
-            map.put(new CacheKey(regionName, key), value);
+            map.put(new CacheKey(regionName, key), value, timeToLive);
         }
     }
 
@@ -81,9 +84,9 @@ public class SimpleMapCache implements Cache {
     public void update(Object key, Object value) throws CacheException {
         LockHandle lockHandle = lockHandlerContext.get();
         if (lockHandle != null) {
-            map.put(new CacheKey(regionName, key), value, lockHandle.getTransaction(), Integer.MAX_VALUE);
+            map.put(new CacheKey(regionName, key), value, lockHandle.getTransaction(), timeToLive);
         } else {
-            map.put(new CacheKey(regionName, key), value);
+            map.put(new CacheKey(regionName, key), value, timeToLive);
         }
     }
 

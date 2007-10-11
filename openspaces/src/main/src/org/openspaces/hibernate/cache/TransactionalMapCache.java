@@ -43,16 +43,19 @@ public class TransactionalMapCache implements Cache {
 
     private IMap map;
 
+    private long timeToLive;
+
     private TransactionManager transactionManager;
 
     private LocalTransactionManager localTransactionManager;
 
     private ISpaceProxy masterSpace;
 
-    public TransactionalMapCache(String regionName, IMap map, TransactionManager transactionManager,
-                                 LocalTransactionManager localTransactionManager) {
+    public TransactionalMapCache(String regionName, IMap map, long timeToLive,
+                                 TransactionManager transactionManager, LocalTransactionManager localTransactionManager) {
         this.regionName = regionName;
         this.map = map;
+        this.timeToLive = timeToLive;
         this.transactionManager = transactionManager;
         this.localTransactionManager = localTransactionManager;
         this.masterSpace = (ISpaceProxy) map.getMasterSpace();
@@ -87,7 +90,7 @@ public class TransactionalMapCache implements Cache {
         Transaction.Created tx = masterSpace.getContextTransaction();
         try {
             masterSpace.setContextTansaction(null);
-            map.put(new CacheKey(regionName, key), value);
+            map.put(new CacheKey(regionName, key), value, timeToLive);
         } finally {
             masterSpace.setContextTansaction(tx);
         }
@@ -98,7 +101,7 @@ public class TransactionalMapCache implements Cache {
      */
     public void update(Object key, Object value) throws CacheException {
         verifyTransaction();
-        map.put(new CacheKey(regionName, key), value);
+        map.put(new CacheKey(regionName, key), value, timeToLive);
     }
 
     /**
