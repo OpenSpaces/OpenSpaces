@@ -79,14 +79,24 @@ public class SimpleMapCache implements Cache {
      * Add an item to the cache
      */
     public void update(Object key, Object value) throws CacheException {
-        map.put(new CacheKey(regionName, key), value);
+        LockHandle lockHandle = lockHandlerContext.get();
+        if (lockHandle != null) {
+            map.put(new CacheKey(regionName, key), value, lockHandle.getTransaction(), Integer.MAX_VALUE);
+        } else {
+            map.put(new CacheKey(regionName, key), value);
+        }
     }
 
     /**
      * Remove an item from the cache
      */
     public void remove(Object key) throws CacheException {
-        map.remove(new CacheKey(regionName, key));
+        LockHandle lockHandle = lockHandlerContext.get();
+        if (lockHandle != null) {
+            map.remove(new CacheKey(regionName, key), lockHandle.getTransaction(), Integer.MAX_VALUE);
+        } else {
+            map.remove(new CacheKey(regionName, key));
+        }
     }
 
     /**
