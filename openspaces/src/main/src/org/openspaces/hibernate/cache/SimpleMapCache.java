@@ -16,6 +16,7 @@
 
 package org.openspaces.hibernate.cache;
 
+import com.j_spaces.core.client.ReadModifiers;
 import com.j_spaces.map.Envelope;
 import com.j_spaces.map.IMap;
 import org.hibernate.cache.Cache;
@@ -55,14 +56,24 @@ public class SimpleMapCache implements Cache {
      * Get an item from the cache
      */
     public Object read(Object key) throws CacheException {
-        return map.get(new CacheKey(regionName, key));
+        LockHandle lockHandle = lockHandlerContext.get();
+        if (lockHandle != null) {
+            return map.get(new CacheKey(regionName, key), lockHandle.getTransaction(), 0, ReadModifiers.REPEATABLE_READ);
+        } else {
+            return map.get(new CacheKey(regionName, key));
+        }
     }
 
     /**
      * Get an item from the cache, nontransactionally
      */
     public Object get(Object key) throws CacheException {
-        return map.get(new CacheKey(regionName, key));
+        LockHandle lockHandle = lockHandlerContext.get();
+        if (lockHandle != null) {
+            return map.get(new CacheKey(regionName, key), lockHandle.getTransaction(), 0, ReadModifiers.REPEATABLE_READ);
+        } else {
+            return map.get(new CacheKey(regionName, key));
+        }
     }
 
     /**
