@@ -66,7 +66,13 @@ public class SimpleMapCache implements Cache {
             if (logger.isTraceEnabled()) {
                 logger.trace("Read [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
             }
-            return map.get(cacheKey, lockHandle.getTransaction(), 0, ReadModifiers.REPEATABLE_READ);
+            Object retVal = map.get(cacheKey, lockHandle.getTransaction(), 0, ReadModifiers.REPEATABLE_READ);
+            if (retVal instanceof String && ((String) retVal).length() == 0) {
+                // this is a null value put there as a marker for the lock
+                // since there was no entry for this mentioned key when tried to lock
+                return null;
+            }
+            return retVal;
         } else {
             if (logger.isTraceEnabled()) {
                 logger.trace("Read [" + cacheKey + "]");
@@ -85,7 +91,13 @@ public class SimpleMapCache implements Cache {
             if (logger.isTraceEnabled()) {
                 logger.trace("Get [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
             }
-            return map.get(cacheKey, lockHandle.getTransaction(), 0, ReadModifiers.REPEATABLE_READ);
+            Object retVal = map.get(cacheKey, lockHandle.getTransaction(), 0, ReadModifiers.REPEATABLE_READ);
+            if (retVal instanceof String && ((String) retVal).length() == 0) {
+                // this is a null value put there as a marker for the lock
+                // since there was no entry for this mentioned key when tried to lock
+                return null;
+            }
+            return retVal;
         } else {
             if (logger.isTraceEnabled()) {
                 logger.trace("Get [" + cacheKey + "]");
