@@ -160,6 +160,7 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="Groovy" level="project" />
+    <orderEntry type="library" name="JSR-223" level="project" />
     <orderEntryProperties />
   </component>
   <component name="copyright">
