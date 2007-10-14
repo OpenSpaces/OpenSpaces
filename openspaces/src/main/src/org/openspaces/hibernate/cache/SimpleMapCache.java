@@ -209,7 +209,7 @@ public class SimpleMapCache implements Cache {
         if (logger.isTraceEnabled()) {
             LockHandle lockHandle = lockHandlerContext.get();
             if (logger.isTraceEnabled()) {
-                logger.trace("Remove [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
+                logger.trace("Unlock [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
             }
         }
         lockHandlerContext.remove();
