@@ -179,6 +179,9 @@ public class SimpleMapCache implements Cache {
      */
     public void lock(Object key) throws CacheException {
         CacheKey cacheKey = new CacheKey(regionName, key);
+        if (logger.isTraceEnabled()) {
+            logger.trace("Trying to lock [" + cacheKey + "]");
+        }
         LockHandle lockHandle = lockManager.lock(cacheKey, getTimeout(), getTimeout());
         if (logger.isTraceEnabled()) {
             logger.trace("Lock [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
