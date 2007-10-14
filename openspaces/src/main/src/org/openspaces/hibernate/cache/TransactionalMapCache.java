@@ -22,6 +22,8 @@ import com.j_spaces.core.client.XAResourceImpl;
 import com.j_spaces.map.Envelope;
 import com.j_spaces.map.IMap;
 import net.jini.core.transaction.Transaction;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.TransactionException;
 import org.hibernate.cache.Cache;
 import org.hibernate.cache.CacheException;
@@ -39,6 +41,8 @@ import java.util.Map;
  */
 public class TransactionalMapCache implements Cache {
 
+    private Log logger = LogFactory.getLog(getClass());
+    
     private String regionName;
 
     private IMap map;
@@ -66,7 +70,11 @@ public class TransactionalMapCache implements Cache {
      */
     public Object read(Object key) throws CacheException {
         verifyTransaction();
-        return map.get(new CacheKey(regionName, key));
+        CacheKey cacheKey = new CacheKey(regionName, key);
+        if (logger.isTraceEnabled()) {
+            logger.trace("Read [" + cacheKey + "] under transaction [" + masterSpace.getContextTransaction() + "]");
+        }
+        return map.get(cacheKey);
     }
 
     /**
@@ -76,7 +84,11 @@ public class TransactionalMapCache implements Cache {
         Transaction.Created tx = masterSpace.getContextTransaction();
         try {
             masterSpace.setContextTansaction(null);
-            return map.get(new CacheKey(regionName, key));
+            CacheKey cacheKey = new CacheKey(regionName, key);
+            if (logger.isTraceEnabled()) {
+                logger.trace("Get [" + cacheKey + "] under no transaction");
+            }
+            return map.get(cacheKey);
         } finally {
             masterSpace.setContextTansaction(tx);
         }
@@ -90,6 +102,10 @@ public class TransactionalMapCache implements Cache {
         Transaction.Created tx = masterSpace.getContextTransaction();
         try {
             masterSpace.setContextTansaction(null);
+            CacheKey cacheKey = new CacheKey(regionName, key);
+            if (logger.isTraceEnabled()) {
+                logger.trace("Put [" + cacheKey + "] under no transaction");
+            }
             map.put(new CacheKey(regionName, key), value, timeToLive);
         } finally {
             masterSpace.setContextTansaction(tx);
@@ -101,7 +117,11 @@ public class TransactionalMapCache implements Cache {
      */
     public void update(Object key, Object value) throws CacheException {
         verifyTransaction();
-        map.put(new CacheKey(regionName, key), value, timeToLive);
+        CacheKey cacheKey = new CacheKey(regionName, key);
+        if (logger.isTraceEnabled()) {
+            logger.trace("Update [" + cacheKey + "] under transaction [" + masterSpace.getContextTransaction() + "]");
+        }
+        map.put(cacheKey, value, timeToLive);
     }
 
     /**
@@ -109,15 +129,21 @@ public class TransactionalMapCache implements Cache {
      */
     public void remove(Object key) throws CacheException {
         verifyTransaction();
-        map.remove(new CacheKey(regionName, key));
+        CacheKey cacheKey = new CacheKey(regionName, key);
+        if (logger.isTraceEnabled()) {
+            logger.trace("Remove [" + cacheKey + "] under transaction [" + masterSpace.getContextTransaction() + "]");
+        }
+        map.remove(cacheKey);
     }
 
     /**
      * Clear the cache
      */
     public void clear() throws CacheException {
-        // TODO we only need to clear the specific region
         verifyTransaction();
+        if (logger.isTraceEnabled()) {
+            logger.trace("Clearing region [" + regionName + "]");
+        }
         map.clear();
         try {
             map.getMasterSpace().clear(new Envelope(new CacheKey(regionName, null), null), null);

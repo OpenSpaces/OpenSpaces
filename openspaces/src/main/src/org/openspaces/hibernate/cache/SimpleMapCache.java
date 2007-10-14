@@ -19,6 +19,8 @@ package org.openspaces.hibernate.cache;
 import com.j_spaces.core.client.ReadModifiers;
 import com.j_spaces.map.Envelope;
 import com.j_spaces.map.IMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.cache.Cache;
 import org.hibernate.cache.CacheException;
 import org.hibernate.cache.Timestamper;
@@ -34,6 +36,8 @@ import java.util.Map;
  * @author kimchy
  */
 public class SimpleMapCache implements Cache {
+
+    private Log logger = LogFactory.getLog(getClass());
 
     private String regionName;
 
@@ -56,11 +60,18 @@ public class SimpleMapCache implements Cache {
      * Get an item from the cache
      */
     public Object read(Object key) throws CacheException {
+        CacheKey cacheKey = new CacheKey(regionName, key);
         LockHandle lockHandle = lockHandlerContext.get();
         if (lockHandle != null) {
-            return map.get(new CacheKey(regionName, key), lockHandle.getTransaction(), 0, ReadModifiers.REPEATABLE_READ);
+            if (logger.isTraceEnabled()) {
+                logger.trace("Read [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
+            }
+            return map.get(cacheKey, lockHandle.getTransaction(), 0, ReadModifiers.REPEATABLE_READ);
         } else {
-            return map.get(new CacheKey(regionName, key));
+            if (logger.isTraceEnabled()) {
+                logger.trace("Read [" + cacheKey + "]");
+            }
+            return map.get(cacheKey);
         }
     }
 
@@ -68,11 +79,18 @@ public class SimpleMapCache implements Cache {
      * Get an item from the cache, nontransactionally
      */
     public Object get(Object key) throws CacheException {
+        CacheKey cacheKey = new CacheKey(regionName, key);
         LockHandle lockHandle = lockHandlerContext.get();
         if (lockHandle != null) {
-            return map.get(new CacheKey(regionName, key), lockHandle.getTransaction(), 0, ReadModifiers.REPEATABLE_READ);
+            if (logger.isTraceEnabled()) {
+                logger.trace("Get [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
+            }
+            return map.get(cacheKey, lockHandle.getTransaction(), 0, ReadModifiers.REPEATABLE_READ);
         } else {
-            return map.get(new CacheKey(regionName, key));
+            if (logger.isTraceEnabled()) {
+                logger.trace("Get [" + cacheKey + "]");
+            }
+            return map.get(cacheKey);
         }
     }
 
@@ -81,11 +99,18 @@ public class SimpleMapCache implements Cache {
      * failfast semantics
      */
     public void put(Object key, Object value) throws CacheException {
+        CacheKey cacheKey = new CacheKey(regionName, key);
         LockHandle lockHandle = lockHandlerContext.get();
         if (lockHandle != null) {
-            map.put(new CacheKey(regionName, key), value, lockHandle.getTransaction(), timeToLive);
+            if (logger.isTraceEnabled()) {
+                logger.trace("Put [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
+            }
+            map.put(cacheKey, value, lockHandle.getTransaction(), timeToLive);
         } else {
-            map.put(new CacheKey(regionName, key), value, timeToLive);
+            if (logger.isTraceEnabled()) {
+                logger.trace("Put [" + cacheKey + "]");
+            }
+            map.put(cacheKey, value, timeToLive);
         }
     }
 
@@ -93,11 +118,18 @@ public class SimpleMapCache implements Cache {
      * Add an item to the cache
      */
     public void update(Object key, Object value) throws CacheException {
+        CacheKey cacheKey = new CacheKey(regionName, key);
         LockHandle lockHandle = lockHandlerContext.get();
         if (lockHandle != null) {
-            map.put(new CacheKey(regionName, key), value, lockHandle.getTransaction(), timeToLive);
+            if (logger.isTraceEnabled()) {
+                logger.trace("Update [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
+            }
+            map.put(cacheKey, value, lockHandle.getTransaction(), timeToLive);
         } else {
-            map.put(new CacheKey(regionName, key), value, timeToLive);
+            if (logger.isTraceEnabled()) {
+                logger.trace("Update [" + cacheKey + "]");
+            }
+            map.put(cacheKey, value, timeToLive);
         }
     }
 
@@ -105,10 +137,17 @@ public class SimpleMapCache implements Cache {
      * Remove an item from the cache
      */
     public void remove(Object key) throws CacheException {
+        CacheKey cacheKey = new CacheKey(regionName, key);
         LockHandle lockHandle = lockHandlerContext.get();
         if (lockHandle != null) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("Remove [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
+            }
             map.remove(new CacheKey(regionName, key), lockHandle.getTransaction(), Integer.MAX_VALUE);
         } else {
+            if (logger.isTraceEnabled()) {
+                logger.trace("Remove [" + cacheKey + "]");
+            }
             map.remove(new CacheKey(regionName, key));
         }
     }
@@ -117,6 +156,9 @@ public class SimpleMapCache implements Cache {
      * Clear the cache
      */
     public void clear() throws CacheException {
+        if (logger.isTraceEnabled()) {
+            logger.trace("Clearing region [" + regionName + "]");
+        }
         map.clear();
         try {
             map.getMasterSpace().clear(new Envelope(new CacheKey(regionName, null), null), null);
@@ -136,7 +178,11 @@ public class SimpleMapCache implements Cache {
      * If this is a clustered cache, lock the item
      */
     public void lock(Object key) throws CacheException {
-        LockHandle lockHandle = lockManager.lock(new CacheKey(regionName, key), getTimeout(), getTimeout());
+        CacheKey cacheKey = new CacheKey(regionName, key);
+        LockHandle lockHandle = lockManager.lock(cacheKey, getTimeout(), getTimeout());
+        if (logger.isTraceEnabled()) {
+            logger.trace("Lock [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
+        }
         lockHandlerContext.set(lockHandle);
     }
 
@@ -144,8 +190,15 @@ public class SimpleMapCache implements Cache {
      * If this is a clustered cache, unlock the item
      */
     public void unlock(Object key) throws CacheException {
+        CacheKey cacheKey = new CacheKey(regionName, key);
+        if (logger.isTraceEnabled()) {
+            LockHandle lockHandle = lockHandlerContext.get();
+            if (logger.isTraceEnabled()) {
+                logger.trace("Remove [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
+            }
+        }
         lockHandlerContext.remove();
-        lockManager.unlock(new CacheKey(regionName, key));
+        lockManager.unlock(cacheKey);
     }
 
     /**
