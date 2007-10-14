@@ -208,8 +208,10 @@ public class SimpleMapCache implements Cache {
         CacheKey cacheKey = new CacheKey(regionName, key);
         if (logger.isTraceEnabled()) {
             LockHandle lockHandle = lockHandlerContext.get();
-            if (logger.isTraceEnabled()) {
+            if (lockHandle != null) {
                 logger.trace("Unlock [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
+            } else {
+                logger.trace("Unlock [" + cacheKey + "] not under lock transaction, might be due to an internal bug");
             }
         }
         lockHandlerContext.remove();
