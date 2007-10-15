@@ -155,12 +155,12 @@ public class SimpleMapCache implements Cache {
             if (logger.isTraceEnabled()) {
                 logger.trace("Remove [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
             }
-            map.remove(new CacheKey(regionName, key), lockHandle.getTransaction(), Integer.MAX_VALUE);
+            map.remove(cacheKey, lockHandle.getTransaction(), Integer.MAX_VALUE);
         } else {
             if (logger.isTraceEnabled()) {
                 logger.trace("Remove [" + cacheKey + "]");
             }
-            map.remove(new CacheKey(regionName, key));
+            map.remove(cacheKey);
         }
     }
 
