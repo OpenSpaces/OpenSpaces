@@ -32,7 +32,7 @@ public class SimpleGigaMapCache extends SimpleMapCache {
     private GigaMap gigaMap;
 
     public SimpleGigaMapCache(String regionName, GigaMap gigaMap) {
-        super(regionName, gigaMap.getMap(), gigaMap.getDefaultTimeToLive());
+        super(regionName, gigaMap.getMap(), gigaMap.getDefaultTimeToLive(), gigaMap.getDefaultWaitForResponse());
         this.gigaMap = gigaMap;
     }
 

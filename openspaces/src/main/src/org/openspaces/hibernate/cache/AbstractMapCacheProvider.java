@@ -37,9 +37,13 @@ public abstract class AbstractMapCacheProvider implements CacheProvider {
 
     public static final String TIME_TO_LIVE_PROPERTY = "gigaspace.hibernate.cache.timeToLive";
 
+    public static final String WAIT_FOR_RESPONSE_PROPERTY = "gigaspace.hibernate.cache.waitForResponse";
+
     private IMap map;
 
     private long timeToLive;
+
+    private long waitForResponse;
 
     /**
      * Starts the pure GigaSpace Hibernate cache provider. Uses <code>gigaspace.hibernate.cache.url</code>
@@ -63,6 +67,11 @@ public abstract class AbstractMapCacheProvider implements CacheProvider {
         String timeToLiveProp = properties.getProperty(TIME_TO_LIVE_PROPERTY);
         if (timeToLiveProp != null) {
             timeToLive = Long.parseLong(timeToLiveProp);
+        }
+        waitForResponse = 0;
+        String waitForResponseProp = properties.getProperty(WAIT_FOR_RESPONSE_PROPERTY);
+        if (waitForResponseProp != null) {
+            waitForResponse = Long.parseLong(waitForResponseProp);
         }
         doStart(properties);
     }
@@ -112,5 +121,9 @@ public abstract class AbstractMapCacheProvider implements CacheProvider {
 
     protected long getTimeToLive() {
         return this.timeToLive;
+    }
+
+    protected long getWaitForResponse() {
+        return this.waitForResponse;
     }
 }

@@ -33,6 +33,6 @@ public class SimpleMapCacheProvider extends AbstractMapCacheProvider {
      * Returns {@link org.openspaces.hibernate.cache.SimpleMapCache}.
      */
     public Cache buildCache(String regionName, Properties properties) throws CacheException {
-        return new SimpleMapCache(regionName, getMap(), getTimeToLive());
+        return new SimpleMapCache(regionName, getMap(), getTimeToLive(), getWaitForResponse());
     }
 }

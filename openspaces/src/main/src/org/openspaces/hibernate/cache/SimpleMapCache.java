@@ -45,15 +45,18 @@ public class SimpleMapCache implements Cache {
 
     private long timeToLive;
 
+    private long waitForResponse;
+
     private LockManager lockManager;
 
     private static final ThreadLocal<LockHandle> lockHandlerContext = new ThreadLocal<LockHandle>();
 
-    public SimpleMapCache(String regionName, IMap map, long timeToLive) {
+    public SimpleMapCache(String regionName, IMap map, long timeToLive, long waitForResponse) {
         this.regionName = regionName;
         this.map = map;
         this.lockManager = new LockManager(map);
         this.timeToLive = timeToLive;
+        this.waitForResponse = waitForResponse;
     }
 
     /**
@@ -66,7 +69,7 @@ public class SimpleMapCache implements Cache {
             if (logger.isTraceEnabled()) {
                 logger.trace("Read [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
             }
-            Object retVal = map.get(cacheKey, lockHandle.getTransaction(), 0, ReadModifiers.REPEATABLE_READ);
+            Object retVal = map.get(cacheKey, lockHandle.getTransaction(), waitForResponse, ReadModifiers.REPEATABLE_READ);
             if (retVal instanceof String && ((String) retVal).length() == 0) {
                 // this is a null value put there as a marker for the lock
                 // since there was no entry for this mentioned key when tried to lock
@@ -77,7 +80,7 @@ public class SimpleMapCache implements Cache {
             if (logger.isTraceEnabled()) {
                 logger.trace("Read [" + cacheKey + "]");
             }
-            return map.get(cacheKey);
+            return map.get(cacheKey, waitForResponse);
         }
     }
 
@@ -91,7 +94,7 @@ public class SimpleMapCache implements Cache {
             if (logger.isTraceEnabled()) {
                 logger.trace("Get [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
             }
-            Object retVal = map.get(cacheKey, lockHandle.getTransaction(), 0, ReadModifiers.REPEATABLE_READ);
+            Object retVal = map.get(cacheKey, lockHandle.getTransaction(), waitForResponse, ReadModifiers.REPEATABLE_READ);
             if (retVal instanceof String && ((String) retVal).length() == 0) {
                 // this is a null value put there as a marker for the lock
                 // since there was no entry for this mentioned key when tried to lock
@@ -102,7 +105,7 @@ public class SimpleMapCache implements Cache {
             if (logger.isTraceEnabled()) {
                 logger.trace("Get [" + cacheKey + "]");
             }
-            return map.get(cacheKey);
+            return map.get(cacheKey, waitForResponse);
         }
     }
 
@@ -155,12 +158,12 @@ public class SimpleMapCache implements Cache {
             if (logger.isTraceEnabled()) {
                 logger.trace("Remove [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
             }
-            map.remove(cacheKey, lockHandle.getTransaction(), Integer.MAX_VALUE);
+            map.remove(cacheKey, lockHandle.getTransaction(), waitForResponse);
         } else {
             if (logger.isTraceEnabled()) {
                 logger.trace("Remove [" + cacheKey + "]");
             }
-            map.remove(cacheKey);
+            map.remove(cacheKey, waitForResponse);
         }
     }
 

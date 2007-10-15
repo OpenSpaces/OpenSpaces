@@ -49,17 +49,20 @@ public class TransactionalMapCache implements Cache {
 
     private long timeToLive;
 
+    private long waitForResponse;
+
     private TransactionManager transactionManager;
 
     private LocalTransactionManager localTransactionManager;
 
     private ISpaceProxy masterSpace;
 
-    public TransactionalMapCache(String regionName, IMap map, long timeToLive,
+    public TransactionalMapCache(String regionName, IMap map, long timeToLive, long waitForResponse,
                                  TransactionManager transactionManager, LocalTransactionManager localTransactionManager) {
         this.regionName = regionName;
         this.map = map;
         this.timeToLive = timeToLive;
+        this.waitForResponse = waitForResponse;
         this.transactionManager = transactionManager;
         this.localTransactionManager = localTransactionManager;
         this.masterSpace = (ISpaceProxy) map.getMasterSpace();
@@ -74,7 +77,7 @@ public class TransactionalMapCache implements Cache {
         if (logger.isTraceEnabled()) {
             logger.trace("Read [" + cacheKey + "] under transaction [" + masterSpace.getContextTransaction() + "]");
         }
-        return map.get(cacheKey);
+        return map.get(cacheKey, waitForResponse);
     }
 
     /**
@@ -88,7 +91,7 @@ public class TransactionalMapCache implements Cache {
             if (logger.isTraceEnabled()) {
                 logger.trace("Get [" + cacheKey + "] under no transaction");
             }
-            return map.get(cacheKey);
+            return map.get(cacheKey, waitForResponse);
         } finally {
             masterSpace.setContextTansaction(tx);
         }
@@ -106,7 +109,7 @@ public class TransactionalMapCache implements Cache {
             if (logger.isTraceEnabled()) {
                 logger.trace("Put [" + cacheKey + "] under no transaction");
             }
-            map.put(new CacheKey(regionName, key), value, timeToLive);
+            map.put(cacheKey, value, timeToLive);
         } finally {
             masterSpace.setContextTansaction(tx);
         }
@@ -133,7 +136,7 @@ public class TransactionalMapCache implements Cache {
         if (logger.isTraceEnabled()) {
             logger.trace("Remove [" + cacheKey + "] under transaction [" + masterSpace.getContextTransaction() + "]");
         }
-        map.remove(cacheKey);
+        map.remove(cacheKey, waitForResponse);
     }
 
     /**
