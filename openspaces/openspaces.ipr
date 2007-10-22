@@ -317,6 +317,7 @@
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
       <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
       <module name="examples-helloworld" />
       <RunnerSettings RunnerId="Debug">
         <option name="DEBUG_PORT" value="61020" />
@@ -347,6 +348,7 @@
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
       <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
       <module name="examples-data-processor" />
       <RunnerSettings RunnerId="Debug">
         <option name="DEBUG_PORT" value="54867" />
@@ -378,6 +380,7 @@
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
       <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
       <module name="examples-data-feeder" />
       <RunnerSettings RunnerId="Debug">
         <option name="DEBUG_PORT" value="56134" />
@@ -408,6 +411,7 @@
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
       <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
       <module name="examples-data-processor" />
       <RunnerSettings RunnerId="Debug">
         <option name="DEBUG_PORT" value="59876" />
@@ -438,6 +442,7 @@
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
       <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
       <module name="examples-data-processor" />
       <RunnerSettings RunnerId="Debug">
         <option name="DEBUG_PORT" value="59925" />
@@ -468,6 +473,7 @@
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
       <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
       <module name="examples-data-processor" />
       <RunnerSettings RunnerId="Debug">
         <option name="DEBUG_PORT" value="63684" />
@@ -498,6 +504,7 @@
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
       <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
       <module name="examples-data-processor" />
       <RunnerSettings RunnerId="Debug">
         <option name="DEBUG_PORT" value="50408" />
@@ -531,6 +538,7 @@
       <option name="PARAMETERS" value="" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
       <option name="ADDITIONAL_CLASS_PATH" />
       <option name="TEST_SEARCH_SCOPE">
         <value defaultName="wholeProject" />
@@ -573,6 +581,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="CVS" />
   </component>
+  <component name="WebServicesPlugin" addRequiredLibraries="true" />
   <component name="com.intellij.jsf.UserDefinedFacesConfigs">
     <option name="USER_DEFINED_CONFIGS">
       <value>
