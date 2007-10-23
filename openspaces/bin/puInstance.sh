@@ -9,6 +9,8 @@ if [ "${JSHOMEDIR}" = "" ] ; then
 fi
 export JSHOMEDIR
 
+bootclasspath="-Xbootclasspath/p:$XML_JARS"
+
 JAVACMD="${JAVA_HOME}/bin/java"
 
 
@@ -33,7 +35,7 @@ LOOKUPLOCATORS=; export LOOKUPLOCATORS
 fi
 LOOKUP_LOCATORS_PROP="-Dcom.gs.jini_lus.locators=${LOOKUPLOCATORS}"; export LOOKUP_LOCATORS_PROP
 
-COMMAND_LINE="${JAVACMD} ${JAVA_OPTIONS} ${RMI_OPTIONS} ${LOOKUP_LOCATORS_PROP} ${LOOKUP_GROUPS_PROP} -Djava.security.policy=${POLICY} -Dcom.gs.home=${JSHOMEDIR} -classpath "${COMMON_JARS}${CPS}${SPRING_JARS}${CPS}${EXT_JARS}$CPS${JDBC_JARS}$CPS${JSHOMEDIR}${CPS}${JSHOMEDIR}/lib/JSpaces.jar$CPS${OPENSPACES_JARS}" org.openspaces.pu.container.standalone.StandaloneProcessingUnitContainer $*"
+COMMAND_LINE="${JAVACMD} $bootclasspath ${JAVA_OPTIONS} ${RMI_OPTIONS} ${LOOKUP_LOCATORS_PROP} ${LOOKUP_GROUPS_PROP} -Djava.security.policy=${POLICY} -Dcom.gs.home=${JSHOMEDIR} -classpath "${COMMON_JARS}${CPS}${SPRING_JARS}${CPS}${EXT_JARS}$CPS${JDBC_JARS}$CPS${JSHOMEDIR}${CPS}${JSHOMEDIR}/lib/JSpaces.jar$CPS${OPENSPACES_JARS}" org.openspaces.pu.container.standalone.StandaloneProcessingUnitContainer $*"
 
 echo
 echo
