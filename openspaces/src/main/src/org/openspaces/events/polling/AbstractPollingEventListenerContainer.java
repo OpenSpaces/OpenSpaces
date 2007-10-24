@@ -279,7 +279,12 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
         Object template = getReceiveTemplate();
         // if trigger is configure, work using trigger outside of a possible transaction
         if (triggerOperationHandler != null) {
-            Object trigger = triggerOperationHandler.triggerReceive(this.template, getGigaSpace(), receiveTimeout);
+            Object trigger;
+            try {
+                trigger = triggerOperationHandler.triggerReceive(this.template, getGigaSpace(), receiveTimeout);
+            } catch (SpaceInterruptedException e) {
+                return false;
+            }
             if (logger.isTraceEnabled()) {
                 logger.trace(message("Trigger operation handler returned [" + trigger + "]"));
             }
