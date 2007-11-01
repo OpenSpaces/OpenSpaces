@@ -1,5 +1,6 @@
 package org.openspaces.hibernate.cache;
 
+import com.j_spaces.core.Constants;
 import com.j_spaces.core.client.FinderException;
 import com.j_spaces.core.client.cache.ISpaceLocalCache;
 import com.j_spaces.map.CacheFinder;
@@ -59,6 +60,8 @@ public abstract class AbstractMapCacheProvider implements CacheProvider {
             log.info("Using GigaSpace as Hibernate second level cache with url [" + url + "]");
         }
         try {
+            // no need for a shutdown hook in the space as well
+            properties.setProperty(Constants.Container.CONTAINER_SHUTDOWN_HOOK_PROP, "false");
             map = (IMap) CacheFinder.find(url, properties);
         } catch (FinderException e) {
             throw new CacheException("Failed to find/create cache [" + url + "]", e);
