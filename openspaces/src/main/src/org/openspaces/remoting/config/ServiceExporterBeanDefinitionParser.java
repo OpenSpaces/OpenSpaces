@@ -16,6 +16,7 @@
 
 package org.openspaces.remoting.config;
 
+import org.openspaces.remoting.ServiceRef;
 import org.openspaces.remoting.SpaceRemotingServiceExporter;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
@@ -43,7 +44,12 @@ public class ServiceExporterBeanDefinitionParser extends AbstractSingleBeanDefin
         List<Element> serviceElements = DomUtils.getChildElementsByTagName(element, SERVICE);
         ManagedList list = new ManagedList(serviceElements.size());
         for (Element ele : serviceElements) {
-            list.add(parserContext.getDelegate().parsePropertyValue(ele, builder.getRawBeanDefinition(), null));
+            String ref = ele.getAttribute("ref");
+            if (ref != null) {
+                list.add(new ServiceRef(ref));
+            } else {
+                list.add(parserContext.getDelegate().parsePropertyValue(ele, builder.getRawBeanDefinition(), null));
+            }
         }
         builder.addPropertyValue("services", list);
     }

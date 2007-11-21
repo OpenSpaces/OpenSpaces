@@ -35,6 +35,9 @@ import org.openspaces.events.SpaceDataEventListener;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteLookupFailureException;
 import org.springframework.transaction.TransactionStatus;
@@ -43,7 +46,6 @@ import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +78,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @see AsyncSpaceRemotingProxyFactoryBean
  */
 public class SpaceRemotingServiceExporter implements SpaceDataEventListener<AsyncSpaceRemotingEntry>, InitializingBean, ApplicationContextAware,
-        EventTemplateProvider, FilterProviderFactory, ClusterInfoAware {
+        EventTemplateProvider, FilterProviderFactory, ClusterInfoAware, ApplicationListener {
 
     public static final String DEFAULT_ASYNC_INTERFACE_SUFFIX = "Async";
 
@@ -148,21 +150,28 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
     }
 
     public void afterPropertiesSet() throws Exception {
-        Assert.notNull(services, "services property is required");
-        // go over the services and create the interface to service lookup
-        for (Object service : services) {
-            Class<?>[] interfaces = ClassUtils.getAllInterfaces(service);
-            for (Class<?> anInterface : interfaces) {
-                interfaceToService.put(anInterface.getName(), service);
-                methodInvocationCache.addService(anInterface);
-            }
-        }
-
         // create the filter provider
         filterProvider = new FilterProvider("Remoting Filter", new RemotingServiceInvoker());
         filterProvider.setActiveWhenBackup(false);
         filterProvider.setEnabled(true);
         filterProvider.setOpCodes(new int[]{FilterOperationCodes.BEFORE_READ_MULTIPLE, FilterOperationCodes.BEFORE_TAKE_MULTIPLE});
+    }
+
+    public void onApplicationEvent(ApplicationEvent applicationEvent) {
+        if (applicationEvent instanceof ContextRefreshedEvent) {
+            Assert.notNull(services, "services property is required");
+            // go over the services and create the interface to service lookup
+            for (Object service : services) {
+                if (service instanceof ServiceRef) {
+                    service = applicationContext.getBean(((ServiceRef) service).getRef());
+                }
+                Class<?>[] interfaces = ClassUtils.getAllInterfaces(service);
+                for (Class<?> anInterface : interfaces) {
+                    interfaceToService.put(anInterface.getName(), service);
+                    methodInvocationCache.addService(anInterface);
+                }
+            }
+        }
     }
 
     /**
@@ -482,9 +491,10 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                 if (list == null) {
                     list = new Method[] {method};
                 } else {
-                    List<Method> templList = Arrays.asList(list);
-                    templList.add(method);
-                    list = templList.toArray(new Method[templList.size()]);
+                    Method[] tempList = new Method[list.length + 1];
+                    System.arraycopy(list, 0, tempList, 0, list.length);
+                    tempList[list.length] = method;
+                    list = tempList;
                 }
                 parametersPerMethodMap.put(method.getParameterTypes().length, list);
             }

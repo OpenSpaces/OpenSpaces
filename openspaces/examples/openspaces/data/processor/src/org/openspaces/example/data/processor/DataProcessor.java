@@ -17,7 +17,7 @@
 package org.openspaces.example.data.processor;
 
 import org.openspaces.core.GigaSpace;
-import org.openspaces.core.context.GigaSpaceLateContext;
+import org.openspaces.core.context.GigaSpaceContext;
 import org.openspaces.events.adapter.SpaceDataEvent;
 import org.openspaces.example.data.common.Data;
 import org.openspaces.example.data.common.IDataProcessor;
@@ -53,10 +53,7 @@ public class DataProcessor implements IDataProcessor {
 
     private long workDuration = 100;
 
-    /**
-     * We use late context injection here since it is created *before* the space.
-     */
-    @GigaSpaceLateContext
+    @GigaSpaceContext
     private GigaSpace gigaSpace;
 
     /**
