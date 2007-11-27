@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:os-core="http://www.openspaces.org/schema/core"
+       xmlns:os-events="http://www.openspaces.org/schema/events"
+       xmlns:os-remoting="http://www.openspaces.org/schema/remoting"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
+       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
+       http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/remoting/openspaces-remoting.xsd">
+
+    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
+
+    <os-core:space id="space" url="/./spaceScriptingRemoting" lookup-groups="${user.name}">
+        <os-core:filter-provider ref="serviceExporter"/>
+    </os-core:space>
+
+    <os-core:giga-space id="gigaSpace" space="space"/>
+
+    <bean id="scriptingExecutorImpl" class="org.openspaces.remoting.scripting.DefaultScriptingExecutor">
+        <property name="gigaSpaceRef" value="gigaSpace"/>
+    </bean>
+
+    <os-remoting:service-exporter id="serviceExporter">
+        <os-remoting:service ref="scriptingExecutorImpl"/>
+    </os-remoting:service-exporter>
+
+    <os-events:polling-container id="remotingContainer" giga-space="gigaSpace">
+        <os-events:listener ref="serviceExporter"/>
+    </os-events:polling-container>
+
+
+    <os-remoting:async-proxy id="asyncScriptingExecutor" giga-space="gigaSpace"
+                             interface="org.openspaces.remoting.scripting.ScriptingExecutor" timeout="15000"/>
+
+
+    <os-remoting:sync-proxy id="syncScriptingExecutor" giga-space="gigaSpace"
+                            interface="org.openspaces.remoting.scripting.ScriptingExecutor"/>
+</beans>

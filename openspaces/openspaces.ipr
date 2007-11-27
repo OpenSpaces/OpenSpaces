@@ -656,6 +656,20 @@
       <JAVADOC />
       <SOURCES />
     </library>
+    <library name="JRuby">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/jruby/jruby.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="ASM">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/asm/asm-2.2.3.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
   </component>
 </project>
 

@@ -161,6 +161,8 @@
     </orderEntry>
     <orderEntry type="library" name="Groovy" level="project" />
     <orderEntry type="library" name="JSR-223" level="project" />
+    <orderEntry type="library" name="JRuby" level="project" />
+    <orderEntry type="library" name="ASM" level="project" />
     <orderEntryProperties />
   </component>
   <component name="copyright">
