@@ -23,6 +23,9 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.util.ClassUtils;
 
 import java.util.HashMap;
@@ -49,7 +52,7 @@ import java.util.concurrent.Future;
  *
  * @author kimchy
  */
-public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationContextAware, InitializingBean {
+public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationContextAware, InitializingBean, ApplicationListener {
 
     private static final Log logger = LogFactory.getLog(DefaultScriptingExecutor.class);
 
@@ -66,6 +69,8 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
     private Map<String, LocalScriptExecutor> executors = new HashMap<String, LocalScriptExecutor>();
 
     private LocalScriptExecutor jsr223Executor;
+
+    private Map<String, GigaSpace> gigaSpacesBeans = new HashMap<String, GigaSpace>(); 
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
@@ -119,6 +124,22 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
         }
     }
 
+    /**
+     * On applicaiton context refresh event get all the GigaSpace beans and put them in a map
+     * that will later be appeneded to any script parameters.
+     */
+    public void onApplicationEvent(ApplicationEvent applicationEvent) {
+        if (applicationEvent instanceof ContextRefreshedEvent) {
+            Map gigaBeans = applicationContext.getBeansOfType(GigaSpace.class);
+            if (gigaBeans != null) {
+                for (Iterator it = gigaBeans.entrySet().iterator(); it.hasNext();) {
+                    Map.Entry entry = (Map.Entry) it.next();
+                    gigaSpacesBeans.put((String) entry.getKey(), (GigaSpace) entry.getValue());
+                }
+            }
+        }
+    }
+
     public Object execute(Script script) throws ScriptingException {
         if (script.getType() == null) {
             throw new IllegalArgumentException("Must contain type, for now");
@@ -136,13 +157,7 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
         if (parameters != null) {
             scriptParams.putAll(parameters);
         }
-        Map gigaSpacesBeans = applicationContext.getBeansOfType(GigaSpace.class);
-        if (gigaSpacesBeans != null) {
-            for (Iterator it = gigaSpacesBeans.entrySet().iterator(); it.hasNext();) {
-                Map.Entry entry = (Map.Entry) it.next();
-                scriptParams.put((String) entry.getKey(), entry.getValue());
-            }
-        }
+        scriptParams.putAll(gigaSpacesBeans);
         scriptParams.put(APPLICATION_CONTEXT_KEY, applicationContext);
         if (script.getParameters() != null) {
             scriptParams.putAll(script.getParameters());
