@@ -26,6 +26,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.ClassUtils;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -41,13 +42,16 @@ import java.util.concurrent.Future;
  * if no local script executors are found for a given type. The JSR allows for a unified API on top of different scripting
  * libraries with pluggable types.
  *
+ * <p>The executor will automatically add the Spring application context as a parameter to the script under the
+ * name <code>applicationContext</code> allowing to get any beans defined on the "server side". Since <code>GigaSpace</code>
+ * instances are often used within the script, it will automatically add all the different <code>GigaSpace</code>
+ * instances defined within the application context under their respective bean names.
+ *
  * @author kimchy
  */
 public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationContextAware, InitializingBean {
 
     private static final Log logger = LogFactory.getLog(DefaultScriptingExecutor.class);
-
-    public static final String GIGA_SPACE_KEY = "gigaSpace";
 
     public static final String APPLICATION_CONTEXT_KEY = "applicationContext";
 
@@ -57,8 +61,6 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
 
     private ApplicationContext applicationContext;
 
-    private String gigaSpaceRef;
-
     private Map<String, Object> parameters;
 
     private Map<String, LocalScriptExecutor> executors = new HashMap<String, LocalScriptExecutor>();
@@ -67,10 +69,6 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
-    }
-
-    public void setGigaSpaceRef(String gigaSpaceRef) {
-        this.gigaSpaceRef = gigaSpaceRef;
     }
 
     public void setParameters(Map<String, Object> parameters) {
@@ -138,9 +136,12 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
         if (parameters != null) {
             scriptParams.putAll(parameters);
         }
-        GigaSpace gigaSpace = (GigaSpace) applicationContext.getBean(gigaSpaceRef);
-        if (gigaSpace != null) {
-            scriptParams.put(GIGA_SPACE_KEY, gigaSpace);
+        Map gigaSpacesBeans = applicationContext.getBeansOfType(GigaSpace.class);
+        if (gigaSpacesBeans != null) {
+            for (Iterator it = gigaSpacesBeans.entrySet().iterator(); it.hasNext();) {
+                Map.Entry entry = (Map.Entry) it.next();
+                scriptParams.put((String) entry.getKey(), entry.getValue());
+            }
         }
         scriptParams.put(APPLICATION_CONTEXT_KEY, applicationContext);
         if (script.getParameters() != null) {
