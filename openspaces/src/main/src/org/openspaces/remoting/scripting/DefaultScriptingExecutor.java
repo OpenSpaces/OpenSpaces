@@ -142,7 +142,7 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
 
     public Object execute(Script script) throws ScriptingException {
         if (script.getType() == null) {
-            throw new IllegalArgumentException("Must contain type, for now");
+            throw new IllegalArgumentException("Script must contain type");
         }
         LocalScriptExecutor localScriptExecutor = executors.get(script.getType());
         // if we fail to find one specific for that type, fail (if possible) to JSR 223
