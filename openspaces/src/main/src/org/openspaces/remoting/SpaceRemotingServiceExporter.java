@@ -96,6 +96,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
     // sync execution fields
 
+    private long syncEntryWriteLease = Lease.FOREVER;
+
     private FilterProvider filterProvider;
 
 
@@ -133,6 +135,13 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
      */
     public void setFifo(boolean fifo) {
         this.fifo = fifo;
+    }
+
+    /**
+     * Sets the sync entry write lease. Defaults to <code>Lease.FOREVER</code>. 
+     */
+    public void setSyncEntryWriteLease(long syncEntryWriteLease) {
+        this.syncEntryWriteLease = syncEntryWriteLease;
     }
 
     /**
@@ -368,7 +377,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                     if (clusterInfo != null) {
                         remotingEntry.instanceId = clusterInfo.getInstanceId();
                     }
-                    space.write(remotingEntry, null, Lease.FOREVER);
+                    space.write(remotingEntry, null, syncEntryWriteLease);
                 } catch (Exception e1) {
                     if (logger.isErrorEnabled()) {
                         logger.error("Failed to write remoting entry with exception [" + e.getMessage() + "]", e1);
@@ -392,7 +401,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                     if (clusterInfo != null) {
                         remotingEntry.instanceId = clusterInfo.getInstanceId();
                     }
-                    space.write(remotingEntry, null, Lease.FOREVER);
+                    space.write(remotingEntry, null, syncEntryWriteLease);
                 } catch (Exception e1) {
                     if (logger.isErrorEnabled()) {
                         logger.error("Failed to write remoting entry", e1);
