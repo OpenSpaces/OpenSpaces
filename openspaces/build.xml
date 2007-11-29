@@ -60,6 +60,7 @@
                 <include name="**/*.xml"/>
                 <include name="**/*.dtd"/>
                 <include name="**/*.xsd"/>
+                <include name="**/*.groovy"/>
             </fileset>
         </copy>
 
@@ -347,6 +348,7 @@
                 <include name="**/*.xml"/>
                 <include name="**/*.dtd"/>
                 <include name="**/*.xsd"/>
+                <include name="**/*.groovy"/>
             </fileset>
         </copy>
 

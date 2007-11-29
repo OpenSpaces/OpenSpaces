@@ -16,37 +16,23 @@
 
 package org.openspaces.remoting.scripting;
 
-import java.util.Map;
-
 /**
- * A script that will be excuted.
+ * Allows to define a lazy loading script which will not send the scipt contents during the
+ * invocaiton if the scipt can be cached and compiled. If the scipt has already been compiled and cached,
+ * it will be executed. If it was not, it will be loaded on the client and sent again for execution. 
  *
  * @author kimchy
+ * @see org.openspaces.remoting.scripting.LazyLoadingRemoteInvocationAspect
  */
-public interface Script {
+public interface LazyLoadingScript extends Script {
 
     /**
-     * The name of the script. Should uniquely identify scripts.
+     * Returns <code>true</code> if the script has been loaded.
      */
-    String getName();
+    boolean hasScript();
 
     /**
-     * The type of the script (or actually, language). For example, <code>groovy</code> or <code>ruby</code>.
+     * Loads the script into memory.
      */
-    String getType();
-
-    /**
-     * The script source as a string.
-     */
-    String getScriptAsString();
-
-    /**
-     * One or more parameters that will be passes to the script.
-     */
-    Map<String, Object> getParameters();
-
-    /**
-     * Should this script be cached or not. Defaults to <code>true</code>.
-     */
-    boolean shouldCache();
+    void loadScript();
 }

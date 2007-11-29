@@ -29,7 +29,7 @@ import java.util.Map;
  *
  * @author kimchy
  */
-public class Jsr223LocalScriptExecutor implements LocalScriptExecutor<Object> {
+public class Jsr223LocalScriptExecutor extends AbstractLocalScriptExecutor<Object> {
 
     private ScriptEngineManager scriptEngineManager;
 
@@ -37,7 +37,7 @@ public class Jsr223LocalScriptExecutor implements LocalScriptExecutor<Object> {
         scriptEngineManager = new ScriptEngineManager();
     }
 
-    public Object compile(Script script) throws ScriptCompilationException {
+    public Object doCompile(Script script) throws ScriptCompilationException {
         ScriptEngine scriptEngine = scriptEngineManager.getEngineByName(script.getType());
         if (scriptEngine instanceof Compilable) {
             try {
@@ -81,7 +81,7 @@ public class Jsr223LocalScriptExecutor implements LocalScriptExecutor<Object> {
     public void close(Object compiledScript) {
     }
 
-    public boolean isThreadSafe(Object compiledScript) {
-        return compiledScript instanceof ScriptEngine;
+    public boolean isThreadSafe() {
+        return false;
     }
 }

@@ -64,11 +64,15 @@ import java.util.concurrent.Future;
  * The proxy allows for a pluggable routing handler implementation by setting
  * {@link #setRemoteRoutingHandler(RemoteRoutingHandler)}.
  *
+ * <p>The actual remote invocation can be replaced with an aspect implementing {@link org.openspaces.remoting.RemoteInvocationAspect}
+ * which can be set using {@link #setRemoteInvocationAspect(RemoteInvocationAspect)}. It is up the aspect to then
+ * call the actual remote invocation.  
+ *
  * @author kimchy
  * @see SpaceRemotingServiceExporter
  */
 public class AsyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements FactoryBean, InitializingBean,
-        MethodInterceptor {
+        MethodInterceptor, RemotingInvoker {
 
     public static final String DEFAULT_ASYNC_METHOD_PREFIX = "async";
 
@@ -85,6 +89,8 @@ public class AsyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implement
     private boolean fifo = false;
 
     private String asyncMethodPrefix = DEFAULT_ASYNC_METHOD_PREFIX;
+
+    private RemoteInvocationAspect remoteInvocationAspect;
 
     private Object serviceProxy;
 
@@ -144,12 +150,20 @@ public class AsyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implement
         this.fifo = fifo;
     }
 
-
     /**
      * Sets the async method prefix. Defaults to {@link #DEFAULT_ASYNC_METHOD_PREFIX}.
      */
     public void setAsyncMethodPrefix(String asyncMethodPrefix) {
         this.asyncMethodPrefix = asyncMethodPrefix;
+    }
+
+    /**
+     * The actual remote invocation can be replaced with an aspect implementing {@link org.openspaces.remoting.RemoteInvocationAspect}
+     * which can be set using {@link #setRemoteInvocationAspect(RemoteInvocationAspect)}. It is up the aspect to then
+     * call the actual remote invocation.
+     */
+    public void setRemoteInvocationAspect(RemoteInvocationAspect remoteInvocationAspect) {
+        this.remoteInvocationAspect = remoteInvocationAspect;
     }
 
     public void afterPropertiesSet() {
@@ -172,7 +186,13 @@ public class AsyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implement
 
     @SuppressWarnings("unchecked")
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+        if (remoteInvocationAspect != null) {
+            return remoteInvocationAspect.invoke(methodInvocation, this);
+        }
+        return invokeRemote(methodInvocation);
+    }
 
+    public Object invokeRemote(MethodInvocation methodInvocation) throws Throwable {
         String lookupName = getServiceInterface().getName();
         String methodName = methodInvocation.getMethod().getName();
 

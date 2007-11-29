@@ -47,6 +47,8 @@ public class SyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinitionP
 
     private static final String RESULT_REDUCER = "result-reducer";
 
+    private static final String ASPECT = "aspect";
+
     protected Class<SyncSpaceRemotingProxyFactoryBean> getBeanClass(Element element) {
         return SyncSpaceRemotingProxyFactoryBean.class;
     }
@@ -84,6 +86,12 @@ public class SyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinitionP
         if (routingHandlerEle != null) {
             builder.addPropertyValue("remoteRoutingHandler", parserContext.getDelegate().parsePropertyValue(
                     routingHandlerEle, builder.getRawBeanDefinition(), "remoteRoutingHandler"));
+        }
+
+        Element aspectEle = DomUtils.getChildElementByTagName(element, ASPECT);
+        if (aspectEle != null) {
+            builder.addPropertyValue("remoteInvocationAspect", parserContext.getDelegate().parsePropertyValue(
+                    aspectEle, builder.getRawBeanDefinition(), "remoteInvocationAspect"));
         }
 
         Element resultReducerEle = DomUtils.getChildElementByTagName(element, RESULT_REDUCER);

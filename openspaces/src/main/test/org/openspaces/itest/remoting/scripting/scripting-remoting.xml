@@ -29,9 +29,17 @@
 
 
     <os-remoting:async-proxy id="asyncScriptingExecutor" giga-space="gigaSpace"
-                             interface="org.openspaces.remoting.scripting.ScriptingExecutor" timeout="15000"/>
+                             interface="org.openspaces.remoting.scripting.ScriptingExecutor" timeout="15000">
+        <os-remoting:aspect>
+            <bean class="org.openspaces.remoting.scripting.LazyLoadingRemoteInvocationAspect" />
+        </os-remoting:aspect>
+    </os-remoting:async-proxy>
 
 
     <os-remoting:sync-proxy id="syncScriptingExecutor" giga-space="gigaSpace"
-                            interface="org.openspaces.remoting.scripting.ScriptingExecutor"/>
+                            interface="org.openspaces.remoting.scripting.ScriptingExecutor">
+        <os-remoting:aspect>
+            <bean class="org.openspaces.remoting.scripting.LazyLoadingRemoteInvocationAspect" />
+        </os-remoting:aspect>
+    </os-remoting:sync-proxy>
 </beans>

@@ -55,11 +55,15 @@ import org.springframework.util.Assert;
  * a custom {@link #setRemoteResultReducer(RemoteResultReducer)}  can be plugged to reduce the results of
  * all different services into a single response (assuming that the service has a return value).
  *
+ * <p>The actual remote invocation can be replaced with an aspect implementing {@link org.openspaces.remoting.RemoteInvocationAspect}
+ * which can be set using {@link #setRemoteInvocationAspect(RemoteInvocationAspect)}. It is up the aspect to then
+ * call the actual remote invocation.
+ *
  * @author kimchy
  * @see org.openspaces.remoting.SpaceRemotingServiceExporter
  */
 public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements FactoryBean, InitializingBean,
-        MethodInterceptor {
+        MethodInterceptor, RemotingInvoker {
 
     private GigaSpace gigaSpace;
 
@@ -74,6 +78,8 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
     private boolean returnFirstResult = true;
 
     private RemoteResultReducer remoteResultReducer;
+
+    private RemoteInvocationAspect remoteInvocationAspect;
 
     private Object serviceProxy;
 
@@ -138,6 +144,15 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
         this.returnFirstResult = returnFirstResult;
     }
 
+    /**
+     * The actual remote invocation can be replaced with an aspect implementing {@link org.openspaces.remoting.RemoteInvocationAspect}
+     * which can be set using {@link #setRemoteInvocationAspect(RemoteInvocationAspect)}. It is up the aspect to then
+     * call the actual remote invocation.
+     */
+    public void setRemoteInvocationAspect(RemoteInvocationAspect remoteInvocationAspect) {
+        this.remoteInvocationAspect = remoteInvocationAspect;
+    }
+
     public void afterPropertiesSet() {
         Assert.notNull(getServiceInterface(), "serviceInterface property is required");
         Assert.notNull(gigaSpace, "gigaSpace property is required");
@@ -158,7 +173,13 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
 
     @SuppressWarnings("unchecked")
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+        if (remoteInvocationAspect != null) {
+            return remoteInvocationAspect.invoke(methodInvocation, this);
+        }
+        return invokeRemote(methodInvocation);
+    }
 
+    public Object invokeRemote(MethodInvocation methodInvocation) throws Throwable {
         String lookupName = getServiceInterface().getName();
         String methodName = methodInvocation.getMethod().getName();
 

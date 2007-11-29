@@ -45,5 +45,5 @@ public interface LocalScriptExecutor<T> {
      * Returns <code>true</code> if the same compiled script can be used by different threads (note, parameres
      * or bindings usually make a scripting library not thread safe).
      */
-    boolean isThreadSafe(T compiledScript);
+    boolean isThreadSafe();
 }

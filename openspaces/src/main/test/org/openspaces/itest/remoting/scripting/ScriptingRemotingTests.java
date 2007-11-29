@@ -17,6 +17,7 @@
 package org.openspaces.itest.remoting.scripting;
 
 import org.openspaces.core.GigaSpace;
+import org.openspaces.remoting.scripting.ResourceLazyLoadingScript;
 import org.openspaces.remoting.scripting.ScriptingExecutor;
 import org.openspaces.remoting.scripting.StaticScript;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
@@ -76,17 +77,45 @@ public class ScriptingRemotingTests extends AbstractDependencyInjectionSpringCon
     }
 
     public void testSyncJsr223WithParameterExecution() {
-        Integer value = (Integer) syncScriptingExecutor.execute(new StaticScript("testSyncJsr223Execution", "JavaScript", "number").parameter("number", 1));
+        Integer value = (Integer) syncScriptingExecutor.execute(new StaticScript("testSyncJsr223WithParameterExecution", "JavaScript", "number").parameter("number", 1));
         assertEquals(1, value.intValue());
     }
 
     public void testSyncJRubyExecution() {
-        Long value = (Long) syncScriptingExecutor.execute(new StaticScript("testSyncJsr223Execution", "ruby", "1"));
+        Long value = (Long) syncScriptingExecutor.execute(new StaticScript("testSyncJRubyExecution", "ruby", "1"));
         assertEquals(1, value.intValue());
     }
 
     public void testSyncJRubyWithParameteresExecution() {
-        Long value = (Long) syncScriptingExecutor.execute(new StaticScript("testSyncJsr223Execution", "ruby", "$number").parameter("number", 1));
+        Long value = (Long) syncScriptingExecutor.execute(new StaticScript("testSyncJRubyWithParameteresExecution", "ruby", "$number").parameter("number", 1));
         assertEquals(1, value.intValue());
+    }
+
+    public void testSimpleCachingWithJRuby() {
+        // warmup
+        Long value = (Long) syncScriptingExecutor.execute(new StaticScript("testSimpleCachingWithJRuby-warmup", "ruby", "$number").parameter("number", 1));
+        assertEquals(1, value.intValue());
+
+        long time = System.currentTimeMillis();
+        for (int i = 0; i < 10; i++) {
+            value = (Long) syncScriptingExecutor.execute(new StaticScript("testSimpleCachingWithJRuby-cached", "ruby", "$number").parameter("number", 1));
+            assertEquals(1, value.intValue());
+        }
+        long cacheTime = System.currentTimeMillis() - time;
+        time = System.currentTimeMillis();
+        for (int i = 0; i < 10; i++) {
+            value = (Long) syncScriptingExecutor.execute(new StaticScript("testSimpleCachingWithJRuby-not-cached", "ruby", "$number").parameter("number", 1).shouldCache(false));
+            assertEquals(1, value.intValue());
+        }
+        long nonCacheTime = System.currentTimeMillis() - time;
+        assertTrue(cacheTime < nonCacheTime);
+    }
+
+    public void testLazyLoadingGroovyScript() {
+        gigaSpace.clear(null);
+        Integer value = (Integer) syncScriptingExecutor.execute(new ResourceLazyLoadingScript("testLazyLoadingGroovyScript", "groovy", "classpath:/org/openspaces/itest/remoting/scripting/test.groovy"));
+        assertEquals(1, value.intValue());
+        value = (Integer) syncScriptingExecutor.execute(new ResourceLazyLoadingScript("testLazyLoadingGroovyScript", "groovy", "classpath:/org/openspaces/itest/remoting/scripting/test.groovy"));
+        assertEquals(2, value.intValue());
     }
 }

@@ -16,6 +16,7 @@
 
 package org.openspaces.remoting.scripting;
 
+
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 
@@ -26,7 +27,7 @@ import java.util.Map;
  *
  * @author kimchy
  */
-public class GroovyLocalScriptExecutor implements LocalScriptExecutor<groovy.lang.Script> {
+public class GroovyLocalScriptExecutor extends AbstractLocalScriptExecutor<groovy.lang.Script> {
 
     private GroovyShell groovyShell;
 
@@ -34,7 +35,8 @@ public class GroovyLocalScriptExecutor implements LocalScriptExecutor<groovy.lan
         groovyShell = new GroovyShell();
     }
 
-    public groovy.lang.Script compile(Script script) throws ScriptCompilationException {
+
+    protected groovy.lang.Script doCompile(Script script) throws ScriptCompilationException {
         try {
             return groovyShell.parse(script.getScriptAsString());
         } catch (Exception e) {
@@ -60,7 +62,7 @@ public class GroovyLocalScriptExecutor implements LocalScriptExecutor<groovy.lan
     public void close(groovy.lang.Script compiledScript) {
     }
 
-    public boolean isThreadSafe(groovy.lang.Script script) {
+    public boolean isThreadSafe() {
         return false;
     }
 }

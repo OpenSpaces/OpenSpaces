@@ -38,9 +38,9 @@ import java.util.Map;
  *
  * @author kimchy
  */
-public class JRubyLocalScriptExecutor implements LocalScriptExecutor<JRubyLocalScriptExecutor.JRubyCompiledScript> {
+public class JRubyLocalScriptExecutor extends AbstractLocalScriptExecutor<JRubyLocalScriptExecutor.JRubyCompiledScript> {
 
-    public JRubyCompiledScript compile(Script script) throws ScriptCompilationException {
+    public JRubyCompiledScript doCompile(Script script) throws ScriptCompilationException {
         Ruby runtime = JavaEmbedUtils.initialize(new ArrayList());
         IRubyObject rubyScript = JavaEmbedUtils.javaToRuby(runtime, script.getScriptAsString());
         Node node = runtime.parse(rubyScript.asSymbol(), "<unknown>", null, 0);
@@ -63,7 +63,7 @@ public class JRubyLocalScriptExecutor implements LocalScriptExecutor<JRubyLocalS
         JavaEmbedUtils.terminate(compiledScript.runtime);
     }
 
-    public boolean isThreadSafe(JRubyCompiledScript compiledScript) {
+    public boolean isThreadSafe() {
         return false;
     }
 

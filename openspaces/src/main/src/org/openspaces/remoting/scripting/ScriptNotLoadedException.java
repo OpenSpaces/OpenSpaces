@@ -16,37 +16,19 @@
 
 package org.openspaces.remoting.scripting;
 
-import java.util.Map;
-
 /**
- * A script that will be excuted.
+ * An exception indicating that a script was executed without its script content
+ * not loaded.
  *
  * @author kimchy
  */
-public interface Script {
+public class ScriptNotLoadedException extends ScriptingException {
 
-    /**
-     * The name of the script. Should uniquely identify scripts.
-     */
-    String getName();
+    public ScriptNotLoadedException(String msg) {
+        super(msg);
+    }
 
-    /**
-     * The type of the script (or actually, language). For example, <code>groovy</code> or <code>ruby</code>.
-     */
-    String getType();
-
-    /**
-     * The script source as a string.
-     */
-    String getScriptAsString();
-
-    /**
-     * One or more parameters that will be passes to the script.
-     */
-    Map<String, Object> getParameters();
-
-    /**
-     * Should this script be cached or not. Defaults to <code>true</code>.
-     */
-    boolean shouldCache();
+    public ScriptNotLoadedException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 }

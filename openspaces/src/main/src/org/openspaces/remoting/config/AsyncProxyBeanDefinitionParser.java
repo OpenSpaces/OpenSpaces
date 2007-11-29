@@ -45,6 +45,8 @@ public class AsyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinition
 
     private static final String ROUTING_HANDLER = "routing-handler";
 
+    private static final String ASPECT = "aspect";
+    
     protected Class<AsyncSpaceRemotingProxyFactoryBean> getBeanClass(Element element) {
         return AsyncSpaceRemotingProxyFactoryBean.class;
     }
@@ -78,6 +80,12 @@ public class AsyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinition
             builder.addPropertyValue("timeout", timeout);
         }
 
+        Element aspectEle = DomUtils.getChildElementByTagName(element, ASPECT);
+        if (aspectEle != null) {
+            builder.addPropertyValue("remoteInvocationAspect", parserContext.getDelegate().parsePropertyValue(
+                    aspectEle, builder.getRawBeanDefinition(), "remoteInvocationAspect"));
+        }
+        
         Element routingHandlerEle = DomUtils.getChildElementByTagName(element, ROUTING_HANDLER);
         if (routingHandlerEle != null) {
             builder.addPropertyValue("remoteRoutingHandler", parserContext.getDelegate().parsePropertyValue(

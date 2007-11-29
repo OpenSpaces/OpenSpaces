@@ -19,6 +19,9 @@ package org.openspaces.remoting.scripting;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.remoting.scripting.cache.CompiledScriptCache;
+import org.openspaces.remoting.scripting.cache.LRUNonThreadSafeCompiledScriptCache;
+import org.openspaces.remoting.scripting.cache.LRUThreadSafeCompiledScriptCache;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -50,6 +53,12 @@ import java.util.concurrent.Future;
  * instances are often used within the script, it will automatically add all the different <code>GigaSpace</code>
  * instances defined within the application context under their respective bean names.
  *
+ * <p>This executor also supports caching of compiled scipts using the {@link org.openspaces.remoting.scripting.cache.CompiledScriptCache}
+ * abstraction. There are two special caches, one for compiled scripts that are thread safe (the same compiled script
+ * can be executed by several threads) and one for compiled scripts that are not thread safe (the same compiled scripts
+ * can only be executed by a single thread). Note, caching is done based on the script name ({@link Script#getName()},
+ * this means that changed scripts should change their name in order to recompile them and insert them into the cache.
+ *
  * @author kimchy
  */
 public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationContextAware, InitializingBean, ApplicationListener {
@@ -70,7 +79,11 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
 
     private LocalScriptExecutor jsr223Executor;
 
-    private Map<String, GigaSpace> gigaSpacesBeans = new HashMap<String, GigaSpace>(); 
+    private CompiledScriptCache threadSafeCompiledScriptCache;
+
+    private CompiledScriptCache nonThreadSafeCopmiledScriptCache;
+
+    private Map<String, GigaSpace> gigaSpacesBeans = new HashMap<String, GigaSpace>();
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
@@ -82,6 +95,26 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
 
     public void setExecutors(Map<String, LocalScriptExecutor> executors) {
         this.executors = executors;
+    }
+
+    /**
+     * Sets a compiled script cache for compiled scripts taht are thread safe (the same script can
+     * be executed by different threads). Defaults to {@link LRUThreadSafeCompiledScriptCache}.
+     *
+     * @see LocalScriptExecutor#isThreadSafe()
+     */
+    public void setThreadSafeCompiledScriptCache(CompiledScriptCache threadSafeCompiledScriptCache) {
+        this.threadSafeCompiledScriptCache = threadSafeCompiledScriptCache;
+    }
+
+    /**
+     * Sets a compiled script cache for compiled scripts taht are not thread safe (the same script can not
+     * be executed by different threads). Defaults to {@link LRUNonThreadSafeCompiledScriptCache}.
+     *
+     * @see LocalScriptExecutor#isThreadSafe()
+     */
+    public void setNonThreadSafeCopmiledScriptCache(CompiledScriptCache nonThreadSafeCopmiledScriptCache) {
+        this.nonThreadSafeCopmiledScriptCache = nonThreadSafeCopmiledScriptCache;
     }
 
     public void afterPropertiesSet() throws Exception {
@@ -122,6 +155,13 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
         if (executors.size() == 0 && jsr223Executor == null) {
             throw new IllegalArgumentException("No local script executors are configured or automatically detected");
         }
+
+        if (threadSafeCompiledScriptCache == null) {
+            threadSafeCompiledScriptCache = new LRUThreadSafeCompiledScriptCache();
+        }
+        if (nonThreadSafeCopmiledScriptCache == null) {
+            nonThreadSafeCopmiledScriptCache = new LRUNonThreadSafeCompiledScriptCache();
+        }
     }
 
     /**
@@ -152,7 +192,16 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
                 throw new ScriptingException("Failed to find executor for type [" + script.getType() + "]");
             }
         }
-        Object compiledScript = localScriptExecutor.compile(script);
+        Object compiledScript;
+        if (script.shouldCache()) {
+            if (localScriptExecutor.isThreadSafe()) {
+                compiledScript = threadSafeCompiledScriptCache.get(script.getName(), localScriptExecutor, script);
+            } else {
+                compiledScript = nonThreadSafeCopmiledScriptCache.get(script.getName(), localScriptExecutor, script);
+            }
+        } else {
+            compiledScript = localScriptExecutor.compile(script);
+        }
         Map<String, Object> scriptParams = new HashMap<String, Object>();
         if (parameters != null) {
             scriptParams.putAll(parameters);
@@ -165,7 +214,15 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
         try {
             return localScriptExecutor.execute(script, compiledScript, scriptParams);
         } finally {
-            localScriptExecutor.close(compiledScript);
+            if (script.shouldCache()) {
+                if (localScriptExecutor.isThreadSafe()) {
+                    threadSafeCompiledScriptCache.put(script.getName(), compiledScript, localScriptExecutor);
+                } else {
+                    nonThreadSafeCopmiledScriptCache.put(script.getName(), compiledScript, localScriptExecutor);
+                }
+            } else {
+                localScriptExecutor.close(compiledScript);
+            }
         }
     }
 

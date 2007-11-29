@@ -16,19 +16,31 @@
 
 package org.openspaces.remoting.scripting;
 
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.FileCopyUtils;
+
+import java.io.BufferedReader;
 import java.io.Externalizable;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A script that holds the actual script as a String. The name, type, and script must be provided.
+ * A resource lazy loading script is a lazy loading script that uses Spring abstraction
+ * on top of resources on top of a resource. The script resource location uses Spring
+ * notation for location (similar to URL, with the addition of <code>classpath:</code>
+ * prefix support).
+ *
+ * <p>When the scipt is constructed, the actual script contents is not loaded. Only if needed
+ * the script contents will be loaded. See {@link org.openspaces.remoting.scripting.LazyLoadingRemoteInvocationAspect}.
  *
  * @author kimchy
  */
-public class StaticScript implements Script, Externalizable {
+public class ResourceLazyLoadingScript implements LazyLoadingScript, Externalizable {
 
     private String name;
 
@@ -36,35 +48,61 @@ public class StaticScript implements Script, Externalizable {
 
     private String script;
 
+    private String resourceLocation;
+
     private Map<String, Object> parameters;
 
     private boolean shouldCache = true;
 
-    /**
-     * Constructs a new static script. Note, the name, type, and script must be provided.
-     */
-    public StaticScript() {
+
+    private ResourceLoader resourceLoader = new DefaultResourceLoader();
+
+    public ResourceLazyLoadingScript() {
 
     }
 
     /**
-     * Constructs a new static script.
+     * Constructs a new lazy loading sctipt.
      *
-     * @param name   The name of the script.
-     * @param type   The type of the script (for example, <code>groovy</code>).
-     * @param script The actual script as a String.
+     * @param name             The script name (used as a unique identifier for cachable scripts).
+     * @param type             The type of the script executed
+     * @param resoruceLocation The resource location (similar to URL syntax, with additional support for <code>classpath:</code> prefix).
      */
-    public StaticScript(String name, String type, String script) {
+    public ResourceLazyLoadingScript(String name, String type, String resoruceLocation) {
         this.name = name;
         this.type = type;
-        this.script = script;
+        this.resourceLocation = resoruceLocation;
     }
 
     /**
-     * Returns the script as a String.
+     * Returns the scirpt string only if it was already loaded using {@link #loadScript()}.
      */
     public String getScriptAsString() {
-        return this.script;
+        if (script != null) {
+            return script;
+        }
+        throw new ScriptNotLoadedException("Script [" + getName() + "] not loaded");
+    }
+
+    /**
+     * Returns <code>true</code> if the script has been loaded.
+     */
+    public boolean hasScript() {
+        return script != null;
+    }
+
+    /**
+     * Loads the scirpt into memory from the resource location.
+     */
+    public void loadScript() {
+        if (script != null) {
+            return;
+        }
+        try {
+            script = FileCopyUtils.copyToString(new BufferedReader(new InputStreamReader(resourceLoader.getResource(resourceLocation).getInputStream())));
+        } catch (IOException e) {
+            throw new ScriptingException("Failed to load script resource [" + resourceLocation + "]", e);
+        }
     }
 
     /**
@@ -94,11 +132,11 @@ public class StaticScript implements Script, Externalizable {
     public boolean shouldCache() {
         return this.shouldCache;
     }
-    
+
     /**
      * Sets the name of the script.
      */
-    public StaticScript name(String name) {
+    public ResourceLazyLoadingScript name(String name) {
         this.name = name;
         return this;
     }
@@ -106,15 +144,15 @@ public class StaticScript implements Script, Externalizable {
     /**
      * Sets the actual script source.
      */
-    public StaticScript script(String script) {
-        this.script = script;
+    public ResourceLazyLoadingScript script(String resourceLocation) {
+        this.resourceLocation = resourceLocation;
         return this;
     }
 
     /**
      * Sets the type of the script. For example: <code>groovy</code>.
      */
-    public StaticScript type(String type) {
+    public ResourceLazyLoadingScript type(String type) {
         this.type = type;
         return this;
     }
@@ -122,7 +160,7 @@ public class StaticScript implements Script, Externalizable {
     /**
      * Should this script be cached or not. Deaults to <code>true</code>.
      */
-    public StaticScript shouldCache(boolean shouldCache) {
+    public ResourceLazyLoadingScript shouldCache(boolean shouldCache) {
         this.shouldCache = shouldCache;
         return this;
     }
@@ -133,7 +171,7 @@ public class StaticScript implements Script, Externalizable {
      * @param name  The name of the parameter.
      * @param value The value of the parameter.
      */
-    public StaticScript parameter(String name, Object value) {
+    public ResourceLazyLoadingScript parameter(String name, Object value) {
         if (parameters == null) {
             parameters = new HashMap<String, Object>();
         }
@@ -144,7 +182,12 @@ public class StaticScript implements Script, Externalizable {
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeUTF(name);
         out.writeUTF(type);
-        out.writeObject(script);
+        if (script == null) {
+            out.writeBoolean(false);
+        } else {
+            out.writeBoolean(true);
+            out.writeObject(script);
+        }
         out.writeBoolean(shouldCache);
         if (parameters == null) {
             out.writeBoolean(false);
@@ -161,7 +204,9 @@ public class StaticScript implements Script, Externalizable {
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         name = in.readUTF();
         type = in.readUTF();
-        script = (String) in.readObject();
+        if (in.readBoolean()) {
+            script = (String) in.readObject();
+        }
         shouldCache = in.readBoolean();
         if (in.readBoolean()) {
             int size = in.readShort();
@@ -176,8 +221,9 @@ public class StaticScript implements Script, Externalizable {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("StaticScript name[").append(getName()).append("]");
+        sb.append("ResourceLazyLoadingScript name[").append(getName()).append("]");
         sb.append(" type [").append(getType()).append("]");
+        sb.append(" resource location [").append(resourceLocation).append("]");
         sb.append(" script [").append(script).append("]");
         sb.append(" parameters [").append(parameters).append("]");
         return sb.toString();

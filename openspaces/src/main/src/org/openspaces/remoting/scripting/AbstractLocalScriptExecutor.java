@@ -16,37 +16,20 @@
 
 package org.openspaces.remoting.scripting;
 
-import java.util.Map;
-
 /**
- * A script that will be excuted.
- *
  * @author kimchy
  */
-public interface Script {
+public abstract class AbstractLocalScriptExecutor<T> implements LocalScriptExecutor<T> {
 
-    /**
-     * The name of the script. Should uniquely identify scripts.
-     */
-    String getName();
+    public T compile(Script script) throws ScriptCompilationException {
+        if (script instanceof LazyLoadingScript) {
+            LazyLoadingScript lazyLoadingScript = (LazyLoadingScript) script;
+            if (!lazyLoadingScript.hasScript()) {
+                throw new ScriptNotLoadedException("Script [" + script.getName() + "] not loaded");
+            }
+        }
+        return doCompile(script);
+    }
 
-    /**
-     * The type of the script (or actually, language). For example, <code>groovy</code> or <code>ruby</code>.
-     */
-    String getType();
-
-    /**
-     * The script source as a string.
-     */
-    String getScriptAsString();
-
-    /**
-     * One or more parameters that will be passes to the script.
-     */
-    Map<String, Object> getParameters();
-
-    /**
-     * Should this script be cached or not. Defaults to <code>true</code>.
-     */
-    boolean shouldCache();
+    protected abstract T doCompile(Script script) throws ScriptCompilationException;
 }
