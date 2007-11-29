@@ -45,6 +45,8 @@ public class AsyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinition
 
     private static final String ROUTING_HANDLER = "routing-handler";
 
+    private static final String META_ARGUMENT_HANDLER = "meta-arguments-handler";
+
     private static final String ASPECT = "aspect";
     
     protected Class<AsyncSpaceRemotingProxyFactoryBean> getBeanClass(Element element) {
@@ -90,6 +92,12 @@ public class AsyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinition
         if (routingHandlerEle != null) {
             builder.addPropertyValue("remoteRoutingHandler", parserContext.getDelegate().parsePropertyValue(
                     routingHandlerEle, builder.getRawBeanDefinition(), "remoteRoutingHandler"));
+        }
+
+        Element metaArguemntsHandlerEle = DomUtils.getChildElementByTagName(element, META_ARGUMENT_HANDLER);
+        if (metaArguemntsHandlerEle != null) {
+            builder.addPropertyValue("metaArgumentsHandler", parserContext.getDelegate().parsePropertyValue(
+                    metaArguemntsHandlerEle, builder.getRawBeanDefinition(), "metaArgumentsHandler"));
         }
 
     }

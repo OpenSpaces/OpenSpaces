@@ -94,6 +94,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
     private boolean fifo = false;
 
+    private ServiceExecutionCallback serviceExecutionCallback;
+
     // sync execution fields
 
     private long syncEntryWriteLease = Lease.FOREVER;
@@ -135,6 +137,13 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
      */
     public void setFifo(boolean fifo) {
         this.fifo = fifo;
+    }
+
+    /**
+     * Allows to inject a service execution callback.
+     */
+    public void setServiceExecutionCallback(ServiceExecutionCallback serviceExecutionCallback) {
+        this.serviceExecutionCallback = serviceExecutionCallback;
     }
 
     /**
@@ -235,7 +244,13 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             return;
         }
         try {
+            if (serviceExecutionCallback != null) {
+                serviceExecutionCallback.beforeInvocation(remotingEntry);
+            }
             Object retVal = method.invoke(service, remotingEntry.arguments);
+            if (serviceExecutionCallback != null) {
+                retVal = serviceExecutionCallback.afterInvocation(remotingEntry, retVal);
+            }
             writeResponse(gigaSpace, remotingEntry, retVal);
         } catch (InvocationTargetException e) {
             writeResponse(gigaSpace, remotingEntry, e.getTargetException());
@@ -350,7 +365,13 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                 return;
             }
             try {
+                if (serviceExecutionCallback != null) {
+                    serviceExecutionCallback.beforeInvocation(remotingEntry);
+                }
                 Object retVal = method.invoke(service, remotingEntry.arguments);
+                if (serviceExecutionCallback != null) {
+                    retVal = serviceExecutionCallback.afterInvocation(remotingEntry, retVal);
+                }
                 writeResponse(space, entry, remotingEntry, retVal);
             } catch (InvocationTargetException e) {
                 writeResponse(space, entry, remotingEntry, e.getTargetException());

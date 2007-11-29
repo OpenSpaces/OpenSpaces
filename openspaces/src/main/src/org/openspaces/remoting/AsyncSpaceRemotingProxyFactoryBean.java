@@ -82,6 +82,8 @@ public class AsyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implement
 
     private RemoteRoutingHandler remoteRoutingHandler;
 
+    private MetaArgumentsHandler metaArgumentsHandler;
+
     private boolean globalOneWay = false;
 
     private boolean voidOneWay = false;
@@ -119,6 +121,13 @@ public class AsyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implement
      */
     public void setRemoteRoutingHandler(RemoteRoutingHandler remoteRoutingHandler) {
         this.remoteRoutingHandler = remoteRoutingHandler;
+    }
+
+    /**
+     * Allows to set a meta argument handler that will control {@link SpaceRemotingInvocation#getMetaArguments()}.
+     */
+    public void setMetaArgumentsHandler(MetaArgumentsHandler metaArgumentsHandler) {
+        this.metaArgumentsHandler = metaArgumentsHandler;
     }
 
     /**
@@ -215,6 +224,11 @@ public class AsyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implement
             routing = remotingEntry.hashCode();
         }
         remotingEntry.setRouting(routing);
+
+        if (metaArgumentsHandler != null) {
+            remotingEntry.metaArguments = metaArgumentsHandler.computeMetaArguments(remotingEntry);
+        }
+
         // check if this invocation will be a one way invocation
         if (globalOneWay) {
             remotingEntry.oneWay = Boolean.TRUE;

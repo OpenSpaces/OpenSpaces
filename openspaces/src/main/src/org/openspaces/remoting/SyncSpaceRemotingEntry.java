@@ -34,6 +34,8 @@ public class SyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemoti
 
     public Object[] arguments;
 
+    public Object[] metaArguments;
+
     public Boolean oneWay;
 
     public Integer routing;
@@ -58,6 +60,10 @@ public class SyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemoti
 
     public Object[] getArguments() {
         return arguments;
+    }
+
+    public Object[] getMetaArguments() {
+        return metaArguments;
     }
 
     public Integer getRouting() {

@@ -41,6 +41,13 @@ public interface SpaceRemotingInvocation {
     Object[] getArguments();
 
     /**
+     * Meta arguments that can be passed as part of the invocation. This arguments are
+     * not used to invoke the method, but can be used to control ceratin pluggable
+     * invocation "aspects".
+     */
+    Object[] getMetaArguments();
+
+    /**
      * Routing field controls the partition the invocation will be directed to when working with a
      * partitioned space.
      */

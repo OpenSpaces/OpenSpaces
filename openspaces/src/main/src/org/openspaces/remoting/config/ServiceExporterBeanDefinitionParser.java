@@ -34,6 +34,8 @@ public class ServiceExporterBeanDefinitionParser extends AbstractSingleBeanDefin
 
     private static final String SERVICE = "service";
 
+    private static final String CALLBACK = "callback";
+
     protected Class<SpaceRemotingServiceExporter> getBeanClass(Element element) {
         return SpaceRemotingServiceExporter.class;
     }
@@ -41,6 +43,13 @@ public class ServiceExporterBeanDefinitionParser extends AbstractSingleBeanDefin
     @SuppressWarnings("unchecked")
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
         super.doParse(element, parserContext, builder);
+
+        Element callbackEle = DomUtils.getChildElementByTagName(element, CALLBACK);
+        if (callbackEle != null) {
+            builder.addPropertyValue("serviceExecutionCallback", parserContext.getDelegate().parsePropertyValue(
+                    callbackEle, builder.getRawBeanDefinition(), "serviceExecutionCallback"));
+        }
+
         List<Element> serviceElements = DomUtils.getChildElementsByTagName(element, SERVICE);
         ManagedList list = new ManagedList(serviceElements.size());
         for (Element ele : serviceElements) {

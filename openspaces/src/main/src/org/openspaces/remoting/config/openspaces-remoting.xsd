@@ -31,6 +31,28 @@
             <xsd:complexContent>
                 <xsd:extension base="beans:identifiedType">
                     <xsd:sequence>
+                        <xsd:element name="callback" minOccurs="0" maxOccurs="1">
+                            <xsd:annotation>
+                                <xsd:appinfo>
+                                    <tool:annotation kind="ref">
+                                        <tool:expected-type type="org.openspaces.remoting.ServiceExecutionCallback"/>
+                                    </tool:annotation>
+                                </xsd:appinfo>
+                                <xsd:documentation>
+                                    Allows to set a callback before and after each service execution.
+                                </xsd:documentation>
+                            </xsd:annotation>
+                            <xsd:complexType>
+                                <xsd:group ref="beans:collectionElements"/>
+                                <xsd:attribute name="ref" type="xsd:string">
+                                    <xsd:annotation>
+                                        <xsd:documentation>
+                                            <![CDATA[A short-cut alternative to a nested "<ref bean='...'/>".]]>
+                                        </xsd:documentation>
+                                    </xsd:annotation>
+                                </xsd:attribute>
+                            </xsd:complexType>
+                        </xsd:element>
                         <xsd:element name="service" minOccurs="1" maxOccurs="unbounded">
                             <xsd:annotation>
                                 <xsd:documentation>
@@ -86,6 +108,29 @@
                                     routing index will be random (the hashCode of the newly created remote invocation).
                                     This RemoteRoutingHandler allows for custom routing computation (for example, based
                                     on one of the service method parameters).
+                                </xsd:documentation>
+                            </xsd:annotation>
+                            <xsd:complexType>
+                                <xsd:group ref="beans:collectionElements"/>
+                                <xsd:attribute name="ref" type="xsd:string">
+                                    <xsd:annotation>
+                                        <xsd:documentation>
+                                            <![CDATA[A short-cut alternative to a nested "<ref bean='...'/>".]]>
+                                        </xsd:documentation>
+                                    </xsd:annotation>
+                                </xsd:attribute>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element name="meta-arguments-handler" minOccurs="0" maxOccurs="1">
+                            <xsd:annotation>
+                                <xsd:appinfo>
+                                    <tool:annotation kind="ref">
+                                        <tool:expected-type type="org.openspaces.remoting.MetaArgumentsHandler"/>
+                                    </tool:annotation>
+                                </xsd:appinfo>
+                                <xsd:documentation>
+                                    Allows to set the meta arguemnts handler controlling the meta arguments passed with
+                                    each remote invocation.
                                 </xsd:documentation>
                             </xsd:annotation>
                             <xsd:complexType>
@@ -236,6 +281,29 @@
                                                 <tool:expected-type type="org.openspaces.remoting.RemoteResultReducer"/>
                                             </tool:annotation>
                                         </xsd:appinfo>
+                                        <xsd:documentation>
+                                            <![CDATA[A short-cut alternative to a nested "<ref bean='...'/>".]]>
+                                        </xsd:documentation>
+                                    </xsd:annotation>
+                                </xsd:attribute>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element name="meta-arguments-handler" minOccurs="0" maxOccurs="1">
+                            <xsd:annotation>
+                                <xsd:appinfo>
+                                    <tool:annotation kind="ref">
+                                        <tool:expected-type type="org.openspaces.remoting.MetaArgumentsHandler"/>
+                                    </tool:annotation>
+                                </xsd:appinfo>
+                                <xsd:documentation>
+                                    Allows to set the meta arguemnts handler controlling the meta arguments passed with
+                                    each remote invocation.
+                                </xsd:documentation>
+                            </xsd:annotation>
+                            <xsd:complexType>
+                                <xsd:group ref="beans:collectionElements"/>
+                                <xsd:attribute name="ref" type="xsd:string">
+                                    <xsd:annotation>
                                         <xsd:documentation>
                                             <![CDATA[A short-cut alternative to a nested "<ref bean='...'/>".]]>
                                         </xsd:documentation>

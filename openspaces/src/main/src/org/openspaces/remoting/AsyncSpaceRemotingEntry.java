@@ -40,6 +40,8 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
 
     public Object[] arguments;
 
+    public Object[] metaArguments;
+
     public Boolean oneWay;
 
     public Integer routing;
@@ -65,6 +67,10 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
 
     public Object[] getArguments() {
         return arguments;
+    }
+
+    public Object[] getMetaArguments() {
+        return metaArguments;
     }
 
     public Integer getRouting() {
@@ -167,6 +173,14 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
             for (Object argument : arguments) {
                 out.writeObject(argument);
             }
+            if (metaArguments == null || metaArguments.length == 0) {
+                out.writeInt(0);
+            } else {
+                out.writeInt(metaArguments.length);
+            }
+            for (Object argument : metaArguments) {
+                out.writeObject(argument);
+            }
         } else {
             if (result != null) {
                 out.writeBoolean(true);
@@ -202,6 +216,13 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
                 arguments = new Object[argumentNumber];
                 for (int i = 0; i < argumentNumber; i++) {
                     arguments[i] = in.readObject();
+                }
+            }
+            argumentNumber = in.readInt();
+            if (argumentNumber > 0) {
+                metaArguments = new Object[argumentNumber];
+                for (int i = 0; i < argumentNumber; i++) {
+                    metaArguments[i] = in.readObject();
                 }
             }
         } else {

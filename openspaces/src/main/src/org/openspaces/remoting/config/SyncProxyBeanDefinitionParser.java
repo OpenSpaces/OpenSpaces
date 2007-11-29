@@ -45,6 +45,8 @@ public class SyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinitionP
 
     private static final String ROUTING_HANDLER = "routing-handler";
 
+    private static final String META_ARGUMENT_HANDLER = "meta-arguments-handler";
+    
     private static final String RESULT_REDUCER = "result-reducer";
 
     private static final String ASPECT = "aspect";
@@ -98,6 +100,12 @@ public class SyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinitionP
         if (resultReducerEle != null) {
             builder.addPropertyValue("remoteResultReducer", parserContext.getDelegate().parsePropertyValue(
                     resultReducerEle, builder.getRawBeanDefinition(), "remoteResultReducer"));
+        }
+
+        Element metaArguemntsHandlerEle = DomUtils.getChildElementByTagName(element, META_ARGUMENT_HANDLER);
+        if (metaArguemntsHandlerEle != null) {
+            builder.addPropertyValue("metaArgumentsHandler", parserContext.getDelegate().parsePropertyValue(
+                    metaArguemntsHandlerEle, builder.getRawBeanDefinition(), "metaArgumentsHandler"));
         }
     }
 }

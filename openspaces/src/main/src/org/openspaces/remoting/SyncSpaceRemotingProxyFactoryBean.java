@@ -69,6 +69,8 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
 
     private RemoteRoutingHandler remoteRoutingHandler;
 
+    private MetaArgumentsHandler metaArgumentsHandler;
+    
     private boolean globalOneWay = false;
 
     private boolean voidOneWay = false;
@@ -137,6 +139,13 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
     }
 
     /**
+     * Allows to set a meta argument handler that will control {@link SpaceRemotingInvocation#getMetaArguments()}.
+     */
+    public void setMetaArgumentsHandler(MetaArgumentsHandler metaArgumentsHandler) {
+        this.metaArgumentsHandler = metaArgumentsHandler;
+    }
+    
+    /**
      * When set to <code>true</code> (defaults to <code>true</code>) will return the first result
      * when using broadcast. If set to <code>false</code>, an array of results will be retuned.
      */
@@ -195,6 +204,10 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
                 routing = remotingEntry.hashCode();
             }
             remotingEntry.setRouting(routing);
+        }
+
+        if (metaArgumentsHandler != null) {
+            remotingEntry.metaArguments = metaArgumentsHandler.computeMetaArguments(remotingEntry);
         }
 
         // check if this invocation will be a one way invocation
