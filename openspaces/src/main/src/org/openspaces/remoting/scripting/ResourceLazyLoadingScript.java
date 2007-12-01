@@ -16,6 +16,7 @@
 
 package org.openspaces.remoting.scripting;
 
+import org.openspaces.remoting.RemoteResultReducer;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.FileCopyUtils;
@@ -54,6 +55,10 @@ public class ResourceLazyLoadingScript implements LazyLoadingScript, Externaliza
 
     private boolean shouldCache = true;
 
+
+    private Boolean broadcast;
+
+    private RemoteResultReducer remoteResultReducer;
 
     private Object routing;
 
@@ -142,6 +147,14 @@ public class ResourceLazyLoadingScript implements LazyLoadingScript, Externaliza
         return this.routing;
     }
 
+    public RemoteResultReducer getReducer() {
+        return this.remoteResultReducer;
+    }
+
+    public Boolean shouldBroadcast() {
+        return this.broadcast;
+    }
+
     /**
      * Sets the name of the script.
      */
@@ -194,6 +207,16 @@ public class ResourceLazyLoadingScript implements LazyLoadingScript, Externaliza
      */
     public ResourceLazyLoadingScript routing(Object routing) {
         this.routing = routing;
+        return this;
+    }
+
+    /**
+     * Broadcast the execution of this script over all active partitions. Optionally use a reducer
+     * to reduce the results.
+     */
+    public <T> ResourceLazyLoadingScript broadcast(RemoteResultReducer<T> reducer) {
+        this.broadcast = true;
+        this.remoteResultReducer = reducer;
         return this;
     }
 

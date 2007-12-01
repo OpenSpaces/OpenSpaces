@@ -17,6 +17,9 @@ public abstract class RemotingProxyUtils {
 
     }
 
+    /**
+     * Computes the routing index for a given remote invocation.
+     */
     public static Object computeRouting(SpaceRemotingInvocation remotingEntry, RemoteRoutingHandler remoteRoutingHandler,
                                         MethodInvocation methodInvocation) throws Exception {
         Object routing = null;

@@ -195,7 +195,17 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
         SyncSpaceRemotingEntry remotingEntry = new SyncSpaceRemotingEntry().buildInvocation(lookupName, methodName,
                 methodInvocation.getArguments());
 
-        if (!broadcast) {
+        BroadcastIndicator broadcastIndicator = null;
+        boolean shouldBroadcast = broadcast;
+        if (methodInvocation.getArguments() != null && methodInvocation.getArguments().length > 0) {
+            if (methodInvocation.getArguments()[0] instanceof BroadcastIndicator) {
+                broadcastIndicator = (BroadcastIndicator) methodInvocation.getArguments()[0];
+                if (broadcastIndicator.shouldBroadcast() != null) {
+                    shouldBroadcast = broadcastIndicator.shouldBroadcast();
+                }
+            }
+        }
+        if (!shouldBroadcast) {
             remotingEntry.setRouting(RemotingProxyUtils.computeRouting(remotingEntry, remoteRoutingHandler, methodInvocation));
         }
 
@@ -221,10 +231,14 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
         if (result == null || result.length == 0) {
             throw new RemoteAccessException("Failed to invoke remoting service [" + remotingEntry + "], no return value");
         }
-        if (remoteResultReducer != null) {
+        RemoteResultReducer internalRemoteResultReducer = remoteResultReducer;
+        if (broadcastIndicator != null) {
+            internalRemoteResultReducer = broadcastIndicator.getReducer();
+        }
+        if (internalRemoteResultReducer != null) {
             SpaceRemotingResult[] results = new SpaceRemotingResult[result.length];
             System.arraycopy(result, 0, results, 0, result.length);
-            return remoteResultReducer.reduce(results, remotingEntry);
+            return internalRemoteResultReducer.reduce(results, remotingEntry);
         } else if (returnFirstResult) {
             SyncSpaceRemotingEntry resultEntry = (SyncSpaceRemotingEntry) result[0];
             if (resultEntry.ex != null) {

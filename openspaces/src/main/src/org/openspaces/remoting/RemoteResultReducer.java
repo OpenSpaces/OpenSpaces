@@ -38,5 +38,5 @@ public interface RemoteResultReducer<T> {
      * @return A reduced return value (to the calling client)
      * @throws Exception An exception that will be propagated to the client
      */
-    T reduce(SpaceRemotingResult[] results, SpaceRemotingInvocation remotingInvocation) throws Exception;
+    <Y> T reduce(SpaceRemotingResult<Y>[] results, SpaceRemotingInvocation remotingInvocation) throws Exception;
 }

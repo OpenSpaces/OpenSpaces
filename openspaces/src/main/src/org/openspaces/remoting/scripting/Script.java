@@ -16,6 +16,9 @@
 
 package org.openspaces.remoting.scripting;
 
+import org.openspaces.remoting.BroadcastIndicator;
+import org.openspaces.remoting.RemoteResultReducer;
+
 import java.util.Map;
 
 /**
@@ -23,7 +26,7 @@ import java.util.Map;
  *
  * @author kimchy
  */
-public interface Script {
+public interface Script extends BroadcastIndicator {
 
     /**
      * The name of the script. Should uniquely identify scripts.
@@ -55,4 +58,9 @@ public interface Script {
      * Should this script be cached or not. Defaults to <code>true</code>.
      */
     boolean shouldCache();
+
+    /**
+     * Returns the reducer in case broadcasting is enabled.
+     */
+    RemoteResultReducer getReducer();
 }

@@ -26,7 +26,7 @@ package org.openspaces.remoting;
  *
  * @author kimchy
  */
-public interface SpaceRemotingResult {
+public interface SpaceRemotingResult<T> {
 
     /**
      * Returns the routing index for the given result in cases where the remote
@@ -39,7 +39,7 @@ public interface SpaceRemotingResult {
      * might mean that remote service returned null/void, but it also might
      * means that there might be an {@link #getException()}.
      */
-    Object getResult();
+    T getResult();
 
     /**
      * An exception that occured during the remote invocation. <code>null</code>

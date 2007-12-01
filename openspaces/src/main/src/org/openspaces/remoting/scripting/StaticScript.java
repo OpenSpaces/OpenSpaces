@@ -16,6 +16,8 @@
 
 package org.openspaces.remoting.scripting;
 
+import org.openspaces.remoting.RemoteResultReducer;
+
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -40,7 +42,12 @@ public class StaticScript implements Script, Externalizable {
 
     private boolean shouldCache = true;
 
+    
     private Object routing;
+
+    private Boolean broadcast;
+
+    private RemoteResultReducer remoteResultReducer;
 
     /**
      * Constructs a new static script. Note, the name, type, and script must be provided.
@@ -97,8 +104,19 @@ public class StaticScript implements Script, Externalizable {
         return this.shouldCache;
     }
 
+    /**
+     * Returns the routing index.
+     */
     public Object getRouting() {
         return this.routing;
+    }
+
+    public RemoteResultReducer getReducer() {
+        return this.remoteResultReducer;
+    }
+
+    public Boolean shouldBroadcast() {
+        return this.broadcast;
     }
 
     /**
@@ -152,6 +170,16 @@ public class StaticScript implements Script, Externalizable {
      */
     public StaticScript routing(Object routing) {
         this.routing = routing;
+        return this;
+    }
+
+    /**
+     * Broadcast the execution of this script over all active partitions. Optionally use a reducer
+     * to reduce the results.
+     */
+    public <T> StaticScript broadcast(RemoteResultReducer<T> reducer) {
+        this.broadcast = true;
+        this.remoteResultReducer = reducer;
         return this;
     }
 

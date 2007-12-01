@@ -17,6 +17,9 @@
 package org.openspaces.itest.remoting.scripting;
 
 import org.openspaces.core.GigaSpace;
+import org.openspaces.remoting.RemoteResultReducer;
+import org.openspaces.remoting.SpaceRemotingInvocation;
+import org.openspaces.remoting.SpaceRemotingResult;
 import org.openspaces.remoting.scripting.ResourceLazyLoadingScript;
 import org.openspaces.remoting.scripting.ScriptingExecutor;
 import org.openspaces.remoting.scripting.StaticScript;
@@ -63,6 +66,16 @@ public class ScriptingRemotingTests extends AbstractDependencyInjectionSpringCon
     public void testSyncExecutionWithParameters() {
         Integer value = (Integer) syncScriptingExecutor.execute(new StaticScript("testSyncExecutionWithParameters", "groovy", "return number").parameter("number", 1));
         assertEquals(1, value.intValue());
+    }
+
+    public void testSyncExecutionWithBroadcast() {
+        Integer value = (Integer) syncScriptingExecutor.execute(new StaticScript("testSyncExecutionWithBroadcast", "groovy", "return 1")
+                .broadcast(new RemoteResultReducer<Integer>() {
+            public Integer reduce(SpaceRemotingResult[] results, SpaceRemotingInvocation remotingInvocation) throws Exception {
+                return ((Integer) results[0].getResult()) + 1;
+            }
+        }));
+        assertEquals(2, value.intValue());
     }
 
     public void testAsyncSyncExecutionWithReferenceToSpace() {
