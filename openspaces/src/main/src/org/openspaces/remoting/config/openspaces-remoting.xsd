@@ -95,7 +95,7 @@
         <xsd:complexType>
             <xsd:complexContent>
                 <xsd:extension base="beans:identifiedType">
-                    <xsd:sequence>
+                    <xsd:choice minOccurs="0" maxOccurs="unbounded">
                         <xsd:element name="routing-handler" minOccurs="0" maxOccurs="1">
                             <xsd:annotation>
                                 <xsd:appinfo>
@@ -165,7 +165,7 @@
                                 </xsd:attribute>
                             </xsd:complexType>
                         </xsd:element>
-                    </xsd:sequence>
+                    </xsd:choice>
                     <xsd:attribute name="giga-space" type="os-core:gigaSpaceRefType" use="required">
                         <xsd:annotation>
                             <xsd:documentation>
@@ -239,7 +239,7 @@
         <xsd:complexType>
             <xsd:complexContent>
                 <xsd:extension base="beans:identifiedType">
-                    <xsd:sequence>
+                    <xsd:choice minOccurs="0" maxOccurs="unbounded">
                         <xsd:element name="routing-handler" minOccurs="0" maxOccurs="1">
                             <xsd:annotation>
                                 <xsd:documentation>
@@ -332,7 +332,7 @@
                                 </xsd:attribute>
                             </xsd:complexType>
                         </xsd:element>
-                    </xsd:sequence>
+                    </xsd:choice>
                     <xsd:attribute name="giga-space" type="os-core:gigaSpaceRefType" use="required">
                         <xsd:annotation>
                             <xsd:documentation>

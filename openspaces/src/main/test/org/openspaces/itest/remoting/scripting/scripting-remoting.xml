@@ -33,6 +33,12 @@
         <os-remoting:aspect>
             <bean class="org.openspaces.remoting.scripting.LazyLoadingRemoteInvocationAspect" />
         </os-remoting:aspect>
+        <os-remoting:routing-handler>
+            <bean class="org.openspaces.remoting.scripting.ScriptingRemoteRoutingHandler" />
+        </os-remoting:routing-handler>
+        <os-remoting:meta-arguments-handler>
+            <bean class="org.openspaces.remoting.scripting.ScriptingMetaArgumentsHandler" />
+        </os-remoting:meta-arguments-handler>
     </os-remoting:async-proxy>
 
 
@@ -41,5 +47,11 @@
         <os-remoting:aspect>
             <bean class="org.openspaces.remoting.scripting.LazyLoadingRemoteInvocationAspect" />
         </os-remoting:aspect>
+        <os-remoting:routing-handler>
+            <bean class="org.openspaces.remoting.scripting.ScriptingRemoteRoutingHandler" />
+        </os-remoting:routing-handler>
+        <os-remoting:meta-arguments-handler>
+            <bean class="org.openspaces.remoting.scripting.ScriptingMetaArgumentsHandler" />
+        </os-remoting:meta-arguments-handler>
     </os-remoting:sync-proxy>
 </beans>
