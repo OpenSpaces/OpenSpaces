@@ -146,7 +146,7 @@ public class StaticScript implements Script, Externalizable {
     /**
      * Should this script be cached or not. Deaults to <code>true</code>.
      */
-    public StaticScript shouldCache(boolean shouldCache) {
+    public StaticScript cache(boolean shouldCache) {
         this.shouldCache = shouldCache;
         return this;
     }

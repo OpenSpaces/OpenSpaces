@@ -182,7 +182,7 @@ public class ResourceLazyLoadingScript implements LazyLoadingScript, Externaliza
     /**
      * Should this script be cached or not. Deaults to <code>true</code>.
      */
-    public ResourceLazyLoadingScript shouldCache(boolean shouldCache) {
+    public ResourceLazyLoadingScript cache(boolean shouldCache) {
         this.shouldCache = shouldCache;
         return this;
     }

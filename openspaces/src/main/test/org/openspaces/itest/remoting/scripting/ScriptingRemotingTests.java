@@ -117,7 +117,7 @@ public class ScriptingRemotingTests extends AbstractDependencyInjectionSpringCon
         long cacheTime = System.currentTimeMillis() - time;
         time = System.currentTimeMillis();
         for (int i = 0; i < 10; i++) {
-            value = (Long) syncScriptingExecutor.execute(new StaticScript("testSimpleCachingWithJRuby-not-cached", "ruby", "$number").parameter("number", 1).shouldCache(false));
+            value = (Long) syncScriptingExecutor.execute(new StaticScript("testSimpleCachingWithJRuby-not-cached", "ruby", "$number").parameter("number", 1).cache(false));
             assertEquals(1, value.intValue());
         }
         long nonCacheTime = System.currentTimeMillis() - time;
