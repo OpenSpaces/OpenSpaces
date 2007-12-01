@@ -40,6 +40,8 @@ public class StaticScript implements Script, Externalizable {
 
     private boolean shouldCache = true;
 
+    private Object routing;
+
     /**
      * Constructs a new static script. Note, the name, type, and script must be provided.
      */
@@ -94,7 +96,11 @@ public class StaticScript implements Script, Externalizable {
     public boolean shouldCache() {
         return this.shouldCache;
     }
-    
+
+    public Object getRouting() {
+        return this.routing;
+    }
+
     /**
      * Sets the name of the script.
      */
@@ -138,6 +144,14 @@ public class StaticScript implements Script, Externalizable {
             parameters = new HashMap<String, Object>();
         }
         parameters.put(name, value);
+        return this;
+    }
+
+    /**
+     * Sets the routing index (which partition it will "hit") for the scirpt.
+     */
+    public StaticScript routing(Object routing) {
+        this.routing = routing;
         return this;
     }
 

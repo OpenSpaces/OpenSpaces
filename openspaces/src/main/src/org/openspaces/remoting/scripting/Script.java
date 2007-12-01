@@ -46,6 +46,12 @@ public interface Script {
     Map<String, Object> getParameters();
 
     /**
+     * The routing index for the script. Can be <code>null</code>. Defaults
+     * to a random routing.
+     */
+    Object getRouting();
+
+    /**
      * Should this script be cached or not. Defaults to <code>true</code>.
      */
     boolean shouldCache();

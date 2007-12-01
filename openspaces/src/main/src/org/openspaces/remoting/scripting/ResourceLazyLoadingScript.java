@@ -55,6 +55,8 @@ public class ResourceLazyLoadingScript implements LazyLoadingScript, Externaliza
     private boolean shouldCache = true;
 
 
+    private Object routing;
+
     private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
     public ResourceLazyLoadingScript() {
@@ -134,6 +136,13 @@ public class ResourceLazyLoadingScript implements LazyLoadingScript, Externaliza
     }
 
     /**
+     * Returns the routing index (which partition it will "hit").
+     */
+    public Object getRouting() {
+        return this.routing;
+    }
+
+    /**
      * Sets the name of the script.
      */
     public ResourceLazyLoadingScript name(String name) {
@@ -176,6 +185,15 @@ public class ResourceLazyLoadingScript implements LazyLoadingScript, Externaliza
             parameters = new HashMap<String, Object>();
         }
         parameters.put(name, value);
+        return this;
+    }
+
+    /**
+     * Sets the routing index (which partition this will "hit") for the script. Defaults
+     * to a random routing. Defaults to a random routing.
+     */
+    public ResourceLazyLoadingScript routing(Object routing) {
+        this.routing = routing;
         return this;
     }
 
