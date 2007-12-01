@@ -39,7 +39,7 @@ public @interface AsyncScriptingExecutor {
      * <p>If there is only one instance of {@link org.openspaces.core.GigaSpace}, will defualt to
      * it. If not, will throw an exception if not defined.
      */
-    String value() default "";
+    String gigaSpace() default "";
 
     /**
      * The timeout value when using this async call in a sync manner.

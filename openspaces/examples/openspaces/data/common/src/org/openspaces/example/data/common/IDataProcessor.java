@@ -16,6 +16,8 @@
 
 package org.openspaces.example.data.common;
 
+import org.openspaces.remoting.Routing;
+
 /**
  * An interface representing a data processor.
  *
@@ -26,7 +28,7 @@ public interface IDataProcessor {
     /**
      * Process a given Data object, returning the processed Data object.
      */
-    Data processData(Data data);
+    Data processData(@Routing("getType") Data data);
 
     /**
      * Simply says (prints out) the Data object passed as a parameter.

@@ -33,6 +33,8 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
 
     protected SimpleService simpleServiceSync;
 
+    protected SimpleAnnotationBean simpleAnnotationBean;
+
     protected GigaSpace gigaSpace;
 
     public SimpleRemotingTests() {
@@ -69,6 +71,13 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
 
     public void testSyncSyncExecution() {
         String reply = simpleServiceSync.say("test");
+        assertEquals("SAY test", reply);
+    }
+
+    public void testSimpleAnnotationExecution() {
+        String reply = simpleAnnotationBean.syncSimpleService.say("test");
+        assertEquals("SAY test", reply);
+        reply = simpleAnnotationBean.asyncSimpleService.say("test");
         assertEquals("SAY test", reply);
     }
 }

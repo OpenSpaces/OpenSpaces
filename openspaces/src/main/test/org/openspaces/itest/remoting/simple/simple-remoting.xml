@@ -19,6 +19,10 @@
 
     <bean id="simpleServiceServer" class="org.openspaces.itest.remoting.simple.DefaultSimpleService"/>
 
+    <os-remoting:annotation-support />
+
+    <bean id="simpleAnnotationBean" class="org.openspaces.itest.remoting.simple.SimpleAnnotationBean" />
+    
     <os-remoting:service-exporter id="serviceExporter">
         <os-remoting:service ref="simpleServiceServer"/>
     </os-remoting:service-exporter>

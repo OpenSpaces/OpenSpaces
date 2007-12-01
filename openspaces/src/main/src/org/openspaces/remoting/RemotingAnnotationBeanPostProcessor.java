@@ -16,6 +16,7 @@ import org.springframework.beans.factory.config.InstantiationAwareBeanPostProces
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -45,7 +46,7 @@ public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanP
                 SyncScriptingExecutor syncScriptingExecutor = field.getAnnotation(SyncScriptingExecutor.class);
                 if (syncScriptingExecutor != null) {
                     SyncSpaceRemotingProxyFactoryBean factoryBean = new SyncSpaceRemotingProxyFactoryBean();
-                    factoryBean.setGigaSpace(findGigaSpaceByName(syncScriptingExecutor.value()));
+                    factoryBean.setGigaSpace(findGigaSpaceByName(syncScriptingExecutor.gigaSpace()));
                     factoryBean.setMetaArgumentsHandler(new ScriptingMetaArgumentsHandler());
                     factoryBean.setRemoteInvocationAspect(new LazyLoadingRemoteInvocationAspect());
                     factoryBean.setRemoteRoutingHandler(new ScriptingRemoteRoutingHandler());
@@ -59,7 +60,7 @@ public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanP
                     AsyncSpaceRemotingProxyFactoryBean factoryBean = new AsyncSpaceRemotingProxyFactoryBean();
                     factoryBean.setTimeout(asyncScriptingExecutor.timeout());
                     factoryBean.setFifo(asyncScriptingExecutor.fifo());
-                    factoryBean.setGigaSpace(findGigaSpaceByName(asyncScriptingExecutor.value()));
+                    factoryBean.setGigaSpace(findGigaSpaceByName(asyncScriptingExecutor.gigaSpace()));
                     factoryBean.setMetaArgumentsHandler(new ScriptingMetaArgumentsHandler());
                     factoryBean.setRemoteInvocationAspect(new LazyLoadingRemoteInvocationAspect());
                     factoryBean.setRemoteRoutingHandler(new ScriptingRemoteRoutingHandler());
@@ -68,9 +69,53 @@ public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanP
                     field.setAccessible(true);
                     field.set(bean, factoryBean.getObject());
                 }
+                AsyncProxy asyncProxy = field.getAnnotation(AsyncProxy.class);
+                if (asyncProxy != null) {
+                    AsyncSpaceRemotingProxyFactoryBean factoryBean = new AsyncSpaceRemotingProxyFactoryBean();
+                    factoryBean.setTimeout(asyncProxy.timeout());
+                    factoryBean.setFifo(asyncProxy.fifo());
+                    factoryBean.setGigaSpace(findGigaSpaceByName(asyncProxy.gigaSpace()));
+                    factoryBean.setAsyncMethodPrefix(asyncProxy.asyncMethodPrefix());
+                    factoryBean.setMetaArgumentsHandler((MetaArgumentsHandler) createByClassOrFindByName(asyncProxy.metaArgumentsHandler(), asyncProxy.metaArgumentsHandlerType()));
+                    factoryBean.setRemoteInvocationAspect((RemoteInvocationAspect) createByClassOrFindByName(asyncProxy.remoteInvocationAspect(), asyncProxy.remoteInvocationAspectType()));
+                    factoryBean.setRemoteRoutingHandler((RemoteRoutingHandler) createByClassOrFindByName(asyncProxy.remoteRoutingHandler(), asyncProxy.remoteRoutingHandlerType()));
+                    factoryBean.setServiceInterface(field.getType());
+                    factoryBean.afterPropertiesSet();
+                    field.setAccessible(true);
+                    field.set(bean, factoryBean.getObject());
+                }
+                SyncProxy syncProxy = field.getAnnotation(SyncProxy.class);
+                if (syncProxy != null) {
+                    SyncSpaceRemotingProxyFactoryBean factoryBean = new SyncSpaceRemotingProxyFactoryBean();
+                    factoryBean.setGigaSpace(findGigaSpaceByName(syncProxy.gigaSpace()));
+                    factoryBean.setBroadcast(syncProxy.broadcast());
+                    factoryBean.setMetaArgumentsHandler((MetaArgumentsHandler) createByClassOrFindByName(syncProxy.metaArgumentsHandler(), syncProxy.metaArgumentsHandlerType()));
+                    factoryBean.setRemoteInvocationAspect((RemoteInvocationAspect) createByClassOrFindByName(syncProxy.remoteInvocationAspect(), syncProxy.remoteInvocationAspectType()));
+                    factoryBean.setRemoteRoutingHandler((RemoteRoutingHandler) createByClassOrFindByName(syncProxy.remoteRoutingHandler(), syncProxy.remoteRoutingHandlerType()));
+                    factoryBean.setRemoteResultReducer((RemoteResultReducer) createByClassOrFindByName(syncProxy.remoteResultReducer(), syncProxy.remoteResultReducerType()));
+                    factoryBean.setServiceInterface(field.getType());
+                    factoryBean.afterPropertiesSet();
+                    field.setAccessible(true);
+                    field.set(bean, factoryBean.getObject());
+                }
             }
         });
         return true;
+    }
+
+    protected Object createByClassOrFindByName(String name, Class clazz) throws NoSuchBeanDefinitionException {
+        if (StringUtils.hasLength(name)) {
+            return applicationContext.getBean(name);
+        }
+
+        if (!Object.class.equals(clazz)) {
+            try {
+                return clazz.newInstance();
+            } catch (Exception e) {
+                throw new NoSuchBeanDefinitionException("Failed to create class [" + clazz + "]");
+            }
+        }
+        return null;
     }
 
     protected GigaSpace findGigaSpaceByName(String gsName) throws NoSuchBeanDefinitionException {

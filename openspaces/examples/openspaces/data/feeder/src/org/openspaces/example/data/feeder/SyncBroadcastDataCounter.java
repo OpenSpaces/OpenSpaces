@@ -17,6 +17,8 @@
 package org.openspaces.example.data.feeder;
 
 import org.openspaces.example.data.common.IDataProcessor;
+import org.openspaces.example.data.feeder.support.SyncBroadcastCounterReducer;
+import org.openspaces.remoting.SyncProxy;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
@@ -38,6 +40,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SyncBroadcastDataCounter implements InitializingBean, DisposableBean {
 
+    @SyncProxy(gigaSpace="gigaSpace", remoteResultReducerType = SyncBroadcastCounterReducer.class, broadcast = true)
     private IDataProcessor dataProcessor;
 
     private ScheduledExecutorService executorService;
@@ -47,10 +50,6 @@ public class SyncBroadcastDataCounter implements InitializingBean, DisposableBea
     private ViewCounterTask viewCounterTask;
 
     private long defaultDelay = 1000;
-
-    public void setDataProcessor(IDataProcessor dataProcessor) {
-        this.dataProcessor = dataProcessor;
-    }
 
     public void setDefaultDelay(long defaultDelay) {
         this.defaultDelay = defaultDelay;

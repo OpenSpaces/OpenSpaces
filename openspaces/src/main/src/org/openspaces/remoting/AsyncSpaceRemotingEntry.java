@@ -169,17 +169,17 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
                 out.writeInt(0);
             } else {
                 out.writeInt(arguments.length);
-            }
-            for (Object argument : arguments) {
-                out.writeObject(argument);
+                for (Object argument : arguments) {
+                    out.writeObject(argument);
+                }
             }
             if (metaArguments == null || metaArguments.length == 0) {
                 out.writeInt(0);
             } else {
                 out.writeInt(metaArguments.length);
-            }
-            for (Object argument : metaArguments) {
-                out.writeObject(argument);
+                for (Object argument : metaArguments) {
+                    out.writeObject(argument);
+                }
             }
         } else {
             if (result != null) {

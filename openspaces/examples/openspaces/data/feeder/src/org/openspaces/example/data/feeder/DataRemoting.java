@@ -18,6 +18,7 @@ package org.openspaces.example.data.feeder;
 
 import org.openspaces.example.data.common.Data;
 import org.openspaces.example.data.common.IDataProcessor;
+import org.openspaces.remoting.AsyncProxy;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -45,15 +46,12 @@ public class DataRemoting implements InitializingBean, DisposableBean {
     
     private long defaultDelay = 1000;
 
+    @AsyncProxy(gigaSpace="gigaSpace", timeout = 15000)
     private IDataProcessor dataProcessor;
 
     private ScheduledExecutorService executorService;
 
     private ScheduledFuture<?> sf;
-
-    public void setDataProcessor(IDataProcessor dataProcessor) {
-        this.dataProcessor = dataProcessor;
-    }
 
     /**
      * Sets the number of types that will be used to set {@link org.openspaces.example.data.common.Data#setType(Long)}.

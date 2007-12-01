@@ -39,5 +39,5 @@ public @interface SyncScriptingExecutor {
      * <p>If there is only one instance of {@link org.openspaces.core.GigaSpace}, will defualt to
      * it. If not, will throw an exception if not defined.
      */
-    String value() default "";
+    String gigaSpace() default "";
 }
