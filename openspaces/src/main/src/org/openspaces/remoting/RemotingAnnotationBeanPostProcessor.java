@@ -58,6 +58,7 @@ public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanP
                 if (asyncScriptingExecutor != null) {
                     AsyncSpaceRemotingProxyFactoryBean factoryBean = new AsyncSpaceRemotingProxyFactoryBean();
                     factoryBean.setTimeout(asyncScriptingExecutor.timeout());
+                    factoryBean.setFifo(asyncScriptingExecutor.fifo());
                     factoryBean.setGigaSpace(findGigaSpaceByName(asyncScriptingExecutor.value()));
                     factoryBean.setMetaArgumentsHandler(new ScriptingMetaArgumentsHandler());
                     factoryBean.setRemoteInvocationAspect(new LazyLoadingRemoteInvocationAspect());

@@ -47,4 +47,9 @@ public @interface AsyncScriptingExecutor {
      * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setTimeout(long) 
      */
     long timeout() default 5000;
+
+    /**
+     * Should the remote invocation operate in a fifo manner.
+     */
+    boolean fifo() default false;
 }
