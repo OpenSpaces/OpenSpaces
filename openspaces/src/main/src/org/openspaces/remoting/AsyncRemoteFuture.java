@@ -29,7 +29,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author kimchy
  */
-public class DefaultRemoteFuture<T> implements Future<T> {
+public class AsyncRemoteFuture<T> implements Future<T> {
 
     private GigaSpace gigaSpace;
 
@@ -41,7 +41,7 @@ public class DefaultRemoteFuture<T> implements Future<T> {
 
     private AsyncSpaceRemotingEntry template;
 
-    public DefaultRemoteFuture(GigaSpace gigaSpace, AsyncSpaceRemotingEntry remotingEntry) {
+    public AsyncRemoteFuture(GigaSpace gigaSpace, AsyncSpaceRemotingEntry remotingEntry) {
         this.gigaSpace = gigaSpace;
         this.remotingEntry = remotingEntry;
         try {

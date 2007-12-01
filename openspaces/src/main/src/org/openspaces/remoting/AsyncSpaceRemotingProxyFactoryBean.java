@@ -241,7 +241,7 @@ public class AsyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implement
 
         // if the return value is a future, return the future
         if (asyncExecution) {
-            return new DefaultRemoteFuture(gigaSpace, remotingEntry);
+            return new AsyncRemoteFuture(gigaSpace, remotingEntry);
         }
 
         AsyncSpaceRemotingEntry invokeResult = gigaSpace.take(remotingEntry.buildResultTemplate(), timeout);
