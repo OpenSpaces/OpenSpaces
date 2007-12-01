@@ -37,6 +37,8 @@ public class ScriptingRemotingTests extends AbstractDependencyInjectionSpringCon
 
     protected ScriptingExecutor syncScriptingExecutor;
 
+    protected ScriptingAnnotationBean scriptingAnnotationBean;
+
     protected GigaSpace gigaSpace;
 
     public ScriptingRemotingTests() {
@@ -130,5 +132,10 @@ public class ScriptingRemotingTests extends AbstractDependencyInjectionSpringCon
         assertEquals(1, value.intValue());
         value = (Integer) syncScriptingExecutor.execute(new ResourceLazyLoadingScript("testLazyLoadingGroovyScript", "groovy", "classpath:/org/openspaces/itest/remoting/scripting/test.groovy"));
         assertEquals(2, value.intValue());
+    }
+
+    public void testAnnotationInjection() {
+        assertEquals(2, scriptingAnnotationBean.executeAsyncScriptThatReturns2().intValue());
+        assertEquals(2, scriptingAnnotationBean.executeSyncScriptThatReturns2().intValue());
     }
 }

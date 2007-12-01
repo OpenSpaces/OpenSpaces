@@ -11,6 +11,14 @@
     <xsd:import namespace="http://www.springframework.org/schema/tool"/>
     <xsd:import namespace="http://www.openspaces.org/schema/core"/>
 
+    <xsd:element name="annotation-support">
+        <xsd:annotation>
+            <xsd:documentation>
+                Allows to use different annotation based injection and configuration associated with remoting.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
     <xsd:element name="service-exporter">
         <xsd:annotation>
             <xsd:documentation source="java:org.openspaces.remoting.SpaceRemotingServiceExporter">

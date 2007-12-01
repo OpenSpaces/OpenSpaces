@@ -27,6 +27,10 @@
         <os-events:listener ref="serviceExporter"/>
     </os-events:polling-container>
 
+    <os-remoting:annotation-support />
+
+    <bean id="scriptingAnnotationBean" class="org.openspaces.itest.remoting.scripting.ScriptingAnnotationBean" />
+
 
     <os-remoting:async-proxy id="asyncScriptingExecutor" giga-space="gigaSpace"
                              interface="org.openspaces.remoting.scripting.ScriptingExecutor" timeout="15000">
