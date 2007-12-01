@@ -19,6 +19,8 @@ package org.openspaces.remoting.scripting;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.remoting.scripting.cache.CompiledScriptCache;
 import org.openspaces.remoting.scripting.cache.LRUNonThreadSafeCompiledScriptCache;
 import org.openspaces.remoting.scripting.cache.LRUThreadSafeCompiledScriptCache;
@@ -53,6 +55,9 @@ import java.util.concurrent.Future;
  * instances are often used within the script, it will automatically add all the different <code>GigaSpace</code>
  * instances defined within the application context under their respective bean names.
  *
+ * <p>Another parameter that will be passed to the script is the {@link org.openspaces.core.cluster.ClusterInfo} allowing
+ * the script to be "aware" of which cluster instance it is executed on, and the cluster size.
+ *
  * <p>This executor also supports caching of compiled scipts using the {@link org.openspaces.remoting.scripting.cache.CompiledScriptCache}
  * abstraction. There are two special caches, one for compiled scripts that are thread safe (the same compiled script
  * can be executed by several threads) and one for compiled scripts that are not thread safe (the same compiled scripts
@@ -61,11 +66,14 @@ import java.util.concurrent.Future;
  *
  * @author kimchy
  */
-public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationContextAware, InitializingBean, ApplicationListener {
+public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationContextAware, InitializingBean,
+        ApplicationListener, ClusterInfoAware {
 
     private static final Log logger = LogFactory.getLog(DefaultScriptingExecutor.class);
 
     public static final String APPLICATION_CONTEXT_KEY = "applicationContext";
+
+    public static final String CLUSTER_INFO_KEY = "clusterInfo";
 
     public static final String GROOVY_LOCAL_EXECUTOR_TYPE = "groovy";
 
@@ -85,10 +93,20 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
 
     private Map<String, GigaSpace> gigaSpacesBeans = new HashMap<String, GigaSpace>();
 
+    private ClusterInfo clusterInfo;
+
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
 
+    public void setClusterInfo(ClusterInfo clusterInfo) {
+        this.clusterInfo = clusterInfo;
+    }
+
+    /**
+     * Sets parameters that will be added to each script. The key of the map is the parameter name
+     * (a String) and the value if a free Object as the parameter value.
+     */
     public void setParameters(Map<String, Object> parameters) {
         this.parameters = parameters;
     }
@@ -202,15 +220,18 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
         } else {
             compiledScript = localScriptExecutor.compile(script);
         }
+
         Map<String, Object> scriptParams = new HashMap<String, Object>();
         if (parameters != null) {
             scriptParams.putAll(parameters);
         }
         scriptParams.putAll(gigaSpacesBeans);
         scriptParams.put(APPLICATION_CONTEXT_KEY, applicationContext);
+        scriptParams.put(CLUSTER_INFO_KEY, clusterInfo);
         if (script.getParameters() != null) {
             scriptParams.putAll(script.getParameters());
         }
+        
         try {
             return localScriptExecutor.execute(script, compiledScript, scriptParams);
         } finally {
