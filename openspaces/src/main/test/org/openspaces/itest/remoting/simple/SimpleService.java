@@ -1,5 +1,7 @@
 package org.openspaces.itest.remoting.simple;
 
+import org.openspaces.remoting.Routing;
+
 import java.util.concurrent.Future;
 
 /**
@@ -7,7 +9,7 @@ import java.util.concurrent.Future;
  */
 public interface SimpleService {
 
-    String say(String message);
+    String say(@Routing String message);
 
     Future asyncSay(String message);
 }

@@ -22,11 +22,22 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * A method parameter annotation allowing to control the routing of a certain remote invocation
+ * using an anntoation. If annotated, will use the paramter as the routing index (determines which
+ * partition it will "hit").
+ *
+ * <p>The annotation value allows to set an optional method name which will be invoked on the parameter
+ * using reflection in order to get the actual routing index.
+ *
  * @author kimchy
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Routing {
-    
+
+    /**
+     * Optional method name. If set, will call this method name using reflection in order to
+     * get the actual routing index. If not set, will use the parameter value itself.
+     */
     String value() default "";
 }
