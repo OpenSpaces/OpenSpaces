@@ -233,15 +233,8 @@ public class ResourceLazyLoadingScript implements LazyLoadingScript, Externaliza
      * @see org.openspaces.remoting.SpaceRemotingInvocation#getMetaArguments()
      * @see org.openspaces.remoting.scripting.ScriptingMetaArgumentsHandler
      */
-    public ResourceLazyLoadingScript metaArgument(Object argument) {
-        if (metaArguments == null) {
-            metaArguments = new Object[] {argument};
-        } else {
-            Object[] tempMetaArguments = new Object[metaArguments.length + 1];
-            System.arraycopy(metaArguments, 0, tempMetaArguments, 0, metaArguments.length);
-            tempMetaArguments[metaArguments.length] = argument;
-            metaArguments = tempMetaArguments;
-        }
+    public ResourceLazyLoadingScript metaArguments(Object ... metaArguments) {
+        this.metaArguments = metaArguments;
         return this;
     }
     
