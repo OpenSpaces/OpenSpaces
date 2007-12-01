@@ -49,6 +49,8 @@ public class StaticScript implements Script, Externalizable {
 
     private RemoteResultReducer remoteResultReducer;
 
+    private Object[] metaArguments;
+
     /**
      * Constructs a new static script. Note, the name, type, and script must be provided.
      */
@@ -119,6 +121,10 @@ public class StaticScript implements Script, Externalizable {
         return this.broadcast;
     }
 
+    public Object[] getMetaArguments() {
+        return this.metaArguments;
+    }
+
     /**
      * Sets the name of the script.
      */
@@ -170,6 +176,25 @@ public class StaticScript implements Script, Externalizable {
      */
     public StaticScript routing(Object routing) {
         this.routing = routing;
+        return this;
+    }
+
+    /**
+     * Adds another meta argument to the script
+     *
+     * @see org.openspaces.remoting.scripting.Script#getMetaArguments()
+     * @see org.openspaces.remoting.SpaceRemotingInvocation#getMetaArguments()
+     * @see org.openspaces.remoting.scripting.ScriptingMetaArgumentsHandler
+     */
+    public StaticScript metaArgument(Object argument) {
+        if (metaArguments == null) {
+            metaArguments = new Object[] {argument};
+        } else {
+            Object[] tempMetaArguments = new Object[metaArguments.length + 1];
+            System.arraycopy(metaArguments, 0, tempMetaArguments, 0, metaArguments.length);
+            tempMetaArguments[metaArguments.length] = argument;
+            metaArguments = tempMetaArguments;
+        }
         return this;
     }
 

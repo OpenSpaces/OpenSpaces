@@ -63,4 +63,11 @@ public interface Script extends BroadcastIndicator {
      * Returns the reducer in case broadcasting is enabled.
      */
     RemoteResultReducer getReducer();
+
+    /**
+     * Returns a set of meta arguments that are used for remote invocation.
+     *
+     * @see org.openspaces.remoting.SpaceRemotingInvocation#getMetaArguments()  
+     */
+    Object[] getMetaArguments();
 }

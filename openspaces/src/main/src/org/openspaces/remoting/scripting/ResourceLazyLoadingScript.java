@@ -64,6 +64,8 @@ public class ResourceLazyLoadingScript implements LazyLoadingScript, Externaliza
 
     private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
+    private Object[] metaArguments;
+    
     public ResourceLazyLoadingScript() {
 
     }
@@ -155,6 +157,10 @@ public class ResourceLazyLoadingScript implements LazyLoadingScript, Externaliza
         return this.broadcast;
     }
 
+    public Object[] getMetaArguments() {
+        return this.metaArguments;
+    }
+    
     /**
      * Sets the name of the script.
      */
@@ -220,6 +226,25 @@ public class ResourceLazyLoadingScript implements LazyLoadingScript, Externaliza
         return this;
     }
 
+    /**
+     * Adds another meta argument to the script
+     *
+     * @see org.openspaces.remoting.scripting.Script#getMetaArguments()
+     * @see org.openspaces.remoting.SpaceRemotingInvocation#getMetaArguments()
+     * @see org.openspaces.remoting.scripting.ScriptingMetaArgumentsHandler
+     */
+    public ResourceLazyLoadingScript metaArgument(Object argument) {
+        if (metaArguments == null) {
+            metaArguments = new Object[] {argument};
+        } else {
+            Object[] tempMetaArguments = new Object[metaArguments.length + 1];
+            System.arraycopy(metaArguments, 0, tempMetaArguments, 0, metaArguments.length);
+            tempMetaArguments[metaArguments.length] = argument;
+            metaArguments = tempMetaArguments;
+        }
+        return this;
+    }
+    
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeUTF(name);
         out.writeUTF(type);
