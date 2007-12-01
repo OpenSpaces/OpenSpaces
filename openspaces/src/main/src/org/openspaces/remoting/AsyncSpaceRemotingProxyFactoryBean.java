@@ -216,14 +216,7 @@ public class AsyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implement
         AsyncSpaceRemotingEntry remotingEntry = new AsyncSpaceRemotingEntry().buildInvocation(lookupName, methodName,
                 methodInvocation.getArguments());
 
-        Object routing = null;
-        if (remoteRoutingHandler != null) {
-            routing = remoteRoutingHandler.computeRouting(remotingEntry);
-        }
-        if (routing == null) {
-            routing = remotingEntry.hashCode();
-        }
-        remotingEntry.setRouting(routing);
+        remotingEntry.setRouting(RemotingProxyUtils.computeRouting(remotingEntry, remoteRoutingHandler, methodInvocation));
 
         if (metaArgumentsHandler != null) {
             remotingEntry.metaArguments = metaArgumentsHandler.computeMetaArguments(remotingEntry);
