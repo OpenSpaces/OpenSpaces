@@ -40,7 +40,7 @@ public class GroovyLocalScriptExecutor extends AbstractLocalScriptExecutor<groov
         try {
             return groovyShell.parse(script.getScriptAsString());
         } catch (Exception e) {
-            throw new ScriptCompilationException("Failed to compile script [" + script.getName() + "]", e);
+            throw new ScriptCompilationException("Failed to compile script [" + script.getName() + "]: " + e.getMessage());
         }
     }
 

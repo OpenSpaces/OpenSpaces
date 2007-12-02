@@ -43,8 +43,12 @@ public class JRubyLocalScriptExecutor extends AbstractLocalScriptExecutor<JRubyL
     public JRubyCompiledScript doCompile(Script script) throws ScriptCompilationException {
         Ruby runtime = JavaEmbedUtils.initialize(new ArrayList());
         IRubyObject rubyScript = JavaEmbedUtils.javaToRuby(runtime, script.getScriptAsString());
-        Node node = runtime.parse(rubyScript.asSymbol(), "<unknown>", null, 0);
-        return new JRubyCompiledScript(runtime, node);
+        try {
+            Node node = runtime.parse(rubyScript.asSymbol(), "<unknown>", null, 0);
+            return new JRubyCompiledScript(runtime, node);
+        } catch (Exception e) {
+            throw new ScriptExecutionException("Failed to execute script [" + script.getName() + "]", e);
+        }
     }
 
     public Object execute(Script script, JRubyCompiledScript compiledScript, Map<String, Object> parameters) throws ScriptExecutionException {

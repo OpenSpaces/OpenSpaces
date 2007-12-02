@@ -43,7 +43,7 @@ public class Jsr223LocalScriptExecutor extends AbstractLocalScriptExecutor<Objec
             try {
                 return ((Compilable) scriptEngine).compile(script.getScriptAsString());
             } catch (ScriptException e) {
-                throw new ScriptCompilationException("Failed to compile script [" + script.getName() + "]", e);
+                throw new ScriptCompilationException("Failed to compile script [" + script.getName() + "]: " + e.getMessage());
             }
         }
         return scriptEngine;

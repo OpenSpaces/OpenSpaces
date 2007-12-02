@@ -26,8 +26,4 @@ public class ScriptCompilationException extends ScriptingException {
     public ScriptCompilationException(String msg) {
         super(msg);
     }
-
-    public ScriptCompilationException(String msg, Throwable cause) {
-        super(msg, cause);
-    }
 }
