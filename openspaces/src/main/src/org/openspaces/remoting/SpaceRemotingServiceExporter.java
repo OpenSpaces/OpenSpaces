@@ -459,7 +459,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             if (arguments != null) {
                 numberOfParameters = arguments.length;
             }
-            Method invocationMethod = null;
+            Method invocationMethod;
             Method[] methods = serviceToMethodCacheMap.get(lookupName).getMethodCacheEntry(methodName).getMethod(numberOfParameters);
             if (methods != null && methods.length == 1) {
                 //we can do caching
@@ -483,6 +483,9 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             if (methodsCacheEntry == null) {
                 methodsCacheEntry = new MethodsCacheEntry();
                 serviceToMethodCacheMap.put(service.getName(), methodsCacheEntry);
+            } else {
+                // don't want to proces it twice
+                serviceToMethodCacheMap.remove(service.getName());
             }
             methodsCacheEntry.addService(service);
         }
