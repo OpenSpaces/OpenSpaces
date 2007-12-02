@@ -210,7 +210,7 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
         }
 
         if (metaArgumentsHandler != null) {
-            remotingEntry.metaArguments = metaArgumentsHandler.computeMetaArguments(remotingEntry);
+            remotingEntry.metaArguments = metaArgumentsHandler.obtainMetaArguments(remotingEntry);
         }
 
         // check if this invocation will be a one way invocation

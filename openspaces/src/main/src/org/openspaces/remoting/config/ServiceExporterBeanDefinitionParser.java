@@ -34,7 +34,7 @@ public class ServiceExporterBeanDefinitionParser extends AbstractSingleBeanDefin
 
     private static final String SERVICE = "service";
 
-    private static final String CALLBACK = "callback";
+    private static final String ASPECT = "aspect";
 
     protected Class<SpaceRemotingServiceExporter> getBeanClass(Element element) {
         return SpaceRemotingServiceExporter.class;
@@ -44,10 +44,10 @@ public class ServiceExporterBeanDefinitionParser extends AbstractSingleBeanDefin
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
         super.doParse(element, parserContext, builder);
 
-        Element callbackEle = DomUtils.getChildElementByTagName(element, CALLBACK);
-        if (callbackEle != null) {
-            builder.addPropertyValue("serviceExecutionCallback", parserContext.getDelegate().parsePropertyValue(
-                    callbackEle, builder.getRawBeanDefinition(), "serviceExecutionCallback"));
+        Element aspectEle = DomUtils.getChildElementByTagName(element, ASPECT);
+        if (aspectEle != null) {
+            builder.addPropertyValue("serviceExecutionAspect", parserContext.getDelegate().parsePropertyValue(
+                    aspectEle, builder.getRawBeanDefinition(), "serviceExecutionAspect"));
         }
 
         List<Element> serviceElements = DomUtils.getChildElementsByTagName(element, SERVICE);

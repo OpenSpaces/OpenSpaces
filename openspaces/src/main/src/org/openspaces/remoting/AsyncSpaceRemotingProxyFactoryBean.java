@@ -219,7 +219,7 @@ public class AsyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implement
         remotingEntry.setRouting(RemotingProxyUtils.computeRouting(remotingEntry, remoteRoutingHandler, methodInvocation));
 
         if (metaArgumentsHandler != null) {
-            remotingEntry.metaArguments = metaArgumentsHandler.computeMetaArguments(remotingEntry);
+            remotingEntry.metaArguments = metaArgumentsHandler.obtainMetaArguments(remotingEntry);
         }
 
         // check if this invocation will be a one way invocation

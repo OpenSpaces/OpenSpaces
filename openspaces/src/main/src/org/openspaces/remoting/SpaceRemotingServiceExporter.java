@@ -94,7 +94,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
     private boolean fifo = false;
 
-    private ServiceExecutionCallback serviceExecutionCallback;
+    private ServiceExecutionAspect serviceExecutionAspect;
 
     // sync execution fields
 
@@ -142,8 +142,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
     /**
      * Allows to inject a service execution callback.
      */
-    public void setServiceExecutionCallback(ServiceExecutionCallback serviceExecutionCallback) {
-        this.serviceExecutionCallback = serviceExecutionCallback;
+    public void setServiceExecutionAspect(ServiceExecutionAspect serviceExecutionAspect) {
+        this.serviceExecutionAspect = serviceExecutionAspect;
     }
 
     /**
@@ -244,12 +244,11 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             return;
         }
         try {
-            if (serviceExecutionCallback != null) {
-                serviceExecutionCallback.beforeInvocation(remotingEntry);
-            }
-            Object retVal = method.invoke(service, remotingEntry.arguments);
-            if (serviceExecutionCallback != null) {
-                retVal = serviceExecutionCallback.afterInvocation(remotingEntry, retVal);
+            Object retVal;
+            if (serviceExecutionAspect != null) {
+                retVal = serviceExecutionAspect.invoke(remotingEntry, method, service);
+            } else {
+                retVal = method.invoke(service, remotingEntry.arguments);
             }
             writeResponse(gigaSpace, remotingEntry, retVal);
         } catch (InvocationTargetException e) {
@@ -365,12 +364,11 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                 return;
             }
             try {
-                if (serviceExecutionCallback != null) {
-                    serviceExecutionCallback.beforeInvocation(remotingEntry);
-                }
-                Object retVal = method.invoke(service, remotingEntry.arguments);
-                if (serviceExecutionCallback != null) {
-                    retVal = serviceExecutionCallback.afterInvocation(remotingEntry, retVal);
+                Object retVal;
+                if (serviceExecutionAspect != null) {
+                    retVal = serviceExecutionAspect.invoke(remotingEntry, method, service);
+                } else {
+                    retVal = method.invoke(service, remotingEntry.arguments);
                 }
                 writeResponse(space, entry, remotingEntry, retVal);
             } catch (InvocationTargetException e) {

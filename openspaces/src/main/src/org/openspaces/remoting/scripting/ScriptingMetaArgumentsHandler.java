@@ -10,7 +10,7 @@ import org.openspaces.remoting.SpaceRemotingInvocation;
  */
 public class ScriptingMetaArgumentsHandler implements MetaArgumentsHandler {
 
-    public Object[] computeMetaArguments(SpaceRemotingInvocation remotingEntry) {
+    public Object[] obtainMetaArguments(SpaceRemotingInvocation remotingEntry) {
         return ((Script) remotingEntry.getArguments()[0]).getMetaArguments();
     }
 }

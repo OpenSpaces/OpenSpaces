@@ -28,5 +28,5 @@ public interface MetaArgumentsHandler {
      * Meta argument handler can control the meta data objects that will be used
      * for the remote invocation.
      */
-    Object[] computeMetaArguments(SpaceRemotingInvocation remotingEntry);
+    Object[] obtainMetaArguments(SpaceRemotingInvocation remotingEntry);
 }
