@@ -220,7 +220,7 @@ public class ResourceLazyLoadingScript implements LazyLoadingScript, Externaliza
      * Broadcast the execution of this script over all active partitions. Optionally use a reducer
      * to reduce the results.
      */
-    public <T> ResourceLazyLoadingScript broadcast(RemoteResultReducer<T> reducer) {
+    public <T, Y> ResourceLazyLoadingScript broadcast(RemoteResultReducer<T, Y> reducer) {
         this.broadcast = true;
         this.remoteResultReducer = reducer;
         return this;

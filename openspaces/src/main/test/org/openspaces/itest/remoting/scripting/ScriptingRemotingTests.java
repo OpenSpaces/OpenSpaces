@@ -72,9 +72,9 @@ public class ScriptingRemotingTests extends AbstractDependencyInjectionSpringCon
 
     public void testSyncExecutionWithBroadcast() {
         Integer value = (Integer) syncScriptingExecutor.execute(new StaticScript("testSyncExecutionWithBroadcast", "groovy", "return 1")
-                .broadcast(new RemoteResultReducer<Integer>() {
-            public Integer reduce(SpaceRemotingResult[] results, SpaceRemotingInvocation remotingInvocation) throws Exception {
-                return ((Integer) results[0].getResult()) + 1;
+                .broadcast(new RemoteResultReducer<Integer, Integer>() {
+            public Integer reduce(SpaceRemotingResult<Integer>[] results, SpaceRemotingInvocation remotingInvocation) throws Exception {
+                return results[0].getResult() + 1;
             }
         }));
         assertEquals(2, value.intValue());

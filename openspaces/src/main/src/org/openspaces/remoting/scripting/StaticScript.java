@@ -195,7 +195,7 @@ public class StaticScript implements Script, Externalizable {
      * Broadcast the execution of this script over all active partitions. Optionally use a reducer
      * to reduce the results.
      */
-    public <T> StaticScript broadcast(RemoteResultReducer<T> reducer) {
+    public <T, Y> StaticScript broadcast(RemoteResultReducer<T, Y> reducer) {
         this.broadcast = true;
         this.remoteResultReducer = reducer;
         return this;

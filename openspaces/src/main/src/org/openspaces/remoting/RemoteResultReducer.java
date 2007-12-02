@@ -24,7 +24,7 @@ package org.openspaces.remoting;
  *
  * @author kimchy
  */
-public interface RemoteResultReducer<T> {
+public interface RemoteResultReducer<T, Y> {
 
     /**
      * Reduces a list of Space remoting invocation results to an Object value. Can use
@@ -38,5 +38,5 @@ public interface RemoteResultReducer<T> {
      * @return A reduced return value (to the calling client)
      * @throws Exception An exception that will be propagated to the client
      */
-    <Y> T reduce(SpaceRemotingResult<Y>[] results, SpaceRemotingInvocation remotingInvocation) throws Exception;
+    T reduce(SpaceRemotingResult<Y>[] results, SpaceRemotingInvocation remotingInvocation) throws Exception;
 }
