@@ -26,12 +26,12 @@ import org.aopalliance.intercept.MethodInvocation;
  * @see AsyncSpaceRemotingProxyFactoryBean
  * @see SyncSpaceRemotingProxyFactoryBean
  */
-public interface RemoteInvocationAspect {
+public interface RemoteInvocationAspect<T> {
 
     /**
-     * The aspect is called instead of the actual remote invocaiotn. The methodInvocation can
-     * be used to access any method related information. The remoting invoker passes can be used
+     * The aspect is called instead of the actual remote invocation. The methodInvocation can
+     * be used to access any method related information. The remoting invoker passed can be used
      * to actually invoke the remote invocaiton.
      */
-    Object invoke(MethodInvocation methodInvocation, RemotingInvoker remotingInvoker) throws Throwable;
+    T invoke(MethodInvocation methodInvocation, RemotingInvoker remotingInvoker) throws Throwable;
 }
