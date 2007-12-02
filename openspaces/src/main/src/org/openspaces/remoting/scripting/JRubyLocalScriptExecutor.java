@@ -38,6 +38,7 @@ import java.util.Map;
  *
  * @author kimchy
  */
+//TODO how to set the classloader on ruby?
 public class JRubyLocalScriptExecutor extends AbstractLocalScriptExecutor<JRubyLocalScriptExecutor.JRubyCompiledScript> {
 
     public JRubyCompiledScript doCompile(Script script) throws ScriptCompilationException {

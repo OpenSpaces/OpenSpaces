@@ -32,7 +32,7 @@ public class GroovyLocalScriptExecutor extends AbstractLocalScriptExecutor<groov
     private GroovyShell groovyShell;
 
     public GroovyLocalScriptExecutor() {
-        groovyShell = new GroovyShell();
+        groovyShell = new GroovyShell(Thread.currentThread().getContextClassLoader());
     }
 
 

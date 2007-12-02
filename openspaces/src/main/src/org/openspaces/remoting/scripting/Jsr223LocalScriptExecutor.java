@@ -34,7 +34,7 @@ public class Jsr223LocalScriptExecutor extends AbstractLocalScriptExecutor<Objec
     private ScriptEngineManager scriptEngineManager;
 
     public Jsr223LocalScriptExecutor() {
-        scriptEngineManager = new ScriptEngineManager();
+        scriptEngineManager = new ScriptEngineManager(Thread.currentThread().getContextClassLoader());
     }
 
     public Object doCompile(Script script) throws ScriptCompilationException {
