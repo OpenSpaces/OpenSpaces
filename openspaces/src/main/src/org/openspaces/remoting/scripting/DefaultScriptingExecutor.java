@@ -144,7 +144,7 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
                 if (logger.isDebugEnabled()) {
                     logger.debug("Groovy detected in the classpath, adding it as a local executor under the [" + GROOVY_LOCAL_EXECUTOR_TYPE + "] type");
                 }
-            } catch (Exception e) {
+            } catch (Error e) {
                 // no grovy in the classpath, don't register it
             }
         }
@@ -156,7 +156,7 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
                 if (logger.isDebugEnabled()) {
                     logger.debug("JRuby detected in the classpath, adding it as a local executor under the [" + JRUBY_LOCAL_EXECUTOR_TYPE + "] type");
                 }
-            } catch (Exception e) {
+            } catch (Error e) {
                 // no jruby in the classpath, don't register it
             }
         }
@@ -165,7 +165,7 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
             if (logger.isDebugEnabled()) {
                 logger.debug("Java 6 (JSR 223) detected in the classpath, adding it as a default executor");
             }
-        } catch (Exception e) {
+        } catch (Error e) {
             // not working with Java 6, or JSR 223 jars are not included
         }
 
