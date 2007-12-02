@@ -479,14 +479,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
         }
 
         public void addService(Class service) {
-            MethodsCacheEntry methodsCacheEntry = serviceToMethodCacheMap.get(service.getName());
-            if (methodsCacheEntry == null) {
-                methodsCacheEntry = new MethodsCacheEntry();
-                serviceToMethodCacheMap.put(service.getName(), methodsCacheEntry);
-            } else {
-                // don't want to proces it twice
-                serviceToMethodCacheMap.remove(service.getName());
-            }
+            MethodsCacheEntry methodsCacheEntry = new MethodsCacheEntry();
+            serviceToMethodCacheMap.put(service.getName(), methodsCacheEntry);
             methodsCacheEntry.addService(service);
         }
 
