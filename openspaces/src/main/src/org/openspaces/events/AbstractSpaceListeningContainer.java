@@ -291,6 +291,11 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
                 it.remove();
             }
         }
+        doAfterStart();
+    }
+
+    protected void doAfterStart() throws DataAccessException {
+        
     }
 
     /**
@@ -306,10 +311,15 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      * Notify all invoker tasks to stop
      */
     protected void doStop() throws DataAccessException {
+        doBeforeStop();
         synchronized (this.lifecycleMonitor) {
             this.running = false;
             this.lifecycleMonitor.notifyAll();
         }
+    }
+
+    protected void doBeforeStop() throws DataAccessException {
+
     }
 
     /**

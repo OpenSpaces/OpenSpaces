@@ -61,6 +61,9 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
         if (eventListener != null) {
             return eventListener;
         }
+        if (eventListenerRef == null) {
+            return null;
+        }
         return (SpaceDataEventListener) applicationContext.getBean(eventListenerRef);
     }
 
@@ -81,12 +84,12 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
     }
 
     /**
-     * Validates that the {@link #setEventListener(SpaceDataEventListener)} property is set.
+     * Only start if we have a listener registered. If we don't, then
+     * explicit start should be called.
      */
-    protected void validateConfiguration() {
-        super.validateConfiguration();
-        if (eventListener == null && eventListenerRef == null) {
-            throw new IllegalArgumentException("eventListener or eventListenerRef must be defined");
+    protected void doStart() throws DataAccessException {
+        if (getEventListener() != null) {
+            super.doStart();
         }
     }
 

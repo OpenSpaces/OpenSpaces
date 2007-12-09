@@ -90,18 +90,16 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
         closeSession();
     }
 
-    protected void doStart() throws DataAccessException {
-        super.doStart();
+    protected void doAfterStart() throws DataAccessException {
         if (!registerOnStartup) {
             registerListener();
         }
     }
 
-    protected void doStop() throws DataAccessException {
+    protected void doBeforeStop() throws DataAccessException {
         if (!registerOnStartup) {
             closeSession();
         }
-        super.doStop();
     }
 
     protected void registerListener() throws DataAccessException {
