@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <!DOCTYPE gs-deployment SYSTEM "java://gs-deploy-desc.dtd">
 <gs-deployment Name="PU ServiceBean">
-    <Codebase>$[com.gigaspaces.system.codeserver]</Codebase>
+    <Codebase Adaptive="yes">$[com.gigaspaces.system.codeserver]</Codebase>
 
     <ServiceBean Name="PU">
 
