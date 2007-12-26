@@ -188,6 +188,8 @@
         <zip zipfile="${dist.dir}/${name}-1.4.zip">
             <zipfileset dir="${target.dir}/temp" />
         </zip>
+    	<mkdir dir="${dist.dir}/1.4" />
+    	<copy todir="${dist.dir}/1.4" file="${lib.dir}/${name}/${name}.jar" />
     </target>
 
     <target name="dist_1_5" depends="build_1_5, fulljar, buildexamples, srczip, javadoc, schema, license"
@@ -209,6 +211,8 @@
 
             </zipfileset>
         </zip>
+    	<mkdir dir="${dist.dir}/1.5" />
+    	<copy todir="${dist.dir}/1.5" file="${lib.dir}/${name}/${name}.jar" />
     </target>
 
     <target name="dist">
