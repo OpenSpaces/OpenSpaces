@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-package org.openspaces.pu.container.servicegrid;
+package org.openspaces.pu.sla.config;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
+import org.openspaces.pu.sla.MemberAliveIndicator;
+import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
+import org.w3c.dom.Element;
 
 /**
  * @author kimchy
  */
-public interface PUServiceBean extends Remote {
+public class MemberAliveIndicatorBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 
-    /**
-     * Should this member be checked to see if it is alive or not.
-     */
-    boolean isMemberAliveEnabled() throws RemoteException;
-
-    /**
-     * Return <code>true</code> if the member is alive or not.
-     */
-    boolean isAlive() throws RemoteException;
+    protected Class getBeanClass(Element element) {
+        return MemberAliveIndicator.class;
+    }
 }

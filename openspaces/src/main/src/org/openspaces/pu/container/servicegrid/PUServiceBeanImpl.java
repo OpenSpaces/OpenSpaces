@@ -27,6 +27,7 @@ import org.jini.rio.watch.Calculable;
 import org.jini.rio.watch.GaugeWatch;
 import org.jini.rio.watch.Watch;
 import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.cluster.MemberAliveIndicator;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
@@ -38,7 +39,9 @@ import org.springframework.core.io.Resource;
 import java.io.IOException;
 import java.rmi.MarshalledObject;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -64,6 +67,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private ScheduledExecutorService executorService;
 
     private ClassLoader contextClassLoader;
+
+    private MemberAliveIndicator[] memberAliveIndicators;
 
     public PUServiceBeanImpl() {
         contextClassLoader = Thread.currentThread().getContextClassLoader();
@@ -193,6 +198,16 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         integratedContainer = (IntegratedProcessingUnitContainer) factory.createContainer();
 
+        Map map = integratedContainer.getApplicationContext().getBeansOfType(MemberAliveIndicator.class);
+        ArrayList<MemberAliveIndicator> maiList = new ArrayList<MemberAliveIndicator>();
+        for (Iterator it = map.values().iterator(); it.hasNext();) {
+            MemberAliveIndicator memberAliveIndicator =(MemberAliveIndicator) it.next();
+            if (memberAliveIndicator.isMemberAliveEnabled()) {
+                maiList.add(memberAliveIndicator);
+            }
+        }
+        memberAliveIndicators = maiList.toArray(new MemberAliveIndicator[maiList.size()]);
+
         // inject the application context to all the monitors and schedule them
         // currently use the number of threads in relation to the number of monitors
         int numberOfThreads = watchTasks.size() / 5;
@@ -227,6 +242,25 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 integratedContainer = null;
             }
         }
+    }
+
+    public boolean isMemberAliveEnabled() {
+        return memberAliveIndicators.length > 0;
+    }
+
+    public boolean isAlive() {
+        boolean alive = false;
+        for (MemberAliveIndicator memberAliveIndicator : memberAliveIndicators) {
+            try {
+                alive = memberAliveIndicator.isAlive();
+                if (!alive) {
+                    break;
+                }
+            } catch (Exception e) {
+                break;
+            }
+        }
+        return alive;
     }
 
     private int getMaxServiceCount(String[] args) {

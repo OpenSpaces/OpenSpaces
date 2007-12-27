@@ -36,5 +36,6 @@ public class SLANamespaceHandler extends NamespaceHandlerSupport {
         registerBeanDefinitionParser("range", new RangeRequirementBeanDefinitionParser());
         registerBeanDefinitionParser("system", new SystemRequirementBeanDefinitionParser());
         registerBeanDefinitionParser("instance-SLA", new InstanceSLABeanDefinitionParser());
+        registerBeanDefinitionParser("member-alive-indicator", new MemberAliveIndicatorBeanDefinitionParser());
     }
 }

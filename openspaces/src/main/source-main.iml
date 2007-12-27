@@ -25,7 +25,9 @@
           <root url="jar://$MODULE_DIR$/../../lib/jini/jsk-platform.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="intellijad://intellijad" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
@@ -106,7 +108,9 @@
           <root url="jar://$MODULE_DIR$/../../lib/ServiceGrid/gs-lib.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="intellijad://intellijad" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">

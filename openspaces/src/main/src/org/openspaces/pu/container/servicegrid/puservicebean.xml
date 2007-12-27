@@ -6,16 +6,27 @@
     <ServiceBean Name="PU">
 
         <Interfaces>
-            <Interface>org.jini.rio.resources.servicecore.Service</Interface>
+            <Interface>org.openspaces.pu.container.servicegrid.PUServiceBean</Interface>
             <Resources>
                 <JAR>gs-dl.jar</JAR>
-                <JAR>JSpaces.jar</JAR>
             </Resources>
         </Interfaces>
         <ImplementationClass>org.openspaces.pu.container.servicegrid.PUServiceBeanImpl
         </ImplementationClass>
 
         <Maintain>1</Maintain>
+
+        <FaultDetectionHandler
+                ClassName="org.openspaces.pu.container.servicegrid.PUFaultDetectionHandler">
+            <Configuration>
+                <Component
+                        Name="org.openspaces.pu.container.servicegrid.PUFaultDetectionHandler">
+                    <Parameter Name="invocationDelay" Value="5000"/>
+                    <Parameter Name="retryCount" Value="3"/>
+                    <Parameter Name="retryDelay" Value="500"/>
+                </Component>
+            </Configuration>
+        </FaultDetectionHandler>
     </ServiceBean>
 
 </gs-deployment>

@@ -136,6 +136,40 @@
                     </xsd:element>
                 </xsd:choice>
                 <xsd:element name="requirements" type="requirementsType" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="member-alive-indicator" minOccurs="0" maxOccurs="1">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            The member alive indicator allows to configure the SLA on how often a member will be checed
+                            to see if a member is alive, and in case of failure, how many times to retry and how often.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                    <xsd:complexType>
+                        <xsd:attribute name="invocation-delay" type="xsd:positiveInteger">
+                            <xsd:annotation>
+                                <xsd:documentation>
+                                    How often an instance will be checked and verfied to be alive. In milliseconds and
+                                    defaults to 5000, which are 5 seconds.
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </xsd:attribute>
+                        <xsd:attribute name="retry-count" type="xsd:nonNegativeInteger">
+                            <xsd:annotation>
+                                <xsd:documentation>
+                                    Once a member has been indicated as not alive, how many times to check it before
+                                    giving up on it. Defaults to 3.
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </xsd:attribute>
+                        <xsd:attribute name="retry-timeout" type="xsd:positiveInteger">
+                            <xsd:annotation>
+                                <xsd:documentation>
+                                    Once a member has been indicated as not alive, what is the retry timeout interval.
+                                    In zmilliseconds and defaults to 500 milliseconds.
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </xsd:attribute>
+                    </xsd:complexType>
+                </xsd:element>
                 <xsd:element name="monitors" minOccurs="0" maxOccurs="1">
                     <xsd:annotation>
                         <xsd:documentation>

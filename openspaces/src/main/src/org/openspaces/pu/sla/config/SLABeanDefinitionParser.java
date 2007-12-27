@@ -83,6 +83,11 @@ public class SLABeanDefinitionParser extends AbstractSingleBeanDefinitionParser 
             builder.addPropertyValue("policy", parserContext.getDelegate().parsePropertySubElement(relocationPolicyEle, builder.getRawBeanDefinition()));
         }
 
+        Element memberAliveIndicatorEle = DomUtils.getChildElementByTagName(element, "member-alive-indicator");
+        if (memberAliveIndicatorEle != null) {
+            builder.addPropertyValue("memberAliveIndicator", parserContext.getDelegate().parsePropertySubElement(memberAliveIndicatorEle, builder.getRawBeanDefinition()));
+        }
+
         // montiors
         Element monitorsEle = DomUtils.getChildElementByTagName(element, "monitors");
         if (monitorsEle != null) {

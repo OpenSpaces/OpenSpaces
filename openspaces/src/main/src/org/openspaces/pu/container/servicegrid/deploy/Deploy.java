@@ -416,6 +416,14 @@ public class Deploy {
         //requirements
         applyRequirements(element, sla.getRequirements());
 
+        element.getFaultDetectionHandlerBundle().addMethod("setConfiguration", new String[] {
+                "-",
+                "org.openspaces.pu.container.servicegrid.PUFaultDetectionHandler.invocationDelay = " + sla.getMemberAliveIndicator().getInvocationDelay(),
+                "org.openspaces.pu.container.servicegrid.PUFaultDetectionHandler.retryCount = " + sla.getMemberAliveIndicator().getRetryCount(),
+                "org.openspaces.pu.container.servicegrid.PUFaultDetectionHandler.retryTimeout = " + sla.getMemberAliveIndicator().getRetryTimeout()
+
+        });
+
         if (sla.getMaxInstancesPerVM() > 0) {
             element.setMaxPerMachine(sla.getMaxInstancesPerVM());
         }

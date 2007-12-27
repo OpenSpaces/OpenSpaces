@@ -81,6 +81,8 @@ public class SLA implements Serializable {
 
     private List<InstanceSLA> instanceSLAs;
 
+    private MemberAliveIndicator memberAliveIndicator = new MemberAliveIndicator();
+
     /**
      * Returns the cluster schema the processing unit will use. Usually maps to the space
      * cluster schema. Can have <code>null</code> value which means that it was not set.
@@ -243,6 +245,14 @@ public class SLA implements Serializable {
 
     public void setInstanceSLAs(List<InstanceSLA> instanceSLAs) {
         this.instanceSLAs = instanceSLAs;
+    }
+
+    public MemberAliveIndicator getMemberAliveIndicator() {
+        return memberAliveIndicator;
+    }
+
+    public void setMemberAliveIndicator(MemberAliveIndicator memberAliveIndicator) {
+        this.memberAliveIndicator = memberAliveIndicator;
     }
 
     public String toString() {
