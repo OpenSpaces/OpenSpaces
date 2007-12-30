@@ -171,7 +171,7 @@ public class DefaultScriptingExecutor implements ScriptingExecutor, ApplicationC
 
         // validate that we have at least one local script executor
         if (executors.size() == 0 && jsr223Executor == null) {
-            throw new IllegalArgumentException("No local script executors are configured or automatically detected");
+            logger.info("No local script executors are configured or automatically detected");
         }
 
         if (threadSafeCompiledScriptCache == null) {
