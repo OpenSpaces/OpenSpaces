@@ -92,6 +92,7 @@
       <facet-type id="Spring">
         <modules>
           <module name="source-main" />
+          <module name="openspaces" />
         </modules>
       </facet-type>
     </autodetection-disabled>
