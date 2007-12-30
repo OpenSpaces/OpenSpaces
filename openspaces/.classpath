@@ -38,5 +38,25 @@
 	<classpathentry kind="lib" path="lib/common/commons-collections.jar"/>
 	<classpathentry kind="lib" path="lib/common/commons-dbcp.jar"/>
 	<classpathentry kind="lib" path="lib/common/commons-pool.jar"/>
+	<classpathentry kind="lib" path="lib/atomikos/atomikos-util.jar"/>
+	<classpathentry kind="lib" path="lib/atomikos/transactions.jar"/>
+	<classpathentry kind="lib" path="lib/atomikos/transactions-api.jar"/>
+	<classpathentry kind="lib" path="lib/atomikos/transactions-jta.jar"/>
+	<classpathentry kind="lib" path="lib/groovy/groovy-all-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/hibernate/hibernate3.jar"/>
+	<classpathentry kind="lib" path="lib/jbossts/concurrent.jar"/>
+	<classpathentry kind="lib" path="lib/jbossts/jbossjts.jar"/>
+	<classpathentry kind="lib" path="lib/jbossts/jbossts-common.jar"/>
+	<classpathentry kind="lib" path="lib/jotm/howl.jar"/>
+	<classpathentry kind="lib" path="lib/jotm/jotm_jrmp_stubs.jar"/>
+	<classpathentry kind="lib" path="lib/jotm/jotm.jar"/>
+	<classpathentry kind="lib" path="lib/jotm/ow_carol.jar"/>
+	<classpathentry kind="lib" path="lib/jotm/xapool.jar"/>
+	<classpathentry kind="lib" path="lib/jruby/jruby.jar"/>
+	<classpathentry kind="lib" path="lib/jsr223/js.jar"/>
+	<classpathentry kind="lib" path="lib/jsr223/script-api.jar"/>
+	<classpathentry kind="lib" path="lib/jsr223/script-js.jar"/>
+	<classpathentry kind="lib" path="lib/spring/connector.jar"/>
+	<classpathentry kind="lib" path="lib/spring/jta.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
