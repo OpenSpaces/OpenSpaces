@@ -16,6 +16,8 @@
 
 package org.openspaces.pu.sla;
 
+import java.io.Serializable;
+
 /**
  * The member alive indicator allows to configure the SLA on how often a member will be checed to
  * see if a member is alive, and in case of failure, how many times to retry and how often.
@@ -23,7 +25,7 @@ package org.openspaces.pu.sla;
  * @author kimchy
  * @see org.openspaces.core.cluster.MemberAliveIndicator
  */
-public class MemberAliveIndicator {
+public class MemberAliveIndicator implements Serializable {
 
     private long invocationDelay = 5000;
 
