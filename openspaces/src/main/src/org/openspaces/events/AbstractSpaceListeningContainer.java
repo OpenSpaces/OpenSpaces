@@ -91,6 +91,9 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
 
     private PrimaryBackupListener primaryBackupListener;
 
+    private SpaceMode currentSpaceMode;
+
+
     /**
      * Sets the GigaSpace instance to be used for space event listening operations.
      */
@@ -262,6 +265,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
                     }
                     doStop();
                 }
+                currentSpaceMode = spEvent.getSpaceMode();
             }
         }
     }
@@ -276,7 +280,9 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      * @see #doStart
      */
     public void start() throws DataAccessException {
-        doStart();
+        if (currentSpaceMode != null && currentSpaceMode == SpaceMode.PRIMARY) {
+            doStart();
+        }
     }
 
     /**
@@ -295,7 +301,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
     }
 
     protected void doAfterStart() throws DataAccessException {
-        
+
     }
 
     /**

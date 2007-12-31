@@ -550,7 +550,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
         }
     }
 
-    // -------------------------------------------------------------------------
+// -------------------------------------------------------------------------
     // Inner classes used as internal adapters
     // -------------------------------------------------------------------------
 
@@ -570,7 +570,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
         private Thread invokerThread;
 
         // use the getEventListener to possibly get a proptotyped listener per thread
-        private SpaceDataEventListener eventListener = getEventListener();
+        private SpaceDataEventListener eventListener;
 
         public void run() {
             synchronized (activeInvokerMonitor) {
@@ -640,6 +640,9 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
 
         private boolean invokeListener() throws DataAccessException {
             initResourcesIfNecessary();
+            if (eventListener == null) {
+                eventListener = getEventListener();
+            }
             boolean eventReceived = receiveAndExecute(eventListener);
             this.lastEventSucceeded = true;
             this.idle = !eventReceived;
