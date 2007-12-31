@@ -249,6 +249,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     public boolean isAlive() {
+        if (memberAliveIndicators.length == 0) {
+            return true;
+        }
         boolean alive = false;
         for (MemberAliveIndicator memberAliveIndicator : memberAliveIndicators) {
             try {
