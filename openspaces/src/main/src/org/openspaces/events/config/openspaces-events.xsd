@@ -105,7 +105,7 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="concurrent-consumers" type="xsd:nonNegativeInteger">
+                    <xsd:attribute name="concurrent-consumers" type="xsd:string">
                         <xsd:annotation>
                             <xsd:documentation>
                                 Specify the number of concurrent consumers to create. Default is 1.
@@ -121,7 +121,7 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="max-concurrent-consumers" type="xsd:nonNegativeInteger">
+                    <xsd:attribute name="max-concurrent-consumers" type="xsd:string">
                         <xsd:annotation>
                             <xsd:documentation>
                                 Specify the maximum number of concurrent consumers to create. Default is 1.
