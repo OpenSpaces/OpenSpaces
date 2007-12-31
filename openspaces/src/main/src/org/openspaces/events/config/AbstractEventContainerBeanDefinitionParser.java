@@ -34,16 +34,19 @@ public abstract class AbstractEventContainerBeanDefinitionParser extends Abstrac
 
     private static final String ACTIVE_WHEN_PRIMARY = "active-when-primary";
 
+
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
         super.doParse(element, parserContext, builder);
         Element listenerEle = DomUtils.getChildElementByTagName(element, LISTENER);
 
-        String listenerRef = listenerEle.getAttribute("ref");
-        if (StringUtils.hasLength(listenerRef)) {
-            builder.addPropertyValue("eventListenerRef", listenerRef);
-        } else {
-            builder.addPropertyValue("eventListener", parserContext.getDelegate().parsePropertyValue(listenerEle,
-                    builder.getRawBeanDefinition(), "eventListener"));
+        if (listenerEle!=null) {
+            String listenerRef = listenerEle.getAttribute("ref");
+            if (StringUtils.hasLength(listenerRef)) {
+                builder.addPropertyValue("eventListenerRef", listenerRef);
+            } else {
+                builder.addPropertyValue("eventListener", parserContext.getDelegate().parsePropertyValue(listenerEle,
+                        builder.getRawBeanDefinition(), "eventListener"));
+            }
         }
 
         String gigaSpace = element.getAttribute(GIGA_SPACE);
