@@ -200,11 +200,11 @@ rem the GS_JARS contains the same list as defined in the Class-Path entry of the
 rem These jars are required for client application and starting a Space from within your application.
 set GS_JARS=%EXT_JARS%;%JSHOMEDIR%;%JSHOMEDIR%/lib/JSpaces.jar;%JSHOMEDIR%/lib/jini/jsk-platform.jar;%JSHOMEDIR%/lib/jini/jsk-lib.jar;%JSHOMEDIR%/lib/jini/start.jar;%JSHOMEDIR%/lib/common/backport-util-concurrent.jar;%JSHOMEDIR%/lib/ServiceGrid/gs-lib.jar;%JSHOMEDIR%/lib/ServiceGrid/gs-boot.jar
 
-set PLATFORM_VERSION=6.0
+set PLATFORM_VERSION=6.1
 set POLICY=%JSHOMEDIR%\policy\policy.all
 
 if "%LOOKUPGROUPS%" == ""  (
-set LOOKUPGROUPS="gigaspaces-6.0EE"
+set LOOKUPGROUPS="gigaspaces-6.1XAP"
 )
 set LOOKUP_GROUPS_PROP=-Dcom.gs.jini_lus.groups=%LOOKUPGROUPS%
 

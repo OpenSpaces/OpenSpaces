@@ -222,11 +222,11 @@ export OPENSPACES_JARS
 # These jars are required for client application and starting a Space from within your application.
 GS_JARS=${EXT_JARS}$CPS${JSHOMEDIR}$CPS${JSHOMEDIR}/lib/JSpaces.jar$CPS${JSHOMEDIR}/lib/jini/jsk-platform.jar$CPS${JSHOMEDIR}/lib/jini/jsk-lib.jar$CPS${JSHOMEDIR}/lib/jini/start.jar$CPS${JSHOMEDIR}/lib/ServiceGrid/gs-lib.jar$CPS${JSHOMEDIR}/lib/ServiceGrid/gs-boot.jar$CPS${JSHOMEDIR}/lib/common/backport-util-concurrent.jar
 
-PLATFORM_VERSION=6.0; export PLATFORM_VERSION
+PLATFORM_VERSION=6.1; export PLATFORM_VERSION
 POLICY=${JSHOMEDIR}/policy/policy.all; export POLICY
 
 if [ "${LOOKUPGROUPS}" = "" ] ; then
-LOOKUPGROUPS="gigaspaces-6.0EE"; export LOOKUPGROUPS
+LOOKUPGROUPS="gigaspaces-6.1XAP"; export LOOKUPGROUPS
 fi
 LOOKUP_GROUPS_PROP=-Dcom.gs.jini_lus.groups=${LOOKUPGROUPS}; export LOOKUP_GROUPS_PROP
 
