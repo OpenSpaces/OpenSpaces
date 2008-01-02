@@ -58,5 +58,6 @@
 	<classpathentry kind="lib" path="lib/jsr223/script-js.jar"/>
 	<classpathentry kind="lib" path="lib/spring/connector.jar"/>
 	<classpathentry kind="lib" path="lib/spring/jta.jar"/>
+	<classpathentry kind="lib" path="lib/asm/asm-2.2.3.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
