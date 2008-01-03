@@ -20,6 +20,7 @@ import org.openspaces.core.GigaSpace;
 import org.openspaces.example.data.common.Data;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.openspaces.core.SpaceInterruptedException;
 
 import edu.emory.mathcs.backport.java.util.concurrent.Executors;
 import edu.emory.mathcs.backport.java.util.concurrent.ScheduledExecutorService;
@@ -72,7 +73,7 @@ public class ViewDataCounter implements InitializingBean, DisposableBean {
     }
 
     public void destroy() throws Exception {
-        sf.cancel(true);
+        sf.cancel(false);
         sf = null;
         executorService.shutdown();
     }
@@ -88,6 +89,8 @@ public class ViewDataCounter implements InitializingBean, DisposableBean {
                     System.out.println("---- VIEW COUNT IS [" + count + "]");
                     latestCount = count;
                 }
+            } catch (SpaceInterruptedException e) {
+                // ignore, we are being shutdown
             } catch (Exception e) {
                 e.printStackTrace();
             }

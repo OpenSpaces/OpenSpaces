@@ -20,6 +20,7 @@ import org.openspaces.example.data.common.Data;
 import org.openspaces.example.data.common.IDataProcessor;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.openspaces.core.SpaceInterruptedException;
 
 import edu.emory.mathcs.backport.java.util.concurrent.Executors;
 import edu.emory.mathcs.backport.java.util.concurrent.ScheduledExecutorService;
@@ -76,7 +77,7 @@ public class DataRemoting implements InitializingBean, DisposableBean {
     }
 
     public void destroy() throws Exception {
-        sf.cancel(true);
+        sf.cancel(false);
         sf = null;
         executorService.shutdown();
     }
@@ -94,7 +95,8 @@ public class DataRemoting implements InitializingBean, DisposableBean {
                 dataProcessor.sayData(data);
                 data = dataProcessor.processData(data);
                 System.out.println("--- REMOTING RESULT   " + data);
-
+            } catch (SpaceInterruptedException e) {
+                // ignore, we are being shutdown
             } catch (Exception e) {
                 e.printStackTrace();
             }

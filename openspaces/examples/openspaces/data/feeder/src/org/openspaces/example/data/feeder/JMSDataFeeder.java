@@ -16,6 +16,7 @@
 
 package org.openspaces.example.data.feeder;
 
+import org.openspaces.core.SpaceInterruptedException;
 import org.openspaces.example.data.common.Data;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -103,7 +104,7 @@ public class JMSDataFeeder implements InitializingBean, DisposableBean {
     }
 
     public void destroy() throws Exception {
-        sf.cancel(true);
+        sf.cancel(false);
         sf = null;
         executorService.shutdown();
     }
@@ -128,6 +129,8 @@ public class JMSDataFeeder implements InitializingBean, DisposableBean {
                     }
                 });
                 System.out.println("--- JMS WROTE " + data);
+            } catch (SpaceInterruptedException e) {
+                // ignore, we are being shut down
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -17,6 +17,7 @@
 package org.openspaces.example.data.feeder;
 
 import org.openspaces.core.GigaSpace;
+import org.openspaces.core.SpaceInterruptedException;
 import org.openspaces.example.data.common.Data;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -90,7 +91,7 @@ public class DataFeeder implements InitializingBean, DisposableBean {
     }
 
     public void destroy() throws Exception {
-        sf.cancel(true);
+        sf.cancel(false);
         sf = null;
         executorService.shutdown();
     }
@@ -107,6 +108,8 @@ public class DataFeeder implements InitializingBean, DisposableBean {
                 data.setProcessed(new Boolean(false));
                 gigaSpace.write(data);
                 System.out.println("--- WROTE " + data);
+            } catch (SpaceInterruptedException e) {
+                // ignore, we are being shutdown
             } catch (Exception e) {
                 e.printStackTrace();
             }

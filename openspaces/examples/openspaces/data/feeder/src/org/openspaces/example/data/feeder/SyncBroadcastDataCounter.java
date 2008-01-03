@@ -16,6 +16,7 @@
 
 package org.openspaces.example.data.feeder;
 
+import org.openspaces.core.SpaceInterruptedException;
 import org.openspaces.example.data.common.IDataProcessor;
 import org.openspaces.example.data.feeder.support.SyncBroadcastCounterReducer;
 import org.openspaces.remoting.SyncProxy;
@@ -81,6 +82,8 @@ public class SyncBroadcastDataCounter implements InitializingBean, DisposableBea
                     System.out.println("**** SYNC REMOTING COUNT IS [" + count + "]");
                     latestCount = count;
                 }
+            } catch (SpaceInterruptedException e) {
+                // ignore, we are shutting down (being interrupted)
             } catch (Exception e) {
                 e.printStackTrace();
             }
