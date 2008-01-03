@@ -61,7 +61,7 @@
     <!--
         The Data feeder bean, writing new Data objects to the space in a constant interval.
     -->
-    <bean id="dataFeeder" class="org.openspaces.example.data.feeder.DataFeeder">
+    <bean id="dataFeeder" class="org.openspaces.example.data.feeder.DataFeeder" depends-on="gigaSpace">
         <property name="instanceId" value="${clusterInfo.instanceId}" />
         <property name="numberOfTypes" value="${numberOfTypes}" />
     </bean>
@@ -72,7 +72,7 @@
         It is important to understand that the MessageConverter is not the standard JmsTemplate's MessageConverter, but the GigaSpaces's
         implementation of MessageConverter.
     -->
-    <bean id="jmsDataFeeder" class="org.openspaces.example.data.feeder.JMSDataFeeder">
+    <bean id="jmsDataFeeder" class="org.openspaces.example.data.feeder.JMSDataFeeder" depends-on="gigaSpace">
         <property name="instanceId" value="${clusterInfo.instanceId}" />
         <property name="numberOfTypes" value="${numberOfTypes}" />
         <property name="jmsTemplate">
@@ -106,7 +106,7 @@
         The DataRemoting bean, uses the proxied dataProcessor without any knowledge of the remoting
         invocation.
     -->
-    <bean id="dataRemoting" class="org.openspaces.example.data.feeder.DataRemoting">
+    <bean id="dataRemoting" class="org.openspaces.example.data.feeder.DataRemoting" depends-on="gigaSpace">
         <property name="numberOfTypes" value="${numberOfTypes}" />
     </bean>
 
@@ -114,7 +114,7 @@
         Uses the sync remoting proxoed bean to call count without any knownaled of the remoting
         invocation.
     -->
-    <bean id="syncBroadcastDataCounter" class="org.openspaces.example.data.feeder.SyncBroadcastDataCounter">
+    <bean id="syncBroadcastDataCounter" class="org.openspaces.example.data.feeder.SyncBroadcastDataCounter" depends-on="gigaSpace">
     </bean>
 
     <!-- Local View Example ("client side") -->
