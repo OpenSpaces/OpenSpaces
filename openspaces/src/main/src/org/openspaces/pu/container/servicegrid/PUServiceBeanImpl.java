@@ -17,6 +17,8 @@
 
 package org.openspaces.pu.container.servicegrid;
 
+import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.client.SpaceURL;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.core.SLA;
@@ -29,6 +31,7 @@ import org.jini.rio.watch.Watch;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.MemberAliveIndicator;
 import org.openspaces.core.properties.BeanLevelProperties;
+import org.openspaces.core.util.SpaceUtils;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
 import org.openspaces.pu.sla.monitor.ApplicationContextMonitor;
@@ -38,6 +41,7 @@ import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.rmi.MarshalledObject;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -69,6 +73,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private ClassLoader contextClassLoader;
 
     private MemberAliveIndicator[] memberAliveIndicators;
+
+    private IJSpace[] spaces;
 
     public PUServiceBeanImpl() {
         contextClassLoader = Thread.currentThread().getContextClassLoader();
@@ -201,12 +207,23 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         Map map = integratedContainer.getApplicationContext().getBeansOfType(MemberAliveIndicator.class);
         ArrayList<MemberAliveIndicator> maiList = new ArrayList<MemberAliveIndicator>();
         for (Iterator it = map.values().iterator(); it.hasNext();) {
-            MemberAliveIndicator memberAliveIndicator =(MemberAliveIndicator) it.next();
+            MemberAliveIndicator memberAliveIndicator = (MemberAliveIndicator) it.next();
             if (memberAliveIndicator.isMemberAliveEnabled()) {
                 maiList.add(memberAliveIndicator);
             }
         }
         memberAliveIndicators = maiList.toArray(new MemberAliveIndicator[maiList.size()]);
+
+        map = integratedContainer.getApplicationContext().getBeansOfType(IJSpace.class);
+        ArrayList<IJSpace> spacesList = new ArrayList<IJSpace>();
+        for (Iterator it = map.values().iterator(); it.hasNext();) {
+            IJSpace space = (IJSpace) it.next();
+            // only list Spaces that were started by this processing unit
+            if (!SpaceUtils.isRemoteProtocol(space)) {
+                spacesList.add((IJSpace) it.next());
+            }
+        }
+        spaces = spacesList.toArray(new IJSpace[spacesList.size()]);
 
         // inject the application context to all the monitors and schedule them
         // currently use the number of threads in relation to the number of monitors
@@ -264,6 +281,18 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
         }
         return alive;
+    }
+
+    public SpaceURL[] listSpacesURLs() throws RemoteException {
+        SpaceURL[] spaceURLs = new SpaceURL[spaces.length];
+        for (int i = 0; i < spaces.length; i++) {
+            spaceURLs[i] = spaces[i].getFinderURL();
+        }
+        return spaceURLs;
+    }
+
+    public IJSpace[] listSpaces() throws RemoteException {
+        return spaces;
     }
 
     private int getMaxServiceCount(String[] args) {

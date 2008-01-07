@@ -16,6 +16,9 @@
 
 package org.openspaces.pu.container.servicegrid;
 
+import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.client.SpaceURL;
+
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -33,4 +36,8 @@ public interface PUServiceBean extends Remote {
      * Return <code>true</code> if the member is alive or not.
      */
     boolean isAlive() throws RemoteException;
+
+    SpaceURL[] listSpacesURLs() throws RemoteException;
+
+    IJSpace[] listSpaces() throws RemoteException;
 }
