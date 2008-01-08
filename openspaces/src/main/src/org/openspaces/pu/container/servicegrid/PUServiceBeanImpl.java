@@ -220,7 +220,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             IJSpace space = (IJSpace) it.next();
             // only list Spaces that were started by this processing unit
             if (!SpaceUtils.isRemoteProtocol(space)) {
-                spacesList.add((IJSpace) it.next());
+                spacesList.add(space);
             }
         }
         spaces = spacesList.toArray(new IJSpace[spacesList.size()]);
