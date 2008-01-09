@@ -1,14 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module relativePaths="true" type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager" inherit-compiler-output="true">
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/classes" />
     <exclude-output />
+    <output-test url="file://$MODULE_DIR$/classes" />
     <content url="file://$MODULE_DIR$">
-      <excludeFolder url="file://$MODULE_DIR$/docs" />
-      <excludeFolder url="file://$MODULE_DIR$/logs" />
-      <excludeFolder url="file://$MODULE_DIR$/target" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/test" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/sandbox/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/sandbox/test" isTestSource="true" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="gigaspaces" />
+    <orderEntry type="module" module-name="jini" />
+    <orderEntry type="library" name="openspaces-resources" level="project" />
+    <orderEntry type="library" name="spring-2.0.2" level="project" />
+    <orderEntry type="library" name="script" level="project" />
+    <orderEntry type="library" name="JOTM" level="project" />
+    <orderEntry type="library" name="common" level="project" />
+    <orderEntry type="library" name="hibernate" level="project" />
+    <orderEntry type="library" name="HibernateDataSource" level="project" />
+    <orderEntry type="library" name="tools" level="project" />
+    <orderEntry type="library" name="jruby" level="project" />
+    <orderEntry type="library" name="dbcp" level="project" />
+    <orderEntry type="library" name="jmock" level="project" />
+    <orderEntry type="library" name="groovy" level="project" />
     <orderEntryProperties />
   </component>
   <component name="copyright">

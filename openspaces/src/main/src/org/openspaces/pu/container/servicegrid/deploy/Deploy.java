@@ -55,16 +55,10 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URISyntaxException;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -346,8 +340,23 @@ public class Deploy {
     }
 
     private static String readPUFile(URL root, String puPath) throws IOException {
-        URL puURL = new URL(root, puPath + "/META-INF/spring/pu.xml");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(puURL.openStream()));
+        final String fullName = puPath + "/META-INF/spring/pu.xml";
+        URL puURL = new URL(root, fullName);
+
+        InputStream stream = null;
+
+        try
+        {
+            stream = puURL.openStream();
+        }
+        catch (IOException e)
+        {
+            stream = Deploy.class.getClassLoader().getResourceAsStream(fullName);
+            if (stream == null)
+                throw e;
+        }
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 
         StringBuffer buffer = new StringBuffer();
         String line;
