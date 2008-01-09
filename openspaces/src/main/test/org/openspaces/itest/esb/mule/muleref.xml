@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesource.org/schema/mule/core/2.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:spring="http://www.springframework.org/schema/beans"
+      xmlns:os="http://www.openspaces.org/schema/mule"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.mulesource.org/schema/mule/core/2.0 http://www.mulesource.org/schema/mule/core/2.0/mule.xsd
+       http://www.openspaces.org/schema/mule http://www.openspaces.org/schema/mule/mule-os.xsd">
+    
+    <description>
+        This mule config file using helloPollingEventContainer and gigaSpace beans that declared in puembedmuleref.xml
+        and loaded by the parent appliction context
+    </description>
+
+    <os:connector name="gigaSpacesConnector"/>
+
+    <model name="helloSample">
+        <service name="MessageReaderUMO">
+            <inbound-router>
+                <inbound-endpoint address="os://helloPollingEventContainer"/>
+            </inbound-router>
+
+            <component class="org.openspaces.itest.esb.mule.MessageReader"/>
+
+            <outbound-router>
+                <outbound-pass-through-router>
+                    <outbound-endpoint
+                            address="os://gigaSpace?writeLease=2000&amp;updateOrWrite=false&amp;updateTimeout=1"/>
+                </outbound-pass-through-router>
+            </outbound-router>
+        </service>
+    </model>
+
+</mule>

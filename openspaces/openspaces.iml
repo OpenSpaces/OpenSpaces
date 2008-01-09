@@ -12,20 +12,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="gigaspaces" />
-    <orderEntry type="module" module-name="jini" />
-    <orderEntry type="library" name="openspaces-resources" level="project" />
-    <orderEntry type="library" name="spring-2.0.2" level="project" />
-    <orderEntry type="library" name="script" level="project" />
-    <orderEntry type="library" name="JOTM" level="project" />
-    <orderEntry type="library" name="common" level="project" />
-    <orderEntry type="library" name="hibernate" level="project" />
-    <orderEntry type="library" name="HibernateDataSource" level="project" />
-    <orderEntry type="library" name="tools" level="project" />
-    <orderEntry type="library" name="jruby" level="project" />
-    <orderEntry type="library" name="dbcp" level="project" />
-    <orderEntry type="library" name="jmock" level="project" />
-    <orderEntry type="library" name="groovy" level="project" />
     <orderEntryProperties />
   </component>
   <component name="copyright">

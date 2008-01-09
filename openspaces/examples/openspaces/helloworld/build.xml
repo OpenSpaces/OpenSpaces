@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<project name="openspaces" default="usage" basedir=".">
+<project name="openspaces helloworld example" default="usage" basedir=".">
 
     <!-- Two options to have custom build properties file (for example, to set the gshome.dir) -->
     <property file="../../../build.properties"/>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesource.org/schema/mule/core/2.0"
+      xmlns:os-events="http://www.openspaces.org/schema/events"
+      xmlns:os-core="http://www.openspaces.org/schema/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:spring="http://www.springframework.org/schema/beans"
+      xmlns:os="http://www.openspaces.org/schema/mule"
+
+      xsi:schemaLocation="http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
+       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.mulesource.org/schema/mule/core/2.0 http://www.mulesource.org/schema/mule/core/2.0/mule.xsd
+       http://www.openspaces.org/schema/mule http://www.openspaces.org/schema/mule/mule-os.xsd">
+    
+
+    <description>
+        Tests mule connector, receive and process single object at a time.
+        usingSimpleNotifyEventListenerContainer to receive events.
+    </description>
+
+    <!--
+        Spring property configurer which allows us to use system properties (such as user.name).
+    -->
+    <spring:bean id="propertiesConfigurer"
+                 class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
+
+
+    <spring:bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
+        <spring:property name="url" value="/./space"/>
+        <spring:property name="lookupGroups" value="${user.name}"/>        
+   </spring:bean>
+
+    <spring:bean id="gigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
+        <spring:property name="space" ref="space"/>
+    </spring:bean>
+
+
+    <spring:bean id="helloPollingEventContainer"
+                 class="org.openspaces.events.notify.SimpleNotifyEventListenerContainer">
+        <spring:property name="gigaSpace" ref="gigaSpace"/>
+        <spring:property name="template">
+            <spring:bean class="org.openspaces.itest.esb.mule.Message">
+                <spring:property name="read" value="false"/>
+            </spring:bean>
+        </spring:property>
+    </spring:bean>
+
+
+    <!-- this connector must be declared ,in order to inject the  Spring appliction context -->
+    <os:connector name="gigaSpacesConnector"/>
+    <!--
+        The Mule model initialises and manages your UMO components
+    -->
+    <model name="helloSample">
+
+        <service name="MessageReaderUMO">
+            <inbound-router>
+                <inbound-endpoint address="os://helloPollingEventContainer?workManager=true"/>
+            </inbound-router>
+
+            <component class="org.openspaces.itest.esb.mule.MessageReader"/>
+
+            <outbound-router>
+                <outbound-pass-through-router>
+                    <outbound-endpoint
+                            address="os://gigaSpace?writeLease=2000&amp;updateOrWrite=false&amp;updateTimeout=1"/>
+                </outbound-pass-through-router>
+            </outbound-router>
+
+        </service>
+
+    </model>
+
+</mule>

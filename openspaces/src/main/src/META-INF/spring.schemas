@@ -4,3 +4,8 @@ http\://www.openspaces.org/schema/remoting/openspaces-remoting.xsd=org/openspace
 http\://www.openspaces.org/schema/jdbc/openspaces-jdbc.xsd=org/openspaces/jdbc/config/openspaces-jdbc.xsd
 http\://www.openspaces.org/schema/jms/openspaces-jms.xsd=org/openspaces/jms/config/openspaces-jms.xsd
 http\://www.openspaces.org/schema/sla/openspaces-sla.xsd=org/openspaces/pu/sla/config/openspaces-sla.xsd
+http\://www.openspaces.org/schema/mule/mule-os.xsd=org/openspaces/esb/mule/config/mule-os.xsd
+
+
+
+        

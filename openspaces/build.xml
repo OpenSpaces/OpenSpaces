@@ -9,6 +9,7 @@
 
         <fileset dir="${lib.dir}">
             <include name="**/*.jar"/>
+            <exclude name="openspaces/**" />
         </fileset>
 
     </path>
@@ -33,8 +34,8 @@
 
     <target name="clean" description="Clean all output dirs (dist, javadocs, classes, test-classes, etc)">
         <!-- Just kill target dir (it's safer). No need at this point to keep it. -->
-        <delete dir="${target.dir}" />
-        <delete dir="${lib.dir}/${name}" />
+        <delete dir="${target.dir}"/>
+        <delete dir="${lib.dir}/${name}"/>
     </target>
 
     <!--
@@ -63,15 +64,15 @@
                 <include name="**/*.groovy"/>
             </fileset>
         </copy>
-
     </target>
+
 
     <target name="buildexamples" description="Build the examples that come with OpenSpaces">
 
-        <ant antfile="build.xml" dir="examples/openspaces/helloworld/" target="dist" />
-        <ant antfile="build.xml" dir="examples/openspaces/data/" target="dist" />
-        <ant antfile="build.xml" dir="examples/openspaces/data-1.4/" target="dist" />
-
+        <ant antfile="build.xml" dir="examples/openspaces/helloworld/" target="dist"/>
+        <ant antfile="build.xml" dir="examples/openspaces/data/" target="dist"/>
+        <ant antfile="build.xml" dir="examples/openspaces/data-1.4/" target="dist"/>
+        <ant antfile="build.xml" dir="examples/openspaces/mule/data/" target="dist" />
     </target>
 
     <target name="build_1_5" depends="clean, buildmain" description="Compile main sources"/>
@@ -80,15 +81,35 @@
         <retrotranslator srcdir="${target.classes.dir}" verify="true"/>
     </target>
 
+    <target name="fulljar_1_5" depends="build_1_5, fulljar" />
+
     <target name="fulljar" description="Create full JAR file with all OpenSpaces classes">
 
         <mkdir dir="${lib.dir}/${name}"/>
         <delete file="${lib.dir}/${name}/${name}.jar"/>
 
+
         <jar jarfile="${lib.dir}/${name}/${name}.jar">
             <fileset dir="${target.classes.dir}">
                 <include name="META-INF/**"/>
                 <include name="org/openspaces/**"/>
+                <exclude name="org/openspaces/esb/mule/**"/>
+                <exclude name="org/openspaces/esb/mule/config/mule-os.xsd"/>
+                <exclude name="META-INF/services/org/mule/providers/os.properties"/>
+            </fileset>
+            <manifest>
+                <attribute name="Implementation-Title" value="${openspaces-title}"/>
+                <attribute name="Implementation-Version" value="${openspaces-version}"/>
+                <attribute name="OpenSpaces-Version" value="${openspaces-version}"/>
+            </manifest>
+        </jar>
+
+        <delete file="${lib.dir}/${name}/mule-os.jar"/>
+        <jar jarfile="${lib.dir}/${name}/mule-os.jar">
+            <fileset dir="${target.classes.dir}">
+                <include name="org/openspaces/esb/mule/**"/>
+                <include name="org/openspaces/esb/mule/config/mule-os.xsd"/>
+                <include name="META-INF/services/org/mule/providers/os.properties"/>
             </fileset>
             <manifest>
                 <attribute name="Implementation-Title" value="${openspaces-title}"/>
@@ -156,8 +177,8 @@
     </target>
 
     <target name="license" description="Copy over license files">
-        <copy todir="lib/${name}" file="${basedir}/openspaces.license.txt" />
-        <copy todir="lib/${name}" file="${basedir}/openspaces.notice.txt" />
+        <copy todir="lib/${name}" file="${basedir}/openspaces.license.txt"/>
+        <copy todir="lib/${name}" file="${basedir}/openspaces.notice.txt"/>
     </target>
 
     <target name="dist_1_4" depends="build_1_4, fulljar, buildexamples, srczip, javadoc, schema, license"
@@ -177,16 +198,19 @@
 
                 <include name="lib/${name}/**"/>
 
+                <exclude name="examples/openspaces/mule/**"/>
+                <exclude name="lib/${name}/mule-os.jar"/>
+
             </zipfileset>
         </zip>
-        <delete dir="${target.dir}/temp" />
-        <mkdir dir="${target.dir}/temp" />
-        <unzip src="${dist.dir}/${name}-1.4.zip" dest="${target.dir}/temp" />
+        <delete dir="${target.dir}/temp"/>
+        <mkdir dir="${target.dir}/temp"/>
+        <unzip src="${dist.dir}/${name}-1.4.zip" dest="${target.dir}/temp"/>
         <move todir="${target.dir}/temp/examples/openspaces/data">
-            <fileset dir="${target.dir}/temp/examples/openspaces/data-1.4" />
+            <fileset dir="${target.dir}/temp/examples/openspaces/data-1.4"/>
         </move>
         <zip zipfile="${dist.dir}/${name}-1.4.zip">
-            <zipfileset dir="${target.dir}/temp" />
+            <zipfileset dir="${target.dir}/temp"/>
         </zip>
     	<mkdir dir="${dist.dir}/1.4" />
     	<copy todir="${dist.dir}/1.4" file="${lib.dir}/${name}/${name}.jar" />
@@ -206,9 +230,9 @@
                 <exclude name="examples/openspaces/data-1.4/**"/>
                 <exclude name="examples/**/*.iml"/>
                 <exclude name="examples/**/.cvsignore"/>
-
                 <include name="lib/${name}/**"/>
 
+                <exclude  name="examples/openspaces/mule/**"/>
             </zipfileset>
         </zip>
     	<mkdir dir="${dist.dir}/1.5" />
@@ -219,9 +243,9 @@
         <antcall target="dist_1_5"/>
         <antcall target="dist_1_4"/>
     </target>
-    
+
     <target name="install_1_5" depends="dist_1_5">
-        <unzip src="${dist.dir}/${name}-1.5.zip" dest="${gshome.dir}" />
+        <unzip src="${dist.dir}/${name}-1.5.zip" dest="${gshome.dir}"/>
     </target>
 
 
@@ -358,7 +382,8 @@
 
     </target>
 
-    <target name="sandboxjar" description="Create full sandbox JAR file with all OpenSpaces classes" depends="buildsandbox">
+    <target name="sandboxjar" description="Create full sandbox JAR file with all OpenSpaces classes"
+            depends="buildsandbox">
 
         <mkdir dir="${lib.dir}/${name}"/>
         <delete file="${lib.dir}/${name}/${name}-sandbox.jar"/>

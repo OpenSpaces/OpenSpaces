@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns:mule="http://www.mulesource.org/schema/mule/core/2.0"
+       xmlns:os-events="http://www.openspaces.org/schema/events"
+       xmlns:os-core="http://www.openspaces.org/schema/core"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xmlns:os="http://www.openspaces.org/schema/mule"
+
+       xsi:schemaLocation="http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
+       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.mulesource.org/schema/mule/core/2.0 http://www.mulesource.org/schema/mule/core/2.0/mule.xsd
+       http://www.openspaces.org/schema/mule http://www.openspaces.org/schema/mule/mule-os.xsd">
+    <description>Test that check the ability to run mule using spring base configuration.</description>
+
+    <!--
+        Spring property configurer which allows us to use system properties (such as user.name).
+    -->
+
+    <bean id="propertiesConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
+
+
+    <!--
+        A bean representing a space (an IJSpace implementation).
+    -->
+    <os-core:space id="space" url="/./space" lookup-groups="${user.name}"/>
+
+    <!--
+        OpenSpaces simplified space API built on top of IJSpace/JavaSpace.
+    -->
+    <os-core:giga-space id="gigaSpace" space="space"/>
+
+
+    <!--
+        A polling event container that perfoms (by default) polling take operations against
+        the space using the provided template (in our case, and the non processed data objects).
+        Once a match is found, the data processor bean event listener is triggered using the
+        annotation adapter.
+    -->
+    <os-events:polling-container id="helloPollingEventContainer" giga-space="gigaSpace" pass-array-as-is="true">
+        <os-core:template>
+            <bean class="org.openspaces.itest.esb.mule.Message">
+                <property name="read" value="false"/>
+            </bean>
+        </os-core:template>
+    </os-events:polling-container>
+
+    <mule:mule>
+        <os:connector name="gigaSpacesConnector"/>
+    </mule:mule>
+
+    <!--
+        The Mule model initialises and manages your UMO components
+    -->
+    <mule:model name="helloSample">
+
+        <mule:service name="MessageReaderUMO">
+            <mule:inbound-router>
+                <mule:inbound-endpoint address="os://helloPollingEventContainer"/>
+            </mule:inbound-router>
+
+            <mule:component class="org.openspaces.itest.esb.mule.MessageReader"/>
+
+            <mule:outbound-router>
+                <mule:outbound-pass-through-router>
+                    <mule:outbound-endpoint
+                            address="os://gigaSpace?writeLease=2000&amp;updateOrWrite=false&amp;updateTimeout=1"/>
+                </mule:outbound-pass-through-router>
+            </mule:outbound-router>
+
+        </mule:service>
+
+    </mule:model>
+
+
+</beans>
