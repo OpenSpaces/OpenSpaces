@@ -99,6 +99,8 @@
             </files>
           </module>
           <module name="examples-data-processor" />
+          <module name="examples-mule-data-feeder" />
+          <module name="examples-mule-data-processor" />
         </modules>
       </facet-type>
     </autodetection-disabled>
