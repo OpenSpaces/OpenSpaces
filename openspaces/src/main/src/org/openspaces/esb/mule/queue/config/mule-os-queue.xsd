@@ -17,7 +17,7 @@
                 <xsd:attribute name="fifo" type="mule:substitutableBoolean"/>
                 <xsd:attribute name="persistent" type="mule:substitutableBoolean"/>
                 <xsd:attribute name="timeout" type="xsd:positiveInteger"/>
-                <xsd:attribute name="giga-pace" type="xsd:string"/>
+                <xsd:attribute name="giga-space" type="xsd:string"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
