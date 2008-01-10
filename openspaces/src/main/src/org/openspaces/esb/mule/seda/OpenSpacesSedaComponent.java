@@ -26,6 +26,10 @@ import javax.resource.spi.work.Work;
 import javax.resource.spi.work.WorkListener;
 
 /**
+ * A SEDA component using the Space as the queue.  The queue is a virtualized queue represented
+ * by the {@link org.openspaces.esb.mule.seda.InternalEventEntry} with the service name set (and
+ * not the actual event). This allows for simple failover support inherited by the Space.
+ *
  * @author kimchy
  */
 public class OpenSpacesSedaComponent extends SedaComponent implements Work, WorkListener {

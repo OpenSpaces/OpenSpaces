@@ -20,6 +20,9 @@ import com.j_spaces.core.client.MetaDataEntry;
 import org.mule.umo.UMOEvent;
 
 /**
+ * An intenral entry holding the name of the serice (that has the SEDA queue) and the
+ * actual mule event to be used.
+ *
  * @author kimchy
  */
 public class InternalEventEntry extends MetaDataEntry {

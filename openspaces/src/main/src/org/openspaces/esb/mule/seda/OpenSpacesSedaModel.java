@@ -24,6 +24,16 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 /**
+ * An OS queue connector. Holding the actual {@link org.openspaces.core.GigaSpace} instance that will
+ * be used to communicate with the Space by the {@link org.openspaces.esb.mule.seda.OpenSpacesSedaComponent}.
+ *
+ * <p>If the giga space reference is defined ({@link #setGigaSpace(String)}, will use it to find the
+ * {@link org.openspaces.core.GigaSpace} instnace defined. If it is not defined, will try to get
+ * GigaSpace instances from Spring and if there is only one defined, will used it.
+ *
+ * <p>Also holds other attributes related to the written and read entry. Such as if the entry will be
+ * a fifo one, and if it will be persisted.
+ * 
  * @author kimchy
  */
 public class OpenSpacesSedaModel extends SedaModel implements ApplicationContextAware {

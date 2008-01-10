@@ -34,6 +34,16 @@ import org.springframework.context.ApplicationContextAware;
 import java.util.Iterator;
 
 /**
+ * An OS queue connector. Holding the actual {@link org.openspaces.core.GigaSpace} instance that will
+ * be used to communicate with the Space by the dispatcher, receiver, and requestor.
+ *
+ * <p>If the giga space reference is defined ({@link #setGigaSpace(String)}, will use it to find the
+ * {@link org.openspaces.core.GigaSpace} instnace defined. If it is not defined, will try to get
+ * GigaSpace instances from Spring and if there is only one defined, will used it.
+ *
+ * <p>Also holds other attributes related to the written and read entry. Such as if the entry will be
+ * a fifo one, and if it will be persisted.
+ *
  * @author kimchy
  */
 public class OpenSpacesQueueConnector extends AbstractConnector implements ApplicationContextAware {
@@ -63,38 +73,70 @@ public class OpenSpacesQueueConnector extends AbstractConnector implements Appli
     }
 
 
+    /**
+     * Injected by Spring. The application context to get the {@link org.openspaces.core.GigaSpace}
+     * instance from.
+     */
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
 
+    /**
+     * Sets the GigaSpace bean id reference to be retrieved from Spring. If not defined, will try
+     * to get all the GigaSpace instnaces from Spring, and if there is only one, will use it.
+     */
     public void setGigaSpace(String gigaSpaceRef) {
         this.gigaSpaceRef = gigaSpaceRef;
     }
 
+    /**
+     * Returns the GigaSpace bean id reference to be retrieved from Spring. If not defined, will try
+     * to get all the GigaSpace instnaces from Spring, and if there is only one, will use it.
+     */
     public String getGigaSpace() {
         return gigaSpaceRef;
     }
 
+    /**
+     * Should the entries written to the virtualized queue be fifo or not. Defaults to <code>false</code>.
+     */
     public boolean isFifo() {
         return fifo;
     }
 
+    /**
+     * Should the entries written to the virtualized queue be fifo or not. Defaults to <code>false</code>.
+     */
     public void setFifo(boolean fifo) {
         this.fifo = fifo;
     }
 
+    /**
+     * Should the entries written to the Space will be persistent to a backend storage or not. Defaults
+     * to <code>false</code> (as many times a backup space is enough).
+     */
     public boolean isPersistent() {
         return persistent;
     }
 
+    /**
+     * Should the entries written to the Space will be persistent to a backend storage or not. Defaults
+     * to <code>false</code> (as many times a backup space is enough).
+     */
     public void setPersistent(boolean persistent) {
         this.persistent = persistent;
     }
 
+    /**
+     * The timeout waiting for a message on the queue in <b>milliseconds</b>. Defaults to 1000.
+     */
     public long getTimeout() {
         return timeout;
     }
 
+    /**
+     * The timeout waiting for a message on the queue in <b>milliseconds</b>. Defaults to 1000.
+     */
     public void setTimeout(long timeout) {
         this.timeout = timeout;
     }

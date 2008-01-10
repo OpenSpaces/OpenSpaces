@@ -22,6 +22,8 @@ import org.mule.impl.endpoint.URIBuilder;
 import org.openspaces.esb.mule.queue.OpenSpacesQueueConnector;
 
 /**
+ * The OpenSpaces queue namespace support.
+ *
  * @author kimchy
  */
 public class OpenSpacesQueueNamespaceHandler extends AbstractMuleNamespaceHandler {

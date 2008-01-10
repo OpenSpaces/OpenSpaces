@@ -20,6 +20,8 @@ import com.j_spaces.core.client.MetaDataEntry;
 import org.mule.umo.UMOMessage;
 
 /**
+ * An internal queue entry holding the endopint address and the actual message.
+ *
  * @author kimchy
  */
 public class InternalQueueEntry extends MetaDataEntry {
