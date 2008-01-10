@@ -625,7 +625,9 @@
         <root url="jar://$PROJECT_DIR$/lib/JSpaces.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES />
+      <SOURCES>
+        <root url="intellijad://intellijad" />
+      </SOURCES>
     </library>
     <library name="Spring">
       <CLASSES>
@@ -705,7 +707,6 @@
         <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-stdio-2.0.0-RC2-SNAPSHOT.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/mule/commons-pool.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/mule/commons-lang-2.3.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/connector.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/mule/commons-collections.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-jms-2.0.0-RC2-SNAPSHOT.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/mule/mule-core-2.0.0-RC2-SNAPSHOT.jar!/" />
@@ -713,6 +714,8 @@
         <root url="jar://$PROJECT_DIR$/lib/mule/commons-io-1.3.1.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/mule/commons-beanutils-1.7.0.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-vm-2.0.0-RC2-SNAPSHOT.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-spring-config-2.0.0-RC2-SNAPSHOT.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-client-2.0.0-RC2-SNAPSHOT.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
@@ -770,6 +773,23 @@
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/lib/jmock/jmock-1.1.0.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/jmock/jmock-cglib-1.1.0.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="j2ee">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/j2ee/jsp-api.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/j2ee/jms.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/j2ee/mail.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/j2ee/jstl.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/j2ee/jaxrpc.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/j2ee/ejb.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/j2ee/servlet-api.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/j2ee/jta.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/j2ee/rowset.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/j2ee/connector.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/j2ee/activation.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />

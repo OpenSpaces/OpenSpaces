@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesource.org/schema/mule/core/2.0"
+      xmlns:os-events="http://www.openspaces.org/schema/events"
+      xmlns:os-core="http://www.openspaces.org/schema/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:spring="http://www.springframework.org/schema/beans"
+      xmlns:os="http://www.openspaces.org/schema/mule"
+      xmlns:os-queue="http://www.openspaces.org/schema/mule/os-queue"
+      xmlns:stdio="http://www.mulesource.org/schema/mule/stdio/2.0"
+
+      xsi:schemaLocation="http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
+       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.mulesource.org/schema/mule/core/2.0 http://www.mulesource.org/schema/mule/core/2.0/mule.xsd
+       http://www.mulesource.org/schema/mule/stdio/2.0 http://www.mulesource.org/schema/mule/stdio/2.0/mule-stdio.xsd
+       http://www.openspaces.org/schema/mule http://www.openspaces.org/schema/mule/mule-os.xsd
+       http://www.openspaces.org/schema/mule/os-queue http://www.openspaces.org/schema/mule/mule-os-queue.xsd">
+
+    <spring:beans>
+        <os-core:space id="space" url="/./space" lookup-groups="${user.name}"/>
+
+        <os-core:giga-space id="gigaSpace" space="space" />
+    </spring:beans>
+
+    <!-- this connector must be declared ,in order to inject the  Spring appliction context -->
+    <os-queue:connector name="queueConnector" />
+
+    <model name="helloSample">
+
+        <service name="Appender1">
+
+            <inbound-router>
+                <os-queue:inbound-endpoint path="test1"/>
+            </inbound-router>
+
+            <component class="org.openspaces.itest.esb.mule.queue.EchoeComponentAppender"/>
+
+            <outbound-router>
+                <outbound-pass-through-router>
+                    <os-queue:outbound-endpoint path="test2"/>
+                </outbound-pass-through-router>
+            </outbound-router>
+
+        </service>
+
+        <service name="Appender2">
+
+            <inbound-router>
+                <os-queue:inbound-endpoint path="test2"/>
+            </inbound-router>
+
+            <component class="org.openspaces.itest.esb.mule.queue.EchoeComponentAppender"/>
+
+            <outbound-router>
+                <outbound-pass-through-router>
+                    <os-queue:outbound-endpoint path="test3"/>
+                </outbound-pass-through-router>
+            </outbound-router>
+
+        </service>
+
+    </model>
+
+</mule>

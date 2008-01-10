@@ -16,7 +16,7 @@
 
 package org.openspaces.esb.mule;
 
-import org.mule.config.builders.MuleXmlConfigurationBuilder;
+import org.mule.config.spring.SpringXmlConfigurationBuilder;
 import org.mule.umo.UMOManagementContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
@@ -65,7 +65,7 @@ public class OpenSpacesMuleContextLoader implements ApplicationContextAware, Ini
         if (event instanceof ContextRefreshedEvent) {
             if (!contextCreated) {
                 contextCreated = true;
-                MuleXmlConfigurationBuilder muleXmlConfigurationBuilder = new MuleXmlConfigurationBuilder(this.applicationContext);
+                SpringXmlConfigurationBuilder muleXmlConfigurationBuilder = new SpringXmlConfigurationBuilder(this.applicationContext);
                 try {
                     umoManagementContext = muleXmlConfigurationBuilder.configure(location);
                     umoManagementContext.start();

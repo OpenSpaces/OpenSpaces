@@ -16,13 +16,12 @@
 package org.openspaces.itest.esb.mule;
 
 import junit.framework.TestCase;
-import org.mule.config.ConfigurationException;
-import org.mule.config.builders.MuleXmlConfigurationBuilder;
+import org.mule.config.spring.SpringXmlConfigurationBuilder;
+import org.mule.extras.client.MuleClient;
 import org.mule.umo.UMOManagementContext;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceConfigurer;
 import org.openspaces.core.space.UrlSpaceConfigurer;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
 
 /**
  * Convenient superclass for tests depending on a Spring context.
@@ -33,10 +32,11 @@ public abstract class AbstractMuleTests extends TestCase {
 
     protected UMOManagementContext umoManagementContext;
 
-    protected MuleXmlConfigurationBuilder builder;
+    protected SpringXmlConfigurationBuilder builder;
 
     protected GigaSpace gigaSpace;
 
+    protected MuleClient muleClient;
 
     protected void setUp() throws Exception {
         createApplicationContext(getConfigLocations());
@@ -44,13 +44,10 @@ public abstract class AbstractMuleTests extends TestCase {
         umoManagementContext.start();
     }
 
-    protected void createApplicationContext(String[] locations) {
-        builder = new MuleXmlConfigurationBuilder();
-        try {
-            umoManagementContext = builder.configure(locations);
-        } catch (ConfigurationException e) {
-            throw new BeanDefinitionStoreException("Failed to load configuration");
-        }
+    protected void createApplicationContext(String[] locations) throws Exception {
+        builder = new SpringXmlConfigurationBuilder();
+        umoManagementContext = builder.configure(locations);
+        muleClient = new MuleClient(umoManagementContext);
     }
 
     protected void tearDown() throws Exception {
