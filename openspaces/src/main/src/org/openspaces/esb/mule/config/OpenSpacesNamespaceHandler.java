@@ -22,14 +22,12 @@ import org.openspaces.esb.mule.OpenSpacesConnector;
 
 /**
  * A namespace handler for <code>OpenSpaces</code> namespace.
- *  
+ *
  * @author yitzhaki
  */
-public class OpenSpacesNamespaceHandler extends AbstractMuleNamespaceHandler
-{
+public class OpenSpacesNamespaceHandler extends AbstractMuleNamespaceHandler {
 
-    public void init()
-    {
+    public void init() {
         registerStandardTransportEndpoints(OpenSpacesConnector.OS, new String[]{});
         registerBeanDefinitionParser("connector", new MuleOrphanDefinitionParser(OpenSpacesConnector.class, true));
     }
