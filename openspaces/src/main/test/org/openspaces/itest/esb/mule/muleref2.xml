@@ -64,5 +64,4 @@
             </outbound-router>
         </service>
     </model>
-
 </mule>
