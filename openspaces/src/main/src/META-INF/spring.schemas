@@ -6,6 +6,7 @@ http\://www.openspaces.org/schema/jms/openspaces-jms.xsd=org/openspaces/jms/conf
 http\://www.openspaces.org/schema/sla/openspaces-sla.xsd=org/openspaces/pu/sla/config/openspaces-sla.xsd
 http\://www.openspaces.org/schema/mule/mule-os.xsd=org/openspaces/esb/mule/config/mule-os.xsd
 http\://www.openspaces.org/schema/mule/mule-os-queue.xsd=org/openspaces/esb/mule/queue/config/mule-os-queue.xsd
+http\://www.openspaces.org/schema/mule/mule-os-seda.xsd=org/openspaces/esb/mule/seda/config/mule-os-seda.xsd
 
 
 

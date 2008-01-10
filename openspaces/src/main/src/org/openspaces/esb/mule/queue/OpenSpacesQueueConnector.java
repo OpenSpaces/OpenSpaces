@@ -67,8 +67,12 @@ public class OpenSpacesQueueConnector extends AbstractConnector implements Appli
         this.applicationContext = applicationContext;
     }
 
-    public void setGigaSpaceRef(String gigaSpaceRef) {
+    public void setGigaSpace(String gigaSpaceRef) {
         this.gigaSpaceRef = gigaSpaceRef;
+    }
+
+    public String getGigaSpace() {
+        return gigaSpaceRef;
     }
 
     public boolean isFifo() {
@@ -127,7 +131,7 @@ public class OpenSpacesQueueConnector extends AbstractConnector implements Appli
         return applicationContext;
     }
 
-    public GigaSpace getGigaSpace() {
+    public GigaSpace getGigaSpaceObj() {
         return gigaSpace;
     }
 

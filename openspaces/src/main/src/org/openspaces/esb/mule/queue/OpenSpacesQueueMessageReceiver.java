@@ -48,7 +48,13 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
     protected void doConnect() throws Exception {
         InternalQueueEntry internalTemplate = new InternalQueueEntry();
         internalTemplate.endpointURI = endpoint.getEndpointURI().getAddress();
-        template = connector.getGigaSpace().snapshot(internalTemplate);
+        internalTemplate.setFifo(connector.isFifo());
+        if (connector.isPersistent()) {
+            internalTemplate.makePersistent();
+        } else {
+            internalTemplate.makeTransient();
+        }
+        template = connector.getGigaSpaceObj().snapshot(internalTemplate);
     }
 
     protected void doDispose() {
@@ -77,10 +83,10 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
          */
         int maxThreads = connector.getReceiverThreadingProfile().getMaxThreadsActive();
         // also make sure batchSize is always at least 1
-        int batchSize = Math.max(1, Math.min(connector.getGigaSpace().count(template), ((maxThreads / 2) - 1)));
+        int batchSize = Math.max(1, Math.min(connector.getGigaSpaceObj().count(template), ((maxThreads / 2) - 1)));
 
         // try to get the first event off the queue
-        InternalQueueEntry entry = (InternalQueueEntry) connector.getGigaSpace().take(template, connector.getTimeout());
+        InternalQueueEntry entry = (InternalQueueEntry) connector.getGigaSpaceObj().take(template, connector.getTimeout());
 
         if (entry.message != null) {
             // keep first dequeued event
@@ -88,7 +94,7 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
 
             // keep batching if more events are available
             for (int i = 0; i < batchSize && entry != null; i++) {
-                entry = (InternalQueueEntry) connector.getGigaSpace().take(template, 0);
+                entry = (InternalQueueEntry) connector.getGigaSpaceObj().take(template, 0);
                 if (entry != null) {
                     messages.add(entry.message);
                 }

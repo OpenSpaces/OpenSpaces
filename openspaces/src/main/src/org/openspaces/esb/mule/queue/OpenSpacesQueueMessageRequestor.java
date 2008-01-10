@@ -53,7 +53,7 @@ public class OpenSpacesQueueMessageRequestor extends AbstractMessageRequester {
                 logger.debug("Waiting for a message on " + endpoint.getEndpointURI().getAddress());
             }
             try {
-                InternalQueueEntry entry = (InternalQueueEntry) connector.getGigaSpace().take(template, timeout);
+                InternalQueueEntry entry = (InternalQueueEntry) connector.getGigaSpaceObj().take(template, timeout);
                 if (entry != null) {
                     message = entry.message;
                 }
@@ -84,7 +84,13 @@ public class OpenSpacesQueueMessageRequestor extends AbstractMessageRequester {
     protected void doConnect() throws Exception {
         InternalQueueEntry internalTemplate = new InternalQueueEntry();
         internalTemplate.endpointURI = endpoint.getEndpointURI().getAddress();
-        template = connector.getGigaSpace().snapshot(internalTemplate);
+        internalTemplate.setFifo(connector.isFifo());
+        if (connector.isPersistent()) {
+            internalTemplate.makePersistent();
+        } else {
+            internalTemplate.makeTransient();
+        }
+        template = connector.getGigaSpaceObj().snapshot(internalTemplate);
     }
 
     protected void doDisconnect() throws Exception {

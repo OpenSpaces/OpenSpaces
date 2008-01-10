@@ -56,7 +56,7 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
             entry.makeTransient();
         }
 
-        connector.getGigaSpace().write(entry);
+        connector.getGigaSpaceObj().write(entry);
 
         if (logger.isDebugEnabled()) {
             logger.debug("dispatched Event on endpointUri: " + endpointUri);
