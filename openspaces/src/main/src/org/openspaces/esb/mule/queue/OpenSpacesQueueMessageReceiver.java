@@ -95,12 +95,11 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
         if (entry.message != null) {
             // keep first dequeued event
             messages.add(entry.message);
-
-            // keep batching if more events are available
-            for (int i = 0; i < batchSize && entry != null; i++) {
-                entry = (InternalQueueEntry) connector.getGigaSpaceObj().take(template, 0);
-                if (entry != null) {
-                    messages.add(entry.message);
+            // batch more messages if needed
+            Object[] entries = connector.getGigaSpaceObj().takeMultiple(template, batchSize);
+            if (entries != null) {
+                for (Object entry1: entries) {
+                    messages.add( ((InternalQueueEntry) entry1).message );
                 }
             }
         }
