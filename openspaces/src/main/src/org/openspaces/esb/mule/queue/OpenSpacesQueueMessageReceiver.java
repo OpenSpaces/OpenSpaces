@@ -92,7 +92,7 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
         // try to get the first event off the queue
         InternalQueueEntry entry = (InternalQueueEntry) connector.getGigaSpaceObj().take(template, connector.getTimeout());
 
-        if (entry.message != null) {
+        if (entry != null) {
             // keep first dequeued event
             messages.add(entry.message);
             // batch more messages if needed
