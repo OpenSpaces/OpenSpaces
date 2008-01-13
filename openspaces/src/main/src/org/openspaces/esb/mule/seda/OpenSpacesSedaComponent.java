@@ -17,10 +17,8 @@
 package org.openspaces.esb.mule.seda;
 
 import org.mule.config.i18n.CoreMessages;
-import org.mule.impl.model.seda.SedaComponent;
 import org.mule.umo.UMOEvent;
 import org.mule.umo.lifecycle.InitialisationException;
-import org.openspaces.core.GigaSpace;
 
 import javax.resource.spi.work.Work;
 import javax.resource.spi.work.WorkListener;
@@ -32,11 +30,7 @@ import javax.resource.spi.work.WorkListener;
  *
  * @author kimchy
  */
-public class OpenSpacesSedaComponent extends SedaComponent implements Work, WorkListener {
-
-    private OpenSpacesSedaModel sedaModel;
-
-    private GigaSpace gigaSpace;
+public class OpenSpacesSedaComponent extends SpaceAwareSedaComponent implements Work, WorkListener {
 
     private Object template;
 
@@ -49,8 +43,6 @@ public class OpenSpacesSedaComponent extends SedaComponent implements Work, Work
 
     public synchronized void doInitialise() throws InitialisationException {
         super.doInitialise();
-        this.sedaModel = (OpenSpacesSedaModel) model;
-        this.gigaSpace = sedaModel.getGigaSpaceObj();
 
         InternalEventEntry internalTemplate = new InternalEventEntry();
         internalTemplate.name = name;
