@@ -625,7 +625,9 @@
         <root url="jar://$PROJECT_DIR$/lib/JSpaces.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES />
+      <SOURCES>
+        <root url="intellijad://intellijad" />
+      </SOURCES>
     </library>
     <library name="Spring">
       <CLASSES>

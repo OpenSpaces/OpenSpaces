@@ -188,6 +188,7 @@
         <zip zipfile="${dist.dir}/${name}-1.4.zip">
             <zipfileset dir="${basedir}">
                 <include name="bin/pu*"/>
+                <include name="bin/installmavenrep*"/>
                 <include name="deploy/**"/>
                 <include name="docs/openspaces-javadoc/**"/>
 
@@ -223,6 +224,7 @@
         <zip zipfile="${dist.dir}/${name}-1.5.zip">
             <zipfileset dir="${basedir}">
                 <include name="bin/pu*"/>
+                <include name="bin/installmavenrep*"/>
                 <include name="deploy/**"/>
                 <include name="docs/openspaces-javadoc/**"/>
 
