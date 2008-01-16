@@ -23,7 +23,7 @@ import com.j_spaces.kernel.PlatformVersion;
  */
 public class OutputVersion {
 
-    public static String VERSION = PlatformVersion.V_NUM + "." + PlatformVersion.BUILD_NUM;
+    public static String VERSION = PlatformVersion.VERSION + "-" + PlatformVersion.MILESTONE + PlatformVersion.BUILD_NUM;
 
     public static void main(String[] args) throws Exception {
         System.out.println(VERSION);
