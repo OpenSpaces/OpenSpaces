@@ -127,10 +127,7 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
                 routeMessage(message);
             }
         } catch (Exception e) {
-            System.out.println("e.getMessage() = " + e.getMessage());
-            e.printStackTrace();
-            //todo
-//            handleException(e);
+            handleException(e);
         }
     }
 
@@ -154,13 +151,6 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
     protected void doDisconnect() throws Exception {
         eventListenerContainer.setEventListener(null);
         eventListenerContainer.stop();
-        //todo: this is a patch find better solution.
-        try {
-            Thread.sleep(10);
-        } catch (InterruptedException e) {
-            System.out.println("e.getMessage() = " + e.getMessage());
-            e.printStackTrace();
-        }
     }
 
     protected void doStop() throws UMOException {
