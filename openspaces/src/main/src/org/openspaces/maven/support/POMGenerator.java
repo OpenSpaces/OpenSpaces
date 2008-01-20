@@ -26,6 +26,7 @@ public class POMGenerator {
         writeSimplePom(dir, "jini-reggie");
         writeSimplePom(dir, "jini-mahalo");
         writeSimplePom(dir, "gs-boot");
+        writeSimplePom(dir, "gs-service");
 
         PrintWriter writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "JSpaces-pom.xml")))));
         printHeader(writer, "JSpaces");
@@ -35,6 +36,7 @@ public class POMGenerator {
         printDependency(writer, "jini-jsk-resources");
         printDependency(writer, "jini-reggie");
         printDependency(writer, "gs-boot");
+        printDependency(writer, "gs-service");
         printFooter(writer);
         writer.close();
 
