@@ -31,19 +31,19 @@ public class TakeAndWriteSingleTests extends AbstractMuleTests {
     }
 
     public void testTakeSingleFromSpace() throws ConfigurationException {
-        int numberOfMsgs = 10;
+        int numberOfMsgs = 1;
         for (int i = 0; i < numberOfMsgs; i++) {
-            Message message = new Message("Hello World " + i, false);
+            SimpleMessage message = new SimpleMessage("Hello World " + i, false);
             gigaSpace.write(message);
         }
 
         //blocking wait untill the mule writes back the messages to the space after reading them.
         for (int i = 0; i < numberOfMsgs; i++) {
-            Message template = new Message("Hello World " + i, true);
-            Message message = (Message) gigaSpace.take(template, Lease.FOREVER);
+            SimpleMessage template = new SimpleMessage("Hello World " + i, true);
+            SimpleMessage message = (SimpleMessage) gigaSpace.take(template, Lease.FOREVER);
             assertEquals(template, message);
         }
-        assertEquals(0, gigaSpace.count(new Message()));
+        assertEquals(0, gigaSpace.count(new SimpleMessage()));
 
     }
 }

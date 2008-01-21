@@ -43,7 +43,7 @@
 
 
         <spring:property name="template">
-            <spring:bean class="org.openspaces.itest.esb.mule.Message">
+            <spring:bean class="org.openspaces.itest.esb.mule.SimpleMessage">
                 <spring:property name="read" value="false"/>
             </spring:bean>
         </spring:property>

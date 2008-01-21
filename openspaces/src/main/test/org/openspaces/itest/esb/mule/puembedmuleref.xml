@@ -40,7 +40,7 @@
     -->
     <os-events:polling-container id="helloPollingEventContainer" giga-space="gigaSpace" pass-array-as-is="true">
         <os-core:template>
-            <bean class="org.openspaces.itest.esb.mule.Message">
+            <bean class="org.openspaces.itest.esb.mule.SimpleMessage">
                 <property name="read" value="false"/>
             </bean>
         </os-core:template>

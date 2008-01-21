@@ -36,7 +36,7 @@
         -->
         <os-events:polling-container id="helloPollingEventContainer" giga-space="gigaSpace">
             <os-core:template>
-                <spring:bean class="org.openspaces.itest.esb.mule.Message">
+                <spring:bean class="org.openspaces.itest.esb.mule.SimpleMessage">
                     <spring:property name="read" value="false"/>
                 </spring:bean>
             </os-core:template>

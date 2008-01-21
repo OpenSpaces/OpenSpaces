@@ -14,40 +14,41 @@
  * limitations under the License.
  */
 
-package org.openspaces.itest.esb.mule;
+package org.openspaces.itest.esb.mule.message;
 
 import net.jini.core.lease.Lease;
 import org.mule.config.ConfigurationException;
-import org.openspaces.core.GigaSpace;
-import org.openspaces.core.GigaSpaceConfigurer;
-import org.openspaces.core.space.UrlSpaceConfigurer;
-import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
+import org.openspaces.itest.esb.mule.AbstractMuleTests;
+import org.openspaces.itest.esb.mule.SimpleMessage;
 
 /**
- * Test the ability to run PU with mule imbedded in it.
+ * Tests mule connector, receive and process single object at a time.
  *
-* @author yitzhaki
+ * This test write SimpleMessage (without metadata to the space)
+ * The Appliction reads the <code>org.openspaces.itest.esb.mule.SimpleMessage</code> from the space and for each
+ * SimpleMessage it's creates <code> ProcessedMessage </code> object, set it name and write it back to the space.
+ *
+ * @author yitzhaki
  */
-public class PUEmbedMuleRefTests extends AbstractDependencyInjectionSpringContextTests {
+public class MetaDataTests extends AbstractMuleTests {
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/esb/mule/puembedmuleref.xml"};
+        return new String[]{"/org/openspaces/itest/esb/mule/message/metadata.xml"};
     }
 
     public void testTakeSingleFromSpace() throws ConfigurationException {
-        GigaSpace gigaSpace = new GigaSpaceConfigurer(new UrlSpaceConfigurer("jini://*/*/space").lookupGroups(System.getProperty("user.name")).space()).gigaSpace();
-        int numberOfMsgs = 1000;
+        int numberOfMsgs = 10;
         for (int i = 0; i < numberOfMsgs; i++) {
             SimpleMessage message = new SimpleMessage("Hello World " + i, false);
             gigaSpace.write(message);
         }
-
         //blocking wait untill the mule writes back the messages to the space after reading them.
         for (int i = 0; i < numberOfMsgs; i++) {
-            SimpleMessage template = new SimpleMessage("Hello World " + i, true);
-            SimpleMessage message = (SimpleMessage) gigaSpace.take(template, Lease.FOREVER);
+            ProcessedMessage template = new ProcessedMessage("Hello World " + i);
+            ProcessedMessage message = gigaSpace.take(template, Lease.FOREVER);
             assertEquals(template, message);
+            assertEquals("processed message " + "Hello World " + i , message.getProperty("name"));
         }
-        assertEquals(0, gigaSpace.count(new SimpleMessage()));
+        assertEquals(0, gigaSpace.count(new ProcessedMessage()));
     }
 }

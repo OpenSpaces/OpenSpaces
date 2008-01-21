@@ -52,7 +52,7 @@ public class HelloWorldBean implements InitializingBean {
 
     /**
      * A spring callback invoked when the container starts. Uses
-     * the injected GigaSpace to write and then take a single Message
+     * the injected GigaSpace to write and then take a single SimpleMessage
      * object.
      */
     public void afterPropertiesSet() throws Exception {
@@ -61,10 +61,10 @@ public class HelloWorldBean implements InitializingBean {
         RandomData randomData = new RandomDataImpl();
 
         Message message = new Message("Hello World " + randomData.nextLong(0l, 100l));
-        System.out.println("Writing Message [" + message.getMessage() + "]");
+        System.out.println("Writing SimpleMessage [" + message.getMessage() + "]");
         gigaSpace.write(message);
 
         message = (Message) gigaSpace.take(new Message());
-        System.out.println("Took Message [" + message.getMessage() + "]");
+        System.out.println("Took SimpleMessage [" + message.getMessage() + "]");
     }
 }

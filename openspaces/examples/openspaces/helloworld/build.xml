@@ -66,11 +66,11 @@
     </target>
 
     <target name="dist" depends="build">
-        <!-- Build a common jar file with the Message object to include under shared-lib -->
+        <!-- Build a common jar file with the SimpleMessage object to include under shared-lib -->
         <mkdir dir="${pulocation}/shared-lib" />
-        <jar basedir="${pulocation}" jarfile="${pulocation}/shared-lib/common.jar" includes="org/**/Message.class" />
+        <jar basedir="${pulocation}" jarfile="${pulocation}/shared-lib/common.jar" includes="org/**/SimpleMessage.class" />
         <!-- Now delete it from the pu location -->
-        <delete file="${pulocation}/org/openspaces/example/helloworld/Message.class" />
+        <delete file="${pulocation}/org/openspaces/example/helloworld/SimpleMessage.class" />
 
         <mkdir dir="${pulocation}/lib" />
         <copy todir="${pulocation}/lib">

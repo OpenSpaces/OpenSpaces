@@ -17,7 +17,6 @@
 package org.openspaces.itest.esb.mule;
 
 import junit.framework.TestCase;
-import net.jini.core.lease.Lease;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceConfigurer;
 import org.openspaces.core.space.UrlSpaceConfigurer;
@@ -40,17 +39,17 @@ public class IntegratedPUMuleEmbedTests extends TestCase {
 
         int numberOfMsgs = 22;
         for (int i = 0; i < numberOfMsgs; i++) {
-            Message message = new Message("Hello World " + i, false);
+            SimpleMessage message = new SimpleMessage("Hello World " + i, false);
             gigaSpace.write(message);
         }
 
         //blocking wait untill the mule writes back the messages to the space after reading them.
         for (int i = 0; i < numberOfMsgs; i++) {
-            Message template = new Message("Hello World " + i, true);
-            Message message = gigaSpace.take(template, Lease.FOREVER);
+            SimpleMessage template = new SimpleMessage("Hello World " + i, true);
+            SimpleMessage message = gigaSpace.take(template, Integer.MAX_VALUE);
             assertNotNull(message);
         }
-        assertEquals(0, gigaSpace.count(new Message()));
+        assertEquals(0, gigaSpace.count(new SimpleMessage()));
 
         container.close();
     }

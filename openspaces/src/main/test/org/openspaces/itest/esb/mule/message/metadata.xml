@@ -5,21 +5,18 @@
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xmlns:spring="http://www.springframework.org/schema/beans"
       xmlns:os="http://www.openspaces.org/schema/mule"
+      xmlns:stdio="http://www.mulesource.org/schema/mule/stdio/2.0"
 
       xsi:schemaLocation="http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
        http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
        http://www.mulesource.org/schema/mule/core/2.0 http://www.mulesource.org/schema/mule/core/2.0/mule.xsd
+       http://www.mulesource.org/schema/mule/stdio/2.0 http://www.mulesource.org/schema/mule/stdio/2.0/mule-stdio.xsd
        http://www.openspaces.org/schema/mule http://www.openspaces.org/schema/mule/mule-os.xsd">
 
-
-    <description>
-        This mule config file using helloPollingEventContainer and gigaSpace beans that declared as a pure spring beans.
-    </description>
-
+    <description>Tests mule connector, receive and process single object at a time.</description>
 
     <spring:beans>
-
         <!--
             A bean representing a space (an IJSpace implementation).
         -->
@@ -29,6 +26,7 @@
             OpenSpaces simplified space API built on top of IJSpace/JavaSpace.
         -->
         <os-core:giga-space id="gigaSpace" space="space"/>
+
 
         <!--
             A polling event container that perfoms (by default) polling take operations against
@@ -45,23 +43,31 @@
         </os-events:polling-container>
     </spring:beans>
 
-
+    <!-- this connector must be declared ,in order to inject the  Spring appliction context -->
     <os:connector name="gigaSpacesConnector"/>
 
+    <!--The Mule model initialises and manages your UMO components-->
+
+    <!-- MessageTransformer in order to transfer the metadata from the UMOmessage to the dispatched object -->
+    <custom-transformer name="MessageTransformer" class="org.openspaces.itest.esb.mule.message.MessageTransformer"/>
+
     <model name="helloSample">
+        
+
         <service name="MessageReaderUMO">
+
             <inbound-router>
-                <inbound-endpoint address="os://helloPollingEventContainer"/>
+                <os:inbound-endpoint address="os://helloPollingEventContainer"/>
             </inbound-router>
 
             <component class="org.openspaces.itest.esb.mule.MessageReader"/>
-
+            
             <outbound-router>
-                <outbound-pass-through-router>
-                    <outbound-endpoint
-                            address="os://gigaSpace?writeLease=2000&amp;updateOrWrite=false&amp;updateTimeout=1"/>
+                <outbound-pass-through-router >
+                    <outbound-endpoint address="os://gigaSpace" transformer-refs="MessageTransformer"/>
                 </outbound-pass-through-router>
             </outbound-router>
         </service>
     </model>
+    
 </mule>

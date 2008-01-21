@@ -13,16 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openspaces.itest.esb.mule;
+package org.openspaces.esb.mule.message;
+
+import org.mule.config.MuleProperties;
 
 /**
- * Interface that declares basic message. 
+ * Base interface that expose mule meta data.
+ * and explicitly expose ReplyTo attribute.
+ *
+ * <p>
+ * <B>Note:</B> implementation of this interface must have consistent results with equivalent get/set Property method.
  *
  * @author yitzhaki
  */
-public interface Message {
+public interface ReplyToMessageHeader extends MessageHeader {
 
-    void setMessage(String message);
+    public static String REPLY_TO = MuleProperties.MULE_REPLY_TO_PROPERTY;
 
-    String getMessage();
+    Object getReplyTo();
+
+    void setReplyTo(Object replyTo);
 }

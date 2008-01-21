@@ -34,18 +34,18 @@ public class TakeAndWriteMultipleTests extends AbstractMuleTests {
 
     public void testTakeMultipleFromSpace() throws ConfigurationException {
         int numberOfMsgs = 100;
-        Message msgs[] = new Message[numberOfMsgs];
+        SimpleMessage msgs[] = new SimpleMessage[numberOfMsgs];
         for (int i = 0; i < numberOfMsgs; i++) {
-            msgs[i] = new Message("Hello World " + i, false);
+            msgs[i] = new SimpleMessage("Hello World " + i, false);
         }
         gigaSpace.writeMultiple(msgs);
 
         //blocking wait untill the mule writes back the messages to the space after reading them.
         for (int i = 0; i < numberOfMsgs; i++) {
-            Message template = new Message("Hello World " + i, true);
-            Message message = (Message) gigaSpace.take(template, Lease.FOREVER);
+            SimpleMessage template = new SimpleMessage("Hello World " + i, true);
+            SimpleMessage message = (SimpleMessage) gigaSpace.take(template, Lease.FOREVER);
             assertEquals(template, message);
         }
-        assertEquals(0, gigaSpace.count(new Message()));
+        assertEquals(0, gigaSpace.count(new SimpleMessage()));
     }
 }

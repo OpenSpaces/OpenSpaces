@@ -14,37 +14,32 @@
  * limitations under the License.
  */
 
-package org.openspaces.itest.esb.mule;
+package org.openspaces.itest.esb.mule.message;
 
 import org.mule.umo.UMOEventContext;
 import org.mule.umo.lifecycle.Callable;
 
 
 /**
- * <code>MessageReader</code> used as a UMOComponent and implements Callable,
+ * <code>MessageWithHeaderReader</code> used as a UMOComponent and implements Callable,
  * meaning that the onCall method invoked by the mule framework.
  *
  * @author yitzhaki
  */
-public class MessageReader implements Callable {
+public class MessageWithHeaderReader implements Callable {
 
 
     public Object onCall(UMOEventContext eventContext) throws Exception {
         Object payload = eventContext.getMessage().getPayload();
-        return read(payload);
+        return changeName((MessageWithMessageHeader) payload);
     }
 
     /**
-     * Sets to true the obj read attribute.
+     * Change the value of name property to "new" + name value.
      */
-    private Object read(Object obj) {
-        if (obj instanceof Object[]) {
-            for (Object o : ((Object[]) obj)) {
-                ((SimpleMessage) o).setRead(true);
-            }
-        } else {
-            ((SimpleMessage) obj).setRead(true);
-        }
-        return obj;
+    private Object changeName(MessageWithMessageHeader message) {
+        String name = (String) message.getProperty("name");
+        message.setProperty("name", "new " + name);
+        return message;
     }
 }

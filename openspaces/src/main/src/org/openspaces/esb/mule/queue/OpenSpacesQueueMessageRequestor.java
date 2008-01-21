@@ -66,7 +66,7 @@ public class OpenSpacesQueueMessageRequestor extends AbstractMessageRequester {
             }
             if (message != null) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Message received: " + message);
+                    logger.debug("SimpleMessage received: " + message);
                 }
                 return message;
             } else {

@@ -96,7 +96,8 @@ public class OpenSpacesMessageDispatcher extends AbstractMessageDispatcher {
     }
 
     protected UMOMessage doSend(UMOEvent event) throws Exception {
-        Object payload = event.getMessage().getPayload();
+        Object payload = event.transformMessage();
+
         if (payload != null) {
             if (payload instanceof Object[]) {
                 Object[] payloadArr = (Object[]) payload;
@@ -122,6 +123,8 @@ public class OpenSpacesMessageDispatcher extends AbstractMessageDispatcher {
         }
         return null;
     }
+
+
 
     protected void doConnect() throws Exception {
     }

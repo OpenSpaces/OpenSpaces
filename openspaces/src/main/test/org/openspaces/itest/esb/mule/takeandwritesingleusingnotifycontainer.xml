@@ -39,7 +39,7 @@
                  class="org.openspaces.events.notify.SimpleNotifyEventListenerContainer">
         <spring:property name="gigaSpace" ref="gigaSpace"/>
         <spring:property name="template">
-            <spring:bean class="org.openspaces.itest.esb.mule.Message">
+            <spring:bean class="org.openspaces.itest.esb.mule.SimpleMessage">
                 <spring:property name="read" value="false"/>
             </spring:bean>
         </spring:property>
