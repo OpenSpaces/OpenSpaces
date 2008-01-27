@@ -39,6 +39,9 @@ public class Jsr223LocalScriptExecutor extends AbstractLocalScriptExecutor<Objec
 
     public Object doCompile(Script script) throws ScriptCompilationException {
         ScriptEngine scriptEngine = scriptEngineManager.getEngineByName(script.getType());
+        if (scriptEngine == null) {
+            throw new ScriptingException("Failed to find script engine for type [" + script.getType() + "] with Jsr223 support");
+        }
         if (scriptEngine instanceof Compilable) {
             try {
                 return ((Compilable) scriptEngine).compile(script.getScriptAsString());
