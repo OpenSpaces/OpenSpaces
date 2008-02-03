@@ -30,14 +30,14 @@ import javax.resource.spi.work.WorkListener;
  *
  * @author kimchy
  */
-public class OpenSpacesSedaComponent extends SpaceAwareSedaComponent implements Work, WorkListener {
+public class OpenSpacesSedaService extends SpaceAwareSedaService implements Work, WorkListener {
 
     private Object template;
 
     /**
      * For Spring only
      */
-    public OpenSpacesSedaComponent() {
+    public OpenSpacesSedaService() {
         super();
     }
 

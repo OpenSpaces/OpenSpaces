@@ -32,7 +32,7 @@ import org.springframework.context.ApplicationListener;
  *
  * @author kimchy
  */
-public class SpaceAwareSedaComponent extends SedaService implements ApplicationListener {
+public class SpaceAwareSedaService extends SedaService implements ApplicationListener {
 
     protected OpenSpacesSedaModel sedaModel;
 

@@ -20,9 +20,9 @@ import org.mule.config.spring.handlers.AbstractMuleNamespaceHandler;
 import org.mule.config.spring.parsers.delegate.InheritDefinitionParser;
 import org.mule.config.spring.parsers.generic.NamedDefinitionParser;
 import org.mule.config.spring.parsers.generic.OrphanDefinitionParser;
-import org.openspaces.esb.mule.seda.OpenSpacesSedaComponent;
 import org.openspaces.esb.mule.seda.OpenSpacesSedaModel;
-import org.openspaces.esb.mule.seda.SpaceAwareSedaComponent;
+import org.openspaces.esb.mule.seda.OpenSpacesSedaService;
+import org.openspaces.esb.mule.seda.SpaceAwareSedaService;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.w3c.dom.Element;
@@ -36,8 +36,8 @@ public class OpenSpacesSedaNamespaceHandler extends AbstractMuleNamespaceHandler
 
     public void init() {
         registerBeanDefinitionParser("model", new InheritDefinitionParser(new ModelOrphanDefinitionParser(OpenSpacesSedaModel.class, true), new NamedDefinitionParser()));
-        registerBeanDefinitionParser("service", new ServiceDefinitionParser(OpenSpacesSedaComponent.class));
-        registerBeanDefinitionParser("space-aware-service", new ServiceDefinitionParser(SpaceAwareSedaComponent.class));
+        registerBeanDefinitionParser("service", new ServiceDefinitionParser(OpenSpacesSedaService.class));
+        registerBeanDefinitionParser("space-aware-service", new ServiceDefinitionParser(SpaceAwareSedaService.class));
     }
 
     private class ModelOrphanDefinitionParser extends OrphanDefinitionParser {
