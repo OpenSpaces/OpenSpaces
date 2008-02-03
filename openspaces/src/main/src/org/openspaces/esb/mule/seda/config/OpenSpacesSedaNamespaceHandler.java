@@ -16,17 +16,15 @@
 
 package org.openspaces.esb.mule.seda.config;
 
+import org.mule.config.spring.MuleHierarchicalBeanDefinitionParserDelegate;
 import org.mule.config.spring.handlers.AbstractMuleNamespaceHandler;
 import org.mule.config.spring.parsers.delegate.InheritDefinitionParser;
 import org.mule.config.spring.parsers.generic.NamedDefinitionParser;
 import org.mule.config.spring.parsers.generic.OrphanDefinitionParser;
+import org.mule.config.spring.parsers.specific.ServiceDefinitionParser;
 import org.openspaces.esb.mule.seda.OpenSpacesSedaModel;
 import org.openspaces.esb.mule.seda.OpenSpacesSedaService;
 import org.openspaces.esb.mule.seda.SpaceAwareSedaService;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.xml.ParserContext;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 /**
  * @author kimchy
@@ -35,48 +33,16 @@ import org.w3c.dom.NodeList;
 public class OpenSpacesSedaNamespaceHandler extends AbstractMuleNamespaceHandler {
 
     public void init() {
-        registerBeanDefinitionParser("model", new InheritDefinitionParser(new ModelOrphanDefinitionParser(OpenSpacesSedaModel.class, true), new NamedDefinitionParser()));
-        registerBeanDefinitionParser("service", new ServiceDefinitionParser(OpenSpacesSedaService.class));
+        InheritDefinitionParser modelParser = new InheritDefinitionParser(new OrphanDefinitionParser(OpenSpacesSedaModel.class, true), new NamedDefinitionParser());
+        modelParser.addBeanFlag(MuleHierarchicalBeanDefinitionParserDelegate.MULE_FORCE_RECURSE);
+        registerBeanDefinitionParser("model", modelParser);
+
+        ServiceDefinitionParser serviceDefinitionParser = new ServiceDefinitionParser(OpenSpacesSedaService.class);
+        serviceDefinitionParser.addBeanFlag(MuleHierarchicalBeanDefinitionParserDelegate.MULE_FORCE_RECURSE);
+        registerBeanDefinitionParser("service", serviceDefinitionParser);
+
+        serviceDefinitionParser = new ServiceDefinitionParser(SpaceAwareSedaService.class);
+        serviceDefinitionParser.addBeanFlag(MuleHierarchicalBeanDefinitionParserDelegate.MULE_FORCE_RECURSE);
         registerBeanDefinitionParser("space-aware-service", new ServiceDefinitionParser(SpaceAwareSedaService.class));
     }
-
-    private class ModelOrphanDefinitionParser extends OrphanDefinitionParser {
-
-        public ModelOrphanDefinitionParser(boolean singleton) {
-            super(singleton);
-        }
-
-        public ModelOrphanDefinitionParser(Class beanClass, boolean singleton) {
-            super(beanClass, singleton);
-        }
-
-        protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
-            super.doParse(element, parserContext, builder);
-            NodeList list = element.getChildNodes();
-            for (int i = 0; i < list.getLength(); i++) {
-                if (list.item(i) instanceof Element) {
-                    Element childElement = (Element) list.item(i);
-                    getParserContext().getDelegate().parseCustomElement(childElement, builder.getBeanDefinition());
-                }
-            }
-        }
-
-    }
-
-    public class ServiceDefinitionParser extends ModelOrphanDefinitionParser {
-
-        public ServiceDefinitionParser(Class clazz) {
-            super(clazz, true);
-        }
-
-        //@java.lang.Override
-        protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
-            Element parent = (Element) element.getParentNode();
-            String modelName = parent.getAttribute(ATTRIBUTE_NAME);
-            builder.addPropertyReference("model", modelName);
-            super.doParse(element, parserContext, builder);
-        }
-
-    }
-
 }

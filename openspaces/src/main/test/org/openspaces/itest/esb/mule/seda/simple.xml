@@ -26,9 +26,9 @@
 
     <vm:connector name="vm" queueEvents="true" />
 
-    <model name="helloSample" class="org.openspaces.esb.mule.seda.OpenSpacesSedaModel" >
+    <os-seda:model name="helloSample" giga-space="gigaSpace">
 
-        <service name="Appender1" class="org.openspaces.esb.mule.seda.OpenSpacesSedaService">
+        <os-seda:service name="Appender1">
 
             <inbound>
                 <vm:inbound-endpoint path="test1"/>
@@ -42,9 +42,9 @@
                 </outbound-pass-through-router>
             </outbound>
 
-        </service>
+        </os-seda:service>
 
-        <service name="Appender2" class="org.openspaces.esb.mule.seda.OpenSpacesSedaService">
+        <os-seda:service name="Appender2">
 
             <inbound>
                 <vm:inbound-endpoint path="test2"/>
@@ -58,8 +58,8 @@
                 </outbound-pass-through-router>
             </outbound>
 
-        </service>
+        </os-seda:service>
 
-    </model>
+    </os-seda:model>
 
 </mule>
