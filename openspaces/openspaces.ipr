@@ -704,22 +704,22 @@
     </library>
     <library name="mule">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-stdio-2.0.0-RC2-SNAPSHOT.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/mule/commons-pool.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/mule/commons-lang-2.3.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/mule/commons-collections.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-jms-2.0.0-RC2-SNAPSHOT.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-core-2.0.0-RC2-SNAPSHOT.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/mule/jug-2.0.0-asl.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/mule/commons-io-1.3.1.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/mule/commons-beanutils-1.7.0.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-vm-2.0.0-RC2-SNAPSHOT.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-spring-config-2.0.0-RC2-SNAPSHOT.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-client-2.0.0-RC2-SNAPSHOT.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-stdio-2.0.0-RC2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-spring-config-2.0.0-RC2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-vm-2.0.0-RC2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-jms-2.0.0-RC2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-client-2.0.0-RC2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-core-2.0.0-RC2.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-2.0.0-RC2-SNAPSHOT-src.zip!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-2.0.0-RC2-src.zip!/" />
       </SOURCES>
     </library>
     <library name="ServiceGrid">

@@ -50,18 +50,18 @@
 
     <model name="helloSample">
         <service name="MessageReaderUMO">
-            <inbound-router>
+            <inbound>
                 <inbound-endpoint address="os://helloPollingEventContainer"/>
-            </inbound-router>
+            </inbound>
 
             <component class="org.openspaces.itest.esb.mule.MessageReader"/>
 
-            <outbound-router>
+            <outbound>
                 <outbound-pass-through-router>
                     <outbound-endpoint
                             address="os://gigaSpace?writeLease=2000&amp;updateOrWrite=false&amp;updateTimeout=1"/>
                 </outbound-pass-through-router>
-            </outbound-router>
+            </outbound>
         </service>
     </model>
 </mule>

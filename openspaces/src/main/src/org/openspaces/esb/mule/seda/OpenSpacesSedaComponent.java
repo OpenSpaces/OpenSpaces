@@ -16,9 +16,9 @@
 
 package org.openspaces.esb.mule.seda;
 
+import org.mule.api.MuleEvent;
+import org.mule.api.lifecycle.InitialisationException;
 import org.mule.config.i18n.CoreMessages;
-import org.mule.umo.UMOEvent;
-import org.mule.umo.lifecycle.InitialisationException;
 
 import javax.resource.spi.work.Work;
 import javax.resource.spi.work.WorkListener;
@@ -55,7 +55,7 @@ public class OpenSpacesSedaComponent extends SpaceAwareSedaComponent implements 
         template = gigaSpace.snapshot(internalTemplate);
     }
 
-    protected void enqueue(UMOEvent event) throws Exception {
+    protected void enqueue(MuleEvent event) throws Exception {
         if (logger.isDebugEnabled()) {
             logger.debug("Component " + name + " putting event on queue " + name + ": " + event);
         }
@@ -69,12 +69,12 @@ public class OpenSpacesSedaComponent extends SpaceAwareSedaComponent implements 
         gigaSpace.write(entry);
     }
 
-    protected UMOEvent dequeue() throws Exception {
+    protected MuleEvent dequeue() throws Exception {
         if (logger.isDebugEnabled()) {
             //logger.debug("Component " + name + " polling queue " + name + ", timeout = " + queueTimeout);
         }
         if (getQueueTimeout() == null) {
-            throw new InitialisationException(CoreMessages.noComponentQueueTimeoutSet(this), this);
+            throw new InitialisationException(CoreMessages.noServiceQueueTimeoutSet(this), this);
         } else {
             InternalEventEntry entry = (InternalEventEntry) gigaSpace.take(template, getQueueTimeout());
             if (entry == null) {

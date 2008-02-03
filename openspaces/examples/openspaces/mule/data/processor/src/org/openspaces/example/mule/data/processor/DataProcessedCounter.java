@@ -17,8 +17,8 @@
 package org.openspaces.example.mule.data.processor;
 
 
-import org.mule.umo.UMOEventContext;
-import org.mule.umo.lifecycle.Callable;
+import org.mule.api.MuleEventContext;
+import org.mule.api.lifecycle.Callable;
 import org.openspaces.example.mule.data.common.Data;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -45,7 +45,7 @@ public class DataProcessedCounter implements Callable {
 
    private AtomicInteger processedDataCount = new AtomicInteger(0);
 
-    public Object onCall(UMOEventContext eventContext) throws Exception {
+    public Object onCall(MuleEventContext eventContext) throws Exception {
         Object payload = eventContext.getMessage().getPayload();
         return dataProcessed((Data) payload);
     }

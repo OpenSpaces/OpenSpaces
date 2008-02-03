@@ -17,7 +17,7 @@
 package org.openspaces.esb.mule.queue;
 
 import com.j_spaces.core.client.MetaDataEntry;
-import org.mule.umo.UMOMessage;
+import org.mule.api.MuleMessage;
 
 /**
  * An internal queue entry holding the endopint address and the actual message.
@@ -28,7 +28,7 @@ public class InternalQueueEntry extends MetaDataEntry {
 
     public String endpointURI;
 
-    public UMOMessage message;
+    public MuleMessage message;
 
     public static String[] __getSpaceIndexedFields() {
         return new String[]{"endpointURI"};

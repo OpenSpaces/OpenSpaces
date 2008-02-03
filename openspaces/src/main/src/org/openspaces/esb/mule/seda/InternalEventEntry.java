@@ -17,7 +17,7 @@
 package org.openspaces.esb.mule.seda;
 
 import com.j_spaces.core.client.MetaDataEntry;
-import org.mule.umo.UMOEvent;
+import org.mule.api.MuleEvent;
 
 /**
  * An intenral entry holding the name of the serice (that has the SEDA queue) and the
@@ -29,12 +29,12 @@ public class InternalEventEntry extends MetaDataEntry {
 
     public String name;
 
-    public UMOEvent event;
+    public MuleEvent event;
 
     public InternalEventEntry() {
     }
 
-    public InternalEventEntry(UMOEvent event, String name) {
+    public InternalEventEntry(MuleEvent event, String name) {
         this.event = event;
         this.name = name;
     }

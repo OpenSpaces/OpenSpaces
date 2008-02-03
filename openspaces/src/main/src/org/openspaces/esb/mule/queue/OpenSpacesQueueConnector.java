@@ -16,16 +16,16 @@
 
 package org.openspaces.esb.mule.queue;
 
-import org.mule.impl.endpoint.DynamicEndpointURIEndpoint;
-import org.mule.impl.endpoint.MuleEndpointURI;
-import org.mule.providers.AbstractConnector;
+import org.mule.api.MuleException;
+import org.mule.api.endpoint.EndpointException;
+import org.mule.api.endpoint.EndpointURI;
+import org.mule.api.endpoint.ImmutableEndpoint;
+import org.mule.api.lifecycle.InitialisationException;
+import org.mule.api.transport.MessageReceiver;
+import org.mule.endpoint.DynamicEndpointURIEndpoint;
+import org.mule.endpoint.MuleEndpointURI;
 import org.mule.routing.filters.WildcardFilter;
-import org.mule.umo.UMOException;
-import org.mule.umo.endpoint.EndpointException;
-import org.mule.umo.endpoint.UMOEndpointURI;
-import org.mule.umo.endpoint.UMOImmutableEndpoint;
-import org.mule.umo.lifecycle.InitialisationException;
-import org.mule.umo.provider.UMOMessageReceiver;
+import org.mule.transport.AbstractConnector;
 import org.openspaces.core.GigaSpace;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -147,10 +147,10 @@ public class OpenSpacesQueueConnector extends AbstractConnector implements Appli
     protected void doDispose() {
     }
 
-    protected void doStart() throws UMOException {
+    protected void doStart() throws MuleException {
     }
 
-    protected void doStop() throws UMOException {
+    protected void doStop() throws MuleException {
     }
 
     protected void doConnect() throws Exception {
@@ -177,18 +177,18 @@ public class OpenSpacesQueueConnector extends AbstractConnector implements Appli
         return gigaSpace;
     }
 
-    OpenSpacesQueueMessageReceiver getReceiver(UMOEndpointURI endpointUri) throws EndpointException {
+    OpenSpacesQueueMessageReceiver getReceiver(EndpointURI endpointUri) throws EndpointException {
         return (OpenSpacesQueueMessageReceiver) getReceiverByEndpoint(endpointUri);
     }
 
-    protected UMOMessageReceiver getReceiverByEndpoint(UMOEndpointURI endpointUri) throws EndpointException {
+    protected MessageReceiver getReceiverByEndpoint(EndpointURI endpointUri) throws EndpointException {
         if (logger.isDebugEnabled()) {
             logger.debug("Looking up vm receiver for address: " + endpointUri.toString());
         }
 
-        UMOMessageReceiver receiver;
+        MessageReceiver receiver;
         // If we have an exact match, use it
-        receiver = (UMOMessageReceiver) receivers.get(endpointUri.getAddress());
+        receiver = (MessageReceiver) receivers.get(endpointUri.getAddress());
         if (receiver != null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Found exact receiver match on endpointUri: " + endpointUri);
@@ -198,12 +198,12 @@ public class OpenSpacesQueueConnector extends AbstractConnector implements Appli
 
         // otherwise check each one against a wildcard match
         for (Iterator iterator = receivers.values().iterator(); iterator.hasNext();) {
-            receiver = (UMOMessageReceiver) iterator.next();
+            receiver = (MessageReceiver) iterator.next();
             String filterAddress = receiver.getEndpointURI().getAddress();
             WildcardFilter filter = new WildcardFilter(filterAddress);
             if (filter.accept(endpointUri.getAddress())) {
-                UMOImmutableEndpoint endpoint = receiver.getEndpoint();
-                UMOEndpointURI newEndpointURI = new MuleEndpointURI(endpointUri, filterAddress);
+                ImmutableEndpoint endpoint = receiver.getEndpoint();
+                EndpointURI newEndpointURI = new MuleEndpointURI(endpointUri, filterAddress);
                 receiver.setEndpoint(new DynamicEndpointURIEndpoint(endpoint, newEndpointURI));
 
                 if (logger.isDebugEnabled()) {

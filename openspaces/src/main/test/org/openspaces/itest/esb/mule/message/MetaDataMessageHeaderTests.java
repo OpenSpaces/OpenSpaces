@@ -17,7 +17,7 @@
 package org.openspaces.itest.esb.mule.message;
 
 import net.jini.core.lease.Lease;
-import org.mule.config.ConfigurationException;
+import org.mule.api.config.ConfigurationException;
 import org.openspaces.itest.esb.mule.AbstractMuleTests;
 
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public class MetaDataMessageHeaderTests extends AbstractMuleTests {
 
         //blocking wait untill the mule writes back the messages to the space after reading them.
         for (int i = 0; i < numberOfMsgs; i++) {
-            MessageWithMessageHeader template = new MessageWithMessageHeader("Hello World " + i,  i + "");
+            MessageWithMessageHeader template = new MessageWithMessageHeader("Hello World " + i, i + "");
             MessageWithMessageHeader message = gigaSpace.take(template, Lease.FOREVER);
             assertEquals(template.getMessage(), message.getMessage());
             assertEquals(list.get(i).getUniqueId(), message.getUniqueId());

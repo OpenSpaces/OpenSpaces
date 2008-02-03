@@ -16,15 +16,16 @@
 
 package org.openspaces.esb.mule.queue;
 
-import org.mule.impl.MuleMessage;
-import org.mule.providers.PollingReceiverWorker;
-import org.mule.providers.TransactedPollingMessageReceiver;
-import org.mule.umo.UMOComponent;
-import org.mule.umo.UMOException;
-import org.mule.umo.UMOMessage;
-import org.mule.umo.endpoint.UMOImmutableEndpoint;
-import org.mule.umo.lifecycle.CreateException;
-import org.mule.umo.provider.UMOConnector;
+
+import org.mule.DefaultMuleMessage;
+import org.mule.api.MuleException;
+import org.mule.api.MuleMessage;
+import org.mule.api.endpoint.ImmutableEndpoint;
+import org.mule.api.lifecycle.CreateException;
+import org.mule.api.service.Service;
+import org.mule.api.transport.Connector;
+import org.mule.transport.PollingReceiverWorker;
+import org.mule.transport.TransactedPollingMessageReceiver;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -43,8 +44,10 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
 
     private Object template;
 
-    public OpenSpacesQueueMessageReceiver(UMOConnector connector, UMOComponent component, UMOImmutableEndpoint endpoint) throws CreateException {
-        super(connector, component, endpoint);
+    public OpenSpacesQueueMessageReceiver(Connector connector,
+                                            Service service,
+                                            final ImmutableEndpoint endpoint) throws CreateException {
+        super(connector, service, endpoint);
         this.setReceiveMessagesInTransaction(endpoint.getTransactionConfig().isTransacted());
         this.connector = (OpenSpacesQueueConnector) connector;
     }
@@ -69,15 +72,15 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
         // template method
     }
 
-    public Object onCall(UMOMessage message, boolean synchronous) throws UMOException {
+    public Object onCall(MuleMessage message, boolean synchronous) throws MuleException {
         // Rewrite the message to treat it as a new message
-        UMOMessage newMessage = new MuleMessage(message.getPayload(), message);
+        MuleMessage newMessage = new DefaultMuleMessage(message.getPayload(), message);
         return routeMessage(newMessage, synchronous);
     }
 
     protected List getMessages() throws Exception {
         // The list of retrieved messages that will be returned
-        List<UMOMessage> messages = new LinkedList<UMOMessage>();
+        List<MuleMessage> messages = new LinkedList<MuleMessage>();
 
         /*
          * Determine how many messages to batch in this poll: we need to drain the queue quickly, but not by
@@ -110,10 +113,10 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
 
     protected void processMessage(Object msg) throws Exception {
         // getMessages() returns UMOEvents
-        UMOMessage message = (UMOMessage) msg;
+        MuleMessage message = (MuleMessage) msg;
 
         // Rewrite the message to treat it as a new message
-        UMOMessage newMessage = new MuleMessage(message.getPayload(), message);
+        MuleMessage newMessage = new DefaultMuleMessage(message.getPayload(), message);
         routeMessage(newMessage);
     }
 

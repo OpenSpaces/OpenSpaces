@@ -16,8 +16,10 @@
 
 package org.openspaces.esb.mule;
 
+import org.mule.api.MuleContext;
+import org.mule.api.context.MuleContextFactory;
 import org.mule.config.spring.SpringXmlConfigurationBuilder;
-import org.mule.umo.UMOManagementContext;
+import org.mule.context.DefaultMuleContextFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -38,11 +40,15 @@ import org.springframework.context.event.ContextRefreshedEvent;
  */
 public class OpenSpacesMuleContextLoader implements ApplicationContextAware, InitializingBean, DisposableBean, ApplicationListener {
 
+    private static final String DEFAULT_LOCATION = "/META-INF/spring/mule.xml";
+
     private String location;
 
     private ApplicationContext applicationContext;
 
-    private UMOManagementContext umoManagementContext;
+    private MuleContextFactory muleContextFactory;
+
+    private MuleContext muleContext;
 
     private volatile boolean contextCreated = false;
 
@@ -59,16 +65,20 @@ public class OpenSpacesMuleContextLoader implements ApplicationContextAware, Ini
 
 
     public void afterPropertiesSet() throws Exception {
+        if (this.location == null) {
+            this.location = DEFAULT_LOCATION;
+        }
     }
 
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof ContextRefreshedEvent) {
             if (!contextCreated) {
                 contextCreated = true;
-                SpringXmlConfigurationBuilder muleXmlConfigurationBuilder = new SpringXmlConfigurationBuilder(this.applicationContext);
                 try {
-                    umoManagementContext = muleXmlConfigurationBuilder.configure(location);
-                    umoManagementContext.start();
+                    muleContextFactory = new DefaultMuleContextFactory();
+                    SpringXmlConfigurationBuilder muleXmlConfigurationBuilder = new SpringXmlConfigurationBuilder(location, this.applicationContext);
+                    muleContext = muleContextFactory.createMuleContext(muleXmlConfigurationBuilder);
+                    muleContext.start();
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to start mule [" + location + "]", e);
                 }
@@ -77,8 +87,8 @@ public class OpenSpacesMuleContextLoader implements ApplicationContextAware, Ini
     }
 
     public void destroy() throws Exception {
-        if (umoManagementContext != null) {
-            umoManagementContext.dispose();
+        if (muleContext != null) {
+            muleContext.dispose();
         }
     }
 }

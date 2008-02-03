@@ -16,10 +16,10 @@
 
 package org.openspaces.esb.mule;
 
-import org.mule.providers.AbstractMessageDispatcherFactory;
-import org.mule.umo.UMOException;
-import org.mule.umo.endpoint.UMOImmutableEndpoint;
-import org.mule.umo.provider.UMOMessageDispatcher;
+import org.mule.api.MuleException;
+import org.mule.api.endpoint.ImmutableEndpoint;
+import org.mule.api.transport.MessageDispatcher;
+import org.mule.transport.AbstractMessageDispatcherFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,10 +31,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class OpenSpacesMessageDispatcherFactory extends AbstractMessageDispatcherFactory {
     
-    private Map<UMOImmutableEndpoint, OpenSpacesMessageDispatcher> dispatcherMap =
-            new ConcurrentHashMap<UMOImmutableEndpoint, OpenSpacesMessageDispatcher>();
+    private Map<ImmutableEndpoint, OpenSpacesMessageDispatcher> dispatcherMap =
+            new ConcurrentHashMap<ImmutableEndpoint, OpenSpacesMessageDispatcher>();
 
-    public UMOMessageDispatcher create(UMOImmutableEndpoint endpoint) throws UMOException {
+
+    public MessageDispatcher create(ImmutableEndpoint endpoint) throws MuleException {
         OpenSpacesMessageDispatcher spacesMessageDispatcher = dispatcherMap.get(endpoint);
         if (spacesMessageDispatcher == null) {
             spacesMessageDispatcher = new OpenSpacesMessageDispatcher(endpoint);

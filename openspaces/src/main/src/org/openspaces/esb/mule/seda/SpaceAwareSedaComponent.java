@@ -16,9 +16,9 @@
 
 package org.openspaces.esb.mule.seda;
 
-import org.mule.impl.model.seda.SedaComponent;
-import org.mule.umo.UMOException;
-import org.mule.umo.lifecycle.InitialisationException;
+import org.mule.api.MuleException;
+import org.mule.api.lifecycle.InitialisationException;
+import org.mule.model.seda.SedaService;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.space.mode.AfterSpaceModeChangeEvent;
 import org.openspaces.core.space.mode.BeforeSpaceModeChangeEvent;
@@ -32,7 +32,7 @@ import org.springframework.context.ApplicationListener;
  *
  * @author kimchy
  */
-public class SpaceAwareSedaComponent extends SedaComponent implements ApplicationListener {
+public class SpaceAwareSedaComponent extends SedaService implements ApplicationListener {
 
     protected OpenSpacesSedaModel sedaModel;
 
@@ -44,11 +44,11 @@ public class SpaceAwareSedaComponent extends SedaComponent implements Applicatio
         this.gigaSpace = sedaModel.getGigaSpaceObj();
     }
 
-    public void start() throws UMOException {
+    public void start() throws MuleException {
         // do nothing here, it will be started based on the Space PRIMARY/BACKUP event
     }
 
-    public void stop() throws UMOException {
+    public void stop() throws MuleException {
         // do nothing here, it will be stopped based on the Space PRIMARY/BACKUP event
     }
 
@@ -60,7 +60,7 @@ public class SpaceAwareSedaComponent extends SedaComponent implements Applicatio
                 stop();
             }
         }
-        catch (UMOException e) {
+        catch (MuleException e) {
             logger.error("Failed to stop component: " + name, e);
         }
     }

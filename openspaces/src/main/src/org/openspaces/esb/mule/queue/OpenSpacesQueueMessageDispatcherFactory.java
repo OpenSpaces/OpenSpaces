@@ -1,16 +1,16 @@
 package org.openspaces.esb.mule.queue;
 
-import org.mule.providers.AbstractMessageDispatcherFactory;
-import org.mule.umo.UMOException;
-import org.mule.umo.endpoint.UMOImmutableEndpoint;
-import org.mule.umo.provider.UMOMessageDispatcher;
+import org.mule.api.MuleException;
+import org.mule.api.endpoint.ImmutableEndpoint;
+import org.mule.api.transport.MessageDispatcher;
+import org.mule.transport.AbstractMessageDispatcherFactory;
 
 /**
  * @author kimchy
  */
 public class OpenSpacesQueueMessageDispatcherFactory extends AbstractMessageDispatcherFactory {
 
-    public UMOMessageDispatcher create(UMOImmutableEndpoint endpoint) throws UMOException {
+    public MessageDispatcher create(ImmutableEndpoint endpoint) throws MuleException {
         return new OpenSpacesQueueMessageDispatcher(endpoint);
     }
 }

@@ -56,17 +56,17 @@
 
         <service name="MessageReaderUMO">
 
-            <inbound-router>
+            <inbound>
                 <os:inbound-endpoint address="os://helloPollingEventContainer"/>
-            </inbound-router>
+            </inbound>
 
             <component class="org.openspaces.itest.esb.mule.MessageReader"/>
             
-            <outbound-router>
+            <outbound>
                 <outbound-pass-through-router >
                     <outbound-endpoint address="os://gigaSpace" transformer-refs="MessageTransformer"/>
                 </outbound-pass-through-router>
-            </outbound-router>
+            </outbound>
         </service>
     </model>
     

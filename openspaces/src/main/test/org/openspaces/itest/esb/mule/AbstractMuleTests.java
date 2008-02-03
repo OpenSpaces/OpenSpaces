@@ -16,9 +16,11 @@
 package org.openspaces.itest.esb.mule;
 
 import junit.framework.TestCase;
+import org.mule.api.MuleContext;
+import org.mule.api.context.MuleContextFactory;
 import org.mule.config.spring.SpringXmlConfigurationBuilder;
+import org.mule.context.DefaultMuleContextFactory;
 import org.mule.extras.client.MuleClient;
-import org.mule.umo.UMOManagementContext;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceConfigurer;
 import org.openspaces.core.space.UrlSpaceConfigurer;
@@ -30,7 +32,7 @@ import org.openspaces.core.space.UrlSpaceConfigurer;
  */
 public abstract class AbstractMuleTests extends TestCase {
 
-    protected UMOManagementContext umoManagementContext;
+    protected MuleContext muleContext;
 
     protected SpringXmlConfigurationBuilder builder;
 
@@ -41,17 +43,18 @@ public abstract class AbstractMuleTests extends TestCase {
     protected void setUp() throws Exception {
         createApplicationContext(getConfigLocations());
         gigaSpace = new GigaSpaceConfigurer(new UrlSpaceConfigurer("jini://*/*/space").lookupGroups(System.getProperty("user.name")).space()).gigaSpace();
-        umoManagementContext.start();
+        muleContext.start();
     }
 
     protected void createApplicationContext(String[] locations) throws Exception {
-        builder = new SpringXmlConfigurationBuilder();
-        umoManagementContext = builder.configure(locations);
-        muleClient = new MuleClient(umoManagementContext);
+        MuleContextFactory muleContextFactory = new DefaultMuleContextFactory();
+        SpringXmlConfigurationBuilder builder = new SpringXmlConfigurationBuilder(locations);
+        muleContext = muleContextFactory.createMuleContext(builder);
+        muleClient = new MuleClient(muleContext);
     }
 
     protected void tearDown() throws Exception {
-        umoManagementContext.dispose();
+        muleContext.dispose();
     }
 
     protected abstract String[] getConfigLocations();

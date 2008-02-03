@@ -16,9 +16,9 @@
 
 package org.openspaces.esb.mule.queue;
 
-import org.mule.providers.AbstractMessageRequester;
-import org.mule.umo.UMOMessage;
-import org.mule.umo.endpoint.UMOImmutableEndpoint;
+import org.mule.api.MuleMessage;
+import org.mule.api.endpoint.ImmutableEndpoint;
+import org.mule.transport.AbstractMessageRequester;
 import org.openspaces.core.SpaceInterruptedException;
 
 /**
@@ -34,7 +34,7 @@ public class OpenSpacesQueueMessageRequestor extends AbstractMessageRequester {
 
     private Object template;
 
-    public OpenSpacesQueueMessageRequestor(UMOImmutableEndpoint endpoint) {
+    public OpenSpacesQueueMessageRequestor(ImmutableEndpoint endpoint) {
         super(endpoint);
         this.connector = (OpenSpacesQueueConnector) endpoint.getConnector();
     }
@@ -50,9 +50,9 @@ public class OpenSpacesQueueMessageRequestor extends AbstractMessageRequester {
      *         returned if no data was available
      * @throws Exception if the call to the underlying protocol causes an exception
      */
-    protected UMOMessage doRequest(long timeout) throws Exception {
+    protected MuleMessage doRequest(long timeout) throws Exception {
         try {
-            UMOMessage message = null;
+            MuleMessage message = null;
             if (logger.isDebugEnabled()) {
                 logger.debug("Waiting for a message on " + endpoint.getEndpointURI().getAddress());
             }

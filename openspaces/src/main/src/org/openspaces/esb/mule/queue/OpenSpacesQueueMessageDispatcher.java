@@ -16,13 +16,13 @@
 
 package org.openspaces.esb.mule.queue;
 
+import org.mule.api.MuleEvent;
+import org.mule.api.MuleMessage;
+import org.mule.api.endpoint.EndpointURI;
+import org.mule.api.endpoint.ImmutableEndpoint;
+import org.mule.api.transport.DispatchException;
 import org.mule.config.i18n.CoreMessages;
-import org.mule.providers.AbstractMessageDispatcher;
-import org.mule.umo.UMOEvent;
-import org.mule.umo.UMOMessage;
-import org.mule.umo.endpoint.UMOEndpointURI;
-import org.mule.umo.endpoint.UMOImmutableEndpoint;
-import org.mule.umo.provider.DispatchException;
+import org.mule.transport.AbstractMessageDispatcher;
 
 /**
  * Dispatches (writes) a message to an intenral queue. The queue is a virtualized queue represented
@@ -35,13 +35,13 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
 
     private final OpenSpacesQueueConnector connector;
 
-    public OpenSpacesQueueMessageDispatcher(UMOImmutableEndpoint endpoint) {
+    public OpenSpacesQueueMessageDispatcher(ImmutableEndpoint endpoint) {
         super(endpoint);
         this.connector = (OpenSpacesQueueConnector) endpoint.getConnector();
     }
 
-    protected void doDispatch(UMOEvent event) throws Exception {
-        UMOEndpointURI endpointUri = event.getEndpoint().getEndpointURI();
+    protected void doDispatch(MuleEvent event) throws Exception {
+        EndpointURI endpointUri = event.getEndpoint().getEndpointURI();
         //Apply any outbound transformers on this event before we dispatch
         event.transformMessage();
 
@@ -67,9 +67,9 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
         }
     }
 
-    protected UMOMessage doSend(UMOEvent event) throws Exception {
-        UMOMessage retMessage;
-        UMOEndpointURI endpointUri = event.getEndpoint().getEndpointURI();
+    protected MuleMessage doSend(MuleEvent event) throws Exception {
+        MuleMessage retMessage;
+        EndpointURI endpointUri = event.getEndpoint().getEndpointURI();
         OpenSpacesQueueMessageReceiver receiver = connector.getReceiver(endpointUri);
         //Apply any outbound transformers on this event before we dispatch
         event.transformMessage();
@@ -83,9 +83,9 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
             return null;
         }
 
-        UMOMessage message = event.getMessage();
+        MuleMessage message = event.getMessage();
         connector.getSessionHandler().storeSessionInfoToMessage(event.getSession(), message);
-        retMessage = (UMOMessage) receiver.onCall(message, event.isSynchronous());
+        retMessage = (MuleMessage) receiver.onCall(message, event.isSynchronous());
 
         if (logger.isDebugEnabled()) {
             logger.debug("sent event on endpointUri: " + event.getEndpoint().getEndpointURI());

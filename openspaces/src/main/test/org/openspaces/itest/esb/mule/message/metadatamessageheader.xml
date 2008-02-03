@@ -46,18 +46,18 @@
 
     <!--The Mule model initialises and manages your UMO components-->
     <model name="helloSample">
-        <service name="MessageReaderUMO">
-            <inbound-router>
+        <service name="MessageReader">
+            <inbound>
                 <os:inbound-endpoint address="os://helloPollingEventContainer"/>
-            </inbound-router>
+            </inbound>
 
             <component class="org.openspaces.itest.esb.mule.message.MessageWithHeaderReader"/>
             
-            <outbound-router>
+            <outbound>
                 <outbound-pass-through-router >
-                    <outbound-endpoint address="os://gigaSpace" transformer-refs="MessageTransformer"/>
+                    <outbound-endpoint address="os://gigaSpace"/>
                 </outbound-pass-through-router>
-            </outbound-router>
+            </outbound>
         </service>
     </model>
     

@@ -15,9 +15,9 @@
  */
 package org.openspaces.esb.mule.transformers;
 
-import org.mule.transformers.AbstractMessageAwareTransformer;
-import org.mule.umo.UMOMessage;
-import org.mule.umo.transformer.TransformerException;
+import org.mule.api.MuleMessage;
+import org.mule.api.transformer.TransformerException;
+import org.mule.transformer.AbstractMessageAwareTransformer;
 import org.openspaces.esb.mule.message.MessageHeader;
 
 import java.util.Iterator;
@@ -28,14 +28,14 @@ import java.util.Iterator;
  *
  * Note: In case that the return object isn't the payload that contained in the UMOMessage you should
  * override the
- * {@link org.openspaces.esb.mule.transformers.OpenSpacesTransformer#getResultPayload(org.mule.umo.UMOMessage, String)}
+ * {@link org.openspaces.esb.mule.transformers.OpenSpacesTransformer#getResultPayload(org.mule.api.MuleMessage, String)}
  * method and return the new transformered object.
  *
  * @author yitzhaki
  */
 public class OpenSpacesTransformer extends AbstractMessageAwareTransformer {
 
-    public Object transform(UMOMessage message, String outputEncoding) throws TransformerException {
+    public Object transform(MuleMessage message, String outputEncoding) throws TransformerException {
         Object result = getResultPayload(message, outputEncoding);
         copyMetaData(message, result);
         return result;
@@ -44,14 +44,14 @@ public class OpenSpacesTransformer extends AbstractMessageAwareTransformer {
     /**
      * Returns the origin UMOMessage payload.
      */
-    protected Object getResultPayload(UMOMessage message, String outputEncoding) {
+    protected Object getResultPayload(MuleMessage message, String outputEncoding) {
         return message.getPayload();
     }
 
     /**
      * Copies the metadata from the UMOMessage to the result object.
      */
-    protected void copyMetaData(UMOMessage message, Object result) {
+    protected void copyMetaData(MuleMessage message, Object result) {
         if (result instanceof MessageHeader) {
             Iterator names = message.getPropertyNames().iterator();
             while (names.hasNext()) {

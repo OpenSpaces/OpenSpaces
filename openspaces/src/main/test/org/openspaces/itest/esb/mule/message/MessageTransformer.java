@@ -15,7 +15,7 @@
  */
 package org.openspaces.itest.esb.mule.message;
 
-import org.mule.umo.UMOMessage;
+import org.mule.api.MuleMessage;
 import org.openspaces.esb.mule.transformers.OpenSpacesTransformer;
 import org.openspaces.itest.esb.mule.Message;
 
@@ -31,7 +31,7 @@ public class MessageTransformer extends OpenSpacesTransformer {
     /**
      * @see org.openspaces.esb.mule.transformers.OpenSpacesTransformer#getResultPayload(org.mule.umo.UMOMessage, String)
      */
-    protected Object getResultPayload(UMOMessage message, String outputEncoding) {
+    protected Object getResultPayload(MuleMessage message, String outputEncoding) {
         Message msg = (Message) message.getPayload();
         ProcessedMessage pMsg = new ProcessedMessage(msg.getMessage());
         pMsg.setProperty("name", "processed message " + msg.getMessage());

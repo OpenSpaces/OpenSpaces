@@ -16,21 +16,20 @@
 
 package org.openspaces.esb.mule;
 
-import org.mule.MuleRuntimeException;
+import org.mule.DefaultMuleMessage;
+import org.mule.api.MuleException;
+import org.mule.api.MuleMessage;
+import org.mule.api.MuleRuntimeException;
+import org.mule.api.endpoint.ImmutableEndpoint;
+import org.mule.api.lifecycle.CreateException;
+import org.mule.api.service.Service;
+import org.mule.api.transaction.Transaction;
+import org.mule.api.transaction.TransactionException;
+import org.mule.api.transport.Connector;
+import org.mule.api.transport.MessageAdapter;
 import org.mule.config.i18n.CoreMessages;
-import org.mule.impl.MuleMessage;
-import org.mule.providers.AbstractMessageReceiver;
-import org.mule.providers.AbstractReceiverWorker;
-import org.mule.umo.TransactionException;
-import org.mule.umo.UMOComponent;
-import org.mule.umo.UMOException;
-import org.mule.umo.UMOMessage;
-import org.mule.umo.UMOTransaction;
-import org.mule.umo.endpoint.UMOEndpoint;
-import org.mule.umo.endpoint.UMOImmutableEndpoint;
-import org.mule.umo.lifecycle.CreateException;
-import org.mule.umo.provider.UMOConnector;
-import org.mule.umo.provider.UMOMessageAdapter;
+import org.mule.transport.AbstractMessageReceiver;
+import org.mule.transport.AbstractReceiverWorker;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.events.AbstractEventListenerContainer;
 import org.openspaces.events.SpaceDataEventListener;
@@ -46,7 +45,6 @@ import java.util.Properties;
  *
  * @author yitzhaki
  * @see org.openspaces.events.SpaceDataEventListener
- * @see org.mule.umo.provider.UMOMessageReceiver
  */
 public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implements SpaceDataEventListener {
 
@@ -56,24 +54,24 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
 
     private boolean workManager = false;
 
-
     /**
      * Creates a OpenSpacesMessageReceiver and resister it as a SpaceDataEventListener to
      * the Polling/Notify container that declared as umoEndpoint.EndpointURI.address.
      *
      * @param connector the endpoint that created this listener
-     * @param component the component to associate with the receiver. When data is
+     * @param service the service to associate with the receiver. When data is
      *                  received the component <code>dispatchEvent</code> or
      *                  <code>sendEvent</code> is used to dispatch the data to the
      *                  relivant UMO.
      * @param endpoint  the provider contains the endpointUri on which the receiver
      *                  will listen on. The URI structure must be declared as the following
      *                  os://<Polling/Notify container id>
-     * @see UMOComponent
-     * @see UMOEndpoint
+     * @see Service
+     * @see ImmutableEndpoint
      */
-    public OpenSpacesMessageReceiver(UMOConnector connector, UMOComponent component, UMOImmutableEndpoint endpoint) throws CreateException {
-        super(connector, component, endpoint);
+
+    public OpenSpacesMessageReceiver(Connector connector, Service service, ImmutableEndpoint endpoint) throws CreateException {
+        super(connector, service, endpoint);
         ApplicationContext applicationContext = ((OpenSpacesConnector) connector).getApplicationContext();
         if (applicationContext == null) {
             throw new CreateException(CoreMessages.connectorWithProtocolNotRegistered(connector.getProtocol()), this);
@@ -91,7 +89,7 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
      * Extract the workManager setting from the URI. If the atrribute is missing sets
      * it to the default (<code>false</code>).
      */
-    private void initWritingAttributes(UMOImmutableEndpoint endpoint) {
+    private void initWritingAttributes(ImmutableEndpoint endpoint) {
         Properties params = endpoint.getEndpointURI().getParams();
         if (params != null) {
             try {
@@ -121,8 +119,8 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
             if (workManager) {
                 getWorkManager().scheduleWork(new GigaSpaceWorker(data, this));
             } else {
-                UMOMessageAdapter adapter = connector.getMessageAdapter(data);
-                UMOMessage message = new MuleMessage(adapter);
+                MessageAdapter adapter = connector.getMessageAdapter(data);
+                MuleMessage message = new DefaultMuleMessage(adapter);
                 // nothing to do with the result
                 routeMessage(message);
             }
@@ -139,12 +137,12 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
             messages.add(message);
         }
 
-        protected void bindTransaction(UMOTransaction tx) throws TransactionException {
+        protected void bindTransaction(Transaction tx) throws TransactionException {
             //todo:support transaction
         }
     }
 
-    protected void doStart() throws UMOException {
+    protected void doStart() throws MuleException {
         eventListenerContainer.start();
     }
 
@@ -153,7 +151,7 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
         eventListenerContainer.stop();
     }
 
-    protected void doStop() throws UMOException {
+    protected void doStop() throws MuleException {
     }
 
     protected void doConnect() throws Exception {

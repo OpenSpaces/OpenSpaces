@@ -19,12 +19,12 @@ package org.openspaces.esb.mule;
 import com.j_spaces.core.client.UpdateModifiers;
 import net.jini.core.lease.Lease;
 import net.jini.space.JavaSpace;
-import org.mule.MuleRuntimeException;
+import org.mule.api.MuleEvent;
+import org.mule.api.MuleMessage;
+import org.mule.api.MuleRuntimeException;
+import org.mule.api.endpoint.ImmutableEndpoint;
 import org.mule.config.i18n.CoreMessages;
-import org.mule.providers.AbstractMessageDispatcher;
-import org.mule.umo.UMOEvent;
-import org.mule.umo.UMOMessage;
-import org.mule.umo.endpoint.UMOImmutableEndpoint;
+import org.mule.transport.AbstractMessageDispatcher;
 import org.openspaces.core.GigaSpace;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
@@ -54,7 +54,7 @@ public class OpenSpacesMessageDispatcher extends AbstractMessageDispatcher {
     private long updateTimeout = JavaSpace.NO_WAIT;
 
 
-    public OpenSpacesMessageDispatcher(UMOImmutableEndpoint endpoint) {
+    public OpenSpacesMessageDispatcher(ImmutableEndpoint endpoint) {
         super(endpoint);
         ApplicationContext applicationContext = ((OpenSpacesConnector) getConnector()).getApplicationContext();
         String spaceId = endpoint.getEndpointURI().getAddress();
@@ -66,7 +66,7 @@ public class OpenSpacesMessageDispatcher extends AbstractMessageDispatcher {
      * Extract the writeLease, updateOrWrite & updateTimeout from the URI.
      * If atrribute is missing sets the default.
      */
-    private void initWritingAttributes(UMOImmutableEndpoint endpoint) {
+    private void initWritingAttributes(ImmutableEndpoint endpoint) {
         Properties params = endpoint.getEndpointURI().getParams();
         if (params != null) {
             try {
@@ -91,11 +91,11 @@ public class OpenSpacesMessageDispatcher extends AbstractMessageDispatcher {
     protected void doDispose() {
     }
 
-    protected void doDispatch(UMOEvent event) throws Exception {
+    protected void doDispatch(MuleEvent event) throws Exception {
         doSend(event);
     }
 
-    protected UMOMessage doSend(UMOEvent event) throws Exception {
+    protected MuleMessage doSend(MuleEvent event) throws Exception {
         Object payload = event.transformMessage();
 
         if (payload != null) {
@@ -132,7 +132,7 @@ public class OpenSpacesMessageDispatcher extends AbstractMessageDispatcher {
     protected void doDisconnect() throws Exception {
     }
 
-    protected UMOMessage doReceive(long timeout) throws Exception {
+    protected MuleMessage doReceive(long timeout) throws Exception {
         return null;
     }
 }

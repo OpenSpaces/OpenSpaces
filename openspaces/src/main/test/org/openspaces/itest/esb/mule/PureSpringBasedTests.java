@@ -17,7 +17,7 @@
 package org.openspaces.itest.esb.mule;
 
 import net.jini.core.lease.Lease;
-import org.mule.config.ConfigurationException;
+import org.mule.api.config.ConfigurationException;
 
 /**
  * Test that check the ability to run mule using spring base configuration.

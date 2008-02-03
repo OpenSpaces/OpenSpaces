@@ -16,9 +16,9 @@
 
 package org.openspaces.esb.mule;
 
-import org.mule.providers.AbstractConnector;
-import org.mule.umo.UMOException;
-import org.mule.umo.lifecycle.InitialisationException;
+import org.mule.api.MuleException;
+import org.mule.api.lifecycle.InitialisationException;
+import org.mule.transport.AbstractConnector;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -59,10 +59,10 @@ public class OpenSpacesConnector extends AbstractConnector implements Applicatio
     protected void doDispose() {
     }
 
-    protected void doStart() throws UMOException {
+    protected void doStart() throws MuleException {
     }
 
-    protected void doStop() throws UMOException {
+    protected void doStop() throws MuleException {
     }
 
     protected void doConnect() throws Exception {

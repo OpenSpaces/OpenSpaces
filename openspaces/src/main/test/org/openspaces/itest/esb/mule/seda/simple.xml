@@ -26,37 +26,37 @@
 
     <vm:connector name="vm" queueEvents="true" />
 
-    <model name="helloSample" class="org.openspaces.esb.mule.seda.OpenSpacesSedaModel">
+    <model name="helloSample" class="org.openspaces.esb.mule.seda.OpenSpacesSedaModel" >
 
         <service name="Appender1" class="org.openspaces.esb.mule.seda.OpenSpacesSedaComponent">
 
-            <inbound-router>
+            <inbound>
                 <vm:inbound-endpoint path="test1"/>
-            </inbound-router>
+            </inbound>
 
-            <component class="org.mule.components.simple.EchoComponent"/>
+            <component class="org.mule.component.simple.EchoComponent"/>
 
-            <outbound-router>
+            <outbound>
                 <outbound-pass-through-router>
                     <vm:outbound-endpoint path="test2"/>
                 </outbound-pass-through-router>
-            </outbound-router>
+            </outbound>
 
         </service>
 
         <service name="Appender2" class="org.openspaces.esb.mule.seda.OpenSpacesSedaComponent">
 
-            <inbound-router>
+            <inbound>
                 <vm:inbound-endpoint path="test2"/>
-            </inbound-router>
+            </inbound>
 
-            <component class="org.mule.components.simple.EchoComponent"/>
+            <component class="org.mule.component.simple.EchoComponent"/>
 
-            <outbound-router>
+            <outbound>
                 <outbound-pass-through-router>
                     <vm:outbound-endpoint path="test3"/>
                 </outbound-pass-through-router>
-            </outbound-router>
+            </outbound>
 
         </service>
 

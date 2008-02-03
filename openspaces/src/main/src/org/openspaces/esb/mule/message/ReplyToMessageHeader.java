@@ -15,7 +15,7 @@
  */
 package org.openspaces.esb.mule.message;
 
-import org.mule.config.MuleProperties;
+import org.mule.api.config.MuleProperties;
 
 /**
  * Base interface that expose mule meta data.

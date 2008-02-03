@@ -16,9 +16,8 @@
 
 package org.openspaces.itest.esb.mule;
 
-import org.mule.umo.UMOEventContext;
-import org.mule.umo.lifecycle.Callable;
-
+import org.mule.api.MuleEventContext;
+import org.mule.api.lifecycle.Callable;
 
 /**
  * <code>MessageReader</code> used as a UMOComponent and implements Callable,
@@ -29,7 +28,7 @@ import org.mule.umo.lifecycle.Callable;
 public class MessageReader implements Callable {
 
 
-    public Object onCall(UMOEventContext eventContext) throws Exception {
+    public Object onCall(MuleEventContext eventContext) throws Exception {
         Object payload = eventContext.getMessage().getPayload();
         return read(payload);
     }
@@ -47,4 +46,5 @@ public class MessageReader implements Callable {
         }
         return obj;
     }
+
 }

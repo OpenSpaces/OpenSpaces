@@ -16,8 +16,8 @@
 
 package org.openspaces.example.mule.data.processor;
 
-import org.mule.umo.UMOEventContext;
-import org.mule.umo.lifecycle.Callable;
+import org.mule.api.MuleEventContext;
+import org.mule.api.lifecycle.Callable;
 import org.openspaces.example.mule.data.common.Data;
 
 
@@ -58,7 +58,7 @@ public class DataProcessor implements Callable {
         this.workDuration = workDuration;
     }
 
-    public Object onCall(UMOEventContext eventContext) throws Exception {
+    public Object onCall(MuleEventContext eventContext) throws Exception {
         Object payload = eventContext.getMessage().getPayload();
         return processData((Data) payload);
     }

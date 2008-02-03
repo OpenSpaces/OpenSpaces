@@ -16,8 +16,9 @@
 
 package org.openspaces.itest.esb.mule.queue;
 
-import org.mule.umo.UMOEventContext;
-import org.mule.umo.lifecycle.Callable;
+import org.mule.api.MuleEventContext;
+import org.mule.api.lifecycle.Callable;
+
 
 /**
  * A simple message object that is written to the space. Note, this
@@ -30,7 +31,7 @@ import org.mule.umo.lifecycle.Callable;
  */
 public class EchoeComponentAppender implements Callable {
 
-    public Object onCall(UMOEventContext eventContext) throws Exception {
-        return eventContext.getMessage().getPayload() + eventContext.getComponent().getName();
+    public Object onCall(MuleEventContext eventContext) throws Exception {
+        return eventContext.getMessage().getPayload() + eventContext.getService().getName();
     }
 }

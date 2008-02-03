@@ -16,8 +16,8 @@
 
 package org.openspaces.itest.esb.mule.message;
 
-import org.mule.umo.UMOEventContext;
-import org.mule.umo.lifecycle.Callable;
+import org.mule.api.MuleEventContext;
+import org.mule.api.lifecycle.Callable;
 
 
 /**
@@ -29,7 +29,7 @@ import org.mule.umo.lifecycle.Callable;
 public class MessageWithHeaderReader implements Callable {
 
 
-    public Object onCall(UMOEventContext eventContext) throws Exception {
+    public Object onCall(MuleEventContext eventContext) throws Exception {
         Object payload = eventContext.getMessage().getPayload();
         return changeName((MessageWithMessageHeader) payload);
     }

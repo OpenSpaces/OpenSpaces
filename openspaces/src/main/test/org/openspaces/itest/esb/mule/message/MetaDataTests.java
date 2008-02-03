@@ -17,7 +17,7 @@
 package org.openspaces.itest.esb.mule.message;
 
 import net.jini.core.lease.Lease;
-import org.mule.config.ConfigurationException;
+import org.mule.api.config.ConfigurationException;
 import org.openspaces.itest.esb.mule.AbstractMuleTests;
 import org.openspaces.itest.esb.mule.SimpleMessage;
 
@@ -47,7 +47,7 @@ public class MetaDataTests extends AbstractMuleTests {
             ProcessedMessage template = new ProcessedMessage("Hello World " + i);
             ProcessedMessage message = gigaSpace.take(template, Lease.FOREVER);
             assertEquals(template, message);
-            assertEquals("processed message " + "Hello World " + i , message.getProperty("name"));
+            assertEquals("processed message " + "Hello World " + i, message.getProperty("name"));
         }
         assertEquals(0, gigaSpace.count(new ProcessedMessage()));
     }

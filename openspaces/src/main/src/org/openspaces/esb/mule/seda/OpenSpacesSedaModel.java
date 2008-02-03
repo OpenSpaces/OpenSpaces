@@ -16,8 +16,8 @@
 
 package org.openspaces.esb.mule.seda;
 
-import org.mule.impl.model.seda.SedaModel;
-import org.mule.umo.lifecycle.InitialisationException;
+import org.mule.api.lifecycle.InitialisationException;
+import org.mule.model.seda.SedaModel;
 import org.openspaces.core.GigaSpace;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
