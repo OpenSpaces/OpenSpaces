@@ -76,12 +76,11 @@
 	<classpathentry kind="lib" path="lib/mule/commons-lang-2.3.jar"/>
 	<classpathentry kind="lib" path="lib/mule/commons-pool.jar"/>
 	<classpathentry kind="lib" path="lib/mule/jug-2.0.0-asl.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-2.0.0-RC2-SNAPSHOT-src.zip"/>
-	<classpathentry kind="lib" path="lib/mule/mule-core-2.0.0-RC2-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-module-client-2.0.0-RC2-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-module-spring-config-2.0.0-RC2-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-transport-jms-2.0.0-RC2-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-transport-stdio-2.0.0-RC2-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-transport-vm-2.0.0-RC2-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-core-2.0.0-RC2.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-module-client-2.0.0-RC2.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-module-spring-config-2.0.0-RC2.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-transport-jms-2.0.0-RC2.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-transport-stdio-2.0.0-RC2.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-transport-vm-2.0.0-RC2.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
