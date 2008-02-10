@@ -101,7 +101,7 @@ public class Undeploy {
         if (primary != null) {
             primary.undeploy(puName);
         } else {
-            throw new Exception("Failed to find GSM to undeploy [" + puName + "]");
+            throw new GSMNotFoundException(getGroups(), lookupTimeout);
         }
     }
 
