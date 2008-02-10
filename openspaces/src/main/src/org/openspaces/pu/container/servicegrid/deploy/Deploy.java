@@ -55,14 +55,8 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.MarshalledObject;
@@ -86,14 +80,26 @@ public class Deploy {
 
     private int lookupTimeout = 5000;
 
-    public DeployAdmin getDeployAdmin() throws GSMNotFoundException {
+    public GSM[] findGSMs() {
+        GSM[] gsms;
+        ServiceItem[] result = ServiceFinder.find(null, GSM.class, lookupTimeout, getGroups());
+        if (result != null && result.length > 0) {
+            gsms = new GSM[result.length];
+            for (int i = 0; i < result.length; i++) {
+                gsms[i] = (GSM) result[i].service;
+            }
+        } else {
+            gsms = new GSM[0];
+        }
+        return gsms;
+    }
+
+    public DeployAdmin getDeployAdmin(GSM[] gsms) throws GSMNotFoundException {
+        GSM gsm = null;
         if (deployAdmin == null) {
-            GSM gsm = null;
-            ServiceItem result = ServiceFinder.find(null, GSM.class, lookupTimeout, getGroups());
-            if (result != null) {
+            if (gsms.length > 0) {
                 try {
-                    result = (ServiceItem) new MarshalledObject(result).get();
-                    gsm = (GSM) result.service;
+                    gsm = gsms[0];
                 } catch (Exception e) {
                     throw new GSMNotFoundException(getGroups(), lookupTimeout, e);
                 }
@@ -165,6 +171,12 @@ public class Deploy {
         // override pu name allows to change the actual pu name deployed from the on under deploy directory
         String overridePuName = puName;
 
+        File puFile = new File(puPath);
+        if (puFile.exists() && puFile.getName().endsWith(".jar")) {
+            overridePuName = puFile.getName().substring(0, puFile.getName().length() - ".jar".length());
+            puPath = overridePuName;
+        }
+
         CommandLineParser.Parameter[] params = CommandLineParser.parse(args, args.length - 1);
 
         // check if we have a groups parameter and timeout parameter
@@ -188,8 +200,57 @@ public class Deploy {
                 logger.info("Deploying [" + puName + "] with name [" + overridePuName + "] and default groups");
             }
         }
+        // first, find all the GSMS
+        GSM[] gsms = findGSMs();
+
+        // check if the pu to deploy is an actual file on the file system and ends with jar
+        if (puFile.exists() && puFile.getName().endsWith(".jar")) {
+            // we deploy a jar file, upload it to all the GSMs
+            byte[] buffer = new byte[4098];
+            for (GSM gsm : gsms) {
+                String codebase = getCodebase((DeployAdmin) gsm.getAdmin());
+                if (logger.isInfoEnabled()) {
+                    logger.info("Uploading [" + puPath + "] to [" + codebase + "]");
+                }
+                HttpURLConnection conn = (HttpURLConnection) new URL(codebase + puFile.getName()).openConnection();
+                conn.setDoOutput(true);
+                conn.setDoInput(true);
+                conn.setAllowUserInteraction(false);
+                conn.setUseCaches(false);
+                conn.setRequestMethod("PUT");
+                conn.setRequestProperty("Content-Length", "" + puFile.length());
+                conn.setRequestProperty("Extract", "true");
+                conn.connect();
+                OutputStream out = new BufferedOutputStream(conn.getOutputStream());
+                InputStream in = new BufferedInputStream(new FileInputStream(puFile));
+                int byteCount = 0;
+                int bytesRead = -1;
+                while ((bytesRead = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, bytesRead);
+                    byteCount += bytesRead;
+                }
+                out.flush();
+                out.close();
+                in.close();
+
+                int responseCode = conn.getResponseCode();
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String line;
+                StringBuffer sb = new StringBuffer();
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+                reader.close();
+                conn.disconnect();
+                if (responseCode != 200 && responseCode != 201) {
+                    throw new RuntimeException("Failed to upload file, response code [" + responseCode + "], response: " + sb.toString());
+                }
+            }
+        }
+
         //get codebase from service
-        String codeserver = getCodebase(getDeployAdmin());
+        String codeserver = getCodebase(getDeployAdmin(gsms));
         if (logger.isDebugEnabled()) {
             logger.debug("Usign codeserver [" + codeserver + "]");
         }
@@ -416,7 +477,7 @@ public class Deploy {
         //requirements
         applyRequirements(element, sla.getRequirements());
 
-        element.getFaultDetectionHandlerBundle().addMethod("setConfiguration", new Object[] {new String[] {
+        element.getFaultDetectionHandlerBundle().addMethod("setConfiguration", new Object[]{new String[]{
                 "-",
                 "org.openspaces.pu.container.servicegrid.PUFaultDetectionHandler.invocationDelay = " + sla.getMemberAliveIndicator().getInvocationDelay(),
                 "org.openspaces.pu.container.servicegrid.PUFaultDetectionHandler.retryCount = " + sla.getMemberAliveIndicator().getRetryCount(),

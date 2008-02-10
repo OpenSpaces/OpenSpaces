@@ -35,8 +35,8 @@
         <echo message="clean                    --> Cleans all output dirs"/>
         <echo message="build                    --> Build all; don't create JARs"/>
         <echo message="dist                     --> Build the distribution"/>
-        <echo message="copy-local-helloworld    --> Build and copies the hellow world into the local deploy directory"/>
-        <echo message="deploy-local-helloworld  --> Build, copies and deploys the hello world on the service grid"/>
+        <echo message="deploy                   --> Build, copies and deploys the hello world on the service grid"/>
+        <echo message="undeploy                 --> Undeploys the hello world"/>
         <echo message=""/>
     </target>
 
@@ -80,22 +80,28 @@
         <jar basedir="${pulocation}" jarfile="${basedir}/pu/helloworld.jar"/>
     </target>
 
-    <target name="copy-local-helloworld" depends="dist">
-        <delete dir="${gshome.dir}/deploy/hello-world"/>
-        <mkdir dir="${gshome.dir}/deploy/hello-world"/>
-        <copy todir="${gshome.dir}/deploy/hello-world">
-            <fileset dir="${pulocation}"/>
-        </copy>
+    <target name="deploy" depends="dist">
+        <deploy name="${basedir}/pu/helloworld.jar" />
     </target>
 
-    <target name="deploy-local-helloworld" depends="copy-local-helloworld">
-        <deploy name="hello-world" />
+    <target name="undeploy">
+        <deploy name="helloworld" />
     </target>
 
     <macrodef name="deploy">
         <attribute name="name"/>
         <sequential>
             <java classname="org.openspaces.pu.container.servicegrid.deploy.Deploy" fork="false">
+                <classpath refid="all-libs"/>
+                <arg value="@{name}"/>
+            </java>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="undeploy">
+        <attribute name="name"/>
+        <sequential>
+            <java classname="org.openspaces.pu.container.servicegrid.deploy.Undeploy" fork="false">
                 <classpath refid="all-libs"/>
                 <arg value="@{name}"/>
             </java>

@@ -37,8 +37,8 @@ public class ServiceFinder {
 
 // -------------------------- STATIC METHODS --------------------------
 
-    public static ServiceItem find(String name, Class type, long wait, String[] groups) {
-        ServiceItem result;
+    public static ServiceItem[] find(String name, Class type, long wait, String[] groups) {
+        ServiceItem[] result;
         ServiceDiscoveryManager sdm = null;
 
         try {
@@ -62,7 +62,7 @@ public class ServiceFinder {
                     + (name != null ? (" named " + name) : "")
                     + " in groups "
                     + Arrays.asList(groups));
-            result = sdm.lookup(template, null, wait);
+            result = sdm.lookup(template, Integer.MAX_VALUE, Integer.MAX_VALUE,  null, wait);
         } catch (Exception e) {
             // TODO add proper exception here
             e.printStackTrace();
