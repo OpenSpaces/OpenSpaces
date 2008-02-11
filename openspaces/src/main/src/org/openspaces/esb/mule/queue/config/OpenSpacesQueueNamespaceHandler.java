@@ -16,8 +16,14 @@
 
 package org.openspaces.esb.mule.queue.config;
 
+import org.mule.config.spring.MuleHierarchicalBeanDefinitionParserDelegate;
+import org.mule.config.spring.factories.InboundEndpointFactoryBean;
+import org.mule.config.spring.factories.OutboundEndpointFactoryBean;
 import org.mule.config.spring.handlers.AbstractMuleNamespaceHandler;
 import org.mule.config.spring.parsers.generic.MuleOrphanDefinitionParser;
+import org.mule.config.spring.parsers.specific.endpoint.TransportEndpointDefinitionParser;
+import org.mule.config.spring.parsers.specific.endpoint.TransportGlobalEndpointDefinitionParser;
+import org.mule.config.spring.parsers.specific.endpoint.support.AddressedEndpointDefinitionParser;
 import org.mule.endpoint.URIBuilder;
 import org.openspaces.esb.mule.queue.OpenSpacesQueueConnector;
 
@@ -30,6 +36,18 @@ public class OpenSpacesQueueNamespaceHandler extends AbstractMuleNamespaceHandle
 
     public void init() {
         registerStandardTransportEndpoints(OpenSpacesQueueConnector.OS_QUEUE, URIBuilder.PATH_ATTRIBUTES);
+
+        TransportGlobalEndpointDefinitionParser transportGlobalEndpointDefinitionParser = new TransportGlobalEndpointDefinitionParser(OpenSpacesQueueConnector.OS_QUEUE, AddressedEndpointDefinitionParser.PROTOCOL, URIBuilder.PATH_ATTRIBUTES, new String[]{});
+        transportGlobalEndpointDefinitionParser.addBeanFlag(MuleHierarchicalBeanDefinitionParserDelegate.MULE_FORCE_RECURSE);
+        registerBeanDefinitionParser("endpoint", transportGlobalEndpointDefinitionParser);
+
+        TransportEndpointDefinitionParser endpointDefinitionParser = new TransportEndpointDefinitionParser(OpenSpacesQueueConnector.OS_QUEUE, AddressedEndpointDefinitionParser.PROTOCOL, InboundEndpointFactoryBean.class, URIBuilder.PATH_ATTRIBUTES, new String[]{});
+        endpointDefinitionParser.addBeanFlag(MuleHierarchicalBeanDefinitionParserDelegate.MULE_FORCE_RECURSE);
+        registerBeanDefinitionParser("inbound-endpoint", endpointDefinitionParser);
+        TransportEndpointDefinitionParser transportEndpointDefinitionParser = new TransportEndpointDefinitionParser(OpenSpacesQueueConnector.OS_QUEUE, AddressedEndpointDefinitionParser.PROTOCOL, OutboundEndpointFactoryBean.class, URIBuilder.PATH_ATTRIBUTES, new String[]{});
+        transportEndpointDefinitionParser.addBeanFlag(MuleHierarchicalBeanDefinitionParserDelegate.MULE_FORCE_RECURSE);
+        registerBeanDefinitionParser("outbound-endpoint", transportEndpointDefinitionParser);
+        
         registerBeanDefinitionParser("connector", new MuleOrphanDefinitionParser(OpenSpacesQueueConnector.class, true));
     }
 

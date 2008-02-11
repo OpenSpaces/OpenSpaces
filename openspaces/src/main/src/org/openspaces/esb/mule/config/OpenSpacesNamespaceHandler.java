@@ -28,7 +28,7 @@ import org.openspaces.esb.mule.OpenSpacesConnector;
 public class OpenSpacesNamespaceHandler extends AbstractMuleNamespaceHandler {
 
     public void init() {
-        registerStandardTransportEndpoints(OpenSpacesConnector.OS, new String[]{});
+        registerStandardTransportEndpoints(OpenSpacesConnector.OS_EVENT_CONTAINER, new String[]{});
         registerBeanDefinitionParser("connector", new MuleOrphanDefinitionParser(OpenSpacesConnector.class, true));
     }
 }

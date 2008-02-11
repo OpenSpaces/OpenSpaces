@@ -4,7 +4,7 @@
       xmlns:os-core="http://www.openspaces.org/schema/core"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xmlns:spring="http://www.springframework.org/schema/beans"
-      xmlns:os="http://www.openspaces.org/schema/mule"
+      xmlns:os-eventcontainer="http://www.openspaces.org/schema/mule/os-eventcontainer"
       xmlns:os-seda="http://www.openspaces.org/schema/mule/os-seda"
       xmlns:stdio="http://www.mulesource.org/schema/mule/stdio/2.0"
       xmlns:vm="http://www.mulesource.org/schema/mule/vm/2.0"
@@ -15,7 +15,7 @@
        http://www.mulesource.org/schema/mule/core/2.0 http://www.mulesource.org/schema/mule/core/2.0/mule.xsd
        http://www.mulesource.org/schema/mule/stdio/2.0 http://www.mulesource.org/schema/mule/stdio/2.0/mule-stdio.xsd
        http://www.mulesource.org/schema/mule/vm/2.0 http://www.mulesource.org/schema/mule/vm/2.0/mule-vm.xsd
-       http://www.openspaces.org/schema/mule http://www.openspaces.org/schema/mule/mule-os.xsd
+       http://www.openspaces.org/schema/mule mule-os-eventcontainer.xsd
        http://www.openspaces.org/schema/mule/os-seda http://www.openspaces.org/schema/mule/mule-os-seda.xsd">
 
     <spring:beans>

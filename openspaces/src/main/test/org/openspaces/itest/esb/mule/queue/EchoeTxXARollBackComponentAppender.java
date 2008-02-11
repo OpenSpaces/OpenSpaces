@@ -21,13 +21,21 @@ import org.mule.api.lifecycle.Callable;
 
 
 /**
- *  This service returns the payload concatenated with the service name. 
+ *  This service throws <code>Error</code> at the first invocation, thus causing the transction to rollback.
+ *  At the second invocation it will just return the payload concatenated with the service name.
  *
  * @author yitzhaki
  */
-public class EchoeComponentAppender implements Callable {
+public class EchoeTxXARollBackComponentAppender implements Callable {
+
+    private static boolean alreadyRollbacked = false;
 
     public Object onCall(MuleEventContext eventContext) throws Exception {
-        return eventContext.getMessage().getPayload() + eventContext.getService().getName();
+        if (alreadyRollbacked) {
+            return eventContext.getMessage().getPayload() + eventContext.getService().getName();
+        } else {
+            alreadyRollbacked = true;
+            throw new Error("Rolling back (-:");
+        }
     }
 }

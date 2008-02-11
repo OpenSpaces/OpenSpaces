@@ -94,8 +94,9 @@
                 <include name="META-INF/**"/>
                 <include name="org/openspaces/**"/>
                 <exclude name="org/openspaces/esb/mule/**"/>
-                <exclude name="org/openspaces/esb/mule/config/mule-os.xsd"/>
-                <exclude name="META-INF/services/org/mule/providers/os.properties"/>
+                <exclude name="META-INF/services/org/mule/**"/>
+                <exclude name="META-INF/mule-spring.handlers"/>
+                <exclude name="META-INF/mule-spring.schemas"/>
             </fileset>
             <manifest>
                 <attribute name="Implementation-Title" value="${openspaces-title}"/>
@@ -104,12 +105,19 @@
             </manifest>
         </jar>
 
+        <copy file="${target.classes.dir}/META-INF/spring.handlers" tofile="${target.classes.dir}/META-INF/spring.handlers.orig"/>
+        <copy file="${target.classes.dir}/META-INF/spring.schemas" tofile="${target.classes.dir}/META-INF/spring.schemas.orig"/>
+        <copy file="${target.classes.dir}/META-INF/mule-spring.handlers" tofile="${target.classes.dir}/META-INF/spring.handlers" overwrite="true"/>
+        <copy file="${target.classes.dir}/META-INF/mule-spring.schemas" tofile="${target.classes.dir}/META-INF/spring.schemas" overwrite="true"/>
+
+
         <delete file="${lib.dir}/${name}/mule-os.jar"/>
         <jar jarfile="${lib.dir}/${name}/mule-os.jar">
             <fileset dir="${target.classes.dir}">
                 <include name="org/openspaces/esb/mule/**"/>
-                <include name="org/openspaces/esb/mule/config/mule-os.xsd"/>
-                <include name="META-INF/services/org/mule/providers/os.properties"/>
+                <include name="META-INF/services/org/mule/**"/>
+                <include name="META-INF/spring.handlers"/>
+                <include name="META-INF/spring.schemas"/>
             </fileset>
             <manifest>
                 <attribute name="Implementation-Title" value="${openspaces-title}"/>
@@ -117,6 +125,10 @@
                 <attribute name="OpenSpaces-Version" value="${openspaces-version}"/>
             </manifest>
         </jar>
+        <copy file="${target.classes.dir}/META-INF/spring.handlers.orig" tofile="${target.classes.dir}/META-INF/spring.handlers" overwrite="true"/>
+        <copy file="${target.classes.dir}/META-INF/spring.schemas.orig" tofile="${target.classes.dir}/META-INF/spring.schemas" overwrite="true"/>
+        <delete file="${target.classes.dir}/META-INF/spring.handlers.orig"/>
+        <delete file="${target.classes.dir}/META-INF/spring.schemas.orig"/>
 
     </target>
 

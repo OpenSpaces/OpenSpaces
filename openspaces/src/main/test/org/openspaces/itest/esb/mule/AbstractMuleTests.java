@@ -26,7 +26,7 @@ import org.openspaces.core.GigaSpaceConfigurer;
 import org.openspaces.core.space.UrlSpaceConfigurer;
 
 /**
- * Convenient superclass for tests depending on a Spring context.
+ * Convenient superclass for tests depending on a Mule context.
  *
  * @author yitzhaki
  */

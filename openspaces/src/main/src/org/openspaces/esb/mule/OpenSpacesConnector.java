@@ -36,7 +36,7 @@ import org.springframework.context.ApplicationContextAware;
  */
 public class OpenSpacesConnector extends AbstractConnector implements ApplicationContextAware {
 
-    public static final String OS = "os";
+    public static final String OS_EVENT_CONTAINER = "os-eventcontainer";
     
     private ApplicationContext applicationContext;
 
@@ -45,7 +45,7 @@ public class OpenSpacesConnector extends AbstractConnector implements Applicatio
      * @return the openspaces protocol name.
      */
     public String getProtocol() {
-        return OS;
+        return OS_EVENT_CONTAINER;
     }
 
 

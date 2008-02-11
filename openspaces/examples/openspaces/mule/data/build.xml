@@ -85,7 +85,8 @@
         </copy>
         <copy todir="${gshome.dir}/deploy/mule-data-processor/lib">
             <fileset file="${gshome.dir}/lib/openspaces/mule-os.jar"/>
-            <fileset dir="${gshome.dir}/lib/mule"/>
+            <fileset dir="${gshome.dir}/lib/mule" />
+            <fileset dir="${gshome.dir}/lib/spring/connector.jar" />
         </copy>
     </target>
 

@@ -4,13 +4,13 @@
       xmlns:os-core="http://www.openspaces.org/schema/core"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xmlns:spring="http://www.springframework.org/schema/beans"
-      xmlns:os="http://www.openspaces.org/schema/mule"
+      xmlns:os-eventcontainer="http://www.openspaces.org/schema/mule/os-eventcontainer"
 
       xsi:schemaLocation="http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
        http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
        http://www.mulesource.org/schema/mule/core/2.0 http://www.mulesource.org/schema/mule/core/2.0/mule.xsd
-       http://www.openspaces.org/schema/mule http://www.openspaces.org/schema/mule/mule-os.xsd">
+       http://www.openspaces.org/schema/mule/os-eventcontainer http://www.openspaces.org/schema/mule/os-eventcontainer.xsd">
 
     <description>Test the ability of mule connector to receive and process bulk of objects.</description>
 
@@ -51,7 +51,7 @@
 
 
     <!-- this connector must be declared ,in order to inject the  Spring appliction context -->
-    <os:connector name="gigaSpacesConnector"/>
+    <os-eventcontainer:connector name="gigaSpacesConnector"/>
         
 
 
@@ -62,7 +62,7 @@
 
         <service name="MessageReaderUMO">
             <inbound>
-                <inbound-endpoint address="os://helloPollingEventContainer?workManager=true"/>
+                <inbound-endpoint address="os-eventcontainer://helloPollingEventContainer?workManager=true"/>
             </inbound>
 
             <component class="org.openspaces.itest.esb.mule.MessageReader"/>
@@ -70,7 +70,7 @@
             <outbound>
                 <outbound-pass-through-router>
                     <outbound-endpoint
-                            address="os://gigaSpace?writeLease=2000&amp;updateOrWrite=false&amp;updateTimeout=1"/>
+                            address="os-eventcontainer://gigaSpace?writeLease=2000&amp;updateOrWrite=false&amp;updateTimeout=1"/>
                 </outbound-pass-through-router>
             </outbound>
 

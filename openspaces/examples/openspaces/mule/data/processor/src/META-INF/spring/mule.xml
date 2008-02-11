@@ -4,13 +4,12 @@
       xmlns:os-core="http://www.openspaces.org/schema/core"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xmlns:spring="http://www.springframework.org/schema/beans"
-      xmlns:os="http://www.openspaces.org/schema/mule"
-      xmlns:stdio="http://www.mulesource.org/schema/mule/stdio/2.0"
+      xmlns:os-eventcontainer="http://www.openspaces.org/schema/mule/os-eventcontainer"      xmlns:stdio="http://www.mulesource.org/schema/mule/stdio/2.0"
       xsi:schemaLocation="http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
        http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
        http://www.mulesource.org/schema/mule/core/2.0 http://www.mulesource.org/schema/mule/core/2.0/mule.xsd
-       http://www.openspaces.org/schema/mule http://www.openspaces.org/schema/mule/mule-os.xsd
+       http://www.openspaces.org/schema/mule/os-eventcontainer http://www.openspaces.org/schema/mule/os-eventcontainer.xsd
        http://www.mulesource.org/schema/mule/stdio/2.0 http://www.mulesource.org/schema/mule/stdio/2.0/mule-stdio.xsd">
 
     <spring:beans>
@@ -55,27 +54,27 @@
     </spring:beans>
 
 
-    <os:connector name="gigaSpacesConnector"/>
+    <os-eventcontainer:connector name="gigaSpacesConnector"/>
 
     <model name="processor">
         <service name="DataProcessorUMO">
-            <inbound-router>
-                <inbound-endpoint address="os://dataProcessorPollingEventContainer"/>
-            </inbound-router>
+            <inbound>
+                <inbound-endpoint address="os-eventcontainer://dataProcessorPollingEventContainer"/>
+            </inbound>
 
             <component class="org.openspaces.example.mule.data.processor.DataProcessor"/>
             
-            <outbound-router>
+            <outbound>
                 <outbound-pass-through-router>
-                    <outbound-endpoint address="os://gigaSpace"/>
+                    <outbound-endpoint address="os-eventcontainer://gigaSpace"/>
                 </outbound-pass-through-router>
-            </outbound-router>
+            </outbound>
         </service>
 
         <service name="DataProcessedCounterUMO">
-            <inbound-router>
-                <inbound-endpoint address="os://dataProcessedCounterNotifyContainer"/>
-            </inbound-router>
+            <inbound>
+                <inbound-endpoint address="os-eventcontainer://dataProcessedCounterNotifyContainer"/>
+            </inbound>
 
             <component class="org.openspaces.example.mule.data.processor.DataProcessedCounter"/>
             
@@ -85,11 +84,11 @@
                 criteria. The pass-through-router is a router that automically passes
                 on every message it receives
             -->
-            <outbound-router>
+            <outbound>
                 <outbound-pass-through-router>
                     <outbound-endpoint address="stdio://System.out"/>
                 </outbound-pass-through-router>
-            </outbound-router>
+            </outbound>
         </service>
 
     </model>
