@@ -18,7 +18,7 @@
 
         <fileset dir="${gshome.dir}/lib">
             <include name="**/*.jar"/>
-            <exclude name="openspaces/mule-0s.jar" />
+            <exclude name="openspaces/mule-os.jar" />
         </fileset>
 
         <fileset dir="${basedir}">
