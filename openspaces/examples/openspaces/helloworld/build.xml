@@ -86,7 +86,7 @@
     </target>
 
     <target name="undeploy">
-        <deploy name="helloworld" />
+        <undeploy name="helloworld" />
     </target>
 
     <macrodef name="deploy">

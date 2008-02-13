@@ -626,7 +626,7 @@
       </CLASSES>
       <JAVADOC />
       <SOURCES>
-        <root url="intellijad://intellijad" />
+        <root url="intellijaD://intellijad" />
       </SOURCES>
     </library>
     <library name="Spring">
@@ -716,7 +716,6 @@
         <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-jms-2.0.0-RC2.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-client-2.0.0-RC2.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/mule/mule-core-2.0.0-RC2.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-spring-extras-2.0.0-RC2.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>

@@ -40,8 +40,7 @@ This will start a standalone processing unit container that will run the process
 Another option for deploying the hello world example is to use the Service Grid. The ant build
 file comes with an example of how to define a macro allowing to deploy a processing unit to
 the Service Grid. In order to deploy the processing unit, please start a single gsm and a single
-gsc (located under the bin directory) and then execute 'build.(sh/bat) deploy-local-helloworld'.
-The task will copy the processing unit directory under the 'deploy' directory located under the root
-of the product, and then run the deploy command against the running GSM.
+gsc (located under the bin directory) and then execute 'build.(sh/bat) deploy'. The task will bundle
+the processing unit directory into a jar file and deploy it onto the GSM.
 
 For more advance example, including different cluster topologies, please see the data example.

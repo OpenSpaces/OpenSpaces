@@ -32,7 +32,7 @@
     <path id="all-libs">
         <fileset dir="${gshome.dir}/lib">
             <include name="**/*.jar"/>
-            <exclude name="openspaces/os-mule.jar" />
+            <exclude name="openspaces/mule-os.jar" />
         </fileset>
     </path>
 
