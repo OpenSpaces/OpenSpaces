@@ -33,11 +33,13 @@ public class Undeploy {
 
     private String[] groups;
 
+    private String locators;
+    
     private int lookupTimeout = 5000;
 
     public GSM[] findGSMs() {
         GSM[] gsms;
-        ServiceItem[] result = ServiceFinder.find(null, GSM.class, lookupTimeout, getGroups());
+        ServiceItem[] result = ServiceFinder.find(null, GSM.class, lookupTimeout, getGroups(), getLocators());
         if (result != null && result.length > 0) {
             gsms = new GSM[result.length];
             for (int i = 0; i < result.length; i++) {
@@ -70,6 +72,20 @@ public class Undeploy {
         this.groups = groups;
     }
 
+    public String getLocators() {
+        if (locators == null) {
+            String locatorsProperty = java.lang.System.getProperty("com.gs.jini_lus.locators");
+            if (locatorsProperty != null) {
+                locators = locatorsProperty;
+            }
+        }
+        return locators;
+    }
+
+    public void setLocators(String locators) {
+        this.locators = locators;
+    }
+    
     public void setLookupTimeout(int lookupTimeout) {
         this.lookupTimeout = lookupTimeout;
     }
@@ -89,6 +105,13 @@ public class Undeploy {
         for (CommandLineParser.Parameter param : params) {
             if (param.getName().equalsIgnoreCase("groups")) {
                 setGroups(param.getArguments());
+            }
+            if (param.getName().equalsIgnoreCase("locators")) {
+                StringBuilder sb = new StringBuilder();
+                for (String arg : param.getArguments()) {
+                    sb.append(arg).append(',');
+                }
+                setLocators(sb.toString());
             }
             if (param.getName().equalsIgnoreCase("timeout")) {
                 setLookupTimeout(Integer.valueOf(param.getArguments()[0]));

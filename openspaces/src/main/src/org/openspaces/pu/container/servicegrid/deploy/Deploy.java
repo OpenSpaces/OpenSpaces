@@ -78,11 +78,13 @@ public class Deploy {
 
     private String[] groups;
 
+    private String locators;
+
     private int lookupTimeout = 5000;
 
     public GSM[] findGSMs() {
         GSM[] gsms;
-        ServiceItem[] result = ServiceFinder.find(null, GSM.class, lookupTimeout, getGroups());
+        ServiceItem[] result = ServiceFinder.find(null, GSM.class, lookupTimeout, getGroups(), getLocators());
         if (result != null && result.length > 0) {
             gsms = new GSM[result.length];
             for (int i = 0; i < result.length; i++) {
@@ -138,8 +140,22 @@ public class Deploy {
         return groups;
     }
 
+    public String getLocators() {
+        if (locators == null) {
+            String locatorsProperty = java.lang.System.getProperty("com.gs.jini_lus.locators");
+            if (locatorsProperty != null) {
+                locators = locatorsProperty;
+            }
+        }
+        return locators;
+    }
+
     public void setGroups(String[] groups) {
         this.groups = groups;
+    }
+
+    public void setLocators(String locators) {
+        this.locators = locators;
     }
 
     public void setLookupTimeout(int lookupTimeout) {
@@ -184,6 +200,13 @@ public class Deploy {
             if (param.getName().equalsIgnoreCase("groups")) {
                 setGroups(param.getArguments());
             }
+            if (param.getName().equalsIgnoreCase("locators")) {
+                StringBuilder sb = new StringBuilder();
+                for (String arg : param.getArguments()) {
+                    sb.append(arg).append(',');
+                }
+                setLocators(sb.toString());
+            }
             if (param.getName().equalsIgnoreCase("timeout")) {
                 setLookupTimeout(Integer.valueOf(param.getArguments()[0]));
             }
@@ -195,9 +218,9 @@ public class Deploy {
         String[] groups = getGroups();
         if (logger.isInfoEnabled()) {
             if (groups != null) {
-                logger.info("Deploying [" + puName + "] with name [" + overridePuName + "] and groups " + Arrays.asList(groups));
+                logger.info("Deploying [" + puName + "] with name [" + overridePuName + "] under groups " + Arrays.asList(groups) + " and locators " + getLocators());
             } else {
-                logger.info("Deploying [" + puName + "] with name [" + overridePuName + "] and default groups");
+                logger.info("Deploying [" + puName + "] with name [" + overridePuName + "] under default groups and locators " + getLocators());
             }
         }
         // first, find all the GSMS
@@ -663,6 +686,7 @@ public class Deploy {
         sb.append("\n             schema=partitioned              : The cluster schema to override");
         sb.append("\n             total_members=1,1               : The number of instances and number of backups to override");
         sb.append("\n    -groups [groupName] [groupName] ...      : The lookup groups used to look up the GSM");
+        sb.append("\n    -locators [host1] [host2] ...            : The lookup locators used to look up the GSM");
         sb.append("\n    -timeout [timeout value]                 : The timeout value of GSM lookup (defaults to 5000) in milliseconds");
         sb.append("\n    -proeprties [properties-loc]             : Location of context level properties");
         sb.append("\n    -proeprties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");

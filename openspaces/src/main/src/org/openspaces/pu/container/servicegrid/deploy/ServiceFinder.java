@@ -16,6 +16,7 @@
 
 package org.openspaces.pu.container.servicegrid.deploy;
 
+import net.jini.core.discovery.LookupLocator;
 import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceItem;
 import net.jini.core.lookup.ServiceTemplate;
@@ -25,6 +26,7 @@ import net.jini.lookup.ServiceDiscoveryManager;
 import net.jini.lookup.entry.Name;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jini.rio.boot.BootUtil;
 
 import java.util.Arrays;
 
@@ -37,13 +39,15 @@ public class ServiceFinder {
 
 // -------------------------- STATIC METHODS --------------------------
 
-    public static ServiceItem[] find(String name, Class type, long wait, String[] groups) {
+    public static ServiceItem[] find(String name, Class type, long wait, String[] groups, String locators) {
         ServiceItem[] result;
         ServiceDiscoveryManager sdm = null;
 
+        LookupLocator[] lookupLocators = BootUtil.toLookupLocators(locators);
+
         try {
             sdm = new ServiceDiscoveryManager(
-                    new LookupDiscoveryManager(groups, null, null),
+                    new LookupDiscoveryManager(groups, lookupLocators, null),
                     new LeaseRenewalManager()
             );
             Entry[] attributes = null;
