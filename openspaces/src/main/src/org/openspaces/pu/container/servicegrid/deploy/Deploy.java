@@ -641,7 +641,7 @@ public class Deploy {
     public static void main(String[] args) throws Exception {
         if (args.length < 1) {
             System.out.println(getUsage());
-            java.lang.System.exit(-1);
+            return;
         }
 
         if (System.getProperty("java.security.policy") == null) {
