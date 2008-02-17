@@ -65,7 +65,9 @@ public class ServiceFinder {
             logger.info("Searching for " + type.getName()
                     + (name != null ? (" named " + name) : "")
                     + " in groups "
-                    + Arrays.asList(groups));
+                    + Arrays.asList(groups)
+                    + " and locators "
+                    + Arrays.asList(lookupLocators));
             result = sdm.lookup(template, Integer.MAX_VALUE, Integer.MAX_VALUE,  null, wait);
         } catch (Exception e) {
             // TODO add proper exception here
