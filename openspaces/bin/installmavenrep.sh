@@ -29,6 +29,7 @@ mvn install:install-file -DgroupId=gigaspaces -DartifactId=jini-mahalo -Dversion
 # GigaSpaces Jars
 mvn install:install-file -DgroupId=gigaspaces -DartifactId=gs-boot -Dversion=$VERSION -DpomFile=$TMPDIR/gs-boot-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/ServiceGrid/gs-boot.jar
 mvn install:install-file -DgroupId=gigaspaces -DartifactId=gs-service -Dversion=$VERSION -DpomFile=$TMPDIR/gs-service-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/ServiceGrid/gs-service.jar
+mvn install:install-file -DgroupId=gigaspaces -DartifactId=gs-lib -Dversion=$VERSION -DpomFile=$TMPDIR/gs-lib-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/ServiceGrid/gs-lib.jar
 mvn install:install-file -DgroupId=gigaspaces -DartifactId=JSpaces -Dversion=$VERSION -DpomFile=$TMPDIR/JSpaces-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/JSpaces.jar
 mvn install:install-file -DgroupId=gigaspaces -DartifactId=openspaces -Dversion=$VERSION -DpomFile=$TMPDIR/openspaces-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/openspaces/openspaces.jar
 mvn install:install-file -DgroupId=gigaspaces -DartifactId=mule-os -Dversion=$VERSION -Dpackaging=jar -DpomFile=$TMPDIR/mule-os-pom.xml -Dfile=${JSHOMEDIR}/lib/openspaces/mule-os.jar

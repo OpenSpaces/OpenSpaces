@@ -31,6 +31,7 @@ call mvn install:install-file -DgroupId=gigaspaces -DartifactId=jini-mahalo -Dve
 REM GigaSpaces Jars
 call mvn install:install-file -DgroupId=gigaspaces -DartifactId=gs-boot -Dversion=%VERSION% -DpomFile=%TEMP%/gs-boot-pom.xml -Dpackaging=jar -Dfile=%JSHOMEDIR%/lib/ServiceGrid/gs-boot.jar
 call mvn install:install-file -DgroupId=gigaspaces -DartifactId=gs-service -Dversion=%VERSION% -DpomFile=%TEMP%/gs-service-pom.xml -Dpackaging=jar -Dfile=%JSHOMEDIR%/lib/ServiceGrid/gs-service.jar
+call mvn install:install-file -DgroupId=gigaspaces -DartifactId=gs-lib -Dversion=%VERSION% -DpomFile=%TEMP%/gs-lib-pom.xml -Dpackaging=jar -Dfile=%JSHOMEDIR%/lib/ServiceGrid/gs-lib.jar
 call mvn install:install-file -DgroupId=gigaspaces -DartifactId=JSpaces -Dversion=%VERSION% -DpomFile=%TEMP%/JSpaces-pom.xml -Dpackaging=jar -Dfile=%JSHOMEDIR%/lib/JSpaces.jar
 call mvn install:install-file -DgroupId=gigaspaces -DartifactId=openspaces -Dversion=%VERSION% -DpomFile=%TEMP%/openspaces-pom.xml -Dpackaging=jar -Dfile=%JSHOMEDIR%/lib/openspaces/openspaces.jar
 call mvn install:install-file -DgroupId=gigaspaces -DartifactId=mule-os -Dversion=%VERSION% -Dpackaging=jar -DpomFile=%TEMP%/mule-os-pom.xml -Dfile=%JSHOMEDIR%/lib/openspaces/mule-os.jar
