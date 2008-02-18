@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.openspaces.esb.mule.config;
+package org.openspaces.esb.mule.eventcontainer.config;
 
 import org.mule.config.spring.handlers.AbstractMuleNamespaceHandler;
 import org.mule.config.spring.parsers.generic.MuleOrphanDefinitionParser;
-import org.openspaces.esb.mule.OpenSpacesConnector;
+import org.openspaces.esb.mule.eventcontainer.OpenSpacesConnector;
 
 /**
  * A namespace handler for <code>OpenSpaces</code> namespace.

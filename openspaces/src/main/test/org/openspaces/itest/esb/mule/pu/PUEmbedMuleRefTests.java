@@ -14,24 +14,30 @@
  * limitations under the License.
  */
 
-package org.openspaces.itest.esb.mule;
+package org.openspaces.itest.esb.mule.pu;
 
 import net.jini.core.lease.Lease;
 import org.mule.api.config.ConfigurationException;
+import org.openspaces.core.GigaSpace;
+import org.openspaces.core.GigaSpaceConfigurer;
+import org.openspaces.core.space.UrlSpaceConfigurer;
+import org.openspaces.itest.esb.mule.SimpleMessage;
+import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 /**
- * Test that check the ability to run mule using spring base configuration.
+ * Test the ability to run PU with mule imbedded in it.
  *
-  * @author yitzhaki
+* @author yitzhaki
  */
-public class PureSpringBasedTests extends AbstractMuleTests {
+public class PUEmbedMuleRefTests extends AbstractDependencyInjectionSpringContextTests {
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/esb/mule/purespringbased.xml"};
+        return new String[]{"/org/openspaces/itest/esb/mule/pu/puembedmuleref.xml"};
     }
 
     public void testTakeSingleFromSpace() throws ConfigurationException {
-        int numberOfMsgs = 22;
+        GigaSpace gigaSpace = new GigaSpaceConfigurer(new UrlSpaceConfigurer("jini://*/*/space").lookupGroups(System.getProperty("user.name")).space()).gigaSpace();
+        int numberOfMsgs = 10;
         for (int i = 0; i < numberOfMsgs; i++) {
             SimpleMessage message = new SimpleMessage("Hello World " + i, false);
             gigaSpace.write(message);
@@ -45,5 +51,4 @@ public class PureSpringBasedTests extends AbstractMuleTests {
         }
         assertEquals(0, gigaSpace.count(new SimpleMessage()));
     }
-
 }

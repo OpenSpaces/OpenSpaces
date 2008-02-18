@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package org.openspaces.itest.esb.mule;
+package org.openspaces.itest.esb.mule.eventcontainer;
 
 import net.jini.core.lease.Lease;
 import org.mule.api.config.ConfigurationException;
+import org.openspaces.itest.esb.mule.AbstractMuleTests;
+import org.openspaces.itest.esb.mule.SimpleMessage;
 
 /**
  * Tests mule connector, receive and process single object at a time.
@@ -28,7 +30,7 @@ import org.mule.api.config.ConfigurationException;
 public class TakeAndWriteSingleUsingNotifyContainerTests extends AbstractMuleTests {
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/esb/mule/takeandwritesingleusingnotifycontainer.xml"};
+        return new String[]{"/org/openspaces/itest/esb/mule/eventcontainer/takeandwritesingleusingnotifycontainer.xml"};
     }
 
     public void testTakeSingleFromSpace() throws ConfigurationException {

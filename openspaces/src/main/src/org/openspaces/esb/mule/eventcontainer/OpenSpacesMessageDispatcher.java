@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.esb.mule;
+package org.openspaces.esb.mule.eventcontainer;
 
 import com.j_spaces.core.client.UpdateModifiers;
 import net.jini.core.lease.Lease;

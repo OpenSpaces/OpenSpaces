@@ -14,28 +14,33 @@
  * limitations under the License.
  */
 
-package org.openspaces.itest.esb.mule;
+package org.openspaces.itest.esb.mule.eventcontainer;
 
 import net.jini.core.lease.Lease;
 import org.mule.api.config.ConfigurationException;
+import org.openspaces.itest.esb.mule.AbstractMuleTests;
+import org.openspaces.itest.esb.mule.SimpleMessage;
 
 /**
- * Tests mule connector, receive and process single object at a time.
+ * Tests mule connector, receive and process bulk of objects.
  *
  * @author yitzhaki
  */
-public class TakeAndWriteSingleTests extends AbstractMuleTests {
+public class TakeAndWriteMultipleTests extends AbstractMuleTests {
+
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/esb/mule/takeandwritesingle.xml"};
+        return new String[]{"/org/openspaces/itest/esb/mule/eventcontainer/takeandwritemultiple.xml"};
     }
 
-    public void testTakeSingleFromSpace() throws ConfigurationException {
-        int numberOfMsgs = 1;
+
+    public void testTakeMultipleFromSpace() throws ConfigurationException {
+        int numberOfMsgs = 100;
+        SimpleMessage msgs[] = new SimpleMessage[numberOfMsgs];
         for (int i = 0; i < numberOfMsgs; i++) {
-            SimpleMessage message = new SimpleMessage("Hello World " + i, false);
-            gigaSpace.write(message);
+            msgs[i] = new SimpleMessage("Hello World " + i, false);
         }
+        gigaSpace.writeMultiple(msgs);
 
         //blocking wait untill the mule writes back the messages to the space after reading them.
         for (int i = 0; i < numberOfMsgs; i++) {
@@ -44,6 +49,5 @@ public class TakeAndWriteSingleTests extends AbstractMuleTests {
             assertEquals(template, message);
         }
         assertEquals(0, gigaSpace.count(new SimpleMessage()));
-
     }
 }

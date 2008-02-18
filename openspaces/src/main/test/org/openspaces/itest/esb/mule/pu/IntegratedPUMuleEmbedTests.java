@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package org.openspaces.itest.esb.mule;
+package org.openspaces.itest.esb.mule.pu;
 
 import junit.framework.TestCase;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceConfigurer;
 import org.openspaces.core.space.UrlSpaceConfigurer;
+import org.openspaces.itest.esb.mule.SimpleMessage;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
 
@@ -32,7 +33,7 @@ public class IntegratedPUMuleEmbedTests extends TestCase {
 
     public void testTakeSingleFromSpace() throws Exception {
         IntegratedProcessingUnitContainerProvider provider = new IntegratedProcessingUnitContainerProvider();
-        provider.addConfigLocation("/org/openspaces/itest/esb/mule/puembedmuleref2.xml");
+        provider.addConfigLocation("/org/openspaces/itest/esb/mule/pu/puembedmuleref2.xml");
         IntegratedProcessingUnitContainer container = (IntegratedProcessingUnitContainer) provider.createContainer();
 
         GigaSpace gigaSpace = new GigaSpaceConfigurer(new UrlSpaceConfigurer("jini://*/*/space").lookupGroups(System.getProperty("user.name")).space()).gigaSpace();

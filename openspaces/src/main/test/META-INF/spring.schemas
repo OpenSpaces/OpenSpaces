@@ -4,7 +4,7 @@ http\://www.openspaces.org/schema/remoting/openspaces-remoting.xsd=org/openspace
 http\://www.openspaces.org/schema/jdbc/openspaces-jdbc.xsd=org/openspaces/jdbc/config/openspaces-jdbc.xsd
 http\://www.openspaces.org/schema/jms/openspaces-jms.xsd=org/openspaces/jms/config/openspaces-jms.xsd
 http\://www.openspaces.org/schema/sla/openspaces-sla.xsd=org/openspaces/pu/sla/config/openspaces-sla.xsd
-http\://www.openspaces.org/schema/mule/os-eventcontainer.xsd=org/openspaces/esb/mule/config/os-eventcontainer.xsd
+http\://www.openspaces.org/schema/mule/os-eventcontainer.xsd=org/openspaces/esb/mule/eventcontainer/config/os-eventcontainer.xsd
 http\://www.openspaces.org/schema/mule/mule-os-queue.xsd=org/openspaces/esb/mule/queue/config/mule-os-queue.xsd
 http\://www.openspaces.org/schema/mule/mule-os-seda.xsd=org/openspaces/esb/mule/seda/config/mule-os-seda.xsd
 

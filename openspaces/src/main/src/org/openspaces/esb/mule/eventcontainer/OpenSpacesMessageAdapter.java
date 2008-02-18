@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openspaces.esb.mule;
+package org.openspaces.esb.mule.eventcontainer;
 
 import org.mule.api.MessagingException;
 import org.mule.api.ThreadSafeAccess;
@@ -28,7 +28,6 @@ import org.openspaces.esb.mule.message.UniqueIdMessageHeader;
 import java.util.Iterator;
 
 /**
- *
  * @author yitzhaki
  */
 public class OpenSpacesMessageAdapter extends AbstractMessageAdapter {
@@ -53,7 +52,7 @@ public class OpenSpacesMessageAdapter extends AbstractMessageAdapter {
             throw new MessageTypeNotSupportedException(message, getClass());
         }
         this.message = message;
-        
+
         if (message instanceof MessageHeader) {
             Iterator<String> keys = ((MessageHeader) message).getProperties().keySet().iterator();
             while (keys.hasNext()) {
@@ -89,7 +88,11 @@ public class OpenSpacesMessageAdapter extends AbstractMessageAdapter {
     }
 
     public int getCorrelationSequence() {
-        return (Integer) getProperty(CorrelationMessageHeader.CORRELATION_SEQUENCE);
+        Object correlationSequence = getProperty(CorrelationMessageHeader.CORRELATION_SEQUENCE);
+        if(correlationSequence==null){
+            return -1;
+        }
+        return (Integer) correlationSequence;
     }
 
     public void setCorrelationSequence(int sequence) {
@@ -97,7 +100,11 @@ public class OpenSpacesMessageAdapter extends AbstractMessageAdapter {
     }
 
     public int getCorrelationGroupSize() {
-        return (Integer) getProperty(CorrelationMessageHeader.CORRELATION_GROUP_SIZE);
+        Object correlationGroupSize = getProperty(CorrelationMessageHeader.CORRELATION_GROUP_SIZE);
+        if (correlationGroupSize == null) {
+            return -1;
+        }
+        return (Integer) correlationGroupSize;
     }
 
     public void setCorrelationGroupSize(int correlationGroupSize) {

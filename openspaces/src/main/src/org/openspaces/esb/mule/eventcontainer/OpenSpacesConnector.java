@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.esb.mule;
+package org.openspaces.esb.mule.eventcontainer;
 
 import org.mule.api.MuleException;
 import org.mule.api.lifecycle.InitialisationException;
