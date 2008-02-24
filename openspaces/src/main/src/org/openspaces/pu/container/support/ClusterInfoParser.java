@@ -105,6 +105,9 @@ public abstract class ClusterInfoParser {
             } else {
                 clusterInfo.setSchema("partitioned");
             }
+        } else if (clusterInfo.getNumberOfInstances() != null && clusterInfo.getNumberOfInstances() == 1 &&
+                clusterInfo.getNumberOfBackups() != null && clusterInfo.getNumberOfBackups() > 0) {
+            clusterInfo.setSchema("partitioned-sync2backup");
         }
     }
 }
