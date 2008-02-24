@@ -27,6 +27,9 @@ import org.openspaces.core.cluster.ClusterInfo;
  * (1,1 is an example value), <code>id=1</code> (1 is an example value), <code>backupid=1</code>
  * (1 is an example value) and <code>schema=primary_backup</code> (primary_backup is an example
  * value).
+ *
+ * <p>The container allows not to specifiy explicit <code>instnaceId</code> or <code>backupId</code>. In
+ * this case, it will create several processing units that run embedded within the JVM.
  * 
  * @author kimchy
  */
@@ -84,5 +87,24 @@ public abstract class ClusterInfoParser {
             }
         }
         return clusterInfo;
+    }
+
+    /**
+     * Guess the cluster schema if not set. If the number of instances is higher than 1 and the number
+     * of backups it higher than 0, the cluster schema will be <code>partitioned_sync2backup</code>. If just
+     * the number of instnaces is higher than one (with no backups) the cluster schema will be
+     * <code>partitioned</code>.
+     */
+    public static void guessSchema(ClusterInfo clusterInfo) {
+        if (clusterInfo.getSchema() != null) {
+            return;
+        }
+        if (clusterInfo.getNumberOfInstances() != null && clusterInfo.getNumberOfInstances() > 1) {
+            if (clusterInfo.getNumberOfBackups() != null && clusterInfo.getNumberOfBackups() > 0) {
+                clusterInfo.setSchema("partitioned-sync2backup");
+            } else {
+                clusterInfo.setSchema("partitioned");
+            }
+        }
     }
 }

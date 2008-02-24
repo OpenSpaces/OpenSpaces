@@ -20,6 +20,7 @@ import com.gigaspaces.logger.GSLogConfigLoader;
 import com.j_spaces.core.Constants;
 import com.j_spaces.kernel.SecurityPolicyLoader;
 import org.openspaces.pu.container.CannotCloseContainerException;
+import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
 import org.openspaces.pu.container.support.ClusterInfoParser;
@@ -27,7 +28,6 @@ import org.openspaces.pu.container.support.CommandLineParser;
 import org.openspaces.pu.container.support.ConfigLocationParser;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * The integrated processing unit container wraps Spring
@@ -131,13 +131,13 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
             provider.setClusterInfo(ClusterInfoParser.parse(params));
             ConfigLocationParser.parse(provider, params);
 
-            IntegratedProcessingUnitContainer container = (IntegratedProcessingUnitContainer) provider.createContainer();
-            ((ConfigurableApplicationContext) container.getApplicationContext()).registerShutdownHook();
-            
+            final ProcessingUnitContainer container = provider.createContainer();
+
             // Use the MAIN thread as the non daemon thread to keep it alive
             final Thread mainThread = Thread.currentThread();
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
+                    container.close();
                     mainThread.interrupt();
                 }
             });

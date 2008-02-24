@@ -23,6 +23,7 @@ import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
+import org.openspaces.pu.container.support.CompoundProcessingUnitContainer;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.File;
@@ -165,6 +166,29 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
         if (!fileLocation.exists()) {
             throw new CannotCreateContainerException("Failed to locate pu location [" + location + "]");
         }
+
+        // in case we don't have a cluster info specific members
+        if (clusterInfo != null && clusterInfo.getInstanceId() == null) {
+            ClusterInfo origClusterInfo = clusterInfo;
+            List<ProcessingUnitContainer> containers = new ArrayList<ProcessingUnitContainer>();
+            for (int i = 0; i < clusterInfo.getNumberOfInstances(); i++) {
+                ClusterInfo containerClusterInfo = clusterInfo.copy();
+                containerClusterInfo.setInstanceId(i + 1);
+                setClusterInfo(containerClusterInfo);
+                containers.add(createContainer());
+                if (clusterInfo.getNumberOfBackups() != null) {
+                    for (int j = 0; j < clusterInfo.getNumberOfBackups(); j++) {
+                        containerClusterInfo = containerClusterInfo.copy();
+                        containerClusterInfo.setBackupId(j + 1);
+                        setClusterInfo(containerClusterInfo);
+                        containers.add(createContainer());
+                    }
+                }
+            }
+            setClusterInfo(origClusterInfo);
+            return new CompoundProcessingUnitContainer(containers.toArray(new ProcessingUnitContainer[containers.size()]));
+        }
+
         List<URL> urls = new ArrayList<URL>();
         if (fileLocation.isDirectory()) {
             if (fileLocation.exists()) {

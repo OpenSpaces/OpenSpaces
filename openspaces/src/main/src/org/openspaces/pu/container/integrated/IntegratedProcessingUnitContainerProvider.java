@@ -25,6 +25,8 @@ import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
+import org.openspaces.pu.container.support.ClusterInfoParser;
+import org.openspaces.pu.container.support.CompoundProcessingUnitContainer;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
@@ -163,6 +165,32 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
                 throw new CannotCreateContainerException("Failed to read config files from " + DEFAULT_PU_CONTEXT_LOCATION, e);
             }
         }
+        if (clusterInfo != null) {
+            ClusterInfoParser.guessSchema(clusterInfo);
+        }
+
+        // in case we don't have a cluster info specific members
+        if (clusterInfo != null && clusterInfo.getInstanceId() == null) {
+            ClusterInfo origClusterInfo = clusterInfo;
+            List<ProcessingUnitContainer> containers = new ArrayList<ProcessingUnitContainer>();
+            for (int i = 0; i < clusterInfo.getNumberOfInstances(); i++) {
+                ClusterInfo containerClusterInfo = clusterInfo.copy();
+                containerClusterInfo.setInstanceId(i + 1);
+                setClusterInfo(containerClusterInfo);
+                containers.add(createContainer());
+                if (clusterInfo.getNumberOfBackups() != null) {
+                    for (int j = 0; j < clusterInfo.getNumberOfBackups(); j++) {
+                        containerClusterInfo = containerClusterInfo.copy();
+                        containerClusterInfo.setBackupId(j + 1);
+                        setClusterInfo(containerClusterInfo);
+                        containers.add(createContainer());
+                    }
+                }
+            }
+            setClusterInfo(origClusterInfo);
+            return new CompoundProcessingUnitContainer(containers.toArray(new ProcessingUnitContainer[containers.size()]));
+        }
+
         Resource[] resources = configResources.toArray(new Resource[configResources.size()]);
         // create the Spring application context
         ResourceApplicationContext applicationContext = new ResourceApplicationContext(resources, parentContext);
