@@ -20,6 +20,9 @@ import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 
 /**
+ * Compound processing unit container wraps several processing unit containers and
+ * allows to close them.
+ *
  * @author kimchy
  */
 public class CompoundProcessingUnitContainer implements ProcessingUnitContainer {
