@@ -101,6 +101,7 @@
           <module name="examples-data-processor" />
           <module name="examples-mule-data-feeder" />
           <module name="examples-mule-data-processor" />
+          <module name="examples-helloworld" />
         </modules>
       </facet-type>
     </autodetection-disabled>
@@ -353,7 +354,7 @@
         <option name="INTERPRETED" value="false" />
       </RunnerSettings>
       <RunnerSettings RunnerId="Profile ">
-        <option name="myExternalizedOptions" value="&#10;snapshots-dir=&#10;" />
+        <option name="myExternalizedOptions" value="&#10;additional-options=&#10;snapshots-dir=&#10;" />
       </RunnerSettings>
       <RunnerSettings RunnerId="Run" />
       <ConfigurationWrapper RunnerId="Debug" />
@@ -430,7 +431,7 @@
     <configuration default="false" name="Example Data Processor Primary" type="Application" factoryName="Application" enabled="false" merge="false">
       <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
       <option name="VM_PARAMETERS" value="" />
-      <option name="PROGRAM_PARAMETERS" value="-cluster schema=primary_backup total_members=1,1 id=1" />
+      <option name="PROGRAM_PARAMETERS" value="-cluster total_members=1,1" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
@@ -674,7 +675,7 @@
     </library>
     <library name="Groovy">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/groovy/groovy-all-1.0.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/groovy/groovy-all-1.5.4.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
