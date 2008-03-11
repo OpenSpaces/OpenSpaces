@@ -137,8 +137,11 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
             final Thread mainThread = Thread.currentThread();
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
-                    container.close();
-                    mainThread.interrupt();
+                    try {
+                        container.close();
+                    } finally {
+                        mainThread.interrupt();
+                    }
                 }
             });
             while (!mainThread.isInterrupted()) {
