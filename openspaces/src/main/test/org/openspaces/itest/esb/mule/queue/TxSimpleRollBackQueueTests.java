@@ -18,7 +18,7 @@ public class TxSimpleRollBackQueueTests extends AbstractMuleTests {
     public void testSimpleQueueHandling() throws Exception {
         muleClient.dispatch("os-queue://test1", "testme", null);
 
-        MuleMessage message = muleClient.request("os-queue://test3", 5000000);
+        MuleMessage message = muleClient.request("os-queue://test3", 5000);
         assertEquals("testmeAppender1Appender2", message.getPayload());
     }
 }

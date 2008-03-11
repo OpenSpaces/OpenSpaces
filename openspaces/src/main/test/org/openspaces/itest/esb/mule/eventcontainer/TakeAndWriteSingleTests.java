@@ -16,7 +16,6 @@
 
 package org.openspaces.itest.esb.mule.eventcontainer;
 
-import net.jini.core.lease.Lease;
 import org.mule.api.config.ConfigurationException;
 import org.openspaces.itest.esb.mule.AbstractMuleTests;
 import org.openspaces.itest.esb.mule.SimpleMessage;
@@ -42,7 +41,7 @@ public class TakeAndWriteSingleTests extends AbstractMuleTests {
         //blocking wait untill the mule writes back the messages to the space after reading them.
         for (int i = 0; i < numberOfMsgs; i++) {
             SimpleMessage template = new SimpleMessage("Hello World " + i, true);
-            SimpleMessage message = (SimpleMessage) gigaSpace.take(template, Lease.FOREVER);
+            SimpleMessage message = (SimpleMessage) gigaSpace.take(template, 5000);
             assertEquals(template, message);
         }
         assertEquals(0, gigaSpace.count(new SimpleMessage()));

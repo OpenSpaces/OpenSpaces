@@ -16,7 +16,6 @@
 
 package org.openspaces.itest.esb.mule.pu;
 
-import net.jini.core.lease.Lease;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceConfigurer;
 import org.openspaces.core.space.UrlSpaceConfigurer;
@@ -36,7 +35,7 @@ public class PUEmbedMuleRef2Tests extends AbstractDependencyInjectionSpringConte
 
     public void testTakeSingleFromSpace() throws Exception {
         GigaSpace gigaSpace = new GigaSpaceConfigurer(new UrlSpaceConfigurer("jini://*/*/space").lookupGroups(System.getProperty("user.name")).space()).gigaSpace();
-        
+
         int numberOfMsgs = 10;
         for (int i = 0; i < numberOfMsgs; i++) {
             SimpleMessage message = new SimpleMessage("Hello World " + i, false);
@@ -46,7 +45,7 @@ public class PUEmbedMuleRef2Tests extends AbstractDependencyInjectionSpringConte
         //blocking wait untill the mule writes back the messages to the space after reading them.
         for (int i = 0; i < numberOfMsgs; i++) {
             SimpleMessage template = new SimpleMessage("Hello World " + i, true);
-            SimpleMessage message = gigaSpace.take(template, Lease.FOREVER);
+            SimpleMessage message = gigaSpace.take(template, 5000);
             assertNotNull(message);
         }
         assertEquals(0, gigaSpace.count(new SimpleMessage()));

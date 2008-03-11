@@ -16,7 +16,6 @@
 
 package org.openspaces.itest.esb.mule.pu;
 
-import net.jini.core.lease.Lease;
 import org.mule.api.config.ConfigurationException;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceConfigurer;
@@ -27,7 +26,7 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 /**
  * Test the ability to run PU with mule imbedded in it.
  *
-* @author yitzhaki
+ * @author yitzhaki
  */
 public class PUEmbedMuleRefTests extends AbstractDependencyInjectionSpringContextTests {
 
@@ -46,7 +45,7 @@ public class PUEmbedMuleRefTests extends AbstractDependencyInjectionSpringContex
         //blocking wait untill the mule writes back the messages to the space after reading them.
         for (int i = 0; i < numberOfMsgs; i++) {
             SimpleMessage template = new SimpleMessage("Hello World " + i, true);
-            SimpleMessage message = (SimpleMessage) gigaSpace.take(template, Lease.FOREVER);
+            SimpleMessage message = (SimpleMessage) gigaSpace.take(template, 5000);
             assertEquals(template, message);
         }
         assertEquals(0, gigaSpace.count(new SimpleMessage()));

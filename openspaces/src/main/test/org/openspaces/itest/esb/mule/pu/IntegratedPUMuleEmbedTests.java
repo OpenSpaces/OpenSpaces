@@ -47,7 +47,7 @@ public class IntegratedPUMuleEmbedTests extends TestCase {
         //blocking wait untill the mule writes back the messages to the space after reading them.
         for (int i = 0; i < numberOfMsgs; i++) {
             SimpleMessage template = new SimpleMessage("Hello World " + i, true);
-            SimpleMessage message = gigaSpace.take(template, Integer.MAX_VALUE);
+            SimpleMessage message = gigaSpace.take(template, 5000);
             assertNotNull(message);
         }
         assertEquals(0, gigaSpace.count(new SimpleMessage()));
