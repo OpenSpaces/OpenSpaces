@@ -1,5 +1,6 @@
 package org.openspaces.pbs;
 
+import org.jini.rio.boot.ServiceClassLoader;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoAware;
 import org.springframework.beans.factory.DisposableBean;
@@ -49,13 +50,22 @@ public class BridgedProcessingUnitBean implements InitializingBean, DisposableBe
 	 * {@inheritDoc}
 	 */
     public void afterPropertiesSet() throws Exception {  
-        _proxy = new ProcessingUnitProxy(_assemblyFullPath, _implementationName, _dependencies);
-        if (_clusterInfo == null) {
-            _proxy.init();
-        } else {
-            _proxy.init(_clusterInfo.getBackupId(), _clusterInfo.getInstanceId(), _clusterInfo.getNumberOfBackups(), _clusterInfo.getNumberOfInstances(), _clusterInfo.getSchema());
+        
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            if (classLoader instanceof ServiceClassLoader) {
+                Thread.currentThread().setContextClassLoader(classLoader.getParent());
+            }
+            _proxy = new ProcessingUnitProxy(_assemblyFullPath, _implementationName, _dependencies);
+            if (_clusterInfo == null) {
+                _proxy.init();
+            } else {
+                _proxy.init(_clusterInfo.getBackupId(), _clusterInfo.getInstanceId(), _clusterInfo.getNumberOfBackups(), _clusterInfo.getNumberOfInstances(), _clusterInfo.getSchema());
+            }
+            _proxy.start();
+        } finally {
+            Thread.currentThread().setContextClassLoader(classLoader);
         }
-        _proxy.start();
     }
 	/**
 	 * {@inheritDoc}
