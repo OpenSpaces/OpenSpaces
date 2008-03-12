@@ -211,7 +211,6 @@
 
                 <include name="lib/${name}/**"/>
                 <include name="lib/groovy/**"/>
-                <include name="lib/jruby/**"/>
 
                 <exclude name="examples/openspaces/mule/**"/>
                 <exclude name="lib/${name}/mule-os.jar"/>
@@ -248,7 +247,6 @@
                 <exclude name="examples/**/.cvsignore"/>
                 <include name="lib/${name}/**"/>
                 <include name="lib/groovy/**"/>
-                <include name="lib/jruby/**"/>
 
                 <exclude  name="examples/openspaces/mule/**"/>
             </zipfileset>
