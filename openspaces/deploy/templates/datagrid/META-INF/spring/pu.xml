@@ -39,7 +39,7 @@
     <!-- A GigaSpace instance (that can be used within scripts) that works only against the whole cluster -->
     <os-core:giga-space id="clusteredGigaSpace" space="space" clustered="true" />
 
-    <!-- Theh scripting executor remoting support -->
+    <!-- The scripting executor remoting support -->
     <bean id="scriptingExecutorImpl" class="org.openspaces.remoting.scripting.DefaultScriptingExecutor" />
 
     <os-remoting:service-exporter id="serviceExporter">
