@@ -17,6 +17,8 @@
 package org.openspaces.itest.remoting.simple;
 
 import org.openspaces.core.GigaSpace;
+import org.openspaces.remoting.AsyncRemotingProxyConfigurer;
+import org.openspaces.remoting.SyncRemotingProxyConfigurer;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 import java.util.concurrent.ExecutionException;
@@ -51,7 +53,7 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         assertEquals("SAY test", reply);
     }
 
-    public void testAsyncExecotionIsDone() throws InterruptedException, ExecutionException {
+    public void testAsyncExecutionIsDone() throws InterruptedException, ExecutionException {
         Future result = simpleService.asyncSay("test");
         while (!result.isDone()) {
             Thread.sleep(1000);
@@ -78,6 +80,18 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         String reply = simpleAnnotationBean.syncSimpleService.say("test");
         assertEquals("SAY test", reply);
         reply = simpleAnnotationBean.asyncSimpleService.say("test");
+        assertEquals("SAY test", reply);
+    }
+
+    public void testSimpleConfigurerExecution() {
+        SimpleService localSyncSimpleService = new SyncRemotingProxyConfigurer<SimpleService>(gigaSpace, SimpleService.class)
+                                               .syncProxy();
+        String reply = localSyncSimpleService.say("test");
+        assertEquals("SAY test", reply);
+        SimpleService localAsyncSimpleService = new AsyncRemotingProxyConfigurer<SimpleService>(gigaSpace, SimpleService.class)
+                                               .timeout(15000)
+                                               .asyncProxy();
+        reply = localAsyncSimpleService.say("test");
         assertEquals("SAY test", reply);
     }
 }
