@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project relativePaths="false" version="4">
   <component name="AntConfiguration">
-    <defaultAnt bundledAnt="true" />
+    <defaultAnt name="Apache Ant version 1.6.5" />
     <buildFile url="file://$PROJECT_DIR$/build.xml">
       <additionalClassPath />
       <antReference projectDefault="true" />
       <customJdkName value="" />
-      <maximumHeapSize value="128" />
+      <maximumHeapSize value="256" />
       <properties />
     </buildFile>
   </component>
@@ -44,6 +44,7 @@
       <entry name=".+\.(gif|png|jpeg|jpg)" />
     </resourceExtensions>
     <wildcardResourcePatterns>
+      <entry name="1.0" />
       <entry name="?*.properties" />
       <entry name="?*.xml" />
       <entry name="?*.gif" />
@@ -101,7 +102,6 @@
           <module name="examples-data-processor" />
           <module name="examples-mule-data-feeder" />
           <module name="examples-mule-data-processor" />
-          <module name="examples-helloworld" />
         </modules>
       </facet-type>
     </autodetection-disabled>
@@ -158,7 +158,7 @@
     <option name="GENERATE_NO_WARNINGS" value="false" />
     <option name="DEPRECATION" value="true" />
     <option name="ADDITIONAL_OPTIONS_STRING" value="" />
-    <option name="MAXIMUM_HEAP_SIZE" value="128" />
+    <option name="MAXIMUM_HEAP_SIZE" value="256" />
   </component>
   <component name="JavadocGenerationManager">
     <option name="OUTPUT_DIRECTORY" />
@@ -354,7 +354,7 @@
         <option name="INTERPRETED" value="false" />
       </RunnerSettings>
       <RunnerSettings RunnerId="Profile ">
-        <option name="myExternalizedOptions" value="&#10;additional-options=&#10;snapshots-dir=&#10;" />
+        <option name="myExternalizedOptions" value="&#10;snapshots-dir=&#10;" />
       </RunnerSettings>
       <RunnerSettings RunnerId="Run" />
       <ConfigurationWrapper RunnerId="Debug" />
@@ -626,9 +626,7 @@
         <root url="jar://$PROJECT_DIR$/lib/JSpaces.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES>
-        <root url="intellijaD://intellijad" />
-      </SOURCES>
+      <SOURCES />
     </library>
     <library name="Spring">
       <CLASSES>
@@ -794,6 +792,98 @@
       </CLASSES>
       <JAVADOC />
       <SOURCES />
+    </library>
+    <library name="servicemix">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/servicemix-services-3.2.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/xbean-spring-3.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/servicemix-jbi-3.2.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/xbean-classloader-3.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/servicemix-common-3.2.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/servicemix-core-3.2.1.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/common/servicemix-soap2/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-bean/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-saxon/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-bean/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/bindingcomponents/servicemix-file/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/common/servicemix-soap/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/distributions/apache-servicemix-web/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-jsr181/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/tooling/jbi-maven-plugin/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/samples/cxf-wsdl-first/wsdl-first-cxfse-su/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/common/servicemix-common/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-eip/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/bindingcomponents/servicemix-cxf-bc/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-camel/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/bindingcomponents/servicemix-cxf-bc/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/samples/wsdl-first/wsdl-first-jsr181-su/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-drools/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/bindingcomponents/servicemix-ftp/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/core/servicemix-core/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/samples/servicemix-web/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/build/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-cxf-se/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/core/servicemix-services/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/bindingcomponents/servicemix-jms/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/bindingcomponents/servicemix-truezip/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/distributions/apache-servicemix/src/main/release/examples/loan-broker/src/components" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/core/servicemix-core/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-eip/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/core/servicemix-audit/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-wsn2005/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/samples/loan-broker/loan-broker-drools-su/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/bindingcomponents/servicemix-http/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/common/servicemix-common/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/common/servicemix-beanflow/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-lwcontainer/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/samples/servicemix-web/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/web/servicemix-console/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-bpe/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-jsr181/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/core/servicemix-audit/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/samples/loan-broker/loan-broker-bean-su/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/tooling/res-maven-plugin/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-quartz/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-script/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-camel/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-quartz/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/platforms/geronimo/deployer-service/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-cxf-se/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/bindingcomponents/servicemix-file/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/servicemix-itests/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/common/servicemix-components/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/bindingcomponents/servicemix-jms/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/bindingcomponents/servicemix-truezip/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/bindingcomponents/servicemix-xmpp/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/tooling/xfire-maven-plugin/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/tooling/jbi-maven-plugin/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/samples/camel/camel-sa-itest/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/common/servicemix-soap2/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/samples/bridge/bridge-sa-itest/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/web/servicemix-web-console/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/bindingcomponents/servicemix-ftp/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/common/servicemix-soap/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-lwcontainer/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-script/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/core/servicemix-jbi/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/samples/camel/camel-simple-su/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-bpe/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/core/servicemix-services/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/platforms/geronimo/deployer-service/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/platforms/geronimo/servicemix-service/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/archetypes/servicemix-archetypes-itests/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-drools/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/bindingcomponents/servicemix-xmpp/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/common/servicemix-components/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/common/servicemix-beanflow/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-saxon/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/bindingcomponents/servicemix-http/src/test/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-wsn2005/src/main/java" />
+        <root url="jar://$PROJECT_DIR$/lib/servicemix/xbean-spring-3.2-sources.jar!/" />
+      </SOURCES>
     </library>
   </component>
 </project>

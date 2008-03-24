@@ -35,6 +35,8 @@
     <orderEntry type="library" exported="" name="Junit" level="project" />
     <orderEntry type="library" exported="" name="JMock" level="project" />
     <orderEntry type="library" exported="" name="j2ee" level="project" />
+    <orderEntry type="library" name="servicemix" level="project" />
+    <orderEntry type="library" name="servicemix" level="project" />
     <orderEntryProperties />
   </component>
   <component name="copyright">

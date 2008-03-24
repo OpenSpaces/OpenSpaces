@@ -98,6 +98,7 @@
                 <exclude name="META-INF/services/org/mule/**"/>
                 <exclude name="META-INF/mule-spring.handlers"/>
                 <exclude name="META-INF/mule-spring.schemas"/>
+                <exclude name="org/openspaces/esb/servicemix/**"/>
             </fileset>
             <manifest>
                 <attribute name="Implementation-Title" value="${openspaces-title}"/>
@@ -130,6 +131,21 @@
         <copy file="${target.classes.dir}/META-INF/spring.schemas.orig" tofile="${target.classes.dir}/META-INF/spring.schemas" overwrite="true"/>
         <delete file="${target.classes.dir}/META-INF/spring.handlers.orig"/>
         <delete file="${target.classes.dir}/META-INF/spring.schemas.orig"/>
+
+
+        <delete file="${lib.dir}/${name}/servicemix-os.jar"/>
+
+        <jar jarfile="${lib.dir}/${name}/servicemix-os.jar">
+            <fileset dir="${target.classes.dir}">
+                <include name="org/openspaces/esb/servicemix/**"/>
+            </fileset>
+            <manifest>
+                <attribute name="Implementation-Title" value="${openspaces-title}"/>
+                <attribute name="Implementation-Version" value="${openspaces-version}"/>
+                <attribute name="OpenSpaces-Version" value="${openspaces-version}"/>
+            </manifest>
+        </jar>
+
 
     </target>
 
@@ -215,6 +231,7 @@
 
                 <exclude name="examples/openspaces/mule/**"/>
                 <exclude name="lib/${name}/mule-os.jar"/>
+                <exclude name="lib/${name}/servicemix-os.jar"/>
 
             </zipfileset>
         </zip>
@@ -250,6 +267,7 @@
                 <include name="lib/groovy/**"/>
 
                 <exclude  name="examples/openspaces/mule/**"/>
+                <exclude  name="examples/openspaces/servicemix/**"/>
             </zipfileset>
         </zip>
     	<mkdir dir="${dist.dir}/1.5" />
