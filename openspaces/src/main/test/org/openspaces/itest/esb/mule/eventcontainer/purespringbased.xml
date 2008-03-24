@@ -59,15 +59,15 @@
 
         <mule:service name="MessageReaderUMO">
             <mule:inbound>
-                <mule:inbound-endpoint address="os-eventcontainer://helloPollingEventContainer"/>
+
+                <os-eventcontainer:inbound-endpoint address="os-eventcontainer://helloPollingEventContainer"/>
             </mule:inbound>
 
             <mule:component class="org.openspaces.itest.esb.mule.MessageReader"/>
 
             <mule:outbound>
                 <mule:outbound-pass-through-router>
-                    <mule:outbound-endpoint
-                            address="os-eventcontainer://gigaSpace?writeLease=2000&amp;updateOrWrite=false&amp;updateTimeout=1"/>
+                    <os-eventcontainer:outbound-endpoint address="os-eventcontainer://gigaSpace"/>
                 </mule:outbound-pass-through-router>
             </mule:outbound>
 

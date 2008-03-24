@@ -51,7 +51,7 @@
         PU application context as the parent of Mule application context, giving it the ability to access beans that
         declared in the PU application context.
      -->
-    <bean class="org.openspaces.esb.mule.OpenSpacesMuleContextLoader">
+    <bean class="org.openspaces.esb.mule.pu.OpenSpacesMuleContextLoader">
         <property name="location" value="/org/openspaces/itest/esb/mule/pu/muleref.xml"/>
     </bean>
 

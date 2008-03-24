@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.esb.mule;
+package org.openspaces.esb.mule.pu;
 
 import org.mule.api.MuleContext;
 import org.mule.api.context.MuleContextFactory;
