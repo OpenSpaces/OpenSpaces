@@ -33,7 +33,7 @@ public class PureSpringBasedTests extends AbstractMuleTests {
     }
 
     public void testTakeSingleFromSpace() throws ConfigurationException {
-        int numberOfMsgs = 22;
+        int numberOfMsgs = 10;
         for (int i = 0; i < numberOfMsgs; i++) {
             SimpleMessage message = new SimpleMessage("Hello World " + i, false);
             gigaSpace.write(message);
