@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" output="target/classes" path="src/main/src"/>
+	<classpathentry kind="src" path="maven/maven-openspaces-plugin/src/main/java"/>
 	<classpathentry kind="src" output="target/sandbox-classes" path="src/sandbox/src"/>
 	<classpathentry kind="src" output="target/sandbox-test-classes" path="src/sandbox/test"/>
 	<classpathentry kind="src" output="target/main-test-classes" path="src/main/test"/>
@@ -82,5 +83,6 @@
 	<classpathentry kind="lib" path="lib/mule/mule-transport-stdio-2.0.0-RC2.jar"/>
 	<classpathentry kind="lib" path="lib/mule/mule-transport-vm-2.0.0-RC2.jar"/>
 	<classpathentry kind="lib" path="lib/groovy/groovy-all-1.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/maven/maven-2.0.8-uber.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
