@@ -7,7 +7,7 @@ if [ "${JSHOMEDIR}" = "" ] ; then
   JSHOMEDIR=`dirname $0`/..
 fi
 export JSHOMEDIR
-
+export TMPDIR="/tmp"
 export VERSION=`${JAVACMD} -cp ${JSHOMEDIR}/lib/JSpaces.jar:${JSHOMEDIR}/lib/openspaces/openspaces.jar org.openspaces.maven.support.OutputVersion`
 
 ${JAVACMD} -cp ${JSHOMEDIR}/lib/JSpaces.jar:${JSHOMEDIR}/lib/openspaces/openspaces.jar org.openspaces.maven.support.POMGenerator $TMPDIR
@@ -36,3 +36,6 @@ mvn install:install-file -DgroupId=gigaspaces -DartifactId=mule-os -Dversion=$VE
 
 # Copy licenese file
 cp $JSHOMEDIR/gslicense.xml ~/.m2/repository/gigaspaces/gs-boot/$VERSION
+
+# Build and install OpenSpaces Maven Plugin
+mvn -f ../lib/openspaces/maven-openspaces-plugin/pom.xml install

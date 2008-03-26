@@ -210,7 +210,7 @@
         <copy todir="lib/${name}" file="${basedir}/openspaces.notice.txt"/>
     </target>
 
-    <target name="dist_1_4" depends="build_1_4, fulljar, buildexamples, srczip, javadoc, schema, license"
+    <target name="dist_1_4" depends="build_1_4, fulljar, buildexamples, srczip, javadoc, schema, license, maven-openspaces-plugin"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}"/>
         <delete file="${dist.dir}/${name}-1.4.zip"/>
@@ -248,7 +248,7 @@
     	<copy todir="${dist.dir}/1.4" file="${lib.dir}/${name}/${name}.jar" />
     </target>
 
-    <target name="dist_1_5" depends="build_1_5, fulljar, buildexamples, srczip, javadoc, schema, license"
+    <target name="dist_1_5" depends="build_1_5, fulljar, buildexamples, srczip, javadoc, schema, license, maven-openspaces-plugin"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}"/>
         <delete file="${dist.dir}/${name}-1.5.zip"/>
@@ -456,6 +456,17 @@
         </jar>
 
     </target>
+	
+	
+	<!-- Copying Maven2 plugin sources into the distribution -->
+    <target name="maven-openspaces-plugin">
+    	<mkdir dir="${maven.plugin.dir}"/>
+        <copy todir="${maven.plugin.dir}" preservelastmodified="true">
+            <fileset dir="${basedir}/maven/maven-openspaces-plugin">
+                <include name="**/*"/>
+            </fileset>
+        </copy>
+    </target> 
 
 
 </project>

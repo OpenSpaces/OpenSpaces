@@ -39,5 +39,8 @@ call mvn install:install-file -DgroupId=gigaspaces -DartifactId=mule-os -Dversio
 REM Copy licenese file
 copy "%JSHOMEDIR%\gslicense.xml" "%HOMEDRIVE%\%HOMEPATH%\.m2\repository\gigaspaces\gs-boot\%VERSION%"
 
+REM Build and install OpenSpaces Maven Plugin 
+call mvn -f ../lib/openspaces/maven-openspaces-plugin/pom.xml install 
+
 
 :END
