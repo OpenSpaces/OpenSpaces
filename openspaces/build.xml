@@ -356,7 +356,7 @@
         <mkdir dir="${target.junit.reports.dir}"/>
         <mkdir dir="${target.junit.summary.dir}"/>
 
-        <junit forkmode="${junit.forkmode}" printsummary="yes" haltonfailure="no" haltonerror="no">
+        <junit failureproperty="junit.tests.failed" forkmode="${junit.forkmode}" printsummary="yes" haltonfailure="no" haltonerror="no">
 
             <jvmarg line="-Djava.security.policy=policy/policy.all -Djava.awt.headless=true -Xmx512m -XX:MaxPermSize=128m"/>
 
@@ -384,6 +384,8 @@
             </fileset>
             <report todir="${target.junit.summary.dir}"/>
         </junitreport>
+    	
+    	<fail if="junit.tests.failed" message="JUnit tests failed. exiting..."/>
 
     </target>
 
