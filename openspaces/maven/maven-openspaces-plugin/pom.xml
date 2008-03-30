@@ -8,7 +8,11 @@
   <name>maven-openspaces-plugin</name>
   <url>http://maven.apache.org</url>
   <properties>
-    <gsVersion>${gs-build}</gsVersion>
+    <!-- 
+      This parameter is injected by the maven build lifecycle as the version of
+      openspaces dependency. We support version 6.4 (not inclusive) and higher.
+    -->
+    <gsVersion>(6.4,)</gsVersion>
   </properties>
   <dependencies>
     <dependency>
@@ -37,6 +41,7 @@
     </resources>
     <plugins>
       <plugin>
+        <!-- Enable the prefix 'os' for the plugin -->
         <artifactId>maven-plugin-plugin</artifactId>
         <configuration>
           <goalPrefix>os</goalPrefix>
