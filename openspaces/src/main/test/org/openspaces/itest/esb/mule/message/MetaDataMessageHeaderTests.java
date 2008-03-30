@@ -64,6 +64,6 @@ public class MetaDataMessageHeaderTests extends AbstractMuleTests {
             assertEquals("new " + list.get(i).getProperty("name"), message.getProperty("name"));
 
         }
-        assertEquals(0, gigaSpace.count(new ProcessedMessage()));
+        assertEquals(0, gigaSpace.count(new MessageWithMessageHeader()));
     }
 }

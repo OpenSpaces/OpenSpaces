@@ -49,5 +49,6 @@ public class MetaDataTests extends AbstractMuleTests {
             assertEquals("processed message " + "Hello World " + i, message.getProperty("name"));
         }
         assertEquals(0, gigaSpace.count(new ProcessedMessage()));
+        assertEquals(0, gigaSpace.count(new SimpleMessage()));
     }
 }
