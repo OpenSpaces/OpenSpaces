@@ -16,6 +16,8 @@
 
 package org.openspaces.pu.container.integrated;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
 import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
@@ -29,9 +31,11 @@ import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.CompoundProcessingUnitContainer;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +65,8 @@ import java.util.List;
  */
 public class IntegratedProcessingUnitContainerProvider implements ApplicationContextProcessingUnitContainerProvider {
 
+    private static final Log logger = LogFactory.getLog(IntegratedProcessingUnitContainerProvider.class);
+    
     private ApplicationContext parentContext;
 
     private List<Resource> configResources = new ArrayList<Resource>();
@@ -161,6 +167,26 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
         if (configResources.size() == 0) {
             try {
                 addConfigLocation(DEFAULT_PU_CONTEXT_LOCATION);
+                boolean foundValidResource = false;
+                for (Resource resource : configResources) {
+                    if (resource.exists()) {
+                        foundValidResource = true;
+                        break;
+                    }
+                }
+                if (!foundValidResource) {
+                    addConfigLocation(new FileSystemResource(DEFAULT_FS_PU_CONTEXT_LOCATION));
+                    for (Resource resource : configResources) {
+                        if (!resource.exists()) {
+                            throw new CannotCreateContainerException("No explicit config location, tried [" + DEFAULT_PU_CONTEXT_LOCATION + "], and [" + DEFAULT_FS_PU_CONTEXT_LOCATION + "] (relative to working director), and no configuration found");
+                        }
+                    }
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("No explicit config location, default location [" + DEFAULT_PU_CONTEXT_LOCATION + "] has no configuration, loading from [" + DEFAULT_FS_PU_CONTEXT_LOCATION + "] relative to working directory [" + new File(".").getAbsolutePath() + "]");
+                    } else {
+                        logger.debug("No explicit config location, defaulting to [" + DEFAULT_PU_CONTEXT_LOCATION + "]");
+                    }
+                }
             } catch (IOException e) {
                 throw new CannotCreateContainerException("Failed to read config files from " + DEFAULT_PU_CONTEXT_LOCATION, e);
             }
