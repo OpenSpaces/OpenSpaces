@@ -30,5 +30,7 @@ public interface ApplicationContextProcessingUnitContainerProvider extends Proce
 
     static final String DEFAULT_PU_CONTEXT_LOCATION = "classpath*:/META-INF/spring/pu.xml";
     
+    static final String DEFAULT_FS_PU_CONTEXT_LOCATION = "META-INF/spring/pu.xml";
+    
     void addConfigLocation(String configLocation) throws IOException;
 }
