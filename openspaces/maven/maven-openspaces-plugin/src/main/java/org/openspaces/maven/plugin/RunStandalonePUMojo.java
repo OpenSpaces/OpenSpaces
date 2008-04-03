@@ -57,8 +57,8 @@ public class RunStandalonePUMojo extends AbstractMojo
     
     /** 
      * Project instance, used to add new source directory to the build. 
-     * @parameter default-value="${project}" 
-     * @readonly 
+     * @parameter expression="${project}" 
+     * @required
      */ 
     private MavenProject project;
     
@@ -67,11 +67,6 @@ public class RunStandalonePUMojo extends AbstractMojo
      */
 	public void execute() throws MojoExecutionException, MojoFailureException 
 	{
-		if (project == null || !project.getPackaging().equalsIgnoreCase("jar"))
-		{
-			throw new MojoExecutionException("The goal has to be run in a context" +
-					" of an OpenSpaces project.");
-		}
 		List<String> puNames = resolvePUNames();
 		if (puNames.size() == 0)
 		{
@@ -110,26 +105,40 @@ public class RunStandalonePUMojo extends AbstractMojo
 	/**
 	 * Returns a list of all processing unit names to deploy.
 	 * @return processing unit names list
+	 * @throws MojoExecutionException 
 	 */
-	private List<String> resolvePUNames()
+	private List<String> resolvePUNames() throws MojoExecutionException
 	{
-		List<String> puNames = new LinkedList<String>();
-		if (puName != null)
-		{
-			puNames.add(puName);
-		}
-		else if (project != null)
-		{
-			if (project.getPackaging() != null && project.getPackaging().equalsIgnoreCase("pom"))
-			{
-				getLog().error("Can't run goal 'purun' on multi module project.");
-			}
-			else
-			{
-				puNames.add(getPURelativePath(project));
-			}
-		}
-		return puNames;
+	    List<String> puNames = new LinkedList<String>();
+	    if (project.getPackaging().equalsIgnoreCase("pom"))
+        {
+	        if (puName != null)
+	        {
+	            List projects = project.getCollectedProjects();
+	            Iterator i = projects.iterator();
+	            while (i.hasNext())
+	            {
+	                MavenProject proj = (MavenProject)i.next();
+	                if (proj.getName().equals(puName))
+	                {
+	                    puNames.add(getPURelativePath(proj));
+	                }
+	            }
+	        }
+	        else
+	        {
+	            throw new MojoExecutionException("Missing argument: puName");
+	        }
+        }
+	    else if (project.getPackaging().equalsIgnoreCase("jar"))
+	    {
+	        puNames.add(getPURelativePath(project));
+	    }
+	    else
+	    {
+	        throw new MojoExecutionException("Unknown project packaging: " + project.getPackaging());
+	    }
+	    return puNames;
 	}
 
 	/**
