@@ -22,6 +22,7 @@ import org.openspaces.core.GigaSpace;
 import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.events.adapter.AnnotationEventListenerAdapter;
 import org.openspaces.events.adapter.MethodEventListenerAdapter;
+import org.openspaces.events.polling.SimplePollingContainerConfigurer;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
@@ -286,6 +287,15 @@ public class SimpleNotifyContainerConfigurer {
         notifyEventListenerContainer.setActiveWhenPrimary(activeWhenPrimary);
         return this;
     }
+    
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setAutoStart(boolean)
+     */
+    public SimpleNotifyContainerConfigurer autoStart(boolean autoStart) {
+        notifyEventListenerContainer.setAutoStart(autoStart);
+        return this;
+    }
+
 
     public SimpleNotifyEventListenerContainer notifyContainer() {
         if (!initialized) {

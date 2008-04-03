@@ -231,6 +231,14 @@ public class SimplePollingContainerConfigurer {
         pollingEventListenerContainer.setActiveWhenPrimary(activeWhenPrimary);
         return this;
     }
+    
+    /**
+     * @see org.openspaces.events.polling.SimplePollingEventListenerContainer#setAutoStart(boolean)
+     */
+    public SimplePollingContainerConfigurer autoStart(boolean autoStart) {
+        pollingEventListenerContainer.setAutoStart(autoStart);
+        return this;
+    }
 
     public SimplePollingEventListenerContainer pollingContainer() {
         if (!initialized) {
