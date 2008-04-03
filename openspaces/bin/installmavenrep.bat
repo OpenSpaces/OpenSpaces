@@ -12,7 +12,7 @@ goto END
 
 FOR /F "usebackq tokens=*" %%i IN (`installmavenrep.bat version`) DO @set VERSION=%%i
 
-%JAVACMD% -cp %JSHOMEDIR%/lib/JSpaces.jar;%JSHOMEDIR%/lib/openspaces/openspaces.jar org.openspaces.maven.support.POMGenerator %TEMP%
+%JAVACMD% -cp %JSHOMEDIR%/lib/JSpaces.jar;%JSHOMEDIR%/lib/openspaces/openspaces.jar org.openspaces.maven.support.POMGenerator %TEMP% %VERSION% ../lib/openspaces/maven-openspaces-plugin/
 
 echo ""
 echo ""

@@ -112,6 +112,17 @@ public class DeployPUMojo extends AbstractMojo
      */
 	public void execute() throws MojoExecutionException, MojoFailureException 
 	{
+	    // Remove white spaces from ClassLoader's URLs
+	    ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
+	    try 
+        {
+            Utils.changeClassLoaderToSupportWhiteSpacesRepository(currentCL);
+        }
+        catch (Exception e) 
+        {
+            getLog().info("Unable to update ClassLoader. Proceeding with processing unit invocation.", e);
+        }
+        
 		List<String> puNames = resolvePUNames();
 		if (puNames.size() == 0)
 		{

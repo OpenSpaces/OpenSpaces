@@ -126,6 +126,16 @@ public class RunPUMojo extends AbstractMojo
 		ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
 		try
 		{
+		    // Remove white spaces from ClassLoader's URLs
+		    try 
+		    {
+                Utils.changeClassLoaderToSupportWhiteSpacesRepository(currentCL);
+            }
+		    catch (Exception e) 
+		    {
+		        getLog().info("Unable to update ClassLoader. Proceeding with processing unit invocation.", e);
+            }
+		    
 			// create the class loader for the PU execution
 			ClassLoader classLoader = createClassLoader(classpath, currentCL);
 
@@ -152,6 +162,8 @@ public class RunPUMojo extends AbstractMojo
 			Thread.currentThread().setContextClassLoader(currentCL);
 		}
 	}
+	
+	
 	
 	
 	/**

@@ -1,8 +1,14 @@
 package org.openspaces.maven.support;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
@@ -54,8 +60,47 @@ public class POMGenerator {
         printDependency(writer, "openspaces");
         printFooter(writer);
         writer.close();
+        
+        if (args.length > 2) {
+            String version = args[1];
+            String directory = args[2];
+            replaceVersionInPluginPom(version, directory);
+        }
     }
 
+    //../lib/openspaces/maven-openspaces-plugin/
+    private static void replaceVersionInPluginPom(String version, String dir) throws IOException {
+        File f = new File(dir, "pom.xml");
+        FileReader fr = new FileReader(f);
+        BufferedReader br = new BufferedReader(fr);
+        StringBuilder sb = new StringBuilder();
+        String line;
+        String openTag = "<gsVersion>";
+        String closeTag = "</gsVersion>";
+        String newLine = "\n";
+        int index = 0;
+        while((line = br.readLine()) != null) {
+            if ((index = line.indexOf(openTag)) < 0) {
+                sb.append(line);
+            }
+            else {
+                sb.append(line.substring(0, index+openTag.length()));
+                sb.append(version);
+                sb.append(closeTag);
+            }
+            sb.append(newLine);
+        }
+        File f2 = new File(dir, "pom2.xml");
+        FileWriter fw = new FileWriter(f2);
+        BufferedWriter bw = new BufferedWriter(fw);
+        bw.write(sb.toString());
+        br.close();
+        bw.close();
+        f.delete();
+        f2.renameTo(f);
+    }
+    
+    
     private static void writeSimplePom(File dir, String artifactId) throws Exception {
         PrintWriter writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, artifactId + "-pom.xml")))));
         printHeader(writer, artifactId);

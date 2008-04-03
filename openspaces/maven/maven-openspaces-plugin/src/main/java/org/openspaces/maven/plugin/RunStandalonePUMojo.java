@@ -77,6 +77,18 @@ public class RunStandalonePUMojo extends AbstractMojo
 		{
 			throw new MojoExecutionException("No processing unit was resolved.");
 		}
+		
+		// Remove white spaces from ClassLoader's URLs 
+		ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
+		try 
+        {
+            Utils.changeClassLoaderToSupportWhiteSpacesRepository(currentCL);
+        }
+        catch (Exception e) 
+        {
+            getLog().info("Unable to update ClassLoader. Proceeding with processing unit invocation.", e);
+        }
+        
 		try
 		{
 			Iterator<String> i = puNames.iterator();

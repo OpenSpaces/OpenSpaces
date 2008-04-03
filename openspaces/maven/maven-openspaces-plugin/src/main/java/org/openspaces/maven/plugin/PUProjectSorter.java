@@ -24,7 +24,7 @@ import org.apache.maven.project.MavenProject;
  * Used to sort the deployment order of the processing unit
  * when deploying a multi module project.
  */
-class PUProjectSorter implements Comparator
+public class PUProjectSorter implements Comparator
 {
 	static final String PARAM_ORDER = "order";
 	
