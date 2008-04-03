@@ -33,6 +33,8 @@ public abstract class AbstractEventContainerBeanDefinitionParser extends Abstrac
     private static final String GIGA_SPACE = "giga-space";
 
     private static final String ACTIVE_WHEN_PRIMARY = "active-when-primary";
+    
+    private static final String AUTO_START = "auto-start";
 
 
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
@@ -56,5 +58,9 @@ public abstract class AbstractEventContainerBeanDefinitionParser extends Abstrac
         if (StringUtils.hasLength(activeWhenPrimary)) {
             builder.addPropertyValue("activeWhenPrimary", Boolean.valueOf(activeWhenPrimary));
         }
+        String autoStart = element.getAttribute(AUTO_START);
+        if (StringUtils.hasLength(autoStart)) {
+            builder.addPropertyValue("autoStart", Boolean.valueOf(autoStart));
+        }        
     }
 }

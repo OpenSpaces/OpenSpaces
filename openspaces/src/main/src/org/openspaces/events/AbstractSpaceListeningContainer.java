@@ -93,12 +93,24 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
 
     private SpaceMode currentSpaceMode;
 
+    private volatile boolean autoStart = true ;
+
 
     /**
      * Sets the GigaSpace instance to be used for space event listening operations.
      */
     public void setGigaSpace(GigaSpace gigaSpace) {
         this.gigaSpace = gigaSpace;
+    }
+    
+    /**
+     * Set whether this container will start once instantiated.
+     *
+     * <p>Default is <code>true</code>. Set to <code>false</code> in order for this container to
+     * be started using {@link #start()}.
+     */
+    public void setAutoStart(boolean initOnStartup) {
+        this.autoStart = initOnStartup ;
     }
 
     /**
@@ -141,7 +153,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      */
     public void afterPropertiesSet() {
         validateConfiguration();
-        initialize();
+        initialize();      
     }
 
     /**
@@ -280,8 +292,11 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      * @see #doStart
      */
     public void start() throws DataAccessException {
+        if (! autoStart) {
+            autoStart = true ;
+        }
         if (currentSpaceMode != null && currentSpaceMode == SpaceMode.PRIMARY) {
-            doStart();
+            doStart();           
         }
     }
 
@@ -289,6 +304,9 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      * Notify all invoker tasks.
      */
     protected void doStart() throws DataAccessException {
+        if (!autoStart) {
+            return ;
+        }
         synchronized (this.lifecycleMonitor) {
             this.running = true;
             this.lifecycleMonitor.notifyAll();

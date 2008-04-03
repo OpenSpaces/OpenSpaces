@@ -483,6 +483,15 @@
                         </xsd:documentation>
                     </xsd:annotation>
                 </xsd:attribute>
+                <xsd:attribute name="auto-start" type="xsd:boolean">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            Set whether this container will start once instantiated.
+							Default is true. Set to false in order for this container to
+							be started using start().
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
