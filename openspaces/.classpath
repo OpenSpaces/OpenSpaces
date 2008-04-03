@@ -84,5 +84,11 @@
 	<classpathentry kind="lib" path="lib/mule/mule-transport-vm-2.0.0-RC2.jar"/>
 	<classpathentry kind="lib" path="lib/groovy/groovy-all-1.5.4.jar"/>
 	<classpathentry kind="lib" path="lib/maven/maven-2.0.8-uber.jar"/>
+	<classpathentry kind="lib" path="lib/servicemix/servicemix-jbi-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/servicemix/servicemix-common-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/servicemix/servicemix-core-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/servicemix/servicemix-services-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/servicemix/xbean-classloader-3.2.jar"/>
+	<classpathentry kind="lib" path="lib/servicemix/xbean-spring-3.2.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
