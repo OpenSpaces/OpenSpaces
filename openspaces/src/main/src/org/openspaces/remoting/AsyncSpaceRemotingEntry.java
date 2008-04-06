@@ -32,6 +32,18 @@ import java.io.ObjectOutput;
 public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemotingInvocation, SpaceRemotingResult,
         Cloneable, Externalizable {
 
+    static int bitIndexCounter=0;
+    private static final int LOOKUP_NAME_BIT_MASK = 1 << bitIndexCounter++;
+    private static final int METHOD_NAME_BIT_MASK = 1 << bitIndexCounter++;
+    private static final int ROUTING_BIT_MASK = 1 << bitIndexCounter++;
+    private static final int ONE_WAY_BIT_MASK = 1<< bitIndexCounter++;
+    private static final int ARGUMENTS_BIT_MASK = 1<< bitIndexCounter++;
+    private static final int META_ARGUMENTS_BIT_MASK = 1 << bitIndexCounter++;
+    private static final int RESULT_BIT_MASK = 1 << bitIndexCounter++;
+    private static final int EX_BIT_MASK = 1 << bitIndexCounter++;
+    private static final int INSTANCE_ID_BIT_MASK = 1 << bitIndexCounter++;
+
+
     public Boolean isInvocation;
 
     public String lookupName;
@@ -51,6 +63,8 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
     public Throwable ex;
 
     public Integer instanceId;
+
+
 
     public AsyncSpaceRemotingEntry() {
         setNOWriteLeaseMode(true);
@@ -155,27 +169,34 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
 
     public void writeExternal(ObjectOutput out) throws IOException {
         super._writeExternal(out);
+        short nullableFieldsBitMask = getNullableFieldsBitMask();
+        out.writeShort(nullableFieldsBitMask);
         out.writeBoolean(isInvocation);
+
         if (isInvocation) {
-            out.writeUTF(lookupName);
-            out.writeUTF(methodName);
-            out.writeInt(routing);
+            if (lookupName != null) {
+                out.writeUTF(lookupName);
+            }
+
+            if (methodName != null) {
+                out.writeUTF(methodName);
+            }
+
+            if (routing != null) {
+                out.writeInt(routing);
+            }
+
             if (oneWay != null && oneWay) {
                 out.writeBoolean(true);
-            } else {
-                out.writeBoolean(false);
             }
-            if (arguments == null || arguments.length == 0) {
-                out.writeInt(0);
-            } else {
+            
+            if (arguments != null && arguments.length != 0) {
                 out.writeInt(arguments.length);
                 for (Object argument : arguments) {
                     out.writeObject(argument);
                 }
             }
-            if (metaArguments == null || metaArguments.length == 0) {
-                out.writeInt(0);
-            } else {
+            if (metaArguments != null && metaArguments.length != 0) {
                 out.writeInt(metaArguments.length);
                 for (Object argument : metaArguments) {
                     out.writeObject(argument);
@@ -183,57 +204,66 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
             }
         } else {
             if (result != null) {
-                out.writeBoolean(true);
                 out.writeObject(result);
-            } else {
-                out.writeBoolean(false);
             }
             if (ex != null) {
-                out.writeBoolean(true);
                 out.writeObject(ex);
-            } else {
-                out.writeBoolean(false);
             }
-            out.writeInt(routing);
+            if (routing != null) {
+                out.writeInt(routing);
+            }             
             if (instanceId != null) {
                 out.writeInt(instanceId);
-            } else {
-                out.writeInt(-1);
             }
         }
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super._readExternal(in);
+        short bitMask = in.readShort();
         isInvocation = in.readBoolean();
         if (isInvocation) {
-            lookupName = in.readUTF();
-            methodName = in.readUTF();
-            routing = in.readInt();
-            oneWay = in.readBoolean();
-            int argumentNumber = in.readInt();
-            if (argumentNumber > 0) {
+            if (!isFieldNull(bitMask, LOOKUP_NAME_BIT_MASK)) {
+                lookupName = in.readUTF();
+            }
+            if (!isFieldNull(bitMask, METHOD_NAME_BIT_MASK)) {
+                methodName = in.readUTF();
+            }
+            if (!isFieldNull(bitMask, ROUTING_BIT_MASK)) {
+                routing = in.readInt();
+            }
+            if (!isFieldNull(bitMask, ONE_WAY_BIT_MASK)) {
+                oneWay = in.readBoolean();
+            }
+
+            if (!isFieldNull(bitMask, ARGUMENTS_BIT_MASK)) {
+                int argumentNumber = in.readInt();
                 arguments = new Object[argumentNumber];
                 for (int i = 0; i < argumentNumber; i++) {
                     arguments[i] = in.readObject();
                 }
             }
-            argumentNumber = in.readInt();
-            if (argumentNumber > 0) {
+
+            if (!isFieldNull(bitMask, META_ARGUMENTS_BIT_MASK)) {
+                int argumentNumber = in.readInt();
                 metaArguments = new Object[argumentNumber];
                 for (int i = 0; i < argumentNumber; i++) {
                     metaArguments[i] = in.readObject();
                 }
             }
         } else {
-            if (in.readBoolean()) {
+            if (!isFieldNull(bitMask, RESULT_BIT_MASK)) {
                 result = in.readObject();
             }
-            if (in.readBoolean()) {
+            if (!isFieldNull(bitMask, EX_BIT_MASK)) {
                 ex = (Exception) in.readObject();
             }
-            routing = in.readInt();
-            instanceId = in.readInt();
+            if (!isFieldNull(bitMask, ROUTING_BIT_MASK)) {
+                routing = in.readInt();
+            }
+            if (!isFieldNull(bitMask, INSTANCE_ID_BIT_MASK)) {
+                instanceId = in.readInt();
+            }
         }
     }
 
@@ -255,5 +285,28 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
             sb.append(" instnaceId[").append(instanceId).append("]");
         }
         return sb.toString();
+    }
+
+    /**
+     * Returns a bit mask. Fields with non-null values have 1 in their respective index, fields with
+     * null values have 0.  
+     */
+    private short getNullableFieldsBitMask() {
+        int bitMask = 0;
+        bitMask = ((lookupName != null)  ? bitMask | LOOKUP_NAME_BIT_MASK : bitMask) ;
+        bitMask = ((methodName != null)  ? bitMask | METHOD_NAME_BIT_MASK : bitMask) ;
+        bitMask = ((routing != null)  ? bitMask | ROUTING_BIT_MASK : bitMask) ;
+        bitMask = ((oneWay != null)  ? bitMask | ONE_WAY_BIT_MASK : bitMask) ;
+        bitMask = ((arguments != null)  ? bitMask | ARGUMENTS_BIT_MASK : bitMask) ;
+        bitMask = ((metaArguments != null)  ? bitMask | META_ARGUMENTS_BIT_MASK : bitMask) ;
+        bitMask = ((result != null)  ? bitMask | RESULT_BIT_MASK : bitMask) ;
+        bitMask = ((ex != null)  ? bitMask | EX_BIT_MASK : bitMask) ;
+        bitMask = ((instanceId != null)  ? bitMask | INSTANCE_ID_BIT_MASK : bitMask) ;
+        return (short)bitMask;
+    }
+
+    private boolean isFieldNull(short bitMask, int fieldBitMask) {
+        return (bitMask & fieldBitMask) == 0;
+        
     }
 }

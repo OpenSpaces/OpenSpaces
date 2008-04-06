@@ -16,11 +16,17 @@
 
 package org.openspaces.itest.remoting.simple;
 
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.remoting.AsyncRemotingProxyConfigurer;
+import org.openspaces.remoting.AsyncSpaceRemotingEntry;
 import org.openspaces.remoting.SyncRemotingProxyConfigurer;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -93,5 +99,63 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
                                                .asyncProxy();
         reply = localAsyncSimpleService.say("test");
         assertEquals("SAY test", reply);
+    }
+
+    public void testSerializationOfAsyncRemotingEntry() throws IOException, ClassNotFoundException {
+        AsyncSpaceRemotingEntry entry = new AsyncSpaceRemotingEntry();
+        entry = entry.buildInvocation("test", "test", null);
+        entry.oneWay = true;
+        entry.metaArguments = new Object[]{new Integer(1)};
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(byteArrayOutputStream);
+        oos.writeObject(entry);
+        oos.flush();
+        byte[] bytes = byteArrayOutputStream.toByteArray();
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+        ObjectInputStream ois = new ObjectInputStream(byteArrayInputStream);
+        AsyncSpaceRemotingEntry invocation = (AsyncSpaceRemotingEntry) ois.readObject();
+        compareAsyncInvocationNullableFields(entry, invocation);
+
+        entry = entry.buildResult("result");
+        entry.instanceId = 1; 
+        byteArrayOutputStream = new ByteArrayOutputStream();
+        oos = new ObjectOutputStream(byteArrayOutputStream);
+        oos.writeObject(entry);
+        oos.flush();
+        bytes = byteArrayOutputStream.toByteArray();
+        byteArrayInputStream = new ByteArrayInputStream(bytes);
+        ois = new ObjectInputStream(byteArrayInputStream);
+        AsyncSpaceRemotingEntry invocationResult = (AsyncSpaceRemotingEntry) ois.readObject();
+        compareAsyncResultNullableFields(entry, invocationResult);
+    }
+
+    private void compareAsyncResultNullableFields(AsyncSpaceRemotingEntry entry, AsyncSpaceRemotingEntry invocationResult) {
+        assertEquals(entry.getRouting(), invocationResult.getRouting());
+        assertEquals(entry.getResult(), invocationResult.getResult());
+        assertEquals(entry.getInstanceId(), invocationResult.getInstanceId());
+        assertEquals(entry.getException(), invocationResult.getException());
+    }
+
+    private void compareAsyncInvocationNullableFields(AsyncSpaceRemotingEntry entry, AsyncSpaceRemotingEntry invocation) {
+        assertEquals(entry.getRouting(), invocation.getRouting());
+        assertEquals(entry.oneWay, invocation.oneWay);
+        Object[] entryMetaArgs = entry.getMetaArguments();
+        if (entryMetaArgs != null) {
+            Object[] invocationMetaArgs = invocation.getMetaArguments();
+            for (int i=0; i<entryMetaArgs.length; i++) {
+                assertEquals(entryMetaArgs[i], invocationMetaArgs[i]);
+            }
+        } else {
+            assertNull(invocation.getMetaArguments());
+        }
+        Object[] entryArgs = entry.getArguments();
+        if (entryArgs != null) {
+            Object[] invocationArgs = invocation.getArguments();
+            for (int i=0; i<entryArgs.length; i++) {
+                assertEquals(entryArgs[i], invocationArgs[i]);
+            }
+        } else {
+            assertNull(invocation.getArguments());
+        }
     }
 }
