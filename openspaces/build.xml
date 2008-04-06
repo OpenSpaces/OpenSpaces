@@ -9,8 +9,8 @@
 
         <fileset dir="${lib.dir}">
             <include name="**/*.jar"/>
-            <exclude name="openspaces/**" />
-            <exclude name="ant/**" />
+            <exclude name="openspaces/**"/>
+            <exclude name="ant/**"/>
         </fileset>
 
     </path>
@@ -56,6 +56,7 @@
 
         <copy todir="${target.classes.dir}" preservelastmodified="true">
             <fileset dir="${main.src.dir}">
+                <include name="**/1.0"/>
                 <include name="**/*.properties"/>
                 <include name="**/*.handlers"/>
                 <include name="**/*.schemas"/>
@@ -73,7 +74,7 @@
         <ant antfile="build.xml" dir="examples/openspaces/helloworld/" target="dist"/>
         <ant antfile="build.xml" dir="examples/openspaces/data/" target="dist"/>
         <ant antfile="build.xml" dir="examples/openspaces/data-1.4/" target="dist"/>
-        <ant antfile="build.xml" dir="examples/openspaces/mule/data/" target="dist" />
+        <ant antfile="build.xml" dir="examples/openspaces/mule/data/" target="dist"/>
     </target>
 
     <target name="build_1_5" depends="clean, buildmain" description="Compile main sources"/>
@@ -82,7 +83,7 @@
         <retrotranslator srcdir="${target.classes.dir}" verify="true"/>
     </target>
 
-    <target name="fulljar_1_5" depends="build_1_5, fulljar" />
+    <target name="fulljar_1_5" depends="build_1_5, fulljar"/>
 
     <target name="fulljar" description="Create full JAR file with all OpenSpaces classes">
 
@@ -99,6 +100,7 @@
                 <exclude name="META-INF/mule-spring.handlers"/>
                 <exclude name="META-INF/mule-spring.schemas"/>
                 <exclude name="org/openspaces/esb/servicemix/**"/>
+                <exclude name="META-INF/services/org/apache/**"/>
             </fileset>
             <manifest>
                 <attribute name="Implementation-Title" value="${openspaces-title}"/>
@@ -107,10 +109,14 @@
             </manifest>
         </jar>
 
-        <copy file="${target.classes.dir}/META-INF/spring.handlers" tofile="${target.classes.dir}/META-INF/spring.handlers.orig"/>
-        <copy file="${target.classes.dir}/META-INF/spring.schemas" tofile="${target.classes.dir}/META-INF/spring.schemas.orig"/>
-        <copy file="${target.classes.dir}/META-INF/mule-spring.handlers" tofile="${target.classes.dir}/META-INF/spring.handlers" overwrite="true"/>
-        <copy file="${target.classes.dir}/META-INF/mule-spring.schemas" tofile="${target.classes.dir}/META-INF/spring.schemas" overwrite="true"/>
+        <copy file="${target.classes.dir}/META-INF/spring.handlers"
+              tofile="${target.classes.dir}/META-INF/spring.handlers.orig"/>
+        <copy file="${target.classes.dir}/META-INF/spring.schemas"
+              tofile="${target.classes.dir}/META-INF/spring.schemas.orig"/>
+        <copy file="${target.classes.dir}/META-INF/mule-spring.handlers"
+              tofile="${target.classes.dir}/META-INF/spring.handlers" overwrite="true"/>
+        <copy file="${target.classes.dir}/META-INF/mule-spring.schemas"
+              tofile="${target.classes.dir}/META-INF/spring.schemas" overwrite="true"/>
 
 
         <delete file="${lib.dir}/${name}/mule-os.jar"/>
@@ -127,17 +133,21 @@
                 <attribute name="OpenSpaces-Version" value="${openspaces-version}"/>
             </manifest>
         </jar>
-        <copy file="${target.classes.dir}/META-INF/spring.handlers.orig" tofile="${target.classes.dir}/META-INF/spring.handlers" overwrite="true"/>
-        <copy file="${target.classes.dir}/META-INF/spring.schemas.orig" tofile="${target.classes.dir}/META-INF/spring.schemas" overwrite="true"/>
-        <delete file="${target.classes.dir}/META-INF/spring.handlers.orig"/>
-        <delete file="${target.classes.dir}/META-INF/spring.schemas.orig"/>
 
+
+        <copy file="${target.classes.dir}/META-INF/servicemix-spring.handlers"
+              tofile="${target.classes.dir}/META-INF/spring.handlers" overwrite="true"/>
+        <copy file="${target.classes.dir}/META-INF/servicemix-spring.schemas"
+              tofile="${target.classes.dir}/META-INF/spring.schemas" overwrite="true"/>
 
         <delete file="${lib.dir}/${name}/servicemix-os.jar"/>
 
         <jar jarfile="${lib.dir}/${name}/servicemix-os.jar">
             <fileset dir="${target.classes.dir}">
                 <include name="org/openspaces/esb/servicemix/**"/>
+               <include name="META-INF/services/org/apache/**"/> 
+                <include name="META-INF/spring.handlers"/>
+                <include name="META-INF/spring.schemas"/>
             </fileset>
             <manifest>
                 <attribute name="Implementation-Title" value="${openspaces-title}"/>
@@ -146,6 +156,12 @@
             </manifest>
         </jar>
 
+        <copy file="${target.classes.dir}/META-INF/spring.handlers.orig"
+              tofile="${target.classes.dir}/META-INF/spring.handlers" overwrite="true"/>
+        <copy file="${target.classes.dir}/META-INF/spring.schemas.orig"
+              tofile="${target.classes.dir}/META-INF/spring.schemas" overwrite="true"/>
+        <delete file="${target.classes.dir}/META-INF/spring.handlers.orig"/>
+        <delete file="${target.classes.dir}/META-INF/spring.schemas.orig"/>
 
     </target>
 
@@ -210,7 +226,8 @@
         <copy todir="lib/${name}" file="${basedir}/openspaces.notice.txt"/>
     </target>
 
-    <target name="dist_1_4" depends="build_1_4, fulljar, buildexamples, srczip, javadoc, schema, license, maven-openspaces-plugin"
+    <target name="dist_1_4"
+            depends="build_1_4, fulljar, buildexamples, srczip, javadoc, schema, license, maven-openspaces-plugin"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}"/>
         <delete file="${dist.dir}/${name}-1.4.zip"/>
@@ -244,11 +261,12 @@
         <zip zipfile="${dist.dir}/${name}-1.4.zip">
             <zipfileset dir="${target.dir}/temp"/>
         </zip>
-    	<mkdir dir="${dist.dir}/1.4" />
-    	<copy todir="${dist.dir}/1.4" file="${lib.dir}/${name}/${name}.jar" />
+        <mkdir dir="${dist.dir}/1.4"/>
+        <copy todir="${dist.dir}/1.4" file="${lib.dir}/${name}/${name}.jar"/>
     </target>
 
-    <target name="dist_1_5" depends="build_1_5, fulljar, buildexamples, srczip, javadoc, schema, license, maven-openspaces-plugin"
+    <target name="dist_1_5"
+            depends="build_1_5, fulljar, buildexamples, srczip, javadoc, schema, license, maven-openspaces-plugin"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}"/>
         <delete file="${dist.dir}/${name}-1.5.zip"/>
@@ -266,12 +284,12 @@
                 <include name="lib/${name}/**"/>
                 <include name="lib/groovy/**"/>
 
-                <exclude  name="examples/openspaces/mule/**"/>
-                <exclude  name="examples/openspaces/servicemix/**"/>
+                <exclude name="examples/openspaces/mule/**"/>
+                <exclude name="examples/openspaces/servicemix/**"/>
             </zipfileset>
         </zip>
-    	<mkdir dir="${dist.dir}/1.5" />
-    	<copy todir="${dist.dir}/1.5" file="${lib.dir}/${name}/${name}.jar" />
+        <mkdir dir="${dist.dir}/1.5"/>
+        <copy todir="${dist.dir}/1.5" file="${lib.dir}/${name}/${name}.jar"/>
     </target>
 
     <target name="dist">
@@ -458,17 +476,17 @@
         </jar>
 
     </target>
-	
-	
-	<!-- Copying Maven2 plugin sources into the distribution -->
+
+
+    <!-- Copying Maven2 plugin sources into the distribution -->
     <target name="maven-openspaces-plugin">
-    	<mkdir dir="${maven.plugin.dir}"/>
+        <mkdir dir="${maven.plugin.dir}"/>
         <copy todir="${maven.plugin.dir}" preservelastmodified="true">
             <fileset dir="${basedir}/maven/maven-openspaces-plugin">
                 <include name="**/*"/>
             </fileset>
         </copy>
-    </target> 
+    </target>
 
 
 </project>
