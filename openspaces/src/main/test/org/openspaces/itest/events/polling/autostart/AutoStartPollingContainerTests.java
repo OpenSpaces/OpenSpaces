@@ -42,10 +42,10 @@ public class AutoStartPollingContainerTests extends AbstractDependencyInjectionS
     public void testAutoStartFalse() throws Exception{
         assertEquals(0, autoStartEventListener.getMessageCounter());
         gigaSpace.write(new Object());
-        Thread.sleep(100);
+        Thread.sleep(500);
         assertEquals(0, autoStartEventListener.getMessageCounter());
         pollingContainer.start() ;
-        Thread.sleep(100);
+        Thread.sleep(500);
         assertEquals(1, autoStartEventListener.getMessageCounter());        
     }
 
