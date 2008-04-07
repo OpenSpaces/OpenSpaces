@@ -76,7 +76,8 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
 
             if (logger.isLoggable(Level.FINEST)) {
                 StringBuffer buffer = new StringBuffer();
-                buffer.append("AdminFaultDetectionHandler Properties : ");
+                buffer.append("PUFaultDetectionHandler Properties : ");
+                buffer.append("invocation delay=" + invocationDelay + ", ");
                 buffer.append("retry count=" + retryCount + ", ");
                 buffer.append("retry timeout=" + retryTimeout);
                 logger.finest(buffer.toString());
