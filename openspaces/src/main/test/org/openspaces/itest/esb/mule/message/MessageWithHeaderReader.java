@@ -17,6 +17,7 @@
 package org.openspaces.itest.esb.mule.message;
 
 import org.mule.api.MuleEventContext;
+import org.mule.api.MuleMessage;
 import org.mule.api.lifecycle.Callable;
 
 
@@ -28,18 +29,20 @@ import org.mule.api.lifecycle.Callable;
  */
 public class MessageWithHeaderReader implements Callable {
 
-
-    public Object onCall(MuleEventContext eventContext) throws Exception {
-        Object payload = eventContext.getMessage().getPayload();
-        return changeName((MessageWithMessageHeader) payload);
-    }
-
     /**
      * Change the value of name property to "new" + name value.
      */
-    private Object changeName(MessageWithMessageHeader message) {
+    public Object onCall(MuleEventContext eventContext) throws Exception {
+        MuleMessage umoMsg = eventContext.getMessage();
+        Object payload = umoMsg.getPayload();
+        MessageWithMessageHeader message = ((MessageWithMessageHeader) payload);
         String name = (String) message.getProperty("name");
-        message.setProperty("name", "new " + name);
+        //pay attention that we are setting the new value on the umoMsg instead of the payload.
+        //this is due to the fact the the transformer will override the value of thie property on the orignal message
+        //by coping the values from the Adapter to the message.
+        umoMsg.setProperty("name", "new " + name);
+        message.setRead(true);
         return message;
     }
+
 }
