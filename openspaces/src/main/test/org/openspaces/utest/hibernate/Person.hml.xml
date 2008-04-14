@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="org.openspaces.utest.hibernate.Person" table="PERSON">
+        <id name="id" type="int">
+            <column name="id" length="20" />
+        </id>
+        <property name="username" type="string">
+            <column name="userName" length="20" />
+        </property>
+        <property name="firstName" type="string">
+            <column name="firstName" />
+        </property>
+        <property name="lastName" type="string">
+            <column name="lastName" length="20" />
+        </property>
+    </class>
+</hibernate-mapping>
