@@ -43,7 +43,7 @@
     </bean>
 
     <bean id="externalDataSource" class="org.openspaces.persistency.hibernate.HibernateExternalDataSource">
-        <property name="batchSize" value="10000"/>
+        <property name="initialLoadBatchSize" value="10000"/>
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
     

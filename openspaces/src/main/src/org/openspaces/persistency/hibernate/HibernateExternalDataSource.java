@@ -61,7 +61,7 @@ public class HibernateExternalDataSource implements ExternalDataSource<Object>, 
     private static final String DEFAULT_INITIAL_LOAD_QUERY = "from java.lang.Object";
 
     private SessionFactory sessionFactory;
-    private Integer batchSize;
+    private Integer initialLoadBatchSize;
     protected String initialLoadQuery = DEFAULT_INITIAL_LOAD_QUERY;
     protected ClusterInfo clusterInfo;
 
@@ -110,8 +110,14 @@ public class HibernateExternalDataSource implements ExternalDataSource<Object>, 
         this.sessionFactory = sessionFactory;
     }
 
-    public void setBatchSize(Integer batchSize) {
-        this.batchSize = batchSize;
+    /**
+     * Sets the initial load batch size. This will be used when retreving data from the database.
+     * The retreival is done in pages whose size is determined on the value of field.
+     * Default value is determined by {@link org.openspaces.persistency.hibernate.HibernateDataIterator#DEFAULT_LOAD_BATCH_SIZE}
+     * @param initialLoadBatchSize the batch size
+     */
+    public void setInitialLoadBatchSize(Integer initialLoadBatchSize) {
+        this.initialLoadBatchSize = initialLoadBatchSize;
     }
 
     /**
@@ -327,8 +333,8 @@ public class HibernateExternalDataSource implements ExternalDataSource<Object>, 
                 query.setCacheMode(CacheMode.IGNORE);
                 query.setCacheable(false);
                 HibernateDataIterator<Object> hibernateDataIterator = new HibernateDataIterator<Object>(query, session, transaction);
-                if (batchSize != null) {
-                    hibernateDataIterator.setLoadBatchSize(batchSize);
+                if (initialLoadBatchSize != null) {
+                    hibernateDataIterator.setLoadBatchSize(initialLoadBatchSize);
                 }
                 return hibernateDataIterator;
             }
@@ -376,8 +382,8 @@ public class HibernateExternalDataSource implements ExternalDataSource<Object>, 
                 hQuery.setCacheable(false);
                 hQuery.setReadOnly(true);
                 HibernateDataIterator<Object> hibernateDataIterator = new HibernateDataIterator<Object>(hQuery, session, transaction);
-                if (batchSize != null) {
-                    hibernateDataIterator.setLoadBatchSize(batchSize);
+                if (initialLoadBatchSize != null) {
+                    hibernateDataIterator.setLoadBatchSize(initialLoadBatchSize);
                 }
                 return hibernateDataIterator;
             }
@@ -396,8 +402,8 @@ public class HibernateExternalDataSource implements ExternalDataSource<Object>, 
                 query.setCacheMode(CacheMode.IGNORE);
                 query.setCacheable(false);
                 HibernateDataIterator<Object> hibernateDataIterator = new HibernateDataIterator<Object>(query, session, transaction);
-                if (batchSize != null) {
-                    hibernateDataIterator.setLoadBatchSize(batchSize);
+                if (initialLoadBatchSize != null) {
+                    hibernateDataIterator.setLoadBatchSize(initialLoadBatchSize);
                 }
                 return hibernateDataIterator;
             }
