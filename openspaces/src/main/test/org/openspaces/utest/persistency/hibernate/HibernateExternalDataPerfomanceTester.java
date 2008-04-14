@@ -86,7 +86,7 @@ public class HibernateExternalDataPerfomanceTester extends AbstractDependencyInj
     /**
      * Test the initial load functionality outside of the space
      */
-    public void testInitialLoad() throws Exception{
+    public void benchmarkInitialLoad() throws Exception{
         StopWatch stopWatch = new StopWatch("HibernateDataSource");
         stopWatch.start();
         DataIterator dataIterator = externalDataSource.initialLoad();
