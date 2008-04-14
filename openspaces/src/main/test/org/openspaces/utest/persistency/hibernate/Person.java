@@ -1,4 +1,4 @@
-package org.openspaces.utest.hibernate;
+package org.openspaces.utest.persistency.hibernate;
 
 import com.gigaspaces.annotation.pojo.SpaceClass;
 import com.gigaspaces.annotation.pojo.SpaceId;

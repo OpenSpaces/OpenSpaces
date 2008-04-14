@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openspaces.utest.hibernate;
+package org.openspaces.utest.persistency.hibernate;
 
 import com.gigaspaces.datasource.BulkItem;
 import com.gigaspaces.datasource.DataIterator;
@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Tests the {@link org.openspaces.hibernate.HibernateExternalDataSource} class 
+ * Tests the {@link org.openspaces.persistency.hibernate.HibernateExternalDataSource} class
  */
 public class HibernateExternalDataSourceUnitTests extends AbstractDependencyInjectionSpringContextTests {
 
@@ -255,7 +255,7 @@ public class HibernateExternalDataSourceUnitTests extends AbstractDependencyInje
 
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/utest/hibernate/hibernate-data-source-context.xml"};
+        return new String[]{"/org/openspaces/utest/persistency/hibernate/hibernate-data-source-context.xml"};
         
     }
 }

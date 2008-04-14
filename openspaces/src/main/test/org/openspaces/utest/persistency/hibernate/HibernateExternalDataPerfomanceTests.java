@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openspaces.utest.hibernate;
+package org.openspaces.utest.persistency.hibernate;
 
 import com.gigaspaces.datasource.DataIterator;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.openspaces.hibernate.HibernateExternalDataSource;
+import org.openspaces.persistency.hibernate.HibernateExternalDataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.HibernateTemplate;
@@ -30,7 +30,8 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 
 /**
- * Performance tests the {@link org.openspaces.hibernate.HibernateExternalDataSource} class
+ * Performance tests the {@link org.openspaces.persistency.hibernate.HibernateExternalDataSource} class.
+ * Make sure you have an instance of h2 server named 'xdb' up and running. 
  */
 public class HibernateExternalDataPerfomanceTests extends AbstractDependencyInjectionSpringContextTests {
 
@@ -102,6 +103,6 @@ public class HibernateExternalDataPerfomanceTests extends AbstractDependencyInje
 
     @Override
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/utest/hibernate/hibernate-data-source-perf-context.xml"};
+        return new String[]{"/org/openspaces/utest/persistency/hibernate/hibernate-data-source-perf-context.xml"};
     }
 }

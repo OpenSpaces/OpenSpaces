@@ -696,7 +696,7 @@
     </library>
     <library name="ASM">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/asm/asm-2.2.3.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/asm/asm.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />

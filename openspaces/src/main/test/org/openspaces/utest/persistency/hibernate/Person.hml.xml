@@ -2,7 +2,7 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-    <class name="org.openspaces.utest.hibernate.Person" table="PERSON">
+    <class name="org.openspaces.utest.persistency.hibernate.Person" table="PERSON">
         <id name="id" type="int">
             <column name="id" length="20" />
         </id>

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openspaces.hibernate;
+package org.openspaces.persistency.hibernate;
 
 import com.gigaspaces.datasource.DataIterator;
 import org.hibernate.Criteria;
@@ -32,7 +32,7 @@ import java.util.NoSuchElementException;
  *
  * @author uri  
  */
-public class HibernateDataIterator<T> implements DataIterator<T>
+class HibernateDataIterator<T> implements DataIterator<T>
 {
 	private static final int DEFAULT_FETCH_SIZE = 10000;
     

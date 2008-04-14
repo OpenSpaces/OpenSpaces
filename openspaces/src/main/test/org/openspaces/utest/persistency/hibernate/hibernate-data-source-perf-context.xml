@@ -28,7 +28,7 @@
         <property name="dataSource" ref="dataSource"/>
         <property name="mappingResources">
             <list>
-                <value>/org/openspaces/utest/hibernate/Person.hml.xml</value>
+                <value>/org/openspaces/utest/persistency/hibernate/Person.hml.xml</value>
             </list>
         </property>
         <property name="hibernateProperties">
@@ -42,7 +42,7 @@
         </property>
     </bean>
 
-    <bean id="externalDataSource" class="org.openspaces.hibernate.HibernateExternalDataSource">
+    <bean id="externalDataSource" class="org.openspaces.persistency.hibernate.HibernateExternalDataSource">
         <property name="batchSize" value="10000"/>
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
