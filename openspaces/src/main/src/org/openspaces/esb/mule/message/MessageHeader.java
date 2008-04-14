@@ -1,7 +1,5 @@
 package org.openspaces.esb.mule.message;
 
-import java.util.Map;
-
 /**
  * Base interface that expose mule meta data.
  *
@@ -30,12 +28,12 @@ public interface MessageHeader {
     /**
      * @return {@link java.util.Map} that contains all the properties.
      */
-    Map<String, Object> getProperties();
+    MatchingMap<String, Object> getProperties();
 
     /**
      * Sets all the properties from the properties param.
      *
      * @param properties - properties to set.
      */
-    void setProperties(Map<String, Object> properties);
+    void setProperties(MatchingMap<String, Object> properties);
 }

@@ -44,6 +44,7 @@ public class MetaDataMessageHeaderTests extends AbstractMuleTests {
 
         for (int i = 0; i < numberOfMsgs; i++) {
             MessageWithMessageHeader message = new MessageWithMessageHeader("Hello World " + i, i + "");
+            message.setRead(false);
             message.setCorrelationSequence(i);
             message.setCorrelationId("CorrelationId " + i);
             message.setCorrelationGroupSize(i);
@@ -54,15 +55,15 @@ public class MetaDataMessageHeaderTests extends AbstractMuleTests {
 
         //blocking wait untill the mule writes back the messages to the space after reading them.
         for (int i = 0; i < numberOfMsgs; i++) {
-            MessageWithMessageHeader template = new MessageWithMessageHeader("Hello World " + i, i + "");
+            String msg = "Hello World " + i;
+            MessageWithMessageHeader template = new MessageWithMessageHeader(msg, i + "");
+            template.setRead(true);
             MessageWithMessageHeader message = gigaSpace.take(template, 5000);
-            assertEquals(template.getMessage(), message.getMessage());
-            assertEquals(list.get(i).getUniqueId(), message.getUniqueId());
-            assertEquals(list.get(i).getCorrelationGroupSize(), message.getCorrelationGroupSize());
-            assertEquals(list.get(i).getCorrelationId(), message.getCorrelationId());
-            assertEquals(list.get(i).getCorrelationSequence(), message.getCorrelationSequence());
-            assertEquals("new " + list.get(i).getProperty("name"), message.getProperty("name"));
-
+            assertEquals("Hello World " + i, message.getMessage());
+            assertEquals(i + "", message.getUniqueId());
+            assertEquals(new Integer(i), message.getCorrelationGroupSize());
+            assertEquals(new Integer(i), message.getCorrelationSequence());
+            assertEquals("new name " + i, message.getProperty("name"));
         }
         assertEquals(0, gigaSpace.count(new MessageWithMessageHeader()));
     }

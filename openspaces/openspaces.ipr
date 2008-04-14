@@ -885,6 +885,13 @@
         <root url="jar://$PROJECT_DIR$/lib/servicemix/xbean-spring-3.2-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="dummylib">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/JSpaces.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
   </component>
 </project>
 

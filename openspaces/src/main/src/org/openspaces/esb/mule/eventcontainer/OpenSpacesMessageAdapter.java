@@ -54,9 +54,9 @@ public class OpenSpacesMessageAdapter extends AbstractMessageAdapter {
         this.message = message;
 
         if (message instanceof MessageHeader) {
-            Iterator<String> keys = ((MessageHeader) message).getProperties().keySet().iterator();
+            Iterator keys = ((MessageHeader) message).getProperties().keySet().iterator();
             while (keys.hasNext()) {
-                String key = keys.next();
+                String key = (String) keys.next();
                 Object value = ((MessageHeader) message).getProperty(key);
                 if (value != null) {
                     setProperty(key, value);

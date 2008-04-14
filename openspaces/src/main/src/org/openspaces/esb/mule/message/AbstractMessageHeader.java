@@ -16,9 +16,7 @@
 package org.openspaces.esb.mule.message;
 
 
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 /**
  * implemention of all Mule metadata interfaces.
@@ -28,20 +26,19 @@ import java.util.Map;
  */
 public abstract class AbstractMessageHeader implements CorrelationMessageHeader, ReplyToMessageHeader, UniqueIdMessageHeader {
 
-    private Map<String, Object> properties = new HashMap<String, Object>();
+    private MatchingMap<String, Object> properties = new MatchingMap<String, Object>();
 
     public Iterator<String> propertyNames() {
         return properties.keySet().iterator();
     }
 
-    public Map<String, Object> getProperties() {
+    public MatchingMap<String, Object> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String, Object> properties) {
+    public void setProperties(MatchingMap<String, Object> properties) {
         this.properties = properties;
     }
-
 
     public void setProperty(String key, Object value) {
         properties.put(key, value);
@@ -91,5 +88,25 @@ public abstract class AbstractMessageHeader implements CorrelationMessageHeader,
 
     public void setCorrelationGroupSize(Integer correlationGroupSize) {
         properties.put(CORRELATION_GROUP_SIZE, correlationGroupSize);
+    }
+
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AbstractMessageHeader that = (AbstractMessageHeader) o;
+
+        if (properties != null ? !properties.equals(that.properties) : that.properties != null) return false;
+
+        return true;
+    }
+
+    public int hashCode() {
+        return (properties != null ? properties.hashCode() : 0);
+    }
+
+    @Override
+    public String toString() {
+        return properties.toString();
     }
 }

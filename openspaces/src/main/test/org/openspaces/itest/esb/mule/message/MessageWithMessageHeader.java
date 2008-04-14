@@ -53,9 +53,7 @@ public class MessageWithMessageHeader extends AbstractMessageHeader implements M
     }
 
 
-    public String toString() {
-        return "message=" + message ;
-    }
+
 
     public boolean isRead() {
         return read;
@@ -69,6 +67,7 @@ public class MessageWithMessageHeader extends AbstractMessageHeader implements M
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
 
         MessageWithMessageHeader that = (MessageWithMessageHeader) o;
 
@@ -79,9 +78,14 @@ public class MessageWithMessageHeader extends AbstractMessageHeader implements M
     }
 
     public int hashCode() {
-        int result;
-        result = (message != null ? message.hashCode() : 0);
+        int result = super.hashCode();
+        result = 31 * result + (message != null ? message.hashCode() : 0);
         result = 31 * result + (read ? 1 : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "message = " + message + " read = " +  read + " " + super.toString();
     }
 }
