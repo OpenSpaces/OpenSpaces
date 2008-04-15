@@ -19,19 +19,19 @@ import com.gigaspaces.serialization.pbs.openspaces.ProcessingUnitProxy;
  */
 public class DotnetProcessingUnitBean implements InitializingBean, DisposableBean, ClusterInfoAware {
     private ProcessingUnitProxy proxy;  
-    private String assemblyFullPath;
+    private String assemblyFile;
     private String implementationClassName;
     private String[] dependencies;
     private ClusterInfo clusterInfo;
     private Properties customProperties;
 
     /**
-     * Injects the .Net processing unit implementation's assembly full path
+     * Injects the .Net processing unit implementation's assembly file
      * 
-     * @param assemblyFullPath
+     * @param assemblyFile
      */
-    public void setAssemblyFullPath(String assemblyFullPath) {
-        this.assemblyFullPath = assemblyFullPath;
+    public void setAssemblyFile(String assemblyFile) {
+        this.assemblyFile = assemblyFile;
     }
 
     /**
@@ -72,7 +72,7 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
             if (classLoader instanceof ServiceClassLoader) {
                 Thread.currentThread().setContextClassLoader(classLoader.getParent());
             }
-            proxy = new ProcessingUnitProxy(assemblyFullPath, implementationClassName, dependencies);
+            proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies);
             if (clusterInfo == null) {
                 proxy.init(customProperties);
             } else {
