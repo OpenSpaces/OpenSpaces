@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module relativePaths="true" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" inherit-compiler-output="false">
-    <output url="file://$MODULE_DIR$/../../target/sandbox-classes" />
+    <output url="file://$JBOSS_HOME$/Uri/Dev/GS-CVS/openspaces/target/sandbox-classes" />
     <exclude-output />
-    <output-test url="file://$MODULE_DIR$/../../target/sandbox-test-classes" />
+    <output-test url="file://$JBOSS_HOME$/Uri/Dev/GS-CVS/openspaces/target/sandbox-test-classes" />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
@@ -11,6 +11,18 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="source-main" />
+    <orderEntry type="library" name="servicemix" level="project" />
+    <orderEntry type="module-library">
+      <library name="ObjectGrid Session">
+        <CLASSES>
+          <root url="jar://$JBOSS_HOME$/JavaLibs/ObjectGrid/session/lib/sessionobjectgrid.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$JBOSS_HOME$/JavaLibs/ObjectGrid/session/src" />
+        </SOURCES>
+      </library>
+    </orderEntry>
     <orderEntryProperties />
   </component>
 </module>
