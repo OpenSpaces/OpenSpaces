@@ -38,7 +38,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.metadata.ClassMetadata;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoAware;
-//import org.openspaces.persistency.ExternalDataSourceExceptionFilter;
+import org.openspaces.persistency.BulkDataPersisterExceptionFilter;
 
 import java.io.Serializable;
 import java.sql.SQLException;
@@ -65,7 +65,7 @@ public class HibernateExternalDataSource implements ExternalDataSource<Object>, 
     private Integer initialLoadBatchSize;
     protected String initialLoadQuery = DEFAULT_INITIAL_LOAD_QUERY;
     protected ClusterInfo clusterInfo;
-  //  protected ExternalDataSourceExceptionFilter exceptionFilter;  
+    protected BulkDataPersisterExceptionFilter exceptionFilter;
 
     /**
      * Returns the query used for initial loading of the data (the one invoked from {@link #initialLoad})
@@ -92,6 +92,15 @@ public class HibernateExternalDataSource implements ExternalDataSource<Object>, 
      */
     public void setClusterInfo(ClusterInfo clusterInfo) {
         this.clusterInfo = clusterInfo;
+    }
+
+    /**
+     * Sets the {@link org.openspaces.persistency.BulkDataPersisterExceptionFilter} to be used
+     * when executing {@link #executeBulk(java.util.List)} 
+     * @param exceptionFilter the filter so set. If non set no exception will be filtered
+     */
+    public void setExceptionFilter(BulkDataPersisterExceptionFilter exceptionFilter) {
+        this.exceptionFilter = exceptionFilter;
     }
 
     /**
@@ -258,33 +267,46 @@ public class HibernateExternalDataSource implements ExternalDataSource<Object>, 
      */
     public void executeBulk(final List<BulkItem> bulk) throws DataSourceException {
         log.debug("method entry : executeBulk(List<BulkItem> bulk)");
-        doInHibernateTransaction(new HibernateCallback() {
-            public Object doInHibernate(Session session) throws HibernateException, SQLException {
-                session.setFlushMode(FlushMode.MANUAL);
-                Iterator<BulkItem> iter = bulk.iterator();
-                while (iter.hasNext()) {
-                    BulkItem bulkItem = iter.next();
-                    Object entry = bulkItem.getItem();
-                    Object id = getId(entry);
-                    if (id == null) {
-                        continue;
+        try {
+            doInHibernateTransaction(new HibernateCallback() {
+                public Object doInHibernate(Session session) throws HibernateException, SQLException {
+                    session.setFlushMode(FlushMode.MANUAL);
+                    Iterator<BulkItem> iter = bulk.iterator();
+                    while (iter.hasNext()) {
+                        BulkItem bulkItem = iter.next();
+                        Object entry = bulkItem.getItem();
+                        Object id = getId(entry);
+                        if (id == null) {
+                            continue;
+                        }
+                        switch (bulkItem.getOperation()) {
+                            case BulkItem.REMOVE:
+                                session.delete(entry);
+                                break;
+                            case BulkItem.WRITE:
+                            case BulkItem.UPDATE:
+                                session.merge(entry);
+                                break;
+                            default:
+                                break;
+                        }
                     }
-                    switch (bulkItem.getOperation()) {
-                        case BulkItem.REMOVE:
-                            session.delete(entry);
-                            break;
-                        case BulkItem.WRITE:
-                        case BulkItem.UPDATE:
-                            session.merge(entry);
-                            break;
-                        default:
-                            break;
-                    }
+                    session.flush();
+                    return null;
                 }
-                session.flush();
-                return null;
+            });
+        } catch (DataSourceException e) {
+            if (!shouldFilterException(e)) {
+                throw e;
             }
-        });
+        }
+    }
+
+    private boolean shouldFilterException(DataSourceException e) {
+        if (exceptionFilter != null) {
+            return exceptionFilter.shouldFilter(e);            
+        }
+        return false;
     }
 
     /**
