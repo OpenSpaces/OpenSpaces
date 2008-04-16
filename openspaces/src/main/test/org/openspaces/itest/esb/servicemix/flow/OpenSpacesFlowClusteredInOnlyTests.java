@@ -39,10 +39,10 @@ public class OpenSpacesFlowClusteredInOnlyTests extends OpenSpacesFlowAbstractTe
         senderContainer.activateComponent(new ActivationSpec("sender", sender2));
         senderContainer.activateComponent(new ActivationSpec("receiver", receiver1));
         receiverContainer.activateComponent(new ActivationSpec("receiver", receiver2));
-        Thread.sleep(1000);
+        Thread.sleep(2000);
 
         sender2.sendMessages(NUM_MESSAGES);
-        Thread.sleep(3000);
+        Thread.sleep(5000);
 
         assertTrue(receiver1.getMessageList().hasReceivedMessage());
         assertTrue(receiver2.getMessageList().hasReceivedMessage());
@@ -50,10 +50,10 @@ public class OpenSpacesFlowClusteredInOnlyTests extends OpenSpacesFlowAbstractTe
         receiver2.getMessageList().flushMessages();
 
         senderContainer.deactivateComponent("receiver");
-        Thread.sleep(1000);
+        Thread.sleep(2000);
 
         sender2.sendMessages(NUM_MESSAGES);
-        Thread.sleep(3000);
+        Thread.sleep(4000);
         assertFalse(receiver1.getMessageList().hasReceivedMessage());
         assertTrue(receiver2.getMessageList().hasReceivedMessage());
         receiver1.getMessageList().flushMessages();
@@ -61,10 +61,10 @@ public class OpenSpacesFlowClusteredInOnlyTests extends OpenSpacesFlowAbstractTe
 
         senderContainer.activateComponent(new ActivationSpec("receiver", receiver1));
         receiverContainer.deactivateComponent("receiver");
-        Thread.sleep(1000);
+        Thread.sleep(2000);
 
         sender2.sendMessages(NUM_MESSAGES);
-        Thread.sleep(3000);
+        Thread.sleep(4000);
         assertTrue(receiver1.getMessageList().hasReceivedMessage());
         assertFalse(receiver2.getMessageList().hasReceivedMessage());
         receiver1.getMessageList().flushMessages();

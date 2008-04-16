@@ -35,17 +35,16 @@ public class PUServicemixTests extends AbstractDependencyInjectionSpringContextT
     public void test() {
         GigaSpace gigaSpace =
                 new GigaSpaceConfigurer(new UrlSpaceConfigurer("jini://*/*/space").lookupGroups(System.getProperty("user.name")).space()).gigaSpace();
-        for (int i = 0; i < 100; i++) {
+        int numOfMsgs = 10;
+        for (int i = 0; i < numOfMsgs; i++) {
             Message msg = new Message("hello " + i, false);
             gigaSpace.write(msg);
         }
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < numOfMsgs; i++) {
             Message msg = new Message("hello " + i, true);
-            Message message = gigaSpace.read(msg, Long.MAX_VALUE);
+            Message message = gigaSpace.take(msg, 5000);
             assertNotNull(message);
 
         }
-        int count = gigaSpace.count(new Message());
-        assertEquals(count, 0);
     }
 }

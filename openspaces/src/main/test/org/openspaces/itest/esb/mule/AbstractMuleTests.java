@@ -32,6 +32,8 @@ import org.openspaces.core.space.UrlSpaceConfigurer;
  */
 public abstract class AbstractMuleTests extends TestCase {
 
+    protected static final int TIMEOUT = 5000;
+
     protected MuleContext muleContext;
 
     protected SpringXmlConfigurationBuilder builder;

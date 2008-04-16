@@ -58,7 +58,7 @@ public class MetaDataMessageHeaderTests extends AbstractMuleTests {
             String msg = "Hello World " + i;
             MessageWithMessageHeader template = new MessageWithMessageHeader(msg, i + "");
             template.setRead(true);
-            MessageWithMessageHeader message = gigaSpace.take(template, 5000);
+            MessageWithMessageHeader message = gigaSpace.take(template, TIMEOUT);
             assertEquals("Hello World " + i, message.getMessage());
             assertEquals(i + "", message.getUniqueId());
             assertEquals(new Integer(i), message.getCorrelationGroupSize());

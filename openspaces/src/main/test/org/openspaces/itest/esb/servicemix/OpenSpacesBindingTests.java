@@ -26,17 +26,16 @@ public class OpenSpacesBindingTests extends SpringTestSupport {
     }
 
     public void test() {
-        for (int i = 0; i < 10; i++) {
+        int numOfMsgs = 10;
+        for (int i = 0; i < numOfMsgs; i++) {
             Message msg = new Message("hello " + i, false);
             gigaSpace.write(msg);
         }
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < numOfMsgs; i++) {
             Message msg = new Message("hello " + i, true);
-            Message message = gigaSpace.read(msg, Long.MAX_VALUE);
+            Message message = gigaSpace.take(msg, 5000);
             assertNotNull(message);
         }
-        int count = gigaSpace.count(new Message());
-        assertEquals(0, count);
     }
 
 }

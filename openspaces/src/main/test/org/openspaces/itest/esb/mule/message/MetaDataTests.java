@@ -44,7 +44,7 @@ public class MetaDataTests extends AbstractMuleTests {
         //blocking wait untill the mule writes back the messages to the space after reading them.
         for (int i = 0; i < numberOfMsgs; i++) {
             ProcessedMessage template = new ProcessedMessage("Hello World " + i);
-            ProcessedMessage message = gigaSpace.take(template, 5000);
+            ProcessedMessage message = gigaSpace.take(template, TIMEOUT);
             assertEquals(template, message);
             assertEquals("processed message " + "Hello World " + i, message.getProperty("name"));
         }

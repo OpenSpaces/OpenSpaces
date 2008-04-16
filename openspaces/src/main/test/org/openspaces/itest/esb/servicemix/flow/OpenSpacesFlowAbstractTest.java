@@ -63,7 +63,7 @@ public abstract class OpenSpacesFlowAbstractTest extends TestCase {
         receiverContainer.start();
         Object receiverFlow = receiverContainer.getFlow();
         assertTrue(receiverFlow instanceof OpenSpacesFlow);
-        Thread.sleep(2000);
+        Thread.sleep(3000);
     }
 
     protected void tearDown() throws Exception {

@@ -20,7 +20,7 @@ package org.openspaces.itest.esb.servicemix.flow;
  */
 public class OpenSpacesFlowClusteredStatelessSyncInOnlyTests extends OpenSpacesFlowAbstractTest {
 
-    //todo: delte this empty test after resolving the following issue 
+    //todo: delete this empty test after resolving the following issue 
      public void test() throws Exception {
 
      }

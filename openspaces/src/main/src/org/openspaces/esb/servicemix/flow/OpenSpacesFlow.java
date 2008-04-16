@@ -85,7 +85,7 @@ public class OpenSpacesFlow extends AbstractFlow {
 
     private boolean persistent = false;
 
-    private long timeout = 1000;
+    private long timeout = 5000;
 
 
     public void setGigaSpace(GigaSpace gigaSpace) {

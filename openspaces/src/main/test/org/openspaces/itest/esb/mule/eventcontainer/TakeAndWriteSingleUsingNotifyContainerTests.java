@@ -33,7 +33,7 @@ public class TakeAndWriteSingleUsingNotifyContainerTests extends AbstractMuleTes
     }
 
     public void testTakeSingleFromSpace() throws ConfigurationException {
-        int numberOfMsgs = 100;
+        int numberOfMsgs = 10;
         for (int i = 0; i < numberOfMsgs; i++) {
             SimpleMessage message = new SimpleMessage("Hello World " + i, false);
             gigaSpace.write(message);
@@ -42,10 +42,10 @@ public class TakeAndWriteSingleUsingNotifyContainerTests extends AbstractMuleTes
         //blocking wait untill the mule writes back the messages to the space after reading them.
         for (int i = 0; i < numberOfMsgs; i++) {
             SimpleMessage template = new SimpleMessage("Hello World " + i, true);
-            SimpleMessage message = (SimpleMessage) gigaSpace.take(template, 500);
+            SimpleMessage message = (SimpleMessage) gigaSpace.take(template, TIMEOUT);
             assertEquals(template, message);
         }
-        assertEquals(100, gigaSpace.count(new SimpleMessage(null, false)));
+        assertEquals(numberOfMsgs, gigaSpace.count(new SimpleMessage(null, false)));
         assertEquals(0, gigaSpace.count(new SimpleMessage(null, true)));
     }
 
