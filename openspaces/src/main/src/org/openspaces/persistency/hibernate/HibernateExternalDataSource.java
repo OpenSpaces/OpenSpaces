@@ -38,7 +38,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.metadata.ClassMetadata;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoAware;
-import org.openspaces.persistency.ExternalDataSourceExceptionFilter;
+//import org.openspaces.persistency.ExternalDataSourceExceptionFilter;
 
 import java.io.Serializable;
 import java.sql.SQLException;
@@ -65,7 +65,7 @@ public class HibernateExternalDataSource implements ExternalDataSource<Object>, 
     private Integer initialLoadBatchSize;
     protected String initialLoadQuery = DEFAULT_INITIAL_LOAD_QUERY;
     protected ClusterInfo clusterInfo;
-    protected ExternalDataSourceExceptionFilter exceptionFilter;  
+  //  protected ExternalDataSourceExceptionFilter exceptionFilter;  
 
     /**
      * Returns the query used for initial loading of the data (the one invoked from {@link #initialLoad})
