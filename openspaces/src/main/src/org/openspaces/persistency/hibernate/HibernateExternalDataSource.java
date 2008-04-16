@@ -38,6 +38,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.metadata.ClassMetadata;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoAware;
+import org.openspaces.persistency.ExternalDataSourceExceptionFilter;
 
 import java.io.Serializable;
 import java.sql.SQLException;
@@ -51,7 +52,7 @@ import java.util.Properties;
  * made on the space to an external database.
  * It delegates these changes into external database via Hibernate 3.0 ORM.
  *
- * @author uri
+ * @author Uri Cohen
  * @see com.gigaspaces.datasource.ExternalDataSource
  */
 public class HibernateExternalDataSource implements ExternalDataSource<Object>, ClusterInfoAware {
@@ -64,6 +65,7 @@ public class HibernateExternalDataSource implements ExternalDataSource<Object>, 
     private Integer initialLoadBatchSize;
     protected String initialLoadQuery = DEFAULT_INITIAL_LOAD_QUERY;
     protected ClusterInfo clusterInfo;
+    protected ExternalDataSourceExceptionFilter exceptionFilter;  
 
     /**
      * Returns the query used for initial loading of the data (the one invoked from {@link #initialLoad})

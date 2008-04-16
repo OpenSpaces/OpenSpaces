@@ -35,7 +35,7 @@ import org.openspaces.remoting.AsyncRemotingProxyConfigurer;
  *                  .script("return 1")));
  * </pre>
  *
- * @author uri
+ * @author Uri Cohen
  */
 public class AsyncScriptingProxyConfigurer<T> {
 

@@ -30,7 +30,7 @@ import java.util.NoSuchElementException;
  * Hibernate constructs (Query or criteria).
  * Results are fetched in bulks, and bulk size can be determined by the method {@link #setLoadBatchSize(int)} .
  *
- * @author uri
+ * @author Uri Cohen
  */
 class HibernateDataIterator<T> implements DataIterator<T> {
     /**

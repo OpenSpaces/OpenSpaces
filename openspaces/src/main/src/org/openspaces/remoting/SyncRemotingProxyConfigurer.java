@@ -33,7 +33,7 @@ import org.openspaces.core.GigaSpace;
  * proxy.businessMethod(...);
  * </pre>
  *
- * @author uri
+ * @author Uri Cohen
  */
 public class SyncRemotingProxyConfigurer<T> {
 
