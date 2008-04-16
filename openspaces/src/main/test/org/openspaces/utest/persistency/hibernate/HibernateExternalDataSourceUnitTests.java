@@ -253,7 +253,6 @@ public class HibernateExternalDataSourceUnitTests extends AbstractDependencyInje
         assertEquals(numberOfEntriesToCreate+1, hibernateTemplate.find("from Person").size());
     }
 
-
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/utest/persistency/hibernate/hibernate-data-source-context.xml"};
         
