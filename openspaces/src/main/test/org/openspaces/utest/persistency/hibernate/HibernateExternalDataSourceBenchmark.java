@@ -33,7 +33,7 @@ import java.sql.SQLException;
  * Performance tests the {@link org.openspaces.persistency.hibernate.HibernateExternalDataSource} class.
  * Make sure you have an instance of h2 server named 'xdb' up and running. 
  */
-public class HibernateExternalDataPerfomanceTester extends AbstractDependencyInjectionSpringContextTests {
+public class HibernateExternalDataSourceBenchmark extends AbstractDependencyInjectionSpringContextTests {
 
     private SessionFactory sessionFactory;
     private HibernateTemplate hibernateTemplate;
