@@ -292,15 +292,20 @@ public class HibernateExternalDataSource implements ExternalDataSource<Object>, 
         log.debug("method entry : count(Object template)");
         return (Integer) doInHibernateTransaction(new HibernateCallback() {
             public Object doInHibernate(Session session) throws HibernateException, SQLException {
-                Example example = Example.create(template);
-                Criteria criteria = session.createCriteria(template.getClass()).add(example);
+                Criteria criteria;
+                if (template == null) {
+                    criteria = session.createCriteria(Object.class);
+                } else {
+                    Example example = Example.create(template);
+                    criteria = session.createCriteria(template.getClass()).add(example);
 
-                // Handle null templates
-                Object idValue = getId(template);
-                if (idValue != null) {
-                    ClassMetadata classMetaData = getMetadata(template);
-                    String idPropName = classMetaData.getIdentifierPropertyName();
-                    criteria.add(Restrictions.eq(idPropName, idValue));
+                    // Handle null templates
+                    Object idValue = getId(template);
+                    if (idValue != null) {
+                        ClassMetadata classMetaData = getMetadata(template);
+                        String idPropName = classMetaData.getIdentifierPropertyName();
+                        criteria.add(Restrictions.eq(idPropName, idValue));
+                    }
                 }
                 criteria.setProjection(Projections.rowCount());
                 //no caching
