@@ -23,7 +23,7 @@ import org.openspaces.core.GigaSpace;
  *
  * <p>Usage example:
  * <pre>
- * IPojoSpace space = new UrlSpaceConfigurer("jini://&#42;/&#42;/mySpace")
+ * IJSpace space = new UrlSpaceConfigurer("jini://&#42;/&#42;/mySpace")
  *                        .space();
  * GigaSpace gigaSpace = new GigaSpaceConfigurer(space).gigaSpace();
  * MyBusinessInterface proxy = new SyncRemotingProxyConfigurer&lt;MyBusinessInterface&gt;(gigaSpace, MyBusinessInterface.class)
