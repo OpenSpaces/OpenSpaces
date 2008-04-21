@@ -53,14 +53,14 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
     }
 
     protected void doConnect() throws Exception {
-        InternalQueueEntry internalTemplate = new InternalQueueEntry();
-        internalTemplate.endpointURI = endpoint.getEndpointURI().getAddress();
-        internalTemplate.setFifo(connector.isFifo());
-        if (connector.isPersistent()) {
-            internalTemplate.makePersistent();
+        InternalQueueEntry internalTemplate;
+        if (connector.isFifo()) {
+            internalTemplate = new InternalQueueFifoEntry();
         } else {
-            internalTemplate.makeTransient();
+            internalTemplate = new InternalQueueEntry();
         }
+        internalTemplate.setPersist(connector.isPersistent());
+        internalTemplate.setEndpointURI(endpoint.getEndpointURI().getAddress());
         template = connector.getGigaSpaceObj().snapshot(internalTemplate);
     }
 
@@ -106,7 +106,6 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
                 }
             }
         }
-
         // let our workManager handle the batch of events
         return messages;
     }

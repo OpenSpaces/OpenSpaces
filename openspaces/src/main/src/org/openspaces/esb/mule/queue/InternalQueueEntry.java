@@ -16,21 +16,53 @@
 
 package org.openspaces.esb.mule.queue;
 
-import com.j_spaces.core.client.MetaDataEntry;
+import com.gigaspaces.annotation.pojo.SpacePersist;
+import com.gigaspaces.annotation.pojo.SpaceProperty;
 import org.mule.api.MuleMessage;
+
 
 /**
  * An internal queue entry holding the endopint address and the actual message.
  *
  * @author kimchy
  */
-public class InternalQueueEntry extends MetaDataEntry {
+public class InternalQueueEntry {
 
-    public String endpointURI;
+    protected String endpointURI;
 
-    public MuleMessage message;
+    protected MuleMessage message;
 
-    public static String[] __getSpaceIndexedFields() {
-        return new String[]{"endpointURI"};
+    protected Boolean persist;
+
+
+    @SpaceProperty(index = SpaceProperty.IndexType.BASIC)
+    public String getEndpointURI() {
+        return endpointURI;
+    }
+
+    public void setEndpointURI(String endpointURI) {
+        this.endpointURI = endpointURI;
+    }
+
+    public MuleMessage getMessage() {
+        return message;
+    }
+
+    public void setMessage(MuleMessage message) {
+        this.message = message;
+    }
+
+    @SpacePersist
+    public boolean isPersist() {
+        return (persist != null && persist.booleanValue());
+    }
+
+    public void setPersist(boolean persist) {
+        this.persist = persist;
+    }
+
+    @Override
+    public String toString() {
+        return "endpointURI = " + endpointURI + ", message = " + message + " persist = " + persist;
     }
 }
