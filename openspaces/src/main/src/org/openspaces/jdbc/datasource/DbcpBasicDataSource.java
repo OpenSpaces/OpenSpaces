@@ -567,6 +567,7 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
      *
      * @deprecated
      */
+    @Deprecated
     public boolean getRemoveAbandoned() {
         if (abandonedConfig != null) {
             return abandonedConfig.getRemoveAbandoned();
@@ -578,6 +579,7 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
      * @param removeAbandoned
      * @deprecated
      */
+    @Deprecated
     public void setRemoveAbandoned(boolean removeAbandoned) {
         if (abandonedConfig == null) {
             abandonedConfig = new AbandonedConfig();
@@ -593,6 +595,7 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
      *
      * @deprecated
      */
+    @Deprecated
     public int getRemoveAbandonedTimeout() {
         if (abandonedConfig != null) {
             return abandonedConfig.getRemoveAbandonedTimeout();
@@ -604,6 +607,7 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
      * @param removeAbandonedTimeout
      * @deprecated
      */
+    @Deprecated
     public void setRemoveAbandonedTimeout(int removeAbandonedTimeout) {
         if (abandonedConfig == null) {
             abandonedConfig = new AbandonedConfig();
@@ -624,6 +628,7 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
      *
      * @deprecated
      */
+    @Deprecated
     public boolean getLogAbandoned() {
         if (abandonedConfig != null) {
             return abandonedConfig.getLogAbandoned();
@@ -635,6 +640,7 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
      * @param logAbandoned
      * @deprecated
      */
+    @Deprecated
     public void setLogAbandoned(boolean logAbandoned) {
         if (abandonedConfig == null) {
             abandonedConfig = new AbandonedConfig();
