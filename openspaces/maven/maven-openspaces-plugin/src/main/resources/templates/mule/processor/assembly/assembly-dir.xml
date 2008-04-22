@@ -1,0 +1,35 @@
+<assembly>
+  <id>assembly-dir</id>
+  <formats>
+    <format>dir</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>target/classes</directory>
+      <lineEnding>keep</lineEnding>
+      <outputDirectory>processor</outputDirectory>
+      <includes>
+        <include>**/**</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+  <dependencySets>
+    <dependencySet>
+      <useProjectArtifact>false</useProjectArtifact>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
+      <outputDirectory>processor/lib</outputDirectory>
+      <excludes>
+        <exclude>${puGroupId}:common</exclude>
+      </excludes>
+    </dependencySet>
+    <dependencySet>
+      <useProjectArtifact>false</useProjectArtifact>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
+      <outputDirectory>processor/shared-lib</outputDirectory>
+      <includes>
+        <include>${puGroupId}:common</include>
+      </includes>
+    </dependencySet>
+  </dependencySets>
+</assembly>
