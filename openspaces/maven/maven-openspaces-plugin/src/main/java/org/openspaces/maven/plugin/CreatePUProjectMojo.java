@@ -40,6 +40,11 @@ public class CreatePUProjectMojo extends AbstractMojo
 	private static final String FILTER_GROUP_ID = "${puGroupId}";
 	
 	/**
+     * the groupId string to replace with the package name 
+     */
+    private static final String FILTER_GROUP_PATH = "${puGroupPath}";
+	
+	/**
 	 * the groupId string to replace with the package name 
 	 */
 	private static final String FILTER_ARTIFACT_ID = "${puArtifactId}";
@@ -78,6 +83,8 @@ public class CreatePUProjectMojo extends AbstractMojo
      * The template directory name.
      */
     private String templateDirName;
+    
+    private boolean isMirror = false;
 
     
     public void execute() throws MojoExecutionException
@@ -87,6 +94,15 @@ public class CreatePUProjectMojo extends AbstractMojo
     	{
     		executeDefault();
     	}
+    	else if (template.equals("mule"))
+    	{
+    	    executeMule();
+    	}
+    	else if (template.equals("mirror"))
+        {
+    	    isMirror = true;
+            executeMirror();
+        }
     	else
     	{
     		throw new MojoExecutionException("Unknown project template: " + template);
@@ -98,8 +114,6 @@ public class CreatePUProjectMojo extends AbstractMojo
      */
     public void executeDefault() throws MojoExecutionException
     {
-        //File f = projectDir;
-        
         packageDirs = packageName.replaceAll("\\.", "/");
 
         if ( !projectDir.exists() )
@@ -117,6 +131,60 @@ public class CreatePUProjectMojo extends AbstractMojo
         	createFeederModule(projectDir);
         	getLog().info("Generating module: processor");
         	createProcessorModule(projectDir);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    public void executeMule() throws MojoExecutionException
+    {
+        packageDirs = packageName.replaceAll("\\.", "/");
+
+        if ( !projectDir.exists() )
+        {
+            projectDir.mkdirs();
+        }
+        
+        templateDirName = "/templates/" + template;
+        try
+        {
+            copyResource(templateDirName+"/pom.xml", projectDir, "pom.xml");
+            getLog().info("Generating module: common");
+            createCommonModule(projectDir);
+            getLog().info("Generating module: feeder");
+            createFeederModule(projectDir);
+            getLog().info("Generating module: processor");
+            createMuleProcessorModule(projectDir);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    public void executeMirror() throws MojoExecutionException
+    {
+        packageDirs = packageName.replaceAll("\\.", "/");
+
+        if ( !projectDir.exists() )
+        {
+            projectDir.mkdirs();
+        }
+        
+        templateDirName = "/templates/" + template;
+        try
+        {
+            copyResource(templateDirName+"/pom.xml", projectDir, "pom.xml");
+            getLog().info("Generating module: common");
+            createMirrorCommonModule(projectDir);
+            getLog().info("Generating module: feeder");
+            createFeederModule(projectDir);
+            getLog().info("Generating module: processor");
+            createProcessorModule(projectDir);
+            getLog().info("Generating module: mirror");
+            createMirrorModule(projectDir);
         }
         catch (Exception e)
         {
@@ -198,6 +266,61 @@ public class CreatePUProjectMojo extends AbstractMojo
     }
     
     /**
+     * Creates the mule processor module
+     * @param projDir the project directory
+     */
+    private void createMuleProcessorModule(File projDir)
+    {
+        createProcessorModule(projDir);
+     
+        // copy mule.xml
+        File puDir = new File(projDir, "processor/src/main/resources/META-INF/spring");
+        if (!puDir.exists())
+        {
+            puDir.mkdirs();
+        }
+        copyResource(templateDirName+"/processor/META-INF/spring/mule.xml", puDir, "mule.xml");
+    }
+    
+    /**
+     * Creates the common module for the mirror project
+     * @param projDir the project directory
+     */
+    private void createMirrorCommonModule(File projDir)
+    {
+        createCommonModule(projDir);
+        
+        // copy the Data hibernate mapping file
+        File commonDir = new File(projDir, "common/src/main/java/"+packageDirs+"/common");
+        commonDir.mkdirs();
+        
+        // copy common dir
+        copyResource(templateDirName+"/common/src/Data.hbm.xml", commonDir, "Data.hbm.xml");
+    }
+    
+    /**
+     * Creates the mirror module
+     * @param projDir the project directory
+     */
+    private void createMirrorModule(File projDir)
+    {
+        // copy pu.xml
+        File puDir = new File(projDir, "mirror/src/main/resources/META-INF/spring");
+        puDir.mkdirs();
+        copyResource(templateDirName+"/mirror/META-INF/spring/pu.xml", puDir, "pu.xml");
+        
+        // copy assembly dir
+        File assemblyDir = new File(projDir, "mirror/src/main/assembly");
+        assemblyDir.mkdirs();
+        copyResource(templateDirName+"/mirror/assembly/assembly-jar.xml", assemblyDir, "assembly-jar.xml");
+        copyResource(templateDirName+"/mirror/assembly/assembly-dir.xml", assemblyDir, "assembly-dir.xml");
+        
+        // copy pom.xml
+        File pomDir = new File(projDir, "mirror");
+        copyResource(templateDirName+"/mirror/pom.xml", pomDir, "pom.xml");
+    }
+    
+    /**
      * Copies a resource to the target directory
      * @param sourceFile the file to copy
      * @param targetDir the destination directory
@@ -220,7 +343,11 @@ public class CreatePUProjectMojo extends AbstractMojo
     		{
    				data = data.replace(FILTER_GROUP_ID, packageName);
    				data = data.replace(FILTER_ARTIFACT_ID, projectDir.getName());
-                contentBuilder.append(data);
+   				if (isMirror)
+   				{
+   				    data = data.replace(FILTER_GROUP_PATH, packageDirs);
+   				}
+   				contentBuilder.append(data);
     			contentBuilder.append(NEW_LINE);
     		}
     		

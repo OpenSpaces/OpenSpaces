@@ -44,16 +44,16 @@ import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer;
  */
 public class RunPUMojo extends AbstractMojo
 {
-    /** The classpath elements of the project being tested.
-     * 
+    /** 
+     * The classpath elements of the project being tested.
      * @parameter expression="${project}"
      * @required
      * @readonly
      */
     private MavenProject project;
     
-    /** The classpath elements of the project being tested.
-     * 
+    /** 
+     * The classpath elements of the project being tested.
      * @parameter expression="${puName}"
      * @required
      * @readonly
