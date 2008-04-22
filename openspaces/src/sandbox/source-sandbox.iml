@@ -23,6 +23,7 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="library" name="Junit" level="project" />
     <orderEntryProperties />
   </component>
 </module>
