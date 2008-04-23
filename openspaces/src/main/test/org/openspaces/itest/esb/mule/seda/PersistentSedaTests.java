@@ -9,7 +9,7 @@ import org.openspaces.itest.esb.mule.AbstractMuleTests;
 public class PersistentSedaTests extends AbstractMuleTests {
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/esb/mule/seda/persistent.xml"};
+        return new String[]{"org/openspaces/itest/esb/mule/seda/persistent.xml"};
     }
 
     public void testSimpleSedaHandling() throws Exception {

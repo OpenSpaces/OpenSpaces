@@ -19,7 +19,7 @@ package org.openspaces.esb.mule.queue;
 import org.mule.api.MuleEvent;
 import org.mule.api.MuleMessage;
 import org.mule.api.endpoint.EndpointURI;
-import org.mule.api.endpoint.ImmutableEndpoint;
+import org.mule.api.endpoint.OutboundEndpoint;
 import org.mule.api.transport.DispatchException;
 import org.mule.config.i18n.CoreMessages;
 import org.mule.transport.AbstractMessageDispatcher;
@@ -35,7 +35,7 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
 
     private final OpenSpacesQueueConnector connector;
 
-    public OpenSpacesQueueMessageDispatcher(ImmutableEndpoint endpoint) {
+    public OpenSpacesQueueMessageDispatcher(OutboundEndpoint endpoint) {
         super(endpoint);
         this.connector = (OpenSpacesQueueConnector) endpoint.getConnector();
     }

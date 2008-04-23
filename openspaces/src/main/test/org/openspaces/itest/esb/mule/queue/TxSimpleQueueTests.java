@@ -12,7 +12,7 @@ import org.openspaces.itest.esb.mule.AbstractMuleTests;
 public class TxSimpleQueueTests extends AbstractMuleTests {
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/esb/mule/queue/tx-simple.xml"};
+        return new String[]{"org/openspaces/itest/esb/mule/queue/tx-simple.xml"};
     }
 
     public void testSimpleQueueHandling() throws Exception {

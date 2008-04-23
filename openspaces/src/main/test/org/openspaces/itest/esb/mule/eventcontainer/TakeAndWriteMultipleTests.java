@@ -29,7 +29,7 @@ public class TakeAndWriteMultipleTests extends AbstractMuleTests {
 
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/esb/mule/eventcontainer/takeandwritemultiple.xml"};
+        return new String[]{"org/openspaces/itest/esb/mule/eventcontainer/takeandwritemultiple.xml"};
     }
 
 

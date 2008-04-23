@@ -40,7 +40,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
  */
 public class OpenSpacesMuleContextLoader implements ApplicationContextAware, InitializingBean, DisposableBean, ApplicationListener {
 
-    private static final String DEFAULT_LOCATION = "/META-INF/spring/mule.xml";
+    private static final String DEFAULT_LOCATION = "META-INF/spring/mule.xml";
 
     private String location;
 

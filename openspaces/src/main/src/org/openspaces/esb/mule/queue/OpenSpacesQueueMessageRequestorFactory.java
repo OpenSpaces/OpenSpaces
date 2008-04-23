@@ -17,7 +17,7 @@
 package org.openspaces.esb.mule.queue;
 
 import org.mule.api.MuleException;
-import org.mule.api.endpoint.ImmutableEndpoint;
+import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.api.transport.MessageRequester;
 import org.mule.transport.AbstractMessageRequesterFactory;
 
@@ -30,7 +30,7 @@ public class OpenSpacesQueueMessageRequestorFactory extends AbstractMessageReque
      *
      * @see org.mule.umo.provider.UMOMessageDispatcherFactory#create(org.mule.umo.provider.UMOConnector)
      */
-    public MessageRequester create(ImmutableEndpoint endpoint) throws MuleException {
+    public MessageRequester create(InboundEndpoint endpoint) throws MuleException {
         return new OpenSpacesQueueMessageRequestor(endpoint);
     }
 }

@@ -31,7 +31,7 @@
 
         <!-- using Spring transaction factory that wraps JTA transactionManager  -->
         <spring:bean id="transactionFactory"
-                     class="org.mule.extras.spring.transaction.SpringTransactionFactory">
+                     class="org.mule.module.spring.transaction.SpringTransactionFactory">
             <spring:property name="manager">
                 <spring:ref bean="transactionManager"/>
             </spring:property>

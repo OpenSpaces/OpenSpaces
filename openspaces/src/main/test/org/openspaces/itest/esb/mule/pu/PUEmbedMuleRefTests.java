@@ -31,7 +31,7 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 public class PUEmbedMuleRefTests extends AbstractDependencyInjectionSpringContextTests {
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/esb/mule/pu/puembedmuleref.xml"};
+        return new String[]{"org/openspaces/itest/esb/mule/pu/puembedmuleref.xml"};
     }
 
     public void testTakeSingleFromSpace() throws ConfigurationException {

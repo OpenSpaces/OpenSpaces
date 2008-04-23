@@ -12,7 +12,7 @@ import org.openspaces.itest.esb.mule.AbstractMuleTests;
 public class TxSimpleRollBackQueueTests extends AbstractMuleTests {
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/esb/mule/queue/tx-simple-roolback.xml"};
+        return new String[]{"org/openspaces/itest/esb/mule/queue/tx-simple-roolback.xml"};
     }
 
     public void testSimpleQueueHandling() throws Exception {

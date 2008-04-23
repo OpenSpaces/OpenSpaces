@@ -21,6 +21,7 @@ import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
 import org.mule.api.MuleRuntimeException;
 import org.mule.api.endpoint.ImmutableEndpoint;
+import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.api.lifecycle.CreateException;
 import org.mule.api.service.Service;
 import org.mule.api.transaction.Transaction;
@@ -70,7 +71,7 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
      * @see ImmutableEndpoint
      */
 
-    public OpenSpacesMessageReceiver(Connector connector, Service service, ImmutableEndpoint endpoint) throws CreateException {
+    public OpenSpacesMessageReceiver(Connector connector, Service service, InboundEndpoint endpoint) throws CreateException {
         super(connector, service, endpoint);
         ApplicationContext applicationContext = ((OpenSpacesConnector) connector).getApplicationContext();
         if (applicationContext == null) {

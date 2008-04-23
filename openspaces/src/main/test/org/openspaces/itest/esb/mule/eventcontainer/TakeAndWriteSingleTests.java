@@ -28,7 +28,7 @@ import org.openspaces.itest.esb.mule.SimpleMessage;
 public class TakeAndWriteSingleTests extends AbstractMuleTests {
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/esb/mule/eventcontainer/takeandwritesingle.xml"};
+        return new String[]{"org/openspaces/itest/esb/mule/eventcontainer/takeandwritesingle.xml"};
     }
 
     public void testTakeSingleFromSpace() throws ConfigurationException {

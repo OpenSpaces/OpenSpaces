@@ -32,7 +32,7 @@ import org.openspaces.itest.esb.mule.SimpleMessage;
 public class MetaDataTests extends AbstractMuleTests {
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/esb/mule/message/metadata.xml"};
+        return new String[]{"org/openspaces/itest/esb/mule/message/metadata.xml"};
     }
 
     public void testTakeSingleFromSpace() throws ConfigurationException {

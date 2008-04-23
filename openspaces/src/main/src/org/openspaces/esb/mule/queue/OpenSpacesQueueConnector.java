@@ -19,10 +19,10 @@ package org.openspaces.esb.mule.queue;
 import org.mule.api.MuleException;
 import org.mule.api.endpoint.EndpointException;
 import org.mule.api.endpoint.EndpointURI;
-import org.mule.api.endpoint.ImmutableEndpoint;
+import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.api.lifecycle.InitialisationException;
 import org.mule.api.transport.MessageReceiver;
-import org.mule.endpoint.DynamicEndpointURIEndpoint;
+import org.mule.endpoint.DynamicURIInboundEndpoint;
 import org.mule.endpoint.MuleEndpointURI;
 import org.mule.routing.filters.WildcardFilter;
 import org.mule.transport.AbstractConnector;
@@ -202,9 +202,9 @@ public class OpenSpacesQueueConnector extends AbstractConnector implements Appli
             String filterAddress = receiver.getEndpointURI().getAddress();
             WildcardFilter filter = new WildcardFilter(filterAddress);
             if (filter.accept(endpointUri.getAddress())) {
-                ImmutableEndpoint endpoint = receiver.getEndpoint();
+                InboundEndpoint endpoint = receiver.getEndpoint();
                 EndpointURI newEndpointURI = new MuleEndpointURI(endpointUri, filterAddress);
-                receiver.setEndpoint(new DynamicEndpointURIEndpoint(endpoint, newEndpointURI));
+                receiver.setEndpoint(new DynamicURIInboundEndpoint(endpoint, newEndpointURI));
 
                 if (logger.isDebugEnabled()) {
                     logger.debug("Found receiver match on endpointUri: " + receiver.getEndpointURI()

@@ -28,7 +28,7 @@ import org.openspaces.itest.esb.mule.SimpleMessage;
 public class PureSpringBasedTests extends AbstractMuleTests {
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/esb/mule/eventcontainer/purespringbased.xml"};
+        return new String[]{"org/openspaces/itest/esb/mule/eventcontainer/purespringbased.xml"};
     }
 
     public void testTakeSingleFromSpace() throws ConfigurationException {

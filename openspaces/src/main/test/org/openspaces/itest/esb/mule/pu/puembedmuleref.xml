@@ -52,7 +52,7 @@
         declared in the PU application context.
      -->
     <bean class="org.openspaces.esb.mule.pu.OpenSpacesMuleContextLoader">
-        <property name="location" value="/org/openspaces/itest/esb/mule/pu/muleref.xml"/>
+        <property name="location" value="org/openspaces/itest/esb/mule/pu/muleref.xml"/>
     </bean>
 
 </beans>

@@ -35,7 +35,7 @@ import java.util.List;
 public class MetaDataMessageHeaderTests extends AbstractMuleTests {
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/esb/mule/message/metadatamessageheader.xml"};
+        return new String[]{"org/openspaces/itest/esb/mule/message/metadatamessageheader.xml"};
     }
 
     public void testTakeSingleFromSpace() throws ConfigurationException {

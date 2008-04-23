@@ -29,7 +29,7 @@ import org.openspaces.itest.esb.mule.SimpleMessage;
 public class TakeAndWriteSingleUsingNotifyContainerTests extends AbstractMuleTests {
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/esb/mule/eventcontainer/takeandwritesingleusingnotifycontainer.xml"};
+        return new String[]{"org/openspaces/itest/esb/mule/eventcontainer/takeandwritesingleusingnotifycontainer.xml"};
     }
 
     public void testTakeSingleFromSpace() throws ConfigurationException {

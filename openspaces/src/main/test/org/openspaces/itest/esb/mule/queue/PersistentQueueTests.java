@@ -11,7 +11,7 @@ import org.openspaces.itest.esb.mule.AbstractMuleTests;
 public class PersistentQueueTests extends AbstractMuleTests {
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/esb/mule/queue/persistent.xml"};
+        return new String[]{"org/openspaces/itest/esb/mule/queue/persistent.xml"};
     }
 
     public void testSimpleQueueHandling() throws Exception {

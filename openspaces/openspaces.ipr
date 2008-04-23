@@ -319,6 +319,9 @@
       <module fileurl="file://$PROJECT_DIR$/examples/openspaces/data/feeder/examples-data-feeder.iml" filepath="$PROJECT_DIR$/examples/openspaces/data/feeder/examples-data-feeder.iml" />
       <module fileurl="file://$PROJECT_DIR$/examples/openspaces/data/processor/examples-data-processor.iml" filepath="$PROJECT_DIR$/examples/openspaces/data/processor/examples-data-processor.iml" />
       <module fileurl="file://$PROJECT_DIR$/examples/openspaces/helloworld/examples-helloworld.iml" filepath="$PROJECT_DIR$/examples/openspaces/helloworld/examples-helloworld.iml" />
+      <module fileurl="file://$PROJECT_DIR$/examples/openspaces/mule/data/common/examples-mule-data-common.iml" filepath="$PROJECT_DIR$/examples/openspaces/mule/data/common/examples-mule-data-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/examples/openspaces/mule/data/feeder/examples-mule-data-feeder.iml" filepath="$PROJECT_DIR$/examples/openspaces/mule/data/feeder/examples-mule-data-feeder.iml" />
+      <module fileurl="file://$PROJECT_DIR$/examples/openspaces/mule/data/processor/examples-mule-data-processor.iml" filepath="$PROJECT_DIR$/examples/openspaces/mule/data/processor/examples-mule-data-processor.iml" />
       <module fileurl="file://$PROJECT_DIR$/openspaces.iml" filepath="$PROJECT_DIR$/openspaces.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/main/source-main.iml" filepath="$PROJECT_DIR$/src/main/source-main.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/sandbox/source-sandbox.iml" filepath="$PROJECT_DIR$/src/sandbox/source-sandbox.iml" />
@@ -697,22 +700,18 @@
     </library>
     <library name="mule">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/mule/commons-pool.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/commons-lang-2.3.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/commons-collections.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-spring-extras-2.0.0.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-client-2.0.0.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-spring-config-2.0.0.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-vm-2.0.0.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-stdio-2.0.0.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-core-2.0.0.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-local-install.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/mule/jug-2.0.0-asl.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/commons-io-1.3.1.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/commons-beanutils-1.7.0.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-stdio-2.0.0-RC2.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-spring-config-2.0.0-RC2.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-vm-2.0.0-RC2.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-jms-2.0.0-RC2.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-client-2.0.0-RC2.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-core-2.0.0-RC2.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-2.0.0-RC2-src.zip!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-2.0.0-src.zip!/" />
       </SOURCES>
     </library>
     <library name="ServiceGrid">
@@ -749,8 +748,12 @@
         <root url="jar://$PROJECT_DIR$/lib/common/backport-util-concurrent.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/common/commons-dbcp.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/common/commons-logging.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/common/commons-collections.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/common/commons-pool.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/common/commons-lang-2.3.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/common/commons-collections-3.2.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/common/commons-pool-1.4.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/common/commons-io-1.3.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/common/commons-codec-1.3.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/common/commons-beanutils-1.7.0.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
@@ -788,5 +791,8 @@
       <SOURCES />
     </library>
   </component>
+  <UsedPathMacros>
+    <macro name="JBOSS_HOME" />
+  </UsedPathMacros>
 </project>
 

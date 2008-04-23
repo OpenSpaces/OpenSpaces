@@ -9,7 +9,7 @@ import org.openspaces.itest.esb.mule.AbstractMuleTests;
 public class SimpleQueueTests extends AbstractMuleTests {
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/esb/mule/queue/simple.xml"};
+        return new String[]{"org/openspaces/itest/esb/mule/queue/simple.xml"};
     }
 
     public void testSimpleQueueHandling() throws Exception {

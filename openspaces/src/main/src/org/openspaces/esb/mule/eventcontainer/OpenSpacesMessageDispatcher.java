@@ -23,6 +23,7 @@ import org.mule.api.MuleEvent;
 import org.mule.api.MuleMessage;
 import org.mule.api.MuleRuntimeException;
 import org.mule.api.endpoint.ImmutableEndpoint;
+import org.mule.api.endpoint.OutboundEndpoint;
 import org.mule.config.i18n.CoreMessages;
 import org.mule.transport.AbstractMessageDispatcher;
 import org.openspaces.core.GigaSpace;
@@ -54,7 +55,7 @@ public class OpenSpacesMessageDispatcher extends AbstractMessageDispatcher {
     private long updateTimeout = JavaSpace.NO_WAIT;
 
 
-    public OpenSpacesMessageDispatcher(ImmutableEndpoint endpoint) {
+    public OpenSpacesMessageDispatcher(OutboundEndpoint endpoint) {
         super(endpoint);
         ApplicationContext applicationContext = ((OpenSpacesConnector) getConnector()).getApplicationContext();
         String spaceId = endpoint.getEndpointURI().getAddress();

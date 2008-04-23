@@ -20,7 +20,7 @@ package org.openspaces.esb.mule.queue;
 import org.mule.DefaultMuleMessage;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
-import org.mule.api.endpoint.ImmutableEndpoint;
+import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.api.lifecycle.CreateException;
 import org.mule.api.service.Service;
 import org.mule.api.transport.Connector;
@@ -46,7 +46,7 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
 
     public OpenSpacesQueueMessageReceiver(Connector connector,
                                             Service service,
-                                            final ImmutableEndpoint endpoint) throws CreateException {
+                                            final InboundEndpoint endpoint) throws CreateException {
         super(connector, service, endpoint);
         this.setReceiveMessagesInTransaction(endpoint.getTransactionConfig().isTransacted());
         this.connector = (OpenSpacesQueueConnector) connector;

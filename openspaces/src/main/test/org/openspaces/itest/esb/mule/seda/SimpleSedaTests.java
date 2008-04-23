@@ -9,7 +9,7 @@ import org.openspaces.itest.esb.mule.AbstractMuleTests;
 public class SimpleSedaTests extends AbstractMuleTests {
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/esb/mule/seda/simple.xml"};
+        return new String[]{"org/openspaces/itest/esb/mule/seda/simple.xml"};
     }
 
     public void testSimpleSedaHandling() throws Exception {

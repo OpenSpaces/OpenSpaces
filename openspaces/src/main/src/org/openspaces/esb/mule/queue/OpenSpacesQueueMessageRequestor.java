@@ -17,7 +17,7 @@
 package org.openspaces.esb.mule.queue;
 
 import org.mule.api.MuleMessage;
-import org.mule.api.endpoint.ImmutableEndpoint;
+import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.transport.AbstractMessageRequester;
 import org.openspaces.core.SpaceInterruptedException;
 
@@ -34,7 +34,7 @@ public class OpenSpacesQueueMessageRequestor extends AbstractMessageRequester {
 
     private Object template;
 
-    public OpenSpacesQueueMessageRequestor(ImmutableEndpoint endpoint) {
+    public OpenSpacesQueueMessageRequestor(InboundEndpoint endpoint) {
         super(endpoint);
         this.connector = (OpenSpacesQueueConnector) endpoint.getConnector();
     }
