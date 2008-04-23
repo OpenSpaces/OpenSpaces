@@ -319,9 +319,6 @@
       <module fileurl="file://$PROJECT_DIR$/examples/openspaces/data/feeder/examples-data-feeder.iml" filepath="$PROJECT_DIR$/examples/openspaces/data/feeder/examples-data-feeder.iml" />
       <module fileurl="file://$PROJECT_DIR$/examples/openspaces/data/processor/examples-data-processor.iml" filepath="$PROJECT_DIR$/examples/openspaces/data/processor/examples-data-processor.iml" />
       <module fileurl="file://$PROJECT_DIR$/examples/openspaces/helloworld/examples-helloworld.iml" filepath="$PROJECT_DIR$/examples/openspaces/helloworld/examples-helloworld.iml" />
-      <module fileurl="file://$PROJECT_DIR$/examples/openspaces/mule/data/common/examples-mule-data-common.iml" filepath="$PROJECT_DIR$/examples/openspaces/mule/data/common/examples-mule-data-common.iml" />
-      <module fileurl="file://$PROJECT_DIR$/examples/openspaces/mule/data/feeder/examples-mule-data-feeder.iml" filepath="$PROJECT_DIR$/examples/openspaces/mule/data/feeder/examples-mule-data-feeder.iml" />
-      <module fileurl="file://$PROJECT_DIR$/examples/openspaces/mule/data/processor/examples-mule-data-processor.iml" filepath="$PROJECT_DIR$/examples/openspaces/mule/data/processor/examples-mule-data-processor.iml" />
       <module fileurl="file://$PROJECT_DIR$/openspaces.iml" filepath="$PROJECT_DIR$/openspaces.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/main/source-main.iml" filepath="$PROJECT_DIR$/src/main/source-main.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/sandbox/source-sandbox.iml" filepath="$PROJECT_DIR$/src/sandbox/source-sandbox.iml" />
