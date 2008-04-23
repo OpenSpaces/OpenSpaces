@@ -42,7 +42,7 @@
     <!-- The scripting executor remoting support -->
     <bean id="scriptingExecutorImpl" class="org.openspaces.remoting.scripting.DefaultScriptingExecutor" />
 
-    <os-remoting:service-exporter id="serviceExporter">
+    <os-remoting:service-exporter id="serviceExporter" template-lookup-name="org.openspaces.remoting.scripting.ScriptingExecutor">
         <os-remoting:service ref="scriptingExecutorImpl"/>
     </os-remoting:service-exporter>
 

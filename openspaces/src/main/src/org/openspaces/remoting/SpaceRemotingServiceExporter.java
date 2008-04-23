@@ -96,6 +96,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
     private ServiceExecutionAspect serviceExecutionAspect;
 
+    private String templateLookupName;
+
     // sync execution fields
 
     private long syncEntryWriteLease = Lease.FOREVER;
@@ -147,10 +149,22 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
     }
 
     /**
-     * Sets the sync entry write lease. Defaults to <code>Lease.FOREVER</code>. 
+     * Sets the sync entry write lease. Defaults to <code>Lease.FOREVER</code>.
      */
     public void setSyncEntryWriteLease(long syncEntryWriteLease) {
         this.syncEntryWriteLease = syncEntryWriteLease;
+    }
+
+    /**
+     * Allows to narrow down the async polling container to perform a lookup only on specific lookup
+     * name (which is usually the interface that will be used to proxy it on the client side). Defaults
+     * to match on all async remoting invocations.
+     *
+     * <p>This option allows to create several polling container, each for different service that will
+     * perform the actual invocation.
+     */
+    public void setTemplateLookupName(String templateLookupName) {
+        this.templateLookupName = templateLookupName;
     }
 
     /**
@@ -200,6 +214,10 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
         AsyncSpaceRemotingEntry remotingEntry = new AsyncSpaceRemotingEntry();
         remotingEntry.isInvocation = true;
         remotingEntry.setFifo(fifo);
+        remotingEntry.lookupName = templateLookupName;
+        if (logger.isDebugEnabled()) {
+            logger.debug("Registering async remoting service tempalte [" + remotingEntry + "]");
+        }
         return remotingEntry;
     }
 
@@ -446,7 +464,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
      * Java reflection getMethod as it only returns exact match for argument types.
      *
      * <p>Also note, this cache is *not* thread safe. The idea here is that this cache is initlaized at startup
-     * and then never updated. 
+     * and then never updated.
      */
     private class MethodInvocationCache {
 
@@ -514,7 +532,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             public void addMethod(Method method) {
                 Method[] list = parametersPerMethodMap.get(method.getParameterTypes().length);
                 if (list == null) {
-                    list = new Method[] {method};
+                    list = new Method[]{method};
                 } else {
                     Method[] tempList = new Method[list.length + 1];
                     System.arraycopy(list, 0, tempList, 0, list.length);

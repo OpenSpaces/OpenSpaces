@@ -22,6 +22,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
@@ -43,6 +44,11 @@ public class ServiceExporterBeanDefinitionParser extends AbstractSingleBeanDefin
     @SuppressWarnings("unchecked")
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
         super.doParse(element, parserContext, builder);
+
+        String templateLookupName = element.getAttribute("template-lookup-name");
+        if (StringUtils.hasLength(templateLookupName)) {
+            builder.addPropertyValue("templateLookupName", templateLookupName);
+        }
 
         Element aspectEle = DomUtils.getChildElementByTagName(element, ASPECT);
         if (aspectEle != null) {

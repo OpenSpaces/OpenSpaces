@@ -80,6 +80,17 @@
                             </xsd:complexType>
                         </xsd:element>
                     </xsd:sequence>
+                    <xsd:attribute name="template-lookup-name" type="xsd:string" use="optional">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                Allows to narrow down the async polling container to perform a lookup only on specific
+                                lookup name (which is usually the interface that will be used to proxy it on the client
+                                side). Defaults to match on all async remoting invocations. This option allows to create
+                                several polling container, each for different service that will perform the actual
+                                invocation.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
                 </xsd:extension>
             </xsd:complexContent>
         </xsd:complexType>
@@ -263,7 +274,8 @@
                                     <xsd:annotation>
                                         <xsd:appinfo>
                                             <tool:annotation kind="ref">
-                                                <tool:expected-type type="org.openspaces.remoting.RemoteRoutingHandler"/>
+                                                <tool:expected-type
+                                                        type="org.openspaces.remoting.RemoteRoutingHandler"/>
                                             </tool:annotation>
                                         </xsd:appinfo>
                                         <xsd:documentation>
