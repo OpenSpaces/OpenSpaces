@@ -631,11 +631,11 @@
     <library name="Spring">
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/lib/spring/spring.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/spring/spring-mock.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/spring/spring-test.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
-        <root url="jar://$PROJECT_DIR$/lib/spring/spring-src.zip!/" />
+        <root url="jar://$PROJECT_DIR$/lib/spring/spring-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Jotm">
