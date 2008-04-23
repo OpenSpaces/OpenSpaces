@@ -17,6 +17,8 @@
 package org.openspaces.remoting;
 
 /**
+ * A service reference (the reference is generally the Spring bean id).
+ *
  * @author kimchy
  */
 public class ServiceRef {
