@@ -11,18 +11,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="source-main" />
-    <orderEntry type="module-library">
-      <library name="ObjectGrid Session">
-        <CLASSES>
-          <root url="jar://$JBOSS_HOME$/JavaLibs/ObjectGrid/session/lib/sessionobjectgrid.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="file://$JBOSS_HOME$/JavaLibs/ObjectGrid/session/src" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="library" name="Junit" level="project" />
     <orderEntryProperties />
   </component>
 </module>
