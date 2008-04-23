@@ -632,9 +632,6 @@
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/lib/spring/spring.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/spring/spring-mock.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/spring/jta.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/spring/connector.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/common/commons-logging.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
@@ -695,7 +692,9 @@
       <SOURCES />
     </library>
     <library name="ASM">
-      <CLASSES />
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/asm/asm-2.2.3.jar!/" />
+      </CLASSES>
       <JAVADOC />
       <SOURCES />
     </library>
@@ -882,13 +881,6 @@
         <root url="jar://$PROJECT_DIR$/lib/servicemix/src.zip!/src/deployables/serviceengines/servicemix-wsn2005/src/main/java" />
         <root url="jar://$PROJECT_DIR$/lib/servicemix/xbean-spring-3.2-sources.jar!/" />
       </SOURCES>
-    </library>
-    <library name="dummylib">
-      <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/JSpaces.jar!/" />
-      </CLASSES>
-      <JAVADOC />
-      <SOURCES />
     </library>
   </component>
 </project>

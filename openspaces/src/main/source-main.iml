@@ -41,8 +41,6 @@
     <orderEntry type="library" exported="" name="JMock" level="project" />
     <orderEntry type="library" exported="" name="j2ee" level="project" />
     <orderEntry type="library" exported="" name="servicemix" level="project" />
-    <orderEntry type="library" exported="" name="servicemix" level="project" />
-    <orderEntry type="library" exported="" name="servicemix" level="project" />
     <orderEntry type="module-library" exported="">
       <library name="dom4j">
         <CLASSES>

@@ -25,7 +25,7 @@ import javax.script.ScriptException;
 import java.util.Map;
 
 /**
- * Java 6 (JSR 223) sciprt executor.
+ * Java 6 (JSR 223) script executor.
  *
  * @author kimchy
  */
