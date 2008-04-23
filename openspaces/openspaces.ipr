@@ -891,8 +891,5 @@
       <SOURCES />
     </library>
   </component>
-  <UsedPathMacros>
-    <macro name="JBOSS_HOME" />
-  </UsedPathMacros>
 </project>
 
