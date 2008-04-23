@@ -1,15 +1,6 @@
 package org.openspaces.maven.support;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
 
 /**
  * @author kimchy
@@ -50,7 +41,7 @@ public class POMGenerator {
         writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "openspaces-pom.xml")))));
         printHeader(writer, "openspaces");
         printDependency(writer, "JSpaces");
-        printDependency(writer, "org.springframework", "spring", "2.0.7");
+        printDependency(writer, "org.springframework", "spring", "2.5.3");
         printFooter(writer);
         writer.close();
 
