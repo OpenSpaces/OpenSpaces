@@ -74,7 +74,6 @@
         <ant antfile="build.xml" dir="examples/openspaces/helloworld/" target="dist"/>
         <ant antfile="build.xml" dir="examples/openspaces/data/" target="dist"/>
         <ant antfile="build.xml" dir="examples/openspaces/data-1.4/" target="dist"/>
-        <ant antfile="build.xml" dir="examples/openspaces/mule/data/" target="dist"/>
     </target>
 
     <target name="build_1_5" depends="clean, buildmain" description="Compile main sources"/>
@@ -223,7 +222,6 @@
                 <include name="lib/${name}/**"/>
                 <include name="lib/groovy/**"/>
 
-                <exclude name="examples/openspaces/mule/**"/>
                 <exclude name="lib/${name}/mule-os.jar"/>
 
             </zipfileset>
@@ -259,8 +257,6 @@
                 <exclude name="examples/**/.cvsignore"/>
                 <include name="lib/${name}/**"/>
                 <include name="lib/groovy/**"/>
-
-                <exclude name="examples/openspaces/mule/**"/>
             </zipfileset>
         </zip>
         <mkdir dir="${dist.dir}/1.5"/>
