@@ -688,8 +688,8 @@ public class Deploy {
         sb.append("\n    -groups [groupName] [groupName] ...      : The lookup groups used to look up the GSM");
         sb.append("\n    -locators [host1] [host2] ...            : The lookup locators used to look up the GSM");
         sb.append("\n    -timeout [timeout value]                 : The timeout value of GSM lookup (defaults to 5000) in milliseconds");
-        sb.append("\n    -proeprties [properties-loc]             : Location of context level properties");
-        sb.append("\n    -proeprties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
+        sb.append("\n    -properties [properties-loc]             : Location of context level properties");
+        sb.append("\n    -properties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
         sb.append("\n    -override-name [override pu name]        : An override pu name, useful when using pu as a template");
         sb.append("\n    -max-instances-per-vm [number]           : Allows to set the SLA number of instances per VM");
         sb.append("\n    -max-instances-per-machine [number]      : Allows to set the SLA number of instances per machine");
@@ -702,7 +702,7 @@ public class Deploy {
         sb.append("\n    - Deploys a processing unit called data-processor using an SLA element read from sla.xml");
         sb.append("\n3. Deploy -properties file://config/context.properties -properties space1 file://config/space1.properties data-processor");
         sb.append("\n    - Deploys a processing unit called data-processor using context level properties called context.proeprties and bean level properties called space1.properties applied to bean named space1");
-        sb.append("\n4. Deploy -properties embed://prop1=value1 -properties space1 embed://prop2=value2;prop3=value3");
+        sb.append("\n4. Deploy -properties embed://prop1=value1 -properties space1 embed://prop2=value2;prop3=value3 data-processor");
         sb.append("\n    - Deploys a processing unit called data-processor using context level properties with a single property called prop1 with value1 and bean level properties with two properties");
         return sb.toString();
     }
