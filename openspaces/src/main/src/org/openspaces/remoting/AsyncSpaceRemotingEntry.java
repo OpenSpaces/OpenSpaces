@@ -64,11 +64,14 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
 
     public Integer instanceId;
 
-
-
+    /**
+     * Constructs a new Async remoting entry. By default a transient one witn that does not
+     * return a lease. Also, by default, this is an invocation entry.
+     */
     public AsyncSpaceRemotingEntry() {
         setNOWriteLeaseMode(true);
         makeTransient();
+        isInvocation = true;
     }
 
     public String getLookupName() {
