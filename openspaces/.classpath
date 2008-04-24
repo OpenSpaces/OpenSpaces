@@ -23,8 +23,6 @@
 	<classpathentry kind="lib" path="lib/jmock/jmock-cglib-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/JSpaces.jar"/>
 	<classpathentry kind="lib" path="lib/junit/junit.jar"/>
-	<classpathentry kind="lib" path="lib/spring/cglib-nodep-2.1_3.jar"/>
-	<classpathentry kind="lib" path="lib/spring/spring-mock.jar"/>
 	<classpathentry kind="lib" path="lib/spring/spring.jar" sourcepath="lib/spring/spring-src.zip">
 		<attributes>
 			<attribute name="javadoc_location" value="http://static.springframework.org/spring/docs/2.0.x/api/"/>
@@ -36,9 +34,7 @@
 	<classpathentry kind="lib" path="lib/jmx/jmxri.jar"/>
 	<classpathentry kind="lib" path="lib/common/commons-math-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/ServiceGrid/gs-boot.jar"/>
-	<classpathentry kind="lib" path="lib/common/commons-collections.jar"/>
 	<classpathentry kind="lib" path="lib/common/commons-dbcp.jar"/>
-	<classpathentry kind="lib" path="lib/common/commons-pool.jar"/>
 	<classpathentry kind="lib" path="lib/atomikos/atomikos-util.jar"/>
 	<classpathentry kind="lib" path="lib/atomikos/transactions.jar"/>
 	<classpathentry kind="lib" path="lib/atomikos/transactions-api.jar"/>
@@ -56,8 +52,6 @@
 	<classpathentry kind="lib" path="lib/jsr223/js.jar"/>
 	<classpathentry kind="lib" path="lib/jsr223/script-api.jar"/>
 	<classpathentry kind="lib" path="lib/jsr223/script-js.jar"/>
-	<classpathentry kind="lib" path="lib/spring/connector.jar"/>
-	<classpathentry kind="lib" path="lib/spring/jta.jar"/>
 	<classpathentry kind="lib" path="lib/asm/asm-2.2.3.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/activation.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/connector.jar"/>
@@ -70,25 +64,29 @@
 	<classpathentry kind="lib" path="lib/j2ee/mail.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/rowset.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/servlet-api.jar"/>
-	<classpathentry kind="lib" path="lib/mule/commons-beanutils-1.7.0.jar"/>
-	<classpathentry kind="lib" path="lib/mule/commons-collections.jar"/>
-	<classpathentry kind="lib" path="lib/mule/commons-io-1.3.1.jar"/>
-	<classpathentry kind="lib" path="lib/mule/commons-lang-2.3.jar"/>
-	<classpathentry kind="lib" path="lib/mule/commons-pool.jar"/>
 	<classpathentry kind="lib" path="lib/mule/jug-2.0.0-asl.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-core-2.0.0-RC2.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-module-client-2.0.0-RC2.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-module-spring-config-2.0.0-RC2.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-transport-jms-2.0.0-RC2.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-transport-stdio-2.0.0-RC2.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-transport-vm-2.0.0-RC2.jar"/>
 	<classpathentry kind="lib" path="lib/groovy/groovy-all-1.5.4.jar"/>
 	<classpathentry kind="lib" path="lib/maven/maven-2.0.8-uber.jar"/>
-	<classpathentry kind="lib" path="lib/servicemix/servicemix-jbi-3.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/servicemix/servicemix-common-3.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/servicemix/servicemix-core-3.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/servicemix/servicemix-services-3.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/servicemix/xbean-classloader-3.2.jar"/>
-	<classpathentry kind="lib" path="lib/servicemix/xbean-spring-3.2.jar"/>
+	<classpathentry kind="lib" path="lib/cglib/cglib-2.1.3.jar"/>
+	<classpathentry kind="lib" path="lib/common/commons-beanutils-1.7.0.jar"/>
+	<classpathentry kind="lib" path="lib/common/commons-codec-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/common/commons-collections-3.2.jar"/>
+	<classpathentry kind="lib" path="lib/common/commons-io-1.3.1.jar"/>
+	<classpathentry kind="lib" path="lib/common/commons-lang-2.3.jar"/>
+	<classpathentry kind="lib" path="lib/common/commons-pool-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/dom4j/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/hibernate/ejb3-persistence.jar"/>
+	<classpathentry kind="lib" path="lib/hibernate/hibernate-annotations.jar"/>
+	<classpathentry kind="lib" path="lib/hibernate/hibernate-commons-annotations.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-core-2.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-local-install.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-module-client-2.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-module-spring-config-2.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-module-spring-extras-2.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-transport-stdio-2.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-transport-vm-2.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/spring/spring-test.jar"/>
+	<classpathentry kind="lib" path="lib/javassist/javassist.jar"/>
+	<classpathentry kind="lib" path="lib/antlr/antlr-2.7.6.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
