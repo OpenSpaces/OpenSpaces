@@ -818,6 +818,13 @@
       <JAVADOC />
       <SOURCES />
     </library>
+    <library name="hsql">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/jdbc/hsqldb.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
   </component>
   <UsedPathMacros>
     <macro name="JBOSS_HOME" />
