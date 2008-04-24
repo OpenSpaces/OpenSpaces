@@ -220,6 +220,7 @@
 
                 <include name="lib/${name}/**"/>
                 <include name="lib/groovy/**"/>
+                <include name="lib/spring/spring.jar" />
 
                 <exclude name="lib/${name}/mule-os.jar"/>
 
@@ -256,6 +257,7 @@
                 <exclude name="examples/**/.cvsignore"/>
                 <include name="lib/${name}/**"/>
                 <include name="lib/groovy/**"/>
+                <include name="lib/spring/spring.jar" />
             </zipfileset>
         </zip>
         <mkdir dir="${dist.dir}/1.5"/>
