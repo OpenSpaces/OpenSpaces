@@ -12,6 +12,10 @@ public class PersistentSedaTests extends AbstractMuleTests {
         return new String[]{"org/openspaces/itest/esb/mule/seda/persistent.xml"};
     }
 
+    protected String getSpaceName() {
+        return "muleSedaPersistent";
+    }
+
     public void testSimpleSedaHandling() throws Exception {
         muleClient.dispatch("vm://test1", "testme", null);
 

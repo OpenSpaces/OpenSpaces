@@ -14,6 +14,10 @@ public class PersistentQueueTests extends AbstractMuleTests {
         return new String[]{"org/openspaces/itest/esb/mule/queue/persistent.xml"};
     }
 
+    protected String getSpaceName() {
+        return "muleQueuePersistent";
+    }
+
     public void testSimpleQueueHandling() throws Exception {
         muleClient.dispatch("os-queue://test1", "testme", null);
         MuleMessage message = muleClient.request("os-queue://test2", 5000);

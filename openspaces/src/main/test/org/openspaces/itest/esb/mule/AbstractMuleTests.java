@@ -44,8 +44,12 @@ public abstract class AbstractMuleTests extends TestCase {
 
     protected void setUp() throws Exception {
         createApplicationContext(getConfigLocations());
-        gigaSpace = new GigaSpaceConfigurer(new UrlSpaceConfigurer("jini://*/*/space").lookupGroups(System.getProperty("user.name")).space()).gigaSpace();
+        gigaSpace = new GigaSpaceConfigurer(new UrlSpaceConfigurer("jini://*/*/" + getSpaceName()).lookupGroups(System.getProperty("user.name")).space()).gigaSpace();
         muleContext.start();
+    }
+
+    protected String getSpaceName() {
+        return "space";
     }
 
     protected void createApplicationContext(String[] locations) throws Exception {

@@ -19,7 +19,7 @@
        http://www.openspaces.org/schema/mule/os-seda http://www.openspaces.org/schema/mule/mule-os-seda.xsd">
 
     <spring:beans>
-       <os-core:space id="space" url="/./space" schema="persistent" lookup-groups="${user.name}">
+       <os-core:space id="space" url="/./muleSedaPersistent" schema="persistent" lookup-groups="${user.name}">
             <os-core:properties>
                 <spring:props>
                     <!-- Properties that control the persistent schema -->

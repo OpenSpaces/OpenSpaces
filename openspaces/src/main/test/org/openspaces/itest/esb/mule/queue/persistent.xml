@@ -16,7 +16,7 @@
 
     <spring:beans>
 
-       <os-core:space id="space" url="/./space" schema="persistent" lookup-groups="${user.name}">
+       <os-core:space id="space" url="/./muleQueuePersistent" schema="persistent" lookup-groups="${user.name}">
             <os-core:properties>
                 <spring:props>
                     <!-- Properties that control the persistent schema -->
