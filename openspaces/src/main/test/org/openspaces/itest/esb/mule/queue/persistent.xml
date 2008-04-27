@@ -23,7 +23,7 @@
                     <spring:prop key="space-config.persistent.StorageAdapterClass">
                         com.j_spaces.sadapter.GenericJDBC.JDBCStorageAdapter
                     </spring:prop>
-                    <spring:prop key="space-config.persistent.StorageAdapterURL">/GenericJDBCProperties/HSQLProperties</spring:prop>
+                    <spring:prop key="space-config.persistent.StorageAdapterURL">config/GenericJDBCProperties/HSQLProperties</spring:prop>
                     <!-- override hsql default properties (found under jdbc.properties) -->
                     <spring:prop key="userName">sa</spring:prop>
                     <spring:prop key="password"></spring:prop>
