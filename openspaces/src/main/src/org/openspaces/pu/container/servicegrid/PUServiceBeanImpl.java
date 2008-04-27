@@ -257,6 +257,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 logger.warn(logMessage("Failed to close"), e);
             } finally {
                 integratedContainer = null;
+                spaces = null;
+                memberAliveIndicators = null;
             }
         }
     }
