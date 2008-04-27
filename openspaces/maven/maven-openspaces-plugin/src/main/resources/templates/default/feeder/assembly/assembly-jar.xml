@@ -4,14 +4,10 @@
     <format>jar</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
-  <includeSiteDirectory>false</includeSiteDirectory>
   <fileSets>
     <fileSet>
       <directory>target/classes</directory>
       <lineEnding>keep</lineEnding>
-      <filtered>false</filtered>
-      <useStrictFiltering>false</useStrictFiltering>
-      <useDefaultExcludes>true</useDefaultExcludes>
       <outputDirectory>/</outputDirectory>
       <includes>
         <include>**/**</include>
@@ -20,17 +16,16 @@
   </fileSets>
   <dependencySets>
     <dependencySet>
-      <unpack>false</unpack>
-      <useTransitiveFiltering>true</useTransitiveFiltering>
+      <useProjectArtifact>false</useProjectArtifact>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
       <outputDirectory>lib</outputDirectory>
       <excludes>
         <exclude>${puGroupId}:common</exclude>
       </excludes>
     </dependencySet>
     <dependencySet>
-      <unpack>false</unpack>
-      <useTransitiveFiltering>true</useTransitiveFiltering>
-      <useStrictFiltering>true</useStrictFiltering>
+      <useProjectArtifact>false</useProjectArtifact>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
       <outputDirectory>shared-lib</outputDirectory>
       <includes>
         <include>${puGroupId}:common</include>
