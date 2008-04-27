@@ -48,19 +48,21 @@ class HibernateDataIterator<T> implements DataIterator<T> {
     private boolean isExhausted = false;
     int loadBatchSize = DEFAULT_LOAD_BATCH_SIZE;
 
-    public HibernateDataIterator(Query query, Session session, Transaction tx) {
+    public HibernateDataIterator(Query query, Session session, Transaction tx, int loadBatchSize) {
         this.session = session;
         this.tx = tx;
         this.query = query;
         this.criteria = null;
+        this.loadBatchSize = loadBatchSize;
         assignNextElement();
     }
 
-    public HibernateDataIterator(Criteria criteria, Session session, Transaction tx) {
+    public HibernateDataIterator(Criteria criteria, Session session, Transaction tx, int loadBatchSize) {
         this.session = session;
         this.tx = tx;
         this.criteria = criteria;
         this.query = null;
+        this.loadBatchSize = loadBatchSize;
         assignNextElement();
     }
 

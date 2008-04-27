@@ -361,10 +361,10 @@ public class HibernateExternalDataSource implements ExternalDataSource<Object>, 
                 }
                 query.setCacheMode(CacheMode.IGNORE);
                 query.setCacheable(false);
-                HibernateDataIterator<Object> hibernateDataIterator = new HibernateDataIterator<Object>(query, session, transaction);
-                if (initialLoadBatchSize != null) {
-                    hibernateDataIterator.setLoadBatchSize(initialLoadBatchSize);
+                if (initialLoadBatchSize == null) {
+                    initialLoadBatchSize = HibernateDataIterator.DEFAULT_LOAD_BATCH_SIZE;
                 }
+                HibernateDataIterator<Object> hibernateDataIterator = new HibernateDataIterator<Object>(query, session, transaction, initialLoadBatchSize);
                 return hibernateDataIterator;
             }
         });
@@ -410,10 +410,10 @@ public class HibernateExternalDataSource implements ExternalDataSource<Object>, 
                 hQuery.setCacheMode(CacheMode.IGNORE);
                 hQuery.setCacheable(false);
                 hQuery.setReadOnly(true);
-                HibernateDataIterator<Object> hibernateDataIterator = new HibernateDataIterator<Object>(hQuery, session, transaction);
-                if (initialLoadBatchSize != null) {
-                    hibernateDataIterator.setLoadBatchSize(initialLoadBatchSize);
+                if (initialLoadBatchSize == null) {
+                    initialLoadBatchSize = HibernateDataIterator.DEFAULT_LOAD_BATCH_SIZE;
                 }
+                HibernateDataIterator<Object> hibernateDataIterator = new HibernateDataIterator<Object>(hQuery, session, transaction, initialLoadBatchSize);
                 return hibernateDataIterator;
             }
         });
@@ -430,10 +430,10 @@ public class HibernateExternalDataSource implements ExternalDataSource<Object>, 
                 Query query = session.createQuery(getInitialLoadQuery());
                 query.setCacheMode(CacheMode.IGNORE);
                 query.setCacheable(false);
-                HibernateDataIterator<Object> hibernateDataIterator = new HibernateDataIterator<Object>(query, session, transaction);
-                if (initialLoadBatchSize != null) {
-                    hibernateDataIterator.setLoadBatchSize(initialLoadBatchSize);
+                if (initialLoadBatchSize == null) {
+                    initialLoadBatchSize = HibernateDataIterator.DEFAULT_LOAD_BATCH_SIZE;
                 }
+                HibernateDataIterator<Object> hibernateDataIterator = new HibernateDataIterator<Object>(query, session, transaction, initialLoadBatchSize);
                 return hibernateDataIterator;
             }
         });
