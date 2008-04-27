@@ -22,6 +22,7 @@ import net.jini.config.ConfigurationProvider;
 import org.jini.rio.resources.client.AbstractFaultDetectionHandler;
 
 import java.rmi.RemoteException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -74,13 +75,14 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
                     0,
                     Long.MAX_VALUE);
 
-            if (logger.isLoggable(Level.FINEST)) {
+            if (logger.isLoggable(Level.CONFIG)) {
                 StringBuffer buffer = new StringBuffer();
                 buffer.append("PUFaultDetectionHandler Properties : ");
-                buffer.append("invocation delay=" + invocationDelay + ", ");
-                buffer.append("retry count=" + retryCount + ", ");
-                buffer.append("retry timeout=" + retryTimeout);
-                logger.finest(buffer.toString());
+                buffer.append("\n invocation delay=" + invocationDelay);
+                buffer.append("\n retry count=" + retryCount + ", ");
+                buffer.append("\n retry timeout=" + retryTimeout);
+                buffer.append("\n configArgs: " + Arrays.toString( configArgs));
+                logger.config(buffer.toString());
             }
         } catch (ConfigurationException e) {
             logger.log(Level.SEVERE, "Setting Configuration", e);
@@ -100,6 +102,9 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
          * Its all over
          */
         public void drop() {
+            if (logger.isLoggable(Level.FINE)) {
+                logger.fine("Dropping monitor for service: [" + proxy +"]" );
+            }
         }
 
         /**
@@ -108,8 +113,22 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
          */
         public boolean verify() {
             try {
-                return ((PUServiceBean) proxy).isAlive();
+                if (logger.isLoggable(Level.FINEST)) {
+                    logger.finest("Requesting isAlive() on service: [" + proxy +"]" );
+                }
+                
+                final boolean isAlive = ((PUServiceBean) proxy).isAlive();
+
+                if (logger.isLoggable(Level.FINEST)) {
+                    logger.finest("isAlive() succesfully returned: ["+isAlive+"] for service: [" + proxy +"]" );
+                }
+                
+                return isAlive;
             } catch (RemoteException e) {
+                if(logger.isLoggable(Level.FINE)) {
+                    logger.log( Level.FINE, "RemoteException reaching service: ["
+                            + proxy + "] service cannot be reached", e);
+                }
                 return false;
             }
         }
