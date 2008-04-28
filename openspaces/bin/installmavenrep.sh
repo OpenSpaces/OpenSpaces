@@ -34,8 +34,8 @@ mvn install:install-file -DgroupId=gigaspaces -DartifactId=JSpaces -Dversion=$VE
 mvn install:install-file -DgroupId=gigaspaces -DartifactId=openspaces -Dversion=$VERSION -DpomFile=$TMPDIR/openspaces-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/openspaces/openspaces.jar
 mvn install:install-file -DgroupId=gigaspaces -DartifactId=mule-os -Dversion=$VERSION -Dpackaging=jar -DpomFile=$TMPDIR/mule-os-pom.xml -Dfile=${JSHOMEDIR}/lib/openspaces/mule-os.jar
 
-# Copy licenese file
-cp $JSHOMEDIR/gslicense.xml ~/.m2/repository/gigaspaces/gs-boot/$VERSION
-
 # Build and install OpenSpaces Maven Plugin
 mvn -f ../lib/openspaces/maven-openspaces-plugin/pom.xml install
+
+# Copy licenese file
+mvn os:install-license -Dfile=$JSHOMEDIR/gslicense.xml -Dversion=%VERSION%
