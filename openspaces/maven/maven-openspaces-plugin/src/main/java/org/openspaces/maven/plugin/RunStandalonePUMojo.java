@@ -93,11 +93,34 @@ public class RunStandalonePUMojo extends AbstractMojo
 				getLog().info("Running processing unit: " + name);
 				String[] args = createAttributesArray(name);
 				getLog().info("Arguments list: " + args);
-				StandaloneProcessingUnitContainer.main(args);
+				System.out.println("1111111111111");
+				StandaloneProcessingUnitContainer.runContainer(args);
+				System.out.println("2222222222222");
 			}
 		}
 		catch (Exception e)
 		{
+		    System.out.println("333333333333");
+		    Throwable cause = (Throwable)e;
+            while (cause.getCause() != null)
+            {
+                cause = cause.getCause();
+                if (cause instanceof SecurityException)
+                {
+                    if (cause.getMessage() != null && cause.getMessage().contains("gslicense.xml"))
+                    {
+                        String msg = 
+                            "\nThe GigaSpaces license file - gslicense.xml - was not found in " +
+                            "Maven repository.\nThis file should be placed in the directory " +
+                            "where gs-boot.jar resides.\n" +
+                            "Please try to reinstall OpenSpaces Plugin for Maven by running " +
+                            "'installmavenrep' script again.\nAlternatively, copy gslicense.xml " +
+                            "manually to <maven-repository-home>/gigaspaces/gs-boot/<version>.";
+                        throw new MojoExecutionException(msg);
+                    }
+                }
+            }
+            System.out.println("4444444444444");
 			throw new MojoExecutionException(e.getMessage(), e);
 		}
 	}

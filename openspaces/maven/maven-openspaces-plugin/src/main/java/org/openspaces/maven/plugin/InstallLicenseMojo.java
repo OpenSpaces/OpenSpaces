@@ -31,8 +31,7 @@ import org.springframework.util.FileCopyUtils;
  * 
  * @requiresProject  false
  */
-public class InstallLicenseMojo extends AbstractMojo
-{
+public class InstallLicenseMojo extends AbstractMojo {
 
     /**
      * The license file.
@@ -56,37 +55,29 @@ public class InstallLicenseMojo extends AbstractMojo
     protected String version;
     
     
-    public void execute() throws MojoExecutionException
-    {
-        if (!file.exists())
-        {
-            throw new MojoExecutionException("GigaSpaces license file not found at " + file);
+    public void execute() throws MojoExecutionException {
+        if (!file.exists()) {
+            throw new MojoExecutionException("GigaSpaces license file not found at " + file.getAbsolutePath());
         }
         
-        if (version == null || version.length() == 0)
-        {
+        if (version == null || version.length() == 0) {
             throw new MojoExecutionException("GigaSpaces version is not specified");
         }
         
         File baseDir = new File(localRepository.getBasedir());
-        if (!baseDir.exists())
-        {
-            throw new MojoExecutionException("The local repository was not found at " + baseDir);
+        if (!baseDir.exists()) {
+            throw new MojoExecutionException("The local repository was not found at " + baseDir.getAbsolutePath());
         }
             
         File target = new File(baseDir+"/gigaspaces/gs-boot/"+version+"/gslicense.xml");
-        if (!target.getParentFile().exists())
-        {
+        if (!target.getParentFile().exists()) {
             throw new MojoExecutionException("The gs-boot artifact is not installed");
         }
         
-        try 
-        {
-            getLog().info("Copying GigaSlapces license file to: " + target);
+        try {
+            getLog().info("Copying GigaSlapces license file to: " + target.getAbsolutePath());
             FileCopyUtils.copy(file, target);
-        }
-        catch (IOException e) 
-        {
+        } catch (IOException e) {
             throw new MojoExecutionException("Failed to copy GigaSpaces license file.", e);
         }
     }

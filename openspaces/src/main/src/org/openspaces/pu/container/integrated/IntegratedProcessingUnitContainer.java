@@ -117,21 +117,12 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
      * </ul>
      */
     public static void main(String[] args) throws Exception {
-        // init GigaSpace logger
         GSLogConfigLoader.getLoader();
         if (System.getProperty("java.security.policy") == null) {
             SecurityPolicyLoader.loadPolicy(Constants.System.SYSTEM_GS_POLICY);
         }
-
         try {
-            CommandLineParser.Parameter[] params = CommandLineParser.parse(args);
-
-            IntegratedProcessingUnitContainerProvider provider = new IntegratedProcessingUnitContainerProvider();
-            provider.setBeanLevelProperties(BeanLevelPropertiesParser.parse(params));
-            provider.setClusterInfo(ClusterInfoParser.parse(params));
-            ConfigLocationParser.parse(provider, params);
-
-            final ProcessingUnitContainer container = provider.createContainer();
+           final ProcessingUnitContainer container = createContainer(args);
 
             // Use the MAIN thread as the non daemon thread to keep it alive
             final Thread mainThread = Thread.currentThread();
@@ -156,6 +147,17 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
             e.printStackTrace(System.err);
             System.exit(1);
         }
+    }
+    
+    public static ProcessingUnitContainer createContainer(String[] args) throws Exception {
+        CommandLineParser.Parameter[] params = CommandLineParser.parse(args);
+
+        IntegratedProcessingUnitContainerProvider provider = new IntegratedProcessingUnitContainerProvider();
+        provider.setBeanLevelProperties(BeanLevelPropertiesParser.parse(params));
+        provider.setClusterInfo(ClusterInfoParser.parse(params));
+        ConfigLocationParser.parse(provider, params);
+
+        return provider.createContainer();
     }
 
     public static void printUsage() {

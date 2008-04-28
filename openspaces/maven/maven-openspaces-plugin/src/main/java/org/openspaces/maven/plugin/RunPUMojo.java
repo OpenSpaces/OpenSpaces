@@ -31,7 +31,14 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.openspaces.core.space.CannotCreateSpaceException;
+import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer;
+import org.springframework.beans.factory.BeanCreationException;
+
+import com.gigaspaces.logger.GSLogConfigLoader;
+import com.j_spaces.core.Constants;
+import com.j_spaces.kernel.SecurityPolicyLoader;
 
 
 /**
@@ -55,7 +62,6 @@ public class RunPUMojo extends AbstractMojo
     /** 
      * The classpath elements of the project being tested.
      * @parameter expression="${puName}"
-     * @required
      * @readonly
      */
     private String puName;
@@ -72,35 +78,50 @@ public class RunPUMojo extends AbstractMojo
      */
     private String proeprties;
 
-    /**
-     * The processing unit project
-     */
-    private MavenProject puProject;
+    private List containers = new ArrayList();
     
     
 	public void execute() throws MojoExecutionException, MojoFailureException 
 	{
-		if (project == null || !project.getPackaging().equalsIgnoreCase("pom"))
-		{
-			throw new MojoExecutionException("The goal has to be run in the master context" +
-					" of a multi module project (packaging=pom).");
-		}
-		Iterator i = project.getCollectedProjects().iterator();
-		while (i.hasNext())
-		{
-			MavenProject m = (MavenProject)i.next();
-			if (m.getName().equals(puName))
-			{
-				getLog().info("Located processing unit project: " + puName);
-				puProject = m;
-				break;
-			}
-		}
-		if (puProject == null)
-		{
-			throw new MojoExecutionException("Failed to locate processing unit project named '" + puName + "'.");
-		}
-		executePU();
+        // save the current class loader
+        ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
+        // Remove white spaces from ClassLoader's URLs
+        try {
+            Utils.changeClassLoaderToSupportWhiteSpacesRepository(currentCL);
+        } catch (Exception e) {
+            getLog().info("Unable to update ClassLoader. Proceeding with processing unit invocation.", e);
+        }
+        
+        GSLogConfigLoader.getLoader();
+        if (System.getProperty("java.security.policy") == null) {
+            SecurityPolicyLoader.loadPolicy(Constants.System.SYSTEM_GS_POLICY);
+        }
+        
+        List projects = Utils.resolveProjects(project, puName);
+        for (Iterator projIt = projects.iterator(); projIt.hasNext();) {
+            MavenProject proj = (MavenProject) projIt.next();
+            executePU(proj);
+        }
+        
+        final Thread mainThread = Thread.currentThread();
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                try {
+                    for (int i = (containers.size() - 1); i >= 0; --i) {
+                        ((ProcessingUnitContainer) containers.get(i)).close();
+                    }
+                } finally {
+                    mainThread.interrupt();
+                }
+            }
+        });
+        while (!mainThread.isInterrupted()) {
+            try {
+                Thread.sleep(Long.MAX_VALUE);
+            } catch (InterruptedException e) {
+                // do nothing, simply exit
+            }
+        }
 	}
 	
 	
@@ -109,138 +130,49 @@ public class RunPUMojo extends AbstractMojo
 	 * @throws MojoExecutionException
 	 * @throws MojoFailureException
 	 */
-	private void executePU() throws MojoExecutionException, MojoFailureException
-	{
-		if (puProject == null || !puProject.getPackaging().equalsIgnoreCase("jar"))
-		{
-			throw new MojoExecutionException("The processing unit project '"+ puProject.getName() +
+	private void executePU(MavenProject project) throws MojoExecutionException, MojoFailureException {
+		if (project == null || !project.getPackaging().equalsIgnoreCase("jar")) {
+			throw new MojoExecutionException("The processing unit project '"+ project.getName() +
 					"' must be of type jar (packaging=jar).");
 		}
 		
 		// resolve the classpath of the PU to run
-		List<String> classpath = resolveClasspath();
+		List classpath;
+        try {
+            classpath = Utils.resolveClasspath(project);
+        } catch (Exception e1) {
+            throw new MojoExecutionException("Failed to resolve project classpath", e1);
+        }
 		
-		getLog().info("Processing unit classpath: "+classpath);
+		getLog().info("Processing unit [" + project.getName() + "] classpath: " + classpath);
 
-		// save the current class loader
-		ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
-		try
-		{
-		    // Remove white spaces from ClassLoader's URLs
-		    try 
-		    {
-                Utils.changeClassLoaderToSupportWhiteSpacesRepository(currentCL);
-            }
-		    catch (Exception e) 
-		    {
-		        getLog().info("Unable to update ClassLoader. Proceeding with processing unit invocation.", e);
-            }
-		    
-			// create the class loader for the PU execution
-			ClassLoader classLoader = createClassLoader(classpath, currentCL);
-
-			// set the current ClassLoader
-			getLog().debug("Setting the processing unit's ClassLoader.");
-			Thread.currentThread().setContextClassLoader(classLoader);
-
-			// run the PU
-			runPU();
-		}
-		catch (MojoExecutionException e)
-		{
-			throw e;
-		}
-		catch (Exception e)
-		{
-			throw new MojoFailureException(e, "Processing unit execution failure",
-					"Failed to execute processing unit: " + puProject.getBuild().getFinalName());
-		}
-		finally
-		{
-			// restore the class loader
-			getLog().debug("Restoring the ClassLoader.");
-			Thread.currentThread().setContextClassLoader(currentCL);
-		}
+		// run the PU
+        getLog().info("Running processing unit: " + project.getBuild().getFinalName());
+        String[] args = createAttributesArray();
+        ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
+        try {
+            // create the class loader for the PU execution
+            ClassLoader classLoader = Utils.createClassLoader(classpath, currentCL);
+            Thread.currentThread().setContextClassLoader(classLoader);
+            
+            ProcessingUnitContainer container = IntegratedProcessingUnitContainer.createContainer(args);
+            containers.add(container);
+        } catch (Exception e) {
+            printUsage();
+            throw Utils.createMojoException(e);
+        } finally {
+            Thread.currentThread().setContextClassLoader(currentCL);
+        }
 	}
 	
 	
-	
-	
-	/**
-	 * resolves the PU classpath.
-	 * It includes the PU executables and dependencies. 
-	 * @return a list containing all classpath paths.
-	 */
-	private List<String> resolveClasspath()
-	{
-		List<String> dependencyFiles = new ArrayList<String>();
-		dependencyFiles.add(puProject.getArtifact().getFile().getAbsolutePath());
-		Set dependencyArtifacts = puProject.getArtifacts();
-		Iterator i = dependencyArtifacts.iterator();
-		while (i.hasNext())
-		{
-			Artifact artifact = (Artifact)i.next();
-			dependencyFiles.add(artifact.getFile().getAbsolutePath());
-		}
-		return dependencyFiles; 
-	}
-	
-	
-	/**
-	 * Creates the class loader of the PU application.
-	 * @param classpathUrls the classpath to use by the class loader.
-	 * @param parent the parent classloader
-	 * @return the class loader of the PU application.
-	 * @throws MalformedURLException
-	 */
-	private ClassLoader createClassLoader( List<String> classpathUrls, ClassLoader parent)
-	throws MalformedURLException
-	{
-		// convert classpath strings to URLs
-		List<URL> urls = new ArrayList<URL>();
-		for (Iterator<String> i = classpathUrls.iterator(); i.hasNext();)
-		{
-			String url = i.next();
-			File f = new File(url);
-			urls.add(f.toURL());
-		}
-		
-		// convert to array
-		URL[] urlsArray = new URL[urls.size()];
-		urls.toArray(urlsArray);
-		
-		// create the classloader
-		ClassLoader urlCL = URLClassLoader.newInstance(urlsArray, parent);
-		return urlCL;
-	}
-	
-	
-	/**
-	 * Runs the PU.
-	 * @throws MojoExecutionException
-	 * @throws MojoFailureException
-	 */
-	public void runPU() throws MojoExecutionException, MojoFailureException 
-	{
-		getLog().info("Running processing unit: " + puProject.getBuild().getFinalName());
-		String[] args = createAttributesArray();
-		try
-		{
-			IntegratedProcessingUnitContainer.main(args);
-		}
-		catch (Exception e)
-		{
-			throw new MojoExecutionException(e.getMessage(), e);
-		}
-	}
-
 	/**
 	 * Creates the attributes array
 	 * @return attributes array
 	 */
 	private String[] createAttributesArray()
 	{
-		ArrayList<String> attlist = new ArrayList<String>();
+		ArrayList attlist = new ArrayList();
 		addAttributeToList(attlist, "-cluster", cluster);
 		addAttributeToList(attlist, "-proeprties", proeprties);
 		getLog().info("Arguments list: " + attlist);
@@ -270,4 +202,32 @@ public class RunPUMojo extends AbstractMojo
 			}
 		}
 	}
+	
+	/**
+	 * Prints usage instructions.
+	 */
+	public static void printUsage() {
+        System.out.println("Usage: mvn compile os:run [-Dcluster=\"...\"] [-Dproperties=\"...\"] -DpuName=<module-name>");
+        System.out.println("    -cluster [cluster properties]: Allows specify cluster parameters");
+        System.out.println("             schema=partitioned  : The cluster schema to use");
+        System.out.println("             total_members=1,1   : The number of instances and number of backups to use");
+        System.out.println("             id=1                : The instance id of this processing unit");
+        System.out.println("             backup_id=1         : The backup id of this processing unit");
+        System.out.println("    -properties [properties-loc] : Location of context level properties");
+        System.out.println("    -properties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
+        System.out.println("");
+        System.out.println("");
+        System.out.println("Some Examples:");
+        System.out.println("1. -Dcluster=\"schema=partitioned total_members=2 id=1\"");
+        System.out.println("    - Starts a processing unit with a partitioned cluster schema of two members with instance id 1");
+        System.out.println("2. -Dcluster=\"schema=partitioned total_members=2 id=2\"");
+        System.out.println("    - Starts a processing unit with a partitioned cluster schema of two members with instance id 2");
+        System.out.println("3. -Dcluster=\"schema=partitioned-sync2backup total_members=2,1 id=1 backup_id=1\"");
+        System.out.println("    - Starts a processing unit with a partitioned sync2backup cluster schema of two members with two members each with one backup with instance id of 1 and backup id of 1");
+        System.out.println("4. -Dproperties=file://config/context.properties -properties space1 file://config/space1.properties");
+        System.out.println("    - Starts a processing unit called data-processor using context level properties called context.properties and bean level properties called space1.properties applied to bean named space1");
+        System.out.println("5. -Dproperties=embed://prop1=value1 -properties space1 embed://prop2=value2;prop3=value3");
+        System.out.println("    - Starts a processing unit called data-processor using context level properties with a single property called prop1 with value1 and bean level properties with two properties");
+        System.out.println("");
+    }
 }

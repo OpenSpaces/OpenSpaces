@@ -98,6 +98,16 @@ public class StandaloneProcessingUnitContainer implements ApplicationContextProc
      * </ul>
      */
     public static void main(String[] args) throws Exception {
+        try {
+            runContainer(args);
+        } catch (Exception e) {
+            printUsage();
+            e.printStackTrace(System.err);
+            System.exit(1);
+        }
+    }
+    
+    public static void runContainer(String[] args) throws Exception {
         if (System.getProperty("java.security.policy") == null) {
             SecurityPolicyLoader.loadPolicy(Constants.System.SYSTEM_GS_POLICY);
         }
@@ -109,39 +119,33 @@ public class StandaloneProcessingUnitContainer implements ApplicationContextProc
             System.exit(1);
         }
         String puLocation = args[args.length - 1];
+        
+        CommandLineParser.Parameter[] params = CommandLineParser.parse(args, args.length - 1);
+        StandaloneProcessingUnitContainerProvider provider = new StandaloneProcessingUnitContainerProvider(puLocation);
 
-        try {
-            CommandLineParser.Parameter[] params = CommandLineParser.parse(args, args.length - 1);
-            StandaloneProcessingUnitContainerProvider provider = new StandaloneProcessingUnitContainerProvider(puLocation);
+        provider.setBeanLevelProperties(BeanLevelPropertiesParser.parse(params));
+        provider.setClusterInfo(ClusterInfoParser.parse(params));
+        ConfigLocationParser.parse(provider, params);
 
-            provider.setBeanLevelProperties(BeanLevelPropertiesParser.parse(params));
-            provider.setClusterInfo(ClusterInfoParser.parse(params));
-            ConfigLocationParser.parse(provider, params);
+        final ProcessingUnitContainer container = provider.createContainer();
 
-            final ProcessingUnitContainer container = provider.createContainer();
-
-            // Use the MAIN thread as the non daemon thread to keep it alive
-            final Thread mainThread = Thread.currentThread();
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                public void run() {
-                    try {
-                        container.close();
-                    } finally {
-                        mainThread.interrupt();
-                    }
-                }
-            });
-            while (!mainThread.isInterrupted()) {
+        // Use the MAIN thread as the non daemon thread to keep it alive
+        final Thread mainThread = Thread.currentThread();
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
                 try {
-                    Thread.sleep(Long.MAX_VALUE);
-                } catch (InterruptedException e) {
-                    // do nothing, simply exit
+                    container.close();
+                } finally {
+                    mainThread.interrupt();
                 }
             }
-        } catch (Exception e) {
-            printUsage();
-            e.printStackTrace(System.err);
-            System.exit(1);
+        });
+        while (!mainThread.isInterrupted()) {
+            try {
+                Thread.sleep(Long.MAX_VALUE);
+            } catch (InterruptedException e) {
+                // do nothing, simply exit
+            }
         }
     }
 
