@@ -37,7 +37,7 @@ import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer;
 /**
  * Goal that runs a processing unit.
  *
- * @goal pu-run
+ * @goal run
  * 
  * @requiresProject false
  * @description Runs ...

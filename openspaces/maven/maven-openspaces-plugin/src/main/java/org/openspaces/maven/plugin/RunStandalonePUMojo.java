@@ -31,7 +31,7 @@ import org.openspaces.pu.container.standalone.StandaloneProcessingUnitContainer;
 /**
  * Goal that runs a processing unit as standalone.
  *
- * @goal pu-run-standalone
+ * @goal run-standalone
  * 
  * @requiresProject true
  */
