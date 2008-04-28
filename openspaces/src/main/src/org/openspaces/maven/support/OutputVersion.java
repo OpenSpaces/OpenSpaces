@@ -23,13 +23,15 @@ import com.j_spaces.kernel.PlatformVersion;
  */
 public class OutputVersion {
 
-    public static void main(String[] args) throws Exception {
-        String version;
+    public static String computeVersion() {
         if (PlatformVersion.MILESTONE.equals("GA")) {
-            version = PlatformVersion.VERSION;
+            return PlatformVersion.VERSION;
         } else {
-            version = PlatformVersion.VERSION + "-" + PlatformVersion.MILESTONE + "-" + PlatformVersion.BUILD_NUM;
+            return PlatformVersion.VERSION + "-" + PlatformVersion.MILESTONE + "-" + PlatformVersion.BUILD_NUM;
         }
-        System.out.println(version);
+    }
+    
+    public static void main(String[] args) throws Exception {
+        System.out.println(computeVersion());
     }
 }

@@ -107,13 +107,13 @@ public class POMGenerator {
         writer.println("  <groupId>gigaspaces</groupId>");
         writer.println("  <artifactId>" + artifactId + "</artifactId>");
         writer.println("  <packaging>jar</packaging>");
-        writer.println("  <version>" + OutputVersion.VERSION + "</version>");
+        writer.println("  <version>" + OutputVersion.computeVersion() + "</version>");
         writer.println("  <url>http://www.gigaspaces.com</url>");
         writer.println("  <dependencies>");
     }
 
     public static void printDependency(PrintWriter writer, String dependencyId) {
-        printDependency(writer, "gigaspaces", dependencyId, OutputVersion.VERSION);
+        printDependency(writer, "gigaspaces", dependencyId, OutputVersion.computeVersion());
     }
 
     public static void printDependency(PrintWriter writer, String groupId, String dependencyId, String version) {
