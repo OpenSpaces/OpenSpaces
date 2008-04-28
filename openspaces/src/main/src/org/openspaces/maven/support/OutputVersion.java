@@ -28,7 +28,7 @@ public class OutputVersion {
         if (PlatformVersion.MILESTONE.equals("GA")) {
             version = PlatformVersion.VERSION;
         } else {
-            version = PlatformVersion.VERSION + "-" + PlatformVersion.MILESTONE + PlatformVersion.BUILD_NUM;
+            version = PlatformVersion.VERSION + "-" + PlatformVersion.MILESTONE + "-" + PlatformVersion.BUILD_NUM;
         }
         System.out.println(version);
     }
