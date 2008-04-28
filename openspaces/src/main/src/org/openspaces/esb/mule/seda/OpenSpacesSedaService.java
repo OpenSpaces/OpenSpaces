@@ -44,14 +44,14 @@ public class OpenSpacesSedaService extends SpaceAwareSedaService implements Work
     public synchronized void doInitialise() throws InitialisationException {
         super.doInitialise();
 
-        InternalEventEntry internalTemplate;
-        if (sedaModel.isFifo()) {
-            internalTemplate = new InternalEventFifoEntry();
-        } else {
-            internalTemplate = new InternalEventEntry();
-        }
-        internalTemplate.setPersist(sedaModel.isPersistent());
+        InternalEventEntry internalTemplate = new InternalEventEntry();
         internalTemplate.name = name;
+        internalTemplate.setFifo(sedaModel.isFifo());
+        if (sedaModel.isPersistent()) {
+            internalTemplate.makePersistent();
+        } else {
+            internalTemplate.makeTransient();
+        }
         template = gigaSpace.snapshot(internalTemplate);
     }
 
@@ -59,20 +59,19 @@ public class OpenSpacesSedaService extends SpaceAwareSedaService implements Work
         if (logger.isDebugEnabled()) {
             logger.debug("Component " + name + " putting event on queue " + name + ": " + event);
         }
-
-        InternalEventEntry entry;
-        if (sedaModel.isFifo()) {
-            entry = new InternalEventFifoEntry(event, name);
+        InternalEventEntry entry = new InternalEventEntry(event, name);
+        entry.setFifo(sedaModel.isFifo());
+        if (sedaModel.isPersistent()) {
+            entry.makePersistent();
         } else {
-            entry = new InternalEventEntry(event, name);
+            entry.makeTransient();
         }
-        entry.setPersist(sedaModel.isPersistent());
         gigaSpace.write(entry);
     }
 
     protected MuleEvent dequeue() throws Exception {
         if (logger.isDebugEnabled()) {
-            logger.debug("Component " + name + " polling queue " + name + ", timeout = " + queueTimeout);
+            //logger.debug("Component " + name + " polling queue " + name + ", timeout = " + queueTimeout);
         }
         if (getQueueTimeout() == null) {
             throw new InitialisationException(CoreMessages.noServiceQueueTimeoutSet(this), this);

@@ -45,22 +45,22 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
     private Object template;
 
     public OpenSpacesQueueMessageReceiver(Connector connector,
-                                            Service service,
-                                            final InboundEndpoint endpoint) throws CreateException {
+                                          Service service,
+                                          final InboundEndpoint endpoint) throws CreateException {
         super(connector, service, endpoint);
         this.setReceiveMessagesInTransaction(endpoint.getTransactionConfig().isTransacted());
         this.connector = (OpenSpacesQueueConnector) connector;
     }
 
     protected void doConnect() throws Exception {
-        InternalQueueEntry internalTemplate;
-        if (connector.isFifo()) {
-            internalTemplate = new InternalQueueFifoEntry();
+        InternalQueueEntry internalTemplate = new InternalQueueEntry();
+        internalTemplate.endpointURI = endpoint.getEndpointURI().getAddress();
+        internalTemplate.setFifo(connector.isFifo());
+        if (connector.isPersistent()) {
+            internalTemplate.makePersistent();
         } else {
-            internalTemplate = new InternalQueueEntry();
+            internalTemplate.makeTransient();
         }
-        internalTemplate.setPersist(connector.isPersistent());
-        internalTemplate.setEndpointURI(endpoint.getEndpointURI().getAddress());
         template = connector.getGigaSpaceObj().snapshot(internalTemplate);
     }
 
@@ -101,11 +101,12 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
             // batch more messages if needed
             Object[] entries = connector.getGigaSpaceObj().takeMultiple(template, batchSize);
             if (entries != null) {
-                for (Object entry1: entries) {
-                    messages.add( ((InternalQueueEntry) entry1).message );
+                for (Object entry1 : entries) {
+                    messages.add(((InternalQueueEntry) entry1).message);
                 }
             }
         }
+
         // let our workManager handle the batch of events
         return messages;
     }

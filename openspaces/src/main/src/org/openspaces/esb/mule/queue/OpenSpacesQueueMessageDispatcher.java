@@ -50,15 +50,16 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
                     CoreMessages.objectIsNull("Endpoint"), event.getMessage(), event.getEndpoint());
         }
 
-        InternalQueueEntry entry;
-        if (connector.isFifo()) {
-            entry = new InternalQueueFifoEntry();
-        } else {
-            entry = new InternalQueueEntry();
-        }
-        entry.setPersist(connector.isPersistent());
+        InternalQueueEntry entry = new InternalQueueEntry();
         entry.message = event.getMessage();
         entry.endpointURI = endpointUri.getAddress();
+        entry.setFifo(connector.isFifo());
+        if (connector.isPersistent()) {
+            entry.makePersistent();
+        } else {
+            entry.makeTransient();
+        }
+
         connector.getGigaSpaceObj().write(entry);
 
         if (logger.isDebugEnabled()) {

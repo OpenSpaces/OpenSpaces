@@ -86,14 +86,14 @@ public class OpenSpacesQueueMessageRequestor extends AbstractMessageRequester {
     }
 
     protected void doConnect() throws Exception {
-        InternalQueueEntry internalTemplate;
-        if (connector.isFifo()) {
-            internalTemplate = new InternalQueueFifoEntry();
-        } else {
-            internalTemplate = new InternalQueueEntry();
-        }
-        internalTemplate.setPersist(connector.isPersistent());
+        InternalQueueEntry internalTemplate = new InternalQueueEntry();
         internalTemplate.endpointURI = endpoint.getEndpointURI().getAddress();
+        internalTemplate.setFifo(connector.isFifo());
+        if (connector.isPersistent()) {
+            internalTemplate.makePersistent();
+        } else {
+            internalTemplate.makeTransient();
+        }
         template = connector.getGigaSpaceObj().snapshot(internalTemplate);
     }
 

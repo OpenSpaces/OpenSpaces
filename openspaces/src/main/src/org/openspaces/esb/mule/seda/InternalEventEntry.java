@@ -16,8 +16,7 @@
 
 package org.openspaces.esb.mule.seda;
 
-import com.gigaspaces.annotation.pojo.SpacePersist;
-import com.gigaspaces.annotation.pojo.SpaceProperty;
+import com.j_spaces.core.client.MetaDataEntry;
 import org.mule.api.MuleEvent;
 
 /**
@@ -26,14 +25,11 @@ import org.mule.api.MuleEvent;
  *
  * @author kimchy
  */
-public class InternalEventEntry {
+public class InternalEventEntry extends MetaDataEntry {
 
-    protected String name;
+    public String name;
 
-    protected MuleEvent event;
-
-    protected boolean persist = false;
-
+    public MuleEvent event;
 
     public InternalEventEntry() {
     }
@@ -43,29 +39,7 @@ public class InternalEventEntry {
         this.name = name;
     }
 
-    @SpaceProperty(index = SpaceProperty.IndexType.BASIC)
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @SpacePersist
-    public boolean isPersist() {
-        return persist;
-    }
-
-    public void setPersist(boolean persist) {
-        this.persist = persist;
-    }
-
-    public MuleEvent getEvent() {
-        return event;
-    }
-
-    public void setEvent(MuleEvent event) {
-        this.event = event;
+    public static String[] __getSpaceIndexedFields() {
+        return new String[]{"name"};
     }
 }
