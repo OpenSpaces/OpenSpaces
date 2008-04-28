@@ -19,17 +19,13 @@
 
         The SLA bean also mandates that a primary and a backup won't run under the same
         GSC by setting the maxInstancesPerVM to 1.
-
-        Within the SLA several Monitors can be defined which can then be viewed within the UI.
-        This monitors (on top of the built in monitors such as CPU and Memory) can be used
-        with a policy handler (not shown here).
     -->
     <os-sla:sla cluster-schema="partitioned-sync2backup" number-of-instances="2" number-of-backups="1"
                 max-instances-per-vm="1">
     </os-sla:sla>
 
     <!--
-        Spring propery configurer which allows us to use system properties (such as user.name).
+        Spring property configurer which allows us to use system properties (such as user.name).
     -->
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
