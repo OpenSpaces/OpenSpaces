@@ -16,25 +16,17 @@
 
 package org.openspaces.maven.plugin;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
-import org.openspaces.core.space.CannotCreateSpaceException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer;
-import org.springframework.beans.factory.BeanCreationException;
 
 import com.gigaspaces.logger.GSLogConfigLoader;
 import com.j_spaces.core.Constants;
