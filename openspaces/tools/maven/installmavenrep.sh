@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # The call to setenv.sh can be commented out if necessary.
-. `dirname $0`/setenv.sh
+. `dirname $0`/../../bin/setenv.sh
 
 if [ "${JSHOMEDIR}" = "" ] ; then
   JSHOMEDIR=`dirname $0`/..
@@ -10,7 +10,7 @@ export JSHOMEDIR
 export TMPDIR="/tmp"
 export VERSION=`${JAVACMD} -cp ${JSHOMEDIR}/lib/JSpaces.jar:${JSHOMEDIR}/lib/openspaces/openspaces.jar org.openspaces.maven.support.OutputVersion`
 
-${JAVACMD} -cp ${JSHOMEDIR}/lib/JSpaces.jar:${JSHOMEDIR}/lib/openspaces/openspaces.jar org.openspaces.maven.support.POMGenerator $TMPDIR
+${JAVACMD} -cp ${JSHOMEDIR}/lib/JSpaces.jar:${JSHOMEDIR}/lib/openspaces/openspaces.jar org.openspaces.maven.support.POMGenerator $TMPDIR maven-openspaces-plugin/
 
 echo ""
 echo ""
@@ -35,7 +35,7 @@ mvn install:install-file -DgroupId=gigaspaces -DartifactId=openspaces -Dversion=
 mvn install:install-file -DgroupId=gigaspaces -DartifactId=mule-os -Dversion=$VERSION -Dpackaging=jar -DpomFile=$TMPDIR/mule-os-pom.xml -Dfile=${JSHOMEDIR}/lib/openspaces/mule-os.jar
 
 # Build and install OpenSpaces Maven Plugin
-mvn -f ../lib/openspaces/maven-openspaces-plugin/pom.xml install
+mvn -f maven-openspaces-plugin/pom.xml install
 
 # Copy licenese file
 mvn os:install-license -Dfile=$JSHOMEDIR/gslicense.xml -Dversion=%VERSION%

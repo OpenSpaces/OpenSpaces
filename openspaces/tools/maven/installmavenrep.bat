@@ -2,7 +2,7 @@
 
 if "%1" == ""  (
 @rem The call to setenv.bat can be commented out if necessary.
-@call "%~dp0\setenv.bat"
+@call "%~dp0\..\..\bin\setenv.bat"
 )
 
 if "%1" == "version"  (
@@ -12,7 +12,7 @@ goto END
 
 FOR /F "usebackq tokens=*" %%i IN (`installmavenrep.bat version`) DO @set VERSION=%%i
 
-%JAVACMD% -cp "%JSHOMEDIR%/lib/JSpaces.jar";"%JSHOMEDIR%/lib/openspaces/openspaces.jar" org.openspaces.maven.support.POMGenerator %TEMP% %VERSION% ../lib/openspaces/maven-openspaces-plugin/
+%JAVACMD% -cp "%JSHOMEDIR%/lib/JSpaces.jar";"%JSHOMEDIR%/lib/openspaces/openspaces.jar" org.openspaces.maven.support.POMGenerator %TEMP% %VERSION% maven-openspaces-plugin/
 
 echo ""
 echo ""
@@ -21,7 +21,7 @@ echo ""
 echo ""
 
 REM Jini Jars
-@call mvn install:install-file -DgroupId=gigaspaces -DartifactId=jini-start -Dversion=%VERSION% -DpomFile=%TEMP%/jini-start-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/start.jar"
+call mvn install:install-file -DgroupId=gigaspaces -DartifactId=jini-start -Dversion=%VERSION% -DpomFile=%TEMP%/jini-start-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/start.jar"
 call mvn install:install-file -DgroupId=gigaspaces -DartifactId=jini-jsk-lib -Dversion=%VERSION% -DpomFile=%TEMP%/jini-jsk-lib-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/jsk-lib.jar"
 call mvn install:install-file -DgroupId=gigaspaces -DartifactId=jini-jsk-platform -Dversion=%VERSION% -DpomFile=%TEMP%/jini-jsk-platform-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/jsk-platform.jar"
 call mvn install:install-file -DgroupId=gigaspaces -DartifactId=jini-jsk-resources -Dversion=%VERSION% -DpomFile=%TEMP%/jini-jsk-resources-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/jsk-resources.jar"
@@ -37,7 +37,7 @@ call mvn install:install-file -DgroupId=gigaspaces -DartifactId=openspaces -Dver
 call mvn install:install-file -DgroupId=gigaspaces -DartifactId=mule-os -Dversion=%VERSION% -Dpackaging=jar -DpomFile=%TEMP%/mule-os-pom.xml -Dfile="%JSHOMEDIR%/lib/openspaces/mule-os.jar"
 
 REM Build and install OpenSpaces Maven Plugin 
-call mvn -f ../lib/openspaces/maven-openspaces-plugin/pom.xml install 
+call mvn -f maven-openspaces-plugin/pom.xml install 
 
 REM Copy licenese file
 call mvn os:install-license -Dfile="%JSHOMEDIR%\gslicense.xml" -Dversion=%VERSION%

@@ -202,16 +202,17 @@
     </target>
 
     <target name="dist_1_4"
-            depends="build_1_4, fulljar, buildexamples, srczip, javadoc, schema, license, maven-openspaces-plugin"
+            depends="build_1_4, fulljar, buildexamples, srczip, javadoc, schema, license"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}"/>
         <delete file="${dist.dir}/${name}-1.4.zip"/>
         <zip zipfile="${dist.dir}/${name}-1.4.zip">
             <zipfileset dir="${basedir}">
                 <include name="bin/pu*"/>
-                <include name="bin/installmavenrep*"/>
                 <include name="deploy/**"/>
                 <include name="docs/openspaces-javadoc/**"/>
+                <include name="tools/**"/>
+                <exclude name="tools/maven/maven-openspaces-plugin/target/**" />
 
                 <include name="examples/**"/>
                 <exclude name="examples/openspaces/data/**"/>
@@ -240,16 +241,17 @@
     </target>
 
     <target name="dist_1_5"
-            depends="build_1_5, fulljar, buildexamples, srczip, javadoc, schema, license, maven-openspaces-plugin"
+            depends="build_1_5, fulljar, buildexamples, srczip, javadoc, schema, license"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}"/>
         <delete file="${dist.dir}/${name}-1.5.zip"/>
         <zip zipfile="${dist.dir}/${name}-1.5.zip">
             <zipfileset dir="${basedir}">
                 <include name="bin/pu*"/>
-                <include name="bin/installmavenrep*"/>
                 <include name="deploy/**"/>
                 <include name="docs/openspaces-javadoc/**"/>
+                <include name="tools/**"/>
+            	<exclude name="tools/maven/maven-openspaces-plugin/target/**" />
 
                 <include name="examples/**"/>
                 <exclude name="examples/openspaces/data-1.4/**"/>
@@ -447,17 +449,6 @@
             </manifest>
         </jar>
 
-    </target>
-
-
-    <!-- Copying Maven2 plugin sources into the distribution -->
-    <target name="maven-openspaces-plugin">
-        <mkdir dir="${maven.plugin.dir}"/>
-        <copy todir="${maven.plugin.dir}" preservelastmodified="true">
-            <fileset dir="${basedir}/maven/maven-openspaces-plugin">
-                <include name="**/*"/>
-            </fileset>
-        </copy>
     </target>
 
 
