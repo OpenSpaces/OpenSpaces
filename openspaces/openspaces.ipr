@@ -319,6 +319,7 @@
       <module fileurl="file://$PROJECT_DIR$/examples/openspaces/data/feeder/examples-data-feeder.iml" filepath="$PROJECT_DIR$/examples/openspaces/data/feeder/examples-data-feeder.iml" />
       <module fileurl="file://$PROJECT_DIR$/examples/openspaces/data/processor/examples-data-processor.iml" filepath="$PROJECT_DIR$/examples/openspaces/data/processor/examples-data-processor.iml" />
       <module fileurl="file://$PROJECT_DIR$/examples/openspaces/helloworld/examples-helloworld.iml" filepath="$PROJECT_DIR$/examples/openspaces/helloworld/examples-helloworld.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tools/maven/maven-openspaces-plugin/maven-plugin.iml" filepath="$PROJECT_DIR$/tools/maven/maven-openspaces-plugin/maven-plugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/openspaces.iml" filepath="$PROJECT_DIR$/openspaces.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/main/source-main.iml" filepath="$PROJECT_DIR$/src/main/source-main.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/sandbox/source-sandbox.iml" filepath="$PROJECT_DIR$/src/sandbox/source-sandbox.iml" />
@@ -821,6 +822,13 @@
     <library name="hsql">
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/lib/jdbc/hsqldb.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="Maven">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/tools/maven/apache-maven-2.0.9/lib/maven-2.0.9-uber.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
