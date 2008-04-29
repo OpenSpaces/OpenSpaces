@@ -2,6 +2,7 @@ package org.openspaces.maven.plugin;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -10,6 +11,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -41,8 +43,7 @@ public class Utils {
         Field ucpField = clazz2.getDeclaredField("ucp");
         
         // make this field accessible
-        if (!ucpField.isAccessible())
-        {
+        if (!ucpField.isAccessible()) {
             ucpField.setAccessible(true);
         }
         
@@ -55,8 +56,7 @@ public class Utils {
         URL[] urls2 = new URL[urls.length];
         
         // replace the white spaces of all URLs with %20
-        for (int i = 0; i < urls.length; i++) 
-        {
+        for (int i = 0; i < urls.length; i++) {
             String path = urls[i].toExternalForm();
             path = path.replaceAll(" ", "%20");
             urls2[i] = new URL(path);
@@ -86,8 +86,6 @@ public class Utils {
         } else {
             if (project.getPackaging() != null && project.getPackaging().equalsIgnoreCase("pom")) {
                 List collectedProjects = project.getCollectedProjects();
-                // sort the projects by the order parameter
-                Collections.sort(collectedProjects, new PUProjectSorter(true));
                 for (Iterator projIt = collectedProjects.iterator(); projIt.hasNext();) {
                     MavenProject proj = (MavenProject) projIt.next();
                     if (proj.getProperties().getProperty(PUProjectSorter.PARAM_ORDER) != null) {
@@ -101,16 +99,6 @@ public class Utils {
         return projects;
     }
     
-    public static String getProcessingUnitJar(MavenProject project) {
-        String targetDir = project.getBuild().getDirectory();
-        String curDir = System.getProperty("user.dir");
-        String relativePath = targetDir.substring(curDir.length()+1);
-        relativePath = relativePath.replace("\\", "/");
-        String finalName = project.getBuild().getFinalName();
-        String name = relativePath + "/" + finalName + ".jar";
-        return name;
-    }
-
     /**
      * resolves the PU classpath.
      * It includes the PU executables and dependencies. 
@@ -126,8 +114,18 @@ public class Utils {
         }
         return dependencyFiles; 
     }
-    
-    private static URL getURL(File f) throws Exception {
+
+    public static List resolveDependencyClasspath(MavenProject project) throws Exception {
+        List dependencyFiles = new ArrayList();
+        Set dependencyArtifacts = project.getArtifacts();
+        for (Iterator i = dependencyArtifacts.iterator(); i.hasNext();) {
+            Artifact artifact = (Artifact)i.next();
+            dependencyFiles.add(getURL(artifact.getFile()));
+        }
+        return dependencyFiles; 
+    }
+
+    public static URL getURL(File f) throws Exception {
         String path = f.toURL().toExternalForm();
         path = path.replaceAll(" ", "%20");
         return new URL(path);
@@ -164,5 +162,57 @@ public class Utils {
             }
         }
         return new MojoExecutionException(e.getMessage(), e);
+    }
+    
+    /**
+     * Adds an attribute with all of its parameters to the list.
+     * @param list the list
+     * @param name the attribute's name
+     * @param value contains the attributes value or parameters
+     */
+    static void addAttributeToList(ArrayList list, String name, String value) {
+        if (value != null) {
+            list.add(name);
+            StringTokenizer st = new StringTokenizer(value);
+            String next;
+            while (st.hasMoreTokens()) {
+                next = st.nextToken();
+                list.add(next);
+            }
+        }
+    }
+    
+    
+    public static String getProcessingUnitJar(MavenProject project) {
+        String targetDir = project.getBuild().getDirectory();
+        String curDir = System.getProperty("user.dir");
+        String relativePath = targetDir.substring(curDir.length()+1);
+        relativePath = relativePath.replace("\\", "/");
+        String finalName = project.getBuild().getFinalName();
+        String name = relativePath + "/" + finalName + ".jar";
+        return name;
+    }
+
+    static String getPURelativePathDir(MavenProject proj) {
+        String targetDir = proj.getBuild().getDirectory();
+        String curDir = System.getProperty("user.dir");
+        String relativePath = targetDir.substring(curDir.length()+1);
+        relativePath = relativePath.replace("\\", "/");
+        String finalName = proj.getBuild().getFinalName();
+        String name = relativePath+"/"+finalName+".dir";
+        return name;
+    }
+    
+    
+    static void addSharedLibToClassLoader(MavenProject project, ClassLoader classLoader) throws Exception {
+        String path = Utils.getPURelativePathDir(project);
+        path = path + "/" + project.getBuild().getFinalName() + "/shared-lib";
+        File f = new File(path);
+        File[] files = f.listFiles();
+        Method m = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] {URL.class});
+        m.setAccessible(true);
+        for (int i = 0; i < files.length; i++) {
+            m.invoke(classLoader, Utils.getURL(files[i]));
+        }
     }
 }

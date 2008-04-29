@@ -19,9 +19,7 @@ package org.openspaces.maven.plugin;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -37,13 +35,14 @@ import org.openspaces.pu.container.servicegrid.deploy.Undeploy;
  * 
  * @requiresProject  false
  */
-public class UndeployPUMojo extends AbstractMojo
-{
+public class UndeployPUMojo extends AbstractMojo {
+    
 	/**
      * groups
      * @parameter expression="${groups}"
      */
     private String groups;
+    
     
     /**
      * locators
@@ -51,17 +50,20 @@ public class UndeployPUMojo extends AbstractMojo
      */
     private String locators;
     
+    
     /**
      * timeout
      * @parameter expression="${timeout}" default-value="10000"
      */
     private String timeout;
     
+    
 	/**
      * puName
      * @parameter expression="${puName}"
      */
     private String puName;
+    
     
     /** 
      * Project instance, used to add new source directory to the build. 
@@ -76,77 +78,23 @@ public class UndeployPUMojo extends AbstractMojo
      */
 	public void execute() throws MojoExecutionException, MojoFailureException 
 	{
-		List<String> puNames = resolvePUNames();
-		if (puNames.size() == 0)
-		{
-			throw new MojoExecutionException("No processing unit was resolved.");
-		}
-		try
-		{
-			Iterator<String> i = puNames.iterator();
-			while (i.hasNext())
-			{
-				String name = i.next();
-				getLog().info("Undeploying processing unit: " + name);
-				String[] attributesArray = createAttributesArray(name);
-				Undeploy.main(attributesArray);
-			}
-		}
-		catch (Exception e)
-		{
-			throw new MojoExecutionException(e.getMessage(), e);
-		}
+	    List projects = Utils.resolveProjects(project, puName);
+	    
+	    // sort the projects by the order parameter
+        Collections.sort(projects, new PUProjectSorter(false));
+        
+        for (Iterator projIt = projects.iterator(); projIt.hasNext();) {
+            MavenProject proj = (MavenProject) projIt.next();
+            getLog().info("Undeploying processing unit: " + proj.getName());
+            String[] attributesArray = createAttributesArray(proj.getName());
+            try {
+                Undeploy.main(attributesArray);
+            } catch (Exception e) {
+                throw new MojoExecutionException(e.getMessage(), e);
+            }
+        }
 	}
 	
-	/**
-	 * Returns a list of all processing unit names to undeploy.
-	 * @return processing unit names list
-	 */
-	private List<String> resolvePUNames()
-	{
-		List<String> puNames = new LinkedList<String>();
-		if (puName != null)
-		{
-			puNames.add(puName);
-		}
-		else if (project != null)
-		{
-			if (project.getPackaging() != null && project.getPackaging().equalsIgnoreCase("pom"))
-			{
-				getLog().info("Undeploying processing units of multi module project: " + project.getName());
-				List projects = project.getCollectedProjects();
-				
-				// sort the projects by the order parameter
-				Collections.sort(projects, new PUProjectSorter(false));
-				
-				// create processing unit name for each PU sub project
-				Iterator i = projects.iterator();
-				while (i.hasNext())
-				{
-					MavenProject proj = (MavenProject)i.next();
-					if (proj.getProperties().getProperty(PUProjectSorter.PARAM_ORDER) != null)
-					{
-						puNames.add(getPUName(proj));
-					}
-				}
-			}
-			else
-			{
-				puNames.add(getPUName(project));
-			}
-		}
-		return puNames;
-	}
-	
-	/**
-	 * Returns the name of the processing unit 
-	 * @param proj the Maven project
-	 * @return the name of the processing unit
-	 */
-	private String getPUName(MavenProject proj)
-	{
-		return proj.getBuild().getFinalName();
-	}
 	
 	/**
 	 * Creates the attributes array
@@ -154,38 +102,14 @@ public class UndeployPUMojo extends AbstractMojo
 	 */
 	private String[] createAttributesArray(String name)
 	{
-		ArrayList<String> Attlist = new ArrayList<String>();
-		addAttributeToList(Attlist, "-groups", groups);
-		addAttributeToList(Attlist, "-locators", locators);
-		addAttributeToList(Attlist, "-timeout", timeout);
+		ArrayList Attlist = new ArrayList();
+		Utils.addAttributeToList(Attlist, "-groups", groups);
+		Utils.addAttributeToList(Attlist, "-locators", locators);
+		Utils.addAttributeToList(Attlist, "-timeout", timeout);
 		Attlist.add(name);
 		getLog().info("Arguments list: " + Attlist);
 		String[] attArray = new String[Attlist.size()];
 		Attlist.toArray(attArray);
 		return attArray;
 	}
-
-	
-	/**
-	 * Adds an attribute with all of its parameters to the list.
-	 * @param list the list
-	 * @param name the attribute's name
-	 * @param value contains the attributes value or parameters
-	 */
-	private void addAttributeToList(ArrayList<String> list, String name, String value)
-	{
-		if (value != null)
-		{
-			getLog().debug("Adding argument to the arguments list: name="+name+" ,value="+value);
-			list.add(name);
-			StringTokenizer st = new StringTokenizer(value);
-			String next;
-			while (st.hasMoreTokens())
-			{
-				next = st.nextToken();
-				list.add(next);
-			}
-		}
-	}
-
 }

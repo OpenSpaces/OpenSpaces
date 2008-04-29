@@ -17,18 +17,15 @@
 package org.openspaces.maven.plugin;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
-import org.openspaces.pu.container.ProcessingUnitContainer;
-import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer;
 
-import com.gigaspaces.logger.GSLogConfigLoader;
 import com.j_spaces.core.Constants;
 import com.j_spaces.kernel.SecurityPolicyLoader;
 
@@ -51,6 +48,7 @@ public class RunPUMojo extends AbstractMojo
      */
     private MavenProject project;
     
+    
     /** 
      * The classpath elements of the project being tested.
      * @parameter expression="${puName}"
@@ -58,11 +56,13 @@ public class RunPUMojo extends AbstractMojo
      */
     private String puName;
     
+    
     /**
      * cluster
      * @parameter expression="${cluster}"
      */
     private String cluster;
+    
     
     /**
      * proeprties
@@ -70,26 +70,35 @@ public class RunPUMojo extends AbstractMojo
      */
     private String proeprties;
 
+    
+    /**
+     * Container list.
+     */
     private List containers = new ArrayList();
     
     
+    /**
+     * Executed the Mojo.
+     */
 	public void execute() throws MojoExecutionException, MojoFailureException 
 	{
-        // save the current class loader
+	    // Remove white spaces from ClassLoader's URLs
         ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
-        // Remove white spaces from ClassLoader's URLs
         try {
             Utils.changeClassLoaderToSupportWhiteSpacesRepository(currentCL);
         } catch (Exception e) {
             getLog().info("Unable to update ClassLoader. Proceeding with processing unit invocation.", e);
         }
         
-        GSLogConfigLoader.getLoader();
         if (System.getProperty("java.security.policy") == null) {
             SecurityPolicyLoader.loadPolicy(Constants.System.SYSTEM_GS_POLICY);
         }
         
         List projects = Utils.resolveProjects(project, puName);
+        
+        // sort the projects by the order parameter
+        Collections.sort(projects, new PUProjectSorter(true));
+        
         for (Iterator projIt = projects.iterator(); projIt.hasNext();) {
             MavenProject proj = (MavenProject) projIt.next();
             executePU(proj);
@@ -100,7 +109,7 @@ public class RunPUMojo extends AbstractMojo
             public void run() {
                 try {
                     for (int i = (containers.size() - 1); i >= 0; --i) {
-                        ((ProcessingUnitContainer) containers.get(i)).close();
+                        ((Thread) containers.get(i)).interrupt();
                     }
                 } finally {
                     mainThread.interrupt();
@@ -128,33 +137,31 @@ public class RunPUMojo extends AbstractMojo
 					"' must be of type jar (packaging=jar).");
 		}
 		
-		// resolve the classpath of the PU to run
-		List classpath;
+		// run the PU
+        getLog().info("Running processing unit: " + project.getName());
+        
+        ClassLoader classLoader;
         try {
-            classpath = Utils.resolveClasspath(project);
+            List classpath = Utils.resolveClasspath(project);
+            getLog().info("Processing unit [" + project.getName() + "] classpath: " + classpath);
+            classLoader = Utils.createClassLoader(classpath, null);
         } catch (Exception e1) {
             throw new MojoExecutionException("Failed to resolve project classpath", e1);
         }
-		
-		getLog().info("Processing unit [" + project.getName() + "] classpath: " + classpath);
-
-		// run the PU
-        getLog().info("Running processing unit: " + project.getBuild().getFinalName());
-        String[] args = createAttributesArray();
-        ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
-        try {
-            // create the class loader for the PU execution
-            ClassLoader classLoader = Utils.createClassLoader(classpath, currentCL);
-            Thread.currentThread().setContextClassLoader(classLoader);
-            
-            ProcessingUnitContainer container = IntegratedProcessingUnitContainer.createContainer(args);
-            containers.add(container);
-        } catch (Exception e) {
-            printUsage();
-            throw Utils.createMojoException(e);
-        } finally {
-            Thread.currentThread().setContextClassLoader(currentCL);
+        ContainerRunnable conatinerRunnable = new ContainerRunnable("org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer", createAttributesArray());
+        Thread thread = new Thread(conatinerRunnable, "Processing Unit [" + project.getName() + "]");
+        thread.setContextClassLoader(classLoader);
+        thread.start();
+        while (!conatinerRunnable.hasStarted()) {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+            }
         }
+        if (conatinerRunnable.getException() != null) {
+            throw new MojoExecutionException("Failed to start processing unit [" + project.getName() + "]", conatinerRunnable.getException());
+        }
+        containers.add(thread);
 	}
 	
 	
@@ -165,48 +172,27 @@ public class RunPUMojo extends AbstractMojo
 	private String[] createAttributesArray()
 	{
 		ArrayList attlist = new ArrayList();
-		addAttributeToList(attlist, "-cluster", cluster);
-		addAttributeToList(attlist, "-proeprties", proeprties);
+		Utils.addAttributeToList(attlist, "-cluster", cluster);
+		Utils.addAttributeToList(attlist, "-proeprties", proeprties);
 		getLog().info("Arguments list: " + attlist);
 		String[] attArray = new String[attlist.size()];
 		attlist.toArray(attArray);
 		return attArray;
 	}
 	
-	/**
-	 * Adds an attribute with all of its parameters to the list.
-	 * @param list the list
-	 * @param name the attribute's name
-	 * @param value contains the attributes value or parameters
-	 */
-	private void addAttributeToList(ArrayList<String> list, String name, String value)
-	{
-		if (value != null)
-		{
-			getLog().debug("Adding argument to the arguments list: name="+name+" ,value="+value);
-			list.add(name);
-			StringTokenizer st = new StringTokenizer(value);
-			String next;
-			while (st.hasMoreTokens())
-			{
-				next = st.nextToken();
-				list.add(next);
-			}
-		}
-	}
 	
 	/**
 	 * Prints usage instructions.
 	 */
 	public static void printUsage() {
         System.out.println("Usage: mvn compile os:run [-Dcluster=\"...\"] [-Dproperties=\"...\"] -DpuName=<module-name>");
-        System.out.println("    -cluster [cluster properties]: Allows specify cluster parameters");
+        System.out.println("    -Dcluster [cluster properties]: Allows specify cluster parameters");
         System.out.println("             schema=partitioned  : The cluster schema to use");
         System.out.println("             total_members=1,1   : The number of instances and number of backups to use");
         System.out.println("             id=1                : The instance id of this processing unit");
         System.out.println("             backup_id=1         : The backup id of this processing unit");
-        System.out.println("    -properties [properties-loc] : Location of context level properties");
-        System.out.println("    -properties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
+        System.out.println("    -Dproperties [properties-loc] : Location of context level properties");
+        System.out.println("    -Dproperties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
         System.out.println("");
         System.out.println("");
         System.out.println("Some Examples:");
@@ -216,9 +202,9 @@ public class RunPUMojo extends AbstractMojo
         System.out.println("    - Starts a processing unit with a partitioned cluster schema of two members with instance id 2");
         System.out.println("3. -Dcluster=\"schema=partitioned-sync2backup total_members=2,1 id=1 backup_id=1\"");
         System.out.println("    - Starts a processing unit with a partitioned sync2backup cluster schema of two members with two members each with one backup with instance id of 1 and backup id of 1");
-        System.out.println("4. -Dproperties=file://config/context.properties -properties space1 file://config/space1.properties");
+        System.out.println("4. -Dproperties=file://config/context.properties -Dproperties space1 file://config/space1.properties");
         System.out.println("    - Starts a processing unit called data-processor using context level properties called context.properties and bean level properties called space1.properties applied to bean named space1");
-        System.out.println("5. -Dproperties=embed://prop1=value1 -properties space1 embed://prop2=value2;prop3=value3");
+        System.out.println("5. -Dproperties=embed://prop1=value1 -Dproperties space1 embed://prop2=value2;prop3=value3");
         System.out.println("    - Starts a processing unit called data-processor using context level properties with a single property called prop1 with value1 and bean level properties with two properties");
         System.out.println("");
     }

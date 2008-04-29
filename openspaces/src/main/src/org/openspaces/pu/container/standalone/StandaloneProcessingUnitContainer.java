@@ -21,6 +21,7 @@ import com.j_spaces.core.Constants;
 import com.j_spaces.kernel.SecurityPolicyLoader;
 import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
+import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
 import org.openspaces.pu.container.support.ClusterInfoParser;
@@ -98,8 +99,35 @@ public class StandaloneProcessingUnitContainer implements ApplicationContextProc
      * </ul>
      */
     public static void main(String[] args) throws Exception {
+        GSLogConfigLoader.getLoader();
+        if (System.getProperty("java.security.policy") == null) {
+            SecurityPolicyLoader.loadPolicy(Constants.System.SYSTEM_GS_POLICY);
+        }
+        if (args.length == 0) {
+            printUsage();
+            System.exit(1);
+        }
         try {
-            runContainer(args);
+            final ProcessingUnitContainer container = createContainer(args);
+
+            // Use the MAIN thread as the non daemon thread to keep it alive
+            final Thread mainThread = Thread.currentThread();
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                    try {
+                        container.close();
+                    } finally {
+                        mainThread.interrupt();
+                    }
+                }
+            });
+            while (!mainThread.isInterrupted()) {
+                try {
+                    Thread.sleep(Long.MAX_VALUE);
+                } catch (InterruptedException e) {
+                    // do nothing, simply exit
+                }
+            }
         } catch (Exception e) {
             printUsage();
             e.printStackTrace(System.err);
@@ -107,46 +135,16 @@ public class StandaloneProcessingUnitContainer implements ApplicationContextProc
         }
     }
     
-    public static void runContainer(String[] args) throws Exception {
-        if (System.getProperty("java.security.policy") == null) {
-            SecurityPolicyLoader.loadPolicy(Constants.System.SYSTEM_GS_POLICY);
-        }
-        // init GigaSpace logger
-        GSLogConfigLoader.getLoader();
-
-        if (args.length == 0) {
-            printUsage();
-            System.exit(1);
-        }
+    public static ProcessingUnitContainer createContainer(String[] args) throws Exception {
         String puLocation = args[args.length - 1];
-        
         CommandLineParser.Parameter[] params = CommandLineParser.parse(args, args.length - 1);
+        
         StandaloneProcessingUnitContainerProvider provider = new StandaloneProcessingUnitContainerProvider(puLocation);
-
         provider.setBeanLevelProperties(BeanLevelPropertiesParser.parse(params));
         provider.setClusterInfo(ClusterInfoParser.parse(params));
         ConfigLocationParser.parse(provider, params);
 
-        final ProcessingUnitContainer container = provider.createContainer();
-
-        // Use the MAIN thread as the non daemon thread to keep it alive
-        final Thread mainThread = Thread.currentThread();
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                try {
-                    container.close();
-                } finally {
-                    mainThread.interrupt();
-                }
-            }
-        });
-        while (!mainThread.isInterrupted()) {
-            try {
-                Thread.sleep(Long.MAX_VALUE);
-            } catch (InterruptedException e) {
-                // do nothing, simply exit
-            }
-        }
+        return provider.createContainer();
     }
 
     public static void printUsage() {
