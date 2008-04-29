@@ -12,7 +12,7 @@
       This parameter is injected by the maven build lifecycle as the version of
       openspaces dependency. We support version 6.4 (not inclusive) and higher.
     -->
-    <gsVersion>(6.4,)</gsVersion>
+    <gsVersion>6.5-m11-2329-274</gsVersion>
   </properties>
   <dependencies>
     <dependency>
