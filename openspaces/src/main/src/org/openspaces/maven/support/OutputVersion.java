@@ -24,10 +24,10 @@ import com.j_spaces.kernel.PlatformVersion;
 public class OutputVersion {
 
     public static String computeVersion() {
-        if (PlatformVersion.MILESTONE.equals("GA")) {
-            return PlatformVersion.VERSION;
+        if (PlatformVersion.getMilestone().equals("GA")) {
+            return PlatformVersion.getVersion();
         } else {
-            return PlatformVersion.VERSION + "-" + PlatformVersion.MILESTONE + "-" + PlatformVersion.BUILD_NUM;
+            return PlatformVersion.getVersion() + "-" + PlatformVersion.getMilestone() + "-" + PlatformVersion.getBuildNumber();
         }
     }
     
