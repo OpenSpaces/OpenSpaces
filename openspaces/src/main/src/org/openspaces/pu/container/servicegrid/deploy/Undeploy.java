@@ -17,7 +17,7 @@
 package org.openspaces.pu.container.servicegrid.deploy;
 
 import com.gigaspaces.grid.gsm.GSM;
-import com.j_spaces.core.Constants;
+import com.j_spaces.kernel.PlatformVersion;
 import net.jini.core.lookup.ServiceItem;
 import org.jini.rio.core.OperationalString;
 import org.jini.rio.core.OperationalStringManager;
@@ -62,7 +62,7 @@ public class Undeploy {
                     groups[i] = tokenizer.nextToken();
                 }
             } else {
-                groups = new String[]{Constants.LookupManager.LOOKUP_GROUP_DEFAULT};
+                groups = new String[]{"gigaspaces-" + PlatformVersion.getVersionNumber()};
             }
         }
         return groups;
