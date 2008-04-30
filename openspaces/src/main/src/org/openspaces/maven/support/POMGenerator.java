@@ -46,6 +46,7 @@ public class POMGenerator {
         printHeader(writer, version, "openspaces");
         printDependency(writer, "JSpaces");
         printDependency(writer, "org.springframework", "spring", "2.5.3");
+        printDependency(writer, "commons-logging", "commons-logging", "1.1.1");
         printFooter(writer);
         writer.close();
 
