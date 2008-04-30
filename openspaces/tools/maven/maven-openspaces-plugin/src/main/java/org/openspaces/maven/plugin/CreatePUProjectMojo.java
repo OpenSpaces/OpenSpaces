@@ -114,7 +114,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
             projectDir.mkdirs();
         }
 
-        templateDirName = "/templates/" + template;
+        templateDirName = "/pu-templates/" + template;
         try {
             copyResource(templateDirName + "/pom.xml", projectDir, "pom.xml");
             getLog().info("Generating module: common");
