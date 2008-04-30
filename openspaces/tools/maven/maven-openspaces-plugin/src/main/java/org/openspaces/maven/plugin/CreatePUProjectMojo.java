@@ -61,8 +61,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
     /**
      * Project directory.
      *
-     * @parameter expression="${artifactId}"
-     * @required
+     * @parameter expression="${artifactId}" default-value="my-app"
      */
     private File projectDir;
 
@@ -70,8 +69,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
     /**
      * The packageName.
      *
-     * @parameter expression="${groupId}"
-     * @required
+     * @parameter expression="${groupId}" default-value="com.mycompany.app"
      */
     private String packageName;
 
