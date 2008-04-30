@@ -213,6 +213,7 @@
                 <include name="docs/openspaces-javadoc/**"/>
                 <include name="tools/**"/>
                 <exclude name="tools/maven/maven-openspaces-plugin/target/**" />
+                <exclude name="tools/**/*.iml" />
 
                 <include name="examples/**"/>
                 <exclude name="examples/openspaces/data/**"/>
@@ -252,6 +253,7 @@
                 <include name="docs/openspaces-javadoc/**"/>
                 <include name="tools/**"/>
             	<exclude name="tools/maven/maven-openspaces-plugin/target/**" />
+                <exclude name="tools/**/*.iml" />
 
                 <include name="examples/**"/>
                 <exclude name="examples/openspaces/data-1.4/**"/>
