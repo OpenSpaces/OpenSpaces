@@ -12,9 +12,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.StringTokenizer;
 
 
@@ -134,7 +134,7 @@ public class Utils {
      */
     static List resolveDependencyClasspath(MavenProject project) throws Exception {
         List dependencyFiles = new ArrayList();
-        Set dependencyArtifacts = project.getArtifacts();
+        Collection dependencyArtifacts = project.getArtifacts();
         for (Iterator i = dependencyArtifacts.iterator(); i.hasNext();) {
             Artifact artifact = (Artifact) i.next();
             dependencyFiles.add(getURL(artifact.getFile()));
@@ -277,7 +277,7 @@ public class Utils {
         if (System.getProperty("java.security.policy") == null) {
             try {
                 Class secLoaderClass = Class.forName("com.j_spaces.kernel.SecurityPolicyLoader", true, Thread.currentThread().getContextClassLoader());
-                secLoaderClass.getMethod("loadPolicy", new Class[] {String.class}).invoke(null, new Object[] {"policy/policy.all"});
+                secLoaderClass.getMethod("loadPolicy", new Class[]{String.class}).invoke(null, new Object[]{"policy/policy.all"});
             } catch (Exception e) {
                 throw new MojoExecutionException("Failed to load security file", e);
             }
