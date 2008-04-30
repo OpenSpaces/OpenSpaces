@@ -63,9 +63,9 @@ public class UndeployPUMojo extends AbstractMojo {
     /**
      * puName
      *
-     * @parameter expression="${puName}"
+     * @parameter expression="${module}"
      */
-    private String puName;
+    private String module;
 
 
     /**
@@ -83,7 +83,7 @@ public class UndeployPUMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         Utils.handleSecurity();
 
-        List projects = Utils.resolveProjects(project, puName);
+        List projects = Utils.resolveProjects(project, module);
 
         // sort the projects by the order parameter
         Collections.sort(projects, new PUProjectSorter(false));

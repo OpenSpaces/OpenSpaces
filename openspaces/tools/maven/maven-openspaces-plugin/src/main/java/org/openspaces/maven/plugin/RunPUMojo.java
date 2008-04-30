@@ -48,10 +48,10 @@ public class RunPUMojo extends AbstractMojo {
     /**
      * The classpath elements of the project being tested.
      *
-     * @parameter expression="${puName}"
+     * @parameter expression="${module}"
      * @readonly
      */
-    private String puName;
+    private String module;
 
 
     /**
@@ -90,7 +90,7 @@ public class RunPUMojo extends AbstractMojo {
 
         Utils.handleSecurity();
 
-        List projects = Utils.resolveProjects(project, puName);
+        List projects = Utils.resolveProjects(project, module);
 
         // sort the projects by the order parameter
         Collections.sort(projects, new PUProjectSorter(true));

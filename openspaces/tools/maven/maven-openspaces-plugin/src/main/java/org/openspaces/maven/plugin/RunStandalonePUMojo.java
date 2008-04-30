@@ -53,9 +53,9 @@ public class RunStandalonePUMojo extends AbstractMojo {
     /**
      * puName
      *
-     * @parameter expression="${puName}"
+     * @parameter expression="${module}"
      */
-    private String puName;
+    private String module;
 
 
     /**
@@ -95,7 +95,7 @@ public class RunStandalonePUMojo extends AbstractMojo {
             throw new MojoExecutionException("Failed to create ClassLoader", e1);
         }
 
-        List projects = Utils.resolveProjects(project, puName);
+        List projects = Utils.resolveProjects(project, module);
 
         // sort the projects by the order parameter
         Collections.sort(projects, new PUProjectSorter(true));

@@ -101,9 +101,9 @@ public class DeployPUMojo extends AbstractMojo {
     /**
      * puName
      *
-     * @parameter expression="${puName}"
+     * @parameter expression="${module}"
      */
-    private String puName;
+    private String module;
 
     /**
      * Project instance, used to add new source directory to the build.
@@ -128,7 +128,7 @@ public class DeployPUMojo extends AbstractMojo {
 
         Utils.handleSecurity();
 
-        List projects = Utils.resolveProjects(project, puName);
+        List projects = Utils.resolveProjects(project, module);
 
         // sort the projects by the order parameter
         Collections.sort(projects, new PUProjectSorter(true));
