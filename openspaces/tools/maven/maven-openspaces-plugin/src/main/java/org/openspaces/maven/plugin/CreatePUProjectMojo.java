@@ -16,94 +16,96 @@
 
 package org.openspaces.maven.plugin;
 
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.springframework.util.StringUtils;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-
 /**
  * Goal which creates the openspaces project.
  *
  * @goal create
- * 
- * @requiresProject  false
+ * @requiresProject false
  */
 public class CreatePUProjectMojo extends AbstractMojo {
 
     /**
-	 * the groupId string to replace with the package name 
-	 */
-	private static final String FILTER_GROUP_ID = "${puGroupId}";
-	
-	
-	/**
-     * the groupId string to replace with the package name 
+     * the groupId string to replace with the package name
+     */
+    private static final String FILTER_GROUP_ID = "${puGroupId}";
+
+
+    /**
+     * the groupId string to replace with the package name
      */
     private static final String FILTER_GROUP_PATH = "${puGroupPath}";
-	
-    
-	/**
-	 * the groupId string to replace with the package name 
-	 */
-	private static final String FILTER_ARTIFACT_ID = "${puArtifactId}";
-    
-	
+
+
     /**
-	 * New line
-	 */
-	private static final String NEW_LINE = "\n";
-	
-	
+     * the groupId string to replace with the package name
+     */
+    private static final String FILTER_ARTIFACT_ID = "${puArtifactId}";
+
+
+    /**
+     * New line
+     */
+    private static final String NEW_LINE = "\n";
+
+
     /**
      * Project directory.
+     *
      * @parameter expression="${artifactId}"
      * @required
      */
     private File projectDir;
-    
-    
+
+
     /**
      * The packageName.
+     *
      * @parameter expression="${groupId}"
      * @required
      */
     private String packageName;
-    
-    
+
+
     /**
      * The template.
+     *
      * @parameter expression="${template}" default-value="default"
      */
     private String template;
-    
-    
+
+
     /**
      * The directory structure of the package.
      */
     private String packageDirs;
-    
-    
+
+
     /**
      * The template directory name.
      */
     private String templateDirName;
-    
+
 
     public void execute() throws MojoExecutionException {
-    	getLog().info("Project template: " + template);
-    	if (template.equals("default")) {
-    		executeDefault();
-    	}
-    	else {
-    		throw new MojoExecutionException("Unknown project template: " + template);
-    	}
+        getLog().info("Project template: " + template);
+        if (template.equals("default")) {
+            executeDefault();
+        } else {
+            throw new MojoExecutionException("Unknown project template: " + template);
+        }
     }
-    
-    
+
+
     /**
      * Mojo implementation
      */
@@ -111,126 +113,130 @@ public class CreatePUProjectMojo extends AbstractMojo {
         packageDirs = packageName.replaceAll("\\.", "/");
 
         if (!projectDir.exists()) {
-        	projectDir.mkdirs();
+            projectDir.mkdirs();
         }
-        
+
         templateDirName = "/templates/" + template;
         try {
-        	copyResource(templateDirName+"/pom.xml", projectDir, "pom.xml");
-        	getLog().info("Generating module: common");
-        	createCommonModule(projectDir);
-        	getLog().info("Generating module: feeder");
-        	createFeederModule(projectDir);
-        	getLog().info("Generating module: processor");
-        	createProcessorModule(projectDir);
+            copyResource(templateDirName + "/pom.xml", projectDir, "pom.xml");
+            getLog().info("Generating module: common");
+            createCommonModule(projectDir);
+            getLog().info("Generating module: feeder");
+            createFeederModule(projectDir);
+            getLog().info("Generating module: processor");
+            createProcessorModule(projectDir);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    
+
     /**
      * Creates the common module
+     *
      * @param projDir the project directory
      */
     private void createCommonModule(File projDir) {
-    	File commonDir = new File(projDir, "common/src/main/java/"+packageDirs+"/common");
-    	commonDir.mkdirs();
-    	
-    	// copy common dir
-    	copyResource(templateDirName+"/common/src/Data.java", commonDir, "Data.java");
-    	
+        File commonDir = new File(projDir, "common/src/main/java/" + packageDirs + "/common");
+        commonDir.mkdirs();
+
+        // copy common dir
+        copyResource(templateDirName + "/common/src/Data.java", commonDir, "Data.java");
+
         // copy pom.xml
-    	File pomDir = new File(projDir, "common");
-    	copyResource(templateDirName+"/common/pom.xml", pomDir, "pom.xml");
+        File pomDir = new File(projDir, "common");
+        copyResource(templateDirName + "/common/pom.xml", pomDir, "pom.xml");
     }
-    
-    
+
+
     /**
      * Creates the feeder module
+     *
      * @param projDir the project directory
      */
     private void createFeederModule(File projDir) {
-    	File feederDir = new File(projDir, "feeder/src/main/java/"+packageDirs+"/feeder");
-    	feederDir.mkdirs();
-    	
-    	// copy feeder dir
-    	copyResource(templateDirName+"/feeder/src/Feeder.java", feederDir, "Feeder.java");
-    	
-    	// copy pu.xml
-    	File puDir = new File(projDir, "feeder/src/main/resources/META-INF/spring");
-    	puDir.mkdirs();
-    	copyResource(templateDirName+"/feeder/META-INF/spring/pu.xml", puDir, "pu.xml");
-        
+        File feederDir = new File(projDir, "feeder/src/main/java/" + packageDirs + "/feeder");
+        feederDir.mkdirs();
+
+        // copy feeder dir
+        copyResource(templateDirName + "/feeder/src/Feeder.java", feederDir, "Feeder.java");
+
+        // copy pu.xml
+        File puDir = new File(projDir, "feeder/src/main/resources/META-INF/spring");
+        puDir.mkdirs();
+        copyResource(templateDirName + "/feeder/META-INF/spring/pu.xml", puDir, "pu.xml");
+
         // copy assembly dir
         File assemblyDir = new File(projDir, "feeder/src/main/assembly");
-    	assemblyDir.mkdirs();
-    	copyResource(templateDirName+"/feeder/assembly/assembly-jar.xml", assemblyDir, "assembly-jar.xml");
-        copyResource(templateDirName+"/feeder/assembly/assembly-dir.xml", assemblyDir, "assembly-dir.xml");
-    	
+        assemblyDir.mkdirs();
+        copyResource(templateDirName + "/feeder/assembly/assembly-jar.xml", assemblyDir, "assembly-jar.xml");
+        copyResource(templateDirName + "/feeder/assembly/assembly-dir.xml", assemblyDir, "assembly-dir.xml");
+
         // copy pom.xml
-    	File pomDir = new File(projDir, "feeder");
-    	copyResource(templateDirName+"/feeder/pom.xml", pomDir, "pom.xml");
+        File pomDir = new File(projDir, "feeder");
+        copyResource(templateDirName + "/feeder/pom.xml", pomDir, "pom.xml");
     }
-    
-    
+
+
     /**
      * Creates the processor module
+     *
      * @param projDir the project directory
      */
     private void createProcessorModule(File projDir) {
-    	File processorDir = new File(projDir, "processor/src/main/java/"+packageDirs+"/processor");
-    	processorDir.mkdirs();
-    	
-    	// copy processor dir
-    	copyResource(templateDirName+"/processor/src/Processor.java", processorDir, "Processor.java");
-    	
-    	// copy pu.xml
-    	File puDir = new File(projDir, "processor/src/main/resources/META-INF/spring");
-    	puDir.mkdirs();
-    	copyResource(templateDirName+"/processor/META-INF/spring/pu.xml", puDir, "pu.xml");
-        
+        File processorDir = new File(projDir, "processor/src/main/java/" + packageDirs + "/processor");
+        processorDir.mkdirs();
+
+        // copy processor dir
+        copyResource(templateDirName + "/processor/src/Processor.java", processorDir, "Processor.java");
+
+        // copy pu.xml
+        File puDir = new File(projDir, "processor/src/main/resources/META-INF/spring");
+        puDir.mkdirs();
+        copyResource(templateDirName + "/processor/META-INF/spring/pu.xml", puDir, "pu.xml");
+
         // copy assembly dir
         File assemblyDir = new File(projDir, "processor/src/main/assembly");
-    	assemblyDir.mkdirs();
-        copyResource(templateDirName+"/processor/assembly/assembly-jar.xml", assemblyDir, "assembly-jar.xml");
-        copyResource(templateDirName+"/processor/assembly/assembly-dir.xml", assemblyDir, "assembly-dir.xml");
-    	
+        assemblyDir.mkdirs();
+        copyResource(templateDirName + "/processor/assembly/assembly-jar.xml", assemblyDir, "assembly-jar.xml");
+        copyResource(templateDirName + "/processor/assembly/assembly-dir.xml", assemblyDir, "assembly-dir.xml");
+
         // copy pom.xml
-    	File pomDir = new File(projDir, "processor");
-    	copyResource(templateDirName+"/processor/pom.xml", pomDir, "pom.xml");
+        File pomDir = new File(projDir, "processor");
+        copyResource(templateDirName + "/processor/pom.xml", pomDir, "pom.xml");
     }
-    
-    
+
+
     /**
      * Copies a resource to the target directory
+     *
      * @param sourceFile the file to copy
-     * @param targetDir the destination directory
+     * @param targetDir  the destination directory
      * @param targetFile the name of the target file
      */
     private void copyResource(String sourceFile, File targetDir, String targetFile) {
-    	try {
-    		String data;
-            
+        try {
+            String data;
+
             // prepare the file reader
-    		InputStream is = getClass().getResourceAsStream( sourceFile );
-    		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-    		StringBuilder contentBuilder = new StringBuilder();
-    		
+            InputStream is = getClass().getResourceAsStream(sourceFile);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            StringBuffer contentBuilder = new StringBuffer();
+
             // read the lines one by one and replace property references with 
             // the syntax ${property_name} to their respective property values.
-    		while ((data = reader.readLine()) != null) {
-   				data = data.replace(FILTER_GROUP_ID, packageName);
-   				data = data.replace(FILTER_ARTIFACT_ID, projectDir.getName());
- 				data = data.replace(FILTER_GROUP_PATH, packageDirs);
-   				contentBuilder.append(data);
-    			contentBuilder.append(NEW_LINE);
-    		}
-    		
+            while ((data = reader.readLine()) != null) {
+                data = StringUtils.replace(data, FILTER_GROUP_ID, packageName);
+                data = StringUtils.replace(data, FILTER_ARTIFACT_ID, projectDir.getName());
+                data = StringUtils.replace(data, FILTER_GROUP_PATH, packageDirs);
+                contentBuilder.append(data);
+                contentBuilder.append(NEW_LINE);
+            }
+
             // write the entire converted file content to the destination file.
-    		File f = new File(targetDir, targetFile);
-    		getLog().debug("Copying resource " + sourceFile + " to " + f.getAbsolutePath());
-        	FileWriter writer = new FileWriter(f);
+            File f = new File(targetDir, targetFile);
+            getLog().debug("Copying resource " + sourceFile + " to " + f.getAbsolutePath());
+            FileWriter writer = new FileWriter(f);
             writer.write(contentBuilder.toString());
             reader.close();
             writer.close();

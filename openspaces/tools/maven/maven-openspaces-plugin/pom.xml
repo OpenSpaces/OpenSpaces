@@ -8,10 +8,6 @@
   <name>maven-openspaces-plugin</name>
   <url>http://maven.apache.org</url>
   <properties>
-    <!-- 
-      This parameter is injected by the maven build lifecycle as the version of
-      openspaces dependency. We support version 6.4 (not inclusive) and higher.
-    -->
     <gsVersion>6.5-m11-2329-274</gsVersion>
   </properties>
   <dependencies>
@@ -51,8 +47,8 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
+          <source>1.4</source>
+          <target>1.4</target>
         </configuration>
       </plugin>
     </plugins>

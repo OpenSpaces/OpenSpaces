@@ -16,57 +16,57 @@
 
 package org.openspaces.maven.plugin;
 
-import java.util.Comparator;
-
 import org.apache.maven.project.MavenProject;
+
+import java.util.Comparator;
 
 /**
  * Used to sort the deployment order of the processing unit
  * when deploying a multi module project.
  */
-public class PUProjectSorter implements Comparator
-{
-	static final String PARAM_ORDER = "order";
-	
-	private boolean assending;
-	
-	public PUProjectSorter(boolean assending)
-	{
-		this.assending = assending;
-	}
-	
-	public int compare(Object obj1, Object obj2)
-	{
-		MavenProject proj1 = (MavenProject)obj1;
-		MavenProject proj2 = (MavenProject)obj2;
+public class PUProjectSorter implements Comparator {
+    static final String PARAM_ORDER = "order";
 
-		String orderStr1 = (String)proj1.getProperties().get(PARAM_ORDER);
-		String orderStr2 = (String)proj2.getProperties().get(PARAM_ORDER);
-		
-		// if one of the order values is null
-		if (orderStr1 == null) {
-			if (orderStr2 == null) {return 0;}
-			else return (assending?-1:1);
-		} else {
-			if (orderStr2 == null) {return assending?1:-1;}
-		}
-		
-		// both are not null
-		int order1;
-		int order2;
-		try {
-			order1 = Integer.valueOf(orderStr1);
-		} catch (NumberFormatException e) {
-			//getLog().warn("Problem parsing \""+PARAM_ORDER+"\" parameter in project "+proj1.getName(), e);
-			order1 = -1;
-		}
-		try	{
-			order2 = Integer.valueOf(orderStr2);
-		}
-		catch (NumberFormatException e)	{
-			//getLog().warn("Problem parsing \""+PARAM_ORDER+"\" parameter in project "+proj1.getName(), e);
-			order2 = -1;
-		}
-		return assending ? (order1-order2) : (order2-order1);
-	}
+    private boolean assending;
+
+    public PUProjectSorter(boolean assending) {
+        this.assending = assending;
+    }
+
+    public int compare(Object obj1, Object obj2) {
+        MavenProject proj1 = (MavenProject) obj1;
+        MavenProject proj2 = (MavenProject) obj2;
+
+        String orderStr1 = (String) proj1.getProperties().get(PARAM_ORDER);
+        String orderStr2 = (String) proj2.getProperties().get(PARAM_ORDER);
+
+        // if one of the order values is null
+        if (orderStr1 == null) {
+            if (orderStr2 == null) {
+                return 0;
+            } else return (assending ? -1 : 1);
+        } else {
+            if (orderStr2 == null) {
+                return assending ? 1 : -1;
+            }
+        }
+
+        // both are not null
+        int order1;
+        int order2;
+        try {
+            order1 = Integer.parseInt(orderStr1);
+        } catch (NumberFormatException e) {
+            //getLog().warn("Problem parsing \""+PARAM_ORDER+"\" parameter in project "+proj1.getName(), e);
+            order1 = -1;
+        }
+        try {
+            order2 = Integer.parseInt(orderStr2);
+        }
+        catch (NumberFormatException e) {
+            //getLog().warn("Problem parsing \""+PARAM_ORDER+"\" parameter in project "+proj1.getName(), e);
+            order2 = -1;
+        }
+        return assending ? (order1 - order2) : (order2 - order1);
+    }
 }

@@ -16,94 +16,90 @@
 
 package org.openspaces.maven.plugin;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 
-import com.j_spaces.core.Constants;
-import com.j_spaces.kernel.SecurityPolicyLoader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 
 /**
  * Goal that runs a processing unit.
  *
  * @goal run
- * 
  * @requiresProject false
  * @description Runs ...
  */
-public class RunPUMojo extends AbstractMojo
-{
-    /** 
+public class RunPUMojo extends AbstractMojo {
+    /**
      * The classpath elements of the project being tested.
+     *
      * @parameter expression="${project}"
      * @required
      * @readonly
      */
     private MavenProject project;
-    
-    
-    /** 
+
+
+    /**
      * The classpath elements of the project being tested.
+     *
      * @parameter expression="${puName}"
      * @readonly
      */
     private String puName;
-    
-    
+
+
     /**
      * cluster
+     *
      * @parameter expression="${cluster}"
      */
     private String cluster;
-    
-    
+
+
     /**
      * proeprties
+     *
      * @parameter expression="${proeprties}"
      */
     private String proeprties;
 
-    
+
     /**
      * Container list.
      */
     private List containers = new ArrayList();
-    
-    
+
+
     /**
      * Executed the Mojo.
      */
-	public void execute() throws MojoExecutionException, MojoFailureException 
-	{
-	    // Remove white spaces from ClassLoader's URLs
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        // Remove white spaces from ClassLoader's URLs
         ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
         try {
             Utils.changeClassLoaderToSupportWhiteSpacesRepository(currentCL);
         } catch (Exception e) {
             getLog().info("Unable to update ClassLoader. Proceeding with processing unit invocation.", e);
         }
-        
-        if (System.getProperty("java.security.policy") == null) {
-            SecurityPolicyLoader.loadPolicy(Constants.System.SYSTEM_GS_POLICY);
-        }
-        
+
+        Utils.handleSecurity();
+
         List projects = Utils.resolveProjects(project, puName);
-        
+
         // sort the projects by the order parameter
         Collections.sort(projects, new PUProjectSorter(true));
-        
+
         for (Iterator projIt = projects.iterator(); projIt.hasNext();) {
             MavenProject proj = (MavenProject) projIt.next();
             executePU(proj);
         }
-        
+
         final Thread mainThread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
@@ -123,23 +119,24 @@ public class RunPUMojo extends AbstractMojo
                 // do nothing, simply exit
             }
         }
-	}
-	
-	
-	/**
-	 * Prepares and executes the PU.  
-	 * @throws MojoExecutionException
-	 * @throws MojoFailureException
-	 */
-	private void executePU(MavenProject project) throws MojoExecutionException, MojoFailureException {
-		if (project == null || !project.getPackaging().equalsIgnoreCase("jar")) {
-			throw new MojoExecutionException("The processing unit project '"+ project.getName() +
-					"' must be of type jar (packaging=jar).");
-		}
-		
-		// run the PU
-        getLog().info("Running processing unit: " + project.getName());
-        
+    }
+
+
+    /**
+     * Prepares and executes the PU.
+     *
+     * @throws MojoExecutionException
+     * @throws MojoFailureException
+     */
+    private void executePU(MavenProject project) throws MojoExecutionException, MojoFailureException {
+        if (project == null || !project.getPackaging().equalsIgnoreCase("jar")) {
+            throw new MojoExecutionException("The processing unit project '" + project.getName() +
+                    "' must be of type jar (packaging=jar).");
+        }
+
+        // run the PU
+        getLog().info("Running processing unit: " + project.getBuild().getFinalName());
+
         ClassLoader classLoader;
         try {
             List classpath = Utils.resolveClasspath(project);
@@ -149,7 +146,7 @@ public class RunPUMojo extends AbstractMojo
             throw new MojoExecutionException("Failed to resolve project classpath", e1);
         }
         ContainerRunnable conatinerRunnable = new ContainerRunnable("org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer", createAttributesArray());
-        Thread thread = new Thread(conatinerRunnable, "Processing Unit [" + project.getName() + "]");
+        Thread thread = new Thread(conatinerRunnable, "Processing Unit [" + project.getBuild().getFinalName() + "]");
         thread.setContextClassLoader(classLoader);
         thread.start();
         while (!conatinerRunnable.hasStarted()) {
@@ -159,32 +156,32 @@ public class RunPUMojo extends AbstractMojo
             }
         }
         if (conatinerRunnable.getException() != null) {
-            throw new MojoExecutionException("Failed to start processing unit [" + project.getName() + "]", conatinerRunnable.getException());
+            throw new MojoExecutionException("Failed to start processing unit [" + project.getBuild().getFinalName() + "]", conatinerRunnable.getException());
         }
         containers.add(thread);
-	}
-	
-	
-	/**
-	 * Creates the attributes array
-	 * @return attributes array
-	 */
-	private String[] createAttributesArray()
-	{
-		ArrayList attlist = new ArrayList();
-		Utils.addAttributeToList(attlist, "-cluster", cluster);
-		Utils.addAttributeToList(attlist, "-proeprties", proeprties);
-		getLog().info("Arguments list: " + attlist);
-		String[] attArray = new String[attlist.size()];
-		attlist.toArray(attArray);
-		return attArray;
-	}
-	
-	
-	/**
-	 * Prints usage instructions.
-	 */
-	public static void printUsage() {
+    }
+
+
+    /**
+     * Creates the attributes array
+     *
+     * @return attributes array
+     */
+    private String[] createAttributesArray() {
+        ArrayList attlist = new ArrayList();
+        Utils.addAttributeToList(attlist, "-cluster", cluster);
+        Utils.addAttributeToList(attlist, "-proeprties", proeprties);
+        getLog().info("Arguments list: " + attlist);
+        String[] attArray = new String[attlist.size()];
+        attlist.toArray(attArray);
+        return attArray;
+    }
+
+
+    /**
+     * Prints usage instructions.
+     */
+    public static void printUsage() {
         System.out.println("Usage: mvn compile os:run [-Dcluster=\"...\"] [-Dproperties=\"...\"] -DpuName=<module-name>");
         System.out.println("    -Dcluster [cluster properties]: Allows specify cluster parameters");
         System.out.println("             schema=partitioned  : The cluster schema to use");

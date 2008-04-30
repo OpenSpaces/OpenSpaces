@@ -16,148 +16,158 @@
 
 package org.openspaces.maven.plugin;
 
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.MavenProject;
+
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.project.MavenProject;
-import org.openspaces.pu.container.servicegrid.deploy.Deploy;
-
 /**
  * Goal that deploys a processing unit.
  *
  * @goal deploy
- * 
- * @requiresProject  false
+ * @requiresProject false
  */
-public class DeployPUMojo extends AbstractMojo 
-{
-	
+public class DeployPUMojo extends AbstractMojo {
+
     /**
      * sla
+     *
      * @parameter expression="${sla}"
      */
     private String sla;
-    
+
     /**
      * cluster
+     *
      * @parameter expression="${cluster}"
      */
     private String cluster;
-    
+
     /**
      * groups
+     *
      * @parameter expression="${groups}"
      */
     private String groups;
-    
+
     /**
      * locators
+     *
      * @parameter expression="${locators}"
      */
     private String locators;
-    
+
     /**
      * timeout
+     *
      * @parameter expression="${timeout}" default-value="10000"
      */
     private String timeout;
-    
+
     /**
      * proeprties
+     *
      * @parameter expression="${proeprties}"
      */
     private String proeprties;
-    
+
     /**
      * override-name
+     *
      * @parameter expression="${override-name}"
      */
     private String overrideName;
-    
+
     /**
      * max-instances-per-vm
+     *
      * @parameter expression="${max-instances-per-vm}"
      */
     private String maxInstancesPerVm;
-    
+
     /**
      * max-instances-per-machine
+     *
      * @parameter expression="${max-instances-per-machine}"
      */
     private String maxInstancesPerMachine;
-    
+
     /**
      * puName
+     *
      * @parameter expression="${puName}"
      */
     private String puName;
-    
-    /** 
-     * Project instance, used to add new source directory to the build. 
-     * @parameter default-value="${project}" 
-     * @readonly 
-     */ 
+
+    /**
+     * Project instance, used to add new source directory to the build.
+     *
+     * @parameter default-value="${project}"
+     * @readonly
+     */
     private MavenProject project;
-    
-    
+
+
     /**
      * executes the mojo.
      */
-	public void execute() throws MojoExecutionException, MojoFailureException 
-	{
-	    // Remove white spaces from ClassLoader's URLs
-	    ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
-	    try 
-        {
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        // Remove white spaces from ClassLoader's URLs
+        ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
+        try {
             Utils.changeClassLoaderToSupportWhiteSpacesRepository(currentCL);
-        }
-        catch (Exception e) 
-        {
+        } catch (Exception e) {
             getLog().info("Unable to update ClassLoader. Proceeding with processing unit invocation.", e);
         }
-        
+
+        Utils.handleSecurity();
+
         List projects = Utils.resolveProjects(project, puName);
-        
+
         // sort the projects by the order parameter
         Collections.sort(projects, new PUProjectSorter(true));
-        
+
         for (Iterator projIt = projects.iterator(); projIt.hasNext();) {
             MavenProject proj = (MavenProject) projIt.next();
-            getLog().info("Deploying processing unit: " + proj.getName());
+            getLog().info("Deploying processing unit: " + proj.getBuild().getFinalName());
             String[] attributesArray = createAttributesArray(Utils.getProcessingUnitJar(proj));
             try {
-                Deploy.main(attributesArray);
+                Class deployClass = Class.forName("org.openspaces.pu.container.servicegrid.deploy.Deploy", true, Thread.currentThread().getContextClassLoader());
+                deployClass.getMethod("main", new Class[]{String[].class}).invoke(null, new Object[]{attributesArray});
+            } catch (InvocationTargetException e) {
+                throw new MojoExecutionException(e.getTargetException().getMessage(), e.getTargetException());
             } catch (Exception e) {
                 throw new MojoExecutionException(e.getMessage(), e);
             }
         }
-	}
+    }
 
-	/**
-	 * Creates the attributes array
-	 * @return attributes array
-	 */
-	private String[] createAttributesArray(String name)
-	{
-		ArrayList Attlist = new ArrayList();
-		Utils.addAttributeToList(Attlist, "-sla", sla);
-		Utils.addAttributeToList(Attlist, "-cluster", cluster);
-		Utils.addAttributeToList(Attlist, "-groups", groups);
-		Utils.addAttributeToList(Attlist, "-locators", locators);
-		Utils.addAttributeToList(Attlist, "-timeout", timeout);
-		Utils.addAttributeToList(Attlist, "-proeprties", proeprties);
-		Utils.addAttributeToList(Attlist, "-override-name", overrideName);
-		Utils.addAttributeToList(Attlist, "-max-instances-per-vm", maxInstancesPerVm);
-		Utils.addAttributeToList(Attlist, "-max-instances-per-machine", maxInstancesPerMachine);
-		Attlist.add(name);
-		getLog().info("Arguments list: " + Attlist);
-		String[] attArray = new String[Attlist.size()];
-		Attlist.toArray(attArray);
-		return attArray;
-	}
+    /**
+     * Creates the attributes array
+     *
+     * @return attributes array
+     */
+    private String[] createAttributesArray(String name) {
+        ArrayList Attlist = new ArrayList();
+        Utils.addAttributeToList(Attlist, "-sla", sla);
+        Utils.addAttributeToList(Attlist, "-cluster", cluster);
+        Utils.addAttributeToList(Attlist, "-groups", groups);
+        Utils.addAttributeToList(Attlist, "-locators", locators);
+        Utils.addAttributeToList(Attlist, "-timeout", timeout);
+        Utils.addAttributeToList(Attlist, "-proeprties", proeprties);
+        Utils.addAttributeToList(Attlist, "-override-name", overrideName);
+        Utils.addAttributeToList(Attlist, "-max-instances-per-vm", maxInstancesPerVm);
+        Utils.addAttributeToList(Attlist, "-max-instances-per-machine", maxInstancesPerMachine);
+        Attlist.add(name);
+        getLog().info("Arguments list: " + Attlist);
+        String[] attArray = new String[Attlist.size()];
+        Attlist.toArray(attArray);
+        return attArray;
+    }
 }

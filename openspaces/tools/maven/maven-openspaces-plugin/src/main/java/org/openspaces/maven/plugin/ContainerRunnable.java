@@ -20,32 +20,32 @@ import java.lang.reflect.InvocationTargetException;
 
 public class ContainerRunnable implements Runnable {
 
-    
+
     private volatile Throwable exception;
-    
-    
+
+
     private volatile boolean started = false;
-    
-    
+
+
     private String[] args;
-    
-    
+
+
     private String containerClassName;
-    
-    
+
+
     public ContainerRunnable(String containerClassName, String[] arguments) {
         this.containerClassName = containerClassName;
         this.args = arguments;
     }
-    
-    
+
+
     public void run() {
         try {
             // TODO Maybe call this one 
             // GSLogConfigLoader.getLoader();
-            
+
             Class containerClass = Class.forName(containerClassName, true, Thread.currentThread().getContextClassLoader());
-            Object container = containerClass.getMethod("createContainer", String[].class).invoke(null, new Object[] {args});
+            Object container = containerClass.getMethod("createContainer", new Class[] {String[].class}).invoke(null, new Object[]{args});
             started = true;
             final Thread mainThread = Thread.currentThread();
             while (!mainThread.isInterrupted()) {
@@ -56,7 +56,7 @@ public class ContainerRunnable implements Runnable {
                 }
             }
             Class puContainerClass = Class.forName("org.openspaces.pu.container.ProcessingUnitContainer", true, Thread.currentThread().getContextClassLoader());
-            puContainerClass.getMethod("close").invoke(container);
+            puContainerClass.getMethod("close", new Class[0]).invoke(container, new Object[0]);
         } catch (InvocationTargetException e) {
             exception = e.getTargetException();
         } catch (Exception e) {
@@ -65,13 +65,13 @@ public class ContainerRunnable implements Runnable {
             started = true;
         }
     }
-    
-    
+
+
     public boolean hasStarted() {
         return this.started;
     }
-    
-    
+
+
     public Throwable getException() {
         return this.exception;
     }

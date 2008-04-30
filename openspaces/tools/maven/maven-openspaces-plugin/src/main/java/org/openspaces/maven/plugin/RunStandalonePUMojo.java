@@ -16,97 +16,95 @@
 
 package org.openspaces.maven.plugin;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 
-import com.j_spaces.core.Constants;
-import com.j_spaces.kernel.SecurityPolicyLoader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Goal that runs a processing unit as standalone.
  *
  * @goal run-standalone
- * 
  * @requiresProject true
  */
 public class RunStandalonePUMojo extends AbstractMojo {
-    
-	/**
+
+    /**
      * cluster
+     *
      * @parameter expression="${cluster}"
      */
     private String cluster;
-    
-    
+
+
     /**
      * proeprties
+     *
      * @parameter expression="${proeprties}"
      */
     private String proeprties;
-    
-    
+
+
     /**
      * puName
+     *
      * @parameter expression="${puName}"
      */
     private String puName;
-    
-    
-    /** 
-     * Project instance, used to add new source directory to the build. 
-     * @parameter expression="${project}" 
+
+
+    /**
+     * Project instance, used to add new source directory to the build.
+     *
+     * @parameter expression="${project}"
      * @required
-     */ 
+     */
     private MavenProject project;
-    
-    
+
+
     /**
      * Container list.
      */
     private List containers = new ArrayList();
 
     private ClassLoader sharedClassLoader;
-    
+
     /**
      * executes the mojo.
      */
-	public void execute() throws MojoExecutionException, MojoFailureException {
-	    
-	    // Remove white spaces from ClassLoader's URLs 
+    public void execute() throws MojoExecutionException, MojoFailureException {
+
+        // Remove white spaces from ClassLoader's URLs
         ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
         try {
             Utils.changeClassLoaderToSupportWhiteSpacesRepository(currentCL);
         } catch (Exception e) {
             getLog().info("Unable to update ClassLoader. Proceeding with processing unit invocation.", e);
         }
-        
-        if (System.getProperty("java.security.policy") == null) {
-            SecurityPolicyLoader.loadPolicy(Constants.System.SYSTEM_GS_POLICY);
-        }
-        
+
+        Utils.handleSecurity();
+
         try {
             sharedClassLoader = Utils.createClassLoader(new ArrayList(), Thread.currentThread().getContextClassLoader());
         } catch (Exception e1) {
             throw new MojoExecutionException("Failed to create ClassLoader", e1);
         }
-        
+
         List projects = Utils.resolveProjects(project, puName);
-        
+
         // sort the projects by the order parameter
         Collections.sort(projects, new PUProjectSorter(true));
-        
+
         for (Iterator projIt = projects.iterator(); projIt.hasNext();) {
             MavenProject proj = (MavenProject) projIt.next();
             executePU(proj);
         }
-        
+
         final Thread mainThread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
@@ -127,34 +125,34 @@ public class RunStandalonePUMojo extends AbstractMojo {
             }
         }
 
-	}
-	
-	
-	/**
-     * Prepares and executes the PU.  
+    }
+
+
+    /**
+     * Prepares and executes the PU.
+     *
      * @throws MojoExecutionException
      * @throws MojoFailureException
      */
     private void executePU(MavenProject project) throws MojoExecutionException, MojoFailureException {
         if (project == null || !project.getPackaging().equalsIgnoreCase("jar")) {
-            throw new MojoExecutionException("The processing unit project '"+ project.getName() +
+            throw new MojoExecutionException("The processing unit project '" + project.getName() +
                     "' must be of type jar (packaging=jar).");
         }
-        
-        // run the PU
-        getLog().info("Running processing unit: " + project.getName());
 
-        
-        // iterate over target/[]dir/[]/shared-lib/*.jar and add it (if does not exists in class loader) 
+        // run the PU
+        getLog().info("Running processing unit: " + project.getBuild().getFinalName());
+
+        // iterate over target/[]dir/[]/shared-lib/*.jar and add it (if does not exists in class loader)
         // into the shared class loader
         try {
             Utils.addSharedLibToClassLoader(project, this.sharedClassLoader);
         } catch (Exception e1) {
-            throw new MojoExecutionException("Failed to add shared-lib jars of processing unit ["+ project.getName() +"]", e1);
+            throw new MojoExecutionException("Failed to add shared-lib jars of processing unit [" + project.getName() + "]", e1);
         }
-        
+
         ContainerRunnable conatinerRunnable = new ContainerRunnable("org.openspaces.pu.container.standalone.StandaloneProcessingUnitContainer", createAttributesArray(Utils.getProcessingUnitJar((project))));
-        Thread thread = new Thread(conatinerRunnable, "Processing Unit [" + project.getName() + "]");
+        Thread thread = new Thread(conatinerRunnable, "Processing Unit [" + project.getBuild().getFinalName() + "]");
         thread.setContextClassLoader(sharedClassLoader);
         thread.start();
         while (!conatinerRunnable.hasStarted()) {
@@ -164,33 +162,33 @@ public class RunStandalonePUMojo extends AbstractMojo {
             }
         }
         if (conatinerRunnable.getException() != null) {
-            throw new MojoExecutionException("Failed to start processing unit [" + project.getName() + "]", conatinerRunnable.getException());
+            throw new MojoExecutionException("Failed to start processing unit [" + project.getBuild().getFinalName() + "]", conatinerRunnable.getException());
         }
         containers.add(thread);
     }
-    
-    
 
-	/**
-	 * Creates the attributes array
-	 * @return attributes array
-	 */
-	private String[] createAttributesArray(String name)	{
-		ArrayList attlist = new ArrayList();
-		Utils.addAttributeToList(attlist, "-cluster", cluster);
-		Utils.addAttributeToList(attlist, "-proeprties", proeprties);
-		attlist.add(name);
-		getLog().info("Arguments list: " + attlist);
-		String[] attArray = new String[attlist.size()];
-		attlist.toArray(attArray);
-		return attArray;
-	}
-	
-	
-	/**
+
+    /**
+     * Creates the attributes array
+     *
+     * @return attributes array
+     */
+    private String[] createAttributesArray(String name) {
+        ArrayList attlist = new ArrayList();
+        Utils.addAttributeToList(attlist, "-cluster", cluster);
+        Utils.addAttributeToList(attlist, "-proeprties", proeprties);
+        attlist.add(name);
+        getLog().info("Arguments list: " + attlist);
+        String[] attArray = new String[attlist.size()];
+        attlist.toArray(attArray);
+        return attArray;
+    }
+
+
+    /**
      * Prints usage instructions.
      */
-	public static void printUsage() {
+    public static void printUsage() {
         System.out.println("Usage: puInstance [-Dcluster=\"...\"] [-Dproperties=\"...\"] pu-location");
         System.out.println("    pu-location                  : The relative/absolute path to a processing unit directory location");
         System.out.println("    -Dcluster [cluster properties]: Allows specify cluster parameters");
