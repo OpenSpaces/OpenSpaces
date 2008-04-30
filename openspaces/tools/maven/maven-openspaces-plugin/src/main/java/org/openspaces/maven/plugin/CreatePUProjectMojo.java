@@ -173,6 +173,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
         // copy pom.xml
         File pomDir = new File(projDir, "feeder");
         copyResource(templateDirName + "/feeder/pom.xml", pomDir, "pom.xml");
+        copyResource(templateDirName + "/feeder/Feeder.launch", pomDir, "Feeder.launch");
     }
 
 
@@ -208,6 +209,9 @@ public class CreatePUProjectMojo extends AbstractMojo {
         // copy pom.xml
         File pomDir = new File(projDir, "processor");
         copyResource(templateDirName + "/processor/pom.xml", pomDir, "pom.xml");
+
+        copyResource(templateDirName + "/Processor.launch", pomDir, "Processor.launch");
+        copyResource(templateDirName + "/Processor 2,1.launch", pomDir, "Processor 2,1.launch");
     }
 
 
