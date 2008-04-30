@@ -210,8 +210,8 @@ public class CreatePUProjectMojo extends AbstractMojo {
         File pomDir = new File(projDir, "processor");
         copyResource(templateDirName + "/processor/pom.xml", pomDir, "pom.xml");
 
-        copyResource(templateDirName + "/Processor.launch", pomDir, "Processor.launch");
-        copyResource(templateDirName + "/Processor-2-1.launch", pomDir, "Processor-2-1.launch");
+        copyResource(templateDirName + "/processor/Processor.launch", pomDir, "Processor.launch");
+        copyResource(templateDirName + "/processor/Processor_2_1.launch", pomDir, "Processor_2_1.launch");
     }
 
 

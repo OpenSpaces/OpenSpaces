@@ -8,7 +8,7 @@
     <name>maven-openspaces-plugin</name>
     <url>http://maven.apache.org</url>
     <properties>
-        <gsVersion>6.5-m11-2329-360</gsVersion>
+        <gsVersion>6.5-m11-2329-369</gsVersion>
     </properties>
     <dependencies>
         <dependency>
@@ -33,6 +33,11 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+                <includes>
+                    <include>**/*.launch</include>
+                    <include>**/*.xml</include>
+                    <include>**/*.java</include>
+                </includes>
             </resource>
         </resources>
         <plugins>
