@@ -76,7 +76,7 @@ public class InstallLicenseMojo extends AbstractMojo {
 
         try {
             File target = new File(targetDir, "gslicense.xml");
-            getLog().info("Copying GigaSlapces license file to: " + target.getAbsolutePath());
+            getLog().info("Copying license file to: " + target.getAbsolutePath());
             FileCopyUtils.copy(file, target);
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to copy GigaSpaces license file.", e);
