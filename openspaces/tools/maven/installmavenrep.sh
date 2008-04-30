@@ -11,7 +11,7 @@ export JSHOMEDIR
 export TMPDIR="/tmp"
 export VERSION=`${JAVACMD} -cp ${JSHOMEDIR}/lib/JSpaces.jar:${JSHOMEDIR}/lib/openspaces/openspaces.jar org.openspaces.maven.support.OutputVersion`
 
-${JAVACMD} -cp ${JSHOMEDIR}/lib/JSpaces.jar:${JSHOMEDIR}/lib/openspaces/openspaces.jar org.openspaces.maven.support.POMGenerator $TMPDIR maven-openspaces-plugin/
+${JAVACMD} -cp ${JSHOMEDIR}/lib/JSpaces.jar:${JSHOMEDIR}/lib/openspaces/openspaces.jar org.openspaces.maven.support.POMGenerator $TMPDIR $VERSION "${JSHOMEDIR}/tools/maven/maven-openspaces-plugin"
 
 echo ""
 echo ""
