@@ -8,7 +8,7 @@
     <fileSet>
       <directory>target/classes</directory>
       <lineEnding>keep</lineEnding>
-      <outputDirectory>feeder</outputDirectory>
+      <outputDirectory>${finalName}</outputDirectory>
       <includes>
         <include>**/**</include>
       </includes>
@@ -18,7 +18,7 @@
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
       <useTransitiveDependencies>false</useTransitiveDependencies>
-      <outputDirectory>feeder/lib</outputDirectory>
+      <outputDirectory>${finalName}/lib</outputDirectory>
       <excludes>
         <exclude>${puGroupId}:common</exclude>
       </excludes>
@@ -26,7 +26,7 @@
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
       <useTransitiveDependencies>false</useTransitiveDependencies>
-      <outputDirectory>feeder/shared-lib</outputDirectory>
+      <outputDirectory>${finalName}/shared-lib</outputDirectory>
       <includes>
         <include>${puGroupId}:common</include>
       </includes>
