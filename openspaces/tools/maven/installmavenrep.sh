@@ -39,4 +39,4 @@ mvn install:install-file -DgroupId=gigaspaces -DartifactId=mule-os -Dversion=$VE
 mvn -f maven-openspaces-plugin/pom.xml install
 
 # Copy licenese file
-mvn os:install-license -Dfile=$JSHOMEDIR/gslicense.xml -Dversion=%VERSION%
+mvn os:install-license -Dfile=$JSHOMEDIR/gslicense.xml -Dversion=$VERSION
