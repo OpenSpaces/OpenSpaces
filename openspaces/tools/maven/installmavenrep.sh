@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # The call to setenv.sh can be commented out if necessary.
+export JSHOMEDIR=`dirname $0`/../../
 . `dirname $0`/../../bin/setenv.sh
 
 if [ "${JSHOMEDIR}" = "" ] ; then
