@@ -25,7 +25,12 @@ import java.util.Comparator;
  * when deploying a multi module project.
  */
 public class PUProjectSorter implements Comparator {
+
     static final String PARAM_ORDER = "order";
+
+    static final String GS_TYPE = "gsType";
+
+    static final String GS_TYPE_PU = "PU";
 
     private boolean assending;
 

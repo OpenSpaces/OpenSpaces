@@ -94,7 +94,7 @@ public class Utils {
                 List collectedProjects = project.getCollectedProjects();
                 for (Iterator projIt = collectedProjects.iterator(); projIt.hasNext();) {
                     MavenProject proj = (MavenProject) projIt.next();
-                    if (proj.getProperties().getProperty(PUProjectSorter.PARAM_ORDER) != null) {
+                    if (Utils.isPUType(proj)) {
                         projects.add(proj);
                     }
                 }
@@ -103,6 +103,14 @@ public class Utils {
             }
         }
         return projects;
+    }
+
+    static boolean isPUType(MavenProject project) {
+        String gsType = project.getProperties().getProperty(PUProjectSorter.GS_TYPE);
+        if (gsType == null) {
+            return false;
+        }
+        return gsType.equalsIgnoreCase(PUProjectSorter.GS_TYPE_PU);
     }
 
 
