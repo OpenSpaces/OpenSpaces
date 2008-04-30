@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -19,6 +18,11 @@ import org.apache.maven.project.MavenProject;
 
 import sun.misc.URLClassPath;
 
+
+/**
+ * This class contains static helper methods for the Plugin. 
+ * @author shaiw
+ */
 public class Utils {
 
     /**
@@ -30,7 +34,7 @@ public class Utils {
      * @throws IllegalArgumentException 
      * @throws MalformedURLException 
      */
-    public static void changeClassLoaderToSupportWhiteSpacesRepository(ClassLoader mavenClassLoader) 
+    static void changeClassLoaderToSupportWhiteSpacesRepository(ClassLoader mavenClassLoader) 
         throws SecurityException, NoSuchFieldException, IllegalArgumentException,
                IllegalAccessException, MalformedURLException {
         // Get the class of the ClassLoader, this should be RealmClassLoader.
@@ -68,8 +72,15 @@ public class Utils {
         // update the ucf field value 
         ucpField.set(mavenClassLoader, uRLClassPath2);
     }
+ 
     
-    public static List resolveProjects(MavenProject project, String moduleName) {
+    /**
+     * Returns a list of all projects participating in the Mojo's execution.
+     * @param project The project from where the Mojo was executed.
+     * @param moduleName A module name given by the Mojo executor. Could be null.
+     * @return a list of all projects participating in the Mojo's execution.
+     */
+    static List resolveProjects(MavenProject project, String moduleName) {
         List projects = new ArrayList();
         if (moduleName != null) {
             if (project.getPackaging() != null && project.getPackaging().equalsIgnoreCase("pom")) {
@@ -99,23 +110,24 @@ public class Utils {
         return projects;
     }
     
+    
     /**
-     * resolves the PU classpath.
-     * It includes the PU executables and dependencies. 
-     * @return a list containing all classpath paths.
+     * Resolves the processing unit's dependencies classpath.
+     * It includes the processing unit's executables and dependencies. 
+     * @return a list containing all paths.
      */
-    public static List resolveClasspath(MavenProject project) throws Exception {
-        List dependencyFiles = new ArrayList();
+    static List resolveClasspath(MavenProject project) throws Exception {
+        List dependencyFiles = resolveDependencyClasspath(project);
         dependencyFiles.add(getURL(project.getArtifact().getFile()));
-        Set dependencyArtifacts = project.getArtifacts();
-        for (Iterator i = dependencyArtifacts.iterator(); i.hasNext();) {
-            Artifact artifact = (Artifact)i.next();
-            dependencyFiles.add(getURL(artifact.getFile()));
-        }
         return dependencyFiles; 
     }
 
-    public static List resolveDependencyClasspath(MavenProject project) throws Exception {
+    
+    /**
+     * Resolves the processing unit's dependencies classpath.
+     * @return a list containing all dependencies paths.
+     */
+    static List resolveDependencyClasspath(MavenProject project) throws Exception {
         List dependencyFiles = new ArrayList();
         Set dependencyArtifacts = project.getArtifacts();
         for (Iterator i = dependencyArtifacts.iterator(); i.hasNext();) {
@@ -125,11 +137,19 @@ public class Utils {
         return dependencyFiles; 
     }
 
-    public static URL getURL(File f) throws Exception {
+    
+    /**
+     * Replaces white spaces in URLs to %20.
+     * @param f the file
+     * @return A URL with %20 where white space suppose to be.
+     * @throws Exception
+     */
+    static URL getURL(File f) throws Exception {
         String path = f.toURL().toExternalForm();
         path = path.replaceAll(" ", "%20");
         return new URL(path);
     }
+    
     
     /**
      * Creates the class loader of the PU application.
@@ -138,13 +158,21 @@ public class Utils {
      * @return the class loader of the PU application.
      * @throws MalformedURLException
      */
-    public static ClassLoader createClassLoader( List classpathUrls, ClassLoader parent) throws Exception {
+    static ClassLoader createClassLoader( List classpathUrls, ClassLoader parent) throws Exception {
         // create the classloader
         ClassLoader urlCL = URLClassLoader.newInstance((URL[]) classpathUrls.toArray(new URL[classpathUrls.size()]), parent);
         return urlCL;
     }
     
-    public static MojoExecutionException createMojoException(Exception e) {
+    
+    /**
+     * In case there was a SecurityException about missing license file creates an exception with
+     * a special message, explaining what to do. In casse of other exceptions, the original
+     * exception is wrapped with MojoExecutionException.
+     * @param e the original exception
+     * @return the new exception.
+     */
+    static MojoExecutionException createMojoException(Exception e) {
         Throwable cause = (Throwable)e;
         while (cause.getCause() != null) {
             cause = cause.getCause();
@@ -163,6 +191,7 @@ public class Utils {
         }
         return new MojoExecutionException(e.getMessage(), e);
     }
+    
     
     /**
      * Adds an attribute with all of its parameters to the list.
@@ -183,7 +212,12 @@ public class Utils {
     }
     
     
-    public static String getProcessingUnitJar(MavenProject project) {
+    /**
+     * Finds the relative path from current directory to the PU jar file.
+     * @param project the Maven project
+     * @return the relative path from current directory to the PU jar file.
+     */
+    static String getProcessingUnitJar(MavenProject project) {
         String targetDir = project.getBuild().getDirectory();
         String curDir = System.getProperty("user.dir");
         String relativePath = targetDir.substring(curDir.length()+1);
@@ -193,17 +227,29 @@ public class Utils {
         return name;
     }
 
-    static String getPURelativePathDir(MavenProject proj) {
-        String targetDir = proj.getBuild().getDirectory();
+    
+    /**
+     * Finds the relative path from current directory to the PU dir. 
+     * @param project the Maven project
+     * @return the relative path from current directory to the PU dir.
+     */
+    static String getPURelativePathDir(MavenProject project) {
+        String targetDir = project.getBuild().getDirectory();
         String curDir = System.getProperty("user.dir");
         String relativePath = targetDir.substring(curDir.length()+1);
         relativePath = relativePath.replace("\\", "/");
-        String finalName = proj.getBuild().getFinalName();
+        String finalName = project.getBuild().getFinalName();
         String name = relativePath+"/"+finalName+".dir";
         return name;
     }
     
     
+    /**
+     * Adds the jars in shared-lib to the class loader to be accessible in runtime.
+     * @param project the Maven poject
+     * @param classLoader the class loader.
+     * @throws Exception
+     */
     static void addSharedLibToClassLoader(MavenProject project, ClassLoader classLoader) throws Exception {
         String path = Utils.getPURelativePathDir(project);
         path = path + "/" + project.getBuild().getFinalName() + "/shared-lib";
