@@ -102,6 +102,7 @@
           <module name="examples-data-processor" />
           <module name="examples-mule-data-feeder" />
           <module name="examples-mule-data-processor" />
+          <module name="maven-plugin" />
         </modules>
       </facet-type>
     </autodetection-disabled>

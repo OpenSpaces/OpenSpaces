@@ -188,6 +188,12 @@ public class CreatePUProjectMojo extends AbstractMojo {
         // copy processor dir
         copyResource(templateDirName + "/processor/src/Processor.java", processorDir, "Processor.java");
 
+        File testProcessorDir = new File(projDir, "processor/src/test/java/" + packageDirs + "/processor");
+        testProcessorDir.mkdirs();
+        copyResource(templateDirName + "/processor/test/ProcessorTest.java", testProcessorDir, "ProcessorTest.java");
+        copyResource(templateDirName + "/processor/test/ProcessorIntegrationTest.java", testProcessorDir, "ProcessorIntegrationTest.java");
+        copyResource(templateDirName + "/processor/test/ProcessorIntegrationTest-context.xml", testProcessorDir, "ProcessorIntegrationTest-context.xml");
+
         // copy pu.xml
         File puDir = new File(projDir, "processor/src/main/resources/META-INF/spring");
         puDir.mkdirs();

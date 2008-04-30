@@ -80,7 +80,6 @@ public class Feeder implements InitializingBean, DisposableBean {
             try {
                 long time = System.currentTimeMillis();
                 Data data = new Data((counter++ % numberOfTypes), "FEEDER " + Long.toString(time));
-                data.setProcessed(false);
                 gigaSpace.write(data);
                 System.out.println("--- FEEDER WROTE " + data);
             } catch (SpaceInterruptedException e) {

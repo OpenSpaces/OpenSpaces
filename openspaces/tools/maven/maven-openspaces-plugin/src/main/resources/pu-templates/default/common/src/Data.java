@@ -39,6 +39,7 @@ public class Data {
     public Data(long type, String rawData) {
         this.type = type;
         this.rawData = rawData;
+        this.processed = false;
     }
 
     /**
