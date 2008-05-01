@@ -249,7 +249,7 @@ public class Utils {
         String relativePath = targetDir.substring(curDir.length() + 1);
         relativePath = relativePath.replace('\\', '/');
         String finalName = project.getBuild().getFinalName();
-        return relativePath + "/" + finalName + ".dir";
+        return relativePath + "/" + finalName;
     }
 
 
@@ -262,8 +262,11 @@ public class Utils {
      */
     static void addSharedLibToClassLoader(MavenProject project, ClassLoader classLoader) throws Exception {
         String path = Utils.getPURelativePathDir(project);
-        path = path + "/" + project.getBuild().getFinalName() + "/shared-lib";
+        path = path + "/shared-lib";
         File f = new File(path);
+        if (!f.exists()) {
+            return;
+        }
         File[] files = f.listFiles();
         Method m = URLClassLoader.class.getDeclaredMethod("addURL", new Class[]{URL.class});
         m.setAccessible(true);
