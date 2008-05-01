@@ -78,7 +78,7 @@ public class POMGenerator {
                 sb.append(line.substring(0, index + openTag.length()));
                 sb.append(version);
                 sb.append(closeTag);
-            } else if ((index = line.indexOf("<vesrion>")) > 0 && !firstVersionFound) {
+            } else if ((index = line.indexOf("<version>")) > 0 && !firstVersionFound) {
                 firstVersionFound = true;
                 sb.append(line.substring(0, index + "<version>".length()));
                 sb.append(version);
