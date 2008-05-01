@@ -74,20 +74,17 @@ public class POMGenerator {
         int index = 0;
         boolean firstVersionFound = false;
         while ((line = br.readLine()) != null) {
-            if ((index = line.indexOf(openTag)) < 0) {
-                sb.append(line);
-            } else {
+            if ((index = line.indexOf(openTag)) > 0) {
                 sb.append(line.substring(0, index + openTag.length()));
                 sb.append(version);
                 sb.append(closeTag);
-            }
-            if ((index = line.indexOf("<vesrion>")) < 0 && !firstVersionFound) {
-                sb.append(line);
-            } else {
+            } else if ((index = line.indexOf("<vesrion>")) > 0 && !firstVersionFound) {
                 firstVersionFound = true;
                 sb.append(line.substring(0, index + "<version>".length()));
                 sb.append(version);
                 sb.append("</version>");
+            } else {
+                sb.append(line);
             }
             sb.append(newLine);
         }
