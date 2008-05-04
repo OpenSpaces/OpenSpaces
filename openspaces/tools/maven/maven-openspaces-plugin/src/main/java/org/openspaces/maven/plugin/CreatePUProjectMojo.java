@@ -167,8 +167,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
         // copy assembly dir
         File assemblyDir = new File(projDir, "feeder/src/main/assembly");
         assemblyDir.mkdirs();
-        copyResource(templateDirName + "/feeder/assembly/assembly-jar.xml", assemblyDir, "assembly-jar.xml");
-        copyResource(templateDirName + "/feeder/assembly/assembly-dir.xml", assemblyDir, "assembly-dir.xml");
+        copyResource(templateDirName + "/feeder/assembly/assembly.xml", assemblyDir, "assembly.xml");
 
         // copy pom.xml
         File pomDir = new File(projDir, "feeder");
@@ -203,8 +202,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
         // copy assembly dir
         File assemblyDir = new File(projDir, "processor/src/main/assembly");
         assemblyDir.mkdirs();
-        copyResource(templateDirName + "/processor/assembly/assembly-jar.xml", assemblyDir, "assembly-jar.xml");
-        copyResource(templateDirName + "/processor/assembly/assembly-dir.xml", assemblyDir, "assembly-dir.xml");
+        copyResource(templateDirName + "/processor/assembly/assembly.xml", assemblyDir, "assembly.xml");
 
         // copy pom.xml
         File pomDir = new File(projDir, "processor");

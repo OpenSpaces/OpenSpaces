@@ -34,8 +34,7 @@
                     <attach>false</attach>
                     <ignoreDirFormatExtensions>true</ignoreDirFormatExtensions>
                     <descriptors>
-                        <descriptor>src/main/assembly/assembly-jar.xml</descriptor>
-                        <descriptor>src/main/assembly/assembly-dir.xml</descriptor>
+                        <descriptor>src/main/assembly/assembly.xml</descriptor>
                     </descriptors>
                 </configuration>
                 <executions>
