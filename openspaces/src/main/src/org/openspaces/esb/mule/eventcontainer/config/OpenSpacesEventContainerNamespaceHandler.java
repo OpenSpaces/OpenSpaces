@@ -25,7 +25,7 @@ import org.openspaces.esb.mule.eventcontainer.OpenSpacesConnector;
  *
  * @author yitzhaki
  */
-public class OpenSpacesNamespaceHandler extends AbstractMuleNamespaceHandler {
+public class OpenSpacesEventContainerNamespaceHandler extends AbstractMuleNamespaceHandler {
 
     public void init() {
         registerStandardTransportEndpoints(OpenSpacesConnector.OS_EVENT_CONTAINER, new String[]{});
