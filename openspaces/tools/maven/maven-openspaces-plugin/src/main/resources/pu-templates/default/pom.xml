@@ -8,8 +8,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>common</module>
-        <module>feeder</module>
         <module>processor</module>
+        <module>feeder</module>
     </modules>
     <dependencies>
         <dependency>

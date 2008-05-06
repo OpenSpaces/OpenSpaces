@@ -74,6 +74,15 @@ public class RunPUMojo extends AbstractMojo {
      * Container list.
      */
     private List containers = new ArrayList();
+    
+    
+    /**
+     * Project instance, used to add new source directory to the build.
+     *
+     * @parameter default-value="${reactorProjects}"
+     * @readonly
+     */
+    private List reactorProjects;
 
 
     /**
@@ -90,10 +99,8 @@ public class RunPUMojo extends AbstractMojo {
 
         Utils.handleSecurity();
 
-        List projects = Utils.resolveProjects(project, module);
-
-        // sort the projects by the order parameter
-        Collections.sort(projects, new PUProjectSorter(true));
+        // get a list of project to execute in the order set by the reactor
+        List projects = Utils.getProjectsToExecute(reactorProjects, module);
 
         for (Iterator projIt = projects.iterator(); projIt.hasNext();) {
             MavenProject proj = (MavenProject) projIt.next();

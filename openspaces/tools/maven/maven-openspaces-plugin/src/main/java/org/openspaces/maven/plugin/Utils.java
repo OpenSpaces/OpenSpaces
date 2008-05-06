@@ -24,6 +24,10 @@ import java.util.StringTokenizer;
  * @author shaiw
  */
 public class Utils {
+    
+    static final String GS_TYPE = "gsType";
+
+    static final String GS_TYPE_PU = "PU";
 
     /**
      * Uses reflection to replace all white spaces in the ClassLoader's URLs to %20.
@@ -67,50 +71,37 @@ public class Utils {
         ucpField.set(mavenClassLoader, uRLClassPath2);
     }
 
-
+    
     /**
-     * Returns a list of all projects participating in the Mojo's execution.
-     *
-     * @param project    The project from where the Mojo was executed.
-     * @param moduleName A module name given by the Mojo executor. Could be null.
-     * @return a list of all projects participating in the Mojo's execution.
+     * Checks if a project is a PU project.
+     * @param project the project
+     * @return true if the project is a PU project, false otherwise.
      */
-    static List resolveProjects(MavenProject project, String moduleName) {
-        List projects = new ArrayList();
-        if (moduleName != null) {
-            if (project.getPackaging() != null && project.getPackaging().equalsIgnoreCase("pom")) {
-                List collectedProjects = project.getCollectedProjects();
-                for (Iterator projIt = collectedProjects.iterator(); projIt.hasNext();) {
-                    MavenProject proj = (MavenProject) projIt.next();
-                    if (proj.getName().equals(moduleName)) {
-                        projects.add(proj);
-                    }
-                }
-            } else {
-                projects.add(project);
-            }
-        } else {
-            if (project.getPackaging() != null && project.getPackaging().equalsIgnoreCase("pom")) {
-                List collectedProjects = project.getCollectedProjects();
-                for (Iterator projIt = collectedProjects.iterator(); projIt.hasNext();) {
-                    MavenProject proj = (MavenProject) projIt.next();
-                    if (Utils.isPUType(proj)) {
-                        projects.add(proj);
-                    }
-                }
-            } else {
-                projects.add(project);
-            }
-        }
-        return projects;
-    }
-
     static boolean isPUType(MavenProject project) {
-        String gsType = project.getProperties().getProperty(PUProjectSorter.GS_TYPE);
+        String gsType = project.getProperties().getProperty(Utils.GS_TYPE);
         if (gsType == null) {
             return false;
         }
-        return gsType.equalsIgnoreCase(PUProjectSorter.GS_TYPE_PU);
+        return gsType.equalsIgnoreCase(Utils.GS_TYPE_PU);
+    }
+    
+    
+    /**
+     * Gets a list of projects and returns only those that are PU.
+     * @param projects a list of projects.
+     * @return a list of projects and returns only those that are PU.
+     */
+    static List getProjectsToExecute(List projects, String moduleName) {
+        List puProjects = new ArrayList();
+        Iterator i = projects.iterator();
+        while (i.hasNext()) {
+            MavenProject proj = (MavenProject) i.next();
+            if (Utils.isPUType(proj) && 
+                    (moduleName == null || moduleName.equals(proj.getName()))) {
+                puProjects.add(proj);
+            }
+        }
+        return puProjects;
     }
 
 
