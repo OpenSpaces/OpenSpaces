@@ -16,15 +16,24 @@
 
 package org.openspaces.maven.plugin;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.springframework.util.StringUtils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 /**
  * Goal which creates the openspaces project.
@@ -88,166 +97,132 @@ public class CreatePUProjectMojo extends AbstractMojo {
     private String packageDirs;
 
 
-    /**
-     * The template directory name.
-     */
-    private String templateDirName;
-
-
     public void execute() throws MojoExecutionException {
-        getLog().info("Project template: " + template);
-        if (template.equals("default")) {
-            executeDefault();
-        } else {
-            throw new MojoExecutionException("Unknown project template: " + template);
-        }
-    }
-
-
-    /**
-     * Mojo implementation
-     */
-    public void executeDefault() throws MojoExecutionException {
-        packageDirs = packageName.replaceAll("\\.", "/");
-
-        if (!projectDir.exists()) {
-            projectDir.mkdirs();
-        }
-
-        templateDirName = "/pu-templates/" + template;
         try {
-            copyResource(templateDirName + "/pom.xml", projectDir, "pom.xml");
-            getLog().info("Generating module: common");
-            createCommonModule(projectDir);
-            getLog().info("Generating module: feeder");
-            createFeederModule(projectDir);
-            getLog().info("Generating module: processor");
-            createProcessorModule(projectDir);
+            Enumeration urls = Thread.currentThread().getContextClassLoader().getResources("/pu-templates");
+            while (urls.hasMoreElements()) {
+                URL url = (URL) urls.nextElement();
+                String jarURLStr = url.toString().substring("jar:file:/".length()-1, url.toString().indexOf('!'));
+                boolean foundTemplate = extract(jarURLStr);
+                if (!foundTemplate)
+                {
+                    String[] availableTemplates = getAvailableTemplates(jarURLStr);
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Template [" + template + "] not found.\n");
+                    sb.append("Available templates: [");
+                    for (int i = 0; i < availableTemplates.length; i++) {
+                        sb.append(availableTemplates[i]);
+                        if (i < availableTemplates.length-1) {
+                            sb.append(", ");
+                        }
+                    }
+                    sb.append("]");
+                    throw new IllegalArgumentException(sb.toString());
+                }
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new MojoExecutionException("Failed to create processing unit project", e);
         }
     }
-
-
+    
+    
     /**
-     * Creates the common module
-     *
-     * @param projDir the project directory
+     * Extracts the project files to the project directory.
+     * @param jarFileName the plugin's JAR file
+     * @return true of the template is found, false otherwise.
+     * @throws Exception
      */
-    private void createCommonModule(File projDir) {
-        File commonDir = new File(projDir, "common/src/main/java/" + packageDirs + "/common");
-        commonDir.mkdirs();
-
-        // copy common dir
-        copyResource(templateDirName + "/common/src/Data.java", commonDir, "Data.java");
-
-        // copy pom.xml
-        File pomDir = new File(projDir, "common");
-        copyResource(templateDirName + "/common/pom.xml", pomDir, "pom.xml");
+    private boolean extract(String jarFileName) throws Exception {
+        packageDirs = packageName.replaceAll("\\.", "/");
+        String puTemplate = "pu-templates/" + template;
+        int length = puTemplate.length();
+        FileInputStream fis = new FileInputStream(jarFileName);
+        BufferedInputStream bis = new BufferedInputStream(fis);
+        JarInputStream jis = new JarInputStream(bis);
+        JarEntry je = null;
+        boolean foundTemplateContent = false;
+        while ((je = jis.getNextJarEntry()) != null) {
+            String jarEntryName = je.getName();
+            getLog().debug("JAR entry: " + jarEntryName);
+            if (je.isDirectory() || !jarEntryName.startsWith(puTemplate)) {
+                continue;
+            }
+            foundTemplateContent = true;
+            String targetFileName = projectDir + jarEntryName.substring(length);
+            getLog().debug("Extracting entry [" + jarEntryName + "] to file [" + targetFileName + "]");
+            copyResource("/" + jarEntryName, targetFileName);
+        }
+        return foundTemplateContent;
     }
-
-
-    /**
-     * Creates the feeder module
-     *
-     * @param projDir the project directory
-     */
-    private void createFeederModule(File projDir) {
-        File feederDir = new File(projDir, "feeder/src/main/java/" + packageDirs + "/feeder");
-        feederDir.mkdirs();
-
-        // copy feeder dir
-        copyResource(templateDirName + "/feeder/src/Feeder.java", feederDir, "Feeder.java");
-
-        // copy pu.xml
-        File puDir = new File(projDir, "feeder/src/main/resources/META-INF/spring");
-        puDir.mkdirs();
-        copyResource(templateDirName + "/feeder/META-INF/spring/pu.xml", puDir, "pu.xml");
-
-        // copy assembly dir
-        File assemblyDir = new File(projDir, "feeder/src/main/assembly");
-        assemblyDir.mkdirs();
-        copyResource(templateDirName + "/feeder/assembly/assembly.xml", assemblyDir, "assembly.xml");
-
-        // copy pom.xml
-        File pomDir = new File(projDir, "feeder");
-        copyResource(templateDirName + "/feeder/pom.xml", pomDir, "pom.xml");
-        copyResource(templateDirName + "/feeder/Feeder.launch", pomDir, "Feeder.launch");
-    }
-
-
-    /**
-     * Creates the processor module
-     *
-     * @param projDir the project directory
-     */
-    private void createProcessorModule(File projDir) {
-        File processorDir = new File(projDir, "processor/src/main/java/" + packageDirs + "/processor");
-        processorDir.mkdirs();
-
-        // copy processor dir
-        copyResource(templateDirName + "/processor/src/Processor.java", processorDir, "Processor.java");
-
-        File testProcessorDir = new File(projDir, "processor/src/test/java/" + packageDirs + "/processor");
-        testProcessorDir.mkdirs();
-        copyResource(templateDirName + "/processor/test/ProcessorTest.java", testProcessorDir, "ProcessorTest.java");
-        copyResource(templateDirName + "/processor/test/ProcessorIntegrationTest.java", testProcessorDir, "ProcessorIntegrationTest.java");
-        copyResource(templateDirName + "/processor/test/ProcessorIntegrationTest-context.xml", testProcessorDir, "ProcessorIntegrationTest-context.xml");
-
-        // copy pu.xml
-        File puDir = new File(projDir, "processor/src/main/resources/META-INF/spring");
-        puDir.mkdirs();
-        copyResource(templateDirName + "/processor/META-INF/spring/pu.xml", puDir, "pu.xml");
-
-        // copy assembly dir
-        File assemblyDir = new File(projDir, "processor/src/main/assembly");
-        assemblyDir.mkdirs();
-        copyResource(templateDirName + "/processor/assembly/assembly.xml", assemblyDir, "assembly.xml");
-
-        // copy pom.xml
-        File pomDir = new File(projDir, "processor");
-        copyResource(templateDirName + "/processor/pom.xml", pomDir, "pom.xml");
-
-        copyResource(templateDirName + "/processor/Processor.launch", pomDir, "Processor.launch");
-        copyResource(templateDirName + "/processor/Processor_2_1.launch", pomDir, "Processor_2_1.launch");
-    }
-
 
     /**
      * Copies a resource to the target directory
      *
      * @param sourceFile the file to copy
-     * @param targetDir  the destination directory
      * @param targetFile the name of the target file
+     * @throws Exception 
      */
-    private void copyResource(String sourceFile, File targetDir, String targetFile) {
-        try {
-            String data;
+    private void copyResource(String sourceFile, String targetFile) throws Exception {
+        
+        // convert the ${gsGroupPath} to directory
+        targetFile = StringUtils.replace(targetFile, FILTER_GROUP_PATH, packageDirs);
+        
+        // prepare the file reader
+        InputStream is = getClass().getResourceAsStream(sourceFile);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        StringBuffer contentBuilder = new StringBuffer();
 
-            // prepare the file reader
-            InputStream is = getClass().getResourceAsStream(sourceFile);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            StringBuffer contentBuilder = new StringBuffer();
-
-            // read the lines one by one and replace property references with 
-            // the syntax ${property_name} to their respective property values.
-            while ((data = reader.readLine()) != null) {
-                data = StringUtils.replace(data, FILTER_GROUP_ID, packageName);
-                data = StringUtils.replace(data, FILTER_ARTIFACT_ID, projectDir.getName());
-                data = StringUtils.replace(data, FILTER_GROUP_PATH, packageDirs);
-                contentBuilder.append(data);
-                contentBuilder.append(NEW_LINE);
-            }
-
-            // write the entire converted file content to the destination file.
-            File f = new File(targetDir, targetFile);
-            getLog().debug("Copying resource " + sourceFile + " to " + f.getAbsolutePath());
-            FileWriter writer = new FileWriter(f);
-            writer.write(contentBuilder.toString());
-            reader.close();
-            writer.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        // read the lines one by one and replace property references with 
+        // the syntax ${property_name} to their respective property values.
+        String data;
+        while ((data = reader.readLine()) != null) {
+            data = StringUtils.replace(data, FILTER_GROUP_ID, packageName);
+            data = StringUtils.replace(data, FILTER_ARTIFACT_ID, projectDir.getName());
+            data = StringUtils.replace(data, FILTER_GROUP_PATH, packageDirs);
+            contentBuilder.append(data);
+            contentBuilder.append(NEW_LINE);
         }
+
+        // write the entire converted file content to the destination file.
+        File f = new File(targetFile);
+        File dir = f.getParentFile();
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        getLog().debug("Copying resource " + sourceFile + " to " + f.getAbsolutePath());
+        FileWriter writer = new FileWriter(f);
+        writer.write(contentBuilder.toString());
+        reader.close();
+        writer.close();
+    }
+    
+    
+    /**
+     * Returns an array of available project templates names.
+     * @param jarFileName the plugin's JAR file
+     * @return an array of available project templates names.
+     * @throws Exception
+     */
+    private String[] getAvailableTemplates(String jarFileName) throws Exception {
+        Set templates = new HashSet();
+        String templatesDir = "pu-templates/";
+        int length = templatesDir.length();
+        FileInputStream fis = new FileInputStream(jarFileName);
+        BufferedInputStream bis = new BufferedInputStream(fis);
+        JarInputStream jis = new JarInputStream(bis);
+        JarEntry je = null;
+        while ((je = jis.getNextJarEntry()) != null) {
+            String jarEntryName = je.getName();
+            if (jarEntryName.startsWith(templatesDir)) {
+                int nextSlashLocation = jarEntryName.indexOf("/", length);
+                if (nextSlashLocation != -1) {
+                    String templateName = jarEntryName.substring(length, nextSlashLocation);
+                    templates.add(templateName);
+                }
+            }
+        }
+        String[] templatesArray = new String[templates.size()];
+        templates.toArray(templatesArray);
+        return templatesArray;
     }
 }
