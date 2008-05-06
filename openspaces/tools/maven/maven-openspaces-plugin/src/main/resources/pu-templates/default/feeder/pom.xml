@@ -14,7 +14,6 @@
     </parent>
     <properties>
         <gsType>PU</gsType>
-        <order>2</order>
     </properties>
     <dependencies>
         <dependency>
