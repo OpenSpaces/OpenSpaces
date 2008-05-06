@@ -127,7 +127,13 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
             } catch (RemoteException e) {
                 if(logger.isLoggable(Level.FINE)) {
                     logger.log( Level.FINE, "RemoteException reaching service: ["
-                            + proxy + "] service cannot be reached", e);
+                            + proxy + "]  - service cannot be reached", e);
+                }
+                return false;
+            } catch (Exception e) {
+                if(logger.isLoggable(Level.WARNING)) {
+                    logger.log( Level.WARNING, "Exception reaching service: ["
+                            + proxy + "] ", e);
                 }
                 return false;
             }
