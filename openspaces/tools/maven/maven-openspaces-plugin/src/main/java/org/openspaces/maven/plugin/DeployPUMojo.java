@@ -23,7 +23,6 @@ import org.apache.maven.project.MavenProject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
