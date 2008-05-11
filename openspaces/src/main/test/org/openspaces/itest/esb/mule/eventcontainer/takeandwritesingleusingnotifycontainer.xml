@@ -10,8 +10,8 @@
        http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
        http://www.mulesource.org/schema/mule/core/2.0 http://www.mulesource.org/schema/mule/core/2.0/mule.xsd
-       http://www.openspaces.org/schema/mule/os-eventcontainer http://www.openspaces.org/schema/mule/os-eventcontainer.xsd">
-    
+       http://www.openspaces.org/schema/mule/os-eventcontainer http://www.openspaces.org/schema/mule/mule-os-eventcontainer.xsd">
+
 
     <description>
         Tests mule connector, receive and process single object at a time.
@@ -27,8 +27,8 @@
 
     <spring:bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
         <spring:property name="url" value="/./space"/>
-        <spring:property name="lookupGroups" value="${user.name}"/>        
-   </spring:bean>
+        <spring:property name="lookupGroups" value="${user.name}"/>
+    </spring:bean>
 
     <spring:bean id="gigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
         <spring:property name="space" ref="space"/>
@@ -55,7 +55,8 @@
 
         <service name="MessageReaderUMO">
             <inbound>
-                <os-eventcontainer:inbound-endpoint address="os-eventcontainer://helloPollingEventContainer?workManager=true"/>
+                <os-eventcontainer:inbound-endpoint
+                        address="os-eventcontainer://helloPollingEventContainer?workManager=true"/>
             </inbound>
 
             <component class="org.openspaces.itest.esb.mule.MessageReader"/>

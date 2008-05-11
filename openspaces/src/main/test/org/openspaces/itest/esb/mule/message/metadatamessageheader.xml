@@ -12,7 +12,7 @@
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
        http://www.mulesource.org/schema/mule/core/2.0 http://www.mulesource.org/schema/mule/core/2.0/mule.xsd
        http://www.mulesource.org/schema/mule/stdio/2.0 http://www.mulesource.org/schema/mule/stdio/2.0/mule-stdio.xsd
-       http://www.openspaces.org/schema/mule/os-eventcontainer http://www.openspaces.org/schema/mule/os-eventcontainer.xsd">
+       http://www.openspaces.org/schema/mule/os-eventcontainer http://www.openspaces.org/schema/mule/mule-os-eventcontainer.xsd">
 
     <description>Tests mule connector, receive and process single object at a time.</description>
 
@@ -52,13 +52,13 @@
             </inbound>
 
             <component class="org.openspaces.itest.esb.mule.message.MessageWithHeaderReader"/>
-            
+
             <outbound>
-                <outbound-pass-through-router >
+                <outbound-pass-through-router>
                     <outbound-endpoint address="os-eventcontainer://gigaSpace"/>
                 </outbound-pass-through-router>
             </outbound>
         </service>
     </model>
-    
+
 </mule>

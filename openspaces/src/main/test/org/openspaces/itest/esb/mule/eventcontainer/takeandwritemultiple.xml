@@ -10,7 +10,7 @@
        http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
        http://www.mulesource.org/schema/mule/core/2.0 http://www.mulesource.org/schema/mule/core/2.0/mule.xsd
-       http://www.openspaces.org/schema/mule/os-eventcontainer http://www.openspaces.org/schema/mule/os-eventcontainer.xsd">
+       http://www.openspaces.org/schema/mule/os-eventcontainer http://www.openspaces.org/schema/mule/mule-os-eventcontainer.xsd">
 
     <description>Test the ability of mule connector to receive and process bulk of objects.</description>
 
@@ -23,7 +23,7 @@
 
 
     <spring:bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
-        <spring:property name="lookupGroups" value="${user.name}" />
+        <spring:property name="lookupGroups" value="${user.name}"/>
         <spring:property name="url" value="/./space"/>
     </spring:bean>
 
@@ -52,7 +52,6 @@
 
     <!-- this connector must be declared ,in order to inject the  Spring appliction context -->
     <os-eventcontainer:connector name="gigaSpacesConnector"/>
-        
 
 
     <!--
