@@ -16,6 +16,10 @@
 
 package org.openspaces.maven.plugin;
 
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.springframework.util.StringUtils;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -29,10 +33,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
-
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.springframework.util.StringUtils;
 
 
 /**
@@ -107,7 +107,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
                 if (!foundTemplate)
                 {
                     String[] availableTemplates = getAvailableTemplates(jarURLStr);
-                    StringBuilder sb = new StringBuilder();
+                    StringBuffer sb = new StringBuffer();
                     sb.append("Template [" + template + "] not found.\n");
                     sb.append("Available templates: [");
                     for (int i = 0; i < availableTemplates.length; i++) {
