@@ -16,6 +16,7 @@
 
 package org.openspaces.maven.plugin;
 
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -73,6 +74,13 @@ public class RunStandalonePUMojo extends AbstractMojo {
      * @readonly
      */
     private List reactorProjects;
+    
+    /**
+     * @parameter expression="${localRepository}"
+     * @required
+     * @readonly
+     */
+    protected ArtifactRepository localRepository;
 
 
     /**
@@ -168,6 +176,7 @@ public class RunStandalonePUMojo extends AbstractMojo {
             }
         }
         if (conatinerRunnable.getException() != null) {
+            Utils.throwMissingLicenseException(conatinerRunnable.getException(), localRepository);
             throw new MojoExecutionException("Failed to start processing unit [" + project.getBuild().getFinalName() + "]", conatinerRunnable.getException());
         }
         containers.add(thread);

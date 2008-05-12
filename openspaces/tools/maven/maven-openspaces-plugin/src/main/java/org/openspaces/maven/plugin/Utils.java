@@ -1,8 +1,11 @@
 package org.openspaces.maven.plugin;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
+import org.openspaces.maven.support.OutputVersion;
+
 import sun.misc.URLClassPath;
 
 import java.io.File;
@@ -170,25 +173,25 @@ public class Utils {
      *
      * @param e the original exception
      * @return the new exception.
+     * @throws MojoExecutionException 
      */
-    static MojoExecutionException createMojoException(Exception e) {
+    static void throwMissingLicenseException(Throwable e, ArtifactRepository localRepository) throws MojoExecutionException {
+        System.out.println("rep: " + localRepository.getBasedir());
         Throwable cause = (Throwable) e;
         while (cause.getCause() != null) {
             cause = cause.getCause();
             if (cause instanceof SecurityException) {
                 if (cause.getMessage() != null && cause.getMessage().indexOf("gslicense.xml") > 0) {
                     String msg =
-                            "\nThe GigaSpaces license file - gslicense.xml - was not found in " +
-                                    "Maven repository.\nThis file should be placed in the directory " +
-                                    "where gs-boot.jar resides.\n" +
-                                    "Please try to reinstall OpenSpaces Plugin for Maven by running " +
-                                    "'installmavenrep' script again.\nAlternatively, copy gslicense.xml " +
-                                    "manually to <maven-repository-home>/gigaspaces/gs-boot/<version>.";
-                    return new MojoExecutionException(msg);
+                 "\nThe GigaSpaces license file - gslicense.xml - was not found in Maven repository.\n" +
+                 "This file should be placed in the directory where gs-boot.jar resides.\n" +
+                 "Please try to reinstall OpenSpaces Plugin for Maven by running the installmavenrep' script again.\n" +
+                 "Alternatively, copy gslicense.xml manually to " + localRepository.getBasedir() +"/com/gigaspaces/core/gs-boot/" +
+                 OutputVersion.computeVersion() + ".";
+                    throw new MojoExecutionException(msg);
                 }
             }
         }
-        return new MojoExecutionException(e.getMessage(), e);
     }
 
 
