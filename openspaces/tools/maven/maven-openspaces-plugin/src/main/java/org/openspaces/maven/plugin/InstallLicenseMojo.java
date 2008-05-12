@@ -69,7 +69,7 @@ public class InstallLicenseMojo extends AbstractMojo {
         if (!baseDir.exists()) {
             throw new MojoExecutionException("The local repository was not found at " + baseDir.getAbsolutePath());
         }
-        File targetDir = new File(baseDir + "/gigaspaces/gs-boot/" + version + "/");
+        File targetDir = new File(baseDir + "/com/gigaspaces/core/gs-boot/" + version + "/");
         if (!targetDir.exists()) {
             throw new MojoExecutionException("The gs-boot artifact is not installed at [" + targetDir.getAbsolutePath() + "]");
         }

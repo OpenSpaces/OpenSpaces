@@ -4,11 +4,11 @@
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-openspaces-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <version>6.5-m11-2329-437</version>
+    <version>6.5-m11-2330-100</version>
     <name>maven-openspaces-plugin</name>
     <url>http://maven.apache.org</url>
     <properties>
-        <gsVersion>6.5-m11-2329-437</gsVersion>
+        <gsVersion>6.5-m11-2330-100</gsVersion>
     </properties>
     <dependencies>
         <dependency>
@@ -17,7 +17,7 @@
             <version>2.0</version>
         </dependency>
         <dependency>
-            <groupId>gigaspaces</groupId>
+            <groupId>org.openspaces</groupId>
             <artifactId>openspaces</artifactId>
             <version>${gsVersion}</version>
             <scope>compile</scope>

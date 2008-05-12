@@ -13,7 +13,7 @@
     </modules>
     <dependencies>
         <dependency>
-            <groupId>gigaspaces</groupId>
+            <groupId>org.openspaces</groupId>
             <artifactId>openspaces</artifactId>
             <version>${gsVersion}</version>
             <scope>provided</scope>
