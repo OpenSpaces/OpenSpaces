@@ -47,7 +47,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
 
     private SessionFactory sessionFactory;
 
-    private Set<String> entries;
+    private Set<String> managedEntries;
 
     private String[] initialLoadEntries;
 
@@ -83,8 +83,8 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      * <p>Usually, there is no need to explicitly set this.
      */
     public void setManagedEntries(String... entries) {
-        this.entries = new HashSet<String>();
-        this.entries.addAll(Arrays.asList(entries));
+        this.managedEntries = new HashSet<String>();
+        this.managedEntries.addAll(Arrays.asList(entries));
     }
 
     /**
@@ -95,14 +95,14 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      * the {@link #initialLoad()} operation.
      */
     public String[] getManagedEntries() {
-        return entries.toArray(new String[entries.size()]);
+        return managedEntries.toArray(new String[managedEntries.size()]);
     }
 
     /**
      * Returns if the given entity name is part of the {@link #getManagedEntries()} list.
      */
     protected boolean isManagedEntry(String entityName) {
-        return entries.contains(entityName);
+        return managedEntries.contains(entityName);
     }
 
     /**
@@ -210,21 +210,21 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
                 throw new DataSourceException("Failed to create session factory from properties file [" + hibernateFile + "]");
             }
         }
-        if (entries == null) {
-            entries = new HashSet<String>();
-            // try and derive the entries
+        if (managedEntries == null) {
+            managedEntries = new HashSet<String>();
+            // try and derive the managedEntries
             Map allClassMetaData = sessionFactory.getAllClassMetadata();
             for (Iterator it = allClassMetaData.keySet().iterator(); it.hasNext();) {
                 String entityname = (String) it.next();
-                entries.add(entityname);
+                managedEntries.add(entityname);
             }
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Using Hibernate entries [" + entries + "]");
+            logger.debug("Using Hibernate managedEntries [" + managedEntries + "]");
         }
         if (initialLoadEntries == null) {
             Set<String> initialLoadEntries = new HashSet<String>();
-            // try and derive the entries
+            // try and derive the managedEntries
             Map allClassMetaData = sessionFactory.getAllClassMetadata();
             for (Iterator it = allClassMetaData.keySet().iterator(); it.hasNext();) {
                 String entityname = (String) it.next();
@@ -237,7 +237,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
                     if (superClass != null) {
                         if (logger.isDebugEnabled()) {
                             logger.debug("Entity [" + entityname + "] is inherited and has a super class ["
-                                    + superClass + "] filtering it out for intial load entries");
+                                    + superClass + "] filtering it out for intial load managedEntries");
                         }
                         continue;
                     }
@@ -247,7 +247,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
             this.initialLoadEntries = initialLoadEntries.toArray(new String[initialLoadEntries.size()]);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("Using Hibernate inital load entries [" + Arrays.toString(initialLoadEntries) + "]");
+            logger.debug("Using Hibernate inital load managedEntries [" + Arrays.toString(initialLoadEntries) + "]");
         }
     }
 
