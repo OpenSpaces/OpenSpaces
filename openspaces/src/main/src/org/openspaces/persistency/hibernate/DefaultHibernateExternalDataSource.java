@@ -28,6 +28,7 @@ import org.hibernate.Transaction;
 import org.openspaces.persistency.hibernate.iterator.DefaultChunkScrollableDataIterator;
 import org.openspaces.persistency.hibernate.iterator.DefaultListQueryDataIterator;
 import org.openspaces.persistency.hibernate.iterator.DefaultScrollableDataIterator;
+import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
 
 import java.util.List;
 
@@ -90,7 +91,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
      * given sql query.
      */
     public DataIterator iterator(SQLQuery sqlQuery) throws DataSourceException {
-        return new DefaultListQueryDataIterator(sqlQuery, getSessionFactory());
+        return new HibernateProxyRemoverIterator(new DefaultListQueryDataIterator(sqlQuery, getSessionFactory()));
     }
 
     /**

@@ -26,6 +26,7 @@ import org.hibernate.EntityMode;
 import org.hibernate.SessionFactory;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.persister.entity.AbstractEntityPersister;
+import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
 import org.openspaces.persistency.patterns.ManagedDataSourceEntriesProvider;
 import org.openspaces.persistency.support.ConcurrentMultiDataIterator;
 
@@ -266,7 +267,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      * with the provided {@link #setInitialLoadThreadPoolSize(int)} thread pool size.
      */
     protected DataIterator createInitialLoadIterator(DataIterator[] iterators) {
-        return new ConcurrentMultiDataIterator(iterators, initialLoadThreadPoolSize);
+        return new HibernateProxyRemoverIterator(new ConcurrentMultiDataIterator(iterators, initialLoadThreadPoolSize));
     }
 
 }

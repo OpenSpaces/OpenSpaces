@@ -31,6 +31,7 @@ import org.hibernate.Transaction;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.metadata.ClassMetadata;
+import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
 import org.openspaces.persistency.hibernate.iterator.StatelessChunkScrollableDataIterator;
 import org.openspaces.persistency.hibernate.iterator.StatelessListQueryDataIterator;
 import org.openspaces.persistency.hibernate.iterator.StatelessScrollableDataIterator;
@@ -137,7 +138,7 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
      * query.
      */
     public DataIterator iterator(SQLQuery sqlQuery) throws DataSourceException {
-        return new StatelessListQueryDataIterator(sqlQuery, getSessionFactory());
+        return new HibernateProxyRemoverIterator(new StatelessListQueryDataIterator(sqlQuery, getSessionFactory()));
     }
 
     /**
