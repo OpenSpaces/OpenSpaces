@@ -22,10 +22,7 @@ import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.DataSourceException;
 import com.gigaspaces.datasource.SQLDataProvider;
 import com.j_spaces.core.client.SQLQuery;
-import org.hibernate.CacheMode;
-import org.hibernate.FlushMode;
 import org.hibernate.NonUniqueObjectException;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.openspaces.persistency.hibernate.iterator.DefaultChunkScrollableDataIterator;
@@ -94,30 +91,6 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
      */
     public DataIterator iterator(SQLQuery sqlQuery) throws DataSourceException {
         return new DefaultListQueryDataIterator(sqlQuery, getSessionFactory());
-    }
-
-    public int count(SQLQuery sqlQuery) throws DataSourceException {
-        Session session = getSessionFactory().openSession();
-        session.setFlushMode(FlushMode.MANUAL);
-        Transaction tr = session.beginTransaction();
-        try {
-            Query hQuery = session.createQuery(sqlQuery.getSelectCountQuery());
-            Object[] preparedValues = sqlQuery.getParameters();
-            if (preparedValues != null) {
-                for (int i = 0; i < preparedValues.length; i++) {
-                    hQuery.setParameter(i, preparedValues[i]);
-                }
-            }
-            hQuery.setCacheMode(CacheMode.IGNORE);
-            hQuery.setCacheable(false);
-            hQuery.setReadOnly(true);
-            return ((Number) hQuery.uniqueResult()).intValue();
-        } catch (Exception e) {
-            rollbackTx(tr);
-            throw new DataSourceException("Failed to execute count operation on sql query [" + sqlQuery.getSelectCountQuery() + "]", e);
-        } finally {
-            closeSession(session);
-        }
     }
 
     /**

@@ -26,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.EntityMode;
-import org.hibernate.Query;
 import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Projections;
@@ -139,27 +138,6 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
      */
     public DataIterator iterator(SQLQuery sqlQuery) throws DataSourceException {
         return new StatelessListQueryDataIterator(sqlQuery, getSessionFactory());
-    }
-
-    public int count(SQLQuery sqlQuery) throws DataSourceException {
-        StatelessSession session = getSessionFactory().openStatelessSession();
-        Transaction tr = session.beginTransaction();
-        try {
-            Query hQuery = session.createQuery(sqlQuery.getSelectCountQuery());
-            Object[] preparedValues = sqlQuery.getParameters();
-            if (preparedValues != null) {
-                for (int i = 0; i < preparedValues.length; i++) {
-                    hQuery.setParameter(i, preparedValues[i]);
-                }
-            }
-            hQuery.setReadOnly(true);
-            return ((Number) hQuery.uniqueResult()).intValue();
-        } catch (Exception e) {
-            rollbackTx(tr);
-            throw new DataSourceException("Failed to execute count operation on sql query [" + sqlQuery.getSelectCountQuery() + "]", e);
-        } finally {
-            closeSession(session);
-        }
     }
 
     /**

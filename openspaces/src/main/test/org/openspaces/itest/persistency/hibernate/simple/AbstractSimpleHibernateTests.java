@@ -117,13 +117,11 @@ public abstract class AbstractSimpleHibernateTests extends TestCase {
 
         SQLQuery<Simple> sql = new SQLQuery<Simple>(Simple.class, "id = ?");
         sql.setParameter(1, 1);
-        assertEquals(1, sqlDataProvider.count(sql));
         DataIterator it = sqlDataProvider.iterator(sql);
         assertTrue(it.hasNext());
         assertEquals(1, ((Simple) it.next()).getId().intValue());
 
         sql.setParameter(1, 0);
-        assertEquals(0, sqlDataProvider.count(sql));
         it = sqlDataProvider.iterator(sql);
         assertFalse(it.hasNext());
     }

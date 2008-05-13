@@ -4,8 +4,6 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
-import org.openspaces.maven.support.OutputVersion;
-
 import sun.misc.URLClassPath;
 
 import java.io.File;
@@ -27,7 +25,7 @@ import java.util.StringTokenizer;
  * @author shaiw
  */
 public class Utils {
-    
+
     static final String GS_TYPE = "gsType";
 
     static final String GS_TYPE_PU = "PU";
@@ -74,9 +72,10 @@ public class Utils {
         ucpField.set(mavenClassLoader, uRLClassPath2);
     }
 
-    
+
     /**
      * Checks if a project is a PU project.
+     *
      * @param project the project
      * @return true if the project is a PU project, false otherwise.
      */
@@ -87,10 +86,11 @@ public class Utils {
         }
         return gsType.equalsIgnoreCase(Utils.GS_TYPE_PU);
     }
-    
-    
+
+
     /**
      * Gets a list of projects and returns only those that are PU.
+     *
      * @param projects a list of projects.
      * @return a list of projects and returns only those that are PU.
      */
@@ -99,7 +99,7 @@ public class Utils {
         Iterator i = projects.iterator();
         while (i.hasNext()) {
             MavenProject proj = (MavenProject) i.next();
-            if (Utils.isPUType(proj) && 
+            if (Utils.isPUType(proj) &&
                     (moduleName == null || moduleName.equals(proj.getName()))) {
                 puProjects.add(proj);
             }
@@ -173,7 +173,7 @@ public class Utils {
      *
      * @param e the original exception
      * @return the new exception.
-     * @throws MojoExecutionException 
+     * @throws MojoExecutionException
      */
     static void throwMissingLicenseException(Throwable e, ArtifactRepository localRepository) throws MojoExecutionException {
         System.out.println("rep: " + localRepository.getBasedir());
@@ -183,11 +183,10 @@ public class Utils {
             if (cause instanceof SecurityException) {
                 if (cause.getMessage() != null && cause.getMessage().indexOf("gslicense.xml") > 0) {
                     String msg =
-                 "\nThe GigaSpaces license file - gslicense.xml - was not found in Maven repository.\n" +
-                 "This file should be placed in the directory where gs-boot.jar resides.\n" +
-                 "Please try to reinstall OpenSpaces Plugin for Maven by running the installmavenrep' script again.\n" +
-                 "Alternatively, copy gslicense.xml manually to " + localRepository.getBasedir() +"/com/gigaspaces/core/gs-boot/" +
-                 OutputVersion.computeVersion() + ".";
+                            "\nThe GigaSpaces license file - gslicense.xml - was not found in Maven repository.\n" +
+                                    "This file should be placed in the directory where gs-boot.jar resides.\n" +
+                                    "Please try to reinstall OpenSpaces Plugin for Maven by running the installmavenrep' script again." +
+                                    "Alternatively, copy gslicense.xml manually to " + localRepository.getBasedir() + "/com/gigaspaces/core/gs-boot/[version].";
                     throw new MojoExecutionException(msg);
                 }
             }

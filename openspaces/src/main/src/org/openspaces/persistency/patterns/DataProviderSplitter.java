@@ -29,8 +29,4 @@ public class DataProviderSplitter extends BulkDataPersisterSplitter implements D
     public DataIterator iterator(Object o) throws DataSourceException {
         return ((DataProvider) getDataSource(o.getClass().getName())).iterator(o);
     }
-
-    public int count(Object o) throws DataSourceException {
-        return ((DataProvider) getDataSource(o.getClass().getName())).count(o);
-    }
 }
