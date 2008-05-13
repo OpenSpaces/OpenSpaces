@@ -6,6 +6,10 @@ import java.io.*;
  * @author kimchy
  */
 public class POMGenerator {
+    
+    public static final String GS_JINI_GROUP =  "com.gigaspaces.jini";
+    public static final String GS_CORE_GROUP =  "com.gigaspaces.core";
+    public static final String GS_OS_GROUP   =  "org.openspaces";
 
     public static void main(String[] args) throws Exception {
         String templDir = System.getProperty("java.io.tmpdir");
@@ -19,40 +23,43 @@ public class POMGenerator {
         File dir = new File(templDir);
         dir.mkdirs();
 
-        writeSimplePom(dir, version, "jini-start");
-        writeSimplePom(dir, version, "jini-jsk-lib");
-        writeSimplePom(dir, version, "jini-jsk-platform");
-        writeSimplePom(dir, version, "jini-jsk-resources");
-        writeSimplePom(dir, version, "jini-reggie");
-        writeSimplePom(dir, version, "jini-mahalo");
-        writeSimplePom(dir, version, "gs-boot");
-        writeSimplePom(dir, version, "gs-service");
-        writeSimplePom(dir, version, "gs-lib");
+        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "start");
+        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "jsk-lib");
+        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "jsk-platform");
+        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "jsk-resources");
+        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "reggie");
+        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "mahalo");
+        
+        writeSimplePom(dir, version, POMGenerator.GS_CORE_GROUP, "gs-boot");
+        writeSimplePom(dir, version, POMGenerator.GS_CORE_GROUP, "gs-service");
+        writeSimplePom(dir, version, POMGenerator.GS_CORE_GROUP, "gs-lib");
 
         PrintWriter writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "JSpaces-pom.xml")))));
-        printHeader(writer, version, "JSpaces");
-        printDependency(writer, "jini-start");
-        printDependency(writer, "jini-jsk-lib");
-        printDependency(writer, "jini-jsk-platform");
-        printDependency(writer, "jini-jsk-resources");
-        printDependency(writer, "jini-reggie");
-        printDependency(writer, "gs-boot");
-        printDependency(writer, "gs-service");
-        printDependency(writer, "gs-lib");
+        printHeader(writer, version, POMGenerator.GS_CORE_GROUP, "JSpaces");
+        printDependency(writer, POMGenerator.GS_JINI_GROUP, "start");
+        printDependency(writer, POMGenerator.GS_JINI_GROUP, "jsk-lib");
+        printDependency(writer, POMGenerator.GS_JINI_GROUP, "jsk-platform");
+        printDependency(writer, POMGenerator.GS_JINI_GROUP, "jsk-resources");
+        printDependency(writer, POMGenerator.GS_JINI_GROUP, "reggie");
+        printDependency(writer, POMGenerator.GS_JINI_GROUP, "mahalo");
+        
+        printDependency(writer, POMGenerator.GS_CORE_GROUP, "gs-boot");
+        printDependency(writer, POMGenerator.GS_CORE_GROUP, "gs-service");
+        printDependency(writer, POMGenerator.GS_CORE_GROUP, "gs-lib");
         printFooter(writer);
         writer.close();
 
         writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "openspaces-pom.xml")))));
-        printHeader(writer, version, "openspaces");
-        printDependency(writer, "JSpaces");
+        printHeader(writer, version, POMGenerator.GS_OS_GROUP, "openspaces");
+        printDependency(writer, POMGenerator.GS_CORE_GROUP, "JSpaces");
         printDependency(writer, "org.springframework", "spring", "2.5.3");
         printDependency(writer, "commons-logging", "commons-logging", "1.1.1");
         printFooter(writer);
         writer.close();
 
         writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "mule-os-pom.xml")))));
-        printHeader(writer, version, "mule-os");
-        printDependency(writer, "openspaces");
+        printHeader(writer, version, POMGenerator.GS_OS_GROUP, "mule-os");
+        printDependency(writer, POMGenerator.GS_OS_GROUP, "openspaces");
         printFooter(writer);
         writer.close();
 
@@ -115,20 +122,20 @@ public class POMGenerator {
     }
 
 
-    private static void writeSimplePom(File dir, String version, String artifactId) throws Exception {
+    private static void writeSimplePom(File dir, String version, String groupId, String artifactId) throws Exception {
         PrintWriter writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, artifactId + "-pom.xml")))));
-        printHeader(writer, version, artifactId);
+        printHeader(writer, version, groupId, artifactId);
         printFooter(writer);
         writer.close();
     }
 
-    public static void printHeader(PrintWriter writer, String version, String artifactId) throws Exception {
+    public static void printHeader(PrintWriter writer, String version, String groupId, String artifactId) throws Exception {
         writer.println("<project xmlns=\"http://maven.apache.org/POM/4.0.0\"");
         writer.println("  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
         writer.println("  xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0");
         writer.println("                      http://maven.apache.org/xsd/maven-4.0.0.xsd\">");
         writer.println("  <modelVersion>4.0.0</modelVersion>");
-        writer.println("  <groupId>gigaspaces</groupId>");
+        writer.println("  <groupId>" + groupId + "</groupId>");
         writer.println("  <artifactId>" + artifactId + "</artifactId>");
         writer.println("  <packaging>jar</packaging>");
         writer.println("  <version>" + version + "</version>");
@@ -136,14 +143,14 @@ public class POMGenerator {
         writer.println("  <dependencies>");
     }
 
-    public static void printDependency(PrintWriter writer, String dependencyId) {
-        printDependency(writer, "gigaspaces", dependencyId, OutputVersion.computeVersion());
+    public static void printDependency(PrintWriter writer, String groupId, String artifactId) {
+        printDependency(writer, groupId, artifactId, OutputVersion.computeVersion());
     }
 
-    public static void printDependency(PrintWriter writer, String groupId, String dependencyId, String version) {
+    public static void printDependency(PrintWriter writer, String groupId, String artifactId, String version) {
         writer.println("    <dependency>");
         writer.println("      <groupId>" + groupId + "</groupId>");
-        writer.println("      <artifactId>" + dependencyId + "</artifactId>");
+        writer.println("      <artifactId>" + artifactId + "</artifactId>");
         writer.println("      <version>" + version + "</version>");
         writer.println("    </dependency>");
     }
