@@ -17,16 +17,30 @@
 package org.openspaces.persistency.hibernate.iterator;
 
 import com.gigaspaces.datasource.DataIterator;
+import org.openspaces.persistency.support.MultiDataIterator;
 
 /**
  * @author kimchy
  */
-public class HibernateProxyRemoverIterator implements DataIterator {
+public class HibernateProxyRemoverIterator implements MultiDataIterator {
 
     private DataIterator iterator;
 
     public HibernateProxyRemoverIterator(DataIterator iterator) {
         this.iterator = iterator;
+    }
+
+    public DataIterator[] iterators() {
+        if (iterator instanceof MultiDataIterator) {
+            DataIterator[] its = ((MultiDataIterator) iterator).iterators();
+            DataIterator[] retVal = new DataIterator[its.length];
+            for (int i = 0; i < its.length; i++) {
+                retVal[i] = new HibernateProxyRemoverIterator(its[i]);
+            }
+            return retVal;
+        } else {
+            return new DataIterator[]{this};
+        }
     }
 
     public void close() {
