@@ -17,12 +17,13 @@
 package org.openspaces.persistency.hibernate.iterator;
 
 import com.gigaspaces.datasource.DataIterator;
+import com.j_spaces.core.client.SQLQuery;
 import org.hibernate.ScrollableResults;
 import org.hibernate.SessionFactory;
 
 /**
- * A base class for scrollable result set ({@link ScrollableResults} created based on a given
- * entity name. Also allows for a "from" and "size" to be provided, in this case, it will iterate
+ * A base class for scrollable result set ({@link ScrollableResults} created based on either an
+ * entity name or a <code>SQLQuery</code>. Also allows for a "from" and "size" to be provided, in this case, it will iterate
  * from the given index till "size" results.
  *
  * @author kimchy
@@ -30,6 +31,8 @@ import org.hibernate.SessionFactory;
 public abstract class AbstractScrollableDataIterator implements DataIterator {
 
     protected final String entityName;
+
+    protected final SQLQuery sqlQuery;
 
     protected final SessionFactory sessionFactory;
 
@@ -53,6 +56,21 @@ public abstract class AbstractScrollableDataIterator implements DataIterator {
 
     public AbstractScrollableDataIterator(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
         this.entityName = entityName;
+        this.sqlQuery = null;
+        this.sessionFactory = sessionFactory;
+        this.fetchSize = fetchSize;
+        this.perfromOrderById = performOrderById;
+        this.from = from;
+        this.size = size;
+    }
+
+    public AbstractScrollableDataIterator(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById) {
+        this(sqlQuery, sessionFactory, fetchSize, performOrderById, -1, -1);
+    }
+
+    public AbstractScrollableDataIterator(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
+        this.sqlQuery = sqlQuery;
+        this.entityName = null;
         this.sessionFactory = sessionFactory;
         this.fetchSize = fetchSize;
         this.perfromOrderById = performOrderById;

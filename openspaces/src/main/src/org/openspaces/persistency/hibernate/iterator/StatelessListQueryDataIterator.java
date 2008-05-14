@@ -78,15 +78,7 @@ public class StatelessListQueryDataIterator implements DataIterator {
     protected Iterator createIterator() {
         session = sessionFactory.openStatelessSession();
         transaction = session.beginTransaction();
-        String select = sqlQuery.getFromQuery();
-        Query query = session.createQuery(select);
-        Object[] preparedValues = sqlQuery.getParameters();
-        if (preparedValues != null) {
-            for (int i = 0; i < preparedValues.length; i++) {
-                query.setParameter(i, preparedValues[i]);
-            }
-        }
-        query.setReadOnly(true);
+        Query query = HibernateIteratorUtils.createQueryFromSQLQuery(sqlQuery, session);
         return createIterator(query);
     }
 

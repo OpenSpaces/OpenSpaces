@@ -16,7 +16,9 @@
 
 package org.openspaces.persistency.hibernate.iterator;
 
+import com.j_spaces.core.client.SQLQuery;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.SessionFactory;
@@ -44,6 +46,14 @@ public class StatelessScrollableDataIterator extends AbstractScrollableDataItera
         super(entityName, sessionFactory, fetchSize, performOrderById, from, size);
     }
 
+    public StatelessScrollableDataIterator(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById) {
+        super(sqlQuery, sessionFactory, fetchSize, performOrderById);
+    }
+
+    public StatelessScrollableDataIterator(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
+        super(sqlQuery, sessionFactory, fetchSize, performOrderById, from, size);
+    }
+
     protected void doClose() {
         try {
             transaction.commit();
@@ -59,19 +69,31 @@ public class StatelessScrollableDataIterator extends AbstractScrollableDataItera
     protected ScrollableResults createCursor() {
         session = sessionFactory.openStatelessSession();
         transaction = session.beginTransaction();
-        Criteria criteria = session.createCriteria(entityName);
-        criteria.setFetchSize(fetchSize);
-        if (perfromOrderById) {
-            ClassMetadata metadata = sessionFactory.getClassMetadata(entityName);
-            String idPropName = metadata.getIdentifierPropertyName();
-            if (idPropName != null) {
-                criteria.addOrder(Order.asc(idPropName));
+        if (entityName != null) {
+            Criteria criteria = session.createCriteria(entityName);
+            criteria.setFetchSize(fetchSize);
+            if (perfromOrderById) {
+                ClassMetadata metadata = sessionFactory.getClassMetadata(entityName);
+                String idPropName = metadata.getIdentifierPropertyName();
+                if (idPropName != null) {
+                    criteria.addOrder(Order.asc(idPropName));
+                }
             }
+            if (from > 0) {
+                criteria.setFirstResult(from);
+                criteria.setMaxResults(size);
+            }
+            return criteria.scroll(ScrollMode.FORWARD_ONLY);
+        } else if (sqlQuery != null) {
+            Query query = HibernateIteratorUtils.createQueryFromSQLQuery(sqlQuery, session);
+            query.setFetchSize(fetchSize);
+            if (from > 0) {
+                query.setFirstResult(from);
+                query.setMaxResults(size);
+            }
+            return query.scroll(ScrollMode.FORWARD_ONLY);
+        } else {
+            throw new IllegalStateException("Either SQLQuery or entity must be provided");
         }
-        if (from > 0) {
-            criteria.setFirstResult(from);
-            criteria.setMaxResults(size);
-        }
-        return criteria.scroll(ScrollMode.FORWARD_ONLY);
     }
 }

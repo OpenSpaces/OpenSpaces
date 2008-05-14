@@ -18,8 +18,6 @@ package org.openspaces.persistency.hibernate.iterator;
 
 import com.gigaspaces.datasource.DataIterator;
 import com.j_spaces.core.client.SQLQuery;
-import org.hibernate.CacheMode;
-import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -79,19 +77,7 @@ public class DefaultListQueryDataIterator implements DataIterator {
 
     protected Iterator createIterator() {
         session = sessionFactory.openSession();
-        session.setFlushMode(FlushMode.MANUAL);
-        transaction = session.beginTransaction();
-        String select = sqlQuery.getFromQuery();
-        Query query = session.createQuery(select);
-        Object[] preparedValues = sqlQuery.getParameters();
-        if (preparedValues != null) {
-            for (int i = 0; i < preparedValues.length; i++) {
-                query.setParameter(i, preparedValues[i]);
-            }
-        }
-        query.setCacheMode(CacheMode.IGNORE);
-        query.setCacheable(false);
-        query.setReadOnly(true);
+        Query query = HibernateIteratorUtils.createQueryFromSQLQuery(sqlQuery, session);
         return createIterator(query);
     }
 

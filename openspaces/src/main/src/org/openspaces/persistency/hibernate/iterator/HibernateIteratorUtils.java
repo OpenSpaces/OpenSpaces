@@ -16,6 +16,11 @@
 
 package org.openspaces.persistency.hibernate.iterator;
 
+import com.j_spaces.core.client.SQLQuery;
+import org.hibernate.CacheMode;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.StatelessSession;
 import org.hibernate.proxy.HibernateProxy;
 
 /**
@@ -31,5 +36,33 @@ public class HibernateIteratorUtils {
             entity = ((HibernateProxy) entity).getHibernateLazyInitializer().getImplementation();
         }
         return entity;
+    }
+
+    public static Query createQueryFromSQLQuery(SQLQuery sqlQuery, Session session) {
+        String select = sqlQuery.getFromQuery();
+        Query query = session.createQuery(select);
+        Object[] preparedValues = sqlQuery.getParameters();
+        if (preparedValues != null) {
+            for (int i = 0; i < preparedValues.length; i++) {
+                query.setParameter(i, preparedValues[i]);
+            }
+        }
+        query.setCacheMode(CacheMode.IGNORE);
+        query.setCacheable(false);
+        query.setReadOnly(true);
+        return query;
+    }
+
+    public static Query createQueryFromSQLQuery(SQLQuery sqlQuery, StatelessSession session) {
+        String select = sqlQuery.getFromQuery();
+        Query query = session.createQuery(select);
+        Object[] preparedValues = sqlQuery.getParameters();
+        if (preparedValues != null) {
+            for (int i = 0; i < preparedValues.length; i++) {
+                query.setParameter(i, preparedValues[i]);
+            }
+        }
+        query.setReadOnly(true);
+        return query;
     }
 }
