@@ -1,6 +1,7 @@
 package org.openspaces.persistency.hibernate.iterator;
 
 import com.gigaspaces.datasource.DataIterator;
+import com.j_spaces.core.client.SQLQuery;
 import org.hibernate.SessionFactory;
 
 /**
@@ -15,7 +16,19 @@ public class DefaultChunkScrollableDataIterator extends AbstractChunkScrollableD
         super(entityName, sessionFactory, fetchSize, performOrderById, batchSize);
     }
 
-    protected DataIterator createIteartor(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
+    protected DataIterator createScrollableIteartor(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
         return new DefaultScrollableDataIterator(entityName, sessionFactory, fetchSize, performOrderById, from, size);
+    }
+
+    protected DataIterator createScrollableIteartor(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
+        return new DefaultScrollableDataIterator(sqlQuery, sessionFactory, fetchSize, performOrderById, from, size);
+    }
+
+    protected DataIterator createListIteartor(String entityName, SessionFactory sessionFactory) {
+        return new DefaultListQueryDataIterator(entityName, sessionFactory);
+    }
+
+    protected DataIterator createListIteartor(SQLQuery sqlQuery, SessionFactory sessionFactory) {
+        return new DefaultListQueryDataIterator(sqlQuery, sessionFactory);
     }
 }

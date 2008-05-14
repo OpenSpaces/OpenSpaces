@@ -18,7 +18,6 @@ package org.openspaces.persistency.hibernate.iterator;
 
 import com.gigaspaces.datasource.DataIterator;
 import com.j_spaces.core.client.SQLQuery;
-import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
@@ -33,6 +32,8 @@ import java.util.Iterator;
  */
 public class StatelessListQueryDataIterator implements DataIterator {
 
+    protected final String entityName;
+
     protected final SQLQuery sqlQuery;
 
     protected final SessionFactory sessionFactory;
@@ -45,6 +46,13 @@ public class StatelessListQueryDataIterator implements DataIterator {
 
     public StatelessListQueryDataIterator(SQLQuery sqlQuery, SessionFactory sessionFactory) {
         this.sqlQuery = sqlQuery;
+        this.entityName = null;
+        this.sessionFactory = sessionFactory;
+    }
+
+    public StatelessListQueryDataIterator(String entityName, SessionFactory sessionFactory) {
+        this.sqlQuery = null;
+        this.entityName = entityName;
         this.sessionFactory = sessionFactory;
     }
 
@@ -77,12 +85,12 @@ public class StatelessListQueryDataIterator implements DataIterator {
 
     protected Iterator createIterator() {
         session = sessionFactory.openStatelessSession();
-        transaction = session.beginTransaction();
-        Query query = HibernateIteratorUtils.createQueryFromSQLQuery(sqlQuery, session);
-        return createIterator(query);
-    }
-
-    protected Iterator createIterator(Query query) {
-        return query.list().iterator();
+        if (entityName != null) {
+            return session.createCriteria(entityName).list().iterator();
+        } else if (sqlQuery != null) {
+            return HibernateIteratorUtils.createQueryFromSQLQuery(sqlQuery, session).list().iterator();
+        } else {
+            throw new IllegalStateException("Either SQLQuery or entity must be provided");
+        }
     }
 }

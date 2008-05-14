@@ -35,6 +35,8 @@ public class DefaultListQueryDataIterator implements DataIterator {
 
     protected final SQLQuery sqlQuery;
 
+    protected final String entityName;
+
     protected final SessionFactory sessionFactory;
 
     protected Transaction transaction;
@@ -45,6 +47,13 @@ public class DefaultListQueryDataIterator implements DataIterator {
 
     public DefaultListQueryDataIterator(SQLQuery sqlQuery, SessionFactory sessionFactory) {
         this.sqlQuery = sqlQuery;
+        this.entityName = null;
+        this.sessionFactory = sessionFactory;
+    }
+
+    public DefaultListQueryDataIterator(String entityName, SessionFactory sessionFactory) {
+        this.entityName = entityName;
+        this.sqlQuery = null;
         this.sessionFactory = sessionFactory;
     }
 
@@ -77,8 +86,13 @@ public class DefaultListQueryDataIterator implements DataIterator {
 
     protected Iterator createIterator() {
         session = sessionFactory.openSession();
-        Query query = HibernateIteratorUtils.createQueryFromSQLQuery(sqlQuery, session);
-        return createIterator(query);
+        if (entityName != null) {
+            return session.createCriteria(entityName).list().iterator();
+        } else if (sqlQuery != null) {
+            return HibernateIteratorUtils.createQueryFromSQLQuery(sqlQuery, session).list().iterator();
+        } else {
+            throw new IllegalStateException("Either SQLQuery or entity must be provided");
+        }
     }
 
     protected Iterator createIterator(Query query) {

@@ -17,6 +17,7 @@
 package org.openspaces.persistency.hibernate.iterator;
 
 import com.gigaspaces.datasource.DataIterator;
+import com.j_spaces.core.client.SQLQuery;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -24,6 +25,7 @@ import org.hibernate.Transaction;
 import org.hibernate.criterion.Projections;
 import org.openspaces.persistency.support.ConcurrentMultiDataIterator;
 import org.openspaces.persistency.support.MultiDataIterator;
+import org.openspaces.persistency.support.SerialMultiDataIterator;
 
 import java.util.ArrayList;
 
@@ -32,11 +34,15 @@ import java.util.ArrayList;
  * entity by chunking it into batch size chuncks, each iterator will iterate only on the given
  * chunk.
  *
+ * <p>If the count is lower than the given fetch size, will try and use a more optimal list iterator.
+ *
  * @author kimchy
  */
 public abstract class AbstractChunkScrollableDataIterator implements MultiDataIterator {
 
     protected final String entityName;
+
+    protected final SQLQuery sqlQuery;
 
     protected final SessionFactory sessionFactory;
 
@@ -52,6 +58,16 @@ public abstract class AbstractChunkScrollableDataIterator implements MultiDataIt
 
     public AbstractChunkScrollableDataIterator(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int batchSize) {
         this.entityName = entityName;
+        this.sqlQuery = null;
+        this.sessionFactory = sessionFactory;
+        this.fetchSize = fetchSize;
+        this.perfromOrderById = performOrderById;
+        this.batchSize = batchSize;
+    }
+
+    public AbstractChunkScrollableDataIterator(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int batchSize) {
+        this.sqlQuery = sqlQuery;
+        this.entityName = null;
         this.sessionFactory = sessionFactory;
         this.fetchSize = fetchSize;
         this.perfromOrderById = performOrderById;
@@ -66,7 +82,11 @@ public abstract class AbstractChunkScrollableDataIterator implements MultiDataIt
     public boolean hasNext() {
         initIterators();
         if (multiDataIterator == null) {
-            multiDataIterator = new ConcurrentMultiDataIterator(iterators, 10);
+            if (iterators.length == 1) {
+                multiDataIterator = new SerialMultiDataIterator(iterators);
+            } else {
+                multiDataIterator = new ConcurrentMultiDataIterator(iterators, 10);
+            }
         }
         return multiDataIterator.hasNext();
     }
@@ -98,10 +118,22 @@ public abstract class AbstractChunkScrollableDataIterator implements MultiDataIt
                 Criteria criteria = session.createCriteria(entityName);
                 criteria.setProjection(Projections.rowCount());
                 int count = ((Number) criteria.uniqueResult()).intValue();
-                int from = 0;
-                while (from < count) {
-                    itList.add(createIteartor(entityName, sessionFactory, fetchSize, perfromOrderById, from, batchSize));
-                    from += batchSize;
+                if (count < fetchSize) {
+                    if (entityName != null) {
+                        itList.add(createListIteartor(entityName, sessionFactory));
+                    } else if (sqlQuery != null) {
+                        itList.add(createListIteartor(sqlQuery, sessionFactory));
+                    }
+                } else {
+                    int from = 0;
+                    while (from < count) {
+                        if (entityName != null) {
+                            itList.add(createScrollableIteartor(entityName, sessionFactory, fetchSize, perfromOrderById, from, batchSize));
+                        } else if (sqlQuery != null) {
+                            itList.add(createScrollableIteartor(sqlQuery, sessionFactory, fetchSize, perfromOrderById, from, batchSize));
+                        }
+                        from += batchSize;
+                    }
                 }
                 iterators = itList.toArray(new DataIterator[itList.size()]);
             } finally {
@@ -111,5 +143,11 @@ public abstract class AbstractChunkScrollableDataIterator implements MultiDataIt
         }
     }
 
-    protected abstract DataIterator createIteartor(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size);
+    protected abstract DataIterator createScrollableIteartor(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size);
+
+    protected abstract DataIterator createScrollableIteartor(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size);
+
+    protected abstract DataIterator createListIteartor(String entityName, SessionFactory sessionFactory);
+
+    protected abstract DataIterator createListIteartor(SQLQuery sqlQuery, SessionFactory sessionFactory);
 }
