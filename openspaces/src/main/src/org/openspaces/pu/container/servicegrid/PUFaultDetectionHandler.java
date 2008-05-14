@@ -103,7 +103,7 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
          */
         public void drop() {
             if (logger.isLoggable(Level.FINE)) {
-                logger.fine("Dropping monitor for service: [" + proxy +"]" );
+                logger.fine("Dropping monitor for service: [" + getServiceID() +"]" );
             }
         }
 
@@ -114,26 +114,26 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
         public boolean verify() {
             try {
                 if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("Requesting isAlive() on service: [" + proxy +"]" );
+                    logger.finest("Requesting isAlive() on service: [" + getServiceID() +"]" );
                 }
                 
                 final boolean isAlive = ((PUServiceBean) proxy).isAlive();
 
                 if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("isAlive() succesfully returned: ["+isAlive+"] for service: [" + proxy +"]" );
+                    logger.finest("isAlive() succesfully returned: ["+isAlive+"] for service: [" + getServiceID() +"]" );
                 }
                 
                 return isAlive;
             } catch (RemoteException e) {
-                if(logger.isLoggable(Level.FINE)) {
-                    logger.log( Level.FINE, "RemoteException reaching service: ["
-                            + proxy + "]  - service cannot be reached", e);
+                if(logger.isLoggable(Level.FINER)) {
+                    logger.log( Level.FINER, "RemoteException reaching service: ["
+                            + getServiceID() + "]  - service cannot be reached", e);
                 }
                 return false;
             } catch (Exception e) {
                 if(logger.isLoggable(Level.WARNING)) {
                     logger.log( Level.WARNING, "Exception reaching service: ["
-                            + proxy + "] ", e);
+                            +  getServiceID() + "] ", e);
                 }
                 return false;
             }
