@@ -60,10 +60,13 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
 
     private boolean performOrderById = true;
 
+    private boolean createdSessionFactory = true;
+
     /**
      * Injects the Hibernate SessionFactory to be used with this external data source.
      */
     public void setSessionFactory(SessionFactory sessionFactory) {
+        createdSessionFactory = false;
         this.sessionFactory = sessionFactory;
     }
 
@@ -147,6 +150,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      * try and build a sensible list basde on Hiberante meta data.
      *
      * <p>Note, sometimes an explicit list should be provided. For example, if we have a class A and class B, and
+     * <p>Note, sometimes an explicit list should be provided. For example, if we have a class A and class B, and
      * A has a relationship to B which is not component. If in the space, we only wish to have A, and have B just
      * as a field in A (and not as an Entry), then we need to explciitly set the list just to A. By default, if
      * we won't set it, it will result in two entries existing in the Space, A and B, with A having a field of B
@@ -201,6 +205,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
 
     public void init(Properties properties) throws DataSourceException {
         if (sessionFactory == null) {
+            createdSessionFactory = true;
             String hibernateFile = properties.getProperty(HIBERNATE_CFG_PROPERTY);
             if (hibernateFile == null) {
                 logger.error("No session factory injected, and [" + HIBERNATE_CFG_PROPERTY + "] is not provided in the properties file, can't create session factory");
@@ -253,11 +258,13 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
     }
 
     public void shutdown() throws DataSourceException {
-        if (sessionFactory != null && !sessionFactory.isClosed()) {
-            try {
-                sessionFactory.close();
-            } finally {
-                sessionFactory = null;
+        if (createdSessionFactory) {
+            if (sessionFactory != null && !sessionFactory.isClosed()) {
+                try {
+                    sessionFactory.close();
+                } finally {
+                    sessionFactory = null;
+                }
             }
         }
     }
