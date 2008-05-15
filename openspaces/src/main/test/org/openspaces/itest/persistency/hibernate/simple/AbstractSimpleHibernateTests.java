@@ -39,9 +39,15 @@ public abstract class AbstractSimpleHibernateTests extends TestCase {
                 .setProperty(Environment.HBM2DDL_AUTO, "create");
         sessionFactory = conf.buildSessionFactory();
         hibernateTemplate = new HibernateTemplate(sessionFactory);
+        deleteContent();
     }
 
     protected void tearDown() throws Exception {
+        deleteContent();
+        sqlDataProvider.shutdown();
+    }
+
+    private void deleteContent() {
         Session session = sessionFactory.openSession();
         Transaction tr = session.beginTransaction();
         Query query = session.createQuery("delete from Simple");
@@ -50,7 +56,6 @@ public abstract class AbstractSimpleHibernateTests extends TestCase {
         query.executeUpdate();
         tr.commit();
         session.close();
-        sqlDataProvider.shutdown();
     }
 
     public void testSimpleExecuteBulk() throws Exception {
