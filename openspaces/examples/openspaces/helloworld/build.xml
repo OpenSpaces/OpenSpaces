@@ -48,7 +48,7 @@
     <target name="build">
         <mkdir dir="${pulocation}"/>
 
-        <javac destdir="${pulocation}" source="1.5" target="1.5" debug="on"
+        <javac destdir="${pulocation}" source="1.4" target="1.4" debug="on"
                deprecation="false" optimize="false" failonerror="true">
             <src path="src"/>
             <classpath refid="all-libs"/>
