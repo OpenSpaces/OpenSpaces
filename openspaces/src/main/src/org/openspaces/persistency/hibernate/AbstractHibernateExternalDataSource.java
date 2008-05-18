@@ -150,7 +150,6 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      * try and build a sensible list basde on Hiberante meta data.
      *
      * <p>Note, sometimes an explicit list should be provided. For example, if we have a class A and class B, and
-     * <p>Note, sometimes an explicit list should be provided. For example, if we have a class A and class B, and
      * A has a relationship to B which is not component. If in the space, we only wish to have A, and have B just
      * as a field in A (and not as an Entry), then we need to explciitly set the list just to A. By default, if
      * we won't set it, it will result in two entries existing in the Space, A and B, with A having a field of B

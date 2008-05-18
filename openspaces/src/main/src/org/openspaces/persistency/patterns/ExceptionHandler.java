@@ -16,6 +16,8 @@
 
 package org.openspaces.persistency.patterns;
 
+import com.gigaspaces.datasource.DataSourceException;
+
 /**
  * A generic handler for exception handling.
  *
@@ -26,5 +28,5 @@ public interface ExceptionHandler {
     /**
      * Logic to handle the exceptions.
      */
-    void onException(Exception e, Object event);
+    void onException(Exception e, Object event) throws DataSourceException;
 }
