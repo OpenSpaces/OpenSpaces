@@ -4,8 +4,6 @@ import com.gigaspaces.annotation.pojo.SpaceClass;
 import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.annotation.pojo.SpaceRouting;
 
-import java.io.Serializable;
-
 /**
  * A simple object used to work with the Space. Important properties include the id
  * of the object, a type (used to perform routing when working with partitioned space),

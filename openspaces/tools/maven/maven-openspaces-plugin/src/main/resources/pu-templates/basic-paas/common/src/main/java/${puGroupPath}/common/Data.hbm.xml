@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="${puGroupId}.common.Data" table="DATA">
+        <id name="id" type="string" />
+        <property name="type" type="long" />
+        <property name="rawData" type="string" />
+        <property name="data" type="string" />
+        <property name="processed" type="boolean" />
+    </class>
+</hibernate-mapping>
