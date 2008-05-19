@@ -115,7 +115,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
                 return;
             }
             
-            Enumeration templateUrl = Thread.currentThread().getContextClassLoader().getResources(DIR_TEMPLATES + "/" + template);
+            Enumeration templateUrl = Thread.currentThread().getContextClassLoader().getResources(DIR_TEMPLATES + "/" + template + "/");
             if (templateUrl.hasMoreElements()) {
                 // template found
                 URL url = (URL) templateUrl.nextElement();
@@ -172,8 +172,8 @@ public class CreatePUProjectMojo extends AbstractMojo {
      */
     private void extract(String jarFileName) throws Exception {
         packageDirs = packageName.replaceAll("\\.", "/");
-        String puTemplate = DIR_TEMPLATES + "/" + template;
-        int length = puTemplate.length();
+        String puTemplate = DIR_TEMPLATES + "/" + template + "/";
+        int length = puTemplate.length() - 1;
         FileInputStream fis = new FileInputStream(jarFileName);
         BufferedInputStream bis = new BufferedInputStream(fis);
         JarInputStream jis = new JarInputStream(bis);
