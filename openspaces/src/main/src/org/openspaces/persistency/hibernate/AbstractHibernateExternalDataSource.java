@@ -38,6 +38,10 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
+ * A base class for Hibernate based external data source implementations.
+ *
+ * <p>See the different setters for more information and the {@link #init(java.util.Properties)}. 
+ *
  * @author kimchy
  */
 public abstract class AbstractHibernateExternalDataSource implements ManagedDataSource, ManagedDataSourceEntriesProvider {
@@ -202,6 +206,18 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
         return initalLoadChunkSize;
     }
 
+    /**
+     * Initializes the hibernate data source. Called by the Space.
+     *
+     * <p>If the session factory was not injected using {@link #setSessionFactory(org.hibernate.SessionFactory)}, will
+     * try can create it from the Proeprties file expecting to find a property called <code>hibernate-config-file</code>
+     * with the location of the Hibernate config file.
+     *
+     * <p>Initializes the {@link #setManagedEntries(String[])} if they were not set explicitly by iterating over all
+     * the mapped classes in Hibernate and adding them.
+     *
+     * <p>Also initalizes the {@link #setInitialLoadEntries(String[])} if not set explicitly.
+     */
     public void init(Properties properties) throws DataSourceException {
         if (sessionFactory == null) {
             createdSessionFactory = true;
@@ -256,6 +272,9 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
         }
     }
 
+    /**
+     * Shuts down the data source. If the session factory was created by this data source, will close it.
+     */
     public void shutdown() throws DataSourceException {
         if (createdSessionFactory) {
             if (sessionFactory != null && !sessionFactory.isClosed()) {
