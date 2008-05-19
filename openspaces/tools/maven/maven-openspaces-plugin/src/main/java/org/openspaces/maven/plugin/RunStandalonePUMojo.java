@@ -204,8 +204,8 @@ public class RunStandalonePUMojo extends AbstractMojo {
      * Prints usage instructions.
      */
     public static void printUsage() {
-        System.out.println("Usage: puInstance [-Dcluster=\"...\"] [-Dproperties=\"...\"] pu-location");
-        System.out.println("    pu-location                  : The relative/absolute path to a processing unit directory location");
+        System.out.println("Usage: mvn os:run-standalone [-Dcluster=\"...\"] [-Dproperties=\"...\"] [-Dmodule=<module name>]");
+        System.out.println("    -Dmodule [module name]        : The name of the module to run. If none is specified, will run all the PU modules");
         System.out.println("    -Dcluster [cluster properties]: Allows specify cluster parameters");
         System.out.println("             schema=partitioned  : The cluster schema to use");
         System.out.println("             total_members=1,1   : The number of instances and number of backups to use");
@@ -213,20 +213,5 @@ public class RunStandalonePUMojo extends AbstractMojo {
         System.out.println("             backup_id=1         : The backup id of this processing unit");
         System.out.println("    -Dproperties [properties-loc] : Location of context level properties");
         System.out.println("    -Dproperties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
-        System.out.println("");
-        System.out.println("");
-        System.out.println("Some Examples:");
-        System.out.println("1. puInstance ../examples/openspaces/data/processor/pu/data-processor");
-        System.out.println("    - Starts a processing unit with a directory location of ../examples/openspaces/data/processor/pu/data-processor");
-        System.out.println("1. puInstance -Dcluster=\"schema=partitioned total_members=2 id=1\" ../deploy/data-processor");
-        System.out.println("    - Starts a processing unit with a partitioned cluster schema of two members with instance id 1");
-        System.out.println("2. puInstance -Dcluster=\"schema=partitioned total_members=2 id=2\" ../deploy/data-processor");
-        System.out.println("    - Starts a processing unit with a partitioned cluster schema of two members with instance id 2");
-        System.out.println("3. puInstance -Dcluster=\"schema=partitioned-sync2backup total_members=2,1 id=1 backup_id=1\" ../deploy/data-processor");
-        System.out.println("    - Starts a processing unit with a partitioned sync2backup cluster schema of two members with two members each with one backup with instance id of 1 and backup id of 1");
-        System.out.println("4. puInstance -Dproperties=\"file://config/context.properties\" -Dproperties=\"space1 file://config/space1.properties\" ../deploy/data-processor");
-        System.out.println("    - Starts a processing unit called data-processor using context level properties called context.properties and bean level properties called space1.properties applied to bean named space1");
-        System.out.println("5. puInstance -Dproperties=\"embed://prop1=value1\" -Dproperties=\"space1 embed://prop2=value2;prop3=value3\" ../deploy/data-processor");
-        System.out.println("    - Starts a processing unit called data-processor using context level properties with a single property called prop1 with value1 and bean level properties with two properties");
-    }
+   }
 }
