@@ -112,6 +112,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
             if (template == null || template.trim().length() == 0) {
                 //throw new IllegalArgumentException(createAvailableTemplatesMessage());
                 System.out.println(createAvailableTemplatesMessage());
+                return;
             }
             
             Enumeration templateUrl = Thread.currentThread().getContextClassLoader().getResources(DIR_TEMPLATES + "/" + template);
