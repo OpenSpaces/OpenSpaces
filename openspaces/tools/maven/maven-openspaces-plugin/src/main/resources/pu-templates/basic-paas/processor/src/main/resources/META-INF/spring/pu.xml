@@ -68,7 +68,7 @@
         Note, we do not specify here the cluster topology of the space. It is declated outside of
         the processing unit or within the SLA bean.
     -->
-    <os-core:space id="space" url="/./space" schema="persistent"  external-data-source="hibernateDataSource">
+    <os-core:space id="space" url="/./space" schema="persistent" mirror="true" external-data-source="hibernateDataSource">
         <os-core:properties>
             <props>
                 <prop key="space-config.external-data-source.usage">read-only</prop>
