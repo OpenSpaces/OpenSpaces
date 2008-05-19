@@ -110,7 +110,8 @@ public class CreatePUProjectMojo extends AbstractMojo {
             Thread.currentThread().setContextClassLoader(cl);
             
             if (template == null || template.trim().length() == 0) {
-                throw new IllegalArgumentException(createAvailableTemplatesMessage());
+                //throw new IllegalArgumentException(createAvailableTemplatesMessage());
+                System.out.println(createAvailableTemplatesMessage());
             }
             
             Enumeration templateUrl = Thread.currentThread().getContextClassLoader().getResources(DIR_TEMPLATES + "/" + template);
@@ -185,11 +186,10 @@ public class CreatePUProjectMojo extends AbstractMojo {
                 continue;
             }
             String targetFileName = projectDir + jarEntryName.substring(length);
-            getLog().debug("Extracting entry [" + jarEntryName + "] to file [" + targetFileName + "]");
-            //copyResource("/" + jarEntryName, targetFileName);
             
             // convert the ${gsGroupPath} to directory
             targetFileName = StringUtils.replace(targetFileName, FILTER_GROUP_PATH, packageDirs);
+            getLog().debug("Extracting entry " + jarEntryName + " to " + targetFileName);
             
             // read the bytes to the buffer
             ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
@@ -210,7 +210,6 @@ public class CreatePUProjectMojo extends AbstractMojo {
             if (!dir.exists()) {
                 dir.mkdirs();
             }
-            getLog().debug("Extracting entry " + jarEntryName + " to " + f.getAbsolutePath());
             FileWriter writer = new FileWriter(f);
             writer.write(data);
             jis.closeEntry();
@@ -280,7 +279,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
             if (templates.containsKey(jarTemplate)) {
                 continue;
             }
-            if (jarEntryName.endsWith("template.txt")) {
+            if (jarEntryName.endsWith("readme.txt")) {
                 // a description found - add to templates
                 String description = getShortDescription(jis);
                 templates.put(jarTemplate, description);
@@ -304,7 +303,6 @@ public class CreatePUProjectMojo extends AbstractMojo {
     private String getShortDescription(JarInputStream jis) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(jis));
         String description = reader.readLine();
-        System.out.println("description: " + description);
         jis.closeEntry();
         return description;
     }
@@ -347,6 +345,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
             sb.append("' was not found.\n");
         }
         sb.append("Available templates:\n");
+        sb.append("--------------------\n");
         Iterator iter = availableTemplates.keySet().iterator();
         int i = 1;
         while (iter.hasNext()) {
