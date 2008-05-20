@@ -1,5 +1,6 @@
-Creates a typical SBA application that consists of a feeder and a processor that 
-uses a polling container. 
+Creates a basic SBA application with two processing units. The Feeder processing unit
+sends Data objects through the Space to a Processor. The Space and the Processor are 
+collocated in the same processing unit.
 
 GENERAL DESCRIPTION:
 --------------------
@@ -14,9 +15,7 @@ it starts a polling container that performs a take from the Space of unprocessed
 entries. The take operation results in an "event" that will end up executing the 
 "Processor" class. The Processor "processes" the Data object (by setting its processed
 flag to true) and returns it. The return value is automatically written back to the Space.
-The processor is the "SBA" part of the example, where it performs the take operation *only* 
-on the Space member it created. The processor also comes with both a unit test and 
-integration test that verifies its behavior.
+The processor also comes with both a unit test and integration test that verifies its behavior.
 
 The feeder module, which is also a processing unit, connects to a Space remotely and
 writes unprocessed Data objects to the Space (resulting in events firing up within
@@ -69,7 +68,7 @@ WORKING WITH ECLIPSE
 --------------------
 
 In order to generate eclipse project the following command need to be executed from the root of
-the application: "mvn eclipse:eclipse". Now, pointing the Eclipse import existing project wizard
+the application: "mvn eclipse:eclipse". Pointing the Eclipse import existing project wizard
 to the application root directory will result in importing the three modules.
 If this is a fresh Eclipse installation, the M2_REPO needs be defined and pointed to the local 
 maven repository (which resides under USER_HOME/.m2/repository).
@@ -94,6 +93,6 @@ processing all the relevant Data. Note, when deploying on top of the Service Gri
 Grid will also identify that one instance failed, and will automatically start it over in another
 container (GSC).
 
-In terms of the feeder, it is oblivious to all of this behavior. It works with a clustered view of
-the Space (the 2,1 cluster topology looking as one), and simply writes unprocessed Data objects to
-the Space.
+The feeder works with a clustered view of the Space (the 2,1 cluster topology looking as one), and 
+simply writes unprocessed Data objects to the Space. The routing (@SpaceRouting) controls to which
+partition the unprocessed Data will be written and consequently which instance will process it.
