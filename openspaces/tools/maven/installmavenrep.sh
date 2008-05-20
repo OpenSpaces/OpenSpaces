@@ -20,12 +20,12 @@ echo ""
 echo ""
 
 # Jini Jars
-mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jini-start -Dversion=$VERSION -DpomFile=$TMPDIR/jini-start-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/jini/start.jar
-mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jini-jsk-lib -Dversion=$VERSION -DpomFile=$TMPDIR/jini-jsk-lib-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/jini/jsk-lib.jar
-mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jini-jsk-platform -Dversion=$VERSION -DpomFile=$TMPDIR/jini-jsk-platform-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/jini/jsk-platform.jar
-mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jini-jsk-resources -Dversion=$VERSION -DpomFile=$TMPDIR/jini-jsk-resources-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/jini/jsk-resources.jar
-mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jini-reggie -Dversion=$VERSION -DpomFile=$TMPDIR/jini-reggie-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/jini/reggie.jar
-mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jini-mahalo -Dversion=$VERSION -DpomFile=$TMPDIR/jini-mahalo-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/jini/mahalo.jar
+mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=start -Dversion=$VERSION -DpomFile=$TMPDIR/jini-start-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/jini/start.jar
+mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jsk-lib -Dversion=$VERSION -DpomFile=$TMPDIR/jini-jsk-lib-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/jini/jsk-lib.jar
+mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jsk-platform -Dversion=$VERSION -DpomFile=$TMPDIR/jini-jsk-platform-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/jini/jsk-platform.jar
+mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jsk-resources -Dversion=$VERSION -DpomFile=$TMPDIR/jini-jsk-resources-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/jini/jsk-resources.jar
+mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=reggie -Dversion=$VERSION -DpomFile=$TMPDIR/jini-reggie-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/jini/reggie.jar
+mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=mahalo -Dversion=$VERSION -DpomFile=$TMPDIR/jini-mahalo-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/jini/mahalo.jar
 
 # GigaSpaces Jars
 mvn install:install-file -DgroupId=com.gigaspaces.core -DartifactId=gs-boot -Dversion=$VERSION -DpomFile=$TMPDIR/gs-boot-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/ServiceGrid/gs-boot.jar
