@@ -88,5 +88,6 @@
 	<classpathentry kind="lib" path="lib/javassist/javassist.jar"/>
 	<classpathentry kind="lib" path="lib/antlr/antlr-2.7.6.jar"/>
 	<classpathentry kind="lib" path="tools/maven/apache-maven-2.0.9/lib/maven-2.0.9-uber.jar"/>
+	<classpathentry kind="lib" path="lib/jdbc/hsqldb.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
