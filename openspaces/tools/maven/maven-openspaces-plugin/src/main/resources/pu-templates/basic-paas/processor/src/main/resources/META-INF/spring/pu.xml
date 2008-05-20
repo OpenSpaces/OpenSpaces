@@ -33,14 +33,20 @@
         Enables the usage of @GigaSpaceContext annotation based injection.
     -->
     <os-core:giga-space-context/>
- 
-         <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+
+    <!--
+        A JDBC pooled data source that connects to the HSQL server the mirror starts.
+    -->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
         <property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
         <property name="url" value="jdbc:hsqldb:hsql://localhost/testDB"/>
         <property name="username" value="sa"/>
         <property name="password" value=""/>
     </bean>
 
+    <!--
+        Hibernate SessionFactory bean. Uses the pooled data source to connect to the database.
+    -->
     <bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
         <property name="mappingResources">
@@ -67,18 +73,23 @@
 
         Note, we do not specify here the cluster topology of the space. It is declated outside of
         the processing unit or within the SLA bean.
+
+        The space is configured to connect to a mirror, and uses the configured external data source
+        to perform the initial load operation from the database when the Space starts up.
     -->
-    <os-core:space id="space" url="/./space" schema="persistent" mirror="true" external-data-source="hibernateDataSource">
+    <os-core:space id="space" url="/./space" schema="persistent" mirror="true"
+                   external-data-source="hibernateDataSource">
         <os-core:properties>
             <props>
-                <prop key="space-config.engine.cache_policy">1</prop> <!-- Use ALL IN CACHE -->
+                <!-- Use ALL IN CACHE -->
+                <prop key="space-config.engine.cache_policy">1</prop>
                 <prop key="space-config.external-data-source.usage">read-only</prop>
                 <prop key="cluster-config.cache-loader.external-data-source">true</prop>
                 <prop key="cluster-config.cache-loader.central-data-source">true</prop>
             </props>
         </os-core:properties>
     </os-core:space>
- 
+
     <!--
         Defines a local Jini transaction manager.
     -->
