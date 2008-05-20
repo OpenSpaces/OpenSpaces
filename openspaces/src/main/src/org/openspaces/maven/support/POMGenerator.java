@@ -52,7 +52,7 @@ public class POMGenerator {
         writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "openspaces-pom.xml")))));
         printHeader(writer, version, POMGenerator.GS_OS_GROUP, "openspaces");
         printDependency(writer, POMGenerator.GS_CORE_GROUP, "JSpaces");
-        printDependency(writer, "org.springframework", "spring", "2.5.3");
+        printDependency(writer, "org.springframework", "spring", "2.5.4");
         printDependency(writer, "commons-logging", "commons-logging", "1.1.1");
         printFooter(writer);
         writer.close();
