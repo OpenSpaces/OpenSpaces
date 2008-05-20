@@ -23,12 +23,12 @@ public class POMGenerator {
         File dir = new File(templDir);
         dir.mkdirs();
 
-        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "start");
-        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "jsk-lib");
-        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "jsk-platform");
-        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "jsk-resources");
-        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "reggie");
-        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "mahalo");
+        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "jini-start");
+        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "jini-jsk-lib");
+        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "jini-jsk-platform");
+        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "jini-jsk-resources");
+        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "jini-reggie");
+        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "jini-mahalo");
         
         writeSimplePom(dir, version, POMGenerator.GS_CORE_GROUP, "gs-boot");
         writeSimplePom(dir, version, POMGenerator.GS_CORE_GROUP, "gs-service");
@@ -36,12 +36,12 @@ public class POMGenerator {
 
         PrintWriter writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "JSpaces-pom.xml")))));
         printHeader(writer, version, POMGenerator.GS_CORE_GROUP, "JSpaces");
-        printDependency(writer, POMGenerator.GS_JINI_GROUP, "start");
-        printDependency(writer, POMGenerator.GS_JINI_GROUP, "jsk-lib");
-        printDependency(writer, POMGenerator.GS_JINI_GROUP, "jsk-platform");
-        printDependency(writer, POMGenerator.GS_JINI_GROUP, "jsk-resources");
-        printDependency(writer, POMGenerator.GS_JINI_GROUP, "reggie");
-        printDependency(writer, POMGenerator.GS_JINI_GROUP, "mahalo");
+        printDependency(writer, POMGenerator.GS_JINI_GROUP, "jini-start");
+        printDependency(writer, POMGenerator.GS_JINI_GROUP, "jini-jsk-lib");
+        printDependency(writer, POMGenerator.GS_JINI_GROUP, "jini-jsk-platform");
+        printDependency(writer, POMGenerator.GS_JINI_GROUP, "jini-jsk-resources");
+        printDependency(writer, POMGenerator.GS_JINI_GROUP, "jini-reggie");
+        printDependency(writer, POMGenerator.GS_JINI_GROUP, "jini-mahalo");
         
         printDependency(writer, POMGenerator.GS_CORE_GROUP, "gs-boot");
         printDependency(writer, POMGenerator.GS_CORE_GROUP, "gs-service");

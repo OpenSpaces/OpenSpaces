@@ -21,12 +21,12 @@ echo ""
 echo ""
 
 REM Jini Jars
-call mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=start -Dversion=%VERSION% -DpomFile=%TEMP%/start-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/start.jar"
-call mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jsk-lib -Dversion=%VERSION% -DpomFile=%TEMP%/jsk-lib-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/jsk-lib.jar"
-call mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jsk-platform -Dversion=%VERSION% -DpomFile=%TEMP%/jsk-platform-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/jsk-platform.jar"
-call mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jsk-resources -Dversion=%VERSION% -DpomFile=%TEMP%/jsk-resources-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/jsk-resources.jar"
-call mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=reggie -Dversion=%VERSION% -DpomFile=%TEMP%/reggie-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/reggie.jar"
-call mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=mahalo -Dversion=%VERSION% -DpomFile=%TEMP%/mahalo-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/mahalo.jar"
+call mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jini-start -Dversion=%VERSION% -DpomFile=%TEMP%/jini-start-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/start.jar"
+call mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jini-jsk-lib -Dversion=%VERSION% -DpomFile=%TEMP%/jini-jsk-lib-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/jsk-lib.jar"
+call mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jini-jsk-platform -Dversion=%VERSION% -DpomFile=%TEMP%/jini-jsk-platform-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/jsk-platform.jar"
+call mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jini-jsk-resources -Dversion=%VERSION% -DpomFile=%TEMP%/jini-jsk-resources-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/jsk-resources.jar"
+call mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jini-reggie -Dversion=%VERSION% -DpomFile=%TEMP%/jini-reggie-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/reggie.jar"
+call mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jini-mahalo -Dversion=%VERSION% -DpomFile=%TEMP%/jini-mahalo-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/mahalo.jar"
 
 REM GigaSpaces Jars
 call mvn install:install-file -DgroupId=com.gigaspaces.core -DartifactId=gs-boot -Dversion=%VERSION% -DpomFile=%TEMP%/gs-boot-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/ServiceGrid/gs-boot.jar"
