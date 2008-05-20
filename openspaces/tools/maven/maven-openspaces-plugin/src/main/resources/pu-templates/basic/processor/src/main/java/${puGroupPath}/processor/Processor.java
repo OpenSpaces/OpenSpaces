@@ -10,7 +10,7 @@ import org.openspaces.events.adapter.SpaceDataEvent;
 /**
  * The processor simulates work done no un-processed Data object. The processData
  * accepts a Data object, simulate work by sleeping, and then sets the processed
- * flag to true and reutrn the processed Data.
+ * flag to true and returns the processed Data.
  */
 public class Processor {
 
