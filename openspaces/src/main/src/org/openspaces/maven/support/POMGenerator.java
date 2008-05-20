@@ -59,7 +59,6 @@ public class POMGenerator {
 
         writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "mule-os-pom.xml")))));
         printHeader(writer, version, POMGenerator.GS_OS_GROUP, "mule-os");
-        printDependency(writer, POMGenerator.GS_OS_GROUP, "openspaces");
         printFooter(writer);
         writer.close();
 
