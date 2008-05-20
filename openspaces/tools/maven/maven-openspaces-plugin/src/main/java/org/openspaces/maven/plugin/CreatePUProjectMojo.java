@@ -16,14 +16,18 @@
 
 package org.openspaces.maven.plugin;
 
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.springframework.util.StringUtils;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -34,10 +38,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
-
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.springframework.util.StringUtils;
 
 
 /**
@@ -122,10 +122,10 @@ public class CreatePUProjectMojo extends AbstractMojo {
                 getLog().debug("Found template at: " + url);
 
                 // extract the jar path from the url
-                String jarPath = getJarPathFromURL(url);
-                getLog().debug("Template JAR file path: " + jarPath);
+                url = getJarURLFromURL(url, "/" + template + "/");
+                getLog().debug("Template JAR url: " + url);
 
-                extract(jarPath);
+                extract(url);
             }
             else {
                 // the template was not found - show available templates
@@ -139,8 +139,6 @@ public class CreatePUProjectMojo extends AbstractMojo {
 
     /**
      * Returns a list that contains all extension templates URLs.
-     * @return a list that contains all extension templates URLs.
-     * @throws Exception 
      */
     private List getTemplatesURLs() throws Exception {
         String pluginPath = getPluginPath();
@@ -166,16 +164,12 @@ public class CreatePUProjectMojo extends AbstractMojo {
     
     /**
      * Extracts the project files to the project directory.
-     * @param jarFileName the plugin's JAR file
-     * @return true of the template is found, false otherwise.
-     * @throws Exception
      */
-    private void extract(String jarFileName) throws Exception {
+    private void extract(URL url) throws Exception {
         packageDirs = packageName.replaceAll("\\.", "/");
         String puTemplate = DIR_TEMPLATES + "/" + template + "/";
         int length = puTemplate.length() - 1;
-        FileInputStream fis = new FileInputStream(jarFileName);
-        BufferedInputStream bis = new BufferedInputStream(fis);
+        BufferedInputStream bis = new BufferedInputStream(url.openStream());
         JarInputStream jis = new JarInputStream(bis);
         JarEntry je;
         byte[] buf = new byte[1024];
@@ -230,8 +224,10 @@ public class CreatePUProjectMojo extends AbstractMojo {
         Enumeration urls = Thread.currentThread().getContextClassLoader().getResources(DIR_TEMPLATES);
         while (urls.hasMoreElements()) {
             URL url = (URL) urls.nextElement();
-            String jarURLStr = getJarPathFromURL(url);
-            return jarURLStr;
+            url = getJarURLFromURL(url, "");
+            if (url.getProtocol().equals("file")) {
+                return url.getPath();
+            }
         }
         return null;
     }
@@ -239,28 +235,28 @@ public class CreatePUProjectMojo extends AbstractMojo {
     
     /**
      * Returns the path of a JAR file that appears in the URL
-     * @param jarURL
-     * @return
      */
-    private String getJarPathFromURL(URL url) {
-        String urlStr = url.toString();
-        return urlStr.substring("jar:file:/".length(), urlStr.indexOf('!'));
+    private URL getJarURLFromURL(URL url, String suffix) throws MalformedURLException {
+        String urlString = url.toString();
+        suffix = "!/" + DIR_TEMPLATES + suffix;
+        if (urlString.endsWith(suffix)) {
+            urlString = urlString.substring(4);
+            urlString = urlString.substring(0, urlString.length() - suffix.length());
+            url = new URL(urlString);
+        }
+        return url;
     }
     
     
     /**
      * Returns a set containing all templates defined in this JAR file.
-     * @param jarFileName the JAR file
-     * @return a set containing all templates defined in this JAR file.
-     * @throws Exception
      */
-    public HashMap getJarTemplates(String jarFileName) throws Exception {
-        getLog().debug("retrieving all templates of: " + jarFileName);
+    public HashMap getJarTemplates(URL url) throws Exception {
+        getLog().debug("retrieving all templates from jar file: " + url);
         String lookFor = DIR_TEMPLATES + "/";
         int length = lookFor.length();
         HashMap templates = new HashMap();
-        FileInputStream fis = new FileInputStream(jarFileName);
-        BufferedInputStream bis = new BufferedInputStream(fis);
+        BufferedInputStream bis = new BufferedInputStream(url.openStream());
         JarInputStream jis = new JarInputStream(bis);
         JarEntry je;
         Set temp = new HashSet();
@@ -303,26 +299,35 @@ public class CreatePUProjectMojo extends AbstractMojo {
     
     private String getShortDescription(JarInputStream jis) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(jis));
-        String description = reader.readLine();
+        StringBuffer sb = new StringBuffer();
+        boolean first = true;
+        while (true) {
+            String line = reader.readLine();
+            if (line == null || !StringUtils.hasText(line)) {
+                break;
+            }
+            if (!first) {
+                sb.append("\n\r");
+            } else {
+                first = false;
+            }
+            sb.append(line);
+        }
         jis.closeEntry();
-        return description;
+        return sb.toString();
     }
     
     
     /**
      * Returns an array of available project templates names.
-     * @param jarFileName the plugin's JAR file
-     * @return an array of available project templates names.
-     * @throws Exception
      */
     private HashMap getAvailableTemplates() throws Exception {
         HashMap templates = new HashMap();
-        int templatesDirNameLength = DIR_TEMPLATES.length();
         Enumeration urls = Thread.currentThread().getContextClassLoader().getResources(DIR_TEMPLATES);
         while (urls.hasMoreElements()) {
             URL url = (URL) urls.nextElement();
-            String jarPath = getJarPathFromURL(url);
-            HashMap jarTemplates = getJarTemplates(jarPath);
+            getLog().debug("retrieving all templates from url: " + url);
+            HashMap jarTemplates = getJarTemplates(getJarURLFromURL(url, ""));
             templates.putAll(jarTemplates);
         }
         return templates;
@@ -357,7 +362,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
             sb.append(tmpl);
             sb.append(" - ");
             sb.append(desc);
-            sb.append("\n");
+            sb.append("\n\n");
         }
         return sb.toString();
     }
