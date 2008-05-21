@@ -399,7 +399,8 @@
                         <xsd:annotation>
                             <xsd:documentation>
                                 When set to true (defaults to true) will return the first result when using broadcast.
-                                If set to false, an array of results will be retuned.
+                                If set to false, an array of results will be retuned. Note, this only applies when
+                                not setting a reducer.
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
