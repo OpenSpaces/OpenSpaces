@@ -61,6 +61,8 @@ public class StandaloneContainerRunnable implements Runnable {
 
     private ResourceApplicationContext applicationContext;
 
+    private Throwable exception;
+
     /**
      * Constructs a new standalone container runnable based on the provided configuration set
      * parameters.
@@ -126,8 +128,8 @@ public class StandaloneContainerRunnable implements Runnable {
             applicationContext.refresh();
             this.running = true;
         } catch (Throwable t) {
-            // TODO handle it better
-            t.printStackTrace();
+            this.exception = t;
+            return;
         } finally {
             initialized = true;
         }
@@ -170,5 +172,13 @@ public class StandaloneContainerRunnable implements Runnable {
      */
     public ApplicationContext getApplicationContext() {
         return applicationContext;
+    }
+
+    public boolean hasException() {
+        return this.exception != null;
+    }
+
+    public Throwable getException() {
+        return this.exception;
     }
 }

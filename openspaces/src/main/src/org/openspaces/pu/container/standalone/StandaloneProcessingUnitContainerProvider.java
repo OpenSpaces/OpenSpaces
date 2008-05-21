@@ -48,19 +48,19 @@ import java.util.jar.JarFile;
  * location of the processing unit using
  * {@link StandaloneProcessingUnitContainerProvider#StandaloneProcessingUnitContainerProvider(String)}.
  * The location itself follows Spring resource loader syntax.
- * 
+ *
  * <p>
  * When creating the container a thread is started with
  * {@link org.openspaces.pu.container.standalone.StandaloneContainerRunnable}. This is done since a
  * custom class loader is created taking into account the processing unit archive structure, and in
  * order to allows using the standlone container within other environments, the new class loader is
  * only set on the newly created thread context.
- * 
+ *
  * <p>
  * At its core the integrated processing unit container is built around Spring
  * {@link org.springframework.context.ApplicationContext} configured based on a set of config
  * locations.
- * 
+ *
  * <p>
  * The provider allows for programmatic configuration of different processing unit aspects. It
  * allows to configure where the processing unit Spring context xml descriptors are located (by
@@ -68,11 +68,11 @@ import java.util.jar.JarFile;
  * {@link org.openspaces.core.properties.BeanLevelProperties} and
  * {@link org.openspaces.core.cluster.ClusterInfo} that will be injected to beans configured within
  * the processing unit.
- * 
+ *
  * <p>
  * For a runnable "main" processing unit container please see
  * {@link StandaloneProcessingUnitContainer#main(String[])}.
- * 
+ *
  * @author kimchy
  */
 public class StandaloneProcessingUnitContainerProvider implements ApplicationContextProcessingUnitContainerProvider {
@@ -87,13 +87,15 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
 
     private ClusterInfo clusterInfo;
 
+
+    private URLClassLoader commonClassLoader;
+
     /**
      * Constructs a new standalone container provider using the provided location as the location of
      * the processing unit archive (either an exploded archive or a jar/zip archive). The location
      * syntax follows Spring {@link org.springframework.core.io.Resource} syntax.
-     * 
-     * @param location
-     *            The location of the processing unit archive
+     *
+     * @param location The location of the processing unit archive
      */
     public StandaloneProcessingUnitContainerProvider(String location) {
         this.location = location;
@@ -125,7 +127,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
     /**
      * Adds a config location based on a String description using Springs
      * {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver}.
-     * 
+     *
      * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
      */
     public void addConfigLocation(String configLocation) {
@@ -140,12 +142,12 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
      * zip/jar archive of it). It is provided with the location of the processing unit using
      * {@link org.openspaces.pu.container.standalone.StandaloneProcessingUnitContainerProvider#StandaloneProcessingUnitContainerProvider(String)}.
      * The location itself follows Spring resource loader syntax.
-     * 
+     *
      * <p>
      * If {@link #addConfigLocation(String)} is used, the Spring xml context will be read based on
      * the provided locations. If no config location was provided the default config location will
      * be <code>classpath*:/META-INF/spring/pu.xml</code>.
-     * 
+     *
      * <p>
      * If {@link #setBeanLevelProperties(org.openspaces.core.properties.BeanLevelProperties)} is set
      * will use the configured bean level properties in order to configure the application context
@@ -153,12 +155,12 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
      * {@link org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor} and
      * {@link org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer} to the
      * application context.
-     * 
+     *
      * <p>
      * If {@link #setClusterInfo(org.openspaces.core.cluster.ClusterInfo)} is set will use it to
      * inject {@link org.openspaces.core.cluster.ClusterInfo} into beans that implement
      * {@link org.openspaces.core.cluster.ClusterInfoAware}.
-     * 
+     *
      * @return An {@link StandaloneProcessingUnitContainer} instance
      * @throws CannotCreateContainerException
      */
@@ -193,8 +195,9 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
         if (clusterInfo != null) {
             ClusterInfoParser.guessSchema(clusterInfo);
         }
-        
+
         List<URL> urls = new ArrayList<URL>();
+        List<URL> sharedUrls = new ArrayList<URL>();
         if (fileLocation.isDirectory()) {
             if (fileLocation.exists()) {
                 if (logger.isDebugEnabled()) {
@@ -208,7 +211,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
                 }
             }
             addJarsLocation(fileLocation, urls, "lib");
-            addJarsLocation(fileLocation, urls, "shared-lib");
+            addJarsLocation(fileLocation, sharedUrls, "shared-lib");
         } else {
             JarFile jarFile;
             try {
@@ -275,7 +278,11 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
                     }
 
                     try {
-                        urls.add(tempJar.toURL());
+                        if (isWithinDir(jarEntry, "lib")) {
+                            urls.add(tempJar.toURL());
+                        } else if (isWithinDir(jarEntry, "shared-lib")) {
+                            sharedUrls.add(tempJar.toURL());
+                        }
                     } catch (MalformedURLException e) {
                         throw new CannotCreateContainerException("Failed to add pu entry [" + jarEntry.getName()
                                 + "] with location [" + location + "]", e);
@@ -284,14 +291,19 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
             }
         }
 
-        ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
-        if (parentClassLoader == null) {
-            parentClassLoader = this.getClass().getClassLoader();
+        if (commonClassLoader == null) {
+            ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
+            if (parentClassLoader == null) {
+                parentClassLoader = this.getClass().getClassLoader();
+            }
+
+            URL[] sharedClassLoaderUrls = sharedUrls.toArray(new URL[sharedUrls.size()]);
+            commonClassLoader = new URLClassLoader(sharedClassLoaderUrls, parentClassLoader);
         }
+
         URL[] classLoaderUrls = urls.toArray(new URL[urls.size()]);
-        // TODO need to probably implement our own class loader so we can control what gets
-        // propagated to the parent class loader
-        URLClassLoader classLoader = new URLClassLoader(classLoaderUrls, parentClassLoader);
+        URLClassLoader classLoader = new URLClassLoader(classLoaderUrls, commonClassLoader);
+        
         StandaloneContainerRunnable containerRunnable = new StandaloneContainerRunnable(beanLevelProperties,
                 clusterInfo, configLocations);
         Thread standaloneContainerThread = new Thread(containerRunnable, "Standalone Container Thread");
@@ -299,13 +311,16 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
         standaloneContainerThread.setContextClassLoader(classLoader);
         standaloneContainerThread.start();
 
-        // TODO implement proper shutdown if the runnable fails to start
         while (!containerRunnable.isInitialized()) {
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
                 logger.warn("Interrupted while waiting for standalone container to initialize");
             }
+        }
+
+        if (containerRunnable.hasException()) {
+            throw new CannotCreateContainerException("Failed to started container", containerRunnable.getException());
         }
 
         return new StandaloneProcessingUnitContainer(containerRunnable);
