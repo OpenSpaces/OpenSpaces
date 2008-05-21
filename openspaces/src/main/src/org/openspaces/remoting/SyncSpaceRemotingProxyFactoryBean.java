@@ -148,6 +148,8 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
     /**
      * When set to <code>true</code> (defaults to <code>true</code>) will return the first result
      * when using broadcast. If set to <code>false</code>, an array of results will be retuned.
+     *
+     * <p>Note, this only applies if no reducer is provided.
      */
     public void setReturnFirstResult(boolean returnFirstResult) {
         this.returnFirstResult = returnFirstResult;
