@@ -23,6 +23,7 @@ import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
+import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.CompoundProcessingUnitContainer;
 import org.springframework.util.FileCopyUtils;
 
@@ -189,6 +190,10 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
             return new CompoundProcessingUnitContainer(containers.toArray(new ProcessingUnitContainer[containers.size()]));
         }
 
+        if (clusterInfo != null) {
+            ClusterInfoParser.guessSchema(clusterInfo);
+        }
+        
         List<URL> urls = new ArrayList<URL>();
         if (fileLocation.isDirectory()) {
             if (fileLocation.exists()) {
