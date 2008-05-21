@@ -77,17 +77,17 @@
 	<classpathentry kind="lib" path="lib/hibernate/ejb3-persistence.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/hibernate-annotations.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/hibernate-commons-annotations.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-core-2.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-local-install.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-module-client-2.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-module-spring-config-2.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-module-spring-extras-2.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-transport-stdio-2.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-transport-vm-2.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/spring/spring-test.jar"/>
 	<classpathentry kind="lib" path="lib/javassist/javassist.jar"/>
 	<classpathentry kind="lib" path="lib/antlr/antlr-2.7.6.jar"/>
 	<classpathentry kind="lib" path="tools/maven/apache-maven-2.0.9/lib/maven-2.0.9-uber.jar"/>
 	<classpathentry kind="lib" path="lib/jdbc/hsqldb.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-2.0.1-src.zip"/>
+	<classpathentry kind="lib" path="lib/mule/mule-core-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-module-client-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-module-spring-config-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-module-spring-extras-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-transport-stdio-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-transport-vm-2.0.1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
