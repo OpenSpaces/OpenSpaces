@@ -177,6 +177,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
             for (int i = 0; i < clusterInfo.getNumberOfInstances(); i++) {
                 ClusterInfo containerClusterInfo = clusterInfo.copy();
                 containerClusterInfo.setInstanceId(i + 1);
+                containerClusterInfo.setBackupId(null);
                 setClusterInfo(containerClusterInfo);
                 containers.add(createContainer());
                 if (clusterInfo.getNumberOfBackups() != null) {
@@ -194,6 +195,10 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
 
         if (clusterInfo != null) {
             ClusterInfoParser.guessSchema(clusterInfo);
+        }
+
+        if (logger.isInfoEnabled()) {
+            logger.info("Starting a Standalone processing unit container with " + clusterInfo);
         }
 
         List<URL> urls = new ArrayList<URL>();
@@ -313,7 +318,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
 
         while (!containerRunnable.isInitialized()) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 logger.warn("Interrupted while waiting for standalone container to initialize");
             }

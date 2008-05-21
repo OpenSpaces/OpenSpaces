@@ -202,6 +202,7 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
             for (int i = 0; i < clusterInfo.getNumberOfInstances(); i++) {
                 ClusterInfo containerClusterInfo = clusterInfo.copy();
                 containerClusterInfo.setInstanceId(i + 1);
+                containerClusterInfo.setBackupId(null);
                 setClusterInfo(containerClusterInfo);
                 containers.add(createContainer());
                 if (clusterInfo.getNumberOfBackups() != null) {

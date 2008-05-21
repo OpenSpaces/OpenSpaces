@@ -55,13 +55,13 @@ public class StandaloneContainerRunnable implements Runnable {
 
     private List<String> configLocations;
 
-    private boolean running;
+    private volatile boolean running;
 
-    private boolean initialized;
+    private volatile boolean initialized;
 
     private ResourceApplicationContext applicationContext;
 
-    private Throwable exception;
+    private volatile Throwable exception;
 
     /**
      * Constructs a new standalone container runnable based on the provided configuration set
@@ -174,11 +174,11 @@ public class StandaloneContainerRunnable implements Runnable {
         return applicationContext;
     }
 
-    public boolean hasException() {
+    public synchronized boolean hasException() {
         return this.exception != null;
     }
 
-    public Throwable getException() {
+    public synchronized Throwable getException() {
         return this.exception;
     }
 }
