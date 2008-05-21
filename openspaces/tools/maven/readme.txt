@@ -1,0 +1,56 @@
+OPENSPACES MAVEN INTEGRATION
+----------------------------
+
+OpenSpaces Maven (http://maven.apache.org) integration allows to use GigaSpaces with
+maven. The integration includes the ability to install GigaSpaces into the maven local
+repository as well as includes a maven plugin allowing to simplify the build/run/deploy
+cycle.
+
+ENVIRONMENT
+-----------
+
+M2_HOME should be added as an environment variable and point to the home installation of
+Maven. M2_HOME/bin should be added to the PATH.
+
+GigaSpaces comes with a maven installation which is located under tools/maven/apache-maven-2.0.9.
+
+
+INSTALLING GIGASPACES INTO MAVEN REPOSITORY
+-------------------------------------------
+
+Running installmavenrep.(sh/bat) will install GigaSpaces different jar files into Maven local 
+repository (defaults to USER_HOME/.m2/repostiory).
+
+USING OPENSPACES MAVEN PLUGIN
+-----------------------------
+
+(*) mvn os:create
+
+  Creates a built in project that can be used to either show or use as a starting point
+  for a GigaSpaces project. Running it without any parameters shows the different project 
+  templates and how they can be used.
+
+(*) mvn compile os:run
+
+  Runs the given project (all the modules that are marked as PU) without packaging using
+  just the classpath and the compiled classes. Can be configured to run just a specific 
+  processing unit module using -Dmodule=[module name] parameter.
+  
+(*) mvn package
+
+  Not an OpenSpaces goal, but important as it actually ends up (as configured in the 
+  different projects template) packaging the different processing units projects into a 
+  valid structure and "jars" them up.
+
+(*) mvn os:run-standalone
+
+  Runs the given project (all the modules that are marked as PU) using the packaged 
+  processing unit jars. Can be configured to run just a specificprocessing unit module using 
+  -Dmodule=[module name] parameter.
+
+(*) mvn os:deploy
+
+  Deploys the packaged jars of the different processing unit modules into the Service Grid.
+  Can be configured to deploy just a specific module using -Dmodule=[module name]. Can be
+  configured to deploy using a specific lookup group using -Dgroups=[group name].
+  
