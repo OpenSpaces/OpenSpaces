@@ -93,6 +93,7 @@ public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanP
                     factoryBean.setRemoteInvocationAspect((RemoteInvocationAspect) createByClassOrFindByName(syncProxy.remoteInvocationAspect(), syncProxy.remoteInvocationAspectType()));
                     factoryBean.setRemoteRoutingHandler((RemoteRoutingHandler) createByClassOrFindByName(syncProxy.remoteRoutingHandler(), syncProxy.remoteRoutingHandlerType()));
                     factoryBean.setRemoteResultReducer((RemoteResultReducer) createByClassOrFindByName(syncProxy.remoteResultReducer(), syncProxy.remoteResultReducerType()));
+                    factoryBean.setReturnFirstResult(syncProxy.returnFirstResult());
                     factoryBean.setServiceInterface(field.getType());
                     factoryBean.afterPropertiesSet();
                     field.setAccessible(true);

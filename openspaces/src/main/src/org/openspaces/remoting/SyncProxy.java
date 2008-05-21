@@ -58,58 +58,47 @@ public @interface SyncProxy {
     boolean broadcast() default false;
 
     /**
-     * The bean name that implements this interface.
-     *
      * @see org.openspaces.remoting.SyncSpaceRemotingProxyFactoryBean#setRemoteRoutingHandler(RemoteRoutingHandler)
      */
     String remoteRoutingHandler() default "";
 
     /**
-     * The class that implements this interface.
-     *
      * @see org.openspaces.remoting.SyncSpaceRemotingProxyFactoryBean#setRemoteRoutingHandler(RemoteRoutingHandler)
      */
     Class remoteRoutingHandlerType() default Object.class;
 
     /**
-     * The bean name that implements this interface.
-     *
      * @see org.openspaces.remoting.SyncSpaceRemotingProxyFactoryBean#setMetaArgumentsHandler(MetaArgumentsHandler)
      */
     String metaArgumentsHandler() default "";
 
     /**
-     * The class that implements this interface.
-     *
      * @see org.openspaces.remoting.SyncSpaceRemotingProxyFactoryBean#setMetaArgumentsHandler(MetaArgumentsHandler)
      */
     Class metaArgumentsHandlerType() default Object.class;
 
     /**
-     * The bean name that implements this interface.
-     *
      * @see org.openspaces.remoting.SyncSpaceRemotingProxyFactoryBean#setRemoteInvocationAspect(RemoteInvocationAspect)
      */
     String remoteInvocationAspect() default "";
 
     /**
-     * The class that implements this interface.
-     *
      * @see org.openspaces.remoting.SyncSpaceRemotingProxyFactoryBean#setRemoteInvocationAspect(RemoteInvocationAspect)
      */
     Class remoteInvocationAspectType() default Object.class;
 
     /**
-     * The bean name that implements this interface.
-     *
      * @see org.openspaces.remoting.SyncSpaceRemotingProxyFactoryBean#setRemoteResultReducer(RemoteResultReducer) 
      */
     String remoteResultReducer() default "";
 
     /**
-     * The class that implements this interface.
-     *
      * @see org.openspaces.remoting.SyncSpaceRemotingProxyFactoryBean#setRemoteResultReducer(RemoteResultReducer)
      */
     Class remoteResultReducerType() default Object.class;
+
+    /**
+     * @see org.openspaces.remoting.SyncSpaceRemotingProxyFactoryBean#setReturnFirstResult(boolean) 
+     */
+    boolean returnFirstResult() default true;
 }
