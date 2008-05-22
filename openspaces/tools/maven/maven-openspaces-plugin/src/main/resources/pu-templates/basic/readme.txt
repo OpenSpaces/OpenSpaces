@@ -39,7 +39,7 @@ Packaging the application can be done using "mvn package" (note, by default, it 
 runs the tests, in order to disable it, use -DskipTests). The packaging process jars up 
 the common module. The feeder and processor modules packaging process creates a 
 "processing unit structure" directory within the target directory called [app-name]-[module].
-It also creates a jar of the mentioned directory called [app-name]-[module].jar.
+It also creates a jar from the mentioned directory called [app-name]-[module].jar.
 
 In order to simply run both the processor and the feeder, "mvn compile os:run" can be used.
 This will run a single instance of the processor and a single instance of the feeder within
@@ -51,7 +51,7 @@ can be used:
 mvn compile os:run -Dmodule=processor -Dcluster="total_members=2,1".
 
 In order to run a packaged processing unit, "mvn package os:run-standalone" can be used (if
-package was already executed, it can be omitted). This operation will run the processing units
+"mvn package" was already executed, it can be omitted). This operation will run the processing units
 using the packaged jar files. Running a specific module with a cluster topology can be executed using:
 mvn pacakge os:run-standalone -Dmodule=processor -Dcluster="total_members=2,1".
 
