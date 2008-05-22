@@ -89,7 +89,7 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
          * of the receiver's workManager, since it is shared with receivers for other endpoints.
          */
         int maxThreads = connector.getReceiverThreadingProfile().getMaxThreadsActive();
-        // also make sure batchSize is always at least 1
+        // also make sure chunkSize is always at least 1
         int batchSize = Math.max(1, Math.min(connector.getGigaSpaceObj().count(template), ((maxThreads / 2) - 1)));
 
         // try to get the first event off the queue

@@ -453,10 +453,10 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
         super.validateConfiguration();
         if (batchSize == null && batchTime != null) {
             throw new IllegalArgumentException("batchTime has value [" + batchTime
-                    + "] which enables batching. batchSize must have a value as well");
+                    + "] which enables batching. chunkSize must have a value as well");
         }
         if (batchTime == null && batchSize != null) {
-            throw new IllegalArgumentException("batchSize has value [" + batchSize
+            throw new IllegalArgumentException("chunkSize has value [" + batchSize
                     + "] which enables batching. batchTime must have a value as well");
         }
         Assert.notNull(template, "template property is required");

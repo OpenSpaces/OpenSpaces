@@ -17,6 +17,7 @@
 package org.openspaces.persistency.hibernate.iterator;
 
 import com.j_spaces.core.client.SQLQuery;
+import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
@@ -39,20 +40,80 @@ public class DefaultScrollableDataIterator extends AbstractScrollableDataIterato
 
     protected Transaction transaction;
 
+    /**
+     * Constructs a scrollable iterator over the given entity name.
+     *
+     * @param entityName       The entity name to scroll over
+     * @param sessionFactory   The session factory to use to construct the session
+     * @param fetchSize        The fetch size of the scrollabale result set
+     * @param performOrderById Should the query perform order by id or not
+     */
     public DefaultScrollableDataIterator(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById) {
         super(entityName, sessionFactory, fetchSize, performOrderById);
     }
 
+    /**
+     * Constructs a scrollable iterator over the given entity name.
+     *
+     * @param entityName       The entity name to scroll over
+     * @param sessionFactory   The session factory to use to constrcut the session
+     * @param fetchSize        The fetch size of the scrollable result set
+     * @param performOrderById Should the query perform order by id or not
+     * @param from             The from index to scroll from
+     * @param size             The size of data to scroll to
+     */
     public DefaultScrollableDataIterator(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
         super(entityName, sessionFactory, fetchSize, performOrderById, from, size);
     }
 
+    /**
+     * Constructs a scrollable iterator over the given GigaSpaces <code>SQLQuery</code>.
+     *
+     * @param sqlQuery         The <code>SQLQuery</code> to scroll over
+     * @param sessionFactory   The session factory to use to construct the session
+     * @param fetchSize        The fetch size of the scrollabale result set
+     * @param performOrderById Should the query perform order by id or not
+     */
     public DefaultScrollableDataIterator(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById) {
         super(sqlQuery, sessionFactory, fetchSize, performOrderById);
     }
 
+    /**
+     * Constructs a scrollable iterator over the given GigaSpaces <code>SQLQuery</code>.
+     *
+     * @param sqlQuery         The <code>SQLQuery</code> to scroll over
+     * @param sessionFactory   The session factory to use to constrcut the session
+     * @param fetchSize        The fetch size of the scrollable result set
+     * @param performOrderById Should the query perform order by id or not
+     * @param from             The from index to scroll from
+     * @param size             The size of data to scroll to
+     */
     public DefaultScrollableDataIterator(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
         super(sqlQuery, sessionFactory, fetchSize, performOrderById, from, size);
+    }
+
+    /**
+     * Constructs a scrollable iterator over the given hibernate query string.
+     *
+     * @param hQuery         The hiberante query string to scroll over
+     * @param sessionFactory The session factory to use to construct the session
+     * @param fetchSize      The fetch size of the scrollabale result set
+     */
+    public DefaultScrollableDataIterator(String hQuery, SessionFactory sessionFactory, int fetchSize) {
+        super(hQuery, sessionFactory, fetchSize);
+    }
+
+    /**
+     * Constructs a scrollable iterator over the given hibernate query string.
+     *
+     * @param hQuery         The hiberante query string to scroll over
+     * @param sessionFactory The session factory to use to constrcut the session
+     * @param fetchSize      The fetch size of the scrollable result set
+     * @param from           The from index to scroll from
+     * @param size           The size of data to scroll to
+     */
+    public DefaultScrollableDataIterator(String hQuery, SessionFactory sessionFactory, int fetchSize, int from, int size) {
+        super(hQuery, sessionFactory, fetchSize, from, size);
     }
 
     protected void doClose() {
@@ -96,8 +157,19 @@ public class DefaultScrollableDataIterator extends AbstractScrollableDataIterato
                 query.setMaxResults(size);
             }
             return query.scroll(ScrollMode.FORWARD_ONLY);
+        } else if (hQuery != null) {
+            Query query = session.createQuery(hQuery);
+            query.setFetchSize(fetchSize);
+            if (from > 0) {
+                query.setFirstResult(from);
+                query.setMaxResults(size);
+            }
+            query.setCacheMode(CacheMode.IGNORE);
+            query.setCacheable(false);
+            query.setReadOnly(true);
+            return query.scroll(ScrollMode.FORWARD_ONLY);
         } else {
-            throw new IllegalStateException("No SQLQuery or entity provided");
+            throw new IllegalStateException("No SQLQuery, entity, or Hibernate Query provided");
         }
     }
 }
