@@ -300,8 +300,8 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
         bitMask = ((methodName != null)  ? bitMask | METHOD_NAME_BIT_MASK : bitMask) ;
         bitMask = ((routing != null)  ? bitMask | ROUTING_BIT_MASK : bitMask) ;
         bitMask = ((oneWay != null)  ? bitMask | ONE_WAY_BIT_MASK : bitMask) ;
-        bitMask = ((arguments != null)  ? bitMask | ARGUMENTS_BIT_MASK : bitMask) ;
-        bitMask = ((metaArguments != null)  ? bitMask | META_ARGUMENTS_BIT_MASK : bitMask) ;
+        bitMask = ((arguments != null && arguments.length > 0)  ? bitMask | ARGUMENTS_BIT_MASK : bitMask) ;
+        bitMask = ((metaArguments != null && metaArguments.length > 0)  ? bitMask | META_ARGUMENTS_BIT_MASK : bitMask) ;
         bitMask = ((result != null)  ? bitMask | RESULT_BIT_MASK : bitMask) ;
         bitMask = ((ex != null)  ? bitMask | EX_BIT_MASK : bitMask) ;
         bitMask = ((instanceId != null)  ? bitMask | INSTANCE_ID_BIT_MASK : bitMask) ;

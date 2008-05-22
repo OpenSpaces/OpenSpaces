@@ -62,7 +62,7 @@ can be used: mvn compile os:run -Dmodule=processor -Dcluster="total_members=2,1"
   In order to run a packaged processing unit, "mvn package os:run-standalone" can be used (if
 "mvn package" was already executed, it can be omitted). This operation will run the processing units
 using the packaged jar files. Running a specific module with a cluster topology can be executed using:
-mvn pacakge os:run-standalone -Dmodule=processor -Dcluster="total_members=2,1".
+mvn package os:run-standalone -Dmodule=processor -Dcluster="total_members=2,1".
 
   Deploying the application requires starting up a GSM and at least 2 GSCs (scripts located under
 the bin directory within the GigaSpaces installation). Once started, running "mvn package os:deploy"
