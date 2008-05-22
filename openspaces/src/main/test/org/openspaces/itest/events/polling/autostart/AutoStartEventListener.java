@@ -1,11 +1,11 @@
 package org.openspaces.itest.events.polling.autostart;
 
 import org.openspaces.core.GigaSpace;
-import org.openspaces.events.EventTemplateProvider;
+import org.openspaces.events.EventTemplate;
 import org.openspaces.events.SpaceDataEventListener;
 import org.springframework.transaction.TransactionStatus;
 
-public class AutoStartEventListener implements SpaceDataEventListener<Object>, EventTemplateProvider {
+public class AutoStartEventListener implements SpaceDataEventListener<Object> {
 
     private int messageCounter = 0;
 
@@ -17,7 +17,8 @@ public class AutoStartEventListener implements SpaceDataEventListener<Object>, E
         return messageCounter;
     }
 
-    public Object getTemplate() {
+    @EventTemplate
+    public Object getMySpecialTemplate() {
         return new Object();
     }
 

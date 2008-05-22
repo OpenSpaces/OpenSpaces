@@ -25,8 +25,7 @@ import net.jini.core.event.RemoteEventListener;
 import net.jini.core.lease.Lease;
 import net.jini.lease.LeaseListener;
 import org.openspaces.core.util.SpaceUtils;
-import org.openspaces.events.AbstractEventListenerContainer;
-import org.openspaces.events.EventTemplateProvider;
+import org.openspaces.events.AbstractTemplateEventListenerContainer;
 import org.springframework.core.Constants;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -87,7 +86,7 @@ import java.rmi.RemoteException;
  * @see com.gigaspaces.events.EventSessionFactory
  * @see com.gigaspaces.events.DataEventSession
  */
-public abstract class AbstractNotifyEventListenerContainer extends AbstractEventListenerContainer {
+public abstract class AbstractNotifyEventListenerContainer extends AbstractTemplateEventListenerContainer {
 
     public static final String COM_TYPE_PREFIX = "COM_TYPE_";
 
@@ -126,10 +125,6 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
 
     private LeaseListener leaseListener;
 
-    private Object template;
-
-    private boolean performSnapshot = true;
-
     private long listenerLease = Lease.FOREVER;
 
     private INotifyDelegatorFilter notifyFilter;
@@ -152,8 +147,6 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
 
     private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
 
-
-    private Object receiveTemplate;
 
     /**
      * See {@link #setComTypeName(String)}.
@@ -223,32 +216,6 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
      */
     public void setLeaseListener(LeaseListener leaseListener) {
         this.leaseListener = leaseListener;
-    }
-
-    /**
-     * Sets the specified template to be used for notifications.
-     */
-    public void setTemplate(Object template) {
-        this.template = template;
-    }
-
-    /**
-     * Returns the template to be used for receive operations. If
-     * {@link #setPerformSnapshot(boolean)} is set to <code>true</code> (the default)
-     * will return the snapshot of the provided template.
-     */
-    protected Object getReceiveTemplate() {
-        return receiveTemplate;
-    }
-
-    /**
-     * If set to <code>true</code> will perform snapshot operation on the provided template
-     * before invoking registering as an event listener.
-     *
-     * @see org.openspaces.core.GigaSpace#snapshot(Object)
-     */
-    public void setPerformSnapshot(boolean performSnapshot) {
-        this.performSnapshot = performSnapshot;
     }
 
     /**
@@ -387,16 +354,6 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
         this.transactionDefinition.setIsolationLevelName(transactionIsolationLevelName);
     }
 
-    public void afterPropertiesSet() {
-        if (template == null) {
-            Class eventListenerType = getEventListenerClass();
-            if (EventTemplateProvider.class.isAssignableFrom(eventListenerType)) {
-                setTemplate(((EventTemplateProvider) getEventListener()).getTemplate());
-            }
-        }
-        super.afterPropertiesSet();
-    }
-
     public void initialize() throws DataAccessException {
         // if we are using a Space that was started in embedded mode, no need to replicate notify template
         // by default
@@ -413,17 +370,8 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
             replicateNotifyTemplate = true;
         }
 
-        if (performSnapshot) {
-            if (logger.isDebugEnabled()) {
-                logger.debug(message("Performing snapshot on template [" + template + "]"));
-            }
-            receiveTemplate = getGigaSpace().snapshot(template);
-        } else {
-            receiveTemplate = template;
-        }
-
-        if (template instanceof NotifyTypeProvider) {
-            NotifyTypeProvider notifyTypeProvider = (NotifyTypeProvider) template;
+        if (getTemplate() instanceof NotifyTypeProvider) {
+            NotifyTypeProvider notifyTypeProvider = (NotifyTypeProvider) getTemplate();
             if (notifyTypeProvider.isLeaseExpire() != null && notifyLeaseExpire == null) {
                 notifyLeaseExpire = notifyTypeProvider.isLeaseExpire();
             }
@@ -459,7 +407,6 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractEvent
             throw new IllegalArgumentException("chunkSize has value [" + batchSize
                     + "] which enables batching. batchTime must have a value as well");
         }
-        Assert.notNull(template, "template property is required");
     }
 
 

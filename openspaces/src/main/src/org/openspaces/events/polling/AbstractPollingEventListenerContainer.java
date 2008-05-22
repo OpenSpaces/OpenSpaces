@@ -17,8 +17,7 @@
 package org.openspaces.events.polling;
 
 import org.openspaces.core.SpaceInterruptedException;
-import org.openspaces.events.AbstractEventListenerContainer;
-import org.openspaces.events.EventTemplateProvider;
+import org.openspaces.events.AbstractTemplateEventListenerContainer;
 import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.events.polling.receive.ReceiveOperationHandler;
 import org.openspaces.events.polling.receive.SingleTakeReceiveOperationHandler;
@@ -73,16 +72,12 @@ import org.springframework.util.Assert;
  *
  * @author kimchy
  */
-public abstract class AbstractPollingEventListenerContainer extends AbstractEventListenerContainer {
+public abstract class AbstractPollingEventListenerContainer extends AbstractTemplateEventListenerContainer {
 
     /**
      * The default receive timeout: 60000 ms = 60 seconds = 1 minute.
      */
     public static final long DEFAULT_RECEIVE_TIMEOUT = 60000;
-
-    private Object template;
-
-    private boolean performSnapshot = true;
 
     private boolean passArrayAsIs = false;
 
@@ -96,36 +91,6 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
 
     private TriggerOperationHandler triggerOperationHandler;
 
-
-    private Object receiveTemplate;
-
-    /**
-     * Sets the specified template to be used with the polling space operation.
-     *
-     * @see org.openspaces.core.GigaSpace#take(Object,long)
-     */
-    public void setTemplate(Object template) {
-        this.template = template;
-    }
-
-    /**
-     * Returns the template to be used for receive operations. If
-     * {@link #setPerformSnapshot(boolean)} is set to <code>true</code> (the default)
-     * will return the snapshot of the provided template.
-     */
-    protected Object getReceiveTemplate() {
-        return receiveTemplate;
-    }
-
-    /**
-     * If set to <code>true</code> will perform snapshot operation on the provided template
-     * before invoking the receive operation. Defaults to <code>true</code>.
-     *
-     * @see org.openspaces.core.GigaSpace#snapshot(Object)
-     */
-    public void setPerformSnapshot(boolean performSnapshot) {
-        this.performSnapshot = performSnapshot;
-    }
 
     /**
      * If set to <code>true</code> will pass an array value returned from a
@@ -236,28 +201,10 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
         this.triggerOperationHandler = triggerOperationHandler;
     }
 
-    public void afterPropertiesSet() {
-        if (template == null) {
-            Class eventListenerType = getEventListenerClass();
-            if (EventTemplateProvider.class.isAssignableFrom(eventListenerType)) {
-                setTemplate(((EventTemplateProvider) getEventListener()).getTemplate());
-            }
-        }
-        super.afterPropertiesSet();
-    }
-
     public void initialize() {
         // Use bean name as default transaction name.
         if (this.transactionDefinition.getName() == null) {
             this.transactionDefinition.setName(getBeanName());
-        }
-        if (performSnapshot) {
-            if (logger.isDebugEnabled()) {
-                logger.debug(message("Performing snapshot on template [" + template + "]"));
-            }
-            receiveTemplate = getGigaSpace().snapshot(template);
-        } else {
-            receiveTemplate = template;
         }
         // Proceed with superclass initialization.
         super.initialize();
@@ -266,7 +213,6 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
     protected void validateConfiguration() {
         super.validateConfiguration();
         Assert.isTrue(receiveTimeout >= 0, "receiveTimeout must have a non negative value");
-        Assert.notNull(template, "template property is required");
     }
 
     /**
@@ -281,7 +227,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractEven
         if (triggerOperationHandler != null) {
             Object trigger;
             try {
-                trigger = triggerOperationHandler.triggerReceive(this.template, getGigaSpace(), receiveTimeout);
+                trigger = triggerOperationHandler.triggerReceive(getReceiveTemplate(), getGigaSpace(), receiveTimeout);
             } catch (SpaceInterruptedException e) {
                 return false;
             }
