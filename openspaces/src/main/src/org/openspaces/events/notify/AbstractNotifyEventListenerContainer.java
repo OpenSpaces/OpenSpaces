@@ -401,10 +401,10 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
         super.validateConfiguration();
         if (batchSize == null && batchTime != null) {
             throw new IllegalArgumentException("batchTime has value [" + batchTime
-                    + "] which enables batching. chunkSize must have a value as well");
+                    + "] which enables batching. batchSize must have a value as well");
         }
         if (batchTime == null && batchSize != null) {
-            throw new IllegalArgumentException("chunkSize has value [" + batchSize
+            throw new IllegalArgumentException("batchSize has value [" + batchSize
                     + "] which enables batching. batchTime must have a value as well");
         }
     }

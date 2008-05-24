@@ -108,7 +108,7 @@ public class NotifyContainerBeanDefinitionParser extends AbstractTxEventContaine
         Element batchEle = DomUtils.getChildElementByTagName(element, BATCH);
         if (batchEle != null) {
             builder.addPropertyValue("batchTime", batchEle.getAttribute(BATCH_TIME));
-            builder.addPropertyValue("chunkSize", batchEle.getAttribute(BATCH_SIZE));
+            builder.addPropertyValue("batchSize", batchEle.getAttribute(BATCH_SIZE));
         }
 
         Element leaseEle = DomUtils.getChildElementByTagName(element, LEASE);
