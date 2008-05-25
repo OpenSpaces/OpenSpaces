@@ -32,6 +32,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -88,7 +89,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
     private ClusterInfo clusterInfo;
 
 
-    private URLClassLoader commonClassLoader;
+    private boolean addedSharedLibToClassLoader = false;
 
     /**
      * Constructs a new standalone container provider using the provided location as the location of
@@ -241,11 +242,15 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
                     File tempLocation = new File(System.getProperty("java.io.tmpdir") + "/openspaces");
                     tempLocation.mkdirs();
                     File tempJar;
+                    String tempJarName = jarEntry.getName();
+                    if (tempJarName.indexOf('/') != -1) {
+                        tempJarName = tempJarName.substring(tempJarName.lastIndexOf('/') + 1);
+                    }
                     try {
-                        tempJar = File.createTempFile("openspaces-", ".jar", tempLocation);
+                        tempJar = File.createTempFile(tempJarName, ".jar", tempLocation);
                     } catch (IOException e) {
                         throw new CannotCreateContainerException("Failed to create temp jar at location ["
-                                + tempLocation + "]");
+                                + tempLocation + "] with name [" + tempJarName + "]", e);
                     }
                     tempJar.deleteOnExit();
                     if (logger.isTraceEnabled()) {
@@ -296,19 +301,11 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
             }
         }
 
-        if (commonClassLoader == null) {
-            ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
-            if (parentClassLoader == null) {
-                parentClassLoader = this.getClass().getClassLoader();
-            }
-
-            URL[] sharedClassLoaderUrls = sharedUrls.toArray(new URL[sharedUrls.size()]);
-            commonClassLoader = new URLClassLoader(sharedClassLoaderUrls, parentClassLoader);
-        }
+        addSharedLibToContextClassLoader(sharedUrls.toArray(new URL[sharedUrls.size()]));
 
         URL[] classLoaderUrls = urls.toArray(new URL[urls.size()]);
-        URLClassLoader classLoader = new URLClassLoader(classLoaderUrls, commonClassLoader);
-        
+        URLClassLoader classLoader = new URLClassLoader(classLoaderUrls, Thread.currentThread().getContextClassLoader());
+
         StandaloneContainerRunnable containerRunnable = new StandaloneContainerRunnable(beanLevelProperties,
                 clusterInfo, configLocations);
         Thread standaloneContainerThread = new Thread(containerRunnable, "Standalone Container Thread");
@@ -354,4 +351,32 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
         }
     }
 
+    /**
+     * Adds the shared lib to the thread context class loader (they need to be added to where the openspaces.jar
+     * class exists).
+     */
+    private void addSharedLibToContextClassLoader(URL[] sharedURLs) {
+        if (addedSharedLibToClassLoader) {
+            return;
+        }
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        Class clazz = classLoader.getClass();
+        while (clazz != Object.class && !URLClassLoader.class.equals(clazz)) {
+            clazz = clazz.getSuperclass();
+        }
+        if (clazz == Object.class) {
+            throw new CannotCreateContainerException("Failed to find URLClassLoader to add shared lib for " + classLoader.getClass());
+        }
+
+        try {
+            Method addURL = clazz.getDeclaredMethod("addURL", URL.class);
+            addURL.setAccessible(true);
+            for (URL url : sharedURLs) {
+                addURL.invoke(classLoader, url);
+            }
+        } catch (Exception e) {
+            throw new CannotCreateContainerException("Failed to add shared lib to therad context class loader [" + classLoader + "]", e);
+        }
+        addedSharedLibToClassLoader = true;
+    }
 }

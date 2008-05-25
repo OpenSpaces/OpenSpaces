@@ -157,17 +157,8 @@ public class RunStandalonePUMojo extends AbstractMojo {
         // run the PU
         getLog().info("Running processing unit: " + project.getBuild().getFinalName());
 
-        // iterate over target/[]dir/[]/shared-lib/*.jar and add it (if does not exists in class loader)
-        // into the shared class loader
-        try {
-            Utils.addSharedLibToClassLoader(project, this.sharedClassLoader);
-        } catch (Exception e1) {
-            throw new MojoExecutionException("Failed to add shared-lib jars of processing unit [" + project.getName() + "]", e1);
-        }
-
         ContainerRunnable conatinerRunnable = new ContainerRunnable("org.openspaces.pu.container.standalone.StandaloneProcessingUnitContainer", createAttributesArray(Utils.getProcessingUnitJar((project))));
         Thread thread = new Thread(conatinerRunnable, "Processing Unit [" + project.getBuild().getFinalName() + "]");
-        thread.setContextClassLoader(sharedClassLoader);
         thread.start();
         while (!conatinerRunnable.hasStarted()) {
             try {

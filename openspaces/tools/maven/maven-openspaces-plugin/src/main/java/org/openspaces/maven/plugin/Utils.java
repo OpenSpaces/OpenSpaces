@@ -8,7 +8,6 @@ import sun.misc.URLClassPath;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -243,29 +242,6 @@ public class Utils {
         relativePath = relativePath.replace('\\', '/');
         String finalName = project.getBuild().getFinalName();
         return relativePath + "/" + finalName;
-    }
-
-
-    /**
-     * Adds the jars in shared-lib to the class loader to be accessible in runtime.
-     *
-     * @param project     the Maven poject
-     * @param classLoader the class loader.
-     * @throws Exception
-     */
-    static void addSharedLibToClassLoader(MavenProject project, ClassLoader classLoader) throws Exception {
-        String path = Utils.getPURelativePathDir(project);
-        path = path + "/shared-lib";
-        File f = new File(path);
-        if (!f.exists()) {
-            return;
-        }
-        File[] files = f.listFiles();
-        Method m = URLClassLoader.class.getDeclaredMethod("addURL", new Class[]{URL.class});
-        m.setAccessible(true);
-        for (int i = 0; i < files.length; i++) {
-            m.invoke(classLoader, new Object[]{Utils.getURL(files[i])});
-        }
     }
 
 
