@@ -45,7 +45,7 @@ USING OPENSPACES MAVEN PLUGIN
 (*) mvn os:run-standalone
 
   Runs the given project (all the modules that are marked as PU) using the packaged 
-  processing unit jars. Can be configured to run just a specificprocessing unit module using 
+  processing unit jars. Can be configured to run just a specific processing unit module using 
   -Dmodule=[module name] parameter.
 
 (*) mvn os:deploy
