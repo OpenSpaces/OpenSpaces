@@ -19,7 +19,7 @@ INSTALLING GIGASPACES INTO MAVEN REPOSITORY
 -------------------------------------------
 
 Running installmavenrep.(sh/bat) will install GigaSpaces different jar files into Maven local 
-repository (defaults to USER_HOME/.m2/repostiory).
+repository (defaults to USER_HOME/.m2/repository).
 
 USING OPENSPACES MAVEN PLUGIN
 -----------------------------
