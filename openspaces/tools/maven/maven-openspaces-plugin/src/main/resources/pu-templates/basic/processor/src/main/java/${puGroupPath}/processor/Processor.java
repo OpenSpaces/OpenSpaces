@@ -20,7 +20,7 @@ public class Processor {
     private GigaSpace gigaSpace;
 
     /**
-     * Sets the simulated work duration (in milliseconds). Defaut to 100.
+     * Sets the simulated work duration (in milliseconds). Default to 100.
      */
     public void setWorkDuration(long workDuration) {
         this.workDuration = workDuration;

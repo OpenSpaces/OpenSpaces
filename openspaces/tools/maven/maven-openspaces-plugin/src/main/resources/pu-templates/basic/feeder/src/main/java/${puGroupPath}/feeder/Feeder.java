@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * annotation.
  *
  * <p>The scheduling uses the java.util.concurrent Scheduled Executor Service. It
- * is started and stopped based on Spring lifecycle events.
+ * is started and stopped based on Spring life cycle events.
  *
  * @author kimchy
  */
