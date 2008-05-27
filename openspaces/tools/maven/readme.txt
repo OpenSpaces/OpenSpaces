@@ -35,6 +35,12 @@ USING OPENSPACES MAVEN PLUGIN
   Creates a built in project that can be used to either show or use as a starting point
   for a GigaSpaces project. Running it without any parameters shows the different project 
   templates and how they can be used.
+  
+  -DartifactId: Controls the name of the project. Defaults to my-app.
+  -DgroupId: Controls the package name. Defaults to com.mycompany.app.
+  
+  Once executed, cd into the [artifactId] directory in order to work within the 
+  application. For example, run 'mvn test'.
 
 (*) mvn compile os:run
 
