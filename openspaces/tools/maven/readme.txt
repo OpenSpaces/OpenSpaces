@@ -21,6 +21,12 @@ INSTALLING GIGASPACES INTO MAVEN REPOSITORY
 Running installmavenrep.(sh/bat) will install GigaSpaces different jar files into Maven local 
 repository (defaults to USER_HOME/.m2/repository).
 
+NEXT STEPS
+----------
+
+Use 'mvn os:create' in order to create a project template. Once a certain project is created,
+the project includes a readme.txt that explains how to run it.
+
 USING OPENSPACES MAVEN PLUGIN
 -----------------------------
 
@@ -53,4 +59,9 @@ USING OPENSPACES MAVEN PLUGIN
   Deploys the packaged jars of the different processing unit modules into the Service Grid.
   Can be configured to deploy just a specific module using -Dmodule=[module name]. Can be
   configured to deploy using a specific lookup group using -Dgroups=[group name].
-  
+
+(*) mvn os:undeploy
+
+  Undeploys the different processing units modules from the Service Grid. Can to configured
+  to undeploy just a specific module using -Dmodule=[module name]. Can be configured to
+  undeploy using a specific lookup groups using -Dgroups=[group name].

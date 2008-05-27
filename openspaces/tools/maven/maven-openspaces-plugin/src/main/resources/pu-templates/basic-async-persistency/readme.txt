@@ -38,6 +38,7 @@ Quick list:
 
 * mvn compile: Compile the project.
 * mvn compile os:run: Compile and run the project.
+* mvn test: Runs the tests in the project.
 * mvn package: Compile and package the project.
 * mvn os:run-standalone: Runs a packaged application (from the jars).
 * mvn os:deploy: Deploys the project onto the Service Grid.
