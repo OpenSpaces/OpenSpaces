@@ -1,6 +1,7 @@
 Creates a basic SBA application with two processing units. The Feeder
 processing unit sends Data objects through the Space to a Processor.
 The Space and the Processor are collocated in the same processing unit.
+JVM: > 5.
 
 GENERAL DESCRIPTION:
 --------------------
