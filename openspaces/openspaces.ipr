@@ -635,7 +635,9 @@
         <root url="jar://$PROJECT_DIR$/lib/JSpaces.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES />
+      <SOURCES>
+        <root url="file://$PROJECT_DIR$/../gigaspaces/src/java" />
+      </SOURCES>
     </library>
     <library name="Spring">
       <CLASSES>
@@ -748,7 +750,9 @@
         <root url="jar://$PROJECT_DIR$/lib/jini/jsk-lib.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES />
+      <SOURCES>
+        <root url="file://$PROJECT_DIR$/../jini/src" />
+      </SOURCES>
     </library>
     <library name="Common">
       <CLASSES>
