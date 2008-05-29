@@ -16,6 +16,7 @@
 
 package org.openspaces.events;
 
+import org.openspaces.events.adapter.EventListenerAdapter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.dao.DataAccessException;
@@ -65,6 +66,14 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
             return null;
         }
         return (SpaceDataEventListener) applicationContext.getBean(eventListenerRef);
+    }
+
+    protected Object getActualEventListener() {
+        Object listener = getEventListener();
+        while (listener instanceof EventListenerAdapter) {
+            listener = ((EventListenerAdapter) listener).getActualEventListener();
+        }
+        return listener;
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) {

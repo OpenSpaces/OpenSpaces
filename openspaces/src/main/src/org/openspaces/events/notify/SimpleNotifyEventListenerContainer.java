@@ -74,7 +74,7 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
     /**
      * If set to <code>true</code>, will not propagate the event if the take operation returned
      * <code>null</code>. This flag only makes sense when
-     * {@link #setPerformTakeOnNotify(boolean)} is set to <code>true</code>.
+     * {@link #setPerformTakeOnNotify(boolean)} is set to <code>true</code>. Defaults to <code>false</code>.
      */
     public void setIgnoreEventOnNullTake(boolean ignoreEventOnNullTake) {
         this.ignoreEventOnNullTake = ignoreEventOnNullTake;

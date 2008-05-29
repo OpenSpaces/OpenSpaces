@@ -45,14 +45,16 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
         if (template == null) {
             Class eventListenerType = getEventListenerClass();
             if (eventListenerType != null) {
+                Object listener = getActualEventListener();
+
                 // check if it implements an interface to provide the template
-                if (EventTemplateProvider.class.isAssignableFrom(eventListenerType)) {
+                if (EventTemplateProvider.class.isAssignableFrom(listener.getClass())) {
                     setTemplate(((EventTemplateProvider) getEventListener()).getTemplate());
                 }
 
                 // check if there is an annotation for it
                 final AtomicReference<Method> ref = new AtomicReference<Method>();
-                ReflectionUtils.doWithMethods(eventListenerType, new ReflectionUtils.MethodCallback() {
+                ReflectionUtils.doWithMethods(listener.getClass(), new ReflectionUtils.MethodCallback() {
                     public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
                         if (method.isAnnotationPresent(EventTemplate.class)) {
                             ref.set(method);
@@ -61,7 +63,7 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
                 });
                 if (ref.get() != null) {
                     try {
-                        setTemplate(ref.get().invoke(getEventListener()));
+                        setTemplate(ref.get().invoke(listener));
                     } catch (Exception e) {
                         throw new IllegalArgumentException("Failed to get template from method [" + ref.get().getName() + "]", e);
                     }

@@ -30,7 +30,7 @@ public class EventContainersBus implements DisposableBean {
 
     private ConcurrentHashMap<String, AbstractEventListenerContainer> containers = new ConcurrentHashMap<String, AbstractEventListenerContainer>();
 
-    public void registerContaienr(String name, AbstractEventListenerContainer container) throws Exception {
+    public void registerContaienr(String name, AbstractEventListenerContainer container) {
         containers.put(name + SUFFIX, container);
     }
 
@@ -39,6 +39,10 @@ public class EventContainersBus implements DisposableBean {
         if (container != null) {
             container.destroy();
         }
+    }
+
+    public AbstractEventListenerContainer getEventContaienr(String name) {
+        return containers.get(name + SUFFIX);
     }
 
     public void destroy() throws Exception {

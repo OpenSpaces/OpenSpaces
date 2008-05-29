@@ -64,7 +64,7 @@ import java.lang.reflect.Method;
  * @author kimchy
  */
 public abstract class AbstractReflectionEventListenerAdapter extends AbstractResultEventListenerAdapter implements
-        InitializingBean {
+        InitializingBean, EventListenerAdapter {
 
     /**
      * Logger available to subclasses
@@ -173,6 +173,10 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
 
         }
         return result;
+    }
+
+    public Object getActualEventListener() {
+        return this.delegate;
     }
 
     /**

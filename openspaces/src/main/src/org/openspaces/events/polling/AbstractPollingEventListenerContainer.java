@@ -28,6 +28,10 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
+
+import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Base class for listener container implementations which are based on polling. Provides support
@@ -87,7 +91,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTemp
 
     private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 
-    private ReceiveOperationHandler receiveOperationHandler = new SingleTakeReceiveOperationHandler();
+    private ReceiveOperationHandler receiveOperationHandler;
 
     private TriggerOperationHandler triggerOperationHandler;
 
@@ -206,6 +210,49 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTemp
         if (this.transactionDefinition.getName() == null) {
             this.transactionDefinition.setName(getBeanName());
         }
+
+        if (receiveOperationHandler == null) {
+            if (getActualEventListener() != null) {
+                // try and find an annotated one
+                final AtomicReference<Method> ref = new AtomicReference<Method>();
+                ReflectionUtils.doWithMethods(getActualEventListener().getClass(), new ReflectionUtils.MethodCallback() {
+                    public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+                        if (method.isAnnotationPresent(ReceiveHandler.class)) {
+                            ref.set(method);
+                        }
+                    }
+                });
+                if (ref.get() != null) {
+                    try {
+                        setReceiveOperationHandler((ReceiveOperationHandler) ref.get().invoke(getActualEventListener()));
+                    } catch (Exception e) {
+                        throw new IllegalArgumentException("Failed to set ReceiveOperationHandler from method [" + ref.get().getName() + "]", e);
+                    }
+                }
+            }
+            if (receiveOperationHandler == null) {
+                receiveOperationHandler = new SingleTakeReceiveOperationHandler();
+            }
+        }
+
+        if (triggerOperationHandler == null && getActualEventListener() != null) {
+            final AtomicReference<Method> ref = new AtomicReference<Method>();
+            ReflectionUtils.doWithMethods(getActualEventListener().getClass(), new ReflectionUtils.MethodCallback() {
+                public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+                    if (method.isAnnotationPresent(TriggerHandler.class)) {
+                        ref.set(method);
+                    }
+                }
+            });
+            if (ref.get() != null) {
+                try {
+                    setTriggerOperationHandler((TriggerOperationHandler) ref.get().invoke(getActualEventListener()));
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Failed to set ReceiveOperationHandler from method [" + ref.get().getName() + "]", e);
+                }
+            }
+        }
+
         // Proceed with superclass initialization.
         super.initialize();
     }

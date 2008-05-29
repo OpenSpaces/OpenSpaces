@@ -22,7 +22,7 @@ import org.springframework.util.Assert;
  * @author kimchy
  * @see org.springframework.core.task.TaskExecutor
  */
-public class TaskExecutorEventListenerAdapter implements SpaceDataEventListener, InitializingBean {
+public class TaskExecutorEventListenerAdapter implements SpaceDataEventListener, InitializingBean, EventListenerAdapter {
 
     private static Log logger = LogFactory.getLog(TaskExecutorEventListenerAdapter.class);
 
@@ -60,6 +60,10 @@ public class TaskExecutorEventListenerAdapter implements SpaceDataEventListener,
             simpleAsyncTaskExecutor.setDaemon(true);
             taskExecutor = simpleAsyncTaskExecutor;
         }
+    }
+
+    public Object getActualEventListener() {
+        return this.delegate;
     }
 
     /**
