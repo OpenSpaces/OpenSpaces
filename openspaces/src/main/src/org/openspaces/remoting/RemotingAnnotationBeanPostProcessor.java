@@ -3,6 +3,7 @@ package org.openspaces.remoting;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.core.util.AnnotationUtils;
 import org.openspaces.remoting.scripting.AsyncScriptingExecutor;
 import org.openspaces.remoting.scripting.LazyLoadingRemoteInvocationAspect;
 import org.openspaces.remoting.scripting.ScriptingExecutor;
@@ -16,7 +17,6 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 

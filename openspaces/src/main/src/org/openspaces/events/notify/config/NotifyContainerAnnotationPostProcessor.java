@@ -19,6 +19,7 @@ package org.openspaces.events.notify.config;
 import com.j_spaces.core.client.INotifyDelegatorFilter;
 import net.jini.lease.LeaseListener;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.core.util.AnnotationUtils;
 import org.openspaces.events.TransactionalEventContainer;
 import org.openspaces.events.notify.NotifyBatch;
 import org.openspaces.events.notify.NotifyContainer;
@@ -32,7 +33,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * A {@link org.openspaces.events.notify.NotifyContainer} annotation post processor. Creates an intenral

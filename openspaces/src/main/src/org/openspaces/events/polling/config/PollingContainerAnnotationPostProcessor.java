@@ -17,6 +17,7 @@
 package org.openspaces.events.polling.config;
 
 import org.openspaces.core.GigaSpace;
+import org.openspaces.core.util.AnnotationUtils;
 import org.openspaces.events.TransactionalEventContainer;
 import org.openspaces.events.polling.PollingContainer;
 import org.openspaces.events.polling.SimplePollingContainerConfigurer;
@@ -27,7 +28,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * A {@link org.openspaces.events.polling.PollingContainer} annotation post processor. Creates an intenral
