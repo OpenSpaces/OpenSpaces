@@ -373,10 +373,14 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             entry.setFieldValue("oneWay", null);
 
 
-            Object service = interfaceToService.get(remotingEntry.lookupName);
+            String lookupName = remotingEntry.lookupName;
+            if (lookupName.endsWith(asyncInterfaceSuffix)) {
+                lookupName = lookupName.substring(0, lookupName.length() - asyncInterfaceSuffix.length());
+            }
+            Object service = interfaceToService.get(lookupName);
             if (service == null) {
                 // we did not get an interface, maybe it is a bean name?
-                service = applicationContext.getBean(remotingEntry.lookupName);
+                service = applicationContext.getBean(lookupName);
                 if (service == null) {
                     writeResponse(space, entry, remotingEntry, new RemoteLookupFailureException(
                             "Failed to find service for lookup [" + remotingEntry.getLookupName() + "]"));
@@ -386,7 +390,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
             Method method;
             try {
-                method = methodInvocationCache.findMethod(remotingEntry.lookupName, service, remotingEntry.methodName, remotingEntry.arguments);
+                method = methodInvocationCache.findMethod(lookupName, service, remotingEntry.methodName, remotingEntry.arguments);
             } catch (Exception e) {
                 writeResponse(space, entry, remotingEntry, new RemoteLookupFailureException("Failed to find method ["
                         + remotingEntry.getMethodName() + "] for lookup [" + remotingEntry.getLookupName() + "]", e));

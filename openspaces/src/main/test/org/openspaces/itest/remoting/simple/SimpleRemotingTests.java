@@ -82,6 +82,11 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         assertEquals("SAY test", reply);
     }
 
+    public void testSyncAsyncExecution() throws Exception {
+        Future<String> reply = simpleServiceSync.asyncSay("test");
+        assertEquals("SAY test", reply.get());
+    }
+
     public void testSimpleAnnotationExecution() {
         String reply = simpleAnnotationBean.syncSimpleService.say("test");
         assertEquals("SAY test", reply);

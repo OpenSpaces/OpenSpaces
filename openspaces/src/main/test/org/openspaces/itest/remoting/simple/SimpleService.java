@@ -11,5 +11,5 @@ public interface SimpleService {
 
     String say(@Routing String message);
 
-    Future asyncSay(String message);
+    Future<String> asyncSay(String message);
 }

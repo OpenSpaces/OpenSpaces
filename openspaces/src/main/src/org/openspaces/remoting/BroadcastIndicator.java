@@ -29,6 +29,9 @@ public interface BroadcastIndicator {
      * if should not affect it in any manner.
      */
     Boolean shouldBroadcast();
-    
+
+    /**
+     * Returns the reducer that will be used in case broadcasting is enabled or not.
+     */
     RemoteResultReducer getReducer();
 }

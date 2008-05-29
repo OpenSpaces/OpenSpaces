@@ -25,6 +25,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.support.RemoteAccessor;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+
+import java.util.concurrent.Future;
 
 /**
  * A space <b>sync</b> remoting proxy that forward the service execution to a remote service with the space as
@@ -65,11 +68,16 @@ import org.springframework.util.Assert;
 public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements FactoryBean, InitializingBean,
         MethodInterceptor, RemotingInvoker {
 
+    public static final String DEFAULT_ASYNC_METHOD_PREFIX = "async";
+
+    
     private GigaSpace gigaSpace;
 
     private RemoteRoutingHandler remoteRoutingHandler;
 
     private MetaArgumentsHandler metaArgumentsHandler;
+
+    private String asyncMethodPrefix = DEFAULT_ASYNC_METHOD_PREFIX;
     
     private boolean globalOneWay = false;
 
@@ -194,6 +202,15 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
         String lookupName = getServiceInterface().getName();
         String methodName = methodInvocation.getMethod().getName();
 
+        boolean asyncExecution = false;
+        if (Future.class.isAssignableFrom(methodInvocation.getMethod().getReturnType())) {
+            asyncExecution = true;
+            if (methodName.startsWith(asyncMethodPrefix)) {
+                methodName = StringUtils.uncapitalize(methodName.substring(asyncMethodPrefix.length()));
+            }
+        }
+
+        
         SyncSpaceRemotingEntry remotingEntry = new SyncSpaceRemotingEntry().buildInvocation(lookupName, methodName,
                 methodInvocation.getArguments());
 
@@ -237,27 +254,40 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
         if (broadcastIndicator != null) {
             internalRemoteResultReducer = broadcastIndicator.getReducer();
         }
-        if (internalRemoteResultReducer != null) {
-            SpaceRemotingResult[] results = new SpaceRemotingResult[result.length];
-            System.arraycopy(result, 0, results, 0, result.length);
-            return internalRemoteResultReducer.reduce(results, remotingEntry);
-        } else if (returnFirstResult) {
-            SyncSpaceRemotingEntry resultEntry = (SyncSpaceRemotingEntry) result[0];
-            if (resultEntry.ex != null) {
-                throw resultEntry.ex;
-            }
-            return resultEntry.result;
-        } else {
-            Object[] retVals = new Object[result.length];
-            for (int i = 0; i < result.length; i++) {
-                SpaceRemotingResult spaceRemotingResult = (SpaceRemotingResult) result[i];
-                if (spaceRemotingResult.getException() != null) {
-                    throw spaceRemotingResult.getException();
-                } else {
-                    retVals[i] = spaceRemotingResult.getResult();
+
+        Object retVal = null;
+        try {
+            if (internalRemoteResultReducer != null) {
+                SpaceRemotingResult[] results = new SpaceRemotingResult[result.length];
+                System.arraycopy(result, 0, results, 0, result.length);
+                retVal = internalRemoteResultReducer.reduce(results, remotingEntry);
+            } else if (returnFirstResult) {
+                SyncSpaceRemotingEntry resultEntry = (SyncSpaceRemotingEntry) result[0];
+                if (resultEntry.ex != null) {
+                    throw resultEntry.ex;
                 }
+                retVal = resultEntry.result;
+            } else {
+                Object[] retVals = new Object[result.length];
+                for (int i = 0; i < result.length; i++) {
+                    SpaceRemotingResult spaceRemotingResult = (SpaceRemotingResult) result[i];
+                    if (spaceRemotingResult.getException() != null) {
+                        throw spaceRemotingResult.getException();
+                    } else {
+                        retVals[i] = spaceRemotingResult.getResult();
+                    }
+                }
+                retVal = retVals;
             }
-            return retVals;
+        } catch (Exception e) {
+            if (asyncExecution) {
+                return new SyncRemoteFuture(e);
+            }
+            throw e;
         }
+        if (asyncExecution) {
+            return new SyncRemoteFuture(retVal);
+        }
+        return retVal;
     }
 }
