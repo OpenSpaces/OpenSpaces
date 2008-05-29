@@ -61,7 +61,7 @@
                                 </xsd:attribute>
                             </xsd:complexType>
                         </xsd:element>
-                        <xsd:element name="service" minOccurs="1" maxOccurs="unbounded">
+                        <xsd:element name="service" minOccurs="0" maxOccurs="unbounded">
                             <xsd:annotation>
                                 <xsd:documentation>
                                     A service that will be exposed as a remoting services with the Space as the

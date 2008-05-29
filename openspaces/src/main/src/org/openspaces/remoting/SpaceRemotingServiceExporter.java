@@ -46,6 +46,7 @@ import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +85,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
     private static final Log logger = LogFactory.getLog(SpaceRemotingServiceExporter.class);
 
-    private List<Object> services;
+    private List<Object> services = new ArrayList<Object>();
 
     private ApplicationContext applicationContext;
 
@@ -108,6 +109,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
     private ClusterInfo clusterInfo;
 
     private MethodInvocationCache methodInvocationCache = new MethodInvocationCache();
+
+    private volatile boolean initialized = false;
 
     /**
      * Sets the list of services that will be exported as remote services. Each service will have
@@ -181,6 +184,13 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
         this.clusterInfo = clusterInfo;
     }
 
+    public void addService(Object service) throws IllegalStateException {
+        if (initialized) {
+            throw new IllegalStateException("Can't add a service once the exporter has initialized");
+        }
+        this.services.add(service);
+    }
+
     public void afterPropertiesSet() throws Exception {
         // create the filter provider
         filterProvider = new FilterProvider("Remoting Filter", new RemotingServiceInvoker());
@@ -191,6 +201,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
     public void onApplicationEvent(ApplicationEvent applicationEvent) {
         if (applicationEvent instanceof ContextRefreshedEvent) {
+            initialized = true;
             Assert.notNull(services, "services property is required");
             // go over the services and create the interface to service lookup
             for (Object service : services) {
