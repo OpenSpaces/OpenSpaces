@@ -23,10 +23,25 @@ package org.openspaces.events.notify;
  */
 public enum NotifyComType {
 
+    /**
+     * Controls how notification are propagated from the space to the listener. Unicast propagation
+     * uses TCP unicast communication which is usually best for small amount of registered clients.
+     * This is the default communication type.
+     */
     UNICAST(AbstractNotifyEventListenerContainer.COM_TYPE_UNICAST),
 
+    /**
+     * Controls how notification are propagated from the space to the listener. Same as unicast ({@link #UNICAST})
+     * in terms of communication protocol but uses a single client side multiplexer which handles
+     * all the dispatching to the different notification listeners.
+     */
     MULTIPLEX(AbstractNotifyEventListenerContainer.COM_TYPE_MULTIPLEX),
 
+    /**
+     * Controls how notification are propagated from the space to the listener. Multicast
+     * propagation uses UDP multicast communication which is usually best for large amount of
+     * registered clients.
+     */
     MULTICAST(AbstractNotifyEventListenerContainer.COM_TYPE_MULTICAST);
 
 
