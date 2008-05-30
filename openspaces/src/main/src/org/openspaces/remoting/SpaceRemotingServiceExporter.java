@@ -33,6 +33,7 @@ import org.openspaces.core.space.filter.FilterProviderFactory;
 import org.openspaces.events.EventTemplateProvider;
 import org.openspaces.events.SpaceDataEventListener;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
@@ -256,7 +257,11 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
         Object service = interfaceToService.get(lookupName);
         if (service == null) {
             // we did not get an interface, maybe it is a bean name?
-            service = applicationContext.getBean(lookupName);
+            try {
+                service = applicationContext.getBean(lookupName);
+            } catch (NoSuchBeanDefinitionException e) {
+                // do nothing, write back a proper exception
+            }
             if (service == null) {
                 writeResponse(gigaSpace, remotingEntry, new RemoteLookupFailureException(
                         "Failed to find service for lookup [" + remotingEntry.lookupName + "]"));
@@ -380,7 +385,11 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             Object service = interfaceToService.get(lookupName);
             if (service == null) {
                 // we did not get an interface, maybe it is a bean name?
-                service = applicationContext.getBean(lookupName);
+                try {
+                    service = applicationContext.getBean(lookupName);
+                } catch (NoSuchBeanDefinitionException e) {
+                    // do nothing, return a proper response
+                }
                 if (service == null) {
                     writeResponse(space, entry, remotingEntry, new RemoteLookupFailureException(
                             "Failed to find service for lookup [" + remotingEntry.getLookupName() + "]"));

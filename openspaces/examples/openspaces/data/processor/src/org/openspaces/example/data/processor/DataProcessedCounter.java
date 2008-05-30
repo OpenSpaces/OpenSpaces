@@ -16,7 +16,12 @@
 
 package org.openspaces.example.data.processor;
 
+import com.j_spaces.core.client.SQLQuery;
+import org.openspaces.events.EventTemplate;
 import org.openspaces.events.adapter.SpaceDataEvent;
+import org.openspaces.events.notify.NotifyBatch;
+import org.openspaces.events.notify.NotifyContainer;
+import org.openspaces.events.notify.NotifyType;
 import org.openspaces.example.data.common.Data;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,9 +44,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author kimchy
  */
+@NotifyContainer
+@NotifyBatch(size = 10, time = 5000)
+@NotifyType(write = true, update = true)
 public class DataProcessedCounter {
 
     AtomicInteger processedDataCount = new AtomicInteger(0);
+
+    @EventTemplate
+    public SQLQuery<Data> processedDataQuery() {
+        return new SQLQuery<Data>(Data.class, "processed = true");
+    }
 
     @SpaceDataEvent
     public void dataProcessed(Data data) {

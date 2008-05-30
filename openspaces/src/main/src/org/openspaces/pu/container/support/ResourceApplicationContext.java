@@ -21,6 +21,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.AbstractXmlApplicationContext;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,5 +84,9 @@ public class ResourceApplicationContext extends AbstractXmlApplicationContext {
             beanFactory.addBeanPostProcessor(beanPostProcessor);
         }
         return beanFactory;
+    }
+
+    protected ResourcePatternResolver getResourcePatternResolver() {
+        return new PUPathMatchingResourcePatternResolver();
     }
 }

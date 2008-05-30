@@ -17,10 +17,14 @@
 package org.openspaces.example.data.processor;
 
 import org.openspaces.core.GigaSpace;
-import org.openspaces.core.context.GigaSpaceContext;
+import org.openspaces.events.EventTemplate;
+import org.openspaces.events.TransactionalEventContainer;
 import org.openspaces.events.adapter.SpaceDataEvent;
+import org.openspaces.events.polling.PollingContainer;
 import org.openspaces.example.data.common.Data;
 import org.openspaces.example.data.common.IDataProcessor;
+import org.openspaces.remoting.RemotingService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * An implementation of IDataProcessor. Can set the simulated work done when
@@ -49,11 +53,14 @@ import org.openspaces.example.data.common.IDataProcessor;
  *
  * @author kimchy
  */
+@RemotingService
+@PollingContainer
+@TransactionalEventContainer
 public class DataProcessor implements IDataProcessor {
 
     private long workDuration = 100;
 
-    @GigaSpaceContext
+    @Autowired
     private GigaSpace gigaSpace;
 
     /**
@@ -61,6 +68,13 @@ public class DataProcessor implements IDataProcessor {
      */
     public void setWorkDuration(long workDuration) {
         this.workDuration = workDuration;
+    }
+
+    @EventTemplate
+    public Data unprocessedDataTemplate() {
+        Data data = new Data();
+        data.setProcessed(false);
+        return data;
     }
 
     /**
