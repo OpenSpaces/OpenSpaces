@@ -43,6 +43,9 @@
         </property>
     </bean>
 
+
+    <context:annotation-config />
+    
     <!--
         Scan for components (both Spring ones and OpenSpaces ones)
     -->

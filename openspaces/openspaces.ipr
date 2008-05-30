@@ -643,6 +643,7 @@
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/lib/spring/spring.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/spring/spring-test.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/spring/common-annotations.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>

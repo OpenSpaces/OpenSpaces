@@ -260,6 +260,7 @@
                 <include name="lib/${name}/**"/>
                 <include name="lib/groovy/**"/>
                 <include name="lib/spring/spring.jar" />
+                <include name="lib/spring/common-annotations.jar" />
             </zipfileset>
         </zip>
         <mkdir dir="${dist.dir}/1.5"/>

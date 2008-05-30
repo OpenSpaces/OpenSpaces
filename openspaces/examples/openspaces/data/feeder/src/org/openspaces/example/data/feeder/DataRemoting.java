@@ -20,9 +20,9 @@ import org.openspaces.core.SpaceInterruptedException;
 import org.openspaces.example.data.common.Data;
 import org.openspaces.example.data.common.IDataProcessor;
 import org.openspaces.remoting.AsyncProxy;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -41,13 +41,13 @@ import java.util.concurrent.TimeUnit;
  *
  * @author kimchy
  */
-public class DataRemoting implements InitializingBean, DisposableBean {
+public class DataRemoting {
 
     private long numberOfTypes = 10;
-    
+
     private long defaultDelay = 1000;
 
-    @AsyncProxy(gigaSpace="gigaSpace", timeout = 15000)
+    @AsyncProxy(gigaSpace = "gigaSpace", timeout = 15000)
     private IDataProcessor dataProcessor;
 
     private ScheduledExecutorService executorService;
@@ -68,13 +68,15 @@ public class DataRemoting implements InitializingBean, DisposableBean {
         this.defaultDelay = defaultDelay;
     }
 
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void construct() {
         System.out.println("--- STARTING REMOTING WITH CYCLE [" + defaultDelay + "]");
         executorService = Executors.newScheduledThreadPool(1);
         sf = executorService.scheduleAtFixedRate(new DataFeederTask(), 0, defaultDelay, TimeUnit.MILLISECONDS);
     }
 
-    public void destroy() throws Exception {
+    @PreDestroy
+    public void destroy() {
         sf.cancel(false);
         sf = null;
         executorService.shutdown();

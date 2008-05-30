@@ -20,9 +20,9 @@ import org.openspaces.core.GigaSpace;
 import org.openspaces.core.SpaceInterruptedException;
 import org.openspaces.core.context.GigaSpaceContext;
 import org.openspaces.example.data.common.Data;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author kimchy
  */
-public class ViewDataCounter implements InitializingBean, DisposableBean {
+public class ViewDataCounter {
 
     private ScheduledExecutorService executorService;
 
@@ -62,7 +62,8 @@ public class ViewDataCounter implements InitializingBean, DisposableBean {
         this.defaultDelay = defaultDelay;
     }
 
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void construct() {
         System.out.println("--- STARTING VIEW COUNTER WITH CYCLE [" + defaultDelay + "]");
         viewCounterTask = new ViewCounterTask();
         executorService = Executors.newScheduledThreadPool(1);
@@ -70,7 +71,8 @@ public class ViewDataCounter implements InitializingBean, DisposableBean {
                 TimeUnit.MILLISECONDS);
     }
 
-    public void destroy() throws Exception {
+    @PreDestroy
+    public void destroy() {
         sf.cancel(false);
         sf = null;
         executorService.shutdown();

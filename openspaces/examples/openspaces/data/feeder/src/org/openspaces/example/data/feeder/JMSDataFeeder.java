@@ -18,11 +18,11 @@ package org.openspaces.example.data.feeder;
 
 import org.openspaces.core.SpaceInterruptedException;
 import org.openspaces.example.data.common.Data;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author shaiw
  */
-public class JMSDataFeeder implements InitializingBean, DisposableBean {
+public class JMSDataFeeder {
 
     private ScheduledExecutorService executorService;
 
@@ -91,7 +91,8 @@ public class JMSDataFeeder implements InitializingBean, DisposableBean {
     }
 
 
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void construct() {
         System.out.println("--- STARTING FEEDER WITH CYCLE [" + defaultDelay + "]");
         if (instanceId != null) {
             // have a range of ids based on the instance id of the processing unit
@@ -103,7 +104,8 @@ public class JMSDataFeeder implements InitializingBean, DisposableBean {
                 TimeUnit.MILLISECONDS);
     }
 
-    public void destroy() throws Exception {
+    @PreDestroy
+    public void destroy() {
         sf.cancel(false);
         sf = null;
         executorService.shutdown();

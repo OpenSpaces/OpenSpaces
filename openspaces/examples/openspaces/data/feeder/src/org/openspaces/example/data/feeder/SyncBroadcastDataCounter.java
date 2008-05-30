@@ -20,10 +20,10 @@ import org.openspaces.core.SpaceInterruptedException;
 import org.openspaces.example.data.common.IDataProcessor;
 import org.openspaces.example.data.feeder.support.SyncBroadcastCounterReducer;
 import org.openspaces.remoting.SyncProxy;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -39,9 +39,9 @@ import java.util.concurrent.TimeUnit;
  *
  * @author kimchy
  */
-public class SyncBroadcastDataCounter implements InitializingBean, DisposableBean {
+public class SyncBroadcastDataCounter {
 
-    @SyncProxy(gigaSpace="gigaSpace", remoteResultReducerType = SyncBroadcastCounterReducer.class, broadcast = true)
+    @SyncProxy(gigaSpace = "gigaSpace", remoteResultReducerType = SyncBroadcastCounterReducer.class, broadcast = true)
     private IDataProcessor dataProcessor;
 
     private ScheduledExecutorService executorService;
@@ -56,7 +56,8 @@ public class SyncBroadcastDataCounter implements InitializingBean, DisposableBea
         this.defaultDelay = defaultDelay;
     }
 
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void construct() throws Exception {
         Assert.notNull(dataProcessor, "dataProcessor proeprty must be set");
         System.out.println("--- STARTING SYNC REMOTING COUNTER WITH CYCLE [" + defaultDelay + "]");
         viewCounterTask = new ViewCounterTask();
@@ -65,7 +66,8 @@ public class SyncBroadcastDataCounter implements InitializingBean, DisposableBea
                 TimeUnit.MILLISECONDS);
     }
 
-    public void destroy() throws Exception {
+    @PreDestroy
+    public void destroy() {
         sf.cancel(true);
         sf = null;
         executorService.shutdown();

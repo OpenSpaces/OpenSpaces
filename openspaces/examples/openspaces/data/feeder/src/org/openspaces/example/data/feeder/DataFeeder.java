@@ -20,9 +20,9 @@ import org.openspaces.core.GigaSpace;
 import org.openspaces.core.SpaceInterruptedException;
 import org.openspaces.core.context.GigaSpaceContext;
 import org.openspaces.example.data.common.Data;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author kimchy
  */
-public class DataFeeder implements InitializingBean, DisposableBean {
+public class DataFeeder {
 
     private ScheduledExecutorService executorService;
 
@@ -76,7 +76,8 @@ public class DataFeeder implements InitializingBean, DisposableBean {
         this.instanceId = instanceId;
     }
 
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void construct() {
         System.out.println("--- STARTING FEEDER WITH CYCLE [" + defaultDelay + "]");
         if (instanceId != null) {
             // have a range of ids based on the instance id of the processing unit
@@ -88,7 +89,8 @@ public class DataFeeder implements InitializingBean, DisposableBean {
                 TimeUnit.MILLISECONDS);
     }
 
-    public void destroy() throws Exception {
+    @PreDestroy
+    public void destroy() {
         sf.cancel(false);
         sf = null;
         executorService.shutdown();
