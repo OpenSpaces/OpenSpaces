@@ -18,6 +18,7 @@ package org.openspaces.events.polling.config;
 
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.util.AnnotationUtils;
+import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.events.TransactionalEventContainer;
 import org.openspaces.events.polling.PollingContainer;
 import org.openspaces.events.polling.SimplePollingContainerConfigurer;
@@ -61,7 +62,11 @@ public class PollingContainerAnnotationPostProcessor implements BeanPostProcesso
         GigaSpace gigaSpace = AnnotationProcessorUtils.findGigaSpace(bean, pollingContainer.gigaSpace(), applicationContext, beanName);
 
         SimplePollingContainerConfigurer pollingContainerConfigurer = new SimplePollingContainerConfigurer(gigaSpace);
-        pollingContainerConfigurer.eventListenerAnnotation(bean);
+        if (bean instanceof SpaceDataEventListener) {
+            pollingContainerConfigurer.eventListener((SpaceDataEventListener) bean);
+        } else {
+            pollingContainerConfigurer.eventListenerAnnotation(bean);
+        }
         pollingContainerConfigurer.concurrentConsumers(pollingContainer.concurrentConsumers());
         pollingContainerConfigurer.maxConcurrentConsumers(pollingContainer.maxConcurrentConsumers());
         pollingContainerConfigurer.receiveTimeout(pollingContainer.receiveTimeout());

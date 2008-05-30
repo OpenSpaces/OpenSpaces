@@ -20,6 +20,7 @@ import com.j_spaces.core.client.INotifyDelegatorFilter;
 import net.jini.lease.LeaseListener;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.util.AnnotationUtils;
+import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.events.TransactionalEventContainer;
 import org.openspaces.events.notify.NotifyBatch;
 import org.openspaces.events.notify.NotifyContainer;
@@ -66,7 +67,11 @@ public class NotifyContainerAnnotationPostProcessor implements BeanPostProcessor
         GigaSpace gigaSpace = AnnotationProcessorUtils.findGigaSpace(bean, notifyContainer.gigaSpace(), applicationContext, beanName);
 
         SimpleNotifyContainerConfigurer notifyContainerConfigurer = new SimpleNotifyContainerConfigurer(gigaSpace);
-        notifyContainerConfigurer.eventListenerAnnotation(bean);
+        if (bean instanceof SpaceDataEventListener) {
+            notifyContainerConfigurer.eventListener((SpaceDataEventListener) bean);
+        } else {
+            notifyContainerConfigurer.eventListenerAnnotation(bean);
+        }
         notifyContainerConfigurer.performSnapshot(notifyContainer.performSnapshot());
 
         notifyContainerConfigurer.ignoreEventOnNullTake(notifyContainer.ignoreEventOnNullTake());
