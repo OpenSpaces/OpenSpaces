@@ -86,6 +86,10 @@ public class ResourceApplicationContext extends AbstractXmlApplicationContext {
         return beanFactory;
     }
 
+    /**
+     * Overrides in order to return {@link org.openspaces.pu.container.support.PUPathMatchingResourcePatternResolver}
+     * which allows to perform path mathcing over a remote processing unit.
+     */
     protected ResourcePatternResolver getResourcePatternResolver() {
         return new PUPathMatchingResourcePatternResolver();
     }
