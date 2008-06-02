@@ -2,6 +2,8 @@ package org.openspaces.maven.support;
 
 import java.io.*;
 
+import org.springframework.core.JdkVersion;
+
 /**
  * @author kimchy
  */
@@ -42,10 +44,19 @@ public class POMGenerator {
         printDependency(writer, POMGenerator.GS_JINI_GROUP, "jini-jsk-resources");
         printDependency(writer, POMGenerator.GS_JINI_GROUP, "jini-reggie");
         printDependency(writer, POMGenerator.GS_JINI_GROUP, "jini-mahalo");
-        
+
         printDependency(writer, POMGenerator.GS_CORE_GROUP, "gs-boot");
         printDependency(writer, POMGenerator.GS_CORE_GROUP, "gs-service");
         printDependency(writer, POMGenerator.GS_CORE_GROUP, "gs-lib");
+        
+        // jmx
+        if (!JdkVersion.isAtLeastJava15()) {
+            printDependency(writer, "com.sun.jdmk", "jmxtools", "1.2.1");
+            printDependency(writer, "javax.management", "jmxremote", "1.0.1_04");
+            printDependency(writer, "javax.management", "jmxri", "1.2.1");
+            printDependency(writer, "backport-util-concurrent", "backport-util-concurrent", "3.0");
+        }
+
         printFooter(writer);
         writer.close();
 
@@ -54,6 +65,10 @@ public class POMGenerator {
         printDependency(writer, POMGenerator.GS_CORE_GROUP, "JSpaces");
         printDependency(writer, "org.springframework", "spring", "2.5.4");
         printDependency(writer, "commons-logging", "commons-logging", "1.1.1");
+        // add javax.annotations (@PostConstruct) for JDK 1.5 (no need for 1.6 since it is there)
+        if (!JdkVersion.isAtLeastJava16() && JdkVersion.isAtLeastJava15()) {
+            printDependency(writer, "org.apache.geronimo.specs", "geronimo-annotation_1.0_spec", "1.1.1");
+        }
         printFooter(writer);
         writer.close();
 

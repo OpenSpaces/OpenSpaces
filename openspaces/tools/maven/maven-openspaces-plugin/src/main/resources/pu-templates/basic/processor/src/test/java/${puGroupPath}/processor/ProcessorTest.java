@@ -1,8 +1,10 @@
 package ${puGroupId}.processor;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
 import ${puGroupId}.common.Data;
+
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
 
 /**
  * A simple unit test that verifies the Processor processData method actually processes

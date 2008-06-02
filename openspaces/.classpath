@@ -88,6 +88,7 @@
 	<classpathentry kind="lib" path="lib/mule/mule-module-spring-extras-2.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/mule/mule-transport-stdio-2.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/mule/mule-transport-vm-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/cglib/cglib-nodep-2.1_3.jar"/>
 	<classpathentry kind="lib" path="lib/spring/common-annotations.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

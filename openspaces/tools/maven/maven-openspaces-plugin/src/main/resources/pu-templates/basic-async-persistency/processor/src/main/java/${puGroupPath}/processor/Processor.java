@@ -2,10 +2,8 @@ package ${puGroupId}.processor;
 
 import ${puGroupId}.common.Data;
 
-import org.openspaces.core.GigaSpace;
-import org.openspaces.core.context.GigaSpaceContext;
-
 import org.openspaces.events.adapter.SpaceDataEvent;
+
 
 /**
  * The processor simulates work done no un-processed Data object. The processData
@@ -15,9 +13,6 @@ import org.openspaces.events.adapter.SpaceDataEvent;
 public class Processor {
 
     private long workDuration = 100;
-
-    @GigaSpaceContext
-    private GigaSpace gigaSpace;
 
     /**
      * Sets the simulated work duration (in milliseconds). Defaut to 100.

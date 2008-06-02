@@ -1,16 +1,20 @@
 package ${puGroupId}.processor;
 
+import ${puGroupId}.common.Data;
+
 import org.junit.runner.RunWith;
 import org.junit.Before;
 import org.junit.After;
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.openspaces.core.GigaSpace;
-import ${puGroupId}.common.Data;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+
 
 /**
  * Integration test for the Processor. Uses similar xml definition file (ProcessorIntegrationTest-context.xml)

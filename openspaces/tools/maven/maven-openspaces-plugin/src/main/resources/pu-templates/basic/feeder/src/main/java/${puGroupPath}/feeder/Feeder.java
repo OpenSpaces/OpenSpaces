@@ -1,9 +1,11 @@
 package ${puGroupId}.feeder;
 
+import ${puGroupId}.common.Data;
+
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.SpaceInterruptedException;
 import org.openspaces.core.context.GigaSpaceContext;
-import ${puGroupId}.common.Data;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -11,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
 
 /**
  * A feeder bean starts a scheduled task that writes a new Data objects to the space

@@ -5,12 +5,10 @@
        xmlns:os-events="http://www.openspaces.org/schema/events"
        xmlns:os-remoting="http://www.openspaces.org/schema/remoting"
        xmlns:os-sla="http://www.openspaces.org/schema/sla"
-       xmlns:os-jms="http://www.openspaces.org/schema/jms"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
        http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
        http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/remoting/openspaces-remoting.xsd
-       http://www.openspaces.org/schema/jms http://www.openspaces.org/schema/jms/openspaces-jms.xsd
        http://www.openspaces.org/schema/sla http://www.openspaces.org/schema/sla/openspaces-sla.xsd">
 
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">

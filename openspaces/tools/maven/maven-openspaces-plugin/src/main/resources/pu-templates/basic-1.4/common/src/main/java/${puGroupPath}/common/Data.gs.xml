@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE gigaspaces-mapping PUBLIC "-//GIGASPACES//DTD GS//EN" "http://www.gigaspaces.com/dtd/
+6_0/gigaspaces-metadata.dtd">
+<gigaspaces-mapping>
+	<class name="${puGroupId}.common.Data">
+        <property name="rawData" />
+        <property name="data" />
+        <property name="processed" />
+		<id name="id" auto-generate="true" />
+        <routing name="type" />
+	</class>
+</gigaspaces-mapping>
+

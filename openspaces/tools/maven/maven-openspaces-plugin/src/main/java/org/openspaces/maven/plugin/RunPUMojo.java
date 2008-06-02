@@ -205,7 +205,6 @@ public class RunPUMojo extends AbstractMojo {
         System.out.println("             id=1                 : The instance id of this processing unit");
         System.out.println("             backup_id=1          : The backup id of this processing unit");
         System.out.println("    -Dproperties [properties-loc] : Location of context level properties");
-        System.out.println("    -Dproperties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
         System.out.println("");
         System.out.println("");
         System.out.println("Some Examples:");
@@ -215,10 +214,10 @@ public class RunPUMojo extends AbstractMojo {
         System.out.println("    - Starts a processing unit with a partitioned cluster schema of two members with instance id 2");
         System.out.println("3. -Dcluster=\"schema=partitioned-sync2backup total_members=2,1 id=1 backup_id=1\"");
         System.out.println("    - Starts a processing unit with a partitioned sync2backup cluster schema of two members with two members each with one backup with instance id of 1 and backup id of 1");
-        System.out.println("4. -Dproperties=file://config/context.properties -Dproperties space1 file://config/space1.properties");
-        System.out.println("    - Starts a processing unit called data-processor using context level properties called context.properties and bean level properties called space1.properties applied to bean named space1");
-        System.out.println("5. -Dproperties=embed://prop1=value1 -Dproperties space1 embed://prop2=value2;prop3=value3");
-        System.out.println("    - Starts a processing unit called data-processor using context level properties with a single property called prop1 with value1 and bean level properties with two properties");
+        System.out.println("4. -Dproperties=file://config/context.properties");
+        System.out.println("    - Starts a processing unit called data-processor using context level properties called context.properties");
+        System.out.println("5. -Dproperties=embed://prop1=value1");
+        System.out.println("    - Starts a processing unit called data-processor using context level properties with a single property called prop1 with value1");
         System.out.println("");
     }
 }
