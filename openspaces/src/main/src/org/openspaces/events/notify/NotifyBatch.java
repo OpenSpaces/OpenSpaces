@@ -22,13 +22,24 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Enables batching of notifications. Requires setting {@link #size()} and {@link #time()}
+ * which control when the batched notifications will be sent to the listener.
+ *
  * @author kimchy
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface NotifyBatch {
 
+    /**
+     * The batch size controls the number of notifications that
+     * will be batched before they are sent.
+     */
     int size();
 
+    /**
+     * The batch time controls the elapsed time until the batch
+     * buffer is cleared and sent. The time is in <b>milliseconds</b>.
+     */
     int time();
 }

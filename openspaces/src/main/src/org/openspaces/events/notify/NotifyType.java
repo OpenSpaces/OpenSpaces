@@ -22,6 +22,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Controls which type of notifications will be sent.
+ *
  * @author kimchy
  */
 @Target(ElementType.TYPE)
@@ -29,22 +31,22 @@ import java.lang.annotation.Target;
 public @interface NotifyType {
 
     /**
-     * Should this listener be notified when write occurs.
+     * Should this listener be notified when write occurs and it matches the given template.
      */
     boolean write() default false;
 
     /**
-     * Should this listener be notified when take occurs.
+     * Should this listener be notified when take occurs and it matches the given template.
      */
     boolean take() default false;
 
     /**
-     * Should this listener be notified when update occurs.
+     * Should this listener be notified when update occurs and it matches the given template.
      */
     boolean update() default false;
 
     /**
-     * Should this listener be notified when lease expiration occurs.
+     * Should this listener be notified when lease expiration occurs and it matches the given template.
      */
     boolean leaseExpire() default false;
 }

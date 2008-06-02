@@ -34,11 +34,16 @@ import java.lang.annotation.Target;
 public @interface NotifyLease {
 
     /**
+     * Controls the lease associated with the registered listener. Defaults to
+     * {@link net.jini.core.lease.Lease#FOREVER}.
+     *
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setListenerLease(long)
      */
     long lease();
 
     /**
+     * Sets the lease listener for the lease. Default to no listener.
+     *
      * @see SimpleNotifyEventListenerContainer#setLeaseListener(net.jini.lease.LeaseListener)
      */
     Class<LeaseListener> leaseListener() default LeaseListener.class;
