@@ -147,6 +147,8 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
 
     private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
 
+    private boolean disableTransactionValidation = false;
+    
 
     /**
      * See {@link #setComTypeName(String)}.
@@ -354,6 +356,15 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
         this.transactionDefinition.setIsolationLevelName(transactionIsolationLevelName);
     }
 
+    /**
+     * Should transaction validation be enabled or not (verify and fail if transaction manager is
+     * provided and the GigaSpace is not transactional). Default to <code>false</code>.
+     */
+    public void setDisableTransactionValidation(boolean disableTransactionValidation) {
+        this.disableTransactionValidation = disableTransactionValidation;
+    }
+
+    
     public void initialize() throws DataAccessException {
         // if we are using a Space that was started in embedded mode, no need to replicate notify template
         // by default
@@ -399,6 +410,12 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
 
     protected void validateConfiguration() {
         super.validateConfiguration();
+        if (transactionManager != null && !disableTransactionValidation) {
+            if (!getGigaSpace().getTxProvider().isEnabled()) {
+                throw new IllegalStateException("Notify container is configured to run under transactions (transaction manager is provided) " +
+                        "but GigaSpace is not transactional. Please pass the transaction manager to the GigaSpace bean as well");
+            }
+        }
         if (batchSize == null && batchTime != null) {
             throw new IllegalArgumentException("batchTime has value [" + batchTime
                     + "] which enables batching. batchSize must have a value as well");

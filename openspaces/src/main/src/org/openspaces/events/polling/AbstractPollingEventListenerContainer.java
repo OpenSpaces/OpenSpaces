@@ -95,6 +95,8 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTemp
 
     private TriggerOperationHandler triggerOperationHandler;
 
+    private boolean disableTransactionValidation = false;
+
 
     /**
      * If set to <code>true</code> will pass an array value returned from a
@@ -205,6 +207,14 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTemp
         this.triggerOperationHandler = triggerOperationHandler;
     }
 
+    /**
+     * Should transaction validation be enabled or not (verify and fail if transaction manager is
+     * provided and the GigaSpace is not transactional). Default to <code>false</code>.
+     */
+    public void setDisableTransactionValidation(boolean disableTransactionValidation) {
+        this.disableTransactionValidation = disableTransactionValidation;
+    }
+
     public void initialize() {
         // Use bean name as default transaction name.
         if (this.transactionDefinition.getName() == null) {
@@ -260,6 +270,12 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTemp
     protected void validateConfiguration() {
         super.validateConfiguration();
         Assert.isTrue(receiveTimeout >= 0, "receiveTimeout must have a non negative value");
+        if (transactionManager != null && !disableTransactionValidation) {
+            if (!getGigaSpace().getTxProvider().isEnabled()) {
+                throw new IllegalStateException("Polling container is configured to run under transactions (transaction manager is provided) " +
+                        "but GigaSpace is not transactional. Please pass the transaction manager to the GigaSpace bean as well");
+            }
+        }
     }
 
     /**
