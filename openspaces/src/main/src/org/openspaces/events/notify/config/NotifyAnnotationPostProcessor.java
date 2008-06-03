@@ -21,9 +21,9 @@ import net.jini.lease.LeaseListener;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.util.AnnotationUtils;
 import org.openspaces.events.SpaceDataEventListener;
-import org.openspaces.events.TransactionalEventBean;
+import org.openspaces.events.TransactionalEvent;
+import org.openspaces.events.notify.Notify;
 import org.openspaces.events.notify.NotifyBatch;
-import org.openspaces.events.notify.NotifyEventBean;
 import org.openspaces.events.notify.NotifyLease;
 import org.openspaces.events.notify.NotifyType;
 import org.openspaces.events.notify.SimpleNotifyContainerConfigurer;
@@ -39,13 +39,13 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * A {@link org.openspaces.events.notify.NotifyEventBean} annotation post processor. Creates an intenral
+ * A {@link org.openspaces.events.notify.Notify} annotation post processor. Creates an intenral
  * instance of {@link org.openspaces.events.notify.SimpleNotifyEventListenerContainer} that wraps the given
  * bean (if annotated) listener.
  *
  * @author kimchy
  */
-public class NotifyEventBeanAnnotationPostProcessor implements BeanPostProcessor, ApplicationContextAware {
+public class NotifyAnnotationPostProcessor implements BeanPostProcessor, ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
@@ -60,14 +60,14 @@ public class NotifyEventBeanAnnotationPostProcessor implements BeanPostProcessor
     public Object postProcessAfterInitialization(final Object bean, String beanName) throws BeansException {
         Class<?> beanClass = this.getBeanClass(bean);
 
-        NotifyEventBean notifyEventBean = AnnotationUtils.findAnnotation(beanClass, NotifyEventBean.class);
-        if (notifyEventBean == null) {
+        Notify notify = AnnotationUtils.findAnnotation(beanClass, Notify.class);
+        if (notify == null) {
             return bean;
         }
 
         EventContainersBus eventContainersBus = AnnotationProcessorUtils.findBus(applicationContext);
 
-        GigaSpace gigaSpace = AnnotationProcessorUtils.findGigaSpace(bean, notifyEventBean.gigaSpace(), applicationContext, beanName);
+        GigaSpace gigaSpace = AnnotationProcessorUtils.findGigaSpace(bean, notify.gigaSpace(), applicationContext, beanName);
 
         SimpleNotifyContainerConfigurer notifyContainerConfigurer = new SimpleNotifyContainerConfigurer(gigaSpace);
         if (bean instanceof SpaceDataEventListener) {
@@ -75,30 +75,30 @@ public class NotifyEventBeanAnnotationPostProcessor implements BeanPostProcessor
         } else {
             notifyContainerConfigurer.eventListenerAnnotation(bean);
         }
-        notifyContainerConfigurer.performSnapshot(notifyEventBean.performSnapshot());
+        notifyContainerConfigurer.performSnapshot(notify.performSnapshot());
 
-        notifyContainerConfigurer.ignoreEventOnNullTake(notifyEventBean.ignoreEventOnNullTake());
-        notifyContainerConfigurer.performTakeOnNotify(notifyEventBean.performTakeOnNotify());
+        notifyContainerConfigurer.ignoreEventOnNullTake(notify.ignoreEventOnNullTake());
+        notifyContainerConfigurer.performTakeOnNotify(notify.performTakeOnNotify());
 
-        notifyContainerConfigurer.comType(notifyEventBean.commType().value());
+        notifyContainerConfigurer.comType(notify.commType().value());
 
-        notifyContainerConfigurer.fifo(notifyEventBean.fifo());
+        notifyContainerConfigurer.fifo(notify.fifo());
 
-        if (!INotifyDelegatorFilter.class.equals(notifyEventBean.notifyFilter())) {
+        if (!INotifyDelegatorFilter.class.equals(notify.notifyFilter())) {
             try {
-                INotifyDelegatorFilter filter = notifyEventBean.notifyFilter().newInstance();
+                INotifyDelegatorFilter filter = notify.notifyFilter().newInstance();
                 notifyContainerConfigurer.notifyFilter(filter);
             } catch (Exception e) {
-                throw new IllegalArgumentException("Failed to create [" + notifyEventBean.notifyFilter() + "]", e);
+                throw new IllegalArgumentException("Failed to create [" + notify.notifyFilter() + "]", e);
             }
         }
 
-        // handle transactions (we support using either @Transactional or @TransactionalEventBean or both)
-        TransactionalEventBean transactionalEventBean = AnnotationUtils.findAnnotation(beanClass, TransactionalEventBean.class);
+        // handle transactions (we support using either @Transactional or @TransactionalEvent or both)
+        TransactionalEvent transactionalEvent = AnnotationUtils.findAnnotation(beanClass, TransactionalEvent.class);
         Transactional transactional = AnnotationUtils.findAnnotation(beanClass, Transactional.class);
-        if (transactionalEventBean != null || transactional != null) {
-            if (transactionalEventBean != null) {
-                notifyContainerConfigurer.transactionManager(AnnotationProcessorUtils.findTxManager(transactionalEventBean.transactionManager(), applicationContext, beanName));
+        if (transactionalEvent != null || transactional != null) {
+            if (transactionalEvent != null) {
+                notifyContainerConfigurer.transactionManager(AnnotationProcessorUtils.findTxManager(transactionalEvent.transactionManager(), applicationContext, beanName));
             } else {
                 notifyContainerConfigurer.transactionManager(AnnotationProcessorUtils.findTxManager("", applicationContext, beanName));
             }
@@ -106,8 +106,8 @@ public class NotifyEventBeanAnnotationPostProcessor implements BeanPostProcessor
             if (transactional != null && transactional.isolation() != Isolation.DEFAULT) {
                 isolation = transactional.isolation();
             }
-            if (transactionalEventBean != null && transactionalEventBean.isolation() != Isolation.DEFAULT) {
-                isolation = transactionalEventBean.isolation();
+            if (transactionalEvent != null && transactionalEvent.isolation() != Isolation.DEFAULT) {
+                isolation = transactionalEvent.isolation();
             }
             notifyContainerConfigurer.transactionIsolationLevel(isolation.value());
 
@@ -115,8 +115,8 @@ public class NotifyEventBeanAnnotationPostProcessor implements BeanPostProcessor
             if (transactional != null && transactional.timeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
                 timeout = transactional.timeout();
             }
-            if (transactionalEventBean != null && transactionalEventBean.timeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
-                timeout = transactionalEventBean.timeout();
+            if (transactionalEvent != null && transactionalEvent.timeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
+                timeout = transactionalEvent.timeout();
             }
             notifyContainerConfigurer.transactionTimeout(timeout);
         }

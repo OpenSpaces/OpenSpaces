@@ -1,19 +1,19 @@
 package org.openspaces.itest.events.notify.annotation;
 
 import org.openspaces.events.EventTemplate;
-import org.openspaces.events.TransactionalEventBean;
+import org.openspaces.events.TransactionalEvent;
 import org.openspaces.events.adapter.SpaceDataEvent;
+import org.openspaces.events.notify.Notify;
 import org.openspaces.events.notify.NotifyBatch;
-import org.openspaces.events.notify.NotifyEventBean;
 import org.openspaces.events.notify.NotifyType;
 
 /**
  * @author kimchy
  */
-@NotifyEventBean
+@Notify
 @NotifyType(write = true)
 @NotifyBatch(size = 1, time = 100)
-@TransactionalEventBean
+@TransactionalEvent
 public class TestListener {
 
     private volatile boolean receivedMessage = false;

@@ -17,10 +17,11 @@
 package org.openspaces.example.data.processor;
 
 import org.openspaces.core.GigaSpace;
+import org.openspaces.events.EventDriven;
 import org.openspaces.events.EventTemplate;
-import org.openspaces.events.TransactionalEventBean;
+import org.openspaces.events.TransactionalEvent;
 import org.openspaces.events.adapter.SpaceDataEvent;
-import org.openspaces.events.polling.PollingEventBean;
+import org.openspaces.events.polling.Polling;
 import org.openspaces.example.data.common.Data;
 import org.openspaces.example.data.common.IDataProcessor;
 import org.openspaces.remoting.RemotingService;
@@ -54,8 +55,9 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author kimchy
  */
 @RemotingService
-@PollingEventBean
-@TransactionalEventBean
+@EventDriven
+@Polling
+@TransactionalEvent
 public class DataProcessor implements IDataProcessor {
 
     private long workDuration = 100;

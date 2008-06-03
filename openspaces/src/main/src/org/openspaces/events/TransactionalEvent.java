@@ -26,14 +26,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks an event container configured using annotations ({@link org.openspaces.events.polling.PollingEventBean}
- * or {@link org.openspaces.events.notify.NotifyEventBean} as transactional.
+ * Marks an event container configured using annotations ({@link org.openspaces.events.polling.Polling}
+ * or {@link org.openspaces.events.notify.Notify} as transactional.
  *
  * @author kimchy
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TransactionalEventBean {
+public @interface TransactionalEvent {
 
     /**
      * The transaction propagation type.

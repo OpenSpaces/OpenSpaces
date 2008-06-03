@@ -18,9 +18,11 @@ package org.openspaces.events.polling.config;
 
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.util.AnnotationUtils;
+import org.openspaces.events.EventDriven;
 import org.openspaces.events.SpaceDataEventListener;
-import org.openspaces.events.TransactionalEventBean;
-import org.openspaces.events.polling.PollingEventBean;
+import org.openspaces.events.TransactionalEvent;
+import org.openspaces.events.notify.Notify;
+import org.openspaces.events.polling.Polling;
 import org.openspaces.events.polling.SimplePollingContainerConfigurer;
 import org.openspaces.events.support.AnnotationProcessorUtils;
 import org.openspaces.events.support.EventContainersBus;
@@ -34,13 +36,13 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * A {@link org.openspaces.events.polling.PollingEventBean} annotation post processor. Creates an intenral
+ * A {@link org.openspaces.events.polling.Polling} annotation post processor. Creates an intenral
  * instance of {@link org.openspaces.events.polling.SimplePollingEventListenerContainer} that wraps the given
  * bean (if annotated) listener.
  *
  * @author kimchy
  */
-public class PollingEventBeanAnnotationPostProcessor implements BeanPostProcessor, ApplicationContextAware {
+public class PollingAnnotationPostProcessor implements BeanPostProcessor, ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
@@ -55,14 +57,22 @@ public class PollingEventBeanAnnotationPostProcessor implements BeanPostProcesso
     public Object postProcessAfterInitialization(final Object bean, String beanName) throws BeansException {
         Class<?> beanClass = this.getBeanClass(bean);
 
-        PollingEventBean pollingEventBean = AnnotationUtils.findAnnotation(beanClass, PollingEventBean.class);
-        if (pollingEventBean == null) {
+        Polling polling = AnnotationUtils.findAnnotation(beanClass, Polling.class);
+        if (polling == null) {
+            EventDriven eventDriven = AnnotationUtils.findAnnotation(beanClass, EventDriven.class);
+            if (eventDriven == null) {
+                return bean;
+            }
+            Notify notify = AnnotationUtils.findAnnotation(beanClass, Notify.class);
+            if (notify != null) {
+                return bean;
+            }
             return bean;
         }
 
         EventContainersBus eventContainersBus = AnnotationProcessorUtils.findBus(applicationContext);
 
-        GigaSpace gigaSpace = AnnotationProcessorUtils.findGigaSpace(bean, pollingEventBean.gigaSpace(), applicationContext, beanName);
+        GigaSpace gigaSpace = AnnotationProcessorUtils.findGigaSpace(bean, polling.gigaSpace(), applicationContext, beanName);
 
         SimplePollingContainerConfigurer pollingContainerConfigurer = new SimplePollingContainerConfigurer(gigaSpace);
         if (bean instanceof SpaceDataEventListener) {
@@ -70,19 +80,19 @@ public class PollingEventBeanAnnotationPostProcessor implements BeanPostProcesso
         } else {
             pollingContainerConfigurer.eventListenerAnnotation(bean);
         }
-        pollingContainerConfigurer.concurrentConsumers(pollingEventBean.concurrentConsumers());
-        pollingContainerConfigurer.maxConcurrentConsumers(pollingEventBean.maxConcurrentConsumers());
-        pollingContainerConfigurer.receiveTimeout(pollingEventBean.receiveTimeout());
-        pollingContainerConfigurer.performSnapshot(pollingEventBean.performSnapshot());
-        pollingContainerConfigurer.passArrayAsIs(pollingEventBean.passArrayAsIs());
-        pollingContainerConfigurer.recoveryInterval(pollingEventBean.recoveryInterval());
+        pollingContainerConfigurer.concurrentConsumers(polling.concurrentConsumers());
+        pollingContainerConfigurer.maxConcurrentConsumers(polling.maxConcurrentConsumers());
+        pollingContainerConfigurer.receiveTimeout(polling.receiveTimeout());
+        pollingContainerConfigurer.performSnapshot(polling.performSnapshot());
+        pollingContainerConfigurer.passArrayAsIs(polling.passArrayAsIs());
+        pollingContainerConfigurer.recoveryInterval(polling.recoveryInterval());
 
-        // handle transactions (we support using either @Transactional or @TransactionalEventBean or both)
-        TransactionalEventBean transactionalEventBean = AnnotationUtils.findAnnotation(beanClass, TransactionalEventBean.class);
+        // handle transactions (we support using either @Transactional or @TransactionalEvent or both)
+        TransactionalEvent transactionalEvent = AnnotationUtils.findAnnotation(beanClass, TransactionalEvent.class);
         Transactional transactional = AnnotationUtils.findAnnotation(beanClass, Transactional.class);
-        if (transactionalEventBean != null || transactional != null) {
-            if (transactionalEventBean != null) {
-                pollingContainerConfigurer.transactionManager(AnnotationProcessorUtils.findTxManager(transactionalEventBean.transactionManager(), applicationContext, beanName));
+        if (transactionalEvent != null || transactional != null) {
+            if (transactionalEvent != null) {
+                pollingContainerConfigurer.transactionManager(AnnotationProcessorUtils.findTxManager(transactionalEvent.transactionManager(), applicationContext, beanName));
             } else {
                 pollingContainerConfigurer.transactionManager(AnnotationProcessorUtils.findTxManager("", applicationContext, beanName));
             }
@@ -90,8 +100,8 @@ public class PollingEventBeanAnnotationPostProcessor implements BeanPostProcesso
             if (transactional != null && transactional.isolation() != Isolation.DEFAULT) {
                 isolation = transactional.isolation();
             }
-            if (transactionalEventBean != null && transactionalEventBean.isolation() != Isolation.DEFAULT) {
-                isolation = transactionalEventBean.isolation();
+            if (transactionalEvent != null && transactionalEvent.isolation() != Isolation.DEFAULT) {
+                isolation = transactionalEvent.isolation();
             }
             pollingContainerConfigurer.transactionIsolationLevel(isolation.value());
 
@@ -99,8 +109,8 @@ public class PollingEventBeanAnnotationPostProcessor implements BeanPostProcesso
             if (transactional != null && transactional.timeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
                 timeout = transactional.timeout();
             }
-            if (transactionalEventBean != null && transactionalEventBean.timeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
-                timeout = transactionalEventBean.timeout();
+            if (transactionalEvent != null && transactionalEvent.timeout() != TransactionDefinition.TIMEOUT_DEFAULT) {
+                timeout = transactionalEvent.timeout();
             }
             pollingContainerConfigurer.transactionTimeout(timeout);
         }

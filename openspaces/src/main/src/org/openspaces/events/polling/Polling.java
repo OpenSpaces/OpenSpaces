@@ -33,14 +33,14 @@ import java.lang.annotation.Target;
  * <p>The event listener method should be marked with {@link org.openspaces.events.adapter.SpaceDataEvent}.
  *
  * @author kimchy
- * @see org.openspaces.events.TransactionalEventBean
+ * @see org.openspaces.events.TransactionalEvent
  * @see org.openspaces.events.polling.ReceiveHandler
  * @see org.openspaces.events.polling.TriggerHandler
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Component
-public @interface PollingEventBean {
+public @interface Polling {
 
     /**
      * The name of the bean that that is the {@link org.openspaces.core.GigaSpace} this container will

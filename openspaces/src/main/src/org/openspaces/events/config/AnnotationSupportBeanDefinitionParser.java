@@ -16,8 +16,8 @@
 
 package org.openspaces.events.config;
 
-import org.openspaces.events.notify.config.NotifyEventBeanAnnotationPostProcessor;
-import org.openspaces.events.polling.config.PollingEventBeanAnnotationPostProcessor;
+import org.openspaces.events.notify.config.NotifyAnnotationPostProcessor;
+import org.openspaces.events.polling.config.PollingAnnotationPostProcessor;
 import org.openspaces.events.support.EventContainersBus;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -36,11 +36,11 @@ public class AnnotationSupportBeanDefinitionParser implements BeanDefinitionPars
         BeanComponentDefinition bcd = new BeanComponentDefinition(bd, "intenral-eventContainerBus");
         parserContext.registerBeanComponent(bcd);
 
-        bd = new RootBeanDefinition(PollingEventBeanAnnotationPostProcessor.class);
+        bd = new RootBeanDefinition(PollingAnnotationPostProcessor.class);
         bcd = new BeanComponentDefinition(bd, "intenral-pollingContaienrAnnotationPostProcessor");
         parserContext.registerBeanComponent(bcd);
 
-        bd = new RootBeanDefinition(NotifyEventBeanAnnotationPostProcessor.class);
+        bd = new RootBeanDefinition(NotifyAnnotationPostProcessor.class);
         bcd = new BeanComponentDefinition(bd, "intenral-notifyContaienrAnnotationPostProcessor");
         parserContext.registerBeanComponent(bcd);
 
