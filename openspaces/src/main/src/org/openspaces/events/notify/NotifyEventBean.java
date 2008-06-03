@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
  *
  * <p>The event listener method should be marked with {@link org.openspaces.events.adapter.SpaceDataEvent}.
  *
- * @see org.openspaces.events.TransactionalEventContainer
+ * @see org.openspaces.events.TransactionalEventBean
  * @see org.openspaces.events.notify.NotifyBatch
  * @see org.openspaces.events.notify.NotifyLease
  * @see org.openspaces.events.notify.NotifyType
@@ -42,7 +42,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Component
-public @interface NotifyContainer {
+public @interface NotifyEventBean {
 
     /**
      * The name of the bean that that is the {@link org.openspaces.core.GigaSpace} this container will

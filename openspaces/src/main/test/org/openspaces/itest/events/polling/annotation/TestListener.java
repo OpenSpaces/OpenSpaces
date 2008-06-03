@@ -1,9 +1,9 @@
 package org.openspaces.itest.events.polling.annotation;
 
 import org.openspaces.events.EventTemplate;
-import org.openspaces.events.TransactionalEventContainer;
+import org.openspaces.events.TransactionalEventBean;
 import org.openspaces.events.adapter.SpaceDataEvent;
-import org.openspaces.events.polling.PollingContainer;
+import org.openspaces.events.polling.PollingEventBean;
 import org.openspaces.events.polling.ReceiveHandler;
 import org.openspaces.events.polling.receive.MultiTakeReceiveOperationHandler;
 import org.openspaces.events.polling.receive.ReceiveOperationHandler;
@@ -11,8 +11,8 @@ import org.openspaces.events.polling.receive.ReceiveOperationHandler;
 /**
  * @author kimchy
  */
-@PollingContainer
-@TransactionalEventContainer
+@PollingEventBean
+@TransactionalEventBean
 public class TestListener {
 
     private volatile boolean receivedMessage = false;

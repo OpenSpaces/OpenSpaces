@@ -20,7 +20,7 @@ import com.j_spaces.core.client.SQLQuery;
 import org.openspaces.events.EventTemplate;
 import org.openspaces.events.adapter.SpaceDataEvent;
 import org.openspaces.events.notify.NotifyBatch;
-import org.openspaces.events.notify.NotifyContainer;
+import org.openspaces.events.notify.NotifyEventBean;
 import org.openspaces.events.notify.NotifyType;
 import org.openspaces.example.data.common.Data;
 
@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author kimchy
  */
-@NotifyContainer
+@NotifyEventBean
 @NotifyBatch(size = 10, time = 5000)
 @NotifyType(write = true, update = true)
 public class DataProcessedCounter {

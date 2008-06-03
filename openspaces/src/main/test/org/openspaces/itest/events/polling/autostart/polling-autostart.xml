@@ -17,7 +17,7 @@
 
 	<bean id="autoStartEventListener" class="org.openspaces.itest.events.polling.autostart.AutoStartEventListener" />
 
-    <os-events:polling-container id="pollingContainer" giga-space="gigaSpace" auto-start="false">
+    <os-events:polling-container id="pollingEventBean" giga-space="gigaSpace" auto-start="false">
         <os-events:listener ref="autoStartEventListener"/>
     </os-events:polling-container>
 </beans>

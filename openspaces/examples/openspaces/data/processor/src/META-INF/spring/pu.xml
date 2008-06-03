@@ -52,7 +52,7 @@
     <os-core:giga-space-context/>
     
     <!--
-        Enables using @PollingContainer and @NotifyContainer annotations
+        Enables using @PollingEventBean and @NotifyEventBean annotations
     -->
     <os-events:annotation-support />
 
