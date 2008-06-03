@@ -30,7 +30,7 @@ import com.j_spaces.kernel.PlatformVersion;
 public class OutputVersion {
 
     public static String computeVersion() {
-        if (PlatformVersion.getMilestone().equals("GA")) {
+        if (PlatformVersion.getMilestone().equalsIgnoreCase("GA")) {
             return PlatformVersion.getVersion();
         } else if (PlatformVersion.getBuildNumber().indexOf("-") == -1) {
             return PlatformVersion.getVersion() + "-" + PlatformVersion.getMilestone();
