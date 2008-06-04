@@ -16,9 +16,12 @@
 
 package org.openspaces.pu.container.standalone;
 
+import com.gigaspaces.admin.cli.RuntimeInfo;
 import com.gigaspaces.logger.GSLogConfigLoader;
 import com.j_spaces.core.Constants;
 import com.j_spaces.kernel.SecurityPolicyLoader;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
@@ -42,6 +45,8 @@ import org.springframework.context.ApplicationContext;
  * @author kimchy
  */
 public class StandaloneProcessingUnitContainer implements ApplicationContextProcessingUnitContainer {
+
+    private static final Log logger = LogFactory.getLog(StandaloneProcessingUnitContainer.class);
 
     private StandaloneContainerRunnable containerRunnable;
 
@@ -105,6 +110,10 @@ public class StandaloneProcessingUnitContainer implements ApplicationContextProc
         if (args.length == 0) {
             printUsage();
             System.exit(1);
+        }
+        System.setProperty("com.gs.printRuntimeInfo", "false");
+        if (logger.isInfoEnabled()) {
+            logger.info(RuntimeInfo.getEnvironmentInfo());
         }
         try {
             final ProcessingUnitContainer container = createContainer(args);

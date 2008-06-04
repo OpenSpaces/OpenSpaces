@@ -16,9 +16,12 @@
 
 package org.openspaces.pu.container.integrated;
 
+import com.gigaspaces.admin.cli.RuntimeInfo;
 import com.gigaspaces.logger.GSLogConfigLoader;
 import com.j_spaces.core.Constants;
 import com.j_spaces.kernel.SecurityPolicyLoader;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
@@ -48,6 +51,8 @@ import org.springframework.context.ApplicationContext;
  * @author kimchy
  */
 public class IntegratedProcessingUnitContainer implements ApplicationContextProcessingUnitContainer {
+
+    private static final Log logger = LogFactory.getLog(IntegratedProcessingUnitContainer.class);
 
     private ApplicationContext applicationContext;
 
@@ -120,6 +125,10 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
         GSLogConfigLoader.getLoader();
         if (System.getProperty("java.security.policy") == null) {
             SecurityPolicyLoader.loadPolicy(Constants.System.SYSTEM_GS_POLICY);
+        }
+        System.setProperty("com.gs.printRuntimeInfo", "false");
+        if (logger.isInfoEnabled()) {
+            logger.info(RuntimeInfo.getEnvironmentInfo());
         }
         try {
            final ProcessingUnitContainer container = createContainer(args);

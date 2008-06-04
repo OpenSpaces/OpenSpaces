@@ -16,6 +16,7 @@
 
 package org.openspaces.maven.plugin;
 
+import com.gigaspaces.admin.cli.RuntimeInfo;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -106,6 +107,11 @@ public class RunPUMojo extends AbstractMojo {
 
         Utils.handleSecurity();
 
+        System.setProperty("com.gs.printRuntimeInfo", "false");
+        if (getLog().isDebugEnabled()) {
+            getLog().debug(RuntimeInfo.getEnvironmentInfo());
+        }
+        
         // get a list of project to execute in the order set by the reactor
         List projects = Utils.getProjectsToExecute(reactorProjects, module);
 
