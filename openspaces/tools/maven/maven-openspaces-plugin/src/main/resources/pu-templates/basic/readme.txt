@@ -33,6 +33,7 @@ Quick list:
 * mvn package: Compile and package the project.
 * mvn os:run-standalone: Runs a packaged application (from the jars).
 * mvn os:deploy: Deploys the project onto the Service Grid.
+* mvn os:undeploy: Removes the project from the Service Grid.
 
   In order to build the example, a simple "mvn compile" executed from the root of the 
 project will compile all the different modules.
