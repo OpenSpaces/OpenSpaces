@@ -17,6 +17,7 @@
 package org.openspaces.maven.plugin;
 
 import com.gigaspaces.admin.cli.RuntimeInfo;
+import com.gigaspaces.logger.GSLogConfigLoader;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -106,6 +107,7 @@ public class RunPUMojo extends AbstractMojo {
         }
 
         Utils.handleSecurity();
+        GSLogConfigLoader.getLoader();
 
         System.setProperty("com.gs.printRuntimeInfo", "false");
         if (getLog().isDebugEnabled()) {
