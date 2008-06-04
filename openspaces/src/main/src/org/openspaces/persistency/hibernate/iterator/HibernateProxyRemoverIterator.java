@@ -20,6 +20,9 @@ import com.gigaspaces.datasource.DataIterator;
 import org.openspaces.persistency.support.MultiDataIterator;
 
 /**
+ * A wrapper iterator that removes Hibernate proxies from the actual object
+ * returned.
+ *
  * @author kimchy
  */
 public class HibernateProxyRemoverIterator implements MultiDataIterator {
