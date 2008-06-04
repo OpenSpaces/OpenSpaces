@@ -39,6 +39,11 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-annotations</artifactId>
+            <version>3.2.1.ga</version>
+        </dependency>
+        <dependency>
             <groupId>geronimo-spec</groupId>
             <artifactId>geronimo-spec-jta</artifactId>
             <version>1.0.1B-rc4</version>

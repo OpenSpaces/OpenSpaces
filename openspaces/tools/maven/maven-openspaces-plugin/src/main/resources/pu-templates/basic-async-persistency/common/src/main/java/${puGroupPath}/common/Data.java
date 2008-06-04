@@ -4,6 +4,9 @@ import com.gigaspaces.annotation.pojo.SpaceClass;
 import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.annotation.pojo.SpaceRouting;
 
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Id;
 
 /**
  * A simple object used to work with the Space. Important properties include the id
@@ -11,9 +14,12 @@ import com.gigaspaces.annotation.pojo.SpaceRouting;
  * the raw data and processed data, and a boolean flag indicating if this Data object
  * was processed or not.
  */
+@Entity
+@Table(name="DATA")
 @SpaceClass
 public class Data {
 
+    @Id
     private String id;
 
     private Long type;

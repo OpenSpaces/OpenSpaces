@@ -40,11 +40,11 @@
     <!--
         Hibernate SessionFactory bean. Uses the pooled data source to connect to the database.
     -->
-    <bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
-        <property name="mappingResources">
+        <property name="annotatedClasses">
             <list>
-                <value>${puGroupPath}/common/Data.hbm.xml</value>
+                <value>${puGroupId}.common.Data</value>
             </list>
         </property>
         <property name="hibernateProperties">
