@@ -183,7 +183,7 @@ public class OpenSpacesQueueConnector extends AbstractConnector implements Appli
 
     protected MessageReceiver getReceiverByEndpoint(EndpointURI endpointUri) throws EndpointException {
         if (logger.isDebugEnabled()) {
-            logger.debug("Looking up vm receiver for address: " + endpointUri.toString());
+            logger.debug("Looking up os-queue receiver for address: " + endpointUri.toString());
         }
 
         MessageReceiver receiver;
