@@ -16,15 +16,13 @@
 
 package org.openspaces.events.notify;
 
+import com.j_spaces.core.client.INotifyDelegatorFilter;
 import net.jini.lease.LeaseListener;
-
 import org.openspaces.core.GigaSpace;
 import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.events.adapter.AnnotationEventListenerAdapter;
 import org.openspaces.events.adapter.MethodEventListenerAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
-
-import com.j_spaces.core.client.INotifyDelegatorFilter;
 
 /**
  * A simplified programmatic configuration that for {@link org.openspaces.events.notify.SimpleNotifyEventListenerContainer}.
@@ -58,6 +56,11 @@ public class SimpleNotifyContainerConfigurer {
     public SimpleNotifyContainerConfigurer(GigaSpace gigaSpace) {
         notifyEventListenerContainer = new SimpleNotifyEventListenerContainer();
         notifyEventListenerContainer.setGigaSpace(gigaSpace);
+    }
+
+    public SimpleNotifyContainerConfigurer name(String name) {
+        notifyEventListenerContainer.setBeanName(name);
+        return this;
     }
 
     /**

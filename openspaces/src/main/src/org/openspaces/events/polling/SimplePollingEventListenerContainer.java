@@ -308,6 +308,36 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
         super.initialize();
     }
 
+    protected void doAfterStart() throws DataAccessException {
+        super.doAfterStart();
+        if (logger.isDebugEnabled()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("[").append(getBeanName()).append("] ").append("Started");
+            if (getTransactionManager() != null) {
+                sb.append(" transactional");
+            }
+            sb.append(" polling event container");
+            sb.append(" with receiveTimeout [").append(getReceiveTimeout()).append("]");
+            if (getTemplate() != null) {
+                sb.append(", tempalte ").append(ClassUtils.getShortName(getTemplate().getClass())).append("[").append(getTemplate()).append("]");
+            } else {
+                sb.append(", tempalte [null]");
+            }
+            sb.append(", concurrentConsumers [").append(concurrentConsumers).append("]");
+            if (maxConcurrentConsumers != concurrentConsumers) {
+                sb.append(", maxConcurrentConsumers [").append(maxConcurrentConsumers).append("]");
+            }
+            logger.debug(sb.toString());
+        }
+    }
+
+    protected void doBeforeStop() throws DataAccessException {
+        super.doBeforeStop();
+        if (logger.isDebugEnabled()) {
+            logger.debug("Stopped polling event container");
+        }
+    }
+
     /**
      * Create a default TaskExecutor. Called if no explicit TaskExecutor has been specified.
      *

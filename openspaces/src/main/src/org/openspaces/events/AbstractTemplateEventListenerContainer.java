@@ -75,8 +75,8 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
 
     public void initialize() throws DataAccessException {
         if (performSnapshot && template != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug(message("Performing snapshot on template [" + template + "]"));
+            if (logger.isTraceEnabled()) {
+                logger.trace(message("Performing snapshot on template [" + template + "]"));
             }
             receiveTemplate = getGigaSpace().snapshot(template);
         } else {

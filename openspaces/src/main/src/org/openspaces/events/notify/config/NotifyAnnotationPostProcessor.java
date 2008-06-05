@@ -70,6 +70,9 @@ public class NotifyAnnotationPostProcessor implements BeanPostProcessor, Applica
         GigaSpace gigaSpace = AnnotationProcessorUtils.findGigaSpace(bean, notify.gigaSpace(), applicationContext, beanName);
 
         SimpleNotifyContainerConfigurer notifyContainerConfigurer = new SimpleNotifyContainerConfigurer(gigaSpace);
+
+        notifyContainerConfigurer.name(beanName);
+
         if (bean instanceof SpaceDataEventListener) {
             notifyContainerConfigurer.eventListener((SpaceDataEventListener) bean);
         } else {

@@ -59,6 +59,11 @@ public class SimplePollingContainerConfigurer {
         pollingEventListenerContainer.setGigaSpace(gigaSpace);
     }
 
+    public SimplePollingContainerConfigurer name(String name) {
+        pollingEventListenerContainer.setBeanName(name);
+        return this;
+    }
+
     /**
      * @see org.openspaces.events.polling.SimplePollingEventListenerContainer#setTaskExecutor(org.springframework.core.task.TaskExecutor)
      */

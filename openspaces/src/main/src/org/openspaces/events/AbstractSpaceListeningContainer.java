@@ -264,16 +264,16 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
             if (applicationEvent instanceof AfterSpaceModeChangeEvent) {
                 AfterSpaceModeChangeEvent spEvent = (AfterSpaceModeChangeEvent) applicationEvent;
                 if (spEvent.isPrimary() && SpaceUtils.isSameSpace(spEvent.getSpace(), gigaSpace.getSpace())) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug(message("Space [" + getGigaSpace() + "] became primary, starting the container"));
+                    if (logger.isTraceEnabled()) {
+                        logger.trace(message("Space [" + getGigaSpace() + "] became primary, starting the container"));
                     }
                     doStart();
                 }
             } else if (applicationEvent instanceof BeforeSpaceModeChangeEvent) {
                 BeforeSpaceModeChangeEvent spEvent = (BeforeSpaceModeChangeEvent) applicationEvent;
                 if (!spEvent.isPrimary() && SpaceUtils.isSameSpace(spEvent.getSpace(), gigaSpace.getSpace())) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug(message("Space [" + getGigaSpace() + "] became backup, stopping the container"));
+                    if (logger.isTraceEnabled()) {
+                        logger.trace(message("Space [" + getGigaSpace() + "] became backup, stopping the container"));
                     }
                     doStop();
                 }
@@ -292,7 +292,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      * @see #doStart
      */
     public void start() throws DataAccessException {
-        if (! autoStart) {
+        if (!autoStart) {
             autoStart = true ;
         }
         if (currentSpaceMode != null && currentSpaceMode == SpaceMode.PRIMARY) {
@@ -306,6 +306,9 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
     protected void doStart() throws DataAccessException {
         if (!autoStart) {
             return ;
+        }
+        if (running) {
+            return;
         }
         synchronized (this.lifecycleMonitor) {
             this.running = true;
@@ -335,6 +338,9 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      * Notify all invoker tasks to stop
      */
     protected void doStop() throws DataAccessException {
+        if (!running) {
+            return;
+        }
         doBeforeStop();
         synchronized (this.lifecycleMonitor) {
             this.running = false;

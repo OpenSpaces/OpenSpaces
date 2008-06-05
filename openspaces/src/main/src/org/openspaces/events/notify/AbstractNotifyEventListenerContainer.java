@@ -364,19 +364,35 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
         this.disableTransactionValidation = disableTransactionValidation;
     }
 
-    
+
+    protected Boolean getNotifyWrite() {
+        return notifyWrite;
+    }
+
+    protected Boolean getNotifyUpdate() {
+        return notifyUpdate;
+    }
+
+    protected Boolean getNotifyTake() {
+        return notifyTake;
+    }
+
+    protected Boolean getNotifyLeaseExpire() {
+        return notifyLeaseExpire;
+    }
+
     public void initialize() throws DataAccessException {
         // if we are using a Space that was started in embedded mode, no need to replicate notify template
         // by default
         if (replicateNotifyTemplate == null && !SpaceUtils.isRemoteProtocol(getGigaSpace().getSpace())) {
-            if (logger.isDebugEnabled()) {
-                logger.debug(message("Setting replicateNotifyTemplate to true since working with an embedded Space"));
+            if (logger.isTraceEnabled()) {
+                logger.trace(message("Setting replicateNotifyTemplate to true since working with an embedded Space"));
             }
             replicateNotifyTemplate = false;
         }
         if (replicateNotifyTemplate == null && triggerNotifyTemplate != null && triggerNotifyTemplate) {
-            if (logger.isDebugEnabled()) {
-                logger.debug(message("triggerNotifyTemplate is set, automatically setting replicateNotifyTemplate to true"));
+            if (logger.isTraceEnabled()) {
+                logger.trace(message("triggerNotifyTemplate is set, automatically setting replicateNotifyTemplate to true"));
             }
             replicateNotifyTemplate = true;
         }
@@ -400,8 +416,8 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
         if (notifyAll == null && notifyTake == null && notifyUpdate == null && notifyWrite == null
                 && notifyLeaseExpire == null) {
             notifyWrite = true;
-            if (logger.isDebugEnabled()) {
-                logger.debug(message("No notify flag is set, setting write notify to true by default"));
+            if (logger.isTraceEnabled()) {
+                logger.trace(message("No notify flag is set, setting write notify to true by default"));
             }
         }
 

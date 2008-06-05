@@ -75,6 +75,9 @@ public class PollingAnnotationPostProcessor implements BeanPostProcessor, Applic
         GigaSpace gigaSpace = AnnotationProcessorUtils.findGigaSpace(bean, polling.gigaSpace(), applicationContext, beanName);
 
         SimplePollingContainerConfigurer pollingContainerConfigurer = new SimplePollingContainerConfigurer(gigaSpace);
+
+        pollingContainerConfigurer.name(beanName);
+
         if (bean instanceof SpaceDataEventListener) {
             pollingContainerConfigurer.eventListener((SpaceDataEventListener) bean);
         } else {

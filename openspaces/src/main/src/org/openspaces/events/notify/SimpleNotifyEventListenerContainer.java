@@ -25,6 +25,7 @@ import net.jini.core.event.UnknownEventException;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.UnusableEntryException;
 import org.springframework.dao.DataAccessException;
+import org.springframework.util.ClassUtils;
 
 import java.rmi.RemoteException;
 
@@ -91,14 +92,47 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
     }
 
     protected void doAfterStart() throws DataAccessException {
+        super.doAfterStart();
         if (!registerOnStartup) {
             registerListener();
+        }
+        if (logger.isDebugEnabled()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("[").append(getBeanName()).append("] ").append("Started");
+            if (getTransactionManager() != null) {
+                sb.append(" transactional");
+            }
+            sb.append(" notify event container");
+            if (getTemplate() != null) {
+                sb.append(", tempalte ").append(ClassUtils.getShortName(getTemplate().getClass())).append("[").append(getTemplate()).append("]");
+            } else {
+                sb.append(", tempalte [null]");
+            }
+            sb.append(", notifications [");
+            if (getNotifyWrite() != null && getNotifyWrite()) {
+                sb.append("write,");
+            }
+            if (getNotifyUpdate() != null && getNotifyUpdate()) {
+                sb.append("update,");
+            }
+            if (getNotifyTake() != null && getNotifyTake()) {
+                sb.append("take,");
+            }
+            if (getNotifyLeaseExpire() != null && getNotifyLeaseExpire()) {
+                sb.append("leaseExpire,");
+            }
+            sb.append("]");
+            logger.debug(sb.toString());
         }
     }
 
     protected void doBeforeStop() throws DataAccessException {
+        super.doBeforeStop();
         if (!registerOnStartup) {
             closeSession();
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("Stopped notify event container");
         }
     }
 
