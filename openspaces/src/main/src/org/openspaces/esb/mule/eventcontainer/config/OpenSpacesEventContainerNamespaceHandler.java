@@ -16,8 +16,15 @@
 
 package org.openspaces.esb.mule.eventcontainer.config;
 
+import org.mule.config.spring.MuleHierarchicalBeanDefinitionParserDelegate;
+import org.mule.config.spring.factories.InboundEndpointFactoryBean;
+import org.mule.config.spring.factories.OutboundEndpointFactoryBean;
 import org.mule.config.spring.handlers.AbstractMuleNamespaceHandler;
 import org.mule.config.spring.parsers.generic.MuleOrphanDefinitionParser;
+import org.mule.config.spring.parsers.specific.endpoint.TransportEndpointDefinitionParser;
+import org.mule.config.spring.parsers.specific.endpoint.TransportGlobalEndpointDefinitionParser;
+import org.mule.config.spring.parsers.specific.endpoint.support.AddressedEndpointDefinitionParser;
+import org.mule.endpoint.URIBuilder;
 import org.openspaces.esb.mule.eventcontainer.OpenSpacesConnector;
 
 /**
@@ -28,7 +35,21 @@ import org.openspaces.esb.mule.eventcontainer.OpenSpacesConnector;
 public class OpenSpacesEventContainerNamespaceHandler extends AbstractMuleNamespaceHandler {
 
     public void init() {
-        registerStandardTransportEndpoints(OpenSpacesConnector.OS_EVENT_CONTAINER, new String[]{});
+//        registerStandardTransportEndpoints(OpenSpacesConnector.OS_EVENT_CONTAINER, new String[]{});
+
+        TransportGlobalEndpointDefinitionParser transportGlobalEndpointDefinitionParser = new TransportGlobalEndpointDefinitionParser(OpenSpacesConnector.OS_EVENT_CONTAINER, AddressedEndpointDefinitionParser.PROTOCOL, URIBuilder.PATH_ATTRIBUTES, new String[]{});
+        transportGlobalEndpointDefinitionParser.addBeanFlag(MuleHierarchicalBeanDefinitionParserDelegate.MULE_FORCE_RECURSE);
+        registerBeanDefinitionParser("endpoint", transportGlobalEndpointDefinitionParser);
+
+        TransportEndpointDefinitionParser inboundParser = new TransportEndpointDefinitionParser(OpenSpacesConnector.OS_EVENT_CONTAINER, AddressedEndpointDefinitionParser.PROTOCOL, InboundEndpointFactoryBean.class, new String[]{}, new String[]{});
+        inboundParser.addBeanFlag(MuleHierarchicalBeanDefinitionParserDelegate.MULE_FORCE_RECURSE);
+        registerBeanDefinitionParser("inbound-endpoint", inboundParser);
+
+        TransportEndpointDefinitionParser outboundParser = new TransportEndpointDefinitionParser(OpenSpacesConnector.OS_EVENT_CONTAINER, AddressedEndpointDefinitionParser.PROTOCOL, OutboundEndpointFactoryBean.class, new String[]{"giga-space"}, new String[]{});
+        outboundParser.addBeanFlag(MuleHierarchicalBeanDefinitionParserDelegate.MULE_FORCE_RECURSE);
+        outboundParser.addAlias("giga-space", URIBuilder.PATH);
+        registerBeanDefinitionParser("outbound-endpoint", outboundParser);
+
         registerBeanDefinitionParser("connector", new MuleOrphanDefinitionParser(OpenSpacesConnector.class, true));
     }
 }

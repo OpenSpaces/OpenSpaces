@@ -36,7 +36,7 @@
     <xsd:complexType name="outboundEndpointType">
         <xsd:complexContent>
             <xsd:extension base="mule:outboundEndpointType">
-                <xsd:attributeGroup ref="addressAttributes"/>
+                <xsd:attributeGroup ref="outboundAddressAttributes"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
@@ -52,6 +52,10 @@
     </xsd:complexType>
 
     <xsd:attributeGroup name="addressAttributes">
+    </xsd:attributeGroup>
+
+    <xsd:attributeGroup name="outboundAddressAttributes">
+        <xsd:attribute name="giga-space" type="xsd:string" />
     </xsd:attributeGroup>
 
 

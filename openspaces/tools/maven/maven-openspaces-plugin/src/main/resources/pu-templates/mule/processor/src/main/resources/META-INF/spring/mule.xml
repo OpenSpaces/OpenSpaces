@@ -53,7 +53,7 @@
 
         <os-seda:service name="Verifier">
             <inbound>
-                <inbound-endpoint address="os-eventcontainer://dataProcessorPollingEventContainer"/>
+                <os-eventcontainer:inbound-endpoint address="os-eventcontainer://dataProcessorPollingEventContainer"/>
             </inbound>
             <component class="${puGroupId}.processor.Verifier"/>
             <outbound>
@@ -82,7 +82,7 @@
             <component class="${puGroupId}.processor.Processor"/>
             <outbound>
                 <outbound-pass-through-router>
-                    <outbound-endpoint address="os-eventcontainer://gigaSpace"/>
+                    <os-eventcontainer:outbound-endpoint giga-space="gigaSpace"/>
                 </outbound-pass-through-router>
             </outbound>
         </os-seda:service>

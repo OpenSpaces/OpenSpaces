@@ -43,7 +43,7 @@
             
             <outbound>
                 <outbound-pass-through-router>
-                    <outbound-endpoint address="os-eventcontainer://gigaSpace"/>
+                    <os-eventcontainer:outbound-endpoint giga-space="gigaSpace"/>
                 </outbound-pass-through-router>
             </outbound>
         </service>

@@ -60,8 +60,7 @@
 
             <outbound>
                 <outbound-pass-through-router>
-                    <os-eventcontainer:outbound-endpoint
-                            address="os-eventcontainer://gigaSpace?writeLease=2000&amp;updateOrWrite=false&amp;updateTimeout=1"/>
+                    <os-eventcontainer:outbound-endpoint giga-space="gigaSpace" />
                 </outbound-pass-through-router>
             </outbound>
 

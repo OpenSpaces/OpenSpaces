@@ -29,6 +29,7 @@ import org.mule.transport.AbstractMessageDispatcher;
 import org.openspaces.core.GigaSpace;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
+import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.Properties;
@@ -58,8 +59,15 @@ public class OpenSpacesMessageDispatcher extends AbstractMessageDispatcher {
     public OpenSpacesMessageDispatcher(OutboundEndpoint endpoint) {
         super(endpoint);
         ApplicationContext applicationContext = ((OpenSpacesConnector) getConnector()).getApplicationContext();
-        String spaceId = endpoint.getEndpointURI().getAddress();
         initWritingAttributes(endpoint);
+        String spaceId = endpoint.getEndpointURI().getPath();
+        if (!StringUtils.hasLength(spaceId)) {
+            spaceId = endpoint.getEndpointURI().getAddress();
+        } else {
+            if (spaceId.startsWith("/")) {
+                spaceId = spaceId.substring(1);
+            }
+        }
         gigaSpace = (GigaSpace) applicationContext.getBean(spaceId);
     }
 
