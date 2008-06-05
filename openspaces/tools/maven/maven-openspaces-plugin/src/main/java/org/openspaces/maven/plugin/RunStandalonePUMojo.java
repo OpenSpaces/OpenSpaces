@@ -16,13 +16,15 @@
 
 package org.openspaces.maven.plugin;
 
-import com.gigaspaces.admin.cli.RuntimeInfo;
-import com.gigaspaces.logger.GSLogConfigLoader;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+
+import com.gigaspaces.admin.cli.RuntimeInfo;
+import com.gigaspaces.logger.GSLogConfigLoader;
+import com.j_spaces.kernel.SystemProperties;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -59,16 +61,6 @@ public class RunStandalonePUMojo extends AbstractMojo {
      */
     private String module;
 
-
-    /**
-     * Project instance, used to add new source directory to the build.
-     *
-     * @parameter expression="${project}"
-     * @required
-     */
-    private MavenProject project;
-    
-    
     /**
      * Project instance, used to add new source directory to the build.
      *
@@ -84,13 +76,25 @@ public class RunStandalonePUMojo extends AbstractMojo {
      */
     protected ArtifactRepository localRepository;
 
+    /**
+     * groups
+     *
+     * @parameter expression="${groups}"
+     */
+    private String groups;
+
+    /**
+     * locators
+     *
+     * @parameter expression="${locators}"
+     */
+    private String locators;
 
     /**
      * Container list.
      */
     private List containers = new ArrayList();
 
-    private ClassLoader sharedClassLoader;
 
     /**
      * executes the mojo.
@@ -111,12 +115,6 @@ public class RunStandalonePUMojo extends AbstractMojo {
         System.setProperty("com.gs.printRuntimeInfo", "false");
         if (getLog().isDebugEnabled()) {
             getLog().debug(RuntimeInfo.getEnvironmentInfo());
-        }
-        
-        try {
-            sharedClassLoader = Utils.createClassLoader(new ArrayList(), Thread.currentThread().getContextClassLoader());
-        } catch (Exception e1) {
-            throw new MojoExecutionException("Failed to create ClassLoader", e1);
         }
 
         // get a list of project to execute in the order set by the reactor
@@ -161,6 +159,13 @@ public class RunStandalonePUMojo extends AbstractMojo {
             throw new MojoExecutionException("The processing unit project '" + project.getName() +
                     "' must be of type jar (packaging=jar).");
         }
+        
+        if (groups != null && !groups.trim().equals("")) {
+            System.setProperty(SystemProperties.JINI_LUS_GROUPS, groups);
+        }
+        if (locators != null && !locators.trim().equals("")) {
+            System.setProperty(SystemProperties.JINI_LUS_LOCATORS, locators);
+        }
 
         // run the PU
         getLog().info("Running processing unit: " + project.getBuild().getFinalName());
@@ -204,13 +209,26 @@ public class RunStandalonePUMojo extends AbstractMojo {
      */
     public static void printUsage() {
         System.out.println("Usage: mvn os:run-standalone [-Dcluster=\"...\"] [-Dproperties=\"...\"] [-Dmodule=<module name>]");
-        System.out.println("    -Dmodule [module name]        : The name of the module to run. If none is specified, will run all the PU modules");
-        System.out.println("    -Dcluster [cluster properties]: Allows specify cluster parameters");
-        System.out.println("             schema=partitioned  : The cluster schema to use");
-        System.out.println("             total_members=1,1   : The number of instances and number of backups to use");
-        System.out.println("             id=1                : The instance id of this processing unit");
-        System.out.println("             backup_id=1         : The backup id of this processing unit");
-        System.out.println("    -Dproperties [properties-loc] : Location of context level properties");
-        System.out.println("    -Dproperties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
+        System.out.println("    -Dmodule [module name]         : The name of the module to run. If none is specified, will run all the PU modules");
+        System.out.println("    -Dcluster [cluster properties] : Allows specify cluster parameters");
+        System.out.println("             schema=partitioned    : The cluster schema to use");
+        System.out.println("             total_members=1,1     : The number of instances and number of backups to use");
+        System.out.println("             id=1                  : The instance id of this processing unit");
+        System.out.println("             backup_id=1           : The backup id of this processing unit");
+        System.out.println("    -Dproperties [properties-loc]  : Location of context level properties");
+        System.out.println("");
+        System.out.println("");
+        System.out.println("Some Examples:");
+        System.out.println("1. -Dcluster=\"schema=partitioned total_members=2 id=1\"");
+        System.out.println("    - Starts a processing unit with a partitioned cluster schema of two members with instance id 1");
+        System.out.println("2. -Dcluster=\"schema=partitioned total_members=2 id=2\"");
+        System.out.println("    - Starts a processing unit with a partitioned cluster schema of two members with instance id 2");
+        System.out.println("3. -Dcluster=\"schema=partitioned-sync2backup total_members=2,1 id=1 backup_id=1\"");
+        System.out.println("    - Starts a processing unit with a partitioned sync2backup cluster schema of two members with two members each with one backup with instance id of 1 and backup id of 1");
+        System.out.println("4. -Dproperties=file://config/context.properties");
+        System.out.println("    - Starts a processing unit called data-processor using context level properties called context.properties");
+        System.out.println("5. -Dproperties=embed://prop1=value1");
+        System.out.println("    - Starts a processing unit called data-processor using context level properties with a single property called prop1 with value1");
+        System.out.println("");
    }
 }

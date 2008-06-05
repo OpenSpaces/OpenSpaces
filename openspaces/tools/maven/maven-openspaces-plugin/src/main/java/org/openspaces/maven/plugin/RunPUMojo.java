@@ -24,6 +24,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 
+import com.j_spaces.kernel.SystemProperties;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -37,16 +39,7 @@ import java.util.List;
  * @description Runs ...
  */
 public class RunPUMojo extends AbstractMojo {
-    /**
-     * The classpath elements of the project being tested.
-     *
-     * @parameter expression="${project}"
-     * @required
-     * @readonly
-     */
-    private MavenProject project;
-
-
+    
     /**
      * The classpath elements of the project being tested.
      *
@@ -70,6 +63,20 @@ public class RunPUMojo extends AbstractMojo {
      * @parameter expression="${proeprties}"
      */
     private String proeprties;
+    
+    /**
+     * groups
+     *
+     * @parameter expression="${groups}"
+     */
+    private String groups;
+
+    /**
+     * locators
+     *
+     * @parameter expression="${locators}"
+     */
+    private String locators;
 
 
     /**
@@ -166,6 +173,12 @@ public class RunPUMojo extends AbstractMojo {
             classLoader = Utils.createClassLoader(classpath, null);
         } catch (Exception e1) {
             throw new MojoExecutionException("Failed to resolve project classpath", e1);
+        }
+        if (groups != null && !groups.trim().equals("")) {
+            System.setProperty(SystemProperties.JINI_LUS_GROUPS, groups);
+        }
+        if (locators != null && !locators.trim().equals("")) {
+            System.setProperty(SystemProperties.JINI_LUS_LOCATORS, locators);
         }
         ContainerRunnable conatinerRunnable = new ContainerRunnable("org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer", createAttributesArray());
         Thread thread = new Thread(conatinerRunnable, "Processing Unit [" + project.getBuild().getFinalName() + "]");
