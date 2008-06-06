@@ -36,6 +36,9 @@ public class PUEmbedMuleRefTests extends AbstractDependencyInjectionSpringContex
 
     public void testTakeSingleFromSpace() throws ConfigurationException {
         GigaSpace gigaSpace = new GigaSpaceConfigurer(new UrlSpaceConfigurer("jini://*/*/space").lookupGroups(System.getProperty("user.name")).space()).gigaSpace();
+
+        gigaSpace.clear(null);
+        
         int numberOfMsgs = 10;
         for (int i = 0; i < numberOfMsgs; i++) {
             SimpleMessage message = new SimpleMessage("Hello World " + i, false);
