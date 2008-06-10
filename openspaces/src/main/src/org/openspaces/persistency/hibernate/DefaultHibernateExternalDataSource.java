@@ -42,8 +42,8 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
     /**
      * Perform the given bulk changes using Hibernate {@link org.hibernate.Session}.
      *
-     * <p>Note, this implemenation relies on Hibernate {@link org.hibernate.NonUniqueObjectException} in case
-     * the entity is alredy associated wih the given session, and in such a case, will result in performing
+     * <p>Note, this implementation relies on Hibernate {@link org.hibernate.NonUniqueObjectException} in case
+     * the entity is already associated with the given session, and in such a case, will result in performing
      * merge operation (which is more expensive).
      */
     public void executeBulk(List<BulkItem> bulkItems) throws DataSourceException {
