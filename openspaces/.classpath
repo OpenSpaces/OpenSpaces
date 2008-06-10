@@ -81,12 +81,12 @@
 	<classpathentry kind="lib" path="lib/antlr/antlr-2.7.6.jar"/>
 	<classpathentry kind="lib" path="tools/maven/apache-maven-2.0.9/lib/maven-2.0.9-uber.jar"/>
 	<classpathentry kind="lib" path="lib/jdbc/hsqldb.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-core-2.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-module-client-2.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-module-spring-config-2.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-module-spring-extras-2.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-transport-stdio-2.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/mule/mule-transport-vm-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/mule/mule-core-2.0.1.jar" sourcepath="lib/mule/mule-2.0.1-src.zip"/>
+	<classpathentry kind="lib" path="lib/mule/mule-module-client-2.0.1.jar" sourcepath="lib/mule/mule-2.0.1-src.zip"/>
+	<classpathentry kind="lib" path="lib/mule/mule-module-spring-config-2.0.1.jar" sourcepath="lib/mule/mule-2.0.1-src.zip"/>
+	<classpathentry kind="lib" path="lib/mule/mule-module-spring-extras-2.0.1.jar" sourcepath="lib/mule/mule-2.0.1-src.zip"/>
+	<classpathentry kind="lib" path="lib/mule/mule-transport-stdio-2.0.1.jar" sourcepath="lib/mule/mule-2.0.1-src.zip"/>
+	<classpathentry kind="lib" path="lib/mule/mule-transport-vm-2.0.1.jar" sourcepath="lib/mule/mule-2.0.1-src.zip"/>
 	<classpathentry kind="lib" path="lib/cglib/cglib-nodep-2.1_3.jar"/>
 	<classpathentry kind="lib" path="lib/spring/common-annotations.jar"/>
 	<classpathentry kind="lib" path="lib/asm/asm-commons-2.2.3.jar"/>
