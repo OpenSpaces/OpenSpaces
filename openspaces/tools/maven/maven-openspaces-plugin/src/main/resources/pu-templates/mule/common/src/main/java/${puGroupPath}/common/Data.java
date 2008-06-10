@@ -1,5 +1,7 @@
 package ${puGroupId}.common;
 
+import java.io.Serializable;
+
 import com.gigaspaces.annotation.pojo.SpaceClass;
 import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.annotation.pojo.SpaceRouting;
@@ -12,7 +14,7 @@ import com.gigaspaces.annotation.pojo.SpaceRouting;
  * was processed or not.
  */
 @SpaceClass
-public class Data {
+public class Data implements Serializable {
 
     private String id;
 
