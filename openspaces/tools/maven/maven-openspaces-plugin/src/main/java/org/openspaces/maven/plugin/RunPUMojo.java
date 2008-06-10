@@ -16,15 +16,12 @@
 
 package org.openspaces.maven.plugin;
 
-import com.gigaspaces.admin.cli.RuntimeInfo;
-import com.gigaspaces.logger.GSLogConfigLoader;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
-
-import com.j_spaces.kernel.SystemProperties;
+import org.springframework.util.ClassUtils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -39,7 +36,7 @@ import java.util.List;
  * @description Runs ...
  */
 public class RunPUMojo extends AbstractMojo {
-    
+
     /**
      * The classpath elements of the project being tested.
      *
@@ -63,7 +60,7 @@ public class RunPUMojo extends AbstractMojo {
      * @parameter expression="${proeprties}"
      */
     private String proeprties;
-    
+
     /**
      * groups
      *
@@ -83,8 +80,8 @@ public class RunPUMojo extends AbstractMojo {
      * Container list.
      */
     private List containers = new ArrayList();
-    
-    
+
+
     /**
      * Project instance, used to add new source directory to the build.
      *
@@ -92,7 +89,7 @@ public class RunPUMojo extends AbstractMojo {
      * @readonly
      */
     private List reactorProjects;
-    
+
     /**
      * @parameter expression="${localRepository}"
      * @required
@@ -114,13 +111,14 @@ public class RunPUMojo extends AbstractMojo {
         }
 
         Utils.handleSecurity();
-        GSLogConfigLoader.getLoader();
+        try {
+            ClassUtils.forName("com.gigaspaces.logger.GSLogConfigLoader").getMethod("getLoader", new Class[0]).invoke(null, new Object[0]);
+        } catch (Exception e) {
+            throw new MojoExecutionException("Failed to configure logging", e);
+        }
 
         System.setProperty("com.gs.printRuntimeInfo", "false");
-        if (getLog().isDebugEnabled()) {
-            getLog().debug(RuntimeInfo.getEnvironmentInfo());
-        }
-        
+
         // get a list of project to execute in the order set by the reactor
         List projects = Utils.getProjectsToExecute(reactorProjects, module);
 
@@ -175,10 +173,10 @@ public class RunPUMojo extends AbstractMojo {
             throw new MojoExecutionException("Failed to resolve project classpath", e1);
         }
         if (groups != null && !groups.trim().equals("")) {
-            System.setProperty(SystemProperties.JINI_LUS_GROUPS, groups);
+            System.setProperty("com.gs.jini_lus.groups", groups);
         }
         if (locators != null && !locators.trim().equals("")) {
-            System.setProperty(SystemProperties.JINI_LUS_LOCATORS, locators);
+            System.setProperty("com.gs.jini_lus.locators", locators);
         }
         ContainerRunnable conatinerRunnable = new ContainerRunnable("org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer", createAttributesArray());
         Thread thread = new Thread(conatinerRunnable, "Processing Unit [" + project.getBuild().getFinalName() + "]");

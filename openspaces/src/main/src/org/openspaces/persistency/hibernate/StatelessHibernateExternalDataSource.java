@@ -64,16 +64,28 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
             for (BulkItem bulkItem : bulkItems) {
                 Object entry = bulkItem.getItem();
                 if (!isManagedEntry(entry.getClass().getName())) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("[Optimistic] Entry [" + entry + "] is not managed, filtering it out");
+                    }
                     continue;
                 }
                 switch (bulkItem.getOperation()) {
                     case BulkItem.REMOVE:
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("[Optimistic REMOVE] Deleting Entry [" + entry + "]");
+                        }
                         session.delete(entry);
                         break;
                     case BulkItem.WRITE:
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("[Optimistic WRITE] Write Entry [" + entry + "]");
+                        }
                         session.insert(entry);
                         break;
                     case BulkItem.UPDATE:
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("[Optimistic UPDATE] Update Entry [" + entry + "]");
+                        }
                         session.update(entry);
                         break;
                     default:
@@ -103,20 +115,44 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
             for (BulkItem bulkItem : bulkItems) {
                 Object entry = bulkItem.getItem();
                 if (!isManagedEntry(entry.getClass().getName())) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("[Exists] Entry [" + entry + "] is not managed, filtering it out");
+                    }
                     continue;
                 }
                 latest = entry;
                 switch (bulkItem.getOperation()) {
                     case BulkItem.REMOVE:
                         if (exists(entry, session)) {
+                            if (logger.isTraceEnabled()) {
+                                logger.trace("[Exists REMOVE] Deleting Entry [" + entry + "]");
+                            }
                             session.delete(entry);
                         }
                         break;
                     case BulkItem.WRITE:
-                    case BulkItem.UPDATE:
                         if (exists(entry, session)) {
+                            if (logger.isTraceEnabled()) {
+                                logger.trace("[Exists WRITE] Update Entry [" + entry + "]");
+                            }
                             session.update(entry);
                         } else {
+                            if (logger.isTraceEnabled()) {
+                                logger.trace("[Exists WRITE] Insert Entry [" + entry + "]");
+                            }
+                            session.insert(entry);
+                        }
+                        break;
+                    case BulkItem.UPDATE:
+                        if (exists(entry, session)) {
+                            if (logger.isTraceEnabled()) {
+                                logger.trace("[Exists UPDATE] Update Entry [" + entry + "]");
+                            }
+                            session.update(entry);
+                        } else {
+                            if (logger.isTraceEnabled()) {
+                                logger.trace("[Exists UPDATE] Insert Entry [" + entry + "]");
+                            }
                             session.insert(entry);
                         }
                         break;
@@ -153,8 +189,14 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
         int iteratorCounter = 0;
         for (String entityName : getInitialLoadEntries()) {
             if (getInitalLoadChunkSize() == -1) {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Creating inital load scrollable iterator for entry [" + entityName + "]");
+                }
                 iterators[iteratorCounter++] = new StatelessScrollableDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById());
             } else {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Creating inital load chunk scrollable iterator for entry [" + entityName + "]");
+                }
                 iterators[iteratorCounter++] = new StatelessChunkScrollableDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById(), getInitalLoadChunkSize());
             }
         }

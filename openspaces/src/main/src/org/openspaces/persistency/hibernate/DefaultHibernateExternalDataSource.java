@@ -54,11 +54,17 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
             for (BulkItem bulkItem : bulkItems) {
                 Object entry = bulkItem.getItem();
                 if (!isManagedEntry(entry.getClass().getName())) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Entry [" + entry + "] is not managed, filtering it out");
+                    }
                     continue;
                 }
                 latest = entry;
                 switch (bulkItem.getOperation()) {
                     case BulkItem.REMOVE:
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Deleting Entry [" + entry + "]");
+                        }
                         try {
                             session.delete(entry);
                         } catch (NonUniqueObjectException e) {
@@ -66,7 +72,19 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                         }
                         break;
                     case BulkItem.WRITE:
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Write Entry [" + entry + "]");
+                        }
+                        try {
+                            session.saveOrUpdate(entry);
+                        } catch (NonUniqueObjectException e) {
+                            session.merge(entry);
+                        }
+                        break;
                     case BulkItem.UPDATE:
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Update Entry [" + entry + "]");
+                        }
                         try {
                             session.saveOrUpdate(entry);
                         } catch (NonUniqueObjectException e) {
@@ -91,6 +109,9 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
      * given sql query.
      */
     public DataIterator iterator(SQLQuery sqlQuery) throws DataSourceException {
+        if (logger.isTraceEnabled()) {
+            logger.trace("Iterator over query [" + sqlQuery + "]");
+        }
         return new HibernateProxyRemoverIterator(new DefaultListQueryDataIterator(sqlQuery, getSessionFactory()));
     }
 
@@ -106,8 +127,14 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
         int iteratorCounter = 0;
         for (String entityName : getInitialLoadEntries()) {
             if (getInitalLoadChunkSize() == -1) {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Creating inital load scrollable iterator for entry [" + entityName + "]");
+                }
                 iterators[iteratorCounter++] = new DefaultScrollableDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById());
             } else {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Creating inital load chunk scrollable iterator for entry [" + entityName + "]");
+                }
                 iterators[iteratorCounter++] = new DefaultChunkScrollableDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById(), getInitalLoadChunkSize());
             }
         }

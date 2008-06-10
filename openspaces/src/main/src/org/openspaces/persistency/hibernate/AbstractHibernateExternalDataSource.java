@@ -219,6 +219,9 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      * <p>Also initalizes the {@link #setInitialLoadEntries(String[])} if not set explicitly.
      */
     public void init(Properties properties) throws DataSourceException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Using initialLoadChunkSize [" + initalLoadChunkSize + "], fetchSize [" + fetchSize + "], initalLoadThreadPoolSize [" + initialLoadThreadPoolSize + "], performOrderById [" + performOrderById + "]");
+        }
         if (sessionFactory == null) {
             createdSessionFactory = true;
             String hibernateFile = properties.getProperty(HIBERNATE_CFG_PROPERTY);

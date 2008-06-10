@@ -21,10 +21,7 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
-
-import com.gigaspaces.admin.cli.RuntimeInfo;
-import com.gigaspaces.logger.GSLogConfigLoader;
-import com.j_spaces.kernel.SystemProperties;
+import org.springframework.util.ClassUtils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -110,12 +107,13 @@ public class RunStandalonePUMojo extends AbstractMojo {
         }
 
         Utils.handleSecurity();
-        GSLogConfigLoader.getLoader();
+        try {
+            ClassUtils.forName("com.gigaspaces.logger.GSLogConfigLoader").getMethod("getLoader", new Class[0]).invoke(null, new Object[0]);
+        } catch (Exception e) {
+            throw new MojoExecutionException("Failed to configure logging", e);
+        }
 
         System.setProperty("com.gs.printRuntimeInfo", "false");
-        if (getLog().isDebugEnabled()) {
-            getLog().debug(RuntimeInfo.getEnvironmentInfo());
-        }
 
         // get a list of project to execute in the order set by the reactor
         List projects = Utils.getProjectsToExecute(reactorProjects, module);
@@ -161,10 +159,10 @@ public class RunStandalonePUMojo extends AbstractMojo {
         }
         
         if (groups != null && !groups.trim().equals("")) {
-            System.setProperty(SystemProperties.JINI_LUS_GROUPS, groups);
+            System.setProperty("com.gs.jini_lus.groups", groups);
         }
         if (locators != null && !locators.trim().equals("")) {
-            System.setProperty(SystemProperties.JINI_LUS_LOCATORS, locators);
+            System.setProperty("com.gs.jini_lus.locators", locators);
         }
 
         // run the PU
