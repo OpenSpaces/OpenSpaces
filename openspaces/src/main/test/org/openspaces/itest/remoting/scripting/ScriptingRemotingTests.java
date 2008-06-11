@@ -113,18 +113,18 @@ public class ScriptingRemotingTests extends AbstractDependencyInjectionSpringCon
         Long value = (Long) syncScriptingExecutor.execute(new StaticScript("testSimpleCachingWithJRuby-warmup", "ruby", "$number").parameter("number", 1));
         assertEquals(1, value.intValue());
 
-        long time = System.currentTimeMillis();
+        long time = System.nanoTime();
         for (int i = 0; i < 10; i++) {
             value = (Long) syncScriptingExecutor.execute(new StaticScript("testSimpleCachingWithJRuby-cached", "ruby", "$number").parameter("number", 1));
             assertEquals(1, value.intValue());
         }
-        long cacheTime = System.currentTimeMillis() - time;
-        time = System.currentTimeMillis();
+        long cacheTime = System.nanoTime() - time;
+        time = System.nanoTime();
         for (int i = 0; i < 10; i++) {
             value = (Long) syncScriptingExecutor.execute(new StaticScript("testSimpleCachingWithJRuby-not-cached", "ruby", "$number").parameter("number", 1).cache(false));
             assertEquals(1, value.intValue());
         }
-        long nonCacheTime = System.currentTimeMillis() - time;
+        long nonCacheTime = System.nanoTime() - time;
         assertTrue(cacheTime < nonCacheTime);
     }
 
