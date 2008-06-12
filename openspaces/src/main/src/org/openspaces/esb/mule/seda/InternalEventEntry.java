@@ -19,17 +19,25 @@ package org.openspaces.esb.mule.seda;
 import com.j_spaces.core.client.MetaDataEntry;
 import org.mule.api.MuleEvent;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.rmi.MarshalledObject;
+
 /**
  * An intenral entry holding the name of the serice (that has the SEDA queue) and the
  * actual mule event to be used.
  *
  * @author kimchy
  */
-public class InternalEventEntry extends MetaDataEntry {
+public class InternalEventEntry extends MetaDataEntry implements Externalizable {
 
     public String name;
 
     public MuleEvent event;
+
+    private MarshalledObject marshalledObject;
 
     public InternalEventEntry() {
     }
@@ -41,5 +49,39 @@ public class InternalEventEntry extends MetaDataEntry {
 
     public static String[] __getSpaceIndexedFields() {
         return new String[]{"name"};
+    }
+
+    public void writeExternal(ObjectOutput out) throws IOException {
+        super._writeExternal(out);
+        MarshalledObject marshalledObject = new MarshalledObject(event);
+        out.writeUTF(name);
+        out.writeObject(marshalledObject);
+    }
+
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        super._readExternal(in);
+        name = in.readUTF();
+        marshalledObject = (MarshalledObject) in.readObject();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public MuleEvent getEvent() throws IOException, ClassNotFoundException {
+        if (event != null) {
+            return event;
+        }
+        event = (MuleEvent) marshalledObject.get();
+        marshalledObject = null;
+        return event;
+    }
+
+    public void setEvent(MuleEvent event) {
+        this.event = event;
     }
 }

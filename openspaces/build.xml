@@ -93,6 +93,7 @@
             <fileset dir="${target.classes.dir}">
                 <include name="META-INF/**"/>
                 <include name="org/openspaces/**"/>
+                <exclude name="org/mule/**"/>
                 <exclude name="org/openspaces/esb/mule/**"/>
                 <exclude name="META-INF/services/org/mule/**"/>
                 <exclude name="META-INF/mule-spring.handlers"/>
@@ -122,6 +123,18 @@
                 <include name="META-INF/services/org/mule/**"/>
                 <include name="META-INF/spring.handlers"/>
                 <include name="META-INF/spring.schemas"/>
+            </fileset>
+            <manifest>
+                <attribute name="Implementation-Title" value="${openspaces-title}"/>
+                <attribute name="Implementation-Version" value="${openspaces-version}"/>
+                <attribute name="OpenSpaces-Version" value="${openspaces-version}"/>
+            </manifest>
+        </jar>
+
+        <delete file="${lib.dir}/${name}/mule-os-boot.jar"/>
+        <jar jarfile="${lib.dir}/${name}/mule-os-boot.jar">
+            <fileset dir="${target.classes.dir}">
+                <include name="org/mule/**"/>
             </fileset>
             <manifest>
                 <attribute name="Implementation-Title" value="${openspaces-title}"/>
@@ -213,7 +226,6 @@
                 <include name="docs/openspaces-javadoc/**"/>
                 <include name="tools/**"/>
                 <exclude name="tools/maven/maven-openspaces-plugin/target/**" />
-            	<exclude name="tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/mule/**" />
                 <exclude name="tools/**/*.iml" />
 
                 <include name="examples/**"/>
@@ -252,7 +264,6 @@
                 <include name="docs/openspaces-javadoc/**"/>
                 <include name="tools/**"/>
             	<exclude name="tools/maven/maven-openspaces-plugin/target/**" />
-            	<exclude name="tools/maven/maven-openspaces-plugin/src/main/resources/pu-templates/mule/**" />
                 <exclude name="tools/**/*.iml" />
 
                 <include name="examples/**"/>

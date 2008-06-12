@@ -19,18 +19,60 @@ package org.openspaces.esb.mule.queue;
 import com.j_spaces.core.client.MetaDataEntry;
 import org.mule.api.MuleMessage;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.rmi.MarshalledObject;
+
 /**
  * An internal queue entry holding the endopint address and the actual message.
  *
  * @author kimchy
  */
-public class InternalQueueEntry extends MetaDataEntry {
+public class InternalQueueEntry extends MetaDataEntry implements Externalizable {
 
     public String endpointURI;
 
     public MuleMessage message;
 
+    private MarshalledObject marshalledObject;
+
     public static String[] __getSpaceIndexedFields() {
         return new String[]{"endpointURI"};
+    }
+
+    public void writeExternal(ObjectOutput out) throws IOException {
+        super._writeExternal(out);
+        MarshalledObject marshalledObject = new MarshalledObject(message);
+        out.writeUTF(endpointURI);
+        out.writeObject(marshalledObject);
+    }
+
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        super._readExternal(in);
+        endpointURI = in.readUTF();
+        marshalledObject = (MarshalledObject) in.readObject();
+    }
+
+    public void setEndpointURI(String endpointURI) {
+        this.endpointURI = endpointURI;
+    }
+
+    public String getEndpointURI() {
+        return endpointURI;
+    }
+
+    public void setMessage(MuleMessage message) {
+        this.message = message;
+    }
+    
+    public MuleMessage getMessage() throws IOException, ClassNotFoundException {
+        if (message != null) {
+            return message;
+        }
+        message = (MuleMessage) marshalledObject.get();
+        marshalledObject = null;
+        return message;
     }
 }

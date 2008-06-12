@@ -45,7 +45,7 @@ public class OpenSpacesSedaService extends SpaceAwareSedaService implements Work
         super.doInitialise();
 
         InternalEventEntry internalTemplate = new InternalEventEntry();
-        internalTemplate.name = name;
+        internalTemplate.setName(name);
         internalTemplate.setFifo(sedaModel.isFifo());
         if (sedaModel.isPersistent()) {
             internalTemplate.makePersistent();
@@ -80,7 +80,7 @@ public class OpenSpacesSedaService extends SpaceAwareSedaService implements Work
             if (entry == null) {
                 return null;
             }
-            return entry.event;
+            return entry.getEvent();
         }
     }
 

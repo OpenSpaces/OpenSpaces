@@ -16,6 +16,7 @@
 
 package org.openspaces.esb.mule.pu;
 
+import org.mule.MuleServer;
 import org.mule.api.MuleContext;
 import org.mule.api.context.MuleContextFactory;
 import org.mule.config.spring.SpringXmlConfigurationBuilder;
@@ -88,6 +89,7 @@ public class OpenSpacesMuleContextLoader implements ApplicationContextAware, Ini
 
     public void destroy() throws Exception {
         if (muleContext != null) {
+            MuleServer.setMuleContext(null);
             muleContext.dispose();
         }
     }

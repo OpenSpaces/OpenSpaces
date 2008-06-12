@@ -45,6 +45,5 @@ public class TakeAndWriteSingleTests extends AbstractMuleTests {
             assertEquals(template, message);
         }
         assertEquals(0, gigaSpace.count(new SimpleMessage()));
-
     }
 }

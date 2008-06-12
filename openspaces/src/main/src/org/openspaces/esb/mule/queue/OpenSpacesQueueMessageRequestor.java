@@ -59,7 +59,7 @@ public class OpenSpacesQueueMessageRequestor extends AbstractMessageRequester {
             try {
                 InternalQueueEntry entry = (InternalQueueEntry) connector.getGigaSpaceObj().take(template, timeout);
                 if (entry != null) {
-                    message = entry.message;
+                    message = entry.getMessage();
                 }
             } catch (SpaceInterruptedException e) {
                 logger.debug("Failed to receive message from queue on interruption: " + endpoint.getEndpointURI());
@@ -87,7 +87,7 @@ public class OpenSpacesQueueMessageRequestor extends AbstractMessageRequester {
 
     protected void doConnect() throws Exception {
         InternalQueueEntry internalTemplate = new InternalQueueEntry();
-        internalTemplate.endpointURI = endpoint.getEndpointURI().getAddress();
+        internalTemplate.setEndpointURI(endpoint.getEndpointURI().getAddress());
         internalTemplate.setFifo(connector.isFifo());
         if (connector.isPersistent()) {
             internalTemplate.makePersistent();

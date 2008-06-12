@@ -51,8 +51,8 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
         }
 
         InternalQueueEntry entry = new InternalQueueEntry();
-        entry.message = event.getMessage();
-        entry.endpointURI = endpointUri.getAddress();
+        entry.setMessage(event.getMessage());
+        entry.setEndpointURI(endpointUri.getAddress());
         entry.setFifo(connector.isFifo());
         if (connector.isPersistent()) {
             entry.makePersistent();

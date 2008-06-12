@@ -54,7 +54,7 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
 
     protected void doConnect() throws Exception {
         InternalQueueEntry internalTemplate = new InternalQueueEntry();
-        internalTemplate.endpointURI = endpoint.getEndpointURI().getAddress();
+        internalTemplate.setEndpointURI(endpoint.getEndpointURI().getAddress());
         internalTemplate.setFifo(connector.isFifo());
         if (connector.isPersistent()) {
             internalTemplate.makePersistent();
@@ -97,12 +97,12 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
 
         if (entry != null) {
             // keep first dequeued event
-            messages.add(entry.message);
+            messages.add(entry.getMessage());
             // batch more messages if needed
             Object[] entries = connector.getGigaSpaceObj().takeMultiple(template, batchSize);
             if (entries != null) {
                 for (Object entry1 : entries) {
-                    messages.add(((InternalQueueEntry) entry1).message);
+                    messages.add(((InternalQueueEntry) entry1).getMessage());
                 }
             }
         }
