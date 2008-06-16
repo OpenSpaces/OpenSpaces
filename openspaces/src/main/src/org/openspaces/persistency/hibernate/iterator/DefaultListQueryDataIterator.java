@@ -16,15 +16,14 @@
 
 package org.openspaces.persistency.hibernate.iterator;
 
-import java.util.Iterator;
-
+import com.gigaspaces.datasource.DataIterator;
+import com.j_spaces.core.client.SQLQuery;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
-import com.gigaspaces.datasource.DataIterator;
-import com.j_spaces.core.client.SQLQuery;
+import java.util.Iterator;
 
 /**
  * A simple iterator that iterates over a {@link com.j_spaces.core.client.SQLQuery} by creating
@@ -81,12 +80,15 @@ public class DefaultListQueryDataIterator implements DataIterator {
             transaction.commit();
         } finally {
             transaction = null;
-            session.close();
+            if (session.isOpen()) {
+                session.close();
+            }
         }
     }
 
     protected Iterator createIterator() {
         session = sessionFactory.openSession();
+        transaction = session.beginTransaction();
         if (entityName != null) {
             return session.createCriteria(entityName).list().iterator();
         } else if (sqlQuery != null) {
