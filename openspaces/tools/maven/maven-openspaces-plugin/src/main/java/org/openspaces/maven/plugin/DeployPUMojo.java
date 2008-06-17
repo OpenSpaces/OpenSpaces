@@ -163,8 +163,8 @@ public class DeployPUMojo extends AbstractMojo {
         ArrayList Attlist = new ArrayList();
         Utils.addAttributeToList(Attlist, "-sla", sla);
         Utils.addAttributeToList(Attlist, "-cluster", cluster);
-        Utils.addAttributeToList(Attlist, "-groups", groups);
-        Utils.addAttributeToList(Attlist, "-locators", locators);
+        Utils.addAttributeToList(Attlist, "-groups", groups, ",");
+        Utils.addAttributeToList(Attlist, "-locators", locators, ",");
         Utils.addAttributeToList(Attlist, "-timeout", timeout);
         Utils.addAttributeToList(Attlist, "-proeprties", proeprties);
         Utils.addAttributeToList(Attlist, "-override-name", overrideName);

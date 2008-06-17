@@ -217,9 +217,21 @@ public class Utils {
      * @param value contains the attributes value or parameters
      */
     static void addAttributeToList(ArrayList list, String name, String value) {
+        addAttributeToList(list, name, value, " ");
+    }
+    
+    /**
+     * Adds an attribute with all of its parameters to the list.
+     *
+     * @param list  the list
+     * @param name  the attribute's name
+     * @param value contains the attributes value or parameters
+     * @param delimiter the delimiter of the list
+     */
+    static void addAttributeToList(ArrayList list, String name, String value, String delimiter) {
         if (value != null) {
             list.add(name);
-            StringTokenizer st = new StringTokenizer(value);
+            StringTokenizer st = new StringTokenizer(value, delimiter);
             String next;
             while (st.hasMoreTokens()) {
                 next = st.nextToken();

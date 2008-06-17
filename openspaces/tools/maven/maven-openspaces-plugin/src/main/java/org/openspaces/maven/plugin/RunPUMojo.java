@@ -216,14 +216,16 @@ public class RunPUMojo extends AbstractMojo {
      * Prints usage instructions.
      */
     public static void printUsage() {
-        System.out.println("Usage: mvn compile os:run [-Dcluster=\"...\"] [-Dproperties=\"...\"] [-Dmodule=<module name>]");
-        System.out.println("    -Dmodule [module name]        : The name of the module to run. If none is specified, will run all the PU modules");
-        System.out.println("    -Dcluster[cluster properties] : Allows specify cluster parameters");
-        System.out.println("             schema=partitioned   : The cluster schema to use");
-        System.out.println("             total_members=1,1    : The number of instances and number of backups to use");
-        System.out.println("             id=1                 : The instance id of this processing unit");
-        System.out.println("             backup_id=1          : The backup id of this processing unit");
-        System.out.println("    -Dproperties [properties-loc] : Location of context level properties");
+        System.out.println("Usage: mvn compile os:run [-Dcluster=\"...\"] [-Dgroups=<groups>] [-Dlocators=<locators>] [-Dproperties=\"...\"] [-Dmodule=<module name>]");
+        System.out.println("    -Dmodule [module name]          : The name of the module to run. If none is specified, will run all the PU modules");
+        System.out.println("    -Dcluster [cluster properties]  : Space separated cluster parameters");
+        System.out.println("               schema=partitioned   : The cluster schema to use");
+        System.out.println("               total_members=1,1    : The number of instances and number of backups to use");
+        System.out.println("               id=1                 : The instance id of this processing unit");
+        System.out.println("               backup_id=1          : The backup id of this processing unit");
+        System.out.println("    -Dgroups [Jini groups]          : Comma separated list of Jini lookup groups");
+        System.out.println("    -Dlocators [Jini locator hosts] : Comma separated list of Jini locator hosts");
+        System.out.println("    -Dproperties [properties-loc]   : Location of context level properties");
         System.out.println("");
         System.out.println("");
         System.out.println("Some Examples:");

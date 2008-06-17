@@ -121,8 +121,8 @@ public class UndeployPUMojo extends AbstractMojo {
      */
     private String[] createAttributesArray(String name) {
         ArrayList Attlist = new ArrayList();
-        Utils.addAttributeToList(Attlist, "-groups", groups);
-        Utils.addAttributeToList(Attlist, "-locators", locators);
+        Utils.addAttributeToList(Attlist, "-groups", groups, ",");
+        Utils.addAttributeToList(Attlist, "-locators", locators, ",");
         Utils.addAttributeToList(Attlist, "-timeout", timeout);
         Attlist.add(name);
         getLog().info("Arguments list: " + Attlist);
