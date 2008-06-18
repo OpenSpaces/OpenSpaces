@@ -33,7 +33,7 @@ import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterat
 import java.util.List;
 
 /**
- * The default Hiberante external data source implementation. Based on Hiberante {@link Session}.
+ * The default Hiberante external data source implementation. Based on Hibernate {@link Session}.
  *
  * @author kimchy
  */
