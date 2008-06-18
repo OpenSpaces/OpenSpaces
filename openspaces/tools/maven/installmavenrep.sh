@@ -34,6 +34,7 @@ mvn install:install-file -DgroupId=com.gigaspaces.core -DartifactId=gs-lib -Dver
 mvn install:install-file -DgroupId=com.gigaspaces.core -DartifactId=JSpaces -Dversion=$VERSION -DpomFile=$TMPDIR/JSpaces-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/JSpaces.jar
 mvn install:install-file -DgroupId=org.openspaces -DartifactId=openspaces -Dversion=$VERSION -DpomFile=$TMPDIR/openspaces-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/openspaces/openspaces.jar
 mvn install:install-file -DgroupId=org.openspaces -DartifactId=mule-os -Dversion=$VERSION -Dpackaging=jar -DpomFile=$TMPDIR/mule-os-pom.xml -Dfile=${JSHOMEDIR}/lib/openspaces/mule-os.jar
+mvn install:install-file -DgroupId=org.openspaces -DartifactId=mule-os-boot -Dversion=$VERSION -Dpackaging=jar -DpomFile=$TMPDIR/mule-os-boot-pom.xml -Dfile=${JSHOMEDIR}/lib/openspaces/mule-os-boot.jar
 
 # JMX Jars
 mvn install:install-file -DgroupId=com.sun.jdmk -DartifactId=jmxtools -Dversion=1.2.1 -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/jmx/jmxtools.jar
