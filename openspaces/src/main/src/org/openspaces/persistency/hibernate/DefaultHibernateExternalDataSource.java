@@ -33,7 +33,7 @@ import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterat
 import java.util.List;
 
 /**
- * The default Hiberante extenral data source implemenation. Based on Hiberante {@link Session}.
+ * The default Hiberante external data source implementation. Based on Hiberante {@link Session}.
  *
  * @author kimchy
  */
@@ -116,7 +116,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
     }
 
     /**
-     * Performs the inital load operation. Iterates over the {@link #setInitialLoadEntries(String[])} inital load
+     * Performs the initial load operation. Iterates over the {@link #setInitialLoadEntries(String[])} inital load
      * entries. If {@link #getInitalLoadChunkSize()} is set to <code>-1</code>, will use
      * {@link org.openspaces.persistency.hibernate.iterator.DefaultScrollableDataIterator} for each entity. If
      * {@link # getInitalLoadChunkSize ()} is set to a non <code>-1</code> value, will use the
