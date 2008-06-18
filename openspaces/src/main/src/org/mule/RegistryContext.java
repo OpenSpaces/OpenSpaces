@@ -21,17 +21,27 @@ public class RegistryContext {
     private static final ConcurrentHashMap<ClassLoader, Registry> registryMap = new ConcurrentHashMap<ClassLoader, Registry>();
 
     static {
-        logger.debug("Using OpenSpaces RegistryContext");
+        logger.info("Using OpenSpaces RegistryContext");
     }
 
     public static Registry getRegistry() {
-        return registryMap.get(Thread.currentThread().getContextClassLoader());
+        Registry registry = registryMap.get(Thread.currentThread().getContextClassLoader());
+        if (logger.isTraceEnabled()) {
+            logger.trace("Returning registry " + registry + " under class loader [" + Thread.currentThread().getContextClassLoader() + "]");
+        }
+        return registry;
     }
 
     public static synchronized void setRegistry(Registry registry) {
         if (registry == null) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("Removing registry under class loader [" + Thread.currentThread().getContextClassLoader() + "]");
+            }
             registryMap.remove(Thread.currentThread().getContextClassLoader());
         } else {
+            if (logger.isTraceEnabled()) {
+                logger.trace("Setting registry " + registry + " under class loader [" + Thread.currentThread().getContextClassLoader() + "]");
+            }
             registryMap.put(Thread.currentThread().getContextClassLoader(), registry);
         }
     }

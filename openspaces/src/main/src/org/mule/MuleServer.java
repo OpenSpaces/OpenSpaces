@@ -19,17 +19,27 @@ public class MuleServer {
     private static final ConcurrentHashMap<ClassLoader, MuleContext> muleContextMap = new ConcurrentHashMap<ClassLoader, MuleContext>();
 
     static {
-        logger.debug("Using OpenSpaces MuleServer");
+        logger.info("Using OpenSpaces MuleServer");
     }
 
     public static MuleContext getMuleContext() {
-        return muleContextMap.get(Thread.currentThread().getContextClassLoader());
+        MuleContext muleContext = muleContextMap.get(Thread.currentThread().getContextClassLoader());
+        if (logger.isTraceEnabled()) {
+            logger.trace("Returning context " + muleContext + " under class loader [" + Thread.currentThread().getContextClassLoader() + "]");
+        }
+        return muleContext;
     }
 
     public static void setMuleContext(MuleContext muleContext) {
         if (muleContext == null) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("Removing context under class loader [" + Thread.currentThread().getContextClassLoader() + "]");
+            }
             muleContextMap.remove(Thread.currentThread().getContextClassLoader());
         } else {
+            if (logger.isTraceEnabled()) {
+                logger.trace("Setting context " + muleContext + " under class loader [" + Thread.currentThread().getContextClassLoader() + "]");
+            }
             muleContextMap.put(Thread.currentThread().getContextClassLoader(), muleContext);
         }
     }
