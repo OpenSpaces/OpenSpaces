@@ -15,7 +15,7 @@
         <dependency>
             <groupId>org.openspaces</groupId>
             <artifactId>mule-os</artifactId>
-            <version>6.5-rc2-2340-61</version>
+            <version>${gsVersion}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
