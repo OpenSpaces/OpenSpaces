@@ -236,6 +236,9 @@
                 <include name="lib/${name}/**"/>
                 <include name="lib/groovy/**"/>
                 <include name="lib/spring/spring.jar" />
+                <include name="lib/j2ee/activation.jar" />
+                <include name="lib/j2ee/jta.jar" />
+                <include name="lib/j2ee/connector.jar" />
 
             </zipfileset>
         </zip>
@@ -274,6 +277,9 @@
                 <include name="lib/groovy/**"/>
                 <include name="lib/spring/spring.jar" />
                 <include name="lib/spring/common-annotations.jar" />
+                <include name="lib/j2ee/activation.jar" />
+                <include name="lib/j2ee/jta.jar" />
+                <include name="lib/j2ee/connector.jar" />
             </zipfileset>
         </zip>
         <mkdir dir="${dist.dir}/1.5"/>
