@@ -30,6 +30,20 @@ scheduling.
 BUILDING, PACKAGING, RUNNING, DEPLOYING
 ---------------------------------------
 
+*Note:
+
+   In order to use Mule with GigaSpaces, mule jar files must be copied to the GigaSpaces
+installation under GSHOME/lib/mule (if the mule directory does not exists, create it).
+In order to obtain the mule jar files, please download mule 2.0 from http://mule.mulesource.org.
+
+The follwing needs to be copied:
+  - From GSHOME/lib/openspaces and into GSHOME/lib/mule: muls-os.jar.
+  - From MULEHOME/lib/mule and into GSHOME/lib/mule: mule-core, mule-module-client,
+mule-module-spring-config, mule-module-spring-extras, mule-transport-quartz, mule-transport-stdio,
+mule-transport-vm.
+  - From MULEHOME/lib/opt and into GSHOME/lib/mule: commons-beanutils, commons-collections,
+commons-io, commons-lang, commons-pool, jug-2.0.0-asl, quartz-all.
+
 Quick list:
 
 * mvn compile: Compile the project.
