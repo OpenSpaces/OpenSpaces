@@ -643,7 +643,6 @@
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/lib/spring/spring.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/spring/spring-test.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/spring/common-annotations.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
@@ -801,6 +800,7 @@
         <root url="jar://$PROJECT_DIR$/lib/j2ee/rowset.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/j2ee/connector.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/j2ee/activation.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/j2ee/common-annotations.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
