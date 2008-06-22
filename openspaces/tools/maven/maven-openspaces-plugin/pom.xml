@@ -4,11 +4,11 @@
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-openspaces-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <version>REPLACE_VERSION</version>
+    <version>6.5-rc2-2340-104</version>
     <name>maven-openspaces-plugin</name>
     <url>http://maven.apache.org</url>
     <properties>
-        <gsVersion>REPLACE_VERSION</gsVersion>
+        <gsVersion>6.5-rc2-2340-104</gsVersion>
     </properties>
     <dependencies>
         <dependency>
