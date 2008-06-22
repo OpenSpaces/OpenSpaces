@@ -43,7 +43,7 @@
         <property name="dataSource" ref="dataSource"/>
         <property name="mappingResources">
             <list>
-                <value>${puGroupName}/common/Data.hbm.xml</value>
+                <value>${puGroupPath}/common/Data.hbm.xml</value>
             </list>
         </property>
         <property name="hibernateProperties">
