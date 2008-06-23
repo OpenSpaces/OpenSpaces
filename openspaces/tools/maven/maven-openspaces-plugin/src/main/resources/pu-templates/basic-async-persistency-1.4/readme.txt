@@ -1,7 +1,7 @@
 Creates a basic SBA application with three processing units. The Feeder
 processing unit sends Data objects through the Space to a Processor.
 The Space and the Processor are collocated in the same processing unit.
-The Processor is connected to a Mirror and provides a reliable async
+The Processor is connected to a Mirror and provides a reliable asynchronous
 replication and persistency to the Database using Hibernate.
 JVM: >= 1.4.
 
@@ -18,14 +18,14 @@ it starts a polling container that performs a take from the Space of unprocessed
 entries. The take operation results in an "event" that will end up executing the 
 "Processor" class. The Processor "processes" the Data object (by setting its processed
 flag to true) and returns it. The return value is automatically written back to the Space.
-  Any changes done on the processor Space are replicated in a reliable async manner to the 
+  Any changes done on the processor Space are replicated in a reliable asynchronous manner to the 
 mirror processing unit which in turn persist the changes to the database. When the processor
 starts up, it loads all its relevant data from the database and initializes the Space with it.
   The processor also comes with both a unit test and integration test that verifies its behavior.
 
   The mirror module is a very simple module which includes just a mirror Space. The mirror Space
 uses the Hibernate external data source in order to persist changes to the database using 
-Hibernate. The processor connects to the mirror in a reliable async manner and replicates
+Hibernate. The processor connects to the mirror in a reliable asynchronous manner and replicates
 changes done on its Space to the mirror.
 
   The feeder module, which is also a processing unit, connects to a Space remotely and
@@ -98,7 +98,7 @@ same cluster) will be created, with each polling container working only on the c
 started in an in memory and transactional manner. This is the power of such an architecture, where
 the processing of the Data happens in a collocated manner with the Data. 
   If we want to add High Availability to the processor, we can deploy 2 partitions, each with 
-one backup (2,1). In this  case, the processor instances that ends up starting a cluster member 
+one backup (2,1). In this case, the processor instances that ends up starting a cluster member 
 Space which is the backup will not perform any processing since the polling container identifies the 
 Space state and won't perform the take operation. If one of the processor primaries instances will 
 fail, the backup instance will become primary (with an up to date data), and its polling container 
@@ -108,7 +108,7 @@ another container (GSC).
 
   The mirror provides a transparent persistency model which does not affect the latency of the main
 path of the application (writing and processing Data objects). The processor connects to the mirror 
-and replicates in a reliable async manner changes done on it to the mirror Space. The reliable aspects 
+and replicates in a reliable asynchronous manner changes done on it to the mirror Space. The reliable aspects 
 is achieved thanks to the fact that the processor has a backup Space for each partition. When the 
 mirror fails, the processor Spaces will accumulate the relevant changes until the Service Grid will
 create a new instance of it. The changes will then be replicated to the mirror.
@@ -130,3 +130,12 @@ as well. HSQLDB stores its data in under the USER_HOME directory.
   In order to switch to another database, the bean that starts up HSQLDB should be removed. The JDBC
 data source connection string should point to the new Database in both the mirror and processor. And
 Hibernate should be configured with a different Database Dialect.
+  Note that the mirror and the processor are configured to use a database that runs on the localhost.
+In order to run the mirror and the processor on different machines change the url of the dataSource
+element in the pu.xml file of the processor to use host of the mirror.
+
+OPENSPACES MAVEN PLUGIN WIKI PAGE
+---------------------------------
+
+  For more information about the OpenSpaces Maven Plugin please refer to:
+http://www.gigaspaces.com/wiki/display/OLH/OpenSpaces+Maven+Plugin
