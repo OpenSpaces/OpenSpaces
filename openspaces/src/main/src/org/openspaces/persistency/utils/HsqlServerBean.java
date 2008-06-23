@@ -37,7 +37,7 @@ import java.util.Properties;
  * This is an example of a bean configuration:
  *
  * <pre>
- *     &lt;bean id="dataBase" class="org.springmodules.db.hsqldb.ServerBean" singleton="true" lazy-init="false"&gt;
+ *     &lt;bean id="dataBase" class="org.openspaces.persistency.utils.HsqlServerBean" singleton="true" lazy-init="false"&gt;
  *         &lt;property name="dataSource"&gt;&lt;ref local="dataSource"/&gt;&lt;/property&gt;
  *         &lt;property name="serverProperties"&gt;
  *             &lt;props&gt;
