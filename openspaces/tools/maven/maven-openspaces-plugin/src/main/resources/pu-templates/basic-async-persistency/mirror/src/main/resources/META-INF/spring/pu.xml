@@ -19,6 +19,7 @@
         as connecting to it remotely.
      -->
     <bean id="hsqldbServer" class="org.openspaces.persistency.utils.HsqlServerBean">
+        <property name="dataSource"><ref local="dataSource"/></property>
         <property name="serverProperties">
             <props>
                 <prop key="server.database.0">${user.home}/${puArtifactId}-testDB</prop>
