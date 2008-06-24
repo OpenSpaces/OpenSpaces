@@ -48,4 +48,19 @@ call mvn -f maven-openspaces-plugin/pom.xml install
 REM Copy licenese file
 call mvn os:install-license -Dfile="%JSHOMEDIR%\gslicense.xml" -Dversion=%VERSION%
 
+REM remove temp files
+del %TEMP%\jini-start-pom.xml
+del %TEMP%\jini-jsk-lib-pom.xml
+del %TEMP%\jini-jsk-platform-pom.xml
+del %TEMP%\jini-jsk-resources-pom.xml
+del %TEMP%\jini-reggie-pom.xml
+del %TEMP%\jini-mahalo-pom.xml
+del %TEMP%\gs-boot-pom.xml
+del %TEMP%\gs-service-pom.xml
+del %TEMP%\gs-lib-pom.xml
+del %TEMP%\JSpaces-pom.xml
+del %TEMP%\openspaces-pom.xml
+del %TEMP%\mule-os-pom.xml
+del %TEMP%\mule-os-boot-pom.xml
+
 :END

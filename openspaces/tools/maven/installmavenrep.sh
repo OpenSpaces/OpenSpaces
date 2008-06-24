@@ -46,3 +46,18 @@ mvn -f maven-openspaces-plugin/pom.xml install
 
 # Copy licenese file
 mvn os:install-license -Dfile=$JSHOMEDIR/gslicense.xml -Dversion=$VERSION
+
+# Remove temp files
+rm $TMPDIR/jini-start-pom.xml
+rm $TMPDIR/jini-jsk-lib-pom.xml
+rm $TMPDIR/jini-jsk-platform-pom.xml
+rm $TMPDIR/jini-jsk-resources-pom.xml
+rm $TMPDIR/jini-reggie-pom.xml
+rm $TMPDIR/jini-mahalo-pom.xml
+rm $TMPDIR/gs-boot-pom.xml
+rm $TMPDIR/gs-service-pom.xml
+rm $TMPDIR/gs-lib-pom.xml
+rm $TMPDIR/JSpaces-pom.xml
+rm $TMPDIR/openspaces-pom.xml
+rm $TMPDIR/mule-os-pom.xml
+rm $TMPDIR/mule-os-boot-pom.xml
