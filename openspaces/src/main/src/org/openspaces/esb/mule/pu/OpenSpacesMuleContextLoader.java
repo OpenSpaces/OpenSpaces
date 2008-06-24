@@ -89,8 +89,12 @@ public class OpenSpacesMuleContextLoader implements ApplicationContextAware, Ini
 
     public void destroy() throws Exception {
         if (muleContext != null) {
-            MuleServer.setMuleContext(null);
-            muleContext.dispose();
+            try {
+                muleContext.dispose();
+            } finally {
+                muleContext = null;
+                MuleServer.setMuleContext(null);
+            }
         }
     }
 }
