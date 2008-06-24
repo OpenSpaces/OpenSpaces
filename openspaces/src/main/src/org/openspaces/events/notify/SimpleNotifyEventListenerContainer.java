@@ -18,6 +18,8 @@ package org.openspaces.events.notify;
 
 import com.gigaspaces.events.DataEventSession;
 import com.gigaspaces.events.EventSessionFactory;
+import com.gigaspaces.events.batching.BatchRemoteEvent;
+import com.gigaspaces.events.batching.BatchRemoteEventListener;
 import com.j_spaces.core.client.EntryArrivedRemoteEvent;
 import net.jini.core.event.RemoteEvent;
 import net.jini.core.event.RemoteEventListener;
@@ -144,7 +146,11 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
         EventSessionFactory factory = createEventSessionFactory();
         dataEventSession = createDataEventSession(factory);
         try {
-            registerListener(dataEventSession, new NotifyListenerDelegate());
+            if (isBatchEnabled()) {
+                registerListener(dataEventSession, new BatchNotifyListenerDelegate());
+            } else {
+                registerListener(dataEventSession, new NotifyListenerDelegate());
+            }
         } catch (NotifyListenerRegistrationException ex) {
             // in case of an exception, close the session
             closeSession();
@@ -178,6 +184,36 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
      * flag.
      */
     private class NotifyListenerDelegate implements RemoteEventListener {
+
+        public void notify(RemoteEvent remoteEvent) throws UnknownEventException, RemoteException {
+            if (registerOnStartup) {
+                if (!isRunning()) {
+                    return;
+                }
+            }
+            Object eventData;
+            try {
+                eventData = ((EntryArrivedRemoteEvent) remoteEvent).getObject();
+            } catch (net.jini.core.entry.UnusableEntryException e) {
+                throw new UnusableEntryException("Failute to get object from event [" + remoteEvent + "]", e);
+            }
+            if (logger.isTraceEnabled()) {
+                logger.trace(message("Received event [" + eventData + "]"));
+            }
+            invokeListenerWithTransaction(eventData, remoteEvent, performTakeOnNotify, ignoreEventOnNullTake);
+        }
+    }
+
+    private class BatchNotifyListenerDelegate implements BatchRemoteEventListener {
+
+        public void notifyBatch(BatchRemoteEvent batchRemoteEvent) throws UnknownEventException, RemoteException {
+            if (registerOnStartup) {
+                if (!isRunning()) {
+                    return;
+                }
+            }
+            invokeListenerWithTransaction(batchRemoteEvent, performTakeOnNotify, ignoreEventOnNullTake);
+        }
 
         public void notify(RemoteEvent remoteEvent) throws UnknownEventException, RemoteException {
             if (registerOnStartup) {

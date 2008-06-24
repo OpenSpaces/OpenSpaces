@@ -20,10 +20,14 @@ import com.gigaspaces.events.DataEventSession;
 import com.gigaspaces.events.EventSessionConfig;
 import com.gigaspaces.events.EventSessionFactory;
 import com.gigaspaces.events.NotifyActionType;
+import com.gigaspaces.events.batching.BatchRemoteEvent;
+import com.j_spaces.core.client.EntryArrivedRemoteEvent;
 import com.j_spaces.core.client.INotifyDelegatorFilter;
+import net.jini.core.event.RemoteEvent;
 import net.jini.core.event.RemoteEventListener;
 import net.jini.core.lease.Lease;
 import net.jini.lease.LeaseListener;
+import org.openspaces.core.UnusableEntryException;
 import org.openspaces.core.util.SpaceUtils;
 import org.openspaces.events.AbstractTemplateEventListenerContainer;
 import org.springframework.core.Constants;
@@ -34,6 +38,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.Assert;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 
 /**
  * Base class for notifications based containers allowing to register listener that will be
@@ -52,7 +57,10 @@ import java.rmi.RemoteException;
  * set, notifications will be send for <b>write</b> operations.
  *
  * <p>Batching of notifications can be turned on by setting both {@link #setBatchSize(Integer)} and
- * {@link #setBatchTime(Integer)}.
+ * {@link #setBatchTime(Integer)}. When turning on batch notifications, the listener can choose whether
+ * to receive the events as an array (by setting {@link #setPassArrayAsIs(boolean)} to <code>true</code>,
+ * or to receive the notifications one by one (setting it to <code>false</code>). By default, the
+ * {@link #setPassArrayAsIs(boolean)} is set to <code>false</code>. 
  *
  * <p>Fifo ordering of raised notification can be controlled by setting {@link #setFifo(boolean)} flag
  * to <code>true</code>. Note, for a full fifo based ordering the relevant entries in the space
@@ -148,7 +156,8 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
     private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
 
     private boolean disableTransactionValidation = false;
-    
+
+    private boolean passArrayAsIs = false;
 
     /**
      * See {@link #setComTypeName(String)}.
@@ -364,6 +373,13 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
         this.disableTransactionValidation = disableTransactionValidation;
     }
 
+    /**
+     * When batching is turned on, should the batch of events be passed as an <code>Object[]</code> to
+     * the listener. Default to <code>false</code> which means it will be passed one event at a time.
+     */
+    public void setPassArrayAsIs(boolean passArrayAsIs) {
+        this.passArrayAsIs = passArrayAsIs;
+    }
 
     protected Boolean getNotifyWrite() {
         return notifyWrite;
@@ -379,6 +395,13 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
 
     protected Boolean getNotifyLeaseExpire() {
         return notifyLeaseExpire;
+    }
+
+    /**
+     * Returns <code>true</code> when batching is enabled.
+     */
+    protected boolean isBatchEnabled() {
+        return batchSize != null && batchTime != null;
     }
 
     public void initialize() throws DataAccessException {
@@ -522,6 +545,125 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
             dataEventSession.addListener(getReceiveTemplate(), listener, listenerLease, null, notifyFilter, notifyType);
         } catch (Exception e) {
             throw new NotifyListenerRegistrationException("Failed to register notify listener", e);
+        }
+    }
+
+    protected void invokeListenerWithTransaction(BatchRemoteEvent batchRemoteEvent, boolean performTakeOnNotify,
+                                                 boolean ignoreEventOnNullTake) throws DataAccessException {
+
+        boolean invokeListener = true;
+        TransactionStatus status = null;
+        if (this.transactionManager != null) {
+            // Execute receive within transaction.
+            status = this.transactionManager.getTransaction(this.transactionDefinition);
+        }
+        if (passArrayAsIs) {
+            RemoteEvent[] events = batchRemoteEvent.getEvents();
+            Object[] eventData = new Object[events.length];
+            try {
+                for (int i = 0; i < events.length; i++) {
+                    try {
+                        eventData[i] = ((EntryArrivedRemoteEvent) events[i]).getObject();
+                    } catch (net.jini.core.entry.UnusableEntryException e) {
+                        throw new UnusableEntryException("Failute to get object from event [" + events[i] + "]", e);
+                    }
+                    if (logger.isTraceEnabled()) {
+                        logger.trace(message("Received event [" + eventData[i] + "]"));
+                    }
+                }
+                if (performTakeOnNotify) {
+                    if (ignoreEventOnNullTake) {
+                        ArrayList<Object> tempEventData = new ArrayList<Object>(eventData.length);
+                        for (Object data : eventData) {
+                            Object takeVal = getGigaSpace().take(data, 0);
+                            if (takeVal != null) {
+                                tempEventData.add(data);
+                            }
+                        }
+                        if (tempEventData.isEmpty()) {
+                            invokeListener = false;
+                        } else {
+                            eventData = tempEventData.toArray(new Object[tempEventData.size()]);
+                        }
+                    } else {
+                        for (Object data : eventData) {
+                            getGigaSpace().take(data, 0);
+                        }
+                    }
+                }
+                try {
+                    if (invokeListener) {
+                        invokeListener(getEventListener(), eventData, status, batchRemoteEvent);
+                    }
+                } catch (Throwable t) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace(message("Rolling back transaction because of listener exception thrown: " + t));
+                    }
+                    if (status != null) {
+                        status.setRollbackOnly();
+                    }
+                    handleListenerException(t);
+                }
+            } catch (RuntimeException ex) {
+                if (status != null) {
+                    rollbackOnException(status, ex);
+                }
+                throw ex;
+            } catch (Error err) {
+                if (status != null) {
+                    rollbackOnException(status, err);
+                }
+                throw err;
+            }
+        } else {
+            for (RemoteEvent remoteEvent : batchRemoteEvent.getEvents()) {
+                Object eventData;
+                try {
+                    try {
+                        eventData = ((EntryArrivedRemoteEvent) remoteEvent).getObject();
+                    } catch (net.jini.core.entry.UnusableEntryException e) {
+                        throw new UnusableEntryException("Failute to get object from event [" + remoteEvent + "]", e);
+                    }
+                    if (logger.isTraceEnabled()) {
+                        logger.trace(message("Received event [" + eventData + "]"));
+                    }
+                    if (performTakeOnNotify) {
+                        Object takeVal = getGigaSpace().take(eventData, 0);
+                        if (ignoreEventOnNullTake && takeVal == null) {
+                            invokeListener = false;
+                        }
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Performed take on notify, invoke listener is [" + invokeListener + "]");
+                        }
+                    }
+                    try {
+                        if (invokeListener) {
+                            invokeListener(getEventListener(), eventData, status, remoteEvent);
+                        }
+                    } catch (Throwable t) {
+                        if (logger.isTraceEnabled()) {
+                            logger.trace(message("Rolling back transaction because of listener exception thrown: " + t));
+                        }
+                        if (status != null) {
+                            status.setRollbackOnly();
+                        }
+                        handleListenerException(t);
+                    }
+                } catch (RuntimeException ex) {
+                    if (status != null) {
+                        rollbackOnException(status, ex);
+                    }
+                    throw ex;
+                } catch (Error err) {
+                    if (status != null) {
+                        rollbackOnException(status, err);
+                    }
+                    throw err;
+                }
+            }
+        }
+        if (status != null) {
+            this.transactionManager.commit(status);
         }
     }
 

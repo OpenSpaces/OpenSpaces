@@ -96,6 +96,14 @@ public class SimpleNotifyContainerConfigurer {
     }
 
     /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setPassArrayAsIs(boolean) 
+     */
+    public SimpleNotifyContainerConfigurer passArrayAsIs(boolean passArrayAsIs) {
+        notifyEventListenerContainer.setPassArrayAsIs(passArrayAsIs);
+        return this;
+    }
+
+    /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setBatchSize(Integer)
      */
     public SimpleNotifyContainerConfigurer batchSize(Integer batchSize) {

@@ -136,6 +136,7 @@ public class NotifyAnnotationPostProcessor implements BeanPostProcessor, Applica
         if (notifyBatch != null) {
             notifyContainerConfigurer.batchSize(notifyBatch.size());
             notifyContainerConfigurer.batchTime(notifyBatch.time());
+            notifyContainerConfigurer.passArrayAsIs(notifyBatch.passArrayAsIs());
         }
 
         NotifyLease notifyLease = AnnotationUtils.findAnnotation(beanClass, NotifyLease.class);

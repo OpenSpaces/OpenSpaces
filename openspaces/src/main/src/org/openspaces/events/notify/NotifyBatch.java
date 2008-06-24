@@ -42,4 +42,11 @@ public @interface NotifyBatch {
      * buffer is cleared and sent. The time is in <b>milliseconds</b>.
      */
     int time();
+
+    /**
+     * When batching is turned on, should the batch of events be passed as an <code>Object[]</code> to
+     * the listener. Default to <code>false</code> which means it will be passed one event at a time.
+     */
+    boolean passArrayAsIs() default false;
+
 }
