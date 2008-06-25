@@ -55,6 +55,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -189,8 +190,8 @@ public class Deploy {
         String overridePuName = puName;
 
         File puFile = new File(puPath);
-        if (puFile.exists() && puFile.getName().endsWith(".jar")) {
-            overridePuName = puFile.getName().substring(0, puFile.getName().length() - ".jar".length());
+        if (puFile.exists() && (puFile.getName().endsWith(".jar") || puFile.getName().endsWith(".war"))) {
+            overridePuName = puFile.getName().substring(0, puFile.getName().length() - 4);
             puPath = overridePuName;
         }
 
@@ -228,7 +229,7 @@ public class Deploy {
         GSM[] gsms = findGSMs();
 
         // check if the pu to deploy is an actual file on the file system and ends with jar
-        if (puFile.exists() && puFile.getName().endsWith(".jar")) {
+        if (puFile.exists() && (puFile.getName().endsWith(".jar") || puFile.getName().endsWith(".war"))) {
             // we deploy a jar file, upload it to all the GSMs
             byte[] buffer = new byte[4098];
             for (GSM gsm : gsms) {
@@ -292,14 +293,25 @@ public class Deploy {
         }
 
         //get list of all shared
+        ArrayList<File> sharedJarsList = new ArrayList<File>();
         File shared = view.createFileObject(puHome, "shared-lib");
-        File[] sharedJars = view.getFiles(shared);
+        sharedJarsList.addAll(Arrays.asList(view.getFiles(shared)));
+        shared = view.createFileObject(puHome, "WEB-INF/shared-lib");
+        sharedJarsList.addAll(Arrays.asList(view.getFiles(shared)));
+
+        File[] sharedJars = sharedJarsList.toArray(new File[sharedJarsList.size()]);
         if (logger.isDebugEnabled()) {
-            logger.debug("Using shared-lib " + Arrays.asList(sharedJars));
+            logger.debug("Using shared-lib " + sharedJarsList);
         }
 
         //read pu xml
-        String puString = readPUFile(root, puPath);
+        String puString = "";
+        try {
+            puString = readPUFile(root, puPath);
+        } catch (IOException e) {
+            logger.debug("Failed to find puPath " + puPath, e);
+            // ignore, it might be ok for war files
+        }
         if (logger.isDebugEnabled()) {
             logger.debug("Using PU xml [" + puString + "]");
         }
@@ -327,14 +339,16 @@ public class Deploy {
         }
 
         //get sla from pu string
-        resource = new ByteArrayResource(slaString.getBytes());
-        XmlBeanFactory xmlBeanFactory = new XmlBeanFactory(resource);
-        SLA sla;
-        try {
-            sla = (SLA) xmlBeanFactory.getBean("SLA");
-        } catch (NoSuchBeanDefinitionException e) {
-            logger.info("SLA Not Found in PU.  Using Default SLA.");
-            sla = new SLA();
+        SLA sla = new SLA();
+        if (StringUtils.hasText(slaString)) {
+            resource = new ByteArrayResource(slaString.getBytes());
+            XmlBeanFactory xmlBeanFactory = new XmlBeanFactory(resource);
+            try {
+                sla = (SLA) xmlBeanFactory.getBean("SLA");
+            } catch (NoSuchBeanDefinitionException e) {
+                logger.info("SLA Not Found in PU.  Using Default SLA.");
+                sla = new SLA();
+            }
         }
 
         ClusterInfo clusterInfo = ClusterInfoParser.parse(params);
@@ -541,6 +555,10 @@ public class Deploy {
 
         // pass the SLA as an init parameter so the GSC won't need to parse the XML again
         element.getServiceBeanConfig().addInitParameter("sla", new MarshalledObject(sla));
+        // add pu names, path and code server so it can be used on the service bean side
+        element.getServiceBeanConfig().addInitParameter("puName", puName);
+        element.getServiceBeanConfig().addInitParameter("puPath", puPath);
+        element.getServiceBeanConfig().addInitParameter("codeserver", codeserver);
 
         //this is the MOST IMPORTANT part
         if (sla.getInstanceSLAs() != null && sla.getInstanceSLAs().size() > 0) {

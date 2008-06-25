@@ -17,6 +17,7 @@
 
 package org.openspaces.pu.container.servicegrid;
 
+import com.gigaspaces.start.Locator;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.SpaceURL;
 import org.apache.commons.logging.Log;
@@ -32,17 +33,31 @@ import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.MemberAliveIndicator;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.util.SpaceUtils;
-import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
+import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
+import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
+import org.openspaces.pu.container.web.WebApplicationContextProcessingUnitContainerProvider;
+import org.openspaces.pu.container.web.jetty.JettyWebProcessingUnitContainerProvider;
 import org.openspaces.pu.sla.monitor.ApplicationContextMonitor;
 import org.openspaces.pu.sla.monitor.Monitor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.util.FileSystemUtils;
+import org.springframework.util.StringUtils;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +65,8 @@ import java.util.StringTokenizer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * @author kimchy
@@ -58,7 +75,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private static final Log logger = LogFactory.getLog(PUServiceBeanImpl.class);
 
-    private IntegratedProcessingUnitContainer integratedContainer;
+    private ApplicationContextProcessingUnitContainer container;
 
     private int clusterGroup;
 
@@ -154,6 +171,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             logger.debug(logMessage("Starting PU with [" + springXml + "]"));
         }
 
+        String puName = (String) context.getInitParameter("puName");
+        String puPath = (String) context.getInitParameter("puPath");
+        String codeserver = (String) context.getInitParameter("codeserver");
+
         org.openspaces.pu.sla.SLA sla = getSLA(getServiceBeanContext());
 
         Integer instanceId = this.instanceId;
@@ -181,17 +202,95 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             int slaMax = getSLAMax(context);
             int numberOfInstances = Math.max(slaMax, sla.getNumberOfInstances());
             clusterInfo.setNumberOfInstances(numberOfInstances);
+        } else {
+            clusterInfo.setNumberOfInstances(sla.getNumberOfInstances());
         }
         clusterInfo.setNumberOfBackups(sla.getNumberOfBackups());
         clusterInfo.setInstanceId(instanceId);
         clusterInfo.setBackupId(backupId);
+        clusterInfo.setName(puName);
 
         logger.info(logMessage("ClusterInfo [" + clusterInfo + "]"));
 
         //create PU Container
-        Resource resource = new ByteArrayResource(springXml.getBytes());
-        IntegratedProcessingUnitContainerProvider factory = new IntegratedProcessingUnitContainerProvider();
-        factory.addConfigLocation(resource);
+        ApplicationContextProcessingUnitContainerProvider factory;
+        // identify if this is a web app
+        InputStream webXml = contextClassLoader.getResourceAsStream("WEB-INF/web.xml");
+        if (webXml != null) {
+            WebApplicationContextProcessingUnitContainerProvider webFactory = new JettyWebProcessingUnitContainerProvider();
+            String deployName = puName;
+            if (clusterInfo.getInstanceId() != null) {
+                deployName += "_" + clusterInfo.getInstanceId();
+            }
+            if (clusterInfo.getBackupId() != null) {
+                deployName += "_" + clusterInfo.getBackupId();
+            }
+
+            File warPath = new File(System.getProperty(Locator.GS_HOME) + "/work/deployed-processing-units/" + deployName);
+            File tempWarPath = new File(System.getProperty(Locator.GS_HOME) + "/work/deployed-processing-units/" + deployName + "_work");
+
+            FileSystemUtils.deleteRecursively(warPath);
+            FileSystemUtils.deleteRecursively(tempWarPath);
+            
+            tempWarPath.mkdirs();
+            warPath.mkdirs();
+            
+            webFactory.setWarTempPath(tempWarPath);
+            webFactory.setWarPath(warPath);
+
+            // get the war path and extract it
+            HttpURLConnection conn = (HttpURLConnection) new URL(codeserver + puPath).openConnection();
+            conn.setRequestProperty("Package", "true");
+            int responseCode = conn.getResponseCode();
+            if (responseCode != 200 && responseCode != 201) {
+                throw new RuntimeException("Failed to extract file to: " + warPath.getAbsolutePath() + ", response code [" + responseCode + "]");
+            }
+
+            File tempFile = new File(tempWarPath, "temp.war");
+            InputStream in = new BufferedInputStream(conn.getInputStream());
+            FileCopyUtils.copy(in, new FileOutputStream(tempFile));
+
+            // extract the file
+            byte data[] = new byte[1024];
+            ZipFile zipFile = new ZipFile(tempFile);
+            Enumeration e = zipFile.entries();
+            while (e.hasMoreElements()) {
+                ZipEntry entry = (ZipEntry) e.nextElement();
+                if (entry.isDirectory()) {
+                    File dir = new File(warPath.getAbsolutePath() + "/" + entry.getName());
+                    for (int i = 0; i < 5; i++) {
+                        dir.mkdirs();
+                    }
+                } else {
+                    BufferedInputStream is = new BufferedInputStream(zipFile.getInputStream(entry));
+                    int count;
+                    File file = new File(warPath.getAbsolutePath() + "/" + entry.getName());
+                    if (file.getParentFile() != null) {
+                        file.getParentFile().mkdirs();
+                    }
+                    FileOutputStream fos = new FileOutputStream(file);
+                    BufferedOutputStream dest = new BufferedOutputStream(fos, 1024);
+                    while ((count = is.read(data, 0, 1024)) != -1) {
+                        dest.write(data, 0, count);
+                    }
+                    dest.flush();
+                    dest.close();
+                    is.close();
+                }
+            }
+            tempFile.delete();
+
+            conn.disconnect();
+
+            factory = webFactory;
+        } else {
+            factory = new IntegratedProcessingUnitContainerProvider();
+        }
+
+        if (StringUtils.hasText(springXml)) {
+            Resource resource = new ByteArrayResource(springXml.getBytes());
+            factory.addConfigLocation(resource);
+        }
         factory.setClusterInfo(clusterInfo);
 
         MarshalledObject beanLevelPropertiesMarshObj =
@@ -202,9 +301,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             logger.info(logMessage("BeanLevelProperties " + beanLevelProperties));
         }
 
-        integratedContainer = (IntegratedProcessingUnitContainer) factory.createContainer();
+        container = (ApplicationContextProcessingUnitContainer) factory.createContainer();
 
-        Map map = integratedContainer.getApplicationContext().getBeansOfType(MemberAliveIndicator.class);
+        Map map = container.getApplicationContext().getBeansOfType(MemberAliveIndicator.class);
         ArrayList<MemberAliveIndicator> maiList = new ArrayList<MemberAliveIndicator>();
         for (Iterator it = map.values().iterator(); it.hasNext();) {
             MemberAliveIndicator memberAliveIndicator = (MemberAliveIndicator) it.next();
@@ -214,7 +313,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
         memberAliveIndicators = maiList.toArray(new MemberAliveIndicator[maiList.size()]);
 
-        map = integratedContainer.getApplicationContext().getBeansOfType(IJSpace.class);
+        map = container.getApplicationContext().getBeansOfType(IJSpace.class);
         ArrayList<IJSpace> spacesList = new ArrayList<IJSpace>();
         for (Iterator it = map.values().iterator(); it.hasNext();) {
             IJSpace space = (IJSpace) it.next();
@@ -234,7 +333,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         executorService = Executors.newScheduledThreadPool(numberOfThreads);
         for (WatchTask watchTask : watchTasks) {
             if (watchTask.getMonitor() instanceof ApplicationContextMonitor) {
-                ((ApplicationContextMonitor) watchTask.getMonitor()).setApplicationContext(integratedContainer.getApplicationContext());
+                ((ApplicationContextMonitor) watchTask.getMonitor()).setApplicationContext(container.getApplicationContext());
             }
             executorService.scheduleAtFixedRate(watchTask, watchTask.getMonitor().getPeriod(), watchTask.getMonitor().getPeriod(), TimeUnit.MILLISECONDS);
         }
@@ -250,13 +349,13 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             executorService.shutdown();
             executorService = null;
         }
-        if (integratedContainer != null) {
+        if (container != null) {
             try {
-                integratedContainer.close();
+                container.close();
             } catch (Exception e) {
                 logger.warn(logMessage("Failed to close"), e);
             } finally {
-                integratedContainer = null;
+                container = null;
                 spaces = null;
                 memberAliveIndicators = null;
             }
