@@ -32,15 +32,17 @@ public class SharedThreadPool implements ThreadPool, LifeCycle {
 
     private static volatile ThreadPool threadPool;
 
+    private static volatile int threadPoolCount;
+
+    private static final Object threadPoolLock = new Object();
+
     public SharedThreadPool(ThreadPool delegate) {
-        ThreadPool local = threadPool;
-        if (local == null) {
-            synchronized (SharedThreadPool.class) {
-                local = threadPool;
-                if (local == null) {
-                    threadPool = local = delegate;
-                    logger.debug("Using new thread pool [" + delegate + "]");
-                }
+        synchronized (threadPoolLock) {
+            if (threadPool == null) {
+                threadPool = delegate;
+                logger.debug("Using new thread pool [" + delegate + "]");
+            } else {
+                logger.debug("Using existing thread pool [" + threadPool + "]");
             }
         }
     }
@@ -66,16 +68,18 @@ public class SharedThreadPool implements ThreadPool, LifeCycle {
     }
 
     public void start() throws Exception {
-        synchronized (SharedThreadPool.class) {
-            if (isStopped()) {
+        synchronized (threadPoolLock) {
+            // start the first one
+            if (++threadPoolCount == 1) {
                 ((LifeCycle) threadPool).start();
             }
         }
     }
 
     public void stop() throws Exception {
-        synchronized (SharedThreadPool.class) {
-            if (isStarted()) {
+        synchronized (threadPoolLock) {
+            // start the first one
+            if (--threadPoolCount == 0) {
                 ((LifeCycle) threadPool).stop();
             }
         }
