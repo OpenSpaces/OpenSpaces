@@ -231,56 +231,14 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
             FileSystemUtils.deleteRecursively(warPath);
             FileSystemUtils.deleteRecursively(tempWarPath);
-            
+
             tempWarPath.mkdirs();
             warPath.mkdirs();
-            
+
             webFactory.setWarTempPath(tempWarPath);
             webFactory.setWarPath(warPath);
 
-            // get the war path and extract it
-            HttpURLConnection conn = (HttpURLConnection) new URL(codeserver + puPath).openConnection();
-            conn.setRequestProperty("Package", "true");
-            int responseCode = conn.getResponseCode();
-            if (responseCode != 200 && responseCode != 201) {
-                throw new RuntimeException("Failed to extract file to: " + warPath.getAbsolutePath() + ", response code [" + responseCode + "]");
-            }
-
-            File tempFile = new File(tempWarPath, "temp.war");
-            InputStream in = new BufferedInputStream(conn.getInputStream());
-            FileCopyUtils.copy(in, new FileOutputStream(tempFile));
-
-            // extract the file
-            byte data[] = new byte[1024];
-            ZipFile zipFile = new ZipFile(tempFile);
-            Enumeration e = zipFile.entries();
-            while (e.hasMoreElements()) {
-                ZipEntry entry = (ZipEntry) e.nextElement();
-                if (entry.isDirectory()) {
-                    File dir = new File(warPath.getAbsolutePath() + "/" + entry.getName());
-                    for (int i = 0; i < 5; i++) {
-                        dir.mkdirs();
-                    }
-                } else {
-                    BufferedInputStream is = new BufferedInputStream(zipFile.getInputStream(entry));
-                    int count;
-                    File file = new File(warPath.getAbsolutePath() + "/" + entry.getName());
-                    if (file.getParentFile() != null) {
-                        file.getParentFile().mkdirs();
-                    }
-                    FileOutputStream fos = new FileOutputStream(file);
-                    BufferedOutputStream dest = new BufferedOutputStream(fos, 1024);
-                    while ((count = is.read(data, 0, 1024)) != -1) {
-                        dest.write(data, 0, count);
-                    }
-                    dest.flush();
-                    dest.close();
-                    is.close();
-                }
-            }
-            tempFile.delete();
-
-            conn.disconnect();
+            getAndExtractPU(puPath, codeserver, warPath, tempWarPath);
 
             factory = webFactory;
         } else {
@@ -457,5 +415,50 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         public void run() {
             watch.addWatchRecord(new Calculable(watch.getId(), monitor.getValue(), System.currentTimeMillis()));
         }
+    }
+
+    private void getAndExtractPU(String puPath, String codeserver, File path, File tempPath) throws IOException {
+        HttpURLConnection conn = (HttpURLConnection) new URL(codeserver + puPath).openConnection();
+        conn.setRequestProperty("Package", "true");
+        int responseCode = conn.getResponseCode();
+        if (responseCode != 200 && responseCode != 201) {
+            throw new RuntimeException("Failed to extract file to: " + path.getAbsolutePath() + ", response code [" + responseCode + "]");
+        }
+
+        File tempFile = new File(tempPath, "temp.war");
+        InputStream in = new BufferedInputStream(conn.getInputStream());
+        FileCopyUtils.copy(in, new FileOutputStream(tempFile));
+
+        // extract the file
+        byte data[] = new byte[1024];
+        ZipFile zipFile = new ZipFile(tempFile);
+        Enumeration e = zipFile.entries();
+        while (e.hasMoreElements()) {
+            ZipEntry entry = (ZipEntry) e.nextElement();
+            if (entry.isDirectory()) {
+                File dir = new File(path.getAbsolutePath() + "/" + entry.getName());
+                for (int i = 0; i < 5; i++) {
+                    dir.mkdirs();
+                }
+            } else {
+                BufferedInputStream is = new BufferedInputStream(zipFile.getInputStream(entry));
+                int count;
+                File file = new File(path.getAbsolutePath() + "/" + entry.getName());
+                if (file.getParentFile() != null) {
+                    file.getParentFile().mkdirs();
+                }
+                FileOutputStream fos = new FileOutputStream(file);
+                BufferedOutputStream dest = new BufferedOutputStream(fos, 1024);
+                while ((count = is.read(data, 0, 1024)) != -1) {
+                    dest.write(data, 0, count);
+                }
+                dest.flush();
+                dest.close();
+                is.close();
+            }
+        }
+        tempFile.delete();
+
+        conn.disconnect();
     }
 }

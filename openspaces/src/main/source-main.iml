@@ -32,6 +32,8 @@
     <orderEntry type="library" exported="" name="Javassist" level="project" />
     <orderEntry type="library" exported="" name="hsql" level="project" />
     <orderEntry type="library" exported="" name="antlr" level="project" />
+    <orderEntry type="library" name="jetty" level="project" />
+    <orderEntry type="library" name="jsp-2.1" level="project" />
     <orderEntryProperties />
   </component>
   <component name="copyright">

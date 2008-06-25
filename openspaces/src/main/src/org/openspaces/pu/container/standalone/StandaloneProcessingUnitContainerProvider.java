@@ -25,6 +25,7 @@ import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.CompoundProcessingUnitContainer;
+import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.File;
@@ -133,6 +134,10 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
      */
     public void addConfigLocation(String configLocation) {
         configLocations.add(configLocation);
+    }
+
+    public void addConfigLocation(Resource resource) throws IOException {
+        throw new UnsupportedOperationException();
     }
 
     /**

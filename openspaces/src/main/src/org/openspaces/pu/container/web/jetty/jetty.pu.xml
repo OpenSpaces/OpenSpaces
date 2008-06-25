@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="properties">
+            <props>
+                
+            </props>
+        </property>
+    </bean>
+
+    <bean id="port" class="org.openspaces.pu.container.web.PortGenerator">
+        <property name="basePort" value="8000" />
+    </bean>
+
+    <bean id="confidentialPort" class="org.openspaces.pu.container.web.PortGenerator">
+        <property name="basePort" value="8100" />
+    </bean>
+
+    <bean id="jetty" class="org.mortbay.jetty.Server" init-method="start" destroy-method="stop">
+
+        <property name="threadPool">
+            <bean class="org.mortbay.thread.QueuedThreadPool">
+                <property name="minThreads" value="10"/>
+                <property name="maxThreads" value="200"/>
+                <property name="lowThreads" value="20"/>
+            </bean>
+        </property>
+
+        <property name="connectors">
+            <list>
+                <bean class="org.mortbay.jetty.nio.SelectChannelConnector">
+                    <property name="port" ref="port"/>
+                    <property name="maxIdleTime" value="300000"/>
+                    <property name="acceptors" value="2"/>
+                    <property name="statsOn" value="false"/>
+                    <property name="confidentialPort" ref="confidentialPort"/>
+                    <property name="lowResourcesConnections" value="20000"/>
+                    <property name="lowResourcesMaxIdleTime" value="5000"/>
+                </bean>
+            </list>
+        </property>
+        <property name="handler">
+            <bean class="org.mortbay.jetty.handler.HandlerCollection">
+                <property name="handlers">
+                    <list>
+                        <bean class="org.mortbay.jetty.handler.ContextHandlerCollection"/>
+                        <bean class="org.mortbay.jetty.handler.DefaultHandler"/>
+                    </list>
+                </property>
+            </bean>
+        </property>
+    </bean>
+</beans>
