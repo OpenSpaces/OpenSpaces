@@ -155,6 +155,11 @@
           <option name="IGNORE_JAVADOC_PERIOD" value="true" />
           <option name="myAdditionalJavadocTags" value="" />
         </inspection_tool>
+        <inspection_tool class="UnusedAssignment" level="WARNING" enabled="false">
+          <option name="REPORT_PREFIX_EXPRESSIONS" value="false" />
+          <option name="REPORT_POSTFIX_EXPRESSIONS" value="true" />
+          <option name="REPORT_REDUNDANT_INITIALIZER" value="true" />
+        </inspection_tool>
       </profile>
     </profiles>
     <list size="4">

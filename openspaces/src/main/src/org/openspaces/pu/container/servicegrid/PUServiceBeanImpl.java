@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package org.openspaces.pu.container.servicegrid;
 
 import com.gigaspaces.start.Locator;

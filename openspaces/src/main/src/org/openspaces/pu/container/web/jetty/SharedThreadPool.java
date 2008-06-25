@@ -1,0 +1,107 @@
+/*
+ * Copyright 2006-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.openspaces.pu.container.web.jetty;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.component.LifeCycle;
+import org.mortbay.thread.ThreadPool;
+
+/**
+ * A Jetty {@link org.mortbay.thread.ThreadPool} that shares a single instance of a therad pool. The first
+ * thread pool passed will win and be used.
+ *
+ * @author kimchy
+ */
+public class SharedThreadPool implements ThreadPool, LifeCycle {
+
+    private static final Log logger = LogFactory.getLog(SharedThreadPool.class);
+
+    private static volatile ThreadPool threadPool;
+
+    public SharedThreadPool(ThreadPool delegate) {
+        ThreadPool local = threadPool;
+        if (local == null) {
+            synchronized (SharedThreadPool.class) {
+                local = threadPool;
+                if (local == null) {
+                    threadPool = local = delegate;
+                    logger.debug("Using new thread pool [" + delegate + "]");
+                }
+            }
+        }
+    }
+
+    public boolean dispatch(Runnable runnable) {
+        return threadPool.dispatch(runnable);
+    }
+
+    public void join() throws InterruptedException {
+        threadPool.join();
+    }
+
+    public int getThreads() {
+        return threadPool.getThreads();
+    }
+
+    public int getIdleThreads() {
+        return threadPool.getIdleThreads();
+    }
+
+    public boolean isLowOnThreads() {
+        return threadPool.isLowOnThreads();
+    }
+
+    public void start() throws Exception {
+        synchronized (SharedThreadPool.class) {
+            if (isStopped()) {
+                ((LifeCycle) threadPool).start();
+            }
+        }
+    }
+
+    public void stop() throws Exception {
+        synchronized (SharedThreadPool.class) {
+            if (isStarted()) {
+                ((LifeCycle) threadPool).stop();
+            }
+        }
+    }
+
+    public boolean isRunning() {
+        return ((LifeCycle) threadPool).isRunning();
+    }
+
+    public boolean isStarted() {
+        return ((LifeCycle) threadPool).isStarted();
+    }
+
+    public boolean isStarting() {
+        return ((LifeCycle) threadPool).isStarting();
+    }
+
+    public boolean isStopping() {
+        return ((LifeCycle) threadPool).isStopping();
+    }
+
+    public boolean isStopped() {
+        return ((LifeCycle) threadPool).isStopped();
+    }
+
+    public boolean isFailed() {
+        return ((LifeCycle) threadPool).isFailed();
+    }
+}

@@ -35,6 +35,10 @@ import java.util.List;
  */
 public class JettyWebProcessingUnitContainerProvider implements WebApplicationContextProcessingUnitContainerProvider {
 
+    public final static String DEFAULT_JETTY_PU = "/org/openspaces/pu/container/web/jetty/jetty.pu.xml";
+
+    public static final String DEFAULT_JETTY_PU_LOCATION_SYSPROP = "com.gs.pu.web.jetty.defaultPuLocation";
+
     private static final Log logger = LogFactory.getLog(JettyWebProcessingUnitContainerProvider.class);
 
     private ApplicationContext parentContext;
@@ -137,11 +141,16 @@ public class JettyWebProcessingUnitContainerProvider implements WebApplicationCo
                     }
                 }
                 if (!foundValidResource) {
-                    Resource resource = new ClassPathResource("/org/openspaces/pu/container/web/jetty/jetty.pu.xml", JettyWebProcessingUnitContainerProvider.class);
-                    if (!resource.exists()) {
-                        throw new CannotCreateContainerException("Faield to read default pu file [/org/openspaces/pu/container/web/jetty.pu.xml]");
+                    String defaultLocation = System.getProperty(DEFAULT_JETTY_PU_LOCATION_SYSPROP);
+                    if (defaultLocation == null) {
+                        Resource resource = new ClassPathResource(DEFAULT_JETTY_PU, JettyWebProcessingUnitContainerProvider.class);
+                        addConfigLocation(resource);
+                    } else {
+                        addConfigLocation(defaultLocation);
                     }
-                    addConfigLocation(resource);
+                    if (configResources.size() == 0 || !configResources.get(0).exists()) {
+                        throw new CannotCreateContainerException("Faield to read default pu file [" + defaultLocation + "]");
+                    }
                 }
             } catch (IOException e) {
                 throw new CannotCreateContainerException("Failed to read config files from " + DEFAULT_PU_CONTEXT_LOCATION, e);
@@ -188,7 +197,7 @@ public class JettyWebProcessingUnitContainerProvider implements WebApplicationCo
 
         webAppContext.setTempDirectory(warTempPath);
         webAppContext.setWar(warPath.getAbsolutePath());
-        
+
         webAppContext.setExtractWAR(true);
         webAppContext.setCopyWebDir(false);
 

@@ -22,10 +22,14 @@
     <bean id="jetty" class="org.mortbay.jetty.Server" init-method="start" destroy-method="stop">
 
         <property name="threadPool">
-            <bean class="org.mortbay.thread.QueuedThreadPool">
-                <property name="minThreads" value="10"/>
-                <property name="maxThreads" value="200"/>
-                <property name="lowThreads" value="20"/>
+            <bean class="org.openspaces.pu.container.web.jetty.SharedThreadPool">
+                <constructor-arg>
+                    <bean class="org.mortbay.thread.QueuedThreadPool">
+                        <property name="minThreads" value="10"/>
+                        <property name="maxThreads" value="200"/>
+                        <property name="lowThreads" value="20"/>
+                    </bean>
+                </constructor-arg>
             </bean>
         </property>
 
