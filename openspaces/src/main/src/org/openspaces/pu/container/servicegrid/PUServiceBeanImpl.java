@@ -226,8 +226,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 deployName += "_" + clusterInfo.getBackupId();
             }
 
-            File warPath = new File(System.getProperty(Locator.GS_HOME) + "/work/deployed-processing-units/" + deployName);
-            File tempWarPath = new File(System.getProperty(Locator.GS_HOME) + "/work/deployed-processing-units/" + deployName + "_work");
+            String deployedProcessingUnitsLocation = System.getProperty("com.gs.pu.deployedProcessingUnitsLocation", System.getProperty(Locator.GS_HOME) + "/work/deployed-processing-units");
+            
+            File warPath = new File(deployedProcessingUnitsLocation + "/" + deployName);
+            File tempWarPath = new File(deployedProcessingUnitsLocation + "/" + deployName + "_work");
 
             FileSystemUtils.deleteRecursively(warPath);
             FileSystemUtils.deleteRecursively(tempWarPath);
