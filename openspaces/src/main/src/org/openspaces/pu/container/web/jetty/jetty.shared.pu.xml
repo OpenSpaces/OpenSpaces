@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="properties">
+            <props>
+                <prop key="web.context">/${clusterInfo.name}</prop>
+                <prop key="web.port">8080</prop>
+                <prop key="web.sslPort">8443</prop>
+                <prop key="web.threadPool.minThreads">10</prop>
+                <prop key="web.threadPool.maxThreads">200</prop>
+                <prop key="web.threadPool.lowThreads">20</prop>
+                <prop key="web.selector.maxIdleTime">300000</prop>
+                <prop key="web.selector.acceptors">2</prop>
+                <prop key="web.selector.lowResourcesConnections">20000</prop>
+                <prop key="web.selector.lowResourcesMaxIdleTime">5000</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="port" class="org.openspaces.pu.container.web.PortGenerator">
+        <property name="basePort" value="${web.port}" />
+    </bean>
+
+    <bean id="confidentialPort" class="org.openspaces.pu.container.web.PortGenerator">
+        <property name="basePort" value="${web.sslPort}" />
+    </bean>
+
+    <bean id="context" class="org.openspaces.pu.container.web.ContextGenerator">
+        <constructor-arg>
+            <list>
+                <value>${web.context}</value>
+                <value>_${clusterInfo.runningNumber}</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="jettyHolder" class="org.openspaces.pu.container.web.jetty.SharedJettyHolder">
+        <constructor-arg ref="jetty" />
+    </bean>
+
+    <bean id="jetty" class="org.mortbay.jetty.Server">
+
+        <property name="threadPool">
+            <bean class="org.mortbay.thread.QueuedThreadPool">
+                <property name="minThreads" value="${web.threadPool.minThreads}"/>
+                <property name="maxThreads" value="${web.threadPool.maxThreads}"/>
+                <property name="lowThreads" value="${web.threadPool.lowThreads}"/>
+            </bean>
+        </property>
+
+        <property name="connectors">
+            <list>
+                <bean class="org.mortbay.jetty.nio.SelectChannelConnector">
+                    <property name="port" ref="port"/>
+                    <property name="maxIdleTime" value="${web.selector.maxIdleTime}"/>
+                    <property name="acceptors" value="${web.selector.acceptors}"/>
+                    <property name="statsOn" value="false"/>
+                    <property name="confidentialPort" ref="confidentialPort"/>
+                    <property name="lowResourcesConnections" value="${web.selector.lowResourcesConnections}"/>
+                    <property name="lowResourcesMaxIdleTime" value="${web.selector.lowResourcesMaxIdleTime}"/>
+                </bean>
+            </list>
+        </property>
+        <property name="handler">
+            <bean class="org.mortbay.jetty.handler.HandlerCollection">
+                <property name="handlers">
+                    <list>
+                        <bean class="org.mortbay.jetty.handler.ContextHandlerCollection"/>
+                        <bean class="org.mortbay.jetty.handler.DefaultHandler"/>
+                    </list>
+                </property>
+            </bean>
+        </property>
+    </bean>
+</beans>

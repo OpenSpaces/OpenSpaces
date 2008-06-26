@@ -19,7 +19,6 @@ package org.openspaces.pu.container.web.jetty;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.HandlerContainer;
-import org.mortbay.jetty.Server;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
@@ -40,16 +39,16 @@ public class JettyWebProcessingUnitContainer implements ApplicationContextProces
 
     private HandlerContainer container;
 
-    private Server server;
+    private JettyHolder jettyHolder;
 
     /**
      */
     public JettyWebProcessingUnitContainer(ApplicationContext applicationContext, WebAppContext webAppContext,
-                                           HandlerContainer container, Server server) {
+                                           HandlerContainer container, JettyHolder jettyHolder) {
         this.applicationContext = applicationContext;
         this.webAppContext = webAppContext;
         this.container = container;
-        this.server = server;
+        this.jettyHolder = jettyHolder;
     }
 
     /**
@@ -74,11 +73,17 @@ public class JettyWebProcessingUnitContainer implements ApplicationContextProces
         try {
             webAppContext.stop();
         } catch (Exception e) {
-            logger.warn("Faield to stop web context");
+            logger.warn("Faield to stop web context", e);
         }
 
         if (container != null) {
-            server.removeHandler(webAppContext);
+            container.removeHandler(webAppContext);
+        }
+
+        try {
+            jettyHolder.stop();
+        } catch (Exception e) {
+            logger.warn("Failed to stop jetty server", e);
         }
 
         if (applicationContext instanceof DisposableBean) {

@@ -117,7 +117,7 @@ public class StandaloneContainerRunnable implements Runnable {
             applicationContext = new ResourceApplicationContext(resources, null);
             // add config information if provided
             if (beanLevelProperties != null) {
-                applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties));
+                applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties, clusterInfo));
                 applicationContext.addBeanPostProcessor(new BeanLevelPropertyBeanPostProcessor(beanLevelProperties));
             }
             if (clusterInfo != null) {

@@ -42,12 +42,14 @@ public class ProcessingUnitContextLoader extends ContextLoader {
     protected WebApplicationContext createWebApplicationContext(ServletContext servletContext, ApplicationContext parent) throws BeansException {
         ProcessingUnitWebApplicationContext wac = new ProcessingUnitWebApplicationContext();
 
+        ClusterInfo clusterInfo = (ClusterInfo) servletContext.getAttribute(WebProcessingUnitContainerProvider.CLUSTER_INFO_CONTEXT);
+        
         BeanLevelProperties beanLevelProperties = (BeanLevelProperties) servletContext.getAttribute(WebProcessingUnitContainerProvider.BEAN_LEVEL_PROPERTIES_CONTEXT);
         if (beanLevelProperties != null) {
-            wac.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties));
+            wac.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties, clusterInfo));
             wac.addBeanPostProcessor(new BeanLevelPropertyBeanPostProcessor(beanLevelProperties));
         }
-        ClusterInfo clusterInfo = (ClusterInfo) servletContext.getAttribute(WebProcessingUnitContainerProvider.CLUSTER_INFO_CONTEXT);
+
         if (clusterInfo != null) {
             wac.addBeanPostProcessor(new ClusterInfoBeanPostProcessor(clusterInfo));
         }

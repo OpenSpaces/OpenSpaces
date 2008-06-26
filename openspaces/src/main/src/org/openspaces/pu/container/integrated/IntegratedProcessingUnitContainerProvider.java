@@ -223,7 +223,7 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
         ResourceApplicationContext applicationContext = new ResourceApplicationContext(resources, parentContext);
         // add config information if provided
         if (beanLevelProperties != null) {
-            applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties));
+            applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties, clusterInfo));
             applicationContext.addBeanPostProcessor(new BeanLevelPropertyBeanPostProcessor(beanLevelProperties));
         }
         if (clusterInfo != null) {

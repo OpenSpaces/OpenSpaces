@@ -18,9 +18,10 @@ package org.openspaces.pu.container.web.jetty;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.jetty.AbstractConnector;
+import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
-import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.webapp.WebAppContext;
@@ -43,6 +44,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.BindException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,9 +53,13 @@ import java.util.List;
  */
 public class JettyWebProcessingUnitContainerProvider implements WebProcessingUnitContainerProvider {
 
-    public final static String DEFAULT_JETTY_PU = "/org/openspaces/pu/container/web/jetty/jetty.pu.xml";
+    public final static String DEFAULT_JETTY_PLAIN_PU = "/org/openspaces/pu/container/web/jetty/jetty.plain.pu.xml";
+
+    public final static String DEFAULT_JETTY_SHARED_PU = "/org/openspaces/pu/container/web/jetty/jetty.shared.pu.xml";
 
     public static final String DEFAULT_JETTY_PU_LOCATION_SYSPROP = "com.gs.pu.web.jetty.defaultPuLocation";
+
+    public static final String SHARED_PROP = "web.shared";
 
     private static final Log logger = LogFactory.getLog(JettyWebProcessingUnitContainerProvider.class);
 
@@ -159,7 +165,15 @@ public class JettyWebProcessingUnitContainerProvider implements WebProcessingUni
                 if (!foundValidResource) {
                     String defaultLocation = System.getProperty(DEFAULT_JETTY_PU_LOCATION_SYSPROP);
                     if (defaultLocation == null) {
-                        Resource resource = new ClassPathResource(DEFAULT_JETTY_PU, JettyWebProcessingUnitContainerProvider.class);
+                        defaultLocation = DEFAULT_JETTY_PLAIN_PU;
+                        String sharedProp = (String) beanLevelProperties.getContextProperties().get(SHARED_PROP);
+                        if (sharedProp != null && sharedProp.equalsIgnoreCase("true")) {
+                            defaultLocation = DEFAULT_JETTY_SHARED_PU;
+                        }
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("No custom META-INF/spring/pu.xml found, using default [" + defaultLocation + "]");
+                        }
+                        Resource resource = new ClassPathResource(defaultLocation, JettyWebProcessingUnitContainerProvider.class);
                         addConfigLocation(resource);
                     } else {
                         addConfigLocation(defaultLocation);
@@ -181,7 +195,7 @@ public class JettyWebProcessingUnitContainerProvider implements WebProcessingUni
         ResourceApplicationContext applicationContext = new ResourceApplicationContext(resources, parentContext);
         // add config information if provided
         if (beanLevelProperties != null) {
-            applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties));
+            applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties, clusterInfo));
             applicationContext.addBeanPostProcessor(new BeanLevelPropertyBeanPostProcessor(beanLevelProperties));
         }
         if (clusterInfo != null) {
@@ -194,61 +208,105 @@ public class JettyWebProcessingUnitContainerProvider implements WebProcessingUni
         // "start" the application context
         applicationContext.refresh();
 
-        Server server = (Server) applicationContext.getBean("jetty");
+        JettyHolder jettyHolder = (JettyHolder) applicationContext.getBean("jettyHolder");
 
-        WebAppContext webAppContext = new WebAppContext();
-
-        String contextPath = null;
+        int retryPortCount = 20;
         try {
-            contextPath = (String) applicationContext.getBean("context");
-        } catch (BeansException e) {
-            // not here, ok
+            retryPortCount = (Integer) applicationContext.getBean("retryPortCount");
+        } catch (Exception e) {
+            // do nothing
         }
-        if (contextPath == null) {
-            contextPath = "/";
-        }
-        webAppContext.setContextPath(contextPath);
 
-        webAppContext.setTempDirectory(warTempPath);
-        webAppContext.setWar(warPath.getAbsolutePath());
-
-        webAppContext.setExtractWAR(true);
-        webAppContext.setCopyWebDir(false);
-
-        webAppContext.setAttribute(APPLICATION_CONTEXT_CONTEXT, applicationContext);
-        webAppContext.setAttribute(CLUSTER_INFO_CONTEXT, clusterInfo);
-        webAppContext.setAttribute(BEAN_LEVEL_PROPERTIES_CONTEXT, beanLevelProperties);
-
-        HandlerContainer container = server;
-
-        Handler[] contexts = server.getChildHandlersByClass(ContextHandlerCollection.class);
-        if (contexts != null && contexts.length > 0) {
-            container = (HandlerContainer) contexts[0];
-        } else {
-            while (container != null) {
-                if (container instanceof HandlerWrapper) {
-                    HandlerWrapper wrapper = (HandlerWrapper) container;
-                    Handler handler = wrapper.getHandler();
-                    if (handler == null)
-                        break;
-                    if (handler instanceof HandlerContainer)
-                        container = (HandlerContainer) handler;
-                    else
-                        throw new IllegalStateException("No container");
+        try {
+            boolean success = false;
+            for (int i = 0; i < retryPortCount; i++) {
+                try {
+                    jettyHolder.start();
+                    success = true;
+                    break;
+                } catch (BindException e) {
+                    try {
+                        jettyHolder.stop();
+                    } catch (Exception e1) {
+                        // ignore
+                    }
+                    for (Connector connector : jettyHolder.getServer().getConnectors()) {
+                        connector.setPort(connector.getPort() + 1);
+                        if (connector instanceof AbstractConnector) {
+                            ((AbstractConnector) connector).setConfidentialPort(connector.getConfidentialPort() + 1);
+                        }
+                    }
                 }
-                throw new IllegalStateException("No container");
             }
+            if (!success) {
+                throw new CannotCreateContainerException("Failed to bind jetty to port with retries [" + retryPortCount + "]");
+            }
+        } catch (CannotCreateContainerException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CannotCreateContainerException("Failed to start jetty server", e);
         }
+        try {
+            WebAppContext webAppContext = new WebAppContext();
 
-        container.addHandler(webAppContext);
-        if (container.isStarted() || container.isStarting()) {
+            String contextPath = null;
             try {
-                webAppContext.start();
-            } catch (Exception e) {
-                throw new CannotCreateContainerException("Failed to start web app context", e);
+                contextPath = (String) applicationContext.getBean("context");
+            } catch (BeansException e) {
+                // not here, ok
             }
-        }
+            if (contextPath == null) {
+                contextPath = "/";
+            }
+            webAppContext.setContextPath(contextPath);
 
-        return new JettyWebProcessingUnitContainer(applicationContext, webAppContext, container, server);
+            webAppContext.setTempDirectory(warTempPath);
+            webAppContext.setWar(warPath.getAbsolutePath());
+
+            webAppContext.setExtractWAR(true);
+            webAppContext.setCopyWebDir(false);
+
+            webAppContext.setAttribute(APPLICATION_CONTEXT_CONTEXT, applicationContext);
+            webAppContext.setAttribute(CLUSTER_INFO_CONTEXT, clusterInfo);
+            webAppContext.setAttribute(BEAN_LEVEL_PROPERTIES_CONTEXT, beanLevelProperties);
+
+            HandlerContainer container = jettyHolder.getServer();
+
+            Handler[] contexts = jettyHolder.getServer().getChildHandlersByClass(ContextHandlerCollection.class);
+            if (contexts != null && contexts.length > 0) {
+                container = (HandlerContainer) contexts[0];
+            } else {
+                while (container != null) {
+                    if (container instanceof HandlerWrapper) {
+                        HandlerWrapper wrapper = (HandlerWrapper) container;
+                        Handler handler = wrapper.getHandler();
+                        if (handler == null)
+                            break;
+                        if (handler instanceof HandlerContainer)
+                            container = (HandlerContainer) handler;
+                        else
+                            throw new IllegalStateException("No container");
+                    }
+                    throw new IllegalStateException("No container");
+                }
+            }
+
+            container.addHandler(webAppContext);
+            if (container.isStarted() || container.isStarting()) {
+                try {
+                    webAppContext.start();
+                } catch (Exception e) {
+                    throw new CannotCreateContainerException("Failed to start web app context", e);
+                }
+            }
+            return new JettyWebProcessingUnitContainer(applicationContext, webAppContext, container, jettyHolder);
+        } catch (Exception e) {
+            try {
+                jettyHolder.stop();
+            } catch (Exception e1) {
+                logger.debug("Failed to stop jetty after an error occured, ignoring", e);
+            }
+            throw new CannotCreateContainerException("Failed to start web application", e);
+        }
     }
 }
