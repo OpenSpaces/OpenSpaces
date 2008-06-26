@@ -1,3 +1,19 @@
+/*
+ * Copyright 2006-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openspaces.pu.container.web.jetty;
 
 import org.apache.commons.logging.Log;
@@ -18,7 +34,7 @@ import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
-import org.openspaces.pu.container.web.WebApplicationContextProcessingUnitContainerProvider;
+import org.openspaces.pu.container.web.WebProcessingUnitContainerProvider;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
@@ -33,7 +49,7 @@ import java.util.List;
 /**
  * @author kimchy
  */
-public class JettyWebProcessingUnitContainerProvider implements WebApplicationContextProcessingUnitContainerProvider {
+public class JettyWebProcessingUnitContainerProvider implements WebProcessingUnitContainerProvider {
 
     public final static String DEFAULT_JETTY_PU = "/org/openspaces/pu/container/web/jetty/jetty.pu.xml";
 
@@ -182,17 +198,15 @@ public class JettyWebProcessingUnitContainerProvider implements WebApplicationCo
 
         WebAppContext webAppContext = new WebAppContext();
 
-        String contextPath = clusterInfo.getName();
+        String contextPath = null;
         try {
-            contextPath = (String) applicationContext.getBean("contextPath");
+            contextPath = (String) applicationContext.getBean("context");
         } catch (BeansException e) {
             // not here, ok
         }
         if (contextPath == null) {
             contextPath = "/";
         }
-        // TODO for some reason, it does not work with jetty if using anything except for "/" context
-        contextPath = "/";
         webAppContext.setContextPath(contextPath);
 
         webAppContext.setTempDirectory(warTempPath);

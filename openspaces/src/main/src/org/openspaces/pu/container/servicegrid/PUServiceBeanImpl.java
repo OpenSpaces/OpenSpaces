@@ -35,7 +35,7 @@ import org.openspaces.core.util.SpaceUtils;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
-import org.openspaces.pu.container.web.WebApplicationContextProcessingUnitContainerProvider;
+import org.openspaces.pu.container.web.WebProcessingUnitContainerProvider;
 import org.openspaces.pu.container.web.jetty.JettyWebProcessingUnitContainerProvider;
 import org.openspaces.pu.sla.monitor.ApplicationContextMonitor;
 import org.openspaces.pu.sla.monitor.Monitor;
@@ -216,7 +216,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         // identify if this is a web app
         InputStream webXml = contextClassLoader.getResourceAsStream("WEB-INF/web.xml");
         if (webXml != null) {
-            WebApplicationContextProcessingUnitContainerProvider webFactory = new JettyWebProcessingUnitContainerProvider();
+            WebProcessingUnitContainerProvider webFactory = new JettyWebProcessingUnitContainerProvider();
             String deployName = puName + "_" + clusterInfo.getSuffix();
 
             String deployedProcessingUnitsLocation = System.getProperty("com.gs.pu.deployedProcessingUnitsLocation", System.getProperty(Locator.GS_HOME) + "/work/deployed-processing-units");
