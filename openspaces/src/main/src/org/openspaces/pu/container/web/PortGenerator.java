@@ -25,16 +25,7 @@ public class PortGenerator implements FactoryBean, ClusterInfoAware {
         if (basePort == -1) {
             throw new IllegalArgumentException("Must set basePort property");
         }
-        if (clusterInfo.getNumberOfInstances() == null || clusterInfo.getNumberOfInstances() == 0) {
-            return basePort;
-        }
-        if (clusterInfo.getInstanceId() == null || clusterInfo.getInstanceId() == 0) {
-            return basePort;
-        }
-        if (clusterInfo.getNumberOfBackups() == null || clusterInfo.getNumberOfBackups() == 0) {
-            return basePort + clusterInfo.getInstanceId() - 1;
-        }
-        return basePort + ((clusterInfo.getInstanceId() - 1) * clusterInfo.getNumberOfBackups()) + (clusterInfo.getBackupId() == null ? 0 : clusterInfo.getBackupId());
+        return basePort + clusterInfo.getRunningNumer();
     }
 
     public Class getObjectType() {

@@ -217,13 +217,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         InputStream webXml = contextClassLoader.getResourceAsStream("WEB-INF/web.xml");
         if (webXml != null) {
             WebApplicationContextProcessingUnitContainerProvider webFactory = new JettyWebProcessingUnitContainerProvider();
-            String deployName = puName;
-            if (clusterInfo.getInstanceId() != null) {
-                deployName += "_" + clusterInfo.getInstanceId();
-            }
-            if (clusterInfo.getBackupId() != null) {
-                deployName += "_" + clusterInfo.getBackupId();
-            }
+            String deployName = puName + "_" + clusterInfo.getSuffix();
 
             String deployedProcessingUnitsLocation = System.getProperty("com.gs.pu.deployedProcessingUnitsLocation", System.getProperty(Locator.GS_HOME) + "/work/deployed-processing-units");
             
