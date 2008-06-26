@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-package org.openspaces.pu.container.web.context;
+package org.openspaces.pu.container.web;
 
-import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.ContextLoaderListener;
+import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
+
+import java.io.File;
 
 /**
  * @author kimchy
  */
-public class ProcessingUnitContextLoaderListener extends ContextLoaderListener {
+public interface WebProcessingUnitContainerProvider extends ApplicationContextProcessingUnitContainerProvider {
 
-    protected ContextLoader createContextLoader() {
-        return new ProcessingUnitContextLoader();
-    }
+    public static final String CLUSTER_INFO_CONTEXT = "clusterInfo";
+
+    public static final String BEAN_LEVEL_PROPERTIES_CONTEXT = "beanLevelProperties";
+
+    public static final String APPLICATION_CONTEXT_CONTEXT = "applicationContext";
+    
+    void setWarPath(File warPath);
+
+    void setWarTempPath(File warTempPath);
 }

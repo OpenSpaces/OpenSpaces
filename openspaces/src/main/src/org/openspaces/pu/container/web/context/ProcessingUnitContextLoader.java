@@ -1,3 +1,19 @@
+/*
+ * Copyright 2006-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openspaces.pu.container.web.context;
 
 import org.openspaces.core.cluster.ClusterInfo;
@@ -6,7 +22,7 @@ import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
 import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
-import org.openspaces.pu.container.web.WebApplicationContextProcessingUnitContainerProvider;
+import org.openspaces.pu.container.web.WebProcessingUnitContainerProvider;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.ContextLoader;
@@ -20,18 +36,18 @@ import javax.servlet.ServletContext;
 public class ProcessingUnitContextLoader extends ContextLoader {
 
     protected ApplicationContext loadParentContext(ServletContext servletContext) throws BeansException {
-        return (ApplicationContext) servletContext.getAttribute(WebApplicationContextProcessingUnitContainerProvider.APPLICATION_CONTEXT_CONTEXT);
+        return (ApplicationContext) servletContext.getAttribute(WebProcessingUnitContainerProvider.APPLICATION_CONTEXT_CONTEXT);
     }
 
     protected WebApplicationContext createWebApplicationContext(ServletContext servletContext, ApplicationContext parent) throws BeansException {
         ProcessingUnitWebApplicationContext wac = new ProcessingUnitWebApplicationContext();
 
-        BeanLevelProperties beanLevelProperties = (BeanLevelProperties) servletContext.getAttribute(WebApplicationContextProcessingUnitContainerProvider.BEAN_LEVEL_PROPERTIES_CONTEXT);
+        BeanLevelProperties beanLevelProperties = (BeanLevelProperties) servletContext.getAttribute(WebProcessingUnitContainerProvider.BEAN_LEVEL_PROPERTIES_CONTEXT);
         if (beanLevelProperties != null) {
             wac.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties));
             wac.addBeanPostProcessor(new BeanLevelPropertyBeanPostProcessor(beanLevelProperties));
         }
-        ClusterInfo clusterInfo = (ClusterInfo) servletContext.getAttribute(WebApplicationContextProcessingUnitContainerProvider.CLUSTER_INFO_CONTEXT);
+        ClusterInfo clusterInfo = (ClusterInfo) servletContext.getAttribute(WebProcessingUnitContainerProvider.CLUSTER_INFO_CONTEXT);
         if (clusterInfo != null) {
             wac.addBeanPostProcessor(new ClusterInfoBeanPostProcessor(clusterInfo));
         }

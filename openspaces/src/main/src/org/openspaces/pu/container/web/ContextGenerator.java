@@ -19,34 +19,45 @@ package org.openspaces.pu.container.web;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
- * A port generator that accepts a basePort and a portOffest and simply adds them.
+ * A simple builder that can append a list of Strings into a single context path.
  *
  * @author kimchy
  */
-public class PortGenerator implements FactoryBean {
+public class ContextGenerator implements FactoryBean {
 
-    private int basePort = 0;
+    private String[] contexParts = new String[0];
 
-    private int portOffset = 0;
-
-    public void setBasePort(int basePort) {
-        this.basePort = basePort;
+    public ContextGenerator(String context) {
+        contexParts = new String[]{context};
     }
 
-    public void setPortOffset(int portOffset) {
-        this.portOffset = portOffset;
+    /**
+     * Constucts a new ContextGenerator that is composed of all the provided
+     * context parts.
+     *
+     * @see #getContext()
+     */
+    public ContextGenerator(String[] contexParts) {
+        this.contexParts = contexParts;
     }
 
-    public int getPort() {
-        return basePort + portOffset;
+    /**
+     * Return "/" and then appends all the provided context parts.
+     */
+    public String getContext() {
+        StringBuilder sb = new StringBuilder();
+        for (String contextPart : contexParts) {
+            sb.append(contextPart);
+        }
+        return sb.toString();
     }
 
     public Object getObject() throws Exception {
-        return getPort();
+        return getContext();
     }
 
     public Class getObjectType() {
-        return Integer.class;
+        return String.class;
     }
 
     public boolean isSingleton() {

@@ -17,7 +17,7 @@
     </bean>
 
     <bean id="confidentialPort" class="org.openspaces.pu.container.web.PortGenerator">
-        <property name="basePort" value="8100" />
+        <property name="basePort" value="8400" />
         <property name="portOffset" value="${clusterInfo.runningNumber}" />
     </bean>
 
