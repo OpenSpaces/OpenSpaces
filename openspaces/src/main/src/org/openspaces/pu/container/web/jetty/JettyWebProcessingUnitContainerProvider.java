@@ -36,7 +36,6 @@ import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
 import org.openspaces.pu.container.web.WebProcessingUnitContainerProvider;
-import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -247,22 +246,10 @@ public class JettyWebProcessingUnitContainerProvider implements WebProcessingUni
             throw new CannotCreateContainerException("Failed to start jetty server", e);
         }
         try {
-            WebAppContext webAppContext = new WebAppContext();
-
-            String contextPath = null;
-            try {
-                contextPath = (String) applicationContext.getBean("context");
-            } catch (BeansException e) {
-                // not here, ok
-            }
-            if (contextPath == null) {
-                contextPath = "/";
-            }
-            webAppContext.setContextPath(contextPath);
+            WebAppContext webAppContext = (WebAppContext) applicationContext.getBean("webAppContext");
 
             webAppContext.setTempDirectory(warTempPath);
             webAppContext.setWar(warPath.getAbsolutePath());
-
             webAppContext.setExtractWAR(true);
             webAppContext.setCopyWebDir(false);
 

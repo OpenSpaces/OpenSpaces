@@ -25,6 +25,8 @@ package org.openspaces.pu.container;
  */
 public interface ProcessingUnitContainerProvider {
 
+    public static final String CONTAINER_CLASS_PROP = "pu.container.class";
+    
     /**
      * Creates a processing unit container.
      * 

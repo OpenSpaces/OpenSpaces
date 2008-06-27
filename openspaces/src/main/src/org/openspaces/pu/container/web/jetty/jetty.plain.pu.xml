@@ -30,10 +30,8 @@
         <property name="portOffset" value="${clusterInfo.runningNumber}" />
     </bean>
 
-    <bean id="context" class="org.openspaces.pu.container.web.ContextGenerator">
-        <constructor-arg>
-            <value>${web.context}</value>
-        </constructor-arg>
+    <bean id="webAppContext" class="org.mortbay.jetty.webapp.WebAppContext">
+        <property name="contextPath" value="${web.context}" />
     </bean>
 
     <bean id="jettyHolder" class="org.openspaces.pu.container.web.jetty.PlainJettyHolder">

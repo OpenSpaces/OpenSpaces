@@ -32,6 +32,8 @@ import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.MemberAliveIndicator;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.util.SpaceUtils;
+import org.openspaces.pu.container.CannotCreateContainerException;
+import org.openspaces.pu.container.ProcessingUnitContainerProvider;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
@@ -41,6 +43,7 @@ import org.openspaces.pu.sla.monitor.ApplicationContextMonitor;
 import org.openspaces.pu.sla.monitor.Monitor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
@@ -211,12 +214,20 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         logger.info(logMessage("ClusterInfo [" + clusterInfo + "]"));
 
+        MarshalledObject beanLevelPropertiesMarshObj =
+                (MarshalledObject) getServiceBeanContext().getInitParameter("beanLevelProperties");
+        BeanLevelProperties beanLevelProperties = null;
+        if (beanLevelPropertiesMarshObj != null) {
+            beanLevelProperties = (BeanLevelProperties) beanLevelPropertiesMarshObj.get();
+            logger.info(logMessage("BeanLevelProperties " + beanLevelProperties));
+        }
+
         //create PU Container
         ApplicationContextProcessingUnitContainerProvider factory;
         // identify if this is a web app
         InputStream webXml = contextClassLoader.getResourceAsStream("WEB-INF/web.xml");
         if (webXml != null) {
-            WebProcessingUnitContainerProvider webFactory = new JettyWebProcessingUnitContainerProvider();
+            WebProcessingUnitContainerProvider webFactory = (WebProcessingUnitContainerProvider) createContainerProvider(beanLevelProperties, JettyWebProcessingUnitContainerProvider.class.getName());
             String deployName = puName + "_" + clusterInfo.getSuffix();
 
             String deployedProcessingUnitsLocation = System.getProperty("com.gs.pu.deployedProcessingUnitsLocation", System.getProperty(Locator.GS_HOME) + "/work/deployed-processing-units");
@@ -237,7 +248,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
             factory = webFactory;
         } else {
-            factory = new IntegratedProcessingUnitContainerProvider();
+            factory = (ApplicationContextProcessingUnitContainerProvider) createContainerProvider(beanLevelProperties, IntegratedProcessingUnitContainerProvider.class.getName());
         }
 
         if (StringUtils.hasText(springXml)) {
@@ -245,14 +256,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             factory.addConfigLocation(resource);
         }
         factory.setClusterInfo(clusterInfo);
-
-        MarshalledObject beanLevelPropertiesMarshObj =
-                (MarshalledObject) getServiceBeanContext().getInitParameter("beanLevelProperties");
-        if (beanLevelPropertiesMarshObj != null) {
-            BeanLevelProperties beanLevelProperties = (BeanLevelProperties) beanLevelPropertiesMarshObj.get();
-            factory.setBeanLevelProperties(beanLevelProperties);
-            logger.info(logMessage("BeanLevelProperties " + beanLevelProperties));
-        }
+        factory.setBeanLevelProperties(beanLevelProperties);
 
         container = (ApplicationContextProcessingUnitContainer) factory.createContainer();
 
@@ -409,6 +413,18 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         public void run() {
             watch.addWatchRecord(new Calculable(watch.getId(), monitor.getValue(), System.currentTimeMillis()));
+        }
+    }
+
+    private ProcessingUnitContainerProvider createContainerProvider(BeanLevelProperties beanLevelProperties, String defaultType) {
+        String containerProviderType = defaultType;
+        if (beanLevelProperties != null) {
+            containerProviderType = beanLevelProperties.getContextProperties().getProperty(ProcessingUnitContainerProvider.CONTAINER_CLASS_PROP, defaultType);
+        }
+        try {
+            return (ProcessingUnitContainerProvider) ClassUtils.forName(containerProviderType).newInstance();
+        } catch (Exception e) {
+            throw new CannotCreateContainerException("Failed to create a new instance of container [" + containerProviderType + "]", e);
         }
     }
 

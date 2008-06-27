@@ -28,13 +28,8 @@
         <property name="basePort" value="${web.sslPort}" />
     </bean>
 
-    <bean id="context" class="org.openspaces.pu.container.web.ContextGenerator">
-        <constructor-arg>
-            <list>
-                <value>${web.context}</value>
-                <value>_${clusterInfo.runningNumber}</value>
-            </list>
-        </constructor-arg>
+    <bean id="webAppContext" class="org.mortbay.jetty.webapp.WebAppContext">
+        <property name="contextPath" value="${web.context}_${clusterInfo.runningNumber}" />
     </bean>
 
     <bean id="jettyHolder" class="org.openspaces.pu.container.web.jetty.SharedJettyHolder">
