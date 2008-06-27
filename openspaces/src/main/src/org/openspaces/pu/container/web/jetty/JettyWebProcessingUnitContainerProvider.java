@@ -189,6 +189,9 @@ public class JettyWebProcessingUnitContainerProvider implements WebProcessingUni
             ClusterInfoParser.guessSchema(clusterInfo);
         }
 
+        beanLevelProperties.getContextProperties().setProperty("web.warPath", warPath.getAbsolutePath());
+        beanLevelProperties.getContextProperties().setProperty("web.warTemPath", warTempPath.getAbsolutePath());
+
         Resource[] resources = configResources.toArray(new Resource[configResources.size()]);
         // create the Spring application context
         ResourceApplicationContext applicationContext = new ResourceApplicationContext(resources, parentContext);

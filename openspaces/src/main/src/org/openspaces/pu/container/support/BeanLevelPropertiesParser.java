@@ -50,15 +50,12 @@ public abstract class BeanLevelPropertiesParser {
     public static String EMBEDDED_PROPERTIES_PREFIX = "embed://";
 
     public static BeanLevelProperties parse(CommandLineParser.Parameter[] params) throws IllegalArgumentException {
-        BeanLevelProperties beanLevelProperties = null;
+        BeanLevelProperties beanLevelProperties = new BeanLevelProperties();
         for (CommandLineParser.Parameter param : params) {
             if (!param.getName().equalsIgnoreCase("properties")) {
                 continue;
             }
 
-            if (beanLevelProperties == null) {
-                beanLevelProperties = new BeanLevelProperties();
-            }
             String name = null;
             String properties;
             if (param.getArguments().length == 1) {

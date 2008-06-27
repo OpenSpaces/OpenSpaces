@@ -220,6 +220,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         if (beanLevelPropertiesMarshObj != null) {
             beanLevelProperties = (BeanLevelProperties) beanLevelPropertiesMarshObj.get();
             logger.info(logMessage("BeanLevelProperties " + beanLevelProperties));
+        } else {
+            beanLevelProperties = new BeanLevelProperties();
         }
 
         //create PU Container
