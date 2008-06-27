@@ -231,47 +231,7 @@ public class Deploy {
         // check if the pu to deploy is an actual file on the file system and ends with jar
         if (puFile.exists() && (puFile.getName().endsWith(".jar") || puFile.getName().endsWith(".war"))) {
             // we deploy a jar file, upload it to all the GSMs
-            byte[] buffer = new byte[4098];
-            for (GSM gsm : gsms) {
-                String codebase = getCodebase((DeployAdmin) gsm.getAdmin());
-                if (logger.isInfoEnabled()) {
-                    logger.info("Uploading [" + puPath + "] to [" + codebase + "]");
-                }
-                HttpURLConnection conn = (HttpURLConnection) new URL(codebase + puFile.getName()).openConnection();
-                conn.setDoOutput(true);
-                conn.setDoInput(true);
-                conn.setAllowUserInteraction(false);
-                conn.setUseCaches(false);
-                conn.setRequestMethod("PUT");
-                conn.setRequestProperty("Content-Length", "" + puFile.length());
-                conn.setRequestProperty("Extract", "true");
-                conn.connect();
-                OutputStream out = new BufferedOutputStream(conn.getOutputStream());
-                InputStream in = new BufferedInputStream(new FileInputStream(puFile));
-                int byteCount = 0;
-                int bytesRead = -1;
-                while ((bytesRead = in.read(buffer)) != -1) {
-                    out.write(buffer, 0, bytesRead);
-                    byteCount += bytesRead;
-                }
-                out.flush();
-                out.close();
-                in.close();
-
-                int responseCode = conn.getResponseCode();
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String line;
-                StringBuffer sb = new StringBuffer();
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                reader.close();
-                conn.disconnect();
-                if (responseCode != 200 && responseCode != 201) {
-                    throw new RuntimeException("Failed to upload file, response code [" + responseCode + "], response: " + sb.toString());
-                }
-            }
+            uploadPU(puPath, puFile, gsms);
         }
 
         //get codebase from service
@@ -662,6 +622,50 @@ public class Deploy {
         //put hosts as cluster
         if (hosts.size() > 0) {
             element.setCluster(hosts.toArray(new String[hosts.size()]));
+        }
+    }
+
+    private void uploadPU(String puPath, File puFile, GSM[] gsms) throws IOException {
+        byte[] buffer = new byte[4098];
+        for (GSM gsm : gsms) {
+            String codebase = getCodebase((DeployAdmin) gsm.getAdmin());
+            if (logger.isInfoEnabled()) {
+                logger.info("Uploading [" + puPath + "] to [" + codebase + "]");
+            }
+            HttpURLConnection conn = (HttpURLConnection) new URL(codebase + puFile.getName()).openConnection();
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setAllowUserInteraction(false);
+            conn.setUseCaches(false);
+            conn.setRequestMethod("PUT");
+            conn.setRequestProperty("Content-Length", "" + puFile.length());
+            conn.setRequestProperty("Extract", "true");
+            conn.connect();
+            OutputStream out = new BufferedOutputStream(conn.getOutputStream());
+            InputStream in = new BufferedInputStream(new FileInputStream(puFile));
+            int byteCount = 0;
+            int bytesRead = -1;
+            while ((bytesRead = in.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+                byteCount += bytesRead;
+            }
+            out.flush();
+            out.close();
+            in.close();
+
+            int responseCode = conn.getResponseCode();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String line;
+            StringBuffer sb = new StringBuffer();
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+            reader.close();
+            conn.disconnect();
+            if (responseCode != 200 && responseCode != 201) {
+                throw new RuntimeException("Failed to upload file, response code [" + responseCode + "], response: " + sb.toString());
+            }
         }
     }
 
