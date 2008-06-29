@@ -117,7 +117,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
 
     /**
      * Performs the initial load operation. Iterates over the {@link #setInitialLoadEntries(String[])} inital load
-     * entries. If {@link #getInitalLoadChunkSize()} is set to <code>-1</code>, will use
+     * entries. If {@link #getInitialLoadChunkSize()} is set to <code>-1</code>, will use
      * {@link org.openspaces.persistency.hibernate.iterator.DefaultScrollableDataIterator} for each entity. If
      * {@link # getInitalLoadChunkSize ()} is set to a non <code>-1</code> value, will use the
      * {@link org.openspaces.persistency.hibernate.iterator.DefaultChunkScrollableDataIterator}.
@@ -126,7 +126,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
         DataIterator[] iterators = new DataIterator[getInitialLoadEntries().length];
         int iteratorCounter = 0;
         for (String entityName : getInitialLoadEntries()) {
-            if (getInitalLoadChunkSize() == -1) {
+            if (getInitialLoadChunkSize() == -1) {
                 if (logger.isTraceEnabled()) {
                     logger.trace("Creating inital load scrollable iterator for entry [" + entityName + "]");
                 }
@@ -135,7 +135,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                 if (logger.isTraceEnabled()) {
                     logger.trace("Creating inital load chunk scrollable iterator for entry [" + entityName + "]");
                 }
-                iterators[iteratorCounter++] = new DefaultChunkScrollableDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById(), getInitalLoadChunkSize());
+                iterators[iteratorCounter++] = new DefaultChunkScrollableDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById(), getInitialLoadChunkSize());
             }
         }
         return createInitialLoadIterator(iterators);

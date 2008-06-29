@@ -60,7 +60,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
 
     private int initialLoadThreadPoolSize = 10;
 
-    private int initalLoadChunkSize = 100000;
+    private int initialLoadChunkSize = 100000;
 
     private boolean performOrderById = true;
 
@@ -85,7 +85,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      * Sets all the entries this Hibernate data source will work with. By default, will use Hiberante meta
      * data API in order to get the list of all the given entities it handles.
      *
-     * <p>This list is used to filter out entities when performing all data source operaions exception for
+     * <p>This list is used to filter out entities when performing all data source operations exception for
      * the {@link #initialLoad()} operation.
      *
      * <p>Usually, there is no need to explicitly set this.
@@ -99,7 +99,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      * Returns all the entries this Hibernate data source will work with. By default, will use Hiberante meta
      * data API in order to get the list of all the given entities it handles.
      *
-     * <p>This list is used to filter out entities when performing all data source operaions exception for
+     * <p>This list is used to filter out entities when performing all data source operations exception for
      * the {@link #initialLoad()} operation.
      */
     public String[] getManagedEntries() {
@@ -114,7 +114,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
     }
 
     /**
-     * Sets the fetch size that will be used when working with scrollable results. Defauls to
+     * Sets the fetch size that will be used when working with scrollable results. Defaults to
      * <code>100</code>.
      *
      * @see org.hibernate.Criteria#setFetchSize(int)
@@ -124,7 +124,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
     }
 
     /**
-     * Returns the fetch size that will be used when working with scrollable results. Defauls to
+     * Returns the fetch size that will be used when working with scrollable results. Defaults to
      * <code>100</code>.
      *
      * @see org.hibernate.Criteria#setFetchSize(int)
@@ -135,7 +135,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
 
     /**
      * When performing intial load, this flag indicates if the generated query will order to results by
-     * the id. By default set to <code>true</code> as it most times results in better inital load performance.
+     * the id. By default set to <code>true</code> as it most times results in better initial load performance.
      */
     public void setPerformOrderById(boolean performOrderById) {
         this.performOrderById = performOrderById;
@@ -143,7 +143,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
 
     /**
      * When performing intial load, this flag indicates if the generated query will order to results by
-     * the id. By default set to <code>true</code> as it most times results in better inital load performance.
+     * the id. By default set to <code>true</code> as it most times results in better initial load performance.
      */
     protected boolean isPerformOrderById() {
         return performOrderById;
@@ -178,7 +178,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
     }
 
     /**
-     * The inital load operation uses the {@link org.openspaces.persistency.support.ConcurrentMultiDataIterator}.
+     * The initial load operation uses the {@link org.openspaces.persistency.support.ConcurrentMultiDataIterator}.
      * This property allows to control the thread pool size of the concurrent multi data iterator. Defaults to
      * <code>10</code>.
      *
@@ -189,12 +189,12 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
     }
 
     /**
-     * By default, the inital load process will chunk large tables and will iterate over the table (entity) per
+     * By default, the initial load process will chunk large tables and will iterate over the table (entity) per
      * chunk (concurrently). This setting allows to control the chunk size to split the table by. By default, set
      * to <code>100,000</code>. Batching can be disabled by setting <code>-1</code>.
      */
-    public void setInitalLoadChunkSize(int initalLoadChunkSize) {
-        this.initalLoadChunkSize = initalLoadChunkSize;
+    public void setInitialLoadChunkSize(int initalLoadChunkSize) {
+        this.initialLoadChunkSize = initalLoadChunkSize;
     }
 
     /**
@@ -202,8 +202,8 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      * chunk (concurrently). This setting allows to control the chunk size to split the table by. By default, set
      * to <code>100,000</code>. Batching can be disabled by setting <code>-1</code>.
      */
-    protected int getInitalLoadChunkSize() {
-        return initalLoadChunkSize;
+    protected int getInitialLoadChunkSize() {
+        return initialLoadChunkSize;
     }
 
     /**
@@ -220,7 +220,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      */
     public void init(Properties properties) throws DataSourceException {
         if (logger.isDebugEnabled()) {
-            logger.debug("Using initialLoadChunkSize [" + initalLoadChunkSize + "], fetchSize [" + fetchSize + "], initalLoadThreadPoolSize [" + initialLoadThreadPoolSize + "], performOrderById [" + performOrderById + "]");
+            logger.debug("Using initialLoadChunkSize [" + initialLoadChunkSize + "], fetchSize [" + fetchSize + "], initalLoadThreadPoolSize [" + initialLoadThreadPoolSize + "], performOrderById [" + performOrderById + "]");
         }
         if (sessionFactory == null) {
             createdSessionFactory = true;

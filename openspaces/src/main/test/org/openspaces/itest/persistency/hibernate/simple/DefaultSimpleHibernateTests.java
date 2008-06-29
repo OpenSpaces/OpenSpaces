@@ -12,7 +12,7 @@ public class DefaultSimpleHibernateTests extends AbstractSimpleHibernateTests {
     protected void setUp() throws Exception {
         super.setUp();
         DefaultHibernateExternalDataSource dataSource = new DefaultHibernateExternalDataSource();
-        dataSource.setInitalLoadChunkSize(2);
+        dataSource.setInitialLoadChunkSize(2);
         dataSource.setSessionFactory(sessionFactory);
         dataSource.init(new Properties());
         this.bulkDataPersister = dataSource;
