@@ -38,6 +38,9 @@ public class SharedJettyHolder implements JettyHolder {
     public void start() throws Exception {
         synchronized (serverLock) {
             if (++serverCount == 1) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Starting jetty server [" + server + "]");
+                }
                 server.start();
             }
         }
@@ -46,6 +49,9 @@ public class SharedJettyHolder implements JettyHolder {
     public void stop() throws Exception {
         synchronized (serverLock) {
             if (--serverCount == 0) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Stopping jetty server [" + server + "]");
+                }
                 server.stop();
             }
         }

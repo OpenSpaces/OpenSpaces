@@ -72,6 +72,9 @@ public class SharedThreadPool implements ThreadPool, LifeCycle {
         synchronized (threadPoolLock) {
             // start the first one
             if (++threadPoolCount == 1) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Starting thread pool [" + threadPool + "]");
+                }
                 ((LifeCycle) threadPool).start();
             }
         }
@@ -81,6 +84,9 @@ public class SharedThreadPool implements ThreadPool, LifeCycle {
         synchronized (threadPoolLock) {
             // start the first one
             if (--threadPoolCount == 0) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Stopping thread pool [" + threadPool + "]");
+                }
                 ((LifeCycle) threadPool).stop();
             }
         }

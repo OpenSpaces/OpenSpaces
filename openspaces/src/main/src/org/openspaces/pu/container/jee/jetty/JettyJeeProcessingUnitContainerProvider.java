@@ -164,6 +164,9 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                     } else {
                         defaultLocation = System.getProperty(PLAIN_JETTY_LOCATION_SYSPROP, DEFAULT_JETTY_PLAIN_PU);
                     }
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Loading bulit in jetty pu.xml from [" + defaultLocation + "]");
+                    }
                     addConfigLocation(defaultLocation);
                     if (configResources.size() == 0 || !configResources.get(0).exists()) {
                         throw new CannotCreateContainerException("Faield to read default pu file [" + defaultLocation + "]");
@@ -244,6 +247,11 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             webAppContext.setAttribute(APPLICATION_CONTEXT_CONTEXT, applicationContext);
             webAppContext.setAttribute(CLUSTER_INFO_CONTEXT, clusterInfo);
             webAppContext.setAttribute(BEAN_LEVEL_PROPERTIES_CONTEXT, beanLevelProperties);
+
+            String[] beanNames = applicationContext.getBeanDefinitionNames();
+            for (String beanName : beanNames) {
+                webAppContext.setAttribute(beanName, applicationContext.getBean(beanName));
+            }
 
             HandlerContainer container = jettyHolder.getServer();
 
