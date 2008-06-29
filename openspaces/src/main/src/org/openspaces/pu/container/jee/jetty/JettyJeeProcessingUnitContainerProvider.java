@@ -58,7 +58,7 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
 
     public static final String DEFAULT_JETTY_PU_LOCATION_SYSPROP = "com.gs.pu.web.jetty.defaultPuLocation";
 
-    public static final String SHARED_PROP = "web.shared";
+    public static final String SHARED_PROP = "jetty.shared";
 
     private static final Log logger = LogFactory.getLog(JettyJeeProcessingUnitContainerProvider.class);
 
