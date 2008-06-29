@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.pu.container.web.context;
+package org.openspaces.pu.container.jee.context;
 
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
@@ -22,7 +22,7 @@ import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
 import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
-import org.openspaces.pu.container.web.WebProcessingUnitContainerProvider;
+import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.ContextLoader;
@@ -36,15 +36,15 @@ import javax.servlet.ServletContext;
 public class ProcessingUnitContextLoader extends ContextLoader {
 
     protected ApplicationContext loadParentContext(ServletContext servletContext) throws BeansException {
-        return (ApplicationContext) servletContext.getAttribute(WebProcessingUnitContainerProvider.APPLICATION_CONTEXT_CONTEXT);
+        return (ApplicationContext) servletContext.getAttribute(JeeProcessingUnitContainerProvider.APPLICATION_CONTEXT_CONTEXT);
     }
 
     protected WebApplicationContext createWebApplicationContext(ServletContext servletContext, ApplicationContext parent) throws BeansException {
         ProcessingUnitWebApplicationContext wac = new ProcessingUnitWebApplicationContext();
 
-        ClusterInfo clusterInfo = (ClusterInfo) servletContext.getAttribute(WebProcessingUnitContainerProvider.CLUSTER_INFO_CONTEXT);
+        ClusterInfo clusterInfo = (ClusterInfo) servletContext.getAttribute(JeeProcessingUnitContainerProvider.CLUSTER_INFO_CONTEXT);
         
-        BeanLevelProperties beanLevelProperties = (BeanLevelProperties) servletContext.getAttribute(WebProcessingUnitContainerProvider.BEAN_LEVEL_PROPERTIES_CONTEXT);
+        BeanLevelProperties beanLevelProperties = (BeanLevelProperties) servletContext.getAttribute(JeeProcessingUnitContainerProvider.BEAN_LEVEL_PROPERTIES_CONTEXT);
         if (beanLevelProperties != null) {
             wac.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties, clusterInfo));
             wac.addBeanPostProcessor(new BeanLevelPropertyBeanPostProcessor(beanLevelProperties));

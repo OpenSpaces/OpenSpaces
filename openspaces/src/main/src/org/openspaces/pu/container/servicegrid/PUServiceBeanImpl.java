@@ -35,10 +35,10 @@ import org.openspaces.core.util.SpaceUtils;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainerProvider;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
+import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
+import org.openspaces.pu.container.jee.jetty.JettyJeeProcessingUnitContainerProvider;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
-import org.openspaces.pu.container.web.WebProcessingUnitContainerProvider;
-import org.openspaces.pu.container.web.jetty.JettyWebProcessingUnitContainerProvider;
 import org.openspaces.pu.sla.monitor.ApplicationContextMonitor;
 import org.openspaces.pu.sla.monitor.Monitor;
 import org.springframework.core.io.ByteArrayResource;
@@ -229,7 +229,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         // identify if this is a web app
         InputStream webXml = contextClassLoader.getResourceAsStream("WEB-INF/web.xml");
         if (webXml != null) {
-            WebProcessingUnitContainerProvider webFactory = (WebProcessingUnitContainerProvider) createContainerProvider(beanLevelProperties, JettyWebProcessingUnitContainerProvider.class.getName());
+            JeeProcessingUnitContainerProvider jeeFactory = (JeeProcessingUnitContainerProvider) createContainerProvider(beanLevelProperties, JettyJeeProcessingUnitContainerProvider.class.getName());
             String deployName = puName + "_" + clusterInfo.getSuffix();
 
             String deployedProcessingUnitsLocation = System.getProperty("com.gs.pu.deployedProcessingUnitsLocation", System.getProperty(Locator.GS_HOME) + "/work/deployed-processing-units");
@@ -238,10 +238,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             FileSystemUtils.deleteRecursively(warPath);
             warPath.mkdirs();
 
-            webFactory.setWarPath(warPath);
+            jeeFactory.setDeployPath(warPath);
             getAndExtractPU(puPath, codeserver, warPath, new File(deployedProcessingUnitsLocation));
 
-            factory = webFactory;
+            factory = jeeFactory;
         } else {
             factory = (ApplicationContextProcessingUnitContainerProvider) createContainerProvider(beanLevelProperties, IntegratedProcessingUnitContainerProvider.class.getName());
         }

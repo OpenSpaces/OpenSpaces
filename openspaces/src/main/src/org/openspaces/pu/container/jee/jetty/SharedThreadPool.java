@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.pu.container.web.jetty;
+package org.openspaces.pu.container.jee.jetty;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

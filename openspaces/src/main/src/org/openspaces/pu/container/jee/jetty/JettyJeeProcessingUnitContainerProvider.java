@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.pu.container.web.jetty;
+package org.openspaces.pu.container.jee.jetty;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,9 +33,9 @@ import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
 import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
+import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
-import org.openspaces.pu.container.web.WebProcessingUnitContainerProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -50,17 +50,17 @@ import java.util.List;
 /**
  * @author kimchy
  */
-public class JettyWebProcessingUnitContainerProvider implements WebProcessingUnitContainerProvider {
+public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUnitContainerProvider {
 
-    public final static String DEFAULT_JETTY_PLAIN_PU = "/org/openspaces/pu/container/web/jetty/jetty.plain.pu.xml";
+    public final static String DEFAULT_JETTY_PLAIN_PU = "/org/openspaces/pu/container/jee/jetty/jetty.plain.pu.xml";
 
-    public final static String DEFAULT_JETTY_SHARED_PU = "/org/openspaces/pu/container/web/jetty/jetty.shared.pu.xml";
+    public final static String DEFAULT_JETTY_SHARED_PU = "/org/openspaces/pu/container/jee/jetty/jetty.shared.pu.xml";
 
     public static final String DEFAULT_JETTY_PU_LOCATION_SYSPROP = "com.gs.pu.web.jetty.defaultPuLocation";
 
     public static final String SHARED_PROP = "web.shared";
 
-    private static final Log logger = LogFactory.getLog(JettyWebProcessingUnitContainerProvider.class);
+    private static final Log logger = LogFactory.getLog(JettyJeeProcessingUnitContainerProvider.class);
 
     private ApplicationContext parentContext;
 
@@ -72,7 +72,7 @@ public class JettyWebProcessingUnitContainerProvider implements WebProcessingUni
 
     private ClassLoader classLoader;
 
-    private File warPath;
+    private File deployPath;
 
     /**
      * Sets Spring parent {@link org.springframework.context.ApplicationContext} that will be used
@@ -136,8 +136,8 @@ public class JettyWebProcessingUnitContainerProvider implements WebProcessingUni
         }
     }
 
-    public void setWarPath(File warPath) {
-        this.warPath = warPath;
+    public void setDeployPath(File warPath) {
+        this.deployPath = warPath;
     }
 
     /**
@@ -165,7 +165,7 @@ public class JettyWebProcessingUnitContainerProvider implements WebProcessingUni
                         if (logger.isDebugEnabled()) {
                             logger.debug("No custom META-INF/spring/pu.xml found, using default [" + defaultLocation + "]");
                         }
-                        Resource resource = new ClassPathResource(defaultLocation, JettyWebProcessingUnitContainerProvider.class);
+                        Resource resource = new ClassPathResource(defaultLocation, JettyJeeProcessingUnitContainerProvider.class);
                         addConfigLocation(resource);
                     } else {
                         addConfigLocation(defaultLocation);
@@ -182,7 +182,7 @@ public class JettyWebProcessingUnitContainerProvider implements WebProcessingUni
             ClusterInfoParser.guessSchema(clusterInfo);
         }
 
-        beanLevelProperties.getContextProperties().setProperty("web.warPath", warPath.getAbsolutePath());
+        beanLevelProperties.getContextProperties().setProperty("jee.deployPath", deployPath.getAbsolutePath());
 
         Resource[] resources = configResources.toArray(new Resource[configResources.size()]);
         // create the Spring application context
@@ -279,7 +279,7 @@ public class JettyWebProcessingUnitContainerProvider implements WebProcessingUni
                     throw new CannotCreateContainerException("Failed to start web app context", e);
                 }
             }
-            return new JettyWebProcessingUnitContainer(applicationContext, webAppContext, container, jettyHolder);
+            return new JettyProcessingUnitContainer(applicationContext, webAppContext, container, jettyHolder);
         } catch (Exception e) {
             try {
                 jettyHolder.stop();

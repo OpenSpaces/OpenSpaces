@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.pu.container.web.jetty;
+package org.openspaces.pu.container.jee.jetty;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,9 +29,9 @@ import org.springframework.web.context.ContextLoader;
 /**
  * @author kimchy
  */
-public class JettyWebProcessingUnitContainer implements ApplicationContextProcessingUnitContainer {
+public class JettyProcessingUnitContainer implements ApplicationContextProcessingUnitContainer {
 
-    private static final Log logger = LogFactory.getLog(JettyWebProcessingUnitContainer.class);
+    private static final Log logger = LogFactory.getLog(JettyProcessingUnitContainer.class);
 
     private ApplicationContext applicationContext;
 
@@ -43,7 +43,7 @@ public class JettyWebProcessingUnitContainer implements ApplicationContextProces
 
     /**
      */
-    public JettyWebProcessingUnitContainer(ApplicationContext applicationContext, WebAppContext webAppContext,
+    public JettyProcessingUnitContainer(ApplicationContext applicationContext, WebAppContext webAppContext,
                                            HandlerContainer container, JettyHolder jettyHolder) {
         this.applicationContext = applicationContext;
         this.webAppContext = webAppContext;

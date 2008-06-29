@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.pu.container.web;
+package org.openspaces.pu.container.jee;
 
 import org.springframework.beans.factory.FactoryBean;
 

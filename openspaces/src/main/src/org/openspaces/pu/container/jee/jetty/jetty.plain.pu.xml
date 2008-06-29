@@ -20,31 +20,37 @@
         </property>
     </bean>
 
-    <bean id="port" class="org.openspaces.pu.container.web.PortGenerator">
+    <bean id="port" class="org.openspaces.pu.container.jee.PortGenerator">
         <property name="basePort" value="${web.port}" />
+        <property name="portOffset" value="${clusterInfo.runningNumber}" />
     </bean>
 
-    <bean id="confidentialPort" class="org.openspaces.pu.container.web.PortGenerator">
+    <bean id="confidentialPort" class="org.openspaces.pu.container.jee.PortGenerator">
         <property name="basePort" value="${web.sslPort}" />
+        <property name="portOffset" value="${clusterInfo.runningNumber}" />
     </bean>
 
     <bean id="webAppContext" class="org.mortbay.jetty.webapp.WebAppContext">
-        <property name="contextPath" value="${web.context}_${clusterInfo.runningNumber}" />
-        <property name="war" value="${web.warPath}" />
-        <property name="tempDirectory" value="${web.warPath}/WEB-INF/work" />
+        <property name="contextPath" value="${web.context}" />
+        <property name="war" value="${jee.deployPath}" />
+        <property name="tempDirectory" value="${jee.deployPath}/WEB-INF/work" />
     </bean>
 
-    <bean id="jettyHolder" class="org.openspaces.pu.container.web.jetty.SharedJettyHolder">
+    <bean id="jettyHolder" class="org.openspaces.pu.container.jee.jetty.PlainJettyHolder">
         <constructor-arg ref="jetty" />
     </bean>
 
     <bean id="jetty" class="org.mortbay.jetty.Server">
 
         <property name="threadPool">
-            <bean class="org.mortbay.thread.QueuedThreadPool">
-                <property name="minThreads" value="${web.threadPool.minThreads}"/>
-                <property name="maxThreads" value="${web.threadPool.maxThreads}"/>
-                <property name="lowThreads" value="${web.threadPool.lowThreads}"/>
+            <bean class="org.openspaces.pu.container.jee.jetty.SharedThreadPool">
+                <constructor-arg>
+                    <bean class="org.mortbay.thread.QueuedThreadPool">
+                        <property name="minThreads" value="${web.threadPool.minThreads}"/>
+                        <property name="maxThreads" value="${web.threadPool.maxThreads}"/>
+                        <property name="lowThreads" value="${web.threadPool.lowThreads}"/>
+                    </bean>
+                </constructor-arg>
             </bean>
         </property>
 
