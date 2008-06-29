@@ -253,7 +253,11 @@ public class Utils {
         String relativePath = targetDir.substring(curDir.length() + 1);
         relativePath = relativePath.replace('\\', '/');
         String finalName = project.getBuild().getFinalName();
-        return relativePath + "/" + finalName + ".jar";
+        if ("war".equalsIgnoreCase(project.getPackaging())) {
+            return relativePath + "/" + finalName + ".war";
+        } else {
+            return relativePath + "/" + finalName + ".jar";
+        }
     }
 
 
