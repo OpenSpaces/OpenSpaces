@@ -225,10 +225,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
 
         // set a generic work location that can be used by container providers
-        String workLocation = System.getProperty("com.gs.work", System.getProperty(Locator.GS_HOME) + "/work");
-        new File(workLocation).mkdirs();
+        File workLocation = new File(System.getProperty("com.gs.work", System.getProperty(Locator.GS_HOME) + "/work"));
+        workLocation.mkdirs();
         
-        beanLevelProperties.getContextProperties().setProperty("com.gs.work", workLocation);
+        beanLevelProperties.getContextProperties().setProperty("com.gs.work", workLocation.getAbsolutePath());
 
         //create PU Container
         ApplicationContextProcessingUnitContainerProvider factory;
@@ -238,7 +238,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             JeeProcessingUnitContainerProvider jeeFactory = (JeeProcessingUnitContainerProvider) createContainerProvider(beanLevelProperties, JettyJeeProcessingUnitContainerProvider.class.getName());
             String deployName = puName + "_" + clusterInfo.getSuffix();
 
-            String deployedProcessingUnitsLocation = workLocation + "/deployed-processing-units";
+            String deployedProcessingUnitsLocation = workLocation.getAbsolutePath() + "/deployed-processing-units";
             
             File warPath = new File(deployedProcessingUnitsLocation + "/" + deployName);
             FileSystemUtils.deleteRecursively(warPath);
