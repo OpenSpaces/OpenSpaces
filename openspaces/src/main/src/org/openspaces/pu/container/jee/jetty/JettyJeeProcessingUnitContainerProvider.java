@@ -37,7 +37,6 @@ import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -52,11 +51,13 @@ import java.util.List;
  */
 public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUnitContainerProvider {
 
-    public final static String DEFAULT_JETTY_PLAIN_PU = "/org/openspaces/pu/container/jee/jetty/jetty.plain.pu.xml";
+    public final static String DEFAULT_JETTY_PLAIN_PU = "classpath:/org/openspaces/pu/container/jee/jetty/jetty.plain.pu.xml";
 
-    public final static String DEFAULT_JETTY_SHARED_PU = "/org/openspaces/pu/container/jee/jetty/jetty.shared.pu.xml";
+    public final static String DEFAULT_JETTY_SHARED_PU = "classpath:/org/openspaces/pu/container/jee/jetty/jetty.shared.pu.xml";
 
-    public static final String DEFAULT_JETTY_PU_LOCATION_SYSPROP = "com.gs.pu.web.jetty.defaultPuLocation";
+    public static final String PLAIN_JETTY_LOCATION_SYSPROP = "com.gs.pu.jee.jetty.plainLocation";
+
+    public static final String SHARED_JETTY_LOCATION_SYSPROP = "com.gs.pu.jee.jetty.sharedLocation";
 
     public static final String SHARED_PROP = "jetty.shared";
 
@@ -155,21 +156,15 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                     }
                 }
                 if (!foundValidResource) {
-                    String defaultLocation = System.getProperty(DEFAULT_JETTY_PU_LOCATION_SYSPROP);
-                    if (defaultLocation == null) {
-                        defaultLocation = DEFAULT_JETTY_PLAIN_PU;
-                        String sharedProp = (String) beanLevelProperties.getContextProperties().get(SHARED_PROP);
-                        if (sharedProp != null && sharedProp.equalsIgnoreCase("true")) {
-                            defaultLocation = DEFAULT_JETTY_SHARED_PU;
-                        }
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("No custom META-INF/spring/pu.xml found, using default [" + defaultLocation + "]");
-                        }
-                        Resource resource = new ClassPathResource(defaultLocation, JettyJeeProcessingUnitContainerProvider.class);
-                        addConfigLocation(resource);
+                    String sharedProp = (String) beanLevelProperties.getContextProperties().get(SHARED_PROP);
+                    boolean shared = "true".equalsIgnoreCase(sharedProp);
+                    String defaultLocation = null;
+                    if (shared) {
+                        defaultLocation = System.getProperty(SHARED_JETTY_LOCATION_SYSPROP, DEFAULT_JETTY_SHARED_PU);
                     } else {
-                        addConfigLocation(defaultLocation);
+                        defaultLocation = System.getProperty(PLAIN_JETTY_LOCATION_SYSPROP, DEFAULT_JETTY_PLAIN_PU);
                     }
+                    addConfigLocation(defaultLocation);
                     if (configResources.size() == 0 || !configResources.get(0).exists()) {
                         throw new CannotCreateContainerException("Faield to read default pu file [" + defaultLocation + "]");
                     }
