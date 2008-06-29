@@ -32,6 +32,4 @@ public interface WebProcessingUnitContainerProvider extends ApplicationContextPr
     public static final String APPLICATION_CONTEXT_CONTEXT = "applicationContext";
     
     void setWarPath(File warPath);
-
-    void setWarTempPath(File warTempPath);
 }

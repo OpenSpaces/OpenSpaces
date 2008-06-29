@@ -30,6 +30,8 @@
 
     <bean id="webAppContext" class="org.mortbay.jetty.webapp.WebAppContext">
         <property name="contextPath" value="${web.context}_${clusterInfo.runningNumber}" />
+        <property name="war" value="${web.warPath}" />
+        <property name="tempDirectory" value="${web.warPath}/WEB-INF/work" />
     </bean>
 
     <bean id="jettyHolder" class="org.openspaces.pu.container.web.jetty.SharedJettyHolder">

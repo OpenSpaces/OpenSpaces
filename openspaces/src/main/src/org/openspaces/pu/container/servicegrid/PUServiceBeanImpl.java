@@ -235,18 +235,11 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             String deployedProcessingUnitsLocation = System.getProperty("com.gs.pu.deployedProcessingUnitsLocation", System.getProperty(Locator.GS_HOME) + "/work/deployed-processing-units");
             
             File warPath = new File(deployedProcessingUnitsLocation + "/" + deployName);
-            File tempWarPath = new File(deployedProcessingUnitsLocation + "/" + deployName + "_work");
-
             FileSystemUtils.deleteRecursively(warPath);
-            FileSystemUtils.deleteRecursively(tempWarPath);
-
-            tempWarPath.mkdirs();
             warPath.mkdirs();
 
-            webFactory.setWarTempPath(tempWarPath);
             webFactory.setWarPath(warPath);
-
-            getAndExtractPU(puPath, codeserver, warPath, tempWarPath);
+            getAndExtractPU(puPath, codeserver, warPath, new File(deployedProcessingUnitsLocation));
 
             factory = webFactory;
         } else {
@@ -438,7 +431,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             throw new RuntimeException("Failed to extract file to: " + path.getAbsolutePath() + ", response code [" + responseCode + "]");
         }
 
-        File tempFile = new File(tempPath, "temp.war");
+        File tempFile = File.createTempFile("packaged-webpu", "war", tempPath);
         InputStream in = new BufferedInputStream(conn.getInputStream());
         FileCopyUtils.copy(in, new FileOutputStream(tempFile));
 

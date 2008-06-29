@@ -74,9 +74,6 @@ public class JettyWebProcessingUnitContainerProvider implements WebProcessingUni
 
     private File warPath;
 
-    private File warTempPath;
-
-
     /**
      * Sets Spring parent {@link org.springframework.context.ApplicationContext} that will be used
      * when constructing this processing unit application context.
@@ -143,10 +140,6 @@ public class JettyWebProcessingUnitContainerProvider implements WebProcessingUni
         this.warPath = warPath;
     }
 
-    public void setWarTempPath(File warTempPath) {
-        this.warTempPath = warTempPath;
-    }
-
     /**
      *
      */
@@ -190,7 +183,6 @@ public class JettyWebProcessingUnitContainerProvider implements WebProcessingUni
         }
 
         beanLevelProperties.getContextProperties().setProperty("web.warPath", warPath.getAbsolutePath());
-        beanLevelProperties.getContextProperties().setProperty("web.warTemPath", warTempPath.getAbsolutePath());
 
         Resource[] resources = configResources.toArray(new Resource[configResources.size()]);
         // create the Spring application context
@@ -251,8 +243,6 @@ public class JettyWebProcessingUnitContainerProvider implements WebProcessingUni
         try {
             WebAppContext webAppContext = (WebAppContext) applicationContext.getBean("webAppContext");
 
-            webAppContext.setTempDirectory(warTempPath);
-            webAppContext.setWar(warPath.getAbsolutePath());
             webAppContext.setExtractWAR(true);
             webAppContext.setCopyWebDir(false);
 
