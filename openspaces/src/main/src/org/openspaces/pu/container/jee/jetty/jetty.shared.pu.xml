@@ -29,7 +29,7 @@
     </bean>
 
     <bean id="webAppContext" class="org.mortbay.jetty.webapp.WebAppContext">
-        <property name="contextPath" value="${web.context}_${clusterInfo.runningNumber}" />
+        <property name="contextPath" value="${web.context}_${clusterInfo.runningNumberOffest1}" />
         <property name="war" value="${jee.deployPath}" />
         <property name="tempDirectory" value="${jee.deployPath}/WEB-INF/work" />
     </bean>
