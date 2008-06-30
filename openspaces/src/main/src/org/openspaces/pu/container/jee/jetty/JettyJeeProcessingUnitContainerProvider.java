@@ -171,6 +171,10 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                     if (configResources.size() == 0 || !configResources.get(0).exists()) {
                         throw new CannotCreateContainerException("Faield to read default pu file [" + defaultLocation + "]");
                     }
+                } else {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Loading jetty pu.xml from processing unit at [" + DEFAULT_PU_CONTEXT_LOCATION + "]");
+                    }
                 }
             } catch (IOException e) {
                 throw new CannotCreateContainerException("Failed to read config files from " + DEFAULT_PU_CONTEXT_LOCATION, e);
