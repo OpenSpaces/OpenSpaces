@@ -22,7 +22,7 @@ import org.hibernate.cache.CacheException;
 import java.util.Properties;
 
 /**
- * Simple Cache proivuder uses {@link org.openspaces.hibernate.cache.SimpleMapCache} to provide
+ * Simple Cache provider uses {@link org.openspaces.hibernate.cache.SimpleMapCache} to provide
  * second level cache implementation which is not transactional.
  *
  * @author kimchy

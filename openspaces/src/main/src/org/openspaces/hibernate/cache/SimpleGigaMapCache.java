@@ -21,7 +21,7 @@ import org.openspaces.core.GigaMap;
 import java.util.Map;
 
 /**
- * A hibernate second level cache implemenation using {@link org.openspaces.core.GigaMap}
+ * A hibernate second level cache implementation using {@link org.openspaces.core.GigaMap}
  * that works with no transactions. Supports concurrency strategies of <code>read-only</code>,
  * <code>read-write</code>.
  *

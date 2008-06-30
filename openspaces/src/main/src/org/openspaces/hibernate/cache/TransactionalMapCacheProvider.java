@@ -28,7 +28,7 @@ import java.util.Properties;
 
 /**
  * Transactional Map cache provider allowing to use GigaSpaces as a second level
- * cache within a JTA environment. Uses GigaSpaces XA support to regsiter with the
+ * cache within a JTA environment. Uses GigaSpaces XA support to register with the
  * JTA transaction manager. Uses {@link org.openspaces.hibernate.cache.TransactionalMapCache}
  * as the cache implementation.
  *
