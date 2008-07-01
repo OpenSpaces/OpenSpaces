@@ -2,7 +2,9 @@ package org.openspaces.pu.container.jee.jetty;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
+import org.mortbay.util.MultiException;
 
 /**
  * A shared jetty holder that keeps upon first construction will store a static jetty instnace and will
@@ -34,6 +36,28 @@ public class SharedJettyHolder implements JettyHolder {
             }
         }
     }
+
+    public void open() throws Exception {
+        Connector[] connectors = server.getConnectors();
+        for (Connector c : connectors) {
+            c.open();
+        }
+    }
+
+    public void close() throws Exception {
+        Connector[] connectors = server.getConnectors();
+        MultiException ex = new MultiException();
+        for (Connector c : connectors) {
+            try {
+                c.close();
+            }
+            catch (Exception e) {
+                ex.add(e);
+            }
+        }
+        ex.ifExceptionThrowMulti();
+    }
+
 
     public void start() throws Exception {
         synchronized (serverLock) {

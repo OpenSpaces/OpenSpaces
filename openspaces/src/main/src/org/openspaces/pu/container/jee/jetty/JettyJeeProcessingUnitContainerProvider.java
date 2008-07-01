@@ -213,35 +213,56 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             // do nothing
         }
 
-        try {
-            boolean success = false;
-            for (int i = 0; i < retryPortCount; i++) {
+        boolean success = false;
+        for (int i = 0; i < retryPortCount; i++) {
+            try {
+                jettyHolder.open();
+                success = true;
+                break;
+            } catch (BindException e) {
                 try {
-                    jettyHolder.start();
-                    success = true;
-                    break;
-                } catch (BindException e) {
-                    try {
-                        jettyHolder.stop();
-                    } catch (Exception e1) {
-                        // ignore
-                    }
-                    for (Connector connector : jettyHolder.getServer().getConnectors()) {
-                        connector.setPort(connector.getPort() + 1);
-                        if (connector instanceof AbstractConnector) {
-                            ((AbstractConnector) connector).setConfidentialPort(connector.getConfidentialPort() + 1);
-                        }
+                    jettyHolder.close();
+                } catch (Exception e1) {
+                    logger.debug(e1);
+                    // ignore
+                }
+                for (Connector connector : jettyHolder.getServer().getConnectors()) {
+                    connector.setPort(connector.getPort() + 1);
+                    if (connector instanceof AbstractConnector) {
+                        ((AbstractConnector) connector).setConfidentialPort(connector.getConfidentialPort() + 1);
                     }
                 }
+            } catch (Exception e) {
+                try {
+                    jettyHolder.close();
+                } catch (Exception e1) {
+                    logger.debug(e1);
+                    // ignore
+                }
+                if (e instanceof CannotCreateContainerException)
+                    throw (CannotCreateContainerException)e;
+                throw new CannotCreateContainerException("Failed to start jetty server", e);
             }
-            if (!success) {
-                throw new CannotCreateContainerException("Failed to bind jetty to port with retries [" + retryPortCount + "]");
-            }
-        } catch (CannotCreateContainerException e) {
-            throw e;
+        }
+        if (!success) {
+            throw new CannotCreateContainerException("Failed to bind jetty to port with retries [" + retryPortCount + "]");
+        }
+
+        try {
+            jettyHolder.start();
         } catch (Exception e) {
+            try {
+                jettyHolder.stop();
+            } catch (Exception e1) {
+                logger.debug(e1);
+                // ignore
+            }
+            if (e instanceof CannotCreateContainerException)
+                throw (CannotCreateContainerException)e;
             throw new CannotCreateContainerException("Failed to start jetty server", e);
         }
+        
+        
         try {
             WebAppContext webAppContext = (WebAppContext) applicationContext.getBean("webAppContext");
 

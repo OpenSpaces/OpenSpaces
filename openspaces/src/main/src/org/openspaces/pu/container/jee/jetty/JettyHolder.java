@@ -27,7 +27,17 @@ import org.mortbay.jetty.Server;
 public interface JettyHolder {
 
     /**
-     * Start Jetty. Note, if this fails, make sure to call {@link #stop()} 
+     * Open Jetty ports.
+     */
+    void open() throws Exception;
+
+    /**
+     * Open Jetty ports.
+     */
+    void close() throws Exception;
+
+    /**
+     * Start Jetty. Note, if this fails, make sure to call {@link #stop()}
      */
     void start() throws Exception;
 
