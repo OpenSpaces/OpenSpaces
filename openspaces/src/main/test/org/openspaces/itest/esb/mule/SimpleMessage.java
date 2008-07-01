@@ -34,6 +34,10 @@ public class SimpleMessage implements Message{
     public SimpleMessage() {
     }
 
+    public SimpleMessage(boolean read) {
+        this.read = read;
+    }
+
     public SimpleMessage(String message, boolean read) {
         this.message = message;
         this.read = read;

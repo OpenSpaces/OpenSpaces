@@ -319,10 +319,12 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTemp
                 throw err;
             }
             // if no message is received, rollback the transaction (for better performance).
-            if (!messageReceived) {
-                this.transactionManager.rollback(status);
-            } else {
-                this.transactionManager.commit(status);
+            if (!status.isCompleted()) {
+                if (!messageReceived || status.isRollbackOnly()) {
+                    this.transactionManager.rollback(status);
+                } else {
+                    this.transactionManager.commit(status);
+                }
             }
             return messageReceived;
         } else {

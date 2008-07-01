@@ -60,7 +60,7 @@ import java.util.ArrayList;
  * {@link #setBatchTime(Integer)}. When turning on batch notifications, the listener can choose whether
  * to receive the events as an array (by setting {@link #setPassArrayAsIs(boolean)} to <code>true</code>,
  * or to receive the notifications one by one (setting it to <code>false</code>). By default, the
- * {@link #setPassArrayAsIs(boolean)} is set to <code>false</code>. 
+ * {@link #setPassArrayAsIs(boolean)} is set to <code>false</code>.
  *
  * <p>Fifo ordering of raised notification can be controlled by setting {@link #setFifo(boolean)} flag
  * to <code>true</code>. Note, for a full fifo based ordering the relevant entries in the space
@@ -663,7 +663,13 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
             }
         }
         if (status != null) {
-            this.transactionManager.commit(status);
+            if (!status.isCompleted()) {
+                if (status.isRollbackOnly()) {
+                    this.transactionManager.rollback(status);
+                } else {
+                    this.transactionManager.commit(status);
+                }
+            }
         }
     }
 
@@ -715,7 +721,13 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
                 rollbackOnException(status, err);
                 throw err;
             }
-            this.transactionManager.commit(status);
+            if (!status.isCompleted()) {
+                if (status.isRollbackOnly()) {
+                    this.transactionManager.rollback(status);
+                } else {
+                    this.transactionManager.commit(status);
+                }
+            }
         } else {
             if (performTakeOnNotify) {
                 Object takeVal = getGigaSpace().take(eventData, 0);

@@ -25,10 +25,12 @@ import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.api.lifecycle.CreateException;
 import org.mule.api.service.Service;
 import org.mule.api.transaction.Transaction;
+import org.mule.api.transaction.TransactionCallback;
 import org.mule.api.transaction.TransactionException;
 import org.mule.api.transport.Connector;
 import org.mule.api.transport.MessageAdapter;
 import org.mule.config.i18n.CoreMessages;
+import org.mule.transaction.TransactionTemplate;
 import org.mule.transport.AbstractMessageReceiver;
 import org.mule.transport.AbstractReceiverWorker;
 import org.openspaces.core.GigaSpace;
@@ -60,7 +62,7 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
      * the Polling/Notify container that declared as umoEndpoint.EndpointURI.address.
      *
      * @param connector the endpoint that created this listener
-     * @param service the service to associate with the receiver. When data is
+     * @param service   the service to associate with the receiver. When data is
      *                  received the component <code>dispatchEvent</code> or
      *                  <code>sendEvent</code> is used to dispatch the data to the
      *                  relivant UMO.
@@ -115,18 +117,38 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
      * @param txStatus  An optional transaction status allowing to rollback a transaction programmatically
      * @param source    Optional additional data or the actual source event data object (where relevant)
      */
-    public void onEvent(Object data, GigaSpace gigaSpace, TransactionStatus txStatus, Object source) {
-        try {
-            if (workManager) {
-                getWorkManager().scheduleWork(new GigaSpaceWorker(data, this));
-            } else {
-                MessageAdapter adapter = connector.getMessageAdapter(data);
-                MuleMessage message = new DefaultMuleMessage(adapter);
-                // nothing to do with the result
-                routeMessage(message);
+    public void onEvent(final Object data, final GigaSpace gigaSpace, final TransactionStatus txStatus, final Object source) {
+
+        if (txStatus != null) {
+            TransactionTemplate tt = new TransactionTemplate(endpoint.getTransactionConfig(),
+                    connector.getExceptionListener(), connector.getMuleContext());
+            try {
+                tt.execute(new TransactionCallback() {
+                    public Object doInTransaction() throws Exception {
+                        doReceiveEvent(data, gigaSpace, txStatus, source);
+                        return null;
+                    }
+                });
+            } catch (Exception e) {
+                txStatus.setRollbackOnly();
             }
-        } catch (Exception e) {
-            handleException(e);
+        } else {
+            try {
+                doReceiveEvent(data, gigaSpace, txStatus, source);
+            } catch (Exception e) {
+                handleException(e);
+            }
+        }
+    }
+
+    protected void doReceiveEvent(Object data, GigaSpace gigaSpace, TransactionStatus txStatus, Object source) throws Exception {
+        if (workManager) {
+            getWorkManager().scheduleWork(new GigaSpaceWorker(data, this));
+        } else {
+            MessageAdapter adapter = connector.getMessageAdapter(data);
+            MuleMessage message = new DefaultMuleMessage(adapter);
+            // nothing to do with the result
+            MuleMessage routedMessage = routeMessage(message);
         }
     }
 
