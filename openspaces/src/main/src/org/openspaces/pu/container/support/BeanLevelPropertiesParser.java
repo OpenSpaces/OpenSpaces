@@ -31,6 +31,9 @@ import java.util.StringTokenizer;
  * parameter(s) and transforms it into bean level properties. The format of the command is
  * <code>-properties [beanName] [properties]</code>.
  *
+ * <p>By deafult, will also try and load META-INF/spring/pu.properties and put it in the context
+ * level properties.
+ *
  * <p>
  * [beanName] is optional, if not used, the properties will set the
  * {@link org.openspaces.core.properties.BeanLevelProperties#setContextProperties(java.util.Properties)}.
@@ -49,8 +52,29 @@ public abstract class BeanLevelPropertiesParser {
 
     public static String EMBEDDED_PROPERTIES_PREFIX = "embed://";
 
+    public static String DEFAULT_CONTEXT_PROPERTIES_LOCATION = "META-INF/spring/pu.properties";
+
     public static BeanLevelProperties parse(CommandLineParser.Parameter[] params) throws IllegalArgumentException {
-        BeanLevelProperties beanLevelProperties = new BeanLevelProperties();
+        return parse(new BeanLevelProperties(), params);
+    }
+
+    public static BeanLevelProperties parse(BeanLevelProperties beanLevelProperties, CommandLineParser.Parameter[] params) throws IllegalArgumentException {
+        // try and load pu.properties
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(DEFAULT_CONTEXT_PROPERTIES_LOCATION);
+        if (is != null) {
+            try {
+                beanLevelProperties.getContextProperties().load(is);
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Faled to load [" + DEFAULT_CONTEXT_PROPERTIES_LOCATION + "]", e);
+            } finally {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+        }
+
         for (CommandLineParser.Parameter param : params) {
             if (!param.getName().equalsIgnoreCase("properties")) {
                 continue;
@@ -87,7 +111,7 @@ public abstract class BeanLevelPropertiesParser {
                     }
                 }.getResource(properties);
                 try {
-                    InputStream is = resource.getInputStream();
+                    is = resource.getInputStream();
                     props.load(is);
                     is.close();
                 } catch (IOException e) {
@@ -95,7 +119,7 @@ public abstract class BeanLevelPropertiesParser {
                 }
             }
             if (name == null) {
-                beanLevelProperties.setContextProperties(props);
+                beanLevelProperties.getContextProperties().putAll(props);
             } else {
                 beanLevelProperties.setBeanProperties(name, props);
             }

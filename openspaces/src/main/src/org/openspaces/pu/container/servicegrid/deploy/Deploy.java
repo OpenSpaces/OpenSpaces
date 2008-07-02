@@ -357,8 +357,22 @@ public class Deploy {
             logger.debug("Using SLA " + sla);
         }
 
+
+        BeanLevelProperties beanLevelProperties = new BeanLevelProperties();
+
+        URL puPropsURL = new URL(root, puPath + "/META-INF/spring/pu.properties");
+        try {
+            InputStream is = puPropsURL.openStream();
+            if (is != null) {
+                beanLevelProperties.getContextProperties().load(is);
+                is.close();
+            }
+        } catch (Exception e) {
+            // ignore, no file
+        }
+
         //deploy to sg
-        return loadDeployment(puString, codeserver, sla, jars, puPath, overridePuName, sharedJars, BeanLevelPropertiesParser.parse(params));
+        return loadDeployment(puString, codeserver, sla, jars, puPath, overridePuName, sharedJars, BeanLevelPropertiesParser.parse(beanLevelProperties, params));
     }
 
     //copied from opstringloader
