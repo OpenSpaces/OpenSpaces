@@ -50,4 +50,6 @@ public interface JettyHolder {
      * Returns the jetty server.
      */
     Server getServer();
+
+    boolean isSingleInstance();
 }

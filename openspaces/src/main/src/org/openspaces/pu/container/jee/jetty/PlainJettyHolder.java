@@ -65,4 +65,8 @@ public class PlainJettyHolder implements JettyHolder {
     public Server getServer() {
         return server;
     }
+
+    public boolean isSingleInstance() {
+        return false;
+    }
 }

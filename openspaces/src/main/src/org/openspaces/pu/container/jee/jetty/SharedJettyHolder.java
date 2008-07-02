@@ -84,4 +84,8 @@ public class SharedJettyHolder implements JettyHolder {
     public Server getServer() {
         return server;
     }
+
+    public boolean isSingleInstance() {
+        return true;
+    }
 }

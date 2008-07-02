@@ -867,6 +867,7 @@
         <root url="jar://$PROJECT_DIR$/lib/jetty/jetty-util-6.1.11.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/jetty/jetty-naming-6.1.11.jar!/" />
         <root url="jar://$PROJECT_DIR$/lib/jetty/jetty-6.1.11.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/jetty/jetty-management-6.1.11.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />

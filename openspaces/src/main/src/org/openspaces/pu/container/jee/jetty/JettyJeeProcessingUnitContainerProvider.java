@@ -25,6 +25,7 @@ import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.management.MBeanContainer;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
 import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
@@ -41,8 +42,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
+import javax.management.MBeanServer;
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.BindException;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +66,8 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
     public static final String JETTY_LOCATION_PREFIX_SYSPROP = "com.gs.pu.jee.jetty.pu.locationPrefix";
 
     public static final String JETTY_INSTANCE_PROP = "jetty.instance";
+
+    public static final String JETTY_JMX_PROP = "jetty.jmx";
 
     private static final Log logger = LogFactory.getLog(JettyJeeProcessingUnitContainerProvider.class);
 
@@ -257,6 +262,19 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             if (e instanceof CannotCreateContainerException)
                 throw (CannotCreateContainerException) e;
             throw new CannotCreateContainerException("Failed to start jetty server", e);
+        }
+
+        String jmxEnabled = beanLevelProperties.getContextProperties().getProperty(JETTY_JMX_PROP, "false");
+        if ("true".equals(jmxEnabled)) {
+            MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+            MBeanContainer mBeanContainer = new MBeanContainer(mBeanServer);
+            String domain = "gigaspaces.jetty";
+            if (!jettyHolder.isSingleInstance()) {
+                domain += "." + clusterInfo.getRunningNumberOffset1();
+            }
+            mBeanContainer.setDomain(domain);
+            jettyHolder.getServer().getContainer().addEventListener(mBeanContainer);
+            mBeanContainer.start();
         }
 
         try {
