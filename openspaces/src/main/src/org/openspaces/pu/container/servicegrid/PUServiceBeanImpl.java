@@ -238,6 +238,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         // identify if this is a web app
         InputStream webXml = contextClassLoader.getResourceAsStream("WEB-INF/web.xml");
         if (webXml != null) {
+            webXml.close();
             JeeProcessingUnitContainerProvider jeeFactory = (JeeProcessingUnitContainerProvider) createContainerProvider(beanLevelProperties, JettyJeeProcessingUnitContainerProvider.class.getName());
             String deployName = puName + "_" + clusterInfo.getSuffix();
 
