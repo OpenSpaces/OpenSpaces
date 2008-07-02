@@ -29,6 +29,7 @@ import org.jini.rio.watch.Calculable;
 import org.jini.rio.watch.GaugeWatch;
 import org.jini.rio.watch.Watch;
 import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
 import org.openspaces.core.cluster.MemberAliveIndicator;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.util.SpaceUtils;
@@ -223,6 +224,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         } else {
             beanLevelProperties = new BeanLevelProperties();
         }
+        beanLevelProperties.getContextProperties().putAll(ClusterInfoPropertyPlaceholderConfigurer.createProperties(clusterInfo));
 
         // set a generic work location that can be used by container providers
         File workLocation = new File(System.getProperty("com.gs.work", System.getProperty(Locator.GS_HOME) + "/work"));

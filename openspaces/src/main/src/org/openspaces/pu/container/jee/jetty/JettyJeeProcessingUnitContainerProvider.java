@@ -34,6 +34,7 @@ import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
+import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
 import org.springframework.context.ApplicationContext;
@@ -258,6 +259,26 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             throw new CannotCreateContainerException("Failed to start jetty server", e);
         }
 
+        try {
+            BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, new File(deployPath, "WEB-INF/web.xml"));
+        } catch (IOException e) {
+            throw new CannotCreateContainerException("Failed to resolve properties on WEB-INF/web.xml", e);
+        }
+        try {
+            BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, new File(deployPath, "WEB-INF/jetty-web.xml"));
+        } catch (IOException e) {
+            throw new CannotCreateContainerException("Failed to resolve properties on WEB-INF/jetty-web.xml");
+        }
+        try {
+            BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, new File(deployPath, "WEB-INF/jetty6-web.xml"));
+        } catch (IOException e) {
+            throw new CannotCreateContainerException("Failed to resolve properties on WEB-INF/jetty6-web.xml");
+        }
+        try {
+            BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, new File(deployPath, "WEB-INF/web-jetty.xml.xml"));
+        } catch (IOException e) {
+            throw new CannotCreateContainerException("Failed to resolve properties on WEB-INF/web-jetty.xml");
+        }
 
         try {
             WebAppContext webAppContext = (WebAppContext) applicationContext.getBean("webAppContext");
