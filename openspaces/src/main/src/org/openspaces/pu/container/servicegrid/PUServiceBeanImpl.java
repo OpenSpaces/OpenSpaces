@@ -40,6 +40,7 @@ import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
 import org.openspaces.pu.container.jee.jetty.JettyJeeProcessingUnitContainerProvider;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
+import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
 import org.openspaces.pu.sla.monitor.ApplicationContextMonitor;
 import org.openspaces.pu.sla.monitor.Monitor;
 import org.springframework.core.io.ByteArrayResource;
@@ -248,6 +249,19 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
             jeeFactory.setDeployPath(warPath);
             getAndExtractPU(puPath, codeserver, warPath, new File(deployedProcessingUnitsLocation));
+
+            // go over listed files that needs to be resovled with properties
+            for (Map.Entry entry : beanLevelProperties.getContextProperties().entrySet()) {
+                String key = (String) entry.getKey();
+                if (key.startsWith("com.gs.resolvePlaceholder")) {
+                    String path = (String) entry.getValue();
+                    File input = new File(warPath, path);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Resolving placeholder for file [" + input.getAbsolutePath() + "]");
+                    }
+                    BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, input);
+                }
+            }
 
             factory = jeeFactory;
         } else {
