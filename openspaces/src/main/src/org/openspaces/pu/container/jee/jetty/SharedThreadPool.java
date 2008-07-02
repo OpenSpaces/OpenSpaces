@@ -115,4 +115,8 @@ public class SharedThreadPool implements ThreadPool, LifeCycle {
     public boolean isFailed() {
         return ((LifeCycle) threadPool).isFailed();
     }
+
+    public String toString() {
+        return "Shared(" + threadPoolCount + ") [" + threadPool + "]";
+    }
 }

@@ -35,6 +35,7 @@ import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
+import org.openspaces.pu.container.jee.jetty.support.JdkLogger;
 import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
@@ -54,6 +55,10 @@ import java.util.List;
  * @author kimchy
  */
 public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUnitContainerProvider {
+
+    static {
+        System.setProperty("org.mortbay.log.class", JdkLogger.class.getName());
+    }
 
     public final static String DEFAULT_JETTY_PU_PREFIX = "classpath:/org/openspaces/pu/container/jee/jetty/jetty.";
 
