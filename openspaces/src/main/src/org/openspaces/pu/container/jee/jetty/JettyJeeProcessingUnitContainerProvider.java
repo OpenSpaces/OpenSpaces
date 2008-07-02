@@ -51,15 +51,17 @@ import java.util.List;
  */
 public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUnitContainerProvider {
 
-    public final static String DEFAULT_JETTY_PLAIN_PU = "classpath:/org/openspaces/pu/container/jee/jetty/jetty.plain.pu.xml";
+    public final static String DEFAULT_JETTY_PU_PREFIX = "classpath:/org/openspaces/pu/container/jee/jetty/jetty.";
 
-    public final static String DEFAULT_JETTY_SHARED_PU = "classpath:/org/openspaces/pu/container/jee/jetty/jetty.shared.pu.xml";
+    public final static String PU_SUFFIX = ".pu.xml";
 
-    public static final String PLAIN_JETTY_LOCATION_SYSPROP = "com.gs.pu.jee.jetty.plainLocation";
+    public final static String INSTANCE_PLAIN = "plain";
 
-    public static final String SHARED_JETTY_LOCATION_SYSPROP = "com.gs.pu.jee.jetty.sharedLocation";
+    public final static String INSTANCE_SHARD = "shared";
 
-    public static final String SHARED_PROP = "jetty.shared";
+    public static final String JETTY_LOCATION_PREFIX_SYSPROP = "com.gs.pu.jee.jetty.pu.locationPrefix";
+
+    public static final String JETTY_INSTANCE_PROP = "jetty.instance";
 
     private static final Log logger = LogFactory.getLog(JettyJeeProcessingUnitContainerProvider.class);
 
@@ -156,14 +158,8 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                     }
                 }
                 if (!foundValidResource) {
-                    String sharedProp = (String) beanLevelProperties.getContextProperties().get(SHARED_PROP);
-                    boolean shared = "true".equalsIgnoreCase(sharedProp);
-                    String defaultLocation = null;
-                    if (shared) {
-                        defaultLocation = System.getProperty(SHARED_JETTY_LOCATION_SYSPROP, DEFAULT_JETTY_SHARED_PU);
-                    } else {
-                        defaultLocation = System.getProperty(PLAIN_JETTY_LOCATION_SYSPROP, DEFAULT_JETTY_PLAIN_PU);
-                    }
+                    String instanceProp = beanLevelProperties.getContextProperties().getProperty(JETTY_INSTANCE_PROP, INSTANCE_PLAIN);
+                    String defaultLocation = System.getProperty(JETTY_LOCATION_PREFIX_SYSPROP, DEFAULT_JETTY_PU_PREFIX) + instanceProp + PU_SUFFIX;
                     if (logger.isDebugEnabled()) {
                         logger.debug("Loading bulit in jetty pu.xml from [" + defaultLocation + "]");
                     }
@@ -240,7 +236,7 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                     // ignore
                 }
                 if (e instanceof CannotCreateContainerException)
-                    throw (CannotCreateContainerException)e;
+                    throw (CannotCreateContainerException) e;
                 throw new CannotCreateContainerException("Failed to start jetty server", e);
             }
         }
@@ -258,11 +254,11 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                 // ignore
             }
             if (e instanceof CannotCreateContainerException)
-                throw (CannotCreateContainerException)e;
+                throw (CannotCreateContainerException) e;
             throw new CannotCreateContainerException("Failed to start jetty server", e);
         }
-        
-        
+
+
         try {
             WebAppContext webAppContext = (WebAppContext) applicationContext.getBean("webAppContext");
 
