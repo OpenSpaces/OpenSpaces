@@ -103,6 +103,7 @@ public class RunHSQLDBViewMojo extends AbstractMojo {
         System.out.println("    -Durl=<name>          : jdbc url (defaults to 'jdbc:hsqldb:hsql://localhost/testDB')");
         System.out.println("    -Duser=<name>         : username used for connection");
         System.out.println("    -Dpassword=<password> : password for this user");
+        System.out.println("    -Dhelp                : prints the usage options");
     }
     
 }
