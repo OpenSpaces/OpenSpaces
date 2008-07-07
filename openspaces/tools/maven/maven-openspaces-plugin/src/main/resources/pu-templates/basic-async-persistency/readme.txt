@@ -32,7 +32,7 @@ changes done on its Space to the mirror.
 writes unprocessed Data objects to the Space (resulting in events firing up within
 the processor processing unit).
 
-To view the HSQL database created by the mirror service run the hsqldb-ui script.
+To view the HSQL database created by the mirror service invoke mvn os:hsql-ui.
 
 BUILDING, PACKAGING, RUNNING, DEPLOYING
 ---------------------------------------
