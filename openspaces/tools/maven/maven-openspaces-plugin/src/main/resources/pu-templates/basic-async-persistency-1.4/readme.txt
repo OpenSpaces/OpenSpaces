@@ -32,6 +32,8 @@ changes done on its Space to the mirror.
 writes unprocessed Data objects to the Space (resulting in events firing up within
 the processor processing unit).
 
+To view the HSQL database created by the mirror service run the hsqldb-ui script.
+
 BUILDING, PACKAGING, RUNNING, DEPLOYING
 ---------------------------------------
 
@@ -74,6 +76,7 @@ will deploy the two processing units.
 account. This means that by default when deploying the application, 2 partitions, each with 
 one backup will be created for the processor, a single instance of the feeder will be created,
 and a single instance of the mirror will be created.
+
   A special note regarding groups and deployment: If the GSM and GSCs were started under a specific 
 group, the -Dgroups=[group-name] will need to be used in the deploy command.
 
