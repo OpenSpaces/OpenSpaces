@@ -347,7 +347,7 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                     throw new CannotCreateContainerException("Failed to start web app context", e);
                 }
             }
-            return new JettyProcessingUnitContainer(applicationContext, webAppContext, container, jettyHolder);
+            return new JettyProcessingUnitContainer(applicationContext, webAppContext, container, jettyHolder, deployPath);
         } catch (Exception e) {
             try {
                 jettyHolder.stop();

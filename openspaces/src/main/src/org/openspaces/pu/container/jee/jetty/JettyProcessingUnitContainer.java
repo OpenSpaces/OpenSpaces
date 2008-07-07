@@ -22,9 +22,12 @@ import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.web.context.ContextLoader;
+
+import java.io.File;
 
 /**
  * @author kimchy
@@ -41,14 +44,17 @@ public class JettyProcessingUnitContainer implements ApplicationContextProcessin
 
     private JettyHolder jettyHolder;
 
+    private File deployPath;
+
     /**
      */
     public JettyProcessingUnitContainer(ApplicationContext applicationContext, WebAppContext webAppContext,
-                                           HandlerContainer container, JettyHolder jettyHolder) {
+                                        HandlerContainer container, JettyHolder jettyHolder, File deployPath) {
         this.applicationContext = applicationContext;
         this.webAppContext = webAppContext;
         this.container = container;
         this.jettyHolder = jettyHolder;
+        this.deployPath = deployPath;
     }
 
     /**
@@ -73,12 +79,17 @@ public class JettyProcessingUnitContainer implements ApplicationContextProcessin
         try {
             webAppContext.stop();
         } catch (Exception e) {
-            logger.warn("Faield to stop web context", e);
+            logger.warn("Failed to stop web context", e);
         }
 
         if (container != null) {
             container.removeHandler(webAppContext);
         }
+
+        // close the application context anyhow (it might be closed by the webapp context, but it
+        // might not if it is not a pure Spring application).
+        ConfigurableApplicationContext confAppContext = (ConfigurableApplicationContext) applicationContext;
+        confAppContext.close();
 
         try {
             jettyHolder.stop();
@@ -86,13 +97,16 @@ public class JettyProcessingUnitContainer implements ApplicationContextProcessin
             logger.warn("Failed to stop jetty server", e);
         }
 
-        if (applicationContext instanceof DisposableBean) {
-            try {
-                ((DisposableBean) applicationContext).destroy();
-            } catch (Exception e) {
-                throw new CannotCloseContainerException("Failed to close container with application context ["
-                        + applicationContext + "]", e);
+        // clean the deploy path directory
+        boolean deleted = false;
+        for (int i = 0; i < 5; i++) {
+            deleted = FileSystemUtils.deleteRecursively(deployPath);
+            if (deleted) {
+                break;
             }
+        }
+        if (!deleted) {
+            logger.warn("Failed to delete deployed war from [" + deployPath + "]");
         }
     }
 
