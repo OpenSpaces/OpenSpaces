@@ -24,6 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Extends Spring {@link org.springframework.web.context.support.XmlWebApplicationContext} allowing to
+ * dynamically add (during construction) a {@link org.springframework.beans.factory.config.BeanPostProcessor}.
+ *
  * @author kimchy
  */
 public class ProcessingUnitWebApplicationContext extends XmlWebApplicationContext {

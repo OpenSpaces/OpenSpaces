@@ -20,10 +20,16 @@ import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.ContextLoaderListener;
 
 /**
+ * Excatly the same as {@link org.springframework.web.context.ContextLoaderListener} excepts in creating
+ * a {link {@link org.openspaces.pu.container.jee.context.ProcessingUnitContextLoader}.
+ *
  * @author kimchy
  */
 public class ProcessingUnitContextLoaderListener extends ContextLoaderListener {
 
+    /**
+     * Overrides Spring default ContextLoader with {@link org.openspaces.pu.container.jee.context.ProcessingUnitContextLoader}.
+     */
     protected ContextLoader createContextLoader() {
         return new ProcessingUnitContextLoader();
     }

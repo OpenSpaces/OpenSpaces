@@ -31,19 +31,38 @@ import org.springframework.web.context.WebApplicationContext;
 import javax.servlet.ServletContext;
 
 /**
+ * Same as Spring {@link org.springframework.web.context.ContextLoader}. Different in two aspects:
+ *
+ * <p>The first, it automatillcay loads the binded <code>META-INF/spring/pu.xml</code> (binded into the servlet
+ * context) as the parent application context. See {@link #loadParentContext(javax.servlet.ServletContext)}.
+ *
+ * <p>Second, it overrides the creation of {@link org.springframework.web.context.WebApplicationContext} and
+ * automatically adds {@link org.openspaces.core.cluster.ClusterInfo} and {@link org.openspaces.core.properties.BeanLevelProperties}
+ * handling. It also delegates the objects to the web context level Spring application context.
+ *
  * @author kimchy
  */
 public class ProcessingUnitContextLoader extends ContextLoader {
 
+    /**
+     * Returns the application context bound under {@link org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider#APPLICATION_CONTEXT_CONTEXT}
+     * within the servlet context. This will act as the parent application context.
+     */
     protected ApplicationContext loadParentContext(ServletContext servletContext) throws BeansException {
         return (ApplicationContext) servletContext.getAttribute(JeeProcessingUnitContainerProvider.APPLICATION_CONTEXT_CONTEXT);
     }
 
+    /**
+     * Creates a Spring {@link org.springframework.web.context.WebApplicationContext} - {@link org.openspaces.pu.container.jee.context.ProcessingUnitWebApplicationContext}.
+     *
+     * <p>Adds support to {@link ClusterInfo} and {@link org.openspaces.core.properties.BeanLevelProperties} processors. The objects
+     * themself are bounded in the {@link javax.servlet.ServletContext}.
+     */
     protected WebApplicationContext createWebApplicationContext(ServletContext servletContext, ApplicationContext parent) throws BeansException {
         ProcessingUnitWebApplicationContext wac = new ProcessingUnitWebApplicationContext();
 
         ClusterInfo clusterInfo = (ClusterInfo) servletContext.getAttribute(JeeProcessingUnitContainerProvider.CLUSTER_INFO_CONTEXT);
-        
+
         BeanLevelProperties beanLevelProperties = (BeanLevelProperties) servletContext.getAttribute(JeeProcessingUnitContainerProvider.BEAN_LEVEL_PROPERTIES_CONTEXT);
         if (beanLevelProperties != null) {
             wac.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties, clusterInfo));
