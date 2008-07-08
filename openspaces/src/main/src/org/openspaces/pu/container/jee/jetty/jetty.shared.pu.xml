@@ -16,6 +16,7 @@
                 <prop key="web.selector.acceptors">2</prop>
                 <prop key="web.selector.lowResourcesConnections">20000</prop>
                 <prop key="web.selector.lowResourcesMaxIdleTime">5000</prop>
+                <prop key="web.selector.forwarded">false</prop>
             </props>
         </property>
     </bean>
@@ -58,6 +59,7 @@
                     <property name="confidentialPort" ref="confidentialPort"/>
                     <property name="lowResourcesConnections" value="${web.selector.lowResourcesConnections}"/>
                     <property name="lowResourcesMaxIdleTime" value="${web.selector.lowResourcesMaxIdleTime}"/>
+                    <property name="forwarded" value="${web.forwarded}" />
                 </bean>
             </list>
         </property>
