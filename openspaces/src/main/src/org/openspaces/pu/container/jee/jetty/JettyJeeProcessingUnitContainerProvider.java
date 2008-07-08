@@ -298,7 +298,7 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             throw new CannotCreateContainerException("Failed to resolve properties on WEB-INF/jetty6-web.xml");
         }
         try {
-            BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, new File(deployPath, "WEB-INF/web-jetty.xml.xml"));
+            BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, new File(deployPath, "WEB-INF/web-jetty.xml"));
         } catch (IOException e) {
             throw new CannotCreateContainerException("Failed to resolve properties on WEB-INF/web-jetty.xml");
         }
