@@ -65,7 +65,7 @@
                     <property name="confidentialPort" ref="confidentialPort"/>
                     <property name="lowResourcesConnections" value="${web.selector.lowResourcesConnections}"/>
                     <property name="lowResourcesMaxIdleTime" value="${web.selector.lowResourcesMaxIdleTime}"/>
-                    <property name="forwarded" value="${web.forwarded}" />
+                    <property name="forwarded" value="${web.selector.forwarded}" />
                 </bean>
             </list>
         </property>
