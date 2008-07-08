@@ -313,6 +313,9 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             webAppContext.setAttribute(CLUSTER_INFO_CONTEXT, clusterInfo);
             webAppContext.setAttribute(BEAN_LEVEL_PROPERTIES_CONTEXT, beanLevelProperties);
 
+            // allow aliases so load balancing will work on static content
+            webAppContext.getInitParams().put("org.mortbay.jetty.servlet.Default.aliases", "true");
+
             String[] beanNames = applicationContext.getBeanDefinitionNames();
             for (String beanName : beanNames) {
                 webAppContext.setAttribute(beanName, applicationContext.getBean(beanName));
@@ -338,7 +341,6 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                     throw new IllegalStateException("No container");
                 }
             }
-
             container.addHandler(webAppContext);
             if (container.isStarted() || container.isStarting()) {
                 try {
