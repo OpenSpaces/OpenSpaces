@@ -241,6 +241,9 @@ public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements
             }
         }
 
+        // set the transaction object on the entry if there is an ongoing one
+        remotingEntry.transaction = gigaSpace.getCurrentTransaction();
+
         if (remotingEntry.oneWay != null && remotingEntry.oneWay) {
             gigaSpace.readMultiple(remotingEntry, Integer.MAX_VALUE);
             return null;

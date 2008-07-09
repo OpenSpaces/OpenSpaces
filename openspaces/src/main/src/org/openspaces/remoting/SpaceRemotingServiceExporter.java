@@ -30,6 +30,7 @@ import org.openspaces.core.GigaSpace;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.core.space.filter.FilterProviderFactory;
+import org.openspaces.core.transaction.manager.ExistingJiniTransactionManager;
 import org.openspaces.events.EventTemplateProvider;
 import org.openspaces.events.SpaceDataEventListener;
 import org.springframework.beans.factory.InitializingBean;
@@ -397,27 +398,35 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                 }
             }
 
-            Method method;
+            // bind current transaction
+            boolean boundedTransaction = ExistingJiniTransactionManager.bindExistingTransaction(remotingEntry.transaction);
             try {
-                method = methodInvocationCache.findMethod(lookupName, service, remotingEntry.methodName, remotingEntry.arguments);
-            } catch (Exception e) {
-                writeResponse(space, entry, remotingEntry, new RemoteLookupFailureException("Failed to find method ["
-                        + remotingEntry.getMethodName() + "] for lookup [" + remotingEntry.getLookupName() + "]", e));
-                return;
-            }
-            try {
-                Object retVal;
-                if (serviceExecutionAspect != null) {
-                    retVal = serviceExecutionAspect.invoke(remotingEntry, method, service);
-                } else {
-                    retVal = method.invoke(service, remotingEntry.arguments);
+                Method method;
+                try {
+                    method = methodInvocationCache.findMethod(lookupName, service, remotingEntry.methodName, remotingEntry.arguments);
+                } catch (Exception e) {
+                    writeResponse(space, entry, remotingEntry, new RemoteLookupFailureException("Failed to find method ["
+                            + remotingEntry.getMethodName() + "] for lookup [" + remotingEntry.getLookupName() + "]", e));
+                    return;
                 }
-                writeResponse(space, entry, remotingEntry, retVal);
-            } catch (InvocationTargetException e) {
-                writeResponse(space, entry, remotingEntry, e.getTargetException());
-            } catch (IllegalAccessException e) {
-                writeResponse(space, entry, remotingEntry, new RemoteLookupFailureException("Failed to access method ["
-                        + remotingEntry.getMethodName() + "] for lookup [" + remotingEntry.getLookupName() + "]", e));
+                try {
+                    Object retVal;
+                    if (serviceExecutionAspect != null) {
+                        retVal = serviceExecutionAspect.invoke(remotingEntry, method, service);
+                    } else {
+                        retVal = method.invoke(service, remotingEntry.arguments);
+                    }
+                    writeResponse(space, entry, remotingEntry, retVal);
+                } catch (InvocationTargetException e) {
+                    writeResponse(space, entry, remotingEntry, e.getTargetException());
+                } catch (IllegalAccessException e) {
+                    writeResponse(space, entry, remotingEntry, new RemoteLookupFailureException("Failed to access method ["
+                            + remotingEntry.getMethodName() + "] for lookup [" + remotingEntry.getLookupName() + "]", e));
+                }
+            } finally {     
+                if (boundedTransaction) {
+                    ExistingJiniTransactionManager.unbindExistingTransaction();
+                }
             }
         }
 

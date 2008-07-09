@@ -17,6 +17,7 @@
 package org.openspaces.remoting;
 
 import com.j_spaces.core.client.MetaDataEntry;
+import net.jini.core.transaction.Transaction;
 
 /**
  * Default implementation of a remoting entry that acts both as a remote invocation and a remote
@@ -45,6 +46,8 @@ public class SyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemoti
     public Throwable ex;
 
     public Integer instanceId;
+
+    public Transaction transaction;
 
     public SyncSpaceRemotingEntry() {
         makeTransient();
@@ -134,6 +137,7 @@ public class SyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemoti
             sb.append(" methodName[").append(methodName).append("]");
             sb.append(" routing[").append(routing).append("]");
             sb.append(" oneWay[").append(oneWay).append("]");
+            sb.append(" transaction[").append(transaction).append("]");
         } else {
             if (result != null) {
                 sb.append("result[").append(result).append("]");

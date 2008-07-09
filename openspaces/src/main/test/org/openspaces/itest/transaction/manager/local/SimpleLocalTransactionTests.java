@@ -16,13 +16,18 @@
 
 package org.openspaces.itest.transaction.manager.local;
 
+import junit.framework.AssertionFailedError;
+import net.jini.core.transaction.Transaction;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.core.transaction.manager.ExistingJiniTransactionManager;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author kimchy
@@ -214,5 +219,58 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
         });
         assertNotNull(gigaSpace.read(new Object()));
         assertNull(gigaSpace.read(new TestData1()));
+    }
+
+    public void testSimpleExistingTransactionWithCommit() throws Exception {
+        TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
+        assertNull(gigaSpace.read(new Object()));
+        txTemplate.execute(new TransactionCallbackWithoutResult() {
+            protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+                assertNull(gigaSpace.read(new Object()));
+                gigaSpace.write(new Object());
+                assertNotNull(gigaSpace.read(new Object()));
+
+                final Transaction tx = gigaSpace.getCurrentTransaction();
+
+                final AtomicReference<AssertionFailedError> exceptionHolder = new AtomicReference<AssertionFailedError>();
+                Thread thread = new Thread(new Runnable() {
+                    public void run() {
+                        ExistingJiniTransactionManager.bindExistingTransaction(tx);
+                        try {
+                            assertNotNull(gigaSpace.getCurrentTransaction());
+                            assertSame(tx, gigaSpace.getCurrentTransaction());
+
+                            TransactionTemplate innerTxTemplate = new TransactionTemplate(localTxManager);
+                            innerTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+
+                            innerTxTemplate.execute(new TransactionCallbackWithoutResult() {
+                                protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+                                    assertNotNull(gigaSpace.getCurrentTransaction());
+                                    assertSame(tx, gigaSpace.getCurrentTransaction());
+                                    gigaSpace.write(new TestData1());
+                                }
+                            });
+
+                            assertNotNull(gigaSpace.read(new TestData1()));
+
+
+                        } catch (AssertionFailedError e) {
+                            exceptionHolder.set(e);
+                        }
+                    }
+                });
+                thread.start();
+                try {
+                    thread.join(1000);
+                } catch (InterruptedException e) {
+                    // do nothing
+                }
+                if (exceptionHolder.get() != null) {
+                    throw exceptionHolder.get();
+                }
+            }
+        });
+        assertNotNull(gigaSpace.read(new Object()));
+        assertNotNull(gigaSpace.read(new TestData1()));
     }
 }
