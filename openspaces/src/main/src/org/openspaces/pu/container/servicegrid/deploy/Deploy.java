@@ -524,7 +524,7 @@ public class Deploy {
         jarsMap.put("hack", sharedJarPaths);
         classBundle.addSharedComponents(jarsMap);
 
-        // set the each servive to have the operation string name
+        // set for each service to have the operation string name
         element.getServiceBeanConfig().setName(element.getOperationalStringName().replace(' ', '-') + "." + element.getName());
 
         // pass the SLA as an init parameter so the GSC won't need to parse the XML again
