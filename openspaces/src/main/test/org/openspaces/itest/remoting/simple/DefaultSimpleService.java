@@ -17,4 +17,8 @@ public class DefaultSimpleService implements SimpleService {
     public Future asyncSay(String message) {
         return null;
     }
+
+    public boolean wire(WiredParameter wiredParameter) {
+        return wiredParameter.gigaSpace != null;
+    }
 }

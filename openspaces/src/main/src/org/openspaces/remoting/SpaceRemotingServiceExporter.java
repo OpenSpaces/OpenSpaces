@@ -35,6 +35,7 @@ import org.openspaces.events.EventTemplateProvider;
 import org.openspaces.events.SpaceDataEventListener;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
@@ -75,6 +76,12 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>The exporter also implements {@link org.openspaces.core.space.filter.FilterProviderFactory} and
  * allows to execute services in a <b>sync</b> manner.
  *
+ * <p>By default, the exporter will also autowire and post process all the arguments passed, allowing
+ * to inject them with "server" side beans using Spring {@link org.springframework.beans.factory.annotation.Autowired}
+ * annotation for example. Note, this variables must be defined as <code>transient</code> so they won't be
+ * passed back to the client. This can be disabled by setting {@link #setDisableAutowiredArguements(boolean)}
+ * to <code>true</code>.
+ *
  * @author kimchy
  * @see org.openspaces.events.polling.SimplePollingEventListenerContainer
  * @see org.openspaces.remoting.AsyncSpaceRemotingEntry
@@ -96,6 +103,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
     private String asyncInterfaceSuffix = DEFAULT_ASYNC_INTERFACE_SUFFIX;
 
     private boolean fifo = false;
+
+    private boolean disableAutowiredArguements = false;
 
     private ServiceExecutionAspect serviceExecutionAspect;
 
@@ -144,6 +153,14 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
      */
     public void setFifo(boolean fifo) {
         this.fifo = fifo;
+    }
+
+    /**
+     * Allows to disable (by default it is enabled) the autowiring of method arguments with beans that
+     * exists within the server side context.
+     */
+    public void setDisableAutowiredArguements(boolean disableAutowiredArguements) {
+        this.disableAutowiredArguements = disableAutowiredArguements;
     }
 
     /**
@@ -270,6 +287,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             }
         }
 
+        autowireArguments(remotingEntry.getArguments());
+
         Method method;
         try {
             method = methodInvocationCache.findMethod(lookupName, service, remotingEntry.methodName, remotingEntry.arguments);
@@ -316,6 +335,23 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                 result.instanceId = clusterInfo.getInstanceId();
             }
             gigaSpace.write(result);
+        }
+    }
+
+    private void autowireArguments(Object[] args) {
+        if (disableAutowiredArguements) {
+            return;
+        }
+        if (args == null) {
+            return;
+        }
+        for (Object arg : args) {
+            if (arg == null) {
+                continue;
+            }
+            AutowireCapableBeanFactory beanFactory = applicationContext.getAutowireCapableBeanFactory();
+            beanFactory.autowireBeanProperties(arg, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
+            beanFactory.initializeBean(arg, arg.getClass().getName());
         }
     }
 
@@ -397,6 +433,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                     return;
                 }
             }
+
+            autowireArguments(remotingEntry.getArguments());
 
             // bind current transaction
             boolean boundedTransaction = ExistingJiniTransactionManager.bindExistingTransaction(remotingEntry.transaction);

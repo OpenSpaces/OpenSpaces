@@ -94,6 +94,11 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         assertEquals("SAY test", reply);
     }
 
+    public void testWiredParameters() {
+        assertTrue(simpleAnnotationBean.syncSimpleService.wire(new WiredParameter()));
+        assertTrue(simpleAnnotationBean.asyncSimpleService.wire(new WiredParameter()));
+    }
+
     public void testSimpleConfigurerExecution() {
         SimpleService localSyncSimpleService = new SyncRemotingProxyConfigurer<SimpleService>(gigaSpace, SimpleService.class)
                                                .syncProxy();

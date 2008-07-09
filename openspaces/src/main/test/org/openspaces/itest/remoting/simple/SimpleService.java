@@ -12,4 +12,6 @@ public interface SimpleService {
     String say(@Routing String message);
 
     Future<String> asyncSay(String message);
+
+    boolean wire(WiredParameter wiredParameter);
 }
