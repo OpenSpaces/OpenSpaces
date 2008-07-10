@@ -248,6 +248,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             FileSystemUtils.deleteRecursively(warPath);
             warPath.mkdirs();
 
+            beanLevelProperties.getContextProperties().setProperty("jee.deployPath", warPath.getAbsolutePath());
+
             jeeFactory.setDeployPath(warPath);
             getAndExtractPU(puPath, codeserver, warPath, new File(deployedProcessingUnitsLocation));
 

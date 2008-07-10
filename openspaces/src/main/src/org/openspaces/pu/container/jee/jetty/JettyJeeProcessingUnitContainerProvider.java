@@ -191,8 +191,6 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             ClusterInfoParser.guessSchema(clusterInfo);
         }
 
-        beanLevelProperties.getContextProperties().setProperty("jee.deployPath", deployPath.getAbsolutePath());
-
         Resource[] resources = configResources.toArray(new Resource[configResources.size()]);
         // create the Spring application context
         ResourceApplicationContext applicationContext = new ResourceApplicationContext(resources, parentContext);
