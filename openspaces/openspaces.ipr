@@ -103,6 +103,7 @@
           <module name="examples-mule-data-feeder" />
           <module name="examples-mule-data-processor" />
           <module name="maven-plugin" />
+          <module name="examples-helloworld" />
         </modules>
       </facet-type>
       <facet-type id="hibernate">
@@ -624,7 +625,7 @@
     <option name="ADDITIONAL_OPTIONS_STRING" value="" />
   </component>
   <component name="VcsDirectoryMappings">
-    <mapping directory="" vcs="CVS" />
+    <mapping directory="" vcs="svn" />
   </component>
   <component name="WebServicesPlugin" addRequiredLibraries="true" />
   <component name="com.intellij.jsf.UserDefinedFacesConfigs">
