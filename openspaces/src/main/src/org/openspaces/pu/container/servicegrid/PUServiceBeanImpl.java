@@ -230,7 +230,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         // set a generic work location that can be used by container providers
         File workLocation = new File(System.getProperty("com.gs.work", System.getProperty(Locator.GS_HOME) + "/work"));
         workLocation.mkdirs();
-        
+
         beanLevelProperties.getContextProperties().setProperty("com.gs.work", workLocation.getAbsolutePath());
 
         //create PU Container
@@ -243,7 +243,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             String deployName = puName + "_" + clusterInfo.getSuffix();
 
             String deployedProcessingUnitsLocation = workLocation.getAbsolutePath() + "/deployed-processing-units";
-            
+
             File warPath = new File(deployedProcessingUnitsLocation + "/" + deployName);
             FileSystemUtils.deleteRecursively(warPath);
             warPath.mkdirs();
@@ -251,7 +251,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             beanLevelProperties.getContextProperties().setProperty("jee.deployPath", warPath.getAbsolutePath());
 
             jeeFactory.setDeployPath(warPath);
-            getAndExtractPU(puPath, codeserver, warPath, new File(deployedProcessingUnitsLocation));
+            downloadAndExtractPU(puPath, codeserver, warPath, new File(deployedProcessingUnitsLocation));
 
             // go over listed files that needs to be resovled with properties
             for (Map.Entry entry : beanLevelProperties.getContextProperties().entrySet()) {
@@ -448,7 +448,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
     }
 
-    private void getAndExtractPU(String puPath, String codeserver, File path, File tempPath) throws IOException {
+    private void downloadAndExtractPU(String puPath, String codeserver, File path, File tempPath) throws IOException {
         HttpURLConnection conn = (HttpURLConnection) new URL(codeserver + puPath).openConnection();
         conn.setRequestProperty("Package", "true");
         int responseCode = conn.getResponseCode();
@@ -489,15 +489,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 is.close();
             }
         }
-        for (int i = 0; i < 2; i++) {
-            if (tempFile.delete()) {
-                break;
-            }
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e1) {
-                // do nothing
-            }
-        }
+        zipFile.close();
+        tempFile.delete();
     }
 }
