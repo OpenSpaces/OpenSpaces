@@ -459,6 +459,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         File tempFile = File.createTempFile("packaged-webpu", "war", tempPath);
         InputStream in = new BufferedInputStream(conn.getInputStream());
         FileCopyUtils.copy(in, new FileOutputStream(tempFile));
+        conn.disconnect();
 
         // extract the file
         byte data[] = new byte[1024];
@@ -488,8 +489,15 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 is.close();
             }
         }
-        tempFile.delete();
-
-        conn.disconnect();
+        for (int i = 0; i < 2; i++) {
+            if (tempFile.delete()) {
+                break;
+            }
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e1) {
+                // do nothing
+            }
+        }
     }
 }
