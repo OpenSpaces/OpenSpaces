@@ -40,6 +40,7 @@ import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -60,7 +61,9 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
         System.setProperty("org.mortbay.log.class", JdkLogger.class.getName());
     }
 
-    public final static String DEFAULT_JETTY_PU_PREFIX = "classpath:/org/openspaces/pu/container/jee/jetty/jetty.";
+    public final static String DEFAULT_JETTY_PU = "/META-INF/spring/jetty.pu.xml";
+
+    public final static String INTERNAL_JETTY_PU_PREFIX = "/org/openspaces/pu/container/jee/jetty/jetty.";
 
     public final static String PU_SUFFIX = ".pu.xml";
 
@@ -161,32 +164,29 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
         if (configResources.size() == 0) {
             try {
                 addConfigLocation(DEFAULT_PU_CONTEXT_LOCATION);
-                boolean foundValidResource = false;
-                for (Resource resource : configResources) {
-                    if (resource.exists()) {
-                        foundValidResource = true;
-                        break;
-                    }
-                }
-                if (!foundValidResource) {
-                    String instanceProp = beanLevelProperties.getContextProperties().getProperty(JETTY_INSTANCE_PROP, INSTANCE_PLAIN);
-                    String defaultLocation = System.getProperty(JETTY_LOCATION_PREFIX_SYSPROP, DEFAULT_JETTY_PU_PREFIX) + instanceProp + PU_SUFFIX;
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Loading bulit in jetty pu.xml from [" + defaultLocation + "]");
-                    }
-                    addConfigLocation(defaultLocation);
-                    if (configResources.size() == 0 || !configResources.get(0).exists()) {
-                        throw new CannotCreateContainerException("Faield to read default pu file [" + defaultLocation + "]");
-                    }
-                } else {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Loading jetty pu.xml from processing unit at [" + DEFAULT_PU_CONTEXT_LOCATION + "]");
-                    }
-                }
             } catch (IOException e) {
                 throw new CannotCreateContainerException("Failed to read config files from " + DEFAULT_PU_CONTEXT_LOCATION, e);
             }
         }
+
+        Resource jettyPuResource = new ClassPathResource(DEFAULT_JETTY_PU);
+        if (!jettyPuResource.exists()) {
+            String instanceProp = beanLevelProperties.getContextProperties().getProperty(JETTY_INSTANCE_PROP, INSTANCE_PLAIN);
+            String defaultLocation = System.getProperty(JETTY_LOCATION_PREFIX_SYSPROP, INTERNAL_JETTY_PU_PREFIX) + instanceProp + PU_SUFFIX;
+            jettyPuResource = new ClassPathResource(defaultLocation);
+            if (!jettyPuResource.exists()) {
+                throw new CannotCreateContainerException("Failed to read internal pu file [" + defaultLocation + "] as well as user defined [" + DEFAULT_JETTY_PU + "]");
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Using internal bulit in jetty pu.xml from [" + defaultLocation + "]");
+            }
+        } else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Using user specific jetty pu.xml from [" + DEFAULT_JETTY_PU + "]");
+            }
+        }
+        addConfigLocation(jettyPuResource);
+
         if (clusterInfo != null) {
             ClusterInfoParser.guessSchema(clusterInfo);
         }
