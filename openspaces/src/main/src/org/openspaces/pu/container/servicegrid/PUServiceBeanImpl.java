@@ -79,7 +79,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private static final Log logger = LogFactory.getLog(PUServiceBeanImpl.class);
 
-    private ApplicationContextProcessingUnitContainer container;
+    private volatile ApplicationContextProcessingUnitContainer container;
 
     private int clusterGroup;
 
@@ -87,15 +87,15 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private Integer backupId;
 
-    private List<WatchTask> watchTasks = new ArrayList<WatchTask>();
+    private volatile List<WatchTask> watchTasks = new ArrayList<WatchTask>();
 
-    private ScheduledExecutorService executorService;
+    private volatile ScheduledExecutorService executorService;
 
-    private ClassLoader contextClassLoader;
+    private volatile ClassLoader contextClassLoader;
 
-    private MemberAliveIndicator[] memberAliveIndicators;
+    private volatile MemberAliveIndicator[] memberAliveIndicators;
 
-    private IJSpace[] spaces;
+    private volatile IJSpace[] spaces;
 
     private volatile File deployPath;
 
