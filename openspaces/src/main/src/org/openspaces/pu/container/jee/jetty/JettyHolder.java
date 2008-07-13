@@ -29,12 +29,12 @@ public interface JettyHolder {
     /**
      * Open Jetty ports.
      */
-    void open() throws Exception;
+    void openConnectors() throws Exception;
 
     /**
-     * Open Jetty ports.
+     * Closes Jetty ports.
      */
-    void close() throws Exception;
+    void closeConnectors() throws Exception;
 
     /**
      * Start Jetty. Note, if this fails, make sure to call {@link #stop()}

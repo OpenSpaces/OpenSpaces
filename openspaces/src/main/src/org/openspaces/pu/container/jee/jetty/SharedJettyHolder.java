@@ -37,14 +37,14 @@ public class SharedJettyHolder implements JettyHolder {
         }
     }
 
-    public void open() throws Exception {
+    public void openConnectors() throws Exception {
         Connector[] connectors = server.getConnectors();
         for (Connector c : connectors) {
             c.open();
         }
     }
 
-    public void close() throws Exception {
+    public void closeConnectors() throws Exception {
         Connector[] connectors = server.getConnectors();
         MultiException ex = new MultiException();
         for (Connector c : connectors) {

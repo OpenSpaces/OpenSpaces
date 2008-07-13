@@ -221,12 +221,12 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
         boolean success = false;
         for (int i = 0; i < retryPortCount; i++) {
             try {
-                jettyHolder.open();
+                jettyHolder.openConnectors();
                 success = true;
                 break;
             } catch (BindException e) {
                 try {
-                    jettyHolder.close();
+                    jettyHolder.closeConnectors();
                 } catch (Exception e1) {
                     logger.debug(e1);
                     // ignore
@@ -239,7 +239,7 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                 }
             } catch (Exception e) {
                 try {
-                    jettyHolder.close();
+                    jettyHolder.closeConnectors();
                 } catch (Exception e1) {
                     logger.debug(e1);
                     // ignore
