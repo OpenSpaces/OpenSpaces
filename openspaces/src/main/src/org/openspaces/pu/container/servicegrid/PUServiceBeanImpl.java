@@ -97,6 +97,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private IJSpace[] spaces;
 
+    private volatile File deployPath;
+
     public PUServiceBeanImpl() {
         contextClassLoader = Thread.currentThread().getContextClassLoader();
     }
@@ -244,21 +246,21 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
             String deployedProcessingUnitsLocation = workLocation.getAbsolutePath() + "/deployed-processing-units";
 
-            File warPath = new File(deployedProcessingUnitsLocation + "/" + deployName);
-            FileSystemUtils.deleteRecursively(warPath);
-            warPath.mkdirs();
+            deployPath = new File(deployedProcessingUnitsLocation + "/" + deployName);
+            FileSystemUtils.deleteRecursively(deployPath);
+            deployPath.mkdirs();
 
-            beanLevelProperties.getContextProperties().setProperty("jee.deployPath", warPath.getAbsolutePath());
+            beanLevelProperties.getContextProperties().setProperty("jee.deployPath", deployPath.getAbsolutePath());
 
-            jeeFactory.setDeployPath(warPath);
-            downloadAndExtractPU(puPath, codeserver, warPath, new File(deployedProcessingUnitsLocation));
+            jeeFactory.setDeployPath(deployPath);
+            downloadAndExtractPU(puPath, codeserver, deployPath, new File(deployedProcessingUnitsLocation));
 
             // go over listed files that needs to be resovled with properties
             for (Map.Entry entry : beanLevelProperties.getContextProperties().entrySet()) {
                 String key = (String) entry.getKey();
                 if (key.startsWith("com.gs.resolvePlaceholder")) {
                     String path = (String) entry.getValue();
-                    File input = new File(warPath, path);
+                    File input = new File(deployPath, path);
                     if (logger.isDebugEnabled()) {
                         logger.debug("Resolving placeholder for file [" + input.getAbsolutePath() + "]");
                     }
@@ -335,6 +337,25 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 container = null;
                 spaces = null;
                 memberAliveIndicators = null;
+            }
+        }
+
+        // clean the deploy path directory
+        if (deployPath != null) {
+            boolean deleted = false;
+            for (int i = 0; i < 2; i++) {
+                deleted = FileSystemUtils.deleteRecursively(deployPath);
+                if (deleted) {
+                    break;
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    // do nothing
+                }
+            }
+            if (!deleted) {
+                logger.warn("Failed to delete deployed war from [" + deployPath + "]");
             }
         }
     }
