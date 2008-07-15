@@ -77,6 +77,7 @@ public class SharedJettyHolder implements JettyHolder {
                     logger.debug("Stopping jetty server [" + server + "]");
                 }
                 server.stop();
+                server.destroy();
             }
         }
     }

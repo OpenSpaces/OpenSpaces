@@ -60,6 +60,7 @@ public class PlainJettyHolder implements JettyHolder {
 
     public void stop() throws Exception {
         server.stop();
+        server.destroy();
     }
 
     public Server getServer() {

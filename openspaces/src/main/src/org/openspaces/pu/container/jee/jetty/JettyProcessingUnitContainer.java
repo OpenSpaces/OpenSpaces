@@ -35,6 +35,8 @@ public class JettyProcessingUnitContainer implements ApplicationContextProcessin
 
     private ApplicationContext applicationContext;
 
+    private ApplicationContext webApplicationContext;
+
     private WebAppContext webAppContext;
 
     private HandlerContainer container;
@@ -49,17 +51,17 @@ public class JettyProcessingUnitContainer implements ApplicationContextProcessin
         this.webAppContext = webAppContext;
         this.container = container;
         this.jettyHolder = jettyHolder;
+        this.webApplicationContext = ContextLoader.getCurrentWebApplicationContext();
+        if (webApplicationContext == null) {
+            webApplicationContext = applicationContext;
+        }
     }
 
     /**
      * Returns the spring application context this processing unit container wraps.
      */
     public ApplicationContext getApplicationContext() {
-        ApplicationContext webContext = ContextLoader.getCurrentWebApplicationContext();
-        if (webContext != null) {
-            return webContext;
-        }
-        return applicationContext;
+        return webApplicationContext;
     }
 
     /**
@@ -67,17 +69,17 @@ public class JettyProcessingUnitContainer implements ApplicationContextProcessin
      */
     public void close() throws CannotCloseContainerException {
 
-        if (!webAppContext.isRunning())
-            return;
+        if (webAppContext.isRunning()) {
+            try {
+                webAppContext.stop();
+                webAppContext.destroy();
+            } catch (Exception e) {
+                logger.warn("Failed to stop/destroy web context", e);
+            }
 
-        try {
-            webAppContext.stop();
-        } catch (Exception e) {
-            logger.warn("Failed to stop web context", e);
-        }
-
-        if (container != null) {
-            container.removeHandler(webAppContext);
+            if (container != null) {
+                container.removeHandler(webAppContext);
+            }
         }
 
         // close the application context anyhow (it might be closed by the webapp context, but it

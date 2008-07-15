@@ -312,7 +312,14 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             webAppContext.setAttribute(BEAN_LEVEL_PROPERTIES_CONTEXT, beanLevelProperties);
 
             // allow aliases so load balancing will work on static content
-            webAppContext.getInitParams().put("org.mortbay.jetty.servlet.Default.aliases", "true");
+            if (!webAppContext.getInitParams().containsKey("org.mortbay.jetty.servlet.Default.aliases")) {
+                webAppContext.getInitParams().put("org.mortbay.jetty.servlet.Default.aliases", "true");
+            }
+            // when using file mapped buffers, jetty does not release the files when closing the web application
+            // resulting in not being able to deploy again the application (failure to write the file again)
+            if (!webAppContext.getInitParams().containsKey("org.mortbay.jetty.servlet.Default.useFileMappedBuffer")) {
+                webAppContext.getInitParams().put("org.mortbay.jetty.servlet.Default.useFileMappedBuffer", "false");
+            }
 
             String[] beanNames = applicationContext.getBeanDefinitionNames();
             for (String beanName : beanNames) {
