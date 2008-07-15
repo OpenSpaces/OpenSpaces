@@ -16,9 +16,28 @@
 
 package org.openspaces.pu.container.servicegrid;
 
-import com.gigaspaces.start.Locator;
-import com.j_spaces.core.IJSpace;
-import com.j_spaces.core.client.SpaceURL;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.rmi.MarshalledObject;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.core.SLA;
@@ -50,27 +69,11 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.rmi.MarshalledObject;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import com.gigaspaces.cluster.activeelection.SpaceMode;
+import com.gigaspaces.start.Locator;
+import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
+import com.j_spaces.core.client.SpaceURL;
 
 /**
  * @author kimchy
@@ -103,6 +106,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         contextClassLoader = Thread.currentThread().getContextClassLoader();
     }
 
+    @Override
     public void initialize(ServiceBeanContext context) throws Exception {
         org.openspaces.pu.sla.SLA sla = getSLA(context);
         if (sla.getMonitors() != null) {
@@ -117,6 +121,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         super.initialize(context);
     }
 
+    @Override
     public void destroy() {
         for (WatchTask watchTask : watchTasks) {
             watchRegistry.deregister(watchTask.getWatch());
@@ -125,6 +130,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         super.destroy();
     }
 
+    @Override
     public void advertise() throws IOException {
         String springXML = (String) context.getInitParameter("pu");
         clusterGroup = Integer.parseInt((String) context.getInitParameter("clusterGroup"));
@@ -160,6 +166,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         super.advertise();
     }
 
+    @Override
     public void unadvertise() {
         super.unadvertise();
 
@@ -219,7 +226,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         logger.info(logMessage("ClusterInfo [" + clusterInfo + "]"));
 
         MarshalledObject beanLevelPropertiesMarshObj =
-                (MarshalledObject) getServiceBeanContext().getInitParameter("beanLevelProperties");
+            (MarshalledObject) getServiceBeanContext().getInitParameter("beanLevelProperties");
         BeanLevelProperties beanLevelProperties = null;
         if (beanLevelPropertiesMarshObj != null) {
             beanLevelProperties = (BeanLevelProperties) beanLevelPropertiesMarshObj.get();
@@ -394,6 +401,17 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         return spaces;
     }
 
+    /**
+     * @return A list of {@link SpaceMode Space modes}; An empty array if there are no spaces.
+     */
+    public SpaceMode[] listSpacesModes() throws RemoteException {
+        SpaceMode[] spacesModes = new SpaceMode[spaces.length];
+        for (int i=0; i<spaces.length; ++i){
+            spacesModes[i] = ((IInternalRemoteJSpaceAdmin)spaces[i].getAdmin()).getSpaceMode();
+        }
+        return spacesModes;
+    }
+
     private int getMaxServiceCount(String[] args) {
         int count = -1;
         for (String arg : args) {
@@ -416,11 +434,11 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private int getSLAMax(ServiceBeanContext context) {
         int max = -1;
         ServiceLevelAgreements slas =
-                context.getServiceElement().getServiceLevelAgreements();
+            context.getServiceElement().getServiceLevelAgreements();
         SLA[] spaceSLAs = slas.getServiceSLAs();
         for (SLA spaceSLA : spaceSLAs) {
             int count =
-                    getMaxServiceCount(spaceSLA.getConfigArgs());
+                getMaxServiceCount(spaceSLA.getConfigArgs());
             if (count != -1) {
                 max = count;
                 break;
@@ -435,9 +453,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private class WatchTask implements Runnable {
 
-        private Monitor monitor;
+        private final Monitor monitor;
 
-        private Watch watch;
+        private final Watch watch;
 
         public WatchTask(Monitor monitor, Watch watch) {
             this.monitor = monitor;
