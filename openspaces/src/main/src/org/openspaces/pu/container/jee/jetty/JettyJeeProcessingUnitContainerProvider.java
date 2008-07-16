@@ -91,6 +91,17 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
 
     private File deployPath;
 
+
+    private static final ThreadLocal<ApplicationContext> currentApplicationContext = new ThreadLocal<ApplicationContext>();
+
+    public static ApplicationContext getCurrentApplicationContext() {
+        return currentApplicationContext.get();
+    }
+
+    private static void setCurrentApplicationContext(ApplicationContext applicationContext) {
+        currentApplicationContext.set(applicationContext);
+    }
+
     /**
      * Sets Spring parent {@link org.springframework.context.ApplicationContext} that will be used
      * when constructing this processing unit application context.
@@ -302,6 +313,8 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
         }
 
         try {
+            setCurrentApplicationContext(applicationContext);
+
             WebAppContext webAppContext = (WebAppContext) applicationContext.getBean("webAppContext");
 
             webAppContext.setExtractWAR(true);
@@ -362,6 +375,8 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                 logger.debug("Failed to stop jetty after an error occured, ignoring", e);
             }
             throw new CannotCreateContainerException("Failed to start web application", e);
+        } finally {
+            setCurrentApplicationContext(null);
         }
     }
 }
