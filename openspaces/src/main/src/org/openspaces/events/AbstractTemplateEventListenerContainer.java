@@ -62,6 +62,7 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
                     }
                 });
                 if (ref.get() != null) {
+                    ref.get().setAccessible(true);
                     try {
                         setTemplate(ref.get().invoke(listener));
                     } catch (Exception e) {

@@ -233,6 +233,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTemp
                     }
                 });
                 if (ref.get() != null) {
+                    ref.get().setAccessible(true);
                     try {
                         setReceiveOperationHandler((ReceiveOperationHandler) ref.get().invoke(getActualEventListener()));
                     } catch (Exception e) {
@@ -255,6 +256,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTemp
                 }
             });
             if (ref.get() != null) {
+                ref.get().setAccessible(true);
                 try {
                     setTriggerOperationHandler((TriggerOperationHandler) ref.get().invoke(getActualEventListener()));
                 } catch (Exception e) {
