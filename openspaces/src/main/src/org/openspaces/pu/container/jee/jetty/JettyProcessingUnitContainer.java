@@ -27,6 +27,10 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.web.context.ContextLoader;
 
 /**
+ * The actual contianer simply holding the jetty web application context, the application context,
+ * and the {@link org.openspaces.pu.container.jee.jetty.JettyHolder}. They are used when closing
+ * this container.
+ *
  * @author kimchy
  */
 public class JettyProcessingUnitContainer implements ApplicationContextProcessingUnitContainer {
@@ -43,8 +47,6 @@ public class JettyProcessingUnitContainer implements ApplicationContextProcessin
 
     private JettyHolder jettyHolder;
 
-    /**
-     */
     public JettyProcessingUnitContainer(ApplicationContext applicationContext, WebAppContext webAppContext,
                                         HandlerContainer container, JettyHolder jettyHolder) {
         this.applicationContext = applicationContext;
@@ -65,7 +67,7 @@ public class JettyProcessingUnitContainer implements ApplicationContextProcessin
     }
 
     /**
-     * Closes the processing unit container by destroying the Spring application context.
+     * Closes the processing unit container by destroying the web application and the Spring application context.
      */
     public void close() throws CannotCloseContainerException {
 

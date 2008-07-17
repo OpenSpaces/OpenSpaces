@@ -21,15 +21,33 @@ import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer
 import java.io.File;
 
 /**
+ * An extension to the {@link org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider}
+ * that can handle JEE processing units.
+ *
  * @author kimchy
  */
 public interface JeeProcessingUnitContainerProvider extends ApplicationContextProcessingUnitContainerProvider {
 
+    /**
+     * The {@link javax.servlet.ServletContext} key under which the {@link org.openspaces.core.cluster.ClusterInfo}
+     * is stored.
+     */
     public static final String CLUSTER_INFO_CONTEXT = "clusterInfo";
 
+    /**
+     * The {@link javax.servlet.ServletContext} key under which the {@link org.openspaces.core.properties.BeanLevelProperties}
+     * is stored.
+     */
     public static final String BEAN_LEVEL_PROPERTIES_CONTEXT = "beanLevelProperties";
 
+    /**
+     * The {@link javax.servlet.ServletContext} key under which the {@link org.springframework.context.ApplicationContext}
+     * (loaded from the <code>pu.xml</code>) is stored.
+     */
     public static final String APPLICATION_CONTEXT_CONTEXT = "applicationContext";
-    
+
+    /**
+     * Sets the path where the jee deployment was extracted to.
+     */
     void setDeployPath(File warPath);
 }

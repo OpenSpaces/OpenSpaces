@@ -53,6 +53,40 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * An implementation of {@link org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider} that
+ * can run web applications (war files) using Jetty.
+ *
+ * <p>The implementation uses a specific Spring context xml to configure and load Jetty. This spring
+ * context xml is different than the optional <code>pu.xml</code> (which is also loaded if exists).
+ *
+ * <p>The jetty xml configuration is loaded from {@link #DEFAULT_JETTY_PU} location if it exists. If
+ * it does not exists, two defaults exists, one is the <code>jetty.plain.pu.xml</code> and the other
+ * is <code>jetty.shared.xml</code>. By default, if nothing is passed, the <code>jetty.plain.xml<code>
+ * is loaded.
+ *
+ * <p>The difference between plain and shared mode is only indicated by the buit in jerry spring
+ * application context. The plain mode starts a jetty instance per web application instance. The
+ * shared mode uses the same jetty instance for all web applications. The default is plain mode
+ * as it is usually the simpler and preferred way to use it.
+ *
+ * <p>The web application started stores within the web servlet context several objects. It stores
+ * all the beans defined within the optional <code>pu.xml</code> under their respective bean
+ * names (this allows to define a space within the <code>pu.xml</code> and then get it from within
+ * the servlet context). Other objects, such as the {@link org.openspaces.core.cluster.ClusterInfo},
+ * {@link BeanLevelProperties}, and the acutal {@link ApplicationContext} are also passed to the
+ * servlet context.
+ *
+ * <p>Post processing of the <code>web.xml</code> and <code>jetty-web.xml</code> is perfomed allowing
+ * to use <code>${...}</code> notation within them (for example, using system proeprties, deployed
+ * properties, or <code>${clusterInfo...}</code>). 
+ *
+ * <p>JMX in jetty can be enabled by passing a deployment property {@link #JETTY_JMX_PROP}. If set
+ * to <code>true</code> jetty will be configured with JMX. In plain mode, where there can be more
+ * than one instnace of jetty within the same JVM, the domain each instnace will be registed under
+ * will be <code>gigaspaces.jetty.${clusterInfo.name}.${clusterInfo.runningNumberOffset1}</code>.
+ * In shraed mode, where there is only one instance of jetty in a single JVM, jetty JMX will be registered
+ * with a domain called <code>gigaspaces.jetty</code>.
+ *
  * @author kimchy
  */
 public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUnitContainerProvider {
@@ -61,11 +95,18 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
         System.setProperty("org.mortbay.log.class", JdkLogger.class.getName());
     }
 
+    private static final Log logger = LogFactory.getLog(JettyJeeProcessingUnitContainerProvider.class);
+
+
+    /**
+     * The optional location where a jetty spring application context (responsible for configuring
+     * jetty) will be loaded (within the processing unit). If does not exists, will load either the
+     * plain or shared built in jetty configurations (controlled by {@link #JETTY_INSTANCE_PROP})
+     * defaulting to plain.
+     */
     public final static String DEFAULT_JETTY_PU = "/META-INF/spring/jetty.pu.xml";
 
     public final static String INTERNAL_JETTY_PU_PREFIX = "/org/openspaces/pu/container/jee/jetty/jetty.";
-
-    public final static String PU_SUFFIX = ".pu.xml";
 
     public final static String INSTANCE_PLAIN = "plain";
 
@@ -75,9 +116,11 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
 
     public static final String JETTY_INSTANCE_PROP = "jetty.instance";
 
+    /**
+     * The deployment property controlling if JMX is enabled or not. Defaults to <code>false</code>
+     * (JMX is disabled).
+     */
     public static final String JETTY_JMX_PROP = "jetty.jmx";
-
-    private static final Log logger = LogFactory.getLog(JettyJeeProcessingUnitContainerProvider.class);
 
     private ApplicationContext parentContext;
 
@@ -94,10 +137,21 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
 
     private static final ThreadLocal<ApplicationContext> currentApplicationContext = new ThreadLocal<ApplicationContext>();
 
+    /**
+     * Allows to get the current application context (loaded from <code>pu.xml</code>) during web application
+     * startup. Can be used to access beans defined within it (like a Space) by components loaded (such as
+     * session storage). Note, this is only applicable during web application startup. It is cleared right
+     * afterwards.
+     */
     public static ApplicationContext getCurrentApplicationContext() {
         return currentApplicationContext.get();
     }
 
+    /**
+     * Intenrall used to set the applicationn context loaded from the <code>pu.xml</code> on a thread local
+     * so components within the web container (such as session storge) will be able to access it during
+     * startup time of the web application using {@link #getCurrentApplicationContext()}.
+     */
     private static void setCurrentApplicationContext(ApplicationContext applicationContext) {
         currentApplicationContext.set(applicationContext);
     }
@@ -164,12 +218,15 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
         }
     }
 
+    /**
+     * Sets the deploy path where the exploded war jetty will work with is located.
+     */
     public void setDeployPath(File warPath) {
         this.deployPath = warPath;
     }
 
     /**
-     *
+     * See the header javadoc.
      */
     public ProcessingUnitContainer createContainer() throws CannotCreateContainerException {
         if (configResources.size() == 0) {
@@ -183,7 +240,7 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
         Resource jettyPuResource = new ClassPathResource(DEFAULT_JETTY_PU);
         if (!jettyPuResource.exists()) {
             String instanceProp = beanLevelProperties.getContextProperties().getProperty(JETTY_INSTANCE_PROP, INSTANCE_PLAIN);
-            String defaultLocation = System.getProperty(JETTY_LOCATION_PREFIX_SYSPROP, INTERNAL_JETTY_PU_PREFIX) + instanceProp + PU_SUFFIX;
+            String defaultLocation = System.getProperty(JETTY_LOCATION_PREFIX_SYSPROP, INTERNAL_JETTY_PU_PREFIX) + instanceProp + ".pu.xml";
             jettyPuResource = new ClassPathResource(defaultLocation);
             if (!jettyPuResource.exists()) {
                 throw new CannotCreateContainerException("Failed to read internal pu file [" + defaultLocation + "] as well as user defined [" + DEFAULT_JETTY_PU + "]");
@@ -284,7 +341,7 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             MBeanContainer mBeanContainer = new MBeanContainer(mBeanServer);
             String domain = "gigaspaces.jetty";
             if (!jettyHolder.isSingleInstance()) {
-                domain += "." + clusterInfo.getRunningNumberOffset1();
+                domain += "." + clusterInfo.getName() + "." + clusterInfo.getRunningNumberOffset1();
             }
             mBeanContainer.setDomain(domain);
             jettyHolder.getServer().getContainer().addEventListener(mBeanContainer);
