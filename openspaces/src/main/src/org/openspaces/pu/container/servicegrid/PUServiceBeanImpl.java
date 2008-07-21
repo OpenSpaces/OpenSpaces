@@ -402,11 +402,12 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     /**
-     * @return A list of {@link SpaceMode Space modes}; An empty array if there are no spaces.
+     * @return A list of {@link SpaceMode space modes}; An empty array if there are no spaces.
      */
     public SpaceMode[] listSpacesModes() throws RemoteException {
-        SpaceMode[] spacesModes = new SpaceMode[spaces.length];
-        for (int i = 0; i < spaces.length; ++i) {
+        final int length = spaces == null ? 0 : spaces.length;
+        SpaceMode[] spacesModes = new SpaceMode[length];
+        for (int i = 0; i < length; ++i) {
             spacesModes[i] = ((IInternalRemoteJSpaceAdmin) spaces[i].getAdmin()).getSpaceMode();
         }
         return spacesModes;
