@@ -16,28 +16,12 @@
 
 package org.openspaces.pu.container.servicegrid;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.rmi.MarshalledObject;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
+import com.gigaspaces.cluster.activeelection.SpaceMode;
+import com.gigaspaces.start.Locator;
+import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
+import com.j_spaces.core.client.SpaceURL;
+import net.jini.core.lookup.ServiceID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.core.SLA;
@@ -69,11 +53,27 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
 
-import com.gigaspaces.cluster.activeelection.SpaceMode;
-import com.gigaspaces.start.Locator;
-import com.j_spaces.core.IJSpace;
-import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
-import com.j_spaces.core.client.SpaceURL;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.rmi.MarshalledObject;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * @author kimchy
@@ -226,7 +226,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         logger.info(logMessage("ClusterInfo [" + clusterInfo + "]"));
 
         MarshalledObject beanLevelPropertiesMarshObj =
-            (MarshalledObject) getServiceBeanContext().getInitParameter("beanLevelProperties");
+                (MarshalledObject) getServiceBeanContext().getInitParameter("beanLevelProperties");
         BeanLevelProperties beanLevelProperties = null;
         if (beanLevelPropertiesMarshObj != null) {
             beanLevelProperties = (BeanLevelProperties) beanLevelPropertiesMarshObj.get();
@@ -406,10 +406,20 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
      */
     public SpaceMode[] listSpacesModes() throws RemoteException {
         SpaceMode[] spacesModes = new SpaceMode[spaces.length];
-        for (int i=0; i<spaces.length; ++i){
-            spacesModes[i] = ((IInternalRemoteJSpaceAdmin)spaces[i].getAdmin()).getSpaceMode();
+        for (int i = 0; i < spaces.length; ++i) {
+            spacesModes[i] = ((IInternalRemoteJSpaceAdmin) spaces[i].getAdmin()).getSpaceMode();
         }
         return spacesModes;
+    }
+
+    public PUServiceDetails[] listServiceDetails() throws RemoteException {
+        ArrayList<PUServiceDetails> serviceDetails = new ArrayList<PUServiceDetails>();
+        for (IJSpace space : spaces) {
+            SpaceURL spaceURL = space.getFinderURL();
+            ServiceID serviceID = new ServiceID(space.getReferentUuid().getMostSignificantBits(), space.getReferentUuid().getLeastSignificantBits());
+            serviceDetails.add(new SpacePUServiceDetails(spaceURL.getMemberName(), spaceURL.getContainerName(), serviceID, ((IInternalRemoteJSpaceAdmin) space.getAdmin()).getSpaceMode()));
+        }
+        return serviceDetails.toArray(new PUServiceDetails[serviceDetails.size()]);
     }
 
     private int getMaxServiceCount(String[] args) {
@@ -434,11 +444,11 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private int getSLAMax(ServiceBeanContext context) {
         int max = -1;
         ServiceLevelAgreements slas =
-            context.getServiceElement().getServiceLevelAgreements();
+                context.getServiceElement().getServiceLevelAgreements();
         SLA[] spaceSLAs = slas.getServiceSLAs();
         for (SLA spaceSLA : spaceSLAs) {
             int count =
-                getMaxServiceCount(spaceSLA.getConfigArgs());
+                    getMaxServiceCount(spaceSLA.getConfigArgs());
             if (count != -1) {
                 max = count;
                 break;

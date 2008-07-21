@@ -16,12 +16,12 @@
 
 package org.openspaces.pu.container.servicegrid;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.SpaceURL;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
 /**
  * @author kimchy
@@ -43,4 +43,6 @@ public interface PUServiceBean extends Remote {
     IJSpace[] listSpaces() throws RemoteException;
 
     SpaceMode[] listSpacesModes() throws RemoteException;
+
+    PUServiceDetails[] listServiceDetails() throws RemoteException;
 }
