@@ -23,6 +23,9 @@ public class SpacePUServiceDetails implements PUServiceDetails, Externalizable {
 
     private SpaceMode spaceMode;
 
+    public SpacePUServiceDetails() {
+    }
+
     public SpacePUServiceDetails(String name, String containerName, ServiceID serviceID, SpaceMode spaceMode) {
         this.name = name;
         this.containerName = containerName;
