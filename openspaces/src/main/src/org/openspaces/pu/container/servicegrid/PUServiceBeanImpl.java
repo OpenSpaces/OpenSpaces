@@ -417,7 +417,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         for (IJSpace space : spaces) {
             SpaceURL spaceURL = space.getFinderURL();
             ServiceID serviceID = new ServiceID(space.getReferentUuid().getMostSignificantBits(), space.getReferentUuid().getLeastSignificantBits());
-            serviceDetails.add(new SpacePUServiceDetails(spaceURL.getMemberName(), spaceURL.getContainerName(), serviceID, ((IInternalRemoteJSpaceAdmin) space.getAdmin()).getSpaceMode()));
+            serviceDetails.add(new SpacePUServiceDetails(spaceURL.getSpaceName(), spaceURL.getContainerName(), serviceID, ((IInternalRemoteJSpaceAdmin) space.getAdmin()).getSpaceMode()));
         }
         return serviceDetails.toArray(new PUServiceDetails[serviceDetails.size()]);
     }
