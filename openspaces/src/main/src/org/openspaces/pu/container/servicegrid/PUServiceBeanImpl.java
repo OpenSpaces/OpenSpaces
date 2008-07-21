@@ -249,7 +249,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         if (webXml != null) {
             webXml.close();
             JeeProcessingUnitContainerProvider jeeFactory = (JeeProcessingUnitContainerProvider) createContainerProvider(beanLevelProperties, JettyJeeProcessingUnitContainerProvider.class.getName());
-            String deployName = puName + "_" + clusterInfo.getSuffix();
+            String deployName = puName + "_" + clusterInfo.getRunningNumberOffset1();
 
             String deployedProcessingUnitsLocation = workLocation.getAbsolutePath() + "/deployed-processing-units";
 
