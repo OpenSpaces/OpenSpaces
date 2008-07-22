@@ -39,6 +39,7 @@ import org.openspaces.core.util.SpaceUtils;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainerProvider;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
+import org.openspaces.pu.container.jee.JeeProcessingUnitContainer;
 import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
 import org.openspaces.pu.container.jee.jetty.JettyJeeProcessingUnitContainerProvider;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
@@ -419,6 +420,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             SpaceURL spaceURL = space.getFinderURL();
             ServiceID serviceID = new ServiceID(space.getReferentUuid().getMostSignificantBits(), space.getReferentUuid().getLeastSignificantBits());
             serviceDetails.add(new SpacePUServiceDetails(spaceURL.getSpaceName(), spaceURL.getContainerName(), serviceID, ((IInternalRemoteJSpaceAdmin) space.getAdmin()).getSpaceMode()));
+        }
+        if (container instanceof JeeProcessingUnitContainer) {
+            serviceDetails.add(((JeeProcessingUnitContainer) container).getServiceDetails());
         }
         return serviceDetails.toArray(new PUServiceDetails[serviceDetails.size()]);
     }

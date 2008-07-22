@@ -21,7 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.openspaces.pu.container.CannotCloseContainerException;
-import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
+import org.openspaces.pu.container.servicegrid.JeePUServiceDetails;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.web.context.ContextLoader;
@@ -33,7 +33,7 @@ import org.springframework.web.context.ContextLoader;
  *
  * @author kimchy
  */
-public class JettyProcessingUnitContainer implements ApplicationContextProcessingUnitContainer {
+public class JettyProcessingUnitContainer implements org.openspaces.pu.container.jee.JeeProcessingUnitContainer {
 
     private static final Log logger = LogFactory.getLog(JettyProcessingUnitContainer.class);
 
@@ -64,6 +64,12 @@ public class JettyProcessingUnitContainer implements ApplicationContextProcessin
      */
     public ApplicationContext getApplicationContext() {
         return webApplicationContext;
+    }
+
+    public JeePUServiceDetails getServiceDetails() {
+        return new JeePUServiceDetails(jettyHolder.getServer().getConnectors()[0].getPort(),
+                jettyHolder.getServer().getConnectors()[0].getConfidentialPort(), webAppContext.getContextPath(),
+                jettyHolder.isSingleInstance(), "jetty");
     }
 
     /**
