@@ -94,8 +94,8 @@ public class POMGenerator {
         BufferedReader br = new BufferedReader(fr);
         StringBuilder sb = new StringBuilder();
         String line;
-        String openTag = "<gsVersion>";
-        String closeTag = "</gsVersion>";
+        String openTag = "<pluginVersion>";
+        String closeTag = "</pluginVersion>";
         String newLine = "\n";
         int index = 0;
         boolean firstVersionFound = false;
