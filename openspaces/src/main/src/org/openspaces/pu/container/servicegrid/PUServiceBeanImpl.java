@@ -132,7 +132,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     @Override
-    public void advertise() throws IOException {
+    public void doAdvertise() throws IOException {
         String springXML = (String) context.getInitParameter("pu");
         clusterGroup = Integer.parseInt((String) context.getInitParameter("clusterGroup"));
         String sInstanceId = (String) context.getInitParameter("instanceId");
@@ -164,7 +164,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             Thread.currentThread().setContextClassLoader(origClassLoader);
         }
 
-        super.advertise();
+        super.doAdvertise();
     }
 
     @Override
