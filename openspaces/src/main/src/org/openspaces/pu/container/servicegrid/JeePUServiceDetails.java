@@ -22,6 +22,8 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
+ * A service that holds a jee container (such as jetty).
+ *
  * @author kimchy
  */
 public class JeePUServiceDetails implements PUServiceDetails, Externalizable {
