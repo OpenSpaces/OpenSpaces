@@ -57,7 +57,7 @@ public class SpaceAwareSedaService extends SedaService implements ApplicationLis
             // we need to stop here if was not stopped since during dispose it needs
             // to be stopped and we override stop to do nothing
             if (!stopped.get()) {
-                stop();
+                super.stop();
             }
         }
         catch (MuleException e) {

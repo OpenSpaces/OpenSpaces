@@ -19,6 +19,8 @@ package org.openspaces.esb.mule.seda;
 import org.mule.api.MuleEvent;
 import org.mule.api.lifecycle.InitialisationException;
 import org.mule.config.i18n.CoreMessages;
+import org.openspaces.core.SpaceClosedException;
+import org.openspaces.core.SpaceInterruptedException;
 
 import javax.resource.spi.work.Work;
 import javax.resource.spi.work.WorkListener;
@@ -76,11 +78,19 @@ public class OpenSpacesSedaService extends SpaceAwareSedaService implements Work
         if (getQueueTimeout() == null) {
             throw new InitialisationException(CoreMessages.noServiceQueueTimeoutSet(this), this);
         } else {
-            InternalEventEntry entry = (InternalEventEntry) gigaSpace.take(template, getQueueTimeout());
-            if (entry == null) {
+            try {
+                InternalEventEntry entry = (InternalEventEntry) gigaSpace.take(template, getQueueTimeout());
+                if (entry == null) {
+                    return null;
+                }
+                return entry.getEvent();
+            } catch (SpaceInterruptedException e) {
+                // the space is begin shutdown, simply return null
+                return null;
+            } catch (SpaceClosedException e) {
+                // the space is begin shutdown, simply return null
                 return null;
             }
-            return entry.getEvent();
         }
     }
 

@@ -26,6 +26,8 @@ import org.mule.api.service.Service;
 import org.mule.api.transport.Connector;
 import org.mule.transport.PollingReceiverWorker;
 import org.mule.transport.TransactedPollingMessageReceiver;
+import org.openspaces.core.SpaceClosedException;
+import org.openspaces.core.SpaceInterruptedException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -93,18 +95,24 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
         int batchSize = Math.max(1, Math.min(connector.getGigaSpaceObj().count(template), ((maxThreads / 2) - 1)));
 
         // try to get the first event off the queue
-        InternalQueueEntry entry = (InternalQueueEntry) connector.getGigaSpaceObj().take(template, connector.getTimeout());
+        try {
+            InternalQueueEntry entry = (InternalQueueEntry) connector.getGigaSpaceObj().take(template, connector.getTimeout());
 
-        if (entry != null) {
-            // keep first dequeued event
-            messages.add(entry.getMessage());
-            // batch more messages if needed
-            Object[] entries = connector.getGigaSpaceObj().takeMultiple(template, batchSize);
-            if (entries != null) {
-                for (Object entry1 : entries) {
-                    messages.add(((InternalQueueEntry) entry1).getMessage());
+            if (entry != null) {
+                // keep first dequeued event
+                messages.add(entry.getMessage());
+                // batch more messages if needed
+                Object[] entries = connector.getGigaSpaceObj().takeMultiple(template, batchSize);
+                if (entries != null) {
+                    for (Object entry1 : entries) {
+                        messages.add(((InternalQueueEntry) entry1).getMessage());
+                    }
                 }
             }
+        } catch (SpaceInterruptedException e) {
+            // do nothing, we are being stopped
+        } catch (SpaceClosedException e) {
+            // do nothing, we are being stopped
         }
 
         // let our workManager handle the batch of events
