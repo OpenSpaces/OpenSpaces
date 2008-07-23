@@ -35,11 +35,6 @@
         <property name="contextPath" value="${web.context}" />
         <property name="war" value="${jee.deployPath}" />
         <property name="tempDirectory" value="${jee.deployPath}/WEB-INF/work" />
-        <property name="initParams">
-            <map>
-                <entry key="org.mortbay.jetty.servlet.Default.aliases" value="true" />
-            </map>
-        </property>
     </bean>
 
     <bean id="jettyHolder" class="org.openspaces.pu.container.jee.jetty.PlainJettyHolder">
