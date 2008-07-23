@@ -375,7 +375,6 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             WebAppContext webAppContext = (WebAppContext) applicationContext.getBean("webAppContext");
 
             webAppContext.setExtractWAR(true);
-            webAppContext.setCopyWebDir(false);
 
             webAppContext.setAttribute(APPLICATION_CONTEXT_CONTEXT, applicationContext);
             webAppContext.setAttribute(CLUSTER_INFO_CONTEXT, clusterInfo);
