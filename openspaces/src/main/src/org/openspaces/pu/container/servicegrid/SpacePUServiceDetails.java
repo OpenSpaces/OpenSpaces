@@ -23,14 +23,18 @@ public class SpacePUServiceDetails implements PUServiceDetails, Externalizable {
 
     private SpaceMode spaceMode;
 
+    // can be "embedded", "localview", "localcache"
+    private String type;
+
     public SpacePUServiceDetails() {
     }
 
-    public SpacePUServiceDetails(String name, String containerName, ServiceID serviceID, SpaceMode spaceMode) {
+    public SpacePUServiceDetails(String name, String containerName, ServiceID serviceID, SpaceMode spaceMode, String type) {
         this.name = name;
         this.containerName = containerName;
         this.serviceID = serviceID;
         this.spaceMode = spaceMode;
+        this.type = type;
     }
 
     public String getName() {
@@ -49,12 +53,17 @@ public class SpacePUServiceDetails implements PUServiceDetails, Externalizable {
         return spaceMode;
     }
 
+    public String getType() {
+        return type;
+    }
+
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeUTF(name);
         out.writeUTF(containerName);
         out.writeLong(serviceID.getMostSignificantBits());
         out.writeLong(serviceID.getLeastSignificantBits());
         out.writeObject(spaceMode);
+        out.writeUTF(type);
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
@@ -62,5 +71,6 @@ public class SpacePUServiceDetails implements PUServiceDetails, Externalizable {
         containerName = in.readUTF();
         serviceID = new ServiceID(in.readLong(), in.readLong());
         spaceMode = (SpaceMode) in.readObject();
+        type = in.readUTF();
     }
 }
