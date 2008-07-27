@@ -75,9 +75,16 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
 
     private volatile static int totalNumberOfScavangers = 0;
 
-    private volatile static ScheduledFuture scavengerFuture;
+    // not static, we want to schedule one for each instnace of the session manager
+    private volatile ScheduledFuture scavengerFuture;
 
     private static final Object executorMonitor = new Object();
+
+    private volatile int lastSessionCount = -1;
+
+    private volatile long lastCountSessionsTime = System.currentTimeMillis();
+
+    private int countSessionPeriod = 1000 * 60 * 5; // every 5 minutes do the sessions count
 
     /**
      * Start the session manager.
@@ -109,13 +116,13 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
             if (totalNumberOfScavangers == 0) {
                 if (Log.isDebugEnabled()) Log.debug("Starting scavenger with period [" + _scavengePeriodMs + "ms]");
                 executorService = Executors.newScheduledThreadPool(1);
-                scavengerFuture = executorService.scheduleWithFixedDelay(new Runnable() {
-                    public void run() {
-                        scavenge();
-                    }
-                }, _scavengePeriodMs, _scavengePeriodMs, TimeUnit.MILLISECONDS);
             }
             totalNumberOfScavangers++;
+            scavengerFuture = executorService.scheduleWithFixedDelay(new Runnable() {
+                public void run() {
+                    scavenge();
+                }
+            }, _scavengePeriodMs, _scavengePeriodMs, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -127,9 +134,9 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
      */
     public void doStop() throws Exception {
         synchronized (executorMonitor) {
+            scavengerFuture.cancel(true);
             if (--totalNumberOfScavangers == 0) {
                 if (Log.isDebugEnabled()) Log.debug("Stopping scavenger");
-                scavengerFuture.cancel(true);
                 executorService.shutdown();
             }
         }
@@ -156,6 +163,10 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
     public void setScavengePeriod(int seconds) {
         if (seconds <= 0)
             seconds = 60;
+    }
+
+    public void setCountSessionPeriod(int seconds) {
+        this.countSessionPeriod = seconds * 1000;
     }
 
     public void setSpace(IJSpace space) {
@@ -220,14 +231,20 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
     }
 
     public int getSessions() {
-        try {
-            return space.count(new SessionData(), null);
-        } catch (Exception e) {
-            Log.warn("Failed to execute count of sessions", e);
+        if (lastSessionCount == -1 || (System.currentTimeMillis() - lastCountSessionsTime) > countSessionPeriod) {
+            try {
+                lastSessionCount = space.count(new SessionData(), null);
+            } catch (Exception e) {
+                Log.warn("Failed to execute count of sessions", e);
+            }
         }
-        return 0;
+        return lastSessionCount;
     }
 
+    public void resetStats() {
+        lastSessionCount = -1;
+        super.resetStats();
+    }
 
     protected void invalidateSessions() {
         //Do nothing - we don't want to remove and
@@ -339,9 +356,12 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
                 }
             } while (expiredSessions.length > 0);
 
+            // force a count
+            lastSessionCount = -1;
             int count = getSessions();
-            if (count < this._minSessions)
+            if (count < this._minSessions) {
                 this._minSessions = count;
+            }
         } catch (Throwable t) {
             if (t instanceof ThreadDeath)
                 throw ((ThreadDeath) t);
@@ -532,7 +552,12 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
         }
 
         public void writeExternal(ObjectOutput out) throws IOException {
-            out.writeUTF(_id);
+            if (_id == null) {
+                out.writeBoolean(false);
+            } else {
+                out.writeBoolean(true);
+                out.writeUTF(_id);
+            }
             out.writeLong(_accessed);
             out.writeLong(_lastAccessed);
             out.writeLong(_lastSaved);
@@ -553,7 +578,9 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
         }
 
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            _id = in.readUTF();
+            if (in.readBoolean()) {
+                _id = in.readUTF();
+            }
             _accessed = in.readLong();
             _lastAccessed = in.readLong();
             _lastSaved = in.readLong();
