@@ -1,35 +1,41 @@
-// ========================================================================
-// Copyright 2008 Mort Bay Consulting Pty. Ltd.
-// ------------------------------------------------------------------------
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at 
-// http://www.apache.org/licenses/LICENSE-2.0
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-// ========================================================================
+/*
+ * Copyright 2006-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package org.openspaces.jee.sessions.jetty;
 
+import com.gigaspaces.annotation.pojo.SpaceClass;
 import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.annotation.pojo.SpaceRouting;
+import com.j_spaces.core.IJSpace;
+import com.j_spaces.kernel.ConcurrentHashSet;
+import net.jini.core.lease.Lease;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.AbstractSessionManager;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
-import org.openspaces.core.GigaSpace;
-import org.openspaces.core.GigaSpaceConfigurer;
-import org.openspaces.core.space.UrlSpaceConfigurer;
-import org.openspaces.core.space.cache.LocalCacheSpaceConfigurer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.HashSet;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * GigaspacesSessionIdManager
@@ -38,55 +44,14 @@ import java.util.Random;
  * in a data grid "cloud".
  */
 public class GigaSessionIdManager extends AbstractSessionIdManager {
-    
-    protected HashSet<Id> _sessionIds = new HashSet<Id>();
 
-    protected String _spaceUrl;
+    private final Set<Id> sessionIds = new ConcurrentHashSet<Id>();
 
-    protected GigaSpace _space;
-    
-    protected long _waitMsec = 5000L; //time in msec to wait on read operations
+    protected String spaceUrl;
 
-    /**
-     * Id
-     *
-     * Class to hold the session id. This is really only needed
-     * for gigaspaces so that we can annotate routing information etc.
-     */
-    public static class Id {
-        private String _id;
+    protected IJSpace space;
 
-        public Id() {
-        }
-
-        public Id(String id) {
-            _id = id;
-        }
-
-        public void setId(String id) {
-            _id = id;
-        }
-
-        @SpaceId
-        @SpaceRouting
-        public String getId() {
-            return _id;
-        }
-
-        public boolean equals(Object o) {
-            if (o == null)
-                return false;
-            Id targetId = (Id) o;
-
-            if (targetId.getId() == _id)
-                return true;
-
-            if (targetId.getId().equals(_id))
-                return true;
-
-            return false;
-        }
-    }
+    private long lease = Lease.FOREVER;
 
     public GigaSessionIdManager(Server server) {
         super(server);
@@ -97,41 +62,40 @@ public class GigaSessionIdManager extends AbstractSessionIdManager {
     }
 
     public void setSpaceUrl(String url) {
-        _spaceUrl = url;
+        spaceUrl = url;
     }
 
-    public String getSpaceUrl() {
-        return _spaceUrl;
+    public void setSpace(IJSpace space) {
+        this.space = space;
     }
 
-    public void setWaitMs(long msec) {
-        _waitMsec = msec;
+    public IJSpace getSpace() {
+        return space;
     }
 
-
-    public long getWaitMs() {
-        return _waitMsec;
+    /**
+     * Sets the lease in seconds of Session Ids written to the Space.
+     */
+    public void setLease(long lease) {
+        this.lease = lease * 1000;
     }
 
     public void addSession(HttpSession session) {
         if (session == null)
             return;
 
-        synchronized (_sessionIds) {
-            if (session instanceof GigaSessionManager.Session) {
-                String id = ((GigaSessionManager.Session) session).getClusterId();
-                try {
-                    Id theId = new Id(id);
-                    add(theId);
-                    _sessionIds.add(theId);
-                    if (Log.isDebugEnabled()) Log.debug("Added id " + id);
-                }
-                catch (Exception e) {
-                    Log.warn("Problem storing session id=" + id, e);
-                }
-            } else
-                throw new IllegalStateException("Session is not a Gigaspaces session");
-        }
+        if (session instanceof GigaSessionManager.Session) {
+            String id = ((GigaSessionManager.Session) session).getClusterId();
+            try {
+                Id theId = new Id(id);
+                add(theId);
+                sessionIds.add(theId);
+                if (Log.isDebugEnabled()) Log.debug("Added id " + id);
+            } catch (Exception e) {
+                Log.warn("Problem storing session id=" + id, e);
+            }
+        } else
+            throw new IllegalStateException("Session is not a Gigaspaces session");
     }
 
     public String getClusterId(String nodeId) {
@@ -152,18 +116,15 @@ public class GigaSessionIdManager extends AbstractSessionIdManager {
 
         String clusterId = getClusterId(id);
         Id theId = new Id(clusterId);
-        synchronized (_sessionIds) {
-            if (_sessionIds.contains(theId))
-                return true; //optimisation - if this session is one we've been managing, we can check locally
+        if (sessionIds.contains(theId))
+            return true; //optimisation - if this session is one we've been managing, we can check locally
 
-            //otherwise, we need to go to the space to check
-            try {
-                return exists(theId);
-            }
-            catch (Exception e) {
-                Log.warn("Problem checking inUse for id=" + clusterId, e);
-                return false;
-            }
+        //otherwise, we need to go to the space to check
+        try {
+            return exists(theId);
+        } catch (Exception e) {
+            Log.warn("Problem checking inUse for id=" + clusterId, e);
+            return false;
         }
     }
 
@@ -171,15 +132,13 @@ public class GigaSessionIdManager extends AbstractSessionIdManager {
         //take the id out of the list of known sessionids for this node
         removeSession(id);
 
-        synchronized (_sessionIds) {
-            //tell all contexts that may have a session object with this id to
-            //get rid of them
-            Handler[] contexts = _server.getChildHandlersByClass(WebAppContext.class);
-            for (int i = 0; contexts != null && i < contexts.length; i++) {
-                AbstractSessionManager manager = ((AbstractSessionManager) ((WebAppContext) contexts[i]).getSessionHandler().getSessionManager());
-                if (manager instanceof GigaSessionManager) {
-                    ((GigaSessionManager) manager).invalidateSession(id);
-                }
+        //tell all contexts that may have a session object with this id to
+        //get rid of them
+        Handler[] contexts = _server.getChildHandlersByClass(WebAppContext.class);
+        for (int i = 0; contexts != null && i < contexts.length; i++) {
+            AbstractSessionManager manager = ((AbstractSessionManager) ((WebAppContext) contexts[i]).getSessionHandler().getSessionManager());
+            if (manager instanceof GigaSessionManager) {
+                ((GigaSessionManager) manager).invalidateSession(id);
             }
         }
     }
@@ -196,84 +155,105 @@ public class GigaSessionIdManager extends AbstractSessionIdManager {
         if (id == null)
             return;
 
-        synchronized (_sessionIds) {
-            if (Log.isDebugEnabled())
-                Log.debug("Removing session id=" + id);
-            try {
-                Id theId = new Id(id);
-                _sessionIds.remove(theId);
-                delete(theId);
-            }
-            catch (Exception e) {
-                Log.warn("Problem removing session id=" + id, e);
-            }
+        if (Log.isDebugEnabled()) Log.debug("Removing session id=" + id);
+        try {
+            Id theId = new Id(id);
+            sessionIds.remove(theId);
+            delete(theId);
+        } catch (Exception e) {
+            Log.warn("Problem removing session id=" + id, e);
         }
-
     }
 
-
-    public void setSpace(GigaSpace space) {
-        _space = space;
-    }
-
-    public GigaSpace getSpace() {
-        return _space;
-    }
 
     /**
      * Start up the id manager.
      */
     public void doStart() {
         try {
-            if (_space == null)
+            if (space == null) {
                 initSpace();
+            }
             super.doStart();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Log.warn("Problem initialising session ids", e);
             throw new IllegalStateException(e);
         }
     }
 
-    /**
-     * Stop the scavenger.
-     *
-     * @see org.mortbay.component.AbstractLifeCycle#doStop()
-     */
-    public void doStop()
-            throws Exception {
-        super.doStop();
-    }
-
     protected void initSpace()
             throws Exception {
-        if (_spaceUrl == null)
-            throw new IllegalStateException("No url for space");
-
-        UrlSpaceConfigurer usc = new UrlSpaceConfigurer(_spaceUrl);
-        LocalCacheSpaceConfigurer lcsc = new LocalCacheSpaceConfigurer(usc.space());
-        GigaSpaceConfigurer gigaSpaceConfigurer = new GigaSpaceConfigurer(usc.space());
-        _space = gigaSpaceConfigurer.gigaSpace();
+        if (space != null) {
+            return;
+        }
+        if (spaceUrl == null) {
+            throw new IllegalStateException("No url for space and actual instnace not injected");
+        }
+        space = JettySpaceLocator.locate(spaceUrl);
     }
 
-    protected void add(Id id)
-            throws Exception {
-        _space.write(id);
+    protected void add(Id id) throws Exception {
+        space.write(id, null, lease);
     }
 
-
-    protected void delete(Id id)
-            throws Exception {
-        _space.takeIfExists(id, getWaitMs());
+    protected void delete(Id id) throws Exception {
+        space.take(id, null, 0);
         if (Log.isDebugEnabled()) Log.debug("Deleted id from space: id=" + id);
     }
 
-    protected boolean exists(Id id)
-            throws Exception {
-        Id idFromSpace = (Id) _space.readIfExists(id, getWaitMs());
-        if (Log.isDebugEnabled()) Log.debug("Id=" + id + (idFromSpace == null ? "does not exist" : "exists"));
-        if (idFromSpace == null)
-            return false;
-        return true;
+    protected boolean exists(Id id) throws Exception {
+        Id idFromSpace = (Id) space.read(id, null, 0);
+        if (Log.isDebugEnabled()) Log.debug("Id [" + id + "] " + (idFromSpace == null ? "does not exist" : "exists") + " in space");
+        return idFromSpace != null;
+    }
+
+    /**
+     * Id
+     *
+     * Class to hold the session id. This is really only needed
+     * for gigaspaces so that we can annotate routing information etc.
+     */
+    @SpaceClass(persist = false)
+    public static class Id implements Externalizable {
+
+        private String id;
+
+        public Id() {
+        }
+
+        public Id(String id) {
+            this.id = id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        @SpaceId(autoGenerate = false)
+        @SpaceRouting
+        public String getId() {
+            return this.id;
+        }
+
+        public boolean equals(Object o) {
+            if (o == null) {
+                return false;
+            }
+            Id targetId = (Id) o;
+            return targetId.getId().equals(id);
+
+        }
+
+        public String toString() {
+            return "SessionID [" + id + "]";
+        }
+
+        public void writeExternal(ObjectOutput out) throws IOException {
+            out.writeUTF(id);
+        }
+
+        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            in.readUTF();
+        }
     }
 }

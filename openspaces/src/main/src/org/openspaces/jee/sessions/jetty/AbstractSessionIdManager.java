@@ -1,3 +1,19 @@
+/*
+ * Copyright 2006-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openspaces.jee.sessions.jetty;
 
 import org.mortbay.component.AbstractLifeCycle;
@@ -10,6 +26,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Random;
 
+/**
+ * Base class for session id manager taken from later versions of Jetty.
+ */
 public abstract class AbstractSessionIdManager extends AbstractLifeCycle implements SessionIdManager {
 
     private final static String __NEW_SESSION_ID = "org.mortbay.jetty.newSessionId";
@@ -86,7 +105,9 @@ public abstract class AbstractSessionIdManager extends AbstractLifeCycle impleme
 
                 //add in the id of the node to ensure unique id across cluster
                 //NOTE this is different to the node suffix which denotes which node the request was received on
-                id = _workerName + id;
+                if (_workerName != null) {
+                    id = _workerName + id;
+                }
             }
 
             request.setAttribute(__NEW_SESSION_ID, id);
