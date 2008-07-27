@@ -288,6 +288,7 @@ public class Deploy {
                 }
                 resource = new DefaultResourceLoader() {
                     // override the default load from the classpath to load from the file system
+                    @Override
                     protected Resource getResourceByPath(String path) {
                         return new FileSystemResource(path);
                     }
@@ -504,6 +505,8 @@ public class Deploy {
         if (sla.getMaxInstancesPerMachine() > 0) {
             element.setMaxPerPhysicalMachine(sla.getMaxInstancesPerMachine());
         }
+        
+        element.setTotalNumberOfServices(sla.getNumberOfInstances());
 
         //put jars
         ClassBundle classBundle = element.getComponentBundle();
