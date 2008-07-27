@@ -552,6 +552,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
         }
 
         public void writeExternal(ObjectOutput out) throws IOException {
+            // TODO create a null bitmap (-1 is null for longs)
             if (_id == null) {
                 out.writeBoolean(false);
             } else {
