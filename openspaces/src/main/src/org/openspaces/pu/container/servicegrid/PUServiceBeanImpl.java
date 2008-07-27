@@ -313,7 +313,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         for (Iterator it = map.values().iterator(); it.hasNext();) {
             IJSpace space = (IJSpace) it.next();
             if (space instanceof ISpaceLocalCache) {
-                allSpacesList.add(space)
+                allSpacesList.add(space);
             } else {
                 if (!SpaceUtils.isRemoteProtocol(space)) {
                     embeddedSpacesList.add(space);
