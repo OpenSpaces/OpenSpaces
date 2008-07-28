@@ -54,14 +54,11 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
 
     private long lease = Lease.FOREVER;
 
-    protected int _scavengePeriodMs = 1000 * 60 * 20; //20mins
+    protected int _scavengePeriodMs = 1000 * 60 * 5; //5mins
 
     protected int _scavengeCount = 0;
 
     protected int _savePeriodMs = 60 * 1000; //60 sec
-
-    protected SQLQuery<SessionData> _query;
-
 
     private volatile static ScheduledExecutorService executorService;
 
@@ -89,8 +86,6 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
                 throw new IllegalStateException("No url for space");
             space = JettySpaceLocator.locate(spaceUrl);
         }
-
-        _query = new SQLQuery<SessionData>(SessionData.class, "expiryTime < ?");
 
         if (_sessionIdManager == null) {
             _sessionIdManager = new GigaSessionIdManager(getSessionHandler().getServer());
@@ -307,14 +302,12 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
         if (!(abstractSession instanceof GigaSessionManager.Session))
             throw new IllegalStateException("Not a GigaspacesSessionManager.Session " + abstractSession);
 
-        synchronized (this) {
-            GigaSessionManager.Session session = (GigaSessionManager.Session) abstractSession;
+        GigaSessionManager.Session session = (GigaSessionManager.Session) abstractSession;
 
-            try {
-                add(session._data);
-            } catch (Exception e) {
-                Log.warn("Problem writing new SessionData to space ", e);
-            }
+        try {
+            add(session._data);
+        } catch (Exception e) {
+            Log.warn("Problem writing new SessionData to space ", e);
         }
     }
 
@@ -387,8 +380,9 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
     }
 
     protected Object[] findExpiredSessions(long timestamp) throws Exception {
-        _query.setParameter(1, timestamp);
-        return space.takeMultiple(_query, null, 100);
+        SQLQuery query = new SQLQuery<SessionData>(SessionData.class, "expiryTime < ?");
+        query.setParameter(1, timestamp);
+        return space.takeMultiple(query, null, 100);
     }
 
     /**
@@ -408,7 +402,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
             super(request);
             _data = new SessionData(_clusterId);
             _data.setMaxIdleMs(_dftMaxIdleSecs * 1000);
-            _data.setExpiryTime(_maxIdleMs < 0 ? 0 : (System.currentTimeMillis() + _maxIdleMs));
+            _data.setExpiryTime(_maxIdleMs < 0 ? Long.MAX_VALUE : (System.currentTimeMillis() + _maxIdleMs));
             _data.setCookieSet(0);
             if (_data.getAttributeMap() == null)
                 newAttributeMap();
@@ -454,7 +448,15 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
             super.access(time);
             _data.setLastAccessed(_data.getAccessed());
             _data.setAccessed(time);
-            _data.setExpiryTime(_maxIdleMs < 0 ? 0 : (time + _maxIdleMs));
+            _data.setExpiryTime(_maxIdleMs < 0 ? Long.MAX_VALUE : (time + _maxIdleMs));
+        }
+
+        /**
+         * We override it here so we can reset the expiry time based on the
+         */
+        public void setMaxInactiveInterval(int seconds) {
+            super.setMaxInactiveInterval(seconds);
+            _data.setExpiryTime(_maxIdleMs < 0 ? Long.MAX_VALUE : (System.currentTimeMillis() + _maxIdleMs));
         }
 
         /**

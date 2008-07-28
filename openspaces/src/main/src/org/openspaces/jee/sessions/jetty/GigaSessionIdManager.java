@@ -47,8 +47,6 @@ public class GigaSessionIdManager extends AbstractSessionIdManager {
 
     private final Set<Id> sessionIds = new ConcurrentHashSet<Id>();
 
-    protected String spaceUrl;
-
     protected IJSpace space;
 
     private long lease = Lease.FOREVER;
@@ -59,10 +57,6 @@ public class GigaSessionIdManager extends AbstractSessionIdManager {
 
     public GigaSessionIdManager(Server server, Random random) {
         super(server, random);
-    }
-
-    public void setSpaceUrl(String url) {
-        spaceUrl = url;
     }
 
     public void setSpace(IJSpace space) {
@@ -181,15 +175,10 @@ public class GigaSessionIdManager extends AbstractSessionIdManager {
         }
     }
 
-    protected void initSpace()
-            throws Exception {
-        if (space != null) {
-            return;
+    protected void initSpace() throws Exception {
+        if (space == null) {
+            throw new IllegalStateException("No space configured");
         }
-        if (spaceUrl == null) {
-            throw new IllegalStateException("No url for space and actual instnace not injected");
-        }
-        space = JettySpaceLocator.locate(spaceUrl);
     }
 
     protected void add(Id id) throws Exception {

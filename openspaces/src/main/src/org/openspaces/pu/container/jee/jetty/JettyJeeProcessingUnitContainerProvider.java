@@ -24,6 +24,7 @@ import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerWrapper;
+import org.mortbay.jetty.servlet.HashSessionIdManager;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.management.MBeanContainer;
 import org.openspaces.core.cluster.ClusterInfo;
@@ -421,6 +422,16 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                     webAppContext.start();
                 } catch (Exception e) {
                     throw new CannotCreateContainerException("Failed to start web app context", e);
+                }
+            }
+            // automatically set the worker name
+            if (webAppContext.getSessionHandler().getSessionManager().getIdManager() instanceof HashSessionIdManager) {
+                HashSessionIdManager sessionIdManager = (HashSessionIdManager) webAppContext.getSessionHandler().getSessionManager().getIdManager();
+                if (sessionIdManager.getWorkerName() == null) {
+                    sessionIdManager.setWorkerName(clusterInfo.getName() + clusterInfo.getRunningNumberOffset1());
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Automatically setting worker name to [" + sessionIdManager.getWorkerName() + "]");
+                    }
                 }
             }
             return new JettyProcessingUnitContainer(applicationContext, webAppContext, container, jettyHolder);
