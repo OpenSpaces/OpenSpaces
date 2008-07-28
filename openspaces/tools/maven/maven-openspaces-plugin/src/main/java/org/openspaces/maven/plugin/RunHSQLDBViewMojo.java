@@ -113,12 +113,12 @@ public class RunHSQLDBViewMojo extends AbstractMojo {
     
     /** prints usage options **/
     private void printUsage() {
-        System.out.println("Usage: mvn os:show-hsqldb [-options]");
-        System.out.println("    -Ddriver [jdbc driver class]");
-        System.out.println("    -Durl=<name>          : jdbc url (defaults to 'jdbc:hsqldb:hsql://localhost/testDB')");
-        System.out.println("    -Duser=<name>         : username used for connection");
-        System.out.println("    -Dpassword=<password> : password for this user");
-        System.out.println("    -Dhelp                : prints the usage options");
+        System.out.println("Usage: mvn os:hsql-ui [-options]");
+        System.out.println("    -Ddriver=<driver class> : jdbc driver class (defaults to 'org.hsqldb.jdbcDriver')");
+        System.out.println("    -Durl=<url>             : jdbc url (defaults to 'jdbc:hsqldb:hsql://localhost/testDB')");
+        System.out.println("    -Duser=<user>           : username used for connection");
+        System.out.println("    -Dpassword=<password>   : password for this user");
+        System.out.println("    -Dhelp                  : prints the usage options");
     }
     
 }
