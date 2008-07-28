@@ -33,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @SpaceClass
 public class SessionData /*implements Externalizable*/ {
+    
     private String _id;
     private long _accessed = -1;
     private volatile long _lastAccessed = -1;
