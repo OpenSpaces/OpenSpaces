@@ -253,7 +253,7 @@ public class GigaSessionIdManager extends AbstractSessionIdManager {
         }
 
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            in.readUTF();
+            id = in.readUTF();
         }
     }
 }

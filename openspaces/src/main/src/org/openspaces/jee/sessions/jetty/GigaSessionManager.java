@@ -16,9 +16,6 @@
 
 package org.openspaces.jee.sessions.jetty;
 
-import com.gigaspaces.annotation.pojo.SpaceId;
-import com.gigaspaces.annotation.pojo.SpaceProperty;
-import com.gigaspaces.annotation.pojo.SpaceRouting;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.SQLQuery;
 import edu.emory.mathcs.backport.java.util.concurrent.Executors;
@@ -32,12 +29,7 @@ import org.mortbay.util.LazyList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -219,7 +211,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
             }
             return session;
         } catch (Exception e) {
-            Log.warn("Unable to load session from database", e);
+            Log.warn("Unable to load session", e);
             return null;
         }
     }
@@ -231,12 +223,14 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
     }
 
     public int getSessions() {
-        if (lastSessionCount == -1 || (System.currentTimeMillis() - lastCountSessionsTime) > countSessionPeriod) {
+        long now = System.currentTimeMillis();
+        if (lastSessionCount == -1 || (now - lastCountSessionsTime) > countSessionPeriod) {
             try {
                 lastSessionCount = space.count(new SessionData(), null);
             } catch (Exception e) {
                 Log.warn("Failed to execute count of sessions", e);
             }
+            lastCountSessionsTime = now;
         }
         return lastSessionCount;
     }
@@ -280,7 +274,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
         try {
             removed = delete(getClusterId(session));
         } catch (Exception e) {
-            Log.warn("Faield to remove session [" + getClusterId(session) + "]", e);
+            Log.warn("Failed to remove session [" + getClusterId(session) + "]", e);
         }
         if (removed) {
             _sessionIdManager.removeSession(session);
@@ -480,16 +474,15 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
         protected void complete() {
             super.complete();
             try {
-                if (_dirty || (_data._accessed - _data._lastSaved) >= (_savePeriodMs)) {
+                if (_dirty || (_data.getAccessed() - _data.getLastSaved()) >= (_savePeriodMs)) {
                     _data.setLastSaved(System.currentTimeMillis());
                     willPassivate();
                     update(_data);
                     didActivate();
                     if (Log.isDebugEnabled())
-                        Log.debug("Dirty=" + _dirty + ", accessed-saved=" + _data._accessed + "-" + _data._lastSaved + ", savePeriodMs=" + _savePeriodMs);
+                        Log.debug("Dirty=" + _dirty + ", accessed-saved=" + _data.getAccessed() + "-" + _data.getLastSaved() + ", savePeriodMs=" + _savePeriodMs);
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Log.warn("Problem persisting changed session data id=" + getId(), e);
             }
             finally {
@@ -519,177 +512,4 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
         }
     }
 
-    /**
-     * SessionData
-     *
-     * Data about a session.
-     *
-     * NOTE: we let gigaspaces assign a globally unique identifier for
-     * a SessionData object, although we could compose our own, based on:
-     * canonicalized(contextPath) + virtualhost[0] + sessionid
-     */
-    public static class SessionData implements Externalizable {
-        private String _id;
-        private long _accessed = -1;
-        private volatile long _lastAccessed = -1;
-        private volatile long _lastSaved = -1;
-        private long _maxIdleMs = -1;
-        private volatile long _cookieSet = -1;
-        private long _created = -1;
-        private volatile long _expiryTime = -1;
-        private volatile ConcurrentHashMap _attributes = null;
-
-
-        public SessionData() {
-        }
-
-        public SessionData(String sessionId) {
-            _id = sessionId;
-            _created = System.currentTimeMillis();
-            _accessed = _created;
-            _lastAccessed = 0;
-            _lastSaved = 0;
-        }
-
-        public void writeExternal(ObjectOutput out) throws IOException {
-            // TODO create a null bitmap (-1 is null for longs)
-            if (_id == null) {
-                out.writeBoolean(false);
-            } else {
-                out.writeBoolean(true);
-                out.writeUTF(_id);
-            }
-            out.writeLong(_accessed);
-            out.writeLong(_lastAccessed);
-            out.writeLong(_lastSaved);
-            out.writeLong(_maxIdleMs);
-            out.writeLong(_cookieSet);
-            out.writeLong(_created);
-            out.writeLong(_expiryTime);
-            if (_attributes == null) {
-                out.writeInt(-1);
-            } else {
-                out.writeInt(_attributes.size());
-                for (Iterator it = _attributes.entrySet().iterator(); it.hasNext();) {
-                    Map.Entry entry = (Map.Entry) it.next();
-                    out.writeObject(entry.getKey());
-                    out.writeObject(entry.getValue());
-                }
-            }
-        }
-
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            if (in.readBoolean()) {
-                _id = in.readUTF();
-            }
-            _accessed = in.readLong();
-            _lastAccessed = in.readLong();
-            _lastSaved = in.readLong();
-            _maxIdleMs = in.readLong();
-            _cookieSet = in.readLong();
-            _created = in.readLong();
-            _expiryTime = in.readLong();
-            int size = in.readInt();
-            if (size > -1) {
-                _attributes = new ConcurrentHashMap();
-                for (int i = 0; i < size; i++) {
-                    _attributes.put(in.readObject(), in.readObject());
-                }
-            }
-        }
-
-        @SpaceId(autoGenerate = false)
-        @SpaceRouting
-        public String getId() {
-            return _id;
-        }
-
-        public void setId(String id) {
-            _id = id;
-        }
-
-        @SpaceProperty(nullValue = "-1")
-        public long getCreated() {
-            return _created;
-        }
-
-        public void setCreated(long ms) {
-            _created = ms;
-        }
-
-        @SpaceProperty(nullValue = "-1")
-        public long getAccessed() {
-            return _accessed;
-        }
-
-        public void setAccessed(long ms) {
-            _accessed = ms;
-        }
-
-        public void setLastSaved(long ms) {
-            _lastSaved = ms;
-        }
-
-        @SpaceProperty(nullValue = "-1")
-        public long getLastSaved() {
-            return _lastSaved;
-        }
-
-        public void setMaxIdleMs(long ms) {
-            _maxIdleMs = ms;
-        }
-
-        @SpaceProperty(nullValue = "-1")
-        public long getMaxIdleMs() {
-            return _maxIdleMs;
-        }
-
-        public void setLastAccessed(long ms) {
-            _lastAccessed = ms;
-        }
-
-        @SpaceProperty(nullValue = "-1")
-        public long getLastAccessed() {
-            return _lastAccessed;
-        }
-
-        public void setCookieSet(long ms) {
-            _cookieSet = ms;
-        }
-
-        @SpaceProperty(nullValue = "-1")
-        public long getCookieSet() {
-            return _cookieSet;
-        }
-
-        @SpaceProperty
-        protected ConcurrentHashMap getAttributeMap() {
-            return _attributes;
-        }
-
-        protected void setAttributeMap(ConcurrentHashMap map) {
-            _attributes = map;
-        }
-
-        public void setExpiryTime(long time) {
-            _expiryTime = time;
-        }
-
-        @SpaceProperty(nullValue = "-1")
-        public long getExpiryTime() {
-            return _expiryTime;
-        }
-
-        public String toString() {
-            return "Session id=" + _id +
-                    ",created=" + _created + ",accessed=" + _accessed +
-                    ",lastAccessed=" + _lastAccessed +
-                    ",cookieSet=" + _cookieSet +
-                    ",expiryTime=" + _expiryTime;
-        }
-
-        public String toStringExtended() {
-            return toString() + "values=" + _attributes;
-        }
-    }
 }
