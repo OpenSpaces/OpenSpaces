@@ -29,9 +29,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * SessionData
- *
- * Data about a session.
+ * The entry that is stored in the Space representing a Jetty session.
  */
 @SpaceClass
 public class SessionData /*implements Externalizable*/ {

@@ -33,6 +33,8 @@ import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
 import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
+import org.openspaces.jee.sessions.jetty.GigaSessionIdManager;
+import org.openspaces.jee.sessions.jetty.GigaSessionManager;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
@@ -79,7 +81,7 @@ import java.util.List;
  *
  * <p>Post processing of the <code>web.xml</code> and <code>jetty-web.xml</code> is perfomed allowing
  * to use <code>${...}</code> notation within them (for example, using system proeprties, deployed
- * properties, or <code>${clusterInfo...}</code>). 
+ * properties, or <code>${clusterInfo...}</code>).
  *
  * <p>JMX in jetty can be enabled by passing a deployment property {@link #JETTY_JMX_PROP}. If set
  * to <code>true</code> jetty will be configured with JMX. In plain mode, where there can be more
@@ -118,6 +120,30 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
     public static final String JETTY_INSTANCE_PROP = "jetty.instance";
 
     /**
+     * A deploy property that controls if Jetty will store the session on the Space. Just by specifying the
+     * url it will automatically enable it.
+     */
+    public static final String JETTY_SESSIONS_URL = "jetty.sessions.url";
+
+    /**
+     * How often the scavanger thread will run in order to check for expired sessions. Set in
+     * <b>seconds</b> and defaults to <code>60 * 5</code> seconds (5 minutes).
+     */
+    public static final String JETTY_SESSIONS_SCAVANGE_PERIOD = "jetty.sessions.scavangePeriod";
+
+    /**
+     * How often an actual update of a <b>non dirty</b> session will be perfomed to the Space. Set in
+     * <b>seconds</b> and defaults to <code>60</code> seconds.
+     */
+    public static final String JETTY_SESSIONS_SAVE_PERIOD = "jetty.sessions.savePeriod";
+
+    /**
+     * The lease of the {@link org.openspaces.jee.sessions.jetty.SessionData} that is written to the Space. Set
+     * in <b>seconds</b> and defaults to FOREVER.
+     */
+    public static final String JETTY_SESSIONS_LEASE = "jetty.sessions.lease";
+
+    /**
      * The deployment property controlling if JMX is enabled or not. Defaults to <code>false</code>
      * (JMX is disabled).
      */
@@ -138,6 +164,10 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
 
     private static final ThreadLocal<ApplicationContext> currentApplicationContext = new ThreadLocal<ApplicationContext>();
 
+    private static final ThreadLocal<ClusterInfo> currentClusterInfo = new ThreadLocal<ClusterInfo>();
+
+    private static final ThreadLocal<BeanLevelProperties> currentBeanLevelProperties = new ThreadLocal<BeanLevelProperties>();
+
     /**
      * Allows to get the current application context (loaded from <code>pu.xml</code>) during web application
      * startup. Can be used to access beans defined within it (like a Space) by components loaded (such as
@@ -155,6 +185,22 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
      */
     private static void setCurrentApplicationContext(ApplicationContext applicationContext) {
         currentApplicationContext.set(applicationContext);
+    }
+
+    public static ClusterInfo getCurrentClusterInfo() {
+        return currentClusterInfo.get();
+    }
+
+    private static void setCurrentClusterInfo(ClusterInfo clusterInfo) {
+        currentClusterInfo.set(clusterInfo);
+    }
+
+    public static BeanLevelProperties getCurrentBeanLevelProperties() {
+        return currentBeanLevelProperties.get();
+    }
+
+    private static void setCurrentBeanLevelProperties(BeanLevelProperties beanLevelProperties) {
+        currentBeanLevelProperties.set(beanLevelProperties);
     }
 
     /**
@@ -372,6 +418,8 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
 
         try {
             setCurrentApplicationContext(applicationContext);
+            setCurrentBeanLevelProperties(beanLevelProperties);
+            setCurrentClusterInfo(clusterInfo);
 
             WebAppContext webAppContext = (WebAppContext) applicationContext.getBean("webAppContext");
 
@@ -394,6 +442,33 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             String[] beanNames = applicationContext.getBeanDefinitionNames();
             for (String beanName : beanNames) {
                 webAppContext.setAttribute(beanName, applicationContext.getBean(beanName));
+            }
+
+            // automatically enable GigaSpaces Session Manager when passing the relevant property
+            String sessionsSpaceUrl = beanLevelProperties.getContextProperties().getProperty(JETTY_SESSIONS_URL);
+            if (sessionsSpaceUrl != null) {
+                GigaSessionManager gigaSessionManager = new GigaSessionManager();
+                gigaSessionManager.setSpaceUrl(sessionsSpaceUrl);
+
+                String scavangePeriod = beanLevelProperties.getContextProperties().getProperty(JETTY_SESSIONS_SCAVANGE_PERIOD);
+                if (scavangePeriod != null) {
+                    gigaSessionManager.setScavengePeriod(Integer.parseInt(scavangePeriod));
+                }
+                String savePeriod = beanLevelProperties.getContextProperties().getProperty(JETTY_SESSIONS_SAVE_PERIOD);
+                if (savePeriod != null) {
+                    gigaSessionManager.setSavePeriod(Integer.parseInt(savePeriod));
+                }
+                String lease = beanLevelProperties.getContextProperties().getProperty(JETTY_SESSIONS_LEASE);
+                if (lease != null) {
+                    gigaSessionManager.setLease(Long.parseLong(lease));
+                }
+
+
+                GigaSessionIdManager sessionIdManager = new GigaSessionIdManager(jettyHolder.getServer());
+                sessionIdManager.setWorkerName(clusterInfo.getName() + clusterInfo.getRunningNumberOffset1());
+                gigaSessionManager.setIdManager(sessionIdManager);
+
+                webAppContext.getSessionHandler().setSessionManager(gigaSessionManager);
             }
 
             HandlerContainer container = jettyHolder.getServer();
@@ -444,6 +519,8 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             throw new CannotCreateContainerException("Failed to start web application", e);
         } finally {
             setCurrentApplicationContext(null);
+            setCurrentBeanLevelProperties(null);
+            setCurrentClusterInfo(null);
         }
     }
 }

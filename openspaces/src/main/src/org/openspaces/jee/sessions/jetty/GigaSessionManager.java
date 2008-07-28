@@ -25,6 +25,10 @@ import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 import net.jini.core.lease.Lease;
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
+import org.openspaces.core.GigaSpace;
+import org.openspaces.core.space.UrlSpaceConfigurer;
+import org.openspaces.pu.container.jee.jetty.JettyJeeProcessingUnitContainerProvider;
+import org.springframework.context.ApplicationContext;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSessionEvent;
@@ -49,6 +53,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessionManager {
 
     private IJSpace space;
+
+    private UrlSpaceConfigurer urlSpaceConfigurer;
 
     private String spaceUrl;
 
@@ -84,7 +90,25 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
         if (space == null) {
             if (spaceUrl == null)
                 throw new IllegalStateException("No url for space");
-            space = JettySpaceLocator.locate(spaceUrl);
+
+            if (spaceUrl.startsWith("bean://")) {
+                ApplicationContext applicationContext = JettyJeeProcessingUnitContainerProvider.getCurrentApplicationContext();
+                if (applicationContext == null) {
+                    throw new IllegalStateException("Failed to find thread bounded application context");
+                }
+                Object bean = applicationContext.getBean(spaceUrl.substring("bean://".length()));
+                if (bean instanceof GigaSpace) {
+                    space = ((GigaSpace) bean).getSpace();
+                } else if (bean instanceof IJSpace) {
+                    space = (IJSpace) bean;
+                } else {
+                    throw new IllegalArgumentException("Bean [" + bean + "] is not of either GigaSpace type or IJSpace type");
+                }
+            } else {
+                urlSpaceConfigurer = new UrlSpaceConfigurer(spaceUrl)
+                        .clusterInfo(JettyJeeProcessingUnitContainerProvider.getCurrentClusterInfo());
+                space = urlSpaceConfigurer.space();
+            }
         }
 
         if (_sessionIdManager == null) {
@@ -96,8 +120,6 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
                 ((GigaSessionIdManager) _sessionIdManager).setSpace(space);
             }
         }
-
-        super.doStart();
 
         synchronized (executorMonitor) {
             if (totalNumberOfScavangers == 0) {
@@ -111,6 +133,8 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
                 }
             }, _scavengePeriodMs, _scavengePeriodMs, TimeUnit.MILLISECONDS);
         }
+
+        super.doStart();
     }
 
 
@@ -128,13 +152,24 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
             }
         }
         space = null;
+        if (urlSpaceConfigurer != null) {
+            urlSpaceConfigurer.destroy();
+        }
         super.doStop();
     }
 
+    /**
+     * How often an actual update of the session will be perfomed to the Space. Set in <b>seconds</b>
+     * and defaults to <code>60</code> seconds.
+     */
     public int getSavePeriod() {
         return _savePeriodMs / 1000;
     }
 
+    /**
+     * How often an actual update of the session will be perfomed to the Space. Set in <b>seconds</b>
+     * and defaults to <code>60</code> seconds.
+     */
     public void setSavePeriod(int seconds) {
         if (seconds <= 0)
             seconds = 60;
@@ -143,13 +178,24 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
     }
 
 
+    /**
+     * How often the scavanger thread will run in order to check for expired sessions. Set in
+     * <b>seconds</b> and defaults to <code>60 * 5</code> seconds (5 minutes).
+     */
     public int getScavengePeriod() {
         return _scavengePeriodMs / 1000;
     }
 
+    /**
+     * How often the scavanger thread will run in order to check for expired sessions. Set in
+     * <b>seconds</b> and defaults to <code>60 * 5</code> seconds (5 minutes).
+     */
     public void setScavengePeriod(int seconds) {
-        if (seconds <= 0)
+        if (seconds <= 0) {
             seconds = 60;
+        }
+
+        _scavengePeriodMs = seconds * 1000;
     }
 
     public void setCountSessionPeriod(int seconds) {
@@ -173,7 +219,8 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
     }
 
     /**
-     * Sets the lease (in seconds) of sessions written to the Space.
+     * The lease of the {@link org.openspaces.jee.sessions.jetty.SessionData} that is written to the Space. Set
+     * in <b>seconds</b> and defaults to FOREVER.
      */
     public void setLease(long lease) {
         this.lease = lease * 1000;
