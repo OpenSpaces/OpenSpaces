@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:os-core="http://www.openspaces.org/schema/core"
+       xmlns:os-events="http://www.openspaces.org/schema/events"
+       xmlns:os-remoting="http://www.openspaces.org/schema/remoting"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
+       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
+       http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/remoting/openspaces-remoting.xsd">
+
+
+    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
+
+
+    <context:annotation-config/>
+
+    <os-core:space id="space1" url="/./executorSpace?cluster_schema=partitioned&amp;total_members=2&amp;id=1" lookup-groups="${user.name}" />
+
+    <os-core:local-tx-manager id="localTxManager1" space="space1" />
+
+    <os-core:giga-space id="gigaSpace1" space="space1" tx-manager="localTxManager1" />
+
+    <os-core:giga-space id="localGigaSpace1" space="space1" tx-manager="localTxManager1" clustered="true" />
+
+    <os-core:space id="space2" url="/./executorSpace?cluster_schema=partitioned&amp;total_members=2&amp;id=2" lookup-groups="${user.name}" />
+
+    <os-core:local-tx-manager id="localTxManager2" space="space2" />
+
+    <os-core:giga-space id="gigaSpace2" space="space2" tx-manager="localTxManager2" />
+
+    <os-core:giga-space id="localGigaSpace2" space="space2" tx-manager="localTxManager2" clustered="true" />
+
+    <os-core:distributed-tx-manager id="distTxManager" />
+
+    <os-core:giga-space id="distGigaSpace" space="space2" tx-manager="distTxManager" clustered="true" />
+</beans>
