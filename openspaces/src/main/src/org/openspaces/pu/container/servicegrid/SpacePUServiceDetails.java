@@ -23,7 +23,7 @@ public class SpacePUServiceDetails implements PUServiceDetails, Externalizable {
 
     private SpaceMode spaceMode;
 
-    // can be "embedded", "localview", "localcache"
+    // can be "embedded", "localview", "localcache", "remote"
     private String type;
 
     public SpacePUServiceDetails() {
