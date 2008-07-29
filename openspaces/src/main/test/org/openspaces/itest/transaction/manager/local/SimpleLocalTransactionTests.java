@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpringContextTests {
 
-    protected GigaSpace gigaSpace;
+    protected GigaSpace gigaSpace;      
 
     protected PlatformTransactionManager localTxManager;
 
