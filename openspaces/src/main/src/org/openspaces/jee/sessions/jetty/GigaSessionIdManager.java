@@ -20,13 +20,13 @@ import com.gigaspaces.annotation.pojo.SpaceClass;
 import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.annotation.pojo.SpaceRouting;
 import com.j_spaces.core.IJSpace;
-import com.j_spaces.kernel.ConcurrentHashSet;
 import net.jini.core.lease.Lease;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.AbstractSessionManager;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
+import org.openspaces.core.util.ConcurrentHashSet;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -192,7 +192,8 @@ public class GigaSessionIdManager extends AbstractSessionIdManager {
 
     protected boolean exists(Id id) throws Exception {
         Id idFromSpace = (Id) space.read(id, null, 0);
-        if (Log.isDebugEnabled()) Log.debug("Id [" + id + "] " + (idFromSpace == null ? "does not exist" : "exists") + " in space");
+        if (Log.isDebugEnabled())
+            Log.debug("Id [" + id + "] " + (idFromSpace == null ? "does not exist" : "exists") + " in space");
         return idFromSpace != null;
     }
 
