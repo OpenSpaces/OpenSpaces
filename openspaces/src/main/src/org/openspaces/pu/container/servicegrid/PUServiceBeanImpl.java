@@ -105,7 +105,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     // all the embedded spaces
     private volatile IJSpace[] embeddedSpaces;
 
-    // embedded spaces and localcahce/view spaces
+    // embedded spaces, localcahce/view spaces, proxies
     private volatile IJSpace[] allSpaces;
 
     private volatile File deployPath;
@@ -312,13 +312,11 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         ArrayList<IJSpace> allSpacesList = new ArrayList<IJSpace>();
         for (Iterator it = map.values().iterator(); it.hasNext();) {
             IJSpace space = (IJSpace) it.next();
-            if (space instanceof ISpaceLocalCache) {
+            if (space instanceof ISpaceLocalCache || SpaceUtils.isRemoteProtocol(space)) {
                 allSpacesList.add(space);
             } else {
-                if (!SpaceUtils.isRemoteProtocol(space)) {
-                    embeddedSpacesList.add(space);
-                    allSpacesList.add(space);
-                }
+                embeddedSpacesList.add(space);
+                allSpacesList.add(space);
             }
         }
         embeddedSpaces = embeddedSpacesList.toArray(new IJSpace[embeddedSpacesList.size()]);
@@ -438,6 +436,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 type = "localview";
             } else if (space instanceof DCacheSpaceImpl) {
                 type = "localcache";
+            } else if (SpaceUtils.isRemoteProtocol(space)) {
+                type = "remote";
             }
             serviceDetails.add(new SpacePUServiceDetails(spaceURL.getSpaceName(), spaceURL.getContainerName(), serviceID,
                     ((IInternalRemoteJSpaceAdmin) space.getAdmin()).getSpaceMode(), type));
