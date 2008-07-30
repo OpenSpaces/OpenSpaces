@@ -19,34 +19,26 @@ package org.openspaces.events.support;
 import com.gigaspaces.async.AsyncResult;
 import org.openspaces.core.executor.DistributedTask;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
- * A task that unregisters (stops and disposes it) a dynamically added event container in a distributed manner.
+ * A task that registers a dynamically added event container in a distributed manner.
  * (using {@link org.openspaces.events.polling.Polling} or {@link org.openspaces.events.notify.Notify}.
- * Returns <code>true</code> if all event containers were found and unregistered, <code>false</code> otherwise.
  *
  * @author kimchy
  */
-public class UnregisterDistributedEventContainerTask extends UnregisterEventContainerTask implements DistributedTask<Boolean, Boolean> {
+public class RegisterDistributedEventContainerTask extends RegisterEventContainerTask implements DistributedTask<Serializable, Object> {
 
-    protected UnregisterDistributedEventContainerTask() {
+    protected RegisterDistributedEventContainerTask() {
         super();
     }
 
-    public UnregisterDistributedEventContainerTask(String containerName) {
+    public RegisterDistributedEventContainerTask(String containerName) {
         super(containerName);
     }
 
-    public Boolean reduce(List<AsyncResult<Boolean>> results) throws Exception {
-        for (AsyncResult<Boolean> result : results) {
-            if (result.getException() != null) {
-                throw result.getException();
-            }
-            if (!result.getResult()) {
-                return false;
-            }
-        }
-        return true;
+    public Object reduce(List<AsyncResult<Serializable>> asyncResults) throws Exception {
+        return null;
     }
 }

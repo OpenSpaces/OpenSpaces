@@ -34,6 +34,9 @@ public class UnregisterEventContainerTask implements Task<Boolean>, ApplicationC
 
     private String containerName;
 
+    protected UnregisterEventContainerTask() {
+    }
+
     public UnregisterEventContainerTask(String containerName) {
         this.containerName = containerName;
     }
