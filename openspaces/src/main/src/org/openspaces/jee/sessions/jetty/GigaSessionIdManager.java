@@ -16,26 +16,18 @@
 
 package org.openspaces.jee.sessions.jetty;
 
-import com.gigaspaces.annotation.pojo.SpaceClass;
-import com.gigaspaces.annotation.pojo.SpaceId;
-import com.gigaspaces.annotation.pojo.SpaceRouting;
 import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.client.ReadModifiers;
 import net.jini.core.lease.Lease;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.AbstractSessionManager;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
-import org.openspaces.core.util.ConcurrentHashSet;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.util.Random;
-import java.util.Set;
 
 /**
  * GigaspacesSessionIdManager
@@ -44,8 +36,6 @@ import java.util.Set;
  * in a data grid "cloud".
  */
 public class GigaSessionIdManager extends AbstractSessionIdManager {
-
-    private final Set<Id> sessionIds = new ConcurrentHashSet<Id>();
 
     protected IJSpace space;
 
@@ -75,21 +65,7 @@ public class GigaSessionIdManager extends AbstractSessionIdManager {
     }
 
     public void addSession(HttpSession session) {
-        if (session == null)
-            return;
-
-        if (session instanceof GigaSessionManager.Session) {
-            String id = ((GigaSessionManager.Session) session).getClusterId();
-            try {
-                Id theId = new Id(id);
-                add(theId);
-                sessionIds.add(theId);
-                if (Log.isDebugEnabled()) Log.debug("Added id " + id);
-            } catch (Exception e) {
-                Log.warn("Problem storing session id=" + id, e);
-            }
-        } else
-            throw new IllegalStateException("Session is not a Gigaspaces session");
+        // do nothing, we use SessionData
     }
 
     public String getClusterId(String nodeId) {
@@ -108,24 +84,19 @@ public class GigaSessionIdManager extends AbstractSessionIdManager {
         if (id == null)
             return false;
 
-        String clusterId = getClusterId(id);
-        Id theId = new Id(clusterId);
-        if (sessionIds.contains(theId))
-            return true; //optimisation - if this session is one we've been managing, we can check locally
-
-        //otherwise, we need to go to the space to check
         try {
-            return exists(theId);
+            SessionData sessionData = new SessionData(getClusterId(id));
+            int count = space.count(sessionData, null, ReadModifiers.MATCH_BY_ID);
+            if (Log.isDebugEnabled())
+                Log.debug("Id [" + id + "] " + (count > 0 ? "exists" : "does not exist") + " in space");
+            return count > 0;
         } catch (Exception e) {
-            Log.warn("Problem checking inUse for id=" + clusterId, e);
+            Log.warn("Problem checking inUse for id=" + getClusterId(id), e);
             return false;
         }
     }
 
     public void invalidateAll(String id) {
-        //take the id out of the list of known sessionids for this node
-        removeSession(id);
-
         //tell all contexts that may have a session object with this id to
         //get rid of them
         Handler[] contexts = _server.getChildHandlersByClass(WebAppContext.class);
@@ -138,25 +109,7 @@ public class GigaSessionIdManager extends AbstractSessionIdManager {
     }
 
     public void removeSession(HttpSession session) {
-        if (session == null)
-            return;
-
-        removeSession(((GigaSessionManager.Session) session).getClusterId());
-    }
-
-    public void removeSession(String id) {
-
-        if (id == null)
-            return;
-
-        if (Log.isDebugEnabled()) Log.debug("Removing session id=" + id);
-        try {
-            Id theId = new Id(id);
-            sessionIds.remove(theId);
-            delete(theId);
-        } catch (Exception e) {
-            Log.warn("Problem removing session id=" + id, e);
-        }
+        // do nothing, we reused the SessionData
     }
 
 
@@ -178,72 +131,6 @@ public class GigaSessionIdManager extends AbstractSessionIdManager {
     protected void initSpace() throws Exception {
         if (space == null) {
             throw new IllegalStateException("No space configured");
-        }
-    }
-
-    protected void add(Id id) throws Exception {
-        space.write(id, null, lease);
-    }
-
-    protected void delete(Id id) throws Exception {
-        space.take(id, null, 0);
-        if (Log.isDebugEnabled()) Log.debug("Deleted id from space: id=" + id);
-    }
-
-    protected boolean exists(Id id) throws Exception {
-        Id idFromSpace = (Id) space.read(id, null, 0);
-        if (Log.isDebugEnabled())
-            Log.debug("Id [" + id + "] " + (idFromSpace == null ? "does not exist" : "exists") + " in space");
-        return idFromSpace != null;
-    }
-
-    /**
-     * Id
-     *
-     * Class to hold the session id. This is really only needed
-     * for gigaspaces so that we can annotate routing information etc.
-     */
-    @SpaceClass(persist = false)
-    public static class Id implements Externalizable {
-
-        private String id;
-
-        public Id() {
-        }
-
-        public Id(String id) {
-            this.id = id;
-        }
-
-        public void setId(String id) {
-            this.id = id;
-        }
-
-        @SpaceId(autoGenerate = false)
-        @SpaceRouting
-        public String getId() {
-            return this.id;
-        }
-
-        public boolean equals(Object o) {
-            if (o == null) {
-                return false;
-            }
-            Id targetId = (Id) o;
-            return targetId.getId().equals(id);
-
-        }
-
-        public String toString() {
-            return "SessionID [" + id + "]";
-        }
-
-        public void writeExternal(ObjectOutput out) throws IOException {
-            out.writeUTF(id);
-        }
-
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            id = in.readUTF();
         }
     }
 }
