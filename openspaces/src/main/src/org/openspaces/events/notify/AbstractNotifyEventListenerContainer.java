@@ -145,6 +145,8 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
 
     private Boolean notifyLeaseExpire;
 
+    private Boolean notifyUnmatched;
+
     private Boolean notifyAll;
 
     private Boolean triggerNotifyTemplate;
@@ -285,6 +287,14 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
     }
 
     /**
+     * Turns on notifications for unmatched templates (a template that matched an entry
+     * but not it does not). Defaults to <code>false</code>.
+     */
+    public void setNotifyUnmatched(Boolean notifyUnmatched) {
+        this.notifyUnmatched = notifyUnmatched;
+    }
+
+    /**
      * If using a replicated space controls if the listener that are replicated to cluster members
      * will raise notifications.
      *
@@ -397,6 +407,10 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
         return notifyLeaseExpire;
     }
 
+    protected Boolean getNotifyUnmatched() {
+        return notifyUnmatched;
+    }
+
     /**
      * Returns <code>true</code> when batching is enabled.
      */
@@ -434,10 +448,13 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
             if (notifyTypeProvider.isWrite() != null && notifyWrite == null) {
                 notifyWrite = notifyTypeProvider.isWrite();
             }
+            if (notifyTypeProvider.isUnamtched() != null && notifyUnmatched == null) {
+                notifyUnmatched = notifyTypeProvider.isUnamtched();
+            }
         }
 
         if (notifyAll == null && notifyTake == null && notifyUpdate == null && notifyWrite == null
-                && notifyLeaseExpire == null) {
+                && notifyLeaseExpire == null && notifyUnmatched == null) {
             notifyWrite = true;
             if (logger.isTraceEnabled()) {
                 logger.trace(message("No notify flag is set, setting write notify to true by default"));
@@ -537,6 +554,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
         }
         if (notifyLeaseExpire != null && notifyLeaseExpire) {
             notifyType = notifyType.or(NotifyActionType.NOTIFY_LEASE_EXPIRATION);
+        }
+        if (notifyUnmatched != null && notifyUnmatched) {
+            notifyType = notifyType.or(NotifyActionType.NOTIFY_UNMATCHED);
         }
         if (notifyAll != null && notifyAll) {
             notifyType = notifyType.or(NotifyActionType.NOTIFY_ALL);

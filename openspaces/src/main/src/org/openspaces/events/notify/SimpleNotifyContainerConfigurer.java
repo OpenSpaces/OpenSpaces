@@ -200,6 +200,14 @@ public class SimpleNotifyContainerConfigurer {
     }
 
     /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyUnmatched(Boolean)
+     */
+    public SimpleNotifyContainerConfigurer notifyUnamtched(boolean notifyUnmatched) {
+        notifyEventListenerContainer.setNotifyUnmatched(notifyUnmatched);
+        return this;
+    }
+
+    /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyLeaseExpire(Boolean)
      */
     public SimpleNotifyContainerConfigurer notifyLeaseExpire(boolean notifyLeaseExpire) {

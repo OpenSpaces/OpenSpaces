@@ -270,6 +270,14 @@
                                         </xsd:documentation>
                                     </xsd:annotation>
                                 </xsd:attribute>
+                                <xsd:attribute name="unmatched" type="xsd:boolean">
+                                    <xsd:annotation>
+                                        <xsd:documentation>
+                                            Matched entries that no longer match the templte will cause this listener
+                                            to be invoked.
+                                        </xsd:documentation>
+                                    </xsd:annotation>
+                                </xsd:attribute>
                             </xsd:complexType>
                         </xsd:element>
                         <xsd:element name="batch" minOccurs="0" maxOccurs="1">

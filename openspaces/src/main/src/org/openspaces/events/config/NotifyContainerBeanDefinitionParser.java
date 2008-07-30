@@ -99,6 +99,10 @@ public class NotifyContainerBeanDefinitionParser extends AbstractTxEventContaine
             if (StringUtils.hasLength(leaseExpire)) {
                 builder.addPropertyValue("notifyLeaseExpire", leaseExpire);
             }
+            String unmatched = notifyEle.getAttribute("unmatched");
+            if (StringUtils.hasLength(unmatched)) {
+                builder.addPropertyValue("notifyUnmatched", unmatched);
+            }
             String all = notifyEle.getAttribute("all");
             if (StringUtils.hasLength(all)) {
                 builder.addPropertyValue("notifyAll", all);

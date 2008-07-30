@@ -49,4 +49,9 @@ public @interface NotifyType {
      * Should this listener be notified when lease expiration occurs and it matches the given template.
      */
     boolean leaseExpire() default false;
+
+    /**
+     * Should this listener be notified when entries that no longer match the provided template be notified.
+     */
+    boolean unmatched() default false;
 }
