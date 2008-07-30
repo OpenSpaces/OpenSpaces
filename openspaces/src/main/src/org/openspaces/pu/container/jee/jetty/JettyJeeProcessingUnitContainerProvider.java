@@ -144,6 +144,11 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
     public static final String JETTY_SESSIONS_LEASE = "jetty.sessions.lease";
 
     /**
+     * Controls, using a deployment proeprty, the timeout value of sessions. Set in <b>minutes</b>.
+     */
+    public static final String JETTY_SESSIONS_TIMEOUT = "jetty.sessions.timeout";
+
+    /**
      * The deployment property controlling if JMX is enabled or not. Defaults to <code>false</code>
      * (JMX is disabled).
      */
@@ -453,16 +458,31 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                 String scavangePeriod = beanLevelProperties.getContextProperties().getProperty(JETTY_SESSIONS_SCAVANGE_PERIOD);
                 if (scavangePeriod != null) {
                     gigaSessionManager.setScavengePeriod(Integer.parseInt(scavangePeriod));
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Setting scavenge period to [" + scavangePeriod + "] seconds");
+                    }
                 }
                 String savePeriod = beanLevelProperties.getContextProperties().getProperty(JETTY_SESSIONS_SAVE_PERIOD);
                 if (savePeriod != null) {
                     gigaSessionManager.setSavePeriod(Integer.parseInt(savePeriod));
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Setting save period to [" + savePeriod + "] seconds");
+                    }
                 }
                 String lease = beanLevelProperties.getContextProperties().getProperty(JETTY_SESSIONS_LEASE);
                 if (lease != null) {
                     gigaSessionManager.setLease(Long.parseLong(lease));
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Setting lease to [" + lease + "] milliseconds");
+                    }
                 }
-
+                String sessionTimeout = beanLevelProperties.getContextProperties().getProperty(JETTY_SESSIONS_TIMEOUT);
+                if (sessionTimeout != null) {
+                    gigaSessionManager.setMaxInactiveInterval( Integer.parseInt(sessionTimeout) * 60 );
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Setting session timeout to [" + sessionTimeout + "] seconds");
+                    }
+                }
 
                 GigaSessionIdManager sessionIdManager = new GigaSessionIdManager(jettyHolder.getServer());
                 sessionIdManager.setWorkerName(clusterInfo.getName() + clusterInfo.getRunningNumberOffset1());
