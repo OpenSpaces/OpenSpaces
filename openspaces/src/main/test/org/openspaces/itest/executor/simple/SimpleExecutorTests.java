@@ -3,7 +3,7 @@ package org.openspaces.itest.executor.simple;
 import com.gigaspaces.annotation.pojo.SpaceRouting;
 import com.gigaspaces.async.AsyncFuture;
 import com.gigaspaces.async.AsyncResult;
-import com.gigaspaces.async.AsyncResultsModerator;
+import com.gigaspaces.async.AsyncResultFilter;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.executor.DistributedTask;
 import org.openspaces.core.executor.Task;
@@ -225,7 +225,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         }
     }
 
-    private class AggregatorContinue implements DistributedTask<Integer, Integer>, AsyncResultsModerator<Integer> {
+    private class AggregatorContinue implements DistributedTask<Integer, Integer>, AsyncResultFilter<Integer> {
 
         public Integer execute() throws Exception {
             return 1;
@@ -239,12 +239,12 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
             return sum;
         }
 
-        public Decision moderate(AsyncResult currentResult, Collection receivedResults, int totalExpextedResults) {
+        public Decision onResult(AsyncResult<Integer> currentResult, Collection<AsyncResult<Integer>> receivedResults, int totalExpectedResults) {
             return Decision.CONTINUE;
         }
     }
 
-    private class AggregatorBreak implements DistributedTask<Integer, Integer>, AsyncResultsModerator<Integer> {
+    private class AggregatorBreak implements DistributedTask<Integer, Integer>, AsyncResultFilter<Integer> {
 
         public Integer execute() throws Exception {
             return 1;
@@ -258,7 +258,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
             return sum;
         }
 
-        public Decision moderate(AsyncResult<Integer> currentResult, Collection<AsyncResult<Integer>> receivedResults, int totalExpextedResults) {
+        public Decision onResult(AsyncResult<Integer> currentResult, Collection<AsyncResult<Integer>> receivedResults, int totalExpextedResults) {
             if (receivedResults.size() == 0) {
                 return Decision.BREAK;
             }
