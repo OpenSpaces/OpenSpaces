@@ -18,10 +18,6 @@ package org.openspaces.jee.sessions.jetty;
 
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.SQLQuery;
-import edu.emory.mathcs.backport.java.util.concurrent.Executors;
-import edu.emory.mathcs.backport.java.util.concurrent.ScheduledExecutorService;
-import edu.emory.mathcs.backport.java.util.concurrent.ScheduledFuture;
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 import net.jini.core.lease.Lease;
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
@@ -36,6 +32,10 @@ import javax.servlet.http.HttpSessionListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 
 /**
