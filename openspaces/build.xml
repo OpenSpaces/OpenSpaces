@@ -78,7 +78,7 @@
     <target name="build_1_5" depends="clean, buildmain" description="Compile main sources"/>
 
     <target name="build_1_4" depends="clean, buildmain" description="Compile main sources">
-        <retrotranslator srcdir="${target.classes.dir}" verify="true"/>
+        <retrotranslator srcdir="${target.classes.dir}" verify="true" failonwarning="false"/>
     </target>
 
     <target name="fulljar_1_5" depends="build_1_5, fulljar"/>
