@@ -123,7 +123,7 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
      * A deploy property that controls if Jetty will store the session on the Space. Just by specifying the
      * url it will automatically enable it.
      */
-    public static final String JETTY_SESSIONS_URL = "jetty.sessions.url";
+    public static final String JETTY_SESSIONS_URL = "jetty.sessions.spaceUrl";
 
     /**
      * How often the scavanger thread will run in order to check for expired sessions. Set in
