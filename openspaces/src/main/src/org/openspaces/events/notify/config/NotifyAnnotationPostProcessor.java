@@ -37,6 +37,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 /**
  * A {@link org.openspaces.events.notify.Notify} annotation post processor. Creates an intenral
@@ -71,7 +72,13 @@ public class NotifyAnnotationPostProcessor implements BeanPostProcessor, Applica
 
         SimpleNotifyContainerConfigurer notifyContainerConfigurer = new SimpleNotifyContainerConfigurer(gigaSpace);
 
-        notifyContainerConfigurer.name(beanName);
+        String name;
+        if (StringUtils.hasLength(notify.name())) {
+            name = notify.name();
+        } else {
+            name = beanName;
+        }
+        notifyContainerConfigurer.name(name);
 
         if (bean instanceof SpaceDataEventListener) {
             notifyContainerConfigurer.eventListener((SpaceDataEventListener) bean);
@@ -154,7 +161,7 @@ public class NotifyAnnotationPostProcessor implements BeanPostProcessor, Applica
             }
         }
 
-        eventContainersBus.registerContaienr(beanName, notifyContainerConfigurer.notifyContainer());
+        eventContainersBus.registerContaienr(name, notifyContainerConfigurer.notifyContainer());
 
         return bean;
     }

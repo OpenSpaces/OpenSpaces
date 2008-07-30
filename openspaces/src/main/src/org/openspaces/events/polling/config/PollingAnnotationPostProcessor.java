@@ -34,6 +34,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 /**
  * A {@link org.openspaces.events.polling.Polling} annotation post processor. Creates an intenral
@@ -76,7 +77,13 @@ public class PollingAnnotationPostProcessor implements BeanPostProcessor, Applic
 
         SimplePollingContainerConfigurer pollingContainerConfigurer = new SimplePollingContainerConfigurer(gigaSpace);
 
-        pollingContainerConfigurer.name(beanName);
+        String name;
+        if (StringUtils.hasLength(polling.name())) {
+            name = polling.name();
+        } else {
+            name = beanName;
+        }
+        pollingContainerConfigurer.name(name);
 
         if (bean instanceof SpaceDataEventListener) {
             pollingContainerConfigurer.eventListener((SpaceDataEventListener) bean);
@@ -118,7 +125,7 @@ public class PollingAnnotationPostProcessor implements BeanPostProcessor, Applic
             pollingContainerConfigurer.transactionTimeout(timeout);
         }
 
-        eventContainersBus.registerContaienr(beanName, pollingContainerConfigurer.pollingContainer());
+        eventContainersBus.registerContaienr(name, pollingContainerConfigurer.pollingContainer());
 
         return bean;
     }

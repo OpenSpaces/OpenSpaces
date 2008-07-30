@@ -22,6 +22,8 @@ import org.springframework.beans.factory.DisposableBean;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * Holds dynamically generated event containers.
+ *
  * @author kimchy
  */
 public class EventContainersBus implements DisposableBean {
@@ -34,11 +36,13 @@ public class EventContainersBus implements DisposableBean {
         containers.put(name + SUFFIX, container);
     }
 
-    public void unregisterContainer(String name) {
+    public boolean unregisterContainer(String name) {
         AbstractEventListenerContainer container = containers.remove(name + SUFFIX);
         if (container != null) {
             container.destroy();
+            return true;
         }
+        return false;
     }
 
     public AbstractEventListenerContainer getEventContaienr(String name) {

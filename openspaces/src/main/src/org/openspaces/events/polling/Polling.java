@@ -43,6 +43,11 @@ import java.lang.annotation.Target;
 public @interface Polling {
 
     /**
+     * The logical name of the container that is automatically generated
+     */
+    String name() default "";
+
+    /**
      * The name of the bean that that is the {@link org.openspaces.core.GigaSpace} this container will
      * used.
      *
