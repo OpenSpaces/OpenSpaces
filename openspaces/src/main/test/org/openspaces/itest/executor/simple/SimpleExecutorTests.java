@@ -4,6 +4,7 @@ import com.gigaspaces.annotation.pojo.SpaceRouting;
 import com.gigaspaces.async.AsyncFuture;
 import com.gigaspaces.async.AsyncResult;
 import com.gigaspaces.async.AsyncResultFilter;
+import com.gigaspaces.async.AsyncResultFilterEvent;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.executor.DistributedTask;
 import org.openspaces.core.executor.Task;
@@ -13,7 +14,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 import javax.annotation.Resource;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -239,7 +239,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
             return sum;
         }
 
-        public Decision onResult(AsyncResult<Integer> currentResult, Collection<AsyncResult<Integer>> receivedResults, int totalExpectedResults) {
+        public Decision onResult(AsyncResultFilterEvent<Integer> event) {
             return Decision.CONTINUE;
         }
     }
@@ -258,8 +258,8 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
             return sum;
         }
 
-        public Decision onResult(AsyncResult<Integer> currentResult, Collection<AsyncResult<Integer>> receivedResults, int totalExpextedResults) {
-            if (receivedResults.size() == 0) {
+        public Decision onResult(AsyncResultFilterEvent<Integer> event) {
+            if (event.getReceivedResults().size() == 0) {
                 return Decision.BREAK;
             }
             return Decision.CONTINUE;
