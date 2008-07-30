@@ -8,6 +8,7 @@ import com.gigaspaces.async.AsyncResultFilterEvent;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.executor.DistributedTask;
 import org.openspaces.core.executor.Task;
+import org.openspaces.core.executor.support.SumIntegerTask;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -199,6 +200,11 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     public void testInjection2() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new ApplicationContextInjectable());
         assertEquals(2, (int) result.get(1000, TimeUnit.MILLISECONDS));
+    }
+
+    public void testIntegerSumTask() throws Exception {
+        AsyncFuture<Long> result = clusteredGigaSpace1.execute(new SumIntegerTask(new Task1()));
+        assertEquals(2, (long) result.get(100, TimeUnit.MILLISECONDS));
     }
 
     private class Task1 implements Task<Integer> {
