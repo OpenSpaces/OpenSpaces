@@ -21,6 +21,7 @@ import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.annotation.pojo.SpaceProperty;
 import com.gigaspaces.annotation.pojo.SpaceRouting;
 
+import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -32,8 +33,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * The entry that is stored in the Space representing a Jetty session.
  */
 @SpaceClass
-public class SessionData /*implements Externalizable*/ {
-    
+public class SessionData implements Externalizable {
+
     private String _id;
     private long _accessed = -1;
     private volatile long _lastAccessed = -1;
