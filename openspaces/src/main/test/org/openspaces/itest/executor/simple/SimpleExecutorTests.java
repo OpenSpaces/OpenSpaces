@@ -293,7 +293,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         }
 
         public Decision onResult(AsyncResultFilterEvent<Integer> event) {
-            if (event.getReceivedResults().size() == 0) {
+            if (event.getReceivedResults().length == 0) {
                 return Decision.BREAK;
             }
             return Decision.CONTINUE;
