@@ -8,7 +8,10 @@ import com.gigaspaces.async.AsyncResultFilterEvent;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.executor.DistributedTask;
 import org.openspaces.core.executor.Task;
-import org.openspaces.core.executor.support.SumIntegerTask;
+import org.openspaces.core.executor.support.AvgTask;
+import org.openspaces.core.executor.support.MaxTask;
+import org.openspaces.core.executor.support.MinTask;
+import org.openspaces.core.executor.support.SumTask;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -17,6 +20,7 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author kimchy
@@ -203,13 +207,37 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     }
 
     public void testIntegerSumTask() throws Exception {
-        AsyncFuture<Long> result = clusteredGigaSpace1.execute(new SumIntegerTask(new Task1()));
+        AsyncFuture<Long> result = clusteredGigaSpace1.execute(new SumTask<Integer, Long>(Long.class, new Task1()));
         assertEquals(2, (long) result.get(100, TimeUnit.MILLISECONDS));
+    }
+
+    public void testIntegerMaxTask() throws Exception {
+        AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MaxTask<Integer>(Integer.class, new IncrementalTask()));
+        assertEquals(2, (int) result.get(100, TimeUnit.MILLISECONDS));
+    }
+
+    public void testIntegerMinTask() throws Exception {
+        AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MinTask<Integer>(Integer.class, new IncrementalTask()));
+        assertEquals(1, (int) result.get(100, TimeUnit.MILLISECONDS));
+    }
+
+    public void testAvgTask() throws Exception {
+        AsyncFuture<Float> result = clusteredGigaSpace1.execute(new AvgTask<Integer, Float>(Float.class, new IncrementalTask()));
+        assertEquals(1.5, result.get(100, TimeUnit.MILLISECONDS), 0.000001);
     }
 
     private class Task1 implements Task<Integer> {
         public Integer execute() throws Exception {
             return 1;
+        }
+    }
+
+    private class IncrementalTask implements Task<Integer> {
+
+        private AtomicInteger val = new AtomicInteger();
+
+        public Integer execute() throws Exception {
+            return val.incrementAndGet();
         }
     }
 
