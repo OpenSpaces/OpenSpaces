@@ -378,10 +378,10 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
                 thread.setContextClassLoader(_loader);
             long now = System.currentTimeMillis();
             if (Log.isDebugEnabled())
-                Log.debug("Scavenging old sessions, expiring before: " + (now - _scavengePeriodMs));
+                Log.debug("Scavenging old sessions, expiring before: " + (now));
             Object[] expiredSessions;
             do {
-                expiredSessions = findExpiredSessions((now - _scavengePeriodMs));
+                expiredSessions = findExpiredSessions((now));
                 for (int i = 0; i < expiredSessions.length; i++) {
                     if (Log.isDebugEnabled()) Log.debug("Timing out expired sesson " + expiredSessions[i]);
                     GigaSessionManager.Session expiredSession = new GigaSessionManager.Session((SessionData) expiredSessions[i]);
