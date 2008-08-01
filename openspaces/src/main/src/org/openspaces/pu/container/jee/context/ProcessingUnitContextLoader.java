@@ -64,6 +64,7 @@ public class ProcessingUnitContextLoader extends ContextLoader {
         ClusterInfo clusterInfo = (ClusterInfo) servletContext.getAttribute(JeeProcessingUnitContainerProvider.CLUSTER_INFO_CONTEXT);
 
         BeanLevelProperties beanLevelProperties = (BeanLevelProperties) servletContext.getAttribute(JeeProcessingUnitContainerProvider.BEAN_LEVEL_PROPERTIES_CONTEXT);
+
         if (beanLevelProperties != null) {
             wac.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties, clusterInfo));
             wac.addBeanPostProcessor(new BeanLevelPropertyBeanPostProcessor(beanLevelProperties));
@@ -71,8 +72,8 @@ public class ProcessingUnitContextLoader extends ContextLoader {
 
         if (clusterInfo != null) {
             wac.addBeanPostProcessor(new ClusterInfoBeanPostProcessor(clusterInfo));
+            wac.addBeanFactoryPostProcessor(new ClusterInfoPropertyPlaceholderConfigurer(clusterInfo));
         }
-        wac.addBeanFactoryPostProcessor(new ClusterInfoPropertyPlaceholderConfigurer(clusterInfo));
 
         wac.setParent(parent);
         wac.setServletContext(servletContext);
