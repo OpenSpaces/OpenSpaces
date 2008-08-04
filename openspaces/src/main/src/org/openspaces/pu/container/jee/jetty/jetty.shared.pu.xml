@@ -10,6 +10,7 @@
                 <prop key="web.context.unique">true</prop>
                 <prop key="web.context.separator">_</prop>
                 <prop key="web.context.copyWebDir">false</prop>
+                <prop key="web.context.classLoader.parentFirst">false</prop>
                 <prop key="web.port">8080</prop>
                 <prop key="web.sslPort">8443</prop>
                 <prop key="web.threadPool.minThreads">10</prop>
@@ -43,6 +44,7 @@
         <property name="war" value="${jee.deployPath}" />
         <property name="tempDirectory" value="${jee.deployPath}/WEB-INF/work" />
         <property name="copyWebDir" value="${web.context.copyWebDir}" />
+        <property name="parentLoaderPriority" value="${web.context.classLoader.parentFirst}" />
     </bean>
 
     <bean id="jettyHolder" class="org.openspaces.pu.container.jee.jetty.SharedJettyHolder">
