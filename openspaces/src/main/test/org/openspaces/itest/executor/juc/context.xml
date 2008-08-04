@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
+
+
+    <context:annotation-config/>
+
+    <bean id="space1" class="org.openspaces.core.space.UrlSpaceFactoryBean">
+        <property name="url" value="/./executorSpace?cluster_schema=partitioned&amp;total_members=2&amp;id=1"/>
+        <property name="lookupGroups" value="${user.name}"/>
+    </bean>
+
+    <bean id="gigaSpace1" class="org.openspaces.core.GigaSpaceFactoryBean">
+        <property name="space" ref="space1"/>
+    </bean>
+
+    <bean id="clusteredGigaSpace1" class="org.openspaces.core.GigaSpaceFactoryBean">
+        <property name="space" ref="space1"/>
+        <property name="clustered" value="true"/>
+    </bean>
+
+    <bean id="space2" class="org.openspaces.core.space.UrlSpaceFactoryBean">
+        <property name="url" value="/./executorSpace?cluster_schema=partitioned&amp;total_members=2&amp;id=2"/>
+        <property name="lookupGroups" value="${user.name}"/>
+    </bean>
+
+    <bean id="gigaSpace2" class="org.openspaces.core.GigaSpaceFactoryBean">
+        <property name="space" ref="space2"/>
+    </bean>
+
+    <bean id="clusteredGigaSpace2" class="org.openspaces.core.GigaSpaceFactoryBean">
+        <property name="space" ref="space2"/>
+        <property name="clustered" value="true"/>
+    </bean>
+</beans>

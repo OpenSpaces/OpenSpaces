@@ -12,6 +12,8 @@ import org.openspaces.core.executor.support.AvgTask;
 import org.openspaces.core.executor.support.MaxTask;
 import org.openspaces.core.executor.support.MinTask;
 import org.openspaces.core.executor.support.SumTask;
+import org.openspaces.core.executor.support.WaitForAllListener;
+import org.openspaces.core.executor.support.WaitForAnyListener;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -224,6 +226,45 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     public void testAvgTask() throws Exception {
         AsyncFuture<Float> result = clusteredGigaSpace1.execute(new AvgTask<Integer, Float>(Float.class, new IncrementalTask()));
         assertEquals(1.5, result.get(100, TimeUnit.MILLISECONDS), 0.000001);
+    }
+
+    public void testWaitForAnyListener() throws Exception {
+        WaitForAnyListener<Integer> listener = new WaitForAnyListener<Integer>(2);
+        AsyncFuture<Integer> future = clusteredGigaSpace1.execute(new DelayedTask(500));
+        future.setListener(listener);
+        future = clusteredGigaSpace1.execute(new DelayedTask(100));
+        future.setListener(listener);
+        assertEquals(100, (int) listener.waitForResult());
+    }
+
+    public void testWaitForAllListener() throws Exception {
+        WaitForAllListener<Integer> listener = new WaitForAllListener<Integer>(2);
+        AsyncFuture<Integer> future = clusteredGigaSpace1.execute(new DelayedTask(500));
+        future.setListener(listener);
+        future = clusteredGigaSpace1.execute(new DelayedTask(100));
+        future.setListener(listener);
+        assertEquals(2, listener.waitForResult().length);
+        assertEquals(100, (int) listener.waitForResult()[0].get());
+        assertEquals(500, (int) listener.waitForResult()[1].get());
+    }
+
+    private class DelayedTask implements Task<Integer> {
+
+        private int waitTime;
+
+        public DelayedTask(int waitTime) {
+            this.waitTime = waitTime;
+        }
+
+        @SpaceRouting
+        public int routing() {
+            return waitTime;
+        }
+
+        public Integer execute() throws Exception {
+            Thread.sleep(waitTime);
+            return waitTime;
+        }
     }
 
     private class Task1 implements Task<Integer> {
