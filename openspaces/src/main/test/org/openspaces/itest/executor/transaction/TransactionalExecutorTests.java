@@ -102,6 +102,23 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         assertEquals(1, localGigaSpace1.count(null));
     }
 
+    public void testListenerAsParameterTransactionCommit() throws Exception {
+        TransactionTemplate txTemplate = new TransactionTemplate(localTxManager1);
+        final Listener listener = new Listener();
+        txTemplate.execute(new TransactionCallbackWithoutResult() {
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                AsyncFuture<Integer> value = localGigaSpace1.execute(new DelayedSimpleTask1(), 0, listener);
+            }
+        });
+        assertEquals(0, localGigaSpace1.count(null));
+        while (listener.getResult() == null) {
+            Thread.sleep(100);
+        }
+        // let it commit
+        Thread.sleep(100);
+        assertEquals(1, localGigaSpace1.count(null));
+    }
+
     public void testListenerTransactionRollback() throws Exception {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager1);
         final Listener listener = new Listener();
@@ -109,6 +126,24 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
             protected void doInTransactionWithoutResult(TransactionStatus status) {
                 AsyncFuture<Integer> value = localGigaSpace1.execute(new DelayedSimpleTask1(), 0);
                 value.setListener(listener);
+                status.setRollbackOnly();
+            }
+        });
+        assertEquals(0, localGigaSpace1.count(null));
+        while (listener.getResult() == null) {
+            Thread.sleep(100);
+        }
+        // let it "commit"
+        Thread.sleep(100);
+        assertEquals(0, localGigaSpace1.count(null));
+    }
+
+    public void testListenerAsParameterTransactionRollback() throws Exception {
+        TransactionTemplate txTemplate = new TransactionTemplate(localTxManager1);
+        final Listener listener = new Listener();
+        txTemplate.execute(new TransactionCallbackWithoutResult() {
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                AsyncFuture<Integer> value = localGigaSpace1.execute(new DelayedSimpleTask1(), 0, listener);
                 status.setRollbackOnly();
             }
         });
