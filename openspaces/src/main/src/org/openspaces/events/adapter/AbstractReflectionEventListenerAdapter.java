@@ -96,6 +96,13 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
         if (listenerMethods == null || listenerMethods.length == 0) {
             throw new IllegalArgumentException("No event listening methods found in delegate [" + delegate + "]");
         }
+        for (int i = 0; i < listenerMethods.length; i++) {
+            try {
+                listenerMethods[i] = getDelegate().getClass().getMethod(listenerMethods[i].getName(), listenerMethods[i].getParameterTypes());
+            } catch (NoSuchMethodException e) {
+                throw new IllegalArgumentException("Failed to find method with name [" + listenerMethods[i].getName() + "]", e);
+            }
+        }
         if (listenerMethods.length > 1) {
             // more than one listener methods are allowed, but they must be with the same name
             // if more than one listener method is defined, execution will be slower

@@ -16,6 +16,7 @@
 
 package org.openspaces.events.adapter;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
@@ -25,7 +26,7 @@ import java.util.List;
 /**
  * An event listener adapter that uses {@link SpaceDataEvent} annotation in order to find event
  * listener methods to delegate to.
- * 
+ *
  * @author kimchy
  */
 public class AnnotationEventListenerAdapter extends AbstractReflectionEventListenerAdapter {
@@ -36,7 +37,7 @@ public class AnnotationEventListenerAdapter extends AbstractReflectionEventListe
      */
     protected Method[] doGetListenerMethods() {
         final List<Method> methods = new ArrayList<Method>();
-        ReflectionUtils.doWithMethods(getDelegate().getClass(), new ReflectionUtils.MethodCallback() {
+        ReflectionUtils.doWithMethods(AopUtils.getTargetClass(getDelegate()), new ReflectionUtils.MethodCallback() {
             public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
                 methods.add(method);
             }
