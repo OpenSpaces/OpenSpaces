@@ -42,7 +42,7 @@ import java.util.List;
  * @author kimchy
  */
 public class ExecutorRemotingTask<T extends Serializable> implements DistributedTask<ExecutorRemotingTask.InternalExecutorResult<T>, List<AsyncResult<ExecutorRemotingTask.InternalExecutorResult<T>>>>,
-        ApplicationContextAware, ClusterInfoAware, TaskRoutingProvider, SpaceRemotingInvocation {
+        ApplicationContextAware, ClusterInfoAware, TaskRoutingProvider, SpaceRemotingInvocation, Externalizable {
 
     private String lookupName;
 
@@ -121,6 +121,46 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
 
     void setMetaArguments(Object[] metaArguments) {
         this.metaArguments = metaArguments;
+    }
+
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(lookupName);
+        out.writeUTF(methodName);
+        if (arguments == null) {
+            out.writeInt(0);
+        } else {
+            out.writeInt(arguments.length);
+            for (Object arg : arguments) {
+                out.writeObject(arg);
+            }
+        }
+        if (metaArguments == null) {
+            out.writeInt(0);
+        } else {
+            out.writeInt(metaArguments.length);
+            for (Object arg : metaArguments) {
+                out.writeObject(arg);
+            }
+        }
+    }
+
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        lookupName = in.readUTF();
+        methodName = in.readUTF();
+        int size = in.readInt();
+        if (size > 0) {
+            arguments = new Object[size];
+            for (int i = 0; i < size; i++) {
+                arguments[i] = in.readObject();
+            }
+        }
+        size = in.readInt();
+        if (size > 0) {
+            metaArguments = new Object[size];
+            for (int i = 0; i < size; i++) {
+                metaArguments[i] = in.readObject();
+            }
+        }
     }
 
     public static class InternalExecutorResult<T extends Serializable> implements Externalizable {
