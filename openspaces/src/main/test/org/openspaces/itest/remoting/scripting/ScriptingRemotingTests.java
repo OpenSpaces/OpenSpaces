@@ -39,6 +39,8 @@ public class ScriptingRemotingTests extends AbstractDependencyInjectionSpringCon
 
     protected ScriptingExecutor syncScriptingExecutor;
 
+    protected ScriptingExecutor executorScriptingExecutor;
+
     protected ScriptingAnnotationBean scriptingAnnotationBean;
 
     protected GigaSpace gigaSpace;
@@ -59,6 +61,16 @@ public class ScriptingRemotingTests extends AbstractDependencyInjectionSpringCon
 
     public void testAsyncAsycnExcution() throws ExecutionException, InterruptedException {
         Future<Integer> result = asyncScriptingExecutor.asyncExecute(new StaticScript("testAsyncAsycnExcution", "groovy", "return 1"));
+        assertEquals(1, result.get().intValue());
+    }
+
+    public void testExecutorSyncExecution() {
+        Integer value = (Integer) executorScriptingExecutor.execute(new StaticScript("testAsyncSyncExecution", "groovy", "return 1"));
+        assertEquals(1, value.intValue());
+    }
+
+    public void testExecutorAsycnExcution() throws ExecutionException, InterruptedException {
+        Future<Integer> result = executorScriptingExecutor.asyncExecute(new StaticScript("testAsyncAsycnExcution", "groovy", "return 1"));
         assertEquals(1, result.get().intValue());
     }
 
@@ -139,6 +151,7 @@ public class ScriptingRemotingTests extends AbstractDependencyInjectionSpringCon
     public void testAnnotationInjection() {
         assertEquals(2, scriptingAnnotationBean.executeAsyncScriptThatReturns2().intValue());
         assertEquals(2, scriptingAnnotationBean.executeSyncScriptThatReturns2().intValue());
+        assertEquals(2, scriptingAnnotationBean.executeExecutorScriptThatReturns2().intValue());
     }
 
     public void testAsyncScriptingConfigurer() {

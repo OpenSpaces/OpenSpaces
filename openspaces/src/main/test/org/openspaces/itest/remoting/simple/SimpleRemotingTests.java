@@ -16,8 +16,10 @@
 
 package org.openspaces.itest.remoting.simple;
 
+import com.gigaspaces.async.AsyncFuture;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.core.executor.support.WaitForAnyListener;
 import org.openspaces.remoting.AsyncRemotingProxyConfigurer;
 import org.openspaces.remoting.AsyncSpaceRemotingEntry;
 import org.openspaces.remoting.SyncRemotingProxyConfigurer;
@@ -41,6 +43,8 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
 
     protected SimpleService simpleServiceSync;
 
+    protected SimpleService simpleServiceExecutor;
+
     protected SimpleAnnotationBean simpleAnnotationBean;
 
     protected GigaSpace gigaSpace;
@@ -57,6 +61,28 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
     public void testAsyncSyncExecution() {
         String reply = simpleService.say("test");
         assertEquals("SAY test", reply);
+    }
+
+    public void testAsyncSyncExecutionWithException() {
+        try {
+            simpleService.testException();
+            fail();
+        } catch (SimpleService.MyException e) {
+            // all is well
+        }
+    }
+
+    public void testAsyncAsyncExecutionWithException() {
+        try {
+            simpleService.asyncTestException().get();
+            fail();
+        } catch (InterruptedException e) {
+            fail();
+        } catch (ExecutionException e) {
+            if (!(e.getCause() instanceof SimpleService.MyException)) {
+                fail();
+            }
+        }
     }
 
     public void testAsyncExecutionIsDone() throws InterruptedException, ExecutionException {
@@ -82,15 +108,78 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         assertEquals("SAY test", reply);
     }
 
+    public void testSyncSyncExecutionWithException() {
+        try {
+            simpleServiceSync.testException();
+            fail();
+        } catch (SimpleService.MyException e) {
+            // all is well
+        }
+    }
+
+    public void testSyncAsyncExecutionWithException() {
+        try {
+            simpleServiceSync.asyncTestException().get();
+            fail();
+        } catch (InterruptedException e) {
+            fail();
+        } catch (ExecutionException e) {
+            if (!(e.getCause() instanceof SimpleService.MyException)) {
+                fail();
+            }
+        }
+    }
+
     public void testSyncAsyncExecution() throws Exception {
         Future<String> reply = simpleServiceSync.asyncSay("test");
         assertEquals("SAY test", reply.get());
+    }
+
+    public void testExecutorSyncExecution() {
+        String reply = simpleServiceExecutor.say("test");
+        assertEquals("SAY test", reply);
+    }
+
+    public void testExecutorAsyncExecution() throws Exception {
+        Future<String> reply = simpleServiceExecutor.asyncSay("test");
+        assertEquals("SAY test", reply.get());
+    }
+
+    public void testExecutorAsyncExecutionWithListener() throws Exception {
+        AsyncFuture<String> reply = (AsyncFuture<String>) simpleServiceExecutor.asyncSay("test");
+        WaitForAnyListener<String> listener = new WaitForAnyListener<String>(1);
+        reply.setListener(listener);
+        assertEquals("SAY test", listener.waitForResult());
+    }
+
+    public void testExecutorSyncExecutionWithException() {
+        try {
+            simpleServiceExecutor.testException();
+            fail();
+        } catch (SimpleService.MyException e) {
+            // all is well
+        }
+    }
+
+    public void testExecutorAsyncExecutionWithException() {
+        try {
+            simpleServiceExecutor.asyncTestException().get();
+            fail();
+        } catch (InterruptedException e) {
+            fail();
+        } catch (ExecutionException e) {
+            if (!(e.getCause() instanceof SimpleService.MyException)) {
+                fail();
+            }
+        }
     }
 
     public void testSimpleAnnotationExecution() {
         String reply = simpleAnnotationBean.syncSimpleService.say("test");
         assertEquals("SAY test", reply);
         reply = simpleAnnotationBean.asyncSimpleService.say("test");
+        assertEquals("SAY test", reply);
+        reply = simpleAnnotationBean.executorSimpleService.say("test");
         assertEquals("SAY test", reply);
     }
 

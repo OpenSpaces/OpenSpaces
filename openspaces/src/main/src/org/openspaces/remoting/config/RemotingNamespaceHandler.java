@@ -28,6 +28,6 @@ public class RemotingNamespaceHandler extends NamespaceHandlerSupport {
         registerBeanDefinitionParser("service-exporter", new ServiceExporterBeanDefinitionParser());
         registerBeanDefinitionParser("async-proxy", new AsyncProxyBeanDefinitionParser());
         registerBeanDefinitionParser("sync-proxy", new SyncProxyBeanDefinitionParser());
-
+        registerBeanDefinitionParser("executor-proxy", new ExecutorProxyBeanDefinitionParser());
     }
 }

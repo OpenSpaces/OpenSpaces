@@ -21,4 +21,12 @@ public class DefaultSimpleService implements SimpleService {
     public boolean wire(WiredParameter wiredParameter) {
         return wiredParameter.gigaSpace != null;
     }
+
+    public void testException() throws MyException {
+        throw new MyException();
+    }
+
+    public Future asyncTestException() throws MyException {
+        return null;
+    }
 }

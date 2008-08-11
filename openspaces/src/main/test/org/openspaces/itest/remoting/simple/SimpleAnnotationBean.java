@@ -1,6 +1,7 @@
 package org.openspaces.itest.remoting.simple;
 
 import org.openspaces.remoting.AsyncProxy;
+import org.openspaces.remoting.ExecutorProxy;
 import org.openspaces.remoting.SyncProxy;
 
 /**
@@ -13,4 +14,7 @@ public class SimpleAnnotationBean {
 
     @SyncProxy
     SimpleService syncSimpleService;
+
+    @ExecutorProxy
+    SimpleService executorSimpleService;
 }

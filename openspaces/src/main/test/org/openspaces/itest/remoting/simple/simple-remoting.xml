@@ -40,4 +40,6 @@
                              interface="org.openspaces.itest.remoting.simple.SimpleServiceAsync" timeout="15000"/>
 
     <os-remoting:sync-proxy id="simpleServiceSync" giga-space="gigaSpace" interface="org.openspaces.itest.remoting.simple.SimpleService" />
+
+    <os-remoting:executor-proxy id="simpleServiceExecutor" giga-space="gigaSpace" interface="org.openspaces.itest.remoting.simple.SimpleService" />
 </beans>

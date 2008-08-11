@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.util.AnnotationUtils;
 import org.openspaces.remoting.scripting.AsyncScriptingExecutor;
+import org.openspaces.remoting.scripting.ExecutorScriptingExecutor;
 import org.openspaces.remoting.scripting.LazyLoadingRemoteInvocationAspect;
 import org.openspaces.remoting.scripting.ScriptingExecutor;
 import org.openspaces.remoting.scripting.ScriptingMetaArgumentsHandler;
@@ -57,6 +58,19 @@ public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanP
                     field.setAccessible(true);
                     field.set(bean, factoryBean.getObject());
                 }
+                ExecutorScriptingExecutor executorScriptingExecutor = field.getAnnotation(ExecutorScriptingExecutor.class);
+                if (executorScriptingExecutor != null) {
+                    ExecutorSpaceRemotingProxyFactoryBean factoryBean = new ExecutorSpaceRemotingProxyFactoryBean();
+                    factoryBean.setGigaSpace(findGigaSpaceByName(executorScriptingExecutor.gigaSpace()));
+                    factoryBean.setTimeout(executorScriptingExecutor.timeout());
+                    factoryBean.setMetaArgumentsHandler(new ScriptingMetaArgumentsHandler());
+                    factoryBean.setRemoteInvocationAspect(new LazyLoadingRemoteInvocationAspect());
+                    factoryBean.setRemoteRoutingHandler(new ScriptingRemoteRoutingHandler());
+                    factoryBean.setServiceInterface(ScriptingExecutor.class);
+                    factoryBean.afterPropertiesSet();
+                    field.setAccessible(true);
+                    field.set(bean, factoryBean.getObject());
+                }
                 AsyncScriptingExecutor asyncScriptingExecutor = field.getAnnotation(AsyncScriptingExecutor.class);
                 if (asyncScriptingExecutor != null) {
                     AsyncSpaceRemotingProxyFactoryBean factoryBean = new AsyncSpaceRemotingProxyFactoryBean();
@@ -96,6 +110,22 @@ public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanP
                     factoryBean.setRemoteRoutingHandler((RemoteRoutingHandler) createByClassOrFindByName(syncProxy.remoteRoutingHandler(), syncProxy.remoteRoutingHandlerType()));
                     factoryBean.setRemoteResultReducer((RemoteResultReducer) createByClassOrFindByName(syncProxy.remoteResultReducer(), syncProxy.remoteResultReducerType()));
                     factoryBean.setReturnFirstResult(syncProxy.returnFirstResult());
+                    factoryBean.setServiceInterface(field.getType());
+                    factoryBean.afterPropertiesSet();
+                    field.setAccessible(true);
+                    field.set(bean, factoryBean.getObject());
+                }
+                ExecutorProxy executorProxy = field.getAnnotation(ExecutorProxy.class);
+                if (executorProxy != null) {
+                    ExecutorSpaceRemotingProxyFactoryBean factoryBean = new ExecutorSpaceRemotingProxyFactoryBean();
+                    factoryBean.setGigaSpace(findGigaSpaceByName(executorProxy.gigaSpace()));
+                    factoryBean.setTimeout(executorProxy.timeout());
+                    factoryBean.setBroadcast(executorProxy.broadcast());
+                    factoryBean.setMetaArgumentsHandler((MetaArgumentsHandler) createByClassOrFindByName(executorProxy.metaArgumentsHandler(), executorProxy.metaArgumentsHandlerType()));
+                    factoryBean.setRemoteInvocationAspect((RemoteInvocationAspect) createByClassOrFindByName(executorProxy.remoteInvocationAspect(), executorProxy.remoteInvocationAspectType()));
+                    factoryBean.setRemoteRoutingHandler((RemoteRoutingHandler) createByClassOrFindByName(executorProxy.remoteRoutingHandler(), executorProxy.remoteRoutingHandlerType()));
+                    factoryBean.setRemoteResultReducer((RemoteResultReducer) createByClassOrFindByName(executorProxy.remoteResultReducer(), executorProxy.remoteResultReducerType()));
+                    factoryBean.setReturnFirstResult(executorProxy.returnFirstResult());
                     factoryBean.setServiceInterface(field.getType());
                     factoryBean.afterPropertiesSet();
                     field.setAccessible(true);

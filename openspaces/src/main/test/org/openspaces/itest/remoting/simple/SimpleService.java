@@ -14,4 +14,12 @@ public interface SimpleService {
     Future<String> asyncSay(String message);
 
     boolean wire(WiredParameter wiredParameter);
+
+    void testException() throws MyException;
+
+    Future asyncTestException() throws MyException;
+    
+    class MyException extends RuntimeException {
+
+    }
 }

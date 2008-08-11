@@ -67,14 +67,16 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>The exporter implements {@link org.openspaces.events.SpaceDataEventListener} which means that it
  * acts as a listener to data events and should be used with the different event containers such as
  * {@link org.openspaces.events.polling.SimplePollingEventListenerContainer}. This method of execution
- * is called <b>async</b> remote execution.
+ * is called <b>async</b> remote execution ({@link org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean}).
  *
  * <p>It also implements {@link org.openspaces.events.EventTemplateProvider} which means that within
  * the event container configuration there is no need to configure the template, as it uses the one
  * provided by this exported.
  *
  * <p>The exporter also implements {@link org.openspaces.core.space.filter.FilterProviderFactory} and
- * allows to execute services in a <b>sync</b> manner.
+ * allows to execute services in a <b>sync</b> manner ({@link org.openspaces.remoting.SyncSpaceRemotingProxyFactoryBean}).
+ *
+ * <p>Last, the exporter provides services to executor based remoting ({@link org.openspaces.remoting.ExecutorSpaceRemotingProxyFactoryBean}).
  *
  * <p>By default, the exporter will also autowire and post process all the arguments passed, allowing
  * to inject them with "server" side beans using Spring {@link org.springframework.beans.factory.annotation.Autowired}
@@ -215,7 +217,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
         filterProvider = new FilterProvider("Remoting Filter", new RemotingServiceInvoker());
         filterProvider.setActiveWhenBackup(false);
         filterProvider.setEnabled(true);
-        filterProvider.setOpCodes(new int[]{FilterOperationCodes.BEFORE_READ_MULTIPLE, FilterOperationCodes.BEFORE_TAKE_MULTIPLE});
+        filterProvider.setOpCodes(FilterOperationCodes.BEFORE_READ_MULTIPLE, FilterOperationCodes.BEFORE_TAKE_MULTIPLE);
     }
 
     public void onApplicationEvent(ApplicationEvent applicationEvent) {
@@ -225,7 +227,6 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             // go over the services and create the interface to service lookup
             for (Object service : services) {
                 if (service instanceof ServiceRef) {
-                    service = applicationContext.getBean(((ServiceRef) service).getRef());
                 }
                 Class<?>[] interfaces = ClassUtils.getAllInterfaces(service);
                 for (Class<?> anInterface : interfaces) {
@@ -355,6 +356,50 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
         }
     }
 
+    // Executor execution
+
+    public Object invokeExecutor(ExecutorRemotingTask task) throws Throwable {
+        String lookupName = task.getLookupName();
+        if (lookupName.endsWith(asyncInterfaceSuffix)) {
+            lookupName = lookupName.substring(0, lookupName.length() - asyncInterfaceSuffix.length());
+        }
+
+        Object service = interfaceToService.get(lookupName);
+        if (service == null) {
+            // we did not get an interface, maybe it is a bean name?
+            try {
+                service = applicationContext.getBean(lookupName);
+            } catch (NoSuchBeanDefinitionException e) {
+                // do nothing, write back a proper exception
+            }
+            if (service == null) {
+                throw new RemoteLookupFailureException("Failed to find service for lookup [" + task.getLookupName() + "]");
+            }
+        }
+
+        autowireArguments(task.getArguments());
+
+        Method method;
+        try {
+            method = methodInvocationCache.findMethod(lookupName, service, task.getMethodName(), task.getArguments());
+        } catch (Exception e) {
+            throw new RemoteLookupFailureException("Failed to find method [" + task.getMethodName() + "] for lookup [" + task.getLookupName() + "]");
+        }
+        try {
+            Object retVal;
+            if (serviceExecutionAspect != null) {
+                retVal = serviceExecutionAspect.invoke(task, method, service);
+            } else {
+                retVal = method.invoke(service, task.getArguments());
+            }
+            return retVal;
+        } catch (InvocationTargetException e) {
+            throw e.getTargetException();
+        } catch (IllegalAccessException e) {
+            throw new RemoteLookupFailureException("Failed to access method [" + task.getMethodName() + "] for lookup [" + task.getLookupName() + "]");
+        }
+    }
+
     // Sync execution
 
     /**
@@ -461,7 +506,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                     writeResponse(space, entry, remotingEntry, new RemoteLookupFailureException("Failed to access method ["
                             + remotingEntry.getMethodName() + "] for lookup [" + remotingEntry.getLookupName() + "]", e));
                 }
-            } finally {     
+            } finally {
                 if (boundedTransaction) {
                     ExistingJiniTransactionManager.unbindExistingTransaction();
                 }

@@ -58,4 +58,17 @@
             <bean class="org.openspaces.remoting.scripting.ScriptingMetaArgumentsHandler" />
         </os-remoting:meta-arguments-handler>
     </os-remoting:sync-proxy>
+
+    <os-remoting:executor-proxy id="executorScriptingExecutor" giga-space="gigaSpace"
+                            interface="org.openspaces.remoting.scripting.ScriptingExecutor">
+        <os-remoting:aspect>
+            <bean class="org.openspaces.remoting.scripting.LazyLoadingRemoteInvocationAspect" />
+        </os-remoting:aspect>
+        <os-remoting:routing-handler>
+            <bean class="org.openspaces.remoting.scripting.ScriptingRemoteRoutingHandler" />
+        </os-remoting:routing-handler>
+        <os-remoting:meta-arguments-handler>
+            <bean class="org.openspaces.remoting.scripting.ScriptingMetaArgumentsHandler" />
+        </os-remoting:meta-arguments-handler>
+    </os-remoting:executor-proxy>
 </beans>
