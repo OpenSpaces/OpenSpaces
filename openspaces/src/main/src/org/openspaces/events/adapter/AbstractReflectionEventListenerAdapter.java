@@ -75,6 +75,8 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
 
     private Method[] listenerMethods;
 
+    private int numberOfParameters;
+
     /**
      * The event listener delegate that will be searched for event listening methods and will have
      * its method executed.
@@ -117,6 +119,7 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
         for (Method listenerMethod : listenerMethods) {
             listenerMethod.setAccessible(true);
         }
+        this.numberOfParameters = listenerMethods[0].getParameterTypes().length;
     }
 
     /**
@@ -127,7 +130,6 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
      */
     protected Object onEventWithResult(Object data, GigaSpace gigaSpace, TransactionStatus txStatus, Object source) {
         Method listenerMethod = listenerMethods[0];
-        int numberOfParameters = listenerMethod.getParameterTypes().length;
 
         // set up the arguments passed to the method
         Object[] listenerArguments = null;
