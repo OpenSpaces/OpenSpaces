@@ -163,7 +163,7 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
                 methodInvoker.prepare();
                 result = methodInvoker.invoke();
             } catch (InvocationTargetException ex) {
-                throw new org.springframework.jms.listener.adapter.ListenerExecutionFailedException("Listener method '"
+                throw new ListenerExecutionFailedException("Listener method '"
                         + listenerMethod.getName() + "' threw exception", ex.getTargetException());
             } catch (Throwable ex) {
                 throw new ListenerExecutionFailedException("Failed to invoke target method '"
