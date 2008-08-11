@@ -16,6 +16,9 @@
 
 package org.openspaces.events.adapter;
 
+import com.gigaspaces.reflect.IMethod;
+import com.gigaspaces.reflect.fast.ASMMethodFactory;
+import com.gigaspaces.reflect.standard.StandardMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.GigaSpace;
@@ -75,6 +78,8 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
 
     private Method[] listenerMethods;
 
+    private IMethod fastMethod;
+
     private int numberOfParameters;
 
     /**
@@ -115,6 +120,15 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
                             + numbersOfParams + "] and [" + listenerMethods[i].getParameterTypes().length + "]");
                 }
             }
+        } else {
+            try {
+                fastMethod = ASMMethodFactory.getMethod(listenerMethods[0]);
+            } catch (NoSuchMethodException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed to create fast ASM method reflection, using plain reflection", e);
+                }
+                fastMethod = new StandardMethod(listenerMethods[0]);
+            }
         }
         for (Method listenerMethod : listenerMethods) {
             listenerMethod.setAccessible(true);
@@ -147,13 +161,16 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
         if (listenerMethods.length == 1) {
             // single method, use the already obtained Method to invoke the listener
             try {
-                result = listenerMethod.invoke(delegate, listenerArguments);
+                result = fastMethod.invoke(delegate, listenerArguments);
             } catch (IllegalAccessException ex) {
                 throw new PermissionDeniedDataAccessException("Failed to invoke event method ["
                         + listenerMethod.getName() + "]", ex);
             } catch (InvocationTargetException ex) {
                 throw new ListenerExecutionFailedException("Listener event method '" + listenerMethod.getName()
                         + "' threw exception", ex.getTargetException());
+            } catch (Exception ex) {
+                throw new ListenerExecutionFailedException("Listener event method '" + listenerMethod.getName()
+                        + "' threw exception", ex);
             }
         } else {
             // more than one method, we need to use reflection to find the matched method

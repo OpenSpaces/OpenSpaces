@@ -16,6 +16,9 @@
 
 package org.openspaces.remoting;
 
+import com.gigaspaces.reflect.IMethod;
+import com.gigaspaces.reflect.fast.ASMMethodFactory;
+import com.gigaspaces.reflect.standard.StandardMethod;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.SpaceContext;
 import com.j_spaces.core.filters.FilterOperationCodes;
@@ -227,11 +230,12 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             // go over the services and create the interface to service lookup
             for (Object service : services) {
                 if (service instanceof ServiceRef) {
+                    service = applicationContext.getBean(((ServiceRef) service).getRef());
                 }
                 Class<?>[] interfaces = ClassUtils.getAllInterfaces(service);
                 for (Class<?> anInterface : interfaces) {
                     interfaceToService.put(anInterface.getName(), service);
-                    methodInvocationCache.addService(anInterface);
+                    methodInvocationCache.addService(anInterface, service);
                 }
             }
         }
@@ -290,7 +294,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
         autowireArguments(remotingEntry.getArguments());
 
-        Method method;
+        IMethod method;
         try {
             method = methodInvocationCache.findMethod(lookupName, service, remotingEntry.methodName, remotingEntry.arguments);
         } catch (Exception e) {
@@ -311,6 +315,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
         } catch (IllegalAccessException e) {
             writeResponse(gigaSpace, remotingEntry, new RemoteLookupFailureException("Failed to access method ["
                     + remotingEntry.methodName + "] for lookup [" + remotingEntry.lookupName + "]", e));
+        } catch (Throwable e) {
+            writeResponse(gigaSpace, remotingEntry, e);
         }
     }
 
@@ -379,7 +385,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
         autowireArguments(task.getArguments());
 
-        Method method;
+        IMethod method;
         try {
             method = methodInvocationCache.findMethod(lookupName, service, task.getMethodName(), task.getArguments());
         } catch (Exception e) {
@@ -484,7 +490,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             // bind current transaction
             boolean boundedTransaction = ExistingJiniTransactionManager.bindExistingTransaction(remotingEntry.transaction);
             try {
-                Method method;
+                IMethod method;
                 try {
                     method = methodInvocationCache.findMethod(lookupName, service, remotingEntry.methodName, remotingEntry.arguments);
                 } catch (Exception e) {
@@ -505,6 +511,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                 } catch (IllegalAccessException e) {
                     writeResponse(space, entry, remotingEntry, new RemoteLookupFailureException("Failed to access method ["
                             + remotingEntry.getMethodName() + "] for lookup [" + remotingEntry.getLookupName() + "]", e));
+                } catch (Throwable e) {
+                    writeResponse(space, entry, remotingEntry, e);
                 }
             } finally {
                 if (boundedTransaction) {
@@ -586,13 +594,13 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
         private Map<String, MethodsCacheEntry> serviceToMethodCacheMap = new HashMap<String, MethodsCacheEntry>();
 
-        public Method findMethod(String lookupName, Object service, String methodName, Object[] arguments) throws NoSuchMethodException {
+        public IMethod findMethod(String lookupName, Object service, String methodName, Object[] arguments) throws NoSuchMethodException {
             int numberOfParameters = 0;
             if (arguments != null) {
                 numberOfParameters = arguments.length;
             }
-            Method invocationMethod;
-            Method[] methods = serviceToMethodCacheMap.get(lookupName).getMethodCacheEntry(methodName).getMethod(numberOfParameters);
+            IMethod invocationMethod;
+            IMethod[] methods = serviceToMethodCacheMap.get(lookupName).getMethodCacheEntry(methodName).getMethod(numberOfParameters);
             if (methods != null && methods.length == 1) {
                 //we can do caching
                 invocationMethod = methods[0];
@@ -605,15 +613,15 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                     argumentTypes[i] = (arguments[i] != null ? arguments[i].getClass() : Object.class);
                 }
 
-                invocationMethod = service.getClass().getMethod(methodName, argumentTypes);
+                invocationMethod = new StandardMethod(service.getClass().getMethod(methodName, argumentTypes));
             }
             return invocationMethod;
         }
 
-        public void addService(Class service) {
+        public void addService(Class serviceInterface, Object service) {
             MethodsCacheEntry methodsCacheEntry = new MethodsCacheEntry();
-            serviceToMethodCacheMap.put(service.getName(), methodsCacheEntry);
-            methodsCacheEntry.addService(service);
+            serviceToMethodCacheMap.put(serviceInterface.getName(), methodsCacheEntry);
+            methodsCacheEntry.addService(service.getClass());
         }
 
         private class MethodsCacheEntry {
@@ -639,20 +647,26 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
         private class MethodCacheEntry {
 
-            private Map<Integer, Method[]> parametersPerMethodMap = new HashMap<Integer, Method[]>();
+            private Map<Integer, IMethod[]> parametersPerMethodMap = new HashMap<Integer, IMethod[]>();
 
-            public Method[] getMethod(int numberOfParams) {
+            public IMethod[] getMethod(int numberOfParams) {
                 return parametersPerMethodMap.get(numberOfParams);
             }
 
             public void addMethod(Method method) {
-                Method[] list = parametersPerMethodMap.get(method.getParameterTypes().length);
+                IMethod fastMethod;
+                try {
+                    fastMethod = ASMMethodFactory.getMethod(method);
+                } catch (NoSuchMethodException e) {
+                    fastMethod = new StandardMethod(method);
+                }
+                IMethod[] list = parametersPerMethodMap.get(method.getParameterTypes().length);
                 if (list == null) {
-                    list = new Method[]{method};
+                    list = new IMethod[]{fastMethod};
                 } else {
-                    Method[] tempList = new Method[list.length + 1];
+                    IMethod[] tempList = new IMethod[list.length + 1];
                     System.arraycopy(list, 0, tempList, 0, list.length);
-                    tempList[list.length] = method;
+                    tempList[list.length] = fastMethod;
                     list = tempList;
                 }
                 parametersPerMethodMap.put(method.getParameterTypes().length, list);

@@ -16,8 +16,9 @@
 
 package org.openspaces.remoting;
 
+import com.gigaspaces.reflect.IMethod;
+
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 /**
  * A service execution callback allows to wrap the execution of "server side" service. If
@@ -39,5 +40,5 @@ public interface ServiceExecutionAspect {
      *
      * <p>As an example: <code>method.invoke(service, invocation.getArguments())</code>.
      */
-    Object invoke(SpaceRemotingInvocation invocation, Method method, Object service) throws InvocationTargetException, IllegalAccessException;
+    Object invoke(SpaceRemotingInvocation invocation, IMethod method, Object service) throws InvocationTargetException, IllegalAccessException;
 }
