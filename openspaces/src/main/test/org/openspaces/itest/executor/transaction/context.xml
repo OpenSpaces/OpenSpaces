@@ -21,7 +21,7 @@
 
     <os-core:local-tx-manager id="localTxManager1" space="space1" />
 
-    <os-core:giga-space id="gigaSpace1" space="space1" tx-manager="localTxManager1" async-min-threads="1" async-max-threads="2" async-keep-alive-time="60" />
+    <os-core:giga-space id="gigaSpace1" space="space1" tx-manager="localTxManager1" />
 
     <os-core:giga-space id="localGigaSpace1" space="space1" tx-manager="localTxManager1" clustered="true" />
 
