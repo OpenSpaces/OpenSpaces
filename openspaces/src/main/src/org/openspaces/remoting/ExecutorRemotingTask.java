@@ -232,6 +232,12 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
             return instanceId;
         }
 
+        // no need to fill the stack trace here
+        @Override
+        public Throwable fillInStackTrace() {
+            return null;
+        }
+
         public void writeExternal(ObjectOutput out) throws IOException {
             out.writeObject(exception);
             if (instanceId == null) {
