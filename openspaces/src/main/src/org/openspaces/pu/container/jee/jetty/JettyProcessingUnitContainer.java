@@ -26,6 +26,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.web.context.ContextLoader;
 
+import java.net.InetSocketAddress;
+
 /**
  * The actual contianer simply holding the jetty web application context, the application context,
  * and the {@link org.openspaces.pu.container.jee.jetty.JettyHolder}. They are used when closing
@@ -67,8 +69,11 @@ public class JettyProcessingUnitContainer implements org.openspaces.pu.container
     }
 
     public JeePUServiceDetails getServiceDetails() {
-        return new JeePUServiceDetails(jettyHolder.getServer().getConnectors()[0].getHost(),
-                jettyHolder.getServer().getConnectors()[0].getPort(),
+        int port = jettyHolder.getServer().getConnectors()[0].getPort();
+        String host = jettyHolder.getServer().getConnectors()[0].getHost();
+        InetSocketAddress addr = host == null ? new InetSocketAddress(port) : new InetSocketAddress(host, port);
+        return new JeePUServiceDetails(addr.getAddress().getHostAddress(),
+                port,
                 jettyHolder.getServer().getConnectors()[0].getConfidentialPort(),
                 webAppContext.getContextPath(),
                 jettyHolder.isSingleInstance(),

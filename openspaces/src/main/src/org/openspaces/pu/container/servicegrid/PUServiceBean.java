@@ -19,6 +19,7 @@ package org.openspaces.pu.container.servicegrid;
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.SpaceURL;
+import org.openspaces.core.cluster.ClusterInfo;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -45,4 +46,6 @@ public interface PUServiceBean extends Remote {
     SpaceMode[] listSpacesModes() throws RemoteException;
 
     PUServiceDetails[] listServiceDetails() throws RemoteException;
+
+    ClusterInfo getClusterInfo() throws RemoteException;
 }

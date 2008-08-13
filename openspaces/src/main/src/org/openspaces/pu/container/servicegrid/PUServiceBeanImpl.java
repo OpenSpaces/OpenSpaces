@@ -110,6 +110,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private volatile File deployPath;
 
+    private ClusterInfo clusterInfo;
+
     public PUServiceBeanImpl() {
         contextClassLoader = Thread.currentThread().getContextClassLoader();
     }
@@ -216,7 +218,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
 
         //set cluster info
-        ClusterInfo clusterInfo = new ClusterInfo();
+        clusterInfo = new ClusterInfo();
         String clusterSchema = sla.getClusterSchema();
         if (clusterSchema != null) {
             clusterInfo.setSchema(clusterSchema);
@@ -412,6 +414,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     public IJSpace[] listSpaces() throws RemoteException {
         return embeddedSpaces;
+    }
+
+    public ClusterInfo getClusterInfo() throws RemoteException {
+        return this.clusterInfo;
     }
 
     /**
