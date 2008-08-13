@@ -21,6 +21,7 @@ import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.core.executor.DistributedTask;
 import org.openspaces.core.executor.TaskRoutingProvider;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -73,8 +74,10 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
     }
 
     public InternalExecutorResult<T> execute() throws Exception {
-        SpaceRemotingServiceExporter serviceExporter = (SpaceRemotingServiceExporter) applicationContext.getBean("serviceExporter");
-        if (serviceExporter == null) {
+        SpaceRemotingServiceExporter serviceExporter = null;
+        try {
+            serviceExporter = (SpaceRemotingServiceExporter) applicationContext.getBean("serviceExporter");
+        } catch (NoSuchBeanDefinitionException e) {
             String[] names = applicationContext.getBeanNamesForType(SpaceRemotingServiceExporter.class, false, true);
             if (names != null && names.length > 0) {
                 serviceExporter = (SpaceRemotingServiceExporter) applicationContext.getBean(names[0]);

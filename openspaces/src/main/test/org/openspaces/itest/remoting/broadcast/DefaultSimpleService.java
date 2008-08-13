@@ -1,13 +1,10 @@
 package org.openspaces.itest.remoting.broadcast;
 
-import org.openspaces.remoting.RemotingService;
-
 import java.util.concurrent.Future;
 
 /**
  * @author kimchy
  */
-@RemotingService
 public class DefaultSimpleService implements SimpleService {
 
     public int sum(int value) {
@@ -25,5 +22,5 @@ public class DefaultSimpleService implements SimpleService {
     public Future asyncTestException() throws MyException {
         return null;
     }
-    
+
 }
