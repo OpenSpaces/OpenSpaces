@@ -54,6 +54,22 @@ public class BroadcastRemotingTests extends AbstractDependencyInjectionSpringCon
         innerTestAsyncBroadcast(syncService);
     }
 
+    public void testExecutorAsyncException() throws ExecutionException, InterruptedException {
+        innerTestAsyncException(executorService);
+    }
+
+    public void testSyncAsyncException() throws ExecutionException, InterruptedException {
+        innerTestAsyncException(syncService);
+    }
+
+    public void testExecutorSyncException() throws ExecutionException, InterruptedException {
+        innerTestSyncException(executorService);
+    }
+
+    public void testSyncSyncException() throws ExecutionException, InterruptedException {
+        innerTestSyncException(syncService);
+    }
+
     private void innerTestSyncBroadcast(SimpleService service) {
         int value = service.sum(2);
         assertEquals(4, value);
@@ -63,4 +79,27 @@ public class BroadcastRemotingTests extends AbstractDependencyInjectionSpringCon
         Future<Integer> future = service.asyncSum(2);
         assertEquals(4, (int) future.get());
     }
+
+    public void innerTestSyncException(SimpleService service) {
+        try {
+            service.testException();
+            fail();
+        } catch (SimpleService.MyException e) {
+            // all is well
+        }
+    }
+
+    public void innerTestAsyncException(SimpleService service) {
+        try {
+            service.asyncTestException().get();
+            fail();
+        } catch (InterruptedException e) {
+            fail();
+        } catch (ExecutionException e) {
+            if (!(e.getCause() instanceof SimpleService.MyException)) {
+                fail();
+            }
+        }
+    }
+
 }

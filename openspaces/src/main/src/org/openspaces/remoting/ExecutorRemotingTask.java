@@ -163,6 +163,9 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
         }
     }
 
+    /**
+     * A wrapper executor result that holds more information on the exception, such as the instance id.
+     */
     public static class InternalExecutorResult<T extends Serializable> implements Externalizable {
 
         private T result;
@@ -210,6 +213,9 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
         }
     }
 
+    /**
+     * A wrapper executor exception that holds more information on the exception, such as the instance id.
+     */
     public static class InternalExecutorException extends Exception implements Externalizable {
 
         private Throwable exception;

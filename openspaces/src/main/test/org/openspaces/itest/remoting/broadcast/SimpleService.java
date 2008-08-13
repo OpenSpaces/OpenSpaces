@@ -10,4 +10,12 @@ public interface SimpleService {
     int sum(int value);
 
     Future<Integer> asyncSum(int value);
+
+    void testException() throws MyException;
+
+    Future asyncTestException() throws MyException;
+
+    class MyException extends RuntimeException {
+
+    }
 }

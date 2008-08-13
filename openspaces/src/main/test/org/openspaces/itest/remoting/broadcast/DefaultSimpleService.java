@@ -17,4 +17,13 @@ public class DefaultSimpleService implements SimpleService {
     public Future<Integer> asyncSum(int value) {
         return null;
     }
+
+    public void testException() throws MyException {
+        throw new MyException();
+    }
+
+    public Future asyncTestException() throws MyException {
+        return null;
+    }
+    
 }

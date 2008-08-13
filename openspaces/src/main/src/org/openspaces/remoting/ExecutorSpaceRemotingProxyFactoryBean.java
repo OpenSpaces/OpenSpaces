@@ -239,14 +239,22 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
             if (asyncExecution) {
                 return future;
             } else {
-                return future.get(timeout, TimeUnit.MILLISECONDS);
+                try {
+                    return future.get(timeout, TimeUnit.MILLISECONDS);
+                } catch (ExecutionException e) {
+                    throw e.getCause();
+                }
             }
         } else {
-            ExecutorAsyncFuture future = new ExecutorAsyncFuture(gigaSpace.execute(task, task.getRouting()));
+            ExecutorAsyncFuture future = new ExecutorAsyncFuture(gigaSpace.execute(task, task.getRouting()), task);
             if (asyncExecution) {
                 return future;
             } else {
-                return future.get(timeout, TimeUnit.MILLISECONDS);
+                try {
+                    return future.get(timeout, TimeUnit.MILLISECONDS);
+                } catch (ExecutionException e) {
+                    throw e.getCause();
+                }
             }
         }
     }
@@ -327,6 +335,9 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
             } catch (InterruptedException e) {
                 throw e;
             } catch (ExecutionException e) {
+                if (e.getCause() instanceof ExecutorRemotingTask.InternalExecutorException) {
+                    throw new ExecutionException("Failed to invoke service [" + task.getLookupName() + "] with method [" + task.getMethodName() + "]", ((ExecutorRemotingTask.InternalExecutorException) e.getCause()).getException());
+                }
                 throw e;
             } catch (Throwable e) {
                 Throwable actualException = e;
@@ -342,8 +353,11 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
 
         private AsyncFuture<ExecutorRemotingTask.InternalExecutorResult> future;
 
-        private ExecutorAsyncFuture(AsyncFuture<ExecutorRemotingTask.InternalExecutorResult> future) {
+        private ExecutorRemotingTask task;
+
+        private ExecutorAsyncFuture(AsyncFuture<ExecutorRemotingTask.InternalExecutorResult> future, ExecutorRemotingTask task) {
             this.future = future;
+            this.task = task;
         }
 
         public void setListener(AsyncFutureListener listener) {
@@ -368,7 +382,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
                 return result.getResult();
             } catch (ExecutionException e) {
                 if (e.getCause() instanceof ExecutorRemotingTask.InternalExecutorException) {
-                    throw new ExecutionException("Failed to invoke", ((ExecutorRemotingTask.InternalExecutorException) e.getCause()).getException());
+                    throw new ExecutionException("Failed to invoke service [" + task.getLookupName() + "] with method [" + task.getMethodName() + "]", ((ExecutorRemotingTask.InternalExecutorException) e.getCause()).getException());
                 }
                 throw e;
             }
@@ -380,7 +394,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
                 return result.getResult();
             } catch (ExecutionException e) {
                 if (e.getCause() instanceof ExecutorRemotingTask.InternalExecutorException) {
-                    throw new ExecutionException("Failed to invoke", ((ExecutorRemotingTask.InternalExecutorException) e.getCause()).getException());
+                    throw new ExecutionException("Failed to invoke service [" + task.getLookupName() + "] with method [" + task.getMethodName() + "]", ((ExecutorRemotingTask.InternalExecutorException) e.getCause()).getException());
                 }
                 throw e;
             }
