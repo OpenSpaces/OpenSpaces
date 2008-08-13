@@ -16,6 +16,9 @@
 
 package org.openspaces.itest.remoting.broadcast;
 
+import com.gigaspaces.annotation.pojo.SpaceClass;
+import com.gigaspaces.annotation.pojo.SpaceRouting;
+import org.openspaces.core.GigaSpace;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 import java.util.concurrent.ExecutionException;
@@ -30,12 +33,22 @@ public class BroadcastRemotingTests extends AbstractDependencyInjectionSpringCon
 
     protected SimpleService executorService;
 
+    protected GigaSpace gigaSpace;
+
     public BroadcastRemotingTests() {
         setPopulateProtectedVariables(true);
     }
 
     protected String[] getConfigLocations() {
         return new String[]{"/org/openspaces/itest/remoting/broadcast/broadcast-remoting.xml"};
+    }
+
+    public void testTakeMulitpleWorking() {
+        gigaSpace.write(new Message(1));
+        gigaSpace.write(new Message(2));
+        Message[] result = gigaSpace.takeMultiple(new Message(), Integer.MAX_VALUE);
+        assertEquals(2, result.length);
+        gigaSpace.clear(new Message());
     }
 
     public void testExecutorSyncBroadcast() {
@@ -102,4 +115,25 @@ public class BroadcastRemotingTests extends AbstractDependencyInjectionSpringCon
         }
     }
 
+    @SpaceClass
+    public static class Message {
+
+        private Integer routing;
+
+        public Message() {
+        }
+
+        public Message(int routing) {
+            this.routing = routing;
+        }
+
+        @SpaceRouting
+        public Integer getRouting() {
+            return routing;
+        }
+
+        public void setRouting(Integer routing) {
+            this.routing = routing;
+        }
+    }
 }
