@@ -121,10 +121,10 @@
     </bean>
 
     <!--
-        Uses the sync remoting proxoed bean to call count without any knownaled of the remoting
+        Uses the executor remoting proxoed bean to call count without any knownaled of the remoting
         invocation.
     -->
-    <bean id="syncBroadcastDataCounter" class="org.openspaces.example.data.feeder.SyncBroadcastDataCounter" depends-on="gigaSpace">
+    <bean id="broadcastDataCounter" class="org.openspaces.example.data.feeder.BroadcastDataCounter" depends-on="gigaSpace">
     </bean>
 
     <!-- Local View Example ("client side") -->

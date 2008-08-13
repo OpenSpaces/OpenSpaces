@@ -59,6 +59,12 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
 
     private transient Integer instanceId;
 
+    /**
+     * Should not be used. Used for externalizable.
+     */
+    public ExecutorRemotingTask() {
+    }
+
     public ExecutorRemotingTask(String lookupName, String methodName, Object[] arguments) {
         this.lookupName = lookupName;
         this.methodName = methodName;
