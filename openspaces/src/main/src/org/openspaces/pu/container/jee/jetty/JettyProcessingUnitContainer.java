@@ -18,6 +18,7 @@ package org.openspaces.pu.container.jee.jetty;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jini.rio.boot.BootUtil;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.openspaces.pu.container.CannotCloseContainerException;
@@ -27,6 +28,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.web.context.ContextLoader;
 
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 
 /**
  * The actual contianer simply holding the jetty web application context, the application context,
@@ -71,6 +73,13 @@ public class JettyProcessingUnitContainer implements org.openspaces.pu.container
     public JeePUServiceDetails getServiceDetails() {
         int port = jettyHolder.getServer().getConnectors()[0].getPort();
         String host = jettyHolder.getServer().getConnectors()[0].getHost();
+        if (host == null) {
+            try {
+                host = BootUtil.getHostAddressFromProperty("java.rmi.server.hostname");
+            } catch (UnknownHostException e) {
+                logger.warn("Unknown host exception", e);
+            }
+        }
         InetSocketAddress addr = host == null ? new InetSocketAddress(port) : new InetSocketAddress(host, port);
         return new JeePUServiceDetails(addr.getAddress().getHostAddress(),
                 port,
