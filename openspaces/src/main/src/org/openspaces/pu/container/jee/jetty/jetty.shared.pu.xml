@@ -20,7 +20,7 @@
                 <prop key="web.selector.acceptors">2</prop>
                 <prop key="web.selector.lowResourcesConnections">20000</prop>
                 <prop key="web.selector.lowResourcesMaxIdleTime">5000</prop>
-                <prop key="web.selector.forwarded">false</prop>
+                <prop key="web.selector.forwarded">true</prop>
             </props>
         </property>
     </bean>
