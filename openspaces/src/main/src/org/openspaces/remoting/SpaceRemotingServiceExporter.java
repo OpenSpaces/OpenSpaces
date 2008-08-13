@@ -17,7 +17,7 @@
 package org.openspaces.remoting;
 
 import com.gigaspaces.reflect.IMethod;
-import com.gigaspaces.reflect.fast.ASMMethodFactory;
+import com.gigaspaces.reflect.ReflectionUtil;
 import com.gigaspaces.reflect.standard.StandardMethod;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.SpaceContext;
@@ -654,12 +654,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             }
 
             public void addMethod(Method method) {
-                IMethod fastMethod;
-                try {
-                    fastMethod = ASMMethodFactory.getMethod(method);
-                } catch (NoSuchMethodException e) {
-                    fastMethod = new StandardMethod(method);
-                }
+                IMethod fastMethod = ReflectionUtil.createMethod(method);
                 IMethod[] list = parametersPerMethodMap.get(method.getParameterTypes().length);
                 if (list == null) {
                     list = new IMethod[]{fastMethod};

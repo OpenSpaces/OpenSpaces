@@ -17,8 +17,7 @@
 package org.openspaces.events.adapter;
 
 import com.gigaspaces.reflect.IMethod;
-import com.gigaspaces.reflect.fast.ASMMethodFactory;
-import com.gigaspaces.reflect.standard.StandardMethod;
+import com.gigaspaces.reflect.ReflectionUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.GigaSpace;
@@ -121,14 +120,7 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
                 }
             }
         } else {
-            try {
-                fastMethod = ASMMethodFactory.getMethod(listenerMethods[0]);
-            } catch (NoSuchMethodException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to create fast ASM method reflection, using plain reflection", e);
-                }
-                fastMethod = new StandardMethod(listenerMethods[0]);
-            }
+            fastMethod = ReflectionUtil.createMethod(listenerMethods[0]);
         }
         for (Method listenerMethod : listenerMethods) {
             listenerMethod.setAccessible(true);
@@ -168,7 +160,7 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
             } catch (InvocationTargetException ex) {
                 throw new ListenerExecutionFailedException("Listener event method '" + listenerMethod.getName()
                         + "' threw exception", ex.getTargetException());
-            } catch (Exception ex) {
+            } catch (Throwable ex) {
                 throw new ListenerExecutionFailedException("Listener event method '" + listenerMethod.getName()
                         + "' threw exception", ex);
             }
