@@ -28,6 +28,8 @@ import java.io.ObjectOutput;
  */
 public class JeePUServiceDetails implements PUServiceDetails, Externalizable {
 
+    private String host;
+
     private int port;
 
     private int sslPort;
@@ -41,12 +43,17 @@ public class JeePUServiceDetails implements PUServiceDetails, Externalizable {
     public JeePUServiceDetails() {
     }
 
-    public JeePUServiceDetails(int port, int sslPort, String contextPath, boolean shared, String type) {
+    public JeePUServiceDetails(String host, int port, int sslPort, String contextPath, boolean shared, String type) {
+        this.host = host;
         this.port = port;
         this.sslPort = sslPort;
         this.contextPath = contextPath;
         this.shared = shared;
         this.type = type;
+    }
+
+    public String getHost() {
+        return this.host;
     }
 
     public int getPort() {
@@ -70,6 +77,7 @@ public class JeePUServiceDetails implements PUServiceDetails, Externalizable {
     }
 
     public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(host);
         out.writeInt(port);
         out.writeInt(sslPort);
         out.writeUTF(contextPath);
@@ -78,6 +86,7 @@ public class JeePUServiceDetails implements PUServiceDetails, Externalizable {
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        host = in.readUTF();
         port = in.readInt();
         sslPort = in.readInt();
         contextPath = in.readUTF();

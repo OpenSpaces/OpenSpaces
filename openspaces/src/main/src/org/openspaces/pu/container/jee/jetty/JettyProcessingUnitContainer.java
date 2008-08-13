@@ -67,7 +67,8 @@ public class JettyProcessingUnitContainer implements org.openspaces.pu.container
     }
 
     public JeePUServiceDetails getServiceDetails() {
-        return new JeePUServiceDetails(jettyHolder.getServer().getConnectors()[0].getPort(),
+        return new JeePUServiceDetails(jettyHolder.getServer().getConnectors()[0].getHost(),
+                jettyHolder.getServer().getConnectors()[0].getPort(),
                 jettyHolder.getServer().getConnectors()[0].getConfidentialPort(), webAppContext.getContextPath(),
                 jettyHolder.isSingleInstance(), "jetty");
     }
