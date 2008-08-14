@@ -1,9 +1,7 @@
 @echo off
 
-if "%1" == ""  (
 @rem The call to setenv.bat can be commented out if necessary.
 @call "%~dp0\..\..\bin\setenv.bat"
-)
 
 rem set booclasspath
 set bootclasspath=-Xbootclasspath/p:%XML_JARS%
