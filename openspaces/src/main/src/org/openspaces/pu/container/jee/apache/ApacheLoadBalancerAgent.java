@@ -138,15 +138,23 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
         this.updateInterval = updateInterval;
     }
 
+    public String getRestartCommand() {
+        return restartCommand;
+    }
+
+    public void setRestartCommand(String restartCommand) {
+        this.restartCommand = restartCommand;
+    }
+
     public void start() throws Exception {
         System.out.println("Starting Apache Load Balancer Agent...");
         System.out.println("");
         System.out.println("groups " + Arrays.toString(getGroups()) + ", locators [" + locators + "]");
 
-        if (apachectlLocation == null) {
-            throw new IllegalArgumentException("apachectl must be provided");
+        if (restartCommand == null && apachectlLocation == null) {
+            throw new IllegalStateException("Must provide either apachectl location or direct restart command");
         }
-        if (!new File(apachectlLocation).exists()) {
+        if (apachectlLocation != null && !new File(apachectlLocation).exists()) {
             throw new IllegalArgumentException("apacheclt Location [" + apachectlLocation + "] does not exists");
         }
         if (configLocation == null) {
@@ -154,10 +162,12 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
         }
         new File(configLocation).mkdirs();
 
-        if (isWindows()) {
-            restartCommand = "\"" + apachectlLocation + "\" -k restart";
-        } else {
-            restartCommand = apachectlLocation + " graceful";
+        if (restartCommand == null) {
+            if (isWindows()) {
+                restartCommand = "\"" + apachectlLocation + "\" -k restart";
+            } else {
+                restartCommand = apachectlLocation + " graceful";
+            }
         }
 
         System.out.println("apachectl Location [" + apachectlLocation + "]");
@@ -452,6 +462,7 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
         String apachectlLocation = null;
         String apcaheLocation = null;
         String configLocation = null;
+        String restartCommand = null;
         for (CommandLineParser.Parameter param : params) {
             if (param.getName().equalsIgnoreCase("groups")) {
                 agent.setGroups(param.getArguments());
@@ -466,6 +477,9 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
             if (param.getName().equalsIgnoreCase("apache")) {
                 apcaheLocation = param.getArguments()[0];
             }
+            if (param.getName().equalsIgnoreCase("restart-command")) {
+                restartCommand = param.getArguments()[0];
+            }
             if (param.getName().equalsIgnoreCase("apachectl")) {
                 apachectlLocation = param.getArguments()[0];
             }
@@ -475,6 +489,10 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
             if (param.getName().equalsIgnoreCase("update-interval")) {
                 agent.setUpdateInterval(Integer.parseInt(param.getArguments()[0]));
             }
+        }
+
+        if (restartCommand != null) {
+            agent.setRestartCommand(restartCommand);
         }
 
         if (apcaheLocation == null) {
