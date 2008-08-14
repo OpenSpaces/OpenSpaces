@@ -34,11 +34,13 @@ import org.openspaces.pu.container.servicegrid.JeePUServiceDetails;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
 import org.openspaces.pu.container.servicegrid.PUServiceDetails;
 import org.openspaces.pu.container.support.CommandLineParser;
+import org.springframework.util.FileCopyUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Map;
@@ -63,6 +65,7 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
 
     private String configLocation;
 
+    private String restartCommand;
 
     private LookupDiscoveryManager ldm;
     private ServiceDiscoveryManager sdm;
@@ -150,6 +153,12 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
             throw new IllegalArgumentException("config directory location must be provided");
         }
         new File(configLocation).mkdirs();
+
+        if (isWindows()) {
+            restartCommand = "\"" + apachectlLocation + "\" -k restart";
+        } else {
+            restartCommand = apachectlLocation + " graceful";
+        }
 
         System.out.println("apachectl Location [" + apachectlLocation + "]");
         System.out.println("config directory [" + configLocation + "]");
@@ -298,16 +307,22 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
                 }
             }
             if (dirty) {
-                String command = apachectlLocation + " graceful";
-                System.out.println("Executing [" + command + "]...");
+                System.out.println("Executing [" + restartCommand + "]...");
                 Process process = null;
                 try {
-                    process = Runtime.getRuntime().exec(apachectlLocation + " graceful");
-                    waitFor(process, 60000);
-                    int exitValue = process.exitValue();
-                    System.out.println("Executed [" + command + "], exit code [" + exitValue + "]");
+                    process = Runtime.getRuntime().exec(restartCommand);
+                    boolean exited = waitFor(process, 60000);
+                    int exitValue = -999;
+                    if (exited) {
+                        exitValue = process.exitValue();
+                    }
+                    System.out.println("Executed [" + restartCommand + "], exit code [" + exitValue + "]");
+                    if (exitValue != 0) {
+                        String output = FileCopyUtils.copyToString(new InputStreamReader(process.getErrorStream()));
+                        System.out.println(output);
+                    }
                 } catch (IOException e) {
-                    System.out.println("Failed to run [" + command + "]");
+                    System.out.println("Failed to run [" + restartCommand + "]");
                     e.printStackTrace(System.out);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -367,6 +382,15 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
             return false;
         } catch (IllegalThreadStateException e) {
             return true;
+        }
+    }
+
+    private static boolean isWindows() {
+        String osName = System.getProperty("os.name");
+        if (osName != null && osName.startsWith("Windows")) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -452,10 +476,37 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
                 agent.setUpdateInterval(Integer.parseInt(param.getArguments()[0]));
             }
         }
+
+        if (apcaheLocation == null) {
+            if (isWindows()) {
+                String programFiles = System.getenv("ProgramFiles");
+                if (programFiles != null) {
+                    String location = programFiles + "/Apache Software Foundation/Apache2.2";
+                    if (new File(location + "/bin/httpd.exe").exists()) {
+                        apcaheLocation = location;
+                    }
+                }
+            } else {
+                String location = "/opt/local/apache2";
+                if (new File(location + "/bin/apachectl").exists()) {
+                    apcaheLocation = location;
+                } else {
+                    location = "/opt/apache2";
+                    if (new File(location + "/bin/apachectl").exists()) {
+                        apcaheLocation = location;
+                    }
+                }
+            }
+        }
+
         if (apachectlLocation != null) {
             agent.setApachectlLocation(apachectlLocation);
         } else if (apcaheLocation != null) {
-            agent.setApachectlLocation(apcaheLocation + "/bin/apachectl");
+            if (isWindows()) {
+                agent.setApachectlLocation(apcaheLocation + "/bin/httpd.exe");
+            } else {
+                agent.setApachectlLocation(apcaheLocation + "/bin/apachectl");
+            }
         } else {
             throw new IllegalArgumentException("Either apache location or apachectl location must be provided");
         }
