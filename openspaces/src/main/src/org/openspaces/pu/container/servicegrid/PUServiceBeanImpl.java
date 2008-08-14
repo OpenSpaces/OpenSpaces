@@ -434,6 +434,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     public PUServiceDetails[] listServiceDetails() throws RemoteException {
         ArrayList<PUServiceDetails> serviceDetails = new ArrayList<PUServiceDetails>();
+        if (allSpaces == null) {
+            return null;
+        }
         for (IJSpace space : allSpaces) {
             SpaceURL spaceURL = space.getFinderURL();
             ServiceID serviceID = new ServiceID(space.getReferentUuid().getMostSignificantBits(), space.getReferentUuid().getLeastSignificantBits());
