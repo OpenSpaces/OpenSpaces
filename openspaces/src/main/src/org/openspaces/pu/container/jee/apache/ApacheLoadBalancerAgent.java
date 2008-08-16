@@ -202,6 +202,7 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
 
         System.out.println("");
         System.out.println("Started Apache Load Balancer Agent successfully");
+        System.out.println("Make sure Apache is configured with [Include " + new File(configLocation).getAbsolutePath() + "/*.conf]");
         System.out.println("");
     }
 
@@ -560,7 +561,17 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
             }
         } catch (Exception e) {
             e.printStackTrace(System.err);
+            printUsage();
             System.exit(1);
         }
+    }
+
+    public static void printUsage() {
+        System.out.println("Usage: [-apache location] [-conf-dir location] [-update-interval value] [-restart-command command]");
+        System.out.println("    -apache [location]       : The installation location of apache. Defautls to windows/unix common locations");
+        System.out.println("    -conf-dir [location]     : The directory where the load balancer config files will be created. Defaults to [apache]/conf/gigaspaces");
+        System.out.println("    -update-interval [value] : The interval (in milliseconds) when the load balancer conf files will be updated");
+        System.out.println("    -restart-command [value] : The directy restart command for apache. Defualts to sensible values for windowns and unix systems");
+        System.out.println("");
     }
 }
