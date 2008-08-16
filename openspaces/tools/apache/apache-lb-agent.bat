@@ -14,7 +14,7 @@ set LOOKUPLOCATORS=
 )
 set LOOKUP_LOCATORS_PROP=-Dcom.gs.jini_lus.locators=%LOOKUPLOCATORS%
 
-set COMMAND_LINE=%JAVACMD% %JAVA_OPTIONS% %bootclasspath% %LOOKUP_LOCATORS_PROP% %LOOKUP_GROUPS_PROP% %RMI_OPTIONS% "-Dcom.gs.home=%JSHOMEDIR%" -Djava.security.policy="%POLICY%" -classpath %PRE_CLASSPATH%;%COMMON_JARS%;%SPRING_JARS%;%EXT_JARS%;%JDBC_JARS%;"%JSHOMEDIR%";"%JSHOMEDIR%\lib\JSpaces.jar";%OPENSPACES_JARS%;%POST_CLASSPATH% org.openspaces.pu.container.jee.apache.ApacheLoadBalancerAgent %*
+set COMMAND_LINE=%JAVACMD% %JAVA_OPTIONS% %bootclasspath% %LOOKUP_LOCATORS_PROP% %LOOKUP_GROUPS_PROP% %RMI_OPTIONS% "-Dcom.gs.home=%JSHOMEDIR%" -Djava.security.policy="%POLICY%" -classpath %PRE_CLASSPATH%;%COMMON_JARS%;%SPRING_JARS%;%EXT_JARS%;%JDBC_JARS%;"%JSHOMEDIR%";"%JSHOMEDIR%\lib\JSpaces.jar";%OPENSPACES_JARS%;%POST_CLASSPATH% org.openspaces.pu.container.jee.lb.apache.ApacheLoadBalancerAgent %*
 
 set TITLE="Apache Load Balancer Agent ["%*"] started on [%computername%]"
 @title %TITLE%
