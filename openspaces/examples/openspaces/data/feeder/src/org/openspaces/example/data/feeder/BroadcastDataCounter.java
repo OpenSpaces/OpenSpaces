@@ -18,7 +18,7 @@ package org.openspaces.example.data.feeder;
 
 import org.openspaces.core.SpaceInterruptedException;
 import org.openspaces.example.data.common.IDataProcessor;
-import org.openspaces.example.data.feeder.support.SyncBroadcastCounterReducer;
+import org.openspaces.example.data.feeder.support.BroadcastCounterReducer;
 import org.openspaces.remoting.ExecutorProxy;
 import org.springframework.util.Assert;
 
@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class BroadcastDataCounter {
 
-    @ExecutorProxy(gigaSpace = "gigaSpace", remoteResultReducerType = SyncBroadcastCounterReducer.class, broadcast = true)
+    @ExecutorProxy(gigaSpace = "gigaSpace", remoteResultReducerType = BroadcastCounterReducer.class, broadcast = true)
     private IDataProcessor dataProcessor;
 
     private ScheduledExecutorService executorService;
