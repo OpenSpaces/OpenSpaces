@@ -108,5 +108,10 @@ public class AsyncRemotingProxyConfigurer<T> {
         return (T) asyncFactoryBean.getObject();
     }
 
-
+    /**
+     * Creates a new asynchronous proxy of type T
+     */
+    public T proxy(){
+        return asyncProxy();
+    }
 }

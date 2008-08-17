@@ -112,9 +112,9 @@ public class ExecutorRemotingProxyConfigurer<T> {
     }
 
     /**
-     * Creates a new synchronous proxy of type T
+     * Creates a new executor proxy of type T
      */
-    public T syncProxy() {
+    public T proxy() {
         executorFactoryBean.afterPropertiesSet();
         return (T) executorFactoryBean.getObject();
     }

@@ -127,5 +127,10 @@ public class SyncRemotingProxyConfigurer<T> {
         return (T) syncFactoryBean.getObject();
     }
 
-
+    /**
+     * Creates a new synchronous proxy of type T
+     */
+    public T proxy(){
+        return syncProxy();
+    }
 }
