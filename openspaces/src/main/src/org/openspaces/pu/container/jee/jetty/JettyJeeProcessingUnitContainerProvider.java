@@ -126,10 +126,10 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
     public static final String JETTY_SESSIONS_URL = "jetty.sessions.spaceUrl";
 
     /**
-     * How often the scavanger thread will run in order to check for expired sessions. Set in
+     * How often the scavenger thread will run in order to check for expired sessions. Set in
      * <b>seconds</b> and defaults to <code>60 * 5</code> seconds (5 minutes).
      */
-    public static final String JETTY_SESSIONS_SCAVANGE_PERIOD = "jetty.sessions.scavangePeriod";
+    public static final String JETTY_SESSIONS_SCAVENGE_PERIOD = "jetty.sessions.scavengePeriod";
 
     /**
      * How often an actual update of a <b>non dirty</b> session will be perfomed to the Space. Set in
@@ -455,7 +455,7 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                 GigaSessionManager gigaSessionManager = new GigaSessionManager();
                 gigaSessionManager.setSpaceUrl(sessionsSpaceUrl);
 
-                String scavangePeriod = beanLevelProperties.getContextProperties().getProperty(JETTY_SESSIONS_SCAVANGE_PERIOD);
+                String scavangePeriod = beanLevelProperties.getContextProperties().getProperty(JETTY_SESSIONS_SCAVENGE_PERIOD);
                 if (scavangePeriod != null) {
                     gigaSessionManager.setScavengePeriod(Integer.parseInt(scavangePeriod));
                     if (logger.isDebugEnabled()) {
