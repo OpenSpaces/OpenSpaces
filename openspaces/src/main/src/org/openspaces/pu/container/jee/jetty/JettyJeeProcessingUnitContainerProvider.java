@@ -132,7 +132,7 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
     public static final String JETTY_SESSIONS_SCAVENGE_PERIOD = "jetty.sessions.scavengePeriod";
 
     /**
-     * How often an actual update of a <b>non dirty</b> session will be perfomed to the Space. Set in
+     * How often an actual update of a <b>non dirty</b> session will be performed to the Space. Set in
      * <b>seconds</b> and defaults to <code>60</code> seconds.
      */
     public static final String JETTY_SESSIONS_SAVE_PERIOD = "jetty.sessions.savePeriod";
@@ -144,7 +144,7 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
     public static final String JETTY_SESSIONS_LEASE = "jetty.sessions.lease";
 
     /**
-     * Controls, using a deployment proeprty, the timeout value of sessions. Set in <b>minutes</b>.
+     * Controls, using a deployment property, the timeout value of sessions. Set in <b>minutes</b>.
      */
     public static final String JETTY_SESSIONS_TIMEOUT = "jetty.sessions.timeout";
 
