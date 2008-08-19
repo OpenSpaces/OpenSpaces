@@ -192,14 +192,16 @@ public class Deploy {
         // override pu name allows to change the actual pu name deployed from the on under deploy directory
         String overridePuName = puName;
 
+        boolean deletePUFile = false;
+
         File puFile = new File(puPath);
 
         if (puFile.exists() && puFile.isDirectory()) {
             // this is a directory, jar it up and prepare it for upload
-            File jarPUFile = new File(System.getProperty("java.io.tmp") + "/" + puName + ".jar");
-            jarPUFile.deleteOnExit();
+            File jarPUFile = new File(System.getProperty("java.io.tmpdir") + "/" + puName + ".jar");
             createJarFile(jarPUFile, puFile, null, null);
             puFile = jarPUFile;
+            deletePUFile = true;
         }
 
         if (puFile.exists() && (puFile.getName().endsWith(".jar") || puFile.getName().endsWith(".war"))) {
@@ -244,6 +246,9 @@ public class Deploy {
         if (puFile.exists() && (puFile.getName().endsWith(".jar") || puFile.getName().endsWith(".war"))) {
             // we deploy a jar file, upload it to all the GSMs
             uploadPU(puPath, puFile, gsms);
+            if (deletePUFile) {
+                puFile.delete();
+            }
         }
 
         //get codebase from service
