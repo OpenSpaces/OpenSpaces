@@ -69,6 +69,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.jar.JarOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  */
@@ -190,6 +193,15 @@ public class Deploy {
         String overridePuName = puName;
 
         File puFile = new File(puPath);
+
+        if (puFile.exists() && puFile.isDirectory()) {
+            // this is a directory, jar it up and prepare it for upload
+            File jarPUFile = new File(System.getProperty("java.io.tmp") + "/" + puName + ".jar");
+            jarPUFile.deleteOnExit();
+            createJarFile(jarPUFile, puFile, null, null);
+            puFile = jarPUFile;
+        }
+
         if (puFile.exists() && (puFile.getName().endsWith(".jar") || puFile.getName().endsWith(".war"))) {
             overridePuName = puFile.getName().substring(0, puFile.getName().length() - 4);
             puPath = overridePuName;
@@ -505,7 +517,7 @@ public class Deploy {
         if (sla.getMaxInstancesPerMachine() > 0) {
             element.setMaxPerPhysicalMachine(sla.getMaxInstancesPerMachine());
         }
-        
+
         element.setTotalNumberOfServices(sla.getNumberOfInstances());
 
         //put jars
@@ -746,4 +758,240 @@ public class Deploy {
         sb.append("\n    - Deploys a processing unit called data-processor using context level properties with a single property called prop1 with value1 and bean level properties with two properties");
         return sb.toString();
     }
+
+
+
+    // utility to create a jar file
+
+    public static boolean createJarFile(File jarFile, File directory,
+                                        String mainClass, FileFilter filter) {
+        if (null == directory)
+            throw new IllegalArgumentException("null directory");
+        JarOutputStream out = null;
+        try {
+            OutputStream os = new FileOutputStream(jarFile);
+            out = new JarOutputStream(os);
+            ZipAccumulator reader = new ZipAccumulator(directory, out, filter);
+            descendFileTree(directory, reader);
+            out.closeEntry();
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace(System.err); // todo
+        } finally {
+            if (null != out) {
+                try {
+                    out.close();
+                }
+                catch (IOException e) {
+                } // todo ignored
+            }
+        }
+
+        return false;
+    }
+
+    static class ZipAccumulator implements FileFilter {
+        final File parentDir;
+        final ZipOutputStream out;
+        final FileFilter filter;
+
+        public ZipAccumulator(File parentDir, ZipOutputStream out,
+                              FileFilter filter) {
+            this.parentDir = parentDir;
+            this.out = out;
+            this.filter = filter;
+        }
+
+        public boolean accept(File f) {
+            if ((null != filter) && (!filter.accept(f))) {
+                return false;
+            }
+            try {
+                addFileToZip(f, parentDir, out);
+                return true;
+            } catch (IOException e) {
+                e.printStackTrace(System.err); // todo
+            }
+            return false;
+        }
+    }
+
+    public static void descendFileTree(File file, FileFilter filter) {
+        descendFileTree(file, filter, false);
+    }
+
+    public static boolean descendFileTree(File file, FileFilter fileFilter,
+                                          boolean userRecursion) {
+        if (null == file) {
+            throw new IllegalArgumentException("parm File");
+        }
+        if (null == fileFilter) {
+            throw new IllegalArgumentException("parm FileFilter");
+        }
+
+        if (!file.isDirectory()) {
+            return fileFilter.accept(file);
+        } else if (file.canRead()) {
+            // go through files first
+            File[] files = file.listFiles(ValidFileFilter.FILE_EXISTS);
+            if (null != files) {
+                for (int i = 0; i < files.length; i++) {
+                    if (!fileFilter.accept(files[i])) {
+                        return false;
+                    }
+                }
+            }
+            // now recurse to handle directories
+            File[] dirs = file.listFiles(ValidFileFilter.DIR_EXISTS);
+            if (null != dirs) {
+                for (int i = 0; i < dirs.length; i++) {
+                    if (userRecursion) {
+                        if (!fileFilter.accept(dirs[i])) {
+                            return false;
+                        }
+                    } else {
+                        if (!descendFileTree(dirs[i], fileFilter, userRecursion)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        } // readable directory (ignore unreadable ones)
+        return true;
+    } // descendFiles
+
+    protected static void addFileToZip(File in, File parent,
+                                       ZipOutputStream out)
+            throws IOException {
+        String path = in.getCanonicalPath();
+        String parentPath = parent.getCanonicalPath();
+        if (!path.startsWith(parentPath)) {
+            throw new Error("not parent: " + parentPath + " of " + path);
+        } else {
+            path = path.substring(1 + parentPath.length());
+            path = path.replace('\'', '/'); // todo: use filesep
+        }
+        ZipEntry entry = new ZipEntry(path);
+        entry.setTime(in.lastModified());
+        // todo: default behavior is DEFLATED
+
+        out.putNextEntry(entry);
+
+        InputStream input = null;
+        try {
+            input = new FileInputStream(in);
+            byte[] buf = new byte[1024];
+            int count;
+            while (0 < (count = input.read(buf, 0, buf.length))) {
+                out.write(buf, 0, count);
+            }
+        } finally {
+            if (null != input) input.close();
+        }
+    }
+
+    static class ValidFileFilter implements FileFilter {
+        //----------------------------- singleton variants
+        public static final FileFilter EXIST = new ValidFileFilter();
+        public static final FileFilter FILE_EXISTS = new FilesOnlyFilter();
+        public static final FileFilter DIR_EXISTS = new DirsOnlyFilter();
+        public static final FileFilter CLASS_FILE = new ClassOnlyFilter();
+        public static final FileFilter JAVA_FILE = new JavaOnlyFilter();
+
+        //----------------------------- members
+        protected final FileFilter delegate;
+
+        protected ValidFileFilter() {
+            this(null);
+        }
+
+        protected ValidFileFilter(FileFilter delegate) {
+            this.delegate = delegate;
+        }
+
+        /**
+         * Implement <code>FileFilter.accept(File)</code> by checking
+         * taht input is not null, exists, and is accepted by any delegate.
+         */
+        public boolean accept(File f) {
+            return ((null != f) && (f.exists())
+                    && ((null == delegate) || delegate.accept(f)));
+        }
+
+        //----------------------------- inner subclasses
+        static class FilesOnlyFilter extends ValidFileFilter {
+            public boolean accept(File f) {
+                return (super.accept(f) && (!f.isDirectory()));
+            }
+        }
+
+        static class DirsOnlyFilter extends ValidFileFilter {
+            public final boolean accept(File f) {
+                return (super.accept(f) && (f.isDirectory()));
+            }
+        }
+
+        // todo: StringsFileFilter, accepts String[] variants for each
+        static class StringFileFilter extends ValidFileFilter {
+            public static final boolean IGNORE_CASE = true;
+            protected final String prefix;
+            protected final String substring;
+            protected final String suffix;
+            protected final boolean ignoreCase;
+            /**
+             * true if one of the String specifiers is not null
+             */
+            protected final boolean haveSpecifier;
+
+            public StringFileFilter(String prefix, String substring,
+                                    String suffix, boolean ignoreCase) {
+                this.ignoreCase = ignoreCase;
+                this.prefix = preprocess(prefix);
+                this.substring = preprocess(substring);
+                this.suffix = preprocess(suffix);
+                haveSpecifier = ((null != prefix) || (null != substring)
+                        || (null != suffix));
+            }
+
+            private final String preprocess(String input) {
+                if ((null != input) && ignoreCase) {
+                    input = input.toLowerCase();
+                }
+                return input;
+            }
+
+            public boolean accept(File f) {
+                if (!(super.accept(f))) {
+                    return false;
+                } else if (haveSpecifier) {
+                    String path = preprocess(f.getPath());
+                    if ((null == path) || (0 == path.length())) {
+                        return false;
+                    }
+                    if ((null != prefix) && (!(path.startsWith(prefix)))) {
+                        return false;
+                    }
+                    if ((null != substring) && (-1 == path.indexOf(substring))) {
+                        return false;
+                    }
+                    if ((null != suffix) && (!(path.endsWith(suffix)))) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        } // class StringFileFilter
+
+        static class ClassOnlyFilter extends StringFileFilter {
+            ClassOnlyFilter() {
+                super(null, null, ".class", IGNORE_CASE);
+            }
+        }
+
+        static class JavaOnlyFilter extends StringFileFilter {
+            JavaOnlyFilter() {
+                super(null, null, ".java", IGNORE_CASE);
+            }
+        }
+    } // class ValidFileFilter
 }
