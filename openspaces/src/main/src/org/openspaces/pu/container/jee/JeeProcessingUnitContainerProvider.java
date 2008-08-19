@@ -16,9 +16,8 @@
 
 package org.openspaces.pu.container.jee;
 
+import org.openspaces.pu.container.DeployableProcessingUnitContainerProvider;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
-
-import java.io.File;
 
 /**
  * An extension to the {@link org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider}
@@ -26,7 +25,7 @@ import java.io.File;
  *
  * @author kimchy
  */
-public interface JeeProcessingUnitContainerProvider extends ApplicationContextProcessingUnitContainerProvider {
+public interface JeeProcessingUnitContainerProvider extends ApplicationContextProcessingUnitContainerProvider, DeployableProcessingUnitContainerProvider {
 
     /**
      * The {@link javax.servlet.ServletContext} key under which the {@link org.openspaces.core.cluster.ClusterInfo}
@@ -45,9 +44,4 @@ public interface JeeProcessingUnitContainerProvider extends ApplicationContextPr
      * (loaded from the <code>pu.xml</code>) is stored.
      */
     public static final String APPLICATION_CONTEXT_CONTEXT = "applicationContext";
-
-    /**
-     * Sets the path where the jee deployment was extracted to.
-     */
-    void setDeployPath(File warPath);
 }

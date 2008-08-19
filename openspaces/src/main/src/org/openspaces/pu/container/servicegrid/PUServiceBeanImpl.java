@@ -35,11 +35,15 @@ import org.jini.rio.watch.Calculable;
 import org.jini.rio.watch.GaugeWatch;
 import org.jini.rio.watch.Watch;
 import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
 import org.openspaces.core.cluster.MemberAliveIndicator;
 import org.openspaces.core.properties.BeanLevelProperties;
+import org.openspaces.core.properties.BeanLevelPropertiesAware;
 import org.openspaces.core.util.SpaceUtils;
+import org.openspaces.interop.DotnetProcessingUnitContainerProvider;
 import org.openspaces.pu.container.CannotCreateContainerException;
+import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.ProcessingUnitContainerProvider;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
 import org.openspaces.pu.container.jee.JeeProcessingUnitContainer;
@@ -50,6 +54,7 @@ import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer
 import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
 import org.openspaces.pu.sla.monitor.ApplicationContextMonitor;
 import org.openspaces.pu.sla.monitor.Monitor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ClassUtils;
@@ -86,7 +91,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private static final Log logger = LogFactory.getLog(PUServiceBeanImpl.class);
 
-    private volatile ApplicationContextProcessingUnitContainer container;
+    private volatile ProcessingUnitContainer container;
 
     private int clusterGroup;
 
@@ -253,9 +258,11 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         beanLevelProperties.getContextProperties().setProperty("com.gs.work", workLocation.getAbsolutePath());
 
         //create PU Container
-        ApplicationContextProcessingUnitContainerProvider factory;
+        ProcessingUnitContainerProvider factory;
         // identify if this is a web app
         InputStream webXml = contextClassLoader.getResourceAsStream("WEB-INF/web.xml");
+        // identify if this is a .NET one
+        InputStream gridConfig = contextClassLoader.getResourceAsStream("grid.config");
         if (webXml != null) {
             webXml.close();
             JeeProcessingUnitContainerProvider jeeFactory = (JeeProcessingUnitContainerProvider) createContainerProvider(beanLevelProperties, JettyJeeProcessingUnitContainerProvider.class.getName());
@@ -286,56 +293,100 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
 
             factory = jeeFactory;
+        } else if (gridConfig != null) {
+            gridConfig.close();
+
+            DotnetProcessingUnitContainerProvider dotnetFactory = (DotnetProcessingUnitContainerProvider) createContainerProvider(beanLevelProperties, DotnetProcessingUnitContainerProvider.class.getName());
+            String deployName = puName + "_" + clusterInfo.getRunningNumberOffset1();
+
+            String deployedProcessingUnitsLocation = workLocation.getAbsolutePath() + "/deployed-processing-units";
+
+            deployPath = new File(deployedProcessingUnitsLocation + "/" + deployName);
+            FileSystemUtils.deleteRecursively(deployPath);
+            deployPath.mkdirs();
+
+            beanLevelProperties.getContextProperties().setProperty("dotnet.deployPath", deployPath.getAbsolutePath());
+
+            dotnetFactory.setDeployPath(deployPath);
+            downloadAndExtractPU(puPath, codeserver, deployPath, new File(deployedProcessingUnitsLocation));
+
+            // go over listed files that needs to be resovled with properties
+            for (Map.Entry entry : beanLevelProperties.getContextProperties().entrySet()) {
+                String key = (String) entry.getKey();
+                if (key.startsWith("com.gs.resolvePlaceholder")) {
+                    String path = (String) entry.getValue();
+                    File input = new File(deployPath, path);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Resolving placeholder for file [" + input.getAbsolutePath() + "]");
+                    }
+                    BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, input);
+                }
+            }
+
+            factory = dotnetFactory;
         } else {
-            factory = (ApplicationContextProcessingUnitContainerProvider) createContainerProvider(beanLevelProperties, IntegratedProcessingUnitContainerProvider.class.getName());
+            factory = createContainerProvider(beanLevelProperties, IntegratedProcessingUnitContainerProvider.class.getName());
         }
 
-        if (StringUtils.hasText(springXml)) {
-            Resource resource = new ByteArrayResource(springXml.getBytes());
-            factory.addConfigLocation(resource);
-        }
-        factory.setClusterInfo(clusterInfo);
-        factory.setBeanLevelProperties(beanLevelProperties);
-
-        container = (ApplicationContextProcessingUnitContainer) factory.createContainer();
-
-        Map map = container.getApplicationContext().getBeansOfType(MemberAliveIndicator.class);
-        ArrayList<MemberAliveIndicator> maiList = new ArrayList<MemberAliveIndicator>();
-        for (Iterator it = map.values().iterator(); it.hasNext();) {
-            MemberAliveIndicator memberAliveIndicator = (MemberAliveIndicator) it.next();
-            if (memberAliveIndicator.isMemberAliveEnabled()) {
-                maiList.add(memberAliveIndicator);
+        if (factory instanceof ApplicationContextProcessingUnitContainerProvider) {
+            if (StringUtils.hasText(springXml)) {
+                Resource resource = new ByteArrayResource(springXml.getBytes());
+                ((ApplicationContextProcessingUnitContainerProvider) factory).addConfigLocation(resource);
             }
         }
-        memberAliveIndicators = maiList.toArray(new MemberAliveIndicator[maiList.size()]);
-
-        map = container.getApplicationContext().getBeansOfType(IJSpace.class);
-        ArrayList<IJSpace> embeddedSpacesList = new ArrayList<IJSpace>();
-        ArrayList<IJSpace> allSpacesList = new ArrayList<IJSpace>();
-        for (Iterator it = map.values().iterator(); it.hasNext();) {
-            IJSpace space = (IJSpace) it.next();
-            if (space instanceof ISpaceLocalCache || SpaceUtils.isRemoteProtocol(space)) {
-                allSpacesList.add(space);
-            } else {
-                embeddedSpacesList.add(space);
-                allSpacesList.add(space);
-            }
+        if (factory instanceof ClusterInfoAware) {
+            ((ClusterInfoAware) factory).setClusterInfo(clusterInfo);
         }
-        embeddedSpaces = embeddedSpacesList.toArray(new IJSpace[embeddedSpacesList.size()]);
-        allSpaces = allSpacesList.toArray(new IJSpace[allSpacesList.size()]);
-
-        // inject the application context to all the monitors and schedule them
-        // currently use the number of threads in relation to the number of monitors
-        int numberOfThreads = watchTasks.size() / 5;
-        if (numberOfThreads == 0) {
-            numberOfThreads = 1;
+        if (factory instanceof BeanLevelPropertiesAware) {
+            ((BeanLevelPropertiesAware) factory).setBeanLevelProperties(beanLevelProperties);
         }
-        executorService = Executors.newScheduledThreadPool(numberOfThreads);
-        for (WatchTask watchTask : watchTasks) {
-            if (watchTask.getMonitor() instanceof ApplicationContextMonitor) {
-                ((ApplicationContextMonitor) watchTask.getMonitor()).setApplicationContext(container.getApplicationContext());
+
+        container = factory.createContainer();
+
+        if (container instanceof ApplicationContextProcessingUnitContainer) {
+            ApplicationContext applicationContext = ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
+            Map map = applicationContext.getBeansOfType(MemberAliveIndicator.class);
+            ArrayList<MemberAliveIndicator> maiList = new ArrayList<MemberAliveIndicator>();
+            for (Iterator it = map.values().iterator(); it.hasNext();) {
+                MemberAliveIndicator memberAliveIndicator = (MemberAliveIndicator) it.next();
+                if (memberAliveIndicator.isMemberAliveEnabled()) {
+                    maiList.add(memberAliveIndicator);
+                }
             }
-            executorService.scheduleAtFixedRate(watchTask, watchTask.getMonitor().getPeriod(), watchTask.getMonitor().getPeriod(), TimeUnit.MILLISECONDS);
+            memberAliveIndicators = maiList.toArray(new MemberAliveIndicator[maiList.size()]);
+
+            map = applicationContext.getBeansOfType(IJSpace.class);
+            ArrayList<IJSpace> embeddedSpacesList = new ArrayList<IJSpace>();
+            ArrayList<IJSpace> allSpacesList = new ArrayList<IJSpace>();
+            for (Iterator it = map.values().iterator(); it.hasNext();) {
+                IJSpace space = (IJSpace) it.next();
+                if (space instanceof ISpaceLocalCache || SpaceUtils.isRemoteProtocol(space)) {
+                    allSpacesList.add(space);
+                } else {
+                    embeddedSpacesList.add(space);
+                    allSpacesList.add(space);
+                }
+            }
+            embeddedSpaces = embeddedSpacesList.toArray(new IJSpace[embeddedSpacesList.size()]);
+            allSpaces = allSpacesList.toArray(new IJSpace[allSpacesList.size()]);
+
+            // inject the application context to all the monitors and schedule them
+            // currently use the number of threads in relation to the number of monitors
+            int numberOfThreads = watchTasks.size() / 5;
+            if (numberOfThreads == 0) {
+                numberOfThreads = 1;
+            }
+            executorService = Executors.newScheduledThreadPool(numberOfThreads);
+            for (WatchTask watchTask : watchTasks) {
+                if (watchTask.getMonitor() instanceof ApplicationContextMonitor) {
+                    ((ApplicationContextMonitor) watchTask.getMonitor()).setApplicationContext(applicationContext);
+                }
+                executorService.scheduleAtFixedRate(watchTask, watchTask.getMonitor().getPeriod(), watchTask.getMonitor().getPeriod(), TimeUnit.MILLISECONDS);
+            }
+        } else {
+            // currently, until we support extracting this from non Spring application context
+            embeddedSpaces = new IJSpace[0];
+            allSpaces = new IJSpace[0];
         }
     }
 
@@ -405,6 +456,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     public SpaceURL[] listSpacesURLs() throws RemoteException {
+        if (embeddedSpaces == null) {
+            return new SpaceURL[0];
+        }
         SpaceURL[] spaceURLs = new SpaceURL[embeddedSpaces.length];
         for (int i = 0; i < embeddedSpaces.length; i++) {
             spaceURLs[i] = embeddedSpaces[i].getFinderURL();
