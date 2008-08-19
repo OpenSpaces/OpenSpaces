@@ -21,6 +21,8 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -107,6 +109,29 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
             }
         }, 1, 2);
         assertEquals(2, (int) result.get(1000, TimeUnit.MILLISECONDS));
+    }
+
+    public void testException1() throws Exception {
+        AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new TaskException(), 1);
+        try {
+            result.get(1000, TimeUnit.MILLISECONDS);
+            fail();
+        } catch (ExecutionException e) {
+            assertTrue(e.getCause() instanceof IllegalArgumentException);
+        }
+    }
+
+    public void testExceptionListener1() throws Exception {
+        WaitForAllListener<Integer> listener = new WaitForAllListener<Integer>(1);
+        clusteredGigaSpace1.execute(new TaskException(), 1, listener);
+        Future[] results = listener.waitForResult(1000, TimeUnit.MILLISECONDS);
+        assertEquals(1, results.length);
+        try {
+            results[0].get(1000, TimeUnit.MILLISECONDS);
+            fail();
+        } catch (ExecutionException e) {
+            assertTrue(e.getCause() instanceof IllegalArgumentException);
+        }
     }
 
     public void testMultiRoutingExecutionWithModeratorAll() throws Exception {
@@ -270,6 +295,12 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     private class Task1 implements Task<Integer> {
         public Integer execute() throws Exception {
             return 1;
+        }
+    }
+
+    private class TaskException implements Task<Integer> {
+        public Integer execute() throws Exception {
+            throw new IllegalArgumentException("test");
         }
     }
 
