@@ -1,0 +1,9 @@
+#* @vtlvariable name="loadBalancerInfo" type="org.openspaces.pu.container.jee.lb.apache.LoadBalancerInfo" *#
+
+ProxyPass ${loadBalancerInfo.getName()} balancer://${loadBalancerInfo.getName()}_cluster/ stickysession=JSESSIONID nofailover=Off
+
+<Proxy balancer://${loadBalancerInfo.getName()}_cluster}>
+#foreach($node in $loadBalancerInfo.getNodes())
+    BalancerMember http://${node.getServiceDetails().getHost()}:${node.getServiceDetails().getPort()}${node.getServiceDetails().getContextPath()} route=${node.getClusterInfo().getName()}${node.getClusterInfo().getRunningNumberOffset1()}
+#end
+</Proxy>

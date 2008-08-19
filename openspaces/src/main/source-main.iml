@@ -69,6 +69,7 @@
     <orderEntry type="library" exported="" name="antlr" level="project" />
     <orderEntry type="library" name="jetty" level="project" />
     <orderEntry type="library" name="jsp-2.1" level="project" />
+    <orderEntry type="library" name="Velocity" level="project" />
   </component>
   <component name="copyright">
     <Base>

@@ -240,6 +240,7 @@
                 <include name="lib/j2ee/jta.jar" />
                 <include name="lib/j2ee/connector.jar" />
                 <include name="lib/j2ee/servlet-api.jar" />
+                <include name="lib/velocity/**" />
 
             </zipfileset>
         </zip>
@@ -284,6 +285,7 @@
                 <include name="lib/j2ee/servlet-api.jar" />
                 <include name="lib/jetty/**" />
                 <include name="lib/jsp-2.1/**" />
+                <include name="lib/velocity/**" />
             </zipfileset>
         </zip>
         <mkdir dir="${dist.dir}/1.5"/>

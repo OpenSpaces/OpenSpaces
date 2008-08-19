@@ -28,6 +28,8 @@ import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryListener;
 import net.jini.lookup.ServiceDiscoveryManager;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.Velocity;
 import org.jini.rio.boot.BootUtil;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.pu.container.servicegrid.JeePUServiceDetails;
@@ -36,12 +38,15 @@ import org.openspaces.pu.container.servicegrid.PUServiceDetails;
 import org.openspaces.pu.container.support.CommandLineParser;
 import org.springframework.util.FileCopyUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -71,7 +76,7 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
     private ServiceDiscoveryManager sdm;
     private LookupCache cache;
 
-    private Map<String, LoadBalancersInfo> loadBalancersInfoMap = new ConcurrentHashMap<String, LoadBalancersInfo>();
+    private Map<String, LoadBalancerInfo> loadBalancersInfoMap = new ConcurrentHashMap<String, LoadBalancerInfo>();
 
     private volatile boolean running = false;
 
@@ -182,7 +187,7 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
             public boolean accept(File dir, String name) {
                 String clusterName = name.substring(0, name.length() - ".conf".length());
                 System.out.println("[" + clusterName + "]: existing config detected");
-                loadBalancersInfoMap.put(clusterName, new LoadBalancersInfo());
+                loadBalancersInfoMap.put(clusterName, new LoadBalancerInfo(clusterName));
                 return false;
             }
         });
@@ -231,12 +236,12 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
             for (PUServiceDetails detail : details) {
                 if (detail instanceof JeePUServiceDetails) {
                     JeePUServiceDetails jeeDetails = (JeePUServiceDetails) detail;
-                    LoadBalancersInfo loadBalancersInfo = loadBalancersInfoMap.get(clusterInfo.getName());
+                    LoadBalancerInfo loadBalancersInfo = loadBalancersInfoMap.get(clusterInfo.getName());
                     if (loadBalancersInfo == null) {
-                        loadBalancersInfo = new LoadBalancersInfo();
+                        loadBalancersInfo = new LoadBalancerInfo(clusterInfo.getName());
                         loadBalancersInfoMap.put(clusterInfo.getName(), loadBalancersInfo);
                     }
-                    loadBalancersInfo.putBalancer(new LoadBalancerInfo(clusterInfo, (JeePUServiceDetails) detail));
+                    loadBalancersInfo.putNode(new LoadBalancerNodeInfo(clusterInfo, (JeePUServiceDetails) detail));
                     loadBalancersInfo.setDirty(true);
 
                     System.out.println("[" + clusterInfo.getName() + "]: Adding [" + clusterInfo.getRunningNumberOffset1() + "] [" + jeeDetails.getHost() + ":" + jeeDetails.getPort() + jeeDetails.getContextPath() + "]");
@@ -256,11 +261,11 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
             for (PUServiceDetails detail : details) {
                 JeePUServiceDetails jeeDetails = (JeePUServiceDetails) detail;
                 if (detail instanceof JeePUServiceDetails) {
-                    LoadBalancersInfo loadBalancersInfo = loadBalancersInfoMap.get(clusterInfo.getName());
+                    LoadBalancerInfo loadBalancersInfo = loadBalancersInfoMap.get(clusterInfo.getName());
                     if (loadBalancersInfo == null) {
                         continue;
                     }
-                    loadBalancersInfo.removeBalancer(new LoadBalancerInfo(clusterInfo, (JeePUServiceDetails) detail));
+                    loadBalancersInfo.removeNode(new LoadBalancerNodeInfo(clusterInfo, (JeePUServiceDetails) detail));
                     loadBalancersInfo.setDirty(true);
                     System.out.println("[" + clusterInfo.getName() + "]: Removing [" + clusterInfo.getRunningNumberOffset1() + "] [" + jeeDetails.getHost() + ":" + jeeDetails.getPort() + jeeDetails.getContextPath() + "]");
                 }
@@ -283,11 +288,11 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
                 break;
             }
             boolean dirty = false;
-            for (Map.Entry<String, LoadBalancersInfo> entry : loadBalancersInfoMap.entrySet()) {
-                LoadBalancerInfo[] infos = null;
+            for (Map.Entry<String, LoadBalancerInfo> entry : loadBalancersInfoMap.entrySet()) {
+                LoadBalancerNodeInfo[] infos = null;
                 synchronized (this) {
                     if (entry.getValue().isDirty()) {
-                        infos = entry.getValue().getBlanacers();
+                        infos = entry.getValue().getNodes();
                         entry.getValue().setDirty(false);
                     }
                 }
@@ -298,18 +303,27 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
                 System.out.println("[" + entry.getKey() + "]: Detected as dirty, updating config file...");
                 File confFile = new File(configLocation + "/" + entry.getKey() + ".conf");
                 try {
-                    PrintWriter writer = new PrintWriter(new FileOutputStream(confFile));
-                    writer.println("ProxyPass /" + entry.getKey() + " balancer://" + entry.getKey() + "_cluster/ stickysession=JSESSIONID nofailover=Off");
-                    writer.println("");
-                    writer.println("<Proxy balancer://" + entry.getKey() + "_cluster>");
-                    for (LoadBalancerInfo info : infos) {
-                        JeePUServiceDetails serviceDetails = info.getServiceDetails();
-                        ClusterInfo clusterInfo = info.getClusterInfo();
-                        writer.println("\tBalancerMember http://" + serviceDetails.getHost() + ":" + serviceDetails.getPort() + serviceDetails.getContextPath() + " route=" + clusterInfo.getName() + clusterInfo.getRunningNumberOffset1());
+                    File velocityFile = new File(System.getProperty("lb.vmDir") + "/" + entry.getKey() + ".vm");
+                    if (!velocityFile.exists()) {
+                        velocityFile = new File(System.getProperty("lb.vmDir") + "/balancer-template.vm");
+                        if (!velocityFile.exists()) {
+                            System.out.println("Failed to find velocity template from dir [" + System.getProperty("lb.vmDir"));
+                        }
                     }
-                    writer.println("</Proxy>");
+                    System.out.println("[" + entry.getKey() + "]: Using balancer template [" + velocityFile.getAbsolutePath() + "]");
+                    Velocity.init();
+
+                    PrintWriter writer = new PrintWriter(new FileOutputStream(confFile));
+                    Reader templateReader = new BufferedReader(new InputStreamReader(new FileInputStream(velocityFile)));
+
+                    VelocityContext context = new VelocityContext();
+                    context.put("loadBalancerInfo", entry.getValue());
+                    Velocity.evaluate(context, writer, "", templateReader);
+
                     writer.flush();
                     writer.close();
+
+                    templateReader.close();
                     System.out.println("[" + entry.getKey() + "]: Updated config file");
                 } catch (Exception e) {
                     System.out.println("Failed to write config file, will try again later");
@@ -405,53 +419,6 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
         }
     }
 
-    public class LoadBalancersInfo {
-
-        private Map<Integer, LoadBalancerInfo> balancers = new ConcurrentHashMap<Integer, LoadBalancerInfo>();
-
-        private volatile boolean dirty = true;
-
-        public boolean isDirty() {
-            return dirty;
-        }
-
-        public void setDirty(boolean dirty) {
-            this.dirty = dirty;
-        }
-
-        public void putBalancer(LoadBalancerInfo balancerInfo) {
-            balancers.put(balancerInfo.getClusterInfo().getRunningNumberOffset1(), balancerInfo);
-        }
-
-        public void removeBalancer(LoadBalancerInfo balancerInfo) {
-            balancers.remove(balancerInfo.getClusterInfo().getRunningNumberOffset1());
-        }
-
-        public LoadBalancerInfo[] getBlanacers() {
-            return balancers.values().toArray(new LoadBalancerInfo[0]);
-        }
-    }
-
-    public class LoadBalancerInfo {
-
-        private ClusterInfo clusterInfo;
-
-        private JeePUServiceDetails serviceDetails;
-
-        public LoadBalancerInfo(ClusterInfo clusterInfo, JeePUServiceDetails serviceDetails) {
-            this.clusterInfo = clusterInfo;
-            this.serviceDetails = serviceDetails;
-        }
-
-        public ClusterInfo getClusterInfo() {
-            return clusterInfo;
-        }
-
-        public JeePUServiceDetails getServiceDetails() {
-            return serviceDetails;
-        }
-    }
-
     public static void main(String[] args) throws Exception {
         GSLogConfigLoader.getLoader();
         if (System.getProperty("java.security.policy") == null) {
@@ -490,6 +457,11 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
             if (param.getName().equalsIgnoreCase("update-interval")) {
                 agent.setUpdateInterval(Integer.parseInt(param.getArguments()[0]));
             }
+        }
+
+        File tempalteDir = new File(System.getProperty("lb.vmDir"));
+        if (!tempalteDir.exists()) {
+            throw new IllegalArgumentException("Balancer template directory [" + tempalteDir.getAbsolutePath() + "] does not exists");
         }
 
         if (restartCommand != null) {
