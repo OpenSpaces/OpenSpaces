@@ -236,7 +236,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         assertEquals(2, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testInjectionOfTaskGigaSpace() throws TimeoutException, ExecutionException, InterruptedException {
+    public void testInjection3() throws TimeoutException, ExecutionException, InterruptedException {
         AsyncFuture result = clusteredGigaSpace1.execute(new Task() {
 
             @TaskGigaSpace
@@ -250,6 +250,11 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
             }
         }, 1);
         assertNull(result.get(1000, TimeUnit.MILLISECONDS));
+    }
+
+    public void testInjection4() throws Exception {
+        AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new TaskGigaSpaceInjectable());
+        assertEquals(2, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
     public void testIntegerSumTask() throws Exception {
@@ -401,6 +406,19 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
 
         public Integer execute() throws Exception {
             if (applicationContext == null) {
+                throw new Exception();
+            }
+            return super.execute();
+        }
+    }
+
+    public class TaskGigaSpaceInjectable extends AggregatorContinue {
+
+        @TaskGigaSpace
+        public transient GigaSpace gigaSpace;
+
+        public Integer execute() throws Exception {
+            if (gigaSpace == null) {
                 throw new Exception();
             }
             return super.execute();
