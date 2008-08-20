@@ -8,6 +8,7 @@ import com.gigaspaces.async.AsyncResultFilterEvent;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.executor.DistributedTask;
 import org.openspaces.core.executor.Task;
+import org.openspaces.core.executor.TaskGigaSpace;
 import org.openspaces.core.executor.support.AvgTask;
 import org.openspaces.core.executor.support.MaxTask;
 import org.openspaces.core.executor.support.MinTask;
@@ -20,10 +21,12 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 import javax.annotation.Resource;
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -231,6 +234,22 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     public void testInjection2() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new ApplicationContextInjectable());
         assertEquals(2, (int) result.get(1000, TimeUnit.MILLISECONDS));
+    }
+
+    public void testInjectionOfTaskGigaSpace() throws TimeoutException, ExecutionException, InterruptedException {
+        AsyncFuture result = clusteredGigaSpace1.execute(new Task() {
+
+            @TaskGigaSpace
+            private GigaSpace gigaSpace;
+
+            public Serializable execute() throws Exception {
+                if (gigaSpace == null) {
+                    throw new NullPointerException();
+                }
+                return null;
+            }
+        }, 1);
+        assertNull(result.get(1000, TimeUnit.MILLISECONDS));
     }
 
     public void testIntegerSumTask() throws Exception {
