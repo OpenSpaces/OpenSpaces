@@ -43,11 +43,11 @@ import org.openspaces.core.properties.BeanLevelPropertiesAware;
 import org.openspaces.core.util.SpaceUtils;
 import org.openspaces.interop.DotnetProcessingUnitContainerProvider;
 import org.openspaces.pu.container.CannotCreateContainerException;
+import org.openspaces.pu.container.DeployableProcessingUnitContainerProvider;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.ProcessingUnitContainerProvider;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
 import org.openspaces.pu.container.jee.JeeProcessingUnitContainer;
-import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
 import org.openspaces.pu.container.jee.jetty.JettyJeeProcessingUnitContainerProvider;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
@@ -257,46 +257,29 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         beanLevelProperties.getContextProperties().setProperty("com.gs.work", workLocation.getAbsolutePath());
 
+        boolean downloadPU = false;
         //create PU Container
         ProcessingUnitContainerProvider factory;
         // identify if this is a web app
         InputStream webXml = contextClassLoader.getResourceAsStream("WEB-INF/web.xml");
         // identify if this is a .NET one
         InputStream gridConfig = contextClassLoader.getResourceAsStream("pu.config");
-        if (webXml != null) {                                              
+        if (webXml != null) {
             webXml.close();
-            JeeProcessingUnitContainerProvider jeeFactory = (JeeProcessingUnitContainerProvider) createContainerProvider(beanLevelProperties, JettyJeeProcessingUnitContainerProvider.class.getName());
-            String deployName = puName + "_" + clusterInfo.getRunningNumberOffset1();
-
-            String deployedProcessingUnitsLocation = workLocation.getAbsolutePath() + "/deployed-processing-units";
-
-            deployPath = new File(deployedProcessingUnitsLocation + "/" + deployName);
-            FileSystemUtils.deleteRecursively(deployPath);
-            deployPath.mkdirs();
-
-            beanLevelProperties.getContextProperties().setProperty("jee.deployPath", deployPath.getAbsolutePath());
-
-            jeeFactory.setDeployPath(deployPath);
-            downloadAndExtractPU(puPath, codeserver, deployPath, new File(deployedProcessingUnitsLocation));
-
-            // go over listed files that needs to be resovled with properties
-            for (Map.Entry entry : beanLevelProperties.getContextProperties().entrySet()) {
-                String key = (String) entry.getKey();
-                if (key.startsWith("com.gs.resolvePlaceholder")) {
-                    String path = (String) entry.getValue();
-                    File input = new File(deployPath, path);
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Resolving placeholder for file [" + input.getAbsolutePath() + "]");
-                    }
-                    BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, input);
-                }
-            }
-
-            factory = jeeFactory;
+            downloadPU = true;
+            factory = createContainerProvider(beanLevelProperties, JettyJeeProcessingUnitContainerProvider.class.getName());
         } else if (gridConfig != null) {
             gridConfig.close();
+            downloadPU = true;
+            factory = createContainerProvider(beanLevelProperties, DotnetProcessingUnitContainerProvider.class.getName());
+        } else {
+            factory = createContainerProvider(beanLevelProperties, IntegratedProcessingUnitContainerProvider.class.getName());
+            if (beanLevelProperties.getContextProperties().getProperty("pu.download", "false").equalsIgnoreCase("true")) {
+                downloadPU = true;
+            }
+        }
 
-            DotnetProcessingUnitContainerProvider dotnetFactory = (DotnetProcessingUnitContainerProvider) createContainerProvider(beanLevelProperties, DotnetProcessingUnitContainerProvider.class.getName());
+        if (downloadPU) {
             String deployName = puName + "_" + clusterInfo.getRunningNumberOffset1();
 
             String deployedProcessingUnitsLocation = workLocation.getAbsolutePath() + "/deployed-processing-units";
@@ -305,9 +288,14 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             FileSystemUtils.deleteRecursively(deployPath);
             deployPath.mkdirs();
 
+            // backward compatible
+            beanLevelProperties.getContextProperties().setProperty("jee.deployPath", deployPath.getAbsolutePath());
             beanLevelProperties.getContextProperties().setProperty("dotnet.deployPath", deployPath.getAbsolutePath());
+            beanLevelProperties.getContextProperties().setProperty("deployPath", deployPath.getAbsolutePath());
 
-            dotnetFactory.setDeployPath(deployPath);
+            if (factory instanceof DeployableProcessingUnitContainerProvider) {
+                ((DeployableProcessingUnitContainerProvider) factory).setDeployPath(deployPath);
+            }
             downloadAndExtractPU(puPath, codeserver, deployPath, new File(deployedProcessingUnitsLocation));
 
             // go over listed files that needs to be resovled with properties
@@ -322,10 +310,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                     BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, input);
                 }
             }
-
-            factory = dotnetFactory;
-        } else {
-            factory = createContainerProvider(beanLevelProperties, IntegratedProcessingUnitContainerProvider.class.getName());
         }
 
         if (factory instanceof ApplicationContextProcessingUnitContainerProvider) {
