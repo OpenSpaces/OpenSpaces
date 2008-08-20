@@ -17,17 +17,14 @@
 package org.openspaces.events.polling;
 
 import org.openspaces.core.SpaceInterruptedException;
-import org.openspaces.events.AbstractTemplateEventListenerContainer;
+import org.openspaces.events.AbstractTransactionalEventListenerContainer;
 import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.events.polling.receive.ReceiveOperationHandler;
 import org.openspaces.events.polling.receive.SingleTakeReceiveOperationHandler;
 import org.openspaces.events.polling.trigger.TriggerOperationHandler;
 import org.springframework.dao.DataAccessException;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
@@ -76,7 +73,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @author kimchy
  */
-public abstract class AbstractPollingEventListenerContainer extends AbstractTemplateEventListenerContainer {
+public abstract class AbstractPollingEventListenerContainer extends AbstractTransactionalEventListenerContainer {
 
     /**
      * The default receive timeout: 60000 ms = 60 seconds = 1 minute.
@@ -85,17 +82,11 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTemp
 
     private boolean passArrayAsIs = false;
 
-    private PlatformTransactionManager transactionManager;
-
-    private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
-
     private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 
     private ReceiveOperationHandler receiveOperationHandler;
 
     private TriggerOperationHandler triggerOperationHandler;
-
-    private boolean disableTransactionValidation = false;
 
 
     /**
@@ -106,63 +97,6 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTemp
      */
     public void setPassArrayAsIs(boolean passArrayAsIs) {
         this.passArrayAsIs = passArrayAsIs;
-    }
-
-    /**
-     * Specify the Spring {@link org.springframework.transaction.PlatformTransactionManager} to use
-     * for transactional wrapping of event reception plus listener execution.
-     *
-     * <p>Default is none, not performing any transactional wrapping.
-     */
-    public void setTransactionManager(PlatformTransactionManager transactionManager) {
-        this.transactionManager = transactionManager;
-    }
-
-    /**
-     * Return the Spring PlatformTransactionManager to use for transactional wrapping of message
-     * reception plus listener execution.
-     */
-    protected final PlatformTransactionManager getTransactionManager() {
-        return this.transactionManager;
-    }
-
-    /**
-     * Specify the transaction name to use for transactional wrapping. Default is the bean name of
-     * this listener container, if any.
-     *
-     * @see org.springframework.transaction.TransactionDefinition#getName()
-     */
-    public void setTransactionName(String transactionName) {
-        this.transactionDefinition.setName(transactionName);
-    }
-
-    /**
-     * Specify the transaction timeout to use for transactional wrapping, in <b>seconds</b>.
-     * Default is none, using the transaction manager's default timeout.
-     *
-     * @see org.springframework.transaction.TransactionDefinition#getTimeout()
-     * @see #setReceiveTimeout
-     */
-    public void setTransactionTimeout(int transactionTimeout) {
-        this.transactionDefinition.setTimeout(transactionTimeout);
-    }
-
-    /**
-     * Specify the transaction isolation to use for transactional wrapping.
-     *
-     * @see org.springframework.transaction.support.DefaultTransactionDefinition#setIsolationLevel(int)
-     */
-    public void setTransactionIsolationLevel(int transactionIsolationLevel) {
-        this.transactionDefinition.setIsolationLevel(transactionIsolationLevel);
-    }
-
-    /**
-     * Specify the transaction isolation to use for transactional wrapping.
-     *
-     * @see org.springframework.transaction.support.DefaultTransactionDefinition#setIsolationLevelName(String)
-     */
-    public void setTransactionIsolationLevelName(String transactionIsolationLevelName) {
-        this.transactionDefinition.setIsolationLevelName(transactionIsolationLevelName);
     }
 
     /**
@@ -207,20 +141,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTemp
         this.triggerOperationHandler = triggerOperationHandler;
     }
 
-    /**
-     * Should transaction validation be enabled or not (verify and fail if transaction manager is
-     * provided and the GigaSpace is not transactional). Default to <code>false</code>.
-     */
-    public void setDisableTransactionValidation(boolean disableTransactionValidation) {
-        this.disableTransactionValidation = disableTransactionValidation;
-    }
-
     public void initialize() {
-        // Use bean name as default transaction name.
-        if (this.transactionDefinition.getName() == null) {
-            this.transactionDefinition.setName(getBeanName());
-        }
-
         if (receiveOperationHandler == null) {
             if (getActualEventListener() != null) {
                 // try and find an annotated one
@@ -269,17 +190,6 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTemp
         super.initialize();
     }
 
-    protected void validateConfiguration() {
-        super.validateConfiguration();
-        Assert.isTrue(receiveTimeout >= 0, "receiveTimeout must have a non negative value");
-        if (transactionManager != null && !disableTransactionValidation) {
-            if (!getGigaSpace().getTxProvider().isEnabled()) {
-                throw new IllegalStateException("Polling container is configured to run under transactions (transaction manager is provided) " +
-                        "but GigaSpace is not transactional. Please pass the transaction manager to the GigaSpace bean as well");
-            }
-        }
-    }
-
     /**
      * Execute the listener for a message received from the given consumer, wrapping the entire
      * operation in an external transaction if demanded.
@@ -307,9 +217,9 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTemp
                 template = trigger;
             }
         }
-        if (this.transactionManager != null) {
+        if (this.getTransactionManager() != null) {
             // Execute receive within transaction.
-            TransactionStatus status = this.transactionManager.getTransaction(this.transactionDefinition);
+            TransactionStatus status = this.getTransactionManager().getTransaction(this.getTransactionDefinition());
             boolean messageReceived;
             try {
                 messageReceived = doReceiveAndExecute(eventListener, template, status);
@@ -323,9 +233,9 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTemp
             // if no message is received, rollback the transaction (for better performance).
             if (!status.isCompleted()) {
                 if (!messageReceived || status.isRollbackOnly()) {
-                    this.transactionManager.rollback(status);
+                    this.getTransactionManager().rollback(status);
                 } else {
-                    this.transactionManager.commit(status);
+                    this.getTransactionManager().commit(status);
                 }
             }
             return messageReceived;
@@ -396,7 +306,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTemp
     private void rollbackOnException(TransactionStatus status, Throwable ex) {
         logger.trace(message("Initiating transaction rollback on application exception"), ex);
         try {
-            this.transactionManager.rollback(status);
+            this.getTransactionManager().rollback(status);
         } catch (RuntimeException ex2) {
             logger.error(message("Application exception overridden by rollback exception"), ex);
             throw ex2;

@@ -25,6 +25,7 @@ public class EventsNamespaceHandler extends NamespaceHandlerSupport {
 
     public void init() {
         registerBeanDefinitionParser("polling-container", new PollingContainerBeanDefinitionParser());
+        registerBeanDefinitionParser("async-polling-container", new AsyncPollingContainerBeanDefinitionParser());
         registerBeanDefinitionParser("notify-container", new NotifyContainerBeanDefinitionParser());
         registerBeanDefinitionParser("annotation-adapter", new AnnotationEventAdapterBeanDefinitionParser());
         registerBeanDefinitionParser("method-adapter", new MethodEventAdapterBeanDefinitionParser());

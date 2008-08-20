@@ -1,14 +1,10 @@
 package org.openspaces.events.support;
 
 import org.openspaces.core.GigaSpace;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -32,7 +28,6 @@ public class AnnotationProcessorUtils {
 
     public static GigaSpace findGigaSpace(final Object bean, String gigaSpaceName, ApplicationContext applicationContext, String beanName) throws IllegalArgumentException {
         GigaSpace gigaSpace = null;
-        Class<?> beanClass = AopUtils.getTargetClass(bean);
         if (StringUtils.hasLength(gigaSpaceName)) {
             gigaSpace = (GigaSpace) applicationContext.getBean(gigaSpaceName);
             if (gigaSpace == null) {
@@ -41,42 +36,13 @@ public class AnnotationProcessorUtils {
             return gigaSpace;
         }
 
-        // try and automatically find a GigaSpace instance
-        final Map<String, GigaSpace> fieldsGigaSpace = new HashMap<String, GigaSpace>();
-        ReflectionUtils.doWithFields(beanClass, new ReflectionUtils.FieldCallback() {
-            public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
-                if (GigaSpace.class.isAssignableFrom(field.getType())) {
-                    field.setAccessible(true);
-                    fieldsGigaSpace.put(field.getName(), (GigaSpace) field.get(bean));
-                }
-            }
-        });
-
-        if (!fieldsGigaSpace.isEmpty()) {
-            // we have a field that has GigaSpace, use that one
-            if (fieldsGigaSpace.size() == 1) {
-                gigaSpace = fieldsGigaSpace.values().iterator().next();
-            } else {
-                // prefer one that is called "space" or "gigaSpace"
-                gigaSpace = fieldsGigaSpace.get("gigaSpace");
-                if (gigaSpace == null) {
-                    gigaSpace = fieldsGigaSpace.get("space");
-                }
-                if (gigaSpace == null) {
-                    throw new IllegalArgumentException("Failed to resolve GigaSpace to use with polling contaienr, " +
-                            "[" + beanName + "] has several GigaSpace fields to choose from, and none is called 'space' or 'gigaSpace'");
-                }
-            }
+        Map gigaSpaces = applicationContext.getBeansOfType(GigaSpace.class);
+        if (gigaSpaces.size() == 1) {
+            return (GigaSpace) gigaSpaces.values().iterator().next();
         } else {
-            Map gigaSpaces = applicationContext.getBeansOfType(GigaSpace.class);
-            if (gigaSpaces.size() == 1) {
-                gigaSpace = (GigaSpace) gigaSpaces.values().iterator().next();
-            } else {
-                throw new IllegalArgumentException("Failed to resolve GigaSpace to use with polling container, " +
-                        "[" + beanName + "] does not specifiy one, has no fields of that type, and there are more than one GigaSpace beans within the context");
-            }
+            throw new IllegalArgumentException("Failed to resolve GigaSpace to use with event container, " +
+                    "[" + beanName + "] does not specifiy one, has no fields of that type, and there are more than one GigaSpace beans within the context");
         }
-        return gigaSpace;
     }
 
     public static PlatformTransactionManager findTxManager(String txManagerName, ApplicationContext applicationContext, String beanName) {

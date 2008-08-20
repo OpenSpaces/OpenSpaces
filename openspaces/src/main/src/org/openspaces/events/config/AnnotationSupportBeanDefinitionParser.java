@@ -16,6 +16,7 @@
 
 package org.openspaces.events.config;
 
+import org.openspaces.events.asyncpolling.config.AsyncPollingAnnotationPostProcessor;
 import org.openspaces.events.notify.config.NotifyAnnotationPostProcessor;
 import org.openspaces.events.polling.config.PollingAnnotationPostProcessor;
 import org.openspaces.events.support.EventContainersBus;
@@ -42,6 +43,10 @@ public class AnnotationSupportBeanDefinitionParser implements BeanDefinitionPars
 
         bd = new RootBeanDefinition(NotifyAnnotationPostProcessor.class);
         bcd = new BeanComponentDefinition(bd, "intenral-notifyContaienrAnnotationPostProcessor");
+        parserContext.registerBeanComponent(bcd);
+
+        bd = new RootBeanDefinition(AsyncPollingAnnotationPostProcessor.class);
+        bcd = new BeanComponentDefinition(bd, "intenral-asyncPollingContaienrAnnotationPostProcessor");
         parserContext.registerBeanComponent(bcd);
 
         return null;

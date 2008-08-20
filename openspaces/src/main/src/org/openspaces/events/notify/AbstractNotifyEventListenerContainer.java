@@ -29,12 +29,11 @@ import net.jini.core.lease.Lease;
 import net.jini.lease.LeaseListener;
 import org.openspaces.core.UnusableEntryException;
 import org.openspaces.core.util.SpaceUtils;
-import org.openspaces.events.AbstractTemplateEventListenerContainer;
+import org.openspaces.events.AbstractTransactionalEventListenerContainer;
 import org.springframework.core.Constants;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.Assert;
 
 import java.rmi.RemoteException;
@@ -94,7 +93,7 @@ import java.util.ArrayList;
  * @see com.gigaspaces.events.EventSessionFactory
  * @see com.gigaspaces.events.DataEventSession
  */
-public abstract class AbstractNotifyEventListenerContainer extends AbstractTemplateEventListenerContainer {
+public abstract class AbstractNotifyEventListenerContainer extends AbstractTransactionalEventListenerContainer {
 
     public static final String COM_TYPE_PREFIX = "COM_TYPE_";
 
@@ -152,12 +151,6 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
     private Boolean triggerNotifyTemplate;
 
     private Boolean replicateNotifyTemplate;
-
-    private PlatformTransactionManager transactionManager;
-
-    private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
-
-    private boolean disableTransactionValidation = false;
 
     private boolean passArrayAsIs = false;
 
@@ -319,71 +312,6 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
     }
 
     /**
-     * Specify the Spring {@link org.springframework.transaction.PlatformTransactionManager} to use
-     * for transactional wrapping of listener execution.
-     *
-     * <p>
-     * Default is none, not performing any transactional wrapping.
-     */
-    public void setTransactionManager(PlatformTransactionManager transactionManager) {
-        this.transactionManager = transactionManager;
-    }
-
-    /**
-     * Return the Spring PlatformTransactionManager to use for transactional wrapping of message
-     * reception plus listener execution.
-     */
-    protected final PlatformTransactionManager getTransactionManager() {
-        return this.transactionManager;
-    }
-
-    /**
-     * Specify the transaction name to use for transactional wrapping. Default is the bean name of
-     * this listener container, if any.
-     *
-     * @see org.springframework.transaction.TransactionDefinition#getName()
-     */
-    public void setTransactionName(String transactionName) {
-        this.transactionDefinition.setName(transactionName);
-    }
-
-    /**
-     * Specify the transaction timeout to use for transactional wrapping, in <b>seconds</b>.
-     * Default is none, using the transaction manager's default timeout.
-     *
-     * @see org.springframework.transaction.TransactionDefinition#getTimeout()
-     */
-    public void setTransactionTimeout(int transactionTimeout) {
-        this.transactionDefinition.setTimeout(transactionTimeout);
-    }
-
-    /**
-     * Specify the transaction isolation to use for transactional wrapping.
-     *
-     * @see org.springframework.transaction.support.DefaultTransactionDefinition#setIsolationLevel(int)
-     */
-    public void setTransactionIsolationLevel(int transactionIsolationLevel) {
-        this.transactionDefinition.setIsolationLevel(transactionIsolationLevel);
-    }
-
-    /**
-     * Specify the transaction isolation to use for transactional wrapping.
-     *
-     * @see org.springframework.transaction.support.DefaultTransactionDefinition#setIsolationLevelName(String)
-     */
-    public void setTransactionIsolationLevelName(String transactionIsolationLevelName) {
-        this.transactionDefinition.setIsolationLevelName(transactionIsolationLevelName);
-    }
-
-    /**
-     * Should transaction validation be enabled or not (verify and fail if transaction manager is
-     * provided and the GigaSpace is not transactional). Default to <code>false</code>.
-     */
-    public void setDisableTransactionValidation(boolean disableTransactionValidation) {
-        this.disableTransactionValidation = disableTransactionValidation;
-    }
-
-    /**
      * When batching is turned on, should the batch of events be passed as an <code>Object[]</code> to
      * the listener. Default to <code>false</code> which means it will be passed one event at a time.
      */
@@ -466,12 +394,6 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
 
     protected void validateConfiguration() {
         super.validateConfiguration();
-        if (transactionManager != null && !disableTransactionValidation) {
-            if (!getGigaSpace().getTxProvider().isEnabled()) {
-                throw new IllegalStateException("Notify container is configured to run under transactions (transaction manager is provided) " +
-                        "but GigaSpace is not transactional. Please pass the transaction manager to the GigaSpace bean as well");
-            }
-        }
         if (batchSize == null && batchTime != null) {
             throw new IllegalArgumentException("batchTime has value [" + batchTime
                     + "] which enables batching. batchSize must have a value as well");
@@ -573,9 +495,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
 
         boolean invokeListener = true;
         TransactionStatus status = null;
-        if (this.transactionManager != null) {
+        if (this.getTransactionManager() != null) {
             // Execute receive within transaction.
-            status = this.transactionManager.getTransaction(this.transactionDefinition);
+            status = this.getTransactionManager().getTransaction(this.getTransactionDefinition());
         }
         if (passArrayAsIs) {
             RemoteEvent[] events = batchRemoteEvent.getEvents();
@@ -685,9 +607,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
         if (status != null) {
             if (!status.isCompleted()) {
                 if (status.isRollbackOnly()) {
-                    this.transactionManager.rollback(status);
+                    this.getTransactionManager().rollback(status);
                 } else {
-                    this.transactionManager.commit(status);
+                    this.getTransactionManager().commit(status);
                 }
             }
         }
@@ -710,9 +632,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
     protected void invokeListenerWithTransaction(Object eventData, Object source, boolean performTakeOnNotify,
                                                  boolean ignoreEventOnNullTake) throws DataAccessException {
         boolean invokeListener = true;
-        if (this.transactionManager != null) {
+        if (this.getTransactionManager() != null) {
             // Execute receive within transaction.
-            TransactionStatus status = this.transactionManager.getTransaction(this.transactionDefinition);
+            TransactionStatus status = this.getTransactionManager().getTransaction(this.getTransactionDefinition());
             try {
                 if (performTakeOnNotify) {
                     Object takeVal = getGigaSpace().take(eventData, 0);
@@ -743,9 +665,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
             }
             if (!status.isCompleted()) {
                 if (status.isRollbackOnly()) {
-                    this.transactionManager.rollback(status);
+                    this.getTransactionManager().rollback(status);
                 } else {
-                    this.transactionManager.commit(status);
+                    this.getTransactionManager().commit(status);
                 }
             }
         } else {
@@ -776,7 +698,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTempl
             logger.debug(message("Initiating transaction rollback on application exception"), ex);
         }
         try {
-            this.transactionManager.rollback(status);
+            this.getTransactionManager().rollback(status);
         } catch (RuntimeException ex2) {
             logger.error(message("Application exception overridden by rollback exception"), ex);
             throw ex2;
