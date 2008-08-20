@@ -24,8 +24,6 @@
         </property>
     </bean>
 
-    <context:annotation-config/>
-    
     <!--
         A bean representing a space (an IJSpace implementation).
 
