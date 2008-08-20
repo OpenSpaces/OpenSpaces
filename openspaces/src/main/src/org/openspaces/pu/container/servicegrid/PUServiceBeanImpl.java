@@ -291,7 +291,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             // backward compatible
             beanLevelProperties.getContextProperties().setProperty("jee.deployPath", deployPath.getAbsolutePath());
             beanLevelProperties.getContextProperties().setProperty("dotnet.deployPath", deployPath.getAbsolutePath());
-            beanLevelProperties.getContextProperties().setProperty("deployPath", deployPath.getAbsolutePath());
+            beanLevelProperties.getContextProperties().setProperty(DeployableProcessingUnitContainerProvider.CONTEXT_PROPERTY_DEPLOY_PATH, deployPath.getAbsolutePath());
 
             if (factory instanceof DeployableProcessingUnitContainerProvider) {
                 ((DeployableProcessingUnitContainerProvider) factory).setDeployPath(deployPath);

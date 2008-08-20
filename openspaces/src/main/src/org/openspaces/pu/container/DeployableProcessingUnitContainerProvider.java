@@ -23,6 +23,8 @@ import java.io.File;
  */
 public interface DeployableProcessingUnitContainerProvider extends ProcessingUnitContainerProvider {
 
+    static final String CONTEXT_PROPERTY_DEPLOY_PATH = "deployPath";
+    
     /**
      * Sets the path where the processing unit deployment was extracted to.
      */
