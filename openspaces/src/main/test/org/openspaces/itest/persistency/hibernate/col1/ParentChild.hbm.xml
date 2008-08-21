@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<!--
+
+  This mapping demonstrates how to use an idbag to represent
+  a many-to-many association where the association table has
+  a surrogate key.
+
+-->
+
+<hibernate-mapping package="org.openspaces.itest.persistency.hibernate.col1">
+
+    <class name="Parent" table="Parents">
+        <id name="name"/>
+
+        <set name="children" cascade="all-delete-orphan" lazy="false">
+            <key column="parent_id"/>
+            <one-to-many class="Child"/>
+        </set>
+
+
+    </class>
+
+    <class name="Child" table="chlidren">
+        <id name="name"/>
+    </class>
+
+
+</hibernate-mapping>
