@@ -23,11 +23,18 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
     
     protected final Log log = LogFactory.getLog(getClass());
     
-    private ProcessingUnitProxy proxy;  
+    private ProcessingUnitProxy proxy;
+    
     private String assemblyFile;
+    
     private String implementationClassName;
+    
     private String[] dependencies;
+    
+    private String deploymentDirectory;
+    
     private ClusterInfo clusterInfo;
+    
     private Properties customProperties;
 
     /**
@@ -58,7 +65,14 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
     }
     
     /**
-     * Injects the .Net processing unit custom properties that will be passed
+     * @param deploymentDirectory the deploymentDirectory to set
+     */
+    public void setDeploymentDirectory(String deploymentDirectory) {
+        this.deploymentDirectory = deploymentDirectory;
+    }    
+    
+    /**
+     * Injects the .Net processing unit properties that will be passed
      * to the init method
      * 
      * @param customProperties
@@ -66,6 +80,13 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
     public void setCustomProperties(Properties customProperties)
     {
         this.customProperties = customProperties;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void setClusterInfo(ClusterInfo clusterInfo) {
+        this.clusterInfo = clusterInfo;
     }
 	/**
 	 * {@inheritDoc}
@@ -76,18 +97,15 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         try {
             if (classLoader instanceof ServiceClassLoader) {
                 Thread.currentThread().setContextClassLoader(classLoader.getParent());
-            }
-            log.info("Creating a proxy to the .Net processing unit");
-            proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies);
+            }            
+            log.info("Invoking Init on the .Net processing unit");
             if (clusterInfo == null) {
                 log.info("Invoking Init on the .Net processing unit");
-                proxy.init(customProperties);
+                proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentDirectory, customProperties);
             } else {
-                log.info("Invoking Init on the .Net processing unit");
-                proxy.init(customProperties, clusterInfo.getBackupId(), clusterInfo.getInstanceId(), clusterInfo.getNumberOfBackups(), clusterInfo.getNumberOfInstances(), clusterInfo.getSchema());
+                
+                proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentDirectory, customProperties, clusterInfo.getBackupId(), clusterInfo.getInstanceId(), clusterInfo.getNumberOfBackups(), clusterInfo.getNumberOfInstances(), clusterInfo.getSchema(), clusterInfo.getName());
             }
-            log.info("Invoking Start on the .Net processing unit");
-            proxy.start();
         } finally {
             Thread.currentThread().setContextClassLoader(classLoader);
         }
@@ -96,17 +114,10 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
 	 * {@inheritDoc}
 	 */
     public void destroy() throws Exception {
-        log.info("Invoking Stop on the .Net processing unit");
-        proxy.stop();
-        log.info("Invoking Destroy on the .Net processing unit");
-        proxy.destruct();
+        log.info("Invoking Dispose on the .Net processing unit");
+        proxy.close();
         proxy = null;
     }
-	/**
-	 * {@inheritDoc}
-	 */
-    public void setClusterInfo(ClusterInfo clusterInfo) {
-        this.clusterInfo = clusterInfo;
-    }
+	
 
 }
