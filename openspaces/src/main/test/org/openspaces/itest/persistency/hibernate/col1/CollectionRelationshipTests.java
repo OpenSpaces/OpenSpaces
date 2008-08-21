@@ -36,8 +36,8 @@ public class CollectionRelationshipTests extends TestCase {
         hibernateTemplate = new HibernateTemplate(sessionFactory);
         deleteContent();
         DefaultHibernateExternalDataSource dataSource = new DefaultHibernateExternalDataSource();
-        dataSource.setInitialLoadChunkSize(-1);
-        dataSource.setPerformOrderById(false);
+//        dataSource.setInitialLoadChunkSize(-1);
+//        dataSource.setPerformOrderById(false);
         dataSource.setSessionFactory(sessionFactory);
         dataSource.init(new Properties());
         this.bulkDataPersister = dataSource;
