@@ -265,7 +265,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         // identify if this is a .NET one
         InputStream puConfig = contextClassLoader.getResourceAsStream("pu.config");
         // identify if this is a .NET interop one
-        InputStream puInteropConfig = contextClassLoader.getResourceAsStream("pu.interop..config");
+        InputStream puInteropConfig = contextClassLoader.getResourceAsStream("pu.interop.config");
         if (webXml != null) {
             webXml.close();
             downloadPU = true;
