@@ -3,6 +3,7 @@ package org.openspaces.interop;
 import java.util.Properties;
 
 import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
@@ -15,11 +16,10 @@ public class DotnetProcessingUnitContainer implements ProcessingUnitContainer {
        
     private DotnetProcessingUnitBean dotnetProcessingUnitBean;
     
-    public DotnetProcessingUnitContainer(String deployPath, ClusterInfo clusterInfo, Properties properties) throws CannotCreateContainerException{       
+    public DotnetProcessingUnitContainer(ClusterInfo clusterInfo, BeanLevelProperties beanLevelProperties) throws CannotCreateContainerException{       
         dotnetProcessingUnitBean = new DotnetProcessingUnitBean();
-        dotnetProcessingUnitBean.setDeploymentDirectory(deployPath);
         dotnetProcessingUnitBean.setClusterInfo(clusterInfo);
-        dotnetProcessingUnitBean.setCustomProperties(properties);
+        dotnetProcessingUnitBean.setBeanLevelProperties(beanLevelProperties);
         try {
             dotnetProcessingUnitBean.afterPropertiesSet();
         } catch (Exception e) {

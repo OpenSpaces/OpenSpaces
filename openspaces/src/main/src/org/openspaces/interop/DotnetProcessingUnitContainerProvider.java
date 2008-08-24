@@ -32,9 +32,8 @@ public class DotnetProcessingUnitContainerProvider implements DeployableProcessi
     }
 
     public ProcessingUnitContainer createContainer() throws CannotCreateContainerException {
-        
-        String deployPath = beanLevelProperties.getContextProperties().getProperty(CONTEXT_PROPERTY_DEPLOY_PATH);
-        DotnetProcessingUnitContainer dotnetpuContainer = new DotnetProcessingUnitContainer(deployPath, clusterInfo, beanLevelProperties.getContextProperties());
+                
+        DotnetProcessingUnitContainer dotnetpuContainer = new DotnetProcessingUnitContainer(clusterInfo, beanLevelProperties);
         
         return dotnetpuContainer;
     }

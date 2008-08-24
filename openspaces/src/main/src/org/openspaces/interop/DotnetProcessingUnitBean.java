@@ -7,6 +7,9 @@ import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.ServiceClassLoader;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoAware;
+import org.openspaces.core.properties.BeanLevelProperties;
+import org.openspaces.core.properties.BeanLevelPropertiesAware;
+import org.openspaces.pu.container.DeployableProcessingUnitContainerProvider;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import com.gigaspaces.serialization.pbs.openspaces.ProcessingUnitProxy; 
@@ -19,7 +22,7 @@ import com.gigaspaces.serialization.pbs.openspaces.ProcessingUnitProxy;
  * @author eitany
  * @since 6.5
  */
-public class DotnetProcessingUnitBean implements InitializingBean, DisposableBean, ClusterInfoAware {
+public class DotnetProcessingUnitBean implements InitializingBean, DisposableBean, ClusterInfoAware, BeanLevelPropertiesAware {
     
     protected final Log log = LogFactory.getLog(getClass());
     
@@ -31,11 +34,13 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
     
     private String[] dependencies;
     
-    private String deploymentDirectory;
+    private String deploymentPath;
     
     private ClusterInfo clusterInfo;
     
     private Properties customProperties;
+
+    private BeanLevelProperties beanLevelProperties;
 
     /**
      * Injects the .Net processing unit implementation's assembly file
@@ -68,7 +73,7 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
      * @param deploymentDirectory the deploymentDirectory to set
      */
     public void setDeploymentDirectory(String deploymentDirectory) {
-        this.deploymentDirectory = deploymentDirectory;
+        this.deploymentPath = deploymentDirectory;
     }    
     
     /**
@@ -91,20 +96,35 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
 	/**
 	 * {@inheritDoc}
 	 */
-    public void afterPropertiesSet() throws Exception {  
+    public void afterPropertiesSet() throws Exception {
         
+        //Try to get deployment path if not set, relevant for interop pu scenario.
+        if (this.deploymentPath == null && beanLevelProperties != null)
+        {
+            this.deploymentPath = beanLevelProperties.getContextProperties().getProperty(DeployableProcessingUnitContainerProvider.CONTEXT_PROPERTY_DEPLOY_PATH);            
+        }
+        if (deploymentPath != null)
+            log.info("Deployment path taken from " + DeployableProcessingUnitContainerProvider.CONTEXT_PROPERTY_DEPLOY_PATH + " property (" + this.deploymentPath + ")");
+        
+        //Merge beanLevelProperties with custom properties
+        if (this.beanLevelProperties != null)
+        {
+            if (this.customProperties == null)
+                this.customProperties = new Properties();
+            
+            this.customProperties.putAll(beanLevelProperties.getContextProperties());
+        }
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         try {
             if (classLoader instanceof ServiceClassLoader) {
                 Thread.currentThread().setContextClassLoader(classLoader.getParent());
-            }            
+            }
             log.info("Invoking Init on the .Net processing unit");
             if (clusterInfo == null) {
                 log.info("Invoking Init on the .Net processing unit");
-                proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentDirectory, customProperties);
-            } else {
-                
-                proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentDirectory, customProperties, clusterInfo.getBackupId(), clusterInfo.getInstanceId(), clusterInfo.getNumberOfBackups(), clusterInfo.getNumberOfInstances(), clusterInfo.getSchema(), clusterInfo.getName());
+                proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentPath, customProperties);
+            } else {                
+                proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentPath, customProperties, clusterInfo.getBackupId(), clusterInfo.getInstanceId(), clusterInfo.getNumberOfBackups(), clusterInfo.getNumberOfInstances(), clusterInfo.getSchema(), clusterInfo.getName());
             }
         } finally {
             Thread.currentThread().setContextClassLoader(classLoader);
@@ -117,6 +137,10 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         log.info("Invoking Dispose on the .Net processing unit");
         proxy.close();
         proxy = null;
+    }
+
+    public void setBeanLevelProperties(BeanLevelProperties beanLevelProperties) {
+        this.beanLevelProperties = beanLevelProperties;
     }
 	
 
