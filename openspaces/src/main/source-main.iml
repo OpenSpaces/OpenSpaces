@@ -34,11 +34,14 @@
         <customNs />
       </configuration>
     </facet>
+    <facet type="Groovy" name="Groovy" implicit="true">
+      <configuration />
+    </facet>
   </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_5" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/../../target/classes" />
-    <output-test url="file://$MODULE_DIR$/../../target/main-test-classes" />
     <exclude-output />
+    <output-test url="file://$MODULE_DIR$/../../target/main-test-classes" />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
@@ -70,6 +73,7 @@
     <orderEntry type="library" name="jetty" level="project" />
     <orderEntry type="library" name="jsp-2.1" level="project" />
     <orderEntry type="library" name="Velocity" level="project" />
+    <orderEntryProperties />
   </component>
   <component name="copyright">
     <Base>

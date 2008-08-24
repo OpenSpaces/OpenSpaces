@@ -263,15 +263,21 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         // identify if this is a web app
         InputStream webXml = contextClassLoader.getResourceAsStream("WEB-INF/web.xml");
         // identify if this is a .NET one
-        InputStream gridConfig = contextClassLoader.getResourceAsStream("pu.config");
+        InputStream puConfig = contextClassLoader.getResourceAsStream("pu.config");
+        // identify if this is a .NET interop one
+        InputStream puInteropConfig = contextClassLoader.getResourceAsStream("pu.interop..config");
         if (webXml != null) {
             webXml.close();
             downloadPU = true;
             factory = createContainerProvider(beanLevelProperties, JettyJeeProcessingUnitContainerProvider.class.getName());
-        } else if (gridConfig != null) {
-            gridConfig.close();
+        } else if (puConfig != null) {
+            puConfig.close();
             downloadPU = true;
             factory = createContainerProvider(beanLevelProperties, DotnetProcessingUnitContainerProvider.class.getName());
+        } else if (puInteropConfig != null) {
+            puInteropConfig.close();
+            downloadPU = true;
+            factory = createContainerProvider(beanLevelProperties, IntegratedProcessingUnitContainerProvider.class.getName());
         } else {
             factory = createContainerProvider(beanLevelProperties, IntegratedProcessingUnitContainerProvider.class.getName());
             if (beanLevelProperties.getContextProperties().getProperty("pu.download", "false").equalsIgnoreCase("true")) {

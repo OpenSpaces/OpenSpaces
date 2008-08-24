@@ -7,7 +7,6 @@
       <antReference projectDefault="true" />
       <customJdkName value="" />
       <maximumHeapSize value="128" />
-      <maximumStackSize value="32" />
       <properties />
     </buildFile>
   </component>
@@ -390,7 +389,7 @@
     <output url="file://$PROJECT_DIR$/classes" />
   </component>
   <component name="ProjectRunConfigurationManager">
-    <configuration default="false" name="Example Hello World" type="Application" factoryName="Application" enabled="false" merge="false" runner="emma">
+    <configuration default="false" name="Example Hello World" type="Application" factoryName="Application" enabled="false" merge="false">
       <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
       <option name="VM_PARAMETERS" value="" />
       <option name="PROGRAM_PARAMETERS" value="" />
@@ -422,7 +421,7 @@
         <option name="Make" value="true" />
       </method>
     </configuration>
-    <configuration default="false" name="Example Data Processor" type="Application" factoryName="Application" enabled="false" merge="false" sample_coverage="true" runner="emma">
+    <configuration default="false" name="Example Data Processor" type="Application" factoryName="Application" enabled="false" merge="false">
       <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
       <option name="VM_PARAMETERS" value="" />
       <option name="PROGRAM_PARAMETERS" value="" />
@@ -455,7 +454,7 @@
         <option name="Make" value="true" />
       </method>
     </configuration>
-    <configuration default="false" name="Example Data Feeder" type="Application" factoryName="Application" enabled="false" merge="false" sample_coverage="true" runner="emma">
+    <configuration default="false" name="Example Data Feeder" type="Application" factoryName="Application" enabled="false" merge="false">
       <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
       <option name="VM_PARAMETERS" value="" />
       <option name="PROGRAM_PARAMETERS" value="" />
@@ -487,7 +486,7 @@
         <option name="Make" value="true" />
       </method>
     </configuration>
-    <configuration default="false" name="Example Data Processor Primary" type="Application" factoryName="Application" enabled="false" merge="false" runner="emma">
+    <configuration default="false" name="Example Data Processor Primary" type="Application" factoryName="Application" enabled="false" merge="false">
       <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
       <option name="VM_PARAMETERS" value="" />
       <option name="PROGRAM_PARAMETERS" value="-cluster total_members=1,1" />
@@ -519,7 +518,7 @@
         <option name="Make" value="true" />
       </method>
     </configuration>
-    <configuration default="false" name="Example Data Processor Backup" type="Application" factoryName="Application" enabled="false" merge="false" runner="emma">
+    <configuration default="false" name="Example Data Processor Backup" type="Application" factoryName="Application" enabled="false" merge="false">
       <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
       <option name="VM_PARAMETERS" value="" />
       <option name="PROGRAM_PARAMETERS" value="-cluster schema=primary_backup total_members=1,1 id=1 backup_id=1" />
@@ -551,7 +550,7 @@
         <option name="Make" value="true" />
       </method>
     </configuration>
-    <configuration default="false" name="Example Data Processor Part1" type="Application" factoryName="Application" enabled="false" merge="false" sample_coverage="true" runner="emma">
+    <configuration default="false" name="Example Data Processor Part1" type="Application" factoryName="Application" enabled="false" merge="false">
       <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
       <option name="VM_PARAMETERS" value="" />
       <option name="PROGRAM_PARAMETERS" value="-cluster schema=partitioned total_members=2 id=1" />
@@ -583,7 +582,7 @@
         <option name="Make" value="true" />
       </method>
     </configuration>
-    <configuration default="false" name="Example Data Processor Part2" type="Application" factoryName="Application" enabled="false" merge="false" sample_coverage="true" runner="emma">
+    <configuration default="false" name="Example Data Processor Part2" type="Application" factoryName="Application" enabled="false" merge="false">
       <option name="MAIN_CLASS_NAME" value="org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer" />
       <option name="VM_PARAMETERS" value="" />
       <option name="PROGRAM_PARAMETERS" value="-cluster schema=partitioned total_members=2 id=2" />
@@ -615,7 +614,7 @@
         <option name="Make" value="true" />
       </method>
     </configuration>
-    <configuration default="false" name="OpenSpaces Tests" type="JUnit" factoryName="JUnit" enabled="false" merge="false" runner="emma">
+    <configuration default="false" name="OpenSpaces Tests" type="JUnit" factoryName="JUnit" enabled="false" merge="false">
       <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
