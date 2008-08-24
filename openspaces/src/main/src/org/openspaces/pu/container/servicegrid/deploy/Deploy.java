@@ -186,15 +186,13 @@ public class Deploy {
             throw new IllegalArgumentException("The pu name must be defined");
         }
         String puPath = args[args.length - 1];
-        int index = puPath.lastIndexOf('/');
-        index = index == -1 ? 0 : index;
-        String puName = puPath.substring(index);
+        File puFile = new File(puPath);
+        String puName = puFile.getName();
         // override pu name allows to change the actual pu name deployed from the on under deploy directory
         String overridePuName = puName;
 
         boolean deletePUFile = false;
 
-        File puFile = new File(puPath);
 
         if (puFile.exists() && puFile.isDirectory()) {
             // this is a directory, jar it up and prepare it for upload
