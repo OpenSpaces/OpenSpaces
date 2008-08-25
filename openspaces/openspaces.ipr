@@ -141,7 +141,17 @@
           <module name="source-main" />
           <module name="openspaces">
             <files>
+              <file url="file://$PROJECT_DIR$/target/test-classes/org/openspaces/itest/persistency/hibernate/col1/hibernate.cfg.xml" />
               <file url="file://$PROJECT_DIR$/target/test-classes/org/openspaces/itest/persistency/hibernate/simple/hibernate.cfg.xml" />
+            </files>
+          </module>
+        </modules>
+      </facet-type>
+      <facet-type id="Groovy">
+        <modules>
+          <module name="source-main">
+            <files>
+              <file url="file://$PROJECT_DIR$/src/main/test/org/openspaces/itest/remoting/scripting/test.groovy" />
             </files>
           </module>
         </modules>

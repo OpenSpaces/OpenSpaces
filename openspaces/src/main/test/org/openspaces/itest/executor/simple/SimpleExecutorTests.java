@@ -6,6 +6,8 @@ import com.gigaspaces.async.AsyncResult;
 import com.gigaspaces.async.AsyncResultFilter;
 import com.gigaspaces.async.AsyncResultFilterEvent;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.core.executor.AutowiredTask;
+import org.openspaces.core.executor.AutowiredTaskMarker;
 import org.openspaces.core.executor.DistributedTask;
 import org.openspaces.core.executor.Task;
 import org.openspaces.core.executor.TaskGigaSpace;
@@ -205,29 +207,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     }
 
     public void testInjection() throws Exception {
-        AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new DistributedTask<Integer, Integer>() {
-
-            @Resource(name = "gigaSpace1")
-            transient GigaSpace gigaSpace;
-
-            public Integer execute() throws Exception {
-                if (gigaSpace == null) {
-                    throw new Exception();
-                }
-                return 1;
-            }
-
-            public Integer reduce(List<AsyncResult<Integer>> asyncResults) throws Exception {
-                int sum = 0;
-                for (AsyncResult<Integer> res : asyncResults) {
-                    if (res.getException() != null) {
-                        throw res.getException();
-                    }
-                    sum += res.getResult();
-                }
-                return sum;
-            }
-        });
+        AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MyDistributedTask());
         assertEquals(2, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
@@ -396,6 +376,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         }
     }
 
+    @AutowiredTask
     private class ApplicationContextInjectable extends AggregatorContinue implements ApplicationContextAware {
 
         private transient ApplicationContext applicationContext;
@@ -422,6 +403,30 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
                 throw new Exception();
             }
             return super.execute();
+        }
+    }
+
+    private static class MyDistributedTask implements DistributedTask<Integer, Integer>, AutowiredTaskMarker {
+
+        @Resource(name = "gigaSpace1")
+        transient GigaSpace gigaSpace;
+
+        public Integer execute() throws Exception {
+            if (gigaSpace == null) {
+                throw new Exception();
+            }
+            return 1;
+        }
+
+        public Integer reduce(List<AsyncResult<Integer>> asyncResults) throws Exception {
+            int sum = 0;
+            for (AsyncResult<Integer> res : asyncResults) {
+                if (res.getException() != null) {
+                    throw res.getException();
+                }
+                sum += res.getResult();
+            }
+            return sum;
         }
     }
 }

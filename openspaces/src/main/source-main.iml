@@ -1,40 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module relativePaths="true" type="JAVA_MODULE" version="4">
   <component name="FacetManager">
-    <facet type="Spring" name="Spring">
-      <configuration>
-        <options>
-          <option name="enableValidation" value="false" />
-          <option name="reportErrorsAsWarnings" value="true" />
-        </options>
-        <customNs />
-      </configuration>
-    </facet>
-    <facet type="Spring" name="Spring">
-      <configuration>
-        <fileset id="fileset1" name="My Fileset" removed="false">
-          <file>file://$MODULE_DIR$/test/org/openspaces/itest/remoting/simple/simple-remoting.xml</file>
-        </fileset>
-        <options>
-          <option name="enableValidation" value="false" />
-          <option name="reportErrorsAsWarnings" value="true" />
-        </options>
-        <customNs />
-      </configuration>
-    </facet>
-    <facet type="Spring" name="Spring">
-      <configuration>
-        <fileset id="fileset1" name="My Fileset" removed="false">
-          <file>file://$MODULE_DIR$/test/org/openspaces/itest/remoting/simple/simple-remoting.xml</file>
-        </fileset>
-        <options>
-          <option name="enableValidation" value="false" />
-          <option name="reportErrorsAsWarnings" value="true" />
-        </options>
-        <customNs />
-      </configuration>
-    </facet>
-    <facet type="Groovy" name="Groovy" implicit="true">
+    <facet type="Groovy" name="Groovy">
       <configuration />
     </facet>
   </component>
@@ -46,13 +13,13 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
     </content>
+    <orderEntry type="library" name="GROOVY" level="application" />
     <orderEntry type="jdk" jdkName="1.5" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="ASM" level="project" />
     <orderEntry type="library" exported="" name="Atomikos" level="project" />
     <orderEntry type="library" exported="" name="Common" level="project" />
     <orderEntry type="library" exported="" name="GigaSpaces" level="project" />
-    <orderEntry type="library" exported="" name="Groovy" level="project" />
     <orderEntry type="library" exported="" name="j2ee" level="project" />
     <orderEntry type="library" exported="" name="JBossTS" level="project" />
     <orderEntry type="library" exported="" name="Jini" level="project" />
