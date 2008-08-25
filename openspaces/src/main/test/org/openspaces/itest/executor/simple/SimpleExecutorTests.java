@@ -6,8 +6,8 @@ import com.gigaspaces.async.AsyncResult;
 import com.gigaspaces.async.AsyncResultFilter;
 import com.gigaspaces.async.AsyncResultFilterEvent;
 import org.openspaces.core.GigaSpace;
-import org.openspaces.core.executor.AutowiredTask;
-import org.openspaces.core.executor.AutowiredTaskMarker;
+import org.openspaces.core.executor.AutowireTask;
+import org.openspaces.core.executor.AutowireTaskMarker;
 import org.openspaces.core.executor.DistributedTask;
 import org.openspaces.core.executor.Task;
 import org.openspaces.core.executor.TaskGigaSpace;
@@ -376,7 +376,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         }
     }
 
-    @AutowiredTask
+    @AutowireTask
     private class ApplicationContextInjectable extends AggregatorContinue implements ApplicationContextAware {
 
         private transient ApplicationContext applicationContext;
@@ -406,7 +406,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         }
     }
 
-    private static class MyDistributedTask implements DistributedTask<Integer, Integer>, AutowiredTaskMarker {
+    private static class MyDistributedTask implements DistributedTask<Integer, Integer>, AutowireTaskMarker {
 
         @Resource(name = "gigaSpace1")
         transient GigaSpace gigaSpace;

@@ -292,7 +292,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             }
         }
 
-        autowireArguments(remotingEntry.getArguments());
+        autowireArguments(service, remotingEntry.getArguments());
 
         IMethod method;
         try {
@@ -345,21 +345,38 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
         }
     }
 
-    private void autowireArguments(Object[] args) {
+    private void autowireArguments(Object service, Object[] args) {
         if (disableAutowiredArguements) {
             return;
         }
         if (args == null) {
             return;
         }
-        for (Object arg : args) {
-            if (arg == null) {
-                continue;
+        if (shouldAutowire(service)) {
+            for (Object arg : args) {
+                if (arg == null) {
+                    continue;
+                }
+                AutowireCapableBeanFactory beanFactory = applicationContext.getAutowireCapableBeanFactory();
+                beanFactory.autowireBeanProperties(arg, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
+                beanFactory.initializeBean(arg, arg.getClass().getName());
             }
-            AutowireCapableBeanFactory beanFactory = applicationContext.getAutowireCapableBeanFactory();
-            beanFactory.autowireBeanProperties(arg, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
-            beanFactory.initializeBean(arg, arg.getClass().getName());
         }
+    }
+
+    private boolean shouldAutowire(Object service) {
+        if (service instanceof AutowireArgumentsMarker) {
+            return true;
+        }
+        if (service.getClass().isAnnotationPresent(AutowireArguments.class)) {
+            return true;
+        }
+        for (Class clazz : service.getClass().getInterfaces()) {
+            if (clazz.isAnnotationPresent(AutowireArguments.class)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Executor execution
@@ -383,7 +400,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             }
         }
 
-        autowireArguments(task.getArguments());
+        autowireArguments(service, task.getArguments());
 
         IMethod method;
         try {
@@ -485,7 +502,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                 }
             }
 
-            autowireArguments(remotingEntry.getArguments());
+            autowireArguments(service, remotingEntry.getArguments());
 
             // bind current transaction
             boolean boundedTransaction = ExistingJiniTransactionManager.bindExistingTransaction(remotingEntry.transaction);
