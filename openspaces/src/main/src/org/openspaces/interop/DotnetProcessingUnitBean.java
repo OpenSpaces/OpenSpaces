@@ -1,6 +1,7 @@
 package org.openspaces.interop;
 
 import java.util.Properties;
+import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,9 +11,11 @@ import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertiesAware;
 import org.openspaces.pu.container.DeployableProcessingUnitContainerProvider;
+import org.openspaces.pu.container.SpaceProvider;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import com.gigaspaces.serialization.pbs.openspaces.ProcessingUnitProxy; 
+import com.j_spaces.core.IJSpace;
 
 /**
  * Dotnet processing unit bean, used as an adapter that will delegate
@@ -22,7 +25,7 @@ import com.gigaspaces.serialization.pbs.openspaces.ProcessingUnitProxy;
  * @author eitany
  * @since 6.5
  */
-public class DotnetProcessingUnitBean implements InitializingBean, DisposableBean, ClusterInfoAware, BeanLevelPropertiesAware {
+public class DotnetProcessingUnitBean implements InitializingBean, DisposableBean, ClusterInfoAware, BeanLevelPropertiesAware, SpaceProvider {
     
     protected final Log log = LogFactory.getLog(getClass());
     
@@ -96,8 +99,7 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
 	/**
 	 * {@inheritDoc}
 	 */
-    public void afterPropertiesSet() throws Exception {
-        
+    public void afterPropertiesSet() throws Exception {        
         //Try to get deployment path if not set, relevant for interop pu scenario.
         if (this.deploymentPath == null && beanLevelProperties != null)
         {
@@ -119,12 +121,14 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
             if (classLoader instanceof ServiceClassLoader) {
                 Thread.currentThread().setContextClassLoader(classLoader.getParent());
             }
+            //Create identifier for this bean
+            UUID beanUniqueIdentifier = UUID.randomUUID();
             log.info("Invoking Init on the .Net processing unit");
             if (clusterInfo == null) {
                 log.info("Invoking Init on the .Net processing unit");
-                proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentPath, customProperties);
+                proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentPath, customProperties, beanUniqueIdentifier);
             } else {                
-                proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentPath, customProperties, clusterInfo.getBackupId(), clusterInfo.getInstanceId(), clusterInfo.getNumberOfBackups(), clusterInfo.getNumberOfInstances(), clusterInfo.getSchema(), clusterInfo.getName());
+                proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentPath, customProperties, clusterInfo.getBackupId(), clusterInfo.getInstanceId(), clusterInfo.getNumberOfBackups(), clusterInfo.getNumberOfInstances(), clusterInfo.getSchema(), clusterInfo.getName(), beanUniqueIdentifier);
             }
         } finally {
             Thread.currentThread().setContextClassLoader(classLoader);
@@ -141,6 +145,10 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
 
     public void setBeanLevelProperties(BeanLevelProperties beanLevelProperties) {
         this.beanLevelProperties = beanLevelProperties;
+    }
+
+    public IJSpace[] getSpaces() {
+        return proxy.getContextProxies();
     }
 	
 

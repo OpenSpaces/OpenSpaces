@@ -7,12 +7,15 @@ import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
+import org.openspaces.pu.container.SpaceProvider;
+
+import com.j_spaces.core.IJSpace;
 
 /**
  * @author kimchy
  * @since 6.6
  */
-public class DotnetProcessingUnitContainer implements ProcessingUnitContainer {
+public class DotnetProcessingUnitContainer implements ProcessingUnitContainer, SpaceProvider {
        
     private DotnetProcessingUnitBean dotnetProcessingUnitBean;
     
@@ -33,6 +36,10 @@ public class DotnetProcessingUnitContainer implements ProcessingUnitContainer {
         } catch (Exception e) {
             throw new CannotCloseContainerException(e.getMessage(), e);
         }
+    }
+
+    public IJSpace[] getSpaces() {
+        return dotnetProcessingUnitBean.getSpaces();
     }
     
 }
