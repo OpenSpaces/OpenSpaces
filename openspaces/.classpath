@@ -104,7 +104,6 @@
 	<classpathentry kind="lib" path="lib/jetty/jetty-util-6.1.11.jar"/>
 	<classpathentry kind="lib" path="lib/j2ee/common-annotations.jar"/>
 	<classpathentry kind="lib" path="lib/jetty/jetty-management-6.1.11.jar"/>
-	<classpathentry kind="lib" path="lib/velocity/velocity-1.5.jar"/>
-	<classpathentry kind="lib" path="lib/velocity/velocity-tools-view-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/velocity/velocity-dep-1.5.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

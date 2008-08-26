@@ -958,8 +958,7 @@
     </library>
     <library name="Velocity">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/velocity/velocity-tools-view-1.4.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/velocity/velocity-1.5.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/velocity/velocity-dep-1.5.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
