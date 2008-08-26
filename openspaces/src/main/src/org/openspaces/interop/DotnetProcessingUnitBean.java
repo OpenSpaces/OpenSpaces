@@ -142,11 +142,15 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         proxy.close();
         proxy = null;
     }
-
+    /**
+     * {@inheritDoc}
+     */
     public void setBeanLevelProperties(BeanLevelProperties beanLevelProperties) {
         this.beanLevelProperties = beanLevelProperties;
     }
-
+    /**
+     * {@inheritDoc}
+     */
     public IJSpace[] getSpaces() {
         return proxy.getContextProxies();
     }
