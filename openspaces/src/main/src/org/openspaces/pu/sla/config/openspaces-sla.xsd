@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+numb<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <xsd:schema xmlns="http://www.openspaces.org/schema/sla"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -256,7 +256,7 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:attribute>
-            <xsd:attribute name="number-of-backups" type="xsd:positiveInteger" use="optional">
+            <xsd:attribute name="number-of-backups" type="xsd:nonNegativeInteger" use="optional">
                 <xsd:annotation>
                     <xsd:documentation>
                         The number of backups per instance this processing unit will have. Defaults to 0. Note, when
