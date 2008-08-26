@@ -46,6 +46,7 @@ import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.DeployableProcessingUnitContainerProvider;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.ProcessingUnitContainerProvider;
+import org.openspaces.pu.container.SpaceProvider;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
 import org.openspaces.pu.container.jee.JeeProcessingUnitContainer;
 import org.openspaces.pu.container.jee.jetty.JettyJeeProcessingUnitContainerProvider;
@@ -333,6 +334,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         container = factory.createContainer();
 
+        ArrayList<IJSpace> embeddedSpacesList = new ArrayList<IJSpace>();
+        ArrayList<IJSpace> allSpacesList = new ArrayList<IJSpace>();
         if (container instanceof ApplicationContextProcessingUnitContainer) {
             ApplicationContext applicationContext = ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
             Map map = applicationContext.getBeansOfType(MemberAliveIndicator.class);
@@ -346,8 +349,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             memberAliveIndicators = maiList.toArray(new MemberAliveIndicator[maiList.size()]);
 
             map = applicationContext.getBeansOfType(IJSpace.class);
-            ArrayList<IJSpace> embeddedSpacesList = new ArrayList<IJSpace>();
-            ArrayList<IJSpace> allSpacesList = new ArrayList<IJSpace>();
             for (Iterator it = map.values().iterator(); it.hasNext();) {
                 IJSpace space = (IJSpace) it.next();
                 if (space instanceof ISpaceLocalCache || SpaceUtils.isRemoteProtocol(space)) {
@@ -357,8 +358,20 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                     allSpacesList.add(space);
                 }
             }
-            embeddedSpaces = embeddedSpacesList.toArray(new IJSpace[embeddedSpacesList.size()]);
-            allSpaces = allSpacesList.toArray(new IJSpace[allSpacesList.size()]);
+            map = applicationContext.getBeansOfType(SpaceProvider.class);
+            for (Iterator it = map.values().iterator(); it.hasNext();) {
+                IJSpace[] spaces = ((SpaceProvider) it.next()).getSpaces();
+                if (spaces != null) {
+                    for (IJSpace space : spaces) {
+                        if (space instanceof ISpaceLocalCache || SpaceUtils.isRemoteProtocol(space)) {
+                            allSpacesList.add(space);
+                        } else {
+                            embeddedSpacesList.add(space);
+                            allSpacesList.add(space);
+                        }
+                    }
+                }
+            }
 
             // inject the application context to all the monitors and schedule them
             // currently use the number of threads in relation to the number of monitors
@@ -373,11 +386,24 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 }
                 executorService.scheduleAtFixedRate(watchTask, watchTask.getMonitor().getPeriod(), watchTask.getMonitor().getPeriod(), TimeUnit.MILLISECONDS);
             }
-        } else {
-            // currently, until we support extracting this from non Spring application context
-            embeddedSpaces = new IJSpace[0];
-            allSpaces = new IJSpace[0];
         }
+
+        if (container instanceof SpaceProvider) {
+            IJSpace[] spaces = ((SpaceProvider) container).getSpaces();
+            if (spaces != null) {
+                for (IJSpace space : spaces) {
+                    if (space instanceof ISpaceLocalCache || SpaceUtils.isRemoteProtocol(space)) {
+                        allSpacesList.add(space);
+                    } else {
+                        embeddedSpacesList.add(space);
+                        allSpacesList.add(space);
+                    }
+                }
+            }
+        }
+
+        embeddedSpaces = embeddedSpacesList.toArray(new IJSpace[embeddedSpacesList.size()]);
+        allSpaces = allSpacesList.toArray(new IJSpace[allSpacesList.size()]);
     }
 
     private org.openspaces.pu.sla.SLA getSLA(ServiceBeanContext context) throws IOException, ClassNotFoundException {
