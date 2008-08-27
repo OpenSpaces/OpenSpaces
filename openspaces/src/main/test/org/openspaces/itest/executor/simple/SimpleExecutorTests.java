@@ -206,6 +206,14 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         assertEquals(2, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
+    public void testDistributedExecutionWithListener() throws Exception {
+        WaitForAllListener<Integer> listener = new WaitForAllListener<Integer>(1);
+        clusteredGigaSpace1.execute(new MyDistributedTask(), listener);
+        Future<Integer>[] results = listener.waitForResult(500, TimeUnit.MILLISECONDS);
+        assertEquals(1, results.length);
+        assertEquals(2, (int) results[0].get());
+    }
+
     public void testInjection() throws Exception {
         AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MyDistributedTask());
         assertEquals(2, (int) result.get(1000, TimeUnit.MILLISECONDS));
