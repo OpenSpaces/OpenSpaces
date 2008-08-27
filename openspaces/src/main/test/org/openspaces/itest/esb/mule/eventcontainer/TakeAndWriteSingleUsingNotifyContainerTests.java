@@ -42,7 +42,7 @@ public class TakeAndWriteSingleUsingNotifyContainerTests extends AbstractMuleTes
         //blocking wait untill the mule writes back the messages to the space after reading them.
         for (int i = 0; i < numberOfMsgs; i++) {
             SimpleMessage template = new SimpleMessage("Hello World " + i, true);
-            SimpleMessage message = (SimpleMessage) gigaSpace.take(template, TIMEOUT);
+            SimpleMessage message = gigaSpace.take(template, TIMEOUT);
             assertEquals(template, message);
         }
         assertEquals(numberOfMsgs, gigaSpace.count(new SimpleMessage(null, false)));

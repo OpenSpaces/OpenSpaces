@@ -48,7 +48,7 @@ public class PUEmbedMuleRefTests extends AbstractDependencyInjectionSpringContex
         //blocking wait untill the mule writes back the messages to the space after reading them.
         for (int i = 0; i < numberOfMsgs; i++) {
             SimpleMessage template = new SimpleMessage("Hello World " + i, true);
-            SimpleMessage message = (SimpleMessage) gigaSpace.take(template, 5000);
+            SimpleMessage message = gigaSpace.take(template, 5000);
             assertEquals(template, message);
         }
         assertEquals(0, gigaSpace.count(new SimpleMessage()));

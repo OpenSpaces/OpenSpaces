@@ -69,7 +69,7 @@ public class CollectionRelationshipTests extends TestCase {
         Transaction t = s.beginTransaction();
         List list = s.createQuery("from Parent").list();
         for (Iterator i = list.iterator(); i.hasNext();) {
-            s.delete((Parent) i.next());
+            s.delete( i.next());
         }
         t.commit();
         s.close();

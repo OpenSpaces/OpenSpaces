@@ -192,7 +192,7 @@ public class Utils {
      */
     static void throwMissingLicenseException(Throwable e, ArtifactRepository localRepository) throws MojoExecutionException {
         System.out.println("rep: " + localRepository.getBasedir());
-        Throwable cause = (Throwable) e;
+        Throwable cause = e;
         while (cause.getCause() != null) {
             cause = cause.getCause();
             if (cause instanceof SecurityException) {

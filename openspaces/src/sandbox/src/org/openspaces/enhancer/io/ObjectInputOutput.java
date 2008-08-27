@@ -41,7 +41,7 @@ public class ObjectInputOutput {
     }
 
     public static short readShort(ObjectInput ms) throws IOException {
-        return (short) ms.readShort();
+        return ms.readShort();
     }
 
     public static void writeInt(ObjectOutput ms, int n) throws IOException {
