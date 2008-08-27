@@ -159,6 +159,6 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
     }
 
     public PUServiceDetails[] getServicesDetails() {
-        return new PUServiceDetails[] {new DotnetPUServiceDetails("interop", assemblyFile, implementationClassName)};
+        return new PUServiceDetails[] {new DotnetPUServiceDetails("interop")};
     }
 }

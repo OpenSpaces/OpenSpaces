@@ -32,17 +32,11 @@ public class DotnetPUServiceDetails implements PUServiceDetails, Externalizable 
 
     private String type;
 
-    private String assemblyFile;
-
-    private String implementationClassName;
-
     public DotnetPUServiceDetails() {
     }
 
-    public DotnetPUServiceDetails(String type, String assemblyFile, String implementationClassName) {
+    public DotnetPUServiceDetails(String type) {
         this.type = type;
-        this.assemblyFile = assemblyFile;
-        this.implementationClassName = implementationClassName;
     }
 
     public String getServiceType() {
@@ -63,13 +57,9 @@ public class DotnetPUServiceDetails implements PUServiceDetails, Externalizable 
 
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeUTF(type);
-        out.writeUTF(assemblyFile);
-        out.writeUTF(implementationClassName);
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         type = in.readUTF();
-        assemblyFile = in.readUTF();
-        implementationClassName = in.readUTF();
     }
 }
