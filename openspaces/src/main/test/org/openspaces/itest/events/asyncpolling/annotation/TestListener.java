@@ -1,6 +1,7 @@
 package org.openspaces.itest.events.asyncpolling.annotation;
 
 import org.openspaces.events.EventTemplate;
+import org.openspaces.events.TransactionalEvent;
 import org.openspaces.events.adapter.SpaceDataEvent;
 import org.openspaces.events.asyncpolling.AsyncHandler;
 import org.openspaces.events.asyncpolling.AsyncPolling;
@@ -12,8 +13,7 @@ import org.openspaces.itest.core.simple.Message;
  * @author kimchy
  */
 @AsyncPolling
-// TODO disable this for now as there is a bug in asycn task with transaciton in the core
-//@TransactionalEvent
+@TransactionalEvent
 public class TestListener {
 
     private volatile boolean receivedMessage = false;

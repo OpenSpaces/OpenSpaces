@@ -32,6 +32,21 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
+ * Async polling event container uses the space async operation capabilities (such as
+ * {@link org.openspaces.core.GigaSpace#asyncTake(Object)} in order to simulate events
+ * (optionally transactional).
+ *
+ * <p>Actual event listener is perfomed in an {@link AsyncFutureListener}, and once the result
+ * is processed, another async operation is perfomed. This allows to require no threads running
+ * and perfoming the blocking take operation as is the case with the {@link org.openspaces.events.polling.SimplePollingEventListenerContainer}.
+ *
+ * <p>The number of async operarions executed on startup can be controlled using {@link #setConcurrentConsumers(int)}.
+ * The rest of the operations will be driven by the results arriving, but in essence, there will be concurrent async
+ * operations performed based on the inital number of concurrent consumers.
+ *
+ * <p>The actual execution of an async operation is abstracted using {@link org.openspaces.events.asyncpolling.receive.AsyncOperationHandler}
+ * with default implementation for take, read, and exclusive read lock. 
+ *
  * @author kimchy
  */
 public class SimpleAsyncPollingEventListenerContainer extends AbstractTransactionalEventListenerContainer {
@@ -72,10 +87,16 @@ public class SimpleAsyncPollingEventListenerContainer extends AbstractTransactio
         return receiveTimeout;
     }
 
+    /**
+     * Sets the async operation handler abstracting the actual async operation perfomred.
+     */
     public void setAsyncOperationHandler(AsyncOperationHandler asyncOperationHandler) {
         this.asyncOperationHandler = asyncOperationHandler;
     }
 
+    /**
+     * Sets the number of concurrent async operation performed by this container.
+     */
     public void setConcurrentConsumers(int concurrentConsumers) {
         this.concurrentConsumers = concurrentConsumers;
     }
@@ -148,7 +169,6 @@ public class SimpleAsyncPollingEventListenerContainer extends AbstractTransactio
         if (logger.isTraceEnabled()) {
             logger.trace(message("Rescheduling async receive operation"));
         }
-        System.out.println("reschedule listener " + listener);
 
         if (this.getTransactionManager() != null) {
             // Execute receive within transaction.
@@ -193,7 +213,6 @@ public class SimpleAsyncPollingEventListenerContainer extends AbstractTransactio
     private class AsyncEventListener implements TransactionalAsyncFutureListener {
 
         public void onTransactionalResult(AsyncResult asyncResult, TransactionStatus txStatus) {
-            System.out.println("AsyncResult: " + asyncResult.getResult());
             if (asyncResult.getException() != null) {
                 asyncResult.getException().printStackTrace();
                 if (logger.isWarnEnabled()) {

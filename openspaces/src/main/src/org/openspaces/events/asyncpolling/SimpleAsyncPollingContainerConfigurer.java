@@ -45,6 +45,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * </pre>
  *
  * @author kimchy
+ * @see org.openspaces.events.asyncpolling.SimpleAsyncPollingEventListenerContainer
  */
 public class SimpleAsyncPollingContainerConfigurer {
 
