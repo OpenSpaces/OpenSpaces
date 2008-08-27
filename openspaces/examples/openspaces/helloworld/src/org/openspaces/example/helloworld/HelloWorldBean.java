@@ -64,7 +64,7 @@ public class HelloWorldBean implements InitializingBean {
         System.out.println("Writing SimpleMessage [" + message.getMessage() + "]");
         gigaSpace.write(message);
 
-        message = gigaSpace.take(new Message());
+        message = (Message) gigaSpace.take(new Message());
         System.out.println("Took SimpleMessage [" + message.getMessage() + "]");
     }
 }
