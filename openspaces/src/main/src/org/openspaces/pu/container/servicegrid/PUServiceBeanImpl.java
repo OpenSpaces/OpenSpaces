@@ -48,7 +48,6 @@ import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.ProcessingUnitContainerProvider;
 import org.openspaces.pu.container.SpaceProvider;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
-import org.openspaces.pu.container.jee.JeeProcessingUnitContainer;
 import org.openspaces.pu.container.jee.jetty.JettyJeeProcessingUnitContainerProvider;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
@@ -504,25 +503,31 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     public PUServiceDetails[] listServiceDetails() throws RemoteException {
         ArrayList<PUServiceDetails> serviceDetails = new ArrayList<PUServiceDetails>();
-        if (allSpaces == null) {
-            return null;
+        if (container instanceof ServiceDetailsProvider) {
+            serviceDetails.add(((ServiceDetailsProvider) container).getServiceDetails());
         }
-        for (IJSpace space : allSpaces) {
-            SpaceURL spaceURL = space.getFinderURL();
-            ServiceID serviceID = new ServiceID(space.getReferentUuid().getMostSignificantBits(), space.getReferentUuid().getLeastSignificantBits());
-            String type = "embedded";
-            if (space instanceof LocalSpaceView) {
-                type = "localview";
-            } else if (space instanceof DCacheSpaceImpl) {
-                type = "localcache";
-            } else if (SpaceUtils.isRemoteProtocol(space)) {
-                type = "remote";
+        if (container instanceof ApplicationContextProcessingUnitContainerProvider) {
+            ApplicationContext applicationContext = ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
+            Map map = applicationContext.getBeansOfType(ServiceDetailsProvider.class);
+            for (Iterator it = map.values().iterator(); it.hasNext();) {
+                serviceDetails.add(((ServiceDetailsProvider) it.next()).getServiceDetails());
             }
-            serviceDetails.add(new SpacePUServiceDetails(spaceURL.getSpaceName(), spaceURL.getContainerName(), serviceID,
-                    ((IInternalRemoteJSpaceAdmin) space.getAdmin()).getSpaceMode(), type));
         }
-        if (container instanceof JeeProcessingUnitContainer) {
-            serviceDetails.add(((JeeProcessingUnitContainer) container).getServiceDetails());
+        if (allSpaces != null) {
+            for (IJSpace space : allSpaces) {
+                SpaceURL spaceURL = space.getFinderURL();
+                ServiceID serviceID = new ServiceID(space.getReferentUuid().getMostSignificantBits(), space.getReferentUuid().getLeastSignificantBits());
+                String type = "embedded";
+                if (space instanceof LocalSpaceView) {
+                    type = "localview";
+                } else if (space instanceof DCacheSpaceImpl) {
+                    type = "localcache";
+                } else if (SpaceUtils.isRemoteProtocol(space)) {
+                    type = "remote";
+                }
+                serviceDetails.add(new SpacePUServiceDetails(spaceURL.getSpaceName(), spaceURL.getContainerName(), serviceID,
+                        ((IInternalRemoteJSpaceAdmin) space.getAdmin()).getSpaceMode(), type));
+            }
         }
         return serviceDetails.toArray(new PUServiceDetails[serviceDetails.size()]);
     }

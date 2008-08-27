@@ -37,6 +37,14 @@ public class SpacePUServiceDetails implements PUServiceDetails, Externalizable {
         this.type = type;
     }
 
+    public String getServiceType() {
+        return "space";
+    }
+
+    public String getDescription() {
+        return containerName + ":" + name;
+    }
+
     public String getName() {
         return name;
     }

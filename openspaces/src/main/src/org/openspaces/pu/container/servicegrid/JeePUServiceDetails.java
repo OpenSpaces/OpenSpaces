@@ -52,6 +52,14 @@ public class JeePUServiceDetails implements PUServiceDetails, Externalizable {
         this.type = type;
     }
 
+    public String getServiceType() {
+        return "jee-container";
+    }
+
+    public String getDescription() {
+        return host + ":" + port + contextPath;
+    }
+
     public String getHost() {
         return this.host;
     }

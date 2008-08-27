@@ -1,19 +1,20 @@
 package org.openspaces.interop;
 
+import com.j_spaces.core.IJSpace;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.SpaceProvider;
-
-import com.j_spaces.core.IJSpace;
+import org.openspaces.pu.container.servicegrid.PUServiceDetails;
+import org.openspaces.pu.container.servicegrid.ServiceDetailsProvider;
 
 /**
  * @author kimchy
  * @since 6.6
  */
-public class DotnetProcessingUnitContainer implements ProcessingUnitContainer, SpaceProvider {
+public class DotnetProcessingUnitContainer implements ProcessingUnitContainer, SpaceProvider, ServiceDetailsProvider {
        
     private DotnetProcessingUnitBean dotnetProcessingUnitBean;
     
@@ -39,5 +40,10 @@ public class DotnetProcessingUnitContainer implements ProcessingUnitContainer, S
     public IJSpace[] getSpaces() {
         return dotnetProcessingUnitBean.getSpaces();
     }
-    
+
+    public PUServiceDetails getServiceDetails() {
+        DotnetPUServiceDetails details = (DotnetPUServiceDetails) dotnetProcessingUnitBean.getServiceDetails();
+        details.setType("pure");
+        return details;
+    }
 }

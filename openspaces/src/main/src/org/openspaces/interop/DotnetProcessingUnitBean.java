@@ -1,8 +1,7 @@
 package org.openspaces.interop;
 
-import java.util.Properties;
-import java.util.UUID;
-
+import com.gigaspaces.serialization.pbs.openspaces.ProcessingUnitProxy;
+import com.j_spaces.core.IJSpace;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.ServiceClassLoader;
@@ -12,10 +11,13 @@ import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertiesAware;
 import org.openspaces.pu.container.DeployableProcessingUnitContainerProvider;
 import org.openspaces.pu.container.SpaceProvider;
+import org.openspaces.pu.container.servicegrid.PUServiceDetails;
+import org.openspaces.pu.container.servicegrid.ServiceDetailsProvider;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import com.gigaspaces.serialization.pbs.openspaces.ProcessingUnitProxy; 
-import com.j_spaces.core.IJSpace;
+
+import java.util.Properties;
+import java.util.UUID;
 
 /**
  * Dotnet processing unit bean, used as an adapter that will delegate
@@ -25,7 +27,8 @@ import com.j_spaces.core.IJSpace;
  * @author eitany
  * @since 6.5
  */
-public class DotnetProcessingUnitBean implements InitializingBean, DisposableBean, ClusterInfoAware, BeanLevelPropertiesAware, SpaceProvider {
+public class DotnetProcessingUnitBean implements InitializingBean, DisposableBean, ClusterInfoAware, BeanLevelPropertiesAware,
+        SpaceProvider, ServiceDetailsProvider {
     
     protected final Log log = LogFactory.getLog(getClass());
     
@@ -154,6 +157,8 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
     public IJSpace[] getSpaces() {
         return proxy.getContextProxies();
     }
-	
 
+    public PUServiceDetails getServiceDetails() {
+        return new DotnetPUServiceDetails("interop", assemblyFile, implementationClassName);
+    }
 }
