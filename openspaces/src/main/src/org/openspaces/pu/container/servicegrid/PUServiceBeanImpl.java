@@ -504,13 +504,23 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     public PUServiceDetails[] listServiceDetails() throws RemoteException {
         ArrayList<PUServiceDetails> serviceDetails = new ArrayList<PUServiceDetails>();
         if (container instanceof ServiceDetailsProvider) {
-            serviceDetails.add(((ServiceDetailsProvider) container).getServiceDetails());
+            PUServiceDetails[] details = ((ServiceDetailsProvider) container).getServicesDetails();
+            if (details != null) {
+                for (PUServiceDetails detail : details) {
+                    serviceDetails.add(detail);
+                }
+            }
         }
         if (container instanceof ApplicationContextProcessingUnitContainerProvider) {
             ApplicationContext applicationContext = ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
             Map map = applicationContext.getBeansOfType(ServiceDetailsProvider.class);
             for (Iterator it = map.values().iterator(); it.hasNext();) {
-                serviceDetails.add(((ServiceDetailsProvider) it.next()).getServiceDetails());
+                PUServiceDetails[] details = ((ServiceDetailsProvider) it.next()).getServicesDetails();
+                if (details != null) {
+                    for (PUServiceDetails detail : details) {
+                        serviceDetails.add(detail);
+                    }
+                }
             }
         }
         if (allSpaces != null) {

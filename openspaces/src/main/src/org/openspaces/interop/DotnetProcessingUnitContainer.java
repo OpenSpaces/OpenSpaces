@@ -41,9 +41,15 @@ public class DotnetProcessingUnitContainer implements ProcessingUnitContainer, S
         return dotnetProcessingUnitBean.getSpaces();
     }
 
-    public PUServiceDetails getServiceDetails() {
-        DotnetPUServiceDetails details = (DotnetPUServiceDetails) dotnetProcessingUnitBean.getServiceDetails();
-        details.setType("pure");
+    public PUServiceDetails[] getServicesDetails() {
+        PUServiceDetails[] details = dotnetProcessingUnitBean.getServicesDetails();
+        if (details != null) {
+            for (PUServiceDetails detail : details) {
+                if (detail instanceof DotnetPUServiceDetails) {
+                    ((DotnetPUServiceDetails) detail).setType("pure");
+                }
+            }
+        }
         return details;
     }
 }

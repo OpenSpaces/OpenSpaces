@@ -5,5 +5,5 @@ package org.openspaces.pu.container.servicegrid;
  */
 public interface ServiceDetailsProvider {
 
-    PUServiceDetails getServiceDetails();
+    PUServiceDetails[] getServicesDetails();
 }

@@ -158,7 +158,7 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         return proxy.getContextProxies();
     }
 
-    public PUServiceDetails getServiceDetails() {
-        return new DotnetPUServiceDetails("interop", assemblyFile, implementationClassName);
+    public PUServiceDetails[] getServicesDetails() {
+        return new PUServiceDetails[] {new DotnetPUServiceDetails("interop", assemblyFile, implementationClassName)};
     }
 }
