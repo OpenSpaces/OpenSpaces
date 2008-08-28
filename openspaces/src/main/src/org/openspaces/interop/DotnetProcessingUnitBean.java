@@ -1,5 +1,7 @@
 package org.openspaces.interop;
 
+import com.gigaspaces.serialization.pbs.commands.processingunit.PUDetailsHolder;
+import com.gigaspaces.serialization.pbs.commands.processingunit.ServicesDetails;
 import com.gigaspaces.serialization.pbs.openspaces.ProcessingUnitProxy;
 import com.j_spaces.core.IJSpace;
 import org.apache.commons.logging.Log;
@@ -16,6 +18,7 @@ import org.openspaces.pu.container.servicegrid.ServiceDetailsProvider;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -159,6 +162,24 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
     }
 
     public PUServiceDetails[] getServicesDetails() {
-        return new PUServiceDetails[] {new DotnetPUServiceDetails("interop")};
+        PUDetailsHolder puDetails = proxy.getPUDetailsHolder();
+        ArrayList<PUServiceDetails> dotnetServiceDetails = new ArrayList<PUServiceDetails>();
+        dotnetServiceDetails.add(new DotnetPUContainerServiceDetails("interop", puDetails.getDotnetPUContainerQualifiedName()));
+        BuildServiceDetails(puDetails, dotnetServiceDetails);
+        return dotnetServiceDetails.toArray(new PUServiceDetails[dotnetServiceDetails.size()]);
+    }
+
+    private void BuildServiceDetails(PUDetailsHolder puDetails, ArrayList<PUServiceDetails> serviceDetails) {
+        ServicesDetails details = puDetails.getServicesDetails();
+        if (details != null)
+        {
+            String[] types = details.getTypes();
+            String[] serviceTypes = details.getServiceTypes();
+            String[] descriptions = details.getDescriptions();
+            for(int i = 0; i < descriptions.length; ++i)
+            {
+                serviceDetails.add(new DotnetServiceDetails(types[i], serviceTypes[i], descriptions[i]));
+            }
+        }
     }
 }

@@ -45,8 +45,8 @@ public class DotnetProcessingUnitContainer implements ProcessingUnitContainer, S
         PUServiceDetails[] details = dotnetProcessingUnitBean.getServicesDetails();
         if (details != null) {
             for (PUServiceDetails detail : details) {
-                if (detail instanceof DotnetPUServiceDetails) {
-                    ((DotnetPUServiceDetails) detail).setType("pure");
+                if (detail instanceof DotnetPUContainerServiceDetails) {
+                    ((DotnetPUContainerServiceDetails) detail).setType("pure");
                 }
             }
         }

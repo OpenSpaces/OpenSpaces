@@ -28,15 +28,17 @@ import java.io.ObjectOutput;
  *
  * @author kimchy
  */
-public class DotnetPUServiceDetails implements PUServiceDetails, Externalizable {
+public class DotnetPUContainerServiceDetails implements PUServiceDetails, Externalizable {
 
     private String type;
+    private String description;
 
-    public DotnetPUServiceDetails() {
+    public DotnetPUContainerServiceDetails() {
     }
 
-    public DotnetPUServiceDetails(String type) {
+    public DotnetPUContainerServiceDetails(String type, String description) {
         this.type = type;
+        this.description = description;
     }
 
     public String getServiceType() {
@@ -44,7 +46,7 @@ public class DotnetPUServiceDetails implements PUServiceDetails, Externalizable 
     }
 
     public String getDescription() {
-        return "something goes here";
+        return description;
     }
 
     public String getType() {
@@ -57,9 +59,11 @@ public class DotnetPUServiceDetails implements PUServiceDetails, Externalizable 
 
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeUTF(type);
+        out.writeUTF(description);
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         type = in.readUTF();
+        description = in.readUTF();
     }
 }
