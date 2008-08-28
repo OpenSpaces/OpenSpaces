@@ -18,6 +18,9 @@ package org.openspaces.persistency.hibernate.iterator;
 
 import com.gigaspaces.datasource.DataIterator;
 import com.j_spaces.core.client.SQLQuery;
+import org.hibernate.CacheMode;
+import org.hibernate.Criteria;
+import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -39,6 +42,10 @@ public class DefaultListQueryDataIterator implements DataIterator {
 
     protected final SessionFactory sessionFactory;
 
+    protected final int from;
+
+    protected final int size;
+
     protected Transaction transaction;
 
     protected Session session;
@@ -49,12 +56,32 @@ public class DefaultListQueryDataIterator implements DataIterator {
         this.sqlQuery = sqlQuery;
         this.entityName = null;
         this.sessionFactory = sessionFactory;
+        this.from = -1;
+        this.size = -1;
     }
 
     public DefaultListQueryDataIterator(String entityName, SessionFactory sessionFactory) {
         this.entityName = entityName;
         this.sqlQuery = null;
         this.sessionFactory = sessionFactory;
+        this.from = -1;
+        this.size = -1;
+    }
+
+    public DefaultListQueryDataIterator(String entityName, SessionFactory sessionFactory, int from, int size) {
+        this.entityName = entityName;
+        this.sqlQuery = null;
+        this.sessionFactory = sessionFactory;
+        this.from = from;
+        this.size = size;
+    }
+
+    public DefaultListQueryDataIterator(SQLQuery sqlQuery, SessionFactory sessionFactory, int from, int size) {
+        this.entityName = null;
+        this.sqlQuery = sqlQuery;
+        this.sessionFactory = sessionFactory;
+        this.from = from;
+        this.size = size;
     }
 
     public boolean hasNext() {
@@ -90,9 +117,22 @@ public class DefaultListQueryDataIterator implements DataIterator {
         session = sessionFactory.openSession();
         transaction = session.beginTransaction();
         if (entityName != null) {
-            return session.createCriteria(entityName).list().iterator();
+            Criteria criteria = session.createCriteria(entityName);
+            criteria.setCacheMode(CacheMode.IGNORE);
+            criteria.setCacheable(false);
+            criteria.setFlushMode(FlushMode.NEVER);
+            if (from >= 0) {
+                criteria.setFirstResult(from);
+                criteria.setMaxResults(size);
+            }
+            return criteria.list().iterator();
         } else if (sqlQuery != null) {
-            return HibernateIteratorUtils.createQueryFromSQLQuery(sqlQuery, session).list().iterator();
+            Query query = HibernateIteratorUtils.createQueryFromSQLQuery(sqlQuery, session);
+            if (from >= 0) {
+                query.setFirstResult(from);
+                query.setMaxResults(size);
+            }
+            return query.list().iterator();
         } else {
             throw new IllegalStateException("Either SQLQuery or entity must be provided");
         }

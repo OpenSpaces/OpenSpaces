@@ -36,7 +36,7 @@ import java.util.ArrayList;
  *
  * @author kimchy
  */
-public abstract class AbstractChunkScrollableDataIterator implements MultiDataIterator {
+public abstract class AbstractChunkDataIterator implements MultiDataIterator {
 
     protected final String entityName;
 
@@ -65,7 +65,7 @@ public abstract class AbstractChunkScrollableDataIterator implements MultiDataIt
      * @param performOrderById Should the query perform order by id or not
      * @param chunkSize        The size of the chunks the entity table will be broken to
      */
-    public AbstractChunkScrollableDataIterator(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int chunkSize) {
+    public AbstractChunkDataIterator(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int chunkSize) {
         this.entityName = entityName;
         this.sqlQuery = null;
         this.hQuery = null;
@@ -84,7 +84,7 @@ public abstract class AbstractChunkScrollableDataIterator implements MultiDataIt
      * @param performOrderById Should the query perform order by id or not
      * @param chunkSize        The size of the chunks the entity table will be broken to
      */
-    public AbstractChunkScrollableDataIterator(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int chunkSize) {
+    public AbstractChunkDataIterator(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int chunkSize) {
         this.sqlQuery = sqlQuery;
         this.entityName = null;
         this.hQuery = null;
@@ -102,7 +102,7 @@ public abstract class AbstractChunkScrollableDataIterator implements MultiDataIt
      * @param fetchSize      The fetch size of the scrollabale result set
      * @param chunkSize      The size of the chunks the entity table will be broken to
      */
-    public AbstractChunkScrollableDataIterator(String hQuery, SessionFactory sessionFactory, int fetchSize, int chunkSize) {
+    public AbstractChunkDataIterator(String hQuery, SessionFactory sessionFactory, int fetchSize, int chunkSize) {
         this.sqlQuery = null;
         this.entityName = null;
         this.hQuery = hQuery;
@@ -159,11 +159,11 @@ public abstract class AbstractChunkScrollableDataIterator implements MultiDataIt
                 int from = 0;
                 while (from < count) {
                     if (entityName != null) {
-                        itList.add(createScrollableIteartorByEntityName(entityName, sessionFactory, fetchSize, perfromOrderById, from, chunkSize));
+                        itList.add(createIteartorByEntityName(entityName, sessionFactory, fetchSize, perfromOrderById, from, chunkSize));
                     } else if (sqlQuery != null) {
-                        itList.add(createScrollableIteartorBySQLQuery(sqlQuery, sessionFactory, fetchSize, perfromOrderById, from, chunkSize));
+                        itList.add(createIteartorBySQLQuery(sqlQuery, sessionFactory, fetchSize, perfromOrderById, from, chunkSize));
                     } else if (hQuery != null) {
-                        itList.add(createScrollableIteartorByHibernateQuery(hQuery, sessionFactory, fetchSize, from, chunkSize));
+                        itList.add(createIteartorByHibernateQuery(hQuery, sessionFactory, fetchSize, from, chunkSize));
                     }
                     from += chunkSize;
                 }
@@ -175,9 +175,9 @@ public abstract class AbstractChunkScrollableDataIterator implements MultiDataIt
         }
     }
 
-    protected abstract DataIterator createScrollableIteartorByEntityName(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size);
+    protected abstract DataIterator createIteartorByEntityName(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size);
 
-    protected abstract DataIterator createScrollableIteartorBySQLQuery(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size);
+    protected abstract DataIterator createIteartorBySQLQuery(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size);
 
-    protected abstract DataIterator createScrollableIteartorByHibernateQuery(String hQuery, SessionFactory sessionFactory, int fetchSize, int from, int size);
+    protected abstract DataIterator createIteartorByHibernateQuery(String hQuery, SessionFactory sessionFactory, int fetchSize, int from, int size);
 }

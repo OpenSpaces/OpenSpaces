@@ -66,6 +66,8 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
 
     private boolean createdSessionFactory = true;
 
+    private boolean useScrollableResultSet = true;
+
     /**
      * Injects the Hibernate SessionFactory to be used with this external data source.
      */
@@ -204,6 +206,20 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      */
     protected int getInitialLoadChunkSize() {
         return initialLoadChunkSize;
+    }
+
+    /**
+     * Controls if scrollable resultsets will be used with inital load operation. Defeaults to <code>true</code>.
+     */
+    protected boolean isUseScrollableResultSet() {
+        return useScrollableResultSet;
+    }
+
+    /**
+     * Controls if scrollable resultsets will be used with inital load operation. Defeaults to <code>true</code>.
+     */
+    public void setUseScrollableResultSet(boolean useScrollableResultSet) {
+        this.useScrollableResultSet = useScrollableResultSet;
     }
 
     /**

@@ -10,7 +10,7 @@ import org.hibernate.SessionFactory;
  *
  * @author kimchy
  */
-public class DefaultChunkScrollableDataIterator extends AbstractChunkScrollableDataIterator {
+public class DefaultChunkScrollableDataIterator extends AbstractChunkDataIterator {
 
     /**
      * Constructs a scrollable iterator over the given entity name.
@@ -50,15 +50,15 @@ public class DefaultChunkScrollableDataIterator extends AbstractChunkScrollableD
         super(hQuery, sessionFactory, fetchSize, chunkSize);
     }
 
-    protected DataIterator createScrollableIteartorByEntityName(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
+    protected DataIterator createIteartorByEntityName(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
         return new DefaultScrollableDataIterator(entityName, sessionFactory, fetchSize, performOrderById, from, size);
     }
 
-    protected DataIterator createScrollableIteartorBySQLQuery(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
+    protected DataIterator createIteartorBySQLQuery(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
         return new DefaultScrollableDataIterator(sqlQuery, sessionFactory, fetchSize, performOrderById, from, size);
     }
 
-    protected DataIterator createScrollableIteartorByHibernateQuery(String hQuery, SessionFactory sessionFactory, int fetchSize, int from, int size) {
+    protected DataIterator createIteartorByHibernateQuery(String hQuery, SessionFactory sessionFactory, int fetchSize, int from, int size) {
         return new DefaultScrollableDataIterator(hQuery, sessionFactory, fetchSize, from, size);
     }
 }

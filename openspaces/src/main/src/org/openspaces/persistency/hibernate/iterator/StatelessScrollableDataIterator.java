@@ -139,7 +139,7 @@ public class StatelessScrollableDataIterator extends AbstractScrollableDataItera
                     criteria.addOrder(Order.asc(idPropName));
                 }
             }
-            if (from > 0) {
+            if (from >= 0) {
                 criteria.setFirstResult(from);
                 criteria.setMaxResults(size);
             }
@@ -147,7 +147,7 @@ public class StatelessScrollableDataIterator extends AbstractScrollableDataItera
         } else if (sqlQuery != null) {
             Query query = HibernateIteratorUtils.createQueryFromSQLQuery(sqlQuery, session);
             query.setFetchSize(fetchSize);
-            if (from > 0) {
+            if (from >= 0) {
                 query.setFirstResult(from);
                 query.setMaxResults(size);
             }
@@ -155,7 +155,7 @@ public class StatelessScrollableDataIterator extends AbstractScrollableDataItera
         } else if (hQuery != null) {
             Query query = session.createQuery(hQuery);
             query.setFetchSize(fetchSize);
-            if (from > 0) {
+            if (from >= 0) {
                 query.setFirstResult(from);
                 query.setMaxResults(size);
             }

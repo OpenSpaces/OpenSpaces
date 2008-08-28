@@ -32,6 +32,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.metadata.ClassMetadata;
 import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
+import org.openspaces.persistency.hibernate.iterator.StatelessChunkListDataIterator;
 import org.openspaces.persistency.hibernate.iterator.StatelessChunkScrollableDataIterator;
 import org.openspaces.persistency.hibernate.iterator.StatelessListQueryDataIterator;
 import org.openspaces.persistency.hibernate.iterator.StatelessScrollableDataIterator;
@@ -174,6 +175,14 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
      * query.
      */
     public DataIterator iterator(SQLQuery sqlQuery) throws DataSourceException {
+        if (!isManagedEntry(sqlQuery.getClassName())) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("Ignoring query (no mapping in hibernate) [" + sqlQuery + "]");
+            }
+        }
+        if (logger.isTraceEnabled()) {
+            logger.trace("Iterator over query [" + sqlQuery + "]");
+        }
         return new HibernateProxyRemoverIterator(new StatelessListQueryDataIterator(sqlQuery, getSessionFactory()));
     }
 
@@ -189,15 +198,29 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
         int iteratorCounter = 0;
         for (String entityName : getInitialLoadEntries()) {
             if (getInitialLoadChunkSize() == -1) {
-                if (logger.isTraceEnabled()) {
-                    logger.trace("Creating inital load scrollable iterator for entry [" + entityName + "]");
+                if (isUseScrollableResultSet()) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Creating inital load scrollable iterator for entry [" + entityName + "]");
+                    }
+                    iterators[iteratorCounter++] = new StatelessScrollableDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById());
+                } else {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Creating inital load list iterator for entry [" + entityName + "]");
+                    }
+                    iterators[iteratorCounter++] = new StatelessListQueryDataIterator(entityName, getSessionFactory());
                 }
-                iterators[iteratorCounter++] = new StatelessScrollableDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById());
             } else {
-                if (logger.isTraceEnabled()) {
-                    logger.trace("Creating inital load chunk scrollable iterator for entry [" + entityName + "]");
+                if (isUseScrollableResultSet()) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Creating inital load chunk scrollable iterator for entry [" + entityName + "]");
+                    }
+                    iterators[iteratorCounter++] = new StatelessChunkScrollableDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById(), getInitialLoadChunkSize());
+                } else {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Creating inital load chunk list iterator for entry [" + entityName + "]");
+                    }
+                    iterators[iteratorCounter++] = new StatelessChunkListDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById(), getInitialLoadChunkSize());
                 }
-                iterators[iteratorCounter++] = new StatelessChunkScrollableDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById(), getInitialLoadChunkSize());
             }
         }
         return createInitialLoadIterator(iterators);
