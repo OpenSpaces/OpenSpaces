@@ -36,12 +36,15 @@ public class DotnetPUContainerServiceDetails implements PUServiceDetails, Extern
     
     private String description;
 
+    private String longDescription;
+    
     public DotnetPUContainerServiceDetails() {
     }
 
-    public DotnetPUContainerServiceDetails(String type, String description) {
+    public DotnetPUContainerServiceDetails(String type, String description, String longDescription) {
         this.type = type;
         this.description = description;
+        this.longDescription = longDescription;
     }
 
     public String getServiceType() {
@@ -53,7 +56,7 @@ public class DotnetPUContainerServiceDetails implements PUServiceDetails, Extern
     }
 
     public String getLongDescription() {
-        return "eitan, please feel me ;)";
+        return longDescription;
     }
 
     public String getType() {
@@ -67,10 +70,12 @@ public class DotnetPUContainerServiceDetails implements PUServiceDetails, Extern
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeUTF(type);
         out.writeUTF(description);
+        out.writeUTF(longDescription);
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         type = in.readUTF();
         description = in.readUTF();
+        longDescription = in.readUTF();
     }
 }

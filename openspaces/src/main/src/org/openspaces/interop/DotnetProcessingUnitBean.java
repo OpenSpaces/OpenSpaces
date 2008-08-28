@@ -164,7 +164,7 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
     public PUServiceDetails[] getServicesDetails() {
         PUDetailsHolder puDetails = proxy.getPUDetailsHolder();
         ArrayList<PUServiceDetails> dotnetServiceDetails = new ArrayList<PUServiceDetails>();
-        dotnetServiceDetails.add(new DotnetPUContainerServiceDetails("interop", puDetails.getDotnetPUContainerQualifiedName()));
+        dotnetServiceDetails.add(new DotnetPUContainerServiceDetails("interop", puDetails.getDotnetPUContainerQualifiedName(), puDetails.getDotnetPUContainerShortName()));
         BuildServiceDetails(puDetails, dotnetServiceDetails);
         return dotnetServiceDetails.toArray(new PUServiceDetails[dotnetServiceDetails.size()]);
     }
@@ -176,9 +176,10 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
             String[] types = details.getTypes();
             String[] serviceTypes = details.getServiceTypes();
             String[] descriptions = details.getDescriptions();
+            String[] longDescriptions = details.getLongDescriptions();
             for(int i = 0; i < descriptions.length; ++i)
             {
-                serviceDetails.add(new DotnetServiceDetails(types[i], serviceTypes[i], descriptions[i]));
+                serviceDetails.add(new DotnetServiceDetails(types[i], serviceTypes[i], descriptions[i], longDescriptions[i]));
             }
         }
     }

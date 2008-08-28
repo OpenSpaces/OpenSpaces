@@ -33,16 +33,21 @@ public class DotnetServiceDetails implements PUServiceDetails, Externalizable {
     private static final long serialVersionUID = 1L;
     
     private String type;
-    private String description;
+    
     private String serviceType;
+    
+    private String description;
+    
+    private String longDescription;
 
     public DotnetServiceDetails() {
     }
 
-    public DotnetServiceDetails(String type, String serviceType, String description) {
+    public DotnetServiceDetails(String type, String serviceType, String description, String longDescription) {
         this.type = type;
         this.serviceType = serviceType;
         this.description = description;
+        this.longDescription = longDescription;
     }
 
     public String getServiceType() {
@@ -54,7 +59,7 @@ public class DotnetServiceDetails implements PUServiceDetails, Externalizable {
     }
 
     public String getLongDescription() {
-        return "eitan, please feel me again...";
+        return longDescription;
     }
 
     public String getType() {
@@ -69,11 +74,13 @@ public class DotnetServiceDetails implements PUServiceDetails, Externalizable {
         out.writeUTF(type);
         out.writeUTF(serviceType);
         out.writeUTF(description);
+        out.writeUTF(longDescription);
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         type = in.readUTF();
         serviceType = in.readUTF();
         description = in.readUTF();
+        longDescription = in.readUTF();
     }
 }
