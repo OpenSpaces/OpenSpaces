@@ -24,4 +24,9 @@ public interface PUServiceDetails extends Serializable {
      * Returns a short description of the service.
      */
     String getDescription();
+
+    /**
+     * Returns the long description
+     */
+    String getLongDescription();
 }

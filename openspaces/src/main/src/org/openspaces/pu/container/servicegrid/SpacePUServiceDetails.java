@@ -44,6 +44,10 @@ public class SpacePUServiceDetails implements PUServiceDetails, Externalizable {
     }
 
     public String getDescription() {
+        return name;
+    }
+
+    public String getLongDescription() {
         return containerName + ":" + name;
     }
 

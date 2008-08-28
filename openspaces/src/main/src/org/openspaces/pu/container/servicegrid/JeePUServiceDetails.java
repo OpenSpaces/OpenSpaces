@@ -62,6 +62,10 @@ public class JeePUServiceDetails implements PUServiceDetails, Externalizable {
         return host + ":" + port + contextPath;
     }
 
+    public String getLongDescription() {
+        return getDescription();
+    }
+
     public String getHost() {
         return this.host;
     }

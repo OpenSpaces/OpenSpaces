@@ -53,6 +53,10 @@ public class DotnetServiceDetails implements PUServiceDetails, Externalizable {
         return description;
     }
 
+    public String getLongDescription() {
+        return "eitan, please feel me again...";
+    }
+
     public String getType() {
         return type;
     }

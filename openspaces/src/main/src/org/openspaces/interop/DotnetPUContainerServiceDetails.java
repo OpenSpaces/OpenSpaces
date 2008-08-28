@@ -33,6 +33,7 @@ public class DotnetPUContainerServiceDetails implements PUServiceDetails, Extern
     private static final long serialVersionUID = 1L;
     
     private String type;
+    
     private String description;
 
     public DotnetPUContainerServiceDetails() {
@@ -49,6 +50,10 @@ public class DotnetPUContainerServiceDetails implements PUServiceDetails, Extern
 
     public String getDescription() {
         return description;
+    }
+
+    public String getLongDescription() {
+        return "eitan, please feel me ;)";
     }
 
     public String getType() {
