@@ -28,6 +28,8 @@ import java.io.ObjectOutput;
  */
 public class JeePUServiceDetails implements PUServiceDetails, Externalizable {
 
+    private static final long serialVersionUID = 1L;
+    
     private String host;
 
     private int port;

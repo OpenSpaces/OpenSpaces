@@ -15,6 +15,8 @@ import java.io.ObjectOutput;
  */
 public class SpacePUServiceDetails implements PUServiceDetails, Externalizable {
 
+    private static final long serialVersionUID = 1L;
+    
     private String name;
 
     private String containerName;

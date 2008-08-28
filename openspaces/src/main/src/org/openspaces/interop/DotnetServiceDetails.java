@@ -30,6 +30,8 @@ import java.io.ObjectOutput;
  */
 public class DotnetServiceDetails implements PUServiceDetails, Externalizable {
 
+    private static final long serialVersionUID = 1L;
+    
     private String type;
     private String description;
     private String serviceType;
