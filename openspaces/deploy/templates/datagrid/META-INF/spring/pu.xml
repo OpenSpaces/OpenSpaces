@@ -19,7 +19,6 @@
             <props>
                 <prop key="dataGridName">dataGrid</prop>
                 <prop key="security.encrypted">false</prop>
-                <prop key="scripting.asyncConcurrentConsumers">5</prop>
             </props>
         </property>
     </bean>
@@ -47,9 +46,4 @@
     <os-remoting:service-exporter id="serviceExporter" template-lookup-name="org.openspaces.remoting.scripting.ScriptingExecutor">
         <os-remoting:service ref="scriptingExecutorImpl"/>
     </os-remoting:service-exporter>
-
-    <os-events:polling-container id="remotingContainer" giga-space="gigaSpace" concurrent-consumers="${scripting.asyncConcurrentConsumers}">
-        <os-events:listener ref="serviceExporter"/>
-    </os-events:polling-container>
-
 </beans>
