@@ -164,7 +164,7 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
     public PUServiceDetails[] getServicesDetails() {
         PUDetailsHolder puDetails = proxy.getPUDetailsHolder();
         ArrayList<PUServiceDetails> dotnetServiceDetails = new ArrayList<PUServiceDetails>();
-        dotnetServiceDetails.add(new DotnetPUContainerServiceDetails("interop", puDetails.getDotnetPUContainerQualifiedName(), puDetails.getDotnetPUContainerShortName()));
+        dotnetServiceDetails.add(new DotnetPUContainerServiceDetails("interop", puDetails.getDotnetPUContainerShortName(), puDetails.getDotnetPUContainerQualifiedName()));
         BuildServiceDetails(puDetails, dotnetServiceDetails);
         return dotnetServiceDetails.toArray(new PUServiceDetails[dotnetServiceDetails.size()]);
     }
