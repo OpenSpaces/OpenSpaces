@@ -282,7 +282,7 @@ public class Deploy {
         //read pu xml
         String puString = "";
         try {
-            puString = readPUFile(root, puPath);
+            puString = readFile(root, puPath, "/META-INF/spring/pu.xml");
         } catch (IOException e) {
             logger.debug("Failed to find puPath " + puPath, e);
             // ignore, it might be ok for war files
@@ -311,6 +311,19 @@ public class Deploy {
                 InputStreamReader reader = new InputStreamReader(resource.getInputStream());
                 slaString = FileCopyUtils.copyToString(reader);
                 reader.close();
+            }
+        }
+        if (slaString == puString) {
+            // no sla passed as a parameter, try and load from default locations
+            try {
+                slaString = readFile(root, puPath, "/META-INF/spring/sla.xml");
+            } catch (IOException e) {
+                // no sla string found
+                try {
+                    slaString = readFile(root, puPath, "/sla.xml");
+                } catch (IOException e1) {
+                    // no sla string found
+                }
             }
         }
 
@@ -434,8 +447,8 @@ public class Deploy {
         return (args);
     }
 
-    private static String readPUFile(URL root, String puPath) throws IOException {
-        URL puURL = new URL(root, puPath + "/META-INF/spring/pu.xml");
+    private static String readFile(URL root, String puPath, String filePath) throws IOException {
+        URL puURL = new URL(root, puPath + filePath);
         BufferedReader reader = new BufferedReader(new InputStreamReader(puURL.openStream()));
 
         StringBuffer buffer = new StringBuffer();
