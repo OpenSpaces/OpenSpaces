@@ -51,8 +51,7 @@ public @interface AsyncPolling {
      * The name of the bean that that is the {@link org.openspaces.core.GigaSpace} this container will
      * used.
      *
-     * <p>Note, this is optional. If there is a field of type {@link org.openspaces.core.GigaSpace} it
-     * will be used. If there is none, and there is only one {@link org.openspaces.core.GigaSpace}
+     * <p>Note, this is optional. If there is only one {@link org.openspaces.core.GigaSpace}
      * defined in the application context, it will be used.
      */
     public abstract String gigaSpace() default "";
