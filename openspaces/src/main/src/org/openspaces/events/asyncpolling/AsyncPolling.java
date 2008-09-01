@@ -45,7 +45,7 @@ public @interface AsyncPolling {
     /**
      * The logical name of the container that is automatically generated
      */
-    public abstract String name() default "";
+    String name() default "";
 
     /**
      * The name of the bean that that is the {@link org.openspaces.core.GigaSpace} this container will
@@ -54,14 +54,14 @@ public @interface AsyncPolling {
      * <p>Note, this is optional. If there is only one {@link org.openspaces.core.GigaSpace}
      * defined in the application context, it will be used.
      */
-    public abstract String gigaSpace() default "";
+    String gigaSpace() default "";
 
     /**
      * Specify the number of concurrent consumers to create. Default is 1.
      *
      * @see org.openspaces.events.asyncpolling.SimpleAsyncPollingEventListenerContainer#setConcurrentConsumers(int)
      */
-    public abstract int concurrentConsumers() default 1;
+    int concurrentConsumers() default 1;
 
     /**
      * Set the timeout to use for receive calls, in <b>milliseconds</b>. The default is 60000 ms,
@@ -72,7 +72,7 @@ public @interface AsyncPolling {
      *
      * @see org.openspaces.events.polling.SimplePollingEventListenerContainer#setReceiveTimeout(long)
      */
-    public abstract long receiveTimeout() default AbstractPollingEventListenerContainer.DEFAULT_RECEIVE_TIMEOUT;
+    long receiveTimeout() default AbstractPollingEventListenerContainer.DEFAULT_RECEIVE_TIMEOUT;
 
     /**
      * If set to <code>true</code> will perform snapshot operation on the provided template
@@ -81,5 +81,5 @@ public @interface AsyncPolling {
      * @see org.openspaces.core.GigaSpace#snapshot(Object)
      * @see org.openspaces.events.polling.SimplePollingEventListenerContainer#setPerformSnapshot(boolean)
      */
-    public abstract boolean performSnapshot() default true;
+    boolean performSnapshot() default true;
 }
