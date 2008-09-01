@@ -16,6 +16,7 @@
 
 package org.openspaces.events.support;
 
+import org.openspaces.core.executor.AutowireTaskMarker;
 import org.openspaces.core.executor.Task;
 import org.openspaces.core.executor.support.ProcessObjectsProvider;
 
@@ -27,7 +28,7 @@ import java.io.Serializable;
  *
  * @author kimchy
  */
-public class RegisterEventContainerTask implements Task<Serializable>, ProcessObjectsProvider {
+public class RegisterEventContainerTask implements Task<Serializable>, ProcessObjectsProvider, AutowireTaskMarker {
 
     private Object eventContainer;
 
