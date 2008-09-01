@@ -27,6 +27,7 @@ import com.j_spaces.core.client.view.LocalSpaceView;
 import net.jini.core.lookup.ServiceID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jini.rio.core.JSBInstantiationException;
 import org.jini.rio.core.SLA;
 import org.jini.rio.core.ServiceLevelAgreements;
 import org.jini.rio.core.jsb.ServiceBeanContext;
@@ -169,11 +170,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             } catch (Exception e1) {
                 logger.debug(logMessage("Failed to destroy PU after failed start, ignoring"), e1);
             }
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            }
-            // TODO create explicit exception here
-            throw new RuntimeException(e.getMessage(), e);
+            throw new JSBInstantiationException("Failed to start processing unit [" + getServiceBeanContext().getServiceElement().getName() + "]", e, false);
         } finally {
             Thread.currentThread().setContextClassLoader(origClassLoader);
         }
