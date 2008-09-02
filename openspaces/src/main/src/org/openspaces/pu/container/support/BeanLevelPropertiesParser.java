@@ -121,7 +121,11 @@ public abstract class BeanLevelPropertiesParser {
             if (name == null) {
                 beanLevelProperties.getContextProperties().putAll(props);
             } else {
-                beanLevelProperties.setBeanProperties(name, props);
+                if (beanLevelProperties.hasBeanProperties(name)) {
+                    beanLevelProperties.getBeanProperties(name).putAll(props);
+                } else {
+                    beanLevelProperties.setBeanProperties(name, props);
+                }
             }
         }
         return beanLevelProperties;
