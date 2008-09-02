@@ -508,7 +508,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 }
             }
         }
-        if (container instanceof ApplicationContextProcessingUnitContainerProvider) {
+        if (container instanceof ApplicationContextProcessingUnitContainer) {
             ApplicationContext applicationContext = ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
             Map map = applicationContext.getBeansOfType(ServiceDetailsProvider.class);
             for (Iterator it = map.values().iterator(); it.hasNext();) {
