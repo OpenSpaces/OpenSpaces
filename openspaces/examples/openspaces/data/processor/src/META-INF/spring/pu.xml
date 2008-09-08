@@ -68,7 +68,7 @@
         the processing unit or within the SLA bean.
     -->
     <os-core:space id="space" url="/./space">
-    	<os-core:filter-provider ref="serviceExporter"/>
+    	<os-core:filter-provider ref="remotingServiceExporter"/>
     </os-core:space>
 
     <!--
@@ -87,7 +87,7 @@
     -->
     <os-core:refreshable-context-loader id="modeExample" location="classpath:/META-INF/spring/mode/mode.xml"/>
 
-    <os-remoting:service-exporter id="serviceExporter">
+    <os-remoting:service-exporter id="remotingServiceExporter">
         <os-remoting:service ref="modeExample"/>
     </os-remoting:service-exporter>
 
@@ -102,6 +102,6 @@
         perform-take-on-notify and ignore-event-on-null-take.
     -->
     <os-events:polling-container id="remotingContainer" giga-space="gigaSpace" concurrent-consumers="2">
-        <os-events:listener ref="serviceExporter"/>
+        <os-events:listener ref="remotingServiceExporter"/>
     </os-events:polling-container>
 </beans>
