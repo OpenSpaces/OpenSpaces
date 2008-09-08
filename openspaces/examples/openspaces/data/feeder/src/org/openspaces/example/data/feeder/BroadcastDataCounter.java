@@ -16,18 +16,19 @@
 
 package org.openspaces.example.data.feeder;
 
-import org.openspaces.core.SpaceInterruptedException;
-import org.openspaces.example.data.common.IDataProcessor;
-import org.openspaces.example.data.feeder.support.BroadcastCounterReducer;
-import org.openspaces.remoting.ExecutorProxy;
-import org.springframework.util.Assert;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.openspaces.core.SpaceInterruptedException;
+import org.openspaces.example.data.common.IDataProcessor;
+import org.openspaces.example.data.feeder.support.BroadcastCounterReducer;
+import org.openspaces.remoting.SyncProxy;
+import org.springframework.util.Assert;
 
 /**
  * A data counter that periodically performs a count on the space and updates
@@ -41,7 +42,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class BroadcastDataCounter {
 
-    @ExecutorProxy(gigaSpace = "gigaSpace", remoteResultReducerType = BroadcastCounterReducer.class, broadcast = true)
+    @SyncProxy(gigaSpace = "gigaSpace", remoteResultReducerType = BroadcastCounterReducer.class, broadcast = true)
     private IDataProcessor dataProcessor;
 
     private ScheduledExecutorService executorService;
