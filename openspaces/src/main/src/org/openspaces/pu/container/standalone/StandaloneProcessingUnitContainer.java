@@ -168,8 +168,8 @@ public class StandaloneProcessingUnitContainer implements ApplicationContextProc
         System.out.println("");
         System.out.println("");
         System.out.println("Some Examples:");
-        System.out.println("1. puInstance ../examples/openspaces/data/processor/pu/data-processor");
-        System.out.println("    - Starts a processing unit with a directory location of ../examples/openspaces/data/processor/pu/data-processor");
+        System.out.println("1. puInstance ../examples/data/processor/pu/data-processor");
+        System.out.println("    - Starts a processing unit with a directory location of ../examples/data/processor/pu/data-processor");
         System.out.println("1. puInstance -cluster schema=partitioned total_members=2 id=1 ../deploy/data-processor");
         System.out.println("    - Starts a processing unit with a partitioned cluster schema of two members with instance id 1");
         System.out.println("2. puInstance -cluster schema=partitioned total_members=2 id=2 ../deploy/data-processor");
