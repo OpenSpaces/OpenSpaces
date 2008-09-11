@@ -24,7 +24,6 @@ import com.j_spaces.kernel.SecurityPolicyLoader;
 import net.jini.core.lookup.ServiceItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jini.rio.core.ClassBundle;
 import org.jini.rio.core.OperationalString;
 import org.jini.rio.core.ServiceElement;
 import org.jini.rio.core.ServiceLevelAgreements;
@@ -65,9 +64,7 @@ import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
@@ -258,26 +255,6 @@ public class Deploy {
         //list remote files, only works with webster
         URL root = new URL(codeserver);
         HTTPFileSystemView view = new HTTPFileSystemView(root);
-        File puHome = view.createFileObject(puPath);
-
-        //get list of all jars
-        File lib = view.createFileObject(puHome, "lib");
-        File[] jars = view.getFiles(lib);
-        if (logger.isDebugEnabled()) {
-            logger.debug("Using lib " + Arrays.asList(jars));
-        }
-
-        //get list of all shared
-        ArrayList<File> sharedJarsList = new ArrayList<File>();
-        File shared = view.createFileObject(puHome, "shared-lib");
-        sharedJarsList.addAll(Arrays.asList(view.getFiles(shared)));
-        shared = view.createFileObject(puHome, "WEB-INF/shared-lib");
-        sharedJarsList.addAll(Arrays.asList(view.getFiles(shared)));
-
-        File[] sharedJars = sharedJarsList.toArray(new File[sharedJarsList.size()]);
-        if (logger.isDebugEnabled()) {
-            logger.debug("Using shared-lib " + sharedJarsList);
-        }
 
         //read pu xml
         String puString = "";
@@ -401,7 +378,7 @@ public class Deploy {
         }
 
         //deploy to sg
-        return loadDeployment(puString, codeserver, sla, jars, puPath, overridePuName, sharedJars, BeanLevelPropertiesParser.parse(beanLevelProperties, params));
+        return loadDeployment(puString, codeserver, sla, puPath, overridePuName, BeanLevelPropertiesParser.parse(beanLevelProperties, params));
     }
 
     //copied from opstringloader
@@ -465,9 +442,8 @@ public class Deploy {
         return url.getProtocol() + "://" + url.getHost() + ":" + url.getPort() + "/";
     }
 
-    private OperationalString loadDeployment(String puString, String codeserver, SLA sla, File[] jars, String puPath,
-                                             String puName, File[] sharedJars,
-                                             BeanLevelProperties beanLevelProperties) throws Exception {
+    private OperationalString loadDeployment(String puString, String codeserver, SLA sla, String puPath,
+                                             String puName, BeanLevelProperties beanLevelProperties) throws Exception {
         URL opstringURL = Deploy.class.getResource("/org/openspaces/pu/container/servicegrid/puservicebean.xml");
         OperationalString opString;
 
@@ -535,25 +511,6 @@ public class Deploy {
         }
 
         element.setTotalNumberOfServices(sla.getNumberOfInstances());
-
-        //put jars
-        ClassBundle classBundle = element.getComponentBundle();
-        classBundle.addJAR(puPath + "/");
-        for (File jar : jars) {
-            String path = jar.getPath().replace('\\', '/');
-            classBundle.addJAR(path);
-        }
-
-        //shared-lib as sharedComponents
-        String[] sharedJarPaths = new String[sharedJars.length];
-        for (int i = 0; i < sharedJars.length; i++) {
-            File sharedJar = sharedJars[i];
-            String path = sharedJar.getPath().replace('\\', '/');
-            sharedJarPaths[i] = path;
-        }
-        Map<String, String[]> jarsMap = new HashMap<String, String[]>();
-        jarsMap.put("hack", sharedJarPaths);
-        classBundle.addSharedComponents(jarsMap);
 
         // set for each service to have the operation string name
         element.getServiceBeanConfig().setName(element.getOperationalStringName().replace(' ', '-') + "." + element.getName());

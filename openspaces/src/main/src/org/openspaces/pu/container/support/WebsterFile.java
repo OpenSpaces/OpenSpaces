@@ -41,6 +41,8 @@ public class WebsterFile extends File {
 
     private long time = -1;
 
+    private String name;
+
     public WebsterFile(URL url) {
         super("");
         this.root = url;
@@ -59,6 +61,14 @@ public class WebsterFile extends File {
         this.url = new URL(fullUrl);
         this.time = time;
         this.directory = directory;
+        this.name = name;
+    }
+
+    public String getName() {
+        if (name == null) {
+            return super.getName();
+        }
+        return name;
     }
 
     public URL toURL() throws MalformedURLException {

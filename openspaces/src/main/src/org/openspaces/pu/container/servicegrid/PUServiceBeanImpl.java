@@ -27,6 +27,8 @@ import com.j_spaces.core.client.view.LocalSpaceView;
 import net.jini.core.lookup.ServiceID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jini.rio.boot.CommonClassLoader;
+import org.jini.rio.boot.ServiceClassLoader;
 import org.jini.rio.core.JSBInstantiationException;
 import org.jini.rio.core.SLA;
 import org.jini.rio.core.ServiceLevelAgreements;
@@ -53,6 +55,7 @@ import org.openspaces.pu.container.jee.jetty.JettyJeeProcessingUnitContainerProv
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
 import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
+import org.openspaces.pu.container.support.WebsterFile;
 import org.openspaces.pu.sla.monitor.ApplicationContextMonitor;
 import org.openspaces.pu.sla.monitor.Monitor;
 import org.springframework.context.ApplicationContext;
@@ -258,11 +261,26 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         //create PU Container
         ProcessingUnitContainerProvider factory;
         // identify if this is a web app
-        InputStream webXml = contextClassLoader.getResourceAsStream("WEB-INF/web.xml");
+        InputStream webXml = null;
+        try {
+            webXml = new URL(codeserver + puPath + "WEB-INF/web.xml").openStream();
+        } catch (IOException e) {
+            // does not exists
+        }
         // identify if this is a .NET one
-        InputStream puConfig = contextClassLoader.getResourceAsStream("pu.config");
+        InputStream puConfig = null;
+        try {
+            puConfig = new URL(codeserver + puPath + "pu.config").openStream();
+        } catch (IOException e) {
+            // does not exists
+        }
         // identify if this is a .NET interop one
-        InputStream puInteropConfig = contextClassLoader.getResourceAsStream("pu.interop.config");
+        InputStream puInteropConfig = null;
+        try {
+            puInteropConfig = new URL(codeserver + puPath + "pu.interop.config").openStream();
+        } catch (IOException e) {
+            // does not exists
+        }
         if (webXml != null) {
             webXml.close();
             downloadPU = true;
@@ -312,6 +330,72 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                     }
                     BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, input);
                 }
+            }
+        }
+
+        // handles class loader libraries
+        if (downloadPU) {
+            List<URL> libUrls = new ArrayList<URL>();
+            libUrls.add(deployPath.toURI().toURL());
+            File libDir = new File(deployPath, "lib");
+            if (libDir.exists()) {
+                File[] libFiles = libDir.listFiles();
+                for (File libFile : libFiles) {
+                    libUrls.add(libFile.toURI().toURL());
+                }
+                ((ServiceClassLoader) contextClassLoader).addURLs(libUrls.toArray(new URL[libUrls.size()]));
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug(logMessage("Service Class Loader " + libUrls));
+            }
+            // add to common class loader
+            List<URL> sharedlibUrls = new ArrayList<URL>();
+            File sharedlibDir = new File(deployPath, "shared-lib");
+            if (sharedlibDir.exists()) {
+                File[] sharedlibFiles = sharedlibDir.listFiles();
+                for (File sharedlibFile : sharedlibFiles) {
+                    sharedlibUrls.add(sharedlibFile.toURI().toURL());
+                }
+            }
+            sharedlibDir = new File(deployPath, "WEB-INF/shared-lib");
+            if (sharedlibDir.exists()) {
+                File[] sharedlibFiles = sharedlibDir.listFiles();
+                for (File sharedlibFile : sharedlibFiles) {
+                    sharedlibUrls.add(sharedlibFile.toURI().toURL());
+                }
+            }
+            ((CommonClassLoader) (contextClassLoader.getParent())).addComponent(puName, sharedlibUrls.toArray(new URL[sharedlibUrls.size()]));
+            if (logger.isDebugEnabled()) {
+                logger.debug(logMessage("Common Class Loader " + sharedlibUrls));
+            }
+        } else {
+            // add to service class loader
+            List<URL> libUrls = new ArrayList<URL>();
+            libUrls.add(new URL(codeserver + puPath));
+            WebsterFile libDir = new WebsterFile(new URL(codeserver + puPath + "/lib"));
+            File[] libFiles = libDir.listFiles();
+            for (int i = 0; i < libFiles.length; i++) {
+                libUrls.add(new URL(codeserver + puPath + "/lib/" + libFiles[i].getName()));
+            }
+            ((ServiceClassLoader) contextClassLoader).addURLs(libUrls.toArray(new URL[libUrls.size()]));
+            if (logger.isDebugEnabled()) {
+                logger.debug(logMessage("Service Class Loader " + libUrls));
+            }
+            // add to common class loader
+            WebsterFile sharedlibDir = new WebsterFile(new URL(codeserver + puPath + "/shared-lib"));
+            File[] sharedlibFiles = sharedlibDir.listFiles();
+            List<URL> sharedlibUrls = new ArrayList<URL>();
+            for (File sharedlibFile : sharedlibFiles) {
+                sharedlibUrls.add(new URL(codeserver + puPath + "/shared-lib/" + sharedlibFile.getName()));
+            }
+            sharedlibDir = new WebsterFile(new URL(codeserver + puPath + "/WEB-INF/shared-lib"));
+            sharedlibFiles = sharedlibDir.listFiles();
+            for (File sharedlibFile : sharedlibFiles) {
+                sharedlibUrls.add(new URL(codeserver + puPath + "/WEB-INF/shared-lib/" + sharedlibFile.getName()));
+            }
+            ((CommonClassLoader) (contextClassLoader.getParent())).addComponent(puName, sharedlibUrls.toArray(new URL[sharedlibUrls.size()]));
+            if (logger.isDebugEnabled()) {
+                logger.debug(logMessage("Common Class Loader " + sharedlibUrls));
             }
         }
 
