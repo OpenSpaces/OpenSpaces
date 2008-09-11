@@ -263,21 +263,21 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         // identify if this is a web app
         InputStream webXml = null;
         try {
-            webXml = new URL(codeserver + puPath + "WEB-INF/web.xml").openStream();
+            webXml = new URL(codeserver + puPath + "/WEB-INF/web.xml").openStream();
         } catch (IOException e) {
             // does not exists
         }
         // identify if this is a .NET one
         InputStream puConfig = null;
         try {
-            puConfig = new URL(codeserver + puPath + "pu.config").openStream();
+            puConfig = new URL(codeserver + puPath + "/pu.config").openStream();
         } catch (IOException e) {
             // does not exists
         }
         // identify if this is a .NET interop one
         InputStream puInteropConfig = null;
         try {
-            puInteropConfig = new URL(codeserver + puPath + "pu.interop.config").openStream();
+            puInteropConfig = new URL(codeserver + puPath + "/pu.interop.config").openStream();
         } catch (IOException e) {
             // does not exists
         }
