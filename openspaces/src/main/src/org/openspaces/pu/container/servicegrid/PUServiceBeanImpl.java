@@ -295,7 +295,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             factory = createContainerProvider(beanLevelProperties, IntegratedProcessingUnitContainerProvider.class.getName());
         } else {
             factory = createContainerProvider(beanLevelProperties, IntegratedProcessingUnitContainerProvider.class.getName());
-            if (beanLevelProperties.getContextProperties().getProperty("pu.download", "false").equalsIgnoreCase("true")) {
+            if (beanLevelProperties.getContextProperties().getProperty("pu.download", "true").equalsIgnoreCase("true")) {
                 downloadPU = true;
             }
         }
