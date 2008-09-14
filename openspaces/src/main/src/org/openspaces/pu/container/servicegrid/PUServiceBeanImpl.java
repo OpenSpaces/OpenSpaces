@@ -201,7 +201,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         String puName = (String) context.getInitParameter("puName");
         String puPath = (String) context.getInitParameter("puPath");
-        String codeserver = (String) context.getInitParameter("codeserver");
+        String codeserver = context.getExportCodebase();
 
         org.openspaces.pu.sla.SLA sla = getSLA(getServiceBeanContext());
 

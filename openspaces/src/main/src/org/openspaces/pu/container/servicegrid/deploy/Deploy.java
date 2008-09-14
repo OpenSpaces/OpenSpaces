@@ -523,7 +523,6 @@ public class Deploy {
         // add pu names, path and code server so it can be used on the service bean side
         element.getServiceBeanConfig().addInitParameter("puName", puName);
         element.getServiceBeanConfig().addInitParameter("puPath", puPath);
-        element.getServiceBeanConfig().addInitParameter("codeserver", codeserver);
 
         //this is the MOST IMPORTANT part
         if (sla.getInstanceSLAs() != null && sla.getInstanceSLAs().size() > 0) {
