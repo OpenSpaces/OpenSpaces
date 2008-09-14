@@ -59,7 +59,7 @@ public class EventContainerExecutorTests extends AbstractDependencyInjectionSpri
     }
 
     @EventDriven
-    @Polling(name = "test", gigaSpace = "gigaSpace1")
+    @Polling(value = "test", gigaSpace = "gigaSpace1")
     public class DynamicEventListener {
 
         @EventTemplate

@@ -45,10 +45,12 @@ import java.lang.annotation.Target;
 public @interface Notify {
 
     /**
-     * The logical name of the container that is automatically generated
+     * The value may indicate a suggestion for a logical component name,
+     * to be turned into a Spring bean in case of an autodetected component.
+     * @return the suggested component name, if any
      */
-    String name() default "";
-    
+    String value() default "";
+
     /**
      * The name of the bean that that is the {@link org.openspaces.core.GigaSpace} this container will
      * used.
