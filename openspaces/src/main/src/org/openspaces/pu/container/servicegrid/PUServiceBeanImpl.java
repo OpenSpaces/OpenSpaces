@@ -371,7 +371,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         } else {
             // add to service class loader
             List<URL> libUrls = new ArrayList<URL>();
-            libUrls.add(new URL(codeserver + puPath));
+            libUrls.add(new URL(codeserver + puPath + "/"));
             WebsterFile libDir = new WebsterFile(new URL(codeserver + puPath + "/lib"));
             File[] libFiles = libDir.listFiles();
             for (int i = 0; i < libFiles.length; i++) {
