@@ -195,6 +195,9 @@ public class Deploy {
             // this is a directory, jar it up and prepare it for upload
             File jarPUFile = new File(System.getProperty("java.io.tmpdir") + "/" + puName + ".jar");
             createJarFile(jarPUFile, puFile, null, null);
+            if (logger.isInfoEnabled()) {
+                logger.info("Deploying a directory [" + puFile.getAbsolutePath() + "], jaring it into [" + jarPUFile.getAbsolutePath() + "]");
+            }
             puFile = jarPUFile;
             deletePUFile = true;
         }
