@@ -2,10 +2,6 @@ package org.openspaces.itest.executor.eventcontainer;
 
 import com.gigaspaces.async.AsyncFuture;
 import org.openspaces.core.GigaSpace;
-import org.openspaces.events.EventDriven;
-import org.openspaces.events.EventTemplate;
-import org.openspaces.events.adapter.SpaceDataEvent;
-import org.openspaces.events.polling.Polling;
 import org.openspaces.events.support.RegisterEventContainerTask;
 import org.openspaces.events.support.UnregisterEventContainerTask;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
@@ -22,8 +18,6 @@ public class EventContainerExecutorTests extends AbstractDependencyInjectionSpri
     protected GigaSpace gigaSpace2;
 
     protected GigaSpace distGigaSpace;
-
-    private volatile boolean receivedEvent;
 
     public EventContainerExecutorTests() {
         setPopulateProtectedVariables(true);
@@ -42,34 +36,21 @@ public class EventContainerExecutorTests extends AbstractDependencyInjectionSpri
     }
 
     public void testDynamicRegistrationOfEvents() throws Exception {
+        DynamicEventListener listener = new DynamicEventListener();
         gigaSpace1.write(new Object());
         Thread.sleep(200);
-        assertFalse(receivedEvent);
-        AsyncFuture future = distGigaSpace.execute(new RegisterEventContainerTask(new DynamicEventListener()), 0);
+        assertFalse(listener.isReceivedEvent());
+        AsyncFuture future = distGigaSpace.execute(new RegisterEventContainerTask(listener), 0);
         future.get(500, TimeUnit.MILLISECONDS);
         Thread.sleep(500);
-        assertTrue(receivedEvent);
+        assertTrue(listener.isReceivedEvent());
 
-        receivedEvent = false;
+        listener.setReceivedEvent(false);
         future = distGigaSpace.execute(new UnregisterEventContainerTask("test"), 0);
         future.get(500, TimeUnit.MILLISECONDS);
         gigaSpace1.write(new Object());
         Thread.sleep(500);
-        assertFalse(receivedEvent);
+        assertFalse(listener.isReceivedEvent());
     }
 
-    @EventDriven
-    @Polling(value = "test", gigaSpace = "gigaSpace1")
-    public class DynamicEventListener {
-
-        @EventTemplate
-        public Object template() {
-            return new Object();
-        }
-
-        @SpaceDataEvent
-        public void onEvent() {
-            receivedEvent = true;
-        }
-    }
 }

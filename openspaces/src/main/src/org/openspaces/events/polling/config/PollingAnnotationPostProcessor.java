@@ -21,6 +21,7 @@ import org.openspaces.core.util.AnnotationUtils;
 import org.openspaces.events.EventDriven;
 import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.events.TransactionalEvent;
+import org.openspaces.events.asyncpolling.AsyncPolling;
 import org.openspaces.events.notify.Notify;
 import org.openspaces.events.polling.Polling;
 import org.openspaces.events.polling.SimplePollingContainerConfigurer;
@@ -65,6 +66,10 @@ public class PollingAnnotationPostProcessor implements BeanPostProcessor, Applic
             }
             Notify notify = AnnotationUtils.findAnnotation(beanClass, Notify.class);
             if (notify != null) {
+                return bean;
+            }
+            AsyncPolling asyncPolling = AnnotationUtils.findAnnotation(beanClass, AsyncPolling.class);
+            if (asyncPolling != null) {
                 return bean;
             }
             return bean;
