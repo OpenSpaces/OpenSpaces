@@ -343,8 +343,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 for (File libFile : libFiles) {
                     libUrls.add(libFile.toURI().toURL());
                 }
-                ((ServiceClassLoader) contextClassLoader).addURLs(libUrls.toArray(new URL[libUrls.size()]));
             }
+            ((ServiceClassLoader) contextClassLoader).addURLs(libUrls.toArray(new URL[libUrls.size()]));
             if (logger.isDebugEnabled()) {
                 logger.debug(logMessage("Service Class Loader " + libUrls));
             }
