@@ -18,6 +18,7 @@ package org.openspaces.pu.container.jee.lb.apache;
 
 import com.gigaspaces.logger.GSLogConfigLoader;
 import com.j_spaces.core.Constants;
+import com.j_spaces.core.service.ServiceConfigLoader;
 import com.j_spaces.kernel.PlatformVersion;
 import com.j_spaces.kernel.SecurityPolicyLoader;
 import net.jini.core.lookup.ServiceTemplate;
@@ -194,9 +195,9 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
         System.out.println("Done detecting exising config files");
         System.out.println("");
 
-        ldm = new LookupDiscoveryManager(getGroups(), BootUtil.toLookupLocators(getLocators()), this);
+        ldm = new LookupDiscoveryManager(getGroups(), BootUtil.toLookupLocators(getLocators()), this, ServiceConfigLoader.getConfiguration());
 
-        sdm = new ServiceDiscoveryManager(ldm, null);
+        sdm = new ServiceDiscoveryManager(ldm, null, ServiceConfigLoader.getConfiguration());
         ServiceTemplate template = new ServiceTemplate(null, new Class[]{PUServiceBean.class}, null);
         cache = sdm.createLookupCache(template, null, this);
 
