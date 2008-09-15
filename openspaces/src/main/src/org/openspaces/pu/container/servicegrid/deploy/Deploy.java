@@ -24,6 +24,7 @@ import com.j_spaces.kernel.SecurityPolicyLoader;
 import net.jini.core.lookup.ServiceItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jini.rio.boot.BootUtil;
 import org.jini.rio.core.OperationalString;
 import org.jini.rio.core.ServiceElement;
 import org.jini.rio.core.ServiceLevelAgreements;
@@ -453,6 +454,7 @@ public class Deploy {
         //load the servicebean opstring
         OpStringLoader opStringLoader = new OpStringLoader();
         opStringLoader.setDefaultGroups(getGroups());
+        opStringLoader.setDefaultLookupLocators(BootUtil.toLookupLocators(getLocators()));
         opStringLoader.setCodebaseOverride(codeserver);
         opString = opStringLoader.parseOperationalString(opstringURL)[0];
         ((OpString) opString).setName(puName);
