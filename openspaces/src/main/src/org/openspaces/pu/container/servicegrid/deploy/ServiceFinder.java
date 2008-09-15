@@ -16,6 +16,7 @@
 
 package org.openspaces.pu.container.servicegrid.deploy;
 
+import com.j_spaces.core.service.ServiceConfigLoader;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceItem;
@@ -47,8 +48,9 @@ public class ServiceFinder {
 
         try {
             sdm = new ServiceDiscoveryManager(
-                    new LookupDiscoveryManager(groups, lookupLocators, null),
-                    new LeaseRenewalManager()
+                    new LookupDiscoveryManager(groups, lookupLocators, null, ServiceConfigLoader.getConfiguration()),
+                    new LeaseRenewalManager(),
+                    ServiceConfigLoader.getConfiguration()
             );
             Entry[] attributes = null;
             if (name != null) {
