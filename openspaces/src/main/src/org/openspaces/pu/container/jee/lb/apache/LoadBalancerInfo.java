@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * Holds information on all the different load balancer nodes (web processing unit instnaces).
+ *
  * @author kimchy
  */
 public class LoadBalancerInfo {
@@ -42,6 +44,9 @@ public class LoadBalancerInfo {
         this.dirty = dirty;
     }
 
+    /**
+     * Returns the name of the web application processing unit.
+     */
     public String getName() {
         return name;
     }
@@ -54,7 +59,10 @@ public class LoadBalancerInfo {
         balancers.remove(balancerInfo.getClusterInfo().getRunningNumberOffset1());
     }
 
+    /**
+     * Returns all the nodes of the web application.
+     */
     public LoadBalancerNodeInfo[] getNodes() {
-        return balancers.values().toArray(new LoadBalancerNodeInfo[0]);
+        return balancers.values().toArray(new LoadBalancerNodeInfo[balancers.values().size()]);
     }
 }

@@ -35,10 +35,17 @@ public class LoadBalancerNodeInfo {
         this.serviceDetails = serviceDetails;
     }
 
+    /**
+     * Returns the cluster specific information fo the load balancer node (the web application processing
+     * unit instance).
+     */
     public ClusterInfo getClusterInfo() {
         return clusterInfo;
     }
 
+    /**
+     * Returns jee related information for the given load balancer node (for example, host, port, and context path).
+     */
     public JeePUServiceDetails getServiceDetails() {
         return serviceDetails;
     }

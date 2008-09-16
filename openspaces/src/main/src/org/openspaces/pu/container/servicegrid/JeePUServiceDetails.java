@@ -29,7 +29,7 @@ import java.io.ObjectOutput;
 public class JeePUServiceDetails implements PUServiceDetails, Externalizable {
 
     private static final long serialVersionUID = 1L;
-    
+
     private String host;
 
     private int port;
@@ -54,38 +54,67 @@ public class JeePUServiceDetails implements PUServiceDetails, Externalizable {
         this.type = type;
     }
 
+    /**
+     * The service type. Returns a constant value of <code>jee-container</code>.
+     */
     public String getServiceType() {
         return "jee-container";
     }
 
+    /**
+     * Returns the description of the service. The value is <code>host:port/contextpath</code>.
+     */
     public String getDescription() {
         return host + ":" + port + contextPath;
     }
 
+    /**
+     * Same as {@link #getDescription()}.
+     */
     public String getLongDescription() {
         return getDescription();
     }
 
+    /**
+     * Returns the host of where the service is running on.
+     */
     public String getHost() {
         return this.host;
     }
 
+    /**
+     * Returns the port of where the service is running on.
+     */
     public int getPort() {
         return port;
     }
 
+    /**
+     * Returns the ssl port of where the service is running on.
+     */
     public int getSslPort() {
         return sslPort;
     }
 
+    /**
+     * Returns the context path of the web application.
+     */
     public String getContextPath() {
         return contextPath;
     }
 
+    /**
+     * Returns <code>true</code> if this web service is running on a shared instance of a
+     * web container. <code>false</code> if the web application instance is running on its
+     * own dedicated web container.
+     */
     public boolean isShared() {
         return shared;
     }
 
+    /**
+     * The type of the web container used. For example, <code>jetty</code>.
+     */
     public String getType() {
         return type;
     }
