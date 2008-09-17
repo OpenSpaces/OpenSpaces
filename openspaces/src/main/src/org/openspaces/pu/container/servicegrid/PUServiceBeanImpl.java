@@ -706,7 +706,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             throw new RuntimeException("Failed to extract file to: " + path.getAbsolutePath() + ", response code [" + responseCode + "]");
         }
 
-        File tempFile = File.createTempFile("packaged-webpu", "war", tempPath);
+        File tempFile = File.createTempFile("packaged-pu", "tmp", tempPath);
         InputStream in = new BufferedInputStream(conn.getInputStream());
         FileCopyUtils.copy(in, new FileOutputStream(tempFile));
         conn.disconnect();
