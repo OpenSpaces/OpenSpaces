@@ -99,8 +99,8 @@ container (GSC).
 simply writes unprocessed Data objects to the Space. The routing (@SpaceRouting) controls to which
 partition the unprocessed Data will be written and consequently which instance will process it.
 
-OPENSPACES MAVEN PLUGIN WIKI PAGE
+MAVEN PLUGIN WIKI PAGE
 ---------------------------------
 
-  For more information about the OpenSpaces Maven Plugin please refer to:
-http://www.gigaspaces.com/wiki/display/OLH/OpenSpaces+Maven+Plugin
+  For more information about the Maven Plugin please refer to:
+http://www.gigaspaces.com/wiki/display/XAP66/Maven+Plugin

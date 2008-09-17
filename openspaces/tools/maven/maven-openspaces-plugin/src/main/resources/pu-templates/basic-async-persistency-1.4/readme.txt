@@ -46,6 +46,7 @@ Quick list:
 * mvn os:run-standalone: Runs a packaged application (from the jars).
 * mvn os:deploy: Deploys the project onto the Service Grid.
 * mvn os:undeploy: Removes the project from the Service Grid.
+* mvn os:hsql-ui: To view the HSQL database created by the mirror service
 
   In order to build the example, a simple "mvn compile" executed from the root of the 
 project will compile all the different modules.
@@ -137,8 +138,8 @@ Hibernate should be configured with a different Database Dialect.
 In order to run the mirror and the processor on different machines change the url of the dataSource
 element in the pu.xml file of the processor to use host of the mirror.
 
-OPENSPACES MAVEN PLUGIN WIKI PAGE
+MAVEN PLUGIN WIKI PAGE
 ---------------------------------
 
-  For more information about the OpenSpaces Maven Plugin please refer to:
-http://www.gigaspaces.com/wiki/display/OLH/OpenSpaces+Maven+Plugin
+  For more information about the Maven Plugin please refer to:
+http://www.gigaspaces.com/wiki/display/XAP66/Maven+Plugin
