@@ -243,6 +243,9 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
                     return future.get(timeout, TimeUnit.MILLISECONDS);
                 } catch (ExecutionException e) {
                     throw e.getCause();
+                } catch (TimeoutException e) {
+                    throw new RemoteTimeoutException("Timeout waiting for result for [" + lookupName +
+                            "] and method [" + methodName + "]", timeout);
                 }
             }
         } else {
@@ -254,6 +257,9 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
                     return future.get(timeout, TimeUnit.MILLISECONDS);
                 } catch (ExecutionException e) {
                     throw e.getCause();
+                } catch (TimeoutException e) {
+                    throw new RemoteTimeoutException("Timeout waiting for result for [" + lookupName +
+                            "] and method [" + methodName + "]", timeout);
                 }
             }
         }

@@ -30,12 +30,12 @@ public class RemoteTimeoutException extends RemoteAccessException {
     private long timeout;
 
     public RemoteTimeoutException(String message, long timeout) {
-        super(message);
+        super(message + ", timeout [" + timeout + "ms]");
         this.timeout = timeout;
     }
 
     public RemoteTimeoutException(String message, long timeout, Throwable cause) {
-        super(message, cause);
+        super(message + ", timeout [" + timeout + "ms]", cause);
         this.timeout = timeout;
     }
 
