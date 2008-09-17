@@ -85,7 +85,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
 
     private GigaSpace gigaSpace;
 
-    private long timeout = 5000;
+    private long timeout = 60000;
 
     private RemoteRoutingHandler remoteRoutingHandler;
 
@@ -112,7 +112,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
 
     /**
      * Sets the timeout that will be used to wait for the remote invocation response. The timeout
-     * value is in <b>milliseconds</b> and defaults to <code>5000</code> (5 seconds).
+     * value is in <b>milliseconds</b> and defaults to <code>60000</code> (60 seconds).
      */
     public void setTimeout(long timeout) {
         this.timeout = timeout;

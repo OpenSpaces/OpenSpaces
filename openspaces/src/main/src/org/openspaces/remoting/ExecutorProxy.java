@@ -45,7 +45,7 @@ public @interface ExecutorProxy {
     /**
      * @see org.openspaces.remoting.ExecutorSpaceRemotingProxyFactoryBean#setTimeout(long)
      */
-    long timeout() default 5000;
+    long timeout() default 60000;
 
     /**
      * @see ExecutorSpaceRemotingProxyFactoryBean#setBroadcast(boolean)

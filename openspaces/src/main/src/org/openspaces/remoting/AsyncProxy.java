@@ -50,7 +50,7 @@ public @interface AsyncProxy {
     /**
      * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setTimeout(long)
      */
-    long timeout() default 5000;
+    long timeout() default 60000;
 
     /**
      * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setGlobalOneWay(boolean)

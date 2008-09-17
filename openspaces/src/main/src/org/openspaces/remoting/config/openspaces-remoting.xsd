@@ -223,7 +223,7 @@
                         <xsd:annotation>
                             <xsd:documentation>
                                 Sets the timeout that will be used to wait for the remote invocation response. The
-                                timeout value is in milliseconds and defaults to 5000 (5 seconds).
+                                timeout value is in milliseconds and defaults to 60000 (60 seconds).
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
@@ -532,7 +532,7 @@
                         <xsd:annotation>
                             <xsd:documentation>
                                 Sets the timeout that will be used to wait for the remote invocation response. The
-                                timeout value is in milliseconds and defaults to 5000 (5 seconds).
+                                timeout value is in milliseconds and defaults to 60000 (60 seconds).
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
