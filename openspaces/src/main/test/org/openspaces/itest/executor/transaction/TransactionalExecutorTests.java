@@ -4,6 +4,7 @@ import com.gigaspaces.async.AsyncFuture;
 import com.gigaspaces.async.AsyncFutureListener;
 import com.gigaspaces.async.AsyncResult;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.core.executor.AutowireTask;
 import org.openspaces.core.executor.DistributedTask;
 import org.openspaces.core.executor.Task;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
@@ -235,6 +236,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         }
     }
 
+    @AutowireTask
     private class SimpleDistributedTask1 implements DistributedTask<Integer, Integer> {
 
         @Resource(name = "gigaSpace1")
@@ -261,6 +263,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         }
     }
 
+    @AutowireTask
     private class SimpleTask1 implements Task<Integer> {
 
         @Resource(name = "gigaSpace1")
@@ -272,6 +275,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         }
     }
 
+    @AutowireTask
     private class DelayedSimpleTask1 implements Task<Integer> {
 
         @Resource(name = "gigaSpace1")
