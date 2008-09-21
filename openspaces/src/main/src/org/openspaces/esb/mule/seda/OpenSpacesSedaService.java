@@ -16,6 +16,7 @@
 
 package org.openspaces.esb.mule.seda;
 
+import com.j_spaces.core.exception.SpaceUnavailableException;
 import org.mule.api.MuleEvent;
 import org.mule.api.lifecycle.InitialisationException;
 import org.mule.config.i18n.CoreMessages;
@@ -88,6 +89,9 @@ public class OpenSpacesSedaService extends SpaceAwareSedaService implements Work
                 // the space is begin shutdown, simply return null
                 return null;
             } catch (SpaceClosedException e) {
+                // the space is begin shutdown, simply return null
+                return null;
+            } catch (SpaceUnavailableException e) {
                 // the space is begin shutdown, simply return null
                 return null;
             }

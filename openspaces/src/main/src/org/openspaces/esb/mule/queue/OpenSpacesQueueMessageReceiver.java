@@ -17,6 +17,7 @@
 package org.openspaces.esb.mule.queue;
 
 
+import com.j_spaces.core.exception.SpaceUnavailableException;
 import org.mule.DefaultMuleMessage;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
@@ -112,6 +113,8 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
         } catch (SpaceInterruptedException e) {
             // do nothing, we are being stopped
         } catch (SpaceClosedException e) {
+            // do nothing, we are being stopped
+        } catch (SpaceUnavailableException e) {
             // do nothing, we are being stopped
         }
 
