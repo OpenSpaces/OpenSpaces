@@ -33,11 +33,11 @@ import java.lang.annotation.Target;
  *
  * <p>The event listener method should be marked with {@link org.openspaces.events.adapter.SpaceDataEvent}.
  *
+ * @author kimchy
  * @see org.openspaces.events.TransactionalEvent
  * @see org.openspaces.events.notify.NotifyBatch
  * @see org.openspaces.events.notify.NotifyLease
  * @see org.openspaces.events.notify.NotifyType
- * @author kimchy
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -47,6 +47,7 @@ public @interface Notify {
     /**
      * The value may indicate a suggestion for a logical component name,
      * to be turned into a Spring bean in case of an autodetected component.
+     *
      * @return the suggested component name, if any
      */
     String value() default "";
@@ -86,7 +87,15 @@ public @interface Notify {
     boolean fifo() default false;
 
     /**
-     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyFilter(com.j_spaces.core.client.INotifyDelegatorFilter) 
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyFilter(com.j_spaces.core.client.INotifyDelegatorFilter)
      */
     Class<INotifyDelegatorFilter> notifyFilter() default INotifyDelegatorFilter.class;
+
+    /**
+     * Set whether this container will start once instantiated.
+     *
+     * <p>Default is <code>true</code>. Set to <code>false</code> in order for this container to
+     * be started using {@link org.openspaces.events.notify.SimpleNotifyEventListenerContainer#start()}.
+     */
+    boolean autoStart() default true;
 }

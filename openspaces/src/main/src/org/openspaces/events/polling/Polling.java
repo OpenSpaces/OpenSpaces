@@ -115,6 +115,14 @@ public @interface Polling {
     boolean performSnapshot() default true;
 
     /**
+     * Set whether this container will start once instantiated.
+     *
+     * <p>Default is <code>true</code>. Set to <code>false</code> in order for this container to
+     * be started using {@link SimplePollingEventListenerContainer#start()}.
+     */
+    boolean autoStart() default true;
+
+    /**
      * If set to <code>true</code> will pass an array value returned from a
      * {@link org.openspaces.events.polling.receive.ReceiveOperationHandler}
      * directly to the listener without "serializing" it as one array element

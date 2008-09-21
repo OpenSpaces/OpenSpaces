@@ -45,6 +45,7 @@ public @interface AsyncPolling {
     /**
      * The value may indicate a suggestion for a logical component name,
      * to be turned into a Spring bean in case of an autodetected component.
+     *
      * @return the suggested component name, if any
      */
     String value() default "";
@@ -84,4 +85,12 @@ public @interface AsyncPolling {
      * @see org.openspaces.events.polling.SimplePollingEventListenerContainer#setPerformSnapshot(boolean)
      */
     boolean performSnapshot() default true;
+
+    /**
+     * Set whether this container will start once instantiated.
+     *
+     * <p>Default is <code>true</code>. Set to <code>false</code> in order for this container to
+     * be started using {@link org.openspaces.events.asyncpolling.SimpleAsyncPollingEventListenerContainer#start()}.
+     */
+    boolean autoStart() default true;
 }

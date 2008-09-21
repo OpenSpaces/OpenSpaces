@@ -76,6 +76,7 @@ public class AsyncPollingAnnotationPostProcessor implements BeanPostProcessor, A
         pollingContainerConfigurer.concurrentConsumers(polling.concurrentConsumers());
         pollingContainerConfigurer.receiveTimeout(polling.receiveTimeout());
         pollingContainerConfigurer.performSnapshot(polling.performSnapshot());
+        pollingContainerConfigurer.autoStart(polling.autoStart());
 
         // handle transactions (we support using either @Transactional or @TransactionalEvent or both)
         TransactionalEvent transactionalEvent = AnnotationUtils.findAnnotation(beanClass, TransactionalEvent.class);

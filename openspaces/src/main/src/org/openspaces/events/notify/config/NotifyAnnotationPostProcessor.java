@@ -87,6 +87,8 @@ public class NotifyAnnotationPostProcessor implements BeanPostProcessor, Applica
 
         notifyContainerConfigurer.fifo(notify.fifo());
 
+        notifyContainerConfigurer.autoStart(notify.autoStart());
+
         if (!INotifyDelegatorFilter.class.equals(notify.notifyFilter())) {
             try {
                 INotifyDelegatorFilter filter = notify.notifyFilter().newInstance();
