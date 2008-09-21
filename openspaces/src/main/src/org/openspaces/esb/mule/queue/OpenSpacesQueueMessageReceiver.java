@@ -85,18 +85,18 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
         // The list of retrieved messages that will be returned
         List<MuleMessage> messages = new LinkedList<MuleMessage>();
 
-        /*
-         * Determine how many messages to batch in this poll: we need to drain the queue quickly, but not by
-         * slamming the workManager too hard. It is impossible to determine this more precisely without proper
-         * load statistics/feedback or some kind of "event cost estimate". Therefore we just try to use half
-         * of the receiver's workManager, since it is shared with receivers for other endpoints.
-         */
-        int maxThreads = connector.getReceiverThreadingProfile().getMaxThreadsActive();
-        // also make sure batchSize is always at least 1
-        int batchSize = Math.max(1, Math.min(connector.getGigaSpaceObj().count(template), ((maxThreads / 2) - 1)));
-
         // try to get the first event off the queue
         try {
+            /*
+             * Determine how many messages to batch in this poll: we need to drain the queue quickly, but not by
+             * slamming the workManager too hard. It is impossible to determine this more precisely without proper
+             * load statistics/feedback or some kind of "event cost estimate". Therefore we just try to use half
+             * of the receiver's workManager, since it is shared with receivers for other endpoints.
+             */
+            int maxThreads = connector.getReceiverThreadingProfile().getMaxThreadsActive();
+            // also make sure batchSize is always at least 1
+            int batchSize = Math.max(1, Math.min(connector.getGigaSpaceObj().count(template), ((maxThreads / 2) - 1)));
+            
             InternalQueueEntry entry = (InternalQueueEntry) connector.getGigaSpaceObj().take(template, connector.getTimeout());
 
             if (entry != null) {
