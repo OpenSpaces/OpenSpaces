@@ -842,6 +842,9 @@ public class Deploy {
             throws IOException {
         String path = in.getCanonicalPath();
         String parentPath = parent.getCanonicalPath();
+        if (path.equals(parentPath)) {
+            return;
+        }
         if (!path.startsWith(parentPath)) {
             throw new Error("not parent: " + parentPath + " of " + path);
         } else {
