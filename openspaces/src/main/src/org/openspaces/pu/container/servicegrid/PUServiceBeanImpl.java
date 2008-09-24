@@ -318,7 +318,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             if (factory instanceof DeployableProcessingUnitContainerProvider) {
                 ((DeployableProcessingUnitContainerProvider) factory).setDeployPath(deployPath);
             }
-            downloadAndExtractPU(puPath, codeserver, deployPath, new File(deployedProcessingUnitsLocation));
+            downloadAndExtractPU(puName, puPath, codeserver, deployPath, new File(deployedProcessingUnitsLocation));
 
             // go over listed files that needs to be resovled with properties
             for (Map.Entry entry : beanLevelProperties.getContextProperties().entrySet()) {
@@ -699,7 +699,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
     }
 
-    private void downloadAndExtractPU(String puPath, String codeserver, File path, File tempPath) throws IOException {
+    private void downloadAndExtractPU(String puName, String puPath, String codeserver, File path, File tempPath) throws IOException {
         HttpURLConnection conn = (HttpURLConnection) new URL(codeserver + puPath).openConnection();
         conn.setRequestProperty("Package", "true");
         int responseCode = conn.getResponseCode();
@@ -707,7 +707,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             throw new RuntimeException("Failed to extract file to: " + path.getAbsolutePath() + ", response code [" + responseCode + "]");
         }
 
-        File tempFile = File.createTempFile("packaged-pu", "tmp", tempPath);
+        File tempFile = File.createTempFile(puName, "jar", tempPath);
         InputStream in = new BufferedInputStream(conn.getInputStream());
         FileCopyUtils.copy(in, new FileOutputStream(tempFile));
         conn.disconnect();
