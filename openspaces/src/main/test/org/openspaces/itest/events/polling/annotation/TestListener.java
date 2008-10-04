@@ -11,7 +11,7 @@ import org.openspaces.events.polling.receive.ReceiveOperationHandler;
 /**
  * @author kimchy
  */
-@Polling
+@Polling(passArrayAsIs = true)
 @TransactionalEvent
 public class TestListener {
 
@@ -28,7 +28,7 @@ public class TestListener {
     }
 
     @SpaceDataEvent
-    public void iAmTheListener(Object value) {
+    public void iAmTheListener(Object[] value) {
         receivedMessage = true;
     }
 

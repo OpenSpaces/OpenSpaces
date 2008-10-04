@@ -27,6 +27,7 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -278,7 +279,13 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTran
                 if (logger.isTraceEnabled()) {
                     logger.trace(message("Received event [" + dataEvent + "]"));
                 }
-                eventReceived(dataEvent);
+                if (!(dataEvent instanceof Object[])) {
+                    Object dataEventArr = Array.newInstance(dataEvent.getClass(), 1);
+                    Array.set(dataEventArr, 0, dataEvent);
+                    eventReceived(dataEventArr);
+                } else {
+                    eventReceived(dataEvent);
+                }
                 try {
                     invokeListener(eventListener, dataEvent, status, null);
                 } catch (Throwable ex) {

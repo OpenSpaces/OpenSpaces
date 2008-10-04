@@ -18,6 +18,7 @@ package org.openspaces.events.adapter;
 
 import com.gigaspaces.reflect.IMethod;
 import com.gigaspaces.reflect.ReflectionUtil;
+import com.gigaspaces.reflect.standard.StandardMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.GigaSpace;
@@ -81,6 +82,8 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
 
     private int numberOfParameters;
 
+    private boolean useFastRefelction = true;
+
     /**
      * The event listener delegate that will be searched for event listening methods and will have
      * its method executed.
@@ -94,6 +97,13 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
      */
     protected Object getDelegate() {
         return this.delegate;
+    }
+
+    /**
+     * Controls if the listener will be invoked using fast reflection or not. Defaults to <code>true</code>.
+     */
+    public void setUseFastRefelction(boolean useFastRefelction) {
+        this.useFastRefelction = useFastRefelction;
     }
 
     public void afterPropertiesSet() {
@@ -120,7 +130,11 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
                 }
             }
         } else {
-            fastMethod = ReflectionUtil.createMethod(listenerMethods[0]);
+            if (useFastRefelction) {
+                fastMethod = ReflectionUtil.createMethod(listenerMethods[0]);
+            } else {
+                fastMethod = new StandardMethod(listenerMethods[0]);
+            }
         }
         for (Method listenerMethod : listenerMethods) {
             listenerMethod.setAccessible(true);
