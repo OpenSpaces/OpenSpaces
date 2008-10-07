@@ -154,7 +154,12 @@ goto runm2
 
 @REM Start MAVEN2
 :runm2
-%MAVEN_JAVA_EXE% %MAVEN_OPTS% -classpath %CLASSWORLDS_JAR% "-Dclassworlds.conf=%M2_HOME%\bin\m2.conf" "-Dmaven.home=%M2_HOME%" org.codehaus.classworlds.Launcher %MAVEN_CMD_LINE_ARGS%
+
+@REM set GigaSpaces properties required for using with JDK 1.4
+set JSHOMEDIR=%M2_HOME%\..\..\..
+set GSBOOTCLASSPATH=-Xbootclasspath/p:.;"%JSHOMEDIR%\lib\xml\serializer.jar";"%JSHOMEDIR%\lib\xml\xalan.jar";"%JSHOMEDIR%\lib\xml\xercesImpl.jar";"%JSHOMEDIR%\lib\xml\xml-apis.jar"
+
+%MAVEN_JAVA_EXE% %GSBOOTCLASSPATH% %MAVEN_OPTS% -classpath %CLASSWORLDS_JAR% "-Dclassworlds.conf=%M2_HOME%\bin\m2.conf" "-Dmaven.home=%M2_HOME%" org.codehaus.classworlds.Launcher %MAVEN_CMD_LINE_ARGS%
 if ERRORLEVEL 1 goto error
 goto end
 
