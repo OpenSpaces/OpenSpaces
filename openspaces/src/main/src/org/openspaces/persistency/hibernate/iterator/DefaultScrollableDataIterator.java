@@ -145,7 +145,8 @@ public class DefaultScrollableDataIterator extends AbstractScrollableDataIterato
                 }
             }
             if (from >= 0) {
-                criteria.setFirstResult(from);
+                if (from > 0)
+                    criteria.setFirstResult(from);
                 criteria.setMaxResults(size);
             }
             return criteria.scroll(ScrollMode.FORWARD_ONLY);
@@ -153,7 +154,8 @@ public class DefaultScrollableDataIterator extends AbstractScrollableDataIterato
             Query query = HibernateIteratorUtils.createQueryFromSQLQuery(sqlQuery, session);
             query.setFetchSize(fetchSize);
             if (from >= 0) {
-                query.setFirstResult(from);
+                if (from > 0)
+                    query.setFirstResult(from);
                 query.setMaxResults(size);
             }
             return query.scroll(ScrollMode.FORWARD_ONLY);
@@ -161,7 +163,8 @@ public class DefaultScrollableDataIterator extends AbstractScrollableDataIterato
             Query query = session.createQuery(hQuery);
             query.setFetchSize(fetchSize);
             if (from >= 0) {
-                query.setFirstResult(from);
+                if (from > 0)
+                    query.setFirstResult(from);
                 query.setMaxResults(size);
             }
             query.setCacheMode(CacheMode.IGNORE);
