@@ -17,6 +17,11 @@
             <version>2.0</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.maven.shared</groupId>
+            <artifactId>maven-dependency-tree</artifactId>
+            <version>1.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.openspaces</groupId>
             <artifactId>openspaces</artifactId>
             <version>${pluginVersion}</version>

@@ -16,15 +16,14 @@
 
 package org.openspaces.maven.plugin;
 
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.project.MavenProject;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.MavenProject;
 
 /**
  * Goal that deploys a processing unit.
@@ -32,7 +31,7 @@ import java.util.List;
  * @goal deploy
  * @requiresProject false
  */
-public class DeployPUMojo extends AbstractMojo {
+public class DeployPUMojo extends AbstractOpenSpacesMojo {
 
     /**
      * sla
@@ -125,13 +124,13 @@ public class DeployPUMojo extends AbstractMojo {
     /**
      * executes the mojo.
      */
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    public void executeMojo() throws MojoExecutionException, MojoFailureException {
         // Remove white spaces from ClassLoader's URLs
         ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
         try {
             Utils.changeClassLoaderToSupportWhiteSpacesRepository(currentCL);
         } catch (Exception e) {
-            getLog().info("Unable to update ClassLoader. Proceeding with processing unit invocation.", e);
+            PluginLog.getLog().info("Unable to update ClassLoader. Proceeding with processing unit invocation.", e);
         }
 
         Utils.handleSecurity();
@@ -141,7 +140,7 @@ public class DeployPUMojo extends AbstractMojo {
         
         for (Iterator projIt = projects.iterator(); projIt.hasNext();) {
             MavenProject proj = (MavenProject) projIt.next();
-            getLog().info("Deploying processing unit: " + proj.getBuild().getFinalName());
+            PluginLog.getLog().info("Deploying processing unit: " + proj.getBuild().getFinalName());
             String[] attributesArray = createAttributesArray(Utils.getProcessingUnitJar(proj));
             try {
                 Class deployClass = Class.forName("org.openspaces.pu.container.servicegrid.deploy.Deploy", true, Thread.currentThread().getContextClassLoader());
@@ -171,7 +170,7 @@ public class DeployPUMojo extends AbstractMojo {
         Utils.addAttributeToList(Attlist, "-max-instances-per-vm", maxInstancesPerVm);
         Utils.addAttributeToList(Attlist, "-max-instances-per-machine", maxInstancesPerMachine);
         Attlist.add(name);
-        getLog().info("Arguments list: " + Attlist);
+        PluginLog.getLog().info("Arguments list: " + Attlist);
         String[] attArray = new String[Attlist.size()];
         Attlist.toArray(attArray);
         return attArray;

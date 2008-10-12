@@ -16,10 +16,6 @@
 
 package org.openspaces.maven.plugin;
 
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.springframework.util.StringUtils;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -39,6 +35,9 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
+import org.apache.maven.plugin.MojoExecutionException;
+import org.springframework.util.StringUtils;
+
 
 /**
  * Goal which creates the openspaces project.
@@ -46,7 +45,7 @@ import java.util.jar.JarInputStream;
  * @goal create
  * @requiresProject false
  */
-public class CreatePUProjectMojo extends AbstractMojo {
+public class CreatePUProjectMojo extends AbstractOpenSpacesMojo {
 
     /**
      * the groupId string to replace with the package name
@@ -102,8 +101,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
     private String packageDirs;
     
     
-    
-    public void execute() throws MojoExecutionException {
+    public void executeMojo() throws MojoExecutionException {
         try {
             List urls = getTemplatesURLs();
             ClassLoader cl = Utils.createClassLoader(urls, Thread.currentThread().getContextClassLoader());
@@ -119,11 +117,11 @@ public class CreatePUProjectMojo extends AbstractMojo {
             if (templateUrl.hasMoreElements()) {
                 // template found
                 URL url = (URL) templateUrl.nextElement();
-                getLog().debug("Found template at: " + url);
+                PluginLog.getLog().debug("Found template at: " + url);
 
                 // extract the jar path from the url
                 url = getJarURLFromURL(url, "/" + template + "/");
-                getLog().debug("Template JAR url: " + url);
+                PluginLog.getLog().debug("Template JAR url: " + url);
 
                 extract(url);
             }
@@ -136,7 +134,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
         }
     }
     
-
+    
     /**
      * Returns a list that contains all extension templates URLs.
      */
@@ -144,7 +142,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
         String pluginPath = getPluginPath();
         List urls = new ArrayList();
         if (pluginPath != null) {
-            getLog().debug("Plugin path: " + pluginPath);
+            PluginLog.getLog().debug("Plugin path: " + pluginPath);
             File f = new File(pluginPath);
             File dir = f.getParentFile();
             File templatesDir = new File (dir, DIR_TEMPLATES);
@@ -176,7 +174,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
         int n;
         while ((je = jis.getNextJarEntry()) != null) {
             String jarEntryName = je.getName();
-            getLog().debug("JAR entry: " + jarEntryName);
+            PluginLog.getLog().debug("JAR entry: " + jarEntryName);
             if (je.isDirectory() || !jarEntryName.startsWith(puTemplate)) {
                 continue;
             }
@@ -184,7 +182,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
             
             // convert the ${gsGroupPath} to directory
             targetFileName = StringUtils.replace(targetFileName, FILTER_GROUP_PATH, packageDirs);
-            getLog().debug("Extracting entry " + jarEntryName + " to " + targetFileName);
+            PluginLog.getLog().debug("Extracting entry " + jarEntryName + " to " + targetFileName);
             
             // read the bytes to the buffer
             ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
@@ -252,7 +250,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
      * Returns a set containing all templates defined in this JAR file.
      */
     public HashMap getJarTemplates(URL url) throws Exception {
-        getLog().debug("retrieving all templates from jar file: " + url);
+        PluginLog.getLog().debug("retrieving all templates from jar file: " + url);
         String lookFor = DIR_TEMPLATES + "/";
         int length = lookFor.length();
         HashMap templates = new HashMap();
@@ -263,7 +261,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
         while ((je = jis.getNextJarEntry()) != null) {
             // find the template name
             String jarEntryName = je.getName();
-            getLog().debug("Found entry: " + jarEntryName);
+            PluginLog.getLog().debug("Found entry: " + jarEntryName);
             if (jarEntryName.length() <= length || !jarEntryName.startsWith(lookFor)) {
                 continue;
             }
@@ -272,7 +270,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
                 continue;
             }
             String jarTemplate = jarEntryName.substring(length, nextSlashIndex);
-            getLog().debug("Found template: " + jarTemplate);
+            PluginLog.getLog().debug("Found template: " + jarTemplate);
             if (templates.containsKey(jarTemplate)) {
                 continue;
             }
@@ -326,7 +324,7 @@ public class CreatePUProjectMojo extends AbstractMojo {
         Enumeration urls = Thread.currentThread().getContextClassLoader().getResources(DIR_TEMPLATES);
         while (urls.hasMoreElements()) {
             URL url = (URL) urls.nextElement();
-            getLog().debug("retrieving all templates from url: " + url);
+            PluginLog.getLog().debug("retrieving all templates from url: " + url);
             HashMap jarTemplates = getJarTemplates(getJarURLFromURL(url, ""));
             templates.putAll(jarTemplates);
         }
@@ -366,4 +364,5 @@ public class CreatePUProjectMojo extends AbstractMojo {
         }
         return sb.toString();
     }
+    
 }

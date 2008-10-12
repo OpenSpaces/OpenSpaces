@@ -16,22 +16,34 @@
 
 package org.openspaces.maven.plugin;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.project.MavenProject;
-import sun.misc.URLClassPath;
-
 import java.io.File;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
+
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactCollector;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
+import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.dependency.tree.DependencyNode;
+import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
+
+import sun.misc.URLClassPath;
+import edu.emory.mathcs.backport.java.util.Collections;
 
 
 /**
@@ -124,34 +136,116 @@ public class Utils {
 
 
     /**
-     * Resolves the processing unit's dependencies classpath.
-     * It includes the processing unit's executables and dependencies.
+     * Returns a list of the artifacts' URLs.
      *
-     * @return a list containing all paths.
+     * @return a list of the artifacts' URLs.
      */
-    static List resolveClasspath(MavenProject project) throws Exception {
-        List dependencyFiles = resolveDependencyClasspath(project);
-        dependencyFiles.add(getURL(project.getArtifact().getFile()));
-        return dependencyFiles;
+    static List getArtifactURLs(Set artifacts) throws Exception {
+        List urls = new ArrayList(artifacts.size());
+        for (Iterator i = artifacts.iterator(); i.hasNext();) {
+            Artifact artifact = (Artifact) i.next();
+            urls.add(getURL(artifact.getFile()));
+        }
+        return urls;
     }
-
-
+    
+    
+    /**
+     * Converts a comma separated list in a String to a String array.
+     * 
+     * @param str the string
+     * @return a String array that contains the list elements
+     */
+    static String[] convertCommaSeparatedListToArray(String str) {
+        StringTokenizer st = new StringTokenizer(str, ",");
+        List l = new LinkedList();
+        while (st.hasMoreTokens()) {
+            l.add(st.nextToken());
+        }
+        return (String[])l.toArray(new String[l.size()]);
+    }
+    
     /**
      * Resolves the processing unit's dependencies classpath.
-     *
-     * @return a list containing all dependencies paths.
+     * 
+     * @param project the processing unit project
+     * @param includeScopes the scopes of the dependencies to include
+     * @param includeProjects whether to include project's output directories
+     * @param reactorProjects the reactor projects
+     * @param dependencyTreeBuilder the dependency tree builder
+     * @param metadataSource the metadata source
+     * @param artifactCollector the artifact collector
+     * @param artifactResolver the artifact resolver
+     * @param artifactFactory the artifact factory
+     * @param localRepository the local repository
+     * @param remoteRepositories the remote repositories
+     * @return a list containing all dependency URLs.
+     * @throws Exception
      */
-    static List resolveDependencyClasspath(MavenProject project) throws Exception {
-        List dependencyFiles = new ArrayList();
-        Collection dependencyArtifacts = project.getArtifacts();
-        for (Iterator i = dependencyArtifacts.iterator(); i.hasNext();) {
-            Artifact artifact = (Artifact) i.next();
-            dependencyFiles.add(getURL(artifact.getFile()));
+    static List resolveExecutionClasspath(MavenProject project, String[] includeScopes, 
+            boolean includeProjects, List reactorProjects, DependencyTreeBuilder dependencyTreeBuilder, 
+            ArtifactMetadataSource metadataSource, ArtifactCollector artifactCollector, 
+            ArtifactResolver artifactResolver, ArtifactFactory artifactFactory, 
+            ArtifactRepository localRepository, List remoteRepositories) throws Exception {
+        
+        Set scopes = new HashSet(includeScopes.length);
+        Collections.addAll(scopes, includeScopes);
+        
+        // resolve all dependency of the specifies scope
+        // scope 'test' is the widest scope available.
+        ArtifactFilter artifactFilter = new ScopeArtifactFilter("test");
+        DependencyNode root = dependencyTreeBuilder.buildDependencyTree(project, localRepository, artifactFactory,
+                                                         metadataSource, artifactFilter,artifactCollector);
+        
+        // resolve all dependency files. if the dependency is a referenced project and not
+        // a file in the repository add its output directory to the classpath. 
+        Iterator i = root.preorderIterator();
+        Set artifacts = new HashSet();
+        while (i.hasNext()) {
+            DependencyNode node = (DependencyNode)i.next();
+            // the dependency may not be included due to duplication
+            // dependency cycles and version conflict.
+            // don't include those in the classpath.
+            if (node.getState() != DependencyNode.INCLUDED) {
+                PluginLog.getLog().debug("Not including dependency: " + node);
+                continue;
+            }
+            Artifact artifact = node.getArtifact();
+            if (artifact.getFile() == null) {
+                try {
+                    // if file is not found an exception is thrown
+                    artifactResolver.resolve(artifact, remoteRepositories, localRepository);
+                }
+                catch (Exception e) {
+                    if (includeProjects) {
+                        // try to see if the dependency is a referenced project
+                        Iterator projectsIterator = reactorProjects.iterator();
+                        while (projectsIterator.hasNext()) {
+                            MavenProject proj = (MavenProject)projectsIterator.next();
+                            if (proj.getArtifactId().equals(artifact.getArtifactId())) {
+                                artifact.setFile(new File(proj.getBuild().getOutputDirectory()));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (!scopes.contains(artifact.getScope())) {
+                if (artifact.getScope() != null) {
+                    continue;
+                }
+                // if it's not the same project don't add 
+                if (!includeProjects || !project.getArtifactId().equals(artifact.getArtifactId())) {
+                    continue;
+                }
+            }
+            artifacts.add(artifact);
         }
-        return dependencyFiles;
+        
+        return getArtifactURLs(artifacts);
     }
 
-
+    
     /**
      * Replaces white spaces in URLs to %20.
      *

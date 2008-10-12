@@ -16,16 +16,15 @@
 
 package org.openspaces.maven.plugin;
 
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.project.MavenProject;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.MavenProject;
 
 
 /**
@@ -34,7 +33,7 @@ import java.util.List;
  * @goal undeploy
  * @requiresProject false
  */
-public class UndeployPUMojo extends AbstractMojo {
+public class UndeployPUMojo extends AbstractOpenSpacesMojo {
 
     /**
      * groups
@@ -89,7 +88,7 @@ public class UndeployPUMojo extends AbstractMojo {
     /**
      * executes the mojo.
      */
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    public void executeMojo() throws MojoExecutionException, MojoFailureException {
         Utils.handleSecurity();
 
         // get a list of project to execute in the order set by the reactor
@@ -100,7 +99,7 @@ public class UndeployPUMojo extends AbstractMojo {
 
         for (Iterator projIt = projects.iterator(); projIt.hasNext();) {
             MavenProject proj = (MavenProject) projIt.next();
-            getLog().info("Undeploying processing unit: " + proj.getBuild().getFinalName());
+            PluginLog.getLog().info("Undeploying processing unit: " + proj.getBuild().getFinalName());
             String[] attributesArray = createAttributesArray(proj.getBuild().getFinalName());
             try {
                 Class deployClass = Class.forName("org.openspaces.pu.container.servicegrid.deploy.Undeploy", true, Thread.currentThread().getContextClassLoader());
@@ -125,7 +124,7 @@ public class UndeployPUMojo extends AbstractMojo {
         Utils.addAttributeToList(Attlist, "-locators", locators, ",");
         Utils.addAttributeToList(Attlist, "-timeout", timeout);
         Attlist.add(name);
-        getLog().info("Arguments list: " + Attlist);
+        PluginLog.getLog().info("Arguments list: " + Attlist);
         String[] attArray = new String[Attlist.size()];
         Attlist.toArray(attArray);
         return attArray;

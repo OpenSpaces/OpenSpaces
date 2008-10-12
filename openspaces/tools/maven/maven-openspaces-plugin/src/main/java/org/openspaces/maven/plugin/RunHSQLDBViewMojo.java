@@ -17,7 +17,6 @@ package org.openspaces.maven.plugin;
 
 import java.util.ArrayList;
 
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.hsqldb.util.DatabaseManagerSwing;
@@ -30,7 +29,7 @@ import org.springframework.util.StringUtils;
  * @requiresProject false
  * @description Runs the HSQLDB viewer.
  */
-public class RunHSQLDBViewMojo extends AbstractMojo {
+public class RunHSQLDBViewMojo extends AbstractOpenSpacesMojo {
     
     /**
      * driver
@@ -69,7 +68,7 @@ public class RunHSQLDBViewMojo extends AbstractMojo {
     
     
     /** Executes the Mojo **/
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    public void executeMojo() throws MojoExecutionException, MojoFailureException {
         if (help != null) {
             printUsage();
         }
@@ -99,7 +98,7 @@ public class RunHSQLDBViewMojo extends AbstractMojo {
             // create the arguments array
             String[] args = new String[argList.size()];
             argList.toArray(args);
-            getLog().info("Starting HSQLDB viewer with arguments: " + argList);
+            PluginLog.getLog().info("Starting HSQLDB viewer with arguments: " + argList);
             
             // start the viewer and sleep forever
             DatabaseManagerSwing.main(args);

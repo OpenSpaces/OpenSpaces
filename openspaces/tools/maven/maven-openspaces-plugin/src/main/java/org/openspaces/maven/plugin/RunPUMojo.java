@@ -16,26 +16,29 @@
 
 package org.openspaces.maven.plugin;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.project.MavenProject;
-import org.springframework.util.ClassUtils;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactCollector;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
+import org.springframework.util.ClassUtils;
 
 /**
  * Goal that runs a processing unit.
  *
  * @goal run
  * @requiresProject false
- * @description Runs ...
+ * @description Runs a processing unit from the from the project's output directory
  */
-public class RunPUMojo extends AbstractMojo {
+public class RunPUMojo extends AbstractOpenSpacesMojo {
 
     /**
      * The classpath elements of the project being tested.
@@ -61,6 +64,7 @@ public class RunPUMojo extends AbstractMojo {
      */
     private String proeprties;
 
+    
     /**
      * groups
      *
@@ -68,6 +72,7 @@ public class RunPUMojo extends AbstractMojo {
      */
     private String groups;
 
+    
     /**
      * locators
      *
@@ -80,8 +85,16 @@ public class RunPUMojo extends AbstractMojo {
      * Container list.
      */
     private List containers = new ArrayList();
-
-
+    
+    
+    /**
+    * The remote repositories.
+    * 
+    * @parameter expression="${project.remoteArtifactRepositories}"
+    */
+    private List remoteRepositories;
+   
+   
     /**
      * Project instance, used to add new source directory to the build.
      *
@@ -90,24 +103,71 @@ public class RunPUMojo extends AbstractMojo {
      */
     private List reactorProjects;
 
+    
     /**
+     * The local repository.
+     * 
      * @parameter expression="${localRepository}"
      * @required
      * @readonly
      */
-    protected ArtifactRepository localRepository;
+     private ArtifactRepository localRepository;
+     
+     
+     /**
+      * The scopes for dependencies inclusion.
+      *
+      * @parameter default-value="compile,provided,runtime,system"
+      */
+     private String scopes;
+    
+    
+     /**
+      * @component
+      */
+     private ArtifactResolver artifactResolver;
+     
+     
+     /**
+      *
+      * @component
+      */
+     private ArtifactFactory artifactFactory;
 
+     
+     /**
+     *
+     * @component
+     */
+     private ArtifactMetadataSource metadataSource;
+     
+     
+     /**
+     * The dependency tree builder to use.
+     * 
+     * @component
+     */
+     private DependencyTreeBuilder dependencyTreeBuilder; 
 
+     
+     /**
+      * The artifact collector to use.
+      * 
+      * @component
+      */
+     private ArtifactCollector artifactCollector;
+     
+     
     /**
      * Executed the Mojo.
      */
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    public void executeMojo() throws MojoExecutionException, MojoFailureException {
         // Remove white spaces from ClassLoader's URLs
         ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
         try {
             Utils.changeClassLoaderToSupportWhiteSpacesRepository(currentCL);
         } catch (Exception e) {
-            getLog().info("Unable to update ClassLoader. Proceeding with processing unit invocation.", e);
+            PluginLog.getLog().info("Unable to update ClassLoader. Proceeding with processing unit invocation.", e);
         }
 
         Utils.handleSecurity();
@@ -121,12 +181,12 @@ public class RunPUMojo extends AbstractMojo {
 
         // get a list of project to execute in the order set by the reactor
         List projects = Utils.getProjectsToExecute(reactorProjects, module);
-
+        
         for (Iterator projIt = projects.iterator(); projIt.hasNext();) {
             MavenProject proj = (MavenProject) projIt.next();
             executePU(proj);
         }
-
+        
         final Thread mainThread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
@@ -139,6 +199,7 @@ public class RunPUMojo extends AbstractMojo {
                 }
             }
         });
+
         while (!mainThread.isInterrupted()) {
             try {
                 Thread.sleep(Long.MAX_VALUE);
@@ -147,8 +208,8 @@ public class RunPUMojo extends AbstractMojo {
             }
         }
     }
-
-
+    
+  
     /**
      * Prepares and executes the PU.
      *
@@ -162,22 +223,32 @@ public class RunPUMojo extends AbstractMojo {
         }
 
         // run the PU
-        getLog().info("Running processing unit: " + project.getBuild().getFinalName());
-
-        ClassLoader classLoader;
+        PluginLog.getLog().info("Running processing unit: " + project.getBuild().getFinalName());
+        
+        // resolve the classpath for the execution of the processing unit
+        List classpath = null;
+        ClassLoader classLoader = null;
         try {
-            List classpath = Utils.resolveClasspath(project);
-            getLog().debug("Processing unit [" + project.getName() + "] classpath: " + classpath);
+            String[] includeScopes = Utils.convertCommaSeparatedListToArray(scopes);
+            classpath = Utils.resolveExecutionClasspath(project, includeScopes, true, reactorProjects, dependencyTreeBuilder,
+                    metadataSource, artifactCollector, artifactResolver, artifactFactory, localRepository, remoteRepositories);
+            PluginLog.getLog().info("Processing unit [" + project.getName() + "] classpath: " + classpath);
             classLoader = Utils.createClassLoader(classpath, null);
         } catch (Exception e1) {
-            throw new MojoExecutionException("Failed to resolve project classpath", e1);
+            throw new MojoExecutionException("Failed to resolve the processing unit's  classpath", e1);
         }
+        
+        // set groups
         if (groups != null && !groups.trim().equals("")) {
             System.setProperty("com.gs.jini_lus.groups", groups);
         }
+        
+        // set locators
         if (locators != null && !locators.trim().equals("")) {
             System.setProperty("com.gs.jini_lus.locators", locators);
         }
+        
+        // execute the processing unit in the new class loader 
         ContainerRunnable conatinerRunnable = new ContainerRunnable("org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer", createAttributesArray());
         Thread thread = new Thread(conatinerRunnable, "Processing Unit [" + project.getBuild().getFinalName() + "]");
         thread.setContextClassLoader(classLoader);
@@ -194,8 +265,7 @@ public class RunPUMojo extends AbstractMojo {
         }
         containers.add(thread);
     }
-
-
+    
     /**
      * Creates the attributes array
      *
@@ -205,7 +275,7 @@ public class RunPUMojo extends AbstractMojo {
         ArrayList attlist = new ArrayList();
         Utils.addAttributeToList(attlist, "-cluster", cluster);
         Utils.addAttributeToList(attlist, "-proeprties", proeprties);
-        getLog().info("Arguments list: " + attlist);
+        PluginLog.getLog().info("Arguments list: " + attlist);
         String[] attArray = new String[attlist.size()];
         attlist.toArray(attArray);
         return attArray;

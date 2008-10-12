@@ -16,13 +16,12 @@
 
 package org.openspaces.maven.plugin;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.springframework.util.FileCopyUtils;
-
 import java.io.File;
 import java.io.IOException;
+
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.springframework.util.FileCopyUtils;
 
 /**
  * Installs the GigaSpaces license file in the local repository.
@@ -30,7 +29,7 @@ import java.io.IOException;
  * @goal install-license
  * @requiresProject false
  */
-public class InstallLicenseMojo extends AbstractMojo {
+public class InstallLicenseMojo extends AbstractOpenSpacesMojo {
 
     /**
      * The license file.
@@ -56,7 +55,7 @@ public class InstallLicenseMojo extends AbstractMojo {
     protected String version;
 
 
-    public void execute() throws MojoExecutionException {
+    public void executeMojo() throws MojoExecutionException {
         if (!file.exists()) {
             throw new MojoExecutionException("GigaSpaces license file not found at " + file.getAbsolutePath());
         }
@@ -76,7 +75,7 @@ public class InstallLicenseMojo extends AbstractMojo {
 
         try {
             File target = new File(targetDir, "gslicense.xml");
-            getLog().info("Copying license file to: " + target.getAbsolutePath());
+            PluginLog.getLog().info("Copying license file to: " + target.getAbsolutePath());
             FileCopyUtils.copy(file, target);
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to copy GigaSpaces license file.", e);

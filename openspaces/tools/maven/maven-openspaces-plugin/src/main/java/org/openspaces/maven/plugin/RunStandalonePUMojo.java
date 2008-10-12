@@ -16,24 +16,30 @@
 
 package org.openspaces.maven.plugin;
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.project.MavenProject;
-import org.springframework.util.ClassUtils;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactCollector;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
+import org.springframework.util.ClassUtils;
+
+//
 /**
  * Goal that runs a processing unit as standalone.
  *
  * @goal run-standalone
  * @requiresProject true
+ * @description Runs a processing unit from its bundle
  */
-public class RunStandalonePUMojo extends AbstractMojo {
+public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
 
     /**
      * cluster
@@ -58,6 +64,7 @@ public class RunStandalonePUMojo extends AbstractMojo {
      */
     private String module;
 
+    
     /**
      * Project instance, used to add new source directory to the build.
      *
@@ -66,6 +73,7 @@ public class RunStandalonePUMojo extends AbstractMojo {
      */
     private List reactorProjects;
     
+    
     /**
      * @parameter expression="${localRepository}"
      * @required
@@ -73,6 +81,7 @@ public class RunStandalonePUMojo extends AbstractMojo {
      */
     protected ArtifactRepository localRepository;
 
+    
     /**
      * groups
      *
@@ -80,6 +89,7 @@ public class RunStandalonePUMojo extends AbstractMojo {
      */
     private String groups;
 
+    
     /**
      * locators
      *
@@ -87,23 +97,76 @@ public class RunStandalonePUMojo extends AbstractMojo {
      */
     private String locators;
 
+    
     /**
      * Container list.
      */
     private List containers = new ArrayList();
 
+    
+    /**
+     * The remote repositories.
+     * 
+     * @parameter expression="${project.remoteArtifactRepositories}"
+     */
+     private List remoteRepositories;
+     
+     
+     /**
+      * @component
+      */
+     private ArtifactResolver artifactResolver;
+     
+     
+     /**
+      *
+      * @component
+      */
+     private ArtifactFactory artifactFactory;
 
+     
+    /**
+     *
+     * @component
+     */
+     private ArtifactMetadataSource metadataSource;
+     
+     
+    /**
+     * The dependency tree builder to use.
+     * 
+     * @component
+     */
+     private DependencyTreeBuilder dependencyTreeBuilder; 
+
+     
+     /**
+      * The artifact collector to use.
+      * 
+      * @component
+      */
+     private ArtifactCollector artifactCollector;
+     
+     
+     /**
+      * The scopes for dependencies inclusion.
+      *
+      * @parameter default-value="provided,runtime"
+      */
+     private String scopes;
+
+     
     /**
      * executes the mojo.
      */
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    public void executeMojo() throws MojoExecutionException, MojoFailureException {
 
         // Remove white spaces from ClassLoader's URLs
         ClassLoader currentCL = Thread.currentThread().getContextClassLoader();
         try {
             Utils.changeClassLoaderToSupportWhiteSpacesRepository(currentCL);
         } catch (Exception e) {
-            getLog().info("Unable to update ClassLoader. Proceeding with processing unit invocation.", e);
+            PluginLog.getLog().info("Unable to update ClassLoader. Proceeding with processing unit invocation.", e);
         }
 
         Utils.handleSecurity();
@@ -157,6 +220,19 @@ public class RunStandalonePUMojo extends AbstractMojo {
             throw new MojoExecutionException("The processing unit project '" + project.getName() +
                     "' must be of type jar (packaging=jar).");
         }
+
+        // resolve the classpath for the execution of the processing unit
+        List classpath = null;
+        ClassLoader classLoader = null;
+        try {
+            String[] includeScopes = Utils.convertCommaSeparatedListToArray(scopes);
+            classpath = Utils.resolveExecutionClasspath(project, includeScopes, false, reactorProjects, dependencyTreeBuilder,
+                    metadataSource, artifactCollector, artifactResolver, artifactFactory, localRepository, remoteRepositories);
+            PluginLog.getLog().info("Processing unit [" + project.getName() + "] classpath: " + classpath);
+            classLoader = Utils.createClassLoader(classpath, null);
+        } catch (Exception e1) {
+            throw new MojoExecutionException("Failed to resolve the processing unit's classpath", e1);
+        }
         
         if (groups != null && !groups.trim().equals("")) {
             System.setProperty("com.gs.jini_lus.groups", groups);
@@ -166,10 +242,11 @@ public class RunStandalonePUMojo extends AbstractMojo {
         }
 
         // run the PU
-        getLog().info("Running processing unit: " + project.getBuild().getFinalName());
+        PluginLog.getLog().info("Running processing unit: " + project.getBuild().getFinalName());
 
         ContainerRunnable conatinerRunnable = new ContainerRunnable("org.openspaces.pu.container.standalone.StandaloneProcessingUnitContainer", createAttributesArray(Utils.getProcessingUnitJar((project))));
         Thread thread = new Thread(conatinerRunnable, "Processing Unit [" + project.getBuild().getFinalName() + "]");
+        thread.setContextClassLoader(classLoader);
         thread.start();
         while (!conatinerRunnable.hasStarted()) {
             try {
@@ -183,8 +260,8 @@ public class RunStandalonePUMojo extends AbstractMojo {
         }
         containers.add(thread);
     }
-
-
+    
+    
     /**
      * Creates the attributes array
      *
@@ -195,7 +272,7 @@ public class RunStandalonePUMojo extends AbstractMojo {
         Utils.addAttributeToList(attlist, "-cluster", cluster);
         Utils.addAttributeToList(attlist, "-proeprties", proeprties);
         attlist.add(name);
-        getLog().info("Arguments list: " + attlist);
+        PluginLog.getLog().info("Arguments list: " + attlist);
         String[] attArray = new String[attlist.size()];
         attlist.toArray(attArray);
         return attArray;
