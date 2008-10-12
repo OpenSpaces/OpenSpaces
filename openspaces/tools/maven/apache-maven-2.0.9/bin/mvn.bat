@@ -156,10 +156,10 @@ goto runm2
 :runm2
 
 @REM set GigaSpaces properties required for using with JDK 1.4
-set JSHOMEDIR=%M2_HOME%\..\..\..
-set GSBOOTCLASSPATH=-Xbootclasspath/p:.;"%JSHOMEDIR%\lib\xml\serializer.jar";"%JSHOMEDIR%\lib\xml\xalan.jar";"%JSHOMEDIR%\lib\xml\xercesImpl.jar";"%JSHOMEDIR%\lib\xml\xml-apis.jar"
+@call "%~dp0..\..\..\..\bin\setenv.bat"
+set bootclasspath=-Xbootclasspath/p:%XML_JARS%
 
-%MAVEN_JAVA_EXE% %GSBOOTCLASSPATH% %MAVEN_OPTS% -classpath %CLASSWORLDS_JAR% "-Dclassworlds.conf=%M2_HOME%\bin\m2.conf" "-Dmaven.home=%M2_HOME%" org.codehaus.classworlds.Launcher %MAVEN_CMD_LINE_ARGS%
+%MAVEN_JAVA_EXE% %bootclasspath% %LOOKUP_LOCATORS_PROP% %LOOKUP_GROUPS_PROP% %RMI_OPTIONS% %MAVEN_OPTS% -classpath %CLASSWORLDS_JAR% "-Dclassworlds.conf=%M2_HOME%\bin\m2.conf" "-Dmaven.home=%M2_HOME%" org.codehaus.classworlds.Launcher %MAVEN_CMD_LINE_ARGS%
 if ERRORLEVEL 1 goto error
 goto end
 
