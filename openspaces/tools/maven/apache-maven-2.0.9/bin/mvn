@@ -155,8 +155,8 @@ if $cygwin; then
 fi
 
 # set GigaSpaces properties required for using with JDK 1.4
-export JSHOMEDIR='dirname $0'/../../../..
-. 'dirname $0'/../../../../bin/setenv.sh
+export JSHOMEDIR=`dirname $0`/../../../..
+. `dirname $0`/../../../../bin/setenv.sh
 bootclasspath="-Xbootclasspath/p:$XML_JARS"
 
 exec "$JAVACMD" \
