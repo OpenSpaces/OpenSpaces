@@ -717,7 +717,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         conn.disconnect();
 
         // extract the file
-        byte data[] = new byte[1024];
+        final int bufferSize = 4098;
+        byte data[] = new byte[bufferSize];
         ZipFile zipFile = new ZipFile(tempFile);
         Enumeration e = zipFile.entries();
         while (e.hasMoreElements()) {
@@ -735,8 +736,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                     file.getParentFile().mkdirs();
                 }
                 FileOutputStream fos = new FileOutputStream(file);
-                BufferedOutputStream dest = new BufferedOutputStream(fos, 1024);
-                while ((count = is.read(data, 0, 1024)) != -1) {
+                BufferedOutputStream dest = new BufferedOutputStream(fos, bufferSize);
+                while ((count = is.read(data, 0, bufferSize)) != -1) {
                     dest.write(data, 0, count);
                 }
                 dest.flush();
