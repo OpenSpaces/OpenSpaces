@@ -172,11 +172,11 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
                 throw new PermissionDeniedDataAccessException("Failed to invoke event method ["
                         + listenerMethod.getName() + "]", ex);
             } catch (InvocationTargetException ex) {
-                throw new ListenerExecutionFailedException("Listener event method '" + listenerMethod.getName()
-                        + "' threw exception", ex.getTargetException());
+                throw new ListenerExecutionFailedException("Listener event method [" + listenerMethod.getName()
+                        + "] of class [" + listenerMethod.getDeclaringClass().getName() + "] threw exception", ex.getTargetException());
             } catch (Throwable ex) {
-                throw new ListenerExecutionFailedException("Listener event method '" + listenerMethod.getName()
-                        + "' threw exception", ex);
+                throw new ListenerExecutionFailedException("Listener event method [" + listenerMethod.getName()
+                        + "] of class [" + listenerMethod.getDeclaringClass().getName() + "] threw exception", ex);
             }
         } else {
             // more than one method, we need to use reflection to find the matched method

@@ -280,13 +280,12 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTran
                 if (logger.isTraceEnabled()) {
                     logger.trace(message("Received event [" + dataEvent + "]"));
                 }
-                if (!(dataEvent instanceof Object[])) {
+                if (passArrayAsIs && !(dataEvent instanceof Object[])) {
                     Object dataEventArr = Array.newInstance(dataEvent.getClass(), 1);
                     Array.set(dataEventArr, 0, dataEvent);
-                    eventReceived(dataEventArr);
-                } else {
-                    eventReceived(dataEvent);
+                    dataEvent = dataEventArr;
                 }
+                eventReceived(dataEvent);
                 try {
                     invokeListener(eventListener, dataEvent, status, null);
                 } catch (Throwable ex) {
