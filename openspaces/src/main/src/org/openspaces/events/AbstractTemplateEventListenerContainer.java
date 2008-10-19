@@ -55,7 +55,7 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
 
                 // check if there is an annotation for it
                 final AtomicReference<Method> ref = new AtomicReference<Method>();
-                ReflectionUtils.doWithMethods(AopUtils.getTargetClass(listener.getClass()), new ReflectionUtils.MethodCallback() {
+                ReflectionUtils.doWithMethods(AopUtils.getTargetClass(listener), new ReflectionUtils.MethodCallback() {
                     public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
                         if (method.isAnnotationPresent(EventTemplate.class)) {
                             ref.set(method);

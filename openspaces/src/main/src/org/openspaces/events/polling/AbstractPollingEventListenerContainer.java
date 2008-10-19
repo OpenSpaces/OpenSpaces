@@ -148,7 +148,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTran
             if (getActualEventListener() != null) {
                 // try and find an annotated one
                 final AtomicReference<Method> ref = new AtomicReference<Method>();
-                ReflectionUtils.doWithMethods(AopUtils.getTargetClass(getActualEventListener().getClass()), new ReflectionUtils.MethodCallback() {
+                ReflectionUtils.doWithMethods(AopUtils.getTargetClass(getActualEventListener()), new ReflectionUtils.MethodCallback() {
                     public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
                         if (method.isAnnotationPresent(ReceiveHandler.class)) {
                             ref.set(method);
@@ -171,7 +171,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTran
 
         if (triggerOperationHandler == null && getActualEventListener() != null) {
             final AtomicReference<Method> ref = new AtomicReference<Method>();
-            ReflectionUtils.doWithMethods(AopUtils.getTargetClass(getActualEventListener().getClass()), new ReflectionUtils.MethodCallback() {
+            ReflectionUtils.doWithMethods(AopUtils.getTargetClass(getActualEventListener()), new ReflectionUtils.MethodCallback() {
                 public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
                     if (method.isAnnotationPresent(TriggerHandler.class)) {
                         ref.set(method);

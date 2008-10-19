@@ -108,7 +108,7 @@ public class SimpleAsyncPollingEventListenerContainer extends AbstractTransactio
             if (getActualEventListener() != null) {
                 // try and find an annotated one
                 final AtomicReference<Method> ref = new AtomicReference<Method>();
-                ReflectionUtils.doWithMethods(AopUtils.getTargetClass(getActualEventListener().getClass()), new ReflectionUtils.MethodCallback() {
+                ReflectionUtils.doWithMethods(AopUtils.getTargetClass(getActualEventListener()), new ReflectionUtils.MethodCallback() {
                     public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
                         if (method.isAnnotationPresent(AsyncHandler.class)) {
                             ref.set(method);
