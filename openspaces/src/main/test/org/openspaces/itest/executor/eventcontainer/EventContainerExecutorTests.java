@@ -35,7 +35,7 @@ public class EventContainerExecutorTests extends AbstractDependencyInjectionSpri
         distGigaSpace.clear(null);
     }
 
-    public void testDynamicRegistrationOfEvents() throws Exception {
+    public void XtestDynamicRegistrationOfEvents() throws Exception {
         DynamicEventListener listener = new DynamicEventListener();
         gigaSpace1.write(new Object());
         Thread.sleep(200);
