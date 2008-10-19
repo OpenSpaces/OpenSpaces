@@ -22,6 +22,7 @@ import org.openspaces.core.transaction.internal.TransactionalAsyncFutureListener
 import org.openspaces.events.AbstractTransactionalEventListenerContainer;
 import org.openspaces.events.asyncpolling.receive.AsyncOperationHandler;
 import org.openspaces.events.asyncpolling.receive.SingleTakeAsyncOperationHandler;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -107,7 +108,7 @@ public class SimpleAsyncPollingEventListenerContainer extends AbstractTransactio
             if (getActualEventListener() != null) {
                 // try and find an annotated one
                 final AtomicReference<Method> ref = new AtomicReference<Method>();
-                ReflectionUtils.doWithMethods(getActualEventListener().getClass(), new ReflectionUtils.MethodCallback() {
+                ReflectionUtils.doWithMethods(AopUtils.getTargetClass(getActualEventListener().getClass()), new ReflectionUtils.MethodCallback() {
                     public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
                         if (method.isAnnotationPresent(AsyncHandler.class)) {
                             ref.set(method);

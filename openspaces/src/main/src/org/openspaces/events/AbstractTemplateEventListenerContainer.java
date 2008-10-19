@@ -16,6 +16,7 @@
 
 package org.openspaces.events;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.util.ReflectionUtils;
 
@@ -54,7 +55,7 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
 
                 // check if there is an annotation for it
                 final AtomicReference<Method> ref = new AtomicReference<Method>();
-                ReflectionUtils.doWithMethods(listener.getClass(), new ReflectionUtils.MethodCallback() {
+                ReflectionUtils.doWithMethods(AopUtils.getTargetClass(listener.getClass()), new ReflectionUtils.MethodCallback() {
                     public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
                         if (method.isAnnotationPresent(EventTemplate.class)) {
                             ref.set(method);

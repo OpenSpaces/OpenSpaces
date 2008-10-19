@@ -22,6 +22,7 @@ import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.events.polling.receive.ReceiveOperationHandler;
 import org.openspaces.events.polling.receive.SingleTakeReceiveOperationHandler;
 import org.openspaces.events.polling.trigger.TriggerOperationHandler;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
@@ -147,7 +148,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTran
             if (getActualEventListener() != null) {
                 // try and find an annotated one
                 final AtomicReference<Method> ref = new AtomicReference<Method>();
-                ReflectionUtils.doWithMethods(getActualEventListener().getClass(), new ReflectionUtils.MethodCallback() {
+                ReflectionUtils.doWithMethods(AopUtils.getTargetClass(getActualEventListener().getClass()), new ReflectionUtils.MethodCallback() {
                     public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
                         if (method.isAnnotationPresent(ReceiveHandler.class)) {
                             ref.set(method);
@@ -170,7 +171,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTran
 
         if (triggerOperationHandler == null && getActualEventListener() != null) {
             final AtomicReference<Method> ref = new AtomicReference<Method>();
-            ReflectionUtils.doWithMethods(getActualEventListener().getClass(), new ReflectionUtils.MethodCallback() {
+            ReflectionUtils.doWithMethods(AopUtils.getTargetClass(getActualEventListener().getClass()), new ReflectionUtils.MethodCallback() {
                 public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
                     if (method.isAnnotationPresent(TriggerHandler.class)) {
                         ref.set(method);
