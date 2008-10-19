@@ -68,10 +68,12 @@ import org.springframework.util.StringUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.rmi.MarshalledObject;
@@ -704,7 +706,15 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         conn.setRequestProperty("Package", "true");
         int responseCode = conn.getResponseCode();
         if (responseCode != 200 && responseCode != 201) {
-            throw new RuntimeException("Failed to extract file to: " + path.getAbsolutePath() + ", response code [" + responseCode + "]");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String line;
+            StringBuffer sb = new StringBuffer();
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+            reader.close();
+            conn.disconnect();
+            throw new RuntimeException("Failed to extract file to: " + path.getAbsolutePath() + ", response code [" + responseCode + "], response [" + sb.toString() + "]");
         }
 
         if (puName.length() < 3) {
