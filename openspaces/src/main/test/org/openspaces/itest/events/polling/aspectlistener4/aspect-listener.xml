@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:os-core="http://www.openspaces.org/schema/core"
+       xmlns:os-events="http://www.openspaces.org/schema/events"
+       xmlns:os-remoting="http://www.openspaces.org/schema/remoting"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
+       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
+       http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/remoting/openspaces-remoting.xsd">
+
+    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
+
+    <os-core:space id="space" url="/./eventSpace" lookup-groups="${user.name}"/>
+
+    <os-core:giga-space id="gigaSpace" space="space"/>
+
+    <bean id="testListenerTarget" class="org.openspaces.itest.events.polling.aspectlistener4.TestListener"/>
+
+    <bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor">
+    </bean>
+
+    <bean id="testListener" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="proxyTargetClass" value="true" />
+
+        <property name="target">
+            <ref local="testListenerTarget"/>
+        </property>
+        <property name="interceptorNames">
+            <list>
+                <value>debugInterceptor</value>
+            </list>
+        </property>
+    </bean>
+
+    <os-events:polling-container id="test" giga-space="gigaSpace">
+        <os-core:template>
+            <bean class="java.lang.Object"/>
+        </os-core:template>
+        <os-events:listener>
+            <os-events:method-adapter method-name="iAmTheListener">
+                <os-events:delegate ref="testListener"/>
+            </os-events:method-adapter>
+        </os-events:listener>
+    </os-events:polling-container>
+</beans>

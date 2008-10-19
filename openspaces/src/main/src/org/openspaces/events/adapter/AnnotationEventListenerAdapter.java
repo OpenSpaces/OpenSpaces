@@ -39,7 +39,17 @@ public class AnnotationEventListenerAdapter extends AbstractReflectionEventListe
         final List<Method> methods = new ArrayList<Method>();
         ReflectionUtils.doWithMethods(AopUtils.getTargetClass(getDelegate()), new ReflectionUtils.MethodCallback() {
             public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-                methods.add(method);
+                if (AopUtils.getTargetClass(getDelegate()) != getDelegate().getClass()) {
+                    Method proxyMethod = null;
+                    try {
+                        proxyMethod = getDelegate().getClass().getMethod(method.getName(), method.getParameterTypes());
+                        methods.add(proxyMethod);
+                    } catch (NoSuchMethodException e) {
+                        throw new IllegalArgumentException("Failed to find method [" + method + "] on proxy class [" + getDelegate().getClass().getName() + "]");
+                    }
+                } else {
+                    methods.add(method);
+                }
             }
         }, new ReflectionUtils.MethodFilter() {
             public boolean matches(Method method) {
