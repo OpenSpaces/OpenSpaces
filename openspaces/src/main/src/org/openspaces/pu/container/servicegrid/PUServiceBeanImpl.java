@@ -706,14 +706,19 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         conn.setRequestProperty("Package", "true");
         int responseCode = conn.getResponseCode();
         if (responseCode != 200 && responseCode != 201) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            StringBuffer sb = new StringBuffer();
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
+            StringBuilder sb = new StringBuilder();
+            try {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+                reader.close();
+            } catch (Exception e) {
+                // ignore this exception, failed to read input
+            } finally {
+                conn.disconnect();
             }
-            reader.close();
-            conn.disconnect();
             throw new RuntimeException("Failed to extract file to: " + path.getAbsolutePath() + ", response code [" + responseCode + "], response [" + sb.toString() + "]");
         }
 
