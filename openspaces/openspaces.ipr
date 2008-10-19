@@ -925,6 +925,7 @@
     <library name="Maven">
       <CLASSES>
         <root url="jar://$PROJECT_DIR$/tools/maven/apache-maven-2.0.9/lib/maven-2.0.9-uber.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/maven/maven-dependency-tree-1.1.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
