@@ -16,10 +16,6 @@
 
 package org.openspaces.maven.plugin;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -30,6 +26,10 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.springframework.util.ClassUtils;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 //
 /**
@@ -52,9 +52,9 @@ public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
     /**
      * proeprties
      *
-     * @parameter expression="${proeprties}"
+     * @parameter expression="${properties}"
      */
-    private String proeprties;
+    private String properties;
 
 
     /**
@@ -270,7 +270,7 @@ public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
     private String[] createAttributesArray(String name) {
         ArrayList attlist = new ArrayList();
         Utils.addAttributeToList(attlist, "-cluster", cluster);
-        Utils.addAttributeToList(attlist, "-proeprties", proeprties);
+        Utils.addAttributeToList(attlist, "-properties", properties);
         attlist.add(name);
         PluginLog.getLog().info("Arguments list: " + attlist);
         String[] attArray = new String[attlist.size()];

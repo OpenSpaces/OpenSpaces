@@ -16,14 +16,14 @@
 
 package org.openspaces.maven.plugin;
 
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.MavenProject;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.project.MavenProject;
 
 /**
  * Goal that deploys a processing unit.
@@ -71,9 +71,9 @@ public class DeployPUMojo extends AbstractOpenSpacesMojo {
     /**
      * proeprties
      *
-     * @parameter expression="${proeprties}"
+     * @parameter expression="${properties}"
      */
-    private String proeprties;
+    private String properties;
 
     /**
      * override-name
@@ -165,7 +165,7 @@ public class DeployPUMojo extends AbstractOpenSpacesMojo {
         Utils.addAttributeToList(Attlist, "-groups", groups, ",");
         Utils.addAttributeToList(Attlist, "-locators", locators, ",");
         Utils.addAttributeToList(Attlist, "-timeout", timeout);
-        Utils.addAttributeToList(Attlist, "-proeprties", proeprties);
+        Utils.addAttributeToList(Attlist, "-properties", properties);
         Utils.addAttributeToList(Attlist, "-override-name", overrideName);
         Utils.addAttributeToList(Attlist, "-max-instances-per-vm", maxInstancesPerVm);
         Utils.addAttributeToList(Attlist, "-max-instances-per-machine", maxInstancesPerMachine);
