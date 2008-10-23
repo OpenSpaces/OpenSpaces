@@ -46,6 +46,16 @@
         <property name="tempDirectory" value="${jee.deployPath}/WEB-INF/work" />
         <property name="copyWebDir" value="${web.context.copyWebDir}" />
         <property name="parentLoaderPriority" value="${web.context.classLoader.parentFirst}" />
+        <property name="configurationClasses">
+            <list>
+                <value>org.mortbay.jetty.webapp.WebInfConfiguration</value>
+                <!-- Enable JNDI configuration -->
+                <value>org.mortbay.jetty.plus.webapp.EnvConfiguration</value>
+                <value>org.mortbay.jetty.plus.webapp.Configuration</value>
+                <value>org.mortbay.jetty.webapp.JettyWebXmlConfiguration</value>
+                <value>org.mortbay.jetty.webapp.TagLibConfiguration</value>
+            </list>
+        </property>
     </bean>
 
     <bean id="jettyHolder" class="org.openspaces.pu.container.jee.jetty.SharedJettyHolder">
