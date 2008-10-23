@@ -21,7 +21,7 @@ public class SQLDataProviderExceptionHandler extends BulkDataPersisterExceptionH
     public DataIterator iterator(SQLQuery sqlQuery) throws DataSourceException {
         try {
             return ((SQLDataProvider) dataSource).iterator(sqlQuery);
-        } catch (DataSourceException e) {
+        } catch (Exception e) {
             exceptionHandler.onException(e, sqlQuery);
             return null;
         }
