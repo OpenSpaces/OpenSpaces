@@ -39,10 +39,10 @@ BUILDING, PACKAGING, RUNNING, DEPLOYING
 
 Quick list:
 
-* mvn compile: Compile the project.
-* mvn compile os:run: Compile and run the project.
+* mvn compile: Compiles the project.
+* mvn os:run: Runs the project.
 * mvn test: Runs the tests in the project.
-* mvn package: Compile and package the project.
+* mvn package: Compiles and packages the project.
 * mvn os:run-standalone: Runs a packaged application (from the jars).
 * mvn os:deploy: Deploys the project onto the Service Grid.
 * mvn os:undeploy: Removes the project from the Service Grid.
@@ -57,13 +57,13 @@ the common module. The feeder, processor and mirror modules packaging process cr
 "processing unit structure" directory within the target directory called [app-name]-[module].
 It also creates a jar from the mentioned directory called [app-name]-[module].jar.
 
-  In order to simply run the mirror, processor and feeder, "mvn compile os:run" can be used.
+  In order to simply run the mirror, processor and feeder (after compiling), "mvn os:run" can be used.
 This will run a single instance of each of the mirror, processor and feeder modules within
 the same JVM using the compilation level classpath (no need for packaging). 
 A specific module can also be executed by itself, which in this case, executing
 more than one instance of the processing unit can be done. For example, running the processor
 module with a cluster topology of 2 partitions, each with one backup, the following command
-can be used: mvn compile os:run -Dmodule=processor -Dcluster="total_members=2,1".
+can be used: mvn os:run -Dmodule=processor -Dcluster="total_members=2,1".
 
   In order to run a packaged processing unit, "mvn package os:run-standalone" can be used (if
 "mvn package" was already executed, it can be omitted). This operation will run the processing units
