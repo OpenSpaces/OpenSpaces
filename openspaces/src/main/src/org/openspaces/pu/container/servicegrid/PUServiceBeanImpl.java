@@ -76,6 +76,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
@@ -315,7 +316,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             // backward compatible
             beanLevelProperties.getContextProperties().setProperty("jee.deployPath", deployPath.getAbsolutePath());
             beanLevelProperties.getContextProperties().setProperty("dotnet.deployPath", deployPath.getAbsolutePath());
-            
+
             beanLevelProperties.getContextProperties().setProperty(DeployableProcessingUnitContainerProvider.CONTEXT_PROPERTY_DEPLOY_PATH, deployPath.getAbsolutePath());
 
             if (factory instanceof DeployableProcessingUnitContainerProvider) {
@@ -704,10 +705,26 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
     }
 
-    private void downloadAndExtractPU(String puName, String puPath, String codeserver, File path, File tempPath) throws IOException {
-        HttpURLConnection conn = (HttpURLConnection) new URL(codeserver + puPath).openConnection();
+    private void downloadAndExtractPU(String puName, String puPath, String codeserver, File path, File tempPath) {
+        URL url = null;
+        try {
+            url = new URL(codeserver + puPath);
+        } catch (MalformedURLException e) {
+            throw new CannotCreateContainerException("Failed to construct URL to download procdessing unit, url [" + (codeserver + puPath) + "]", e);
+        }
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection) url.openConnection();
+        } catch (IOException e) {
+            throw new CannotCreateContainerException("Failed to connect to [" + url.toString() + "] in order to download processing unit [" + puName + "]", e);
+        }
         conn.setRequestProperty("Package", "true");
-        int responseCode = conn.getResponseCode();
+        int responseCode = 0;
+        try {
+            responseCode = conn.getResponseCode();
+        } catch (IOException e) {
+            throw new CannotCreateContainerException("Failed to read response code from [" + url.toString() + "] in order to download processing unit [" + puName + "]", e);
+        }
         if (responseCode != 200 && responseCode != 201) {
             StringBuilder sb = new StringBuilder();
             try {
@@ -722,48 +739,61 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             } finally {
                 conn.disconnect();
             }
-            throw new RuntimeException("Failed to extract file to: " + path.getAbsolutePath() + ", response code [" + responseCode + "], response [" + sb.toString() + "]");
+            throw new CannotCreateContainerException("Failed to connect/download (failure on the web server side) from  [" + url.toString() + "], response code [" + responseCode + "], response [" + sb.toString() + "]");
         }
 
         if (puName.length() < 3) {
             puName = "zzz" + puName;
         }
-        
-        File tempFile = File.createTempFile(puName, "jar", tempPath);
-        InputStream in = new BufferedInputStream(conn.getInputStream());
-        FileCopyUtils.copy(in, new FileOutputStream(tempFile));
-        conn.disconnect();
+
+        File tempFile = null;
+        try {
+            tempFile = File.createTempFile(puName, "jar", tempPath);
+        } catch (IOException e) {
+            throw new CannotCreateContainerException("Failed to create temporary file for downloading processing unit [" + puName + "] at [" + tempPath.getAbsolutePath() + "]", e);
+        }
+        try {
+            InputStream in = new BufferedInputStream(conn.getInputStream());
+            FileCopyUtils.copy(in, new FileOutputStream(tempFile));
+            conn.disconnect();
+        } catch (IOException e) {
+            throw new CannotCreateContainerException("Failed to read processing unit [" + puName + "] from [" + url.toString() + "] into [" + tempFile.getAbsolutePath() + "]", e);
+        }
 
         // extract the file
-        final int bufferSize = 4098;
-        byte data[] = new byte[bufferSize];
-        ZipFile zipFile = new ZipFile(tempFile);
-        Enumeration e = zipFile.entries();
-        while (e.hasMoreElements()) {
-            ZipEntry entry = (ZipEntry) e.nextElement();
-            if (entry.isDirectory()) {
-                File dir = new File(path.getAbsolutePath() + "/" + entry.getName());
-                for (int i = 0; i < 5; i++) {
-                    dir.mkdirs();
+        try {
+            final int bufferSize = 4098;
+            byte data[] = new byte[bufferSize];
+            ZipFile zipFile = new ZipFile(tempFile);
+            Enumeration e = zipFile.entries();
+            while (e.hasMoreElements()) {
+                ZipEntry entry = (ZipEntry) e.nextElement();
+                if (entry.isDirectory()) {
+                    File dir = new File(path.getAbsolutePath() + "/" + entry.getName());
+                    for (int i = 0; i < 5; i++) {
+                        dir.mkdirs();
+                    }
+                } else {
+                    BufferedInputStream is = new BufferedInputStream(zipFile.getInputStream(entry));
+                    int count;
+                    File file = new File(path.getAbsolutePath() + "/" + entry.getName());
+                    if (file.getParentFile() != null) {
+                        file.getParentFile().mkdirs();
+                    }
+                    FileOutputStream fos = new FileOutputStream(file);
+                    BufferedOutputStream dest = new BufferedOutputStream(fos, bufferSize);
+                    while ((count = is.read(data, 0, bufferSize)) != -1) {
+                        dest.write(data, 0, count);
+                    }
+                    dest.flush();
+                    dest.close();
+                    is.close();
                 }
-            } else {
-                BufferedInputStream is = new BufferedInputStream(zipFile.getInputStream(entry));
-                int count;
-                File file = new File(path.getAbsolutePath() + "/" + entry.getName());
-                if (file.getParentFile() != null) {
-                    file.getParentFile().mkdirs();
-                }
-                FileOutputStream fos = new FileOutputStream(file);
-                BufferedOutputStream dest = new BufferedOutputStream(fos, bufferSize);
-                while ((count = is.read(data, 0, bufferSize)) != -1) {
-                    dest.write(data, 0, count);
-                }
-                dest.flush();
-                dest.close();
-                is.close();
             }
+            zipFile.close();
+            tempFile.delete();
+        } catch (IOException e) {
+            throw new CannotCreateContainerException("Failed to extract processing unit [" + puName + "] downloaded temp zip file from [" + tempFile.getAbsolutePath() + "] into [" + path.getAbsolutePath() + "]", e);
         }
-        zipFile.close();
-        tempFile.delete();
     }
 }
