@@ -40,6 +40,17 @@ import java.util.List;
  */
 public class DefaultHibernateExternalDataSource extends AbstractHibernateExternalDataSource implements BulkDataPersister, SQLDataProvider {
 
+    private boolean useMerge = false;
+
+    /**
+     * If set to <code>true</code>, will use Hiberante <code>merge</code> to perform the create/update, and will
+     * merge before calling delete. This might be required for complex mappings (depends on Hibernate) at the
+     * expense of slower performance. Defaults to <code>false</code>.
+     */
+    public void setUseMerge(boolean useMerge) {
+        this.useMerge = useMerge;
+    }
+
     /**
      * Perform the given bulk changes using Hibernate {@link org.hibernate.Session}.
      *
@@ -66,30 +77,42 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                         if (logger.isTraceEnabled()) {
                             logger.trace("Deleting Entry [" + entry + "]");
                         }
-                        try {
-                            session.delete(entry);
-                        } catch (NonUniqueObjectException e) {
+                        if (useMerge) {
                             session.delete(session.merge(entry));
+                        } else {
+                            try {
+                                session.delete(entry);
+                            } catch (NonUniqueObjectException e) {
+                                session.delete(session.merge(entry));
+                            }
                         }
                         break;
                     case BulkItem.WRITE:
                         if (logger.isTraceEnabled()) {
                             logger.trace("Write Entry [" + entry + "]");
                         }
-                        try {
-                            session.saveOrUpdate(entry);
-                        } catch (NonUniqueObjectException e) {
+                        if (useMerge) {
                             session.merge(entry);
+                        } else {
+                            try {
+                                session.saveOrUpdate(entry);
+                            } catch (NonUniqueObjectException e) {
+                                session.merge(entry);
+                            }
                         }
                         break;
                     case BulkItem.UPDATE:
                         if (logger.isTraceEnabled()) {
                             logger.trace("Update Entry [" + entry + "]");
                         }
-                        try {
-                            session.saveOrUpdate(entry);
-                        } catch (NonUniqueObjectException e) {
+                        if (useMerge) {
                             session.merge(entry);
+                        } else {
+                            try {
+                                session.saveOrUpdate(entry);
+                            } catch (NonUniqueObjectException e) {
+                                session.merge(entry);
+                            }
                         }
                         break;
                     default:
