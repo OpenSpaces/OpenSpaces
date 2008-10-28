@@ -59,6 +59,7 @@ import org.openspaces.pu.container.support.WebsterFile;
 import org.openspaces.pu.sla.monitor.ApplicationContextMonitor;
 import org.openspaces.pu.sla.monitor.Monitor;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ClassUtils;
@@ -596,13 +597,15 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
         }
         if (container instanceof ApplicationContextProcessingUnitContainer) {
-            ApplicationContext applicationContext = ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
-            Map map = applicationContext.getBeansOfType(ServiceDetailsProvider.class);
-            for (Iterator it = map.values().iterator(); it.hasNext();) {
-                PUServiceDetails[] details = ((ServiceDetailsProvider) it.next()).getServicesDetails();
-                if (details != null) {
-                    for (PUServiceDetails detail : details) {
-                        serviceDetails.add(detail);
+            ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
+            if (applicationContext.isActive()) {
+                Map map = applicationContext.getBeansOfType(ServiceDetailsProvider.class);
+                for (Iterator it = map.values().iterator(); it.hasNext();) {
+                    PUServiceDetails[] details = ((ServiceDetailsProvider) it.next()).getServicesDetails();
+                    if (details != null) {
+                        for (PUServiceDetails detail : details) {
+                            serviceDetails.add(detail);
+                        }
                     }
                 }
             }
