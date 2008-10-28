@@ -616,15 +616,18 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 SpaceURL spaceURL = space.getFinderURL();
                 ServiceID serviceID = new ServiceID(space.getReferentUuid().getMostSignificantBits(), space.getReferentUuid().getLeastSignificantBits());
                 String type = "embedded";
+                SpaceMode spaceMode = SpaceMode.NONE;
                 if (space instanceof LocalSpaceView) {
                     type = "localview";
                 } else if (space instanceof DCacheSpaceImpl) {
                     type = "localcache";
                 } else if (SpaceUtils.isRemoteProtocol(space)) {
                     type = "remote";
+                } else { // embedded
+                    spaceMode = ((IInternalRemoteJSpaceAdmin) space.getAdmin()).getSpaceMode();
                 }
-                serviceDetails.add(new SpacePUServiceDetails(spaceURL.getSpaceName(), spaceURL.getContainerName(), serviceID,
-                        ((IInternalRemoteJSpaceAdmin) space.getAdmin()).getSpaceMode(), type));
+                serviceDetails.add(new SpacePUServiceDetails(spaceURL.getSpaceName(), spaceURL.getContainerName(),
+                        serviceID, spaceMode, type));
             }
         }
         return serviceDetails.toArray(new PUServiceDetails[serviceDetails.size()]);
