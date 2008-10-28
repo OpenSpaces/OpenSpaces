@@ -729,16 +729,21 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             throw new CannotCreateContainerException("Failed to read response code from [" + url.toString() + "] in order to download processing unit [" + puName + "]", e);
         }
         if (responseCode != 200 && responseCode != 201) {
-            StringBuilder sb = new StringBuilder();
+            if (responseCode == 404) {
+                throw new CannotCreateContainerException("Processing Unit [" + puName + "] not found on server [" + url.toString() + "]");
+            }
             try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
+                StringBuilder sb = new StringBuilder();
+                try {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        sb.append(line);
+                    }
+                    reader.close();
+                } catch (Exception e) {
+                    // ignore this exception, failed to read input
                 }
-                reader.close();
-            } catch (Exception e) {
-                // ignore this exception, failed to read input
             } finally {
                 conn.disconnect();
             }
