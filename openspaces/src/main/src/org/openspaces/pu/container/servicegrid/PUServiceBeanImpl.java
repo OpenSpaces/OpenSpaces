@@ -729,10 +729,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             throw new CannotCreateContainerException("Failed to read response code from [" + url.toString() + "] in order to download processing unit [" + puName + "]", e);
         }
         if (responseCode != 200 && responseCode != 201) {
-            if (responseCode == 404) {
-                throw new CannotCreateContainerException("Processing Unit [" + puName + "] not found on server [" + url.toString() + "]");
-            }
             try {
+                if (responseCode == 404) {
+                    throw new CannotCreateContainerException("Processing Unit [" + puName + "] not found on server [" + url.toString() + "]");
+                }
                 StringBuilder sb = new StringBuilder();
                 try {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -744,10 +744,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 } catch (Exception e) {
                     // ignore this exception, failed to read input
                 }
+                throw new CannotCreateContainerException("Failed to connect/download (failure on the web server side) from  [" + url.toString() + "], response code [" + responseCode + "], response [" + sb.toString() + "]");
             } finally {
                 conn.disconnect();
             }
-            throw new CannotCreateContainerException("Failed to connect/download (failure on the web server side) from  [" + url.toString() + "], response code [" + responseCode + "], response [" + sb.toString() + "]");
         }
 
         if (puName.length() < 3) {
