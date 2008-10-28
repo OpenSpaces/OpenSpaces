@@ -18,7 +18,6 @@
         <property name="properties">
             <props>
                 <prop key="dataGridName">dataGrid</prop>
-                <prop key="security.encrypted">false</prop>
             </props>
         </property>
     </bean>
@@ -31,7 +30,7 @@
     -->
     <os-core:space id="space" url="/./${dataGridName}">
         <os-core:filter-provider ref="serviceExporter"/>
-        <os-core:security username="${security.username}" password="${security.password}" encrypted="${security.encrypted}" />
+        <os-core:security username="${security.username}" password="${security.password}" />
     </os-core:space>
 
     <!-- A GigaSpace instance (that can be used within scripts) that works only against this cluster member -->
