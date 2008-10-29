@@ -1,8 +1,8 @@
 package org.openspaces.maven.support;
 
-import java.io.*;
-
 import org.springframework.core.JdkVersion;
+
+import java.io.*;
 
 /**
  * @author kimchy
@@ -63,7 +63,7 @@ public class POMGenerator {
         writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "openspaces-pom.xml")))));
         printHeader(writer, version, POMGenerator.GS_OS_GROUP, "openspaces");
         printDependency(writer, POMGenerator.GS_CORE_GROUP, "JSpaces");
-        printDependency(writer, "org.springframework", "spring", "2.5.4");
+        printDependency(writer, "org.springframework", "spring", "2.5.5");
         printDependency(writer, "commons-logging", "commons-logging", "1.1.1");
         // add javax.annotations (@PostConstruct) for JDK 1.5 (no need for 1.6 since it is there)
         if (!JdkVersion.isAtLeastJava16() && JdkVersion.isAtLeastJava15()) {
