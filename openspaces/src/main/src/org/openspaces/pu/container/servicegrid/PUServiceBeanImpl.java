@@ -777,14 +777,14 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             while (e.hasMoreElements()) {
                 ZipEntry entry = (ZipEntry) e.nextElement();
                 if (entry.isDirectory()) {
-                    File dir = new File(path.getAbsolutePath() + "/" + entry.getName());
+                    File dir = new File(path.getAbsolutePath() + "/" + entry.getName().replace('\\', '/'));
                     for (int i = 0; i < 5; i++) {
                         dir.mkdirs();
                     }
                 } else {
                     BufferedInputStream is = new BufferedInputStream(zipFile.getInputStream(entry));
                     int count;
-                    File file = new File(path.getAbsolutePath() + "/" + entry.getName());
+                    File file = new File(path.getAbsolutePath() + "/" + entry.getName().replace('\\', '/'));
                     if (file.getParentFile() != null) {
                         file.getParentFile().mkdirs();
                     }
