@@ -155,12 +155,12 @@ if $cygwin; then
 fi
 
 # set GigaSpaces properties required for using with JDK 1.4
-export JSHOMEDIR=`dirname $0`/../../../..
-. `dirname $0`/../../../../bin/setenv.sh
+export JSHOMEDIR="`dirname \"$0\"`/../../../.."
+. "$JSHOMEDIR/bin/setenv.sh"
 bootclasspath="-Xbootclasspath/p:$XML_JARS"
 
 exec "$JAVACMD" \
-  $bootclasspath ${RMI_OPTIONS} ${LOOKUP_LOCATORS_PROP} ${LOOKUP_GROUPS_PROP} \
+  "$bootclasspath" ${RMI_OPTIONS} ${LOOKUP_LOCATORS_PROP} ${LOOKUP_GROUPS_PROP} \
   $MAVEN_OPTS \
   -classpath "${M2_HOME}"/boot/classworlds-*.jar \
   "-Dclassworlds.conf=${M2_HOME}/bin/m2.conf" \
