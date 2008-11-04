@@ -597,20 +597,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 }
             }
         }
-        if (container instanceof ApplicationContextProcessingUnitContainer) {
-            ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
-            if (applicationContext.isActive()) {
-                Map map = applicationContext.getBeansOfType(ServiceDetailsProvider.class);
-                for (Iterator it = map.values().iterator(); it.hasNext();) {
-                    PUServiceDetails[] details = ((ServiceDetailsProvider) it.next()).getServicesDetails();
-                    if (details != null) {
-                        for (PUServiceDetails detail : details) {
-                            serviceDetails.add(detail);
-                        }
-                    }
-                }
-            }
-        }
         if (allSpaces != null) {
             for (IJSpace space : allSpaces) {
                 SpaceURL spaceURL = space.getFinderURL();
@@ -628,6 +614,20 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 }
                 serviceDetails.add(new SpacePUServiceDetails(spaceURL.getSpaceName(), spaceURL.getContainerName(),
                         serviceID, spaceMode, type));
+            }
+        }
+        if (container instanceof ApplicationContextProcessingUnitContainer) {
+            ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
+            if (applicationContext.isActive()) {
+                Map map = applicationContext.getBeansOfType(ServiceDetailsProvider.class);
+                for (Iterator it = map.values().iterator(); it.hasNext();) {
+                    PUServiceDetails[] details = ((ServiceDetailsProvider) it.next()).getServicesDetails();
+                    if (details != null) {
+                        for (PUServiceDetails detail : details) {
+                            serviceDetails.add(detail);
+                        }
+                    }
+                }
             }
         }
         return serviceDetails.toArray(new PUServiceDetails[serviceDetails.size()]);
