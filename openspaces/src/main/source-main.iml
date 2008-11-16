@@ -8,10 +8,8 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
     </content>
-    <orderEntry type="library" name="GROOVY" level="application" />
     <orderEntry type="jdk" jdkName="1.5" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="ASM" level="project" />
     <orderEntry type="library" exported="" name="Atomikos" level="project" />
     <orderEntry type="library" exported="" name="Common" level="project" />
     <orderEntry type="library" exported="" name="GigaSpaces" level="project" />
@@ -33,9 +31,9 @@
     <orderEntry type="library" exported="" name="hsql" level="project" />
     <orderEntry type="library" exported="" name="antlr" level="project" />
     <orderEntry type="library" name="jetty" level="project" />
-    <orderEntry type="library" name="jsp-2.1" level="project" />
     <orderEntry type="library" name="Velocity" level="project" />
     <orderEntry type="library" name="Groovy" level="project" />
+    <orderEntry type="library" name="Glassfish" level="project" />
   </component>
   <component name="copyright">
     <Base>

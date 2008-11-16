@@ -95,6 +95,11 @@
                 <include name="org/openspaces/**"/>
                 <exclude name="org/mule/**"/>
                 <exclude name="org/openspaces/esb/mule/**"/>
+                <exclude name="org/openspaces/pu/container/jee/jetty/**"/>
+                <exclude name="org/openspaces/pu/container/jee/glassfish/**"/>
+                <exclude name="org/glassfish/**"/>
+                <exclude name="com/sun/**"/>
+                <exclude name="org/openspaces/jee/sessions/**"/>
                 <exclude name="META-INF/services/org/mule/**"/>
                 <exclude name="META-INF/mule-spring.handlers"/>
                 <exclude name="META-INF/mule-spring.schemas"/>
@@ -143,6 +148,32 @@
             </manifest>
         </jar>
 
+        <delete file="${lib.dir}/jetty/openspaces-jetty.jar"/>
+        <jar jarfile="${lib.dir}/jetty/openspaces-jetty.jar">
+            <fileset dir="${target.classes.dir}">
+                <include name="org/openspaces/pu/container/jee/jetty/**"/>
+                <include name="org/openspaces/jee/sessions/jetty/**" />
+            </fileset>
+            <manifest>
+                <attribute name="Implementation-Title" value="${openspaces-title}"/>
+                <attribute name="Implementation-Version" value="${openspaces-version}"/>
+                <attribute name="OpenSpaces-Version" value="${openspaces-version}"/>
+            </manifest>
+        </jar>
+
+        <delete file="${lib.dir}/glassfish/openspaces-glassfish.jar"/>
+        <jar jarfile="${lib.dir}/glassfish/openspaces-glassfish.jar">
+            <fileset dir="${target.classes.dir}">
+                <include name="org/openspaces/pu/container/jee/glassfish/**"/>
+                <include name="org/glassfish/**" />
+                <include name="com/sun/**" />
+            </fileset>
+            <manifest>
+                <attribute name="Implementation-Title" value="${openspaces-title}"/>
+                <attribute name="Implementation-Version" value="${openspaces-version}"/>
+                <attribute name="OpenSpaces-Version" value="${openspaces-version}"/>
+            </manifest>
+        </jar>
 
         <copy file="${target.classes.dir}/META-INF/spring.handlers.orig"
               tofile="${target.classes.dir}/META-INF/spring.handlers" overwrite="true"/>
@@ -239,7 +270,6 @@
                 <include name="lib/j2ee/activation.jar" />
                 <include name="lib/j2ee/jta.jar" />
                 <include name="lib/j2ee/connector.jar" />
-                <include name="lib/j2ee/servlet-api.jar" />
                 <include name="lib/velocity/**" />
 
             </zipfileset>
@@ -282,9 +312,8 @@
                 <include name="lib/j2ee/activation.jar" />
                 <include name="lib/j2ee/jta.jar" />
                 <include name="lib/j2ee/connector.jar" />
-                <include name="lib/j2ee/servlet-api.jar" />
                 <include name="lib/jetty/**" />
-                <include name="lib/jsp-2.1/**" />
+                <!--<include name="lib/glassfish/**" />-->
                 <include name="lib/velocity/**" />
             </zipfileset>
         </zip>

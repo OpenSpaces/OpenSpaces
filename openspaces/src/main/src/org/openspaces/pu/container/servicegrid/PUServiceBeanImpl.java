@@ -17,13 +17,13 @@
 package org.openspaces.pu.container.servicegrid;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
-import com.gigaspaces.start.Locator;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.client.DCacheSpaceImpl;
 import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.core.client.cache.ISpaceLocalCache;
 import com.j_spaces.core.client.view.LocalSpaceView;
+import com.j_spaces.kernel.Environment;
 import net.jini.core.lookup.ServiceID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,12 +46,12 @@ import org.openspaces.core.properties.BeanLevelPropertiesAware;
 import org.openspaces.core.util.SpaceUtils;
 import org.openspaces.interop.DotnetProcessingUnitContainerProvider;
 import org.openspaces.pu.container.CannotCreateContainerException;
+import org.openspaces.pu.container.ClassLoaderAwareProcessingUnitContainerProvider;
 import org.openspaces.pu.container.DeployableProcessingUnitContainerProvider;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.ProcessingUnitContainerProvider;
 import org.openspaces.pu.container.SpaceProvider;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
-import org.openspaces.pu.container.jee.jetty.JettyJeeProcessingUnitContainerProvider;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
 import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
@@ -78,11 +78,14 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -98,6 +101,8 @@ import java.util.zip.ZipFile;
 public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBean {
 
     private static final Log logger = LogFactory.getLog(PUServiceBeanImpl.class);
+
+    private static final Map<String, ClassLoader> jeeParentClassLoaders = new HashMap<String, ClassLoader>();
 
     private volatile ProcessingUnitContainer container;
 
@@ -256,7 +261,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         beanLevelProperties.getContextProperties().putAll(ClusterInfoPropertyPlaceholderConfigurer.createProperties(clusterInfo));
 
         // set a generic work location that can be used by container providers
-        File workLocation = new File(System.getProperty("com.gs.work", System.getProperty(Locator.GS_HOME) + "/work"));
+        File workLocation = new File(System.getProperty("com.gs.work", Environment.getHomeDirectory() + "/work"));
         workLocation.mkdirs();
 
         beanLevelProperties.getContextProperties().setProperty("com.gs.work", workLocation.getAbsolutePath());
@@ -285,23 +290,28 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         } catch (IOException e) {
             // does not exists
         }
+        String processingUnitContainerProviderClass;
         if (webXml != null) {
             webXml.close();
             downloadPU = true;
-            factory = createContainerProvider(beanLevelProperties, JettyJeeProcessingUnitContainerProvider.class.getName());
+            processingUnitContainerProviderClass = "org.openspaces.pu.container.jee.jetty.JettyJeeProcessingUnitContainerProvider";
         } else if (puConfig != null) {
             puConfig.close();
             downloadPU = true;
-            factory = createContainerProvider(beanLevelProperties, DotnetProcessingUnitContainerProvider.class.getName());
+            processingUnitContainerProviderClass = DotnetProcessingUnitContainerProvider.class.getName();
         } else if (puInteropConfig != null) {
             puInteropConfig.close();
             downloadPU = true;
-            factory = createContainerProvider(beanLevelProperties, IntegratedProcessingUnitContainerProvider.class.getName());
+            processingUnitContainerProviderClass = IntegratedProcessingUnitContainerProvider.class.getName();
         } else {
-            factory = createContainerProvider(beanLevelProperties, IntegratedProcessingUnitContainerProvider.class.getName());
+            processingUnitContainerProviderClass = IntegratedProcessingUnitContainerProvider.class.getName();
             if (beanLevelProperties.getContextProperties().getProperty("pu.download", "true").equalsIgnoreCase("true")) {
                 downloadPU = true;
             }
+        }
+
+        if (beanLevelProperties != null) {
+            processingUnitContainerProviderClass = beanLevelProperties.getContextProperties().getProperty(ProcessingUnitContainerProvider.CONTAINER_CLASS_PROP, processingUnitContainerProviderClass);
         }
 
         if (downloadPU) {
@@ -319,9 +329,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
             beanLevelProperties.getContextProperties().setProperty(DeployableProcessingUnitContainerProvider.CONTEXT_PROPERTY_DEPLOY_PATH, deployPath.getAbsolutePath());
 
-            if (factory instanceof DeployableProcessingUnitContainerProvider) {
-                ((DeployableProcessingUnitContainerProvider) factory).setDeployPath(deployPath);
-            }
             downloadAndExtractPU(puName, puPath, codeserver, deployPath, new File(deployedProcessingUnitsLocation));
 
             // go over listed files that needs to be resovled with properties
@@ -338,6 +345,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
         }
 
+        CommonClassLoader commonClassLoader = (CommonClassLoader) contextClassLoader.getParent(); 
         // handles class loader libraries
         if (downloadPU) {
             List<URL> libUrls = new ArrayList<URL>();
@@ -352,6 +360,38 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             ((ServiceClassLoader) contextClassLoader).addURLs(libUrls.toArray(new URL[libUrls.size()]));
             if (logger.isDebugEnabled()) {
                 logger.debug(logMessage("Service Class Loader " + libUrls));
+            }
+            // create a jee specific common class loader 
+            ClassLoader parent = contextClassLoader.getParent();
+            if (processingUnitContainerProviderClass.indexOf("JeeProcessingUnit") != -1) {
+                String jeeName = processingUnitContainerProviderClass.substring(0, processingUnitContainerProviderClass.indexOf("JeeProcessingUnit")).toLowerCase();
+                jeeName = jeeName.substring(jeeName.lastIndexOf('.') + 1);
+                if (jeeParentClassLoaders.containsKey(jeeName)) {
+                    parent = jeeParentClassLoaders.get(jeeName);
+                    contextClassLoader = new ServiceClassLoader(((ServiceClassLoader) contextClassLoader).getSearchPath(), ((ServiceClassLoader) contextClassLoader).getClassAnnotator(), parent);
+                    Thread.currentThread().setContextClassLoader(contextClassLoader);
+                } else {
+                    File location = new File(Environment.getHomeDirectory() + "/lib/" + jeeName);
+                    LinkedList<URL> urls = new LinkedList<URL>();
+                    if (location.exists()) {
+                        File[] files = location.listFiles();
+                        for (File sharedlibFile : files) {
+                            if (sharedlibFile.getName().indexOf("openspaces") != -1) {
+                                // add the openspaces one as the first one, so we can override stuff
+                                urls.addFirst(sharedlibFile.toURI().toURL());
+                            } else {
+                                urls.add(sharedlibFile.toURI().toURL());
+                            }
+                        }
+                        parent = new URLClassLoader(urls.toArray(new URL[urls.size()]), parent);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug(logMessage("Common Jee Class Loader for [" + jeeName + "]: " + urls));
+                        }
+                        jeeParentClassLoaders.put(jeeName, parent);
+                        contextClassLoader = new ServiceClassLoader(((ServiceClassLoader) contextClassLoader).getSearchPath(), ((ServiceClassLoader) contextClassLoader).getClassAnnotator(), parent);
+                        Thread.currentThread().setContextClassLoader(contextClassLoader);
+                    }
+                }
             }
             // add to common class loader
             List<URL> sharedlibUrls = new ArrayList<URL>();
@@ -369,7 +409,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                     sharedlibUrls.add(sharedlibFile.toURI().toURL());
                 }
             }
-            ((CommonClassLoader) (contextClassLoader.getParent())).addComponent(puName, sharedlibUrls.toArray(new URL[sharedlibUrls.size()]));
+            commonClassLoader.addComponent(puName, sharedlibUrls.toArray(new URL[sharedlibUrls.size()]));
             if (logger.isDebugEnabled()) {
                 logger.debug(logMessage("Common Class Loader " + sharedlibUrls));
             }
@@ -402,6 +442,14 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             if (logger.isDebugEnabled()) {
                 logger.debug(logMessage("Common Class Loader " + sharedlibUrls));
             }
+        }
+
+        factory = createContainerProvider(processingUnitContainerProviderClass);
+        if (factory instanceof DeployableProcessingUnitContainerProvider) {
+            ((DeployableProcessingUnitContainerProvider) factory).setDeployPath(deployPath);
+        }
+        if (factory instanceof ClassLoaderAwareProcessingUnitContainerProvider) {
+            ((ClassLoaderAwareProcessingUnitContainerProvider) factory).setClassLoader(contextClassLoader);
         }
 
         if (factory instanceof ApplicationContextProcessingUnitContainerProvider) {
@@ -696,13 +744,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
     }
 
-    private ProcessingUnitContainerProvider createContainerProvider(BeanLevelProperties beanLevelProperties, String defaultType) {
-        String containerProviderType = defaultType;
-        if (beanLevelProperties != null) {
-            containerProviderType = beanLevelProperties.getContextProperties().getProperty(ProcessingUnitContainerProvider.CONTAINER_CLASS_PROP, defaultType);
-        }
+    private ProcessingUnitContainerProvider createContainerProvider(String containerProviderType) {
         try {
-            return (ProcessingUnitContainerProvider) ClassUtils.forName(containerProviderType).newInstance();
+            return (ProcessingUnitContainerProvider) ClassUtils.forName(containerProviderType, contextClassLoader).newInstance();
         } catch (Exception e) {
             throw new CannotCreateContainerException("Failed to create a new instance of container [" + containerProviderType + "]", e);
         }
