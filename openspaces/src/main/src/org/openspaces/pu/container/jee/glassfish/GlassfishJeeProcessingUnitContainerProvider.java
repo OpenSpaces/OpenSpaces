@@ -56,6 +56,31 @@ import java.util.List;
 import java.util.Properties;
 
 /**
+ * A container allowing to support Glassfish V3 prelude embedded as a web container.
+ *
+ * <p>The glassfish server is a shared one between all applications. The first application deployed will
+ * start the glassfish server. The last one undeployed will stop it (though currently it is not closed
+ * properly).
+ *
+ * <p>Since there is no way to cleanly stop glassfish (currently), a port is assigned to glassfish on creation
+ * and is used throughout the lifecycle of the JVM. The port starts from 9008 (can be set using <code>com.gs.glassfish.port</code>
+ * system property) and tries for 20 times until it manages to find a usuable port. Finding usuable ports is done through
+ * locks on files, so it only works for used ports between different JVMs that use this container. Files are used since
+ * it is not possible to start stop glassfish cleanly now.
+ *
+ * <p>The glassfish work directory is created under <code>GSHOME/work/glassfish/[portNumber]</code>.
+ *
+ * <p>A glassfish <code>domain.xml</code> file is used in order to configure the glassfish instance. By default, it is
+ * located under <code>GSHOME/lib/glassfish/domain.xml</code> and can be changed using <code>com.gs.glassfish.domainXml</code>
+ * system property. The domain xml uses a single main GigaSpaces property called <code>com.gs.glassfish.port</code> and is
+ * changed dynamically and created under the glassfish work directory (generated-domain.xml).
+ *
+ * <p>Note, this overrides the built in Glassfish {@link org.glassfish.embed.Server} code so it won't generate dynamically
+ * the http listener and virtual server. This allows for greater control over how the Glassfish is conifugred by exposing
+ * the full domain xml to the user.
+ *
+ * <p>Any other ${...} notation will be replaced (if possible) in the domain.xml file using context propertes as well.
+ *
  * @author kimchy
  */
 public class GlassfishJeeProcessingUnitContainerProvider implements JeeProcessingUnitContainerProvider, ClassLoaderAwareProcessingUnitContainerProvider {
@@ -96,7 +121,7 @@ public class GlassfishJeeProcessingUnitContainerProvider implements JeeProcessin
         glassfishGlobalWorkDir = new File(System.getProperty("com.gs.work", Environment.getHomeDirectory() + "/work") + "/glassfish");
         File portDir = new File(glassfishGlobalWorkDir, "ports");
         portDir.mkdirs();
-        int startFromPort = 9008;
+        int startFromPort = Integer.getInteger("com.gs.glassfish.port", 9008);
         int retryCount = 20;
         for (int i = 0; i < retryCount; i++) {
             portNumber = startFromPort + i;
@@ -383,7 +408,7 @@ public class GlassfishJeeProcessingUnitContainerProvider implements JeeProcessin
     private static ArchiveFactory getArchiveFactory(Server server) throws Exception {
         return getHabitat(server).getComponent(ArchiveFactory.class);
     }
-    
+
     private static GrizzlyService getGrizzlyService(Server server) throws Exception {
         return getHabitat(server).getComponent(GrizzlyService.class);
     }
