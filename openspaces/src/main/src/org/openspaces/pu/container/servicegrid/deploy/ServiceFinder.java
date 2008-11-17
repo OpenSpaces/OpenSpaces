@@ -25,18 +25,12 @@ import net.jini.discovery.LookupDiscoveryManager;
 import net.jini.lease.LeaseRenewalManager;
 import net.jini.lookup.ServiceDiscoveryManager;
 import net.jini.lookup.entry.Name;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.BootUtil;
-
-import java.util.Arrays;
 
 /**
  */
 public class ServiceFinder {
 // ------------------------------ FIELDS ------------------------------
-
-    private static final Log logger = LogFactory.getLog(ServiceFinder.class);
 
 // -------------------------- STATIC METHODS --------------------------
 
@@ -64,12 +58,6 @@ public class ServiceFinder {
                     attributes
             );
 
-            logger.info("Searching for " + type.getName()
-                    + (name != null ? (" named " + name) : "")
-                    + " in groups "
-                    + Arrays.asList(groups)
-                    + " and locators "
-                    + Arrays.asList(lookupLocators));
             result = sdm.lookup(template, Integer.MAX_VALUE, Integer.MAX_VALUE,  null, wait);
         } catch (Exception e) {
             // TODO add proper exception here

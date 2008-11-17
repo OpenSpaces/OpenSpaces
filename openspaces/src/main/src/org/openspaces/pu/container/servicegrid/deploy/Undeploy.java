@@ -19,11 +19,14 @@ package org.openspaces.pu.container.servicegrid.deploy;
 import com.gigaspaces.grid.gsm.GSM;
 import com.j_spaces.kernel.PlatformVersion;
 import net.jini.core.lookup.ServiceItem;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jini.rio.core.OperationalString;
 import org.jini.rio.core.OperationalStringManager;
 import org.jini.rio.monitor.DeployAdmin;
 import org.openspaces.pu.container.support.CommandLineParser;
 
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 /**
@@ -31,14 +34,17 @@ import java.util.StringTokenizer;
  */
 public class Undeploy {
 
+    private static final Log logger = LogFactory.getLog(Undeploy.class);
+
     private String[] groups;
 
     private String locators;
-    
+
     private int lookupTimeout = 5000;
 
     public GSM[] findGSMs() {
         GSM[] gsms;
+        logger.info("Searching for GSMs  in groups " + Arrays.asList(getGroups()) + " and locators " + Arrays.asList(getLocators()));
         ServiceItem[] result = ServiceFinder.find(null, GSM.class, lookupTimeout, getGroups(), getLocators());
         if (result != null && result.length > 0) {
             gsms = new GSM[result.length];
@@ -85,7 +91,7 @@ public class Undeploy {
     public void setLocators(String locators) {
         this.locators = locators;
     }
-    
+
     public void setLookupTimeout(int lookupTimeout) {
         this.lookupTimeout = lookupTimeout;
     }

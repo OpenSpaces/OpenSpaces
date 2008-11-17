@@ -18,14 +18,18 @@ package org.openspaces.pu.container.servicegrid.deploy;
 
 import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.logger.GSLogConfigLoader;
+import com.gigaspaces.start.SystemConfig;
 import com.j_spaces.core.Constants;
 import com.j_spaces.kernel.PlatformVersion;
 import com.j_spaces.kernel.SecurityPolicyLoader;
+import net.jini.config.Configuration;
 import net.jini.core.lookup.ServiceItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.BootUtil;
+import org.jini.rio.config.ExporterConfig;
 import org.jini.rio.core.OperationalString;
+import org.jini.rio.core.ServiceBeanInstance;
 import org.jini.rio.core.ServiceElement;
 import org.jini.rio.core.ServiceLevelAgreements;
 import org.jini.rio.core.ServiceProvisionListener;
@@ -67,6 +71,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -79,14 +84,19 @@ public class Deploy {
 
     private DeployAdmin deployAdmin;
 
+    private GSM[] gsms = null; 
+
     private String[] groups;
 
     private String locators;
 
     private int lookupTimeout = 5000;
 
+    private static boolean sout = false;
+
     public GSM[] findGSMs() {
         GSM[] gsms;
+        info("Searching for GSMs in groups " + Arrays.asList(getGroups()) + " and locators [" + getLocators() + "]");
         ServiceItem[] result = ServiceFinder.find(null, GSM.class, lookupTimeout, getGroups(), getLocators());
         if (result != null && result.length > 0) {
             gsms = new GSM[result.length];
@@ -99,9 +109,12 @@ public class Deploy {
         return gsms;
     }
 
-    public DeployAdmin getDeployAdmin(GSM[] gsms) throws GSMNotFoundException {
+    public void initDeployAdmin(GSM[] gsms) throws GSMNotFoundException {
         GSM gsm = null;
         if (deployAdmin == null) {
+            if (gsms == null) {
+                gsms = findGSMs();
+            }
             if (gsms.length > 0) {
                 try {
                     gsm = gsms[0];
@@ -118,8 +131,10 @@ public class Deploy {
                 throw new GSMNotFoundException(getGroups(), lookupTimeout);
             }
         }
+    }
 
-        return deployAdmin;
+    public static void setSout(boolean soutVal) {
+        sout = soutVal;
     }
 
     public void setDeployAdmin(DeployAdmin deployAdmin) {
@@ -165,6 +180,22 @@ public class Deploy {
         this.lookupTimeout = lookupTimeout;
     }
 
+    public void deployAndWait(String[] args) throws Exception {
+        OperationalString opString = buildOperationalString(args);
+        int totalPlanned = sumUpServices(opString);
+        DeployListener listener = new DeployListener();
+        Configuration config = SystemConfig.getInstance().getConfiguration();
+        deployAdmin.deploy(opString, (ServiceProvisionListener) ExporterConfig.getExporter(config, "com.gigaspaces.transport", "defaultExporter").export(listener));
+        info("Waiting for [" + totalPlanned + "] processing unit to be deployed...");
+        while (true) {
+            if (totalPlanned == listener.getTotalStarted()) {
+                break;
+            }
+            Thread.sleep(200);
+        }
+        info("Finished deploying [" + totalPlanned + "] processing unit instances");
+    }
+
     public void deploy(String[] args) throws Exception {
         deploy(args, null);
     }
@@ -195,10 +226,8 @@ public class Deploy {
         if (puFile.exists() && puFile.isDirectory()) {
             // this is a directory, jar it up and prepare it for upload
             File jarPUFile = new File(System.getProperty("java.io.tmpdir") + "/" + puName + ".jar");
+            info("Deploying a directory [" + puFile.getAbsolutePath() + "], jaring it into [" + jarPUFile.getAbsolutePath() + "]");
             createJarFile(jarPUFile, puFile, null, null);
-            if (logger.isInfoEnabled()) {
-                logger.info("Deploying a directory [" + puFile.getAbsolutePath() + "], jaring it into [" + jarPUFile.getAbsolutePath() + "]");
-            }
             puFile = jarPUFile;
             deletePUFile = true;
         }
@@ -230,20 +259,12 @@ public class Deploy {
             }
         }
 
-        String[] groups = getGroups();
-        if (logger.isInfoEnabled()) {
-            if (groups != null) {
-                logger.info("Deploying [" + puName + "] with name [" + overridePuName + "] under groups " + Arrays.asList(groups) + " and locators " + getLocators());
-            } else {
-                logger.info("Deploying [" + puName + "] with name [" + overridePuName + "] under default groups and locators " + getLocators());
-            }
-        }
-        // first, find all the GSMS
-        GSM[] gsms = findGSMs();
+        info("Deploying [" + puName + "] with name [" + overridePuName + "] under groups " + Arrays.asList(groups) + " and locators [" + getLocators() + "]");
 
         // check if the pu to deploy is an actual file on the file system and ends with jar
         if (puFile.exists() && (puFile.getName().endsWith(".jar") || puFile.getName().endsWith(".war"))) {
             // we deploy a jar file, upload it to all the GSMs
+            gsms = findGSMs();
             uploadPU(puPath, puFile, gsms);
             if (deletePUFile) {
                 puFile.delete();
@@ -251,9 +272,10 @@ public class Deploy {
         }
 
         //get codebase from service
-        String codeserver = getCodebase(getDeployAdmin(gsms));
+        initDeployAdmin(gsms);
+        String codeserver = getCodebase(deployAdmin);
         if (logger.isDebugEnabled()) {
-            logger.debug("Usign codeserver [" + codeserver + "]");
+            logger.debug("Using codeserver [" + codeserver + "]");
         }
 
         //list remote files, only works with webster
@@ -279,9 +301,7 @@ public class Deploy {
         for (CommandLineParser.Parameter param : params) {
             if (param.getName().equalsIgnoreCase("sla")) {
                 String slaLocation = param.getArguments()[0];
-                if (logger.isInfoEnabled()) {
-                    logger.info("Loading SLA from [" + slaLocation + "]");
-                }
+                info("Loading SLA from [" + slaLocation + "]");
                 resource = new DefaultResourceLoader() {
                     // override the default load from the classpath to load from the file system
                     @Override
@@ -316,7 +336,7 @@ public class Deploy {
             try {
                 sla = (SLA) xmlBeanFactory.getBean("SLA");
             } catch (NoSuchBeanDefinitionException e) {
-                logger.info("SLA Not Found in PU.  Using Default SLA.");
+                info("SLA Not Found in PU.  Using Default SLA.");
                 sla = new SLA();
             }
         }
@@ -325,19 +345,13 @@ public class Deploy {
         if (clusterInfo != null) {
             // override specific cluster info parameters on the SLA
             if (clusterInfo.getSchema() != null) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("Overrding SLA cluster schema with [" + clusterInfo.getSchema() + "]");
-                }
+                info("Overrding SLA cluster schema with [" + clusterInfo.getSchema() + "]");
                 sla.setClusterSchema(clusterInfo.getSchema());
             }
             if (clusterInfo.getNumberOfInstances() != null) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("Overrding SLA numberOfInstances with [" + clusterInfo.getNumberOfInstances() + "]");
-                }
+                info("Overrding SLA numberOfInstances with [" + clusterInfo.getNumberOfInstances() + "]");
                 sla.setNumberOfInstances(clusterInfo.getNumberOfInstances());
-                if (logger.isInfoEnabled()) {
-                    logger.info("Overrding SLA numberOfBackups with [" + clusterInfo.getNumberOfBackups() + "]");
-                }
+                info("Overrding SLA numberOfBackups with [" + clusterInfo.getNumberOfBackups() + "]");
                 if (clusterInfo.getNumberOfBackups() == null) {
                     sla.setNumberOfBackups(0);
                 } else {
@@ -350,16 +364,12 @@ public class Deploy {
             if (param.getName().equalsIgnoreCase("max-instances-per-vm")) {
                 String maxInstancePerVm = param.getArguments()[0];
                 sla.setMaxInstancesPerVM(Integer.valueOf(maxInstancePerVm));
-                if (logger.isInfoEnabled()) {
-                    logger.info("Overrding SLA maxInstancesPerVM with [" + maxInstancePerVm + "]");
-                }
+                info("Overrding SLA maxInstancesPerVM with [" + maxInstancePerVm + "]");
             }
             if (param.getName().equalsIgnoreCase("max-instances-per-machine")) {
                 String maxInstancePerMachine = param.getArguments()[0];
                 sla.setMaxInstancesPerMachine(Integer.valueOf(maxInstancePerMachine));
-                if (logger.isInfoEnabled()) {
-                    logger.info("Overrding SLA maxInstancesPerMachine with [" + maxInstancePerMachine + "]");
-                }
+                info("Overrding SLA maxInstancesPerMachine with [" + maxInstancePerMachine + "]");
             }
         }
 
@@ -635,9 +645,7 @@ public class Deploy {
         byte[] buffer = new byte[4098];
         for (GSM gsm : gsms) {
             String codebase = getCodebase((DeployAdmin) gsm.getAdmin());
-            if (logger.isInfoEnabled()) {
-                logger.info("Uploading [" + puPath + "] to [" + codebase + "]");
-            }
+            info("Uploading [" + puPath + "] to [" + codebase + "]");
             HttpURLConnection conn = (HttpURLConnection) new URL(codebase + puFile.getName()).openConnection();
             conn.setDoOutput(true);
             conn.setDoInput(true);
@@ -703,7 +711,7 @@ public class Deploy {
         GSLogConfigLoader.getLoader();
 
         Deploy deployer = new Deploy();
-        deployer.deploy(args);
+        deployer.deployAndWait(args);
     }
 
     public static String getUsage() {
@@ -737,8 +745,49 @@ public class Deploy {
     }
 
 
+    private static void info(String message) {
+        if (sout) {
+            System.out.println(message);
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info(message);
+        }
+    }
 
     // utility to create a jar file
+
+    private static class DeployListener implements ServiceProvisionListener {
+
+        private AtomicInteger totalStarted = new AtomicInteger();
+
+        public void succeeded(ServiceBeanInstance jsbInstance) throws RemoteException {
+            info("[" + jsbInstance.getServiceBeanConfig().getName() + "] [" + jsbInstance.getServiceBeanConfig().getInstanceID() + "] deployed sucessfuly on [" + jsbInstance.getHostAddress() + "]");
+            totalStarted.incrementAndGet();
+        }
+
+        public void failed(ServiceElement sElem, boolean resubmitted) throws RemoteException {
+            info("[" + sElem.getName() + "] [" + sElem.getServiceBeanConfig().getInstanceID() + "] failed to deploy, resubmitted [" + resubmitted + "]");
+            totalStarted.incrementAndGet();
+        }
+
+        public int getTotalStarted() {
+            return totalStarted.intValue();
+        }
+    }
+
+    private static int sumUpServices(OperationalString deployment) {
+        int summation = 0;
+        ServiceElement[] elems = deployment.getServices();
+        for (int i = 0; i < elems.length; i++) {
+            ServiceElement element = elems[i];
+            summation += element.getPlanned();
+        }
+        OperationalString[] nested = deployment.getNestedOperationalStrings();
+        for (int i = 0; i < nested.length; i++) {
+            summation += sumUpServices(nested[i]);
+        }
+        return (summation);
+    }
 
     public static boolean createJarFile(File jarFile, File directory,
                                         String mainClass, FileFilter filter) {
