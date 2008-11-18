@@ -116,6 +116,14 @@ public class SharedThreadPool implements ThreadPool, LifeCycle {
         return ((LifeCycle) threadPool).isFailed();
     }
 
+    public void addLifeCycleListener(Listener listener) {
+        ((LifeCycle) threadPool).addLifeCycleListener(listener);
+    }
+
+    public void removeLifeCycleListener(Listener listener) {
+        ((LifeCycle) threadPool).removeLifeCycleListener(listener);
+    }
+
     public String toString() {
         return "Shared(" + threadPoolCount + ") [" + threadPool + "]";
     }

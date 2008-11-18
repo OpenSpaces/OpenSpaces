@@ -942,10 +942,12 @@
     </library>
     <library name="jetty">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/jetty/jetty-util-6.1.11.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/jetty/jetty-naming-6.1.11.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/jetty/jetty-6.1.11.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/jetty/jetty-management-6.1.11.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/jetty/jetty-management-6.1.14.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/jetty/jetty-naming-6.1.14.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/jetty/jetty-plus-6.1.14.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/jetty/jetty-util-6.1.14.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/jetty/jetty-6.1.14.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/jetty/servlet-api-2.5-6.1.14.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
