@@ -761,7 +761,7 @@ public class Deploy {
         private AtomicInteger totalStarted = new AtomicInteger();
 
         public void succeeded(ServiceBeanInstance jsbInstance) throws RemoteException {
-            info("[" + jsbInstance.getServiceBeanConfig().getName() + "] [" + jsbInstance.getServiceBeanConfig().getInstanceID() + "] deployed sucessfuly on [" + jsbInstance.getHostAddress() + "]");
+            info("[" + jsbInstance.getServiceBeanConfig().getName() + "] [" + jsbInstance.getServiceBeanConfig().getInstanceID() + "] deployed successfully on [" + jsbInstance.getHostAddress() + "]");
             totalStarted.incrementAndGet();
         }
 
