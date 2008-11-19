@@ -78,14 +78,12 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -294,7 +292,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         if (webXml != null) {
             webXml.close();
             downloadPU = true;
-            processingUnitContainerProviderClass = "org.openspaces.pu.container.jee.jetty.JettyJeeProcessingUnitContainerProvider";
+            String jeeContainer = System.getProperty("com.gs.jee.container", "jetty");
+            String className = StringUtils.capitalize(jeeContainer)  + "JeeProcessingUnitContainerProvider";
+            processingUnitContainerProviderClass = "org.openspaces.pu.container.jee." + jeeContainer + "." + className;
         } else if (puConfig != null) {
             puConfig.close();
             downloadPU = true;
@@ -360,38 +360,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             ((ServiceClassLoader) contextClassLoader).addURLs(libUrls.toArray(new URL[libUrls.size()]));
             if (logger.isDebugEnabled()) {
                 logger.debug(logMessage("Service Class Loader " + libUrls));
-            }
-            // create a jee specific common class loader 
-            ClassLoader parent = contextClassLoader.getParent();
-            if (processingUnitContainerProviderClass.indexOf("JeeProcessingUnit") != -1) {
-                String jeeName = processingUnitContainerProviderClass.substring(0, processingUnitContainerProviderClass.indexOf("JeeProcessingUnit")).toLowerCase();
-                jeeName = jeeName.substring(jeeName.lastIndexOf('.') + 1);
-                if (jeeParentClassLoaders.containsKey(jeeName)) {
-                    parent = jeeParentClassLoaders.get(jeeName);
-                    contextClassLoader = new ServiceClassLoader(((ServiceClassLoader) contextClassLoader).getSearchPath(), ((ServiceClassLoader) contextClassLoader).getClassAnnotator(), parent);
-                    Thread.currentThread().setContextClassLoader(contextClassLoader);
-                } else {
-                    File location = new File(Environment.getHomeDirectory() + "/lib/" + jeeName);
-                    LinkedList<URL> urls = new LinkedList<URL>();
-                    if (location.exists()) {
-                        File[] files = location.listFiles();
-                        for (File sharedlibFile : files) {
-                            if (sharedlibFile.getName().indexOf("openspaces") != -1) {
-                                // add the openspaces one as the first one, so we can override stuff
-                                urls.addFirst(sharedlibFile.toURI().toURL());
-                            } else {
-                                urls.add(sharedlibFile.toURI().toURL());
-                            }
-                        }
-                        parent = new URLClassLoader(urls.toArray(new URL[urls.size()]), parent);
-                        if (logger.isDebugEnabled()) {
-                            logger.debug(logMessage("Common Jee Class Loader for [" + jeeName + "]: " + urls));
-                        }
-                        jeeParentClassLoaders.put(jeeName, parent);
-                        contextClassLoader = new ServiceClassLoader(((ServiceClassLoader) contextClassLoader).getSearchPath(), ((ServiceClassLoader) contextClassLoader).getClassAnnotator(), parent);
-                        Thread.currentThread().setContextClassLoader(contextClassLoader);
-                    }
-                }
             }
             // add to common class loader
             List<URL> sharedlibUrls = new ArrayList<URL>();

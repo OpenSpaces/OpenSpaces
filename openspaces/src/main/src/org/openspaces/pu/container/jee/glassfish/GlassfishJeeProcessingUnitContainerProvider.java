@@ -19,12 +19,14 @@ package org.openspaces.pu.container.jee.glassfish;
 import com.j_spaces.kernel.Environment;
 import com.sun.enterprise.deploy.shared.ArchiveFactory;
 import com.sun.enterprise.v3.services.impl.GrizzlyService;
+import org.apache.catalina.startup.TldConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.glassfish.api.admin.ParameterNames;
 import org.glassfish.api.deployment.archive.ReadableArchive;
 import org.glassfish.embed.Application;
 import org.glassfish.embed.Server;
+import org.jini.rio.boot.CommonClassLoader;
 import org.jvnet.hk2.component.Habitat;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
@@ -50,6 +52,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.List;
@@ -373,6 +376,20 @@ public class GlassfishJeeProcessingUnitContainerProvider implements JeeProcessin
             setCurrentBeanLevelProperties(beanLevelProperties);
             setCurrentClusterInfo(clusterInfo);
 
+            // we disable the smart getUrl in the common class loader so the JSP classpath will be built correclty
+            CommonClassLoader.getInstance().setDisableSmartGetUrl(true);
+
+            // we want to scan parent class loaders for TLDs
+            TldConfig.setScanParentTldListener(true);
+            URL[] commonURLs = CommonClassLoader.getInstance().getURLs();
+            StringBuilder sb = new StringBuilder();
+            for (URL url : commonURLs) {
+                String urlForm = url.toExternalForm();
+                urlForm = urlForm.replace('\\', '/');
+                sb.append(urlForm.substring(urlForm.lastIndexOf('/') + 1)).append(',');
+            }
+            System.setProperty("com.sun.enterprise.taglisteners", sb.toString());
+
             WebappConfiguration webappConfiguration = (WebappConfiguration) applicationContext.getBean("webAppConfiguration");
 
             // TODO how to set this here
@@ -402,6 +419,7 @@ public class GlassfishJeeProcessingUnitContainerProvider implements JeeProcessin
             setCurrentApplicationContext(null);
             setCurrentBeanLevelProperties(null);
             setCurrentClusterInfo(null);
+            CommonClassLoader.getInstance().setDisableSmartGetUrl(false);
         }
     }
 

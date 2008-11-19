@@ -18,6 +18,7 @@ package org.openspaces.pu.container.jee.jetty;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jini.rio.boot.CommonClassLoader;
 import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
@@ -426,6 +427,9 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             setCurrentBeanLevelProperties(beanLevelProperties);
             setCurrentClusterInfo(clusterInfo);
 
+            // we disable the smart getUrl in the common class loader so the JSP classpath will be built correclty
+            CommonClassLoader.getInstance().setDisableSmartGetUrl(true);
+            
             WebAppContext webAppContext = (WebAppContext) applicationContext.getBean("webAppContext");
 
             webAppContext.setExtractWAR(true);
@@ -541,6 +545,8 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             setCurrentApplicationContext(null);
             setCurrentBeanLevelProperties(null);
             setCurrentClusterInfo(null);
+
+            CommonClassLoader.getInstance().setDisableSmartGetUrl(false);
         }
     }
 }
