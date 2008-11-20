@@ -19,9 +19,7 @@ package org.openspaces.pu.container.servicegrid.deploy;
 import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.logger.GSLogConfigLoader;
 import com.gigaspaces.start.SystemConfig;
-import com.j_spaces.core.Constants;
 import com.j_spaces.kernel.PlatformVersion;
-import com.j_spaces.kernel.SecurityPolicyLoader;
 import net.jini.config.Configuration;
 import net.jini.core.lookup.ServiceItem;
 import org.apache.commons.logging.Log;
@@ -704,9 +702,6 @@ public class Deploy {
             return;
         }
 
-        if (System.getProperty("java.security.policy") == null) {
-            SecurityPolicyLoader.loadPolicy(Constants.System.SYSTEM_GS_POLICY);
-        }
         // init GigaSpace logger
         GSLogConfigLoader.getLoader();
 

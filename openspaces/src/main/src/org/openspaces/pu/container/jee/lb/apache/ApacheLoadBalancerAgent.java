@@ -17,10 +17,8 @@
 package org.openspaces.pu.container.jee.lb.apache;
 
 import com.gigaspaces.logger.GSLogConfigLoader;
-import com.j_spaces.core.Constants;
 import com.j_spaces.core.service.ServiceConfigLoader;
 import com.j_spaces.kernel.PlatformVersion;
-import com.j_spaces.kernel.SecurityPolicyLoader;
 import net.jini.core.lookup.ServiceTemplate;
 import net.jini.discovery.DiscoveryEvent;
 import net.jini.discovery.DiscoveryListener;
@@ -422,9 +420,6 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
 
     public static void main(String[] args) throws Exception {
         GSLogConfigLoader.getLoader();
-        if (System.getProperty("java.security.policy") == null) {
-            SecurityPolicyLoader.loadPolicy(Constants.System.SYSTEM_GS_POLICY);
-        }
         final ApacheLoadBalancerAgent agent = new ApacheLoadBalancerAgent();
 
         CommandLineParser.Parameter[] params = CommandLineParser.parse(args, args.length);

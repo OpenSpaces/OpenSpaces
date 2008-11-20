@@ -18,8 +18,6 @@ package org.openspaces.pu.container.integrated;
 
 import com.gigaspaces.admin.cli.RuntimeInfo;
 import com.gigaspaces.logger.GSLogConfigLoader;
-import com.j_spaces.core.Constants;
-import com.j_spaces.kernel.SecurityPolicyLoader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.pu.container.CannotCloseContainerException;
@@ -123,9 +121,6 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
      */
     public static void main(String[] args) throws Exception {
         GSLogConfigLoader.getLoader();
-        if (System.getProperty("java.security.policy") == null) {
-            SecurityPolicyLoader.loadPolicy(Constants.System.SYSTEM_GS_POLICY);
-        }
         System.setProperty("com.gs.printRuntimeInfo", "false");
         if (logger.isInfoEnabled()) {
             logger.info(RuntimeInfo.getEnvironmentInfo());
