@@ -3,7 +3,7 @@ package org.openspaces.admin;
 /**
  * @author kimchy
  */
-public interface LookupServices {
+public interface LookupServices extends Iterable<LookupService> {
 
     LookupService[] getLookupServices();
 
