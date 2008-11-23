@@ -1,15 +1,15 @@
-<mule xmlns="http://www.mulesource.org/schema/mule/core/2.0"
+<mule xmlns="http://www.mulesource.org/schema/mule/core/2.1"
        xmlns:os-events="http://www.openspaces.org/schema/events"
        xmlns:os-core="http://www.openspaces.org/schema/core"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:spring="http://www.springframework.org/schema/beans"
-       xmlns:quartz="http://www.mulesource.org/schema/mule/quartz/2.0"
+       xmlns:quartz="http://www.mulesource.org/schema/mule/quartz/2.1"
        xmlns:os-eventcontainer="http://www.openspaces.org/schema/mule/os-eventcontainer"
        xsi:schemaLocation="http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
            http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
-           http://www.mulesource.org/schema/mule/quartz/2.0 http://www.mulesource.org/schema/mule/quartz/2.0/mule-quartz.xsd
-           http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-           http://www.mulesource.org/schema/mule/core/2.0 http://www.mulesource.org/schema/mule/core/2.0/mule.xsd
+           http://www.mulesource.org/schema/mule/quartz/2.1 http://www.mulesource.org/schema/mule/quartz/2.1/mule-quartz.xsd
+           http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.mulesource.org/schema/mule/core/2.1 http://www.mulesource.org/schema/mule/core/2.1/mule.xsd
            http://www.openspaces.org/schema/mule/os-eventcontainer http://www.openspaces.org/schema/mule/mule-os-eventcontainer.xsd">
 
     <spring:beans>
@@ -42,9 +42,9 @@
             <component class="${puGroupId}.feeder.Feeder"/>
             
             <outbound>
-                <outbound-pass-through-router>
+                <pass-through-router>
                     <os-eventcontainer:outbound-endpoint giga-space="gigaSpace"/>
-                </outbound-pass-through-router>
+                </pass-through-router>
             </outbound>
         </service>
     </model>

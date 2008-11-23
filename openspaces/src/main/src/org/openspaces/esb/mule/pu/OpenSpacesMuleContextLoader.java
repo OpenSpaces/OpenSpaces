@@ -19,6 +19,7 @@ package org.openspaces.esb.mule.pu;
 import org.mule.MuleServer;
 import org.mule.api.MuleContext;
 import org.mule.api.context.MuleContextFactory;
+import org.mule.config.ConfigResource;
 import org.mule.config.spring.SpringXmlConfigurationBuilder;
 import org.mule.context.DefaultMuleContextFactory;
 import org.springframework.beans.BeansException;
@@ -29,6 +30,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.support.AbstractApplicationContext;
 
 /**
  * <code> OpenSpacesMuleContextLoader</code> used for loading Mule configuration that refrenced from PU configuration
@@ -77,7 +79,14 @@ public class OpenSpacesMuleContextLoader implements ApplicationContextAware, Ini
                 contextCreated = true;
                 try {
                     muleContextFactory = new DefaultMuleContextFactory();
-                    SpringXmlConfigurationBuilder muleXmlConfigurationBuilder = new SpringXmlConfigurationBuilder(location, this.applicationContext);
+                    SpringXmlConfigurationBuilder muleXmlConfigurationBuilder = new SpringXmlConfigurationBuilder(location) {
+                        @Override
+                        protected ApplicationContext createApplicationContext(MuleContext muleContext, ConfigResource[] configResources) throws Exception {
+                            AbstractApplicationContext context = (AbstractApplicationContext) super.createApplicationContext(muleContext, configResources);
+                            context.setParent(applicationContext);
+                            return context;
+                        }
+                    };
                     muleContext = muleContextFactory.createMuleContext(muleXmlConfigurationBuilder);
                     muleContext.start();
                 } catch (Exception e) {

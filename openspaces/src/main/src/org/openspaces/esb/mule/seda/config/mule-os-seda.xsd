@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <xsd:schema xmlns="http://www.openspaces.org/schema/mule/os-seda"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            xmlns:mule="http://www.mulesource.org/schema/mule/core/2.0"
+            xmlns:mule="http://www.mulesource.org/schema/mule/core/2.1"
             targetNamespace="http://www.openspaces.org/schema/mule/os-seda"
             elementFormDefault="qualified"
             attributeFormDefault="unqualified">
 
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
-    <xsd:import namespace="http://www.mulesource.org/schema/mule/core/2.0"
-                schemaLocation="http://www.mulesource.org/schema/mule/core/2.0/mule.xsd"/>
+    <xsd:import namespace="http://www.mulesource.org/schema/mule/core/2.1"
+                schemaLocation="http://www.mulesource.org/schema/mule/core/2.1/mule.xsd"/>
 
     <xsd:element name="model" type="osSedaModelType" substitutionGroup="mule:abstract-model"/>
     <xsd:complexType name="osSedaModelType">
@@ -27,7 +27,7 @@
         <xsd:complexContent>
             <xsd:extension base="mule:baseServiceType">
                 <xsd:sequence>
-                    <xsd:element ref="mule:abstract-component-threading-profile" minOccurs="0"/>
+                    <xsd:element ref="mule:abstract-service-threading-profile" minOccurs="0"/>
                 </xsd:sequence>
                 <xsd:attribute name="queueTimeout" type="xsd:integer"/>
             </xsd:extension>
@@ -39,7 +39,7 @@
         <xsd:complexContent>
             <xsd:extension base="mule:baseServiceType">
                 <xsd:sequence>
-                    <xsd:element ref="mule:abstract-component-threading-profile" minOccurs="0"/>
+                    <xsd:element ref="mule:abstract-service-threading-profile" minOccurs="0"/>
                 </xsd:sequence>
                 <xsd:attribute name="queueTimeout" type="xsd:integer"/>
             </xsd:extension>

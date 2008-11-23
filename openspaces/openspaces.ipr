@@ -795,17 +795,19 @@
     </library>
     <library name="mule">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-stdio-2.0.1.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-client-2.0.1.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-spring-config-2.0.1.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-vm-2.0.1.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-spring-extras-2.0.1.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-core-2.0.1.jar!/" />
-        <root url="jar://$PROJECT_DIR$/lib/mule/jug-2.0.0-asl.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-core-2.1.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-vm-2.1.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-stdio-2.1.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-spring-config-2.1.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-2.1.1-src.zip!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-client-2.1.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-module-spring-extras-2.1.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-transport-http-2.1.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/jug.osgi-2.0.0.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
-        <root url="jar://$PROJECT_DIR$/lib/mule/mule-2.0.1-src.zip!/" />
+        <root url="jar://$PROJECT_DIR$/lib/mule/mule-2.1.1-src.zip!/" />
       </SOURCES>
     </library>
     <library name="ServiceGrid">
