@@ -257,7 +257,7 @@ public class Deploy {
             }
         }
 
-        info("Deploying [" + puName + "] with name [" + overridePuName + "] under groups " + Arrays.asList(groups) + " and locators [" + getLocators() + "]");
+        info("Deploying [" + puName + "] with name [" + overridePuName + "] under groups " + Arrays.asList(getGroups()) + " and locators [" + getLocators() + "]");
 
         // check if the pu to deploy is an actual file on the file system and ends with jar
         if (puFile.exists() && (puFile.getName().endsWith(".jar") || puFile.getName().endsWith(".war"))) {
