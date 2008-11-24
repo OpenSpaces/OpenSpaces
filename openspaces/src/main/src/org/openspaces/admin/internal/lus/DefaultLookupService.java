@@ -3,6 +3,9 @@ package org.openspaces.admin.internal.lus;
 import com.gigaspaces.lrmi.nio.info.NIOInfoProvider;
 import com.gigaspaces.lrmi.nio.info.TransportConfiguration;
 import com.gigaspaces.lrmi.nio.info.TransportStatistics;
+import com.gigaspaces.operatingsystem.OSInfoProvider;
+import com.gigaspaces.operatingsystem.OperatingSystemConfiguration;
+import com.gigaspaces.operatingsystem.OperatingSystemStatistics;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceRegistrar;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
@@ -41,5 +44,13 @@ public class DefaultLookupService extends AbstractGridComponent implements Inter
 
     public TransportStatistics getTransportStatistics() throws RemoteException {
         return ((NIOInfoProvider) registrar.getRegistrar()).getTransportStatistics();
+    }
+
+    public OperatingSystemConfiguration getOperatingSystemConfiguration() throws RemoteException {
+        return ((OSInfoProvider) registrar.getRegistrar()).getOperatingSystemConfiguration();
+    }
+
+    public OperatingSystemStatistics getOperatingSystemStatistics() throws RemoteException {
+        return ((OSInfoProvider) registrar.getRegistrar()).getOperatingSystemStatistics();
     }
 }

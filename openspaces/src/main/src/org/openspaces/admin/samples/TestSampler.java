@@ -18,16 +18,16 @@ public class TestSampler {
         while (true) {
             try {
                 for (LookupService lookupService : admin.getLookupServices().getLookupServices()) {
-                    System.out.println("Lookup [" + lookupService.getUID() + "] : " + lookupService.getTransport().getConfiguration().getPort());
+                    System.out.println("Lookup [" + lookupService.getUID() + "] : " + lookupService.getOperatingSystem().getConfiguration().getName());
                 }
                 for (GridServiceManager gridServiceManager : admin.getGridServiceManagers()) {
-                    System.out.println("GSM [" + gridServiceManager.getUID() + "] : " + gridServiceManager.getTransport().getStatistics().getActiveThreadsCount());
+                    System.out.println("GSM [" + gridServiceManager.getUID() + "] : " + gridServiceManager.getOperatingSystem().getConfiguration().getName());
                 }
                 for (GridServiceContainer gridServiceContainer : admin.getGridServiceContainers()) {
-                    System.out.println("GSC [" + gridServiceContainer.getUID() + "] : " + gridServiceContainer.getTransport().getStatistics().getActiveThreadsCount());
+                    System.out.println("GSC [" + gridServiceContainer.getUID() + "] : " + gridServiceContainer.getOperatingSystem().getConfiguration().getName());
                 }
                 for (Machine machine : admin.getMachines().getMachines()) {
-                    System.out.println("Machine [" + machine.getUID() + "], transports: " + machine.getTransports().size());
+                    System.out.println("Machine [" + machine.getUID() + "], transports: " + machine.getOperatingSystem().getConfiguration().getName());
                 }
             } catch (Exception e) {
                 e.printStackTrace();

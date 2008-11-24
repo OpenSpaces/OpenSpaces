@@ -11,6 +11,7 @@ import org.openspaces.admin.internal.lus.InternalLookupServices;
 import org.openspaces.admin.internal.transport.DefaultTransports;
 import org.openspaces.admin.internal.transport.InternalTransports;
 import org.openspaces.admin.lus.LookupServices;
+import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.transport.Transports;
 
 /**
@@ -29,6 +30,8 @@ public class DefaultMachine implements InternalMachine {
     private final InternalGridServiceContainers gridServiceContainers = new DefaultGridServiceContainers();
 
     private final InternalTransports transports = new DefaultTransports();
+
+    private volatile OperatingSystem operatingSystem;
 
     public DefaultMachine(String uid, String host) {
         this.uid = uid;
@@ -61,5 +64,13 @@ public class DefaultMachine implements InternalMachine {
 
     public Transports getTransports() {
         return transports;
+    }
+
+    public void setOperatingSystem(OperatingSystem operatingSystem) {
+        this.operatingSystem = operatingSystem;
+    }
+
+    public OperatingSystem getOperatingSystem() {
+        return this.operatingSystem;
     }
 }

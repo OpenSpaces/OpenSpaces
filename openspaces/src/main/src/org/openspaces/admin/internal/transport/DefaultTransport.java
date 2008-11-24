@@ -14,11 +14,11 @@ import java.util.Set;
  */
 public class DefaultTransport implements InternalTransport {
 
-    private String uid;
+    private final String uid;
 
-    private TransportConfiguration config;
+    private final TransportConfiguration config;
 
-    private Set<InternalTransportInfoProvider> transportInfoProviders = new ConcurrentHashSet<InternalTransportInfoProvider>();
+    private final Set<InternalTransportInfoProvider> transportInfoProviders = new ConcurrentHashSet<InternalTransportInfoProvider>();
 
     public DefaultTransport(TransportConfiguration config) {
         this.config = config;

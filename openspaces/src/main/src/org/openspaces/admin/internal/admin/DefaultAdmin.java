@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.admin;
 
 import com.gigaspaces.lrmi.nio.info.TransportConfiguration;
+import com.gigaspaces.operatingsystem.OperatingSystemConfiguration;
 import net.jini.core.discovery.LookupLocator;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsc.GridServiceContainers;
@@ -20,6 +21,11 @@ import org.openspaces.admin.internal.machine.DefaultMachines;
 import org.openspaces.admin.internal.machine.InternalMachine;
 import org.openspaces.admin.internal.machine.InternalMachineAware;
 import org.openspaces.admin.internal.machine.InternalMachines;
+import org.openspaces.admin.internal.os.DefaultOperatingSystem;
+import org.openspaces.admin.internal.os.DefaultOperatingSystems;
+import org.openspaces.admin.internal.os.InternalOperatingSystem;
+import org.openspaces.admin.internal.os.InternalOperatingSystemInfoProvider;
+import org.openspaces.admin.internal.os.InternalOperatingSystems;
 import org.openspaces.admin.internal.transport.DefaultTransport;
 import org.openspaces.admin.internal.transport.DefaultTransports;
 import org.openspaces.admin.internal.transport.InternalTransport;
@@ -27,6 +33,7 @@ import org.openspaces.admin.internal.transport.InternalTransportInfoProvider;
 import org.openspaces.admin.internal.transport.InternalTransports;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.machine.Machines;
+import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.transport.Transports;
 
 import java.rmi.RemoteException;
@@ -47,6 +54,8 @@ public class DefaultAdmin implements InternalAdmin {
     private final InternalGridServiceContainers gridServiceContainers = new DefaultGridServiceContainers();
 
     private final InternalTransports transports = new DefaultTransports();
+
+    private final InternalOperatingSystems operatingSystems = new DefaultOperatingSystems();
 
     public DefaultAdmin(String[] groups, LookupLocator[] locators) {
         this.discoveryService = new DiscoveryService(groups, locators, this);
@@ -81,16 +90,10 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void addLookupService(InternalLookupService lookupService) {
-        TransportConfiguration txConfig = null;
-        try {
-            txConfig = lookupService.getTransportConfiguration();
-        } catch (RemoteException e) {
-            throw new AdminException("Failed to get transport configuration for lookup service [" + lookupService.getUID() + "]", e);
-        }
+        InternalTransport transport = processTransportOnServiceAddition(lookupService);
+        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(lookupService);
 
-        InternalTransport transport = processTransportOnServiceAddition(txConfig, lookupService);
-
-        InternalMachine machine = processMachineOnServiceAddition(txConfig, lookupService, transport);
+        InternalMachine machine = processMachineOnServiceAddition(transport.getConfiguration(), lookupService, transport, operatingSystem);
 
         ((InternalLookupServices) machine.getLookupServices()).addLookupService(lookupService);
 
@@ -101,21 +104,16 @@ public class DefaultAdmin implements InternalAdmin {
         InternalLookupService lookupService = lookupServices.removeLookupService(uid);
         if (lookupService != null) {
             processTransportOnServiceRemoval(lookupService, lookupService);
+            processOperatingSystemOnServiceRemoval(lookupService, lookupService);
             ((InternalLookupServices) ((InternalMachine) lookupService.getMachine()).getLookupServices()).removeLookupService(uid);
         }
     }
 
     public synchronized void addGridServiceManager(InternalGridServiceManager gridServiceManager) {
-        TransportConfiguration txConfig = null;
-        try {
-            txConfig = gridServiceManager.getTransportConfiguration();
-        } catch (RemoteException e) {
-            throw new AdminException("Failed to get transport configuration for grid service manager [" + gridServiceManager.getUID() + "]", e);
-        }
+        InternalTransport transport = processTransportOnServiceAddition(gridServiceManager);
+        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceManager);
 
-        InternalTransport transport = processTransportOnServiceAddition(txConfig, gridServiceManager);
-
-        InternalMachine machine = processMachineOnServiceAddition(txConfig, gridServiceManager, transport);
+        InternalMachine machine = processMachineOnServiceAddition(transport.getConfiguration(), gridServiceManager, transport, operatingSystem);
 
         ((InternalGridServiceManagers) machine.getGridServiceManagers()).addGridServiceManager(gridServiceManager);
 
@@ -126,21 +124,16 @@ public class DefaultAdmin implements InternalAdmin {
         InternalGridServiceManager gridServiceManager = gridServiceManagers.removeGridServiceManager(uid);
         if (gridServiceManager != null) {
             processTransportOnServiceRemoval(gridServiceManager, gridServiceManager);
+            processOperatingSystemOnServiceRemoval(gridServiceManager, gridServiceManager);
             ((InternalGridServiceManagers) ((InternalMachine) gridServiceManager.getMachine()).getGridServiceManagers()).removeGridServiceManager(uid);
         }
     }
 
     public synchronized void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer) {
-        TransportConfiguration txConfig = null;
-        try {
-            txConfig = gridServiceContainer.getTransportConfiguration();
-        } catch (RemoteException e) {
-            throw new AdminException("Failed to get transport configuration for grid service container [" + gridServiceContainer.getUID() + "]", e);
-        }
+        InternalTransport transport = processTransportOnServiceAddition(gridServiceContainer);
+        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceContainer);
 
-        InternalTransport transport = processTransportOnServiceAddition(txConfig, gridServiceContainer);
-
-        InternalMachine machine = processMachineOnServiceAddition(txConfig, gridServiceContainer, transport);
+        InternalMachine machine = processMachineOnServiceAddition(transport.getConfiguration(), gridServiceContainer, transport, operatingSystem);
 
         ((InternalGridServiceContainers) machine.getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
 
@@ -151,8 +144,39 @@ public class DefaultAdmin implements InternalAdmin {
         InternalGridServiceContainer gridServiceContainer = gridServiceContainers.removeGridServiceContainer(uid);
         if (gridServiceContainer != null) {
             processTransportOnServiceRemoval(gridServiceContainer, gridServiceContainer);
+            processOperatingSystemOnServiceRemoval(gridServiceContainer, gridServiceContainer);
             ((InternalGridServiceContainers) ((InternalMachine) gridServiceContainer.getMachine()).getGridServiceContainers()).removeGridServiceContainer(uid);
         }
+    }
+
+    private InternalMachine processMachineOnServiceAddition(TransportConfiguration txConfig, InternalMachineAware machineAware,
+                                                            InternalTransport transport, OperatingSystem operatingSystem) {
+        InternalMachine machine = (InternalMachine) machines.getMachineByHost(txConfig.getHost());
+        if (machine == null) {
+            machine = new DefaultMachine(txConfig.getHost(), txConfig.getHost());
+            machine.setOperatingSystem(operatingSystem);
+            machines.addMachine(machine);
+        }
+        ((InternalTransports) machine.getTransports()).addTransport(transport);
+        machineAware.setMachine(machine);
+        return machine;
+    }
+
+    private InternalTransport processTransportOnServiceAddition(InternalTransportInfoProvider txProvider) {
+        TransportConfiguration txConfig = null;
+        try {
+            txConfig = txProvider.getTransportConfiguration();
+        } catch (RemoteException e) {
+            throw new AdminException("Failed to get transport configuration", e);
+        }
+        InternalTransport transport = (InternalTransport) transports.getTransportByHostAndPort(txConfig.getHost(), txConfig.getPort());
+        if (transport == null) {
+            transport = new DefaultTransport(txConfig);
+            transports.addTransport(transport);
+        }
+        transport.addTransportInfoProvider(txProvider);
+        txProvider.setTransport(transport);
+        return transport;
     }
 
     private void processTransportOnServiceRemoval(InternalTransportInfoProvider txProvider, InternalMachineAware machineAware) {
@@ -163,26 +187,31 @@ public class DefaultAdmin implements InternalAdmin {
             ((InternalTransports) machineAware.getMachine().getTransports()).removeTransport(transport.getUID());
         }
     }
-
-    private InternalMachine processMachineOnServiceAddition(TransportConfiguration txConfig, InternalMachineAware machineAware, InternalTransport transport) {
-        InternalMachine machine = (InternalMachine) machines.getMachineByHost(txConfig.getHost());
-        if (machine == null) {
-            machine = new DefaultMachine(txConfig.getHost(), txConfig.getHost());
-            machines.addMachine(machine);
+    
+    private InternalOperatingSystem processOperatingSystemOnServiceAddition(InternalOperatingSystemInfoProvider osProvider) {
+        OperatingSystemConfiguration config;
+        try {
+            config = osProvider.getOperatingSystemConfiguration();
+        } catch (RemoteException e) {
+            throw new AdminException("Failed to get operating system configuration", e);
         }
-        ((InternalTransports) machine.getTransports()).addTransport(transport);
-        machineAware.setMachine(machine);
-        return machine;
+
+        InternalOperatingSystem os = (InternalOperatingSystem) operatingSystems.getByUID(config.getUID());
+        if (os == null) {
+            os = new DefaultOperatingSystem(config);
+            operatingSystems.addOperatingSystem(os);
+        }
+        os.addOperatingSystemInfoProvider(osProvider);
+        osProvider.setOperatingSystem(os);
+        return os;
     }
 
-    private InternalTransport processTransportOnServiceAddition(TransportConfiguration txConfig, InternalTransportInfoProvider txProvider) {
-        InternalTransport transport = (InternalTransport) transports.getTransportByHostAndPort(txConfig.getHost(), txConfig.getPort());
-        if (transport == null) {
-            transport = new DefaultTransport(txConfig);
-            transports.addTransport(transport);
+    private void processOperatingSystemOnServiceRemoval(InternalOperatingSystemInfoProvider osProvider, InternalMachineAware machineAware) {
+        InternalOperatingSystem os = (InternalOperatingSystem) osProvider.getOperatingSystem();
+        os.removeOperatingSystemInfoProvider(osProvider);
+        if (!os.hasOperatingSystemInfoProviders()) {
+            operatingSystems.removeOperatingSystem(os.getUID());
+            ((InternalMachine) machineAware.getMachine()).setOperatingSystem(null);
         }
-        transport.addTransportInfoProvider(txProvider);
-        txProvider.setTransport(transport);
-        return transport;
     }
 }

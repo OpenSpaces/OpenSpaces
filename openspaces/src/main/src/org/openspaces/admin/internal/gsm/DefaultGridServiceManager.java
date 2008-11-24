@@ -3,6 +3,8 @@ package org.openspaces.admin.internal.gsm;
 import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.lrmi.nio.info.TransportConfiguration;
 import com.gigaspaces.lrmi.nio.info.TransportStatistics;
+import com.gigaspaces.operatingsystem.OperatingSystemConfiguration;
+import com.gigaspaces.operatingsystem.OperatingSystemStatistics;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 
@@ -40,5 +42,13 @@ public class DefaultGridServiceManager extends AbstractGridComponent implements 
 
     public TransportStatistics getTransportStatistics() throws RemoteException {
         return gsm.getTransportStatistics();
+    }
+
+    public OperatingSystemConfiguration getOperatingSystemConfiguration() throws RemoteException {
+        return gsm.getOperatingSystemConfiguration();
+    }
+
+    public OperatingSystemStatistics getOperatingSystemStatistics() throws RemoteException {
+        return gsm.getOperatingSystemStatistics();
     }
 }
