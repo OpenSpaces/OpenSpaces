@@ -42,6 +42,10 @@ public class DefaultTransports implements InternalTransports {
         return transportsByUID.get(uid);
     }
 
+    public int size() {
+        return transportsByUID.size();
+    }
+
     public void addTransport(Transport transport) {
         transportsByUID.put(transport.getUID(), transport);
         Set<Transport> transportByHost = transportsByHost.get(transport.getHost());

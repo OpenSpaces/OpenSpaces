@@ -12,4 +12,6 @@ public interface Transports extends Iterable<Transport> {
     Transport getTransportByHostAndPort(String host, int port);
 
     Transport getTransportByUID(String uid);
+
+    int size();
 }

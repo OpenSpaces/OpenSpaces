@@ -27,7 +27,7 @@ public class TestSampler {
                     System.out.println("GSC [" + gridServiceContainer.getUID() + "] : " + gridServiceContainer.getTransport().getStatistics().getActiveThreadsCount());
                 }
                 for (Machine machine : admin.getMachines().getMachines()) {
-                    System.out.println("Machine [" + machine.getUID() + "]");
+                    System.out.println("Machine [" + machine.getUID() + "], transports: " + machine.getTransports().size());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
