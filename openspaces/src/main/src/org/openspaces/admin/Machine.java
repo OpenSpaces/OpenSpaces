@@ -14,4 +14,6 @@ public interface Machine {
     GridServiceManagers getGridServiceManagers();
 
     GridServiceContainers getGridServiceContainers();
+
+    Transports getTransports();
 }

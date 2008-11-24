@@ -3,15 +3,15 @@ package org.openspaces.admin.internal.admin.machine;
 import org.openspaces.admin.GridServiceContainers;
 import org.openspaces.admin.GridServiceManagers;
 import org.openspaces.admin.LookupServices;
+import org.openspaces.admin.Transports;
 import org.openspaces.admin.internal.admin.gsc.DefaultGridServiceContainers;
-import org.openspaces.admin.internal.admin.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.admin.gsc.InternalGridServiceContainers;
 import org.openspaces.admin.internal.admin.gsm.DefaultGridServiceManagers;
-import org.openspaces.admin.internal.admin.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.admin.gsm.InternalGridServiceManagers;
 import org.openspaces.admin.internal.admin.lus.DefaultLookupServices;
-import org.openspaces.admin.internal.admin.lus.InternalLookupService;
 import org.openspaces.admin.internal.admin.lus.InternalLookupServices;
+import org.openspaces.admin.internal.admin.transport.DefaultTransports;
+import org.openspaces.admin.internal.admin.transport.InternalTransports;
 
 /**
  * @author kimchy
@@ -27,6 +27,8 @@ public class DefaultMachine implements InternalMachine {
     private final InternalGridServiceManagers gridServiceManagers = new DefaultGridServiceManagers();
 
     private final InternalGridServiceContainers gridServiceContainers = new DefaultGridServiceContainers();
+
+    private final InternalTransports transports = new DefaultTransports();
 
     public DefaultMachine(String uid, String host) {
         this.uid = uid;
@@ -45,14 +47,6 @@ public class DefaultMachine implements InternalMachine {
         return lookupServices;
     }
 
-    public void addLookupService(InternalLookupService lookupService) {
-        lookupServices.addLookupService(lookupService);
-    }
-
-    public void removeLookupService(String uid) {
-        lookupServices.removeLookupService(uid);
-    }
-
     public GridServiceManagers getGridServiceManagers() {
         return gridServiceManagers;
     }
@@ -61,27 +55,7 @@ public class DefaultMachine implements InternalMachine {
         return gridServiceContainers;
     }
 
-    public void addGridServiceManager(InternalGridServiceManager gridServiceManager) {
-        gridServiceManagers.addGridServiceManager(gridServiceManager);
-    }
-
-    public void removeGridServiceManager(String uid) {
-        gridServiceManagers.removeGridServiceManager(uid);
-    }
-
-    public void replaceGridServiceManager(InternalGridServiceManager gridServiceManager) {
-        gridServiceManagers.replaceGridServiceManager(gridServiceManager);
-    }
-
-    public void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer) {
-        gridServiceContainers.addGridServiceContainer(gridServiceContainer);
-    }
-
-    public void removeGridServiceContainer(String uid) {
-        gridServiceContainers.removeGridServiceContainer(uid);
-    }
-
-    public void replaceGridServiceContainer(InternalGridServiceContainer gridServiceContainer) {
-        gridServiceContainers.replaceGridServiceContainer(gridServiceContainer);
+    public Transports getTransports() {
+        return transports;
     }
 }

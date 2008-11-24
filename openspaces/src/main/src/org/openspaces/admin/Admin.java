@@ -16,4 +16,6 @@ public interface Admin {
     GridServiceContainers getGridServiceContainers();
 
     Machines getMachines();
+
+    Transports getTransports();
 }

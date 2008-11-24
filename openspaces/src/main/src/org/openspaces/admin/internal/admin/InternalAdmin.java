@@ -18,11 +18,7 @@ public interface InternalAdmin extends Admin {
 
     void removeGridServiceManager(String uid);
 
-    void replaceGridServiceManager(InternalGridServiceManager gridServiceManager);
-
     void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer);
 
     void removeGridServiceContainer(String uid);
-
-    void repalceGridServiceContainer(InternalGridServiceContainer gridServiceContainer);
 }

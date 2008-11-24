@@ -5,24 +5,18 @@ import com.gigaspaces.lrmi.nio.info.TransportConfiguration;
 import com.gigaspaces.lrmi.nio.info.TransportStatistics;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceRegistrar;
-import org.openspaces.admin.AdminException;
-import org.openspaces.admin.Machine;
-import org.openspaces.admin.internal.admin.machine.InternalMachine;
+import org.openspaces.admin.internal.admin.support.AbstractGridComponent;
 
 import java.rmi.RemoteException;
 
 /**
  * @author kimchy
  */
-public class DefaultLookupService implements InternalLookupService {
+public class DefaultLookupService extends AbstractGridComponent implements InternalLookupService {
 
     private ServiceRegistrar registrar;
 
     private ServiceID serviceID;
-
-    private volatile TransportConfiguration transportConfiguration;
-
-    private volatile InternalMachine machine;
 
     public DefaultLookupService(ServiceRegistrar registrar, ServiceID serviceID) {
         this.registrar = registrar;
@@ -41,31 +35,11 @@ public class DefaultLookupService implements InternalLookupService {
         return this.registrar;
     }
 
-    public void setMachine(InternalMachine machine) {
-        this.machine = machine;
+    public TransportConfiguration getTransportConfiguration() throws RemoteException {
+        return ((NIOInfoProvider) registrar.getRegistrar()).getTransportConfiguration();
     }
 
-    public Machine getMachine() {
-        return this.machine;
-    }
-
-    public TransportConfiguration getTransportConfiguration() throws AdminException {
-        if (transportConfiguration != null) {
-            return transportConfiguration;
-        }
-        try {
-            transportConfiguration = ((NIOInfoProvider) registrar.getRegistrar()).getTransportConfiguration();
-        } catch (RemoteException e) {
-            throw new AdminException("Failed to get transport configuration", e);
-        }
-        return transportConfiguration;
-    }
-
-    public TransportStatistics getTransportStatistics() throws AdminException {
-        try {
-            return ((NIOInfoProvider) registrar.getRegistrar()).getTransportStatistics();
-        } catch (RemoteException e) {
-            throw new AdminException("Failed to get transport statistics", e);
-        }
+    public TransportStatistics getTransportStatistics() throws RemoteException {
+        return ((NIOInfoProvider) registrar.getRegistrar()).getTransportStatistics();
     }
 }

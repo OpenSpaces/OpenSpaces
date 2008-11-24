@@ -3,9 +3,7 @@ package org.openspaces.admin;
 /**
  * @author kimchy
  */
-public interface GridServiceManager extends TransportInfoProvider {
+public interface GridServiceManager extends MachineAware, TransportAware {
 
     String getUID();
-
-    Machine getMachine();
 }

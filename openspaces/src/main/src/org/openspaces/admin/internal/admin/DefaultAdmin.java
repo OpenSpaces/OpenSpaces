@@ -1,10 +1,13 @@
 package org.openspaces.admin.internal.admin;
 
+import com.gigaspaces.lrmi.nio.info.TransportConfiguration;
 import net.jini.core.discovery.LookupLocator;
+import org.openspaces.admin.AdminException;
 import org.openspaces.admin.GridServiceContainers;
 import org.openspaces.admin.GridServiceManagers;
 import org.openspaces.admin.LookupServices;
 import org.openspaces.admin.Machines;
+import org.openspaces.admin.Transports;
 import org.openspaces.admin.internal.admin.gsc.DefaultGridServiceContainers;
 import org.openspaces.admin.internal.admin.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.admin.gsc.InternalGridServiceContainers;
@@ -17,8 +20,16 @@ import org.openspaces.admin.internal.admin.lus.InternalLookupServices;
 import org.openspaces.admin.internal.admin.machine.DefaultMachine;
 import org.openspaces.admin.internal.admin.machine.DefaultMachines;
 import org.openspaces.admin.internal.admin.machine.InternalMachine;
+import org.openspaces.admin.internal.admin.machine.InternalMachineAware;
 import org.openspaces.admin.internal.admin.machine.InternalMachines;
+import org.openspaces.admin.internal.admin.transport.DefaultTransport;
+import org.openspaces.admin.internal.admin.transport.DefaultTransports;
+import org.openspaces.admin.internal.admin.transport.InternalTransport;
+import org.openspaces.admin.internal.admin.transport.InternalTransportInfoProvider;
+import org.openspaces.admin.internal.admin.transport.InternalTransports;
 import org.openspaces.admin.internal.discovery.DiscoveryService;
+
+import java.rmi.RemoteException;
 
 /**
  * @author kimchy
@@ -34,6 +45,8 @@ public class DefaultAdmin implements InternalAdmin {
     private final InternalGridServiceManagers gridServiceManagers = new DefaultGridServiceManagers();
 
     private final InternalGridServiceContainers gridServiceContainers = new DefaultGridServiceContainers();
+
+    private final InternalTransports transports = new DefaultTransports();
 
     public DefaultAdmin(String[] groups, LookupLocator[] locators) {
         this.discoveryService = new DiscoveryService(groups, locators, this);
@@ -63,71 +76,111 @@ public class DefaultAdmin implements InternalAdmin {
         return this.machines;
     }
 
+    public Transports getTransports() {
+        return this.transports;
+    }
+
     public synchronized void addLookupService(InternalLookupService lookupService) {
         lookupServices.addLookupService(lookupService);
-        InternalMachine machine = (InternalMachine) machines.getMachineByHost(lookupService.getTransportConfiguration().getHost());
-        if (machine == null) {
-            machine = new DefaultMachine(lookupService.getTransportConfiguration().getHost(), lookupService.getTransportConfiguration().getHost());
-            machines.addMachine(machine);
+        TransportConfiguration txConfig = null;
+        try {
+            txConfig = lookupService.getTransportConfiguration();
+        } catch (RemoteException e) {
+            throw new AdminException("Failed to get transport configuration for lookup service [" + lookupService.getUID() + "]", e);
         }
-        lookupService.setMachine(machine);
-        machine.addLookupService(lookupService);
+
+        InternalTransport transport = processTransportOnServiceAddition(txConfig, lookupService);
+
+        InternalMachine machine = processMachineOnServiceAddition(txConfig, lookupService, transport);
+
+        ((InternalLookupServices) machine.getLookupServices()).addLookupService(lookupService);
     }
 
     public synchronized void removeLookupService(String uid) {
         InternalLookupService lookupService = lookupServices.removeLookupService(uid);
         if (lookupService != null) {
-            ((InternalMachine) lookupService.getMachine()).removeLookupService(uid);
+            processTransportOnServiceRemoval(lookupService, lookupService);
+            ((InternalLookupServices) ((InternalMachine) lookupService.getMachine()).getLookupServices()).removeLookupService(uid);
         }
     }
 
     public synchronized void addGridServiceManager(InternalGridServiceManager gridServiceManager) {
         gridServiceManagers.addGridServiceManager(gridServiceManager);
-        InternalMachine machine = (InternalMachine) machines.getMachineByHost(gridServiceManager.getTransportConfiguration().getHost());
-        if (machine == null) {
-            machine = new DefaultMachine(gridServiceManager.getTransportConfiguration().getHost(), gridServiceManager.getTransportConfiguration().getHost());
-            machines.addMachine(machine);
+
+        TransportConfiguration txConfig = null;
+        try {
+            txConfig = gridServiceManager.getTransportConfiguration();
+        } catch (RemoteException e) {
+            throw new AdminException("Failed to get transport configuration for grid service manager [" + gridServiceManager.getUID() + "]", e);
         }
-        gridServiceManager.setMachine(machine);
-        machine.addGridServiceManager(gridServiceManager);
+
+        InternalTransport transport = processTransportOnServiceAddition(txConfig, gridServiceManager);
+
+        InternalMachine machine = processMachineOnServiceAddition(txConfig, gridServiceManager, transport);
+
+        ((InternalGridServiceManagers) machine.getGridServiceManagers()).addGridServiceManager(gridServiceManager);
     }
 
     public synchronized void removeGridServiceManager(String uid) {
         InternalGridServiceManager gridServiceManager = gridServiceManagers.removeGridServiceManager(uid);
         if (gridServiceManager != null) {
-            ((InternalMachine) gridServiceManager.getMachine()).removeGridServiceManager(uid);
-        }
-    }
-
-    public synchronized void replaceGridServiceManager(InternalGridServiceManager gridServiceManager) {
-        InternalGridServiceManager oldGridServiceManager = gridServiceManagers.replaceGridServiceManager(gridServiceManager);
-        if (oldGridServiceManager != null) {
-            ((InternalMachine) oldGridServiceManager.getMachine()).replaceGridServiceManager(gridServiceManager);
+            processTransportOnServiceRemoval(gridServiceManager, gridServiceManager);
+            ((InternalGridServiceManagers) ((InternalMachine) gridServiceManager.getMachine()).getGridServiceManagers()).removeGridServiceManager(uid);
         }
     }
 
     public synchronized void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer) {
         gridServiceContainers.addGridServiceContainer(gridServiceContainer);
-        InternalMachine machine = (InternalMachine) machines.getMachineByHost(gridServiceContainer.getTransportConfiguration().getHost());
-        if (machine == null) {
-            machine = new DefaultMachine(gridServiceContainer.getTransportConfiguration().getHost(), gridServiceContainer.getTransportConfiguration().getHost());
-            machines.addMachine(machine);
+        TransportConfiguration txConfig = null;
+        try {
+            txConfig = gridServiceContainer.getTransportConfiguration();
+        } catch (RemoteException e) {
+            throw new AdminException("Failed to get transport configuration for grid service container [" + gridServiceContainer.getUID() + "]", e);
         }
-        gridServiceContainer.setMachine(machine);
-        machine.addGridServiceContainer(gridServiceContainer);
+
+        InternalTransport transport = processTransportOnServiceAddition(txConfig, gridServiceContainer);
+
+        InternalMachine machine = processMachineOnServiceAddition(txConfig, gridServiceContainer, transport);
+
+        ((InternalGridServiceContainers) machine.getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
     }
 
     public synchronized void removeGridServiceContainer(String uid) {
         InternalGridServiceContainer gridServiceContainer = gridServiceContainers.removeGridServiceContainer(uid);
         if (gridServiceContainer != null) {
-            ((InternalMachine) gridServiceContainer.getMachine()).removeGridServiceContainer(uid);
+            processTransportOnServiceRemoval(gridServiceContainer, gridServiceContainer);
+            ((InternalGridServiceContainers) ((InternalMachine) gridServiceContainer.getMachine()).getGridServiceContainers()).removeGridServiceContainer(uid);
         }
     }
 
-    public synchronized void repalceGridServiceContainer(InternalGridServiceContainer gridServiceContainer) {
-        InternalGridServiceContainer oldGridServiceContainer = gridServiceContainers.replaceGridServiceContainer(gridServiceContainer);
-        if (oldGridServiceContainer != null) {
-            ((InternalMachine) oldGridServiceContainer.getMachine()).replaceGridServiceContainer(gridServiceContainer);
+    private void processTransportOnServiceRemoval(InternalTransportInfoProvider txProvider, InternalMachineAware machineAware) {
+        InternalTransport transport = ((InternalTransport) txProvider.getTransport());
+        transport.removeTransportInfoProvider(txProvider);
+        if (!transport.hasTransportInfoProviders()) {
+            transports.removeTransport(transport.getUID());
+            ((InternalTransports) machineAware.getMachine().getTransports()).removeTransport(transport.getUID());
         }
+    }
+
+    private InternalMachine processMachineOnServiceAddition(TransportConfiguration txConfig, InternalMachineAware machineAware, InternalTransport transport) {
+        InternalMachine machine = (InternalMachine) machines.getMachineByHost(txConfig.getHost());
+        if (machine == null) {
+            machine = new DefaultMachine(txConfig.getHost(), txConfig.getHost());
+            machines.addMachine(machine);
+        }
+        ((InternalTransports) machine.getTransports()).addTransport(transport);
+        machineAware.setMachine(machine);
+        return machine;
+    }
+
+    private InternalTransport processTransportOnServiceAddition(TransportConfiguration txConfig, InternalTransportInfoProvider txProvider) {
+        InternalTransport transport = (InternalTransport) transports.getTransportByHostAndPort(txConfig.getHost(), txConfig.getPort());
+        if (transport == null) {
+            transport = new DefaultTransport(txConfig);
+            transports.addTransport(transport);
+        }
+        transport.addTransportInfoProvider(txProvider);
+        txProvider.setTransport(transport);
+        return transport;
     }
 }

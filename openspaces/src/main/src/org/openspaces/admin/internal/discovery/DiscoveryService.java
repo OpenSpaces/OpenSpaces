@@ -128,17 +128,6 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     }
 
     public void serviceChanged(ServiceDiscoveryEvent event) {
-        // TODO we will get these for CPU/Memory changes of GSC, we need to filter them out (hopefully, in the LUS level)
-        Object service = event.getPostEventServiceItem().service;
-        if (service instanceof GSM) {
-            InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(event.getPostEventServiceItem().serviceID, (GSM) service);
-            // TODO register a listener for deployment events
-            // TODO get the currently deployed processing unit
-            // TODO GSMs needs to be pinged periodically and if the ping fails for three times, simply remove it (that is because they usually start LUS as well, so we won't get service removed event)
-            admin.replaceGridServiceManager(gridServiceManager);
-        } else if (service instanceof GSC) {
-            InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(event.getPostEventServiceItem().serviceID, (GSC) service);
-            admin.addGridServiceContainer(gridServiceContainer);
-        }
+        // TODO do we really care about this?
     }
 }

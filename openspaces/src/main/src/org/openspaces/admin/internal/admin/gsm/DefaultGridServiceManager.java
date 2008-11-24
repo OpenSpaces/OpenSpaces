@@ -4,24 +4,18 @@ import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.lrmi.nio.info.TransportConfiguration;
 import com.gigaspaces.lrmi.nio.info.TransportStatistics;
 import net.jini.core.lookup.ServiceID;
-import org.openspaces.admin.AdminException;
-import org.openspaces.admin.Machine;
-import org.openspaces.admin.internal.admin.machine.InternalMachine;
+import org.openspaces.admin.internal.admin.support.AbstractGridComponent;
 
 import java.rmi.RemoteException;
 
 /**
  * @author kimchy
  */
-public class DefaultGridServiceManager implements InternalGridServiceManager {
+public class DefaultGridServiceManager extends AbstractGridComponent implements InternalGridServiceManager {
 
     private final ServiceID serviceID;
 
     private final GSM gsm;
-
-    private volatile TransportConfiguration transportConfiguration;
-
-    private volatile InternalMachine machine;
 
     public DefaultGridServiceManager(ServiceID serviceID, GSM gsm) {
         this.serviceID = serviceID;
@@ -40,31 +34,11 @@ public class DefaultGridServiceManager implements InternalGridServiceManager {
         return this.gsm;
     }
 
-    public void setMachine(InternalMachine machine) {
-        this.machine = machine;
+    public TransportConfiguration getTransportConfiguration() throws RemoteException {
+        return gsm.getTransportConfiguration();
     }
 
-    public Machine getMachine() {
-        return this.machine;
-    }
-
-    public TransportConfiguration getTransportConfiguration() throws AdminException {
-        if (transportConfiguration != null) {
-            return transportConfiguration;
-        }
-        try {
-            transportConfiguration = gsm.getTransportConfiguration();
-        } catch (RemoteException e) {
-            throw new AdminException("Failed to get transport configuration", e);
-        }
-        return transportConfiguration;
-    }
-
-    public TransportStatistics getTransportStatistics() throws AdminException {
-        try {
-            return gsm.getTransportStatistics();
-        } catch (RemoteException e) {
-            throw new AdminException("Failed to get transport statistics", e);
-        }
+    public TransportStatistics getTransportStatistics() throws RemoteException {
+        return gsm.getTransportStatistics();
     }
 }

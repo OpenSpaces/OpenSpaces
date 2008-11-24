@@ -3,9 +3,7 @@ package org.openspaces.admin;
 /**
  * @author kimchy
  */
-public interface LookupService extends TransportInfoProvider {
+public interface LookupService extends TransportAware, MachineAware {
 
     String getUID();
-
-    Machine getMachine();
 }
