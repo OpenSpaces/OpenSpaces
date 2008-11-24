@@ -1,4 +1,4 @@
-package org.openspaces.admin.internal.admin;
+package org.openspaces.admin.internal.admin.machine;
 
 import org.openspaces.admin.Machine;
 import org.openspaces.admin.Machines;

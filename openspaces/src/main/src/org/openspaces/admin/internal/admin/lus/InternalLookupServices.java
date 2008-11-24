@@ -1,4 +1,4 @@
-package org.openspaces.admin.internal.admin;
+package org.openspaces.admin.internal.admin.lus;
 
 import org.openspaces.admin.LookupServices;
 

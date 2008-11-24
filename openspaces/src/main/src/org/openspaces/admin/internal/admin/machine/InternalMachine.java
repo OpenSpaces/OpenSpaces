@@ -1,6 +1,9 @@
-package org.openspaces.admin.internal.admin;
+package org.openspaces.admin.internal.admin.machine;
 
 import org.openspaces.admin.Machine;
+import org.openspaces.admin.internal.admin.gsc.InternalGridServiceContainer;
+import org.openspaces.admin.internal.admin.gsm.InternalGridServiceManager;
+import org.openspaces.admin.internal.admin.lus.InternalLookupService;
 
 /**
  * @author kimchy

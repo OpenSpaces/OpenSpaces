@@ -1,4 +1,4 @@
-package org.openspaces.admin.internal.admin;
+package org.openspaces.admin.internal.admin.gsc;
 
 import org.openspaces.admin.GridServiceContainers;
 

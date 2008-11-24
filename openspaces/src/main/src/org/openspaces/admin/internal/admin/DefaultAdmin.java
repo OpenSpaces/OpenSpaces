@@ -5,6 +5,19 @@ import org.openspaces.admin.GridServiceContainers;
 import org.openspaces.admin.GridServiceManagers;
 import org.openspaces.admin.LookupServices;
 import org.openspaces.admin.Machines;
+import org.openspaces.admin.internal.admin.gsc.DefaultGridServiceContainers;
+import org.openspaces.admin.internal.admin.gsc.InternalGridServiceContainer;
+import org.openspaces.admin.internal.admin.gsc.InternalGridServiceContainers;
+import org.openspaces.admin.internal.admin.gsm.DefaultGridServiceManagers;
+import org.openspaces.admin.internal.admin.gsm.InternalGridServiceManager;
+import org.openspaces.admin.internal.admin.gsm.InternalGridServiceManagers;
+import org.openspaces.admin.internal.admin.lus.DefaultLookupServices;
+import org.openspaces.admin.internal.admin.lus.InternalLookupService;
+import org.openspaces.admin.internal.admin.lus.InternalLookupServices;
+import org.openspaces.admin.internal.admin.machine.DefaultMachine;
+import org.openspaces.admin.internal.admin.machine.DefaultMachines;
+import org.openspaces.admin.internal.admin.machine.InternalMachine;
+import org.openspaces.admin.internal.admin.machine.InternalMachines;
 import org.openspaces.admin.internal.discovery.DiscoveryService;
 
 /**

@@ -1,8 +1,9 @@
-package org.openspaces.admin.internal.admin;
+package org.openspaces.admin.internal.admin.gsc;
 
 import com.gigaspaces.grid.gsc.GSC;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.GridServiceContainer;
+import org.openspaces.admin.internal.admin.machine.InternalMachine;
 
 /**
  * @author kimchy

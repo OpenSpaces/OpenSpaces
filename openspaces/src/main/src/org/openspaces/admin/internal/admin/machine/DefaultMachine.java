@@ -1,8 +1,17 @@
-package org.openspaces.admin.internal.admin;
+package org.openspaces.admin.internal.admin.machine;
 
 import org.openspaces.admin.GridServiceContainers;
 import org.openspaces.admin.GridServiceManagers;
 import org.openspaces.admin.LookupServices;
+import org.openspaces.admin.internal.admin.gsc.DefaultGridServiceContainers;
+import org.openspaces.admin.internal.admin.gsc.InternalGridServiceContainer;
+import org.openspaces.admin.internal.admin.gsc.InternalGridServiceContainers;
+import org.openspaces.admin.internal.admin.gsm.DefaultGridServiceManagers;
+import org.openspaces.admin.internal.admin.gsm.InternalGridServiceManager;
+import org.openspaces.admin.internal.admin.gsm.InternalGridServiceManagers;
+import org.openspaces.admin.internal.admin.lus.DefaultLookupServices;
+import org.openspaces.admin.internal.admin.lus.InternalLookupService;
+import org.openspaces.admin.internal.admin.lus.InternalLookupServices;
 
 /**
  * @author kimchy

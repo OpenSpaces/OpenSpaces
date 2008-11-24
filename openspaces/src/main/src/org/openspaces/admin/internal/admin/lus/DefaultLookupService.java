@@ -1,4 +1,4 @@
-package org.openspaces.admin.internal.admin;
+package org.openspaces.admin.internal.admin.lus;
 
 import com.gigaspaces.lrmi.nio.info.NIOInfoProvider;
 import com.gigaspaces.lrmi.nio.info.TransportConfiguration;
@@ -7,6 +7,7 @@ import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceRegistrar;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.Machine;
+import org.openspaces.admin.internal.admin.machine.InternalMachine;
 
 import java.rmi.RemoteException;
 

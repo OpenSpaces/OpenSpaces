@@ -1,4 +1,4 @@
-package org.openspaces.admin.internal.admin;
+package org.openspaces.admin.internal.admin.gsm;
 
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.GridServiceManager;
