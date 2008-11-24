@@ -76,7 +76,7 @@ import java.util.zip.ZipOutputStream;
 
 /**
  */
-public class SDeploy {
+public class Deploy {
 
     private static final Log logger = LogFactory.getLog(Deploy.class);
 
