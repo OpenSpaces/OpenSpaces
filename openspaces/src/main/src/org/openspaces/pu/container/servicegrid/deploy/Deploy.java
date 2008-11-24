@@ -18,7 +18,7 @@ package org.openspaces.pu.container.servicegrid.deploy;
 
 import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.logger.GSLogConfigLoader;
-import com.gigaspaces.start.SystemConfig;
+import com.j_spaces.core.service.ServiceConfigLoader;
 import com.j_spaces.kernel.PlatformVersion;
 import net.jini.config.Configuration;
 import net.jini.core.lookup.ServiceItem;
@@ -76,13 +76,13 @@ import java.util.zip.ZipOutputStream;
 
 /**
  */
-public class Deploy {
+public class SDeploy {
 
     private static final Log logger = LogFactory.getLog(Deploy.class);
 
     private DeployAdmin deployAdmin;
 
-    private GSM[] gsms = null; 
+    private GSM[] gsms = null;
 
     private String[] groups;
 
@@ -182,7 +182,7 @@ public class Deploy {
         OperationalString opString = buildOperationalString(args);
         int totalPlanned = sumUpServices(opString);
         DeployListener listener = new DeployListener();
-        Configuration config = SystemConfig.getInstance().getConfiguration();
+        Configuration config = ServiceConfigLoader.getConfiguration();
         deployAdmin.deploy(opString, (ServiceProvisionListener) ExporterConfig.getExporter(config, "com.gigaspaces.transport", "defaultExporter").export(listener));
         info("Waiting for [" + totalPlanned + "] processing unit instances to be deployed...");
         while (true) {
