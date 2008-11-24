@@ -1,6 +1,6 @@
 package org.openspaces.admin.events;
 
-import org.openspaces.admin.Machine;
+import org.openspaces.admin.machine.Machine;
 
 /**
  * @author kimchy

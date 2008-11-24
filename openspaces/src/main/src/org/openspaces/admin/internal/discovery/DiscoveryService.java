@@ -17,12 +17,12 @@ import net.jini.lookup.ServiceDiscoveryListener;
 import net.jini.lookup.ServiceDiscoveryManager;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.admin.gsc.DefaultGridServiceContainer;
-import org.openspaces.admin.internal.admin.gsc.InternalGridServiceContainer;
-import org.openspaces.admin.internal.admin.gsm.DefaultGridServiceManager;
-import org.openspaces.admin.internal.admin.gsm.InternalGridServiceManager;
-import org.openspaces.admin.internal.admin.lus.DefaultLookupService;
-import org.openspaces.admin.internal.admin.lus.InternalLookupService;
+import org.openspaces.admin.internal.gsc.DefaultGridServiceContainer;
+import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
+import org.openspaces.admin.internal.gsm.DefaultGridServiceManager;
+import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
+import org.openspaces.admin.internal.lus.DefaultLookupService;
+import org.openspaces.admin.internal.lus.InternalLookupService;
 
 /**
  * @author kimchy

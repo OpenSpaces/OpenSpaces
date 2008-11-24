@@ -2,10 +2,10 @@ package org.openspaces.admin.samples;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
-import org.openspaces.admin.GridServiceContainer;
-import org.openspaces.admin.GridServiceManager;
-import org.openspaces.admin.LookupService;
-import org.openspaces.admin.Machine;
+import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.lus.LookupService;
+import org.openspaces.admin.machine.Machine;
 
 /**
  * @author kimchy

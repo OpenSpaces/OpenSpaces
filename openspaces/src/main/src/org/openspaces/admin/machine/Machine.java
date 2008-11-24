@@ -1,19 +1,18 @@
-package org.openspaces.admin;
+package org.openspaces.admin.machine;
 
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.lus.LookupServices;
-import org.openspaces.admin.machine.Machines;
 import org.openspaces.admin.transport.Transports;
 
 /**
  * @author kimchy
  */
-public interface Admin {
+public interface Machine {
 
-    void start();
+    String getUID();
 
-    void stop();
+    String getHost();
 
     LookupServices getLookupServices();
 
@@ -21,7 +20,7 @@ public interface Admin {
 
     GridServiceContainers getGridServiceContainers();
 
-    Machines getMachines();
+    boolean hasGridComponents();
 
     Transports getTransports();
 }
