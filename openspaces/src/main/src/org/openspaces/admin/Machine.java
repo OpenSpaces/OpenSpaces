@@ -10,4 +10,8 @@ public interface Machine {
     String getHost();
 
     LookupServices getLookupServices();
+
+    GridServiceManagers getGridServiceManagers();
+
+    GridServiceContainers getGridServiceContainers();
 }

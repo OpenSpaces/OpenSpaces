@@ -8,4 +8,6 @@ public interface LookupServices extends Iterable<LookupService> {
     LookupService[] getLookupServices();
 
     LookupService getLookupServiceByUID(String id);
+
+    int size();
 }

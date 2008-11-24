@@ -11,5 +11,9 @@ public interface Admin {
 
     LookupServices getLookupServices();
 
+    GridServiceManagers getGridServiceManagers();
+
+    GridServiceContainers getGridServiceContainers();
+
     Machines getMachines();
 }

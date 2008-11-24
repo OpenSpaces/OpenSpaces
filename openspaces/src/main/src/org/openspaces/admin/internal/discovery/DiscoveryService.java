@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.discovery;
 
+import com.gigaspaces.grid.gsc.GSC;
 import com.gigaspaces.grid.gsm.GSM;
 import com.j_spaces.core.service.ServiceConfigLoader;
 import net.jini.config.Configuration;
@@ -15,8 +16,12 @@ import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryListener;
 import net.jini.lookup.ServiceDiscoveryManager;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.internal.admin.DefaultGridServiceContainer;
+import org.openspaces.admin.internal.admin.DefaultGridServiceManager;
 import org.openspaces.admin.internal.admin.DefaultLookupService;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.admin.InternalGridServiceContainer;
+import org.openspaces.admin.internal.admin.InternalGridServiceManager;
 import org.openspaces.admin.internal.admin.InternalLookupService;
 
 /**
@@ -66,7 +71,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             throw new AdminException("Failed to start discovery service, Service Discovery Manager failed to start", e);
         }
 
-        ServiceTemplate template = new ServiceTemplate(null, new Class[]{GSM.class}, null);
+        ServiceTemplate template = new ServiceTemplate(null, null, null);
         try {
             cache = sdm.createLookupCache(template, null, this);
         } catch (Exception e) {
@@ -95,20 +100,45 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
     public void discarded(DiscoveryEvent e) {
         for (ServiceRegistrar registrar : e.getRegistrars()) {
-            InternalLookupService lookupService = new DefaultLookupService(registrar, registrar.getServiceID());
-            admin.removeLookupService(lookupService.getUID());
+            admin.removeLookupService(registrar.getServiceID().toString());
         }
     }
 
     public void serviceAdded(ServiceDiscoveryEvent event) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        Object service = event.getPostEventServiceItem().service;
+        if (service instanceof GSM) {
+            InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(event.getPostEventServiceItem().serviceID, (GSM) service);
+            // TODO register a listener for deployment events 
+            // TODO get the currently deployed processing unit
+            // TODO GSMs needs to be pinged periodically and if the ping fails for three times, simply remove it (that is because they usually start LUS as well, so we won't get service removed event)
+            admin.addGridServiceManager(gridServiceManager);
+        } else if (service instanceof GSC) {
+            InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(event.getPostEventServiceItem().serviceID, (GSC) service);
+            admin.addGridServiceContainer(gridServiceContainer);
+        }
     }
 
     public void serviceRemoved(ServiceDiscoveryEvent event) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        Object service = event.getPreEventServiceItem().service;
+        if (service instanceof GSM) {
+            admin.removeGridServiceManager(event.getPreEventServiceItem().serviceID.toString());
+        } else if (service instanceof GSC) {
+            admin.removeGridServiceContainer(event.getPreEventServiceItem().serviceID.toString());
+        }
     }
 
     public void serviceChanged(ServiceDiscoveryEvent event) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        // TODO we will get these for CPU/Memory changes of GSC, we need to filter them out (hopefully, in the LUS level)
+        Object service = event.getPostEventServiceItem().service;
+        if (service instanceof GSM) {
+            InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(event.getPostEventServiceItem().serviceID, (GSM) service);
+            // TODO register a listener for deployment events
+            // TODO get the currently deployed processing unit
+            // TODO GSMs needs to be pinged periodically and if the ping fails for three times, simply remove it (that is because they usually start LUS as well, so we won't get service removed event)
+            admin.replaceGridServiceManager(gridServiceManager);
+        } else if (service instanceof GSC) {
+            InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(event.getPostEventServiceItem().serviceID, (GSC) service);
+            admin.addGridServiceContainer(gridServiceContainer);
+        }
     }
 }

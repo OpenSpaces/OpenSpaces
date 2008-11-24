@@ -8,4 +8,6 @@ public interface GridServiceManagers extends Iterable<GridServiceManager> {
     GridServiceManager[] getManagers();
 
     GridServiceManager getManagerByUID(String uid);
+
+    int size();
 }

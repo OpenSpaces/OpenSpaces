@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.admin;
 
+import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Machine;
 
 import java.util.Iterator;
@@ -11,12 +12,16 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DefaultMachines implements InternalMachines {
 
-    private final Map<String, Machine> machinesById = new ConcurrentHashMap<String, Machine>();
+    private final Map<String, Machine> machinesById = new SizeConcurrentHashMap<String, Machine>();
 
     private final Map<String, Machine> machinesByHost = new ConcurrentHashMap<String, Machine>();
 
     public Machine[] getMachines() {
         return machinesById.values().toArray(new Machine[0]);
+    }
+
+    public int size() {
+        return machinesById.size();
     }
 
     public Iterator<Machine> iterator() {

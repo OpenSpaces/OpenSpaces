@@ -1,17 +1,17 @@
 package org.openspaces.admin.internal.admin;
 
+import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.LookupService;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author kimchy
  */
 public class DefaultLookupServices implements InternalLookupServices {
 
-    private final Map<String, LookupService> lookupServiceMap = new ConcurrentHashMap<String, LookupService>();
+    private final Map<String, LookupService> lookupServiceMap = new SizeConcurrentHashMap<String, LookupService>();
 
     public LookupService[] getLookupServices() {
         return lookupServiceMap.values().toArray(new InternalLookupService[0]);
@@ -23,6 +23,10 @@ public class DefaultLookupServices implements InternalLookupServices {
 
     public LookupService getLookupServiceByUID(String id) {
         return lookupServiceMap.get(id);
+    }
+
+    public int size() {
+        return lookupServiceMap.size();
     }
 
     public void addLookupService(InternalLookupService lookupService) {
