@@ -81,7 +81,6 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void addLookupService(InternalLookupService lookupService) {
-        lookupServices.addLookupService(lookupService);
         TransportConfiguration txConfig = null;
         try {
             txConfig = lookupService.getTransportConfiguration();
@@ -94,6 +93,8 @@ public class DefaultAdmin implements InternalAdmin {
         InternalMachine machine = processMachineOnServiceAddition(txConfig, lookupService, transport);
 
         ((InternalLookupServices) machine.getLookupServices()).addLookupService(lookupService);
+
+        lookupServices.addLookupService(lookupService);
     }
 
     public synchronized void removeLookupService(String uid) {
@@ -105,8 +106,6 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void addGridServiceManager(InternalGridServiceManager gridServiceManager) {
-        gridServiceManagers.addGridServiceManager(gridServiceManager);
-
         TransportConfiguration txConfig = null;
         try {
             txConfig = gridServiceManager.getTransportConfiguration();
@@ -119,6 +118,8 @@ public class DefaultAdmin implements InternalAdmin {
         InternalMachine machine = processMachineOnServiceAddition(txConfig, gridServiceManager, transport);
 
         ((InternalGridServiceManagers) machine.getGridServiceManagers()).addGridServiceManager(gridServiceManager);
+
+        gridServiceManagers.addGridServiceManager(gridServiceManager);
     }
 
     public synchronized void removeGridServiceManager(String uid) {
@@ -130,7 +131,6 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer) {
-        gridServiceContainers.addGridServiceContainer(gridServiceContainer);
         TransportConfiguration txConfig = null;
         try {
             txConfig = gridServiceContainer.getTransportConfiguration();
@@ -143,6 +143,8 @@ public class DefaultAdmin implements InternalAdmin {
         InternalMachine machine = processMachineOnServiceAddition(txConfig, gridServiceContainer, transport);
 
         ((InternalGridServiceContainers) machine.getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
+
+        gridServiceContainers.addGridServiceContainer(gridServiceContainer);
     }
 
     public synchronized void removeGridServiceContainer(String uid) {
