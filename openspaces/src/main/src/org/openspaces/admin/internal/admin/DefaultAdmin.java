@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.admin;
 
+import com.gigaspaces.jvm.VirtualMachineConfiguration;
 import com.gigaspaces.lrmi.nio.info.TransportConfiguration;
 import com.gigaspaces.operatingsystem.OperatingSystemConfiguration;
 import net.jini.core.discovery.LookupLocator;
@@ -31,10 +32,16 @@ import org.openspaces.admin.internal.transport.DefaultTransports;
 import org.openspaces.admin.internal.transport.InternalTransport;
 import org.openspaces.admin.internal.transport.InternalTransportInfoProvider;
 import org.openspaces.admin.internal.transport.InternalTransports;
+import org.openspaces.admin.internal.vm.DefaultVirtualMachine;
+import org.openspaces.admin.internal.vm.DefaultVirtualMachines;
+import org.openspaces.admin.internal.vm.InternalVirtualMachine;
+import org.openspaces.admin.internal.vm.InternalVirtualMachineInfoProvider;
+import org.openspaces.admin.internal.vm.InternalVirtualMachines;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.machine.Machines;
 import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.transport.Transports;
+import org.openspaces.admin.vm.VirtualMachine;
 
 import java.rmi.RemoteException;
 
@@ -56,6 +63,8 @@ public class DefaultAdmin implements InternalAdmin {
     private final InternalTransports transports = new DefaultTransports();
 
     private final InternalOperatingSystems operatingSystems = new DefaultOperatingSystems();
+
+    private final InternalVirtualMachines virtualMachines = new DefaultVirtualMachines();
 
     public DefaultAdmin(String[] groups, LookupLocator[] locators) {
         this.discoveryService = new DiscoveryService(groups, locators, this);
@@ -92,8 +101,10 @@ public class DefaultAdmin implements InternalAdmin {
     public synchronized void addLookupService(InternalLookupService lookupService) {
         InternalTransport transport = processTransportOnServiceAddition(lookupService);
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(lookupService);
+        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(lookupService);
 
-        InternalMachine machine = processMachineOnServiceAddition(transport.getConfiguration(), lookupService, transport, operatingSystem);
+        InternalMachine machine = processMachineOnServiceAddition(transport.getConfiguration(), lookupService,
+                transport, operatingSystem, virtualMachine);
 
         ((InternalLookupServices) machine.getLookupServices()).addLookupService(lookupService);
 
@@ -105,6 +116,7 @@ public class DefaultAdmin implements InternalAdmin {
         if (lookupService != null) {
             processTransportOnServiceRemoval(lookupService, lookupService);
             processOperatingSystemOnServiceRemoval(lookupService, lookupService);
+            processVirtualMachineOnServiceRemoval(lookupService, lookupService);
             ((InternalLookupServices) ((InternalMachine) lookupService.getMachine()).getLookupServices()).removeLookupService(uid);
         }
     }
@@ -112,8 +124,10 @@ public class DefaultAdmin implements InternalAdmin {
     public synchronized void addGridServiceManager(InternalGridServiceManager gridServiceManager) {
         InternalTransport transport = processTransportOnServiceAddition(gridServiceManager);
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceManager);
+        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceManager);
 
-        InternalMachine machine = processMachineOnServiceAddition(transport.getConfiguration(), gridServiceManager, transport, operatingSystem);
+        InternalMachine machine = processMachineOnServiceAddition(transport.getConfiguration(), gridServiceManager,
+                transport, operatingSystem, virtualMachine);
 
         ((InternalGridServiceManagers) machine.getGridServiceManagers()).addGridServiceManager(gridServiceManager);
 
@@ -125,6 +139,7 @@ public class DefaultAdmin implements InternalAdmin {
         if (gridServiceManager != null) {
             processTransportOnServiceRemoval(gridServiceManager, gridServiceManager);
             processOperatingSystemOnServiceRemoval(gridServiceManager, gridServiceManager);
+            processVirtualMachineOnServiceRemoval(gridServiceManager, gridServiceManager);
             ((InternalGridServiceManagers) ((InternalMachine) gridServiceManager.getMachine()).getGridServiceManagers()).removeGridServiceManager(uid);
         }
     }
@@ -132,8 +147,10 @@ public class DefaultAdmin implements InternalAdmin {
     public synchronized void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer) {
         InternalTransport transport = processTransportOnServiceAddition(gridServiceContainer);
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceContainer);
+        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceContainer);
 
-        InternalMachine machine = processMachineOnServiceAddition(transport.getConfiguration(), gridServiceContainer, transport, operatingSystem);
+        InternalMachine machine = processMachineOnServiceAddition(transport.getConfiguration(), gridServiceContainer,
+                transport, operatingSystem, virtualMachine);
 
         ((InternalGridServiceContainers) machine.getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
 
@@ -145,12 +162,14 @@ public class DefaultAdmin implements InternalAdmin {
         if (gridServiceContainer != null) {
             processTransportOnServiceRemoval(gridServiceContainer, gridServiceContainer);
             processOperatingSystemOnServiceRemoval(gridServiceContainer, gridServiceContainer);
+            processVirtualMachineOnServiceRemoval(gridServiceContainer, gridServiceContainer);
             ((InternalGridServiceContainers) ((InternalMachine) gridServiceContainer.getMachine()).getGridServiceContainers()).removeGridServiceContainer(uid);
         }
     }
 
     private InternalMachine processMachineOnServiceAddition(TransportConfiguration txConfig, InternalMachineAware machineAware,
-                                                            InternalTransport transport, OperatingSystem operatingSystem) {
+                                                            InternalTransport transport, OperatingSystem operatingSystem,
+                                                            VirtualMachine virtualMachine) {
         InternalMachine machine = (InternalMachine) machines.getMachineByHost(txConfig.getHost());
         if (machine == null) {
             machine = new DefaultMachine(txConfig.getHost(), txConfig.getHost());
@@ -158,8 +177,35 @@ public class DefaultAdmin implements InternalAdmin {
             machines.addMachine(machine);
         }
         ((InternalTransports) machine.getTransports()).addTransport(transport);
+        ((InternalVirtualMachines) machine.getVirtualMachines()).addVirtualMachine(virtualMachine);
         machineAware.setMachine(machine);
         return machine;
+    }
+
+    private InternalVirtualMachine processVirtualMachineOnServiceAddition(InternalVirtualMachineInfoProvider vmProvider) {
+        VirtualMachineConfiguration vmConfig;
+        try {
+            vmConfig = vmProvider.getVirtualMachineConfiguration();
+        } catch (RemoteException e) {
+            throw new AdminException("Failed to get virtual machine configuration", e);
+        }
+        InternalVirtualMachine virtualMachine = (InternalVirtualMachine) virtualMachines.getVirtualMachineByUID(vmConfig.getUid());
+        if (virtualMachine == null) {
+            virtualMachine = new DefaultVirtualMachine(vmConfig);
+            virtualMachines.addVirtualMachine(virtualMachine);
+        }
+        virtualMachine.addVirtualMachineInfoProvider(vmProvider);
+        vmProvider.setVirtualMachine(virtualMachine);
+        return virtualMachine;
+    }
+
+    private void processVirtualMachineOnServiceRemoval(InternalVirtualMachineInfoProvider vmProvider, InternalMachineAware machineAware) {
+        InternalVirtualMachine virtualMachine = (InternalVirtualMachine) vmProvider.getVirtualMachine();
+        virtualMachine.removeVirtualMachineInfoProvider(vmProvider);
+        if (!virtualMachine.hasVirtualMachineInfoProviders()) {
+            virtualMachines.removeVirtualMachine(virtualMachine.getUID());
+            ((InternalVirtualMachines) machineAware.getMachine().getVirtualMachines()).removeVirtualMachine(virtualMachine.getUID());
+        }
     }
 
     private InternalTransport processTransportOnServiceAddition(InternalTransportInfoProvider txProvider) {
@@ -187,7 +233,7 @@ public class DefaultAdmin implements InternalAdmin {
             ((InternalTransports) machineAware.getMachine().getTransports()).removeTransport(transport.getUID());
         }
     }
-    
+
     private InternalOperatingSystem processOperatingSystemOnServiceAddition(InternalOperatingSystemInfoProvider osProvider) {
         OperatingSystemConfiguration config;
         try {

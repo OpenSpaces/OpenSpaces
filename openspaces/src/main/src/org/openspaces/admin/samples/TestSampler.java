@@ -17,8 +17,8 @@ public class TestSampler {
         admin.start();
         while (true) {
             try {
-                for (LookupService lookupService : admin.getLookupServices().getLookupServices()) {
-                    System.out.println("Lookup [" + lookupService.getUID() + "] : " + lookupService.getOperatingSystem().getConfiguration().getName());
+                for (LookupService lookupService : admin.getLookupServices()) {
+                    System.out.println("Lookup [" + lookupService.getUID() + "] : " + lookupService.getVirtualMachine().getStatistics().getMemoryHeapUsed());
                 }
                 for (GridServiceManager gridServiceManager : admin.getGridServiceManagers()) {
                     System.out.println("GSM [" + gridServiceManager.getUID() + "] : " + gridServiceManager.getOperatingSystem().getConfiguration().getName());
@@ -26,7 +26,7 @@ public class TestSampler {
                 for (GridServiceContainer gridServiceContainer : admin.getGridServiceContainers()) {
                     System.out.println("GSC [" + gridServiceContainer.getUID() + "] : " + gridServiceContainer.getOperatingSystem().getConfiguration().getName());
                 }
-                for (Machine machine : admin.getMachines().getMachines()) {
+                for (Machine machine : admin.getMachines()) {
                     System.out.println("Machine [" + machine.getUID() + "], transports: " + machine.getOperatingSystem().getConfiguration().getName());
                 }
             } catch (Exception e) {

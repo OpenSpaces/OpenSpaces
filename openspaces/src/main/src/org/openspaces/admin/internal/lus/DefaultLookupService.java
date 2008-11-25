@@ -1,5 +1,8 @@
 package org.openspaces.admin.internal.lus;
 
+import com.gigaspaces.jvm.JVMInfoProvider;
+import com.gigaspaces.jvm.VirtualMachineConfiguration;
+import com.gigaspaces.jvm.VirtualMachineStatistics;
 import com.gigaspaces.lrmi.nio.info.NIOInfoProvider;
 import com.gigaspaces.lrmi.nio.info.TransportConfiguration;
 import com.gigaspaces.lrmi.nio.info.TransportStatistics;
@@ -52,5 +55,13 @@ public class DefaultLookupService extends AbstractGridComponent implements Inter
 
     public OperatingSystemStatistics getOperatingSystemStatistics() throws RemoteException {
         return ((OSInfoProvider) registrar.getRegistrar()).getOperatingSystemStatistics();
+    }
+
+    public VirtualMachineConfiguration getVirtualMachineConfiguration() throws RemoteException {
+        return ((JVMInfoProvider) registrar.getRegistrar()).getJvmConfiguration();
+    }
+
+    public VirtualMachineStatistics getVirtualMachineStatistics() throws RemoteException {
+        return ((JVMInfoProvider) registrar.getRegistrar()).getJvmStatistics();
     }
 }

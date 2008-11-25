@@ -7,12 +7,13 @@ import org.openspaces.admin.internal.machine.InternalMachineAware;
 import org.openspaces.admin.internal.os.InternalOperatingSystemInfoProvider;
 import org.openspaces.admin.internal.transport.InternalTransportAware;
 import org.openspaces.admin.internal.transport.InternalTransportInfoProvider;
+import org.openspaces.admin.internal.vm.InternalVirtualMachineInfoProvider;
 
 /**
  * @author kimchy
  */
 public interface InternalGridServiceContainer extends GridServiceContainer, InternalTransportInfoProvider, InternalTransportAware,
-        InternalMachineAware, InternalOperatingSystemInfoProvider {
+        InternalMachineAware, InternalOperatingSystemInfoProvider, InternalVirtualMachineInfoProvider {
 
     ServiceID getServiceID();
 

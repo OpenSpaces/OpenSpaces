@@ -2,11 +2,9 @@ package org.openspaces.admin.internal.transport;
 
 import com.gigaspaces.lrmi.nio.info.TransportConfiguration;
 import com.gigaspaces.lrmi.nio.info.TransportStatistics;
-import org.openspaces.admin.AdminException;
 import org.openspaces.core.util.ConcurrentHashSet;
 
 import java.rmi.RemoteException;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -54,14 +52,14 @@ public class DefaultTransport implements InternalTransport {
     }
 
     public TransportStatistics getStatistics() {
-        Iterator<InternalTransportInfoProvider> iter = transportInfoProviders.iterator();
-        if (!iter.hasNext()) {
-            throw new IllegalStateException("No transport information provider is bounded to transport with host [" + getHost() + "] and port [" + getPort() + "]");
+        for (InternalTransportInfoProvider provider : transportInfoProviders) {
+            try {
+                return provider.getTransportStatistics();
+            } catch (RemoteException e) {
+                // failed to get it, try next one
+            }
         }
-        try {
-            return iter.next().getTransportStatistics();
-        } catch (RemoteException e) {
-            throw new AdminException("Failed to get transport statistics for host [" + getHost() + "] and port [" + getPort() + "]", e);
-        }
+        // return an NA if fails
+        return new TransportStatistics();
     }
 }

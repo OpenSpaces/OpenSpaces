@@ -5,6 +5,7 @@ import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.transport.Transports;
+import org.openspaces.admin.vm.VirtualMachines;
 
 /**
  * @author kimchy
@@ -22,6 +23,8 @@ public interface Machine {
     GridServiceContainers getGridServiceContainers();
 
     OperatingSystem getOperatingSystem();
+
+    VirtualMachines getVirtualMachines();
 
     boolean hasGridComponents();
 

@@ -1,7 +1,7 @@
 package org.openspaces.admin.vm;
 
-import com.gigaspaces.jvm.JVMConfiguration;
-import com.gigaspaces.jvm.JVMStatistics;
+import com.gigaspaces.jvm.VirtualMachineConfiguration;
+import com.gigaspaces.jvm.VirtualMachineStatistics;
 
 /**
  * @author kimchy
@@ -10,7 +10,7 @@ public interface VirtualMachine {
 
     String getUID();
 
-    JVMConfiguration getConfiguration();
+    VirtualMachineConfiguration getConfiguration();
 
-    JVMStatistics getStatistics();
+    VirtualMachineStatistics getStatistics();
 }

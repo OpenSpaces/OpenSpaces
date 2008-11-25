@@ -1,6 +1,8 @@
 package org.openspaces.admin.internal.gsc;
 
 import com.gigaspaces.grid.gsc.GSC;
+import com.gigaspaces.jvm.VirtualMachineConfiguration;
+import com.gigaspaces.jvm.VirtualMachineStatistics;
 import com.gigaspaces.lrmi.nio.info.TransportConfiguration;
 import com.gigaspaces.lrmi.nio.info.TransportStatistics;
 import com.gigaspaces.operatingsystem.OperatingSystemConfiguration;
@@ -50,5 +52,13 @@ public class DefaultGridServiceContainer extends AbstractGridComponent implement
 
     public OperatingSystemStatistics getOperatingSystemStatistics() throws RemoteException {
         return gsc.getOperatingSystemStatistics();
+    }
+
+    public VirtualMachineConfiguration getVirtualMachineConfiguration() throws RemoteException {
+        return gsc.getJvmConfiguration();
+    }
+
+    public VirtualMachineStatistics getVirtualMachineStatistics() throws RemoteException {
+        return gsc.getJvmStatistics();
     }
 }

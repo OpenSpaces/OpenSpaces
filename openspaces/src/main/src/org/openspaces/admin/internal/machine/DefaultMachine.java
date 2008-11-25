@@ -10,9 +10,12 @@ import org.openspaces.admin.internal.lus.DefaultLookupServices;
 import org.openspaces.admin.internal.lus.InternalLookupServices;
 import org.openspaces.admin.internal.transport.DefaultTransports;
 import org.openspaces.admin.internal.transport.InternalTransports;
+import org.openspaces.admin.internal.vm.DefaultVirtualMachines;
+import org.openspaces.admin.internal.vm.InternalVirtualMachines;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.transport.Transports;
+import org.openspaces.admin.vm.VirtualMachines;
 
 /**
  * @author kimchy
@@ -30,6 +33,8 @@ public class DefaultMachine implements InternalMachine {
     private final InternalGridServiceContainers gridServiceContainers = new DefaultGridServiceContainers();
 
     private final InternalTransports transports = new DefaultTransports();
+
+    private final InternalVirtualMachines virtualMachines = new DefaultVirtualMachines();
 
     private volatile OperatingSystem operatingSystem;
 
@@ -72,5 +77,9 @@ public class DefaultMachine implements InternalMachine {
 
     public OperatingSystem getOperatingSystem() {
         return this.operatingSystem;
+    }
+
+    public VirtualMachines getVirtualMachines() {
+        return this.virtualMachines;
     }
 }

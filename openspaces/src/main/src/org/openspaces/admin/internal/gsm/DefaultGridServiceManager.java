@@ -1,6 +1,8 @@
 package org.openspaces.admin.internal.gsm;
 
 import com.gigaspaces.grid.gsm.GSM;
+import com.gigaspaces.jvm.VirtualMachineConfiguration;
+import com.gigaspaces.jvm.VirtualMachineStatistics;
 import com.gigaspaces.lrmi.nio.info.TransportConfiguration;
 import com.gigaspaces.lrmi.nio.info.TransportStatistics;
 import com.gigaspaces.operatingsystem.OperatingSystemConfiguration;
@@ -50,5 +52,13 @@ public class DefaultGridServiceManager extends AbstractGridComponent implements 
 
     public OperatingSystemStatistics getOperatingSystemStatistics() throws RemoteException {
         return gsm.getOperatingSystemStatistics();
+    }
+
+    public VirtualMachineConfiguration getVirtualMachineConfiguration() throws RemoteException {
+        return gsm.getJvmConfiguration();
+    }
+
+    public VirtualMachineStatistics getVirtualMachineStatistics() throws RemoteException {
+        return gsm.getJvmStatistics();
     }
 }

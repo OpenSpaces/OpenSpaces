@@ -2,11 +2,9 @@ package org.openspaces.admin.internal.os;
 
 import com.gigaspaces.operatingsystem.OperatingSystemConfiguration;
 import com.gigaspaces.operatingsystem.OperatingSystemStatistics;
-import org.openspaces.admin.AdminException;
 import org.openspaces.core.util.ConcurrentHashSet;
 
 import java.rmi.RemoteException;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -46,14 +44,14 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
     }
 
     public OperatingSystemStatistics getStatistics() {
-        Iterator<InternalOperatingSystemInfoProvider> iter = operatingSystemInfoProviders.iterator();
-        if (!iter.hasNext()) {
-            throw new IllegalStateException("No transport information provider is bounded to os [" + uid + "]");
+        for (InternalOperatingSystemInfoProvider provider : operatingSystemInfoProviders) {
+            try {
+                return provider.getOperatingSystemStatistics();
+            } catch (RemoteException e) {
+                // simply try the next one
+            }
         }
-        try {
-            return iter.next().getOperatingSystemStatistics();
-        } catch (RemoteException e) {
-            throw new AdminException("Failed to get transport statistics for os [" + uid + "]", e);
-        }
+        // return NA on complete failure
+        return new OperatingSystemStatistics();
     }
 }
