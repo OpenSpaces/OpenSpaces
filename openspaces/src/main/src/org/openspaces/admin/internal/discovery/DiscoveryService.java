@@ -15,6 +15,8 @@ import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryListener;
 import net.jini.lookup.ServiceDiscoveryManager;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainer;
@@ -28,6 +30,8 @@ import org.openspaces.admin.internal.lus.InternalLookupService;
  * @author kimchy
  */
 public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryListener {
+
+    private static final Log logger = LogFactory.getLog(DiscoveryService.class);
 
     private String[] groups;
 
@@ -107,11 +111,15 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     public void serviceAdded(ServiceDiscoveryEvent event) {
         Object service = event.getPostEventServiceItem().service;
         if (service instanceof GSM) {
-            InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(event.getPostEventServiceItem().serviceID, (GSM) service);
-            // TODO register a listener for deployment events 
-            // TODO get the currently deployed processing unit
-            // TODO GSMs needs to be pinged periodically and if the ping fails for three times, simply remove it (that is because they usually start LUS as well, so we won't get service removed event)
-            admin.addGridServiceManager(gridServiceManager);
+            try {
+                InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(event.getPostEventServiceItem().serviceID, (GSM) service);
+                // TODO register a listener for deployment events
+                // TODO get the currently deployed processing unit
+                // TODO GSMs needs to be pinged periodically and if the ping fails for three times, simply remove it (that is because they usually start LUS as well, so we won't get service removed event)
+                admin.addGridServiceManager(gridServiceManager);
+            } catch (Exception e) {
+                logger.warn("Faield to add GSM with uid [" + event.getPostEventServiceItem().serviceID + "]", e);
+            }
         } else if (service instanceof GSC) {
             InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(event.getPostEventServiceItem().serviceID, (GSC) service);
             admin.addGridServiceContainer(gridServiceContainer);
