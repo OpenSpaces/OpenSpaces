@@ -42,6 +42,7 @@ import org.openspaces.admin.machine.Machines;
 import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachine;
+import org.openspaces.admin.vm.VirtualMachines;
 
 import java.rmi.RemoteException;
 
@@ -93,6 +94,10 @@ public class DefaultAdmin implements InternalAdmin {
 
     public Transports getTransports() {
         return this.transports;
+    }
+
+    public VirtualMachines getVirtualMachines() {
+        return this.virtualMachines;
     }
 
     public synchronized void addLookupService(InternalLookupService lookupService) {

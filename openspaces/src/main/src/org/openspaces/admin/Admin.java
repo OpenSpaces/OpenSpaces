@@ -5,6 +5,7 @@ import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.machine.Machines;
 import org.openspaces.admin.transport.Transports;
+import org.openspaces.admin.vm.VirtualMachines;
 
 /**
  * @author kimchy
@@ -22,4 +23,6 @@ public interface Admin {
     Machines getMachines();
 
     Transports getTransports();
+
+    VirtualMachines getVirtualMachines();
 }
