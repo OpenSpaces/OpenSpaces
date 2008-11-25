@@ -118,7 +118,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 // TODO GSMs needs to be pinged periodically and if the ping fails for three times, simply remove it (that is because they usually start LUS as well, so we won't get service removed event)
                 admin.addGridServiceManager(gridServiceManager);
             } catch (Exception e) {
-                logger.warn("Faield to add GSM with uid [" + event.getPostEventServiceItem().serviceID + "]", e);
+                logger.warn("Failed to add GSM with uid [" + event.getPostEventServiceItem().serviceID + "]", e);
             }
         } else if (service instanceof GSC) {
             InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(event.getPostEventServiceItem().serviceID, (GSC) service, admin);
