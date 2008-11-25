@@ -97,7 +97,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
     public void discovered(DiscoveryEvent e) {
         for (ServiceRegistrar registrar : e.getRegistrars()) {
-            InternalLookupService lookupService = new DefaultLookupService(registrar, registrar.getServiceID());
+            InternalLookupService lookupService = new DefaultLookupService(registrar, registrar.getServiceID(), admin);
             admin.addLookupService(lookupService);
         }
     }
@@ -112,7 +112,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         Object service = event.getPostEventServiceItem().service;
         if (service instanceof GSM) {
             try {
-                InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(event.getPostEventServiceItem().serviceID, (GSM) service);
+                InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(event.getPostEventServiceItem().serviceID, (GSM) service, admin);
                 // TODO register a listener for deployment events
                 // TODO get the currently deployed processing unit
                 // TODO GSMs needs to be pinged periodically and if the ping fails for three times, simply remove it (that is because they usually start LUS as well, so we won't get service removed event)
@@ -121,7 +121,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 logger.warn("Faield to add GSM with uid [" + event.getPostEventServiceItem().serviceID + "]", e);
             }
         } else if (service instanceof GSC) {
-            InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(event.getPostEventServiceItem().serviceID, (GSC) service);
+            InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(event.getPostEventServiceItem().serviceID, (GSC) service, admin);
             admin.addGridServiceContainer(gridServiceContainer);
         }
     }

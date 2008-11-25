@@ -11,6 +11,7 @@ import com.gigaspaces.operatingsystem.OperatingSystemConfiguration;
 import com.gigaspaces.operatingsystem.OperatingSystemStatistics;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceRegistrar;
+import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 
 import java.rmi.RemoteException;
@@ -24,7 +25,8 @@ public class DefaultLookupService extends AbstractGridComponent implements Inter
 
     private ServiceID serviceID;
 
-    public DefaultLookupService(ServiceRegistrar registrar, ServiceID serviceID) {
+    public DefaultLookupService(ServiceRegistrar registrar, ServiceID serviceID, InternalAdmin admin) {
+        super(admin);
         this.registrar = registrar;
         this.serviceID = serviceID;
     }

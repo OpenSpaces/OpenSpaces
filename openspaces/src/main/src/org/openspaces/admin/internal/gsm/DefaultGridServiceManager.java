@@ -9,6 +9,7 @@ import com.gigaspaces.operatingsystem.OperatingSystemConfiguration;
 import com.gigaspaces.operatingsystem.OperatingSystemStatistics;
 import net.jini.core.lookup.ServiceID;
 import org.jini.rio.monitor.ProvisionMonitorAdmin;
+import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 
 import java.rmi.RemoteException;
@@ -22,12 +23,13 @@ public class DefaultGridServiceManager extends AbstractGridComponent implements 
 
     private final GSM gsm;
 
-    private final ProvisionMonitorAdmin admin;
+    private final ProvisionMonitorAdmin gsmAdmin;
 
-    public DefaultGridServiceManager(ServiceID serviceID, GSM gsm) throws RemoteException {
+    public DefaultGridServiceManager(ServiceID serviceID, GSM gsm, InternalAdmin admin) throws RemoteException {
+        super(admin);
         this.serviceID = serviceID;
         this.gsm = gsm;
-        this.admin = (ProvisionMonitorAdmin) gsm.getAdmin();
+        this.gsmAdmin = (ProvisionMonitorAdmin) gsm.getAdmin();
     }
 
     public String getUID() {
@@ -42,8 +44,8 @@ public class DefaultGridServiceManager extends AbstractGridComponent implements 
         return this.gsm;
     }
 
-    public ProvisionMonitorAdmin getAdmin() {
-        return admin;
+    public ProvisionMonitorAdmin getGSMAdmin() {
+        return gsmAdmin;
     }
 
     public TransportConfiguration getTransportConfiguration() throws RemoteException {

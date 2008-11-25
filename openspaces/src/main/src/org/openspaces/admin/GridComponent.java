@@ -11,4 +11,6 @@ import org.openspaces.admin.vm.VirtualMachineAware;
 public interface GridComponent extends MachineAware, TransportAware, OperatingSystemAware, VirtualMachineAware {
 
     String getUID();
+
+    Admin getAdmin();
 }

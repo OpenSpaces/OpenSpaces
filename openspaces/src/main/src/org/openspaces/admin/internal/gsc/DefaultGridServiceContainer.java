@@ -8,6 +8,7 @@ import com.gigaspaces.lrmi.nio.info.TransportStatistics;
 import com.gigaspaces.operatingsystem.OperatingSystemConfiguration;
 import com.gigaspaces.operatingsystem.OperatingSystemStatistics;
 import net.jini.core.lookup.ServiceID;
+import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 
 import java.rmi.RemoteException;
@@ -21,7 +22,8 @@ public class DefaultGridServiceContainer extends AbstractGridComponent implement
 
     private final GSC gsc;
 
-    public DefaultGridServiceContainer(ServiceID serviceID, GSC gsc) {
+    public DefaultGridServiceContainer(ServiceID serviceID, GSC gsc, InternalAdmin admin) {
+        super(admin);
         this.serviceID = serviceID;
         this.gsc = gsc;
     }
