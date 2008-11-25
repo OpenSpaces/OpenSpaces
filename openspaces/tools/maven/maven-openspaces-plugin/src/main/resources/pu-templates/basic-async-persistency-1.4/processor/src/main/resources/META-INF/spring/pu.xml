@@ -81,7 +81,6 @@
                 <prop key="space-config.external-data-source.usage">read-only</prop>
                 <prop key="cluster-config.cache-loader.external-data-source">true</prop>
                 <prop key="cluster-config.cache-loader.central-data-source">true</prop>
-                <prop key="com.j_spaces.core.container.directory_services.jini_lus.start-embedded-lus">false</prop>
             </props>
         </os-core:properties>
     </os-core:space>
