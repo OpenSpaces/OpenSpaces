@@ -13,8 +13,7 @@ import org.openspaces.admin.machine.Machine;
 public class TestSampler {
 
     public static void main(String[] args) throws InterruptedException {
-        Admin admin = new AdminFactory().addGroup("kimchy").getAdmin();
-        admin.start();
+        Admin admin = new AdminFactory().addGroup("kimchy").createAdmin();
         while (true) {
             try {
                 for (LookupService lookupService : admin.getLookupServices()) {

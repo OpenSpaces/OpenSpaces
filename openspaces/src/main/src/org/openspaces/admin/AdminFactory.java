@@ -35,7 +35,7 @@ public class AdminFactory {
         return this;
     }
 
-    public Admin getAdmin() {
+    public Admin createAdmin() {
         return new DefaultAdmin(getGroups(), getLocators());
     }
 

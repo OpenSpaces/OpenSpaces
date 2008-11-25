@@ -68,13 +68,10 @@ public class DefaultAdmin implements InternalAdmin {
 
     public DefaultAdmin(String[] groups, LookupLocator[] locators) {
         this.discoveryService = new DiscoveryService(groups, locators, this);
-    }
-
-    public void start() {
         discoveryService.start();
     }
 
-    public void stop() {
+    public void close() {
         discoveryService.stop();
     }
 

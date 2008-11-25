@@ -11,9 +11,7 @@ import org.openspaces.admin.transport.Transports;
  */
 public interface Admin {
 
-    void start();
-
-    void stop();
+    void close();
 
     LookupServices getLookupServices();
 
