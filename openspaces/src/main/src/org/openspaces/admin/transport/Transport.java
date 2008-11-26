@@ -7,6 +7,10 @@ public interface Transport {
 
     String getUID();
 
+    String getLocalHostAddress();
+
+    String getLocalHostName();
+
     String getHost();
 
     int getPort();

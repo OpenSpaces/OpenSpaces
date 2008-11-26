@@ -5,6 +5,7 @@ import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.lus.LookupService;
+import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 
 /**
@@ -17,17 +18,17 @@ public class TestSampler {
         while (true) {
             try {
                 for (LookupService lookupService : admin.getLookupServices()) {
-                    System.out.println("Lookup [" + lookupService.getUID() + "] : " + lookupService.getVirtualMachine().getStatistics().getMemoryHeapUsed());
+                    System.out.println("Lookup [" + lookupService.getUID() + "] : " + lookupService.getVirtualMachine());
                 }
                 for (GridServiceManager gridServiceManager : admin.getGridServiceManagers()) {
-                    System.out.println("GSM [" + gridServiceManager.getUID() + "] : " + gridServiceManager.getUID());
+                    System.out.println("GSM [" + gridServiceManager.getUID() + "] : " + gridServiceManager.getOperatingSystem().getUID());
                 }
                 for (GridServiceContainer gridServiceContainer : admin.getGridServiceContainers()) {
-                    System.out.println("GSC [" + gridServiceContainer.getUID() + "] : " + gridServiceContainer.getUID());
+                    System.out.println("GSC [" + gridServiceContainer.getUID() + "] : " + gridServiceContainer.getOperatingSystem().getUID());
                 }
-//                for (Machine machine : admin.getMachines()) {
-//                    System.out.println("Machine [" + machine.getUID() + "], transports: " + machine.getOperatingSystem().getDetails().getName());
-//                }
+                for (Machine machine : admin.getMachines()) {
+                    System.out.println("Machine [" + machine.getUID() + "], transports: " + machine.getOperatingSystem().getUID());
+                }
                 for (ProcessingUnit processingUnit : admin.getProcessingUnits()) {
                     System.out.println("Processing Unit: " + processingUnit.getName() + " status: " + processingUnit.getStatus());
                     if (processingUnit.isManaged()) {

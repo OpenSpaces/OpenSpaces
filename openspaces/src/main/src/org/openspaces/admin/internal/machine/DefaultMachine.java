@@ -75,6 +75,10 @@ public class DefaultMachine implements InternalMachine {
         this.operatingSystem = operatingSystem;
     }
 
+    public boolean hasOperatingSystem() {
+        return operatingSystem != null;
+    }
+
     public OperatingSystem getOperatingSystem() {
         return this.operatingSystem;
     }

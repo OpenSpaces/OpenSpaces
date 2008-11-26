@@ -130,8 +130,9 @@ public class DefaultAdmin implements InternalAdmin {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(lookupService, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(lookupService, jvmDetails);
 
-        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(), lookupService,
-                transport, operatingSystem, virtualMachine);
+        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
+                transport, operatingSystem, virtualMachine,
+                (InternalMachineAware) virtualMachine, lookupService);
 
         ((InternalLookupServices) machine.getLookupServices()).addLookupService(lookupService);
 
@@ -154,8 +155,9 @@ public class DefaultAdmin implements InternalAdmin {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceManager, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceManager, jvmDetails);
 
-        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(), gridServiceManager,
-                transport, operatingSystem, virtualMachine);
+        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
+                transport, operatingSystem, virtualMachine,
+                (InternalMachineAware) virtualMachine, gridServiceManager);
 
         ((InternalGridServiceManagers) machine.getGridServiceManagers()).addGridServiceManager(gridServiceManager);
 
@@ -178,8 +180,9 @@ public class DefaultAdmin implements InternalAdmin {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceContainer, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceContainer, jvmDetails);
 
-        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(), gridServiceContainer,
-                transport, operatingSystem, virtualMachine);
+        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
+                transport, operatingSystem, virtualMachine,
+                (InternalMachineAware) virtualMachine, gridServiceContainer);
 
         ((InternalGridServiceContainers) machine.getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
 
@@ -196,18 +199,20 @@ public class DefaultAdmin implements InternalAdmin {
         }
     }
 
-    private InternalMachine processMachineOnServiceAddition(TransportDetails transportDetails, InternalMachineAware machineAware,
+    private InternalMachine processMachineOnServiceAddition(TransportDetails transportDetails,
                                                             InternalTransport transport, OperatingSystem operatingSystem,
-                                                            VirtualMachine virtualMachine) {
-        InternalMachine machine = (InternalMachine) machines.getMachineByHost(transportDetails.getHost());
+                                                            VirtualMachine virtualMachine, InternalMachineAware ... machineAwares) {
+        InternalMachine machine = (InternalMachine) machines.getMachineByHost(transportDetails.getLocalHostAddress());
         if (machine == null) {
-            machine = new DefaultMachine(transportDetails.getHost(), transportDetails.getHost());
+            machine = new DefaultMachine(transportDetails.getLocalHostAddress(), transportDetails.getLocalHostAddress());
             machine.setOperatingSystem(operatingSystem);
             machines.addMachine(machine);
         }
         ((InternalTransports) machine.getTransports()).addTransport(transport);
         ((InternalVirtualMachines) machine.getVirtualMachines()).addVirtualMachine(virtualMachine);
-        machineAware.setMachine(machine);
+        for (InternalMachineAware machineAware : machineAwares) {
+            machineAware.setMachine(machine);
+        }
         return machine;
     }
 

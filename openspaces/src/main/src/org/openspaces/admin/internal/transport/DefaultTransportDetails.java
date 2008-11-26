@@ -18,6 +18,20 @@ public class DefaultTransportDetails implements TransportDetails {
         return nioDetails.getHost();
     }
 
+    public String getLocalHostAddress() {
+        if (nioDetails.getLocalHostAddress().length() == 0) {
+            return nioDetails.getHost();
+        }
+        return nioDetails.getLocalHostAddress();
+    }
+
+    public String getLocalHostName() {
+        if (nioDetails.getLocalHostName().length() == 0) {
+            return nioDetails.getHost();
+        }
+        return nioDetails.getLocalHostName();
+    }
+
     public int getPort() {
         return nioDetails.getPort();
     }

@@ -40,6 +40,14 @@ public class DefaultTransport implements InternalTransport {
         return this.uid;
     }
 
+    public String getLocalHostAddress() {
+        return transportDetails.getLocalHostAddress();
+    }
+
+    public String getLocalHostName() {
+        return transportDetails.getLocalHostName();
+    }
+
     public String getHost() {
         return transportDetails.getHost();
     }

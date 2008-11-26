@@ -22,6 +22,8 @@ public interface Machine {
 
     GridServiceContainers getGridServiceContainers();
 
+    boolean hasOperatingSystem();
+
     OperatingSystem getOperatingSystem();
 
     VirtualMachines getVirtualMachines();

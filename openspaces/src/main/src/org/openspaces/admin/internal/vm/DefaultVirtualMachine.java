@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.vm;
 
 import com.gigaspaces.jvm.JVMDetails;
+import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.vm.VirtualMachineDetails;
 import org.openspaces.admin.vm.VirtualMachineStatistics;
 import org.openspaces.core.util.ConcurrentHashSet;
@@ -18,6 +19,8 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
     private final VirtualMachineDetails details;
 
     private final Set<InternalVirtualMachineInfoProvider> virtualMachineInfoProviders = new ConcurrentHashSet<InternalVirtualMachineInfoProvider>();
+
+    private volatile Machine machine;
 
     public DefaultVirtualMachine(JVMDetails details) {
         this.details = new DefaultVirtualMachineDetails(details);
@@ -42,6 +45,14 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     public VirtualMachineDetails getDetails() {
         return this.details;
+    }
+
+    public Machine getMachine() {
+        return machine;
+    }
+
+    public void setMachine(Machine machine) {
+        this.machine = machine;
     }
 
     private static final VirtualMachineStatistics NA_STATS = new DefaultVirtualMachineStatistics();
