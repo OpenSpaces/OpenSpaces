@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.machine;
 
+import com.gigaspaces.operatingsystem.OSDetails;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainers;
@@ -8,6 +9,7 @@ import org.openspaces.admin.internal.gsm.DefaultGridServiceManagers;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManagers;
 import org.openspaces.admin.internal.lus.DefaultLookupServices;
 import org.openspaces.admin.internal.lus.InternalLookupServices;
+import org.openspaces.admin.internal.os.DefaultOperatingSystem;
 import org.openspaces.admin.internal.transport.DefaultTransports;
 import org.openspaces.admin.internal.transport.InternalTransports;
 import org.openspaces.admin.internal.vm.DefaultVirtualMachines;
@@ -79,7 +81,12 @@ public class DefaultMachine implements InternalMachine {
         return operatingSystem != null;
     }
 
+    private static OperatingSystem NA_OPERATING_SYSTEM = new DefaultOperatingSystem(new OSDetails());
+
     public OperatingSystem getOperatingSystem() {
+        if (operatingSystem == null) {
+            return NA_OPERATING_SYSTEM;
+        }
         return this.operatingSystem;
     }
 
