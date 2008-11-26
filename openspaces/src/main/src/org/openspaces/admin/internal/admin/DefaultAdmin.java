@@ -1,10 +1,13 @@
 package org.openspaces.admin.internal.admin;
 
+import com.gigaspaces.grid.gsm.PUDetails;
+import com.gigaspaces.grid.gsm.PUsDetails;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.operatingsystem.OSDetails;
 import net.jini.core.discovery.LookupLocator;
 import org.openspaces.admin.gsc.GridServiceContainers;
+import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.internal.discovery.DiscoveryService;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainers;
@@ -26,6 +29,10 @@ import org.openspaces.admin.internal.os.DefaultOperatingSystems;
 import org.openspaces.admin.internal.os.InternalOperatingSystem;
 import org.openspaces.admin.internal.os.InternalOperatingSystemInfoProvider;
 import org.openspaces.admin.internal.os.InternalOperatingSystems;
+import org.openspaces.admin.internal.pu.DefaultProcessingUnit;
+import org.openspaces.admin.internal.pu.DefaultProcessingUnits;
+import org.openspaces.admin.internal.pu.InternalProcessingUnit;
+import org.openspaces.admin.internal.pu.InternalProcessingUnits;
 import org.openspaces.admin.internal.transport.DefaultTransport;
 import org.openspaces.admin.internal.transport.DefaultTransports;
 import org.openspaces.admin.internal.transport.InternalTransport;
@@ -39,15 +46,25 @@ import org.openspaces.admin.internal.vm.InternalVirtualMachines;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.machine.Machines;
 import org.openspaces.admin.os.OperatingSystem;
+import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.ProcessingUnits;
 import org.openspaces.admin.transport.TransportDetails;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.admin.vm.VirtualMachines;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author kimchy
  */
 public class DefaultAdmin implements InternalAdmin {
+
+    private final ScheduledExecutorService scheduledExecutorService;
 
     private final DiscoveryService discoveryService;
 
@@ -65,13 +82,18 @@ public class DefaultAdmin implements InternalAdmin {
 
     private final InternalVirtualMachines virtualMachines = new DefaultVirtualMachines();
 
+    private final InternalProcessingUnits processingUnits = new DefaultProcessingUnits();
+
     public DefaultAdmin(String[] groups, LookupLocator[] locators) {
         this.discoveryService = new DiscoveryService(groups, locators, this);
         discoveryService.start();
+        this.scheduledExecutorService = Executors.newScheduledThreadPool(5);
+        scheduledExecutorService.scheduleWithFixedDelay(new ScheduledProcessingUnitMonitor(), 1000, 1000, TimeUnit.MILLISECONDS);
     }
 
     public void close() {
         discoveryService.stop();
+        scheduledExecutorService.shutdownNow();
     }
 
     public LookupServices getLookupServices() {
@@ -96,6 +118,10 @@ public class DefaultAdmin implements InternalAdmin {
 
     public VirtualMachines getVirtualMachines() {
         return this.virtualMachines;
+    }
+
+    public ProcessingUnits getProcessingUnits() {
+        return this.processingUnits;
     }
 
     public synchronized void addLookupService(InternalLookupService lookupService,
@@ -242,6 +268,106 @@ public class DefaultAdmin implements InternalAdmin {
         if (!os.hasOperatingSystemInfoProviders()) {
             operatingSystems.removeOperatingSystem(os.getUID());
             ((InternalMachine) machineAware.getMachine()).setOperatingSystem(null);
+        }
+    }
+
+    private class ScheduledProcessingUnitMonitor implements Runnable {
+
+        public void run() {
+            Map<String, Holder> holders = new HashMap<String, Holder>();
+            for (GridServiceManager gsm : gridServiceManagers) {
+                try {
+                    PUsDetails pusDetails = ((InternalGridServiceManager) gsm).getGSM().getPUsDetails();
+                    for (PUDetails detail : pusDetails.getDetails()) {
+                        Holder holder = holders.get(detail.getName()); 
+                        if (holder == null) {
+                            holder = new Holder();
+                            holder.name = detail.getName();
+                            holders.put(holder.name, holder);
+                        }
+                        if (detail.isManaging()) {
+                            holder.detail = detail;
+                            holder.managingGSM = gsm;
+                        } else {
+                            holder.backupDetail = detail;
+                            holder.backupGSMs.put(gsm.getUID(), gsm);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            // first go over all of them and remove the ones needed
+            for (ProcessingUnit processingUnit : processingUnits) {
+                if (!holders.containsKey(processingUnit.getName())) {
+                    processingUnits.removeProcessingUnit(processingUnit.getName());
+                }
+            }
+            // now, go over and update what needed to be updated
+            for (Holder holder : holders.values()) {
+                PUDetails details = holder.detail;
+                if (details == null) {
+                    details = holder.backupDetail;
+                }
+                boolean newProcessingUnit = false;
+                InternalProcessingUnit processingUnit = (InternalProcessingUnit) processingUnits.getProcessingUnit(holder.name);
+                if (processingUnit == null) {
+                    processingUnit = new DefaultProcessingUnit(details);
+                    newProcessingUnit = true;
+                } else {
+                    boolean changed = processingUnit.setStatus(details.getStatus());
+                    // changed for future events
+                }
+                if (!newProcessingUnit) {
+                    // handle managing GSM
+                    if (holder.managingGSM == null) {
+                        if (processingUnit.isManaged()) {
+                            // event since we no longer have a managing GSM
+                            processingUnit.setManagingGridServiceManager(null);
+                        }
+                    } else {
+                        if (!processingUnit.isManaged() || !processingUnit.getManagingGridServiceManager().getUID().equals(holder.managingGSM.getUID())) {
+                            // we changed managing GSM
+                            processingUnit.setManagingGridServiceManager(holder.managingGSM);
+                            // if it was in the backups, remove it from it
+                            if (processingUnit.getBackupGridServiceManager(holder.managingGSM.getUID()) != null) {
+                                processingUnit.removeBackupGridServiceManager(holder.managingGSM.getUID());
+                            }
+                        }
+                    }
+                    // handle backup GSM removal
+                    for (GridServiceManager backupGSM : processingUnit.getBackupGridServiceManagers()) {
+                        if (!holder.backupGSMs.containsKey(backupGSM.getUID())) {
+                            processingUnit.removeBackupGridServiceManager(backupGSM.getUID());
+                        }
+                    }
+                    // handle new backup GSMs
+                    for (GridServiceManager backupGSM : holder.backupGSMs.values()) {
+                        if (processingUnit.getBackupGridServiceManager(backupGSM.getUID()) == null) {
+                            processingUnit.addBackupGridServiceManager(backupGSM);
+                        }
+                    }
+                } else { // we have a new processing unit
+                    processingUnit.setManagingGridServiceManager(holder.managingGSM);
+                    for (GridServiceManager backupGSM : holder.backupGSMs.values()) {
+                        processingUnit.addBackupGridServiceManager(backupGSM);
+                    }
+                    processingUnits.addProcessingUnit(processingUnit);
+                }
+            }
+        }
+
+        private class Holder {
+
+            String name;
+
+            PUDetails detail;
+
+            PUDetails backupDetail;
+
+            GridServiceManager managingGSM;
+
+            Map<String, GridServiceManager> backupGSMs = new HashMap<String, GridServiceManager>();
         }
     }
 }
