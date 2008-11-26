@@ -4,7 +4,6 @@ import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.operatingsystem.OSDetails;
 import net.jini.core.discovery.LookupLocator;
-import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.internal.discovery.DiscoveryService;
@@ -44,8 +43,6 @@ import org.openspaces.admin.transport.TransportDetails;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.admin.vm.VirtualMachines;
-
-import java.rmi.RemoteException;
 
 /**
  * @author kimchy
@@ -101,10 +98,11 @@ public class DefaultAdmin implements InternalAdmin {
         return this.virtualMachines;
     }
 
-    public synchronized void addLookupService(InternalLookupService lookupService) {
-        InternalTransport transport = processTransportOnServiceAddition(lookupService);
-        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(lookupService);
-        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(lookupService);
+    public synchronized void addLookupService(InternalLookupService lookupService,
+                                              NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
+        InternalTransport transport = processTransportOnServiceAddition(lookupService, nioDetails);
+        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(lookupService, osDetails);
+        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(lookupService, jvmDetails);
 
         InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(), lookupService,
                 transport, operatingSystem, virtualMachine);
@@ -124,10 +122,11 @@ public class DefaultAdmin implements InternalAdmin {
         }
     }
 
-    public synchronized void addGridServiceManager(InternalGridServiceManager gridServiceManager) {
-        InternalTransport transport = processTransportOnServiceAddition(gridServiceManager);
-        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceManager);
-        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceManager);
+    public synchronized void addGridServiceManager(InternalGridServiceManager gridServiceManager,
+                                                   NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
+        InternalTransport transport = processTransportOnServiceAddition(gridServiceManager, nioDetails);
+        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceManager, osDetails);
+        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceManager, jvmDetails);
 
         InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(), gridServiceManager,
                 transport, operatingSystem, virtualMachine);
@@ -147,10 +146,11 @@ public class DefaultAdmin implements InternalAdmin {
         }
     }
 
-    public synchronized void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer) {
-        InternalTransport transport = processTransportOnServiceAddition(gridServiceContainer);
-        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceContainer);
-        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceContainer);
+    public synchronized void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer,
+                                                     NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
+        InternalTransport transport = processTransportOnServiceAddition(gridServiceContainer, nioDetails);
+        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceContainer, osDetails);
+        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceContainer, jvmDetails);
 
         InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(), gridServiceContainer,
                 transport, operatingSystem, virtualMachine);
@@ -185,13 +185,7 @@ public class DefaultAdmin implements InternalAdmin {
         return machine;
     }
 
-    private InternalVirtualMachine processVirtualMachineOnServiceAddition(InternalVirtualMachineInfoProvider vmProvider) {
-        JVMDetails jvmDetails;
-        try {
-            jvmDetails = vmProvider.getJVMDetails();
-        } catch (RemoteException e) {
-            throw new AdminException("Failed to get virtual machine configuration", e);
-        }
+    private InternalVirtualMachine processVirtualMachineOnServiceAddition(InternalVirtualMachineInfoProvider vmProvider, JVMDetails jvmDetails) {
         InternalVirtualMachine virtualMachine = (InternalVirtualMachine) virtualMachines.getVirtualMachineByUID(jvmDetails.getUid());
         if (virtualMachine == null) {
             virtualMachine = new DefaultVirtualMachine(jvmDetails);
@@ -211,13 +205,7 @@ public class DefaultAdmin implements InternalAdmin {
         }
     }
 
-    private InternalTransport processTransportOnServiceAddition(InternalTransportInfoProvider txProvider) {
-        NIODetails nioDetails = null;
-        try {
-            nioDetails = txProvider.getNIODetails();
-        } catch (RemoteException e) {
-            throw new AdminException("Failed to get transport configuration", e);
-        }
+    private InternalTransport processTransportOnServiceAddition(InternalTransportInfoProvider txProvider, NIODetails nioDetails) {
         InternalTransport transport = (InternalTransport) transports.getTransportByHostAndPort(nioDetails.getHost(), nioDetails.getPort());
         if (transport == null) {
             transport = new DefaultTransport(nioDetails);
@@ -237,14 +225,7 @@ public class DefaultAdmin implements InternalAdmin {
         }
     }
 
-    private InternalOperatingSystem processOperatingSystemOnServiceAddition(InternalOperatingSystemInfoProvider osProvider) {
-        OSDetails osDetails;
-        try {
-            osDetails = osProvider.getOSDetails();
-        } catch (RemoteException e) {
-            throw new AdminException("Failed to get operating system configuration", e);
-        }
-
+    private InternalOperatingSystem processOperatingSystemOnServiceAddition(InternalOperatingSystemInfoProvider osProvider, OSDetails osDetails) {
         InternalOperatingSystem os = (InternalOperatingSystem) operatingSystems.getByUID(osDetails.getUID());
         if (os == null) {
             os = new DefaultOperatingSystem(osDetails);

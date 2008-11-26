@@ -2,6 +2,9 @@ package org.openspaces.admin.internal.discovery;
 
 import com.gigaspaces.grid.gsc.GSC;
 import com.gigaspaces.grid.gsm.GSM;
+import com.gigaspaces.jvm.JVMDetails;
+import com.gigaspaces.lrmi.nio.info.NIODetails;
+import com.gigaspaces.operatingsystem.OSDetails;
 import com.j_spaces.core.service.ServiceConfigLoader;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
@@ -95,10 +98,18 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         ldm.terminate();
     }
 
-    public void discovered(DiscoveryEvent e) {
-        for (ServiceRegistrar registrar : e.getRegistrars()) {
+    public void discovered(DiscoveryEvent disEvent) {
+        for (ServiceRegistrar registrar : disEvent.getRegistrars()) {
             InternalLookupService lookupService = new DefaultLookupService(registrar, registrar.getServiceID(), admin);
-            admin.addLookupService(lookupService);
+            try {
+                // get the details here, on the thread pool
+                NIODetails nioDetails = lookupService.getNIODetails();
+                OSDetails osDetails = lookupService.getOSDetails();
+                JVMDetails jvmDetails = lookupService.getJVMDetails();
+                admin.addLookupService(lookupService, nioDetails, osDetails, jvmDetails);
+            } catch (Exception e) {
+                logger.warn("Failed to add lookup service with id [" + registrar.getServiceID() + "]", e);
+            }
         }
     }
 
@@ -113,16 +124,28 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         if (service instanceof GSM) {
             try {
                 InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(event.getPostEventServiceItem().serviceID, (GSM) service, admin);
+                // get the details here, on the thread pool
+                NIODetails nioDetails = gridServiceManager.getNIODetails();
+                OSDetails osDetails = gridServiceManager.getOSDetails();
+                JVMDetails jvmDetails = gridServiceManager.getJVMDetails();
                 // TODO register a listener for deployment events
                 // TODO get the currently deployed processing unit
                 // TODO GSMs needs to be pinged periodically and if the ping fails for three times, simply remove it (that is because they usually start LUS as well, so we won't get service removed event)
-                admin.addGridServiceManager(gridServiceManager);
+                admin.addGridServiceManager(gridServiceManager, nioDetails, osDetails, jvmDetails);
             } catch (Exception e) {
                 logger.warn("Failed to add GSM with uid [" + event.getPostEventServiceItem().serviceID + "]", e);
             }
         } else if (service instanceof GSC) {
-            InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(event.getPostEventServiceItem().serviceID, (GSC) service, admin);
-            admin.addGridServiceContainer(gridServiceContainer);
+            try {
+                InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(event.getPostEventServiceItem().serviceID, (GSC) service, admin);
+                // get the details here, on the thread pool
+                NIODetails nioDetails = gridServiceContainer.getNIODetails();
+                OSDetails osDetails = gridServiceContainer.getOSDetails();
+                JVMDetails jvmDetails = gridServiceContainer.getJVMDetails();
+                admin.addGridServiceContainer(gridServiceContainer, nioDetails, osDetails, jvmDetails);
+            } catch (Exception e) {
+                logger.warn("Failed to add GSC with uid [" + event.getPostEventServiceItem().serviceID + "]", e);
+            }
         }
     }
 
