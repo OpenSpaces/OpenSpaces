@@ -21,7 +21,7 @@ import org.openspaces.core.SpaceInterruptedException;
 import org.springframework.dao.DataAccessException;
 
 /**
- * Support class to perform either non blockin or blocking receive operation.
+ * Support class to perform either non blocking or blocking receive operation.
  *
  * @author kimchy
  */
@@ -34,7 +34,7 @@ public abstract class AbstractNonBlockingReceiveOperationHandler implements Rece
     /**
      * Allows to configure the take operation to be performed in a non blocking manner.
      *
-     * <p>If configured to use non blocking, will perfrom {@link #setNonBlockingFactor(int)}
+     * <p>If configured to use non blocking, will perform {@link #setNonBlockingFactor(int)}
      * number of non blocking operations (default to 10) within the receive timeout.
      */
     public void setNonBlocking(boolean nonBlocking) {
