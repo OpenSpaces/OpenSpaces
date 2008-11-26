@@ -57,4 +57,17 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
         // return NA on complete failure
         return NA_STATS;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DefaultOperatingSystem that = (DefaultOperatingSystem) o;
+        return uid.equals(that.uid);
+    }
+
+    @Override
+    public int hashCode() {
+        return uid.hashCode();
+    }
 }

@@ -73,4 +73,17 @@ public class DefaultTransport implements InternalTransport {
         // return an NA if fails
         return NA_TRANSPORT_STATS;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DefaultTransport that = (DefaultTransport) o;
+        return uid.equals(that.uid);
+    }
+
+    @Override
+    public int hashCode() {
+        return uid.hashCode();
+    }
 }

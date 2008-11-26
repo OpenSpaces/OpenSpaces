@@ -105,4 +105,17 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
         return false;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DefaultProcessingUnit that = (DefaultProcessingUnit) o;
+        return name.equals(that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
 }

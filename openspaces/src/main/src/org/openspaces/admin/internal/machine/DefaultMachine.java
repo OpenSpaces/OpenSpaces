@@ -93,4 +93,17 @@ public class DefaultMachine implements InternalMachine {
     public VirtualMachines getVirtualMachines() {
         return this.virtualMachines;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DefaultMachine that = (DefaultMachine) o;
+        return uid.equals(that.uid);
+    }
+
+    @Override
+    public int hashCode() {
+        return uid.hashCode();
+    }
 }

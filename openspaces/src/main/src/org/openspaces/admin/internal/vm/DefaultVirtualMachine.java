@@ -68,4 +68,17 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
         // all failed, return NA
         return NA_STATS;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DefaultVirtualMachine that = (DefaultVirtualMachine) o;
+        return uid.equals(that.uid);
+    }
+
+    @Override
+    public int hashCode() {
+        return uid.hashCode();
+    }
 }

@@ -63,4 +63,17 @@ public class DefaultGridServiceContainer extends AbstractGridComponent implement
     public JVMStatistics getJVMStatistics() throws RemoteException {
         return gsc.getJVMStatistics();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DefaultGridServiceContainer that = (DefaultGridServiceContainer) o;
+        return serviceID.equals(that.serviceID);
+    }
+
+    @Override
+    public int hashCode() {
+        return serviceID.hashCode();
+    }
 }

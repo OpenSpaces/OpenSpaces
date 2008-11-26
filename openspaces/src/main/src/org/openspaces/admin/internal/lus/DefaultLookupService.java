@@ -66,4 +66,17 @@ public class DefaultLookupService extends AbstractGridComponent implements Inter
     public JVMStatistics getJVMStatistics() throws RemoteException {
         return ((JVMInfoProvider) registrar.getRegistrar()).getJVMStatistics();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DefaultLookupService that = (DefaultLookupService) o;
+        return serviceID.equals(that.serviceID);
+    }
+
+    @Override
+    public int hashCode() {
+        return serviceID.hashCode();
+    }
 }

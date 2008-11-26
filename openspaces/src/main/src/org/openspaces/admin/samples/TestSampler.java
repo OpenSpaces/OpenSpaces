@@ -18,13 +18,13 @@ public class TestSampler {
         while (true) {
             try {
                 for (LookupService lookupService : admin.getLookupServices()) {
-                    System.out.println("Lookup [" + lookupService.getUID() + "] : " + lookupService.getVirtualMachine());
+                    System.out.println("Lookup [" + lookupService.getUID() + "] : " + lookupService.getVirtualMachine().getMachine().getHost());
                 }
                 for (GridServiceManager gridServiceManager : admin.getGridServiceManagers()) {
                     System.out.println("GSM [" + gridServiceManager.getUID() + "] : " + gridServiceManager.getOperatingSystem().getUID());
                 }
                 for (GridServiceContainer gridServiceContainer : admin.getGridServiceContainers()) {
-                    System.out.println("GSC [" + gridServiceContainer.getUID() + "] : " + gridServiceContainer.getOperatingSystem().getUID());
+                    System.out.println("GSC [" + gridServiceContainer.getUID() + "] : " + gridServiceContainer.getMachine().getUID());
                 }
                 for (Machine machine : admin.getMachines()) {
                     System.out.println("Machine [" + machine.getUID() + "], transports: " + machine.getOperatingSystem().getUID());

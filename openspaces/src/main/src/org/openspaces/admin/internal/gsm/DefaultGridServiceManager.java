@@ -71,4 +71,17 @@ public class DefaultGridServiceManager extends AbstractGridComponent implements 
     public JVMStatistics getJVMStatistics() throws RemoteException {
         return gsm.getJVMStatistics();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DefaultGridServiceManager that = (DefaultGridServiceManager) o;
+        return serviceID.equals(that.serviceID);
+    }
+
+    @Override
+    public int hashCode() {
+        return serviceID.hashCode();
+    }
 }
