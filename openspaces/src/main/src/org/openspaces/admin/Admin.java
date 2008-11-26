@@ -8,10 +8,14 @@ import org.openspaces.admin.pu.ProcessingUnits;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author kimchy
  */
 public interface Admin {
+
+    void setProcessingUnitMonitorInterval(long interval, TimeUnit timeUnit);
 
     void close();
 

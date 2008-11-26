@@ -56,6 +56,7 @@ import org.openspaces.admin.vm.VirtualMachines;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -84,14 +85,30 @@ public class DefaultAdmin implements InternalAdmin {
 
     private final InternalProcessingUnits processingUnits = new DefaultProcessingUnits();
 
+    private Future scheduledProcessingUnitMonitorFuture;
+
+    private volatile boolean closed = false;
+
     public DefaultAdmin(String[] groups, LookupLocator[] locators) {
         this.discoveryService = new DiscoveryService(groups, locators, this);
         discoveryService.start();
         this.scheduledExecutorService = Executors.newScheduledThreadPool(5);
-        scheduledExecutorService.scheduleWithFixedDelay(new ScheduledProcessingUnitMonitor(), 1000, 1000, TimeUnit.MILLISECONDS);
+        scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(new ScheduledProcessingUnitMonitor(), 1000, 1000, TimeUnit.MILLISECONDS);
+    }
+
+    public void setProcessingUnitMonitorInterval(long interval, TimeUnit timeUnit) {
+        if (closed) {
+            throw new IllegalStateException("Admin already closed");
+        }
+        scheduledProcessingUnitMonitorFuture.cancel(false);
+        scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(new ScheduledProcessingUnitMonitor(), interval, interval, timeUnit);
     }
 
     public void close() {
+        if (closed) {
+            return;
+        }
+        closed = true;
         discoveryService.stop();
         scheduledExecutorService.shutdownNow();
     }
