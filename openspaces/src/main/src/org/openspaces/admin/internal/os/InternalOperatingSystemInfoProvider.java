@@ -1,7 +1,7 @@
 package org.openspaces.admin.internal.os;
 
-import com.gigaspaces.operatingsystem.OperatingSystemConfiguration;
-import com.gigaspaces.operatingsystem.OperatingSystemStatistics;
+import com.gigaspaces.operatingsystem.OSDetails;
+import com.gigaspaces.operatingsystem.OSStatistics;
 
 import java.rmi.RemoteException;
 
@@ -10,7 +10,7 @@ import java.rmi.RemoteException;
  */
 public interface InternalOperatingSystemInfoProvider extends InternalOperatingSystemAware {
 
-    OperatingSystemConfiguration getOperatingSystemConfiguration() throws RemoteException;
+    OSDetails getOSDetails() throws RemoteException;
 
-    OperatingSystemStatistics getOperatingSystemStatistics() throws RemoteException;
+    OSStatistics getOSStatistics() throws RemoteException;
 }

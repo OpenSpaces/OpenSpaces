@@ -1,7 +1,7 @@
 package org.openspaces.admin.internal.transport;
 
-import com.gigaspaces.lrmi.nio.info.TransportConfiguration;
-import com.gigaspaces.lrmi.nio.info.TransportStatistics;
+import com.gigaspaces.lrmi.nio.info.NIODetails;
+import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 
 import java.rmi.RemoteException;
 
@@ -10,7 +10,7 @@ import java.rmi.RemoteException;
  */
 public interface InternalTransportInfoProvider extends InternalTransportAware {
 
-    TransportConfiguration getTransportConfiguration() throws RemoteException;
+    NIODetails getNIODetails() throws RemoteException;
 
-    TransportStatistics getTransportStatistics() throws RemoteException;
+    NIOStatistics getNIOStatistics() throws RemoteException;
 }

@@ -20,13 +20,13 @@ public class TestSampler {
                     System.out.println("Lookup [" + lookupService.getUID() + "] : " + lookupService.getVirtualMachine().getStatistics().getMemoryHeapUsed());
                 }
                 for (GridServiceManager gridServiceManager : admin.getGridServiceManagers()) {
-                    System.out.println("GSM [" + gridServiceManager.getUID() + "] : " + gridServiceManager.getOperatingSystem().getConfiguration().getName());
+                    System.out.println("GSM [" + gridServiceManager.getUID() + "] : " + gridServiceManager.getOperatingSystem().getDetails().getName());
                 }
                 for (GridServiceContainer gridServiceContainer : admin.getGridServiceContainers()) {
-                    System.out.println("GSC [" + gridServiceContainer.getUID() + "] : " + gridServiceContainer.getOperatingSystem().getConfiguration().getName());
+                    System.out.println("GSC [" + gridServiceContainer.getUID() + "] : " + gridServiceContainer.getOperatingSystem().getDetails().getName());
                 }
                 for (Machine machine : admin.getMachines()) {
-                    System.out.println("Machine [" + machine.getUID() + "], transports: " + machine.getOperatingSystem().getConfiguration().getName());
+                    System.out.println("Machine [" + machine.getUID() + "], transports: " + machine.getOperatingSystem().getDetails().getName());
                 }
             } catch (Exception e) {
                 e.printStackTrace();

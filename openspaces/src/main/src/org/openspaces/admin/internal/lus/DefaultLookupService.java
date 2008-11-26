@@ -1,14 +1,14 @@
 package org.openspaces.admin.internal.lus;
 
+import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.jvm.JVMInfoProvider;
-import com.gigaspaces.jvm.VirtualMachineConfiguration;
-import com.gigaspaces.jvm.VirtualMachineStatistics;
+import com.gigaspaces.jvm.JVMStatistics;
+import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOInfoProvider;
-import com.gigaspaces.lrmi.nio.info.TransportConfiguration;
-import com.gigaspaces.lrmi.nio.info.TransportStatistics;
+import com.gigaspaces.lrmi.nio.info.NIOStatistics;
+import com.gigaspaces.operatingsystem.OSDetails;
 import com.gigaspaces.operatingsystem.OSInfoProvider;
-import com.gigaspaces.operatingsystem.OperatingSystemConfiguration;
-import com.gigaspaces.operatingsystem.OperatingSystemStatistics;
+import com.gigaspaces.operatingsystem.OSStatistics;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceRegistrar;
 import org.openspaces.admin.internal.admin.InternalAdmin;
@@ -43,27 +43,27 @@ public class DefaultLookupService extends AbstractGridComponent implements Inter
         return this.registrar;
     }
 
-    public TransportConfiguration getTransportConfiguration() throws RemoteException {
-        return ((NIOInfoProvider) registrar.getRegistrar()).getTransportConfiguration();
+    public NIODetails getNIODetails() throws RemoteException {
+        return ((NIOInfoProvider) registrar.getRegistrar()).getNIODetails();
     }
 
-    public TransportStatistics getTransportStatistics() throws RemoteException {
-        return ((NIOInfoProvider) registrar.getRegistrar()).getTransportStatistics();
+    public NIOStatistics getNIOStatistics() throws RemoteException {
+        return ((NIOInfoProvider) registrar.getRegistrar()).getNIOStatistics();
     }
 
-    public OperatingSystemConfiguration getOperatingSystemConfiguration() throws RemoteException {
-        return ((OSInfoProvider) registrar.getRegistrar()).getOperatingSystemConfiguration();
+    public OSDetails getOSDetails() throws RemoteException {
+        return ((OSInfoProvider) registrar.getRegistrar()).getOSConfiguration();
     }
 
-    public OperatingSystemStatistics getOperatingSystemStatistics() throws RemoteException {
-        return ((OSInfoProvider) registrar.getRegistrar()).getOperatingSystemStatistics();
+    public OSStatistics getOSStatistics() throws RemoteException {
+        return ((OSInfoProvider) registrar.getRegistrar()).getOSStatistics();
     }
 
-    public VirtualMachineConfiguration getVirtualMachineConfiguration() throws RemoteException {
-        return ((JVMInfoProvider) registrar.getRegistrar()).getJvmConfiguration();
+    public JVMDetails getJVMDetails() throws RemoteException {
+        return ((JVMInfoProvider) registrar.getRegistrar()).getJVMDetails();
     }
 
-    public VirtualMachineStatistics getVirtualMachineStatistics() throws RemoteException {
-        return ((JVMInfoProvider) registrar.getRegistrar()).getJvmStatistics();
+    public JVMStatistics getJVMStatistics() throws RemoteException {
+        return ((JVMInfoProvider) registrar.getRegistrar()).getJVMStatistics();
     }
 }

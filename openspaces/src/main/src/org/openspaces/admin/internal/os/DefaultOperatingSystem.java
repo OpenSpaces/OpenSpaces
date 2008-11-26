@@ -1,7 +1,8 @@
 package org.openspaces.admin.internal.os;
 
-import com.gigaspaces.operatingsystem.OperatingSystemConfiguration;
-import com.gigaspaces.operatingsystem.OperatingSystemStatistics;
+import com.gigaspaces.operatingsystem.OSDetails;
+import org.openspaces.admin.os.OperatingSystemDetails;
+import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.core.util.ConcurrentHashSet;
 
 import java.rmi.RemoteException;
@@ -14,13 +15,13 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
 
     private final String uid;
 
-    private final OperatingSystemConfiguration config;
+    private final OperatingSystemDetails details;
 
     private final Set<InternalOperatingSystemInfoProvider> operatingSystemInfoProviders = new ConcurrentHashSet<InternalOperatingSystemInfoProvider>();
 
-    public DefaultOperatingSystem(OperatingSystemConfiguration config) {
-        this.config = config;
-        this.uid = config.getUID();
+    public DefaultOperatingSystem(OSDetails osDetails) {
+        this.details = new DefaultOperatingSystemDetails(osDetails);
+        this.uid = details.getUID();
     }
 
     public void addOperatingSystemInfoProvider(InternalOperatingSystemInfoProvider provider) {
@@ -39,19 +40,21 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
         return this.uid;
     }
 
-    public OperatingSystemConfiguration getConfiguration() {
-        return this.config;
+    public OperatingSystemDetails getDetails() {
+        return this.details;
     }
+
+    private static final OperatingSystemStatistics NA_STATS = new DefaultOperatingSystemStatistics();
 
     public OperatingSystemStatistics getStatistics() {
         for (InternalOperatingSystemInfoProvider provider : operatingSystemInfoProviders) {
             try {
-                return provider.getOperatingSystemStatistics();
+                return new DefaultOperatingSystemStatistics(provider.getOSStatistics());
             } catch (RemoteException e) {
                 // simply try the next one
             }
         }
         // return NA on complete failure
-        return new OperatingSystemStatistics();
+        return NA_STATS;
     }
 }

@@ -1,8 +1,8 @@
 package org.openspaces.admin.internal.admin;
 
-import com.gigaspaces.jvm.VirtualMachineConfiguration;
-import com.gigaspaces.lrmi.nio.info.TransportConfiguration;
-import com.gigaspaces.operatingsystem.OperatingSystemConfiguration;
+import com.gigaspaces.jvm.JVMDetails;
+import com.gigaspaces.lrmi.nio.info.NIODetails;
+import com.gigaspaces.operatingsystem.OSDetails;
 import net.jini.core.discovery.LookupLocator;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsc.GridServiceContainers;
@@ -40,6 +40,7 @@ import org.openspaces.admin.internal.vm.InternalVirtualMachines;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.machine.Machines;
 import org.openspaces.admin.os.OperatingSystem;
+import org.openspaces.admin.transport.TransportDetails;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.admin.vm.VirtualMachines;
@@ -105,7 +106,7 @@ public class DefaultAdmin implements InternalAdmin {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(lookupService);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(lookupService);
 
-        InternalMachine machine = processMachineOnServiceAddition(transport.getConfiguration(), lookupService,
+        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(), lookupService,
                 transport, operatingSystem, virtualMachine);
 
         ((InternalLookupServices) machine.getLookupServices()).addLookupService(lookupService);
@@ -128,7 +129,7 @@ public class DefaultAdmin implements InternalAdmin {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceManager);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceManager);
 
-        InternalMachine machine = processMachineOnServiceAddition(transport.getConfiguration(), gridServiceManager,
+        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(), gridServiceManager,
                 transport, operatingSystem, virtualMachine);
 
         ((InternalGridServiceManagers) machine.getGridServiceManagers()).addGridServiceManager(gridServiceManager);
@@ -151,7 +152,7 @@ public class DefaultAdmin implements InternalAdmin {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceContainer);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceContainer);
 
-        InternalMachine machine = processMachineOnServiceAddition(transport.getConfiguration(), gridServiceContainer,
+        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(), gridServiceContainer,
                 transport, operatingSystem, virtualMachine);
 
         ((InternalGridServiceContainers) machine.getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
@@ -169,12 +170,12 @@ public class DefaultAdmin implements InternalAdmin {
         }
     }
 
-    private InternalMachine processMachineOnServiceAddition(TransportConfiguration txConfig, InternalMachineAware machineAware,
+    private InternalMachine processMachineOnServiceAddition(TransportDetails transportDetails, InternalMachineAware machineAware,
                                                             InternalTransport transport, OperatingSystem operatingSystem,
                                                             VirtualMachine virtualMachine) {
-        InternalMachine machine = (InternalMachine) machines.getMachineByHost(txConfig.getHost());
+        InternalMachine machine = (InternalMachine) machines.getMachineByHost(transportDetails.getHost());
         if (machine == null) {
-            machine = new DefaultMachine(txConfig.getHost(), txConfig.getHost());
+            machine = new DefaultMachine(transportDetails.getHost(), transportDetails.getHost());
             machine.setOperatingSystem(operatingSystem);
             machines.addMachine(machine);
         }
@@ -185,15 +186,15 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     private InternalVirtualMachine processVirtualMachineOnServiceAddition(InternalVirtualMachineInfoProvider vmProvider) {
-        VirtualMachineConfiguration vmConfig;
+        JVMDetails jvmDetails;
         try {
-            vmConfig = vmProvider.getVirtualMachineConfiguration();
+            jvmDetails = vmProvider.getJVMDetails();
         } catch (RemoteException e) {
             throw new AdminException("Failed to get virtual machine configuration", e);
         }
-        InternalVirtualMachine virtualMachine = (InternalVirtualMachine) virtualMachines.getVirtualMachineByUID(vmConfig.getUid());
+        InternalVirtualMachine virtualMachine = (InternalVirtualMachine) virtualMachines.getVirtualMachineByUID(jvmDetails.getUid());
         if (virtualMachine == null) {
-            virtualMachine = new DefaultVirtualMachine(vmConfig);
+            virtualMachine = new DefaultVirtualMachine(jvmDetails);
             virtualMachines.addVirtualMachine(virtualMachine);
         }
         virtualMachine.addVirtualMachineInfoProvider(vmProvider);
@@ -211,15 +212,15 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     private InternalTransport processTransportOnServiceAddition(InternalTransportInfoProvider txProvider) {
-        TransportConfiguration txConfig = null;
+        NIODetails nioDetails = null;
         try {
-            txConfig = txProvider.getTransportConfiguration();
+            nioDetails = txProvider.getNIODetails();
         } catch (RemoteException e) {
             throw new AdminException("Failed to get transport configuration", e);
         }
-        InternalTransport transport = (InternalTransport) transports.getTransportByHostAndPort(txConfig.getHost(), txConfig.getPort());
+        InternalTransport transport = (InternalTransport) transports.getTransportByHostAndPort(nioDetails.getHost(), nioDetails.getPort());
         if (transport == null) {
-            transport = new DefaultTransport(txConfig);
+            transport = new DefaultTransport(nioDetails);
             transports.addTransport(transport);
         }
         transport.addTransportInfoProvider(txProvider);
@@ -237,16 +238,16 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     private InternalOperatingSystem processOperatingSystemOnServiceAddition(InternalOperatingSystemInfoProvider osProvider) {
-        OperatingSystemConfiguration config;
+        OSDetails osDetails;
         try {
-            config = osProvider.getOperatingSystemConfiguration();
+            osDetails = osProvider.getOSDetails();
         } catch (RemoteException e) {
             throw new AdminException("Failed to get operating system configuration", e);
         }
 
-        InternalOperatingSystem os = (InternalOperatingSystem) operatingSystems.getByUID(config.getUID());
+        InternalOperatingSystem os = (InternalOperatingSystem) operatingSystems.getByUID(osDetails.getUID());
         if (os == null) {
-            os = new DefaultOperatingSystem(config);
+            os = new DefaultOperatingSystem(osDetails);
             operatingSystems.addOperatingSystem(os);
         }
         os.addOperatingSystemInfoProvider(osProvider);

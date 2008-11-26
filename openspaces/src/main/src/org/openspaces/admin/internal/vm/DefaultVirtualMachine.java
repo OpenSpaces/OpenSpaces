@@ -1,7 +1,8 @@
 package org.openspaces.admin.internal.vm;
 
-import com.gigaspaces.jvm.VirtualMachineConfiguration;
-import com.gigaspaces.jvm.VirtualMachineStatistics;
+import com.gigaspaces.jvm.JVMDetails;
+import org.openspaces.admin.vm.VirtualMachineDetails;
+import org.openspaces.admin.vm.VirtualMachineStatistics;
 import org.openspaces.core.util.ConcurrentHashSet;
 
 import java.rmi.RemoteException;
@@ -14,13 +15,13 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     private final String uid;
 
-    private final VirtualMachineConfiguration config;
+    private final VirtualMachineDetails details;
 
     private final Set<InternalVirtualMachineInfoProvider> virtualMachineInfoProviders = new ConcurrentHashSet<InternalVirtualMachineInfoProvider>();
 
-    public DefaultVirtualMachine(VirtualMachineConfiguration config) {
-        this.config = config;
-        this.uid = config.getUid();
+    public DefaultVirtualMachine(JVMDetails details) {
+        this.details = new DefaultVirtualMachineDetails(details);
+        this.uid = details.getUid();
     }
 
     public String getUID() {
@@ -39,19 +40,21 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
         return !virtualMachineInfoProviders.isEmpty();
     }
 
-    public VirtualMachineConfiguration getConfiguration() {
-        return this.config;
+    public VirtualMachineDetails getDetails() {
+        return this.details;
     }
+
+    private static final VirtualMachineStatistics NA_STATS = new DefaultVirtualMachineStatistics();
 
     public VirtualMachineStatistics getStatistics() {
         for (InternalVirtualMachineInfoProvider provider : virtualMachineInfoProviders) {
             try {
-                return provider.getVirtualMachineStatistics();
+                return new DefaultVirtualMachineStatistics(provider.getJVMStatistics());
             } catch (RemoteException e) {
                 // continue to the next one
             }
         }
         // all failed, return NA
-        return new VirtualMachineStatistics();
+        return NA_STATS;
     }
 }

@@ -1,12 +1,12 @@
 package org.openspaces.admin.internal.gsc;
 
 import com.gigaspaces.grid.gsc.GSC;
-import com.gigaspaces.jvm.VirtualMachineConfiguration;
-import com.gigaspaces.jvm.VirtualMachineStatistics;
-import com.gigaspaces.lrmi.nio.info.TransportConfiguration;
-import com.gigaspaces.lrmi.nio.info.TransportStatistics;
-import com.gigaspaces.operatingsystem.OperatingSystemConfiguration;
-import com.gigaspaces.operatingsystem.OperatingSystemStatistics;
+import com.gigaspaces.jvm.JVMDetails;
+import com.gigaspaces.jvm.JVMStatistics;
+import com.gigaspaces.lrmi.nio.info.NIODetails;
+import com.gigaspaces.lrmi.nio.info.NIOStatistics;
+import com.gigaspaces.operatingsystem.OSDetails;
+import com.gigaspaces.operatingsystem.OSStatistics;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
@@ -40,27 +40,27 @@ public class DefaultGridServiceContainer extends AbstractGridComponent implement
         return this.gsc;
     }
 
-    public TransportConfiguration getTransportConfiguration() throws RemoteException {
-        return gsc.getTransportConfiguration();
+    public NIODetails getNIODetails() throws RemoteException {
+        return gsc.getNIODetails();
     }
 
-    public TransportStatistics getTransportStatistics() throws RemoteException {
-        return gsc.getTransportStatistics();
+    public NIOStatistics getNIOStatistics() throws RemoteException {
+        return gsc.getNIOStatistics();
     }
 
-    public OperatingSystemConfiguration getOperatingSystemConfiguration() throws RemoteException {
-        return gsc.getOperatingSystemConfiguration();
+    public OSDetails getOSDetails() throws RemoteException {
+        return gsc.getOSConfiguration();
     }
 
-    public OperatingSystemStatistics getOperatingSystemStatistics() throws RemoteException {
-        return gsc.getOperatingSystemStatistics();
+    public OSStatistics getOSStatistics() throws RemoteException {
+        return gsc.getOSStatistics();
     }
 
-    public VirtualMachineConfiguration getVirtualMachineConfiguration() throws RemoteException {
-        return gsc.getJvmConfiguration();
+    public JVMDetails getJVMDetails() throws RemoteException {
+        return gsc.getJVMDetails();
     }
 
-    public VirtualMachineStatistics getVirtualMachineStatistics() throws RemoteException {
-        return gsc.getJvmStatistics();
+    public JVMStatistics getJVMStatistics() throws RemoteException {
+        return gsc.getJVMStatistics();
     }
 }

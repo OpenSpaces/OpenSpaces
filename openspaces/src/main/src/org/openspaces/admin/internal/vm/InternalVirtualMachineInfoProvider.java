@@ -1,7 +1,7 @@
 package org.openspaces.admin.internal.vm;
 
-import com.gigaspaces.jvm.VirtualMachineConfiguration;
-import com.gigaspaces.jvm.VirtualMachineStatistics;
+import com.gigaspaces.jvm.JVMDetails;
+import com.gigaspaces.jvm.JVMStatistics;
 
 import java.rmi.RemoteException;
 
@@ -10,7 +10,7 @@ import java.rmi.RemoteException;
  */
 public interface InternalVirtualMachineInfoProvider extends InternalVirtualMachineAware {
 
-    VirtualMachineConfiguration getVirtualMachineConfiguration() throws RemoteException;
+    JVMDetails getJVMDetails() throws RemoteException;
 
-    VirtualMachineStatistics getVirtualMachineStatistics() throws RemoteException;
+    JVMStatistics getJVMStatistics() throws RemoteException;
 }
