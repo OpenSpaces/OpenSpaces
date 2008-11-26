@@ -57,7 +57,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -65,7 +65,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class DefaultAdmin implements InternalAdmin {
 
-    private ScheduledExecutorService scheduledExecutorService;
+    private ScheduledThreadPoolExecutor scheduledExecutorService;
 
     private final DiscoveryService discoveryService;
 
@@ -98,7 +98,7 @@ public class DefaultAdmin implements InternalAdmin {
     // should be called once after construction
     public void begin() {
         discoveryService.start();
-        this.scheduledExecutorService = Executors.newScheduledThreadPool(5);
+        this.scheduledExecutorService = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(5);
         scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(
                 new ScheduledProcessingUnitMonitor(), scheduledProcessingUnitMonitorInterval, scheduledProcessingUnitMonitorInterval, TimeUnit.MILLISECONDS);
     }
@@ -112,6 +112,10 @@ public class DefaultAdmin implements InternalAdmin {
             scheduledProcessingUnitMonitorFuture.cancel(false);
             scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(new ScheduledProcessingUnitMonitor(), interval, interval, timeUnit);
         }
+    }
+
+    public void setSchedulerCorePoolSize(int coreThreads) {
+        scheduledExecutorService.setCorePoolSize(coreThreads);
     }
 
     public void close() {
