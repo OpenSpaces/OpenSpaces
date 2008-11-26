@@ -65,7 +65,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class DefaultAdmin implements InternalAdmin {
 
-    private final ScheduledExecutorService scheduledExecutorService;
+    private ScheduledExecutorService scheduledExecutorService;
 
     private final DiscoveryService discoveryService;
 
@@ -85,23 +85,33 @@ public class DefaultAdmin implements InternalAdmin {
 
     private final InternalProcessingUnits processingUnits = new DefaultProcessingUnits();
 
+    private volatile long scheduledProcessingUnitMonitorInterval = 1000; // default to one second 
+
     private Future scheduledProcessingUnitMonitorFuture;
 
     private volatile boolean closed = false;
 
     public DefaultAdmin(String[] groups, LookupLocator[] locators) {
         this.discoveryService = new DiscoveryService(groups, locators, this);
+    }
+
+    // should be called once after construction
+    public void begin() {
         discoveryService.start();
         this.scheduledExecutorService = Executors.newScheduledThreadPool(5);
-        scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(new ScheduledProcessingUnitMonitor(), 1000, 1000, TimeUnit.MILLISECONDS);
+        scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(
+                new ScheduledProcessingUnitMonitor(), scheduledProcessingUnitMonitorInterval, scheduledProcessingUnitMonitorInterval, TimeUnit.MILLISECONDS);
     }
 
     public void setProcessingUnitMonitorInterval(long interval, TimeUnit timeUnit) {
         if (closed) {
             throw new IllegalStateException("Admin already closed");
         }
-        scheduledProcessingUnitMonitorFuture.cancel(false);
-        scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(new ScheduledProcessingUnitMonitor(), interval, interval, timeUnit);
+        this.scheduledProcessingUnitMonitorInterval = timeUnit.toMillis(interval);
+        if (scheduledProcessingUnitMonitorFuture != null) { // during initialization
+            scheduledProcessingUnitMonitorFuture.cancel(false);
+            scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(new ScheduledProcessingUnitMonitor(), interval, interval, timeUnit);
+        }
     }
 
     public void close() {

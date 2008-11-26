@@ -8,6 +8,7 @@ import org.openspaces.admin.internal.admin.DefaultAdmin;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author kimchy
@@ -17,6 +18,8 @@ public class AdminFactory {
     private List<String> groups = null;
 
     private String locators = null;
+
+    private long scheduledProcessingUnitMonitorInterval = 1000; // default to one second
 
     public AdminFactory addGroup(String group) {
         if (groups == null) {
@@ -35,8 +38,16 @@ public class AdminFactory {
         return this;
     }
 
+    public AdminFactory setProcessingUnitMonitorInterval(long interval, TimeUnit timeUnit) {
+        scheduledProcessingUnitMonitorInterval = timeUnit.toMillis(interval);
+        return this;
+    }
+
     public Admin createAdmin() {
-        return new DefaultAdmin(getGroups(), getLocators());
+        DefaultAdmin admin = new DefaultAdmin(getGroups(), getLocators());
+        admin.setProcessingUnitMonitorInterval(scheduledProcessingUnitMonitorInterval, TimeUnit.MILLISECONDS);
+        admin.begin();
+        return admin;
     }
 
     private String[] getGroups() {
