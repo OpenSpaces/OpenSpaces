@@ -158,8 +158,11 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             try {
                 PUServiceBean puServiceBean = (PUServiceBean) service;
                 PUDetails puDetails = puServiceBean.getPUDetails();
-                InternalProcessingUnitInstance processingUnitInstance = new DefaultProcessingUnitInstance(serviceID, puDetails, puServiceBean);
-                admin.addProcessingUnitInstance(processingUnitInstance);
+                InternalProcessingUnitInstance processingUnitInstance = new DefaultProcessingUnitInstance(serviceID, puDetails, puServiceBean, admin);
+                NIODetails nioDetails = processingUnitInstance.getNIODetails();
+                OSDetails osDetails = processingUnitInstance.getOSDetails();
+                JVMDetails jvmDetails = processingUnitInstance.getJVMDetails();
+                admin.addProcessingUnitInstance(processingUnitInstance, nioDetails, osDetails, jvmDetails);
             } catch (Exception e) {
                 logger.warn("Failed to add Processing Unit with uid [" + serviceID + "]", e);
             }

@@ -17,6 +17,9 @@
 package org.openspaces.pu.container.servicegrid;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
+import com.gigaspaces.jvm.JVMInfoProvider;
+import com.gigaspaces.lrmi.nio.info.NIOInfoProvider;
+import com.gigaspaces.operatingsystem.OSInfoProvider;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.SpaceURL;
 import org.openspaces.core.cluster.ClusterInfo;
@@ -27,7 +30,7 @@ import java.rmi.RemoteException;
 /**
  * @author kimchy
  */
-public interface PUServiceBean extends Remote {
+public interface PUServiceBean extends NIOInfoProvider, OSInfoProvider, JVMInfoProvider, Remote {
 
     /**
      * Should this member be checked to see if it is alive or not.

@@ -34,6 +34,12 @@ public class TestSampler {
                 }
                 for (Machine machine : admin.getMachines()) {
                     System.out.println("Machine [" + machine.getUID() + "], transports: " + machine.getOperatingSystem().getUID());
+                    for (SpaceInstance spaceInstance : machine.getSpaceInstances()) {
+                        System.out.println("   -> Space [" + spaceInstance.getUID() + "]");
+                    }
+                    for (ProcessingUnitInstance processingUnitInstance : machine.getProcessingUnitInstances()) {
+                        System.out.println("   -> PU [" + processingUnitInstance.getUID() + "]");
+                    }
                 }
                 for (ProcessingUnit processingUnit : admin.getProcessingUnits()) {
                     System.out.println("Processing Unit: " + processingUnit.getName() + " status: " + processingUnit.getStatus());

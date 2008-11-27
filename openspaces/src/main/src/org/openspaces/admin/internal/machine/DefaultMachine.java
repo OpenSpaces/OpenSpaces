@@ -10,14 +10,21 @@ import org.openspaces.admin.internal.gsm.InternalGridServiceManagers;
 import org.openspaces.admin.internal.lus.DefaultLookupServices;
 import org.openspaces.admin.internal.lus.InternalLookupServices;
 import org.openspaces.admin.internal.os.DefaultOperatingSystem;
+import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
+import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
 import org.openspaces.admin.internal.transport.DefaultTransports;
 import org.openspaces.admin.internal.transport.InternalTransports;
 import org.openspaces.admin.internal.vm.DefaultVirtualMachines;
 import org.openspaces.admin.internal.vm.InternalVirtualMachines;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.os.OperatingSystem;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author kimchy
@@ -37,6 +44,10 @@ public class DefaultMachine implements InternalMachine {
     private final InternalTransports transports = new DefaultTransports();
 
     private final InternalVirtualMachines virtualMachines = new DefaultVirtualMachines();
+
+    private final InternalProcessingUnitInstances processingUnitInstances = new DefaultProcessingUnitInstances();
+
+    private final Map<String, SpaceInstance> spaceInstances = new ConcurrentHashMap<String, SpaceInstance>();
 
     private volatile OperatingSystem operatingSystem;
 
@@ -92,6 +103,30 @@ public class DefaultMachine implements InternalMachine {
 
     public VirtualMachines getVirtualMachines() {
         return this.virtualMachines;
+    }
+
+    public ProcessingUnitInstance[] getProcessingUnitInstances() {
+        return processingUnitInstances.getInstances();
+    }
+
+    public SpaceInstance[] getSpaceInstances() {
+        return spaceInstances.values().toArray(new SpaceInstance[0]);
+    }
+
+    public void addProcessingUnitInstance(ProcessingUnitInstance processingUnitInstance) {
+        processingUnitInstances.addInstance(processingUnitInstance);
+    }
+
+    public void removeProcessingUnitInstance(String uid) {
+        processingUnitInstances.removeInstnace(uid);
+    }
+
+    public void addSpaceInstance(SpaceInstance spaceInstance) {
+        spaceInstances.put(spaceInstance.getUID(), spaceInstance);
+    }
+
+    public void removeSpaceInstance(String uid) {
+        spaceInstances.remove(uid);
     }
 
     @Override

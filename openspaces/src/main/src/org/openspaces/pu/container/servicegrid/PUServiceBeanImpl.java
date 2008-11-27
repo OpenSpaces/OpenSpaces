@@ -17,6 +17,15 @@
 package org.openspaces.pu.container.servicegrid;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
+import com.gigaspaces.jvm.JVMDetails;
+import com.gigaspaces.jvm.JVMHelper;
+import com.gigaspaces.jvm.JVMStatistics;
+import com.gigaspaces.lrmi.nio.info.NIODetails;
+import com.gigaspaces.lrmi.nio.info.NIOInfoHelper;
+import com.gigaspaces.lrmi.nio.info.NIOStatistics;
+import com.gigaspaces.operatingsystem.OSDetails;
+import com.gigaspaces.operatingsystem.OSHelper;
+import com.gigaspaces.operatingsystem.OSStatistics;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.client.DCacheSpaceImpl;
@@ -823,5 +832,29 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         } catch (IOException e) {
             throw new CannotCreateContainerException("Failed to extract processing unit [" + puName + "] downloaded temp zip file from [" + tempFile.getAbsolutePath() + "] into [" + path.getAbsolutePath() + "]", e);
         }
+    }
+
+    public NIODetails getNIODetails() throws RemoteException {
+        return NIOInfoHelper.getConfiguration();
+    }
+
+    public NIOStatistics getNIOStatistics() throws RemoteException {
+        return NIOInfoHelper.getNIOStatistics();
+    }
+
+    public OSDetails getOSConfiguration() throws RemoteException {
+        return OSHelper.getConfiguration();
+    }
+
+    public OSStatistics getOSStatistics() throws RemoteException {
+        return OSHelper.getStatistics();
+    }
+
+    public JVMDetails getJVMDetails() throws RemoteException {
+        return JVMHelper.getConfiguration();
+    }
+
+    public JVMStatistics getJVMStatistics() throws RemoteException {
+        return JVMHelper.getStatistics();
     }
 }

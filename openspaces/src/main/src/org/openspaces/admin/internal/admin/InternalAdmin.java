@@ -27,7 +27,7 @@ public interface InternalAdmin extends Admin {
 
     void removeGridServiceContainer(String uid);
 
-    void addProcessingUnitInstance(InternalProcessingUnitInstance processingUnitInstance);
+    void addProcessingUnitInstance(InternalProcessingUnitInstance processingUnitInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails);
 
     void removeProcessingUnitInstance(String uid);
 

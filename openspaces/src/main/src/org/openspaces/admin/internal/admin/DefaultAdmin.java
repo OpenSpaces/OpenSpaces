@@ -248,7 +248,15 @@ public class DefaultAdmin implements InternalAdmin {
         }
     }
 
-    public synchronized void addProcessingUnitInstance(InternalProcessingUnitInstance processingUnitInstance) {
+    public synchronized void addProcessingUnitInstance(InternalProcessingUnitInstance processingUnitInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
+        InternalTransport transport = processTransportOnServiceAddition(processingUnitInstance, nioDetails);
+        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(processingUnitInstance, osDetails);
+        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(processingUnitInstance, jvmDetails);
+
+        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
+                transport, operatingSystem, virtualMachine,
+                (InternalMachineAware) virtualMachine, processingUnitInstance);
+
         InternalProcessingUnit processingUnit = (InternalProcessingUnit) processingUnits.getProcessingUnit(processingUnitInstance.getClusterInfo().getName());
         if (processingUnit == null) {
             processingUnitInstances.addOrphaned(processingUnitInstance);
@@ -261,6 +269,7 @@ public class DefaultAdmin implements InternalAdmin {
         processingUnitInstances.removeOrphaned(uid);
         InternalProcessingUnitInstance processingUnitInstance = (InternalProcessingUnitInstance) processingUnitInstances.removeInstnace(uid);
         if (processingUnitInstance != null) {
+            ((InternalMachine) processingUnitInstance.getMachine()).removeProcessingUnitInstance(processingUnitInstance.getUID());
             ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
             ((InternalGridServiceContainer) processingUnitInstance.getGridServiceContainer()).removeProcessingUnitInstance(uid);
         }
@@ -274,15 +283,17 @@ public class DefaultAdmin implements InternalAdmin {
         InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
                 transport, operatingSystem, virtualMachine,
                 (InternalMachineAware) virtualMachine, spaceInstance);
-        
+
         InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
         if (space == null) {
             space = new DefaultSpace(spaceInstance.getSpaceName(), spaceInstance.getSpaceName());
             spaces.addSpace(space);
         }
-        spaces.addSpaceInstance(spaceInstance);
-        space.addInstance(spaceInstance);
         spaceInstance.setSpace(space);
+        space.addInstance(spaceInstance);
+        spaces.addSpaceInstance(spaceInstance);
+
+        machine.addSpaceInstance(spaceInstance);
     }
 
     public synchronized void removeSpaceInstance(String uid) {
@@ -291,6 +302,9 @@ public class DefaultAdmin implements InternalAdmin {
             processTransportOnServiceRemoval(spaceInstance, spaceInstance);
             processOperatingSystemOnServiceRemoval(spaceInstance, spaceInstance);
             processVirtualMachineOnServiceRemoval(spaceInstance, spaceInstance);
+
+            ((InternalMachine) spaceInstance.getMachine()).removeSpaceInstance(spaceInstance.getUID());
+
             InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
             space.removeInstance(uid);
             if (space.size() == 0) {
@@ -311,6 +325,8 @@ public class DefaultAdmin implements InternalAdmin {
         }
         processingUnitInstance.setGridServiceContainer(gridServiceContainer);
         gridServiceContainer.addProcessingUnitInstance(processingUnitInstance);
+
+        ((InternalMachine) processingUnitInstance.getMachine()).addProcessingUnitInstance(processingUnitInstance);
 
         processingUnitInstances.addInstance(processingUnitInstance);
     }
