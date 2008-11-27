@@ -52,7 +52,7 @@ public class TestSampler {
                 for (Space space : admin.getSpaces()) {
                     System.out.println("Space [" + space.getUID() + "]");
                     for (SpaceInstance spaceInstance : space) {
-                        System.out.println("   -> INSTANCE [" + spaceInstance.getUID() + "]");
+                        System.out.println("   -> INSTANCE [" + spaceInstance.getUID() + "] instadeId [" + spaceInstance.getInstanceId() + "] backupId [" + spaceInstance.getBackupId() + "]");
                     }
                 }
                 System.out.println("*********************************************************************");
