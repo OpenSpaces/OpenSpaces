@@ -1,6 +1,10 @@
 package org.openspaces.admin.internal.vm;
 
+import org.openspaces.admin.gsc.GridServiceContainers;
+import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.internal.machine.InternalMachineAware;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.vm.VirtualMachine;
 
 /**
@@ -13,4 +17,16 @@ public interface InternalVirtualMachine extends VirtualMachine, InternalMachineA
     void removeVirtualMachineInfoProvider(InternalVirtualMachineInfoProvider virtualMachineInfoProvider);
 
     boolean hasVirtualMachineInfoProviders();
+
+    void addProcessingUnitInstance(ProcessingUnitInstance processingUnitInstance);
+
+    void removeProcessingUnitInstance(String uid);
+
+    void addSpaceInstance(SpaceInstance spaceInstance);
+
+    void removeSpaceInstance(String uid);
+
+    GridServiceManagers getGridServiceManagers();
+
+    GridServiceContainers getGridServiceContainers();
 }

@@ -216,6 +216,7 @@ public class DefaultAdmin implements InternalAdmin {
                 (InternalMachineAware) virtualMachine, gridServiceManager);
 
         ((InternalGridServiceManagers) machine.getGridServiceManagers()).addGridServiceManager(gridServiceManager);
+        ((InternalGridServiceManagers) ((InternalVirtualMachine) virtualMachine).getGridServiceManagers()).addGridServiceManager(gridServiceManager);
 
         gridServiceManagers.addGridServiceManager(gridServiceManager);
     }
@@ -241,6 +242,7 @@ public class DefaultAdmin implements InternalAdmin {
                 (InternalMachineAware) virtualMachine, gridServiceContainer);
 
         ((InternalGridServiceContainers) machine.getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
+        ((InternalGridServiceContainers) ((InternalVirtualMachine) virtualMachine).getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
 
         gridServiceContainers.addGridServiceContainer(gridServiceContainer);
     }
@@ -277,6 +279,7 @@ public class DefaultAdmin implements InternalAdmin {
         InternalProcessingUnitInstance processingUnitInstance = (InternalProcessingUnitInstance) processingUnitInstances.removeInstnace(uid);
         if (processingUnitInstance != null) {
             ((InternalMachine) processingUnitInstance.getMachine()).removeProcessingUnitInstance(processingUnitInstance.getUID());
+            ((InternalVirtualMachine) processingUnitInstance.getVirtualMachine()).removeProcessingUnitInstance(processingUnitInstance.getUID());
             ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
             ((InternalGridServiceContainer) processingUnitInstance.getGridServiceContainer()).removeProcessingUnitInstance(uid);
         }
@@ -301,6 +304,7 @@ public class DefaultAdmin implements InternalAdmin {
         spaces.addSpaceInstance(spaceInstance);
 
         machine.addSpaceInstance(spaceInstance);
+        ((InternalVirtualMachine) virtualMachine).addSpaceInstance(spaceInstance);
     }
 
     public synchronized void removeSpaceInstance(String uid) {
@@ -311,6 +315,7 @@ public class DefaultAdmin implements InternalAdmin {
             processVirtualMachineOnServiceRemoval(spaceInstance, spaceInstance);
 
             ((InternalMachine) spaceInstance.getMachine()).removeSpaceInstance(spaceInstance.getUID());
+            ((InternalVirtualMachine) spaceInstance.getVirtualMachine()).removeSpaceInstance(spaceInstance.getUID());
 
             InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
             space.removeInstance(uid);
@@ -334,6 +339,7 @@ public class DefaultAdmin implements InternalAdmin {
         gridServiceContainer.addProcessingUnitInstance(processingUnitInstance);
 
         ((InternalMachine) processingUnitInstance.getMachine()).addProcessingUnitInstance(processingUnitInstance);
+        ((InternalVirtualMachine) processingUnitInstance.getVirtualMachine()).addProcessingUnitInstance(processingUnitInstance);
 
         processingUnitInstances.addInstance(processingUnitInstance);
     }

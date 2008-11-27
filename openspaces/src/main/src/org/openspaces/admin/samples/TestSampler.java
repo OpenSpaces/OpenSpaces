@@ -10,6 +10,7 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.pu.service.ProcessingUnitServiceDetails;
 
 /**
@@ -31,6 +32,15 @@ public class TestSampler {
                     System.out.println("GSC [" + gridServiceContainer.getUID() + "] : " + gridServiceContainer.getMachine().getUID());
                     for (ProcessingUnitInstance processingUnitInstance : gridServiceContainer) {
                         System.out.println("   -> PU [" + processingUnitInstance.getClusterInfo() + "]");
+                    }
+                }
+                for (VirtualMachine virtualMachine : admin.getVirtualMachines()) {
+                    System.out.println("VM [" + virtualMachine.getUID() + "] on host [" + virtualMachine.getMachine().getHost() + "]");
+                    for (ProcessingUnitInstance processingUnitInstance : virtualMachine.getProcessingUnitInstances()) {
+                        System.out.println("   -> PU [" + processingUnitInstance.getUID() + "]");
+                    }
+                    for (SpaceInstance spaceInstance : virtualMachine.getSpaceInstances()) {
+                        System.out.println("   -> Space [" + spaceInstance.getUID() + "]");
                     }
                 }
                 for (Machine machine : admin.getMachines()) {
