@@ -9,6 +9,7 @@ import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.SpaceConfig;
 import com.j_spaces.core.service.ServiceConfigLoader;
+import com.j_spaces.kernel.PlatformVersion;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.core.discovery.LookupLocator;
@@ -24,6 +25,7 @@ import net.jini.lookup.ServiceDiscoveryListener;
 import net.jini.lookup.ServiceDiscoveryManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jini.rio.boot.BootUtil;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainer;
@@ -39,6 +41,10 @@ import org.openspaces.admin.internal.space.InternalSpaceInstance;
 import org.openspaces.pu.container.servicegrid.PUDetails;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
+
 /**
  * @author kimchy
  */
@@ -46,9 +52,9 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
     private static final Log logger = LogFactory.getLog(DiscoveryService.class);
 
-    private String[] groups;
+    private List<String> groups = null;
 
-    private LookupLocator[] locators;
+    private String locators = null;
 
     private InternalAdmin admin;
 
@@ -58,10 +64,23 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     private ServiceDiscoveryManager sdm;
     private LookupCache cache;
 
-    public DiscoveryService(String[] groups, LookupLocator[] locators, InternalAdmin admin) {
-        this.groups = groups;
-        this.locators = locators;
+    public DiscoveryService(InternalAdmin admin) {
         this.admin = admin;
+    }
+
+    public void addGroup(String group) {
+        if (groups == null) {
+            groups = new ArrayList<String>();
+        }
+        groups.add(group);
+    }
+
+    public void addLocator(String locator) {
+        if (locators == null) {
+            locators = locator;
+        } else {
+            locators += "," + locator;
+        }
     }
 
     public void start() {
@@ -76,7 +95,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             throw new AdminException("Failed to get configuration for discovery service", e);
         }
         try {
-            ldm = new LookupDiscoveryManager(groups, locators, this, config);
+            ldm = new LookupDiscoveryManager(getGroups(), getLocators(), this, config);
         } catch (Exception e) {
             throw new AdminException("Failed to start discovery service, Lookup Discovery Manager failed to start", e);
         }
@@ -198,5 +217,41 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
     public void serviceChanged(ServiceDiscoveryEvent event) {
         // TODO do we really care about this?
+    }
+
+    private String[] getGroups() {
+        String[] groups;
+        if (this.groups == null) {
+            String groupsProperty = System.getProperty("com.gs.jini_lus.groups");
+            if (groupsProperty == null) {
+                groupsProperty = System.getenv("LOOKUPGROUPS");
+            }
+            if (groupsProperty != null) {
+                StringTokenizer tokenizer = new StringTokenizer(groupsProperty);
+                int count = tokenizer.countTokens();
+                groups = new String[count];
+                for (int i = 0; i < count; i++) {
+                    groups[i] = tokenizer.nextToken();
+                }
+            } else {
+                groups = new String[]{"gigaspaces-" + PlatformVersion.getVersionNumber()};
+            }
+        } else {
+            groups = this.groups.toArray(new String[this.groups.size()]);
+        }
+        return groups;
+    }
+
+    private LookupLocator[] getLocators() {
+        if (locators == null) {
+            String locatorsProperty = System.getProperty("com.gs.jini_lus.locators");
+            if (locatorsProperty == null) {
+                locatorsProperty = System.getenv("LOOKUPLOCATORS");
+            }
+            if (locatorsProperty != null) {
+                locators = locatorsProperty;
+            }
+        }
+        return BootUtil.toLookupLocators(locators);
     }
 }

@@ -5,7 +5,6 @@ import com.gigaspaces.grid.gsm.PUsDetails;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.operatingsystem.OSDetails;
-import net.jini.core.discovery.LookupLocator;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagers;
@@ -105,8 +104,16 @@ public class DefaultAdmin implements InternalAdmin {
 
     private volatile boolean closed = false;
 
-    public DefaultAdmin(String[] groups, LookupLocator[] locators) {
-        this.discoveryService = new DiscoveryService(groups, locators, this);
+    public DefaultAdmin() {
+        this.discoveryService = new DiscoveryService(this);
+    }
+
+    public void addGroup(String group) {
+        discoveryService.addGroup(group);
+    }
+
+    public void addLocator(String locator) {
+        discoveryService.addLocator(locator);
     }
 
     // should be called once after construction
