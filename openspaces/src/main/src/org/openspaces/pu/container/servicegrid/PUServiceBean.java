@@ -16,13 +16,11 @@
 
 package org.openspaces.pu.container.servicegrid;
 
-import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.gigaspaces.jvm.JVMInfoProvider;
 import com.gigaspaces.lrmi.nio.info.NIOInfoProvider;
 import com.gigaspaces.operatingsystem.OSInfoProvider;
-import com.j_spaces.core.IJSpace;
-import com.j_spaces.core.client.SpaceURL;
 import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.pu.service.ProcessingUnitServiceDetails;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -42,13 +40,7 @@ public interface PUServiceBean extends NIOInfoProvider, OSInfoProvider, JVMInfoP
      */
     boolean isAlive() throws RemoteException;
 
-    SpaceURL[] listSpacesURLs() throws RemoteException;
-
-    IJSpace[] listSpaces() throws RemoteException;
-
-    SpaceMode[] listSpacesModes() throws RemoteException;
-
-    PUServiceDetails[] listServiceDetails() throws RemoteException;
+    ProcessingUnitServiceDetails[] listServiceDetails() throws RemoteException;
 
     ClusterInfo getClusterInfo() throws RemoteException;
 

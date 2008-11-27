@@ -31,10 +31,10 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.jini.rio.boot.BootUtil;
 import org.openspaces.core.cluster.ClusterInfo;
-import org.openspaces.pu.container.servicegrid.JeePUServiceDetails;
+import org.openspaces.pu.container.jee.JeeProcessingUnitServiceDetails;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
-import org.openspaces.pu.container.servicegrid.PUServiceDetails;
 import org.openspaces.pu.container.support.CommandLineParser;
+import org.openspaces.pu.service.ProcessingUnitServiceDetails;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.BufferedReader;
@@ -230,17 +230,17 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
     public synchronized void serviceAdded(ServiceDiscoveryEvent event) {
         PUServiceBean service = (PUServiceBean) event.getPostEventServiceItem().service;
         try {
-            PUServiceDetails[] details = service.listServiceDetails();
+            ProcessingUnitServiceDetails[] details = service.listServiceDetails();
             ClusterInfo clusterInfo = service.getClusterInfo();
-            for (PUServiceDetails detail : details) {
-                if (detail instanceof JeePUServiceDetails) {
-                    JeePUServiceDetails jeeDetails = (JeePUServiceDetails) detail;
+            for (ProcessingUnitServiceDetails detail : details) {
+                if (detail instanceof JeeProcessingUnitServiceDetails) {
+                    JeeProcessingUnitServiceDetails jeeDetails = (JeeProcessingUnitServiceDetails) detail;
                     LoadBalancerInfo loadBalancersInfo = loadBalancersInfoMap.get(clusterInfo.getName());
                     if (loadBalancersInfo == null) {
                         loadBalancersInfo = new LoadBalancerInfo(clusterInfo.getName());
                         loadBalancersInfoMap.put(clusterInfo.getName(), loadBalancersInfo);
                     }
-                    loadBalancersInfo.putNode(new LoadBalancerNodeInfo(clusterInfo, (JeePUServiceDetails) detail));
+                    loadBalancersInfo.putNode(new LoadBalancerNodeInfo(clusterInfo, (JeeProcessingUnitServiceDetails) detail));
                     loadBalancersInfo.setDirty(true);
 
                     System.out.println("[" + clusterInfo.getName() + "]: Adding [" + clusterInfo.getRunningNumberOffset1() + "] [" + jeeDetails.getHost() + ":" + jeeDetails.getPort() + jeeDetails.getContextPath() + "]");
@@ -255,16 +255,16 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
     public synchronized void serviceRemoved(ServiceDiscoveryEvent event) {
         PUServiceBean service = (PUServiceBean) event.getPreEventServiceItem().service;
         try {
-            PUServiceDetails[] details = service.listServiceDetails();
+            ProcessingUnitServiceDetails[] details = service.listServiceDetails();
             ClusterInfo clusterInfo = service.getClusterInfo();
-            for (PUServiceDetails detail : details) {
-                JeePUServiceDetails jeeDetails = (JeePUServiceDetails) detail;
-                if (detail instanceof JeePUServiceDetails) {
+            for (ProcessingUnitServiceDetails detail : details) {
+                JeeProcessingUnitServiceDetails jeeDetails = (JeeProcessingUnitServiceDetails) detail;
+                if (detail instanceof JeeProcessingUnitServiceDetails) {
                     LoadBalancerInfo loadBalancersInfo = loadBalancersInfoMap.get(clusterInfo.getName());
                     if (loadBalancersInfo == null) {
                         continue;
                     }
-                    loadBalancersInfo.removeNode(new LoadBalancerNodeInfo(clusterInfo, (JeePUServiceDetails) detail));
+                    loadBalancersInfo.removeNode(new LoadBalancerNodeInfo(clusterInfo, (JeeProcessingUnitServiceDetails) detail));
                     loadBalancersInfo.setDirty(true);
                     System.out.println("[" + clusterInfo.getName() + "]: Removing [" + clusterInfo.getRunningNumberOffset1() + "] [" + jeeDetails.getHost() + ":" + jeeDetails.getPort() + jeeDetails.getContextPath() + "]");
                 }

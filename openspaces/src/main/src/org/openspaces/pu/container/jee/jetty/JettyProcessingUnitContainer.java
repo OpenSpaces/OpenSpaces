@@ -22,8 +22,8 @@ import org.jini.rio.boot.BootUtil;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.openspaces.pu.container.CannotCloseContainerException;
-import org.openspaces.pu.container.servicegrid.JeePUServiceDetails;
-import org.openspaces.pu.container.servicegrid.PUServiceDetails;
+import org.openspaces.pu.container.jee.JeeProcessingUnitServiceDetails;
+import org.openspaces.pu.service.ProcessingUnitServiceDetails;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.web.context.ContextLoader;
@@ -71,7 +71,7 @@ public class JettyProcessingUnitContainer implements org.openspaces.pu.container
         return webApplicationContext;
     }
 
-    public PUServiceDetails[] getServicesDetails() {
+    public ProcessingUnitServiceDetails[] getServicesDetails() {
         int port = jettyHolder.getServer().getConnectors()[0].getPort();
         String host = jettyHolder.getServer().getConnectors()[0].getHost();
         if (host == null) {
@@ -82,13 +82,14 @@ public class JettyProcessingUnitContainer implements org.openspaces.pu.container
             }
         }
         InetSocketAddress addr = host == null ? new InetSocketAddress(port) : new InetSocketAddress(host, port);
-        PUServiceDetails details = new JeePUServiceDetails(addr.getAddress().getHostAddress(),
+        ProcessingUnitServiceDetails details = new JeeProcessingUnitServiceDetails("jetty:" + addr.getAddress().getHostAddress() + ":" + port,
+                addr.getAddress().getHostAddress(),
                 port,
                 jettyHolder.getServer().getConnectors()[0].getConfidentialPort(),
                 webAppContext.getContextPath(),
                 jettyHolder.isSingleInstance(),
                 "jetty");
-        return new PUServiceDetails[] {details};
+        return new ProcessingUnitServiceDetails[] {details};
     }
 
     /**

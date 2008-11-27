@@ -16,7 +16,7 @@
 
 package org.openspaces.interop;
 
-import org.openspaces.pu.container.servicegrid.PUServiceDetails;
+import org.openspaces.pu.service.ProcessingUnitServiceDetails;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -28,9 +28,11 @@ import java.io.ObjectOutput;
  *
  * @author kimchy
  */
-public class DotnetPUContainerServiceDetails implements PUServiceDetails, Externalizable {
+public class DotnetProcessingUnitContainerServiceDetails implements ProcessingUnitServiceDetails, Externalizable {
 
     private static final long serialVersionUID = 1L;
+
+    private String id;
     
     private String type;
     
@@ -38,13 +40,18 @@ public class DotnetPUContainerServiceDetails implements PUServiceDetails, Extern
 
     private String longDescription;
     
-    public DotnetPUContainerServiceDetails() {
+    public DotnetProcessingUnitContainerServiceDetails() {
     }
 
-    public DotnetPUContainerServiceDetails(String type, String description, String longDescription) {
+    public DotnetProcessingUnitContainerServiceDetails(String id, String type, String description, String longDescription) {
+        this.id = id;
         this.type = type;
         this.description = description;
         this.longDescription = longDescription;
+    }
+
+    public String getId() {
+        return this.id;
     }
 
     public String getServiceType() {
@@ -68,12 +75,14 @@ public class DotnetPUContainerServiceDetails implements PUServiceDetails, Extern
     }
 
     public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(id);
         out.writeUTF(type);
         out.writeUTF(description);
         out.writeUTF(longDescription);
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        id = in.readUTF();
         type = in.readUTF();
         description = in.readUTF();
         longDescription = in.readUTF();

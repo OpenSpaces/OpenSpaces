@@ -1,4 +1,4 @@
-package org.openspaces.pu.container.servicegrid;
+package org.openspaces.pu.service;
 
 import java.io.Serializable;
 
@@ -7,7 +7,12 @@ import java.io.Serializable;
  *
  * @author kimchy
  */
-public interface PUServiceDetails extends Serializable {
+public interface ProcessingUnitServiceDetails extends Serializable {
+
+    /**
+     * Returns the id of the processing unit (usually the bean id).
+     */
+    String getId();
 
     /**
      * Returns the service type. For example, space, dotnet, jee.

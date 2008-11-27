@@ -12,9 +12,8 @@ import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertiesAware;
 import org.openspaces.pu.container.DeployableProcessingUnitContainerProvider;
-import org.openspaces.pu.container.SpaceProvider;
-import org.openspaces.pu.container.servicegrid.PUServiceDetails;
-import org.openspaces.pu.container.servicegrid.ServiceDetailsProvider;
+import org.openspaces.pu.service.ProcessingUnitServiceDetails;
+import org.openspaces.pu.service.ProcessingUnitServiceDetailsProvider;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -31,7 +30,7 @@ import java.util.UUID;
  * @since 6.5
  */
 public class DotnetProcessingUnitBean implements InitializingBean, DisposableBean, ClusterInfoAware, BeanLevelPropertiesAware,
-        SpaceProvider, ServiceDetailsProvider {
+        ProcessingUnitServiceDetailsProvider {
     
     protected final Log log = LogFactory.getLog(getClass());
     
@@ -161,15 +160,16 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         return proxy.getContextProxies();
     }
 
-    public PUServiceDetails[] getServicesDetails() {
+    public ProcessingUnitServiceDetails[] getServicesDetails() {
         PUDetailsHolder puDetails = proxy.getPUDetailsHolder();
-        ArrayList<PUServiceDetails> dotnetServiceDetails = new ArrayList<PUServiceDetails>();
-        dotnetServiceDetails.add(new DotnetPUContainerServiceDetails("interop", puDetails.getDotnetPUContainerShortName(), puDetails.getDotnetPUContainerQualifiedName()));
+        ArrayList<ProcessingUnitServiceDetails> dotnetServiceDetails = new ArrayList<ProcessingUnitServiceDetails>();
+        // TODO EITAN FIX ID
+        dotnetServiceDetails.add(new DotnetProcessingUnitContainerServiceDetails("na", "interop", puDetails.getDotnetPUContainerShortName(), puDetails.getDotnetPUContainerQualifiedName()));
         BuildServiceDetails(puDetails, dotnetServiceDetails);
-        return dotnetServiceDetails.toArray(new PUServiceDetails[dotnetServiceDetails.size()]);
+        return dotnetServiceDetails.toArray(new ProcessingUnitServiceDetails[dotnetServiceDetails.size()]);
     }
 
-    private void BuildServiceDetails(PUDetailsHolder puDetails, ArrayList<PUServiceDetails> serviceDetails) {
+    private void BuildServiceDetails(PUDetailsHolder puDetails, ArrayList<ProcessingUnitServiceDetails> serviceDetails) {
         ServicesDetails details = puDetails.getServicesDetails();
         if (details != null)
         {
@@ -179,7 +179,8 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
             String[] longDescriptions = details.getLongDescriptions();
             for(int i = 0; i < descriptions.length; ++i)
             {
-                serviceDetails.add(new DotnetServiceDetails(types[i], serviceTypes[i], descriptions[i], longDescriptions[i]));
+                //TODO EITAN FIX ID
+                serviceDetails.add(new DotnetServiceDetails("na", types[i], serviceTypes[i], descriptions[i], longDescriptions[i]));
             }
         }
     }

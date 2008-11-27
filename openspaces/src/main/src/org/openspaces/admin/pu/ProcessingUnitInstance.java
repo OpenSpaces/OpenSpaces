@@ -3,11 +3,12 @@ package org.openspaces.admin.pu;
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.pu.service.ProcessingUnitServiceDetails;
 
 /**
  * @author kimchy
  */
-public interface ProcessingUnitInstance extends GridComponent {
+public interface ProcessingUnitInstance extends GridComponent, Iterable<ProcessingUnitServiceDetails> {
 
     int getInstanceId();
 
@@ -18,4 +19,6 @@ public interface ProcessingUnitInstance extends GridComponent {
     ClusterInfo getClusterInfo();
 
     GridServiceContainer getGridServiceContainer();
+
+    ProcessingUnitServiceDetails[] getServiceDetails();
 }

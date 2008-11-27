@@ -16,8 +16,8 @@
 
 package org.openspaces.pu.container.jee;
 
-import org.openspaces.pu.container.servicegrid.ServiceDetailsProvider;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
+import org.openspaces.pu.service.ProcessingUnitServiceDetailsProvider;
 
 /**
  * An extension to the {@link org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer}
@@ -25,6 +25,6 @@ import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer
  *
  * @author kimchy
  */
-public interface JeeProcessingUnitContainer extends ApplicationContextProcessingUnitContainer, ServiceDetailsProvider {
+public interface JeeProcessingUnitContainer extends ApplicationContextProcessingUnitContainer, ProcessingUnitServiceDetailsProvider {
 
 }

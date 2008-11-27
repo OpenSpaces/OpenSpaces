@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.openspaces.pu.container.servicegrid;
+package org.openspaces.pu.container.jee;
+
+import org.openspaces.pu.service.ProcessingUnitServiceDetails;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -26,9 +28,11 @@ import java.io.ObjectOutput;
  *
  * @author kimchy
  */
-public class JeePUServiceDetails implements PUServiceDetails, Externalizable {
+public class JeeProcessingUnitServiceDetails implements ProcessingUnitServiceDetails, Externalizable {
 
     private static final long serialVersionUID = 1L;
+
+    private String id;
 
     private String host;
 
@@ -42,16 +46,21 @@ public class JeePUServiceDetails implements PUServiceDetails, Externalizable {
 
     private String type;
 
-    public JeePUServiceDetails() {
+    public JeeProcessingUnitServiceDetails() {
     }
 
-    public JeePUServiceDetails(String host, int port, int sslPort, String contextPath, boolean shared, String type) {
+    public JeeProcessingUnitServiceDetails(String id, String host, int port, int sslPort, String contextPath, boolean shared, String type) {
+        this.id = id;
         this.host = host;
         this.port = port;
         this.sslPort = sslPort;
         this.contextPath = contextPath;
         this.shared = shared;
         this.type = type;
+    }
+
+    public String getId() {
+        return this.id;
     }
 
     /**

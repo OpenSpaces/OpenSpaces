@@ -1,4 +1,4 @@
-package org.openspaces.pu.container.servicegrid;
+package org.openspaces.pu.service;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -6,11 +6,13 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * A simple implementation of {@link org.openspaces.pu.container.servicegrid.PUServiceDetails}.
+ * A simple implementation of {@link ProcessingUnitServiceDetails}.
  *
  * @author kimchy
  */
-public class PlainPUServiceDetails implements PUServiceDetails, Externalizable {
+public class PlainProcessingUnitServiceDetails implements ProcessingUnitServiceDetails, Externalizable {
+
+    private String id;
 
     private String serviceType;
 
@@ -21,10 +23,11 @@ public class PlainPUServiceDetails implements PUServiceDetails, Externalizable {
     private String longDescription;
 
     // Just for externalizable
-    public PlainPUServiceDetails() {
+    public PlainProcessingUnitServiceDetails() {
     }
 
-    public PlainPUServiceDetails(String serviceType, String type, String description, String longDescription) {
+    public PlainProcessingUnitServiceDetails(String id, String serviceType, String type, String description, String longDescription) {
+        this.id = id;
         this.serviceType = serviceType;
         this.type = type;
         this.description = description;
@@ -35,6 +38,10 @@ public class PlainPUServiceDetails implements PUServiceDetails, Externalizable {
         if (this.longDescription == null) {
             this.longDescription = "";
         }
+    }
+
+    public String getId() {
+        return this.id;
     }
 
     public String getServiceType() {
@@ -54,6 +61,7 @@ public class PlainPUServiceDetails implements PUServiceDetails, Externalizable {
     }
 
     public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(id);
         out.writeUTF(serviceType);
         out.writeUTF(type);
         out.writeUTF(description);
@@ -61,6 +69,7 @@ public class PlainPUServiceDetails implements PUServiceDetails, Externalizable {
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        id = in.readUTF();
         serviceType = in.readUTF();
         type = in.readUTF();
         description = in.readUTF();

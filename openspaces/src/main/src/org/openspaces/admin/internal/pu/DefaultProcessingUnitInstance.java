@@ -14,8 +14,11 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.pu.container.servicegrid.PUDetails;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
+import org.openspaces.pu.service.ProcessingUnitServiceDetails;
 
 import java.rmi.RemoteException;
+import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * @author kimchy
@@ -71,6 +74,14 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     public ClusterInfo getClusterInfo() {
         return puDetails.getClusterInfo();
+    }
+
+    public Iterator<ProcessingUnitServiceDetails> iterator() {
+        return Arrays.asList(puDetails.getDetails()).iterator();
+    }
+
+    public ProcessingUnitServiceDetails[] getServiceDetails() {
+        return puDetails.getDetails();
     }
 
     public ServiceID getGridServiceContainerServiceID() {

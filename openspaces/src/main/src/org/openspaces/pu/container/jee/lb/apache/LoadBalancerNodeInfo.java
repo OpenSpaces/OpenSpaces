@@ -17,7 +17,7 @@
 package org.openspaces.pu.container.jee.lb.apache;
 
 import org.openspaces.core.cluster.ClusterInfo;
-import org.openspaces.pu.container.servicegrid.JeePUServiceDetails;
+import org.openspaces.pu.container.jee.JeeProcessingUnitServiceDetails;
 
 /**
  * Node level information for the load balancer.
@@ -28,9 +28,9 @@ public class LoadBalancerNodeInfo {
 
     private ClusterInfo clusterInfo;
 
-    private JeePUServiceDetails serviceDetails;
+    private JeeProcessingUnitServiceDetails serviceDetails;
 
-    public LoadBalancerNodeInfo(ClusterInfo clusterInfo, JeePUServiceDetails serviceDetails) {
+    public LoadBalancerNodeInfo(ClusterInfo clusterInfo, JeeProcessingUnitServiceDetails serviceDetails) {
         this.clusterInfo = clusterInfo;
         this.serviceDetails = serviceDetails;
     }
@@ -46,7 +46,7 @@ public class LoadBalancerNodeInfo {
     /**
      * Returns jee related information for the given load balancer node (for example, host, port, and context path).
      */
-    public JeePUServiceDetails getServiceDetails() {
+    public JeeProcessingUnitServiceDetails getServiceDetails() {
         return serviceDetails;
     }
 }

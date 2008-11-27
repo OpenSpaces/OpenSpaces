@@ -16,7 +16,6 @@
 
 package org.openspaces.pu.container.servicegrid;
 
-import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.jvm.JVMHelper;
 import com.gigaspaces.jvm.JVMStatistics;
@@ -26,14 +25,7 @@ import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.operatingsystem.OSDetails;
 import com.gigaspaces.operatingsystem.OSHelper;
 import com.gigaspaces.operatingsystem.OSStatistics;
-import com.j_spaces.core.IJSpace;
-import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
-import com.j_spaces.core.client.DCacheSpaceImpl;
-import com.j_spaces.core.client.SpaceURL;
-import com.j_spaces.core.client.cache.ISpaceLocalCache;
-import com.j_spaces.core.client.view.LocalSpaceView;
 import com.j_spaces.kernel.Environment;
-import net.jini.core.lookup.ServiceID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.CommonClassLoader;
@@ -52,19 +44,19 @@ import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
 import org.openspaces.core.cluster.MemberAliveIndicator;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertiesAware;
-import org.openspaces.core.util.SpaceUtils;
 import org.openspaces.interop.DotnetProcessingUnitContainerProvider;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ClassLoaderAwareProcessingUnitContainerProvider;
 import org.openspaces.pu.container.DeployableProcessingUnitContainerProvider;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.ProcessingUnitContainerProvider;
-import org.openspaces.pu.container.SpaceProvider;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
 import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
 import org.openspaces.pu.container.support.WebsterFile;
+import org.openspaces.pu.service.ProcessingUnitServiceDetails;
+import org.openspaces.pu.service.ProcessingUnitServiceDetailsProvider;
 import org.openspaces.pu.sla.monitor.ApplicationContextMonitor;
 import org.openspaces.pu.sla.monitor.Monitor;
 import org.springframework.context.ApplicationContext;
@@ -91,7 +83,6 @@ import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -109,8 +100,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private static final Log logger = LogFactory.getLog(PUServiceBeanImpl.class);
 
-    private static final Map<String, ClassLoader> jeeParentClassLoaders = new HashMap<String, ClassLoader>();
-
     private volatile ProcessingUnitContainer container;
 
     private int clusterGroup;
@@ -126,12 +115,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private volatile ClassLoader contextClassLoader;
 
     private volatile MemberAliveIndicator[] memberAliveIndicators;
-
-    // all the embedded spaces
-    private volatile IJSpace[] embeddedSpaces;
-
-    // embedded spaces, localcahce/view spaces, proxies
-    private volatile IJSpace[] allSpaces;
 
     private volatile File deployPath;
 
@@ -304,7 +287,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             webXml.close();
             downloadPU = true;
             String jeeContainer = System.getProperty("com.gs.jee.container", "jetty");
-            String className = StringUtils.capitalize(jeeContainer)  + "JeeProcessingUnitContainerProvider";
+            String className = StringUtils.capitalize(jeeContainer) + "JeeProcessingUnitContainerProvider";
             processingUnitContainerProviderClass = "org.openspaces.pu.container.jee." + jeeContainer + "." + className;
         } else if (puConfig != null) {
             puConfig.close();
@@ -356,7 +339,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
         }
 
-        CommonClassLoader commonClassLoader = (CommonClassLoader) contextClassLoader.getParent(); 
+        CommonClassLoader commonClassLoader = (CommonClassLoader) contextClassLoader.getParent();
         // handles class loader libraries
         if (downloadPU) {
             List<URL> libUrls = new ArrayList<URL>();
@@ -446,8 +429,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         container = factory.createContainer();
 
-        ArrayList<IJSpace> embeddedSpacesList = new ArrayList<IJSpace>();
-        ArrayList<IJSpace> allSpacesList = new ArrayList<IJSpace>();
         if (container instanceof ApplicationContextProcessingUnitContainer) {
             ApplicationContext applicationContext = ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
             Map map = applicationContext.getBeansOfType(MemberAliveIndicator.class);
@@ -459,31 +440,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 }
             }
             memberAliveIndicators = maiList.toArray(new MemberAliveIndicator[maiList.size()]);
-
-            map = applicationContext.getBeansOfType(IJSpace.class);
-            for (Iterator it = map.values().iterator(); it.hasNext();) {
-                IJSpace space = (IJSpace) it.next();
-                if (space instanceof ISpaceLocalCache || SpaceUtils.isRemoteProtocol(space)) {
-                    allSpacesList.add(space);
-                } else {
-                    embeddedSpacesList.add(space);
-                    allSpacesList.add(space);
-                }
-            }
-            map = applicationContext.getBeansOfType(SpaceProvider.class);
-            for (Iterator it = map.values().iterator(); it.hasNext();) {
-                IJSpace[] spaces = ((SpaceProvider) it.next()).getSpaces();
-                if (spaces != null) {
-                    for (IJSpace space : spaces) {
-                        if (space instanceof ISpaceLocalCache || SpaceUtils.isRemoteProtocol(space)) {
-                            allSpacesList.add(space);
-                        } else {
-                            embeddedSpacesList.add(space);
-                            allSpacesList.add(space);
-                        }
-                    }
-                }
-            }
 
             // inject the application context to all the monitors and schedule them
             // currently use the number of threads in relation to the number of monitors
@@ -500,24 +456,30 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
         }
 
-        if (container instanceof SpaceProvider) {
-            IJSpace[] spaces = ((SpaceProvider) container).getSpaces();
-            if (spaces != null) {
-                for (IJSpace space : spaces) {
-                    if (space instanceof ISpaceLocalCache || SpaceUtils.isRemoteProtocol(space)) {
-                        allSpacesList.add(space);
-                    } else {
-                        embeddedSpacesList.add(space);
-                        allSpacesList.add(space);
-                    }
+        ArrayList<ProcessingUnitServiceDetails> serviceDetails = new ArrayList<ProcessingUnitServiceDetails>();
+
+        if (container instanceof ProcessingUnitServiceDetailsProvider) {
+            ProcessingUnitServiceDetails[] details = ((ProcessingUnitServiceDetailsProvider) container).getServicesDetails();
+            if (details != null) {
+                for (ProcessingUnitServiceDetails detail : details) {
+                    serviceDetails.add(detail);
                 }
             }
         }
 
-        embeddedSpaces = embeddedSpacesList.toArray(new IJSpace[embeddedSpacesList.size()]);
-        allSpaces = allSpacesList.toArray(new IJSpace[allSpacesList.size()]);
-
-        this.puDetails = new PUDetails(context.getParentServiceID(), clusterInfo);
+        if (container instanceof ApplicationContextProcessingUnitContainer) {
+            ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
+            Map map = applicationContext.getBeansOfType(ProcessingUnitServiceDetailsProvider.class);
+            for (Iterator it = map.values().iterator(); it.hasNext();) {
+                ProcessingUnitServiceDetails[] details = ((ProcessingUnitServiceDetailsProvider) it.next()).getServicesDetails();
+                if (details != null) {
+                    for (ProcessingUnitServiceDetails detail : details) {
+                        serviceDetails.add(detail);
+                    }
+                }
+            }
+        }
+        this.puDetails = new PUDetails(context.getParentServiceID(), clusterInfo, serviceDetails.toArray(new ProcessingUnitServiceDetails[serviceDetails.size()]));
     }
 
     private org.openspaces.pu.sla.SLA getSLA(ServiceBeanContext context) throws IOException, ClassNotFoundException {
@@ -537,9 +499,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 logger.warn(logMessage("Failed to close"), e);
             } finally {
                 container = null;
-                embeddedSpaces = null;
-                allSpaces = null;
                 memberAliveIndicators = null;
+                puDetails = null;
             }
         }
 
@@ -589,81 +550,15 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         return this.puDetails;
     }
 
-    public SpaceURL[] listSpacesURLs() throws RemoteException {
-        if (embeddedSpaces == null) {
-            return new SpaceURL[0];
-        }
-        SpaceURL[] spaceURLs = new SpaceURL[embeddedSpaces.length];
-        for (int i = 0; i < embeddedSpaces.length; i++) {
-            spaceURLs[i] = embeddedSpaces[i].getFinderURL();
-        }
-        return spaceURLs;
-    }
-
-    public IJSpace[] listSpaces() throws RemoteException {
-        return embeddedSpaces;
-    }
-
     public ClusterInfo getClusterInfo() throws RemoteException {
         return this.clusterInfo;
     }
 
-    /**
-     * @return A list of {@link SpaceMode space modes}; An empty array if there are no spaces.
-     */
-    public SpaceMode[] listSpacesModes() throws RemoteException {
-        final int length = embeddedSpaces == null ? 0 : embeddedSpaces.length;
-        SpaceMode[] spacesModes = new SpaceMode[length];
-        for (int i = 0; i < length; ++i) {
-            spacesModes[i] = ((IInternalRemoteJSpaceAdmin) embeddedSpaces[i].getAdmin()).getSpaceMode();
+    public ProcessingUnitServiceDetails[] listServiceDetails() throws RemoteException {
+        if (puDetails == null) {
+            return new ProcessingUnitServiceDetails[0];
         }
-        return spacesModes;
-    }
-
-    public PUServiceDetails[] listServiceDetails() throws RemoteException {
-        ArrayList<PUServiceDetails> serviceDetails = new ArrayList<PUServiceDetails>();
-        if (container instanceof ServiceDetailsProvider) {
-            PUServiceDetails[] details = ((ServiceDetailsProvider) container).getServicesDetails();
-            if (details != null) {
-                for (PUServiceDetails detail : details) {
-                    serviceDetails.add(detail);
-                }
-            }
-        }
-        if (allSpaces != null) {
-            for (IJSpace space : allSpaces) {
-                SpaceURL spaceURL = space.getFinderURL();
-                ServiceID serviceID = new ServiceID(space.getReferentUuid().getMostSignificantBits(), space.getReferentUuid().getLeastSignificantBits());
-                String type = "embedded";
-                SpaceMode spaceMode = SpaceMode.NONE;
-                if (space instanceof LocalSpaceView) {
-                    type = "localview";
-                } else if (space instanceof DCacheSpaceImpl) {
-                    type = "localcache";
-                } else if (SpaceUtils.isRemoteProtocol(space)) {
-                    type = "remote";
-                } else { // embedded
-                    spaceMode = ((IInternalRemoteJSpaceAdmin) space.getAdmin()).getSpaceMode();
-                }
-                serviceDetails.add(new SpacePUServiceDetails(spaceURL.getSpaceName(), spaceURL.getContainerName(),
-                        serviceID, spaceMode, type));
-            }
-        }
-        if (container instanceof ApplicationContextProcessingUnitContainer) {
-            ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
-            if (applicationContext.isActive()) {
-                Map map = applicationContext.getBeansOfType(ServiceDetailsProvider.class);
-                for (Iterator it = map.values().iterator(); it.hasNext();) {
-                    PUServiceDetails[] details = ((ServiceDetailsProvider) it.next()).getServicesDetails();
-                    if (details != null) {
-                        for (PUServiceDetails detail : details) {
-                            serviceDetails.add(detail);
-                        }
-                    }
-                }
-            }
-        }
-        return serviceDetails.toArray(new PUServiceDetails[serviceDetails.size()]);
+        return puDetails.getDetails();
     }
 
     private int getMaxServiceCount(String[] args) {
