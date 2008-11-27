@@ -48,4 +48,6 @@ public interface PUServiceBean extends Remote {
     PUServiceDetails[] listServiceDetails() throws RemoteException;
 
     ClusterInfo getClusterInfo() throws RemoteException;
+
+    PUDetails getPUDetails() throws RemoteException;
 }

@@ -1,8 +1,10 @@
 package org.openspaces.admin.internal.pu;
 
 import net.jini.core.lookup.ServiceID;
+import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.pu.container.servicegrid.PUDetails;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
 
 /**
@@ -16,15 +18,17 @@ public class DefaultProcessingUnitInstance implements InternalProcessingUnitInst
 
     private final PUServiceBean puServiceBean;
 
-    private final ClusterInfo clusterInfo;
+    private final PUDetails puDetails;
 
     private volatile ProcessingUnit processingUnit;
 
-    public DefaultProcessingUnitInstance(ServiceID serviceID, PUServiceBean puServiceBean, ClusterInfo clusterInfo) {
+    private volatile GridServiceContainer gridServiceContainer;
+
+    public DefaultProcessingUnitInstance(ServiceID serviceID, PUDetails puDetails, PUServiceBean puServiceBean) {
         this.serviceID = serviceID;
         this.uid = serviceID.toString();
+        this.puDetails = puDetails;
         this.puServiceBean = puServiceBean;
-        this.clusterInfo = clusterInfo;
     }
 
     public String getUID() {
@@ -44,6 +48,18 @@ public class DefaultProcessingUnitInstance implements InternalProcessingUnitInst
     }
 
     public ClusterInfo getClusterInfo() {
-        return clusterInfo;
+        return puDetails.getClusterInfo();
+    }
+
+    public ServiceID getGridServiceContainerServiceID() {
+        return puDetails.getGscServiceID();
+    }
+
+    public void setGridServiceContainer(GridServiceContainer gridServiceContainer) {
+        this.gridServiceContainer = gridServiceContainer;
+    }
+
+    public GridServiceContainer getGridServiceContainer() {
+        return this.gridServiceContainer;
     }
 }

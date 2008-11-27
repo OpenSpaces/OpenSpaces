@@ -41,7 +41,7 @@ public class TestSampler {
                         System.out.println("   -> Backup GSM: " + backupGSM.getUID());
                     }
                     for (ProcessingUnitInstance processingUnitInstance : processingUnit) {
-                        System.out.println("   [" + processingUnitInstance.getClusterInfo() + "]");
+                        System.out.println("   [" + processingUnitInstance.getClusterInfo() + "] on GSC [" + processingUnitInstance.getGridServiceContainer().getUID() + "]");
                     }
                 }
                 System.out.println("*********************************************************************");

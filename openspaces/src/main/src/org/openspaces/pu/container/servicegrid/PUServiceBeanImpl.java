@@ -128,6 +128,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private ClusterInfo clusterInfo;
 
+    private volatile PUDetails puDetails;
+
     public PUServiceBeanImpl() {
         contextClassLoader = Thread.currentThread().getContextClassLoader();
     }
@@ -505,6 +507,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         embeddedSpaces = embeddedSpacesList.toArray(new IJSpace[embeddedSpacesList.size()]);
         allSpaces = allSpacesList.toArray(new IJSpace[allSpacesList.size()]);
+
+        this.puDetails = new PUDetails(context.getParentServiceID(), clusterInfo);
     }
 
     private org.openspaces.pu.sla.SLA getSLA(ServiceBeanContext context) throws IOException, ClassNotFoundException {
@@ -570,6 +574,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
         }
         return alive;
+    }
+
+    public PUDetails getPUDetails() throws RemoteException {
+        return this.puDetails;
     }
 
     public SpaceURL[] listSpacesURLs() throws RemoteException {

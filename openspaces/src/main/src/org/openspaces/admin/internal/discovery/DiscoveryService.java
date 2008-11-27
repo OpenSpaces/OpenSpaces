@@ -30,7 +30,7 @@ import org.openspaces.admin.internal.lus.DefaultLookupService;
 import org.openspaces.admin.internal.lus.InternalLookupService;
 import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstance;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
-import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.pu.container.servicegrid.PUDetails;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
 
 /**
@@ -153,8 +153,8 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         } else if (service instanceof PUServiceBean) {
             try {
                 PUServiceBean puServiceBean = (PUServiceBean) service;
-                ClusterInfo clusterInfo = puServiceBean.getClusterInfo();
-                InternalProcessingUnitInstance processingUnitInstance = new DefaultProcessingUnitInstance(event.getPostEventServiceItem().serviceID, puServiceBean, clusterInfo);
+                PUDetails puDetails = puServiceBean.getPUDetails();
+                InternalProcessingUnitInstance processingUnitInstance = new DefaultProcessingUnitInstance(event.getPostEventServiceItem().serviceID, puDetails, puServiceBean);
                 admin.addProcessingUnitInstance(processingUnitInstance);
             } catch (Exception e) {
                 logger.warn("Failed to add Processing Unit with uid [" + event.getPostEventServiceItem().serviceID + "]", e);

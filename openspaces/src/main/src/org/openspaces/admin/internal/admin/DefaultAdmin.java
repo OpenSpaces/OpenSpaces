@@ -258,6 +258,7 @@ public class DefaultAdmin implements InternalAdmin {
 
         processingUnitInstance.setProcessingUnit(processingUnit);
         processingUnit.addProcessingUnitInstance(processingUnitInstance);
+        processingUnitInstance.setGridServiceContainer(gridServiceContainers.getContainerByUID(processingUnitInstance.getGridServiceContainerServiceID().toString()));
 
         processingUnitInstances.addInstance(processingUnitInstance);
     }

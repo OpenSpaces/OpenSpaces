@@ -1,5 +1,6 @@
 package org.openspaces.admin.pu;
 
+import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.core.cluster.ClusterInfo;
 
 /**
@@ -12,4 +13,6 @@ public interface ProcessingUnitInstance {
     ProcessingUnit getProcessingUnit();
 
     ClusterInfo getClusterInfo();
+
+    GridServiceContainer getGridServiceContainer();
 }
