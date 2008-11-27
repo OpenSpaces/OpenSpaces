@@ -9,6 +9,10 @@ public interface Space extends Iterable<SpaceInstance> {
 
     String getName();
 
+    int getNumberOfInstances();
+
+    int getNumberOfBackups();
+
     SpaceInstance[] getInstnaces();
 
     int size();

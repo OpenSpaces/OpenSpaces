@@ -15,6 +15,10 @@ public interface InternalSpaceInstance extends SpaceInstance, InternalGridCompon
 
     ServiceID getServiceID();
 
+    int getNumberOfInstances();
+
+    int getNumberOfBackups();
+
     String getSpaceName();
 
     void setSpace(Space space);

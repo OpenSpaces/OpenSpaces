@@ -30,6 +30,20 @@ public class DefaultSpace implements InternalSpace {
         return this.name;
     }
 
+    public int getNumberOfInstances() {
+        for (SpaceInstance spaceInstance : spaceInstances.values()) {
+            return ((InternalSpaceInstance) spaceInstance).getNumberOfInstances();
+        }
+        return -1;
+    }
+
+    public int getNumberOfBackups() {
+        for (SpaceInstance spaceInstance : spaceInstances.values()) {
+            return ((InternalSpaceInstance) spaceInstance).getNumberOfBackups();
+        }
+        return -1;
+    }
+
     public SpaceInstance[] getInstnaces() {
         return spaceInstances.values().toArray(new SpaceInstance[0]);
     }

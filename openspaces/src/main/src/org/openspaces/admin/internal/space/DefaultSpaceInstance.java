@@ -35,6 +35,10 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     private final SpaceURL spaceURL;
 
+    private final int numberOfInstances;
+
+    private final int numberOfBackups;
+
     private final int instanceId;
 
     private final int backupId;
@@ -62,6 +66,20 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         } else {
             backupId = Integer.parseInt(sBackupId);
         }
+        String totalMembers = spaceURL.getProperty(SpaceURL.CLUSTER_TOTAL_MEMBERS);
+        if (totalMembers == null || totalMembers.length() == 0) {
+            numberOfInstances = 1;
+            numberOfBackups = 0;
+        } else {
+            int index = totalMembers.indexOf(',');
+            if (index > 0) {
+                numberOfInstances = Integer.parseInt(totalMembers.substring(0, index));
+                numberOfBackups = Integer.parseInt(totalMembers.substring(index + 1));
+            } else {
+                numberOfInstances = Integer.parseInt(totalMembers);
+                numberOfBackups = 0;
+            }
+        }
     }
 
     public String getUID() {
@@ -70,6 +88,14 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     public ServiceID getServiceID() {
         return serviceID;
+    }
+
+    public int getNumberOfInstances() {
+        return numberOfInstances;
+    }
+
+    public int getNumberOfBackups() {
+        return numberOfBackups;
     }
 
     public String getSpaceName() {
