@@ -3,18 +3,13 @@ package org.openspaces.admin.internal.gsc;
 import com.gigaspaces.grid.gsc.GSC;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.internal.machine.InternalMachineAware;
-import org.openspaces.admin.internal.os.InternalOperatingSystemInfoProvider;
-import org.openspaces.admin.internal.transport.InternalTransportAware;
-import org.openspaces.admin.internal.transport.InternalTransportInfoProvider;
-import org.openspaces.admin.internal.vm.InternalVirtualMachineInfoProvider;
+import org.openspaces.admin.internal.support.InternalGridComponent;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 
 /**
  * @author kimchy
  */
-public interface InternalGridServiceContainer extends GridServiceContainer, InternalTransportInfoProvider, InternalTransportAware,
-        InternalMachineAware, InternalOperatingSystemInfoProvider, InternalVirtualMachineInfoProvider {
+public interface InternalGridServiceContainer extends GridServiceContainer, InternalGridComponent {
 
     ServiceID getServiceID();
 

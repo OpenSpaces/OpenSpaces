@@ -266,7 +266,15 @@ public class DefaultAdmin implements InternalAdmin {
         }
     }
 
-    public synchronized void addSpaceInstance(InternalSpaceInstance spaceInstance) {
+    public synchronized void addSpaceInstance(InternalSpaceInstance spaceInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
+        InternalTransport transport = processTransportOnServiceAddition(spaceInstance, nioDetails);
+        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(spaceInstance, osDetails);
+        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(spaceInstance, jvmDetails);
+
+        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
+                transport, operatingSystem, virtualMachine,
+                (InternalMachineAware) virtualMachine, spaceInstance);
+        
         InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
         if (space == null) {
             space = new DefaultSpace(spaceInstance.getSpaceName(), spaceInstance.getSpaceName());
@@ -280,6 +288,9 @@ public class DefaultAdmin implements InternalAdmin {
     public synchronized void removeSpaceInstance(String uid) {
         InternalSpaceInstance spaceInstance = (InternalSpaceInstance) spaces.removeSpaceInstance(uid);
         if (spaceInstance != null) {
+            processTransportOnServiceRemoval(spaceInstance, spaceInstance);
+            processOperatingSystemOnServiceRemoval(spaceInstance, spaceInstance);
+            processVirtualMachineOnServiceRemoval(spaceInstance, spaceInstance);
             InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
             space.removeInstance(uid);
             if (space.size() == 0) {

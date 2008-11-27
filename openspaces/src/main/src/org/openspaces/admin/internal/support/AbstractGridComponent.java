@@ -1,12 +1,7 @@
 package org.openspaces.admin.internal.support;
 
 import org.openspaces.admin.Admin;
-import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.machine.InternalMachineAware;
-import org.openspaces.admin.internal.os.InternalOperatingSystemAware;
-import org.openspaces.admin.internal.transport.InternalTransportAware;
-import org.openspaces.admin.internal.vm.InternalVirtualMachineAware;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.transport.Transport;
@@ -15,7 +10,7 @@ import org.openspaces.admin.vm.VirtualMachine;
 /**
  * @author kimchy
  */
-public abstract class AbstractGridComponent implements GridComponent, InternalMachineAware, InternalTransportAware, InternalOperatingSystemAware, InternalVirtualMachineAware {
+public abstract class AbstractGridComponent implements InternalGridComponent {
 
     private final InternalAdmin admin;
 

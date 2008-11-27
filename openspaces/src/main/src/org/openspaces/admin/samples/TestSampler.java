@@ -53,6 +53,8 @@ public class TestSampler {
                     System.out.println("Space [" + space.getUID() + "]");
                     for (SpaceInstance spaceInstance : space) {
                         System.out.println("   -> INSTANCE [" + spaceInstance.getUID() + "] instadeId [" + spaceInstance.getInstanceId() + "] backupId [" + spaceInstance.getBackupId() + "]");
+                        System.out.println("         -> Host: " + spaceInstance.getMachine().getHost());
+                        System.out.println("         -> JVM: " + spaceInstance.getVirtualMachine().getUID());
                     }
                 }
                 System.out.println("*********************************************************************");

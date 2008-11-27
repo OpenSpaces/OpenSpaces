@@ -1,11 +1,11 @@
 package org.openspaces.admin.space;
 
+import org.openspaces.admin.GridComponent;
+
 /**
  * @author kimchy
  */
-public interface SpaceInstance {
-
-    String getUID();
+public interface SpaceInstance extends GridComponent {
 
     int getInstanceId();
 

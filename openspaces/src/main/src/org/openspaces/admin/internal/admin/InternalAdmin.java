@@ -31,7 +31,7 @@ public interface InternalAdmin extends Admin {
 
     void removeProcessingUnitInstance(String uid);
 
-    void addSpaceInstance(InternalSpaceInstance spaceInstance);
+    void addSpaceInstance(InternalSpaceInstance spaceInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails);
 
     void removeSpaceInstance(String uid);
 }

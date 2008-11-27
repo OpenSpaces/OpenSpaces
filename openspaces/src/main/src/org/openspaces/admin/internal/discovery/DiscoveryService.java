@@ -168,8 +168,11 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 IJSpace ijspace = (IJSpace) service;
                 IInternalRemoteJSpaceAdmin spaceAdmin = (IInternalRemoteJSpaceAdmin) ijspace.getAdmin();
                 SpaceConfig spaceConfig = spaceAdmin.getConfig();
-                InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(serviceID, ijspace, spaceAdmin, spaceConfig);
-                admin.addSpaceInstance(spaceInstance);
+                InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(serviceID, ijspace, spaceAdmin, spaceConfig, admin);
+                NIODetails nioDetails = spaceInstance.getNIODetails();
+                OSDetails osDetails = spaceInstance.getOSDetails();
+                JVMDetails jvmDetails = spaceInstance.getJVMDetails();
+                admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails);
             } catch (Exception e) {
                 logger.warn("Failed to add Space with uid [" + serviceID + "]", e);
             }

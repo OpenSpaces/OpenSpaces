@@ -1,17 +1,27 @@
 package org.openspaces.admin.internal.space;
 
+import com.gigaspaces.jvm.JVMDetails;
+import com.gigaspaces.jvm.JVMStatistics;
+import com.gigaspaces.lrmi.nio.info.NIODetails;
+import com.gigaspaces.lrmi.nio.info.NIOStatistics;
+import com.gigaspaces.operatingsystem.OSDetails;
+import com.gigaspaces.operatingsystem.OSStatistics;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.IRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.SpaceConfig;
 import com.j_spaces.core.client.SpaceURL;
 import net.jini.core.lookup.ServiceID;
+import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.space.Space;
+
+import java.rmi.RemoteException;
 
 /**
  * @author kimchy
  */
-public class DefaultSpaceInstance implements InternalSpaceInstance {
+public class DefaultSpaceInstance extends AbstractGridComponent implements InternalSpaceInstance {
 
     private final String uid;
 
@@ -32,7 +42,8 @@ public class DefaultSpaceInstance implements InternalSpaceInstance {
     private volatile Space space;
 
     public DefaultSpaceInstance(ServiceID serviceID, IJSpace ijSpace, IInternalRemoteJSpaceAdmin spaceAdmin,
-                                SpaceConfig spaceConfig) {
+                                SpaceConfig spaceConfig, InternalAdmin admin) {
+        super(admin);
         this.uid = serviceID.toString();
         this.serviceID = serviceID;
         this.ijSpace = ijSpace;
@@ -91,5 +102,29 @@ public class DefaultSpaceInstance implements InternalSpaceInstance {
 
     public void setSpace(Space space) {
         this.space = space;
+    }
+
+    public NIODetails getNIODetails() throws RemoteException {
+        return spaceAdmin.getNIODetails();
+    }
+
+    public NIOStatistics getNIOStatistics() throws RemoteException {
+        return spaceAdmin.getNIOStatistics();
+    }
+
+    public OSDetails getOSDetails() throws RemoteException {
+        return spaceAdmin.getOSConfiguration();
+    }
+
+    public OSStatistics getOSStatistics() throws RemoteException {
+        return spaceAdmin.getOSStatistics();
+    }
+
+    public JVMDetails getJVMDetails() throws RemoteException {
+        return spaceAdmin.getJVMDetails();
+    }
+
+    public JVMStatistics getJVMStatistics() throws RemoteException {
+        return spaceAdmin.getJVMStatistics();
     }
 }
