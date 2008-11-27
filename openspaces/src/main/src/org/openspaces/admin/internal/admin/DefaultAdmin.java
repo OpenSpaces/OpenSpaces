@@ -242,7 +242,7 @@ public class DefaultAdmin implements InternalAdmin {
             processingUnitInstances.addOrphaned(processingUnitInstance);
             return;
         }
-        processAdditionProcessingUnitInstance(processingUnit, processingUnitInstance);
+        processProcessingUnitInstanceAddition(processingUnit, processingUnitInstance);
     }
 
     public synchronized void removeProcessingUnitInstance(String uid) {
@@ -250,15 +250,21 @@ public class DefaultAdmin implements InternalAdmin {
         InternalProcessingUnitInstance processingUnitInstance = (InternalProcessingUnitInstance) processingUnitInstances.removeInstnace(uid);
         if (processingUnitInstance != null) {
             ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
+            ((InternalGridServiceContainer) processingUnitInstance.getGridServiceContainer()).removeProcessingUnitInstance(uid);
         }
     }
 
-    private synchronized void processAdditionProcessingUnitInstance(InternalProcessingUnit processingUnit, InternalProcessingUnitInstance processingUnitInstance) {
+    private synchronized void processProcessingUnitInstanceAddition(InternalProcessingUnit processingUnit, InternalProcessingUnitInstance processingUnitInstance) {
         processingUnitInstances.removeOrphaned(processingUnitInstance.getUID());
 
         processingUnitInstance.setProcessingUnit(processingUnit);
         processingUnit.addProcessingUnitInstance(processingUnitInstance);
-        processingUnitInstance.setGridServiceContainer(gridServiceContainers.getContainerByUID(processingUnitInstance.getGridServiceContainerServiceID().toString()));
+        InternalGridServiceContainer gridServiceContainer = (InternalGridServiceContainer) gridServiceContainers.getContainerByUID(processingUnitInstance.getGridServiceContainerServiceID().toString());
+        if (gridServiceContainer == null) {
+            throw new IllegalStateException("Internal error in admin, should not happen");
+        }
+        processingUnitInstance.setGridServiceContainer(gridServiceContainer);
+        gridServiceContainer.addProcessingUnitInstance(processingUnitInstance);
 
         processingUnitInstances.addInstance(processingUnitInstance);
     }
@@ -429,7 +435,7 @@ public class DefaultAdmin implements InternalAdmin {
             for (ProcessingUnitInstance orphaned : processingUnitInstances.getOrphaned()) {
                 InternalProcessingUnit processingUnit = (InternalProcessingUnit) processingUnits.getProcessingUnit(orphaned.getUID());
                 if (processingUnit != null) {
-                    processAdditionProcessingUnitInstance(processingUnit, (InternalProcessingUnitInstance) orphaned);
+                    processProcessingUnitInstanceAddition(processingUnit, (InternalProcessingUnitInstance) orphaned);
                 }
             }
         }

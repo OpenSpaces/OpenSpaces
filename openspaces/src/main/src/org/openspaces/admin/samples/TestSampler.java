@@ -26,6 +26,9 @@ public class TestSampler {
                 }
                 for (GridServiceContainer gridServiceContainer : admin.getGridServiceContainers()) {
                     System.out.println("GSC [" + gridServiceContainer.getUID() + "] : " + gridServiceContainer.getMachine().getUID());
+                    for (ProcessingUnitInstance processingUnitInstance : gridServiceContainer) {
+                        System.out.println("   -> PU [" + processingUnitInstance.getClusterInfo() + "]");
+                    }
                 }
                 for (Machine machine : admin.getMachines()) {
                     System.out.println("Machine [" + machine.getUID() + "], transports: " + machine.getOperatingSystem().getUID());

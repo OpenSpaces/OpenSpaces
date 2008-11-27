@@ -8,6 +8,7 @@ import org.openspaces.admin.internal.os.InternalOperatingSystemInfoProvider;
 import org.openspaces.admin.internal.transport.InternalTransportAware;
 import org.openspaces.admin.internal.transport.InternalTransportInfoProvider;
 import org.openspaces.admin.internal.vm.InternalVirtualMachineInfoProvider;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
 
 /**
  * @author kimchy
@@ -18,4 +19,8 @@ public interface InternalGridServiceContainer extends GridServiceContainer, Inte
     ServiceID getServiceID();
 
     GSC getGSC();
+
+    void addProcessingUnitInstance(ProcessingUnitInstance processingUnitInstance);
+
+    void removeProcessingUnitInstance(String uid);
 }

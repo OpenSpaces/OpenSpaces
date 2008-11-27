@@ -9,9 +9,13 @@ import com.gigaspaces.operatingsystem.OSDetails;
 import com.gigaspaces.operatingsystem.OSStatistics;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
+import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
 
 import java.rmi.RemoteException;
+import java.util.Iterator;
 
 /**
  * @author kimchy
@@ -21,6 +25,8 @@ public class DefaultGridServiceContainer extends AbstractGridComponent implement
     private final ServiceID serviceID;
 
     private final GSC gsc;
+
+    private final InternalProcessingUnitInstances processingUnitInstances = new DefaultProcessingUnitInstances();
 
     public DefaultGridServiceContainer(ServiceID serviceID, GSC gsc, InternalAdmin admin) {
         super(admin);
@@ -38,6 +44,22 @@ public class DefaultGridServiceContainer extends AbstractGridComponent implement
 
     public GSC getGSC() {
         return this.gsc;
+    }
+
+    public Iterator<ProcessingUnitInstance> iterator() {
+        return processingUnitInstances.getInstancesIt();
+    }
+
+    public ProcessingUnitInstance[] getProcessingUnitInsances() {
+        return processingUnitInstances.getInstances();
+    }
+
+    public void addProcessingUnitInstance(ProcessingUnitInstance processingUnitInstance) {
+        processingUnitInstances.addInstance(processingUnitInstance);
+    }
+
+    public void removeProcessingUnitInstance(String uid) {
+        processingUnitInstances.removeInstnace(uid);
     }
 
     public NIODetails getNIODetails() throws RemoteException {

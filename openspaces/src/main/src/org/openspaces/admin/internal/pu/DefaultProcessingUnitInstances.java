@@ -2,6 +2,7 @@ package org.openspaces.admin.internal.pu;
 
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,5 +33,13 @@ public class DefaultProcessingUnitInstances implements InternalProcessingUnitIns
 
     public ProcessingUnitInstance[] getOrphaned() {
         return orphanedProcessingUnitInstnaces.values().toArray(new ProcessingUnitInstance[0]);
+    }
+
+    public Iterator<ProcessingUnitInstance> getInstancesIt() {
+        return processingUnitInstnaces.values().iterator();
+    }
+
+    public ProcessingUnitInstance[] getInstances() {
+        return processingUnitInstnaces.values().toArray(new ProcessingUnitInstance[0]);
     }
 }

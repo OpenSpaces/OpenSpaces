@@ -2,6 +2,8 @@ package org.openspaces.admin.internal.pu;
 
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 
+import java.util.Iterator;
+
 /**
  * @author kimchy
  */
@@ -16,4 +18,8 @@ public interface InternalProcessingUnitInstances {
     ProcessingUnitInstance removeInstnace(String uid);
 
     ProcessingUnitInstance[] getOrphaned();
+
+    Iterator<ProcessingUnitInstance> getInstancesIt();
+
+    ProcessingUnitInstance[] getInstances();
 }
