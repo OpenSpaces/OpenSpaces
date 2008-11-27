@@ -56,6 +56,8 @@ import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnits;
+import org.openspaces.admin.space.Space;
+import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.Spaces;
 import org.openspaces.admin.transport.TransportDetails;
 import org.openspaces.admin.transport.Transports;
@@ -303,6 +305,13 @@ public class DefaultAdmin implements InternalAdmin {
         space.addInstance(spaceInstance);
         spaces.addSpaceInstance(spaceInstance);
 
+        // go over all the processing unit instnaces and add the space if matching
+        for (ProcessingUnit processingUnit : processingUnits) {
+            for (ProcessingUnitInstance processingUnitInstance : processingUnit) {
+                ((InternalProcessingUnitInstance) processingUnitInstance).addSpaceInstnaceIfMatching(spaceInstance);
+            }
+        }
+
         machine.addSpaceInstance(spaceInstance);
         ((InternalVirtualMachine) virtualMachine).addSpaceInstance(spaceInstance);
     }
@@ -340,6 +349,13 @@ public class DefaultAdmin implements InternalAdmin {
 
         ((InternalMachine) processingUnitInstance.getMachine()).addProcessingUnitInstance(processingUnitInstance);
         ((InternalVirtualMachine) processingUnitInstance.getVirtualMachine()).addProcessingUnitInstance(processingUnitInstance);
+
+        // go over all the space instances, and add the matched one to the processing unit
+        for (Space space : spaces) {
+            for (SpaceInstance spaceInstance : space) {
+                processingUnitInstance.addSpaceInstnaceIfMatching(spaceInstance);
+            }
+        }
 
         processingUnitInstances.addInstance(processingUnitInstance);
     }

@@ -64,6 +64,9 @@ public class TestSampler {
                     }
                     for (ProcessingUnitInstance processingUnitInstance : processingUnit) {
                         System.out.println("   [" + processingUnitInstance.getClusterInfo() + "] on GSC [" + processingUnitInstance.getGridServiceContainer().getUID() + "]");
+                        if (processingUnitInstance.hasEmbeddedSpaces()) {
+                            System.out.println("      -> Embedded Space [" + processingUnitInstance.getSpaceInstance().getUID() + "]");
+                        }
                         for (ProcessingUnitServiceDetails details : processingUnitInstance) {
                             System.out.println("      -> Service [" + details.getId() + "] type [" + details.getType() + "]");
                         }

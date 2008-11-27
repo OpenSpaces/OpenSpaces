@@ -6,19 +6,27 @@ import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.operatingsystem.OSDetails;
 import com.gigaspaces.operatingsystem.OSStatistics;
+import com.j_spaces.kernel.SizeConcurrentHashMap;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.space.InternalSpaceInstance;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.space.SpaceProcessingUnitServiceDetails;
+import org.openspaces.core.space.SpaceType;
+import org.openspaces.pu.container.jee.JeeProcessingUnitServiceDetails;
 import org.openspaces.pu.container.servicegrid.PUDetails;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
 import org.openspaces.pu.service.ProcessingUnitServiceDetails;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * @author kimchy
@@ -37,12 +45,33 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private volatile GridServiceContainer gridServiceContainer;
 
+    private final SpaceProcessingUnitServiceDetails[] spacesDetails;
+
+    private final JeeProcessingUnitServiceDetails jeeDetails;
+
+    private final Map<String, SpaceInstance> spaceInstances = new SizeConcurrentHashMap<String, SpaceInstance>();
+
     public DefaultProcessingUnitInstance(ServiceID serviceID, PUDetails puDetails, PUServiceBean puServiceBean, InternalAdmin admin) {
         super(admin);
         this.serviceID = serviceID;
         this.uid = serviceID.toString();
         this.puDetails = puDetails;
         this.puServiceBean = puServiceBean;
+
+        ArrayList<SpaceProcessingUnitServiceDetails> spacesDetailsList = new ArrayList<SpaceProcessingUnitServiceDetails>();
+        JeeProcessingUnitServiceDetails jeeDetailsX = null;
+        for (ProcessingUnitServiceDetails serviceDetails : puDetails.getDetails()) {
+            if (serviceDetails instanceof SpaceProcessingUnitServiceDetails) {
+                SpaceProcessingUnitServiceDetails space = (SpaceProcessingUnitServiceDetails) serviceDetails;
+                if (space.getSpaceType() == SpaceType.EMBEDDED) {
+                    spacesDetailsList.add((SpaceProcessingUnitServiceDetails) serviceDetails);
+                }
+            } else if (serviceDetails instanceof JeeProcessingUnitServiceDetails) {
+                jeeDetailsX = (JeeProcessingUnitServiceDetails) serviceDetails;
+            }
+        }
+        jeeDetails = jeeDetailsX;
+        spacesDetails = spacesDetailsList.toArray(new SpaceProcessingUnitServiceDetails[spacesDetailsList.size()]);
     }
 
     public String getUID() {
@@ -95,6 +124,44 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     public GridServiceContainer getGridServiceContainer() {
         return this.gridServiceContainer;
     }
+
+    public boolean hasEmbeddedSpaces() {
+        return spaceInstances.size() != 0;
+    }
+
+    public SpaceInstance getSpaceInstance() {
+        Iterator<SpaceInstance> it = spaceInstances.values().iterator();
+        if (it.hasNext()) {
+            return it.next();
+        }
+        return null;
+    }
+
+    public SpaceInstance[] getSpaceInstances() {
+        return spaceInstances.values().toArray(new SpaceInstance[0]);
+    }
+
+    public void addSpaceInstnaceIfMatching(SpaceInstance spaceInstance) {
+        for (SpaceProcessingUnitServiceDetails spaceDetails : spacesDetails) {
+            if (((InternalSpaceInstance) spaceInstance).getServiceID().equals(spaceDetails.getServiceID())) {
+                spaceInstances.put(spaceInstance.getUID(), spaceInstance);
+            }
+        }
+    }
+
+    public void removeSpaceInstance(String uid) {
+        spaceInstances.remove(uid);
+    }
+
+    public boolean isJee() {
+        return jeeDetails != null;
+    }
+
+    public JeeProcessingUnitServiceDetails getJeeDetails() {
+        return jeeDetails;
+    }
+
+// info providers
 
     public NIODetails getNIODetails() throws RemoteException {
         return puServiceBean.getNIODetails();
