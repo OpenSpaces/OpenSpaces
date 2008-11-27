@@ -3,7 +3,9 @@ package org.openspaces.admin.internal.pu;
 import com.gigaspaces.grid.gsm.PUDetails;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.pu.DeploymentStatus;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,6 +25,8 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     private volatile GridServiceManager managingGridServiceManager;
 
     private final Map<String, GridServiceManager> backupGridServiceManagers = new ConcurrentHashMap<String, GridServiceManager>();
+
+    private final Map<String, ProcessingUnitInstance> processingUnitInstances = new ConcurrentHashMap<String, ProcessingUnitInstance>();
 
     public DefaultProcessingUnit(PUDetails details) {
         this.name = details.getName();
@@ -104,6 +108,22 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
             return true;
         }
         return false;
+    }
+
+    public Iterator<ProcessingUnitInstance> iterator() {
+        return processingUnitInstances.values().iterator();
+    }
+
+    public ProcessingUnitInstance[] getProcessingUnitInstances() {
+        return processingUnitInstances.values().toArray(new ProcessingUnitInstance[0]);
+    }
+
+    public void addProcessingUnitInstance(ProcessingUnitInstance processingUnitInstance) {
+        processingUnitInstances.put(processingUnitInstance.getUID(), processingUnitInstance);
+    }
+
+    public void removeProcessingUnitInstance(String uid) {
+        processingUnitInstances.remove(uid);
     }
 
     @Override

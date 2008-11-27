@@ -28,6 +28,10 @@ import org.openspaces.admin.internal.gsm.DefaultGridServiceManager;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.lus.DefaultLookupService;
 import org.openspaces.admin.internal.lus.InternalLookupService;
+import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstance;
+import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
+import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.pu.container.servicegrid.PUServiceBean;
 
 /**
  * @author kimchy
@@ -146,6 +150,15 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             } catch (Exception e) {
                 logger.warn("Failed to add GSC with uid [" + event.getPostEventServiceItem().serviceID + "]", e);
             }
+        } else if (service instanceof PUServiceBean) {
+            try {
+                PUServiceBean puServiceBean = (PUServiceBean) service;
+                ClusterInfo clusterInfo = puServiceBean.getClusterInfo();
+                InternalProcessingUnitInstance processingUnitInstance = new DefaultProcessingUnitInstance(event.getPostEventServiceItem().serviceID, puServiceBean, clusterInfo);
+                admin.addProcessingUnitInstance(processingUnitInstance);
+            } catch (Exception e) {
+                logger.warn("Failed to add Processing Unit with uid [" + event.getPostEventServiceItem().serviceID + "]", e);
+            }
         }
     }
 
@@ -155,6 +168,8 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             admin.removeGridServiceManager(event.getPreEventServiceItem().serviceID.toString());
         } else if (service instanceof GSC) {
             admin.removeGridServiceContainer(event.getPreEventServiceItem().serviceID.toString());
+        } else if (service instanceof PUServiceBean) {
+            admin.removeProcessingUnitInstance(event.getPreEventServiceItem().serviceID.toString());
         }
     }
 

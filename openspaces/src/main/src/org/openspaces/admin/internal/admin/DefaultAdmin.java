@@ -30,8 +30,11 @@ import org.openspaces.admin.internal.os.InternalOperatingSystem;
 import org.openspaces.admin.internal.os.InternalOperatingSystemInfoProvider;
 import org.openspaces.admin.internal.os.InternalOperatingSystems;
 import org.openspaces.admin.internal.pu.DefaultProcessingUnit;
+import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
 import org.openspaces.admin.internal.pu.DefaultProcessingUnits;
 import org.openspaces.admin.internal.pu.InternalProcessingUnit;
+import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
+import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
 import org.openspaces.admin.internal.pu.InternalProcessingUnits;
 import org.openspaces.admin.internal.transport.DefaultTransport;
 import org.openspaces.admin.internal.transport.DefaultTransports;
@@ -47,6 +50,7 @@ import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.machine.Machines;
 import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnits;
 import org.openspaces.admin.transport.TransportDetails;
 import org.openspaces.admin.transport.Transports;
@@ -84,6 +88,8 @@ public class DefaultAdmin implements InternalAdmin {
     private final InternalVirtualMachines virtualMachines = new DefaultVirtualMachines();
 
     private final InternalProcessingUnits processingUnits = new DefaultProcessingUnits();
+
+    private final InternalProcessingUnitInstances processingUnitInstances = new DefaultProcessingUnitInstances();
 
     private volatile long scheduledProcessingUnitMonitorInterval = 1000; // default to one second 
 
@@ -230,9 +236,35 @@ public class DefaultAdmin implements InternalAdmin {
         }
     }
 
+    public synchronized void addProcessingUnitInstance(InternalProcessingUnitInstance processingUnitInstance) {
+        InternalProcessingUnit processingUnit = (InternalProcessingUnit) processingUnits.getProcessingUnit(processingUnitInstance.getClusterInfo().getName());
+        if (processingUnit == null) {
+            processingUnitInstances.addOrphaned(processingUnitInstance);
+            return;
+        }
+        processAdditionProcessingUnitInstance(processingUnit, processingUnitInstance);
+    }
+
+    public synchronized void removeProcessingUnitInstance(String uid) {
+        processingUnitInstances.removeOrphaned(uid);
+        InternalProcessingUnitInstance processingUnitInstance = (InternalProcessingUnitInstance) processingUnitInstances.removeInstnace(uid);
+        if (processingUnitInstance != null) {
+            ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
+        }
+    }
+
+    private synchronized void processAdditionProcessingUnitInstance(InternalProcessingUnit processingUnit, InternalProcessingUnitInstance processingUnitInstance) {
+        processingUnitInstances.removeOrphaned(processingUnitInstance.getUID());
+
+        processingUnitInstance.setProcessingUnit(processingUnit);
+        processingUnit.addProcessingUnitInstance(processingUnitInstance);
+
+        processingUnitInstances.addInstance(processingUnitInstance);
+    }
+
     private InternalMachine processMachineOnServiceAddition(TransportDetails transportDetails,
                                                             InternalTransport transport, OperatingSystem operatingSystem,
-                                                            VirtualMachine virtualMachine, InternalMachineAware ... machineAwares) {
+                                                            VirtualMachine virtualMachine, InternalMachineAware... machineAwares) {
         InternalMachine machine = (InternalMachine) machines.getMachineByHost(transportDetails.getLocalHostAddress());
         if (machine == null) {
             machine = new DefaultMachine(transportDetails.getLocalHostAddress(), transportDetails.getLocalHostAddress());
@@ -315,7 +347,7 @@ public class DefaultAdmin implements InternalAdmin {
                 try {
                     PUsDetails pusDetails = ((InternalGridServiceManager) gsm).getGSM().getPUsDetails();
                     for (PUDetails detail : pusDetails.getDetails()) {
-                        Holder holder = holders.get(detail.getName()); 
+                        Holder holder = holders.get(detail.getName());
                         if (holder == null) {
                             holder = new Holder();
                             holder.name = detail.getName();
@@ -389,6 +421,14 @@ public class DefaultAdmin implements InternalAdmin {
                         processingUnit.addBackupGridServiceManager(backupGSM);
                     }
                     processingUnits.addProcessingUnit(processingUnit);
+                }
+            }
+
+            // Now, process any orphaned processing unit instances
+            for (ProcessingUnitInstance orphaned : processingUnitInstances.getOrphaned()) {
+                InternalProcessingUnit processingUnit = (InternalProcessingUnit) processingUnits.getProcessingUnit(orphaned.getUID());
+                if (processingUnit != null) {
+                    processAdditionProcessingUnitInstance(processingUnit, (InternalProcessingUnitInstance) orphaned);
                 }
             }
         }

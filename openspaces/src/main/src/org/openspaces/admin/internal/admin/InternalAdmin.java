@@ -7,6 +7,7 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.lus.InternalLookupService;
+import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 
 /**
  * @author kimchy
@@ -24,4 +25,8 @@ public interface InternalAdmin extends Admin {
     void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails);
 
     void removeGridServiceContainer(String uid);
+
+    void addProcessingUnitInstance(InternalProcessingUnitInstance processingUnitInstance);
+
+    void removeProcessingUnitInstance(String uid);
 }

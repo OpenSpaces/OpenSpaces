@@ -7,6 +7,7 @@ import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
 
 /**
  * @author kimchy
@@ -38,6 +39,9 @@ public class TestSampler {
                     }
                     for (GridServiceManager backupGSM : processingUnit.getBackupGridServiceManagers()) {
                         System.out.println("   -> Backup GSM: " + backupGSM.getUID());
+                    }
+                    for (ProcessingUnitInstance processingUnitInstance : processingUnit) {
+                        System.out.println("   [" + processingUnitInstance.getClusterInfo() + "]");
                     }
                 }
                 System.out.println("*********************************************************************");

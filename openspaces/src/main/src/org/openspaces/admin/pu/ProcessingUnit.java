@@ -5,7 +5,7 @@ import org.openspaces.admin.gsm.GridServiceManager;
 /**
  * @author kimchy
  */
-public interface ProcessingUnit {
+public interface ProcessingUnit extends Iterable<ProcessingUnitInstance> {
 
     String getName();
 
@@ -25,4 +25,6 @@ public interface ProcessingUnit {
     GridServiceManager[] getBackupGridServiceManagers();
 
     GridServiceManager getBackupGridServiceManager(String gridServiceManagerUID);
+
+    ProcessingUnitInstance[] getProcessingUnitInstances();
 }
