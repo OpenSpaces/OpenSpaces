@@ -26,5 +26,5 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance> {
 
     GridServiceManager getBackupGridServiceManager(String gridServiceManagerUID);
 
-    ProcessingUnitInstance[] getProcessingUnitInstances();
+    ProcessingUnitInstance[] getInstances();
 }

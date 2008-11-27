@@ -114,7 +114,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         return processingUnitInstances.values().iterator();
     }
 
-    public ProcessingUnitInstance[] getProcessingUnitInstances() {
+    public ProcessingUnitInstance[] getInstances() {
         return processingUnitInstances.values().toArray(new ProcessingUnitInstance[0]);
     }
 

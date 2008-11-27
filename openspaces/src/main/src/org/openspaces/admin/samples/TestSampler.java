@@ -8,6 +8,8 @@ import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.space.Space;
+import org.openspaces.admin.space.SpaceInstance;
 
 /**
  * @author kimchy
@@ -45,6 +47,12 @@ public class TestSampler {
                     }
                     for (ProcessingUnitInstance processingUnitInstance : processingUnit) {
                         System.out.println("   [" + processingUnitInstance.getClusterInfo() + "] on GSC [" + processingUnitInstance.getGridServiceContainer().getUID() + "]");
+                    }
+                }
+                for (Space space : admin.getSpaces()) {
+                    System.out.println("Space [" + space.getUID() + "]");
+                    for (SpaceInstance spaceInstance : space) {
+                        System.out.println("   -> INSTANCE [" + spaceInstance.getUID() + "]");
                     }
                 }
                 System.out.println("*********************************************************************");

@@ -8,6 +8,7 @@ import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.lus.InternalLookupService;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
+import org.openspaces.admin.internal.space.InternalSpaceInstance;
 
 /**
  * @author kimchy
@@ -29,4 +30,8 @@ public interface InternalAdmin extends Admin {
     void addProcessingUnitInstance(InternalProcessingUnitInstance processingUnitInstance);
 
     void removeProcessingUnitInstance(String uid);
+
+    void addSpaceInstance(InternalSpaceInstance spaceInstance);
+
+    void removeSpaceInstance(String uid);
 }

@@ -5,6 +5,7 @@ import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.machine.Machines;
 import org.openspaces.admin.pu.ProcessingUnits;
+import org.openspaces.admin.space.Spaces;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
 
@@ -32,4 +33,6 @@ public interface Admin {
     VirtualMachines getVirtualMachines();
 
     ProcessingUnits getProcessingUnits();
+
+    Spaces getSpaces();
 }

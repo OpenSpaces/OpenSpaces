@@ -36,6 +36,11 @@ import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
 import org.openspaces.admin.internal.pu.InternalProcessingUnits;
+import org.openspaces.admin.internal.space.DefaultSpace;
+import org.openspaces.admin.internal.space.DefaultSpaces;
+import org.openspaces.admin.internal.space.InternalSpace;
+import org.openspaces.admin.internal.space.InternalSpaceInstance;
+import org.openspaces.admin.internal.space.InternalSpaces;
 import org.openspaces.admin.internal.transport.DefaultTransport;
 import org.openspaces.admin.internal.transport.DefaultTransports;
 import org.openspaces.admin.internal.transport.InternalTransport;
@@ -52,6 +57,7 @@ import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnits;
+import org.openspaces.admin.space.Spaces;
 import org.openspaces.admin.transport.TransportDetails;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachine;
@@ -90,6 +96,8 @@ public class DefaultAdmin implements InternalAdmin {
     private final InternalProcessingUnits processingUnits = new DefaultProcessingUnits();
 
     private final InternalProcessingUnitInstances processingUnitInstances = new DefaultProcessingUnitInstances();
+
+    private final InternalSpaces spaces = new DefaultSpaces();
 
     private volatile long scheduledProcessingUnitMonitorInterval = 1000; // default to one second 
 
@@ -159,6 +167,10 @@ public class DefaultAdmin implements InternalAdmin {
 
     public ProcessingUnits getProcessingUnits() {
         return this.processingUnits;
+    }
+
+    public Spaces getSpaces() {
+        return this.spaces;
     }
 
     public synchronized void addLookupService(InternalLookupService lookupService,
@@ -251,6 +263,29 @@ public class DefaultAdmin implements InternalAdmin {
         if (processingUnitInstance != null) {
             ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
             ((InternalGridServiceContainer) processingUnitInstance.getGridServiceContainer()).removeProcessingUnitInstance(uid);
+        }
+    }
+
+    public synchronized void addSpaceInstance(InternalSpaceInstance spaceInstance) {
+        InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
+        if (space == null) {
+            space = new DefaultSpace(spaceInstance.getSpaceName(), spaceInstance.getSpaceName());
+            spaces.addSpace(space);
+        }
+        spaces.addSpaceInstance(spaceInstance);
+        space.addInstance(spaceInstance);
+        spaceInstance.setSpace(space);
+    }
+
+    public synchronized void removeSpaceInstance(String uid) {
+        InternalSpaceInstance spaceInstance = (InternalSpaceInstance) spaces.removeSpaceInstance(uid);
+        if (spaceInstance != null) {
+            InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
+            space.removeInstance(uid);
+            if (space.size() == 0) {
+                // no more instnaces, remove it completely
+                spaces.removeSpace(space.getUID());
+            }
         }
     }
 

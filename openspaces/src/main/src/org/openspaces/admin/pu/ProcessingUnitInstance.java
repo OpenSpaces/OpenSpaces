@@ -10,6 +10,10 @@ public interface ProcessingUnitInstance {
 
     String getUID();
 
+    int getInstanceId();
+
+    int getBackupId();
+
     ProcessingUnit getProcessingUnit();
 
     ClusterInfo getClusterInfo();

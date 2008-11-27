@@ -35,6 +35,17 @@ public class DefaultProcessingUnitInstance implements InternalProcessingUnitInst
         return this.uid;
     }
 
+    public int getInstanceId() {
+        return puDetails.getClusterInfo().getInstanceId();
+    }
+
+    public int getBackupId() {
+        if (puDetails.getClusterInfo().getBackupId() == null) {
+            return 0;
+        }
+        return puDetails.getClusterInfo().getBackupId();
+    }
+
     public ServiceID getServiceID() {
         return this.serviceID;
     }

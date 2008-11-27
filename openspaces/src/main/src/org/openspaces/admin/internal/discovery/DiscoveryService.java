@@ -5,10 +5,14 @@ import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.operatingsystem.OSDetails;
+import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
+import com.j_spaces.core.admin.SpaceConfig;
 import com.j_spaces.core.service.ServiceConfigLoader;
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.core.discovery.LookupLocator;
+import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceRegistrar;
 import net.jini.core.lookup.ServiceTemplate;
 import net.jini.discovery.DiscoveryEvent;
@@ -30,6 +34,8 @@ import org.openspaces.admin.internal.lus.DefaultLookupService;
 import org.openspaces.admin.internal.lus.InternalLookupService;
 import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstance;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
+import org.openspaces.admin.internal.space.DefaultSpaceInstance;
+import org.openspaces.admin.internal.space.InternalSpaceInstance;
 import org.openspaces.pu.container.servicegrid.PUDetails;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
 
@@ -125,51 +131,62 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
     public void serviceAdded(ServiceDiscoveryEvent event) {
         Object service = event.getPostEventServiceItem().service;
+        ServiceID serviceID = event.getPostEventServiceItem().serviceID;
         if (service instanceof GSM) {
             try {
-                InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(event.getPostEventServiceItem().serviceID, (GSM) service, admin);
+                InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, (GSM) service, admin);
                 // get the details here, on the thread pool
                 NIODetails nioDetails = gridServiceManager.getNIODetails();
                 OSDetails osDetails = gridServiceManager.getOSDetails();
                 JVMDetails jvmDetails = gridServiceManager.getJVMDetails();
-                // TODO register a listener for deployment events
-                // TODO get the currently deployed processing unit
-                // TODO GSMs needs to be pinged periodically and if the ping fails for three times, simply remove it (that is because they usually start LUS as well, so we won't get service removed event)
                 admin.addGridServiceManager(gridServiceManager, nioDetails, osDetails, jvmDetails);
             } catch (Exception e) {
-                logger.warn("Failed to add GSM with uid [" + event.getPostEventServiceItem().serviceID + "]", e);
+                logger.warn("Failed to add GSM with uid [" + serviceID + "]", e);
             }
         } else if (service instanceof GSC) {
             try {
-                InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(event.getPostEventServiceItem().serviceID, (GSC) service, admin);
+                InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(serviceID, (GSC) service, admin);
                 // get the details here, on the thread pool
                 NIODetails nioDetails = gridServiceContainer.getNIODetails();
                 OSDetails osDetails = gridServiceContainer.getOSDetails();
                 JVMDetails jvmDetails = gridServiceContainer.getJVMDetails();
                 admin.addGridServiceContainer(gridServiceContainer, nioDetails, osDetails, jvmDetails);
             } catch (Exception e) {
-                logger.warn("Failed to add GSC with uid [" + event.getPostEventServiceItem().serviceID + "]", e);
+                logger.warn("Failed to add GSC with uid [" + serviceID + "]", e);
             }
         } else if (service instanceof PUServiceBean) {
             try {
                 PUServiceBean puServiceBean = (PUServiceBean) service;
                 PUDetails puDetails = puServiceBean.getPUDetails();
-                InternalProcessingUnitInstance processingUnitInstance = new DefaultProcessingUnitInstance(event.getPostEventServiceItem().serviceID, puDetails, puServiceBean);
+                InternalProcessingUnitInstance processingUnitInstance = new DefaultProcessingUnitInstance(serviceID, puDetails, puServiceBean);
                 admin.addProcessingUnitInstance(processingUnitInstance);
             } catch (Exception e) {
-                logger.warn("Failed to add Processing Unit with uid [" + event.getPostEventServiceItem().serviceID + "]", e);
+                logger.warn("Failed to add Processing Unit with uid [" + serviceID + "]", e);
+            }
+        } else if (service instanceof IJSpace) {
+            try {
+                IJSpace ijspace = (IJSpace) service;
+                IInternalRemoteJSpaceAdmin spaceAdmin = (IInternalRemoteJSpaceAdmin) ijspace.getAdmin();
+                SpaceConfig spaceConfig = spaceAdmin.getConfig();
+                InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(serviceID, ijspace, spaceAdmin, spaceConfig);
+                admin.addSpaceInstance(spaceInstance);
+            } catch (Exception e) {
+                logger.warn("Failed to add Space with uid [" + serviceID + "]", e);
             }
         }
     }
 
     public void serviceRemoved(ServiceDiscoveryEvent event) {
         Object service = event.getPreEventServiceItem().service;
+        ServiceID serviceID = event.getPreEventServiceItem().serviceID;
         if (service instanceof GSM) {
-            admin.removeGridServiceManager(event.getPreEventServiceItem().serviceID.toString());
+            admin.removeGridServiceManager(serviceID.toString());
         } else if (service instanceof GSC) {
-            admin.removeGridServiceContainer(event.getPreEventServiceItem().serviceID.toString());
+            admin.removeGridServiceContainer(serviceID.toString());
         } else if (service instanceof PUServiceBean) {
-            admin.removeProcessingUnitInstance(event.getPreEventServiceItem().serviceID.toString());
+            admin.removeProcessingUnitInstance(serviceID.toString());
+        } else if (service instanceof IJSpace) {
+            admin.removeSpaceInstance(serviceID.toString());
         }
     }
 
