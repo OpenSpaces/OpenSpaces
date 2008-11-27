@@ -46,10 +46,13 @@ public class JeeProcessingUnitServiceDetails implements ProcessingUnitServiceDet
 
     private String type;
 
+    private JeeType jeeType;
+
     public JeeProcessingUnitServiceDetails() {
     }
 
-    public JeeProcessingUnitServiceDetails(String id, String host, int port, int sslPort, String contextPath, boolean shared, String type) {
+    public JeeProcessingUnitServiceDetails(String id, String host, int port, int sslPort, String contextPath, boolean shared,
+                                           String type, JeeType jeeType) {
         this.id = id;
         this.host = host;
         this.port = port;
@@ -57,6 +60,7 @@ public class JeeProcessingUnitServiceDetails implements ProcessingUnitServiceDet
         this.contextPath = contextPath;
         this.shared = shared;
         this.type = type;
+        this.jeeType = jeeType;
     }
 
     public String getId() {
@@ -128,6 +132,10 @@ public class JeeProcessingUnitServiceDetails implements ProcessingUnitServiceDet
         return type;
     }
 
+    public JeeType getJeeType() {
+        return jeeType;
+    }
+
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeUTF(host);
         out.writeInt(port);
@@ -135,6 +143,7 @@ public class JeeProcessingUnitServiceDetails implements ProcessingUnitServiceDet
         out.writeUTF(contextPath);
         out.writeBoolean(shared);
         out.writeUTF(type);
+        out.writeObject(jeeType);
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
@@ -144,5 +153,6 @@ public class JeeProcessingUnitServiceDetails implements ProcessingUnitServiceDet
         contextPath = in.readUTF();
         shared = in.readBoolean();
         type = in.readUTF();
+        jeeType = (JeeType) in.readObject();
     }
 }

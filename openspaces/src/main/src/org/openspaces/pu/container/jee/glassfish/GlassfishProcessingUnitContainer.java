@@ -22,6 +22,7 @@ import org.glassfish.embed.Application;
 import org.jini.rio.boot.BootUtil;
 import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.jee.JeeProcessingUnitServiceDetails;
+import org.openspaces.pu.container.jee.JeeType;
 import org.openspaces.pu.service.ProcessingUnitServiceDetails;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -83,7 +84,8 @@ public class GlassfishProcessingUnitContainer implements org.openspaces.pu.conta
                 -1,
                 webappConfiguration.getContextPath(),
                 glassfishHolder.isSingleInstance(),
-                "glassfish");
+                "glassfish",
+                JeeType.GLASSFISH);
         return new ProcessingUnitServiceDetails[]{details};
     }
 

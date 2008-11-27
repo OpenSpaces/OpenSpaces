@@ -23,6 +23,7 @@ import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.jee.JeeProcessingUnitServiceDetails;
+import org.openspaces.pu.container.jee.JeeType;
 import org.openspaces.pu.service.ProcessingUnitServiceDetails;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -88,7 +89,8 @@ public class JettyProcessingUnitContainer implements org.openspaces.pu.container
                 jettyHolder.getServer().getConnectors()[0].getConfidentialPort(),
                 webAppContext.getContextPath(),
                 jettyHolder.isSingleInstance(),
-                "jetty");
+                "jetty",
+                JeeType.JETTY);
         return new ProcessingUnitServiceDetails[] {details};
     }
 
