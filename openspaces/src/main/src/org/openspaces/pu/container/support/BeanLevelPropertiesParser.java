@@ -50,9 +50,9 @@ import java.util.StringTokenizer;
  */
 public abstract class BeanLevelPropertiesParser {
 
-    public static String EMBEDDED_PROPERTIES_PREFIX = "embed://";
+    final public static String EMBEDDED_PROPERTIES_PREFIX = "embed://";
 
-    public static String DEFAULT_CONTEXT_PROPERTIES_LOCATION = "META-INF/spring/pu.properties";
+    final public static String DEFAULT_CONTEXT_PROPERTIES_LOCATION = "META-INF/spring/pu.properties";
 
     public static BeanLevelProperties parse(CommandLineParser.Parameter[] params) throws IllegalArgumentException {
         return parse(new BeanLevelProperties(), params);
@@ -96,7 +96,7 @@ public abstract class BeanLevelPropertiesParser {
                 StringTokenizer tokenizer = new StringTokenizer(properties, ";");
                 while (tokenizer.hasMoreTokens()) {
                     String property = tokenizer.nextToken();
-                    int equalsIndex = property.indexOf("=");
+                    int equalsIndex = property.indexOf('=');
                     if (equalsIndex == -1) {
                         props.setProperty(property, "");
                     } else {
@@ -106,6 +106,7 @@ public abstract class BeanLevelPropertiesParser {
             } else {
                 Resource resource = new DefaultResourceLoader() {
                     // override the default load from the classpath to load from the file system
+                    @Override
                     protected Resource getResourceByPath(String path) {
                         return new FileSystemResource(path);
                     }
