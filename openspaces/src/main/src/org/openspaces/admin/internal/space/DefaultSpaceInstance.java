@@ -15,6 +15,7 @@ import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.space.Space;
+import org.openspaces.admin.space.SpacePartition;
 
 import java.rmi.RemoteException;
 
@@ -44,6 +45,8 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     private final int backupId;
 
     private volatile Space space;
+
+    private volatile SpacePartition spacePartition;
 
     public DefaultSpaceInstance(ServiceID serviceID, IJSpace ijSpace, IInternalRemoteJSpaceAdmin spaceAdmin,
                                 SpaceConfig spaceConfig, InternalAdmin admin) {
@@ -128,6 +131,14 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     public void setSpace(Space space) {
         this.space = space;
+    }
+
+    public void setPartition(SpacePartition spacePartition) {
+        this.spacePartition = spacePartition;
+    }
+
+    public SpacePartition getPartition() {
+        return this.spacePartition;
     }
 
     public NIODetails getNIODetails() throws RemoteException {

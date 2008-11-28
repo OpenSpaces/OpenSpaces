@@ -10,6 +10,7 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.space.SpacePartition;
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.pu.service.ProcessingUnitServiceDetails;
 
@@ -75,8 +76,15 @@ public class TestSampler {
                 for (Space space : admin.getSpaces()) {
                     System.out.println("Space [" + space.getUID() + "] numberOfInstances [" + space.getNumberOfInstances() + "] numberOfbackups [" + space.getNumberOfBackups() + "]");
                     for (SpaceInstance spaceInstance : space) {
-                        System.out.println("   -> INSTANCE [" + spaceInstance.getUID() + "] instanceId [" + spaceInstance.getInstanceId() + "] backupId [" + spaceInstance.getBackupId() + "]");
+                        System.out.println("   -> INSTANCE [" + spaceInstance.getUID() + "] instanceId [" + spaceInstance.getInstanceId() +
+                                "] backupId [" + spaceInstance.getBackupId() + "] Partiton [" + spaceInstance.getPartition().getPartitiondId() + "]");
                         System.out.println("         -> Host: " + spaceInstance.getMachine().getHost());
+                    }
+                    for (SpacePartition spacePartition : space.getPartitions()) {
+                        System.out.println("   -> Partition [" + spacePartition.getPartitiondId() + "]");
+                        for (SpaceInstance spaceInstance : spacePartition) {
+                            System.out.println("      -> INSTANCE [" + spaceInstance.getUID() + "]");
+                        }
                     }
                 }
                 System.out.println("*********************************************************************");

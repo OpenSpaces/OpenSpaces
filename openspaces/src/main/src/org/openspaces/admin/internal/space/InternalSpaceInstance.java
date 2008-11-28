@@ -7,6 +7,7 @@ import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.internal.support.InternalGridComponent;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.space.SpacePartition;
 
 /**
  * @author kimchy
@@ -22,6 +23,8 @@ public interface InternalSpaceInstance extends SpaceInstance, InternalGridCompon
     String getSpaceName();
 
     void setSpace(Space space);
+
+    void setPartition(SpacePartition spacePartition);
 
     SpaceConfig getSpaceConfig();
 

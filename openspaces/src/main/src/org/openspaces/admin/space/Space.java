@@ -15,6 +15,10 @@ public interface Space extends Iterable<SpaceInstance> {
 
     SpaceInstance[] getInstnaces();
 
+    SpacePartition[] getPartitions();
+
+    SpacePartition getPartition(int partitionId);
+
     int size();
 }
 
