@@ -34,17 +34,19 @@ public class DefaultSpace implements InternalSpace {
     }
 
     public int getNumberOfInstances() {
-        for (SpaceInstance spaceInstance : spaceInstances.values()) {
-            return ((InternalSpaceInstance) spaceInstance).getNumberOfInstances();
-        }
-        return -1;
+        return doWithInstance(new InstanceCallback<Integer>() {
+            public Integer doWithinstance(InternalSpaceInstance spaceInstance) {
+                return spaceInstance.getNumberOfInstances();
+            }
+        }, -1);
     }
 
     public int getNumberOfBackups() {
-        for (SpaceInstance spaceInstance : spaceInstances.values()) {
-            return ((InternalSpaceInstance) spaceInstance).getNumberOfBackups();
-        }
-        return -1;
+        return doWithInstance(new InstanceCallback<Integer>() {
+            public Integer doWithinstance(InternalSpaceInstance spaceInstance) {
+                return spaceInstance.getNumberOfBackups();
+            }
+        }, -1);
     }
 
     public SpaceInstance[] getInstnaces() {
@@ -86,5 +88,16 @@ public class DefaultSpace implements InternalSpace {
 
     public int size() {
         return spaceInstances.size();
+    }
+
+    private <T> T doWithInstance(InstanceCallback<T> callback, T naValue) {
+        for (SpaceInstance spaceInstance : spaceInstances.values()) {
+            return callback.doWithinstance((InternalSpaceInstance) spaceInstance);
+        }
+        return naValue;
+    }
+
+    private static interface InstanceCallback<T> {
+        T doWithinstance(InternalSpaceInstance spaceInstance);
     }
 }
