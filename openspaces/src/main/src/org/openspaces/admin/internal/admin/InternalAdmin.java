@@ -15,6 +15,10 @@ import org.openspaces.admin.internal.space.InternalSpaceInstance;
  */
 public interface InternalAdmin extends Admin {
 
+    void pushEvent(Object listener, Runnable notifier);
+
+    void raiseEvent(Object listener, Runnable notifier);
+
     void addLookupService(InternalLookupService lookupService, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails);
 
     void removeLookupService(String uid);

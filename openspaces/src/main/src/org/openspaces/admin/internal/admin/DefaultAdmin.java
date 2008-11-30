@@ -5,6 +5,8 @@ import com.gigaspaces.grid.gsm.PUsDetails;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.operatingsystem.OSDetails;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagers;
@@ -64,8 +66,11 @@ import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.admin.vm.VirtualMachines;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -76,13 +81,15 @@ import java.util.concurrent.TimeUnit;
  */
 public class DefaultAdmin implements InternalAdmin {
 
+    private static final Log logger = LogFactory.getLog(DefaultAdmin.class);
+
     private ScheduledThreadPoolExecutor scheduledExecutorService;
 
     private final DiscoveryService discoveryService;
 
     private final InternalLookupServices lookupServices = new DefaultLookupServices();
 
-    private final InternalMachines machines = new DefaultMachines();
+    private final InternalMachines machines = new DefaultMachines(this);
 
     private final InternalGridServiceManagers gridServiceManagers = new DefaultGridServiceManagers();
 
@@ -94,11 +101,17 @@ public class DefaultAdmin implements InternalAdmin {
 
     private final InternalVirtualMachines virtualMachines = new DefaultVirtualMachines();
 
-    private final InternalProcessingUnits processingUnits = new DefaultProcessingUnits();
+    private final InternalProcessingUnits processingUnits = new DefaultProcessingUnits(this);
 
     private final InternalProcessingUnitInstances processingUnitInstances = new DefaultProcessingUnitInstances();
 
     private final InternalSpaces spaces = new DefaultSpaces();
+
+    private ExecutorService[] eventsExecutorServices;
+
+    private int eventsNumberOfThreads = 10;
+
+    private List<Runnable>[] eventsQueue;
 
     private volatile long scheduledProcessingUnitMonitorInterval = 1000; // default to one second 
 
@@ -120,6 +133,13 @@ public class DefaultAdmin implements InternalAdmin {
 
     // should be called once after construction
     public void begin() {
+        eventsExecutorServices = new ExecutorService[eventsNumberOfThreads];
+        eventsQueue = new List[eventsNumberOfThreads];
+        for (int i = 0; i < eventsNumberOfThreads; i++) {
+            eventsExecutorServices[i] = Executors.newFixedThreadPool(1);
+            eventsQueue[i] = new ArrayList<Runnable>();
+        }
+
         discoveryService.start();
         this.scheduledExecutorService = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(5);
         scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(
@@ -148,6 +168,9 @@ public class DefaultAdmin implements InternalAdmin {
         closed = true;
         discoveryService.stop();
         scheduledExecutorService.shutdownNow();
+        for (ExecutorService executorService : eventsExecutorServices) {
+            executorService.shutdownNow();
+        }
     }
 
     public LookupServices getLookupServices() {
@@ -182,6 +205,23 @@ public class DefaultAdmin implements InternalAdmin {
         return this.spaces;
     }
 
+    public synchronized void pushEvent(Object listener, Runnable notifier) {
+        eventsQueue[Math.abs(listener.hashCode()) % eventsExecutorServices.length].add(new LoggerRunnable(notifier));
+    }
+
+    public synchronized void flushEvents() {
+        for (int i = 0; i < eventsNumberOfThreads; i++) {
+            for (Runnable notifier : eventsQueue[i]) {
+                eventsExecutorServices[i].submit(notifier);
+            }
+            eventsQueue[i].clear();
+        }
+    }
+
+    public synchronized void raiseEvent(Object listener, Runnable notifier) {
+        eventsExecutorServices[Math.abs(listener.hashCode()) % eventsExecutorServices.length].submit(new LoggerRunnable(notifier));
+    }
+
     public synchronized void addLookupService(InternalLookupService lookupService,
                                               NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
         InternalTransport transport = processTransportOnServiceAddition(lookupService, nioDetails);
@@ -195,6 +235,8 @@ public class DefaultAdmin implements InternalAdmin {
         ((InternalLookupServices) machine.getLookupServices()).addLookupService(lookupService);
 
         lookupServices.addLookupService(lookupService);
+
+        flushEvents();
     }
 
     public synchronized void removeLookupService(String uid) {
@@ -205,6 +247,8 @@ public class DefaultAdmin implements InternalAdmin {
             processVirtualMachineOnServiceRemoval(lookupService, lookupService);
             ((InternalLookupServices) ((InternalMachine) lookupService.getMachine()).getLookupServices()).removeLookupService(uid);
         }
+
+        flushEvents();
     }
 
     public synchronized void addGridServiceManager(InternalGridServiceManager gridServiceManager,
@@ -221,6 +265,8 @@ public class DefaultAdmin implements InternalAdmin {
         ((InternalGridServiceManagers) ((InternalVirtualMachine) virtualMachine).getGridServiceManagers()).addGridServiceManager(gridServiceManager);
 
         gridServiceManagers.addGridServiceManager(gridServiceManager);
+
+        flushEvents();
     }
 
     public synchronized void removeGridServiceManager(String uid) {
@@ -231,6 +277,8 @@ public class DefaultAdmin implements InternalAdmin {
             processVirtualMachineOnServiceRemoval(gridServiceManager, gridServiceManager);
             ((InternalGridServiceManagers) ((InternalMachine) gridServiceManager.getMachine()).getGridServiceManagers()).removeGridServiceManager(uid);
         }
+
+        flushEvents();
     }
 
     public synchronized void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer,
@@ -247,6 +295,8 @@ public class DefaultAdmin implements InternalAdmin {
         ((InternalGridServiceContainers) ((InternalVirtualMachine) virtualMachine).getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
 
         gridServiceContainers.addGridServiceContainer(gridServiceContainer);
+
+        flushEvents();
     }
 
     public synchronized void removeGridServiceContainer(String uid) {
@@ -257,6 +307,8 @@ public class DefaultAdmin implements InternalAdmin {
             processVirtualMachineOnServiceRemoval(gridServiceContainer, gridServiceContainer);
             ((InternalGridServiceContainers) ((InternalMachine) gridServiceContainer.getMachine()).getGridServiceContainers()).removeGridServiceContainer(uid);
         }
+
+        flushEvents();
     }
 
     public synchronized void addProcessingUnitInstance(InternalProcessingUnitInstance processingUnitInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
@@ -274,6 +326,8 @@ public class DefaultAdmin implements InternalAdmin {
             return;
         }
         processProcessingUnitInstanceAddition(processingUnit, processingUnitInstance);
+
+        flushEvents();
     }
 
     public synchronized void removeProcessingUnitInstance(String uid) {
@@ -285,6 +339,8 @@ public class DefaultAdmin implements InternalAdmin {
             ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
             ((InternalGridServiceContainer) processingUnitInstance.getGridServiceContainer()).removeProcessingUnitInstance(uid);
         }
+
+        flushEvents();
     }
 
     public synchronized void addSpaceInstance(InternalSpaceInstance spaceInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
@@ -314,6 +370,8 @@ public class DefaultAdmin implements InternalAdmin {
 
         machine.addSpaceInstance(spaceInstance);
         ((InternalVirtualMachine) virtualMachine).addSpaceInstance(spaceInstance);
+
+        flushEvents();
     }
 
     public synchronized void removeSpaceInstance(String uid) {
@@ -333,6 +391,8 @@ public class DefaultAdmin implements InternalAdmin {
                 spaces.removeSpace(space.getUID());
             }
         }
+
+        flushEvents();
     }
 
     private synchronized void processProcessingUnitInstanceAddition(InternalProcessingUnit processingUnit, InternalProcessingUnitInstance processingUnitInstance) {
@@ -478,11 +538,10 @@ public class DefaultAdmin implements InternalAdmin {
                 boolean newProcessingUnit = false;
                 InternalProcessingUnit processingUnit = (InternalProcessingUnit) processingUnits.getProcessingUnit(holder.name);
                 if (processingUnit == null) {
-                    processingUnit = new DefaultProcessingUnit(details);
+                    processingUnit = new DefaultProcessingUnit(DefaultAdmin.this, processingUnits, details);
                     newProcessingUnit = true;
                 } else {
-                    boolean changed = processingUnit.setStatus(details.getStatus());
-                    // changed for future events
+                    processingUnit.setStatus(details.getStatus());
                 }
                 if (!newProcessingUnit) {
                     // handle managing GSM
@@ -514,20 +573,24 @@ public class DefaultAdmin implements InternalAdmin {
                         }
                     }
                 } else { // we have a new processing unit
+                    processingUnits.addProcessingUnit(processingUnit);
                     processingUnit.setManagingGridServiceManager(holder.managingGSM);
                     for (GridServiceManager backupGSM : holder.backupGSMs.values()) {
                         processingUnit.addBackupGridServiceManager(backupGSM);
                     }
-                    processingUnits.addProcessingUnit(processingUnit);
                 }
             }
 
             // Now, process any orphaned processing unit instances
-            for (ProcessingUnitInstance orphaned : processingUnitInstances.getOrphaned()) {
-                InternalProcessingUnit processingUnit = (InternalProcessingUnit) processingUnits.getProcessingUnit(orphaned.getUID());
-                if (processingUnit != null) {
-                    processProcessingUnitInstanceAddition(processingUnit, (InternalProcessingUnitInstance) orphaned);
+            synchronized (DefaultAdmin.this) {
+                for (ProcessingUnitInstance orphaned : processingUnitInstances.getOrphaned()) {
+                    InternalProcessingUnit processingUnit = (InternalProcessingUnit) processingUnits.getProcessingUnit(orphaned.getName());
+                    if (processingUnit != null) {
+                        processProcessingUnitInstanceAddition(processingUnit, (InternalProcessingUnitInstance) orphaned);
+                    }
                 }
+
+                flushEvents();
             }
         }
 
@@ -542,6 +605,22 @@ public class DefaultAdmin implements InternalAdmin {
             GridServiceManager managingGSM;
 
             Map<String, GridServiceManager> backupGSMs = new HashMap<String, GridServiceManager>();
+        }
+    }
+
+    private static class LoggerRunnable implements Runnable {
+        private final Runnable runnable;
+
+        private LoggerRunnable(Runnable runnable) {
+            this.runnable = runnable;
+        }
+
+        public void run() {
+            try {
+                runnable.run();
+            } catch (Exception e) {
+                logger.warn("Failed to executed event listener", e);
+            }
         }
     }
 }

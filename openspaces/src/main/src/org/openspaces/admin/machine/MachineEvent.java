@@ -1,13 +1,11 @@
-package org.openspaces.admin.events;
-
-import org.openspaces.admin.machine.Machine;
+package org.openspaces.admin.machine;
 
 /**
  * @author kimchy
  */
 public class MachineEvent {
 
-    private Machine machine;
+    private final Machine machine;
 
     public MachineEvent(Machine machine) {
         this.machine = machine;

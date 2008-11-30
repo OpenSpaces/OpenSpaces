@@ -127,6 +127,10 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         return this.processingUnit;
     }
 
+    public String getName() {
+        return puDetails.getClusterInfo().getName();
+    }
+
     public void setProcessingUnit(ProcessingUnit processingUnit) {
         this.processingUnit = processingUnit;
     }
