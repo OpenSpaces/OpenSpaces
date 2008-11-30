@@ -3,7 +3,8 @@ package org.openspaces.admin.samples;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.gsm.GridServiceManager;
-import org.openspaces.admin.machine.MachineEvent;
+import org.openspaces.admin.gsm.GridServiceManagerEventListener;
+import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.machine.MachineEventListener;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -13,23 +14,24 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 /**
  * @author kimchy
  */
-public class TestEventSampler implements MachineEventListener, ProcessingUnitEventListener {
+public class TestEventSampler implements MachineEventListener, ProcessingUnitEventListener, GridServiceManagerEventListener {
 
     public static void main(String[] args) throws InterruptedException {
         TestEventSampler eventSampler = new TestEventSampler();
         Admin admin = new AdminFactory().addGroup("kimchy").createAdmin();
         admin.getMachines().addEventListener(eventSampler);
         admin.getProcessingUnits().addEventListener(eventSampler);
+        admin.getGridServiceManagers().addEventListener(eventSampler);
 
         Thread.sleep(10000000);
     }
 
-    public void machineAdded(MachineEvent machineEvent) {
-        System.out.println("Machine Added [" + machineEvent.getMachine().getUID() + "]");
+    public void machineAdded(Machine machine) {
+        System.out.println("Machine Added [" + machine.getUID() + "]");
     }
 
-    public void machineRemoved(MachineEvent machineEvent) {
-        System.out.println("Machine Removed [" + machineEvent.getMachine().getUID() + "]");
+    public void machineRemoved(Machine machine) {
+        System.out.println("Machine Removed [" + machine.getUID() + "]");
     }
 
     public void processingUnitAdded(ProcessingUnit processingUnit) {
@@ -66,5 +68,13 @@ public class TestEventSampler implements MachineEventListener, ProcessingUnitEve
 
     public void processingUnitBackupGridServiceManagerRemoved(ProcessingUnit processingUnit, GridServiceManager gridServiceManager) {
         System.out.println("Processing Unit [" + processingUnit.getName() + "] Backup GSM Removed [" + gridServiceManager.getUID() + "]");
+    }
+
+    public void gridServiceManagerAdded(GridServiceManager gridServiceManager) {
+        System.out.println("GSM Added [" + gridServiceManager.getUID() + "]");
+    }
+
+    public void gridServiceManagerRemoved(GridServiceManager gridServiceManager) {
+        System.out.println("GSM Removed [" + gridServiceManager.getUID() + "]");
     }
 }

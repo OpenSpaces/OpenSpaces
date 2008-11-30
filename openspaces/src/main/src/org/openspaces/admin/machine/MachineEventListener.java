@@ -5,7 +5,7 @@ package org.openspaces.admin.machine;
  */
 public interface MachineEventListener {
 
-    void machineAdded(MachineEvent machineEvent);
+    void machineAdded(Machine machine);
 
-    void machineRemoved(MachineEvent machineEvent);
+    void machineRemoved(Machine machine);
 }

@@ -4,7 +4,6 @@ import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.machine.Machine;
-import org.openspaces.admin.machine.MachineEvent;
 import org.openspaces.admin.machine.MachineEventListener;
 
 import java.util.Iterator;
@@ -61,7 +60,7 @@ public class DefaultMachines implements InternalMachines {
             for (final MachineEventListener listener : listeners) {
                 admin.pushEvent(listener, new Runnable() {
                     public void run() {
-                        listener.machineAdded(new MachineEvent(machine));
+                        listener.machineAdded(machine);
                     }
                 });
             }
@@ -75,7 +74,7 @@ public class DefaultMachines implements InternalMachines {
             for (final MachineEventListener listener : listeners) {
                 admin.pushEvent(listener, new Runnable() {
                     public void run() {
-                        listener.machineRemoved(new MachineEvent(existingMachine));
+                        listener.machineRemoved(existingMachine);
                     }
                 });
             }
@@ -86,7 +85,7 @@ public class DefaultMachines implements InternalMachines {
         admin.raiseEvent(machineListener, new Runnable() {
             public void run() {
                 for (Machine machine : getMachines()) {
-                    machineListener.machineAdded(new MachineEvent(machine));
+                    machineListener.machineAdded(machine);
                 }
             }
         });

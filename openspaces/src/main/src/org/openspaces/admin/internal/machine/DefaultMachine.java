@@ -3,6 +3,7 @@ package org.openspaces.admin.internal.machine;
 import com.gigaspaces.operatingsystem.OSDetails;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
+import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainers;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainers;
 import org.openspaces.admin.internal.gsm.DefaultGridServiceManagers;
@@ -31,13 +32,15 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DefaultMachine implements InternalMachine {
 
+    private InternalAdmin admin;
+
     private String uid;
 
     private String host;
 
     private final InternalLookupServices lookupServices = new DefaultLookupServices();
 
-    private final InternalGridServiceManagers gridServiceManagers = new DefaultGridServiceManagers();
+    private final InternalGridServiceManagers gridServiceManagers;
 
     private final InternalGridServiceContainers gridServiceContainers = new DefaultGridServiceContainers();
 
@@ -51,9 +54,11 @@ public class DefaultMachine implements InternalMachine {
 
     private volatile OperatingSystem operatingSystem;
 
-    public DefaultMachine(String uid, String host) {
+    public DefaultMachine(InternalAdmin admin, String uid, String host) {
+        this.admin = admin;
         this.uid = uid;
         this.host = host;
+        this.gridServiceManagers = new DefaultGridServiceManagers(admin);
     }
 
     public String getUID() {

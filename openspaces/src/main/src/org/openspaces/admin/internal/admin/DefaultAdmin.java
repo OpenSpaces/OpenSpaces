@@ -91,7 +91,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     private final InternalMachines machines = new DefaultMachines(this);
 
-    private final InternalGridServiceManagers gridServiceManagers = new DefaultGridServiceManagers();
+    private final InternalGridServiceManagers gridServiceManagers = new DefaultGridServiceManagers(this);
 
     private final InternalGridServiceContainers gridServiceContainers = new DefaultGridServiceContainers();
 
@@ -425,7 +425,7 @@ public class DefaultAdmin implements InternalAdmin {
                                                             VirtualMachine virtualMachine, InternalMachineAware... machineAwares) {
         InternalMachine machine = (InternalMachine) machines.getMachineByHost(transportDetails.getLocalHostAddress());
         if (machine == null) {
-            machine = new DefaultMachine(transportDetails.getLocalHostAddress(), transportDetails.getLocalHostAddress());
+            machine = new DefaultMachine(this, transportDetails.getLocalHostAddress(), transportDetails.getLocalHostAddress());
             machine.setOperatingSystem(operatingSystem);
             machines.addMachine(machine);
         }
@@ -440,7 +440,7 @@ public class DefaultAdmin implements InternalAdmin {
     private InternalVirtualMachine processVirtualMachineOnServiceAddition(InternalVirtualMachineInfoProvider vmProvider, JVMDetails jvmDetails) {
         InternalVirtualMachine virtualMachine = (InternalVirtualMachine) virtualMachines.getVirtualMachineByUID(jvmDetails.getUid());
         if (virtualMachine == null) {
-            virtualMachine = new DefaultVirtualMachine(jvmDetails);
+            virtualMachine = new DefaultVirtualMachine(this, jvmDetails);
             virtualMachines.addVirtualMachine(virtualMachine);
         }
         virtualMachine.addVirtualMachineInfoProvider(vmProvider);

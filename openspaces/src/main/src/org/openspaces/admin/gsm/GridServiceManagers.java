@@ -12,4 +12,8 @@ public interface GridServiceManagers extends Iterable<GridServiceManager> {
     int size();
 
     boolean isEmpty();
+
+    void addEventListener(GridServiceManagerEventListener eventListener);
+
+    void removeEventListener(GridServiceManagerEventListener eventListener);
 }

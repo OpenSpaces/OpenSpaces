@@ -5,6 +5,7 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagers;
+import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainers;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainers;
 import org.openspaces.admin.internal.gsm.DefaultGridServiceManagers;
@@ -29,6 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DefaultVirtualMachine implements InternalVirtualMachine {
 
+    private final InternalAdmin admin;
+
     private final String uid;
 
     private final VirtualMachineDetails details;
@@ -37,7 +40,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     private volatile Machine machine;
 
-    private final InternalGridServiceManagers gridServiceManagers = new DefaultGridServiceManagers();
+    private final InternalGridServiceManagers gridServiceManagers;
 
     private final InternalGridServiceContainers gridServiceContainers = new DefaultGridServiceContainers();
 
@@ -45,9 +48,11 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     private final Map<String, SpaceInstance> spaceInstances = new ConcurrentHashMap<String, SpaceInstance>();
 
-    public DefaultVirtualMachine(JVMDetails details) {
+    public DefaultVirtualMachine(InternalAdmin admin, JVMDetails details) {
+        this.admin = admin;
         this.details = new DefaultVirtualMachineDetails(details);
         this.uid = details.getUid();
+        this.gridServiceManagers = new DefaultGridServiceManagers(admin);
     }
 
     public String getUID() {
