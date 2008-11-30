@@ -26,7 +26,9 @@ import org.openspaces.pu.service.ProcessingUnitServiceDetails;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,9 +50,13 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private volatile ProcessingUnitPartition processingUnitPartition;
 
+    private final SpaceProcessingUnitServiceDetails[] embeddedSpacesDetails;
+
     private final SpaceProcessingUnitServiceDetails[] spacesDetails;
 
     private final JeeProcessingUnitServiceDetails jeeDetails;
+
+    private final Map<String, ProcessingUnitServiceDetails[]> servicesDetailsByServiceId;
 
     private final Map<String, SpaceInstance> spaceInstances = new SizeConcurrentHashMap<String, SpaceInstance>();
 
@@ -61,20 +67,41 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         this.puDetails = puDetails;
         this.puServiceBean = puServiceBean;
 
+        ArrayList<SpaceProcessingUnitServiceDetails> embeddedSpacesEmbeddedList = new ArrayList<SpaceProcessingUnitServiceDetails>();
         ArrayList<SpaceProcessingUnitServiceDetails> spacesDetailsList = new ArrayList<SpaceProcessingUnitServiceDetails>();
         JeeProcessingUnitServiceDetails jeeDetailsX = null;
+
+        Map<String, List<ProcessingUnitServiceDetails>> servicesDetailsByServiceIdList = new HashMap<String, List<ProcessingUnitServiceDetails>>();
+
         for (ProcessingUnitServiceDetails serviceDetails : puDetails.getDetails()) {
+
+            List<ProcessingUnitServiceDetails> list = servicesDetailsByServiceIdList.get(serviceDetails.getServiceType());
+            if (list == null) {
+                list = new ArrayList<ProcessingUnitServiceDetails>();
+                servicesDetailsByServiceIdList.put(serviceDetails.getServiceType(), list);
+            }
+            list.add(serviceDetails);
+
             if (serviceDetails instanceof SpaceProcessingUnitServiceDetails) {
-                SpaceProcessingUnitServiceDetails space = (SpaceProcessingUnitServiceDetails) serviceDetails;
-                if (space.getSpaceType() == SpaceType.EMBEDDED) {
-                    spacesDetailsList.add((SpaceProcessingUnitServiceDetails) serviceDetails);
+                SpaceProcessingUnitServiceDetails spaceDetails = (SpaceProcessingUnitServiceDetails) serviceDetails;
+                spacesDetailsList.add(spaceDetails);
+                if (spaceDetails.getSpaceType() == SpaceType.EMBEDDED) {
+                    embeddedSpacesEmbeddedList.add((SpaceProcessingUnitServiceDetails) serviceDetails);
                 }
             } else if (serviceDetails instanceof JeeProcessingUnitServiceDetails) {
                 jeeDetailsX = (JeeProcessingUnitServiceDetails) serviceDetails;
             }
         }
+
         jeeDetails = jeeDetailsX;
+        embeddedSpacesDetails = embeddedSpacesEmbeddedList.toArray(new SpaceProcessingUnitServiceDetails[embeddedSpacesEmbeddedList.size()]);
         spacesDetails = spacesDetailsList.toArray(new SpaceProcessingUnitServiceDetails[spacesDetailsList.size()]);
+
+        Map<String, ProcessingUnitServiceDetails[]> servicesDetailsTemp = new HashMap<String, ProcessingUnitServiceDetails[]>();
+        for (Map.Entry<String, List<ProcessingUnitServiceDetails>> entry : servicesDetailsByServiceIdList.entrySet()) {
+            servicesDetailsTemp.put(entry.getKey(), entry.getValue().toArray(new ProcessingUnitServiceDetails[entry.getValue().size()]));
+        }
+        servicesDetailsByServiceId = servicesDetailsTemp;
     }
 
     public String getUID() {
@@ -112,7 +139,22 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         return Arrays.asList(puDetails.getDetails()).iterator();
     }
 
-    public ProcessingUnitServiceDetails[] getServiceDetails() {
+    public SpaceProcessingUnitServiceDetails[] getSpaceServiceDetails() {
+        return spacesDetails;
+    }
+
+    public SpaceProcessingUnitServiceDetails getEmbeddedSpaceServiceDetails() {
+        if (embeddedSpacesDetails.length == 0) {
+            return null;
+        }
+        return embeddedSpacesDetails[0];
+    }
+
+    public SpaceProcessingUnitServiceDetails[] getEmbeddedSpacesServiceDetails() {
+        return embeddedSpacesDetails;
+    }
+
+    public ProcessingUnitServiceDetails[] getServicesDetails() {
         return puDetails.getDetails();
     }
 
@@ -153,7 +195,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public void addSpaceInstnaceIfMatching(SpaceInstance spaceInstance) {
-        for (SpaceProcessingUnitServiceDetails spaceDetails : spacesDetails) {
+        for (SpaceProcessingUnitServiceDetails spaceDetails : embeddedSpacesDetails) {
             if (((InternalSpaceInstance) spaceInstance).getServiceID().equals(spaceDetails.getServiceID())) {
                 spaceInstances.put(spaceInstance.getUID(), spaceInstance);
             }
@@ -172,7 +214,11 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         return jeeDetails;
     }
 
-// info providers
+    public ProcessingUnitServiceDetails[] getServicesDetailsByServiceType(String serviceType) {
+        return servicesDetailsByServiceId.get(serviceType);
+    }
+
+    // info providers
 
     public NIODetails getNIODetails() throws RemoteException {
         return puServiceBean.getNIODetails();
