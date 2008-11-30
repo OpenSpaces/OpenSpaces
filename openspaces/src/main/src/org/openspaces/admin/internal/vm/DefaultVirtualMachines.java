@@ -1,17 +1,29 @@
 package org.openspaces.admin.internal.vm;
 
 import com.j_spaces.kernel.SizeConcurrentHashMap;
+import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.vm.VirtualMachine;
+import org.openspaces.admin.vm.VirtualMachineEventListener;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author kimchy
  */
 public class DefaultVirtualMachines implements InternalVirtualMachines {
 
+    private final InternalAdmin admin;
+
     private final Map<String, VirtualMachine> virtualMachinesByUID = new SizeConcurrentHashMap<String, VirtualMachine>();
+
+    private final List<VirtualMachineEventListener> eventListeners = new CopyOnWriteArrayList<VirtualMachineEventListener>();
+
+    public DefaultVirtualMachines(InternalAdmin admin) {
+        this.admin = admin;
+    }
 
     public VirtualMachine[] getVirtualMachines() {
         return virtualMachinesByUID.values().toArray(new VirtualMachine[0]);
@@ -29,11 +41,45 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
         return virtualMachinesByUID.get(uid);
     }
 
-    public void addVirtualMachine(VirtualMachine virtualMachine) {
-        virtualMachinesByUID.put(virtualMachine.getUID(), virtualMachine);
+    public void addVirtualMachine(final VirtualMachine virtualMachine) {
+        VirtualMachine existingVM = virtualMachinesByUID.put(virtualMachine.getUID(), virtualMachine);
+        if (existingVM == null) {
+            for (final VirtualMachineEventListener eventListener : eventListeners) {
+                admin.pushEvent(eventListener, new Runnable() {
+                    public void run() {
+                        eventListener.virtualMachineAdded(virtualMachine);
+                    }
+                });
+            }
+        }
     }
 
-    public void removeVirtualMachine(String uid) {
-        virtualMachinesByUID.remove(uid);
+    public InternalVirtualMachine removeVirtualMachine(String uid) {
+        final InternalVirtualMachine existingVM = (InternalVirtualMachine) virtualMachinesByUID.remove(uid);
+        if (existingVM != null) {
+            for (final VirtualMachineEventListener eventListener : eventListeners) {
+                admin.pushEvent(eventListener, new Runnable() {
+                    public void run() {
+                        eventListener.virtualMachineRemoved(existingVM);
+                    }
+                });
+            }
+        }
+        return existingVM;
+    }
+
+    public void addEventListener(final VirtualMachineEventListener eventListener) {
+        admin.raiseEvent(eventListener, new Runnable() {
+            public void run() {
+                for (VirtualMachine virtualMachine : getVirtualMachines()) {
+                    eventListener.virtualMachineAdded(virtualMachine);
+                }
+            }
+        });
+        eventListeners.add(eventListener);
+    }
+
+    public void removeEventListener(VirtualMachineEventListener eventListener) {
+        eventListeners.remove(eventListener);
     }
 }

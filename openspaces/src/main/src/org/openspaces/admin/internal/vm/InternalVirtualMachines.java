@@ -10,5 +10,5 @@ public interface InternalVirtualMachines extends VirtualMachines {
 
     void addVirtualMachine(VirtualMachine virtualMachine);
 
-    void removeVirtualMachine(String uid);
+    InternalVirtualMachine removeVirtualMachine(String uid);
 }

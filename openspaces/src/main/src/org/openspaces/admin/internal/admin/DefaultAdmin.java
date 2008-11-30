@@ -99,7 +99,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     private final InternalOperatingSystems operatingSystems = new DefaultOperatingSystems();
 
-    private final InternalVirtualMachines virtualMachines = new DefaultVirtualMachines();
+    private final InternalVirtualMachines virtualMachines = new DefaultVirtualMachines(this);
 
     private final InternalProcessingUnits processingUnits = new DefaultProcessingUnits(this);
 

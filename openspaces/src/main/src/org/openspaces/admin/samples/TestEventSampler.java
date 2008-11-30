@@ -14,12 +14,15 @@ import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitEventListener;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.vm.VirtualMachine;
+import org.openspaces.admin.vm.VirtualMachineEventListener;
 
 /**
  * @author kimchy
  */
 public class TestEventSampler implements MachineEventListener, ProcessingUnitEventListener,
-        GridServiceManagerEventListener, GridServiceContainerEventListener, LookupServiceEventListener {
+        GridServiceManagerEventListener, GridServiceContainerEventListener, LookupServiceEventListener,
+        VirtualMachineEventListener {
 
     public static void main(String[] args) throws InterruptedException {
         TestEventSampler eventSampler = new TestEventSampler();
@@ -29,6 +32,7 @@ public class TestEventSampler implements MachineEventListener, ProcessingUnitEve
         admin.getLookupServices().addEventListener(eventSampler);
         admin.getGridServiceManagers().addEventListener(eventSampler);
         admin.getGridServiceContainers().addEventListener(eventSampler);
+        admin.getVirtualMachines().addEventListener(eventSampler);
 
         Thread.sleep(10000000);
     }
@@ -99,5 +103,13 @@ public class TestEventSampler implements MachineEventListener, ProcessingUnitEve
 
     public void lookupServiceRemoved(LookupService lookupService) {
         System.out.println("LUS Removed [" + lookupService.getUID() + "]");
+    }
+
+    public void virtualMachineAdded(VirtualMachine virtualMachine) {
+        System.out.println("VM Added [" + virtualMachine.getUID() + "]");
+    }
+
+    public void virtualMachineRemoved(VirtualMachine virtualMachine) {
+        System.out.println("VM Removed [" + virtualMachine.getUID() + "]");
     }
 }
