@@ -87,7 +87,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     private final DiscoveryService discoveryService;
 
-    private final InternalLookupServices lookupServices = new DefaultLookupServices();
+    private final InternalLookupServices lookupServices = new DefaultLookupServices(this);
 
     private final InternalMachines machines = new DefaultMachines(this);
 

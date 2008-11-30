@@ -6,6 +6,8 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsc.GridServiceContainerEventListener;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagerEventListener;
+import org.openspaces.admin.lus.LookupService;
+import org.openspaces.admin.lus.LookupServiceEventListener;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.machine.MachineEventListener;
 import org.openspaces.admin.pu.DeploymentStatus;
@@ -17,13 +19,14 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
  * @author kimchy
  */
 public class TestEventSampler implements MachineEventListener, ProcessingUnitEventListener,
-        GridServiceManagerEventListener, GridServiceContainerEventListener {
+        GridServiceManagerEventListener, GridServiceContainerEventListener, LookupServiceEventListener {
 
     public static void main(String[] args) throws InterruptedException {
         TestEventSampler eventSampler = new TestEventSampler();
         Admin admin = new AdminFactory().addGroup("kimchy").createAdmin();
         admin.getMachines().addEventListener(eventSampler);
         admin.getProcessingUnits().addEventListener(eventSampler);
+        admin.getLookupServices().addEventListener(eventSampler);
         admin.getGridServiceManagers().addEventListener(eventSampler);
         admin.getGridServiceContainers().addEventListener(eventSampler);
 
@@ -88,5 +91,13 @@ public class TestEventSampler implements MachineEventListener, ProcessingUnitEve
 
     public void gridServiceContainerRemoved(GridServiceContainer gridServiceContainer) {
         System.out.println("GSC Removed [" + gridServiceContainer.getUID() + "]");
+    }
+
+    public void lookupServiceAdded(LookupService lookupService) {
+        System.out.println("LUS Added [" + lookupService.getUID() + "]");
+    }
+
+    public void lookupServiceRemoved(LookupService lookupService) {
+        System.out.println("LUS Removed [" + lookupService.getUID() + "]");
     }
 }

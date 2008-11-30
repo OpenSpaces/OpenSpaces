@@ -38,7 +38,7 @@ public class DefaultMachine implements InternalMachine {
 
     private String host;
 
-    private final InternalLookupServices lookupServices = new DefaultLookupServices();
+    private final InternalLookupServices lookupServices;
 
     private final InternalGridServiceManagers gridServiceManagers;
 
@@ -58,6 +58,7 @@ public class DefaultMachine implements InternalMachine {
         this.admin = admin;
         this.uid = uid;
         this.host = host;
+        this.lookupServices = new DefaultLookupServices(admin);
         this.gridServiceManagers = new DefaultGridServiceManagers(admin);
         this.gridServiceContainers = new DefaultGridServiceContainers(admin);
     }

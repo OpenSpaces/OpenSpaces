@@ -12,4 +12,8 @@ public interface LookupServices extends Iterable<LookupService> {
     int size();
 
     boolean isEmpty();
+
+    void addEventListener(LookupServiceEventListener eventListener);
+
+    void removeEventListener(LookupServiceEventListener eventListener);
 }
