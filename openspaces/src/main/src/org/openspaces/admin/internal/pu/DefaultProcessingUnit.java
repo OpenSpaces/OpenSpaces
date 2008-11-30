@@ -4,6 +4,7 @@ import com.gigaspaces.grid.gsm.PUDetails;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.ProcessingUnitPartition;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -28,11 +29,17 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     private final Map<String, ProcessingUnitInstance> processingUnitInstances = new ConcurrentHashMap<String, ProcessingUnitInstance>();
 
+    private final Map<Integer, ProcessingUnitPartition> processingUnitPartitions = new ConcurrentHashMap<Integer, ProcessingUnitPartition>();
+
     public DefaultProcessingUnit(PUDetails details) {
         this.name = details.getName();
         this.numberOfInstances = details.getNumberOfInstances();
         this.numberOfBackups = details.getNumberOfBackups();
         setStatus(details.getStatus());
+
+        for (int i = 0; i < numberOfInstances; i++) {
+            processingUnitPartitions.put(i, new DefaultProcessingUnitPartition(this, i));
+        }
     }
 
     public String getName() {
@@ -118,12 +125,27 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         return processingUnitInstances.values().toArray(new ProcessingUnitInstance[0]);
     }
 
+    public ProcessingUnitPartition[] getPartitions() {
+        return processingUnitPartitions.values().toArray(new ProcessingUnitPartition[0]);
+    }
+
+    public ProcessingUnitPartition getPartition(int partitionId) {
+        return processingUnitPartitions.get(partitionId);
+    }
+
     public void addProcessingUnitInstance(ProcessingUnitInstance processingUnitInstance) {
         processingUnitInstances.put(processingUnitInstance.getUID(), processingUnitInstance);
+        InternalProcessingUnitPartition partition = ((InternalProcessingUnitPartition) processingUnitPartitions.get(processingUnitInstance.getInstanceId() - 1));
+        partition.addProcessingUnitInstance(processingUnitInstance);
+        ((InternalProcessingUnitInstance) processingUnitInstance).setProcessingUnitPartition(partition);
     }
 
     public void removeProcessingUnitInstance(String uid) {
-        processingUnitInstances.remove(uid);
+        ProcessingUnitInstance processingUnitInstance = processingUnitInstances.remove(uid);
+        if (processingUnitInstance != null) {
+            InternalProcessingUnitPartition partition = ((InternalProcessingUnitPartition) processingUnitPartitions.get(processingUnitInstance.getInstanceId() - 1));
+            partition.removeProcessingUnitInstance(uid);
+        }
     }
 
     @Override

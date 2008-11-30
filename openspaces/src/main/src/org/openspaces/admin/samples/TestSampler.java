@@ -8,6 +8,7 @@ import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.SpacePartition;
@@ -63,8 +64,11 @@ public class TestSampler {
                     for (GridServiceManager backupGSM : processingUnit.getBackupGridServiceManagers()) {
                         System.out.println("   -> Backup GSM: " + backupGSM.getUID());
                     }
+                    for (ProcessingUnitPartition partition : processingUnit.getPartitions()) {
+                        System.out.println("   : Partition [" + partition.getPartitiondId() + "] Instances [" + partition.getInstances().length + "]");
+                    }
                     for (ProcessingUnitInstance processingUnitInstance : processingUnit) {
-                        System.out.println("   [" + processingUnitInstance.getClusterInfo() + "] on GSC [" + processingUnitInstance.getGridServiceContainer().getUID() + "]");
+                        System.out.println("   [" + processingUnitInstance.getClusterInfo() + "] on GSC [" + processingUnitInstance.getGridServiceContainer().getUID() + "] partition [" + processingUnitInstance.getPartition().getPartitiondId() + "]");
                         if (processingUnitInstance.hasEmbeddedSpaces()) {
                             System.out.println("      -> Embedded Space [" + processingUnitInstance.getSpaceInstance().getUID() + "]");
                         }

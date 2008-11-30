@@ -22,6 +22,8 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<Processi
 
     GridServiceContainer getGridServiceContainer();
 
+    ProcessingUnitPartition getPartition();
+
     ProcessingUnitServiceDetails[] getServiceDetails();
 
     /**

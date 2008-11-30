@@ -13,6 +13,7 @@ import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.space.SpaceProcessingUnitServiceDetails;
@@ -44,6 +45,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     private volatile ProcessingUnit processingUnit;
 
     private volatile GridServiceContainer gridServiceContainer;
+
+    private volatile ProcessingUnitPartition processingUnitPartition;
 
     private final SpaceProcessingUnitServiceDetails[] spacesDetails;
 
@@ -123,6 +126,14 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     public GridServiceContainer getGridServiceContainer() {
         return this.gridServiceContainer;
+    }
+
+    public void setProcessingUnitPartition(ProcessingUnitPartition processingUnitPartition) {
+        this.processingUnitPartition = processingUnitPartition;
+    }
+
+    public ProcessingUnitPartition getPartition() {
+        return this.processingUnitPartition;
     }
 
     public boolean hasEmbeddedSpaces() {
