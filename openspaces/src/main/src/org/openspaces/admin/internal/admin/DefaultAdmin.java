@@ -93,7 +93,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     private final InternalGridServiceManagers gridServiceManagers = new DefaultGridServiceManagers(this);
 
-    private final InternalGridServiceContainers gridServiceContainers = new DefaultGridServiceContainers();
+    private final InternalGridServiceContainers gridServiceContainers = new DefaultGridServiceContainers(this);
 
     private final InternalTransports transports = new DefaultTransports();
 

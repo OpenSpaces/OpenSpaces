@@ -12,4 +12,8 @@ public interface GridServiceContainers extends Iterable<GridServiceContainer> {
     int size();
 
     boolean isEmpty();
+
+    void addEventListener(GridServiceContainerEventListener eventListener);
+
+    void removeEventListener(GridServiceContainerEventListener eventListener);
 }

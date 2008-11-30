@@ -2,6 +2,8 @@ package org.openspaces.admin.samples;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
+import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.gsc.GridServiceContainerEventListener;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagerEventListener;
 import org.openspaces.admin.machine.Machine;
@@ -14,7 +16,8 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 /**
  * @author kimchy
  */
-public class TestEventSampler implements MachineEventListener, ProcessingUnitEventListener, GridServiceManagerEventListener {
+public class TestEventSampler implements MachineEventListener, ProcessingUnitEventListener,
+        GridServiceManagerEventListener, GridServiceContainerEventListener {
 
     public static void main(String[] args) throws InterruptedException {
         TestEventSampler eventSampler = new TestEventSampler();
@@ -22,6 +25,7 @@ public class TestEventSampler implements MachineEventListener, ProcessingUnitEve
         admin.getMachines().addEventListener(eventSampler);
         admin.getProcessingUnits().addEventListener(eventSampler);
         admin.getGridServiceManagers().addEventListener(eventSampler);
+        admin.getGridServiceContainers().addEventListener(eventSampler);
 
         Thread.sleep(10000000);
     }
@@ -76,5 +80,13 @@ public class TestEventSampler implements MachineEventListener, ProcessingUnitEve
 
     public void gridServiceManagerRemoved(GridServiceManager gridServiceManager) {
         System.out.println("GSM Removed [" + gridServiceManager.getUID() + "]");
+    }
+
+    public void gridServiceContainerAdded(GridServiceContainer gridServiceContainer) {
+        System.out.println("GSC Added [" + gridServiceContainer.getUID() + "]");
+    }
+
+    public void gridServiceContainerRemoved(GridServiceContainer gridServiceContainer) {
+        System.out.println("GSC Removed [" + gridServiceContainer.getUID() + "]");
     }
 }

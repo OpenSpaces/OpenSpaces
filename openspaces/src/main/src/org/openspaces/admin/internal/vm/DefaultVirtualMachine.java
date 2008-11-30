@@ -42,7 +42,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     private final InternalGridServiceManagers gridServiceManagers;
 
-    private final InternalGridServiceContainers gridServiceContainers = new DefaultGridServiceContainers();
+    private final InternalGridServiceContainers gridServiceContainers;
 
     private final InternalProcessingUnitInstances processingUnitInstances = new DefaultProcessingUnitInstances();
 
@@ -53,6 +53,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
         this.details = new DefaultVirtualMachineDetails(details);
         this.uid = details.getUid();
         this.gridServiceManagers = new DefaultGridServiceManagers(admin);
+        this.gridServiceContainers = new DefaultGridServiceContainers(admin);
     }
 
     public String getUID() {

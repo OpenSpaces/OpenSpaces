@@ -42,7 +42,7 @@ public class DefaultMachine implements InternalMachine {
 
     private final InternalGridServiceManagers gridServiceManagers;
 
-    private final InternalGridServiceContainers gridServiceContainers = new DefaultGridServiceContainers();
+    private final InternalGridServiceContainers gridServiceContainers;
 
     private final InternalTransports transports = new DefaultTransports();
 
@@ -59,6 +59,7 @@ public class DefaultMachine implements InternalMachine {
         this.uid = uid;
         this.host = host;
         this.gridServiceManagers = new DefaultGridServiceManagers(admin);
+        this.gridServiceContainers = new DefaultGridServiceContainers(admin);
     }
 
     public String getUID() {
