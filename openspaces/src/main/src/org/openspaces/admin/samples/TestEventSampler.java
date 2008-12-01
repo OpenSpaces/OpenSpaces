@@ -9,7 +9,8 @@ import org.openspaces.admin.gsm.GridServiceManagerEventListener;
 import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.lus.LookupServiceEventListener;
 import org.openspaces.admin.machine.Machine;
-import org.openspaces.admin.machine.MachineEventListener;
+import org.openspaces.admin.machine.events.MachineAddedEventListener;
+import org.openspaces.admin.machine.events.MachineRemovedEventListener;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitEventListener;
@@ -20,14 +21,15 @@ import org.openspaces.admin.vm.VirtualMachineEventListener;
 /**
  * @author kimchy
  */
-public class TestEventSampler implements MachineEventListener, ProcessingUnitEventListener,
+public class TestEventSampler implements MachineAddedEventListener, MachineRemovedEventListener, ProcessingUnitEventListener,
         GridServiceManagerEventListener, GridServiceContainerEventListener, LookupServiceEventListener,
         VirtualMachineEventListener {
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws Exception {
         TestEventSampler eventSampler = new TestEventSampler();
         Admin admin = new AdminFactory().addGroup("kimchy").createAdmin();
-        admin.getMachines().addEventListener(eventSampler);
+        admin.getMachines().getMachineAdded().add(eventSampler);
+        admin.getMachines().getMachineRemoved().add(eventSampler);
         admin.getProcessingUnits().addEventListener(eventSampler);
         admin.getLookupServices().addEventListener(eventSampler);
         admin.getGridServiceManagers().addEventListener(eventSampler);

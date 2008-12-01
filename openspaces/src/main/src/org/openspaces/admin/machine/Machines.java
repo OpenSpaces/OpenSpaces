@@ -1,6 +1,8 @@
 package org.openspaces.admin.machine;
 
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.machine.events.MachineAddedEventManager;
+import org.openspaces.admin.machine.events.MachineRemovedEventManager;
 
 import java.util.Map;
 
@@ -23,7 +25,7 @@ public interface Machines extends Iterable<Machine> {
 
     boolean isEmpty();
 
-    void addEventListener(MachineEventListener machineListener);
+    MachineAddedEventManager getMachineAdded();
 
-    void removeEventListener(MachineEventListener machineListener);
+    MachineRemovedEventManager getMachineRemoved();
 }

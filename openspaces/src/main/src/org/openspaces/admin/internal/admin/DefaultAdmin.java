@@ -66,6 +66,8 @@ import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.admin.vm.VirtualMachines;
 
+import java.nio.channels.ClosedChannelException;
+import java.rmi.ConnectException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -519,8 +521,14 @@ public class DefaultAdmin implements InternalAdmin {
                             holder.backupGSMs.put(gsm.getUid(), gsm);
                         }
                     }
+                } catch (ConnectException e) {
+                    if (e.getCause() instanceof ClosedChannelException) {
+                        // the GSM is down, continue
+                        continue;
+                    }
+                    logger.warn("Failed to get GSM details", e);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.warn("Failed to get GSM details", e);
                 }
             }
             // first go over all of them and remove the ones needed
