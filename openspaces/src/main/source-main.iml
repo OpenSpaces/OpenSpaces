@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module relativePaths="true" type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="Groovy" name="Groovy">
+      <configuration />
+    </facet>
+  </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_5" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/../../target/classes" />
     <output-test url="file://$MODULE_DIR$/../../target/main-test-classes" />
@@ -8,6 +13,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
     </content>
+    <orderEntry type="library" name="groovy-1.5.7" level="application" />
     <orderEntry type="jdk" jdkName="1.5" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="Atomikos" level="project" />
@@ -32,7 +38,6 @@
     <orderEntry type="library" exported="" name="antlr" level="project" />
     <orderEntry type="library" name="jetty" level="project" />
     <orderEntry type="library" name="Velocity" level="project" />
-    <orderEntry type="library" name="Groovy" level="project" />
     <orderEntry type="library" name="Glassfish" level="project" />
   </component>
   <component name="copyright">

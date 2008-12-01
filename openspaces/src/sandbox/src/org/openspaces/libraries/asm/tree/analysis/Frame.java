@@ -29,9 +29,6 @@
  */
 package org.openspaces.libraries.asm.tree.analysis;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.openspaces.libraries.asm.Opcodes;
 import org.openspaces.libraries.asm.Type;
 import org.openspaces.libraries.asm.tree.AbstractInsnNode;
@@ -39,6 +36,9 @@ import org.openspaces.libraries.asm.tree.IincInsnNode;
 import org.openspaces.libraries.asm.tree.MethodInsnNode;
 import org.openspaces.libraries.asm.tree.MultiANewArrayInsnNode;
 import org.openspaces.libraries.asm.tree.VarInsnNode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A symbolic execution stack frame. A stack frame contains a set of local
@@ -187,7 +187,7 @@ public class Frame {
      */
     public void push(final Value value) throws IndexOutOfBoundsException {
         if (top + locals >= values.length) {
-            throw new IndexOutOfBoundsException("Insufficient maximum stack size.");
+            throw new IndexOutOfBoundsException("Insufficient maximum stack getSize.");
         }
         values[top++ + locals] = value;
     }

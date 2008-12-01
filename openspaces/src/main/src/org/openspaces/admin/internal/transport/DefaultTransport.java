@@ -36,7 +36,7 @@ public class DefaultTransport implements InternalTransport {
         return !transportInfoProviders.isEmpty();
     }
 
-    public String getUID() {
+    public String getUid() {
         return this.uid;
     }
 

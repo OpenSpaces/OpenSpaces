@@ -239,7 +239,7 @@ final class Frame {
 
         // code to generate the above string
         //
-        // int NA = 0; // not applicable (unused opcode or variable size opcode)
+        // int NA = 0; // not applicable (unused opcode or variable getSize opcode)
         //
         // b = new int[] {
         // 0, //NOP, // visitInsn
@@ -933,7 +933,7 @@ final class Frame {
                 set(arg, t1);
                 if (arg > 0) {
                     t2 = get(arg - 1);
-                    // if t2 is of kind STACK or LOCAL we cannot know its size!
+                    // if t2 is of kind STACK or LOCAL we cannot know its getSize!
                     if (t2 == LONG || t2 == DOUBLE) {
                         set(arg - 1, TOP);
                     }
@@ -947,7 +947,7 @@ final class Frame {
                 set(arg + 1, TOP);
                 if (arg > 0) {
                     t2 = get(arg - 1);
-                    // if t2 is of kind STACK or LOCAL we cannot know its size!
+                    // if t2 is of kind STACK or LOCAL we cannot know its getSize!
                     if (t2 == LONG || t2 == DOUBLE) {
                         set(arg - 1, TOP);
                     }

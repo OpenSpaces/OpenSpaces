@@ -14,7 +14,7 @@ import org.openspaces.admin.vm.VirtualMachines;
  */
 public interface Machine {
 
-    String getUID();
+    String getUid();
 
     String getHost();
 

@@ -1,15 +1,16 @@
 package org.openspaces.admin.internal.pu;
 
+import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitEventListener;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -19,7 +20,7 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
 
     private final InternalAdmin admin;
 
-    private final Map<String, ProcessingUnit> processingUnits = new ConcurrentHashMap<String, ProcessingUnit>();
+    private final Map<String, ProcessingUnit> processingUnits = new SizeConcurrentHashMap<String, ProcessingUnit>();
 
     private List<ProcessingUnitEventListener> eventListeners = new CopyOnWriteArrayList<ProcessingUnitEventListener>();
 
@@ -41,6 +42,18 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
 
     public ProcessingUnit getProcessingUnit(String name) {
         return processingUnits.get(name);
+    }
+
+    public Map<String, ProcessingUnit> getNames() {
+        return Collections.unmodifiableMap(processingUnits);
+    }
+
+    public int getSize() {
+        return processingUnits.size();
+    }
+
+    public boolean isEmpty() {
+        return processingUnits.size() == 0;
     }
 
     public void addProcessingUnit(final ProcessingUnit processingUnit) {

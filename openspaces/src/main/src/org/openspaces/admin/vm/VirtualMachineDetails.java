@@ -7,7 +7,7 @@ public interface VirtualMachineDetails {
 
     boolean isNA();
 
-    String getUID();
+    String getUid();
 
     String getVmName();
 

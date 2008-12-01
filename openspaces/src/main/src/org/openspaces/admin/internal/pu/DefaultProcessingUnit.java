@@ -101,7 +101,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     }
 
     public void addBackupGridServiceManager(final GridServiceManager backupGridServiceManager) {
-        GridServiceManager gridServiceManager = this.backupGridServiceManagers.put(backupGridServiceManager.getUID(), backupGridServiceManager);
+        GridServiceManager gridServiceManager = this.backupGridServiceManagers.put(backupGridServiceManager.getUid(), backupGridServiceManager);
         if (gridServiceManager == null) {
             for (final ProcessingUnitEventListener listener : processingUnits.getEventListeners()) {
                 admin.pushEvent(listener, new Runnable() {
@@ -185,7 +185,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     }
 
     public void addProcessingUnitInstance(final ProcessingUnitInstance processingUnitInstance) {
-        final ProcessingUnitInstance existingProcessingUnitInstance = processingUnitInstances.put(processingUnitInstance.getUID(), processingUnitInstance);
+        final ProcessingUnitInstance existingProcessingUnitInstance = processingUnitInstances.put(processingUnitInstance.getUid(), processingUnitInstance);
         InternalProcessingUnitPartition partition = ((InternalProcessingUnitPartition) processingUnitPartitions.get(processingUnitInstance.getInstanceId() - 1));
         partition.addProcessingUnitInstance(processingUnitInstance);
         ((InternalProcessingUnitInstance) processingUnitInstance).setProcessingUnitPartition(partition);

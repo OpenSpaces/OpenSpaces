@@ -6,6 +6,7 @@ import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.machine.MachineEventListener;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +38,12 @@ public class DefaultMachines implements InternalMachines {
         return machinesById.values().toArray(new Machine[0]);
     }
 
-    public int size() {
+    public int getSize() {
         return machinesById.size();
+    }
+
+    public boolean isEmpty() {
+        return machinesById.size() == 0;
     }
 
     public Iterator<Machine> iterator() {
@@ -53,9 +58,17 @@ public class DefaultMachines implements InternalMachines {
         return machinesByHost.get(ipAddress);
     }
 
+    public Map<String, Machine> getUids() {
+        return Collections.unmodifiableMap(machinesById);
+    }
+
+    public Map<String, Machine> getHosts() {
+        return Collections.unmodifiableMap(machinesByHost);
+    }
+
     public void addMachine(final InternalMachine machine) {
         machinesByHost.put(machine.getHost(), machine);
-        Machine existingMachine = machinesById.put(machine.getUID(), machine);
+        Machine existingMachine = machinesById.put(machine.getUid(), machine);
         if (existingMachine == null) {
             for (final MachineEventListener listener : listeners) {
                 admin.pushEvent(listener, new Runnable() {
@@ -69,7 +82,7 @@ public class DefaultMachines implements InternalMachines {
 
     public void removeMachine(final InternalMachine machine) {
         machinesByHost.remove(machine.getHost());
-        final Machine existingMachine = machinesById.remove(machine.getUID());
+        final Machine existingMachine = machinesById.remove(machine.getUid());
         if (existingMachine != null) {
             for (final MachineEventListener listener : listeners) {
                 admin.pushEvent(listener, new Runnable() {

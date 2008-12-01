@@ -5,6 +5,7 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsc.GridServiceContainerEventListener;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,11 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
         return gridServiceContainerMap.get(uid);
     }
 
-    public int size() {
+    public Map<String, GridServiceContainer> getUids() {
+        return Collections.unmodifiableMap(gridServiceContainerMap);
+    }
+
+    public int getSize() {
         return gridServiceContainerMap.size();
     }
 
@@ -46,7 +51,7 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
     }
 
     public void addGridServiceContainer(final InternalGridServiceContainer gridServiceContainer) {
-        final GridServiceContainer existingGSC = gridServiceContainerMap.put(gridServiceContainer.getUID(), gridServiceContainer);
+        final GridServiceContainer existingGSC = gridServiceContainerMap.put(gridServiceContainer.getUid(), gridServiceContainer);
         if (existingGSC == null) {
             for (final GridServiceContainerEventListener eventListener : eventListeners) {
                 admin.pushEvent(eventListener, new Runnable() {

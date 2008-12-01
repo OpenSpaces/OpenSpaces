@@ -1,5 +1,7 @@
 package org.openspaces.admin.vm;
 
+import java.util.Map;
+
 /**
  * @author kimchy
  */
@@ -9,7 +11,11 @@ public interface VirtualMachines extends Iterable<VirtualMachine> {
 
     VirtualMachine getVirtualMachineByUID(String uid);
 
-    int size();
+    Map<String, VirtualMachine> getUids();
+
+    int getSize();
+
+    boolean isEmpty();
 
     void addEventListener(VirtualMachineEventListener eventListener);
 

@@ -18,7 +18,7 @@ public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
         return details.isNA();
     }
 
-    public String getUID() {
+    public String getUid() {
         return details.getUID();
     }
 

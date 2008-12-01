@@ -64,7 +64,7 @@ public class DefaultMachine implements InternalMachine {
         this.virtualMachines = new DefaultVirtualMachines(admin);
     }
 
-    public String getUID() {
+    public String getUid() {
         return this.uid;
     }
 
@@ -130,7 +130,7 @@ public class DefaultMachine implements InternalMachine {
     }
 
     public void addSpaceInstance(SpaceInstance spaceInstance) {
-        spaceInstances.put(spaceInstance.getUID(), spaceInstance);
+        spaceInstances.put(spaceInstance.getUid(), spaceInstance);
     }
 
     public void removeSpaceInstance(String uid) {

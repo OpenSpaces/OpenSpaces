@@ -1,5 +1,7 @@
 package org.openspaces.admin.gsc;
 
+import java.util.Map;
+
 /**
  * @author kimchy
  */
@@ -9,7 +11,9 @@ public interface GridServiceContainers extends Iterable<GridServiceContainer> {
 
     GridServiceContainer getContainerByUID(String uid);
 
-    int size();
+    Map<String, GridServiceContainer> getUids();
+
+    int getSize();
 
     boolean isEmpty();
 

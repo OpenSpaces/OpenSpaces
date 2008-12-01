@@ -5,6 +5,7 @@ import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagerEventListener;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
 
     private final InternalAdmin admin;
 
-    private final Map<String, GridServiceManager> gridServiceManagerMap = new SizeConcurrentHashMap<String, GridServiceManager>();
+    private final Map<String, GridServiceManager> gridServiceManagersByUID = new SizeConcurrentHashMap<String, GridServiceManager>();
 
     private final List<GridServiceManagerEventListener> eventListeners = new CopyOnWriteArrayList<GridServiceManagerEventListener>();
 
@@ -26,27 +27,31 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     }
 
     public GridServiceManager[] getManagers() {
-        return gridServiceManagerMap.values().toArray(new GridServiceManager[0]);
+        return gridServiceManagersByUID.values().toArray(new GridServiceManager[0]);
     }
 
     public GridServiceManager getManagerByUID(String uid) {
-        return gridServiceManagerMap.get(uid);
+        return gridServiceManagersByUID.get(uid);
     }
 
-    public int size() {
-        return gridServiceManagerMap.size();
+    public Map<String, GridServiceManager> getUids() {
+        return Collections.unmodifiableMap(gridServiceManagersByUID);
+    }
+
+    public int getSize() {
+        return gridServiceManagersByUID.size();
     }
 
     public boolean isEmpty() {
-        return gridServiceManagerMap.isEmpty();
+        return gridServiceManagersByUID.isEmpty();
     }
 
     public Iterator<GridServiceManager> iterator() {
-        return gridServiceManagerMap.values().iterator();
+        return gridServiceManagersByUID.values().iterator();
     }
 
     public void addGridServiceManager(final InternalGridServiceManager gridServiceManager) {
-        GridServiceManager existingGSM = gridServiceManagerMap.put(gridServiceManager.getUID(), gridServiceManager);
+        GridServiceManager existingGSM = gridServiceManagersByUID.put(gridServiceManager.getUid(), gridServiceManager);
         if (existingGSM == null) {
             for (final GridServiceManagerEventListener eventListener : eventListeners) {
                 admin.pushEvent(eventListener, new Runnable() {
@@ -59,7 +64,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     }
 
     public InternalGridServiceManager removeGridServiceManager(String uid) {
-        final InternalGridServiceManager existingGSM = (InternalGridServiceManager) gridServiceManagerMap.remove(uid);
+        final InternalGridServiceManager existingGSM = (InternalGridServiceManager) gridServiceManagersByUID.remove(uid);
         if (existingGSM != null) {
             for (final GridServiceManagerEventListener eventListener : eventListeners) {
                 admin.pushEvent(eventListener, new Runnable() {
@@ -73,7 +78,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     }
 
     public InternalGridServiceManager replaceGridServiceManager(InternalGridServiceManager gridServiceManager) {
-        return (InternalGridServiceManager) gridServiceManagerMap.put(gridServiceManager.getUID(), gridServiceManager);
+        return (InternalGridServiceManager) gridServiceManagersByUID.put(gridServiceManager.getUid(), gridServiceManager);
     }
 
     public void addEventListener(final GridServiceManagerEventListener eventListener) {

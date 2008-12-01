@@ -56,7 +56,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
         this.gridServiceContainers = new DefaultGridServiceContainers(admin);
     }
 
-    public String getUID() {
+    public String getUid() {
         return this.uid;
     }
 
@@ -125,7 +125,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
     }
 
     public void addSpaceInstance(SpaceInstance spaceInstance) {
-        spaceInstances.put(spaceInstance.getUID(), spaceInstance);
+        spaceInstances.put(spaceInstance.getUid(), spaceInstance);
     }
 
     public void removeSpaceInstance(String uid) {

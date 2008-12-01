@@ -5,7 +5,7 @@ package org.openspaces.admin.space;
  */
 public interface Space extends Iterable<SpaceInstance> {
 
-    String getUID();
+    String getUid();
 
     String getName();
 
@@ -19,6 +19,8 @@ public interface Space extends Iterable<SpaceInstance> {
 
     SpacePartition getPartition(int partitionId);
 
-    int size();
+    int getSize();
+
+    boolean isEmpty();
 }
 

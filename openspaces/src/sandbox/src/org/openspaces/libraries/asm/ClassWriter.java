@@ -701,7 +701,7 @@ public class ClassWriter implements ClassVisitor {
      * @return the bytecode of the class that was build with this class writer.
      */
     public byte[] toByteArray() {
-        // computes the real size of the bytecode of this class
+        // computes the real getSize of the bytecode of this class
         int size = 24 + 2 * interfaceCount;
         int nbFields = 0;
         FieldWriter fb = firstField;
@@ -770,7 +770,7 @@ public class ClassWriter implements ClassVisitor {
             size += attrs.getSize(this, null, 0, -1, -1);
         }
         size += pool.length;
-        // allocates a byte vector of this size, in order to avoid unnecessary
+        // allocates a byte vector of this getSize, in order to avoid unnecessary
         // arraycopy operations in the ByteVector.enlarge() method
         ByteVector out = new ByteVector(size);
         out.putInt(0xCAFEBABE).putInt(version);

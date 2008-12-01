@@ -40,7 +40,7 @@ public class DefaultSpacePartition implements InternalSpacePartition {
     }
 
     public void addSpaceInstance(SpaceInstance spaceInstance) {
-        spaceInstances.put(spaceInstance.getUID(), spaceInstance);
+        spaceInstances.put(spaceInstance.getUid(), spaceInstance);
     }
 
     public void removeSpaceInstance(String uid) {

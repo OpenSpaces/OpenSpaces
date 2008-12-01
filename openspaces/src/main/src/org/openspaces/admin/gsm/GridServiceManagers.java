@@ -1,5 +1,7 @@
 package org.openspaces.admin.gsm;
 
+import java.util.Map;
+
 /**
  * @author kimchy
  */
@@ -9,7 +11,9 @@ public interface GridServiceManagers extends Iterable<GridServiceManager> {
 
     GridServiceManager getManagerByUID(String uid);
 
-    int size();
+    Map<String, GridServiceManager> getUids();
+
+    int getSize();
 
     boolean isEmpty();
 

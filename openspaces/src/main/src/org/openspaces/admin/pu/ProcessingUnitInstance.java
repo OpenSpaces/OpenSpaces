@@ -8,6 +8,8 @@ import org.openspaces.core.space.SpaceProcessingUnitServiceDetails;
 import org.openspaces.pu.container.jee.JeeProcessingUnitServiceDetails;
 import org.openspaces.pu.service.ProcessingUnitServiceDetails;
 
+import java.util.Map;
+
 /**
  * @author kimchy
  */
@@ -31,6 +33,8 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<Processi
 
     ProcessingUnitServiceDetails[] getServicesDetailsByServiceType(String serviceType);
 
+    Map<String, ProcessingUnitServiceDetails[]> getServiceDetailsByServiceType();
+
     /**
      * Returns the space service details as described by the service started within the processing unit.
      */
@@ -51,7 +55,7 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<Processi
      * Returns <code>true</code> if there are embedded spaces started within this processing
      * unit.
      */
-    boolean hasEmbeddedSpaces();
+    boolean isEmbeddedSpaces();
 
     /**
      * Returns a space instance that was started within the processing unit instnace. Will

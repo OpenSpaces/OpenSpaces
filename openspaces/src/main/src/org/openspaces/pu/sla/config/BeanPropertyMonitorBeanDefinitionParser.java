@@ -47,7 +47,7 @@ public class BeanPropertyMonitorBeanDefinitionParser extends AbstractSingleBeanD
         if (StringUtils.hasLength(period)) {
             builder.addPropertyValue("period", period);
         }
-        String historySize = element.getAttribute("history-size");
+        String historySize = element.getAttribute("history-getSize");
         if (StringUtils.hasLength(historySize)) {
             builder.addPropertyValue("historySize", historySize);
         }

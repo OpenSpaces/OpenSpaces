@@ -38,11 +38,11 @@ public class TestEventSampler implements MachineEventListener, ProcessingUnitEve
     }
 
     public void machineAdded(Machine machine) {
-        System.out.println("Machine Added [" + machine.getUID() + "]");
+        System.out.println("Machine Added [" + machine.getUid() + "]");
     }
 
     public void machineRemoved(Machine machine) {
-        System.out.println("Machine Removed [" + machine.getUID() + "]");
+        System.out.println("Machine Removed [" + machine.getUid() + "]");
     }
 
     public void processingUnitAdded(ProcessingUnit processingUnit) {
@@ -66,7 +66,7 @@ public class TestEventSampler implements MachineEventListener, ProcessingUnitEve
     }
 
     public void processingUnitManagingGridServiceManagerSet(ProcessingUnit processingUnit, GridServiceManager oldManaingGridServiceManager, GridServiceManager newManaingGridServiceManager) {
-        System.out.println("Processing Unit [" + processingUnit.getName() + "] Managing GSM [" + newManaingGridServiceManager.getUID() + "]");
+        System.out.println("Processing Unit [" + processingUnit.getName() + "] Managing GSM [" + newManaingGridServiceManager.getUid() + "]");
     }
 
     public void processingUnitManagingGridServiceManagerUnknown(ProcessingUnit processingUnit) {
@@ -74,42 +74,42 @@ public class TestEventSampler implements MachineEventListener, ProcessingUnitEve
     }
 
     public void processingUnitBackupGridServiceManagerAdded(ProcessingUnit processingUnit, GridServiceManager gridServiceManager) {
-        System.out.println("Processing Unit [" + processingUnit.getName() + "] Backup GSM Added [" + gridServiceManager.getUID() + "]");
+        System.out.println("Processing Unit [" + processingUnit.getName() + "] Backup GSM Added [" + gridServiceManager.getUid() + "]");
     }
 
     public void processingUnitBackupGridServiceManagerRemoved(ProcessingUnit processingUnit, GridServiceManager gridServiceManager) {
-        System.out.println("Processing Unit [" + processingUnit.getName() + "] Backup GSM Removed [" + gridServiceManager.getUID() + "]");
+        System.out.println("Processing Unit [" + processingUnit.getName() + "] Backup GSM Removed [" + gridServiceManager.getUid() + "]");
     }
 
     public void gridServiceManagerAdded(GridServiceManager gridServiceManager) {
-        System.out.println("GSM Added [" + gridServiceManager.getUID() + "]");
+        System.out.println("GSM Added [" + gridServiceManager.getUid() + "]");
     }
 
     public void gridServiceManagerRemoved(GridServiceManager gridServiceManager) {
-        System.out.println("GSM Removed [" + gridServiceManager.getUID() + "]");
+        System.out.println("GSM Removed [" + gridServiceManager.getUid() + "]");
     }
 
     public void gridServiceContainerAdded(GridServiceContainer gridServiceContainer) {
-        System.out.println("GSC Added [" + gridServiceContainer.getUID() + "]");
+        System.out.println("GSC Added [" + gridServiceContainer.getUid() + "]");
     }
 
     public void gridServiceContainerRemoved(GridServiceContainer gridServiceContainer) {
-        System.out.println("GSC Removed [" + gridServiceContainer.getUID() + "]");
+        System.out.println("GSC Removed [" + gridServiceContainer.getUid() + "]");
     }
 
     public void lookupServiceAdded(LookupService lookupService) {
-        System.out.println("LUS Added [" + lookupService.getUID() + "]");
+        System.out.println("LUS Added [" + lookupService.getUid() + "]");
     }
 
     public void lookupServiceRemoved(LookupService lookupService) {
-        System.out.println("LUS Removed [" + lookupService.getUID() + "]");
+        System.out.println("LUS Removed [" + lookupService.getUid() + "]");
     }
 
     public void virtualMachineAdded(VirtualMachine virtualMachine) {
-        System.out.println("VM Added [" + virtualMachine.getUID() + "]");
+        System.out.println("VM Added [" + virtualMachine.getUid() + "]");
     }
 
     public void virtualMachineRemoved(VirtualMachine virtualMachine) {
-        System.out.println("VM Removed [" + virtualMachine.getUID() + "]");
+        System.out.println("VM Removed [" + virtualMachine.getUid() + "]");
     }
 }

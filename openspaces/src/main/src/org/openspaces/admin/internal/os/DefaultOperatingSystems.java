@@ -3,6 +3,7 @@ package org.openspaces.admin.internal.os;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.os.OperatingSystem;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -29,8 +30,12 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
         return operatingSystemsByUID.get(uid);
     }
 
+    public Map<String, OperatingSystem> getUids() {
+        return Collections.unmodifiableMap(operatingSystemsByUID);
+    }
+
     public void addOperatingSystem(OperatingSystem operatingSystem) {
-        operatingSystemsByUID.put(operatingSystem.getUID(), operatingSystem);
+        operatingSystemsByUID.put(operatingSystem.getUid(), operatingSystem);
     }
 
     public void removeOperatingSystem(String uid) {

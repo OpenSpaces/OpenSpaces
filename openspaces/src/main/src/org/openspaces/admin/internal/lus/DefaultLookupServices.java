@@ -5,6 +5,7 @@ import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.lus.LookupServiceEventListener;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,10 @@ public class DefaultLookupServices implements InternalLookupServices {
         return lookupServiceMap.get(id);
     }
 
+    public Map<String, LookupService> getUids() {
+        return Collections.unmodifiableMap(lookupServiceMap);
+    }
+
     public int size() {
         return lookupServiceMap.size();
     }
@@ -46,7 +51,7 @@ public class DefaultLookupServices implements InternalLookupServices {
     }
 
     public void addLookupService(final InternalLookupService lookupService) {
-        LookupService existingLookupService = lookupServiceMap.put(lookupService.getUID(), lookupService);
+        LookupService existingLookupService = lookupServiceMap.put(lookupService.getUid(), lookupService);
         if (existingLookupService == null) {
             for (final LookupServiceEventListener eventListener : eventListeners) {
                 admin.pushEvent(eventListener, new Runnable() {

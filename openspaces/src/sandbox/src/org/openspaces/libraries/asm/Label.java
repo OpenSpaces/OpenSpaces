@@ -137,7 +137,7 @@ public class Label {
 
     /*
      * Fields for the control flow and data flow graph analysis algorithms (used
-     * to compute the maximum stack size or the stack map frames). A control
+     * to compute the maximum stack getSize or the stack map frames). A control
      * flow graph contains one node per "basic block", and one edge per "jump"
      * from one basic block to another. Each node (i.e., each basic block) is
      * represented by the Label object that corresponds to the first instruction
@@ -145,7 +145,7 @@ public class Label {
      * the graph, as a linked list of Edge objects.
      * 
      * The control flow analysis algorithms used to compute the maximum stack
-     * size or the stack map frames are similar and use two steps. The first
+     * getSize or the stack map frames are similar and use two steps. The first
      * step, during the visit of each instruction, builds information about the
      * state of the local variables and the operand stack at the end of each
      * basic block, called the "output frame", <i>relatively</i> to the frame
@@ -156,7 +156,7 @@ public class Label {
      * input state of the first basic block (known from the method signature),
      * and by the using the previously computed relative output frames.
      * 
-     * The algorithm used to compute the maximum stack size only computes the
+     * The algorithm used to compute the maximum stack getSize only computes the
      * relative output and absolute input stack heights, while the algorithm
      * used to compute stack map frames computes relative output frames and
      * absolute input frames.
@@ -367,7 +367,7 @@ public class Label {
                      * MethodWriter). These temporary opcodes are similar to
                      * jump instruction opcodes, except that the 2 bytes offset
                      * is unsigned (and can therefore represent values from 0 to
-                     * 65535, which is sufficient since the size of a method is
+                     * 65535, which is sufficient since the getSize of a method is
                      * limited to 65535 bytes).
                      */
                     int opcode = data[reference - 1] & 0xFF;

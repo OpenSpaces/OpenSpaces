@@ -26,6 +26,7 @@ import org.openspaces.pu.service.ProcessingUnitServiceDetails;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -104,7 +105,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         servicesDetailsByServiceId = servicesDetailsTemp;
     }
 
-    public String getUID() {
+    public String getUid() {
         return this.uid;
     }
 
@@ -182,7 +183,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         return this.processingUnitPartition;
     }
 
-    public boolean hasEmbeddedSpaces() {
+    public boolean isEmbeddedSpaces() {
         return spaceInstances.size() != 0;
     }
 
@@ -201,7 +202,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     public void addSpaceInstnaceIfMatching(SpaceInstance spaceInstance) {
         for (SpaceProcessingUnitServiceDetails spaceDetails : embeddedSpacesDetails) {
             if (((InternalSpaceInstance) spaceInstance).getServiceID().equals(spaceDetails.getServiceID())) {
-                spaceInstances.put(spaceInstance.getUID(), spaceInstance);
+                spaceInstances.put(spaceInstance.getUid(), spaceInstance);
             }
         }
     }
@@ -220,6 +221,10 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     public ProcessingUnitServiceDetails[] getServicesDetailsByServiceType(String serviceType) {
         return servicesDetailsByServiceId.get(serviceType);
+    }
+
+    public Map<String, ProcessingUnitServiceDetails[]> getServiceDetailsByServiceType() {
+        return Collections.unmodifiableMap(servicesDetailsByServiceId);
     }
 
     // info providers

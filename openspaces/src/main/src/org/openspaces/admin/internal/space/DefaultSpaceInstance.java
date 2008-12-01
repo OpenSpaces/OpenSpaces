@@ -85,7 +85,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         }
     }
 
-    public String getUID() {
+    public String getUid() {
         return uid;
     }
 

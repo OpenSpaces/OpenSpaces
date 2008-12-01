@@ -25,52 +25,52 @@ public class TestSampler {
         while (true) {
             try {
                 for (LookupService lookupService : admin.getLookupServices()) {
-                    System.out.println("Lookup [" + lookupService.getUID() + "] : " + lookupService.getVirtualMachine().getMachine().getHost());
+                    System.out.println("Lookup [" + lookupService.getUid() + "] : " + lookupService.getMachine());
                 }
                 for (GridServiceManager gridServiceManager : admin.getGridServiceManagers()) {
-                    System.out.println("GSM [" + gridServiceManager.getUID() + "] : " + gridServiceManager.getOperatingSystem().getUID());
+                    System.out.println("GSM [" + gridServiceManager.getUid() + "] : " + gridServiceManager.getOperatingSystem().getUid());
                 }
                 for (GridServiceContainer gridServiceContainer : admin.getGridServiceContainers()) {
-                    System.out.println("GSC [" + gridServiceContainer.getUID() + "] : " + gridServiceContainer.getMachine().getUID());
+                    System.out.println("GSC [" + gridServiceContainer.getUid() + "] : " + gridServiceContainer.getMachine().getUid());
                     for (ProcessingUnitInstance processingUnitInstance : gridServiceContainer) {
                         System.out.println("   -> PU [" + processingUnitInstance.getClusterInfo() + "]");
                     }
                 }
                 for (VirtualMachine virtualMachine : admin.getVirtualMachines()) {
-                    System.out.println("VM [" + virtualMachine.getUID() + "] on host [" + virtualMachine.getMachine().getHost() + "]");
+                    System.out.println("VM [" + virtualMachine.getUid() + "] on host [" + virtualMachine.getMachine().getHost() + "]");
                     for (ProcessingUnitInstance processingUnitInstance : virtualMachine.getProcessingUnitInstances()) {
-                        System.out.println("   -> PU [" + processingUnitInstance.getUID() + "]");
+                        System.out.println("   -> PU [" + processingUnitInstance.getUid() + "]");
                     }
                     for (SpaceInstance spaceInstance : virtualMachine.getSpaceInstances()) {
-                        System.out.println("   -> Space [" + spaceInstance.getUID() + "]");
+                        System.out.println("   -> Space [" + spaceInstance.getUid() + "]");
                     }
                 }
                 for (Machine machine : admin.getMachines()) {
-                    System.out.println("Machine [" + machine.getUID() + "], transports: " + machine.getOperatingSystem().getUID());
+                    System.out.println("Machine [" + machine.getUid() + "], transports: " + machine.getOperatingSystem().getUid());
                     for (SpaceInstance spaceInstance : machine.getSpaceInstances()) {
-                        System.out.println("   -> Space [" + spaceInstance.getUID() + "]");
+                        System.out.println("   -> Space [" + spaceInstance.getUid() + "]");
                     }
                     for (ProcessingUnitInstance processingUnitInstance : machine.getProcessingUnitInstances()) {
-                        System.out.println("   -> PU [" + processingUnitInstance.getUID() + "]");
+                        System.out.println("   -> PU [" + processingUnitInstance.getUid() + "]");
                     }
                 }
                 for (ProcessingUnit processingUnit : admin.getProcessingUnits()) {
                     System.out.println("Processing Unit: " + processingUnit.getName() + " status: " + processingUnit.getStatus());
                     if (processingUnit.isManaged()) {
-                        System.out.println("   -> Managing GSM: " + processingUnit.getManagingGridServiceManager().getUID());
+                        System.out.println("   -> Managing GSM: " + processingUnit.getManagingGridServiceManager().getUid());
                     } else {
                         System.out.println("   -> Managing GSM: NA");
                     }
                     for (GridServiceManager backupGSM : processingUnit.getBackupGridServiceManagers()) {
-                        System.out.println("   -> Backup GSM: " + backupGSM.getUID());
+                        System.out.println("   -> Backup GSM: " + backupGSM.getUid());
                     }
                     for (ProcessingUnitPartition partition : processingUnit.getPartitions()) {
                         System.out.println("   : Partition [" + partition.getPartitiondId() + "] Instances [" + partition.getInstances().length + "]");
                     }
                     for (ProcessingUnitInstance processingUnitInstance : processingUnit) {
-                        System.out.println("   [" + processingUnitInstance.getClusterInfo() + "] on GSC [" + processingUnitInstance.getGridServiceContainer().getUID() + "] partition [" + processingUnitInstance.getPartition().getPartitiondId() + "]");
-                        if (processingUnitInstance.hasEmbeddedSpaces()) {
-                            System.out.println("      -> Embedded Space [" + processingUnitInstance.getSpaceInstance().getUID() + "]");
+                        System.out.println("   [" + processingUnitInstance.getClusterInfo() + "] on GSC [" + processingUnitInstance.getGridServiceContainer().getUid() + "] partition [" + processingUnitInstance.getPartition().getPartitiondId() + "]");
+                        if (processingUnitInstance.isEmbeddedSpaces()) {
+                            System.out.println("      -> Embedded Space [" + processingUnitInstance.getSpaceInstance().getUid() + "]");
                         }
                         for (ProcessingUnitServiceDetails details : processingUnitInstance) {
                             System.out.println("      -> Service [" + details.getId() + "] type [" + details.getType() + "]");
@@ -78,16 +78,16 @@ public class TestSampler {
                     }
                 }
                 for (Space space : admin.getSpaces()) {
-                    System.out.println("Space [" + space.getUID() + "] numberOfInstances [" + space.getNumberOfInstances() + "] numberOfbackups [" + space.getNumberOfBackups() + "]");
+                    System.out.println("Space [" + space.getUid() + "] numberOfInstances [" + space.getNumberOfInstances() + "] numberOfbackups [" + space.getNumberOfBackups() + "]");
                     for (SpaceInstance spaceInstance : space) {
-                        System.out.println("   -> INSTANCE [" + spaceInstance.getUID() + "] instanceId [" + spaceInstance.getInstanceId() +
+                        System.out.println("   -> INSTANCE [" + spaceInstance.getUid() + "] instanceId [" + spaceInstance.getInstanceId() +
                                 "] backupId [" + spaceInstance.getBackupId() + "] Partiton [" + spaceInstance.getPartition().getPartitiondId() + "]");
                         System.out.println("         -> Host: " + spaceInstance.getMachine().getHost());
                     }
                     for (SpacePartition spacePartition : space.getPartitions()) {
                         System.out.println("   -> Partition [" + spacePartition.getPartitiondId() + "]");
                         for (SpaceInstance spaceInstance : spacePartition) {
-                            System.out.println("      -> INSTANCE [" + spaceInstance.getUID() + "]");
+                            System.out.println("      -> INSTANCE [" + spaceInstance.getUid() + "]");
                         }
                     }
                 }

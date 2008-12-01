@@ -5,6 +5,7 @@ import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.admin.vm.VirtualMachineEventListener;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,16 +34,24 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
         return virtualMachinesByUID.values().iterator();
     }
 
-    public int size() {
+    public int getSize() {
         return virtualMachinesByUID.size();
+    }
+
+    public boolean isEmpty() {
+        return virtualMachinesByUID.size() == 0;
     }
 
     public VirtualMachine getVirtualMachineByUID(String uid) {
         return virtualMachinesByUID.get(uid);
     }
 
+    public Map<String, VirtualMachine> getUids() {
+        return Collections.unmodifiableMap(virtualMachinesByUID);
+    }
+
     public void addVirtualMachine(final VirtualMachine virtualMachine) {
-        VirtualMachine existingVM = virtualMachinesByUID.put(virtualMachine.getUID(), virtualMachine);
+        VirtualMachine existingVM = virtualMachinesByUID.put(virtualMachine.getUid(), virtualMachine);
         if (existingVM == null) {
             for (final VirtualMachineEventListener eventListener : eventListeners) {
                 admin.pushEvent(eventListener, new Runnable() {

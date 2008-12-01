@@ -48,7 +48,7 @@ public class NotifyContainerBeanDefinitionParser extends AbstractTxEventContaine
 
     private static final String BATCH_TIME = "time";
 
-    private static final String BATCH_SIZE = "size";
+    private static final String BATCH_SIZE = "getSize";
 
     private static final String LEASE = "lease";
 

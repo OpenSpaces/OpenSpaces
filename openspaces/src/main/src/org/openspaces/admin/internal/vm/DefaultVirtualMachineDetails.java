@@ -22,7 +22,7 @@ public class DefaultVirtualMachineDetails implements VirtualMachineDetails {
         return details.isNA();
     }
 
-    public String getUID() {
+    public String getUid() {
         return details.getUid();
     }
 

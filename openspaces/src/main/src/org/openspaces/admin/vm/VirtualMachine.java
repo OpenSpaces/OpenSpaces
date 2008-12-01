@@ -11,7 +11,7 @@ import org.openspaces.admin.space.SpaceInstance;
  */
 public interface VirtualMachine extends MachineAware {
 
-    String getUID();
+    String getUid();
 
     VirtualMachineDetails getDetails();
 

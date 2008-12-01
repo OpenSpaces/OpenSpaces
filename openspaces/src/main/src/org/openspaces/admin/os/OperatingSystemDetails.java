@@ -7,7 +7,7 @@ public interface OperatingSystemDetails {
 
     boolean isNA();
 
-    String getUID();
+    String getUid();
 
     String getName();
 

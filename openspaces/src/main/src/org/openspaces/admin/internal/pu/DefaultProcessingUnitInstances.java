@@ -16,7 +16,7 @@ public class DefaultProcessingUnitInstances implements InternalProcessingUnitIns
     private final Map<String, ProcessingUnitInstance> processingUnitInstnaces = new ConcurrentHashMap<String, ProcessingUnitInstance>();
 
     public void addOrphaned(ProcessingUnitInstance processingUnitInstance) {
-        orphanedProcessingUnitInstnaces.put(processingUnitInstance.getUID(), processingUnitInstance);
+        orphanedProcessingUnitInstnaces.put(processingUnitInstance.getUid(), processingUnitInstance);
     }
 
     public ProcessingUnitInstance removeOrphaned(String uid) {
@@ -24,7 +24,7 @@ public class DefaultProcessingUnitInstances implements InternalProcessingUnitIns
     }
 
     public void addInstance(ProcessingUnitInstance processingUnitInstance) {
-        processingUnitInstnaces.put(processingUnitInstance.getUID(), processingUnitInstance);
+        processingUnitInstnaces.put(processingUnitInstance.getUid(), processingUnitInstance);
     }
 
     public ProcessingUnitInstance removeInstnace(String uid) {

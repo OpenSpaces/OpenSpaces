@@ -21,7 +21,7 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
 
     public DefaultOperatingSystem(OSDetails osDetails) {
         this.details = new DefaultOperatingSystemDetails(osDetails);
-        this.uid = details.getUID();
+        this.uid = details.getUid();
     }
 
     public void addOperatingSystemInfoProvider(InternalOperatingSystemInfoProvider provider) {
@@ -36,7 +36,7 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
         return !operatingSystemInfoProviders.isEmpty();
     }
 
-    public String getUID() {
+    public String getUid() {
         return this.uid;
     }
 

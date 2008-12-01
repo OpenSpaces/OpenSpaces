@@ -963,7 +963,7 @@
     </library>
     <library name="Groovy">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/lib/groovy/groovy-all-1.5.4.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/groovy/groovy-all-1.5.7.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />

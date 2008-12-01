@@ -25,7 +25,7 @@ public class DefaultSpace implements InternalSpace {
         this.name = name;
     }
 
-    public String getUID() {
+    public String getUid() {
         return this.uid;
     }
 
@@ -74,7 +74,7 @@ public class DefaultSpace implements InternalSpace {
                 spacePartitions.put(i, new DefaultSpacePartition(this, i));
             }
         }
-        spaceInstances.put(spaceInstance.getUID(), spaceInstance);
+        spaceInstances.put(spaceInstance.getUid(), spaceInstance);
         InternalSpacePartition spacePartition = (InternalSpacePartition) spacePartitions.get(spaceInstance.getInstanceId() - 1);
         internalSpaceInstance.setPartition(spacePartition);
         spacePartition.addSpaceInstance(spaceInstance);
@@ -86,8 +86,12 @@ public class DefaultSpace implements InternalSpace {
         return spaceInstance;
     }
 
-    public int size() {
+    public int getSize() {
         return spaceInstances.size();
+    }
+
+    public boolean isEmpty() {
+        return spaceInstances.size() == 0;
     }
 
     private <T> T doWithInstance(InstanceCallback<T> callback, T naValue) {

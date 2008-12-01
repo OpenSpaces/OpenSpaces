@@ -36,7 +36,7 @@ public class DefaultSpaces implements InternalSpaces {
     }
 
     public synchronized void addSpace(Space space) {
-        spacesByUID.put(space.getUID(), space);
+        spacesByUID.put(space.getUid(), space);
         spacesByName.put(space.getName(), space);
     }
 
@@ -49,7 +49,7 @@ public class DefaultSpaces implements InternalSpaces {
     }
 
     public void addSpaceInstance(SpaceInstance spaceInstance) {
-        spacesInstances.put(spaceInstance.getUID(), spaceInstance);
+        spacesInstances.put(spaceInstance.getUid(), spaceInstance);
     }
 
     public SpaceInstance removeSpaceInstance(String uid) {

@@ -40,7 +40,7 @@ public class DefaultProcessingUnitPartition implements InternalProcessingUnitPar
     }
 
     public void addProcessingUnitInstance(ProcessingUnitInstance processingUnitInstance) {
-        processingUnitInstances.put(processingUnitInstance.getUID(), processingUnitInstance);
+        processingUnitInstances.put(processingUnitInstance.getUid(), processingUnitInstance);
     }
 
     public void removeProcessingUnitInstance(String uid) {

@@ -31,7 +31,7 @@ public class DefaultLookupService extends AbstractGridComponent implements Inter
         this.serviceID = serviceID;
     }
 
-    public String getUID() {
+    public String getUid() {
         return getServiceID().toString();
     }
 

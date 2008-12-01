@@ -5,7 +5,7 @@ package org.openspaces.admin.os;
  */
 public interface OperatingSystem {
 
-    String getUID();
+    String getUid();
 
     OperatingSystemDetails getDetails();
 

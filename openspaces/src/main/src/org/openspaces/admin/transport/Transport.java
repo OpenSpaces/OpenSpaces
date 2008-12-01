@@ -5,7 +5,7 @@ package org.openspaces.admin.transport;
  */
 public interface Transport {
 
-    String getUID();
+    String getUid();
 
     String getLocalHostAddress();
 

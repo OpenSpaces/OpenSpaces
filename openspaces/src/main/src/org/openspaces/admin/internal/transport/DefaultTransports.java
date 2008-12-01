@@ -47,7 +47,7 @@ public class DefaultTransports implements InternalTransports {
     }
 
     public void addTransport(Transport transport) {
-        transportsByUID.put(transport.getUID(), transport);
+        transportsByUID.put(transport.getUid(), transport);
         Set<Transport> transportByHost = transportsByHost.get(transport.getHost());
         if (transportByHost == null) {
             synchronized (transportsByHost) {

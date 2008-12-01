@@ -334,8 +334,8 @@ public class DefaultAdmin implements InternalAdmin {
         processingUnitInstances.removeOrphaned(uid);
         InternalProcessingUnitInstance processingUnitInstance = (InternalProcessingUnitInstance) processingUnitInstances.removeInstnace(uid);
         if (processingUnitInstance != null) {
-            ((InternalMachine) processingUnitInstance.getMachine()).removeProcessingUnitInstance(processingUnitInstance.getUID());
-            ((InternalVirtualMachine) processingUnitInstance.getVirtualMachine()).removeProcessingUnitInstance(processingUnitInstance.getUID());
+            ((InternalMachine) processingUnitInstance.getMachine()).removeProcessingUnitInstance(processingUnitInstance.getUid());
+            ((InternalVirtualMachine) processingUnitInstance.getVirtualMachine()).removeProcessingUnitInstance(processingUnitInstance.getUid());
             ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
             ((InternalGridServiceContainer) processingUnitInstance.getGridServiceContainer()).removeProcessingUnitInstance(uid);
         }
@@ -381,14 +381,14 @@ public class DefaultAdmin implements InternalAdmin {
             processOperatingSystemOnServiceRemoval(spaceInstance, spaceInstance);
             processVirtualMachineOnServiceRemoval(spaceInstance, spaceInstance);
 
-            ((InternalMachine) spaceInstance.getMachine()).removeSpaceInstance(spaceInstance.getUID());
-            ((InternalVirtualMachine) spaceInstance.getVirtualMachine()).removeSpaceInstance(spaceInstance.getUID());
+            ((InternalMachine) spaceInstance.getMachine()).removeSpaceInstance(spaceInstance.getUid());
+            ((InternalVirtualMachine) spaceInstance.getVirtualMachine()).removeSpaceInstance(spaceInstance.getUid());
 
             InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
             space.removeInstance(uid);
-            if (space.size() == 0) {
+            if (space.getSize() == 0) {
                 // no more instnaces, remove it completely
-                spaces.removeSpace(space.getUID());
+                spaces.removeSpace(space.getUid());
             }
         }
 
@@ -396,7 +396,7 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     private synchronized void processProcessingUnitInstanceAddition(InternalProcessingUnit processingUnit, InternalProcessingUnitInstance processingUnitInstance) {
-        processingUnitInstances.removeOrphaned(processingUnitInstance.getUID());
+        processingUnitInstances.removeOrphaned(processingUnitInstance.getUid());
 
         processingUnitInstance.setProcessingUnit(processingUnit);
         processingUnit.addProcessingUnitInstance(processingUnitInstance);
@@ -452,8 +452,8 @@ public class DefaultAdmin implements InternalAdmin {
         InternalVirtualMachine virtualMachine = (InternalVirtualMachine) vmProvider.getVirtualMachine();
         virtualMachine.removeVirtualMachineInfoProvider(vmProvider);
         if (!virtualMachine.hasVirtualMachineInfoProviders()) {
-            virtualMachines.removeVirtualMachine(virtualMachine.getUID());
-            ((InternalVirtualMachines) machineAware.getMachine().getVirtualMachines()).removeVirtualMachine(virtualMachine.getUID());
+            virtualMachines.removeVirtualMachine(virtualMachine.getUid());
+            ((InternalVirtualMachines) machineAware.getMachine().getVirtualMachines()).removeVirtualMachine(virtualMachine.getUid());
         }
     }
 
@@ -472,8 +472,8 @@ public class DefaultAdmin implements InternalAdmin {
         InternalTransport transport = ((InternalTransport) txProvider.getTransport());
         transport.removeTransportInfoProvider(txProvider);
         if (!transport.hasTransportInfoProviders()) {
-            transports.removeTransport(transport.getUID());
-            ((InternalTransports) machineAware.getMachine().getTransports()).removeTransport(transport.getUID());
+            transports.removeTransport(transport.getUid());
+            ((InternalTransports) machineAware.getMachine().getTransports()).removeTransport(transport.getUid());
         }
     }
 
@@ -492,7 +492,7 @@ public class DefaultAdmin implements InternalAdmin {
         InternalOperatingSystem os = (InternalOperatingSystem) osProvider.getOperatingSystem();
         os.removeOperatingSystemInfoProvider(osProvider);
         if (!os.hasOperatingSystemInfoProviders()) {
-            operatingSystems.removeOperatingSystem(os.getUID());
+            operatingSystems.removeOperatingSystem(os.getUid());
             ((InternalMachine) machineAware.getMachine()).setOperatingSystem(null);
         }
     }
@@ -516,7 +516,7 @@ public class DefaultAdmin implements InternalAdmin {
                             holder.managingGSM = gsm;
                         } else {
                             holder.backupDetail = detail;
-                            holder.backupGSMs.put(gsm.getUID(), gsm);
+                            holder.backupGSMs.put(gsm.getUid(), gsm);
                         }
                     }
                 } catch (Exception e) {
@@ -551,24 +551,24 @@ public class DefaultAdmin implements InternalAdmin {
                             processingUnit.setManagingGridServiceManager(null);
                         }
                     } else {
-                        if (!processingUnit.isManaged() || !processingUnit.getManagingGridServiceManager().getUID().equals(holder.managingGSM.getUID())) {
+                        if (!processingUnit.isManaged() || !processingUnit.getManagingGridServiceManager().getUid().equals(holder.managingGSM.getUid())) {
                             // we changed managing GSM
                             processingUnit.setManagingGridServiceManager(holder.managingGSM);
                             // if it was in the backups, remove it from it
-                            if (processingUnit.getBackupGridServiceManager(holder.managingGSM.getUID()) != null) {
-                                processingUnit.removeBackupGridServiceManager(holder.managingGSM.getUID());
+                            if (processingUnit.getBackupGridServiceManager(holder.managingGSM.getUid()) != null) {
+                                processingUnit.removeBackupGridServiceManager(holder.managingGSM.getUid());
                             }
                         }
                     }
                     // handle backup GSM removal
                     for (GridServiceManager backupGSM : processingUnit.getBackupGridServiceManagers()) {
-                        if (!holder.backupGSMs.containsKey(backupGSM.getUID())) {
-                            processingUnit.removeBackupGridServiceManager(backupGSM.getUID());
+                        if (!holder.backupGSMs.containsKey(backupGSM.getUid())) {
+                            processingUnit.removeBackupGridServiceManager(backupGSM.getUid());
                         }
                     }
                     // handle new backup GSMs
                     for (GridServiceManager backupGSM : holder.backupGSMs.values()) {
-                        if (processingUnit.getBackupGridServiceManager(backupGSM.getUID()) == null) {
+                        if (processingUnit.getBackupGridServiceManager(backupGSM.getUid()) == null) {
                             processingUnit.addBackupGridServiceManager(backupGSM);
                         }
                     }

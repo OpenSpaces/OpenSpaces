@@ -34,7 +34,7 @@ public class DefaultGridServiceContainer extends AbstractGridComponent implement
         this.gsc = gsc;
     }
 
-    public String getUID() {
+    public String getUid() {
         return serviceID.toString();
     }
 

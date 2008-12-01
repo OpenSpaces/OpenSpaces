@@ -32,7 +32,7 @@ public class DefaultGridServiceManager extends AbstractGridComponent implements 
         this.gsmAdmin = (ProvisionMonitorAdmin) gsm.getAdmin();
     }
 
-    public String getUID() {
+    public String getUid() {
         return serviceID.toString();
     }
 
