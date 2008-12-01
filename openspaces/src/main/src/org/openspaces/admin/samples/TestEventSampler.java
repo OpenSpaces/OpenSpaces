@@ -7,7 +7,8 @@ import org.openspaces.admin.gsc.GridServiceContainerEventListener;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagerEventListener;
 import org.openspaces.admin.lus.LookupService;
-import org.openspaces.admin.lus.LookupServiceEventListener;
+import org.openspaces.admin.lus.events.LookupServiceAddedEventListener;
+import org.openspaces.admin.lus.events.LookupServiceRemovedEventListener;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.machine.events.MachineAddedEventListener;
 import org.openspaces.admin.machine.events.MachineRemovedEventListener;
@@ -22,7 +23,8 @@ import org.openspaces.admin.vm.VirtualMachineEventListener;
  * @author kimchy
  */
 public class TestEventSampler implements MachineAddedEventListener, MachineRemovedEventListener, ProcessingUnitEventListener,
-        GridServiceManagerEventListener, GridServiceContainerEventListener, LookupServiceEventListener,
+        GridServiceManagerEventListener, GridServiceContainerEventListener,
+        LookupServiceAddedEventListener, LookupServiceRemovedEventListener,
         VirtualMachineEventListener {
 
     public static void main(String[] args) throws Exception {
@@ -31,7 +33,8 @@ public class TestEventSampler implements MachineAddedEventListener, MachineRemov
         admin.getMachines().getMachineAdded().add(eventSampler);
         admin.getMachines().getMachineRemoved().add(eventSampler);
         admin.getProcessingUnits().addEventListener(eventSampler);
-        admin.getLookupServices().addEventListener(eventSampler);
+        admin.getLookupServices().getLookupServiceAdded().add(eventSampler);
+        admin.getLookupServices().getLookupServiceRemoved().add(eventSampler);
         admin.getGridServiceManagers().addEventListener(eventSampler);
         admin.getGridServiceContainers().addEventListener(eventSampler);
         admin.getVirtualMachines().addEventListener(eventSampler);

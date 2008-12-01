@@ -1,11 +1,17 @@
 package org.openspaces.admin.lus;
 
+import org.openspaces.admin.Admin;
+import org.openspaces.admin.lus.events.LookupServiceAddedEventManager;
+import org.openspaces.admin.lus.events.LookupServiceRemovedEventManager;
+
 import java.util.Map;
 
 /**
  * @author kimchy
  */
 public interface LookupServices extends Iterable<LookupService> {
+
+    Admin getAdmin();
 
     LookupService[] getLookupServices();
 
@@ -17,7 +23,7 @@ public interface LookupServices extends Iterable<LookupService> {
 
     boolean isEmpty();
 
-    void addEventListener(LookupServiceEventListener eventListener);
+    LookupServiceAddedEventManager getLookupServiceAdded();
 
-    void removeEventListener(LookupServiceEventListener eventListener);
+    LookupServiceRemovedEventManager getLookupServiceRemoved();
 }

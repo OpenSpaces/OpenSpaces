@@ -1,15 +1,19 @@
 package org.openspaces.admin.internal.lus;
 
 import com.j_spaces.kernel.SizeConcurrentHashMap;
+import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.lus.events.DefaultLookupServiceAddedEventManager;
+import org.openspaces.admin.internal.lus.events.DefaultLookupServiceRemovedEventManager;
+import org.openspaces.admin.internal.lus.events.InternalLookupServiceAddedEventManager;
+import org.openspaces.admin.internal.lus.events.InternalLookupServiceRemovedEventManager;
 import org.openspaces.admin.lus.LookupService;
-import org.openspaces.admin.lus.LookupServiceEventListener;
+import org.openspaces.admin.lus.events.LookupServiceAddedEventManager;
+import org.openspaces.admin.lus.events.LookupServiceRemovedEventManager;
 
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author kimchy
@@ -20,10 +24,18 @@ public class DefaultLookupServices implements InternalLookupServices {
 
     private final Map<String, LookupService> lookupServiceMap = new SizeConcurrentHashMap<String, LookupService>();
 
-    private final List<LookupServiceEventListener> eventListeners = new CopyOnWriteArrayList<LookupServiceEventListener>();
+    private final InternalLookupServiceAddedEventManager lookupServiceAddedEventManager;
+
+    private final InternalLookupServiceRemovedEventManager lookupServiceRemovedEventManager;
 
     public DefaultLookupServices(InternalAdmin admin) {
         this.admin = admin;
+        this.lookupServiceAddedEventManager = new DefaultLookupServiceAddedEventManager(this);
+        this.lookupServiceRemovedEventManager = new DefaultLookupServiceRemovedEventManager(this);
+    }
+
+    public Admin getAdmin() {
+        return this.admin;
     }
 
     public LookupService[] getLookupServices() {
@@ -53,42 +65,23 @@ public class DefaultLookupServices implements InternalLookupServices {
     public void addLookupService(final InternalLookupService lookupService) {
         LookupService existingLookupService = lookupServiceMap.put(lookupService.getUid(), lookupService);
         if (existingLookupService == null) {
-            for (final LookupServiceEventListener eventListener : eventListeners) {
-                admin.pushEvent(eventListener, new Runnable() {
-                    public void run() {
-                        eventListener.lookupServiceAdded(lookupService);
-                    }
-                });
-            }
+            lookupServiceAddedEventManager.lookupServiceAdded(lookupService);
         }
     }
 
     public InternalLookupService removeLookupService(String UID) {
         final InternalLookupService existingLookupService = (InternalLookupService) lookupServiceMap.remove(UID);
         if (existingLookupService != null) {
-            for (final LookupServiceEventListener eventListener : eventListeners) {
-                admin.pushEvent(eventListener, new Runnable() {
-                    public void run() {
-                        eventListener.lookupServiceRemoved(existingLookupService);
-                    }
-                });
-            }
+            lookupServiceRemovedEventManager.lookupServiceRemoved(existingLookupService);
         }
         return existingLookupService;
     }
 
-    public void addEventListener(final LookupServiceEventListener eventListener) {
-        admin.raiseEvent(eventListener, new Runnable() {
-            public void run() {
-                for (LookupService lookupService : getLookupServices()) {
-                    eventListener.lookupServiceAdded(lookupService);
-                }
-            }
-        });
-        eventListeners.add(eventListener);
+    public LookupServiceAddedEventManager getLookupServiceAdded() {
+        return this.lookupServiceAddedEventManager;
     }
 
-    public void removeEventListener(LookupServiceEventListener eventListener) {
-        eventListeners.remove(eventListener);
+    public LookupServiceRemovedEventManager getLookupServiceRemoved() {
+        return this.lookupServiceRemovedEventManager;
     }
 }

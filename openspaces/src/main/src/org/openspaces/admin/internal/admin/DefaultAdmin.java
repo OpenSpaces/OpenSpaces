@@ -522,7 +522,7 @@ public class DefaultAdmin implements InternalAdmin {
                         }
                     }
                 } catch (ConnectException e) {
-                    if (e.getCause() instanceof ClosedChannelException) {
+                    if (e.getCause() instanceof ClosedChannelException || e.getCause() instanceof java.net.ConnectException) {
                         // the GSM is down, continue
                         continue;
                     }
