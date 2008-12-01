@@ -6,7 +6,8 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
 import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventListener;
 import org.openspaces.admin.gsm.GridServiceManager;
-import org.openspaces.admin.gsm.GridServiceManagerEventListener;
+import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventListener;
+import org.openspaces.admin.gsm.events.GridServiceManagerRemovedEventListener;
 import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.lus.events.LookupServiceAddedEventListener;
 import org.openspaces.admin.lus.events.LookupServiceRemovedEventListener;
@@ -25,8 +26,8 @@ import org.openspaces.admin.vm.VirtualMachineEventListener;
  */
 public class TestEventSampler implements MachineAddedEventListener, MachineRemovedEventListener,
         GridServiceContainerAddedEventListener, GridServiceContainerRemovedEventListener,
+        GridServiceManagerAddedEventListener, GridServiceManagerRemovedEventListener,
         ProcessingUnitEventListener,
-        GridServiceManagerEventListener,
         LookupServiceAddedEventListener, LookupServiceRemovedEventListener,
         VirtualMachineEventListener {
 
@@ -38,7 +39,8 @@ public class TestEventSampler implements MachineAddedEventListener, MachineRemov
         admin.getProcessingUnits().addEventListener(eventSampler);
         admin.getLookupServices().getLookupServiceAdded().add(eventSampler);
         admin.getLookupServices().getLookupServiceRemoved().add(eventSampler);
-        admin.getGridServiceManagers().addEventListener(eventSampler);
+        admin.getGridServiceManagers().getGridServiceManagerAdded().add(eventSampler);
+        admin.getGridServiceManagers().getGridServiceManagerRemoved().add(eventSampler);
         admin.getGridServiceContainers().getGridServiceContainerAdded().add(eventSampler);
         admin.getGridServiceContainers().getGridServiceContainerRemoved().add(eventSampler);
         admin.getVirtualMachines().addEventListener(eventSampler);

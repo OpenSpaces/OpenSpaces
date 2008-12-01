@@ -1,11 +1,17 @@
 package org.openspaces.admin.gsm;
 
+import org.openspaces.admin.Admin;
+import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventManager;
+import org.openspaces.admin.gsm.events.GridServiceManagerRemovedEventManager;
+
 import java.util.Map;
 
 /**
  * @author kimchy
  */
 public interface GridServiceManagers extends Iterable<GridServiceManager> {
+
+    Admin getAdmin();
 
     GridServiceManager[] getManagers();
 
@@ -17,7 +23,7 @@ public interface GridServiceManagers extends Iterable<GridServiceManager> {
 
     boolean isEmpty();
 
-    void addEventListener(GridServiceManagerEventListener eventListener);
+    GridServiceManagerAddedEventManager getGridServiceManagerAdded();
 
-    void removeEventListener(GridServiceManagerEventListener eventListener);
+    GridServiceManagerRemovedEventManager getGridServiceManagerRemoved();
 }
