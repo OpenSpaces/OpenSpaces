@@ -3,6 +3,7 @@ import org.openspaces.admin.gsc.GridServiceContainer
 import org.openspaces.admin.gsm.GridServiceManager
 import org.openspaces.admin.lus.LookupService
 import org.openspaces.admin.machine.Machine
+import org.openspaces.admin.vm.VirtualMachine
 
 admin = new AdminFactory().addGroup("kimchy").createAdmin();
 while (true) {
@@ -14,5 +15,7 @@ while (true) {
   admin.gridServiceContainers.gridServiceContainerRemoved << {GridServiceContainer gridServiceContainer -> println "GSC [$gridServiceContainer.uid] Removed"}
   admin.gridServiceManagers.gridServiceManagerAdded << {GridServiceManager gridServiceManger -> println "GSM [$gridServiceManger.uid] Added"}
   admin.gridServiceManagers.gridServiceManagerRemoved << {GridServiceManager gridServiceManger -> println "GSM [$gridServiceManger.uid] Removed"}
+  admin.virtualMachines.virtualMachineAdded << {VirtualMachine virtualMachine -> println "VM [$virtualMachine.uid] Added"}
+  admin.virtualMachines.virtualMachineRemoved << {VirtualMachine virtualMachine -> println "VM [$virtualMachine.uid] Removed"}
   Thread.sleep 2000000
 }

@@ -19,7 +19,8 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitEventListener;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.vm.VirtualMachine;
-import org.openspaces.admin.vm.VirtualMachineEventListener;
+import org.openspaces.admin.vm.events.VirtualMachineAddedEventListener;
+import org.openspaces.admin.vm.events.VirtualMachineRemovedEventListener;
 
 /**
  * @author kimchy
@@ -29,7 +30,7 @@ public class TestEventSampler implements MachineAddedEventListener, MachineRemov
         GridServiceManagerAddedEventListener, GridServiceManagerRemovedEventListener,
         ProcessingUnitEventListener,
         LookupServiceAddedEventListener, LookupServiceRemovedEventListener,
-        VirtualMachineEventListener {
+        VirtualMachineAddedEventListener, VirtualMachineRemovedEventListener {
 
     public static void main(String[] args) throws Exception {
         TestEventSampler eventSampler = new TestEventSampler();
@@ -43,7 +44,8 @@ public class TestEventSampler implements MachineAddedEventListener, MachineRemov
         admin.getGridServiceManagers().getGridServiceManagerRemoved().add(eventSampler);
         admin.getGridServiceContainers().getGridServiceContainerAdded().add(eventSampler);
         admin.getGridServiceContainers().getGridServiceContainerRemoved().add(eventSampler);
-        admin.getVirtualMachines().addEventListener(eventSampler);
+        admin.getVirtualMachines().getVirtualMachineAdded().add(eventSampler);
+        admin.getVirtualMachines().getVirtualMachineRemoved().add(eventSampler);
 
         Thread.sleep(10000000);
     }

@@ -1,15 +1,19 @@
 package org.openspaces.admin.internal.vm;
 
 import com.j_spaces.kernel.SizeConcurrentHashMap;
+import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.vm.events.DefaultVirtualMachineAddedEventManager;
+import org.openspaces.admin.internal.vm.events.DefaultVirtualMachineRemovedEventManager;
+import org.openspaces.admin.internal.vm.events.InternalVirtualMachineAddedEventManager;
+import org.openspaces.admin.internal.vm.events.InternalVirtualMachineRemovedEventManager;
 import org.openspaces.admin.vm.VirtualMachine;
-import org.openspaces.admin.vm.VirtualMachineEventListener;
+import org.openspaces.admin.vm.events.VirtualMachineAddedEventManager;
+import org.openspaces.admin.vm.events.VirtualMachineRemovedEventManager;
 
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author kimchy
@@ -20,10 +24,26 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
 
     private final Map<String, VirtualMachine> virtualMachinesByUID = new SizeConcurrentHashMap<String, VirtualMachine>();
 
-    private final List<VirtualMachineEventListener> eventListeners = new CopyOnWriteArrayList<VirtualMachineEventListener>();
+    private final InternalVirtualMachineAddedEventManager virtualMachineAddedEventManager;
+
+    private final InternalVirtualMachineRemovedEventManager virtualMachineRemovedEventManager;
 
     public DefaultVirtualMachines(InternalAdmin admin) {
         this.admin = admin;
+        this.virtualMachineAddedEventManager = new DefaultVirtualMachineAddedEventManager(this);
+        this.virtualMachineRemovedEventManager = new DefaultVirtualMachineRemovedEventManager(this);
+    }
+
+    public Admin getAdmin() {
+        return this.admin;
+    }
+
+    public VirtualMachineAddedEventManager getVirtualMachineAdded() {
+        return this.virtualMachineAddedEventManager;
+    }
+
+    public VirtualMachineRemovedEventManager getVirtualMachineRemoved() {
+        return this.virtualMachineRemovedEventManager;
     }
 
     public VirtualMachine[] getVirtualMachines() {
@@ -53,42 +73,15 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
     public void addVirtualMachine(final VirtualMachine virtualMachine) {
         VirtualMachine existingVM = virtualMachinesByUID.put(virtualMachine.getUid(), virtualMachine);
         if (existingVM == null) {
-            for (final VirtualMachineEventListener eventListener : eventListeners) {
-                admin.pushEvent(eventListener, new Runnable() {
-                    public void run() {
-                        eventListener.virtualMachineAdded(virtualMachine);
-                    }
-                });
-            }
+            virtualMachineAddedEventManager.virtualMachineAdded(virtualMachine);
         }
     }
 
     public InternalVirtualMachine removeVirtualMachine(String uid) {
         final InternalVirtualMachine existingVM = (InternalVirtualMachine) virtualMachinesByUID.remove(uid);
         if (existingVM != null) {
-            for (final VirtualMachineEventListener eventListener : eventListeners) {
-                admin.pushEvent(eventListener, new Runnable() {
-                    public void run() {
-                        eventListener.virtualMachineRemoved(existingVM);
-                    }
-                });
-            }
+            virtualMachineRemovedEventManager.virtualMachineRemoved(existingVM);
         }
         return existingVM;
-    }
-
-    public void addEventListener(final VirtualMachineEventListener eventListener) {
-        admin.raiseEvent(eventListener, new Runnable() {
-            public void run() {
-                for (VirtualMachine virtualMachine : getVirtualMachines()) {
-                    eventListener.virtualMachineAdded(virtualMachine);
-                }
-            }
-        });
-        eventListeners.add(eventListener);
-    }
-
-    public void removeEventListener(VirtualMachineEventListener eventListener) {
-        eventListeners.remove(eventListener);
     }
 }
