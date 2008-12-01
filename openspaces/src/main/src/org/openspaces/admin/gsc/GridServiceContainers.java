@@ -1,11 +1,17 @@
 package org.openspaces.admin.gsc;
 
+import org.openspaces.admin.Admin;
+import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventManager;
+import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventManager;
+
 import java.util.Map;
 
 /**
  * @author kimchy
  */
 public interface GridServiceContainers extends Iterable<GridServiceContainer> {
+
+    Admin getAdmin();
 
     GridServiceContainer[] getContainers();
 
@@ -17,7 +23,7 @@ public interface GridServiceContainers extends Iterable<GridServiceContainer> {
 
     boolean isEmpty();
 
-    void addEventListener(GridServiceContainerEventListener eventListener);
+    GridServiceContainerAddedEventManager getGridServiceContainerAdded();
 
-    void removeEventListener(GridServiceContainerEventListener eventListener);
+    GridServiceContainerRemovedEventManager getGridServiceContainerRemoved();
 }

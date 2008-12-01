@@ -1,15 +1,19 @@
 package org.openspaces.admin.internal.gsc;
 
 import com.j_spaces.kernel.SizeConcurrentHashMap;
+import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.gsc.GridServiceContainerEventListener;
+import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventManager;
+import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.gsc.events.DefaultGridServiceContainerAddedEventManager;
+import org.openspaces.admin.internal.gsc.events.DefaultGridServiceContainerRemovedEventManager;
+import org.openspaces.admin.internal.gsc.events.InternalGridServiceContainerAddedEventManager;
+import org.openspaces.admin.internal.gsc.events.InternalGridServiceContainerRemovedEventManager;
 
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author kimchy
@@ -20,10 +24,26 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
 
     private final Map<String, GridServiceContainer> gridServiceContainerMap = new SizeConcurrentHashMap<String, GridServiceContainer>();
 
-    private final List<GridServiceContainerEventListener> eventListeners = new CopyOnWriteArrayList<GridServiceContainerEventListener>();
+    private final InternalGridServiceContainerAddedEventManager gridServiceContainerAddedEventManager;
+
+    private final InternalGridServiceContainerRemovedEventManager gridServiceContainerRemovedEventManager;
 
     public DefaultGridServiceContainers(InternalAdmin admin) {
         this.admin = admin;
+        this.gridServiceContainerAddedEventManager = new DefaultGridServiceContainerAddedEventManager(this);
+        this.gridServiceContainerRemovedEventManager = new DefaultGridServiceContainerRemovedEventManager(this);
+    }
+
+    public Admin getAdmin() {
+        return this.admin;
+    }
+
+    public GridServiceContainerAddedEventManager getGridServiceContainerAdded() {
+        return this.gridServiceContainerAddedEventManager;
+    }
+
+    public GridServiceContainerRemovedEventManager getGridServiceContainerRemoved() {
+        return this.gridServiceContainerRemovedEventManager;
     }
 
     public GridServiceContainer[] getContainers() {
@@ -53,42 +73,15 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
     public void addGridServiceContainer(final InternalGridServiceContainer gridServiceContainer) {
         final GridServiceContainer existingGSC = gridServiceContainerMap.put(gridServiceContainer.getUid(), gridServiceContainer);
         if (existingGSC == null) {
-            for (final GridServiceContainerEventListener eventListener : eventListeners) {
-                admin.pushEvent(eventListener, new Runnable() {
-                    public void run() {
-                        eventListener.gridServiceContainerAdded(gridServiceContainer);
-                    }
-                });
-            }
+            gridServiceContainerAddedEventManager.gridServiceContainerAdded(gridServiceContainer);
         }
     }
 
     public InternalGridServiceContainer removeGridServiceContainer(String uid) {
         final InternalGridServiceContainer existingGSC = (InternalGridServiceContainer) gridServiceContainerMap.remove(uid);
         if (existingGSC != null) {
-            for (final GridServiceContainerEventListener eventListener : eventListeners) {
-                admin.pushEvent(eventListener, new Runnable() {
-                    public void run() {
-                        eventListener.gridServiceContainerRemoved(existingGSC);
-                    }
-                });
-            }
+            gridServiceContainerRemovedEventManager.gridServiceContainerRemoved(existingGSC);
         }
         return existingGSC;
-    }
-
-    public void addEventListener(final GridServiceContainerEventListener eventListener) {
-        admin.raiseEvent(eventListener, new Runnable() {
-            public void run() {
-                for (GridServiceContainer gridServiceContainer : getContainers()) {
-                    eventListener.gridServiceContainerAdded(gridServiceContainer);
-                }
-            }
-        });
-        eventListeners.add(eventListener);
-    }
-
-    public void removeEventListener(GridServiceContainerEventListener eventListener) {
-        eventListeners.remove(eventListener);
     }
 }

@@ -3,7 +3,8 @@ package org.openspaces.admin.samples;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.gsc.GridServiceContainerEventListener;
+import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
+import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventListener;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagerEventListener;
 import org.openspaces.admin.lus.LookupService;
@@ -22,8 +23,10 @@ import org.openspaces.admin.vm.VirtualMachineEventListener;
 /**
  * @author kimchy
  */
-public class TestEventSampler implements MachineAddedEventListener, MachineRemovedEventListener, ProcessingUnitEventListener,
-        GridServiceManagerEventListener, GridServiceContainerEventListener,
+public class TestEventSampler implements MachineAddedEventListener, MachineRemovedEventListener,
+        GridServiceContainerAddedEventListener, GridServiceContainerRemovedEventListener,
+        ProcessingUnitEventListener,
+        GridServiceManagerEventListener,
         LookupServiceAddedEventListener, LookupServiceRemovedEventListener,
         VirtualMachineEventListener {
 
@@ -36,7 +39,8 @@ public class TestEventSampler implements MachineAddedEventListener, MachineRemov
         admin.getLookupServices().getLookupServiceAdded().add(eventSampler);
         admin.getLookupServices().getLookupServiceRemoved().add(eventSampler);
         admin.getGridServiceManagers().addEventListener(eventSampler);
-        admin.getGridServiceContainers().addEventListener(eventSampler);
+        admin.getGridServiceContainers().getGridServiceContainerAdded().add(eventSampler);
+        admin.getGridServiceContainers().getGridServiceContainerRemoved().add(eventSampler);
         admin.getVirtualMachines().addEventListener(eventSampler);
 
         Thread.sleep(10000000);
@@ -59,7 +63,7 @@ public class TestEventSampler implements MachineAddedEventListener, MachineRemov
     }
 
     public void processingUnitStatusChanged(ProcessingUnit processingUnit, DeploymentStatus oldStatus, DeploymentStatus newStatus) {
-        System.out.println("Processing Unit Deployment Status changed from [" + oldStatus + "] to [" + newStatus +"]");
+        System.out.println("Processing Unit Deployment Status changed from [" + oldStatus + "] to [" + newStatus + "]");
     }
 
     public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstance) {
