@@ -1,6 +1,6 @@
 package org.openspaces.admin.gsc;
 
-import org.openspaces.admin.Admin;
+import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventManager;
 import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventManager;
 
@@ -9,9 +9,7 @@ import java.util.Map;
 /**
  * @author kimchy
  */
-public interface GridServiceContainers extends Iterable<GridServiceContainer> {
-
-    Admin getAdmin();
+public interface GridServiceContainers extends AdminAware, Iterable<GridServiceContainer> {
 
     GridServiceContainer[] getContainers();
 

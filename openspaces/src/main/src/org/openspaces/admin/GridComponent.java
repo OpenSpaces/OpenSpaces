@@ -8,9 +8,7 @@ import org.openspaces.admin.vm.VirtualMachineAware;
 /**
  * @author kimchy
  */
-public interface GridComponent extends MachineAware, TransportAware, OperatingSystemAware, VirtualMachineAware {
+public interface GridComponent extends AdminAware, MachineAware, TransportAware, OperatingSystemAware, VirtualMachineAware {
 
     String getUid();
-
-    Admin getAdmin();
 }

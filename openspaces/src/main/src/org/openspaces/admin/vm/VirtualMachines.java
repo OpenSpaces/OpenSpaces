@@ -1,6 +1,6 @@
 package org.openspaces.admin.vm;
 
-import org.openspaces.admin.Admin;
+import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.vm.events.VirtualMachineAddedEventManager;
 import org.openspaces.admin.vm.events.VirtualMachineRemovedEventManager;
 
@@ -9,9 +9,7 @@ import java.util.Map;
 /**
  * @author kimchy
  */
-public interface VirtualMachines extends Iterable<VirtualMachine> {
-
-    Admin getAdmin();
+public interface VirtualMachines extends AdminAware, Iterable<VirtualMachine> {
 
     VirtualMachine[] getVirtualMachines();
 
