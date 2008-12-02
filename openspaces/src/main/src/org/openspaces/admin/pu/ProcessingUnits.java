@@ -1,6 +1,13 @@
 package org.openspaces.admin.pu;
 
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
+import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
 
 import java.util.Map;
 
@@ -21,7 +28,17 @@ public interface ProcessingUnits extends Iterable<ProcessingUnit> {
 
     Map<String, ProcessingUnit> getNames();
 
-    void addEventListener(ProcessingUnitEventListener eventListener);
+    ProcessingUnitAddedEventManager getProcessingUnitAdded();
 
-    void removeEventListener(ProcessingUnitEventListener eventListener);
+    ProcessingUnitRemovedEventManager getProcessingUnitRemoved();
+
+    ManagingGridServiceManagerChangedEventManager getManagingGridServiceManagerChanged();
+
+    BackupGridServiceManagerChangedEventManager getBackupGridServiceManagerChanged();
+
+    ProcessingUnitStatusChangedEventManager getProcessingUnitStatusChanged();
+
+    ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded();
+
+    ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved();
 }

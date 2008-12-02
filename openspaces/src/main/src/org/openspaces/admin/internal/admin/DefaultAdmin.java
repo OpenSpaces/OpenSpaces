@@ -548,8 +548,6 @@ public class DefaultAdmin implements InternalAdmin {
                 if (processingUnit == null) {
                     processingUnit = new DefaultProcessingUnit(DefaultAdmin.this, processingUnits, details);
                     newProcessingUnit = true;
-                } else {
-                    processingUnit.setStatus(details.getStatus());
                 }
                 if (!newProcessingUnit) {
                     // handle managing GSM
@@ -587,6 +585,8 @@ public class DefaultAdmin implements InternalAdmin {
                         processingUnit.addBackupGridServiceManager(backupGSM);
                     }
                 }
+
+                processingUnit.setStatus(details.getStatus());
             }
 
             // Now, process any orphaned processing unit instances

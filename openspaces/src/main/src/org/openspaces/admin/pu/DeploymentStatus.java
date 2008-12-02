@@ -5,6 +5,10 @@ package org.openspaces.admin.pu;
  */
 public enum DeploymentStatus {
     /**
+     * Deployment status is not available.
+     */
+    NA,
+    /**
      * Indicates the Processing Unit is not deployed
      */
     UNDEPLOYED,

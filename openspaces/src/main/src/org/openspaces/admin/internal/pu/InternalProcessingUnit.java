@@ -7,7 +7,7 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 /**
  * @author kimchy
  */
-public interface InternalProcessingUnit extends ProcessingUnit {
+public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessingUnitInstancesAware {
 
     void setManagingGridServiceManager(GridServiceManager gridServiceManager);
 

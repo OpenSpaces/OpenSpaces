@@ -3,11 +3,18 @@ package org.openspaces.admin.internal.pu;
 import com.gigaspaces.grid.gsm.PUDetails;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.pu.events.*;
 import org.openspaces.admin.pu.DeploymentStatus;
-import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.admin.pu.ProcessingUnitEventListener;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
+import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEvent;
+import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
+import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEvent;
+import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent;
+import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -28,7 +35,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     private final int numberOfBackups;
 
-    private volatile DeploymentStatus deploymentStatus = null;
+    private volatile DeploymentStatus deploymentStatus = DeploymentStatus.NA;
 
     private volatile GridServiceManager managingGridServiceManager;
 
@@ -38,21 +45,56 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     private final Map<Integer, ProcessingUnitPartition> processingUnitPartitions = new ConcurrentHashMap<Integer, ProcessingUnitPartition>();
 
+    private final InternalManagingGridServiceManagerChangedEventManager managingGridServiceManagerChangedEventManager;
+
+    private final InternalBackupGridServiceManagerChangedEventManager backupGridServiceManagerChangedEventManager;
+
+    private final InternalProcessingUnitStatusChangedEventManager processingUnitStatusChangedEventManager;
+
+    private final InternalProcessingUnitInstanceAddedEventManager processingUnitInstanceAddedEventManager;
+
+    private final InternalProcessingUnitInstanceRemovedEventManager processingUnitInstanceRemovedEventManager;
+
     public DefaultProcessingUnit(InternalAdmin admin, InternalProcessingUnits processingUnits, PUDetails details) {
         this.admin = admin;
         this.processingUnits = processingUnits;
         this.name = details.getName();
         this.numberOfInstances = details.getNumberOfInstances();
         this.numberOfBackups = details.getNumberOfBackups();
-        setStatus(details.getStatus());
 
         for (int i = 0; i < numberOfInstances; i++) {
             processingUnitPartitions.put(i, new DefaultProcessingUnitPartition(this, i));
         }
+
+        this.managingGridServiceManagerChangedEventManager = new DefaultManagingGridServiceManagerChangedEventManager(admin);
+        this.backupGridServiceManagerChangedEventManager = new DefaultBackupGridServiceManagerChangedEventManager(admin);
+        this.processingUnitStatusChangedEventManager = new DefaultProcessingUnitStatusChangedEventManager(admin);
+        this.processingUnitInstanceAddedEventManager = new DefaultProcessingUnitInstanceAddedEventManager(this, admin);
+        this.processingUnitInstanceRemovedEventManager = new DefaultProcessingUnitInstanceRemovedEventManager(admin);
     }
 
     public String getName() {
         return this.name;
+    }
+
+    public ManagingGridServiceManagerChangedEventManager getManagingGridServiceManagerChanged() {
+        return this.managingGridServiceManagerChangedEventManager;
+    }
+
+    public BackupGridServiceManagerChangedEventManager getBackupGridServiceManagerChanged() {
+        return this.backupGridServiceManagerChangedEventManager;
+    }
+
+    public ProcessingUnitStatusChangedEventManager getProcessingUnitStatusChanged() {
+        return this.processingUnitStatusChangedEventManager;
+    }
+
+    public ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded() {
+        return this.processingUnitInstanceAddedEventManager;
+    }
+
+    public ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved() {
+        return this.processingUnitInstanceRemovedEventManager;
     }
 
     public int getNumberOfInstances() {
@@ -84,45 +126,30 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     }
 
     public void setManagingGridServiceManager(GridServiceManager gridServiceManager) {
-        final GridServiceManager oldManaging = this.managingGridServiceManager;
+        final GridServiceManager previousManaging = this.managingGridServiceManager;
         final GridServiceManager newManaging = gridServiceManager;
+
         this.managingGridServiceManager = gridServiceManager;
-        for (final ProcessingUnitEventListener listener : processingUnits.getEventListeners()) {
-            admin.pushEvent(listener, new Runnable() {
-                public void run() {
-                    if (newManaging == null) {
-                        listener.processingUnitManagingGridServiceManagerUnknown(DefaultProcessingUnit.this);
-                    } else {
-                        listener.processingUnitManagingGridServiceManagerSet(DefaultProcessingUnit.this, oldManaging, newManaging);
-                    }
-                }
-            });
-        }
+        ManagingGridServiceManagerChangedEvent event = new ManagingGridServiceManagerChangedEvent(this, newManaging, previousManaging);
+        managingGridServiceManagerChangedEventManager.processingUnitManagingGridServiceManagerChanged(event);
+        ((InternalManagingGridServiceManagerChangedEventManager) processingUnits.getManagingGridServiceManagerChanged()).processingUnitManagingGridServiceManagerChanged(event);
     }
 
     public void addBackupGridServiceManager(final GridServiceManager backupGridServiceManager) {
         GridServiceManager gridServiceManager = this.backupGridServiceManagers.put(backupGridServiceManager.getUid(), backupGridServiceManager);
         if (gridServiceManager == null) {
-            for (final ProcessingUnitEventListener listener : processingUnits.getEventListeners()) {
-                admin.pushEvent(listener, new Runnable() {
-                    public void run() {
-                        listener.processingUnitBackupGridServiceManagerAdded(DefaultProcessingUnit.this, backupGridServiceManager);
-                    }
-                });
-            }
+            BackupGridServiceManagerChangedEvent event = new BackupGridServiceManagerChangedEvent(this, BackupGridServiceManagerChangedEvent.Type.ADDED, backupGridServiceManager);
+            backupGridServiceManagerChangedEventManager.processingUnitBackupGridServiceManagerChanged(event);
+            ((InternalBackupGridServiceManagerChangedEventManager) processingUnits.getBackupGridServiceManagerChanged()).processingUnitBackupGridServiceManagerChanged(event);
         }
     }
 
     public void removeBackupGridServiceManager(String gsmUID) {
         final GridServiceManager existingGridServiceManager = backupGridServiceManagers.remove(gsmUID);
         if (existingGridServiceManager != null) {
-            for (final ProcessingUnitEventListener listener : processingUnits.getEventListeners()) {
-                admin.pushEvent(listener, new Runnable() {
-                    public void run() {
-                        listener.processingUnitBackupGridServiceManagerRemoved(DefaultProcessingUnit.this, existingGridServiceManager);
-                    }
-                });
-            }
+            BackupGridServiceManagerChangedEvent event = new BackupGridServiceManagerChangedEvent(this, BackupGridServiceManagerChangedEvent.Type.REMOVED, existingGridServiceManager);
+            backupGridServiceManagerChangedEventManager.processingUnitBackupGridServiceManagerChanged(event);
+            ((InternalBackupGridServiceManagerChangedEventManager) processingUnits.getBackupGridServiceManagerChanged()).processingUnitBackupGridServiceManagerChanged(event);
         }
     }
 
@@ -150,17 +177,10 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
             default:
                 throw new IllegalStateException("No status match");
         }
-        if (deploymentStatus != null && tempStatus != deploymentStatus) {
-            final ProcessingUnit thisPU = this;
-            final DeploymentStatus oldDeploymentStatus = deploymentStatus;
-            final DeploymentStatus newDeploymentStatus = tempStatus;
-            for (final ProcessingUnitEventListener listener : processingUnits.getEventListeners()) {
-                admin.raiseEvent(listener, new Runnable() {
-                    public void run() {
-                        listener.processingUnitStatusChanged(thisPU, oldDeploymentStatus, newDeploymentStatus);
-                    }
-                });
-            }
+        if (tempStatus != deploymentStatus) {
+            ProcessingUnitStatusChangedEvent event = new ProcessingUnitStatusChangedEvent(this, deploymentStatus, tempStatus);
+            processingUnitStatusChangedEventManager.processingUnitStatusChanged(event);
+            ((InternalProcessingUnitStatusChangedEventManager) processingUnits.getProcessingUnitStatusChanged()).processingUnitStatusChanged(event);
             deploymentStatus = tempStatus;
             return true;
         }
@@ -174,6 +194,10 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     public ProcessingUnitInstance[] getInstances() {
         return processingUnitInstances.values().toArray(new ProcessingUnitInstance[0]);
+    }
+
+    public ProcessingUnitInstance[] getProcessingUnitInstances() {
+        return getInstances();
     }
 
     public ProcessingUnitPartition[] getPartitions() {
@@ -192,13 +216,8 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
         // handle events
         if (existingProcessingUnitInstance == null) {
-            for (final ProcessingUnitEventListener listener : processingUnits.getEventListeners()) {
-                admin.pushEvent(listener, new Runnable() {
-                    public void run() {
-                        listener.processingUnitInstanceAdded(processingUnitInstance);
-                    }
-                });
-            }
+            processingUnitInstanceAddedEventManager.processingUnitInstanceAdded(processingUnitInstance);
+            ((InternalProcessingUnitInstanceAddedEventManager) processingUnits.getProcessingUnitInstanceAdded()).processingUnitInstanceAdded(processingUnitInstance);
         }
     }
 
@@ -208,13 +227,8 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
             InternalProcessingUnitPartition partition = ((InternalProcessingUnitPartition) processingUnitPartitions.get(processingUnitInstance.getInstanceId() - 1));
             partition.removeProcessingUnitInstance(uid);
 
-            for (final ProcessingUnitEventListener listener : processingUnits.getEventListeners()) {
-                admin.pushEvent(listener, new Runnable() {
-                    public void run() {
-                        listener.processingUnitInstanceRemoved(processingUnitInstance);
-                    }
-                });
-            }
+            processingUnitInstanceRemovedEventManager.processingUnitInstanceRemoved(processingUnitInstance);
+            ((InternalProcessingUnitInstanceRemovedEventManager) processingUnits.getProcessingUnitInstanceRemoved()).processingUnitInstanceRemoved(processingUnitInstance);
         }
     }
 
