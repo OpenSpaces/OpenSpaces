@@ -462,6 +462,9 @@ public class DefaultAdmin implements InternalAdmin {
         processingUnitInstances.removeOrphaned(uid);
         InternalProcessingUnitInstance processingUnitInstance = (InternalProcessingUnitInstance) processingUnitInstances.removeInstnace(uid);
         if (processingUnitInstance != null) {
+            processTransportOnServiceRemoval(processingUnitInstance, processingUnitInstance);
+            processOperatingSystemOnServiceRemoval(processingUnitInstance, processingUnitInstance);
+            processVirtualMachineOnServiceRemoval(processingUnitInstance, processingUnitInstance);
             ((InternalMachine) processingUnitInstance.getMachine()).removeProcessingUnitInstance(processingUnitInstance.getUid());
             ((InternalVirtualMachine) processingUnitInstance.getVirtualMachine()).removeProcessingUnitInstance(processingUnitInstance.getUid());
             ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
