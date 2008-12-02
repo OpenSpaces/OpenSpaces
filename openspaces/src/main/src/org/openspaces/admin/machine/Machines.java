@@ -2,6 +2,7 @@ package org.openspaces.admin.machine;
 
 import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.machine.events.MachineAddedEventManager;
+import org.openspaces.admin.machine.events.MachineLifecycleEventListener;
 import org.openspaces.admin.machine.events.MachineRemovedEventManager;
 
 import java.util.Map;
@@ -22,6 +23,10 @@ public interface Machines extends AdminAware, Iterable<Machine> {
     int getSize();
 
     boolean isEmpty();
+
+    void addLifecycleListener(MachineLifecycleEventListener eventListener);
+
+    void removeLifeycleListener(MachineLifecycleEventListener eventListener);
 
     MachineAddedEventManager getMachineAdded();
 

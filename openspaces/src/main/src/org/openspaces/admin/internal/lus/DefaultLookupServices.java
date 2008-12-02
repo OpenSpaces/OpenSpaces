@@ -9,6 +9,7 @@ import org.openspaces.admin.internal.lus.events.InternalLookupServiceAddedEventM
 import org.openspaces.admin.internal.lus.events.InternalLookupServiceRemovedEventManager;
 import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.lus.events.LookupServiceAddedEventManager;
+import org.openspaces.admin.lus.events.LookupServiceLifecycleEventListener;
 import org.openspaces.admin.lus.events.LookupServiceRemovedEventManager;
 
 import java.util.Collections;
@@ -60,6 +61,16 @@ public class DefaultLookupServices implements InternalLookupServices {
 
     public boolean isEmpty() {
         return lookupServiceMap.isEmpty();
+    }
+
+    public void addLifecycleListener(LookupServiceLifecycleEventListener eventListener) {
+        getLookupServiceAdded().add(eventListener);
+        getLookupServiceRemoved().add(eventListener);
+    }
+
+    public void removeLifecycleListener(LookupServiceLifecycleEventListener eventListener) {
+        getLookupServiceAdded().remove(eventListener);
+        getLookupServiceRemoved().remove(eventListener);
     }
 
     public void addLookupService(final InternalLookupService lookupService) {

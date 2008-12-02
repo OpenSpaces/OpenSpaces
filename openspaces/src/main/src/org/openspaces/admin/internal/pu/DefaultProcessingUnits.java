@@ -10,7 +10,9 @@ import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManage
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
 
@@ -120,6 +122,32 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
 
     public boolean isEmpty() {
         return processingUnits.size() == 0;
+    }
+
+    public void addLifecycleListener(ProcessingUnitLifecycleEventListener eventListener) {
+        getProcessingUnitAdded().add(eventListener);
+        getProcessingUnitRemoved().add(eventListener);
+        getProcessingUnitStatusChanged().add(eventListener);
+        getManagingGridServiceManagerChanged().add(eventListener);
+        getBackupGridServiceManagerChanged().add(eventListener);
+    }
+
+    public void removeLifecycleListener(ProcessingUnitLifecycleEventListener eventListener) {
+        getProcessingUnitAdded().remove(eventListener);
+        getProcessingUnitRemoved().remove(eventListener);
+        getProcessingUnitStatusChanged().remove(eventListener);
+        getManagingGridServiceManagerChanged().remove(eventListener);
+        getBackupGridServiceManagerChanged().remove(eventListener);
+    }
+
+    public void addInstanceLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
+        getProcessingUnitInstanceAdded().add(eventListener);
+        getProcessingUnitInstanceRemoved().add(eventListener);
+    }
+
+    public void removeInstanceLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
+        getProcessingUnitInstanceAdded().remove(eventListener);
+        getProcessingUnitInstanceRemoved().remove(eventListener);
     }
 
     public void addProcessingUnit(final ProcessingUnit processingUnit) {

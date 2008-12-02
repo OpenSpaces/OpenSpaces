@@ -9,6 +9,7 @@ import org.openspaces.admin.internal.machine.events.InternalMachineAddedEventMan
 import org.openspaces.admin.internal.machine.events.InternalMachineRemovedEventManager;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.machine.events.MachineAddedEventManager;
+import org.openspaces.admin.machine.events.MachineLifecycleEventListener;
 import org.openspaces.admin.machine.events.MachineRemovedEventManager;
 
 import java.util.Collections;
@@ -79,6 +80,16 @@ public class DefaultMachines implements InternalMachines {
 
     public Map<String, Machine> getHosts() {
         return Collections.unmodifiableMap(machinesByHost);
+    }
+
+    public void addLifecycleListener(MachineLifecycleEventListener eventListener) {
+        getMachineAdded().add(eventListener);
+        getMachineRemoved().add(eventListener);
+    }
+
+    public void removeLifeycleListener(MachineLifecycleEventListener eventListener) {
+        getMachineAdded().remove(eventListener);
+        getMachineRemoved().remove(eventListener);
     }
 
     public void addMachine(final InternalMachine machine) {

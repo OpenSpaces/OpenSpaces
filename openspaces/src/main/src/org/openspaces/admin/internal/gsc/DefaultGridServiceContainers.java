@@ -4,6 +4,7 @@ import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventManager;
+import org.openspaces.admin.gsc.events.GridServiceContainerLifecycleEventListener;
 import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsc.events.DefaultGridServiceContainerAddedEventManager;
@@ -64,6 +65,16 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
 
     public boolean isEmpty() {
         return gridServiceContainerMap.isEmpty();
+    }
+
+    public void addLifecycleListener(GridServiceContainerLifecycleEventListener eventListener) {
+        getGridServiceContainerAdded().add(eventListener);
+        getGridServiceContainerRemoved().add(eventListener);
+    }
+
+    public void removeLifecycleListener(GridServiceContainerLifecycleEventListener eventListener) {
+        getGridServiceContainerAdded().remove(eventListener);
+        getGridServiceContainerRemoved().remove(eventListener);
     }
 
     public Iterator<GridServiceContainer> iterator() {

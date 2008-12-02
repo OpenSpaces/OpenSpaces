@@ -2,6 +2,7 @@ package org.openspaces.admin.gsm;
 
 import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventManager;
+import org.openspaces.admin.gsm.events.GridServiceManagerLifecycleEventListener;
 import org.openspaces.admin.gsm.events.GridServiceManagerRemovedEventManager;
 
 import java.util.Map;
@@ -20,6 +21,10 @@ public interface GridServiceManagers extends AdminAware, Iterable<GridServiceMan
     int getSize();
 
     boolean isEmpty();
+
+    void addLifecycleListener(GridServiceManagerLifecycleEventListener eventListener);
+
+    void removeLifecycleListener(GridServiceManagerLifecycleEventListener eventListener);
 
     GridServiceManagerAddedEventManager getGridServiceManagerAdded();
 

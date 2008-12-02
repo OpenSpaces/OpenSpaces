@@ -5,7 +5,9 @@ import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManage
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
 
@@ -27,6 +29,14 @@ public interface ProcessingUnits extends Iterable<ProcessingUnit> {
     ProcessingUnit getProcessingUnit(String name);
 
     Map<String, ProcessingUnit> getNames();
+
+    void addLifecycleListener(ProcessingUnitLifecycleEventListener eventListener);
+
+    void removeLifecycleListener(ProcessingUnitLifecycleEventListener eventListener);
+
+    void addInstanceLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
+
+    void removeInstanceLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
     ProcessingUnitAddedEventManager getProcessingUnitAdded();
 

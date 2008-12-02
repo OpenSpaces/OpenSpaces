@@ -12,6 +12,7 @@ import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManage
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEvent;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
@@ -95,6 +96,16 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     public ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved() {
         return this.processingUnitInstanceRemovedEventManager;
+    }
+
+    public void addLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
+        getProcessingUnitInstanceAdded().add(eventListener);
+        getProcessingUnitInstanceRemoved().add(eventListener);
+    }
+
+    public void removeLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
+        getProcessingUnitInstanceAdded().remove(eventListener);
+        getProcessingUnitInstanceRemoved().remove(eventListener);
     }
 
     public int getNumberOfInstances() {

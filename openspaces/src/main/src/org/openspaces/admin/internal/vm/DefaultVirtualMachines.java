@@ -9,6 +9,7 @@ import org.openspaces.admin.internal.vm.events.InternalVirtualMachineAddedEventM
 import org.openspaces.admin.internal.vm.events.InternalVirtualMachineRemovedEventManager;
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.admin.vm.events.VirtualMachineAddedEventManager;
+import org.openspaces.admin.vm.events.VirtualMachineLifecycleEventListener;
 import org.openspaces.admin.vm.events.VirtualMachineRemovedEventManager;
 
 import java.util.Collections;
@@ -60,6 +61,16 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
 
     public boolean isEmpty() {
         return virtualMachinesByUID.size() == 0;
+    }
+
+    public void addLifecycleListener(VirtualMachineLifecycleEventListener eventListener) {
+        getVirtualMachineAdded().add(eventListener);
+        getVirtualMachineRemoved().add(eventListener);
+    }
+
+    public void removeLifecycleListener(VirtualMachineLifecycleEventListener eventListener) {
+        getVirtualMachineAdded().remove(eventListener);
+        getVirtualMachineRemoved().remove(eventListener);
     }
 
     public VirtualMachine getVirtualMachineByUID(String uid) {

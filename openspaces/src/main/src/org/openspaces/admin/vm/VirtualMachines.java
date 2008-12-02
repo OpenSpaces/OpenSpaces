@@ -2,6 +2,7 @@ package org.openspaces.admin.vm;
 
 import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.vm.events.VirtualMachineAddedEventManager;
+import org.openspaces.admin.vm.events.VirtualMachineLifecycleEventListener;
 import org.openspaces.admin.vm.events.VirtualMachineRemovedEventManager;
 
 import java.util.Map;
@@ -20,6 +21,10 @@ public interface VirtualMachines extends AdminAware, Iterable<VirtualMachine> {
     int getSize();
 
     boolean isEmpty();
+
+    void addLifecycleListener(VirtualMachineLifecycleEventListener eventListener);
+
+    void removeLifecycleListener(VirtualMachineLifecycleEventListener eventListener);
 
     VirtualMachineAddedEventManager getVirtualMachineAdded();
 

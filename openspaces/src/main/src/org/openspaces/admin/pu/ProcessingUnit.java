@@ -4,6 +4,7 @@ import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
 
@@ -36,6 +37,10 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance> {
     ProcessingUnitPartition[] getPartitions();
 
     ProcessingUnitPartition getPartition(int partitionId);
+
+    void addLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
+
+    void removeLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
     ManagingGridServiceManagerChangedEventManager getManagingGridServiceManagerChanged();
 

@@ -3,58 +3,38 @@ package org.openspaces.admin.samples;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
-import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventListener;
+import org.openspaces.admin.gsc.events.GridServiceContainerLifecycleEventListener;
 import org.openspaces.admin.gsm.GridServiceManager;
-import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventListener;
-import org.openspaces.admin.gsm.events.GridServiceManagerRemovedEventListener;
+import org.openspaces.admin.gsm.events.GridServiceManagerLifecycleEventListener;
 import org.openspaces.admin.lus.LookupService;
-import org.openspaces.admin.lus.events.LookupServiceAddedEventListener;
-import org.openspaces.admin.lus.events.LookupServiceRemovedEventListener;
+import org.openspaces.admin.lus.events.LookupServiceLifecycleEventListener;
 import org.openspaces.admin.machine.Machine;
-import org.openspaces.admin.machine.events.MachineAddedEventListener;
-import org.openspaces.admin.machine.events.MachineRemovedEventListener;
+import org.openspaces.admin.machine.events.MachineLifecycleEventListener;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
-import org.openspaces.admin.pu.events.*;
+import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEvent;
+import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEvent;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitLifecycleEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent;
 import org.openspaces.admin.vm.VirtualMachine;
-import org.openspaces.admin.vm.events.VirtualMachineAddedEventListener;
-import org.openspaces.admin.vm.events.VirtualMachineRemovedEventListener;
+import org.openspaces.admin.vm.events.VirtualMachineLifecycleEventListener;
 
 /**
  * @author kimchy
  */
-public class TestEventSampler implements MachineAddedEventListener, MachineRemovedEventListener,
-        GridServiceContainerAddedEventListener, GridServiceContainerRemovedEventListener,
-        GridServiceManagerAddedEventListener, GridServiceManagerRemovedEventListener,
-        ProcessingUnitAddedEventListener, ProcessingUnitRemovedEventListener,
-        ProcessingUnitInstanceAddedEventListener, ProcessingUnitInstanceRemovedEventListener,
-        ProcessingUnitStatusChangedEventListener,
-        ManagingGridServiceManagerChangedEventListener, BackupGridServiceManagerChangedEventListener, 
-        LookupServiceAddedEventListener, LookupServiceRemovedEventListener,
-        VirtualMachineAddedEventListener, VirtualMachineRemovedEventListener {
+public class TestEventSampler implements MachineLifecycleEventListener,
+        GridServiceContainerLifecycleEventListener,
+        GridServiceManagerLifecycleEventListener,
+        ProcessingUnitLifecycleEventListener,
+        ProcessingUnitInstanceLifecycleEventListener,
+        LookupServiceLifecycleEventListener,
+        VirtualMachineLifecycleEventListener {
 
     public static void main(String[] args) throws Exception {
         TestEventSampler eventSampler = new TestEventSampler();
         Admin admin = new AdminFactory().addGroup("kimchy").createAdmin();
-        admin.getMachines().getMachineAdded().add(eventSampler);
-        admin.getMachines().getMachineRemoved().add(eventSampler);
-        admin.getLookupServices().getLookupServiceAdded().add(eventSampler);
-        admin.getLookupServices().getLookupServiceRemoved().add(eventSampler);
-        admin.getGridServiceManagers().getGridServiceManagerAdded().add(eventSampler);
-        admin.getGridServiceManagers().getGridServiceManagerRemoved().add(eventSampler);
-        admin.getGridServiceContainers().getGridServiceContainerAdded().add(eventSampler);
-        admin.getGridServiceContainers().getGridServiceContainerRemoved().add(eventSampler);
-        admin.getVirtualMachines().getVirtualMachineAdded().add(eventSampler);
-        admin.getVirtualMachines().getVirtualMachineRemoved().add(eventSampler);
-
-        admin.getProcessingUnits().getProcessingUnitAdded().add(eventSampler);
-        admin.getProcessingUnits().getProcessingUnitRemoved().add(eventSampler);
-        admin.getProcessingUnits().getProcessingUnitInstanceAdded().add(eventSampler);
-        admin.getProcessingUnits().getProcessingUnitInstanceRemoved().add(eventSampler);
-        admin.getProcessingUnits().getProcessingUnitStatusChanged().add(eventSampler);
-        admin.getProcessingUnits().getManagingGridServiceManagerChanged().add(eventSampler);
-        admin.getProcessingUnits().getBackupGridServiceManagerChanged().add(eventSampler);
+        admin.addEventListener(eventSampler);
 
         Thread.sleep(10000000);
     }

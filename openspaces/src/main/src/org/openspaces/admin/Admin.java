@@ -37,4 +37,11 @@ public interface Admin {
     ProcessingUnits getProcessingUnits();
 
     Spaces getSpaces();
+
+    /**
+     * Smart addition of event listeners basde on implemented interfaces.
+     */
+    void addEventListener(AdminEventListener eventListener);
+
+    void removeEventListener(AdminEventListener eventListener);
 }
