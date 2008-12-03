@@ -116,7 +116,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     private LinkedList<Runnable>[] eventsQueue;
 
-    private volatile long scheduledProcessingUnitMonitorInterval = 1000; // default to one second 
+    private volatile long scheduledProcessingUnitMonitorInterval = 1000; // default to one second
+
+    private volatile long scheduledSpaceMonitorInterval = 1000; // default to one second
 
     private Future scheduledProcessingUnitMonitorFuture;
 
@@ -134,7 +136,6 @@ public class DefaultAdmin implements InternalAdmin {
         discoveryService.addLocator(locator);
     }
 
-    // should be called once after construction
     public void begin() {
         eventsExecutorServices = new ExecutorService[eventsNumberOfThreads];
         eventsQueue = new LinkedList[eventsNumberOfThreads];
@@ -158,6 +159,15 @@ public class DefaultAdmin implements InternalAdmin {
             scheduledProcessingUnitMonitorFuture.cancel(false);
             scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(new ScheduledProcessingUnitMonitor(), interval, interval, timeUnit);
         }
+    }
+
+    public long getScheduledSpaceMonitorInterval() {
+        return scheduledSpaceMonitorInterval;
+    }
+
+    public synchronized void setSpaceMonitorInterval(long interval, TimeUnit timeUnit) {
+        this.scheduledSpaceMonitorInterval = timeUnit.toMillis(interval);
+        this.spaces.refreshScheduledSpaceMonitors();
     }
 
     public ScheduledThreadPoolExecutor getScheduler() {

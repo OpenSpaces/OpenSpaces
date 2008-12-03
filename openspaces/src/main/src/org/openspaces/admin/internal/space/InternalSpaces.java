@@ -16,4 +16,6 @@ public interface InternalSpaces extends Spaces, InternalSpaceInstancesAware {
     void addSpaceInstance(SpaceInstance spaceInstance);
 
     SpaceInstance removeSpaceInstance(String uid);
+
+    void refreshScheduledSpaceMonitors();
 }

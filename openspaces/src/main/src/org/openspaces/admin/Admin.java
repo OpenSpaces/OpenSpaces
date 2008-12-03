@@ -18,6 +18,8 @@ public interface Admin {
 
     void setProcessingUnitMonitorInterval(long interval, TimeUnit timeUnit);
 
+    void setSpaceMonitorInterval(long interval, TimeUnit timeUnit);
+
     void setSchedulerCorePoolSize(int coreThreads);
 
     void close();

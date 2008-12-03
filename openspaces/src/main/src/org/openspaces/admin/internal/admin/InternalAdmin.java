@@ -19,6 +19,8 @@ public interface InternalAdmin extends Admin {
 
     ScheduledThreadPoolExecutor getScheduler();
 
+    long getScheduledSpaceMonitorInterval();
+
     void pushEvent(Object listener, Runnable notifier);
 
     void pushEventAsFirst(Object listener, Runnable notifier);

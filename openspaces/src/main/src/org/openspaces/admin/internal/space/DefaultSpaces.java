@@ -146,4 +146,10 @@ public class DefaultSpaces implements InternalSpaces {
     public SpaceInstance removeSpaceInstance(String uid) {
         return spacesInstances.remove(uid);
     }
+
+    public void refreshScheduledSpaceMonitors() {
+        for (Space space : this) {
+            ((InternalSpace) space).refreshScheduledSpaceMonitors();
+        }
+    }
 }

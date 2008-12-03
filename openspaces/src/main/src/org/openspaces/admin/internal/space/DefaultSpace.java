@@ -142,7 +142,7 @@ public class DefaultSpace implements InternalSpace {
         Future fetcher = scheduledRuntimeFetchers.get(spaceInstance.getUid());
         if (fetcher == null) {
             // TODO make the schedule configurable
-            fetcher = admin.getScheduler().scheduleWithFixedDelay(new ScheduledRuntimeFetcher(spaceInstance), 1000, 1000, TimeUnit.MILLISECONDS);
+            fetcher = admin.getScheduler().scheduleWithFixedDelay(new ScheduledRuntimeFetcher(spaceInstance), admin.getScheduledSpaceMonitorInterval(), admin.getScheduledSpaceMonitorInterval(), TimeUnit.MILLISECONDS);
             scheduledRuntimeFetchers.put(spaceInstance.getUid(), fetcher);
         }
     }
@@ -159,6 +159,17 @@ public class DefaultSpace implements InternalSpace {
             }
         }
         return spaceInstance;
+    }
+
+    // no need to sync since it is synced on Admin
+    public void refreshScheduledSpaceMonitors() {
+        for (Future fetcher : scheduledRuntimeFetchers.values()) {
+            fetcher.cancel(false);
+        }
+        for (SpaceInstance spaceInstance : this) {
+            Future fetcher = admin.getScheduler().scheduleWithFixedDelay(new ScheduledRuntimeFetcher(spaceInstance), admin.getScheduledSpaceMonitorInterval(), admin.getScheduledSpaceMonitorInterval(), TimeUnit.MILLISECONDS);
+            scheduledRuntimeFetchers.put(spaceInstance.getUid(), fetcher);
+        }
     }
 
     public int getSize() {
