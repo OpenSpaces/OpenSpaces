@@ -12,5 +12,5 @@ public interface InternalMachines extends Machines {
     
     void addMachine(InternalMachine machine);
 
-    void removeMachine(InternalMachine machine);
+    void removeMachine(Machine machine);
 }

@@ -100,7 +100,7 @@ public class DefaultMachines implements InternalMachines {
         }
     }
 
-    public void removeMachine(final InternalMachine machine) {
+    public void removeMachine(final Machine machine) {
         machinesByHost.remove(machine.getHost());
         final Machine existingMachine = machinesById.remove(machine.getUid());
         if (existingMachine != null) {

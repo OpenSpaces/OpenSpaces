@@ -27,7 +27,7 @@ public class DefaultMachineAddedEventManager implements InternalMachineAddedEven
 
     public void machineAdded(final Machine machine) {
         for (final MachineAddedEventListener listener : machineAddedEventListeners) {
-            admin.pushEvent(listener, new Runnable() {
+            admin.pushEventAsFirst(listener, new Runnable() {
                 public void run() {
                     listener.machineAdded(machine);
                 }

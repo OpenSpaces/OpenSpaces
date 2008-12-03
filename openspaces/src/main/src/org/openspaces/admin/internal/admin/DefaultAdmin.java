@@ -55,6 +55,7 @@ import org.openspaces.admin.internal.vm.InternalVirtualMachine;
 import org.openspaces.admin.internal.vm.InternalVirtualMachineInfoProvider;
 import org.openspaces.admin.internal.vm.InternalVirtualMachines;
 import org.openspaces.admin.lus.LookupServices;
+import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.machine.Machines;
 import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -70,9 +71,8 @@ import org.openspaces.admin.vm.VirtualMachines;
 
 import java.nio.channels.ClosedChannelException;
 import java.rmi.ConnectException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -115,7 +115,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     private int eventsNumberOfThreads = 10;
 
-    private List<Runnable>[] eventsQueue;
+    private LinkedList<Runnable>[] eventsQueue;
 
     private volatile long scheduledProcessingUnitMonitorInterval = 1000; // default to one second 
 
@@ -138,10 +138,10 @@ public class DefaultAdmin implements InternalAdmin {
     // should be called once after construction
     public void begin() {
         eventsExecutorServices = new ExecutorService[eventsNumberOfThreads];
-        eventsQueue = new List[eventsNumberOfThreads];
+        eventsQueue = new LinkedList[eventsNumberOfThreads];
         for (int i = 0; i < eventsNumberOfThreads; i++) {
             eventsExecutorServices[i] = Executors.newFixedThreadPool(1);
-            eventsQueue[i] = new ArrayList<Runnable>();
+            eventsQueue[i] = new LinkedList<Runnable>();
         }
 
         discoveryService.start();
@@ -221,6 +221,10 @@ public class DefaultAdmin implements InternalAdmin {
         eventsQueue[Math.abs(listener.hashCode()) % eventsExecutorServices.length].add(new LoggerRunnable(notifier));
     }
 
+    public synchronized void pushEventAsFirst(Object listener, Runnable notifier) {
+        eventsQueue[Math.abs(listener.hashCode()) % eventsExecutorServices.length].addFirst(new LoggerRunnable(notifier));
+    }
+
     public synchronized void flushEvents() {
         for (int i = 0; i < eventsNumberOfThreads; i++) {
             for (Runnable notifier : eventsQueue[i]) {
@@ -257,6 +261,7 @@ public class DefaultAdmin implements InternalAdmin {
             processTransportOnServiceRemoval(lookupService, lookupService);
             processOperatingSystemOnServiceRemoval(lookupService, lookupService);
             processVirtualMachineOnServiceRemoval(lookupService, lookupService);
+            processMachineOnServiceRemoval(lookupService);
             ((InternalLookupServices) ((InternalMachine) lookupService.getMachine()).getLookupServices()).removeLookupService(uid);
         }
 
@@ -287,6 +292,7 @@ public class DefaultAdmin implements InternalAdmin {
             processTransportOnServiceRemoval(gridServiceManager, gridServiceManager);
             processOperatingSystemOnServiceRemoval(gridServiceManager, gridServiceManager);
             processVirtualMachineOnServiceRemoval(gridServiceManager, gridServiceManager);
+            processMachineOnServiceRemoval(gridServiceManager);
             ((InternalGridServiceManagers) ((InternalMachine) gridServiceManager.getMachine()).getGridServiceManagers()).removeGridServiceManager(uid);
         }
 
@@ -317,6 +323,7 @@ public class DefaultAdmin implements InternalAdmin {
             processTransportOnServiceRemoval(gridServiceContainer, gridServiceContainer);
             processOperatingSystemOnServiceRemoval(gridServiceContainer, gridServiceContainer);
             processVirtualMachineOnServiceRemoval(gridServiceContainer, gridServiceContainer);
+            processMachineOnServiceRemoval(gridServiceContainer);
             ((InternalGridServiceContainers) ((InternalMachine) gridServiceContainer.getMachine()).getGridServiceContainers()).removeGridServiceContainer(uid);
         }
 
@@ -346,13 +353,15 @@ public class DefaultAdmin implements InternalAdmin {
         processingUnitInstances.removeOrphaned(uid);
         InternalProcessingUnitInstance processingUnitInstance = (InternalProcessingUnitInstance) processingUnitInstances.removeInstnace(uid);
         if (processingUnitInstance != null) {
+            ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
+            ((InternalGridServiceContainer) processingUnitInstance.getGridServiceContainer()).removeProcessingUnitInstance(uid);
+            ((InternalVirtualMachine) processingUnitInstance.getVirtualMachine()).removeProcessingUnitInstance(processingUnitInstance.getUid());
+            ((InternalMachine) processingUnitInstance.getMachine()).removeProcessingUnitInstance(processingUnitInstance.getUid());
+
             processTransportOnServiceRemoval(processingUnitInstance, processingUnitInstance);
             processOperatingSystemOnServiceRemoval(processingUnitInstance, processingUnitInstance);
             processVirtualMachineOnServiceRemoval(processingUnitInstance, processingUnitInstance);
-            ((InternalMachine) processingUnitInstance.getMachine()).removeProcessingUnitInstance(processingUnitInstance.getUid());
-            ((InternalVirtualMachine) processingUnitInstance.getVirtualMachine()).removeProcessingUnitInstance(processingUnitInstance.getUid());
-            ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
-            ((InternalGridServiceContainer) processingUnitInstance.getGridServiceContainer()).removeProcessingUnitInstance(uid);
+            processMachineOnServiceRemoval(processingUnitInstance);
         }
 
         flushEvents();
@@ -392,19 +401,19 @@ public class DefaultAdmin implements InternalAdmin {
     public synchronized void removeSpaceInstance(String uid) {
         InternalSpaceInstance spaceInstance = (InternalSpaceInstance) spaces.removeSpaceInstance(uid);
         if (spaceInstance != null) {
-            processTransportOnServiceRemoval(spaceInstance, spaceInstance);
-            processOperatingSystemOnServiceRemoval(spaceInstance, spaceInstance);
-            processVirtualMachineOnServiceRemoval(spaceInstance, spaceInstance);
-
-            ((InternalMachine) spaceInstance.getMachine()).removeSpaceInstance(spaceInstance.getUid());
-            ((InternalVirtualMachine) spaceInstance.getVirtualMachine()).removeSpaceInstance(spaceInstance.getUid());
-
             InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
             space.removeInstance(uid);
             if (space.getSize() == 0) {
                 // no more instnaces, remove it completely
                 spaces.removeSpace(space.getUid());
             }
+            ((InternalVirtualMachine) spaceInstance.getVirtualMachine()).removeSpaceInstance(spaceInstance.getUid());
+            ((InternalMachine) spaceInstance.getMachine()).removeSpaceInstance(spaceInstance.getUid());
+
+            processTransportOnServiceRemoval(spaceInstance, spaceInstance);
+            processOperatingSystemOnServiceRemoval(spaceInstance, spaceInstance);
+            processVirtualMachineOnServiceRemoval(spaceInstance, spaceInstance);
+            processMachineOnServiceRemoval(spaceInstance);
         }
 
         flushEvents();
@@ -450,6 +459,17 @@ public class DefaultAdmin implements InternalAdmin {
             machineAware.setMachine(machine);
         }
         return machine;
+    }
+
+    private void processMachineOnServiceRemoval(InternalMachineAware machineAware) {
+        Machine machine = machineAware.getMachine();
+        machine = machines.getMachineByUID(machine.getUid());
+        if (machine != null) {
+            if (machine.getVirtualMachines().isEmpty()) {
+                // no more virtual machines on the machine, we can remove it
+                machines.removeMachine(machine);
+            }
+        }
     }
 
     private InternalVirtualMachine processVirtualMachineOnServiceAddition(InternalVirtualMachineInfoProvider vmProvider, JVMDetails jvmDetails) {
