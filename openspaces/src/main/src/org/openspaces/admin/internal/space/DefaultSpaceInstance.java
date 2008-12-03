@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.space;
 
+import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.jvm.JVMStatistics;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
@@ -8,12 +9,12 @@ import com.gigaspaces.operatingsystem.OSDetails;
 import com.gigaspaces.operatingsystem.OSStatistics;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
-import com.j_spaces.core.admin.IRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.SpaceConfig;
 import com.j_spaces.core.client.SpaceURL;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
+import org.openspaces.admin.space.ReplicationTarget;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpacePartition;
 
@@ -47,6 +48,10 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     private volatile Space space;
 
     private volatile SpacePartition spacePartition;
+
+    private volatile SpaceMode spaceMode;
+
+    private volatile ReplicationTarget[] replicationTargets = new ReplicationTarget[0];
 
     public DefaultSpaceInstance(ServiceID serviceID, IJSpace ijSpace, IInternalRemoteJSpaceAdmin spaceAdmin,
                                 SpaceConfig spaceConfig, InternalAdmin admin) {
@@ -121,8 +126,24 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         return this.ijSpace;
     }
 
-    public IRemoteJSpaceAdmin getSpaceAdmin() {
+    public IInternalRemoteJSpaceAdmin getSpaceAdmin() {
         return this.spaceAdmin;
+    }
+
+    public void setMode(SpaceMode spaceMode) {
+        this.spaceMode = spaceMode;
+    }
+
+    public SpaceMode getMode() {
+        return this.spaceMode;
+    }
+
+    public ReplicationTarget[] getReplicationTargets() {
+        return replicationTargets;
+    }
+
+    public void setReplicationTargets(ReplicationTarget[] replicationTargets) {
+        this.replicationTargets = replicationTargets;
     }
 
     public Space getSpace() {

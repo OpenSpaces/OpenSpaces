@@ -10,10 +10,14 @@ import org.openspaces.admin.internal.lus.InternalLookupService;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
 
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+
 /**
  * @author kimchy
  */
 public interface InternalAdmin extends Admin {
+
+    ScheduledThreadPoolExecutor getScheduler();
 
     void pushEvent(Object listener, Runnable notifier);
 

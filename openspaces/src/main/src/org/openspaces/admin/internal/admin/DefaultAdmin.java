@@ -44,6 +44,7 @@ import org.openspaces.admin.internal.space.InternalSpace;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
 import org.openspaces.admin.internal.space.InternalSpaces;
 import org.openspaces.admin.internal.support.EventRegistrationHelper;
+import org.openspaces.admin.internal.support.NetworkExceptionHelper;
 import org.openspaces.admin.internal.transport.DefaultTransport;
 import org.openspaces.admin.internal.transport.DefaultTransports;
 import org.openspaces.admin.internal.transport.InternalTransport;
@@ -69,8 +70,6 @@ import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.admin.vm.VirtualMachines;
 
-import java.nio.channels.ClosedChannelException;
-import java.rmi.ConnectException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -159,6 +158,10 @@ public class DefaultAdmin implements InternalAdmin {
             scheduledProcessingUnitMonitorFuture.cancel(false);
             scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(new ScheduledProcessingUnitMonitor(), interval, interval, timeUnit);
         }
+    }
+
+    public ScheduledThreadPoolExecutor getScheduler() {
+        return this.scheduledExecutorService;
     }
 
     public void setSchedulerCorePoolSize(int coreThreads) {
@@ -378,7 +381,7 @@ public class DefaultAdmin implements InternalAdmin {
 
         InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
         if (space == null) {
-            space = new DefaultSpace(spaceInstance.getSpaceName(), spaceInstance.getSpaceName());
+            space = new DefaultSpace(this, spaceInstance.getSpaceName(), spaceInstance.getSpaceName());
             spaces.addSpace(space);
         }
         spaceInstance.setSpace(space);
@@ -554,13 +557,11 @@ public class DefaultAdmin implements InternalAdmin {
                             holder.backupGSMs.put(gsm.getUid(), gsm);
                         }
                     }
-                } catch (ConnectException e) {
-                    if (e.getCause() instanceof ClosedChannelException || e.getCause() instanceof java.net.ConnectException) {
-                        // the GSM is down, continue
+                } catch (Exception e) {
+                    if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
+                        // GSM is down, continue
                         continue;
                     }
-                    logger.warn("Failed to get GSM details", e);
-                } catch (Exception e) {
                     logger.warn("Failed to get GSM details", e);
                 }
             }

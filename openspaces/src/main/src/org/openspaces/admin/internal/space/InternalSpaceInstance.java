@@ -1,10 +1,12 @@
 package org.openspaces.admin.internal.space;
 
+import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.j_spaces.core.IJSpace;
-import com.j_spaces.core.admin.IRemoteJSpaceAdmin;
+import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.SpaceConfig;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.internal.support.InternalGridComponent;
+import org.openspaces.admin.space.ReplicationTarget;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.SpacePartition;
@@ -30,5 +32,9 @@ public interface InternalSpaceInstance extends SpaceInstance, InternalGridCompon
 
     IJSpace getIJSpace();
 
-    IRemoteJSpaceAdmin getSpaceAdmin();
+    IInternalRemoteJSpaceAdmin getSpaceAdmin();
+
+    void setMode(SpaceMode spaceMode);
+
+    void setReplicationTargets(ReplicationTarget[] replicationTargets);
 }

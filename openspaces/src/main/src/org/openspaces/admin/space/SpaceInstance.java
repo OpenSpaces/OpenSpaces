@@ -1,5 +1,6 @@
 package org.openspaces.admin.space;
 
+import com.gigaspaces.cluster.activeelection.SpaceMode;
 import org.openspaces.admin.GridComponent;
 
 /**
@@ -14,7 +15,11 @@ public interface SpaceInstance extends GridComponent {
 
     int getBackupId();
 
+    SpaceMode getMode();
+
     Space getSpace();
 
     SpacePartition getPartition();
+
+    ReplicationTarget[] getReplicationTargets();
 }
