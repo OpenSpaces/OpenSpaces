@@ -18,6 +18,8 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListen
 import org.openspaces.admin.pu.events.ProcessingUnitLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent;
 import org.openspaces.admin.space.Space;
+import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceLifecycleEventListener;
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.admin.vm.events.VirtualMachineLifecycleEventListener;
@@ -32,7 +34,8 @@ public class TestEventSampler implements MachineLifecycleEventListener,
         ProcessingUnitInstanceLifecycleEventListener,
         LookupServiceLifecycleEventListener,
         VirtualMachineLifecycleEventListener,
-        SpaceLifecycleEventListener {
+        SpaceLifecycleEventListener,
+        SpaceInstanceLifecycleEventListener {
 
     public static void main(String[] args) throws Exception {
         TestEventSampler eventSampler = new TestEventSampler();
@@ -120,5 +123,13 @@ public class TestEventSampler implements MachineLifecycleEventListener,
 
     public void spaceRemoved(Space space) {
         System.out.println("Space Removed [" + space.getUid() + "]");
+    }
+
+    public void spaceInstanceAdded(SpaceInstance spaceInstance) {
+        System.out.println("Space Instance Added [" + spaceInstance.getUid() + "]");
+    }
+
+    public void spaceInstanceRemoved(SpaceInstance spaceInstance) {
+        System.out.println("Space Instance Removed [" + spaceInstance.getUid() + "]");
     }
 }

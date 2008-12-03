@@ -1,5 +1,6 @@
-package org.openspaces.admin.space;
+package org.openspaces.admin.internal.space;
 
+import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
@@ -7,25 +8,11 @@ import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 /**
  * @author kimchy
  */
-public interface Space extends Iterable<SpaceInstance> {
+public interface InternalSpaceInstances extends InternalSpaceInstancesAware {
 
-    String getUid();
+    void addSpaceInstance(SpaceInstance spaceInstance);
 
-    String getName();
-
-    int getNumberOfInstances();
-
-    int getNumberOfBackups();
-
-    SpaceInstance[] getInstnaces();
-
-    SpacePartition[] getPartitions();
-
-    SpacePartition getPartition(int partitionId);
-
-    int getSize();
-
-    boolean isEmpty();
+    void removeSpaceInstance(String uid);
 
     SpaceInstanceAddedEventManager getSpaceInstanceAdded();
 
@@ -35,4 +22,3 @@ public interface Space extends Iterable<SpaceInstance> {
 
     void removeLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
 }
-

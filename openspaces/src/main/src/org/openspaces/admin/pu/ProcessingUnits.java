@@ -34,9 +34,9 @@ public interface ProcessingUnits extends Iterable<ProcessingUnit> {
 
     void removeLifecycleListener(ProcessingUnitLifecycleEventListener eventListener);
 
-    void addInstanceLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
+    void addLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
-    void removeInstanceLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
+    void removeLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
     ProcessingUnitAddedEventManager getProcessingUnitAdded();
 

@@ -2,6 +2,9 @@ package org.openspaces.admin.space;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.space.events.SpaceAddedEventManager;
+import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
+import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
+import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 import org.openspaces.admin.space.events.SpaceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceRemovedEventManager;
 
@@ -25,4 +28,12 @@ public interface Spaces extends Iterable<Space> {
     SpaceAddedEventManager getSpaceAdded();
 
     SpaceRemovedEventManager getSpaceRemoved();
+
+    SpaceInstanceAddedEventManager getSpaceInstanceAdded();
+
+    SpaceInstanceRemovedEventManager getSpaceInstanceRemoved();
+
+    void addLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
+
+    void removeLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
 }

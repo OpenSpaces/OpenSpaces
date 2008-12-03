@@ -9,6 +9,9 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
+import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
+import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
 
@@ -46,4 +49,12 @@ public interface Machine {
     void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
     SpaceInstance[] getSpaceInstances();
+
+    SpaceInstanceAddedEventManager getSpaceInstanceAdded();
+
+    SpaceInstanceRemovedEventManager getSpaceInstanceRemoved();
+
+    void addLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
+
+    void removeLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
 }

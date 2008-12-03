@@ -13,6 +13,8 @@ import org.openspaces.admin.internal.lus.InternalLookupServices;
 import org.openspaces.admin.internal.os.DefaultOperatingSystem;
 import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
+import org.openspaces.admin.internal.space.DefaultSpaceInstances;
+import org.openspaces.admin.internal.space.InternalSpaceInstances;
 import org.openspaces.admin.internal.transport.DefaultTransports;
 import org.openspaces.admin.internal.transport.InternalTransports;
 import org.openspaces.admin.internal.vm.DefaultVirtualMachines;
@@ -24,11 +26,11 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
+import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
+import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author kimchy
@@ -53,7 +55,7 @@ public class DefaultMachine implements InternalMachine {
 
     private final InternalProcessingUnitInstances processingUnitInstances;
 
-    private final Map<String, SpaceInstance> spaceInstances = new ConcurrentHashMap<String, SpaceInstance>();
+    private final InternalSpaceInstances spaceInstances;
 
     private volatile OperatingSystem operatingSystem;
 
@@ -66,6 +68,7 @@ public class DefaultMachine implements InternalMachine {
         this.gridServiceContainers = new DefaultGridServiceContainers(admin);
         this.virtualMachines = new DefaultVirtualMachines(admin);
         this.processingUnitInstances = new DefaultProcessingUnitInstances(admin);
+        this.spaceInstances = new DefaultSpaceInstances(admin);
     }
 
     public String getUid() {
@@ -138,7 +141,23 @@ public class DefaultMachine implements InternalMachine {
     }
 
     public SpaceInstance[] getSpaceInstances() {
-        return spaceInstances.values().toArray(new SpaceInstance[0]);
+        return spaceInstances.getSpaceInstances();
+    }
+
+    public SpaceInstanceAddedEventManager getSpaceInstanceAdded() {
+        return spaceInstances.getSpaceInstanceAdded();
+    }
+
+    public SpaceInstanceRemovedEventManager getSpaceInstanceRemoved() {
+        return spaceInstances.getSpaceInstanceRemoved();
+    }
+
+    public void addLifecycleListener(SpaceInstanceLifecycleEventListener eventListener) {
+        spaceInstances.addLifecycleListener(eventListener);
+    }
+
+    public void removeLifecycleListener(SpaceInstanceLifecycleEventListener eventListener) {
+        spaceInstances.removeLifecycleListener(eventListener);
     }
 
     public void addProcessingUnitInstance(ProcessingUnitInstance processingUnitInstance) {
@@ -150,11 +169,11 @@ public class DefaultMachine implements InternalMachine {
     }
 
     public void addSpaceInstance(SpaceInstance spaceInstance) {
-        spaceInstances.put(spaceInstance.getUid(), spaceInstance);
+        spaceInstances.addSpaceInstance(spaceInstance);
     }
 
     public void removeSpaceInstance(String uid) {
-        spaceInstances.remove(uid);
+        spaceInstances.removeSpaceInstance(uid);
     }
 
     @Override

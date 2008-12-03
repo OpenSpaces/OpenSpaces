@@ -6,7 +6,7 @@ import org.openspaces.admin.space.SpaceInstance;
 /**
  * @author kimchy
  */
-public interface InternalSpace extends Space {
+public interface InternalSpace extends Space, InternalSpaceInstancesAware {
 
     void addInstance(SpaceInstance spaceInstance);
 

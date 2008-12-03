@@ -7,7 +7,7 @@ import org.openspaces.admin.space.Spaces;
 /**
  * @author kimchy
  */
-public interface InternalSpaces extends Spaces {
+public interface InternalSpaces extends Spaces, InternalSpaceInstancesAware {
 
     void addSpace(Space space);
 

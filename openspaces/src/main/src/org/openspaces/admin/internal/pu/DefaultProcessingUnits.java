@@ -140,12 +140,12 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
         getBackupGridServiceManagerChanged().remove(eventListener);
     }
 
-    public void addInstanceLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
+    public void addLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
         getProcessingUnitInstanceAdded().add(eventListener);
         getProcessingUnitInstanceRemoved().add(eventListener);
     }
 
-    public void removeInstanceLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
+    public void removeLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
         getProcessingUnitInstanceAdded().remove(eventListener);
         getProcessingUnitInstanceRemoved().remove(eventListener);
     }

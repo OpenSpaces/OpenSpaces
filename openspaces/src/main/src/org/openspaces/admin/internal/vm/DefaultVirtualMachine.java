@@ -12,21 +12,24 @@ import org.openspaces.admin.internal.gsm.DefaultGridServiceManagers;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManagers;
 import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
+import org.openspaces.admin.internal.space.DefaultSpaceInstances;
+import org.openspaces.admin.internal.space.InternalSpaceInstances;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
+import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
+import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 import org.openspaces.admin.vm.VirtualMachineDetails;
 import org.openspaces.admin.vm.VirtualMachineStatistics;
 import org.openspaces.core.util.ConcurrentHashSet;
 
 import java.rmi.RemoteException;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author kimchy
@@ -49,7 +52,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     private final InternalProcessingUnitInstances processingUnitInstances;
 
-    private final Map<String, SpaceInstance> spaceInstances = new ConcurrentHashMap<String, SpaceInstance>();
+    private final InternalSpaceInstances spaceInstances;
 
     public DefaultVirtualMachine(InternalAdmin admin, JVMDetails details) {
         this.admin = admin;
@@ -58,6 +61,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
         this.gridServiceManagers = new DefaultGridServiceManagers(admin);
         this.gridServiceContainers = new DefaultGridServiceContainers(admin);
         this.processingUnitInstances = new DefaultProcessingUnitInstances(admin);
+        this.spaceInstances = new DefaultSpaceInstances(admin);
     }
 
     public String getUid() {
@@ -133,7 +137,23 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
     }
 
     public SpaceInstance[] getSpaceInstances() {
-        return spaceInstances.values().toArray(new SpaceInstance[0]);
+        return spaceInstances.getSpaceInstances();
+    }
+
+    public SpaceInstanceAddedEventManager getSpaceInstanceAdded() {
+        return spaceInstances.getSpaceInstanceAdded();
+    }
+
+    public SpaceInstanceRemovedEventManager getSpaceInstanceRemoved() {
+        return spaceInstances.getSpaceInstanceRemoved();
+    }
+
+    public void addLifecycleListener(SpaceInstanceLifecycleEventListener eventListener) {
+        spaceInstances.addLifecycleListener(eventListener);
+    }
+
+    public void removeLifecycleListener(SpaceInstanceLifecycleEventListener eventListener) {
+        spaceInstances.removeLifecycleListener(eventListener);
     }
 
     public void addProcessingUnitInstance(ProcessingUnitInstance processingUnitInstance) {
@@ -145,11 +165,11 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
     }
 
     public void addSpaceInstance(SpaceInstance spaceInstance) {
-        spaceInstances.put(spaceInstance.getUid(), spaceInstance);
+        spaceInstances.addSpaceInstance(spaceInstance);
     }
 
     public void removeSpaceInstance(String uid) {
-        spaceInstances.remove(uid);
+        spaceInstances.removeSpaceInstance(uid);
     }
 
     private static final VirtualMachineStatistics NA_STATS = new DefaultVirtualMachineStatistics();

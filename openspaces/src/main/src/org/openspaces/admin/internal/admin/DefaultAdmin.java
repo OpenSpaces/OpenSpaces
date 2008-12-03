@@ -381,7 +381,7 @@ public class DefaultAdmin implements InternalAdmin {
 
         InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
         if (space == null) {
-            space = new DefaultSpace(this, spaceInstance.getSpaceName(), spaceInstance.getSpaceName());
+            space = new DefaultSpace(spaces, spaceInstance.getSpaceName(), spaceInstance.getSpaceName());
             spaces.addSpace(space);
         }
         spaceInstance.setSpace(space);

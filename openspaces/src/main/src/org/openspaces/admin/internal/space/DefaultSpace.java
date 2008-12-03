@@ -8,11 +8,18 @@ import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.space.events.DefaultSpaceInstanceAddedEventManager;
+import org.openspaces.admin.internal.space.events.DefaultSpaceInstanceRemovedEventManager;
+import org.openspaces.admin.internal.space.events.InternalSpaceInstanceAddedEventManager;
+import org.openspaces.admin.internal.space.events.InternalSpaceInstanceRemovedEventManager;
 import org.openspaces.admin.internal.support.NetworkExceptionHelper;
 import org.openspaces.admin.space.ReplicationStatus;
 import org.openspaces.admin.space.ReplicationTarget;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.SpacePartition;
+import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
+import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
+import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -29,6 +36,8 @@ public class DefaultSpace implements InternalSpace {
 
     private final InternalAdmin admin;
 
+    private final InternalSpaces spaces;
+
     private final String uid;
 
     private final String name;
@@ -41,10 +50,17 @@ public class DefaultSpace implements InternalSpace {
 
     private final Map<String, Future> scheduledRuntimeFetchers = new ConcurrentHashMap<String, Future>();
 
-    public DefaultSpace(InternalAdmin admin, String uid, String name) {
-        this.admin = admin;
+    private final InternalSpaceInstanceAddedEventManager spaceInstanceAddedEventManager;
+
+    private final InternalSpaceInstanceRemovedEventManager spaceInstanceRemovedEventManager;
+
+    public DefaultSpace(InternalSpaces spaces, String uid, String name) {
+        this.spaces = spaces;
+        this.admin = (InternalAdmin) spaces.getAdmin();
         this.uid = uid;
         this.name = name;
+        this.spaceInstanceAddedEventManager = new DefaultSpaceInstanceAddedEventManager(admin, this);
+        this.spaceInstanceRemovedEventManager = new DefaultSpaceInstanceRemovedEventManager(admin);
     }
 
     public String getUid() {
@@ -96,11 +112,16 @@ public class DefaultSpace implements InternalSpace {
                 spacePartitions.put(i, new DefaultSpacePartition(this, i));
             }
         }
-        spaceInstancesByUID.put(spaceInstance.getUid(), spaceInstance);
+        SpaceInstance existing = spaceInstancesByUID.put(spaceInstance.getUid(), spaceInstance);
         spaceInstancesByMemberName.put(((InternalSpaceInstance) spaceInstance).getSpaceConfig().getFullSpaceName(), spaceInstance);
         InternalSpacePartition spacePartition = (InternalSpacePartition) spacePartitions.get(spaceInstance.getInstanceId() - 1);
         internalSpaceInstance.setPartition(spacePartition);
         spacePartition.addSpaceInstance(spaceInstance);
+
+        if (existing == null) {
+            spaceInstanceAddedEventManager.spaceInstanceAdded(spaceInstance);
+            ((InternalSpaceInstanceAddedEventManager) spaces.getSpaceInstanceAdded()).spaceInstanceAdded(spaceInstance);
+        }
 
         // start the scheduler
         Future fetcher = scheduledRuntimeFetchers.get(spaceInstance.getUid());
@@ -113,8 +134,10 @@ public class DefaultSpace implements InternalSpace {
 
     public InternalSpaceInstance removeInstance(String uid) {
         InternalSpaceInstance spaceInstance = (InternalSpaceInstance) spaceInstancesByUID.remove(uid);
-        ((InternalSpacePartition) spacePartitions.get(spaceInstance.getInstanceId() - 1)).removeSpaceInstance(uid);
         if (spaceInstance != null) {
+            ((InternalSpacePartition) spacePartitions.get(spaceInstance.getInstanceId() - 1)).removeSpaceInstance(uid);
+            spaceInstanceRemovedEventManager.spaceInstanceRemoved(spaceInstance);
+            ((InternalSpaceInstanceRemovedEventManager) spaces.getSpaceInstanceRemoved()).spaceInstanceRemoved(spaceInstance);
             Future fetcher = scheduledRuntimeFetchers.get(uid);
             if (fetcher != null) {
                 fetcher.cancel(true);
@@ -129,6 +152,28 @@ public class DefaultSpace implements InternalSpace {
 
     public boolean isEmpty() {
         return spaceInstancesByUID.size() == 0;
+    }
+
+    public SpaceInstance[] getSpaceInstances() {
+        return getInstnaces();
+    }
+
+    public SpaceInstanceAddedEventManager getSpaceInstanceAdded() {
+        return this.spaceInstanceAddedEventManager;
+    }
+
+    public SpaceInstanceRemovedEventManager getSpaceInstanceRemoved() {
+        return this.spaceInstanceRemovedEventManager;
+    }
+
+    public void addLifecycleListener(SpaceInstanceLifecycleEventListener eventListener) {
+        spaceInstanceAddedEventManager.add(eventListener);
+        spaceInstanceRemovedEventManager.add(eventListener);
+    }
+
+    public void removeLifecycleListener(SpaceInstanceLifecycleEventListener eventListener) {
+        spaceInstanceAddedEventManager.remove(eventListener);
+        spaceInstanceRemovedEventManager.remove(eventListener);
     }
 
     private <T> T doWithInstance(InstanceCallback<T> callback, T naValue) {

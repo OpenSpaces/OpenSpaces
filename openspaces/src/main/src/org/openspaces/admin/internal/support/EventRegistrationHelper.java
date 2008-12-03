@@ -18,6 +18,8 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventListener
 import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventListener;
 import org.openspaces.admin.space.events.SpaceAddedEventListener;
+import org.openspaces.admin.space.events.SpaceInstanceAddedEventListener;
+import org.openspaces.admin.space.events.SpaceInstanceRemovedEventListener;
 import org.openspaces.admin.space.events.SpaceRemovedEventListener;
 import org.openspaces.admin.vm.events.VirtualMachineAddedEventListener;
 import org.openspaces.admin.vm.events.VirtualMachineRemovedEventListener;
@@ -85,6 +87,12 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof SpaceRemovedEventListener) {
             admin.getSpaces().getSpaceRemoved().add((SpaceRemovedEventListener) eventListener);
         }
+        if (eventListener instanceof SpaceInstanceAddedEventListener) {
+            admin.getSpaces().getSpaceInstanceAdded().add((SpaceInstanceAddedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceInstanceRemovedEventListener) {
+            admin.getSpaces().getSpaceInstanceRemoved().add((SpaceInstanceRemovedEventListener) eventListener);
+        }
     }
 
     public static void removeEventListener(InternalAdmin admin, AdminEventListener eventListener) {
@@ -144,6 +152,12 @@ public abstract class EventRegistrationHelper {
         }
         if (eventListener instanceof SpaceRemovedEventListener) {
             admin.getSpaces().getSpaceRemoved().remove((SpaceRemovedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceInstanceAddedEventListener) {
+            admin.getSpaces().getSpaceInstanceAdded().remove((SpaceInstanceAddedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceInstanceRemovedEventListener) {
+            admin.getSpaces().getSpaceInstanceRemoved().remove((SpaceInstanceRemovedEventListener) eventListener);
         }
     }
 }

@@ -49,7 +49,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     private volatile SpacePartition spacePartition;
 
-    private volatile SpaceMode spaceMode;
+    private volatile SpaceMode spaceMode = SpaceMode.NONE;
 
     private volatile ReplicationTarget[] replicationTargets = new ReplicationTarget[0];
 

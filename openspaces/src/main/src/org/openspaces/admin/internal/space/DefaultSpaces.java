@@ -4,16 +4,25 @@ import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.space.events.DefaultSpaceAddedEventManager;
+import org.openspaces.admin.internal.space.events.DefaultSpaceInstanceAddedEventManager;
+import org.openspaces.admin.internal.space.events.DefaultSpaceInstanceRemovedEventManager;
 import org.openspaces.admin.internal.space.events.DefaultSpaceRemovedEventManager;
 import org.openspaces.admin.internal.space.events.InternalSpaceAddedEventManager;
+import org.openspaces.admin.internal.space.events.InternalSpaceInstanceAddedEventManager;
+import org.openspaces.admin.internal.space.events.InternalSpaceInstanceRemovedEventManager;
 import org.openspaces.admin.internal.space.events.InternalSpaceRemovedEventManager;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.events.SpaceAddedEventManager;
+import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
+import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
+import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 import org.openspaces.admin.space.events.SpaceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceRemovedEventManager;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,10 +43,16 @@ public class DefaultSpaces implements InternalSpaces {
 
     private final InternalSpaceRemovedEventManager spaceRemovedEventManager;
 
+    private final InternalSpaceInstanceAddedEventManager spaceInstanceAddedEventManager;
+
+    private final InternalSpaceInstanceRemovedEventManager spaceInstanceRemovedEventManager;
+
     public DefaultSpaces(InternalAdmin admin) {
         this.admin = admin;
         this.spaceAddedEventManager = new DefaultSpaceAddedEventManager(this);
         this.spaceRemovedEventManager = new DefaultSpaceRemovedEventManager(this);
+        this.spaceInstanceAddedEventManager = new DefaultSpaceInstanceAddedEventManager(admin, this);
+        this.spaceInstanceRemovedEventManager = new DefaultSpaceInstanceRemovedEventManager(admin);
     }
 
     public Admin getAdmin() {
@@ -76,6 +91,34 @@ public class DefaultSpaces implements InternalSpaces {
     public void removeLifecycleListener(SpaceLifecycleEventListener eventListener) {
         getSpaceAdded().remove(eventListener);
         getSpaceRemoved().remove(eventListener);
+    }
+
+    public SpaceInstance[] getSpaceInstances() {
+        List<SpaceInstance> spaceInstances = new ArrayList<SpaceInstance>();
+        for (Space space : this) {
+            for (SpaceInstance spaceInstance : space) {
+                spaceInstances.add(spaceInstance);
+            }
+        }
+        return spaceInstances.toArray(new SpaceInstance[spaceInstances.size()]);
+    }
+
+    public SpaceInstanceAddedEventManager getSpaceInstanceAdded() {
+        return this.spaceInstanceAddedEventManager;
+    }
+
+    public SpaceInstanceRemovedEventManager getSpaceInstanceRemoved() {
+        return this.spaceInstanceRemovedEventManager;
+    }
+
+    public void addLifecycleListener(SpaceInstanceLifecycleEventListener eventListener) {
+        spaceInstanceAddedEventManager.add(eventListener);
+        spaceInstanceRemovedEventManager.add(eventListener);
+    }
+
+    public void removeLifecycleListener(SpaceInstanceLifecycleEventListener eventListener) {
+        spaceInstanceAddedEventManager.remove(eventListener);
+        spaceInstanceRemovedEventManager.remove(eventListener);
     }
 
     public synchronized void addSpace(Space space) {

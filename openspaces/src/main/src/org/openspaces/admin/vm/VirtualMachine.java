@@ -8,6 +8,9 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
+import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
+import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 
 /**
  * @author kimchy
@@ -49,4 +52,12 @@ public interface VirtualMachine extends MachineAware {
     void addProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
     void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
+
+    SpaceInstanceAddedEventManager getSpaceInstanceAdded();
+
+    SpaceInstanceRemovedEventManager getSpaceInstanceRemoved();
+
+    void addLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
+
+    void removeLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
 }
