@@ -10,16 +10,20 @@ import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.space.events.DefaultSpaceInstanceAddedEventManager;
 import org.openspaces.admin.internal.space.events.DefaultSpaceInstanceRemovedEventManager;
+import org.openspaces.admin.internal.space.events.DefaultSpaceModeChangedEventManager;
 import org.openspaces.admin.internal.space.events.InternalSpaceInstanceAddedEventManager;
 import org.openspaces.admin.internal.space.events.InternalSpaceInstanceRemovedEventManager;
+import org.openspaces.admin.internal.space.events.InternalSpaceModeChangedEventManager;
 import org.openspaces.admin.internal.support.NetworkExceptionHelper;
 import org.openspaces.admin.space.ReplicationStatus;
 import org.openspaces.admin.space.ReplicationTarget;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.SpacePartition;
+import org.openspaces.admin.space.Spaces;
 import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
+import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -54,6 +58,8 @@ public class DefaultSpace implements InternalSpace {
 
     private final InternalSpaceInstanceRemovedEventManager spaceInstanceRemovedEventManager;
 
+    private final InternalSpaceModeChangedEventManager spaceModeChangedEventManager;
+
     public DefaultSpace(InternalSpaces spaces, String uid, String name) {
         this.spaces = spaces;
         this.admin = (InternalAdmin) spaces.getAdmin();
@@ -61,6 +67,11 @@ public class DefaultSpace implements InternalSpace {
         this.name = name;
         this.spaceInstanceAddedEventManager = new DefaultSpaceInstanceAddedEventManager(admin, this);
         this.spaceInstanceRemovedEventManager = new DefaultSpaceInstanceRemovedEventManager(admin);
+        this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(admin);
+    }
+
+    public Spaces getSpaces() {
+        return this.spaces;
     }
 
     public String getUid() {
@@ -101,6 +112,10 @@ public class DefaultSpace implements InternalSpace {
 
     public SpacePartition getPartition(int partitionId) {
         return spacePartitions.get(partitionId);
+    }
+
+    public SpaceModeChangedEventManager getSpaceModeChanged() {
+        return this.spaceModeChangedEventManager;
     }
 
     public void addInstance(SpaceInstance spaceInstance) {

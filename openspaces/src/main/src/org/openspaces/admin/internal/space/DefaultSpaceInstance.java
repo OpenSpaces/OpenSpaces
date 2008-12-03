@@ -13,10 +13,14 @@ import com.j_spaces.core.admin.SpaceConfig;
 import com.j_spaces.core.client.SpaceURL;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.space.events.DefaultSpaceModeChangedEventManager;
+import org.openspaces.admin.internal.space.events.InternalSpaceModeChangedEventManager;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.space.ReplicationTarget;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpacePartition;
+import org.openspaces.admin.space.events.SpaceModeChangedEvent;
+import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
 
 import java.rmi.RemoteException;
 
@@ -53,6 +57,8 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     private volatile ReplicationTarget[] replicationTargets = new ReplicationTarget[0];
 
+    private final InternalSpaceModeChangedEventManager spaceModeChangedEventManager;
+
     public DefaultSpaceInstance(ServiceID serviceID, IJSpace ijSpace, IInternalRemoteJSpaceAdmin spaceAdmin,
                                 SpaceConfig spaceConfig, InternalAdmin admin) {
         super(admin);
@@ -62,6 +68,9 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         this.spaceAdmin = spaceAdmin;
         this.spaceConfig = spaceConfig;
         this.spaceURL = ijSpace.getURL();
+
+        this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(admin);
+        
         String sInstanceId = spaceURL.getProperty(SpaceURL.CLUSTER_MEMBER_ID);
         if (sInstanceId == null || sInstanceId.length() == 0) {
             instanceId = 1;
@@ -110,6 +119,10 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         return spaceConfig.getSpaceName();
     }
 
+    public SpaceModeChangedEventManager getSpaceModeChanged() {
+        return this.spaceModeChangedEventManager;
+    }
+
     public int getInstanceId() {
         return instanceId;
     }
@@ -131,6 +144,14 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     }
 
     public void setMode(SpaceMode spaceMode) {
+        SpaceMode previousSpaceMode = this.spaceMode;
+        SpaceMode newSpaceMode = spaceMode;
+        if (previousSpaceMode != newSpaceMode) {
+            SpaceModeChangedEvent event = new SpaceModeChangedEvent(this, previousSpaceMode, newSpaceMode);
+            spaceModeChangedEventManager.spaceModeChanged(event);
+            ((InternalSpaceModeChangedEventManager) getSpace().getSpaceModeChanged()).spaceModeChanged(event);
+            ((InternalSpaceModeChangedEventManager) getSpace().getSpaces().getSpaceModeChanged()).spaceModeChanged(event);
+        }
         this.spaceMode = spaceMode;
     }
 

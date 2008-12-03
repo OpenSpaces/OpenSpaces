@@ -6,6 +6,7 @@ import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 import org.openspaces.admin.space.events.SpaceLifecycleEventListener;
+import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
 import org.openspaces.admin.space.events.SpaceRemovedEventManager;
 
 /**
@@ -36,4 +37,6 @@ public interface Spaces extends Iterable<Space> {
     void addLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
 
     void removeLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
+
+    SpaceModeChangedEventManager getSpaceModeChanged();
 }

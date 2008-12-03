@@ -3,11 +3,14 @@ package org.openspaces.admin.space;
 import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
+import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
 
 /**
  * @author kimchy
  */
 public interface Space extends Iterable<SpaceInstance> {
+
+    Spaces getSpaces();
 
     String getUid();
 
@@ -34,5 +37,7 @@ public interface Space extends Iterable<SpaceInstance> {
     void addLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
 
     void removeLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
+
+    SpaceModeChangedEventManager getSpaceModeChanged();
 }
 

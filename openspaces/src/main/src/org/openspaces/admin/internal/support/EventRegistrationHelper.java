@@ -20,6 +20,7 @@ import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventListener;
 import org.openspaces.admin.space.events.SpaceAddedEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceAddedEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventListener;
+import org.openspaces.admin.space.events.SpaceModeChangedEventListener;
 import org.openspaces.admin.space.events.SpaceRemovedEventListener;
 import org.openspaces.admin.vm.events.VirtualMachineAddedEventListener;
 import org.openspaces.admin.vm.events.VirtualMachineRemovedEventListener;
@@ -93,6 +94,9 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof SpaceInstanceRemovedEventListener) {
             admin.getSpaces().getSpaceInstanceRemoved().add((SpaceInstanceRemovedEventListener) eventListener);
         }
+        if (eventListener instanceof SpaceModeChangedEventListener) {
+            admin.getSpaces().getSpaceModeChanged().add((SpaceModeChangedEventListener) eventListener);
+        }
     }
 
     public static void removeEventListener(InternalAdmin admin, AdminEventListener eventListener) {
@@ -158,6 +162,9 @@ public abstract class EventRegistrationHelper {
         }
         if (eventListener instanceof SpaceInstanceRemovedEventListener) {
             admin.getSpaces().getSpaceInstanceRemoved().remove((SpaceInstanceRemovedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceModeChangedEventListener) {
+            admin.getSpaces().getSpaceModeChanged().remove((SpaceModeChangedEventListener) eventListener);
         }
     }
 }

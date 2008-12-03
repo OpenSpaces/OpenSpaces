@@ -2,6 +2,7 @@ package org.openspaces.admin.space;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 import org.openspaces.admin.GridComponent;
+import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
 
 /**
  * @author kimchy
@@ -22,4 +23,6 @@ public interface SpaceInstance extends GridComponent {
     SpacePartition getPartition();
 
     ReplicationTarget[] getReplicationTargets();
+
+    SpaceModeChangedEventManager getSpaceModeChanged();
 }

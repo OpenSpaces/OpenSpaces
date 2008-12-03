@@ -21,6 +21,8 @@ import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceLifecycleEventListener;
+import org.openspaces.admin.space.events.SpaceModeChangedEvent;
+import org.openspaces.admin.space.events.SpaceModeChangedEventListener;
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.admin.vm.events.VirtualMachineLifecycleEventListener;
 
@@ -35,7 +37,8 @@ public class TestEventSampler implements MachineLifecycleEventListener,
         LookupServiceLifecycleEventListener,
         VirtualMachineLifecycleEventListener,
         SpaceLifecycleEventListener,
-        SpaceInstanceLifecycleEventListener {
+        SpaceInstanceLifecycleEventListener,
+        SpaceModeChangedEventListener {
 
     public static void main(String[] args) throws Exception {
         TestEventSampler eventSampler = new TestEventSampler();
@@ -131,5 +134,9 @@ public class TestEventSampler implements MachineLifecycleEventListener,
 
     public void spaceInstanceRemoved(SpaceInstance spaceInstance) {
         System.out.println("Space Instance Removed [" + spaceInstance.getUid() + "]");
+    }
+
+    public void spaceModeChanged(SpaceModeChangedEvent event) {
+        System.out.println("Space Instance [" + event.getSpaceInstance().getUid() + "] changed mode from [" + event.getPreviousMode() + "] to [" + event.getNewMode() + "]");
     }
 }
