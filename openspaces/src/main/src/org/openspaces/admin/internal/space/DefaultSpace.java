@@ -1,7 +1,9 @@
 package org.openspaces.admin.internal.space;
 
+import com.gigaspaces.cluster.activeelection.InactiveSpaceException;
 import com.j_spaces.core.admin.IRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.RuntimeHolder;
+import com.j_spaces.core.exception.SpaceUnavailableException;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -177,6 +179,10 @@ public class DefaultSpace implements InternalSpace {
                     }
                     spaceInstance.setReplicationTargets(replicationTargets);
                 }
+            } catch (SpaceUnavailableException e) {
+                // space is going shutdown or abort process
+            } catch (InactiveSpaceException e) {
+                // ignore this (maybe we should add it as a state to a Space instnace?)
             } catch (Exception e) {
                 if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
                     // Space is down, ignore

@@ -17,6 +17,8 @@ import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent;
+import org.openspaces.admin.space.Space;
+import org.openspaces.admin.space.events.SpaceLifecycleEventListener;
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.admin.vm.events.VirtualMachineLifecycleEventListener;
 
@@ -29,7 +31,8 @@ public class TestEventSampler implements MachineLifecycleEventListener,
         ProcessingUnitLifecycleEventListener,
         ProcessingUnitInstanceLifecycleEventListener,
         LookupServiceLifecycleEventListener,
-        VirtualMachineLifecycleEventListener {
+        VirtualMachineLifecycleEventListener,
+        SpaceLifecycleEventListener {
 
     public static void main(String[] args) throws Exception {
         TestEventSampler eventSampler = new TestEventSampler();
@@ -109,5 +112,13 @@ public class TestEventSampler implements MachineLifecycleEventListener,
 
     public void processingUnitBackupGridServiceManagerChanged(BackupGridServiceManagerChangedEvent event) {
         System.out.println("Processing Unit [" + event.getProcessingUnit().getName() + "] Backup GSM [" + event.getType() + "] with uid [" + event.getGridServiceManager().getUid() + "]");
+    }
+
+    public void spaceAdded(Space space) {
+        System.out.println("Space Added [" + space.getUid() + "]");
+    }
+
+    public void spaceRemoved(Space space) {
+        System.out.println("Space Removed [" + space.getUid() + "]");
     }
 }

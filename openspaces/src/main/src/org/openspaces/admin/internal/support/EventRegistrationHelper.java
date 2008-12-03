@@ -17,6 +17,8 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventListener;
+import org.openspaces.admin.space.events.SpaceAddedEventListener;
+import org.openspaces.admin.space.events.SpaceRemovedEventListener;
 import org.openspaces.admin.vm.events.VirtualMachineAddedEventListener;
 import org.openspaces.admin.vm.events.VirtualMachineRemovedEventListener;
 
@@ -77,6 +79,12 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof BackupGridServiceManagerChangedEventListener) {
             admin.getProcessingUnits().getBackupGridServiceManagerChanged().add((BackupGridServiceManagerChangedEventListener) eventListener);
         }
+        if (eventListener instanceof SpaceAddedEventListener) {
+            admin.getSpaces().getSpaceAdded().add((SpaceAddedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceRemovedEventListener) {
+            admin.getSpaces().getSpaceRemoved().add((SpaceRemovedEventListener) eventListener);
+        }
     }
 
     public static void removeEventListener(InternalAdmin admin, AdminEventListener eventListener) {
@@ -130,6 +138,12 @@ public abstract class EventRegistrationHelper {
         }
         if (eventListener instanceof BackupGridServiceManagerChangedEventListener) {
             admin.getProcessingUnits().getBackupGridServiceManagerChanged().remove((BackupGridServiceManagerChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceAddedEventListener) {
+            admin.getSpaces().getSpaceAdded().remove((SpaceAddedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceRemovedEventListener) {
+            admin.getSpaces().getSpaceRemoved().remove((SpaceRemovedEventListener) eventListener);
         }
     }
 }
