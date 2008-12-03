@@ -10,8 +10,8 @@ import org.openspaces.admin.vm.VirtualMachine
 
 admin = new AdminFactory().addGroup("kimchy").createAdmin();
 while (true) {
-  admin.machines.machineAdded << {Machine machine -> println "Machine [$machine.uid] Added" }
-  admin.machines.machineRemoved << {Machine machine -> println "Machien [$machine.uid] Removed" }
+  admin.machines.machineAdded << {Machine machine -> println "Machine [$machine.uid] Added"; }
+  admin.machines.machineRemoved << {Machine machine -> println "Machine [$machine.uid] Removed" }
   admin.lookupServices.lookupServiceAdded << {LookupService lookupService -> println "LUS [$lookupService.uid] Added" }
   admin.lookupServices.lookupServiceRemoved << {LookupService lookupService -> println "LUS [$lookupService.uid] Removed" }
   admin.gridServiceContainers.gridServiceContainerAdded << {GridServiceContainer gridServiceContainer -> println "GSC [$gridServiceContainer.uid] Added"}

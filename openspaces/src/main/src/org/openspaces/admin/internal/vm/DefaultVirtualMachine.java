@@ -14,6 +14,9 @@ import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.vm.VirtualMachineDetails;
 import org.openspaces.admin.vm.VirtualMachineStatistics;
@@ -44,7 +47,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     private final InternalGridServiceContainers gridServiceContainers;
 
-    private final InternalProcessingUnitInstances processingUnitInstances = new DefaultProcessingUnitInstances();
+    private final InternalProcessingUnitInstances processingUnitInstances;
 
     private final Map<String, SpaceInstance> spaceInstances = new ConcurrentHashMap<String, SpaceInstance>();
 
@@ -54,6 +57,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
         this.uid = details.getUid();
         this.gridServiceManagers = new DefaultGridServiceManagers(admin);
         this.gridServiceContainers = new DefaultGridServiceContainers(admin);
+        this.processingUnitInstances = new DefaultProcessingUnitInstances(admin);
     }
 
     public String getUid() {
@@ -110,6 +114,22 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     public ProcessingUnitInstance[] getProcessingUnitInstances() {
         return processingUnitInstances.getInstances();
+    }
+
+    public ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded() {
+        return processingUnitInstances.getProcessingUnitInstanceAdded();
+    }
+
+    public ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved() {
+        return processingUnitInstances.getProcessingUnitInstanceRemoved();
+    }
+
+    public void addProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
+        processingUnitInstances.addProcessingUnitInstanceLifecycleEventListener(eventListener);
+    }
+
+    public void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
+        processingUnitInstances.removeProcessingUnitInstanceLifecycleEventListener(eventListener);
     }
 
     public SpaceInstance[] getSpaceInstances() {

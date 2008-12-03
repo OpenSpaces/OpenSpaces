@@ -107,7 +107,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     private final InternalProcessingUnits processingUnits = new DefaultProcessingUnits(this);
 
-    private final InternalProcessingUnitInstances processingUnitInstances = new DefaultProcessingUnitInstances();
+    private final InternalProcessingUnitInstances processingUnitInstances = new DefaultProcessingUnitInstances(this);
 
     private final InternalSpaces spaces = new DefaultSpaces();
 

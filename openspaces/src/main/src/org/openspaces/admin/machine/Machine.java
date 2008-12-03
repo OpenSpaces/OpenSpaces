@@ -5,6 +5,9 @@ import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
@@ -33,6 +36,14 @@ public interface Machine {
     Transports getTransports();
 
     ProcessingUnitInstance[] getProcessingUnitInstances();
+
+    ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded();
+
+    ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved();
+
+    void addProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
+
+    void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
     SpaceInstance[] getSpaceInstances();
 }

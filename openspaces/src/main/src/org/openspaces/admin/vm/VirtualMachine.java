@@ -4,6 +4,9 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.machine.MachineAware;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.space.SpaceInstance;
 
 /**
@@ -38,4 +41,12 @@ public interface VirtualMachine extends MachineAware {
      * Returns the space instnaces started within this virtual machine.
      */
     SpaceInstance[] getSpaceInstances();
+
+    ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded();
+
+    ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved();
+
+    void addProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
+
+    void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 }

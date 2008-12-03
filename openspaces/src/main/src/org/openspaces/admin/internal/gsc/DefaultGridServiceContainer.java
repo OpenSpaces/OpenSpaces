@@ -13,6 +13,9 @@ import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 
 import java.rmi.RemoteException;
 import java.util.Iterator;
@@ -26,12 +29,13 @@ public class DefaultGridServiceContainer extends AbstractGridComponent implement
 
     private final GSC gsc;
 
-    private final InternalProcessingUnitInstances processingUnitInstances = new DefaultProcessingUnitInstances();
+    private final InternalProcessingUnitInstances processingUnitInstances;
 
     public DefaultGridServiceContainer(ServiceID serviceID, GSC gsc, InternalAdmin admin) {
         super(admin);
         this.serviceID = serviceID;
         this.gsc = gsc;
+        this.processingUnitInstances = new DefaultProcessingUnitInstances(admin);
     }
 
     public String getUid() {
@@ -60,6 +64,22 @@ public class DefaultGridServiceContainer extends AbstractGridComponent implement
 
     public void removeProcessingUnitInstance(String uid) {
         processingUnitInstances.removeInstnace(uid);
+    }
+
+    public ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded() {
+        return processingUnitInstances.getProcessingUnitInstanceAdded();
+    }
+
+    public ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved() {
+        return processingUnitInstances.getProcessingUnitInstanceRemoved();
+    }
+
+    public void addProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
+        processingUnitInstances.addProcessingUnitInstanceLifecycleEventListener(eventListener);
+    }
+
+    public void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
+        processingUnitInstances.removeProcessingUnitInstanceLifecycleEventListener(eventListener);
     }
 
     public NIODetails getNIODetails() throws RemoteException {

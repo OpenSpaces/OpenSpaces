@@ -20,6 +20,9 @@ import org.openspaces.admin.internal.vm.InternalVirtualMachines;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
@@ -48,7 +51,7 @@ public class DefaultMachine implements InternalMachine {
 
     private final InternalVirtualMachines virtualMachines;
 
-    private final InternalProcessingUnitInstances processingUnitInstances = new DefaultProcessingUnitInstances();
+    private final InternalProcessingUnitInstances processingUnitInstances;
 
     private final Map<String, SpaceInstance> spaceInstances = new ConcurrentHashMap<String, SpaceInstance>();
 
@@ -62,6 +65,7 @@ public class DefaultMachine implements InternalMachine {
         this.gridServiceManagers = new DefaultGridServiceManagers(admin);
         this.gridServiceContainers = new DefaultGridServiceContainers(admin);
         this.virtualMachines = new DefaultVirtualMachines(admin);
+        this.processingUnitInstances = new DefaultProcessingUnitInstances(admin);
     }
 
     public String getUid() {
@@ -111,6 +115,22 @@ public class DefaultMachine implements InternalMachine {
 
     public VirtualMachines getVirtualMachines() {
         return this.virtualMachines;
+    }
+
+    public ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded() {
+        return processingUnitInstances.getProcessingUnitInstanceAdded();
+    }
+
+    public ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved() {
+        return processingUnitInstances.getProcessingUnitInstanceRemoved();
+    }
+
+    public void addProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
+        processingUnitInstances.addProcessingUnitInstanceLifecycleEventListener(eventListener);
+    }
+
+    public void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
+        processingUnitInstances.removeProcessingUnitInstanceLifecycleEventListener(eventListener);
     }
 
     public ProcessingUnitInstance[] getProcessingUnitInstances() {
