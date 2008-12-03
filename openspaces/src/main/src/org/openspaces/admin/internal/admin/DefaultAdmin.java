@@ -9,12 +9,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.gsc.GridServiceContainers;
-import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
-import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventListener;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagers;
-import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventListener;
-import org.openspaces.admin.gsm.events.GridServiceManagerRemovedEventListener;
 import org.openspaces.admin.internal.discovery.DiscoveryService;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainers;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
@@ -47,6 +43,7 @@ import org.openspaces.admin.internal.space.DefaultSpaces;
 import org.openspaces.admin.internal.space.InternalSpace;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
 import org.openspaces.admin.internal.space.InternalSpaces;
+import org.openspaces.admin.internal.support.EventRegistrationHelper;
 import org.openspaces.admin.internal.transport.DefaultTransport;
 import org.openspaces.admin.internal.transport.DefaultTransports;
 import org.openspaces.admin.internal.transport.InternalTransport;
@@ -58,22 +55,11 @@ import org.openspaces.admin.internal.vm.InternalVirtualMachine;
 import org.openspaces.admin.internal.vm.InternalVirtualMachineInfoProvider;
 import org.openspaces.admin.internal.vm.InternalVirtualMachines;
 import org.openspaces.admin.lus.LookupServices;
-import org.openspaces.admin.lus.events.LookupServiceAddedEventListener;
-import org.openspaces.admin.lus.events.LookupServiceRemovedEventListener;
 import org.openspaces.admin.machine.Machines;
-import org.openspaces.admin.machine.events.MachineAddedEventListener;
-import org.openspaces.admin.machine.events.MachineRemovedEventListener;
 import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnits;
-import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventListener;
-import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventListener;
-import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventListener;
-import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener;
-import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventListener;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.Spaces;
@@ -81,8 +67,6 @@ import org.openspaces.admin.transport.TransportDetails;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.admin.vm.VirtualMachines;
-import org.openspaces.admin.vm.events.VirtualMachineAddedEventListener;
-import org.openspaces.admin.vm.events.VirtualMachineRemovedEventListener;
 
 import java.nio.channels.ClosedChannelException;
 import java.rmi.ConnectException;
@@ -226,113 +210,13 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public void addEventListener(AdminEventListener eventListener) {
-        if (eventListener instanceof MachineAddedEventListener) {
-            getMachines().getMachineAdded().add((MachineAddedEventListener) eventListener);
-        }
-        if (eventListener instanceof MachineRemovedEventListener) {
-            getMachines().getMachineRemoved().add((MachineRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof VirtualMachineAddedEventListener) {
-            getVirtualMachines().getVirtualMachineAdded().add((VirtualMachineAddedEventListener) eventListener);
-        }
-        if (eventListener instanceof VirtualMachineRemovedEventListener) {
-            getVirtualMachines().getVirtualMachineRemoved().add((VirtualMachineRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof LookupServiceAddedEventListener) {
-            getLookupServices().getLookupServiceAdded().add((LookupServiceAddedEventListener) eventListener);
-        }
-        if (eventListener instanceof LookupServiceRemovedEventListener) {
-            getLookupServices().getLookupServiceRemoved().add((LookupServiceRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof GridServiceManagerAddedEventListener) {
-            getGridServiceManagers().getGridServiceManagerAdded().add((GridServiceManagerAddedEventListener) eventListener);
-        }
-        if (eventListener instanceof GridServiceManagerRemovedEventListener) {
-            getGridServiceManagers().getGridServiceManagerRemoved().add((GridServiceManagerRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof GridServiceContainerAddedEventListener) {
-            getGridServiceContainers().getGridServiceContainerAdded().add((GridServiceContainerAddedEventListener) eventListener);
-        }
-        if (eventListener instanceof GridServiceContainerRemovedEventListener) {
-            getGridServiceContainers().getGridServiceContainerRemoved().add((GridServiceContainerRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof ProcessingUnitAddedEventListener) {
-            getProcessingUnits().getProcessingUnitAdded().add((ProcessingUnitAddedEventListener) eventListener);
-        }
-        if (eventListener instanceof ProcessingUnitRemovedEventListener) {
-            getProcessingUnits().getProcessingUnitRemoved().add((ProcessingUnitRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof ProcessingUnitStatusChangedEventListener) {
-            getProcessingUnits().getProcessingUnitStatusChanged().add((ProcessingUnitStatusChangedEventListener) eventListener);
-        }
-        if (eventListener instanceof ProcessingUnitInstanceAddedEventListener) {
-            getProcessingUnits().getProcessingUnitInstanceAdded().add((ProcessingUnitInstanceAddedEventListener) eventListener);
-        }
-        if (eventListener instanceof ProcessingUnitInstanceRemovedEventListener) {
-            getProcessingUnits().getProcessingUnitInstanceRemoved().add((ProcessingUnitInstanceRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof ManagingGridServiceManagerChangedEventListener) {
-            getProcessingUnits().getManagingGridServiceManagerChanged().add((ManagingGridServiceManagerChangedEventListener) eventListener);
-        }
-        if (eventListener instanceof BackupGridServiceManagerChangedEventListener) {
-            getProcessingUnits().getBackupGridServiceManagerChanged().add((BackupGridServiceManagerChangedEventListener) eventListener);
-        }
+        EventRegistrationHelper.addEventListener(this, eventListener);
     }
 
     public void removeEventListener(AdminEventListener eventListener) {
-        if (eventListener instanceof MachineAddedEventListener) {
-            getMachines().getMachineAdded().remove((MachineAddedEventListener) eventListener);
-        }
-        if (eventListener instanceof MachineRemovedEventListener) {
-            getMachines().getMachineRemoved().remove((MachineRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof VirtualMachineAddedEventListener) {
-            getVirtualMachines().getVirtualMachineAdded().remove((VirtualMachineAddedEventListener) eventListener);
-        }
-        if (eventListener instanceof VirtualMachineRemovedEventListener) {
-            getVirtualMachines().getVirtualMachineRemoved().remove((VirtualMachineRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof LookupServiceAddedEventListener) {
-            getLookupServices().getLookupServiceAdded().remove((LookupServiceAddedEventListener) eventListener);
-        }
-        if (eventListener instanceof LookupServiceRemovedEventListener) {
-            getLookupServices().getLookupServiceRemoved().remove((LookupServiceRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof GridServiceManagerAddedEventListener) {
-            getGridServiceManagers().getGridServiceManagerAdded().remove((GridServiceManagerAddedEventListener) eventListener);
-        }
-        if (eventListener instanceof GridServiceManagerRemovedEventListener) {
-            getGridServiceManagers().getGridServiceManagerRemoved().remove((GridServiceManagerRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof GridServiceContainerAddedEventListener) {
-            getGridServiceContainers().getGridServiceContainerAdded().remove((GridServiceContainerAddedEventListener) eventListener);
-        }
-        if (eventListener instanceof GridServiceContainerRemovedEventListener) {
-            getGridServiceContainers().getGridServiceContainerRemoved().remove((GridServiceContainerRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof ProcessingUnitAddedEventListener) {
-            getProcessingUnits().getProcessingUnitAdded().remove((ProcessingUnitAddedEventListener) eventListener);
-        }
-        if (eventListener instanceof ProcessingUnitRemovedEventListener) {
-            getProcessingUnits().getProcessingUnitRemoved().remove((ProcessingUnitRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof ProcessingUnitStatusChangedEventListener) {
-            getProcessingUnits().getProcessingUnitStatusChanged().remove((ProcessingUnitStatusChangedEventListener) eventListener);
-        }
-        if (eventListener instanceof ProcessingUnitInstanceAddedEventListener) {
-            getProcessingUnits().getProcessingUnitInstanceAdded().remove((ProcessingUnitInstanceAddedEventListener) eventListener);
-        }
-        if (eventListener instanceof ProcessingUnitInstanceRemovedEventListener) {
-            getProcessingUnits().getProcessingUnitInstanceRemoved().remove((ProcessingUnitInstanceRemovedEventListener) eventListener);
-        }
-        if (eventListener instanceof ManagingGridServiceManagerChangedEventListener) {
-            getProcessingUnits().getManagingGridServiceManagerChanged().remove((ManagingGridServiceManagerChangedEventListener) eventListener);
-        }
-        if (eventListener instanceof BackupGridServiceManagerChangedEventListener) {
-            getProcessingUnits().getBackupGridServiceManagerChanged().remove((BackupGridServiceManagerChangedEventListener) eventListener);
-        }
+        EventRegistrationHelper.removeEventListener(this, eventListener);
     }
-    
+
     public synchronized void pushEvent(Object listener, Runnable notifier) {
         eventsQueue[Math.abs(listener.hashCode()) % eventsExecutorServices.length].add(new LoggerRunnable(notifier));
     }
