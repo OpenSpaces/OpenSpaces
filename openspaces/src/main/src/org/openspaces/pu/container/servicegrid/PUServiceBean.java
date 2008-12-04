@@ -16,6 +16,7 @@
 
 package org.openspaces.pu.container.servicegrid;
 
+import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.gigaspaces.jvm.JVMInfoProvider;
 import com.gigaspaces.lrmi.nio.info.NIOInfoProvider;
 import com.gigaspaces.operatingsystem.OSInfoProvider;
@@ -45,4 +46,6 @@ public interface PUServiceBean extends NIOInfoProvider, OSInfoProvider, JVMInfoP
     ClusterInfo getClusterInfo() throws RemoteException;
 
     PUDetails getPUDetails() throws RemoteException;
+
+    SpaceMode[] listSpaceModes() throws RemoteException;
 }

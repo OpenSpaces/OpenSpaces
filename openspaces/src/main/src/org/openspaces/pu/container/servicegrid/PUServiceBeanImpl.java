@@ -16,6 +16,7 @@
 
 package org.openspaces.pu.container.servicegrid;
 
+import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.jvm.JVMHelper;
 import com.gigaspaces.jvm.JVMStatistics;
@@ -25,6 +26,8 @@ import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.operatingsystem.OSDetails;
 import com.gigaspaces.operatingsystem.OSHelper;
 import com.gigaspaces.operatingsystem.OSStatistics;
+import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.kernel.Environment;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,6 +47,8 @@ import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
 import org.openspaces.core.cluster.MemberAliveIndicator;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertiesAware;
+import org.openspaces.core.space.SpaceProcessingUnitServiceDetails;
+import org.openspaces.core.space.SpaceType;
 import org.openspaces.interop.DotnetProcessingUnitContainerProvider;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ClassLoaderAwareProcessingUnitContainerProvider;
@@ -76,6 +81,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -121,6 +127,16 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private ClusterInfo clusterInfo;
 
     private volatile PUDetails puDetails;
+
+    private static Field spaceDetails;
+
+    static {
+        try {
+            spaceDetails = SpaceProcessingUnitServiceDetails.class.getDeclaredField("space");
+        } catch (NoSuchFieldException e) {
+            logger.error("Internal failure in openspaces", e);
+        }
+    }
 
     public PUServiceBeanImpl() {
         contextClassLoader = Thread.currentThread().getContextClassLoader();
@@ -544,6 +560,24 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
         }
         return alive;
+    }
+
+    public SpaceMode[] listSpaceModes() throws RemoteException {
+        List<SpaceMode> spacesModes = new ArrayList<SpaceMode>();
+        for (ProcessingUnitServiceDetails serviceDetails : puDetails.getDetails()) {
+            if (serviceDetails instanceof SpaceProcessingUnitServiceDetails) {
+                SpaceProcessingUnitServiceDetails spaceServiceDetails = (SpaceProcessingUnitServiceDetails) serviceDetails;
+                if (spaceServiceDetails.getSpaceType() == SpaceType.EMBEDDED) {
+                    try {
+                        IJSpace space = (IJSpace) spaceDetails.get(serviceDetails);
+                        spacesModes.add(((IInternalRemoteJSpaceAdmin) space.getAdmin()).getSpaceMode());
+                    } catch (IllegalAccessException e) {
+                        throw new RemoteException("Failed to access field", e);
+                    }
+                }
+            }
+        }
+        return spacesModes.toArray(new SpaceMode[spacesModes.size()]);
     }
 
     public PUDetails getPUDetails() throws RemoteException {
