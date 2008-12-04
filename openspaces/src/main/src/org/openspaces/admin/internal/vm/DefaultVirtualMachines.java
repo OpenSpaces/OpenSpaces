@@ -147,7 +147,6 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
         }, 0, statisticsInterval, TimeUnit.MILLISECONDS);
     }
 
-
     public void addLifecycleListener(VirtualMachineLifecycleEventListener eventListener) {
         getVirtualMachineAdded().add(eventListener);
         getVirtualMachineRemoved().add(eventListener);

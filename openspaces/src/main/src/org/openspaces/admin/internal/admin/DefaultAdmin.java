@@ -100,7 +100,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     private final InternalTransports transports = new DefaultTransports(this);
 
-    private final InternalOperatingSystems operatingSystems = new DefaultOperatingSystems();
+    private final InternalOperatingSystems operatingSystems = new DefaultOperatingSystems(this);
 
     private final InternalVirtualMachines virtualMachines = new DefaultVirtualMachines(this);
 
@@ -123,7 +123,7 @@ public class DefaultAdmin implements InternalAdmin {
     private Future scheduledProcessingUnitMonitorFuture;
 
     private boolean scheduledStatisticsMonitor = false;
-    
+
     private volatile boolean closed = false;
 
     public DefaultAdmin() {
@@ -142,6 +142,7 @@ public class DefaultAdmin implements InternalAdmin {
         this.spaces.setStatisticsInterval(interval, timeUnit);
         this.virtualMachines.setStatisticsInterval(interval, timeUnit);
         this.transports.setStatisticsInterval(interval, timeUnit);
+        this.operatingSystems.setStatisticsInterval(interval, timeUnit);
     }
 
     public synchronized void startStatisticsMonitor() {
@@ -149,6 +150,7 @@ public class DefaultAdmin implements InternalAdmin {
         this.spaces.startStatisticsMonitor();
         this.virtualMachines.startStatisticsMonitor();
         this.transports.startStatisticsMonitor();
+        this.operatingSystems.startStatisticsMonitor();
     }
 
     public synchronized void stopStatisticsMontior() {
@@ -156,6 +158,7 @@ public class DefaultAdmin implements InternalAdmin {
         this.spaces.stopStatisticsMontior();
         this.virtualMachines.stopStatisticsMontior();
         this.transports.stopStatisticsMontior();
+        this.operatingSystems.stopStatisticsMontior();
     }
 
     public boolean isMonitoring() {
@@ -555,7 +558,7 @@ public class DefaultAdmin implements InternalAdmin {
     private InternalOperatingSystem processOperatingSystemOnServiceAddition(InternalOperatingSystemInfoProvider osProvider, OSDetails osDetails) {
         InternalOperatingSystem os = (InternalOperatingSystem) operatingSystems.getByUID(osDetails.getUID());
         if (os == null) {
-            os = new DefaultOperatingSystem(osDetails);
+            os = new DefaultOperatingSystem(osDetails, operatingSystems);
             operatingSystems.addOperatingSystem(os);
         }
         os.addOperatingSystemInfoProvider(osProvider);

@@ -108,7 +108,7 @@ public class DefaultMachine implements InternalMachine {
         return operatingSystem != null;
     }
 
-    private static OperatingSystem NA_OPERATING_SYSTEM = new DefaultOperatingSystem(new OSDetails());
+    private static OperatingSystem NA_OPERATING_SYSTEM = new DefaultOperatingSystem(new OSDetails(), null);
 
     public OperatingSystem getOperatingSystem() {
         if (operatingSystem == null) {
