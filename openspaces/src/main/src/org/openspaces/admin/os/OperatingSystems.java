@@ -14,4 +14,6 @@ public interface OperatingSystems extends Iterable<OperatingSystem> {
     Map<String, OperatingSystem> getUids();
 
     int size();
+
+    OperatingSystemsStatistics getStatistics();
 }
