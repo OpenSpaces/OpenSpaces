@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.space;
 
 import com.gigaspaces.cluster.activeelection.InactiveSpaceException;
+import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.j_spaces.core.admin.IRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.RuntimeHolder;
 import com.j_spaces.core.exception.SpaceUnavailableException;
@@ -20,7 +21,9 @@ import org.openspaces.admin.internal.support.NetworkExceptionHelper;
 import org.openspaces.admin.space.ReplicationStatus;
 import org.openspaces.admin.space.ReplicationTarget;
 import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.space.SpaceInstanceStatistics;
 import org.openspaces.admin.space.SpacePartition;
+import org.openspaces.admin.space.SpaceStatistics;
 import org.openspaces.admin.space.Spaces;
 import org.openspaces.admin.space.events.ReplicationStatusChangedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
@@ -28,7 +31,9 @@ import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -126,6 +131,34 @@ public class DefaultSpace implements InternalSpace {
 
     public ReplicationStatusChangedEventManager getReplicationStatusChanged() {
         return this.replicationStatusChangedEventManager;
+    }
+
+    public SpaceStatistics getStatistics() {
+        List<SpaceInstanceStatistics> stats = new ArrayList<SpaceInstanceStatistics>();
+        for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
+            stats.add(spaceInstance.getStatistics());
+        }
+        return new DefaultSpaceStatistics(stats.toArray(new SpaceInstanceStatistics[stats.size()]));
+    }
+
+    public SpaceStatistics getPrimaryStatistics() {
+        List<SpaceInstanceStatistics> stats = new ArrayList<SpaceInstanceStatistics>();
+        for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
+            if (spaceInstance.getMode() == SpaceMode.PRIMARY) {
+                stats.add(spaceInstance.getStatistics());
+            }
+        }
+        return new DefaultSpaceStatistics(stats.toArray(new SpaceInstanceStatistics[stats.size()]));
+    }
+
+    public SpaceStatistics getBackupStatistics() {
+        List<SpaceInstanceStatistics> stats = new ArrayList<SpaceInstanceStatistics>();
+        for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
+            if (spaceInstance.getMode() == SpaceMode.BACKUP) {
+                stats.add(spaceInstance.getStatistics());
+            }
+        }
+        return new DefaultSpaceStatistics(stats.toArray(new SpaceInstanceStatistics[stats.size()]));
     }
 
     public void addInstance(SpaceInstance spaceInstance) {

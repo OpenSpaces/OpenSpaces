@@ -3,12 +3,14 @@ package org.openspaces.admin.space;
 /**
  * @author kimchy
  */
-public interface SpaceInstanceStatistics {
+public interface SpaceStatistics {
 
     boolean isNA();
 
+    int getSize();
+
     long getTimestamp();
-    
+
     long getWriteCount();
 
     long getReadCount();

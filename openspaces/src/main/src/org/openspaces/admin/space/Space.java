@@ -31,6 +31,21 @@ public interface Space extends Iterable<SpaceInstance> {
 
     boolean isEmpty();
 
+    /**
+     * Returns an aggregated view of all the statistics of all the instances.
+     */
+    SpaceStatistics getStatistics();
+
+    /**
+     * Returns an aggregated view of all the statistics of the primary instances.
+     */
+    SpaceStatistics getPrimaryStatistics();
+
+    /**
+     * Returns an aggregated view of all the statistics of the backup instances.
+     */
+    SpaceStatistics getBackupStatistics();
+
     SpaceInstanceAddedEventManager getSpaceInstanceAdded();
 
     SpaceInstanceRemovedEventManager getSpaceInstanceRemoved();

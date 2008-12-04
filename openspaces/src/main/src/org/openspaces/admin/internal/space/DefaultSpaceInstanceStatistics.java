@@ -34,7 +34,7 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
         return statisticsHolder.getOperationsCount()[2];
     }
 
-    public long getNotifyCount() {
+    public long getNotifyRegistrationCount() {
         return statisticsHolder.getOperationsCount()[3];
     }
 
