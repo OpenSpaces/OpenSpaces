@@ -37,6 +37,7 @@ public class TestSampler {
                         System.out.println("   -> PU [" + processingUnitInstance.getClusterInfo() + "]");
                     }
                 }
+                System.out.println("VM TOTAL STATS: Heap Committed [" + admin.getVirtualMachines().getStatistics().getMemoryHeapCommitted() +"]");
                 for (VirtualMachine virtualMachine : admin.getVirtualMachines()) {
                     System.out.println("VM [" + virtualMachine.getUid() + "] on host [" + virtualMachine.getMachine().getHost() + "]");
                     for (ProcessingUnitInstance processingUnitInstance : virtualMachine.getProcessingUnitInstances()) {

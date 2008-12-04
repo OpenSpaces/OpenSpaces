@@ -8,12 +8,16 @@ import org.openspaces.admin.internal.vm.events.DefaultVirtualMachineRemovedEvent
 import org.openspaces.admin.internal.vm.events.InternalVirtualMachineAddedEventManager;
 import org.openspaces.admin.internal.vm.events.InternalVirtualMachineRemovedEventManager;
 import org.openspaces.admin.vm.VirtualMachine;
+import org.openspaces.admin.vm.VirtualMachineStatistics;
+import org.openspaces.admin.vm.VirtualMachinesStatistics;
 import org.openspaces.admin.vm.events.VirtualMachineAddedEventManager;
 import org.openspaces.admin.vm.events.VirtualMachineLifecycleEventListener;
 import org.openspaces.admin.vm.events.VirtualMachineRemovedEventManager;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -61,6 +65,14 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
 
     public boolean isEmpty() {
         return virtualMachinesByUID.size() == 0;
+    }
+
+    public VirtualMachinesStatistics getStatistics() {
+        List<VirtualMachineStatistics> stats = new ArrayList<VirtualMachineStatistics>();
+        for (VirtualMachine virtualMachine : virtualMachinesByUID.values()) {
+            stats.add(virtualMachine.getStatistics());
+        }
+        return new DefaultVirtualMachinesStatistics(stats.toArray(new VirtualMachineStatistics[stats.size()]));
     }
 
     public void addLifecycleListener(VirtualMachineLifecycleEventListener eventListener) {
