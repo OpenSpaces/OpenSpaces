@@ -2,6 +2,7 @@ package org.openspaces.admin.space;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 import org.openspaces.admin.GridComponent;
+import org.openspaces.admin.space.events.ReplicationStatusChangedEventManager;
 import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
 
 /**
@@ -25,4 +26,6 @@ public interface SpaceInstance extends GridComponent {
     ReplicationTarget[] getReplicationTargets();
 
     SpaceModeChangedEventManager getSpaceModeChanged();
+
+    ReplicationStatusChangedEventManager getReplicationStatusChanged();
 }

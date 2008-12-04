@@ -13,16 +13,22 @@ import com.j_spaces.core.admin.SpaceConfig;
 import com.j_spaces.core.client.SpaceURL;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.space.events.DefaultReplicationStatusChangedEventManager;
 import org.openspaces.admin.internal.space.events.DefaultSpaceModeChangedEventManager;
+import org.openspaces.admin.internal.space.events.InternalReplicationStatusChangedEventManager;
 import org.openspaces.admin.internal.space.events.InternalSpaceModeChangedEventManager;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.space.ReplicationTarget;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpacePartition;
+import org.openspaces.admin.space.events.ReplicationStatusChangedEvent;
+import org.openspaces.admin.space.events.ReplicationStatusChangedEventManager;
 import org.openspaces.admin.space.events.SpaceModeChangedEvent;
 import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author kimchy
@@ -55,9 +61,13 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     private volatile SpaceMode spaceMode = SpaceMode.NONE;
 
-    private volatile ReplicationTarget[] replicationTargets = new ReplicationTarget[0];
+    private static final ReplicationTarget[] NO_REPLICATION_STATUS = new ReplicationTarget[0];
+
+    private volatile ReplicationTarget[] replicationTargets = NO_REPLICATION_STATUS;
 
     private final InternalSpaceModeChangedEventManager spaceModeChangedEventManager;
+
+    private final InternalReplicationStatusChangedEventManager replicationStatusChangedEventManager;
 
     public DefaultSpaceInstance(ServiceID serviceID, IJSpace ijSpace, IInternalRemoteJSpaceAdmin spaceAdmin,
                                 SpaceConfig spaceConfig, InternalAdmin admin) {
@@ -70,7 +80,8 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         this.spaceURL = ijSpace.getURL();
 
         this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(admin);
-        
+        this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
+
         String sInstanceId = spaceURL.getProperty(SpaceURL.CLUSTER_MEMBER_ID);
         if (sInstanceId == null || sInstanceId.length() == 0) {
             instanceId = 1;
@@ -123,6 +134,10 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         return this.spaceModeChangedEventManager;
     }
 
+    public ReplicationStatusChangedEventManager getReplicationStatusChanged() {
+        return this.replicationStatusChangedEventManager;
+    }
+
     public int getInstanceId() {
         return instanceId;
     }
@@ -164,7 +179,29 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     }
 
     public void setReplicationTargets(ReplicationTarget[] replicationTargets) {
+        ReplicationTarget[] previousReplicationTargets = this.replicationTargets;
+        ReplicationTarget[] newReplicationTargets = replicationTargets;
         this.replicationTargets = replicationTargets;
+
+        List<ReplicationStatusChangedEvent> events = new ArrayList<ReplicationStatusChangedEvent>();
+        if (previousReplicationTargets == NO_REPLICATION_STATUS) {
+            for (ReplicationTarget replicationTarget : newReplicationTargets) {
+                events.add(new ReplicationStatusChangedEvent(this, replicationTarget, null, replicationTarget.getReplicationStatus()));
+            }
+        } else {
+            for (int i = 0; i < newReplicationTargets.length; i++) {
+                ReplicationTarget newReplicationTarget = newReplicationTargets[i];
+                ReplicationTarget previousReplicationTarget = previousReplicationTargets[i];
+                if (newReplicationTarget.getReplicationStatus() != previousReplicationTarget.getReplicationStatus()) {
+                    events.add(new ReplicationStatusChangedEvent(this, newReplicationTarget, previousReplicationTarget.getReplicationStatus(), newReplicationTarget.getReplicationStatus()));
+                }
+            }
+        }
+        for (ReplicationStatusChangedEvent event : events) {
+            replicationStatusChangedEventManager.replicationStatusChanged(event);
+            ((InternalReplicationStatusChangedEventManager) getSpace().getReplicationStatusChanged()).replicationStatusChanged(event);
+            ((InternalReplicationStatusChangedEventManager) getSpace().getSpaces().getReplicationStatusChanged()).replicationStatusChanged(event);
+        }
     }
 
     public Space getSpace() {

@@ -6,6 +6,7 @@ import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.space.events.*;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.space.events.ReplicationStatusChangedEventManager;
 import org.openspaces.admin.space.events.SpaceAddedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
@@ -43,6 +44,8 @@ public class DefaultSpaces implements InternalSpaces {
 
     private final InternalSpaceModeChangedEventManager spaceModeChangedEventManager;
 
+    private final InternalReplicationStatusChangedEventManager replicationStatusChangedEventManager;
+
     public DefaultSpaces(InternalAdmin admin) {
         this.admin = admin;
         this.spaceAddedEventManager = new DefaultSpaceAddedEventManager(this);
@@ -50,6 +53,7 @@ public class DefaultSpaces implements InternalSpaces {
         this.spaceInstanceAddedEventManager = new DefaultSpaceInstanceAddedEventManager(admin, this);
         this.spaceInstanceRemovedEventManager = new DefaultSpaceInstanceRemovedEventManager(admin);
         this.spaceModeChangedEventManager =  new DefaultSpaceModeChangedEventManager(admin);
+        this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
     }
 
     public Admin getAdmin() {
@@ -92,6 +96,10 @@ public class DefaultSpaces implements InternalSpaces {
 
     public SpaceModeChangedEventManager getSpaceModeChanged() {
         return this.spaceModeChangedEventManager;
+    }
+
+    public ReplicationStatusChangedEventManager getReplicationStatusChanged() {
+        return this.replicationStatusChangedEventManager;
     }
 
     public SpaceInstance[] getSpaceInstances() {

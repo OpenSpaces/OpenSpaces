@@ -8,9 +8,11 @@ import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.space.events.DefaultReplicationStatusChangedEventManager;
 import org.openspaces.admin.internal.space.events.DefaultSpaceInstanceAddedEventManager;
 import org.openspaces.admin.internal.space.events.DefaultSpaceInstanceRemovedEventManager;
 import org.openspaces.admin.internal.space.events.DefaultSpaceModeChangedEventManager;
+import org.openspaces.admin.internal.space.events.InternalReplicationStatusChangedEventManager;
 import org.openspaces.admin.internal.space.events.InternalSpaceInstanceAddedEventManager;
 import org.openspaces.admin.internal.space.events.InternalSpaceInstanceRemovedEventManager;
 import org.openspaces.admin.internal.space.events.InternalSpaceModeChangedEventManager;
@@ -20,6 +22,7 @@ import org.openspaces.admin.space.ReplicationTarget;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.SpacePartition;
 import org.openspaces.admin.space.Spaces;
+import org.openspaces.admin.space.events.ReplicationStatusChangedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
@@ -60,6 +63,8 @@ public class DefaultSpace implements InternalSpace {
 
     private final InternalSpaceModeChangedEventManager spaceModeChangedEventManager;
 
+    private final InternalReplicationStatusChangedEventManager replicationStatusChangedEventManager;
+
     public DefaultSpace(InternalSpaces spaces, String uid, String name) {
         this.spaces = spaces;
         this.admin = (InternalAdmin) spaces.getAdmin();
@@ -68,6 +73,7 @@ public class DefaultSpace implements InternalSpace {
         this.spaceInstanceAddedEventManager = new DefaultSpaceInstanceAddedEventManager(admin, this);
         this.spaceInstanceRemovedEventManager = new DefaultSpaceInstanceRemovedEventManager(admin);
         this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(admin);
+        this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
     }
 
     public Spaces getSpaces() {
@@ -116,6 +122,10 @@ public class DefaultSpace implements InternalSpace {
 
     public SpaceModeChangedEventManager getSpaceModeChanged() {
         return this.spaceModeChangedEventManager;
+    }
+
+    public ReplicationStatusChangedEventManager getReplicationStatusChanged() {
+        return this.replicationStatusChangedEventManager;
     }
 
     public void addInstance(SpaceInstance spaceInstance) {

@@ -1,6 +1,7 @@
 package org.openspaces.admin.space;
 
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.space.events.ReplicationStatusChangedEventManager;
 import org.openspaces.admin.space.events.SpaceAddedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
@@ -39,4 +40,6 @@ public interface Spaces extends Iterable<Space> {
     void removeLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
 
     SpaceModeChangedEventManager getSpaceModeChanged();
+
+    ReplicationStatusChangedEventManager getReplicationStatusChanged();
 }
