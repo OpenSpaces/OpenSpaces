@@ -133,6 +133,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     static {
         try {
             spaceDetails = SpaceProcessingUnitServiceDetails.class.getDeclaredField("space");
+            spaceDetails.setAccessible(true);
         } catch (NoSuchFieldException e) {
             logger.error("Internal failure in openspaces", e);
         }
@@ -562,7 +563,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         return alive;
     }
 
-    public SpaceMode[] listSpaceModes() throws RemoteException {
+    public SpaceMode[] listSpacesModes() throws RemoteException {
         List<SpaceMode> spacesModes = new ArrayList<SpaceMode>();
         for (ProcessingUnitServiceDetails serviceDetails : puDetails.getDetails()) {
             if (serviceDetails instanceof SpaceProcessingUnitServiceDetails) {
