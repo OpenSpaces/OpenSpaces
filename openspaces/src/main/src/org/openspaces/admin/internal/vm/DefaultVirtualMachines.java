@@ -105,22 +105,14 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
 
     public void setStatisticsInterval(long interval, TimeUnit timeUnit) {
         statisticsInterval = timeUnit.toMillis(interval);
+        rescheduleStatisticsMonitor();
         for (VirtualMachine virualMachine : virtualMachinesByUID.values()) {
             virualMachine.setStatisticsInterval(interval, timeUnit);
         }
     }
 
     public synchronized void startStatisticsMonitor() {
-        if (scheduledStatisticsMonitor != null) {
-            scheduledStatisticsMonitor.cancel(false);
-        }
-        scheduledStatisticsMonitor = admin.getScheduler().scheduleWithFixedDelay(new Runnable() {
-            public void run() {
-                VirtualMachinesStatistics stats = getStatistics();
-                VirtualMachinesStatisticsChangedEvent event = new VirtualMachinesStatisticsChangedEvent(DefaultVirtualMachines.this, stats);
-                virtualMachinesStatisticsChangedEventManager.virtualMachinesStatisticsChanged(event);
-            }
-        }, 0, statisticsInterval, TimeUnit.MILLISECONDS);
+        rescheduleStatisticsMonitor();
         for (VirtualMachine virtualMachine : virtualMachinesByUID.values()) {
             virtualMachine.startStatisticsMonitor();
         }
@@ -139,7 +131,21 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
     public synchronized boolean isMonitoring() {
         return scheduledStatisticsMonitor != null;
     }
-    
+
+    private void rescheduleStatisticsMonitor() {
+        if (scheduledStatisticsMonitor != null) {
+            scheduledStatisticsMonitor.cancel(false);
+        }
+        scheduledStatisticsMonitor = admin.getScheduler().scheduleWithFixedDelay(new Runnable() {
+            public void run() {
+                VirtualMachinesStatistics stats = getStatistics();
+                VirtualMachinesStatisticsChangedEvent event = new VirtualMachinesStatisticsChangedEvent(DefaultVirtualMachines.this, stats);
+                virtualMachinesStatisticsChangedEventManager.virtualMachinesStatisticsChanged(event);
+            }
+        }, 0, statisticsInterval, TimeUnit.MILLISECONDS);
+    }
+
+
     public void addLifecycleListener(VirtualMachineLifecycleEventListener eventListener) {
         getVirtualMachineAdded().add(eventListener);
         getVirtualMachineRemoved().add(eventListener);

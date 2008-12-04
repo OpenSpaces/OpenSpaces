@@ -102,23 +102,14 @@ public class DefaultSpace implements InternalSpace {
 
     public void setStatisticsInterval(long interval, TimeUnit timeUnit) {
         statisticsInterval = timeUnit.toMillis(interval);
+        rescheduleStatisticsMonitor();
         for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
             spaceInstance.setStatisticsInterval(interval, timeUnit);
         }
     }
 
     public synchronized void startStatisticsMonitor() {
-        if (scheduledStatisticsMonitor != null) {
-            scheduledStatisticsMonitor.cancel(false);
-        }
-        scheduledStatisticsMonitor = admin.getScheduler().scheduleWithFixedDelay(new Runnable() {
-            public void run() {
-                SpaceStatistics stats = getStatistics();
-                SpaceStatisticsChangedEvent event = new SpaceStatisticsChangedEvent(DefaultSpace.this, stats);
-                statisticsChangedEventManager.spaceStatisticsChanged(event);
-                ((InternalSpaceStatisticsChangedEventManager) spaces.getSpaceStatisticsChanged()).spaceStatisticsChanged(event);
-            }
-        }, 0, statisticsInterval, TimeUnit.MILLISECONDS);
+        rescheduleStatisticsMonitor();
         for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
             spaceInstance.startStatisticsMonitor();
         }
@@ -136,6 +127,20 @@ public class DefaultSpace implements InternalSpace {
 
     public synchronized boolean isMonitoring() {
         return scheduledStatisticsMonitor != null;
+    }
+
+    private void rescheduleStatisticsMonitor() {
+        if (scheduledStatisticsMonitor != null) {
+            scheduledStatisticsMonitor.cancel(false);
+        }
+        scheduledStatisticsMonitor = admin.getScheduler().scheduleWithFixedDelay(new Runnable() {
+            public void run() {
+                SpaceStatistics stats = getStatistics();
+                SpaceStatisticsChangedEvent event = new SpaceStatisticsChangedEvent(DefaultSpace.this, stats);
+                statisticsChangedEventManager.spaceStatisticsChanged(event);
+                ((InternalSpaceStatisticsChangedEventManager) spaces.getSpaceStatisticsChanged()).spaceStatisticsChanged(event);
+            }
+        }, 0, statisticsInterval, TimeUnit.MILLISECONDS);
     }
 
     public int getNumberOfInstances() {

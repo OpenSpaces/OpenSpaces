@@ -49,7 +49,7 @@ public class DefaultMachine implements InternalMachine {
 
     private final InternalGridServiceContainers gridServiceContainers;
 
-    private final InternalTransports transports = new DefaultTransports();
+    private final InternalTransports transports;
 
     private final InternalVirtualMachines virtualMachines;
 
@@ -69,6 +69,7 @@ public class DefaultMachine implements InternalMachine {
         this.virtualMachines = new DefaultVirtualMachines(admin);
         this.processingUnitInstances = new DefaultProcessingUnitInstances(admin);
         this.spaceInstances = new DefaultSpaceInstances(admin);
+        this.transports = new DefaultTransports(admin);
     }
 
     public String getUid() {

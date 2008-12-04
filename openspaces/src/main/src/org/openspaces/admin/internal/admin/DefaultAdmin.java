@@ -98,7 +98,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     private final InternalGridServiceContainers gridServiceContainers = new DefaultGridServiceContainers(this);
 
-    private final InternalTransports transports = new DefaultTransports();
+    private final InternalTransports transports = new DefaultTransports(this);
 
     private final InternalOperatingSystems operatingSystems = new DefaultOperatingSystems();
 
@@ -276,9 +276,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     public synchronized void addLookupService(InternalLookupService lookupService,
                                               NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
-        InternalTransport transport = processTransportOnServiceAddition(lookupService, nioDetails);
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(lookupService, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(lookupService, jvmDetails);
+        InternalTransport transport = processTransportOnServiceAddition(lookupService, nioDetails, virtualMachine);
 
         InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
                 transport, operatingSystem, virtualMachine,
@@ -306,9 +306,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     public synchronized void addGridServiceManager(InternalGridServiceManager gridServiceManager,
                                                    NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
-        InternalTransport transport = processTransportOnServiceAddition(gridServiceManager, nioDetails);
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceManager, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceManager, jvmDetails);
+        InternalTransport transport = processTransportOnServiceAddition(gridServiceManager, nioDetails, virtualMachine);
 
         InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
                 transport, operatingSystem, virtualMachine,
@@ -337,9 +337,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     public synchronized void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer,
                                                      NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
-        InternalTransport transport = processTransportOnServiceAddition(gridServiceContainer, nioDetails);
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceContainer, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceContainer, jvmDetails);
+        InternalTransport transport = processTransportOnServiceAddition(gridServiceContainer, nioDetails, virtualMachine);
 
         InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
                 transport, operatingSystem, virtualMachine,
@@ -367,9 +367,9 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void addProcessingUnitInstance(InternalProcessingUnitInstance processingUnitInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
-        InternalTransport transport = processTransportOnServiceAddition(processingUnitInstance, nioDetails);
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(processingUnitInstance, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(processingUnitInstance, jvmDetails);
+        InternalTransport transport = processTransportOnServiceAddition(processingUnitInstance, nioDetails, virtualMachine);
 
         InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
                 transport, operatingSystem, virtualMachine,
@@ -404,9 +404,9 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void addSpaceInstance(InternalSpaceInstance spaceInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
-        InternalTransport transport = processTransportOnServiceAddition(spaceInstance, nioDetails);
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(spaceInstance, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(spaceInstance, jvmDetails);
+        InternalTransport transport = processTransportOnServiceAddition(spaceInstance, nioDetails, virtualMachine);
 
         InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
                 transport, operatingSystem, virtualMachine,
@@ -528,10 +528,11 @@ public class DefaultAdmin implements InternalAdmin {
         }
     }
 
-    private InternalTransport processTransportOnServiceAddition(InternalTransportInfoProvider txProvider, NIODetails nioDetails) {
+    private InternalTransport processTransportOnServiceAddition(InternalTransportInfoProvider txProvider, NIODetails nioDetails, VirtualMachine virtualMachine) {
         InternalTransport transport = (InternalTransport) transports.getTransportByHostAndPort(nioDetails.getHost(), nioDetails.getPort());
         if (transport == null) {
-            transport = new DefaultTransport(nioDetails);
+            transport = new DefaultTransport(nioDetails, transports);
+            transport.setVirtualMachine(virtualMachine);
             transports.addTransport(transport);
         }
         transport.addTransportInfoProvider(txProvider);
