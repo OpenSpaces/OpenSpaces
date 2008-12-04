@@ -100,9 +100,11 @@ public class DefaultSpace implements InternalSpace {
         return this.name;
     }
 
-    public void setStatisticsInterval(long interval, TimeUnit timeUnit) {
+    public synchronized void setStatisticsInterval(long interval, TimeUnit timeUnit) {
         statisticsInterval = timeUnit.toMillis(interval);
-        rescheduleStatisticsMonitor();
+        if (isMonitoring()) {
+            rescheduleStatisticsMonitor();
+        }
         for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
             spaceInstance.setStatisticsInterval(interval, timeUnit);
         }

@@ -97,8 +97,11 @@ public class DefaultTransports implements InternalTransports {
         return new DefaultTransportsStatistics(stats.toArray(new TransportStatistics[stats.size()]));
     }
 
-    public void setStatisticsInterval(long interval, TimeUnit timeUnit) {
+    public synchronized void setStatisticsInterval(long interval, TimeUnit timeUnit) {
         statisticsInterval = timeUnit.toMillis(interval);
+        if (isMonitoring()) {
+            rescheduleStatisticsMonitor();
+        }
         rescheduleStatisticsMonitor();
         for (Transport transport : transportsByUID.values()) {
             transport.setStatisticsInterval(interval, timeUnit);
@@ -144,6 +147,9 @@ public class DefaultTransports implements InternalTransports {
         transportsByUID.put(transport.getUid(), transport);
         Set<Transport> transportByHost = transportsByHost.get(transport.getHost());
         if (transportByHost == null) {
+            if (isMonitoring()) {
+                transport.startStatisticsMonitor();
+            }
             synchronized (transportsByHost) {
                 transportByHost = transportsByHost.get(transport.getHost());
                 if (transportByHost == null) {
@@ -159,6 +165,8 @@ public class DefaultTransports implements InternalTransports {
         if (transport == null) {
             return;
         }
+        transport.stopStatisticsMontior();
+
         Set<Transport> transportByHost = transportsByHost.get(transport.getHost());
         if (transportByHost == null) {
             synchronized (transportsByHost) {

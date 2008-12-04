@@ -103,9 +103,11 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
         return new DefaultVirtualMachinesStatistics(stats.toArray(new VirtualMachineStatistics[stats.size()]));
     }
 
-    public void setStatisticsInterval(long interval, TimeUnit timeUnit) {
+    public synchronized void setStatisticsInterval(long interval, TimeUnit timeUnit) {
         statisticsInterval = timeUnit.toMillis(interval);
-        rescheduleStatisticsMonitor();
+        if (isMonitoring()) {
+            rescheduleStatisticsMonitor();
+        }
         for (VirtualMachine virualMachine : virtualMachinesByUID.values()) {
             virualMachine.setStatisticsInterval(interval, timeUnit);
         }
