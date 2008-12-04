@@ -140,16 +140,19 @@ public class DefaultAdmin implements InternalAdmin {
 
     public void setStatisticsInterval(long interval, TimeUnit timeUnit) {
         this.spaces.setStatisticsInterval(interval, timeUnit);
+        this.virtualMachines.setStatisticsInterval(interval, timeUnit);
     }
 
     public synchronized void startStatisticsMonitor() {
         scheduledStatisticsMonitor = true;
         this.spaces.startStatisticsMonitor();
+        this.virtualMachines.startStatisticsMonitor();
     }
 
     public synchronized void stopStatisticsMontior() {
         scheduledStatisticsMonitor = false;
         this.spaces.stopStatisticsMontior();
+        this.virtualMachines.stopStatisticsMontior();
     }
 
     public boolean isMonitoring() {
@@ -508,7 +511,7 @@ public class DefaultAdmin implements InternalAdmin {
     private InternalVirtualMachine processVirtualMachineOnServiceAddition(InternalVirtualMachineInfoProvider vmProvider, JVMDetails jvmDetails) {
         InternalVirtualMachine virtualMachine = (InternalVirtualMachine) virtualMachines.getVirtualMachineByUID(jvmDetails.getUid());
         if (virtualMachine == null) {
-            virtualMachine = new DefaultVirtualMachine(this, jvmDetails);
+            virtualMachine = new DefaultVirtualMachine(virtualMachines, jvmDetails);
             virtualMachines.addVirtualMachine(virtualMachine);
         }
         virtualMachine.addVirtualMachineInfoProvider(vmProvider);

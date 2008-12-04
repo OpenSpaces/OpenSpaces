@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.vm;
 
 import com.gigaspaces.jvm.JVMDetails;
+import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManager;
@@ -14,6 +15,8 @@ import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
 import org.openspaces.admin.internal.space.DefaultSpaceInstances;
 import org.openspaces.admin.internal.space.InternalSpaceInstances;
+import org.openspaces.admin.internal.vm.events.DefaultVirtualMachineStatisticsChangedEventManager;
+import org.openspaces.admin.internal.vm.events.InternalVirtualMachineStatisticsChangedEventManager;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
@@ -23,13 +26,18 @@ import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
+import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.admin.vm.VirtualMachineDetails;
 import org.openspaces.admin.vm.VirtualMachineStatistics;
+import org.openspaces.admin.vm.events.VirtualMachineStatisticsChangedEvent;
+import org.openspaces.admin.vm.events.VirtualMachineStatisticsChangedEventManager;
 import org.openspaces.core.util.ConcurrentHashSet;
 
 import java.rmi.RemoteException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author kimchy
@@ -37,6 +45,8 @@ import java.util.Set;
 public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     private final InternalAdmin admin;
+
+    private final InternalVirtualMachines virtualMachines;
 
     private final String uid;
 
@@ -54,14 +64,26 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     private final InternalSpaceInstances spaceInstances;
 
-    public DefaultVirtualMachine(InternalAdmin admin, JVMDetails details) {
-        this.admin = admin;
+    private long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
+
+    private long lastStatisticsTimestamp = 0;
+
+    private VirtualMachineStatistics lastStatistics;
+
+    private Future scheduledStatisticsMonitor;
+
+    private final InternalVirtualMachineStatisticsChangedEventManager statisticsChangedEventManager;
+
+    public DefaultVirtualMachine(InternalVirtualMachines virtualMachines, JVMDetails details) {
+        this.virtualMachines = virtualMachines;
+        this.admin = (InternalAdmin) virtualMachines.getAdmin();
         this.details = new DefaultVirtualMachineDetails(details);
         this.uid = details.getUid();
         this.gridServiceManagers = new DefaultGridServiceManagers(admin);
         this.gridServiceContainers = new DefaultGridServiceContainers(admin);
         this.processingUnitInstances = new DefaultProcessingUnitInstances(admin);
         this.spaceInstances = new DefaultSpaceInstances(admin);
+        this.statisticsChangedEventManager = new DefaultVirtualMachineStatisticsChangedEventManager(admin);
     }
 
     public String getUid() {
@@ -78,6 +100,10 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     public boolean hasVirtualMachineInfoProviders() {
         return !virtualMachineInfoProviders.isEmpty();
+    }
+
+    public VirtualMachineStatisticsChangedEventManager getVirtualMachineStatisticsChanged() {
+        return this.statisticsChangedEventManager;
     }
 
     public VirtualMachineDetails getDetails() {
@@ -174,16 +200,56 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     private static final VirtualMachineStatistics NA_STATS = new DefaultVirtualMachineStatistics();
 
-    public VirtualMachineStatistics getStatistics() {
+    public synchronized VirtualMachineStatistics getStatistics() {
+        long currentTime = System.currentTimeMillis();
+        if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
+            return lastStatistics;
+        }
+        lastStatistics = NA_STATS;
+        lastStatisticsTimestamp = currentTime;
         for (InternalVirtualMachineInfoProvider provider : virtualMachineInfoProviders) {
             try {
-                return new DefaultVirtualMachineStatistics(provider.getJVMStatistics());
+                lastStatistics = new DefaultVirtualMachineStatistics(provider.getJVMStatistics());
+                break;
             } catch (RemoteException e) {
                 // continue to the next one
             }
         }
-        // all failed, return NA
-        return NA_STATS;
+        return lastStatistics;
+    }
+
+    public synchronized void setStatisticsInterval(long interval, TimeUnit timeUnit) {
+        this.statisticsInterval = timeUnit.toMillis(interval);
+        if (scheduledStatisticsMonitor != null) {
+            stopStatisticsMontior();
+            startStatisticsMonitor();
+        }
+    }
+
+    public synchronized void startStatisticsMonitor() {
+        if (scheduledStatisticsMonitor != null) {
+            scheduledStatisticsMonitor.cancel(false);
+        }
+        final VirtualMachine virtualMachine = this;
+        scheduledStatisticsMonitor = admin.getScheduler().scheduleWithFixedDelay(new Runnable() {
+            public void run() {
+                VirtualMachineStatistics stats = virtualMachine.getStatistics();
+                VirtualMachineStatisticsChangedEvent event = new VirtualMachineStatisticsChangedEvent(virtualMachine, stats);
+                statisticsChangedEventManager.virtualMachineStatisticsChanged(event);
+                ((InternalVirtualMachineStatisticsChangedEventManager) virtualMachines.getVirtualMachineStatisticsChanged()).virtualMachineStatisticsChanged(event);
+            }
+        }, 0, statisticsInterval, TimeUnit.MILLISECONDS);
+    }
+
+    public synchronized void stopStatisticsMontior() {
+        if (scheduledStatisticsMonitor != null) {
+            scheduledStatisticsMonitor.cancel(false);
+            scheduledStatisticsMonitor = null;
+        }
+    }
+
+    public synchronized boolean isMonitoring() {
+        return scheduledStatisticsMonitor != null;
     }
 
     @Override

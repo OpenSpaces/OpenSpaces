@@ -1,5 +1,6 @@
 package org.openspaces.admin.vm;
 
+import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.machine.MachineAware;
@@ -11,11 +12,12 @@ import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
+import org.openspaces.admin.vm.events.VirtualMachineStatisticsChangedEventManager;
 
 /**
  * @author kimchy
  */
-public interface VirtualMachine extends MachineAware {
+public interface VirtualMachine extends MachineAware, StatisticsMonitor {
 
     String getUid();
 
@@ -60,4 +62,6 @@ public interface VirtualMachine extends MachineAware {
     void addLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
 
     void removeLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
+
+    VirtualMachineStatisticsChangedEventManager getVirtualMachineStatisticsChanged();
 }
