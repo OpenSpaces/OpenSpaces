@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author kimchy
  */
-public interface Admin {
+public interface Admin extends StatisticsMonitor {
 
     void setProcessingUnitMonitorInterval(long interval, TimeUnit timeUnit);
 

@@ -122,6 +122,8 @@ public class DefaultAdmin implements InternalAdmin {
 
     private Future scheduledProcessingUnitMonitorFuture;
 
+    private boolean scheduledStatisticsMonitor = false;
+    
     private volatile boolean closed = false;
 
     public DefaultAdmin() {
@@ -134,6 +136,24 @@ public class DefaultAdmin implements InternalAdmin {
 
     public void addLocator(String locator) {
         discoveryService.addLocator(locator);
+    }
+
+    public void setStatisticsInterval(long interval, TimeUnit timeUnit) {
+        this.spaces.setStatisticsInterval(interval, timeUnit);
+    }
+
+    public synchronized void startStatisticsMonitor() {
+        scheduledStatisticsMonitor = true;
+        this.spaces.startStatisticsMonitor();
+    }
+
+    public synchronized void stopStatisticsMontior() {
+        scheduledStatisticsMonitor = false;
+        this.spaces.stopStatisticsMontior();
+    }
+
+    public boolean isMonitoring() {
+        return scheduledStatisticsMonitor;
     }
 
     public void begin() {

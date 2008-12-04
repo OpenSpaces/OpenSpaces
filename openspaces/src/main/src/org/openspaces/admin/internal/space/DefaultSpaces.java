@@ -2,24 +2,19 @@ package org.openspaces.admin.internal.space;
 
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.space.events.*;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
-import org.openspaces.admin.space.events.ReplicationStatusChangedEventManager;
-import org.openspaces.admin.space.events.SpaceAddedEventManager;
-import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
-import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
-import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
-import org.openspaces.admin.space.events.SpaceLifecycleEventListener;
-import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
-import org.openspaces.admin.space.events.SpaceRemovedEventManager;
+import org.openspaces.admin.space.events.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author kimchy
@@ -46,6 +41,14 @@ public class DefaultSpaces implements InternalSpaces {
 
     private final InternalReplicationStatusChangedEventManager replicationStatusChangedEventManager;
 
+    private final InternalSpaceStatisticsChangedEventManager spaceStatisticsChangedEventManager;
+
+    private final InternalSpaceInstanceStatisticsChangedEventManager spaceInstanceStatisticsChangedEventManager;
+
+    private volatile long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
+
+    private volatile boolean scheduledStatisticsMonitor = false;
+    
     public DefaultSpaces(InternalAdmin admin) {
         this.admin = admin;
         this.spaceAddedEventManager = new DefaultSpaceAddedEventManager(this);
@@ -54,10 +57,37 @@ public class DefaultSpaces implements InternalSpaces {
         this.spaceInstanceRemovedEventManager = new DefaultSpaceInstanceRemovedEventManager(admin);
         this.spaceModeChangedEventManager =  new DefaultSpaceModeChangedEventManager(admin);
         this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
+        this.spaceStatisticsChangedEventManager = new DefaultSpaceStatisticsChangedEventManager(admin);
+        this.spaceInstanceStatisticsChangedEventManager = new DefaultSpaceInstanceStatisticsChangedEventManager(admin);
     }
 
     public Admin getAdmin() {
         return this.admin;
+    }
+
+    public void setStatisticsInterval(long interval, TimeUnit timeUnit) {
+        statisticsInterval = timeUnit.toMillis(interval);
+        for (Space space : spacesByUID.values()) {
+            space.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    public void startStatisticsMonitor() {
+        scheduledStatisticsMonitor = true;
+        for (Space space : spacesByUID.values()) {
+            space.startStatisticsMonitor();
+        }
+    }
+
+    public void stopStatisticsMontior() {
+        scheduledStatisticsMonitor = false;
+        for (Space space : spacesByUID.values()) {
+            space.stopStatisticsMontior();
+        }
+    }
+
+    public boolean isMonitoring() {
+        return scheduledStatisticsMonitor;
     }
 
     public Space[] getSpaces() {
@@ -82,6 +112,14 @@ public class DefaultSpaces implements InternalSpaces {
 
     public SpaceRemovedEventManager getSpaceRemoved() {
         return this.spaceRemovedEventManager;
+    }
+
+    public SpaceStatisticsChangedEventManager getSpaceStatisticsChanged() {
+        return this.spaceStatisticsChangedEventManager;
+    }
+
+    public SpaceInstanceStatisticsChangedEventManager getSpaceInstanceStatisticsChanged() {
+        return this.spaceInstanceStatisticsChangedEventManager;
     }
 
     public void addLifecycleListener(SpaceLifecycleEventListener eventListener) {
@@ -136,11 +174,16 @@ public class DefaultSpaces implements InternalSpaces {
         if (existingSpace == null) {
             spaceAddedEventManager.spaceAdded(space);
         }
+        space.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
+        if (scheduledStatisticsMonitor) {
+            space.startStatisticsMonitor();
+        }
     }
 
     public synchronized InternalSpace removeSpace(String uid) {
         Space space = spacesByUID.remove(uid);
         if (space != null) {
+            space.stopStatisticsMontior();
             spacesByName.remove(space.getName());
             spaceRemovedEventManager.spaceRemoved(space);
         }

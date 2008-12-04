@@ -1,15 +1,18 @@
 package org.openspaces.admin.space;
 
+import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.space.events.ReplicationStatusChangedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
+import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
+import org.openspaces.admin.space.events.SpaceStatisticsChangedEventManager;
 
 /**
  * @author kimchy
  */
-public interface Space extends Iterable<SpaceInstance> {
+public interface Space extends Iterable<SpaceInstance>, StatisticsMonitor {
 
     Spaces getSpaces();
 
@@ -57,5 +60,9 @@ public interface Space extends Iterable<SpaceInstance> {
     SpaceModeChangedEventManager getSpaceModeChanged();
 
     ReplicationStatusChangedEventManager getReplicationStatusChanged();
+
+    SpaceStatisticsChangedEventManager getStatisticsChanged();
+
+    SpaceInstanceStatisticsChangedEventManager getInstanceStatisticsChanged();
 }
 

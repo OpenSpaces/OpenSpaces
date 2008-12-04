@@ -8,15 +8,9 @@ import com.j_spaces.core.exception.SpaceUnavailableException;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.space.events.DefaultReplicationStatusChangedEventManager;
-import org.openspaces.admin.internal.space.events.DefaultSpaceInstanceAddedEventManager;
-import org.openspaces.admin.internal.space.events.DefaultSpaceInstanceRemovedEventManager;
-import org.openspaces.admin.internal.space.events.DefaultSpaceModeChangedEventManager;
-import org.openspaces.admin.internal.space.events.InternalReplicationStatusChangedEventManager;
-import org.openspaces.admin.internal.space.events.InternalSpaceInstanceAddedEventManager;
-import org.openspaces.admin.internal.space.events.InternalSpaceInstanceRemovedEventManager;
-import org.openspaces.admin.internal.space.events.InternalSpaceModeChangedEventManager;
+import org.openspaces.admin.internal.space.events.*;
 import org.openspaces.admin.internal.support.NetworkExceptionHelper;
 import org.openspaces.admin.space.ReplicationStatus;
 import org.openspaces.admin.space.ReplicationTarget;
@@ -29,7 +23,10 @@ import org.openspaces.admin.space.events.ReplicationStatusChangedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
+import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
+import org.openspaces.admin.space.events.SpaceStatisticsChangedEvent;
+import org.openspaces.admin.space.events.SpaceStatisticsChangedEventManager;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -70,6 +67,14 @@ public class DefaultSpace implements InternalSpace {
 
     private final InternalReplicationStatusChangedEventManager replicationStatusChangedEventManager;
 
+    private final InternalSpaceStatisticsChangedEventManager statisticsChangedEventManager;
+
+    private final InternalSpaceInstanceStatisticsChangedEventManager instanceStatisticsChangedEventManager;
+
+    private volatile long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
+
+    private Future scheduledStatisticsMonitor;
+
     public DefaultSpace(InternalSpaces spaces, String uid, String name) {
         this.spaces = spaces;
         this.admin = (InternalAdmin) spaces.getAdmin();
@@ -79,6 +84,8 @@ public class DefaultSpace implements InternalSpace {
         this.spaceInstanceRemovedEventManager = new DefaultSpaceInstanceRemovedEventManager(admin);
         this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(admin);
         this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
+        this.statisticsChangedEventManager = new DefaultSpaceStatisticsChangedEventManager(admin);
+        this.instanceStatisticsChangedEventManager = new DefaultSpaceInstanceStatisticsChangedEventManager(admin);
     }
 
     public Spaces getSpaces() {
@@ -91,6 +98,44 @@ public class DefaultSpace implements InternalSpace {
 
     public String getName() {
         return this.name;
+    }
+
+    public void setStatisticsInterval(long interval, TimeUnit timeUnit) {
+        statisticsInterval = timeUnit.toMillis(interval);
+        for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
+            spaceInstance.setStatisticsInterval(interval, timeUnit);
+        }
+    }
+
+    public synchronized void startStatisticsMonitor() {
+        if (scheduledStatisticsMonitor != null) {
+            scheduledStatisticsMonitor.cancel(false);
+        }
+        scheduledStatisticsMonitor = admin.getScheduler().scheduleWithFixedDelay(new Runnable() {
+            public void run() {
+                SpaceStatistics stats = getStatistics();
+                SpaceStatisticsChangedEvent event = new SpaceStatisticsChangedEvent(DefaultSpace.this, stats);
+                statisticsChangedEventManager.spaceStatisticsChanged(event);
+                ((InternalSpaceStatisticsChangedEventManager) spaces.getSpaceStatisticsChanged()).spaceStatisticsChanged(event);
+            }
+        }, 0, statisticsInterval, TimeUnit.MILLISECONDS);
+        for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
+            spaceInstance.startStatisticsMonitor();
+        }
+    }
+
+    public synchronized void stopStatisticsMontior() {
+        if (scheduledStatisticsMonitor != null) {
+            scheduledStatisticsMonitor.cancel(false);
+            scheduledStatisticsMonitor = null;
+        }
+        for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
+            spaceInstance.stopStatisticsMontior();
+        }
+    }
+
+    public synchronized boolean isMonitoring() {
+        return scheduledStatisticsMonitor != null;
     }
 
     public int getNumberOfInstances() {
@@ -131,6 +176,14 @@ public class DefaultSpace implements InternalSpace {
 
     public ReplicationStatusChangedEventManager getReplicationStatusChanged() {
         return this.replicationStatusChangedEventManager;
+    }
+
+    public SpaceStatisticsChangedEventManager getStatisticsChanged() {
+        return this.statisticsChangedEventManager;
+    }
+
+    public SpaceInstanceStatisticsChangedEventManager getInstanceStatisticsChanged() {
+        return this.instanceStatisticsChangedEventManager;
     }
 
     public SpaceStatistics getStatistics() {
@@ -181,6 +234,11 @@ public class DefaultSpace implements InternalSpace {
             ((InternalSpaceInstanceAddedEventManager) spaces.getSpaceInstanceAdded()).spaceInstanceAdded(spaceInstance);
         }
 
+        spaceInstance.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
+        if (isMonitoring()) {
+            spaceInstance.startStatisticsMonitor();
+        }
+
         // start the scheduler
         Future fetcher = scheduledRuntimeFetchers.get(spaceInstance.getUid());
         if (fetcher == null) {
@@ -193,6 +251,7 @@ public class DefaultSpace implements InternalSpace {
     public InternalSpaceInstance removeInstance(String uid) {
         InternalSpaceInstance spaceInstance = (InternalSpaceInstance) spaceInstancesByUID.remove(uid);
         if (spaceInstance != null) {
+            spaceInstance.stopStatisticsMontior();
             ((InternalSpacePartition) spacePartitions.get(spaceInstance.getInstanceId() - 1)).removeSpaceInstance(uid);
             spaceInstanceRemovedEventManager.spaceInstanceRemoved(spaceInstance);
             ((InternalSpaceInstanceRemovedEventManager) spaces.getSpaceInstanceRemoved()).spaceInstanceRemoved(spaceInstance);

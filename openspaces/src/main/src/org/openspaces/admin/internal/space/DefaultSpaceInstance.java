@@ -14,29 +14,37 @@ import com.j_spaces.core.admin.StatisticsAdmin;
 import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.core.filters.StatisticsHolder;
 import net.jini.core.lookup.ServiceID;
+import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.space.events.DefaultReplicationStatusChangedEventManager;
+import org.openspaces.admin.internal.space.events.DefaultSpaceInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.internal.space.events.DefaultSpaceModeChangedEventManager;
 import org.openspaces.admin.internal.space.events.InternalReplicationStatusChangedEventManager;
+import org.openspaces.admin.internal.space.events.InternalSpaceInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.internal.space.events.InternalSpaceModeChangedEventManager;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.space.ReplicationTarget;
 import org.openspaces.admin.space.Space;
+import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.SpaceInstanceStatistics;
 import org.openspaces.admin.space.SpacePartition;
 import org.openspaces.admin.space.events.ReplicationStatusChangedEvent;
 import org.openspaces.admin.space.events.ReplicationStatusChangedEventManager;
+import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEvent;
+import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.space.events.SpaceModeChangedEvent;
 import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author kimchy
  */
-public class DefaultSpaceInstance extends AbstractGridComponent implements InternalSpaceInstance {
+public class DefaultSpaceInstance extends AbstractGridComponent implements InternalSpaceInstance, StatisticsMonitor {
 
     private final String uid;
 
@@ -72,6 +80,16 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     private final InternalReplicationStatusChangedEventManager replicationStatusChangedEventManager;
 
+    private final InternalSpaceInstanceStatisticsChangedEventManager statisticsChangedEventManager;
+
+    private long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
+
+    private long lastStatisticsTimestamp = 0;
+
+    private SpaceInstanceStatistics lastStatistics;
+
+    private Future scheduledStatisticsMonitor;
+
     public DefaultSpaceInstance(ServiceID serviceID, IJSpace ijSpace, IInternalRemoteJSpaceAdmin spaceAdmin,
                                 SpaceConfig spaceConfig, InternalAdmin admin) {
         super(admin);
@@ -84,6 +102,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
         this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(admin);
         this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
+        this.statisticsChangedEventManager = new DefaultSpaceInstanceStatisticsChangedEventManager(admin);
 
         String sInstanceId = spaceURL.getProperty(SpaceURL.CLUSTER_MEMBER_ID);
         if (sInstanceId == null || sInstanceId.length() == 0) {
@@ -121,6 +140,41 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         return serviceID;
     }
 
+    public synchronized void setStatisticsInterval(long interval, TimeUnit timeUnit) {
+        this.statisticsInterval = timeUnit.toMillis(interval);
+        if (scheduledStatisticsMonitor != null) {
+            stopStatisticsMontior();
+            startStatisticsMonitor();
+        }
+    }
+
+    public synchronized void startStatisticsMonitor() {
+        if (scheduledStatisticsMonitor != null) {
+            scheduledStatisticsMonitor.cancel(false);
+        }
+        final SpaceInstance spaceInstance = this;
+        scheduledStatisticsMonitor = ((InternalAdmin) getAdmin()).getScheduler().scheduleWithFixedDelay(new Runnable() {
+            public void run() {
+                SpaceInstanceStatistics stats = spaceInstance.getStatistics();
+                SpaceInstanceStatisticsChangedEvent event = new SpaceInstanceStatisticsChangedEvent(spaceInstance, stats);
+                statisticsChangedEventManager.spaceInstanceStatisticsChanged(event);
+                ((InternalSpaceInstanceStatisticsChangedEventManager) space.getInstanceStatisticsChanged()).spaceInstanceStatisticsChanged(event);
+                ((InternalSpaceInstanceStatisticsChangedEventManager) space.getSpaces().getSpaceInstanceStatisticsChanged()).spaceInstanceStatisticsChanged(event);
+            }
+        }, 0, statisticsInterval, TimeUnit.MILLISECONDS);
+    }
+
+    public synchronized void stopStatisticsMontior() {
+        if (scheduledStatisticsMonitor != null) {
+            scheduledStatisticsMonitor.cancel(false);
+            scheduledStatisticsMonitor = null;
+        }
+    }
+
+    public synchronized boolean isMonitoring() {
+        return scheduledStatisticsMonitor != null;
+    }
+
     public int getNumberOfInstances() {
         return numberOfInstances;
     }
@@ -139,6 +193,10 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     public ReplicationStatusChangedEventManager getReplicationStatusChanged() {
         return this.replicationStatusChangedEventManager;
+    }
+
+    public SpaceInstanceStatisticsChangedEventManager getStatisticsChanged() {
+        return this.statisticsChangedEventManager;
     }
 
     public int getInstanceId() {
@@ -177,14 +235,20 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         return this.spaceMode;
     }
 
-    private static SpaceInstanceStatistics NA_STATISTICS = new DefaultSpaceInstanceStatistics(new StatisticsHolder(new long[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}));
+    private static final SpaceInstanceStatistics NA_STATISTICS = new DefaultSpaceInstanceStatistics(new StatisticsHolder(new long[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}));
 
-    public SpaceInstanceStatistics getStatistics() {
-        try {
-            return new DefaultSpaceInstanceStatistics(((StatisticsAdmin) spaceAdmin).getHolder());
-        } catch (RemoteException e) {
-            return NA_STATISTICS;
+    public synchronized SpaceInstanceStatistics getStatistics() {
+        long currentTime = System.currentTimeMillis();
+        if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
+            return lastStatistics;
         }
+        lastStatisticsTimestamp = currentTime;
+        try {
+            lastStatistics = new DefaultSpaceInstanceStatistics(((StatisticsAdmin) spaceAdmin).getHolder());
+        } catch (RemoteException e) {
+            lastStatistics = NA_STATISTICS;
+        }
+        return lastStatistics;
     }
 
     public ReplicationTarget[] getReplicationTargets() {
