@@ -72,15 +72,18 @@ public class DefaultLookupServices implements InternalLookupServices {
 
     public boolean waitFor(int numberOfLookupServices, long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(numberOfLookupServices);
-        getLookupServiceAdded().add(new LookupServiceAddedEventListener() {
+        LookupServiceAddedEventListener added = new LookupServiceAddedEventListener() {
             public void lookupServiceAdded(LookupService lookupService) {
                 latch.countDown();
             }
-        });
+        };
+        getLookupServiceAdded().add(added);
         try {
             return latch.await(timeout, timeUnit);
         } catch (InterruptedException e) {
             return false;
+        } finally {
+            getLookupServiceAdded().remove(added);
         }
     }
 

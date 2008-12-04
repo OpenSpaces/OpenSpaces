@@ -76,15 +76,18 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
 
     public boolean waitFor(int numberOfGridServiceContainers, long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(numberOfGridServiceContainers);
-        getGridServiceContainerAdded().add(new GridServiceContainerAddedEventListener() {
+        GridServiceContainerAddedEventListener added = new GridServiceContainerAddedEventListener() {
             public void gridServiceContainerAdded(GridServiceContainer gridServiceContainer) {
                 latch.countDown();
             }
-        });
+        };
+        getGridServiceContainerAdded().add(added);
         try {
             return latch.await(timeout, timeUnit);
         } catch (InterruptedException e) {
             return false;
+        } finally {
+            getGridServiceContainerAdded().remove(added);
         }
     }
     

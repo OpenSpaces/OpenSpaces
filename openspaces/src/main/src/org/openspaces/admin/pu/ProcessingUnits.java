@@ -12,6 +12,7 @@ import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author kimchy
@@ -29,6 +30,10 @@ public interface ProcessingUnits extends Iterable<ProcessingUnit> {
     ProcessingUnit getProcessingUnit(String name);
 
     Map<String, ProcessingUnit> getNames();
+
+    ProcessingUnit waitFor(String processingUnitName);
+
+    ProcessingUnit waitFor(String processingUnitName, long timeout, TimeUnit timeUnit);
 
     void addLifecycleListener(ProcessingUnitLifecycleEventListener eventListener);
 

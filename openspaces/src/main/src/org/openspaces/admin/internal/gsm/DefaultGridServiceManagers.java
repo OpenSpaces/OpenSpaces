@@ -76,15 +76,18 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
 
     public boolean waitFor(int numberOfGridServiceManagers, long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(numberOfGridServiceManagers);
-        getGridServiceManagerAdded().add(new GridServiceManagerAddedEventListener() {
+        GridServiceManagerAddedEventListener added = new GridServiceManagerAddedEventListener() {
             public void gridServiceManagerAdded(GridServiceManager gridServiceManager) {
                 latch.countDown();
             }
-        });
+        };
+        getGridServiceManagerAdded().add(added);
         try {
             return latch.await(timeout, timeUnit);
         } catch (InterruptedException e) {
             return false;
+        } finally {
+            getGridServiceManagerAdded().remove(added);
         }
     }
 

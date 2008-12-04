@@ -289,15 +289,18 @@ public class DefaultSpace implements InternalSpace {
 
     public boolean waitFor(int numberOfSpaceInstances, long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(numberOfSpaceInstances);
-        getSpaceInstanceAdded().add(new SpaceInstanceAddedEventListener() {
+        SpaceInstanceAddedEventListener added = new SpaceInstanceAddedEventListener() {
             public void spaceInstanceAdded(SpaceInstance spaceInstance) {
                 latch.countDown();
             }
-        });
+        };
+        getSpaceInstanceAdded().add(added);
         try {
             return latch.await(timeout, timeUnit);
         } catch (InterruptedException e) {
             return false;
+        } finally {
+            getSpaceInstanceAdded().remove(added);
         }
     }
 
@@ -307,18 +310,21 @@ public class DefaultSpace implements InternalSpace {
 
     public boolean waitFor(int numberOfSpaceInstances, final SpaceMode spaceMode, long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(numberOfSpaceInstances);
-        getSpaceModeChanged().add(new SpaceModeChangedEventListener() {
+        SpaceModeChangedEventListener modeChanged = new SpaceModeChangedEventListener() {
             public void spaceModeChanged(SpaceModeChangedEvent event) {
                 if (event.getNewMode() == spaceMode) {
                     latch.countDown();
                 }
             }
-        });
+        };
+        getSpaceModeChanged().add(modeChanged);
         boolean result;
         try {
             result = latch.await(timeout, timeUnit);
         } catch (InterruptedException e) {
             return false;
+        } finally {
+            getSpaceModeChanged().remove(modeChanged);
         }
         if (result) {
             // double check again

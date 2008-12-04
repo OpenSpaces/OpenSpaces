@@ -6,21 +6,15 @@ import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.events.*;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
-import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
-import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitAddedEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitLifecycleEventListener;
-import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.pu.events.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author kimchy
@@ -44,7 +38,7 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
     private final InternalProcessingUnitInstanceAddedEventManager processingUnitInstanceAddedEventManager;
 
     private final InternalProcessingUnitInstanceRemovedEventManager processingUnitInstanceRemovedEventManager;
-    
+
     public DefaultProcessingUnits(InternalAdmin admin) {
         this.admin = admin;
         this.processingUnitAddedEventManager = new DefaultProcessingUnitAddedEventManager(this);
@@ -122,6 +116,40 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
 
     public boolean isEmpty() {
         return processingUnits.size() == 0;
+    }
+
+    public ProcessingUnit waitFor(String processingUnitName) {
+        return waitFor(processingUnitName, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public ProcessingUnit waitFor(final String processingUnitName, long timeout, TimeUnit timeUnit) {
+        final CountDownLatch latch = new CountDownLatch(1);
+        ProcessingUnitAddedEventListener added = new ProcessingUnitAddedEventListener() {
+            public void processingUnitAdded(ProcessingUnit processingUnit) {
+                if (processingUnitName.equals(processingUnit.getName())) {
+                    latch.countDown();
+                }
+            }
+        };
+        getProcessingUnitAdded().add(added);
+        boolean result = false;
+        try {
+            result = latch.await(timeout, timeUnit);
+        } catch (InterruptedException e) {
+            return null;
+        } finally {
+            getProcessingUnitAdded().remove(added);
+        }
+
+        if (result) {
+            ProcessingUnit processingUnit = getProcessingUnit(processingUnitName);
+            if (processingUnit == null) {
+                return waitFor(processingUnitName, timeout, timeUnit);
+            } else {
+                return processingUnit;
+            }
+        }
+        return null;
     }
 
     public void addLifecycleListener(ProcessingUnitLifecycleEventListener eventListener) {

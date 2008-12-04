@@ -71,15 +71,18 @@ public class DefaultMachines implements InternalMachines {
 
     public boolean waitFor(int numberOfMachines, long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(numberOfMachines);
-        getMachineAdded().add(new MachineAddedEventListener() {
+        MachineAddedEventListener added = new MachineAddedEventListener() {
             public void machineAdded(Machine machine) {
                 latch.countDown();
             }
-        });
+        };
+        getMachineAdded().add(added);
         try {
             return latch.await(timeout, timeUnit);
         } catch (InterruptedException e) {
             return false;
+        } finally {
+            getMachineAdded().remove(added);
         }
     }
 

@@ -8,6 +8,7 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListen
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
 import org.openspaces.admin.space.Space;
+import org.openspaces.admin.space.Spaces;
 
 /**
  * @author kimchy
@@ -41,11 +42,9 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance> {
     Space getSpace();
 
     /**
-     * Returns the list of embedded spaces within a processing unit. Returns an empty array if
-     * no embedded space are defined within the processing unit or if no processing unit instance
-     * has been added to the processing unit.
+     * Returns the embedded spaces within this processing unit.
      */
-    Space[] getSpaces();
+    Spaces getSpaces();
 
     ProcessingUnitInstance[] getInstances();
 

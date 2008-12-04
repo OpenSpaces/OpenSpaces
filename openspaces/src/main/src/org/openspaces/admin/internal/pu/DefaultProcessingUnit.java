@@ -4,6 +4,8 @@ import com.gigaspaces.grid.gsm.PUDetails;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.events.*;
+import org.openspaces.admin.internal.space.DefaultSpaces;
+import org.openspaces.admin.internal.space.InternalSpaces;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
@@ -17,6 +19,7 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
 import org.openspaces.admin.space.Space;
+import org.openspaces.admin.space.Spaces;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -47,7 +50,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     private final Map<Integer, ProcessingUnitPartition> processingUnitPartitions = new ConcurrentHashMap<Integer, ProcessingUnitPartition>();
 
-    private final Map<String, Space> embeddedSpacesByName = new ConcurrentHashMap<String, Space>();
+    private final InternalSpaces spaces;
 
     private final InternalManagingGridServiceManagerChangedEventManager managingGridServiceManagerChangedEventManager;
 
@@ -65,6 +68,8 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         this.name = details.getName();
         this.numberOfInstances = details.getNumberOfInstances();
         this.numberOfBackups = details.getNumberOfBackups();
+
+        this.spaces = new DefaultSpaces(admin);
 
         for (int i = 0; i < numberOfInstances; i++) {
             processingUnitPartitions.put(i, new DefaultProcessingUnitPartition(this, i));
@@ -90,19 +95,19 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     }
 
     public Space getSpace() {
-        Iterator<Space> it = embeddedSpacesByName.values().iterator();
+        Iterator<Space> it = spaces.iterator();
         if (it.hasNext()) {
             return it.next();
         }
         return null;
     }
 
-    public Space[] getSpaces() {
-        return embeddedSpacesByName.values().toArray(new Space[0]);
+    public Spaces getSpaces() {
+        return this.spaces;
     }
 
     public void addEmbeddedSpace(Space space) {
-        embeddedSpacesByName.put(space.getName(), space);
+        spaces.addSpace(space);
     }
 
     public ProcessingUnitStatusChangedEventManager getProcessingUnitStatusChanged() {

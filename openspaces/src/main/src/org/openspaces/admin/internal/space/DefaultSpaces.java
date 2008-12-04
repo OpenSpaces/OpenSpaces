@@ -134,18 +134,21 @@ public class DefaultSpaces implements InternalSpaces {
 
     public Space waitFor(final String spaceName, long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(1);
-        getSpaceAdded().add(new SpaceAddedEventListener() {
+        SpaceAddedEventListener added = new SpaceAddedEventListener() {
             public void spaceAdded(Space space) {
                 if (space.getName().equals(spaceName)) {
                     latch.countDown();
                 }
             }
-        });
+        };
+        getSpaceAdded().add(added);
         boolean result = false;
         try {
             result = latch.await(timeout, timeUnit);
         } catch (InterruptedException e) {
             return null;
+        } finally {
+            getSpaceAdded().remove(added);
         }
         if (result) {
             Space space = getSpaceByName(spaceName);
