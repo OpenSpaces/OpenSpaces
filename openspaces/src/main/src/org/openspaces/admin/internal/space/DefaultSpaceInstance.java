@@ -10,7 +10,9 @@ import com.gigaspaces.operatingsystem.OSStatistics;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.SpaceConfig;
+import com.j_spaces.core.admin.StatisticsAdmin;
 import com.j_spaces.core.client.SpaceURL;
+import com.j_spaces.core.filters.StatisticsHolder;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.space.events.DefaultReplicationStatusChangedEventManager;
@@ -20,6 +22,7 @@ import org.openspaces.admin.internal.space.events.InternalSpaceModeChangedEventM
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.space.ReplicationTarget;
 import org.openspaces.admin.space.Space;
+import org.openspaces.admin.space.SpaceInstanceStatistics;
 import org.openspaces.admin.space.SpacePartition;
 import org.openspaces.admin.space.events.ReplicationStatusChangedEvent;
 import org.openspaces.admin.space.events.ReplicationStatusChangedEventManager;
@@ -172,6 +175,16 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     public SpaceMode getMode() {
         return this.spaceMode;
+    }
+
+    private static SpaceInstanceStatistics NA_STATISTICS = new DefaultSpaceInstanceStatistics(new StatisticsHolder(new long[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}));
+
+    public SpaceInstanceStatistics getStatistics() {
+        try {
+            return new DefaultSpaceInstanceStatistics(((StatisticsAdmin) spaceAdmin).getHolder());
+        } catch (RemoteException e) {
+            return NA_STATISTICS;
+        }
     }
 
     public ReplicationTarget[] getReplicationTargets() {

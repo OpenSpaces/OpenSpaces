@@ -19,6 +19,8 @@ public interface SpaceInstance extends GridComponent {
 
     SpaceMode getMode();
 
+    SpaceInstanceStatistics getStatistics();
+
     Space getSpace();
 
     SpacePartition getPartition();

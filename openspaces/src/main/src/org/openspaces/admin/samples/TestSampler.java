@@ -11,6 +11,7 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.space.SpaceInstanceStatistics;
 import org.openspaces.admin.space.SpacePartition;
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.pu.service.ProcessingUnitServiceDetails;
@@ -83,6 +84,8 @@ public class TestSampler {
                         System.out.println("   -> INSTANCE [" + spaceInstance.getUid() + "] instanceId [" + spaceInstance.getInstanceId() +
                                 "] backupId [" + spaceInstance.getBackupId() + "] Partiton [" + spaceInstance.getPartition().getPartitiondId() + "]");
                         System.out.println("         -> Host: " + spaceInstance.getMachine().getHost());
+                        SpaceInstanceStatistics statistics = spaceInstance.getStatistics();
+                        System.out.println("         -> Stats: Write [" + statistics.getWriteCount() + "], Read [" + statistics.getReadCount() + "]");
                     }
                     for (SpacePartition spacePartition : space.getPartitions()) {
                         System.out.println("   -> Partition [" + spacePartition.getPartitiondId() + "]");
