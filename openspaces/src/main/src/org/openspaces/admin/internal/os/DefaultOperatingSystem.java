@@ -47,7 +47,11 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
         this.details = new DefaultOperatingSystemDetails(osDetails);
         this.uid = details.getUid();
         this.operatingSystems = operatingSystems;
-        this.admin = (InternalAdmin) operatingSystems.getAdmin();
+        if (operatingSystems != null) {
+            this.admin = (InternalAdmin) operatingSystems.getAdmin();
+        } else {
+            this.admin = null;
+        }
 
         this.statisticsChangedEventManager = new DefaultOperatingSystemStatisticsChangedEventManager(admin);
     }

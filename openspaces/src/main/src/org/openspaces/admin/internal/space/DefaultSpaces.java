@@ -10,10 +10,12 @@ import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.events.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -102,6 +104,10 @@ public class DefaultSpaces implements InternalSpaces {
         return spacesByName.get(name);
     }
 
+    public Map<String, Space> getNames() {
+        return Collections.unmodifiableMap(spacesByName);
+    }
+
     public Iterator<Space> iterator() {
         return spacesByUID.values().iterator();
     }
@@ -120,6 +126,36 @@ public class DefaultSpaces implements InternalSpaces {
 
     public SpaceInstanceStatisticsChangedEventManager getSpaceInstanceStatisticsChanged() {
         return this.spaceInstanceStatisticsChangedEventManager;
+    }
+
+    public Space waitFor(String spaceName) {
+        return waitFor(spaceName, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public Space waitFor(final String spaceName, long timeout, TimeUnit timeUnit) {
+        final CountDownLatch latch = new CountDownLatch(1);
+        getSpaceAdded().add(new SpaceAddedEventListener() {
+            public void spaceAdded(Space space) {
+                if (space.getName().equals(spaceName)) {
+                    latch.countDown();
+                }
+            }
+        });
+        boolean result = false;
+        try {
+            result = latch.await(timeout, timeUnit);
+        } catch (InterruptedException e) {
+            return null;
+        }
+        if (result) {
+            Space space = getSpaceByName(spaceName);
+            if (space == null) {
+                return waitFor(spaceName, timeout, timeUnit);
+            } else {
+                return space;
+            }
+        }
+        return null;
     }
 
     public void addLifecycleListener(SpaceLifecycleEventListener eventListener) {

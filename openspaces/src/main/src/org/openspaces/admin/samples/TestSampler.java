@@ -13,6 +13,9 @@ public class TestSampler {
 
     public static void main(String[] args) throws InterruptedException {
         Admin admin = new AdminFactory().addGroup("kimchy").createAdmin();
+//        admin.getGridServiceManagers().waitFor(2);
+//        Space space1 = admin.getSpaces().waitFor("space");
+//        space1.waitFor(1, SpaceMode.PRIMARY);
         while (true) {
             try {
 //                for (LookupService lookupService : admin.getLookupServices()) {

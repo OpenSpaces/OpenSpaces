@@ -19,20 +19,14 @@ import org.openspaces.admin.space.SpaceInstanceStatistics;
 import org.openspaces.admin.space.SpacePartition;
 import org.openspaces.admin.space.SpaceStatistics;
 import org.openspaces.admin.space.Spaces;
-import org.openspaces.admin.space.events.ReplicationStatusChangedEventManager;
-import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
-import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
-import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
-import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEventManager;
-import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
-import org.openspaces.admin.space.events.SpaceStatisticsChangedEvent;
-import org.openspaces.admin.space.events.SpaceStatisticsChangedEventManager;
+import org.openspaces.admin.space.events.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -287,6 +281,66 @@ public class DefaultSpace implements InternalSpace {
 
     public boolean isEmpty() {
         return spaceInstancesByUID.size() == 0;
+    }
+
+    public boolean waitFor(int numberOfSpaceInstances) {
+        return waitFor(numberOfSpaceInstances, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public boolean waitFor(int numberOfSpaceInstances, long timeout, TimeUnit timeUnit) {
+        final CountDownLatch latch = new CountDownLatch(numberOfSpaceInstances);
+        getSpaceInstanceAdded().add(new SpaceInstanceAddedEventListener() {
+            public void spaceInstanceAdded(SpaceInstance spaceInstance) {
+                latch.countDown();
+            }
+        });
+        try {
+            return latch.await(timeout, timeUnit);
+        } catch (InterruptedException e) {
+            return false;
+        }
+    }
+
+    public boolean waitFor(int numberOfSpaceInstances, SpaceMode spaceMode) {
+        return waitFor(numberOfSpaceInstances, spaceMode, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public boolean waitFor(int numberOfSpaceInstances, final SpaceMode spaceMode, long timeout, TimeUnit timeUnit) {
+        final CountDownLatch latch = new CountDownLatch(numberOfSpaceInstances);
+        getSpaceModeChanged().add(new SpaceModeChangedEventListener() {
+            public void spaceModeChanged(SpaceModeChangedEvent event) {
+                if (event.getNewMode() == spaceMode) {
+                    latch.countDown();
+                }
+            }
+        });
+        boolean result;
+        try {
+            result = latch.await(timeout, timeUnit);
+        } catch (InterruptedException e) {
+            return false;
+        }
+        if (result) {
+            // double check again
+            int sum = 0;
+            for (SpaceInstance spaceInstance : this) {
+                if (spaceInstance.getMode() == spaceMode) {
+                    sum++;
+                }
+            }
+            if (sum < numberOfSpaceInstances) {
+                return waitFor(numberOfSpaceInstances, spaceMode, timeout, timeUnit);
+            }
+        }
+        return result;
+    }
+
+    public boolean waitForBackups(int numberOfSpaceInstances) {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public boolean waitForBackups(int numberOfSpaceInstances, long timeout, TimeUnit timeUnit) {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public SpaceInstance[] getSpaceInstances() {

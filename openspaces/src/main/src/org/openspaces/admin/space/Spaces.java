@@ -4,6 +4,9 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.space.events.*;
 
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author kimchy
  */
@@ -16,6 +19,12 @@ public interface Spaces extends Iterable<Space>, StatisticsMonitor {
     Space getSpaceByUID(String uid);
 
     Space getSpaceByName(String name);
+
+    Map<String, Space> getNames();
+
+    Space waitFor(String spaceName);
+
+    Space waitFor(String spaceName, long timeout, TimeUnit timeUnit);
 
     void addLifecycleListener(SpaceLifecycleEventListener eventListener);
 

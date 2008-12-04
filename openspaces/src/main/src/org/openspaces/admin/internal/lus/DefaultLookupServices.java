@@ -8,6 +8,7 @@ import org.openspaces.admin.internal.lus.events.DefaultLookupServiceRemovedEvent
 import org.openspaces.admin.internal.lus.events.InternalLookupServiceAddedEventManager;
 import org.openspaces.admin.internal.lus.events.InternalLookupServiceRemovedEventManager;
 import org.openspaces.admin.lus.LookupService;
+import org.openspaces.admin.lus.events.LookupServiceAddedEventListener;
 import org.openspaces.admin.lus.events.LookupServiceAddedEventManager;
 import org.openspaces.admin.lus.events.LookupServiceLifecycleEventListener;
 import org.openspaces.admin.lus.events.LookupServiceRemovedEventManager;
@@ -15,6 +16,8 @@ import org.openspaces.admin.lus.events.LookupServiceRemovedEventManager;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author kimchy
@@ -61,6 +64,24 @@ public class DefaultLookupServices implements InternalLookupServices {
 
     public boolean isEmpty() {
         return lookupServiceMap.isEmpty();
+    }
+
+    public boolean waitFor(int numberOfLookupServices) {
+        return waitFor(numberOfLookupServices, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public boolean waitFor(int numberOfLookupServices, long timeout, TimeUnit timeUnit) {
+        final CountDownLatch latch = new CountDownLatch(numberOfLookupServices);
+        getLookupServiceAdded().add(new LookupServiceAddedEventListener() {
+            public void lookupServiceAdded(LookupService lookupService) {
+                latch.countDown();
+            }
+        });
+        try {
+            return latch.await(timeout, timeUnit);
+        } catch (InterruptedException e) {
+            return false;
+        }
     }
 
     public void addLifecycleListener(LookupServiceLifecycleEventListener eventListener) {

@@ -3,6 +3,7 @@ package org.openspaces.admin.internal.gsm;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventListener;
 import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventManager;
 import org.openspaces.admin.gsm.events.GridServiceManagerLifecycleEventListener;
 import org.openspaces.admin.gsm.events.GridServiceManagerRemovedEventManager;
@@ -15,6 +16,8 @@ import org.openspaces.admin.internal.gsm.events.InternalGridServiceManagerRemove
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author kimchy
@@ -65,6 +68,24 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
 
     public boolean isEmpty() {
         return gridServiceManagersByUID.isEmpty();
+    }
+
+    public boolean waitFor(int numberOfGridServiceManagers) {
+        return waitFor(numberOfGridServiceManagers, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public boolean waitFor(int numberOfGridServiceManagers, long timeout, TimeUnit timeUnit) {
+        final CountDownLatch latch = new CountDownLatch(numberOfGridServiceManagers);
+        getGridServiceManagerAdded().add(new GridServiceManagerAddedEventListener() {
+            public void gridServiceManagerAdded(GridServiceManager gridServiceManager) {
+                latch.countDown();
+            }
+        });
+        try {
+            return latch.await(timeout, timeUnit);
+        } catch (InterruptedException e) {
+            return false;
+        }
     }
 
     public void addLifecycleListener(GridServiceManagerLifecycleEventListener eventListener) {

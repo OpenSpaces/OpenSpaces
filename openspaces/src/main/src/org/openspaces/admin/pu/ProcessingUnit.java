@@ -7,6 +7,7 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.space.Space;
 
 /**
  * @author kimchy
@@ -31,6 +32,20 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance> {
     GridServiceManager[] getBackupGridServiceManagers();
 
     GridServiceManager getBackupGridServiceManager(String gridServiceManagerUID);
+
+    /**
+     * Returns the (first) embedded space within a processing unit. Returns <code>null</code> if
+     * no embedded space is defined within the processing unit or if no processing unit instance
+     * has been added to the processing unit.
+     */
+    Space getSpace();
+
+    /**
+     * Returns the list of embedded spaces within a processing unit. Returns an empty array if
+     * no embedded space are defined within the processing unit or if no processing unit instance
+     * has been added to the processing unit.
+     */
+    Space[] getSpaces();
 
     ProcessingUnitInstance[] getInstances();
 

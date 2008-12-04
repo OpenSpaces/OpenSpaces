@@ -45,7 +45,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private final PUDetails puDetails;
 
-    private volatile ProcessingUnit processingUnit;
+    private volatile InternalProcessingUnit processingUnit;
 
     private volatile GridServiceContainer gridServiceContainer;
 
@@ -133,7 +133,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public void setProcessingUnit(ProcessingUnit processingUnit) {
-        this.processingUnit = processingUnit;
+        this.processingUnit = (InternalProcessingUnit) processingUnit;
     }
 
     public ClusterInfo getClusterInfo() {
@@ -203,6 +203,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         for (SpaceProcessingUnitServiceDetails spaceDetails : embeddedSpacesDetails) {
             if (((InternalSpaceInstance) spaceInstance).getServiceID().equals(spaceDetails.getServiceID())) {
                 spaceInstances.put(spaceInstance.getUid(), spaceInstance);
+                processingUnit.addEmbeddedSpace(spaceInstance.getSpace());
             }
         }
     }

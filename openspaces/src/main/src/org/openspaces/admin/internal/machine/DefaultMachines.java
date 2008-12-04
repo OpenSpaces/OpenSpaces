@@ -8,6 +8,7 @@ import org.openspaces.admin.internal.machine.events.DefaultMachineRemovedEventMa
 import org.openspaces.admin.internal.machine.events.InternalMachineAddedEventManager;
 import org.openspaces.admin.internal.machine.events.InternalMachineRemovedEventManager;
 import org.openspaces.admin.machine.Machine;
+import org.openspaces.admin.machine.events.MachineAddedEventListener;
 import org.openspaces.admin.machine.events.MachineAddedEventManager;
 import org.openspaces.admin.machine.events.MachineLifecycleEventListener;
 import org.openspaces.admin.machine.events.MachineRemovedEventManager;
@@ -16,6 +17,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author kimchy
@@ -60,6 +63,24 @@ public class DefaultMachines implements InternalMachines {
 
     public boolean isEmpty() {
         return machinesById.size() == 0;
+    }
+
+    public boolean waitFor(int numberOfMachines) {
+        return waitFor(numberOfMachines, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public boolean waitFor(int numberOfMachines, long timeout, TimeUnit timeUnit) {
+        final CountDownLatch latch = new CountDownLatch(numberOfMachines);
+        getMachineAdded().add(new MachineAddedEventListener() {
+            public void machineAdded(Machine machine) {
+                latch.countDown();
+            }
+        });
+        try {
+            return latch.await(timeout, timeUnit);
+        } catch (InterruptedException e) {
+            return false;
+        }
     }
 
     public Iterator<Machine> iterator() {

@@ -3,6 +3,7 @@ package org.openspaces.admin.internal.pu;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.space.Space;
 
 /**
  * @author kimchy
@@ -20,4 +21,6 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
     void addProcessingUnitInstance(ProcessingUnitInstance processingUnitInstance);
 
     void removeProcessingUnitInstance(String uid);
+
+    void addEmbeddedSpace(Space space);
 }

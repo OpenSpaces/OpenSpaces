@@ -3,6 +3,7 @@ package org.openspaces.admin.internal.gsc;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
 import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventManager;
 import org.openspaces.admin.gsc.events.GridServiceContainerLifecycleEventListener;
 import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventManager;
@@ -15,6 +16,8 @@ import org.openspaces.admin.internal.gsc.events.InternalGridServiceContainerRemo
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author kimchy
@@ -67,6 +70,24 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
         return gridServiceContainerMap.isEmpty();
     }
 
+    public boolean waitFor(int numberOfGridServiceContainers) {
+        return waitFor(numberOfGridServiceContainers, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public boolean waitFor(int numberOfGridServiceContainers, long timeout, TimeUnit timeUnit) {
+        final CountDownLatch latch = new CountDownLatch(numberOfGridServiceContainers);
+        getGridServiceContainerAdded().add(new GridServiceContainerAddedEventListener() {
+            public void gridServiceContainerAdded(GridServiceContainer gridServiceContainer) {
+                latch.countDown();
+            }
+        });
+        try {
+            return latch.await(timeout, timeUnit);
+        } catch (InterruptedException e) {
+            return false;
+        }
+    }
+    
     public void addLifecycleListener(GridServiceContainerLifecycleEventListener eventListener) {
         getGridServiceContainerAdded().add(eventListener);
         getGridServiceContainerRemoved().add(eventListener);

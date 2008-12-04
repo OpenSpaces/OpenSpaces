@@ -16,6 +16,7 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListen
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.space.Space;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -45,6 +46,8 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     private final Map<String, ProcessingUnitInstance> processingUnitInstances = new ConcurrentHashMap<String, ProcessingUnitInstance>();
 
     private final Map<Integer, ProcessingUnitPartition> processingUnitPartitions = new ConcurrentHashMap<Integer, ProcessingUnitPartition>();
+
+    private final Map<String, Space> embeddedSpacesByName = new ConcurrentHashMap<String, Space>();
 
     private final InternalManagingGridServiceManagerChangedEventManager managingGridServiceManagerChangedEventManager;
 
@@ -84,6 +87,22 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     public BackupGridServiceManagerChangedEventManager getBackupGridServiceManagerChanged() {
         return this.backupGridServiceManagerChangedEventManager;
+    }
+
+    public Space getSpace() {
+        Iterator<Space> it = embeddedSpacesByName.values().iterator();
+        if (it.hasNext()) {
+            return it.next();
+        }
+        return null;
+    }
+
+    public Space[] getSpaces() {
+        return embeddedSpacesByName.values().toArray(new Space[0]);
+    }
+
+    public void addEmbeddedSpace(Space space) {
+        embeddedSpacesByName.put(space.getName(), space);
     }
 
     public ProcessingUnitStatusChangedEventManager getProcessingUnitStatusChanged() {

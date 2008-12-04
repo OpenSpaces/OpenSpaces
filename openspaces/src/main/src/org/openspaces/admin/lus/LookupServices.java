@@ -6,6 +6,7 @@ import org.openspaces.admin.lus.events.LookupServiceLifecycleEventListener;
 import org.openspaces.admin.lus.events.LookupServiceRemovedEventManager;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author kimchy
@@ -21,6 +22,16 @@ public interface LookupServices extends AdminAware, Iterable<LookupService> {
     int size();
 
     boolean isEmpty();
+
+    /**
+     * Waits till at least the provided number of Lookup Services are up.
+     */
+    boolean waitFor(int numberOfLookupServices);
+
+    /**
+     * Waits till at least the provided number of Lookup Services are up for the specified timeout.
+     */
+    boolean waitFor(int numberOfLookupServices, long timeout, TimeUnit timeUnit);
 
     void addLifecycleListener(LookupServiceLifecycleEventListener eventListener);
 
