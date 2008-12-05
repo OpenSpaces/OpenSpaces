@@ -5,6 +5,7 @@ import com.gigaspaces.grid.gsm.PUsDetails;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.operatingsystem.OSDetails;
+import com.j_spaces.core.IJSpace;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.AdminEventListener;
@@ -409,7 +410,7 @@ public class DefaultAdmin implements InternalAdmin {
         flushEvents();
     }
 
-    public synchronized void addSpaceInstance(InternalSpaceInstance spaceInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
+    public synchronized void addSpaceInstance(InternalSpaceInstance spaceInstance, IJSpace clusteredIjspace, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(spaceInstance, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(spaceInstance, jvmDetails);
         InternalTransport transport = processTransportOnServiceAddition(spaceInstance, nioDetails, virtualMachine);
@@ -420,7 +421,7 @@ public class DefaultAdmin implements InternalAdmin {
 
         InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
         if (space == null) {
-            space = new DefaultSpace(spaces, spaceInstance.getSpaceName(), spaceInstance.getSpaceName());
+            space = new DefaultSpace(spaces, spaceInstance.getSpaceName(), spaceInstance.getSpaceName(), clusteredIjspace);
             spaces.addSpace(space);
         }
         spaceInstance.setSpace(space);

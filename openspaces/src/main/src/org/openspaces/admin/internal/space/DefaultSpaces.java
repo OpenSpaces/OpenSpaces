@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author kimchy
@@ -134,31 +135,24 @@ public class DefaultSpaces implements InternalSpaces {
 
     public Space waitFor(final String spaceName, long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<Space> ref = new AtomicReference<Space>();
         SpaceAddedEventListener added = new SpaceAddedEventListener() {
             public void spaceAdded(Space space) {
                 if (space.getName().equals(spaceName)) {
+                    ref.set(space);
                     latch.countDown();
                 }
             }
         };
         getSpaceAdded().add(added);
-        boolean result = false;
         try {
-            result = latch.await(timeout, timeUnit);
+            latch.await(timeout, timeUnit);
+            return ref.get();
         } catch (InterruptedException e) {
             return null;
         } finally {
             getSpaceAdded().remove(added);
         }
-        if (result) {
-            Space space = getSpaceByName(spaceName);
-            if (space == null) {
-                return waitFor(spaceName, timeout, timeUnit);
-            } else {
-                return space;
-            }
-        }
-        return null;
     }
 
     public void addLifecycleListener(SpaceLifecycleEventListener eventListener) {

@@ -8,6 +8,7 @@ import com.gigaspaces.operatingsystem.OSDetails;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.SpaceConfig;
+import com.j_spaces.core.client.ISpaceProxy;
 import com.j_spaces.core.service.ServiceConfigLoader;
 import com.j_spaces.kernel.PlatformVersion;
 import net.jini.config.Configuration;
@@ -187,14 +188,15 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             }
         } else if (service instanceof IJSpace) {
             try {
-                IJSpace ijspace = (IJSpace) service;
-                IInternalRemoteJSpaceAdmin spaceAdmin = (IInternalRemoteJSpaceAdmin) ijspace.getAdmin();
+                IJSpace clusteredIjspace = (IJSpace) service;
+                IJSpace direcyIjspace = ((ISpaceProxy) clusteredIjspace).getClusterMember();
+                IInternalRemoteJSpaceAdmin spaceAdmin = (IInternalRemoteJSpaceAdmin) direcyIjspace.getAdmin();
                 SpaceConfig spaceConfig = spaceAdmin.getConfig();
-                InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(serviceID, ijspace, spaceAdmin, spaceConfig, admin);
+                InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(serviceID, direcyIjspace, spaceAdmin, spaceConfig, admin);
                 NIODetails nioDetails = spaceInstance.getNIODetails();
                 OSDetails osDetails = spaceInstance.getOSDetails();
                 JVMDetails jvmDetails = spaceInstance.getJVMDetails();
-                admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails);
+                admin.addSpaceInstance(spaceInstance, clusteredIjspace, nioDetails, osDetails, jvmDetails);
             } catch (Exception e) {
                 logger.warn("Failed to add Space with uid [" + serviceID + "]", e);
             }

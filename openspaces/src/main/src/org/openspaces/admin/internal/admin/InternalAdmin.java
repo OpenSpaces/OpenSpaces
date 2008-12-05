@@ -3,6 +3,7 @@ package org.openspaces.admin.internal.admin;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.operatingsystem.OSDetails;
+import com.j_spaces.core.IJSpace;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
@@ -43,7 +44,7 @@ public interface InternalAdmin extends Admin {
 
     void removeProcessingUnitInstance(String uid);
 
-    void addSpaceInstance(InternalSpaceInstance spaceInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails);
+    void addSpaceInstance(InternalSpaceInstance spaceInstance, IJSpace clusteredSpace, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails);
 
     void removeSpaceInstance(String uid);
 }

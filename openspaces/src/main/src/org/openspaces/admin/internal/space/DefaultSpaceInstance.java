@@ -34,6 +34,8 @@ import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEvent;
 import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.space.events.SpaceModeChangedEvent;
 import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
+import org.openspaces.core.GigaSpace;
+import org.openspaces.core.GigaSpaceConfigurer;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -50,7 +52,11 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     private final ServiceID serviceID;
 
-    private final IJSpace ijSpace;
+    // direct space proxy
+    private final IJSpace ijspace;
+
+    // direct giga space
+    private final GigaSpace gigaSpace;
 
     private final IInternalRemoteJSpaceAdmin spaceAdmin;
 
@@ -90,15 +96,16 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     private Future scheduledStatisticsMonitor;
 
-    public DefaultSpaceInstance(ServiceID serviceID, IJSpace ijSpace, IInternalRemoteJSpaceAdmin spaceAdmin,
+    public DefaultSpaceInstance(ServiceID serviceID, IJSpace directSpace, IInternalRemoteJSpaceAdmin spaceAdmin,
                                 SpaceConfig spaceConfig, InternalAdmin admin) {
         super(admin);
         this.uid = serviceID.toString();
         this.serviceID = serviceID;
-        this.ijSpace = ijSpace;
+        this.ijspace = directSpace;
+        this.gigaSpace = new GigaSpaceConfigurer(directSpace).gigaSpace();
         this.spaceAdmin = spaceAdmin;
         this.spaceConfig = spaceConfig;
-        this.spaceURL = ijSpace.getURL();
+        this.spaceURL = ijspace.getURL();
 
         this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(admin);
         this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
@@ -138,6 +145,10 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     public ServiceID getServiceID() {
         return serviceID;
+    }
+
+    public GigaSpace getGigaSpace() {
+        return this.gigaSpace;
     }
 
     public synchronized void setStatisticsInterval(long interval, TimeUnit timeUnit) {
@@ -212,7 +223,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     }
 
     public IJSpace getIJSpace() {
-        return this.ijSpace;
+        return this.ijspace;
     }
 
     public IInternalRemoteJSpaceAdmin getSpaceAdmin() {

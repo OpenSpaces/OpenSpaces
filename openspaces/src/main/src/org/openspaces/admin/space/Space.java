@@ -9,6 +9,7 @@ import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
 import org.openspaces.admin.space.events.SpaceStatisticsChangedEventManager;
+import org.openspaces.core.GigaSpace;
 
 import java.util.concurrent.TimeUnit;
 
@@ -36,6 +37,11 @@ public interface Space extends Iterable<SpaceInstance>, StatisticsMonitor {
     int getSize();
 
     boolean isEmpty();
+
+    /**
+     * Returns the clustered view of the space to operate on.
+     */
+    GigaSpace getGigaSpace();
 
     /**
      * Waits till at least the provided number of Space Instances are up.

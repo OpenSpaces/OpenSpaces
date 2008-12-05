@@ -6,6 +6,7 @@ import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.space.events.ReplicationStatusChangedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
+import org.openspaces.core.GigaSpace;
 
 /**
  * @author kimchy
@@ -20,6 +21,11 @@ public interface SpaceInstance extends GridComponent, StatisticsMonitor {
     int getBackupId();
 
     SpaceMode getMode();
+
+    /**
+     * Returns the <b>direct</b> proxy to the actual space instance.
+     */
+    GigaSpace getGigaSpace();
 
     SpaceInstanceStatistics getStatistics();
 

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author kimchy
@@ -124,32 +125,24 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
 
     public ProcessingUnit waitFor(final String processingUnitName, long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<ProcessingUnit> ref = new AtomicReference<ProcessingUnit>();
         ProcessingUnitAddedEventListener added = new ProcessingUnitAddedEventListener() {
             public void processingUnitAdded(ProcessingUnit processingUnit) {
                 if (processingUnitName.equals(processingUnit.getName())) {
+                    ref.set(processingUnit);
                     latch.countDown();
                 }
             }
         };
         getProcessingUnitAdded().add(added);
-        boolean result = false;
         try {
-            result = latch.await(timeout, timeUnit);
+            latch.await(timeout, timeUnit);
+            return ref.get();
         } catch (InterruptedException e) {
             return null;
         } finally {
             getProcessingUnitAdded().remove(added);
         }
-
-        if (result) {
-            ProcessingUnit processingUnit = getProcessingUnit(processingUnitName);
-            if (processingUnit == null) {
-                return waitFor(processingUnitName, timeout, timeUnit);
-            } else {
-                return processingUnit;
-            }
-        }
-        return null;
     }
 
     public void addLifecycleListener(ProcessingUnitLifecycleEventListener eventListener) {

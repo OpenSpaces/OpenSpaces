@@ -2,6 +2,7 @@ package org.openspaces.admin.internal.space;
 
 import com.gigaspaces.cluster.activeelection.InactiveSpaceException;
 import com.gigaspaces.cluster.activeelection.SpaceMode;
+import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.RuntimeHolder;
 import com.j_spaces.core.exception.SpaceUnavailableException;
@@ -20,6 +21,8 @@ import org.openspaces.admin.space.SpacePartition;
 import org.openspaces.admin.space.SpaceStatistics;
 import org.openspaces.admin.space.Spaces;
 import org.openspaces.admin.space.events.*;
+import org.openspaces.core.GigaSpace;
+import org.openspaces.core.GigaSpaceConfigurer;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -45,6 +48,10 @@ public class DefaultSpace implements InternalSpace {
 
     private final String name;
 
+    private final IJSpace space;
+
+    private final GigaSpace gigaSpcae;
+
     private final Map<String, SpaceInstance> spaceInstancesByUID = new SizeConcurrentHashMap<String, SpaceInstance>();
 
     private final Map<String, SpaceInstance> spaceInstancesByMemberName = new ConcurrentHashMap<String, SpaceInstance>();
@@ -69,11 +76,15 @@ public class DefaultSpace implements InternalSpace {
 
     private Future scheduledStatisticsMonitor;
 
-    public DefaultSpace(InternalSpaces spaces, String uid, String name) {
+    public DefaultSpace(InternalSpaces spaces, String uid, String name, IJSpace clusteredSpace) {
         this.spaces = spaces;
         this.admin = (InternalAdmin) spaces.getAdmin();
         this.uid = uid;
         this.name = name;
+
+        this.space = clusteredSpace;
+        this.gigaSpcae = new GigaSpaceConfigurer(space).gigaSpace();
+        
         this.spaceInstanceAddedEventManager = new DefaultSpaceInstanceAddedEventManager(admin, this);
         this.spaceInstanceRemovedEventManager = new DefaultSpaceInstanceRemovedEventManager(admin);
         this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(admin);
@@ -243,7 +254,6 @@ public class DefaultSpace implements InternalSpace {
         // start the scheduler
         Future fetcher = scheduledRuntimeFetchers.get(spaceInstance.getUid());
         if (fetcher == null) {
-            // TODO make the schedule configurable
             fetcher = admin.getScheduler().scheduleWithFixedDelay(new ScheduledRuntimeFetcher(spaceInstance), admin.getScheduledSpaceMonitorInterval(), admin.getScheduledSpaceMonitorInterval(), TimeUnit.MILLISECONDS);
             scheduledRuntimeFetchers.put(spaceInstance.getUid(), fetcher);
         }
@@ -281,6 +291,10 @@ public class DefaultSpace implements InternalSpace {
 
     public boolean isEmpty() {
         return spaceInstancesByUID.size() == 0;
+    }
+
+    public GigaSpace getGigaSpace() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public boolean waitFor(int numberOfSpaceInstances) {
@@ -339,14 +353,6 @@ public class DefaultSpace implements InternalSpace {
             }
         }
         return result;
-    }
-
-    public boolean waitForBackups(int numberOfSpaceInstances) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    public boolean waitForBackups(int numberOfSpaceInstances, long timeout, TimeUnit timeUnit) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public SpaceInstance[] getSpaceInstances() {
