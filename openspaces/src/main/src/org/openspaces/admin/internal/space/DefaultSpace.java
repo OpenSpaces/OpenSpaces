@@ -322,6 +322,7 @@ public class DefaultSpace implements InternalSpace {
         return waitFor(numberOfSpaceInstances, spaceMode, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     }
 
+    // TODO this is wrong, since we won't get events for existing ones
     public boolean waitFor(int numberOfSpaceInstances, final SpaceMode spaceMode, long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(numberOfSpaceInstances);
         SpaceModeChangedEventListener modeChanged = new SpaceModeChangedEventListener() {
