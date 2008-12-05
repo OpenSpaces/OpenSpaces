@@ -10,6 +10,8 @@ import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.Spaces;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author kimchy
  */
@@ -22,6 +24,17 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance> {
     int getNumberOfBackups();
 
     DeploymentStatus getStatus();
+
+    /**
+     * Waits till at least the provided number of Processing Unit Instances are up.
+     */
+    boolean waitFor(int numberOfProcessingUnitInstances);
+
+    /**
+     * Waits till at least the provided number of Processing Unit Instances are up for the specified timeout.
+     */
+    boolean waitFor(int numberOfProcessingUnitInstances, long timeout, TimeUnit timeUnit);
+
 
     /**
      * Returns <code>true</code> if there is a managing GSM for it.

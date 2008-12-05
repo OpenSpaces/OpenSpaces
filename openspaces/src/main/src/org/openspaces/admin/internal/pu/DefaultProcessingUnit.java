@@ -9,21 +9,15 @@ import org.openspaces.admin.internal.space.InternalSpaces;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
-import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEvent;
-import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
-import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEvent;
-import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent;
-import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.pu.events.*;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.Spaces;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author kimchy
@@ -142,6 +136,27 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     public DeploymentStatus getStatus() {
         return this.deploymentStatus;
+    }
+
+    public boolean waitFor(int numberOfProcessingUnitInstances) {
+        return waitFor(numberOfProcessingUnitInstances, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public boolean waitFor(int numberOfProcessingUnitInstances, long timeout, TimeUnit timeUnit) {
+        final CountDownLatch latch = new CountDownLatch(numberOfProcessingUnitInstances);
+        ProcessingUnitInstanceAddedEventListener added = new ProcessingUnitInstanceAddedEventListener() {
+            public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstance) {
+                latch.countDown();
+            }
+        };
+        getProcessingUnitInstanceAdded().add(added);
+        try {
+            return latch.await(timeout, timeUnit);
+        } catch (InterruptedException e) {
+            return false;
+        } finally {
+            getProcessingUnitInstanceAdded().remove(added);
+        }
     }
 
     public GridServiceManager getManagingGridServiceManager() {
