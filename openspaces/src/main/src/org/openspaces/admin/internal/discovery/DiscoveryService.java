@@ -246,7 +246,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         // TODO do we really care about this?
     }
 
-    private String[] getGroups() {
+    public String[] getGroups() {
         String[] groups;
         if (this.groups == null) {
             String groupsProperty = System.getProperty("com.gs.jini_lus.groups");
@@ -269,7 +269,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         return groups;
     }
 
-    private LookupLocator[] getLocators() {
+    public LookupLocator[] getLocators() {
         if (locators == null) {
             String locatorsProperty = System.getProperty("com.gs.jini_lus.locators");
             if (locatorsProperty == null) {

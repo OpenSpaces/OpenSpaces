@@ -6,6 +6,7 @@ import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.operatingsystem.OSDetails;
 import com.j_spaces.core.IJSpace;
+import net.jini.core.discovery.LookupLocator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.AdminEventListener;
@@ -133,6 +134,14 @@ public class DefaultAdmin implements InternalAdmin {
 
     public DefaultAdmin() {
         this.discoveryService = new DiscoveryService(this);
+    }
+
+    public String[] getGroups() {
+        return discoveryService.getGroups();
+    }
+
+    public LookupLocator[] getLocators() {
+        return discoveryService.getLocators();
     }
 
     public String getUsername() {

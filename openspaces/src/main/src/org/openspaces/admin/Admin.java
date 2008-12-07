@@ -1,5 +1,6 @@
 package org.openspaces.admin;
 
+import net.jini.core.discovery.LookupLocator;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.lus.LookupServices;
@@ -15,6 +16,10 @@ import java.util.concurrent.TimeUnit;
  * @author kimchy
  */
 public interface Admin extends StatisticsMonitor {
+
+    String[] getGroups();
+
+    LookupLocator[] getLocators();
 
     void setProcessingUnitMonitorInterval(long interval, TimeUnit timeUnit);
 

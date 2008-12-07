@@ -93,6 +93,9 @@ public class Deploy {
     private static boolean sout = false;
 
     public GSM[] findGSMs() {
+        if (this.gsms != null) {
+            return gsms;
+        }
         GSM[] gsms;
         info("Searching for GSMs in groups " + Arrays.asList(getGroups()) + " and locators [" + getLocators() + "]");
         ServiceItem[] result = ServiceFinder.find(null, GSM.class, lookupTimeout, getGroups(), getLocators());
@@ -133,6 +136,10 @@ public class Deploy {
 
     public static void setSout(boolean soutVal) {
         sout = soutVal;
+    }
+
+    public void setGSMs(GSM[] gsms) {
+        this.gsms = gsms;
     }
 
     public void setDeployAdmin(DeployAdmin deployAdmin) {

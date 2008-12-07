@@ -57,6 +57,8 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
 
     GridServiceManager getBackupGridServiceManager(String gridServiceManagerUID);
 
+    void undeploy();
+
     /**
      * Returns the (first) embedded space within a processing unit. Returns <code>null</code> if
      * no embedded space is defined within the processing unit or if no processing unit instance

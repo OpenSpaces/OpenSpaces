@@ -2,6 +2,7 @@ package org.openspaces.admin.internal.gsm;
 
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventListener;
 import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventManager;
@@ -12,6 +13,9 @@ import org.openspaces.admin.internal.gsm.events.DefaultGridServiceManagerAddedEv
 import org.openspaces.admin.internal.gsm.events.DefaultGridServiceManagerRemovedEventManager;
 import org.openspaces.admin.internal.gsm.events.InternalGridServiceManagerAddedEventManager;
 import org.openspaces.admin.internal.gsm.events.InternalGridServiceManagerRemovedEventManager;
+import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.space.SpaceDeployment;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -89,6 +93,30 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         } finally {
             getGridServiceManagerAdded().remove(added);
         }
+    }
+
+    public ProcessingUnit deploy(ProcessingUnitDeployment deployment) {
+        GridServiceManager gridServiceManager = getGridServiceManager();
+        if (gridServiceManager == null) {
+            throw new AdminException("No Grid Service Manager found to deploy [" + deployment.getProcessingUnit() + "]");
+        }
+        return gridServiceManager.deploy(deployment);
+    }
+
+    public ProcessingUnit deploy(SpaceDeployment deployment) {
+        GridServiceManager gridServiceManager = getGridServiceManager();
+        if (gridServiceManager == null) {
+            throw new AdminException("No Grid Service Manager found to deploy [" + deployment.getSpaceName() + "]");
+        }
+        return gridServiceManager.deploy(deployment);
+    }
+
+    private GridServiceManager getGridServiceManager() {
+        Iterator<GridServiceManager> it = iterator();
+        if (it.hasNext()) {
+            return it.next();
+        }
+        return null;
     }
 
     public void addLifecycleListener(GridServiceManagerLifecycleEventListener eventListener) {

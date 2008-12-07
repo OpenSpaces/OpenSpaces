@@ -2,8 +2,10 @@ package org.openspaces.admin.internal.pu;
 
 import com.gigaspaces.grid.gsm.PUDetails;
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.pu.events.*;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
@@ -209,6 +211,13 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     public GridServiceManager getBackupGridServiceManager(String gridServiceManagerUID) {
         return backupGridServiceManagers.get(gridServiceManagerUID);
+    }
+
+    public void undeploy() {
+        if (!isManaged()) {
+            throw new AdminException("No managing GSM to undeploy from");
+        }
+        ((InternalGridServiceManager) managingGridServiceManager).undeployProcessingUnit(getName());
     }
 
     public void setManagingGridServiceManager(GridServiceManager gridServiceManager) {
