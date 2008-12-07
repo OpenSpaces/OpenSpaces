@@ -11,6 +11,7 @@ import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -30,6 +31,14 @@ public class DefaultSpaceInstances implements InternalSpaceInstances {
         this.admin = admin;
         this.spaceInstanceAddedEventManager = new DefaultSpaceInstanceAddedEventManager(admin, this);
         this.spaceInstanceRemovedEventManager = new DefaultSpaceInstanceRemovedEventManager(admin);
+    }
+
+    public int size() {
+        return spaceInstances.size();
+    }
+
+    public Iterator<SpaceInstance> iterator() {
+        return spaceInstances.values().iterator();
     }
 
     public SpaceInstance[] getSpaceInstances() {

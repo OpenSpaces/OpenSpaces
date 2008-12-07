@@ -8,7 +8,9 @@ import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 /**
  * @author kimchy
  */
-public interface InternalSpaceInstances extends InternalSpaceInstancesAware {
+public interface InternalSpaceInstances extends Iterable<SpaceInstance>, InternalSpaceInstancesAware {
+
+    int size();
 
     void addSpaceInstance(SpaceInstance spaceInstance);
 

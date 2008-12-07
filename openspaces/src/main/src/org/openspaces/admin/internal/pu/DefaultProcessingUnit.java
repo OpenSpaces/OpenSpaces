@@ -1,23 +1,23 @@
 package org.openspaces.admin.internal.pu;
 
 import com.gigaspaces.grid.gsm.PUDetails;
+import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.events.*;
-import org.openspaces.admin.internal.space.DefaultSpaces;
-import org.openspaces.admin.internal.space.InternalSpaces;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.pu.events.*;
 import org.openspaces.admin.space.Space;
-import org.openspaces.admin.space.Spaces;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author kimchy
@@ -44,7 +44,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     private final Map<Integer, ProcessingUnitPartition> processingUnitPartitions = new ConcurrentHashMap<Integer, ProcessingUnitPartition>();
 
-    private final InternalSpaces spaces;
+    private final ConcurrentMap<String, Space> spaces = new ConcurrentHashMap<String, Space>();
 
     private final InternalManagingGridServiceManagerChangedEventManager managingGridServiceManagerChangedEventManager;
 
@@ -56,14 +56,14 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     private final InternalProcessingUnitInstanceRemovedEventManager processingUnitInstanceRemovedEventManager;
 
+    private final InternalProcessingUnitSpaceCorrelatedEventManager spaceCorrelatedEventManager;
+
     public DefaultProcessingUnit(InternalAdmin admin, InternalProcessingUnits processingUnits, PUDetails details) {
         this.admin = admin;
         this.processingUnits = processingUnits;
         this.name = details.getName();
         this.numberOfInstances = details.getNumberOfInstances();
         this.numberOfBackups = details.getNumberOfBackups();
-
-        this.spaces = new DefaultSpaces(admin);
 
         for (int i = 0; i < numberOfInstances; i++) {
             processingUnitPartitions.put(i, new DefaultProcessingUnitPartition(this, i));
@@ -74,6 +74,11 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         this.processingUnitStatusChangedEventManager = new DefaultProcessingUnitStatusChangedEventManager(admin);
         this.processingUnitInstanceAddedEventManager = new DefaultProcessingUnitInstanceAddedEventManager(this, admin);
         this.processingUnitInstanceRemovedEventManager = new DefaultProcessingUnitInstanceRemovedEventManager(admin);
+        this.spaceCorrelatedEventManager = new DefaultProcessingUnitSpaceCorrelatedEventManager(this);
+    }
+
+    public Admin getAdmin() {
+        return this.admin;
     }
 
     public String getName() {
@@ -89,19 +94,22 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     }
 
     public Space getSpace() {
-        Iterator<Space> it = spaces.iterator();
+        Iterator<Space> it = spaces.values().iterator();
         if (it.hasNext()) {
             return it.next();
         }
         return null;
     }
 
-    public Spaces getSpaces() {
-        return this.spaces;
+    public Space[] getSpaces() {
+        return this.spaces.values().toArray(new Space[0]);
     }
 
     public void addEmbeddedSpace(Space space) {
-        spaces.addSpace(space);
+        Space existingSpace = spaces.putIfAbsent(space.getName(), space);
+        if (existingSpace == null) {
+            spaceCorrelatedEventManager.processingUnitSpaceCorrelated(new ProcessingUnitSpaceCorrelatedEvent(space, this));
+        }
     }
 
     public ProcessingUnitStatusChangedEventManager getProcessingUnitStatusChanged() {
@@ -114,6 +122,10 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     public ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved() {
         return this.processingUnitInstanceRemovedEventManager;
+    }
+
+    public ProcessingUnitSpaceCorrelatedEventManager getSpaceCorrelated() {
+        return this.spaceCorrelatedEventManager;
     }
 
     public void addLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
@@ -156,6 +168,30 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
             return false;
         } finally {
             getProcessingUnitInstanceAdded().remove(added);
+        }
+    }
+
+    public Space waitForSpace() {
+        return waitForSpace(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public Space waitForSpace(long timeout, TimeUnit timeUnit) {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<Space> ref = new AtomicReference<Space>();
+        ProcessingUnitSpaceCorrelatedEventListener correlated = new ProcessingUnitSpaceCorrelatedEventListener() {
+            public void processingUnitSpaceCorrelated(ProcessingUnitSpaceCorrelatedEvent event) {
+                ref.set(event.getSpace());
+                latch.countDown();
+            }
+        };
+        getSpaceCorrelated().add(correlated);
+        try {
+            latch.await(timeout, timeUnit);
+            return ref.get();
+        } catch (InterruptedException e) {
+            return null;
+        } finally {
+            getSpaceCorrelated().remove(correlated);
         }
     }
 

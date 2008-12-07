@@ -1,21 +1,22 @@
 package org.openspaces.admin.pu;
 
+import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
 import org.openspaces.admin.space.Space;
-import org.openspaces.admin.space.Spaces;
 
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author kimchy
  */
-public interface ProcessingUnit extends Iterable<ProcessingUnitInstance> {
+public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminAware {
 
     String getName();
 
@@ -35,6 +36,15 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance> {
      */
     boolean waitFor(int numberOfProcessingUnitInstances, long timeout, TimeUnit timeUnit);
 
+    /**
+     * Waits till an embedded Space is correlated with the processing unit.
+     */
+    Space waitForSpace();
+
+    /**
+     * Waits till an embedded Space is correlated with the processing unit for the specified timeout.
+     */
+    Space waitForSpace(long timeout, TimeUnit timeUnit);
 
     /**
      * Returns <code>true</code> if there is a managing GSM for it.
@@ -55,9 +65,11 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance> {
     Space getSpace();
 
     /**
-     * Returns the embedded spaces within this processing unit.
+     * Returns all the embedded spaces within a processing unit. Returns an empty array if there
+     * are no embedded spaces defined within the processing unit, or none has been associated with
+     * the processing unit yet.
      */
-    Spaces getSpaces();
+    Space[] getSpaces();
 
     ProcessingUnitInstance[] getInstances();
 
@@ -78,4 +90,6 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance> {
     ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded();
 
     ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved();
+
+    ProcessingUnitSpaceCorrelatedEventManager getSpaceCorrelated();
 }

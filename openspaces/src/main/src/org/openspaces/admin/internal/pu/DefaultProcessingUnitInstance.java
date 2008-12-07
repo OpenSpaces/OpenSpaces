@@ -6,11 +6,12 @@ import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.operatingsystem.OSDetails;
 import com.gigaspaces.operatingsystem.OSStatistics;
-import com.j_spaces.kernel.SizeConcurrentHashMap;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.space.DefaultSpaceInstances;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
+import org.openspaces.admin.internal.space.InternalSpaceInstances;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
@@ -59,7 +60,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private final Map<String, ProcessingUnitServiceDetails[]> servicesDetailsByServiceId;
 
-    private final Map<String, SpaceInstance> spaceInstances = new SizeConcurrentHashMap<String, SpaceInstance>();
+    private final InternalSpaceInstances spaceInstances;
 
     public DefaultProcessingUnitInstance(ServiceID serviceID, PUDetails puDetails, PUServiceBean puServiceBean, InternalAdmin admin) {
         super(admin);
@@ -67,6 +68,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         this.uid = serviceID.toString();
         this.puDetails = puDetails;
         this.puServiceBean = puServiceBean;
+
+        this.spaceInstances = new DefaultSpaceInstances(admin);
 
         ArrayList<SpaceProcessingUnitServiceDetails> embeddedSpacesEmbeddedList = new ArrayList<SpaceProcessingUnitServiceDetails>();
         ArrayList<SpaceProcessingUnitServiceDetails> spacesDetailsList = new ArrayList<SpaceProcessingUnitServiceDetails>();
@@ -188,7 +191,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public SpaceInstance getSpaceInstance() {
-        Iterator<SpaceInstance> it = spaceInstances.values().iterator();
+        Iterator<SpaceInstance> it = spaceInstances.iterator();
         if (it.hasNext()) {
             return it.next();
         }
@@ -196,20 +199,20 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public SpaceInstance[] getSpaceInstances() {
-        return spaceInstances.values().toArray(new SpaceInstance[0]);
+        return spaceInstances.getSpaceInstances();
     }
 
     public void addSpaceInstnaceIfMatching(SpaceInstance spaceInstance) {
         for (SpaceProcessingUnitServiceDetails spaceDetails : embeddedSpacesDetails) {
             if (((InternalSpaceInstance) spaceInstance).getServiceID().equals(spaceDetails.getServiceID())) {
-                spaceInstances.put(spaceInstance.getUid(), spaceInstance);
+                spaceInstances.addSpaceInstance(spaceInstance);
                 processingUnit.addEmbeddedSpace(spaceInstance.getSpace());
             }
         }
     }
 
     public void removeSpaceInstance(String uid) {
-        spaceInstances.remove(uid);
+        spaceInstances.removeSpaceInstance(uid);
     }
 
     public boolean isJee() {
