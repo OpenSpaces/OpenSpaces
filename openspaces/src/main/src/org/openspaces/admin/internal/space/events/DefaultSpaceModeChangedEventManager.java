@@ -1,7 +1,9 @@
 package org.openspaces.admin.internal.space.events;
 
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.space.InternalSpaceInstancesAware;
 import org.openspaces.admin.internal.support.GroovyHelper;
+import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.events.SpaceModeChangedEvent;
 import org.openspaces.admin.space.events.SpaceModeChangedEventListener;
 
@@ -15,9 +17,12 @@ public class DefaultSpaceModeChangedEventManager implements InternalSpaceModeCha
 
     private final InternalAdmin admin;
 
+    private final InternalSpaceInstancesAware spaceInstances;
+
     private final List<SpaceModeChangedEventListener> listeners = new CopyOnWriteArrayList<SpaceModeChangedEventListener>();
 
-    public DefaultSpaceModeChangedEventManager(InternalAdmin admin) {
+    public DefaultSpaceModeChangedEventManager(InternalSpaceInstancesAware spaceInstances, InternalAdmin admin) {
+        this.spaceInstances = spaceInstances;
         this.admin = admin;
     }
 
@@ -31,8 +36,20 @@ public class DefaultSpaceModeChangedEventManager implements InternalSpaceModeCha
         }
     }
 
-    public void add(SpaceModeChangedEventListener eventListener) {
-        listeners.add(eventListener);
+    public void add(final SpaceModeChangedEventListener eventListener) {
+        if (spaceInstances != null) {
+            SpaceInstance[] instances = spaceInstances.getSpaceInstances();
+            listeners.add(eventListener);
+            for (final SpaceInstance spaceInstance : instances) {
+                admin.raiseEvent(eventListener, new Runnable() {
+                    public void run() {
+                        eventListener.spaceModeChanged(new SpaceModeChangedEvent(spaceInstance, null, spaceInstance.getMode()));
+                    }
+                });
+            }
+        } else {
+            listeners.add(eventListener);
+        }
     }
 
     public void remove(SpaceModeChangedEventListener eventListener) {

@@ -50,7 +50,7 @@ public class DefaultSpace implements InternalSpace {
 
     private final IJSpace space;
 
-    private final GigaSpace gigaSpcae;
+    private final GigaSpace gigaSpace;
 
     private final Map<String, SpaceInstance> spaceInstancesByUID = new SizeConcurrentHashMap<String, SpaceInstance>();
 
@@ -83,11 +83,11 @@ public class DefaultSpace implements InternalSpace {
         this.name = name;
 
         this.space = clusteredSpace;
-        this.gigaSpcae = new GigaSpaceConfigurer(space).gigaSpace();
+        this.gigaSpace = new GigaSpaceConfigurer(space).gigaSpace();
         
         this.spaceInstanceAddedEventManager = new DefaultSpaceInstanceAddedEventManager(admin, this);
         this.spaceInstanceRemovedEventManager = new DefaultSpaceInstanceRemovedEventManager(admin);
-        this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(admin);
+        this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(this, admin);
         this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
         this.statisticsChangedEventManager = new DefaultSpaceStatisticsChangedEventManager(admin);
         this.instanceStatisticsChangedEventManager = new DefaultSpaceInstanceStatisticsChangedEventManager(admin);
@@ -294,7 +294,7 @@ public class DefaultSpace implements InternalSpace {
     }
 
     public GigaSpace getGigaSpace() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return this.gigaSpace;
     }
 
     public boolean waitFor(int numberOfSpaceInstances) {
@@ -322,7 +322,6 @@ public class DefaultSpace implements InternalSpace {
         return waitFor(numberOfSpaceInstances, spaceMode, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     }
 
-    // TODO this is wrong, since we won't get events for existing ones
     public boolean waitFor(int numberOfSpaceInstances, final SpaceMode spaceMode, long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(numberOfSpaceInstances);
         SpaceModeChangedEventListener modeChanged = new SpaceModeChangedEventListener() {

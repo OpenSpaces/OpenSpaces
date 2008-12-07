@@ -107,7 +107,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         this.spaceConfig = spaceConfig;
         this.spaceURL = ijspace.getURL();
 
-        this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(admin);
+        this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(null, admin);
         this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
         this.statisticsChangedEventManager = new DefaultSpaceInstanceStatisticsChangedEventManager(admin);
 

@@ -58,7 +58,7 @@ public class DefaultSpaces implements InternalSpaces {
         this.spaceRemovedEventManager = new DefaultSpaceRemovedEventManager(this);
         this.spaceInstanceAddedEventManager = new DefaultSpaceInstanceAddedEventManager(admin, this);
         this.spaceInstanceRemovedEventManager = new DefaultSpaceInstanceRemovedEventManager(admin);
-        this.spaceModeChangedEventManager =  new DefaultSpaceModeChangedEventManager(admin);
+        this.spaceModeChangedEventManager =  new DefaultSpaceModeChangedEventManager(this, admin);
         this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
         this.spaceStatisticsChangedEventManager = new DefaultSpaceStatisticsChangedEventManager(admin);
         this.spaceInstanceStatisticsChangedEventManager = new DefaultSpaceInstanceStatisticsChangedEventManager(admin);
