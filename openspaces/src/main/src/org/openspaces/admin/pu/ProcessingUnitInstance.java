@@ -17,6 +17,8 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<Processi
 
     void destroy();
 
+    void relocate(GridServiceContainer gridServiceContainerToRelocateTo);
+
     int getInstanceId();
 
     int getBackupId();

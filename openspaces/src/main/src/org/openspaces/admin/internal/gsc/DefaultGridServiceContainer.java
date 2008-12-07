@@ -14,12 +14,15 @@ import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 
 import java.rmi.RemoteException;
 import java.util.Iterator;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author kimchy
@@ -60,6 +63,27 @@ public class DefaultGridServiceContainer extends AbstractGridComponent implement
 
     public ProcessingUnitInstance[] getProcessingUnitInsances() {
         return processingUnitInstances.getInstances();
+    }
+
+    public boolean waitFor(int numberOfProcessingUnitInstances) {
+        return waitFor(numberOfProcessingUnitInstances, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public boolean waitFor(int numberOfProcessingUnitInstances, long timeout, TimeUnit timeUnit) {
+        final CountDownLatch latch = new CountDownLatch(numberOfProcessingUnitInstances);
+        ProcessingUnitInstanceAddedEventListener added = new ProcessingUnitInstanceAddedEventListener() {
+            public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstance) {
+                latch.countDown();
+            }
+        };
+        getProcessingUnitInstanceAdded().add(added);
+        try {
+            return latch.await(timeout, timeUnit);
+        } catch (InterruptedException e) {
+            return false;
+        } finally {
+            getProcessingUnitInstanceAdded().remove(added);
+        }
     }
 
     public void addProcessingUnitInstance(ProcessingUnitInstance processingUnitInstance) {

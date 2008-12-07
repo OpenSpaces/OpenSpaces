@@ -13,8 +13,10 @@ import net.jini.core.lookup.ServiceID;
 import org.jini.rio.core.OperationalString;
 import org.jini.rio.monitor.ProvisionMonitorAdmin;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.internal.support.NetworkExceptionHelper;
@@ -162,6 +164,18 @@ public class DefaultGridServiceManager extends AbstractGridComponent implements 
             } else {
                 throw new AdminException("Faield to destroy procesing unit instance", e);
             }
+        }
+    }
+
+    public void relocate(ProcessingUnitInstance processingUnitInstance, GridServiceContainer gridServiceContainer) {
+        if (credentials != null && credentials != Credentials.FULL) {
+            throw new AdminException("No credentials to destroy a processing unit instance");
+        }
+        try {
+            gsm.relocate(processingUnitInstance.getProcessingUnit().getName(), ((InternalProcessingUnitInstance) processingUnitInstance).getServiceID(),
+                    ((InternalGridServiceContainer) gridServiceContainer).getServiceID(), null);
+        } catch (Exception e) {
+            throw new AdminException("Failed to relocate processing unit instnace to grid service container", e);
         }
     }
 
