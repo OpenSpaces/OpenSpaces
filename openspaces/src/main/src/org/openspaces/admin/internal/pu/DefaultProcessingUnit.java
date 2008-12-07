@@ -32,9 +32,9 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     private final String name;
 
-    private final int numberOfInstances;
+    private volatile int numberOfInstances;
 
-    private final int numberOfBackups;
+    private volatile int numberOfBackups;
 
     private volatile DeploymentStatus deploymentStatus = DeploymentStatus.NA;
 
@@ -67,8 +67,13 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         this.numberOfInstances = details.getNumberOfInstances();
         this.numberOfBackups = details.getNumberOfBackups();
 
-        for (int i = 0; i < numberOfInstances; i++) {
-            processingUnitPartitions.put(i, new DefaultProcessingUnitPartition(this, i));
+        if (numberOfBackups == 0) {
+            // if we have no backup, its actually just a "single partition"
+            processingUnitPartitions.put(0, new DefaultProcessingUnitPartition(this, 0));
+        } else {
+            for (int i = 0; i < numberOfInstances; i++) {
+                processingUnitPartitions.put(i, new DefaultProcessingUnitPartition(this, i));
+            }
         }
 
         this.managingGridServiceManagerChangedEventManager = new DefaultManagingGridServiceManagerChangedEventManager(admin);
@@ -144,8 +149,16 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         return this.numberOfInstances;
     }
 
+    public void setNumberOfInstances(int numberOfInstances) {
+        this.numberOfInstances = numberOfInstances;
+    }
+
     public int getNumberOfBackups() {
         return this.numberOfBackups;
+    }
+
+    public void setNumberOfBackups(int numberOfBackups) {
+        this.numberOfBackups = numberOfBackups;
     }
 
     public DeploymentStatus getStatus() {
@@ -194,6 +207,28 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
             return null;
         } finally {
             getSpaceCorrelated().remove(correlated);
+        }
+    }
+
+    public boolean canIncrementInstance() {
+        return getSpaces().length == 0;
+    }
+
+    public boolean canDecrementInstance() {
+        return getSpaces().length == 0;
+    }
+
+    public void incrementInstance() {
+        if (!isManaged()) {
+            throw new AdminException("No managing grid service manager for processing unit");
+        }
+        ((InternalGridServiceManager) managingGridServiceManager).incrementInstance(this);
+    }
+
+    public void decrementInstance() {
+        Iterator<ProcessingUnitInstance> it = iterator();
+        if (it.hasNext()) {
+            ((InternalGridServiceManager) managingGridServiceManager).decrementInstance(it.next());
         }
     }
 
@@ -305,7 +340,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     public void addProcessingUnitInstance(final ProcessingUnitInstance processingUnitInstance) {
         final ProcessingUnitInstance existingProcessingUnitInstance = processingUnitInstances.put(processingUnitInstance.getUid(), processingUnitInstance);
-        InternalProcessingUnitPartition partition = ((InternalProcessingUnitPartition) processingUnitPartitions.get(processingUnitInstance.getInstanceId() - 1));
+        InternalProcessingUnitPartition partition = getPartition(processingUnitInstance);
         partition.addProcessingUnitInstance(processingUnitInstance);
         ((InternalProcessingUnitInstance) processingUnitInstance).setProcessingUnitPartition(partition);
 
@@ -319,7 +354,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     public void removeProcessingUnitInstance(String uid) {
         final ProcessingUnitInstance processingUnitInstance = processingUnitInstances.remove(uid);
         if (processingUnitInstance != null) {
-            InternalProcessingUnitPartition partition = ((InternalProcessingUnitPartition) processingUnitPartitions.get(processingUnitInstance.getInstanceId() - 1));
+            InternalProcessingUnitPartition partition = getPartition(processingUnitInstance);
             partition.removeProcessingUnitInstance(uid);
 
             processingUnitInstanceRemovedEventManager.processingUnitInstanceRemoved(processingUnitInstance);
@@ -327,6 +362,16 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
     }
 
+    private InternalProcessingUnitPartition getPartition(ProcessingUnitInstance processingUnitInstance) {
+        InternalProcessingUnitPartition partition;
+        if (numberOfBackups == 0) {
+            partition = ((InternalProcessingUnitPartition) processingUnitPartitions.get(0));
+        } else {
+            partition = ((InternalProcessingUnitPartition) processingUnitPartitions.get(processingUnitInstance.getInstanceId() - 1));
+        }
+        return partition;
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

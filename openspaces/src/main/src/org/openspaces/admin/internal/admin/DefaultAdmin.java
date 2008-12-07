@@ -653,6 +653,9 @@ public class DefaultAdmin implements InternalAdmin {
                     processingUnit = new DefaultProcessingUnit(DefaultAdmin.this, processingUnits, details);
                     newProcessingUnit = true;
                 }
+                // we always update the number of instances and backups since they might increate/decrease
+                processingUnit.setNumberOfInstances(details.getNumberOfInstances());
+                processingUnit.setNumberOfBackups(details.getNumberOfBackups());
                 if (!newProcessingUnit) {
                     // handle managing GSM
                     if (holder.managingGSM == null) {

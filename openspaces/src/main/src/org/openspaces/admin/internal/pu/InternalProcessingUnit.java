@@ -10,6 +10,10 @@ import org.openspaces.admin.space.Space;
  */
 public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessingUnitInstancesAware {
 
+    void setNumberOfInstances(int numberOfInstances);
+
+    void setNumberOfBackups(int numberOfBackups);
+
     void setManagingGridServiceManager(GridServiceManager gridServiceManager);
 
     void addBackupGridServiceManager(GridServiceManager backupGridServiceManager);

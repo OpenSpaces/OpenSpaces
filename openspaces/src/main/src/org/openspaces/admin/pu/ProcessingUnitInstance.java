@@ -15,7 +15,15 @@ import java.util.Map;
  */
 public interface ProcessingUnitInstance extends GridComponent, Iterable<ProcessingUnitServiceDetails> {
 
+    /**
+     * Destroy the instance. If breaches the SLA, will instanstiate the instance again.
+     */
     void destroy();
+
+    /**
+     * Decrements the instance (and destroying it in the process). Will not attempt to create it again.
+     */
+    void decrement();
 
     void relocate(GridServiceContainer gridServiceContainerToRelocateTo);
 

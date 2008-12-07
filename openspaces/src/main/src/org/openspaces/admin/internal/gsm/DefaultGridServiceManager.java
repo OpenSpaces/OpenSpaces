@@ -167,6 +167,42 @@ public class DefaultGridServiceManager extends AbstractGridComponent implements 
         }
     }
 
+    public void decrementInstance(ProcessingUnitInstance processingUnitInstance) {
+        if (credentials != null && credentials != Credentials.FULL) {
+            throw new AdminException("No credentials to decrement a processing unit instance");
+        }
+        if (!processingUnitInstance.getProcessingUnit().canDecrementInstance()) {
+            throw new AdminException("Processing unit does not allow to decrement instances on it");
+        }
+        try {
+            gsm.decrement(processingUnitInstance.getProcessingUnit().getName(), ((InternalProcessingUnitInstance) processingUnitInstance).getServiceID(), true);
+        } catch (Exception e) {
+            if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
+                // all is well
+            } else {
+                throw new AdminException("Faield to destroy procesing unit instance", e);
+            }
+        }
+    }
+
+    public void incrementInstance(ProcessingUnit processingUnit) {
+        if (credentials != null && credentials != Credentials.FULL) {
+            throw new AdminException("No credentials to increment a processing unit instance");
+        }
+        if (!processingUnit.canIncrementInstance()) {
+            throw new AdminException("Processing unit does not allow to increment instances on it");
+        }
+        try {
+            gsm.increment(processingUnit.getName(), null);
+        } catch (Exception e) {
+            if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
+                // all is well
+            } else {
+                throw new AdminException("Faield to destroy procesing unit instance", e);
+            }
+        }
+    }
+
     public void relocate(ProcessingUnitInstance processingUnitInstance, GridServiceContainer gridServiceContainer) {
         if (credentials != null && credentials != Credentials.FULL) {
             throw new AdminException("No credentials to destroy a processing unit instance");

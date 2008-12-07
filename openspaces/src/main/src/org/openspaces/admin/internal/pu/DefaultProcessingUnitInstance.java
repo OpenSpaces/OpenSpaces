@@ -251,6 +251,13 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         ((InternalGridServiceManager) processingUnit.getManagingGridServiceManager()).relocate(this, gridServiceContainerToRelocateTo);
     }
 
+    public void decrement() {
+        if (!processingUnit.isManaged()) {
+            throw new AdminException("No managing grid service manager for processing unit");
+        }
+        ((InternalGridServiceManager) processingUnit.getManagingGridServiceManager()).decrementInstance(this);
+    }
+
     // info providers
 
     public NIODetails getNIODetails() throws RemoteException {

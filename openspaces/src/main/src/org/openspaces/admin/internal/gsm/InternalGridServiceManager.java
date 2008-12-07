@@ -6,6 +6,7 @@ import org.jini.rio.monitor.ProvisionMonitorAdmin;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.support.InternalGridComponent;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 
 /**
@@ -22,6 +23,10 @@ public interface InternalGridServiceManager extends GridServiceManager, Internal
     void undeployProcessingUnit(String processingUnitName);
 
     void destroyInstance(ProcessingUnitInstance processingUnitInstance);
+
+    void decrementInstance(ProcessingUnitInstance processingUnitInstance);
+
+    void incrementInstance(ProcessingUnit processingUnit);
 
     void relocate(ProcessingUnitInstance processingUnitInstance, GridServiceContainer gridServiceContainer);
 }

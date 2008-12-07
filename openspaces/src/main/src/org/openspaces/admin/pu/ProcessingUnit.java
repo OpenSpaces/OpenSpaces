@@ -46,6 +46,18 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      */
     Space waitForSpace(long timeout, TimeUnit timeUnit);
 
+    boolean canIncrementInstance();
+
+    boolean canDecrementInstance();
+
+    void incrementInstance();
+
+    /**
+     * Will randomly decrement an instance from the processing units. For more fine
+     * grained control see {@link ProcessingUnitInstance#decrement()}.
+     */
+    void decrementInstance();
+
     /**
      * Returns <code>true</code> if there is a managing GSM for it.
      */
