@@ -20,6 +20,12 @@ public class TestDeployer {
         System.out.println("Deployed space, waiting...");
         procesingUnit.waitFor(4);
         System.out.println("Deployed space");
+
+        System.out.println("Destroying instnace");
+        procesingUnit.getInstances()[0].destroy();
+        System.out.println("Waiting again for all processing unit instances to be up");
+        procesingUnit.waitFor(4);
+
         System.out.println("Undeploying...");
         procesingUnit.undeploy();
         System.out.println("Done");

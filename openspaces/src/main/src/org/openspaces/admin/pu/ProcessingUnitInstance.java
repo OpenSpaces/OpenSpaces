@@ -15,6 +15,8 @@ import java.util.Map;
  */
 public interface ProcessingUnitInstance extends GridComponent, Iterable<ProcessingUnitServiceDetails> {
 
+    void destroy();
+
     int getInstanceId();
 
     int getBackupId();

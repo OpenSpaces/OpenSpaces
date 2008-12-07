@@ -15,9 +15,12 @@ import org.jini.rio.monitor.ProvisionMonitorAdmin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
+import org.openspaces.admin.internal.support.NetworkExceptionHelper;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEventListener;
@@ -144,6 +147,21 @@ public class DefaultGridServiceManager extends AbstractGridComponent implements 
             getGSMAdmin().undeploy(processingUnitName);
         } catch (Exception e) {
             throw new AdminException("Failed to undeploy processing unit [" + processingUnitName + "]");
+        }
+    }
+
+    public void destroyInstance(ProcessingUnitInstance processingUnitInstance) {
+        if (credentials != null && credentials != Credentials.FULL) {
+            throw new AdminException("No credentials to destroy a processing unit instance");
+        }
+        try {
+            ((InternalProcessingUnitInstance) processingUnitInstance).getPUServiceBean().destroy();
+        } catch (Exception e) {
+            if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
+                // all is well
+            } else {
+                throw new AdminException("Faield to destroy procesing unit instance", e);
+            }
         }
     }
 

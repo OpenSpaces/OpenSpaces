@@ -7,6 +7,7 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.pu.container.servicegrid.PUServiceBean;
 
 /**
  * @author kimchy
@@ -29,4 +30,6 @@ public interface InternalProcessingUnitInstance extends ProcessingUnitInstance, 
     void addSpaceInstnaceIfMatching(SpaceInstance spaceInstance);
 
     void removeSpaceInstance(String uid);
+
+    PUServiceBean getPUServiceBean();
 }

@@ -5,6 +5,7 @@ import net.jini.core.lookup.ServiceID;
 import org.jini.rio.monitor.ProvisionMonitorAdmin;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.support.InternalGridComponent;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
 
 /**
  * @author kimchy
@@ -18,4 +19,6 @@ public interface InternalGridServiceManager extends GridServiceManager, Internal
     ProvisionMonitorAdmin getGSMAdmin();
 
     void undeployProcessingUnit(String processingUnitName);
+
+    void destroyInstance(ProcessingUnitInstance processingUnitInstance);
 }

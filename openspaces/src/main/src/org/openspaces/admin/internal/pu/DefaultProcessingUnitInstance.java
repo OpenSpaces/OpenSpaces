@@ -7,8 +7,10 @@ import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.operatingsystem.OSDetails;
 import com.gigaspaces.operatingsystem.OSStatistics;
 import net.jini.core.lookup.ServiceID;
+import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.space.DefaultSpaceInstances;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
 import org.openspaces.admin.internal.space.InternalSpaceInstances;
@@ -186,6 +188,10 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         return this.processingUnitPartition;
     }
 
+    public PUServiceBean getPUServiceBean() {
+        return this.puServiceBean;
+    }
+
     public boolean isEmbeddedSpaces() {
         return spaceInstances.size() != 0;
     }
@@ -229,6 +235,13 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     public Map<String, ProcessingUnitServiceDetails[]> getServiceDetailsByServiceType() {
         return Collections.unmodifiableMap(servicesDetailsByServiceId);
+    }
+
+    public void destroy() {
+        if (!processingUnit.isManaged()) {
+            throw new AdminException("No managing grid service manager for processing unit");
+        }
+        ((InternalGridServiceManager) processingUnit.getManagingGridServiceManager()).destroyInstance(this);
     }
 
     // info providers

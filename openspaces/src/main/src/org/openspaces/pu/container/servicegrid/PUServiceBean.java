@@ -48,4 +48,6 @@ public interface PUServiceBean extends NIOInfoProvider, OSInfoProvider, JVMInfoP
     PUDetails getPUDetails() throws RemoteException;
 
     SpaceMode[] listSpacesModes() throws RemoteException;
+
+    void destroy() throws RemoteException;
 }
