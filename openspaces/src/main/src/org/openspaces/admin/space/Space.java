@@ -71,12 +71,12 @@ public interface Space extends Iterable<SpaceInstance>, StatisticsMonitor {
     /**
      * Returns an aggregated view of all the statistics of the primary instances.
      */
-    SpaceStatistics getPrimaryStatistics();
+    SpaceStatistics getPrimariesStatistics();
 
     /**
      * Returns an aggregated view of all the statistics of the backup instances.
      */
-    SpaceStatistics getBackupStatistics();
+    SpaceStatistics getBackupsStatistics();
 
     SpaceInstanceAddedEventManager getSpaceInstanceAdded();
 

@@ -206,7 +206,7 @@ public class DefaultSpace implements InternalSpace {
         return new DefaultSpaceStatistics(stats.toArray(new SpaceInstanceStatistics[stats.size()]));
     }
 
-    public SpaceStatistics getPrimaryStatistics() {
+    public SpaceStatistics getPrimariesStatistics() {
         List<SpaceInstanceStatistics> stats = new ArrayList<SpaceInstanceStatistics>();
         for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
             if (spaceInstance.getMode() == SpaceMode.PRIMARY) {
@@ -216,7 +216,7 @@ public class DefaultSpace implements InternalSpace {
         return new DefaultSpaceStatistics(stats.toArray(new SpaceInstanceStatistics[stats.size()]));
     }
 
-    public SpaceStatistics getBackupStatistics() {
+    public SpaceStatistics getBackupsStatistics() {
         List<SpaceInstanceStatistics> stats = new ArrayList<SpaceInstanceStatistics>();
         for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
             if (spaceInstance.getMode() == SpaceMode.BACKUP) {

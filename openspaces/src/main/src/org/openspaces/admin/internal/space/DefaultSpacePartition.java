@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.space;
 
+import com.gigaspaces.cluster.activeelection.SpaceMode;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
 
@@ -13,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DefaultSpacePartition implements InternalSpacePartition {
 
     private final Space space;
-    
+
     private final int partitionId;
 
     private final Map<String, SpaceInstance> spaceInstances = new ConcurrentHashMap<String, SpaceInstance>();
@@ -25,6 +26,24 @@ public class DefaultSpacePartition implements InternalSpacePartition {
 
     public Space getSpace() {
         return this.space;
+    }
+
+    public SpaceInstance getPrimary() {
+        for (SpaceInstance spaceInstance : this) {
+            if (spaceInstance.getMode() == SpaceMode.PRIMARY) {
+                return spaceInstance;
+            }
+        }
+        return null;
+    }
+
+    public SpaceInstance getBackup() {
+        for (SpaceInstance spaceInstance : this) {
+            if (spaceInstance.getMode() == SpaceMode.BACKUP) {
+                return spaceInstance;
+            }
+        }
+        return null;
     }
 
     public Iterator<SpaceInstance> iterator() {
