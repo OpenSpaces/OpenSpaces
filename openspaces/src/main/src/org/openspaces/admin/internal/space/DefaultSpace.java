@@ -231,13 +231,18 @@ public class DefaultSpace implements InternalSpace {
         // the first addition (which we make sure is added before the space becomes visible) will
         // cause the parition to initialize
         if (spaceInstancesByUID.size() == 0) {
-            for (int i = 0; i < internalSpaceInstance.getNumberOfInstances(); i++) {
-                spacePartitions.put(i, new DefaultSpacePartition(this, i));
+            if (internalSpaceInstance.getNumberOfBackups() == 0) {
+                // single patition when there is no backup
+                spacePartitions.put(0, new DefaultSpacePartition(this, 0));
+            } else {
+                for (int i = 0; i < internalSpaceInstance.getNumberOfInstances(); i++) {
+                    spacePartitions.put(i, new DefaultSpacePartition(this, i));
+                }
             }
         }
         SpaceInstance existing = spaceInstancesByUID.put(spaceInstance.getUid(), spaceInstance);
         spaceInstancesByMemberName.put(((InternalSpaceInstance) spaceInstance).getSpaceConfig().getFullSpaceName(), spaceInstance);
-        InternalSpacePartition spacePartition = (InternalSpacePartition) spacePartitions.get(spaceInstance.getInstanceId() - 1);
+        InternalSpacePartition spacePartition = getPartition(internalSpaceInstance);
         internalSpaceInstance.setPartition(spacePartition);
         spacePartition.addSpaceInstance(spaceInstance);
 
@@ -263,7 +268,7 @@ public class DefaultSpace implements InternalSpace {
         InternalSpaceInstance spaceInstance = (InternalSpaceInstance) spaceInstancesByUID.remove(uid);
         if (spaceInstance != null) {
             spaceInstance.stopStatisticsMontior();
-            ((InternalSpacePartition) spacePartitions.get(spaceInstance.getInstanceId() - 1)).removeSpaceInstance(uid);
+            getPartition(spaceInstance).removeSpaceInstance(uid);
             spaceInstanceRemovedEventManager.spaceInstanceRemoved(spaceInstance);
             ((InternalSpaceInstanceRemovedEventManager) spaces.getSpaceInstanceRemoved()).spaceInstanceRemoved(spaceInstance);
             Future fetcher = scheduledRuntimeFetchers.get(uid);
@@ -272,6 +277,14 @@ public class DefaultSpace implements InternalSpace {
             }
         }
         return spaceInstance;
+    }
+
+    private InternalSpacePartition getPartition(InternalSpaceInstance spaceInstance) {
+        if (spaceInstance.getNumberOfBackups() == 0) {
+            return (InternalSpacePartition) spacePartitions.get(0);
+        } else {
+            return (InternalSpacePartition) spacePartitions.get(spaceInstance.getInstanceId() - 1);
+        }
     }
 
     // no need to sync since it is synced on Admin
