@@ -26,6 +26,12 @@ public class AdminFactory {
         return this;
     }
 
+    public AdminFactory setCredentials(String username, String password) {
+        admin.setUsername(username);
+        admin.setPassword(password);
+        return this;
+    }
+
     public Admin createAdmin() {
         admin.begin();
         return admin;

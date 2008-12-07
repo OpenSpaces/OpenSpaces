@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.gsm;
 
 import com.gigaspaces.grid.gsm.GSM;
+import com.gigaspaces.grid.security.Credentials;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.jvm.JVMStatistics;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
@@ -25,11 +26,14 @@ public class DefaultGridServiceManager extends AbstractGridComponent implements 
 
     private final ProvisionMonitorAdmin gsmAdmin;
 
-    public DefaultGridServiceManager(ServiceID serviceID, GSM gsm, InternalAdmin admin) throws RemoteException {
+    private final Credentials credentials;
+
+    public DefaultGridServiceManager(ServiceID serviceID, GSM gsm, InternalAdmin admin, Credentials credentials) throws RemoteException {
         super(admin);
         this.serviceID = serviceID;
         this.gsm = gsm;
         this.gsmAdmin = (ProvisionMonitorAdmin) gsm.getAdmin();
+        this.credentials = credentials;
     }
 
     public String getUid() {

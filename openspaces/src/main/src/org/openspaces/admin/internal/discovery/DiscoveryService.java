@@ -2,10 +2,12 @@ package org.openspaces.admin.internal.discovery;
 
 import com.gigaspaces.grid.gsc.GSC;
 import com.gigaspaces.grid.gsm.GSM;
+import com.gigaspaces.grid.security.Credentials;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.operatingsystem.OSDetails;
 import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.SecurityContext;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.SpaceConfig;
 import com.j_spaces.core.client.ISpaceProxy;
@@ -154,7 +156,12 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         ServiceID serviceID = event.getPostEventServiceItem().serviceID;
         if (service instanceof GSM) {
             try {
-                InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, (GSM) service, admin);
+                GSM gsm = (GSM) service;
+                Credentials credentials = null;
+                if (gsm.isSecured()) {
+                    credentials = gsm.authenticate(admin.getUsername(), admin.getPassword());
+                }
+                InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, gsm, admin, credentials);
                 // get the details here, on the thread pool
                 NIODetails nioDetails = gridServiceManager.getNIODetails();
                 OSDetails osDetails = gridServiceManager.getOSDetails();
@@ -165,7 +172,12 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             }
         } else if (service instanceof GSC) {
             try {
-                InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(serviceID, (GSC) service, admin);
+                GSC gsc = (GSC) service;
+                Credentials credentials = null;
+                if (gsc.isSecured()) {
+                    credentials = gsc.authenticate(admin.getUsername(), admin.getPassword());
+                }
+                InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(serviceID, gsc, admin, credentials);
                 // get the details here, on the thread pool
                 NIODetails nioDetails = gridServiceContainer.getNIODetails();
                 OSDetails osDetails = gridServiceContainer.getOSDetails();
@@ -188,9 +200,22 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             }
         } else if (service instanceof IJSpace) {
             try {
+                SecurityContext securityContext = null;
+                if (admin.getUsername() != null) {
+                    securityContext = new SecurityContext(admin.getUsername(), admin.getPassword());
+                }
                 IJSpace clusteredIjspace = (IJSpace) service;
+                if (securityContext != null) {
+                    clusteredIjspace.setSecurityContext(securityContext);
+                }
+
                 IJSpace direcyIjspace = ((ISpaceProxy) clusteredIjspace).getClusterMember();
+                if (securityContext != null) {
+                    direcyIjspace.setSecurityContext(securityContext);
+                }
+                
                 IInternalRemoteJSpaceAdmin spaceAdmin = (IInternalRemoteJSpaceAdmin) direcyIjspace.getAdmin();
+
                 SpaceConfig spaceConfig = spaceAdmin.getConfig();
                 InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(serviceID, direcyIjspace, spaceAdmin, spaceConfig, admin);
                 NIODetails nioDetails = spaceInstance.getNIODetails();
