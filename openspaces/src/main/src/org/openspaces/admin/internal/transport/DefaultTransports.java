@@ -9,7 +9,9 @@ import org.openspaces.admin.internal.transport.events.DefaultTransportsStatistic
 import org.openspaces.admin.internal.transport.events.InternalTransportStatisticsChangedEventManager;
 import org.openspaces.admin.internal.transport.events.InternalTransportsStatisticsChangedEventManager;
 import org.openspaces.admin.transport.Transport;
+import org.openspaces.admin.transport.TransportDetails;
 import org.openspaces.admin.transport.TransportStatistics;
+import org.openspaces.admin.transport.TransportsDetails;
 import org.openspaces.admin.transport.TransportsStatistics;
 import org.openspaces.admin.transport.events.TransportStatisticsChangedEventManager;
 import org.openspaces.admin.transport.events.TransportsStatisticsChangedEvent;
@@ -39,7 +41,11 @@ public class DefaultTransports implements InternalTransports {
 
     private final InternalTransportsStatisticsChangedEventManager transportsStatisticsChangedEventManager;
 
-    private volatile long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
+    private long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
+
+    private long lastStatisticsTimestamp = 0;
+
+    private TransportsStatistics lastStatistics;
 
     private Future scheduledStatisticsMonitor;
 
@@ -89,12 +95,29 @@ public class DefaultTransports implements InternalTransports {
         return transportsByUID.size();
     }
 
-    public TransportsStatistics getStatistics() {
+    public TransportsDetails getDetails() {
+        List<TransportDetails> details = new ArrayList<TransportDetails>();
+        for (Transport transport : transportsByUID.values()) {
+            details.add(transport.getDetails());
+        }
+        return new DefaultTransportsDetails(details.toArray(new TransportDetails[details.size()]));
+    }
+
+    public synchronized TransportsStatistics getStatistics() {
+        long currentTime = System.currentTimeMillis();
+        if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
+            return lastStatistics;
+        }
+        lastStatisticsTimestamp = currentTime;
         List<TransportStatistics> stats = new ArrayList<TransportStatistics>();
+        List<TransportDetails> details = new ArrayList<TransportDetails>();
         for (Transport transport : transportsByUID.values()) {
             stats.add(transport.getStatistics());
+            details.add(transport.getDetails());
         }
-        return new DefaultTransportsStatistics(stats.toArray(new TransportStatistics[stats.size()]));
+        lastStatistics = new DefaultTransportsStatistics(stats.toArray(new TransportStatistics[stats.size()]), lastStatistics,
+                new DefaultTransportsDetails(details.toArray(new TransportDetails[details.size()])));
+        return lastStatistics;
     }
 
     public synchronized void setStatisticsInterval(long interval, TimeUnit timeUnit) {

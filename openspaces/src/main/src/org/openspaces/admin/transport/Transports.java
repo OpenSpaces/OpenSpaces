@@ -20,6 +20,8 @@ public interface Transports extends Iterable<Transport>, AdminAware, StatisticsM
 
     int size();
 
+    TransportsDetails getDetails();
+
     TransportsStatistics getStatistics();
 
     TransportStatisticsChangedEventManager getTransportStatisticsChanged();

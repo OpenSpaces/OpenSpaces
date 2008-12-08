@@ -2,6 +2,7 @@ package org.openspaces.admin.samples;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
+import org.openspaces.admin.transport.Transport;
 import org.openspaces.admin.vm.VirtualMachine;
 
 /**
@@ -86,6 +87,10 @@ public class TestSampler {
 //                        }
 //                    }
 //                }
+                System.out.println("Transport TOTAL: ActiveThreads [" + admin.getTransports().getStatistics().getActiveThreadsCount() + "], CompletedTaskPerSecond [" + admin.getTransports().getStatistics().getCompletedTaskPerSecond() + "]");
+                for (Transport transport : admin.getTransports()) {
+                    System.out.println("Transport [" + transport.getUid() + "] ActiveThreads [" + transport.getStatistics().getActiveThreadsCount() + "], CompletedTaskPerSecond [" + transport.getStatistics().getCompletedTaskPerSecond() + "]");
+                }
                 System.out.println("*********************************************************************");
             } catch (Exception e) {
                 e.printStackTrace();

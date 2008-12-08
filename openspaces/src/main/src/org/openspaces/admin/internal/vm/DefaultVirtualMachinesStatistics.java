@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.vm;
 
+import org.openspaces.admin.support.StatisticsUtils;
 import org.openspaces.admin.vm.VirtualMachineStatistics;
 import org.openspaces.admin.vm.VirtualMachinesDetails;
 import org.openspaces.admin.vm.VirtualMachinesStatistics;
@@ -77,11 +78,11 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
     }
 
     public double getMemoryHeapPerc() {
-        return ((double) getMemoryHeapUsed()) / getDetails().getMemoryHeapMax() * 100;
+        return StatisticsUtils.computePerc(getMemoryHeapUsed(), getDetails().getMemoryHeapMax());
     }
 
     public double getMemoryHeapCommittedPerc() {
-        return ((double) getMemoryHeapUsed()) / getMemoryHeapCommitted() * 100;
+        return StatisticsUtils.computePerc(getMemoryHeapUsed(), getMemoryHeapCommitted());
     }
 
     public long getMemoryNonHeapCommitted() {
@@ -101,11 +102,11 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
     }
 
     public double getMemoryNonHeapPerc() {
-        return ((double) getMemoryNonHeapUsed()) / getDetails().getMemoryNonHeapMax() * 100;
+        return StatisticsUtils.computePerc(getMemoryNonHeapUsed(), getDetails().getMemoryNonHeapMax());
     }
 
     public double getMemoryNonHeapCommittedPerc() {
-        return ((double) getMemoryNonHeapUsed()) / getMemoryNonHeapCommitted() * 100;
+        return StatisticsUtils.computePerc(getMemoryNonHeapUsed(), getMemoryNonHeapCommitted());
     }
 
     public int getThreadCount() {

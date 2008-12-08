@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.vm;
 
 import com.gigaspaces.jvm.JVMStatistics;
+import org.openspaces.admin.support.StatisticsUtils;
 import org.openspaces.admin.vm.VirtualMachineDetails;
 import org.openspaces.admin.vm.VirtualMachineStatistics;
 
@@ -66,14 +67,14 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
         if (previousStats == null) {
             return -1;
         }
-        return ((double) getMemoryHeapUsed()) / getDetails().getMemoryHeapMax() * 100;
+        return StatisticsUtils.computePerc(getMemoryHeapUsed(), getDetails().getMemoryHeapMax());
     }
 
     public double getMemoryHeapCommittedPerc() {
         if (previousStats == null) {
             return -1;
         }
-        return ((double) getMemoryHeapUsed()) / getMemoryHeapCommitted() * 100;
+        return StatisticsUtils.computePerc(getMemoryHeapUsed(), getMemoryHeapCommitted());
     }
 
     public long getMemoryNonHeapCommitted() {
@@ -88,14 +89,14 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
         if (previousStats == null) {
             return -1;
         }
-        return ((double) getMemoryNonHeapUsed()) / getDetails().getMemoryNonHeapMax() * 100;
+        return StatisticsUtils.computePerc(getMemoryNonHeapUsed(), getDetails().getMemoryNonHeapMax());
     }
 
     public double getMemoryNonHeapCommittedPerc() {
         if (previousStats == null) {
             return -1;
         }
-        return ((double) getMemoryNonHeapUsed()) / getMemoryNonHeapCommitted() * 100;
+        return StatisticsUtils.computePerc(getMemoryNonHeapUsed(), getMemoryNonHeapCommitted());
     }
 
     public int getThreadCount() {
@@ -118,6 +119,6 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
         if (previousStats == null) {
             return -1;
         }
-        return ((double)(getGcCollectionTime() - previousStats.getGcCollectionTime())) / (getTimestamp() - getPreviousTimestamp());
+        return StatisticsUtils.computePercByTime(getGcCollectionTime(), previousStats.getGcCollectionTime(), getTimestamp(), getPreviousTimestamp());
     }
 }

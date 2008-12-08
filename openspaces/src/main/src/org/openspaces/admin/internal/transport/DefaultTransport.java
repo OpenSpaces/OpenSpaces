@@ -109,11 +109,12 @@ public class DefaultTransport implements InternalTransport {
         if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
             return lastStatistics;
         }
+        TransportStatistics previousStats = lastStatistics;
         lastStatistics = NA_TRANSPORT_STATS;
         lastStatisticsTimestamp = currentTime;
         for (InternalTransportInfoProvider provider : transportInfoProviders) {
             try {
-                lastStatistics = new DefaultTransportStatistics(provider.getNIOStatistics());
+                lastStatistics = new DefaultTransportStatistics(provider.getNIOStatistics(), previousStats, getDetails());
             } catch (RemoteException e) {
                 // failed to get it, try next one
             }

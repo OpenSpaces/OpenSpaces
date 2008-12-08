@@ -9,9 +9,19 @@ public interface TransportStatistics {
 
     long getTimestamp();
 
+    long getPreviousTimestamp();
+
+    TransportDetails getDetails();
+
+    TransportStatistics getPrevious();
+
     long getCompletedTaskCount();
 
+    double getCompletedTaskPerSecond();
+
     int getActiveThreadsCount();
+
+    double getActiveThreadsPerc();
 
     int getQueueSize();
 }
