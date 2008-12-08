@@ -17,6 +17,8 @@ public interface VirtualMachines extends AdminAware, Iterable<VirtualMachine>, S
 
     VirtualMachine[] getVirtualMachines();
 
+    VirtualMachinesDetails getDetails();
+
     VirtualMachinesStatistics getStatistics();
 
     VirtualMachine getVirtualMachineByUID(String uid);

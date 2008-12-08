@@ -13,7 +13,9 @@ import org.openspaces.admin.internal.vm.events.InternalVirtualMachineRemovedEven
 import org.openspaces.admin.internal.vm.events.InternalVirtualMachineStatisticsChangedEventManager;
 import org.openspaces.admin.internal.vm.events.InternalVirtualMachinesStatisticsChangedEventManager;
 import org.openspaces.admin.vm.VirtualMachine;
+import org.openspaces.admin.vm.VirtualMachineDetails;
 import org.openspaces.admin.vm.VirtualMachineStatistics;
+import org.openspaces.admin.vm.VirtualMachinesDetails;
 import org.openspaces.admin.vm.VirtualMachinesStatistics;
 import org.openspaces.admin.vm.events.VirtualMachineAddedEventManager;
 import org.openspaces.admin.vm.events.VirtualMachineLifecycleEventListener;
@@ -96,11 +98,22 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
     }
 
     public VirtualMachinesStatistics getStatistics() {
+        List<VirtualMachineDetails> details = new ArrayList<VirtualMachineDetails>();
         List<VirtualMachineStatistics> stats = new ArrayList<VirtualMachineStatistics>();
         for (VirtualMachine virtualMachine : virtualMachinesByUID.values()) {
             stats.add(virtualMachine.getStatistics());
+            details.add(virtualMachine.getDetails());
         }
-        return new DefaultVirtualMachinesStatistics(stats.toArray(new VirtualMachineStatistics[stats.size()]));
+        return new DefaultVirtualMachinesStatistics(stats.toArray(new VirtualMachineStatistics[stats.size()]),
+                new DefaultVirtualMachinesDetails(details.toArray(new VirtualMachineDetails[details.size()])));
+    }
+
+    public VirtualMachinesDetails getDetails() {
+        List<VirtualMachineDetails> details = new ArrayList<VirtualMachineDetails>();
+        for (VirtualMachine virtualMachine : virtualMachinesByUID.values()) {
+            details.add(virtualMachine.getDetails());
+        }
+        return new DefaultVirtualMachinesDetails(details.toArray(new VirtualMachineDetails[details.size()]));
     }
 
     public synchronized void setStatisticsInterval(long interval, TimeUnit timeUnit) {

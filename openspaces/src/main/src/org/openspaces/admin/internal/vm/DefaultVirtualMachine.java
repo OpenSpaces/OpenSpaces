@@ -205,11 +205,12 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
         if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
             return lastStatistics;
         }
+        VirtualMachineStatistics previousStatistics = lastStatistics;
         lastStatistics = NA_STATS;
         lastStatisticsTimestamp = currentTime;
         for (InternalVirtualMachineInfoProvider provider : virtualMachineInfoProviders) {
             try {
-                lastStatistics = new DefaultVirtualMachineStatistics(provider.getJVMStatistics());
+                lastStatistics = new DefaultVirtualMachineStatistics(provider.getJVMStatistics(), previousStatistics, getDetails());
                 break;
             } catch (RemoteException e) {
                 // continue to the next one

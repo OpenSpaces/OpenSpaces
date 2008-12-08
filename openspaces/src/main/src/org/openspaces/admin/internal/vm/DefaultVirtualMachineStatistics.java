@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.vm;
 
 import com.gigaspaces.jvm.JVMStatistics;
+import org.openspaces.admin.vm.VirtualMachineDetails;
 import org.openspaces.admin.vm.VirtualMachineStatistics;
 
 /**
@@ -12,12 +13,18 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
 
     private final JVMStatistics stats;
 
+    private final VirtualMachineDetails details;
+
+    private final VirtualMachineStatistics previousStats;
+
     public DefaultVirtualMachineStatistics() {
-        this.stats = NA_STATS;
+        this(NA_STATS, null, null);
     }
 
-    public DefaultVirtualMachineStatistics(JVMStatistics stats) {
+    public DefaultVirtualMachineStatistics(JVMStatistics stats, VirtualMachineStatistics previousStats, VirtualMachineDetails details) {
         this.stats = stats;
+        this.previousStats = previousStats;
+        this.details = details;
     }
 
     public boolean isNA() {
@@ -26,6 +33,21 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
 
     public long getTimestamp() {
         return stats.getTimestamp();
+    }
+
+    public VirtualMachineDetails getDetails() {
+        return this.details;
+    }
+
+    public VirtualMachineStatistics getPrevious() {
+        return previousStats;
+    }
+
+    public long getPreviousTimestamp() {
+        if (previousStats == null) {
+            return -1;
+        }
+        return previousStats.getTimestamp();
     }
 
     public long getUptime() {
@@ -40,12 +62,40 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
         return stats.getMemoryHeapUsed();
     }
 
+    public double getMemoryHeapPerc() {
+        if (previousStats == null) {
+            return -1;
+        }
+        return ((double) getMemoryHeapUsed()) / getDetails().getMemoryHeapMax() * 100;
+    }
+
+    public double getMemoryHeapCommittedPerc() {
+        if (previousStats == null) {
+            return -1;
+        }
+        return ((double) getMemoryHeapUsed()) / getMemoryHeapCommitted() * 100;
+    }
+
     public long getMemoryNonHeapCommitted() {
         return stats.getMemoryNonHeapCommitted();
     }
 
     public long getMemoryNonHeapUsed() {
         return stats.getMemoryNonHeapUsed();
+    }
+
+    public double getMemoryNonHeapPerc() {
+        if (previousStats == null) {
+            return -1;
+        }
+        return ((double) getMemoryNonHeapUsed()) / getDetails().getMemoryNonHeapMax() * 100;
+    }
+
+    public double getMemoryNonHeapCommittedPerc() {
+        if (previousStats == null) {
+            return -1;
+        }
+        return ((double) getMemoryNonHeapUsed()) / getMemoryNonHeapCommitted() * 100;
     }
 
     public int getThreadCount() {
@@ -62,5 +112,12 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
 
     public long getGcCollectionTime() {
         return stats.getGcCollectionTime();
+    }
+
+    public double getGcCollectionPerc() {
+        if (previousStats == null) {
+            return -1;
+        }
+        return ((double)(getGcCollectionTime() - previousStats.getGcCollectionTime())) / (getTimestamp() - getPreviousTimestamp());
     }
 }

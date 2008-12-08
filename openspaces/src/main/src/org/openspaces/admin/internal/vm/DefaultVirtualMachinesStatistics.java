@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.vm;
 
 import org.openspaces.admin.vm.VirtualMachineStatistics;
+import org.openspaces.admin.vm.VirtualMachinesDetails;
 import org.openspaces.admin.vm.VirtualMachinesStatistics;
 
 /**
@@ -12,9 +13,12 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
 
     private final VirtualMachineStatistics[] virutualMachinesStatistics;
 
-    public DefaultVirtualMachinesStatistics(VirtualMachineStatistics[] virutualMachinesStatistics) {
+    private final VirtualMachinesDetails details;
+
+    public DefaultVirtualMachinesStatistics(VirtualMachineStatistics[] virutualMachinesStatistics, VirtualMachinesDetails details) {
         this.timestamp = System.currentTimeMillis();
         this.virutualMachinesStatistics = virutualMachinesStatistics;
+        this.details = details;
     }
 
     public boolean isNA() {
@@ -27,6 +31,10 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
 
     public int getSize() {
         return virutualMachinesStatistics.length;
+    }
+
+    public VirtualMachinesDetails getDetails() {
+        return this.details;
     }
 
     public long getUptime() {
@@ -53,6 +61,14 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
         return total;
     }
 
+    public double getMemoryHeapPerc() {
+        return ((double) getMemoryHeapUsed()) / getDetails().getMemoryHeapMax() * 100;
+    }
+
+    public double getMemoryHeapCommittedPerc() {
+        return ((double) getMemoryHeapUsed()) / getMemoryHeapCommitted() * 100;
+    }
+
     public long getMemoryNonHeapCommitted() {
         long total = 0;
         for (VirtualMachineStatistics stats : virutualMachinesStatistics) {
@@ -67,6 +83,14 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
             total += stats.getMemoryNonHeapUsed();
         }
         return total;
+    }
+
+    public double getMemoryNonHeapPerc() {
+        return ((double) getMemoryNonHeapUsed()) / getDetails().getMemoryNonHeapMax() * 100;
+    }
+
+    public double getMemoryNonHeapCommittedPerc() {
+        return ((double) getMemoryNonHeapUsed()) / getMemoryNonHeapCommitted() * 100;
     }
 
     public int getThreadCount() {
@@ -99,5 +123,18 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
             total += stats.getGcCollectionTime();
         }
         return total;
+    }
+
+    public double getGcCollectionPerc() {
+        double total = 0;
+        int size = 0;
+        for (VirtualMachineStatistics stats : virutualMachinesStatistics) {
+            double perc = stats.getGcCollectionPerc();
+            if (perc != -1) {
+                total += perc;
+                size++;
+            }
+        }
+        return total / size;
     }
 }
