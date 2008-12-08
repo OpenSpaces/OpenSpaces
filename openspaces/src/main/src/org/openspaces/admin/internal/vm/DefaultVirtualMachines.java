@@ -49,7 +49,7 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
 
     private final InternalVirtualMachinesStatisticsChangedEventManager virtualMachinesStatisticsChangedEventManager;
 
-    private volatile long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
+    private long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
     private long lastStatisticsTimestamp = 0;
 
