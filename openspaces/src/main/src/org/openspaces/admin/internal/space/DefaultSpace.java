@@ -74,6 +74,10 @@ public class DefaultSpace implements InternalSpace {
 
     private volatile long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
+    private long lastStatisticsTimestamp = 0;
+
+    private SpaceStatistics lastStatistics;
+
     private Future scheduledStatisticsMonitor;
 
     public DefaultSpace(InternalSpaces spaces, String uid, String name, IJSpace clusteredSpace) {
@@ -198,12 +202,18 @@ public class DefaultSpace implements InternalSpace {
         return this.instanceStatisticsChangedEventManager;
     }
 
-    public SpaceStatistics getStatistics() {
+    public synchronized SpaceStatistics getStatistics() {
+        long currentTime = System.currentTimeMillis();
+        if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
+            return lastStatistics;
+        }
+        lastStatisticsTimestamp = currentTime;
         List<SpaceInstanceStatistics> stats = new ArrayList<SpaceInstanceStatistics>();
         for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
             stats.add(spaceInstance.getStatistics());
         }
-        return new DefaultSpaceStatistics(stats.toArray(new SpaceInstanceStatistics[stats.size()]));
+        lastStatistics = new DefaultSpaceStatistics(stats.toArray(new SpaceInstanceStatistics[stats.size()]));
+        return lastStatistics;
     }
 
     public SpaceStatistics getPrimariesStatistics() {
