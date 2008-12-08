@@ -20,6 +20,8 @@ public interface OperatingSystems extends Iterable<OperatingSystem>, AdminAware,
 
     int size();
 
+    OperatingSystemsDetails getDetails();
+
     OperatingSystemsStatistics getStatistics();
 
     OperatingSystemsStatisticsChangedEventManager getStatisticsChanged();

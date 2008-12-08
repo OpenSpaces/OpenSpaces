@@ -9,7 +9,9 @@ import org.openspaces.admin.internal.os.events.DefaultOperatingSystemsStatistics
 import org.openspaces.admin.internal.os.events.InternalOperatingSystemStatisticsChangedEventManager;
 import org.openspaces.admin.internal.os.events.InternalOperatingSystemsStatisticsChangedEventManager;
 import org.openspaces.admin.os.OperatingSystem;
+import org.openspaces.admin.os.OperatingSystemDetails;
 import org.openspaces.admin.os.OperatingSystemStatistics;
+import org.openspaces.admin.os.OperatingSystemsDetails;
 import org.openspaces.admin.os.OperatingSystemsStatistics;
 import org.openspaces.admin.os.events.OperatingSystemStatisticsChangedEventManager;
 import org.openspaces.admin.os.events.OperatingSystemsStatisticsChangedEvent;
@@ -38,6 +40,10 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
 
     private volatile long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
+    private long lastStatisticsTimestamp = 0;
+
+    private OperatingSystemsStatistics lastStatistics;
+
     private Future scheduledStatisticsMonitor;
 
     public DefaultOperatingSystems(InternalAdmin admin) {
@@ -63,12 +69,26 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
         return operatingSystemsByUID.size();
     }
 
-    public OperatingSystemsStatistics getStatistics() {
+    public OperatingSystemsDetails getDetails() {
+        List<OperatingSystemDetails> details = new ArrayList<OperatingSystemDetails>();
+        for (OperatingSystem os : operatingSystemsByUID.values()) {
+            details.add(os.getDetails());
+        }
+        return new DefaultOperatingSystemsDetails(details.toArray(new OperatingSystemDetails[details.size()]));
+    }
+
+    public synchronized OperatingSystemsStatistics getStatistics() {
+        long currentTime = System.currentTimeMillis();
+        if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
+            return lastStatistics;
+        }
+        lastStatisticsTimestamp = currentTime;
         List<OperatingSystemStatistics> stats = new ArrayList<OperatingSystemStatistics>();
         for (OperatingSystem os : operatingSystemsByUID.values()) {
             stats.add(os.getStatistics());
         }
-        return new DefaultOperatingSystemsStatistics(stats.toArray(new OperatingSystemStatistics[stats.size()]));
+        lastStatistics = new DefaultOperatingSystemsStatistics(stats.toArray(new OperatingSystemStatistics[stats.size()]));
+        return lastStatistics; 
     }
 
     public synchronized void setStatisticsInterval(long interval, TimeUnit timeUnit) {
