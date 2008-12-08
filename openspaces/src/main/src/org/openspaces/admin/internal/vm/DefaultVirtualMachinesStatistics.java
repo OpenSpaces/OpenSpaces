@@ -64,7 +64,9 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
     public long getMemoryHeapCommitted() {
         long total = 0;
         for (VirtualMachineStatistics stats : virutualMachinesStatistics) {
-            total += stats.getMemoryHeapCommitted();
+            if (!stats.isNA()) {
+                total += stats.getMemoryHeapCommitted();
+            }
         }
         return total;
     }
@@ -72,7 +74,9 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
     public long getMemoryHeapUsed() {
         long total = 0;
         for (VirtualMachineStatistics stats : virutualMachinesStatistics) {
-            total += stats.getMemoryHeapUsed();
+            if (!stats.isNA()) {
+                total += stats.getMemoryHeapUsed();
+            }
         }
         return total;
     }
@@ -88,7 +92,9 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
     public long getMemoryNonHeapCommitted() {
         long total = 0;
         for (VirtualMachineStatistics stats : virutualMachinesStatistics) {
-            total += stats.getMemoryNonHeapCommitted();
+            if (!stats.isNA()) {
+                total += stats.getMemoryNonHeapCommitted();
+            }
         }
         return total;
     }
@@ -96,7 +102,9 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
     public long getMemoryNonHeapUsed() {
         long total = 0;
         for (VirtualMachineStatistics stats : virutualMachinesStatistics) {
-            total += stats.getMemoryNonHeapUsed();
+            if (!stats.isNA()) {
+                total += stats.getMemoryNonHeapUsed();
+            }
         }
         return total;
     }
@@ -112,7 +120,9 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
     public int getThreadCount() {
         int total = 0;
         for (VirtualMachineStatistics stats : virutualMachinesStatistics) {
-            total += stats.getThreadCount();
+            if (!stats.isNA()) {
+                total += stats.getThreadCount();
+            }
         }
         return total;
     }
@@ -120,7 +130,9 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
     public int getPeakThreadCount() {
         int total = 0;
         for (VirtualMachineStatistics stats : virutualMachinesStatistics) {
-            total += stats.getPeakThreadCount();
+            if (!stats.isNA()) {
+                total += stats.getPeakThreadCount();
+            }
         }
         return total;
     }
@@ -128,7 +140,9 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
     public long getGcCollectionCount() {
         long total = 0;
         for (VirtualMachineStatistics stats : virutualMachinesStatistics) {
-            total += stats.getGcCollectionCount();
+            if (!stats.isNA()) {
+                total += stats.getGcCollectionCount();
+            }
         }
         return total;
     }
@@ -136,7 +150,9 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
     public long getGcCollectionTime() {
         long total = 0;
         for (VirtualMachineStatistics stats : virutualMachinesStatistics) {
-            total += stats.getGcCollectionTime();
+            if (!stats.isNA()) {
+                total += stats.getGcCollectionTime();
+            }
         }
         return total;
     }

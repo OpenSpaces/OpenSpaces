@@ -73,7 +73,9 @@ public class DefaultTransportsStatistics implements TransportsStatistics {
     public int getActiveThreadsCount() {
         int total = 0;
         for (TransportStatistics stat : stats) {
-            total += stat.getActiveThreadsCount();
+            if (!stat.isNA()) {
+                total += stat.getActiveThreadsCount();
+            }
         }
         return total;
     }
@@ -97,7 +99,9 @@ public class DefaultTransportsStatistics implements TransportsStatistics {
     public int getQueueSize() {
         int total = 0;
         for (TransportStatistics stat : stats) {
-            total += stat.getQueueSize();
+            if (!stat.isNA()) {
+                total += stat.getQueueSize();
+            }
         }
         return total;
     }
