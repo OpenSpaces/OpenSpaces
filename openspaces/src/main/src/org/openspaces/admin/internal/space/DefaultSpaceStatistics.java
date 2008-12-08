@@ -77,26 +77,26 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
-    public long getReadMultipleCount() {
-        long total = 0;
-        for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getReadMultipleCount();
-        }
-        return total;
-    }
-
-    public long getTakeMultipleCount() {
-        long total = 0;
-        for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getTakeMultipleCount();
-        }
-        return total;
-    }
-
     public long getNotifyTriggerCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
             total += stat.getNotifyTriggerCount();
+        }
+        return total;
+    }
+
+    public long getNotifyAckCount() {
+        long total = 0;
+        for (SpaceInstanceStatistics stat : stats) {
+            total += stat.getNotifyAckCount();
+        }
+        return total;
+    }
+
+    public long getExecuteCount() {
+        long total = 0;
+        for (SpaceInstanceStatistics stat : stats) {
+            total += stat.getExecuteCount();
         }
         return total;
     }

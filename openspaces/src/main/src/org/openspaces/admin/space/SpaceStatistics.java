@@ -23,11 +23,11 @@ public interface SpaceStatistics {
 
     long getUpdateCount();
 
-    long getReadMultipleCount();
-
-    long getTakeMultipleCount();
-
     long getNotifyTriggerCount();
+
+    long getNotifyAckCount();
+
+    long getExecuteCount();
 
     /**
      * Remove happens when an entry is removed due to lease expiration or lease cancel.

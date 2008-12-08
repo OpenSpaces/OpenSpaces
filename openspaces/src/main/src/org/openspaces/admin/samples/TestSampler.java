@@ -2,8 +2,8 @@ package org.openspaces.admin.samples;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
-import org.openspaces.admin.transport.Transport;
-import org.openspaces.admin.vm.VirtualMachine;
+import org.openspaces.admin.space.Space;
+import org.openspaces.admin.space.SpaceInstance;
 
 /**
  * @author kimchy
@@ -30,9 +30,9 @@ public class TestSampler {
 //                    }
 //                }
 //                System.out.println("VM TOTAL STATS: Heap Committed [" + admin.getVirtualMachines().getStatistics().getMemoryHeapCommitted() +"]");
-                System.out.println("VM TOTAL STATS: GC PERC [" + admin.getVirtualMachines().getStatistics().getGcCollectionPerc() + "], Heap Used [" + admin.getVirtualMachines().getStatistics().getMemoryHeapPerc() + "%]");
-                for (VirtualMachine virtualMachine : admin.getVirtualMachines()) {
-                    System.out.println("VM [" + virtualMachine.getUid() + "] on host [" + virtualMachine.getMachine().getHost() + "] GC Perc [" + virtualMachine.getStatistics().getGcCollectionPerc() + "], Head Usage [" + virtualMachine.getStatistics().getMemoryHeapPerc() + "%]");
+//                System.out.println("VM TOTAL STATS: GC PERC [" + admin.getVirtualMachines().getStatistics().getGcCollectionPerc() + "], Heap Used [" + admin.getVirtualMachines().getStatistics().getMemoryHeapPerc() + "%]");
+//                for (VirtualMachine virtualMachine : admin.getVirtualMachines()) {
+//                    System.out.println("VM [" + virtualMachine.getUid() + "] on host [" + virtualMachine.getMachine().getHost() + "] GC Perc [" + virtualMachine.getStatistics().getGcCollectionPerc() + "], Head Usage [" + virtualMachine.getStatistics().getMemoryHeapPerc() + "%]");
 //                    for (ProcessingUnitInstance processingUnitInstance : virtualMachine.getProcessingUnitInstances()) {
 //                        System.out.println("   -> PU [" + processingUnitInstance.getUid() + "]");
 //                    }
@@ -48,7 +48,7 @@ public class TestSampler {
 //                    for (ProcessingUnitInstance processingUnitInstance : machine.getProcessingUnitInstances()) {
 //                        System.out.println("   -> PU [" + processingUnitInstance.getUid() + "]");
 //                    }
-                }
+//                }
 //                for (ProcessingUnit processingUnit : admin.getProcessingUnits()) {
 //                    System.out.println("Processing Unit: " + processingUnit.getName() + " status: " + processingUnit.getStatus());
 //                    if (processingUnit.isManaged()) {
@@ -72,25 +72,25 @@ public class TestSampler {
 //                        }
 //                    }
 //                }
-//                for (Space space : admin.getSpaces()) {
-//                    System.out.println("Space [" + space.getUid() + "] numberOfInstances [" + space.getNumberOfInstances() + "] numberOfbackups [" + space.getNumberOfBackups() + "]");
-//                    for (SpaceInstance spaceInstance : space) {
-//                        System.out.println("   -> INSTANCE [" + spaceInstance.getUid() + "] instanceId [" + spaceInstance.getInstanceId() +
-//                                "] backupId [" + spaceInstance.getBackupId() + "] Partiton [" + spaceInstance.getPartition().getPartitiondId() + "]");
-//                        System.out.println("         -> Host: " + spaceInstance.getMachine().getHost());
-//                        System.out.println("         -> Stats: Write [" + spaceInstance.getStatistics().getWriteCount() + "], Read [" + spaceInstance.getStatistics().getReadCount() + "]");
-//                    }
+                for (Space space : admin.getSpaces()) {
+                    System.out.println("Space [" + space.getUid() + "] numberOfInstances [" + space.getNumberOfInstances() + "] numberOfbackups [" + space.getNumberOfBackups() + "]");
+                    for (SpaceInstance spaceInstance : space) {
+                        System.out.println("   -> INSTANCE [" + spaceInstance.getUid() + "] instanceId [" + spaceInstance.getInstanceId() +
+                                "] backupId [" + spaceInstance.getBackupId() + "] Partiton [" + spaceInstance.getPartition().getPartitiondId() + "]");
+                        System.out.println("         -> Host: " + spaceInstance.getMachine().getHost());
+                        System.out.println("         -> Stats: Write [" + spaceInstance.getStatistics().getWriteCount() + "/" + spaceInstance.getStatistics().getWritePerSecond() + "], Take [" + spaceInstance.getStatistics().getTakeCount() + "/" + spaceInstance.getStatistics().getTakePerSecond() + "]");
+                    }
 //                    for (SpacePartition spacePartition : space.getPartitions()) {
 //                        System.out.println("   -> Partition [" + spacePartition.getPartitiondId() + "]");
 //                        for (SpaceInstance spaceInstance : spacePartition) {
 //                            System.out.println("      -> INSTANCE [" + spaceInstance.getUid() + "]");
 //                        }
 //                    }
-//                }
-                System.out.println("Transport TOTAL: ActiveThreads [" + admin.getTransports().getStatistics().getActiveThreadsCount() + "], CompletedTaskPerSecond [" + admin.getTransports().getStatistics().getCompletedTaskPerSecond() + "]");
-                for (Transport transport : admin.getTransports()) {
-                    System.out.println("Transport [" + transport.getUid() + "] ActiveThreads [" + transport.getStatistics().getActiveThreadsCount() + "], CompletedTaskPerSecond [" + transport.getStatistics().getCompletedTaskPerSecond() + "]");
                 }
+//                System.out.println("Transport TOTAL: ActiveThreads [" + admin.getTransports().getStatistics().getActiveThreadsCount() + "], CompletedTaskPerSecond [" + admin.getTransports().getStatistics().getCompletedTaskPerSecond() + "]");
+//                for (Transport transport : admin.getTransports()) {
+//                    System.out.println("Transport [" + transport.getUid() + "] ActiveThreads [" + transport.getStatistics().getActiveThreadsCount() + "], CompletedTaskPerSecond [" + transport.getStatistics().getCompletedTaskPerSecond() + "]");
+//                }
                 System.out.println("*********************************************************************");
             } catch (Exception e) {
                 e.printStackTrace();
