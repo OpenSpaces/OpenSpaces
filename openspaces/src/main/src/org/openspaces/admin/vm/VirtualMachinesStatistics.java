@@ -9,6 +9,10 @@ public interface VirtualMachinesStatistics {
 
     long getTimestamp();
 
+    long getPreviousTimestamp();
+
+    VirtualMachinesStatistics getPrevious();
+
     VirtualMachinesDetails getDetails();
 
     int getSize();

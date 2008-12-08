@@ -29,6 +29,7 @@ public class TestSampler {
 //                    }
 //                }
 //                System.out.println("VM TOTAL STATS: Heap Committed [" + admin.getVirtualMachines().getStatistics().getMemoryHeapCommitted() +"]");
+                System.out.println("VM TOTAL STATS: GC PERC [" + admin.getVirtualMachines().getStatistics().getGcCollectionPerc() + "], Heap Used [" + admin.getVirtualMachines().getStatistics().getMemoryHeapPerc() + "%]");
                 for (VirtualMachine virtualMachine : admin.getVirtualMachines()) {
                     System.out.println("VM [" + virtualMachine.getUid() + "] on host [" + virtualMachine.getMachine().getHost() + "] GC Perc [" + virtualMachine.getStatistics().getGcCollectionPerc() + "], Head Usage [" + virtualMachine.getStatistics().getMemoryHeapPerc() + "%]");
 //                    for (ProcessingUnitInstance processingUnitInstance : virtualMachine.getProcessingUnitInstances()) {

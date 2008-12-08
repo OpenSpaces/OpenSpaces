@@ -51,6 +51,10 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
 
     private volatile long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
+    private long lastStatisticsTimestamp = 0;
+
+    private VirtualMachinesStatistics lastStatistics;
+    
     private Future scheduledStatisticsMonitor;
 
     public DefaultVirtualMachines(InternalAdmin admin) {
@@ -97,15 +101,22 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
         return virtualMachinesByUID.size() == 0;
     }
 
-    public VirtualMachinesStatistics getStatistics() {
+    public synchronized VirtualMachinesStatistics getStatistics() {
+        long currentTime = System.currentTimeMillis();
+        if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
+            return lastStatistics;
+        }
+        lastStatisticsTimestamp = currentTime;
         List<VirtualMachineDetails> details = new ArrayList<VirtualMachineDetails>();
         List<VirtualMachineStatistics> stats = new ArrayList<VirtualMachineStatistics>();
         for (VirtualMachine virtualMachine : virtualMachinesByUID.values()) {
             stats.add(virtualMachine.getStatistics());
             details.add(virtualMachine.getDetails());
         }
-        return new DefaultVirtualMachinesStatistics(stats.toArray(new VirtualMachineStatistics[stats.size()]),
-                new DefaultVirtualMachinesDetails(details.toArray(new VirtualMachineDetails[details.size()])));
+        lastStatistics = new DefaultVirtualMachinesStatistics(stats.toArray(new VirtualMachineStatistics[stats.size()]),
+                new DefaultVirtualMachinesDetails(details.toArray(new VirtualMachineDetails[details.size()])),
+                lastStatistics);
+        return lastStatistics;
     }
 
     public VirtualMachinesDetails getDetails() {
