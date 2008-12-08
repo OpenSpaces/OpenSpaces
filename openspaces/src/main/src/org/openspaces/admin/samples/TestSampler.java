@@ -74,6 +74,7 @@ public class TestSampler {
 //                }
                 for (Space space : admin.getSpaces()) {
                     System.out.println("Space [" + space.getUid() + "] numberOfInstances [" + space.getNumberOfInstances() + "] numberOfbackups [" + space.getNumberOfBackups() + "]");
+                    System.out.println("  Stats: Write [" + space.getStatistics().getWriteCount() + "/" + space.getStatistics().getWritePerSecond() + "], Take [" + space.getStatistics().getTakeCount() + "/" + space.getStatistics().getTakePerSecond() + "]");
                     for (SpaceInstance spaceInstance : space) {
                         System.out.println("   -> INSTANCE [" + spaceInstance.getUid() + "] instanceId [" + spaceInstance.getInstanceId() +
                                 "] backupId [" + spaceInstance.getBackupId() + "] Partiton [" + spaceInstance.getPartition().getPartitiondId() + "]");

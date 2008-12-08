@@ -37,10 +37,26 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    public double getWritePerSecond() {
+        double total = 0;
+        for (SpaceInstanceStatistics stat : stats) {
+            total += stat.getWritePerSecond();
+        }
+        return total;
+    }
+
     public long getReadCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
             total += stat.getReadCount();
+        }
+        return total;
+    }
+
+    public double getReadPerSecond() {
+        double total = 0;
+        for (SpaceInstanceStatistics stat : stats) {
+            total += stat.getReadPerSecond();
         }
         return total;
     }
@@ -53,10 +69,26 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    public double getTakePerSecond() {
+        double total = 0;
+        for (SpaceInstanceStatistics stat : stats) {
+            total += stat.getTakePerSecond();
+        }
+        return total;
+    }
+
     public long getNotifyRegistrationCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
             total += stat.getNotifyRegistrationCount();
+        }
+        return total;
+    }
+
+    public double getNotifyRegistrationPerSecond() {
+        double total = 0;
+        for (SpaceInstanceStatistics stat : stats) {
+            total += stat.getNotifyRegistrationPerSecond();
         }
         return total;
     }
@@ -69,10 +101,26 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    public double getCleanPerSecond() {
+        double total = 0;
+        for (SpaceInstanceStatistics stat : stats) {
+            total += stat.getCleanPerSecond();
+        }
+        return total;
+    }
+
     public long getUpdateCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
             total += stat.getUpdateCount();
+        }
+        return total;
+    }
+
+    public double getUpdatePerSecond() {
+        double total = 0;
+        for (SpaceInstanceStatistics stat : stats) {
+            total += stat.getUpdatePerSecond();
         }
         return total;
     }
@@ -85,10 +133,26 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    public double getNotifyTriggerPerSecond() {
+        double total = 0;
+        for (SpaceInstanceStatistics stat : stats) {
+            total += stat.getNotifyRegistrationPerSecond();
+        }
+        return total;
+    }
+
     public long getNotifyAckCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
             total += stat.getNotifyAckCount();
+        }
+        return total;
+    }
+
+    public double getNotifyAckPerSecond() {
+        double total = 0;
+        for (SpaceInstanceStatistics stat : stats) {
+            total += stat.getNotifyAckPerSecond();
         }
         return total;
     }
@@ -101,10 +165,26 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return total;
     }
 
+    public double getExecutePerSecond() {
+        double total = 0;
+        for (SpaceInstanceStatistics stat : stats) {
+            total += stat.getExecutePerSecond();
+        }
+        return total;
+    }
+
     public long getRemoveCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
             total += stat.getRemoveCount();
+        }
+        return total;
+    }
+
+    public double getRemovePerSecond() {
+        double total = 0;
+        for (SpaceInstanceStatistics stat : stats) {
+            total += stat.getRemovePerSecond();
         }
         return total;
     }
