@@ -10,9 +10,13 @@ import net.jini.core.discovery.LookupLocator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.AdminEventListener;
+import org.openspaces.admin.agent.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagers;
+import org.openspaces.admin.internal.agent.DefaultGridServiceAgents;
+import org.openspaces.admin.internal.agent.InternalGridServiceAgent;
+import org.openspaces.admin.internal.agent.InternalGridServiceAgents;
 import org.openspaces.admin.internal.discovery.DiscoveryService;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainers;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
@@ -95,6 +99,8 @@ public class DefaultAdmin implements InternalAdmin {
     private final InternalLookupServices lookupServices = new DefaultLookupServices(this);
 
     private final InternalMachines machines = new DefaultMachines(this);
+
+    private final InternalGridServiceAgents gridServiceAgents = new DefaultGridServiceAgents(this);
 
     private final InternalGridServiceManagers gridServiceManagers = new DefaultGridServiceManagers(this);
 
@@ -253,6 +259,10 @@ public class DefaultAdmin implements InternalAdmin {
         return this.lookupServices;
     }
 
+    public GridServiceAgents getGridServiceAgents() {
+        return this.gridServiceAgents;
+    }
+
     public GridServiceManagers getGridServiceManagers() {
         return this.gridServiceManagers;
     }
@@ -308,6 +318,36 @@ public class DefaultAdmin implements InternalAdmin {
 
     public synchronized void raiseEvent(Object listener, Runnable notifier) {
         eventsExecutorServices[Math.abs(listener.hashCode()) % eventsExecutorServices.length].submit(new LoggerRunnable(notifier));
+    }
+
+    public void addGridServiceAgent(InternalGridServiceAgent gridServiceAgent, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
+        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceAgent, osDetails);
+        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceAgent, jvmDetails);
+        InternalTransport transport = processTransportOnServiceAddition(gridServiceAgent, nioDetails, virtualMachine);
+
+        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
+                transport, operatingSystem, virtualMachine,
+                (InternalMachineAware) virtualMachine, gridServiceAgent);
+
+        ((InternalGridServiceAgents) machine.getGridServiceAgents()).addGridServiceAgent(gridServiceAgent);
+        ((InternalGridServiceAgents) ((InternalVirtualMachine) virtualMachine).getGridServiceAgents()).addGridServiceAgent(gridServiceAgent);
+
+        gridServiceAgents.addGridServiceAgent(gridServiceAgent);
+
+        flushEvents();
+    }
+
+    public void removeGridServiceAgent(String uid) {
+        InternalGridServiceAgent gridServiceAgent = gridServiceAgents.removeGridServiceAgent(uid);
+        if (gridServiceAgent != null) {
+            processTransportOnServiceRemoval(gridServiceAgent, gridServiceAgent);
+            processOperatingSystemOnServiceRemoval(gridServiceAgent, gridServiceAgent);
+            processVirtualMachineOnServiceRemoval(gridServiceAgent, gridServiceAgent);
+            processMachineOnServiceRemoval(gridServiceAgent);
+            ((InternalGridServiceAgents) ((InternalMachine) gridServiceAgent.getMachine()).getGridServiceAgents()).removeGridServiceAgent(uid);
+        }
+
+        flushEvents();
     }
 
     public synchronized void addLookupService(InternalLookupService lookupService,

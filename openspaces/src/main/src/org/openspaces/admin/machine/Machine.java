@@ -1,5 +1,6 @@
 package org.openspaces.admin.machine;
 
+import org.openspaces.admin.agent.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.lus.LookupServices;
@@ -25,6 +26,8 @@ public interface Machine {
     String getHost();
 
     LookupServices getLookupServices();
+
+    GridServiceAgents getGridServiceAgents();
 
     GridServiceManagers getGridServiceManagers();
 

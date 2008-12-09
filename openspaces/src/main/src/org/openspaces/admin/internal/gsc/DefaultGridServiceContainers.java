@@ -26,7 +26,7 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
 
     private final InternalAdmin admin;
 
-    private final Map<String, GridServiceContainer> gridServiceContainerMap = new SizeConcurrentHashMap<String, GridServiceContainer>();
+    private final Map<String, GridServiceContainer> containers = new SizeConcurrentHashMap<String, GridServiceContainer>();
 
     private final InternalGridServiceContainerAddedEventManager gridServiceContainerAddedEventManager;
 
@@ -51,23 +51,23 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
     }
 
     public GridServiceContainer[] getContainers() {
-        return gridServiceContainerMap.values().toArray(new GridServiceContainer[0]);
+        return containers.values().toArray(new GridServiceContainer[0]);
     }
 
     public GridServiceContainer getContainerByUID(String uid) {
-        return gridServiceContainerMap.get(uid);
+        return containers.get(uid);
     }
 
     public Map<String, GridServiceContainer> getUids() {
-        return Collections.unmodifiableMap(gridServiceContainerMap);
+        return Collections.unmodifiableMap(containers);
     }
 
     public int getSize() {
-        return gridServiceContainerMap.size();
+        return containers.size();
     }
 
     public boolean isEmpty() {
-        return gridServiceContainerMap.isEmpty();
+        return containers.size() == 0;
     }
 
     public boolean waitFor(int numberOfGridServiceContainers) {
@@ -102,18 +102,18 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
     }
 
     public Iterator<GridServiceContainer> iterator() {
-        return gridServiceContainerMap.values().iterator();
+        return containers.values().iterator();
     }
 
     public void addGridServiceContainer(final InternalGridServiceContainer gridServiceContainer) {
-        final GridServiceContainer existingGSC = gridServiceContainerMap.put(gridServiceContainer.getUid(), gridServiceContainer);
+        final GridServiceContainer existingGSC = containers.put(gridServiceContainer.getUid(), gridServiceContainer);
         if (existingGSC == null) {
             gridServiceContainerAddedEventManager.gridServiceContainerAdded(gridServiceContainer);
         }
     }
 
     public InternalGridServiceContainer removeGridServiceContainer(String uid) {
-        final InternalGridServiceContainer existingGSC = (InternalGridServiceContainer) gridServiceContainerMap.remove(uid);
+        final InternalGridServiceContainer existingGSC = (InternalGridServiceContainer) containers.remove(uid);
         if (existingGSC != null) {
             gridServiceContainerRemovedEventManager.gridServiceContainerRemoved(existingGSC);
         }

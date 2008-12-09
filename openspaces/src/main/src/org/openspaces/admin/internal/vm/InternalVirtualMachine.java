@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.vm;
 
+import org.openspaces.admin.agent.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.internal.machine.InternalMachineAware;
@@ -25,6 +26,8 @@ public interface InternalVirtualMachine extends VirtualMachine, InternalMachineA
     void addSpaceInstance(SpaceInstance spaceInstance);
 
     void removeSpaceInstance(String uid);
+
+    GridServiceAgents getGridServiceAgents();
 
     GridServiceManagers getGridServiceManagers();
 

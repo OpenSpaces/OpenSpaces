@@ -1,9 +1,12 @@
 package org.openspaces.admin.internal.machine;
 
 import com.gigaspaces.operatingsystem.OSDetails;
+import org.openspaces.admin.agent.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.agent.DefaultGridServiceAgents;
+import org.openspaces.admin.internal.agent.InternalGridServiceAgents;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainers;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainers;
 import org.openspaces.admin.internal.gsm.DefaultGridServiceManagers;
@@ -45,6 +48,8 @@ public class DefaultMachine implements InternalMachine {
 
     private final InternalLookupServices lookupServices;
 
+    private final InternalGridServiceAgents gridServiceAgents;
+
     private final InternalGridServiceManagers gridServiceManagers;
 
     private final InternalGridServiceContainers gridServiceContainers;
@@ -63,6 +68,7 @@ public class DefaultMachine implements InternalMachine {
         this.admin = admin;
         this.uid = uid;
         this.host = host;
+        this.gridServiceAgents = new DefaultGridServiceAgents(admin);
         this.lookupServices = new DefaultLookupServices(admin);
         this.gridServiceManagers = new DefaultGridServiceManagers(admin);
         this.gridServiceContainers = new DefaultGridServiceContainers(admin);
@@ -78,6 +84,10 @@ public class DefaultMachine implements InternalMachine {
 
     public String getHost() {
         return this.host;
+    }
+
+    public GridServiceAgents getGridServiceAgents() {
+        return this.gridServiceAgents;
     }
 
     public LookupServices getLookupServices() {

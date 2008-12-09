@@ -1,6 +1,7 @@
 package org.openspaces.admin.vm;
 
 import org.openspaces.admin.StatisticsMonitor;
+import org.openspaces.admin.agent.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.machine.MachineAware;
@@ -24,6 +25,8 @@ public interface VirtualMachine extends MachineAware, StatisticsMonitor {
     VirtualMachineDetails getDetails();
 
     VirtualMachineStatistics getStatistics();
+
+    GridServiceAgent getGridServiceAgent();
 
     /**
      * Returns the grid service manager started within this virtual machine.

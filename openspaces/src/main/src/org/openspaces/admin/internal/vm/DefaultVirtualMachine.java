@@ -2,11 +2,15 @@ package org.openspaces.admin.internal.vm;
 
 import com.gigaspaces.jvm.JVMDetails;
 import org.openspaces.admin.StatisticsMonitor;
+import org.openspaces.admin.agent.GridServiceAgent;
+import org.openspaces.admin.agent.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.agent.DefaultGridServiceAgents;
+import org.openspaces.admin.internal.agent.InternalGridServiceAgents;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainers;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainers;
 import org.openspaces.admin.internal.gsm.DefaultGridServiceManagers;
@@ -56,6 +60,8 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     private volatile Machine machine;
 
+    private final InternalGridServiceAgents gridServiceAgents;
+
     private final InternalGridServiceManagers gridServiceManagers;
 
     private final InternalGridServiceContainers gridServiceContainers;
@@ -79,6 +85,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
         this.admin = (InternalAdmin) virtualMachines.getAdmin();
         this.details = new DefaultVirtualMachineDetails(details);
         this.uid = details.getUid();
+        this.gridServiceAgents = new DefaultGridServiceAgents(admin);
         this.gridServiceManagers = new DefaultGridServiceManagers(admin);
         this.gridServiceContainers = new DefaultGridServiceContainers(admin);
         this.processingUnitInstances = new DefaultProcessingUnitInstances(admin);
@@ -116,6 +123,18 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     public void setMachine(Machine machine) {
         this.machine = machine;
+    }
+
+    public GridServiceAgents getGridServiceAgents() {
+        return this.gridServiceAgents;
+    }
+
+    public GridServiceAgent getGridServiceAgent() {
+        Iterator<GridServiceAgent> it = gridServiceAgents.iterator();
+        if (it.hasNext()) {
+            return it.next();
+        }
+        return null;
     }
 
     public GridServiceManager getGridServiceManager() {

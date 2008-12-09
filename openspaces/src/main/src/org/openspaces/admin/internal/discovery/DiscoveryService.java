@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.discovery;
 
+import com.gigaspaces.grid.gsa.GSA;
 import com.gigaspaces.grid.gsc.GSC;
 import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.grid.security.Credentials;
@@ -31,6 +32,8 @@ import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.BootUtil;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.agent.DefaultGridServiceAgent;
+import org.openspaces.admin.internal.agent.InternalGridServiceAgent;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainer;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.gsm.DefaultGridServiceManager;
@@ -170,6 +173,22 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             } catch (Exception e) {
                 logger.warn("Failed to add GSM with uid [" + serviceID + "]", e);
             }
+        } else if (service instanceof GSA) {
+                try {
+                    GSA gsa = (GSA) service;
+                    Credentials credentials = null;
+                    if (gsa.isSecured()) {
+                        credentials = gsa.authenticate(admin.getUsername(), admin.getPassword());
+                    }
+                    InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, gsa, admin, credentials);
+                    // get the details here, on the thread pool
+                    NIODetails nioDetails = gridServiceAgent.getNIODetails();
+                    OSDetails osDetails = gridServiceAgent.getOSDetails();
+                    JVMDetails jvmDetails = gridServiceAgent.getJVMDetails();
+                    admin.addGridServiceAgent(gridServiceAgent, nioDetails, osDetails, jvmDetails);
+                } catch (Exception e) {
+                    logger.warn("Failed to add GSA with uid [" + serviceID + "]", e);
+                }
         } else if (service instanceof GSC) {
             try {
                 GSC gsc = (GSC) service;
@@ -233,6 +252,8 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         ServiceID serviceID = event.getPreEventServiceItem().serviceID;
         if (service instanceof GSM) {
             admin.removeGridServiceManager(serviceID.toString());
+        } else if (service instanceof GSA) {
+            admin.removeGridServiceAgent(serviceID.toString());
         } else if (service instanceof GSC) {
             admin.removeGridServiceContainer(serviceID.toString());
         } else if (service instanceof PUServiceBean) {
