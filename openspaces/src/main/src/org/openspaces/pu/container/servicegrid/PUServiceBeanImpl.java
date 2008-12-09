@@ -28,6 +28,7 @@ import com.gigaspaces.operatingsystem.OSHelper;
 import com.gigaspaces.operatingsystem.OSStatistics;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
+import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.kernel.Environment;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -563,6 +564,24 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         return alive;
     }
 
+    public SpaceURL[] listSpacesURLs() throws RemoteException {
+        List<SpaceURL> spaceUrls = new ArrayList<SpaceURL>();
+        for (ProcessingUnitServiceDetails serviceDetails : puDetails.getDetails()) {
+            if (serviceDetails instanceof SpaceProcessingUnitServiceDetails) {
+                SpaceProcessingUnitServiceDetails spaceServiceDetails = (SpaceProcessingUnitServiceDetails) serviceDetails;
+                if (spaceServiceDetails.getSpaceType() == SpaceType.EMBEDDED) {
+                    try {
+                        IJSpace space = (IJSpace) spaceDetails.get(serviceDetails);
+                        spaceUrls.add(space.getFinderURL());
+                    } catch (IllegalAccessException e) {
+                        throw new RemoteException("Failed to access field", e);
+                    }
+                }
+            }
+        }
+        return spaceUrls.toArray(new SpaceURL[spaceUrls.size()]);
+    }
+    
     public SpaceMode[] listSpacesModes() throws RemoteException {
         List<SpaceMode> spacesModes = new ArrayList<SpaceMode>();
         for (ProcessingUnitServiceDetails serviceDetails : puDetails.getDetails()) {
