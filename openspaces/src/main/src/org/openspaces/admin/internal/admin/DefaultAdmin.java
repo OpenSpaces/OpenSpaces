@@ -10,14 +10,15 @@ import net.jini.core.discovery.LookupLocator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.AdminEventListener;
-import org.openspaces.admin.agent.GridServiceAgents;
+import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagers;
-import org.openspaces.admin.internal.agent.DefaultGridServiceAgents;
-import org.openspaces.admin.internal.agent.InternalGridServiceAgent;
-import org.openspaces.admin.internal.agent.InternalGridServiceAgents;
 import org.openspaces.admin.internal.discovery.DiscoveryService;
+import org.openspaces.admin.internal.gsa.DefaultGridServiceAgents;
+import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
+import org.openspaces.admin.internal.gsa.InternalGridServiceAgents;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainers;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainers;
@@ -50,6 +51,7 @@ import org.openspaces.admin.internal.space.InternalSpace;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
 import org.openspaces.admin.internal.space.InternalSpaces;
 import org.openspaces.admin.internal.support.EventRegistrationHelper;
+import org.openspaces.admin.internal.support.InternalAgentGridComponent;
 import org.openspaces.admin.internal.support.NetworkExceptionHelper;
 import org.openspaces.admin.internal.transport.DefaultTransport;
 import org.openspaces.admin.internal.transport.DefaultTransports;
@@ -77,8 +79,10 @@ import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.admin.vm.VirtualMachines;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -115,6 +119,8 @@ public class DefaultAdmin implements InternalAdmin {
     private final InternalProcessingUnits processingUnits = new DefaultProcessingUnits(this);
 
     private final InternalProcessingUnitInstances processingUnitInstances = new DefaultProcessingUnitInstances(this);
+
+    private final Map<String, InternalAgentGridComponent> orphanedAgentGridComponents = new ConcurrentHashMap<String, InternalAgentGridComponent>();
 
     private final InternalSpaces spaces = new DefaultSpaces(this);
 
@@ -320,7 +326,7 @@ public class DefaultAdmin implements InternalAdmin {
         eventsExecutorServices[Math.abs(listener.hashCode()) % eventsExecutorServices.length].submit(new LoggerRunnable(notifier));
     }
 
-    public void addGridServiceAgent(InternalGridServiceAgent gridServiceAgent, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
+    public synchronized void addGridServiceAgent(InternalGridServiceAgent gridServiceAgent, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceAgent, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceAgent, jvmDetails);
         InternalTransport transport = processTransportOnServiceAddition(gridServiceAgent, nioDetails, virtualMachine);
@@ -334,10 +340,18 @@ public class DefaultAdmin implements InternalAdmin {
 
         gridServiceAgents.addGridServiceAgent(gridServiceAgent);
 
+        for (Iterator<Map.Entry<String, InternalAgentGridComponent>> it = orphanedAgentGridComponents.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<String, InternalAgentGridComponent> entry = it.next();
+            if (entry.getValue().getAgentUid().equals(gridServiceAgent.getUid())) {
+                entry.getValue().setGridServiceAgent(gridServiceAgent);
+                it.remove();
+            }
+        }
+
         flushEvents();
     }
 
-    public void removeGridServiceAgent(String uid) {
+    public synchronized void removeGridServiceAgent(String uid) {
         InternalGridServiceAgent gridServiceAgent = gridServiceAgents.removeGridServiceAgent(uid);
         if (gridServiceAgent != null) {
             processTransportOnServiceRemoval(gridServiceAgent, gridServiceAgent);
@@ -345,6 +359,13 @@ public class DefaultAdmin implements InternalAdmin {
             processVirtualMachineOnServiceRemoval(gridServiceAgent, gridServiceAgent);
             processMachineOnServiceRemoval(gridServiceAgent);
             ((InternalGridServiceAgents) ((InternalMachine) gridServiceAgent.getMachine()).getGridServiceAgents()).removeGridServiceAgent(uid);
+
+            for (Iterator<Map.Entry<String, InternalAgentGridComponent>> it = orphanedAgentGridComponents.entrySet().iterator(); it.hasNext();) {
+                Map.Entry<String, InternalAgentGridComponent> entry = it.next();
+                if (entry.getValue().getAgentUid().equals(gridServiceAgent.getUid())) {
+                    it.remove();
+                }
+            }
         }
 
         flushEvents();
@@ -361,6 +382,8 @@ public class DefaultAdmin implements InternalAdmin {
                 (InternalMachineAware) virtualMachine, lookupService);
 
         ((InternalLookupServices) machine.getLookupServices()).addLookupService(lookupService);
+
+        processAgentOnServiceAddition(lookupService);
 
         lookupServices.addLookupService(lookupService);
 
@@ -393,6 +416,8 @@ public class DefaultAdmin implements InternalAdmin {
         ((InternalGridServiceManagers) machine.getGridServiceManagers()).addGridServiceManager(gridServiceManager);
         ((InternalGridServiceManagers) ((InternalVirtualMachine) virtualMachine).getGridServiceManagers()).addGridServiceManager(gridServiceManager);
 
+        processAgentOnServiceAddition(gridServiceManager);
+
         gridServiceManagers.addGridServiceManager(gridServiceManager);
 
         flushEvents();
@@ -424,6 +449,8 @@ public class DefaultAdmin implements InternalAdmin {
         ((InternalGridServiceContainers) machine.getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
         ((InternalGridServiceContainers) ((InternalVirtualMachine) virtualMachine).getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
 
+        processAgentOnServiceAddition(gridServiceContainer);
+        
         gridServiceContainers.addGridServiceContainer(gridServiceContainer);
 
         flushEvents();
@@ -529,6 +556,15 @@ public class DefaultAdmin implements InternalAdmin {
         }
 
         flushEvents();
+    }
+
+    private void processAgentOnServiceAddition(InternalAgentGridComponent agentGridComponent) {
+        GridServiceAgent gridServiceAgent = gridServiceAgents.getAgentByUID(agentGridComponent.getAgentUid());
+        if (gridServiceAgent == null) {
+            orphanedAgentGridComponents.put(agentGridComponent.getUid(), agentGridComponent);
+        } else {
+            agentGridComponent.setGridServiceAgent(gridServiceAgent);
+        }
     }
 
     private synchronized void processProcessingUnitInstanceAddition(InternalProcessingUnit processingUnit, InternalProcessingUnitInstance processingUnitInstance) {

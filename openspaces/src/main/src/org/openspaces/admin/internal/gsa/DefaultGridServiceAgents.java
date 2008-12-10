@@ -1,8 +1,8 @@
-package org.openspaces.admin.internal.agent;
+package org.openspaces.admin.internal.gsa;
 
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Admin;
-import org.openspaces.admin.agent.GridServiceAgent;
+import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 
 import java.util.Collections;

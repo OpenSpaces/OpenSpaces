@@ -12,7 +12,7 @@ import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
-import org.openspaces.admin.internal.support.AbstractGridComponent;
+import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author kimchy
  */
-public class DefaultGridServiceContainer extends AbstractGridComponent implements InternalGridServiceContainer {
+public class DefaultGridServiceContainer extends AbstractAgentGridComponent implements InternalGridServiceContainer {
 
     private final ServiceID serviceID;
 
@@ -37,8 +37,9 @@ public class DefaultGridServiceContainer extends AbstractGridComponent implement
 
     private final Credentials credentials;
 
-    public DefaultGridServiceContainer(ServiceID serviceID, GSC gsc, InternalAdmin admin, Credentials credentials) {
-        super(admin);
+    public DefaultGridServiceContainer(ServiceID serviceID, GSC gsc, InternalAdmin admin, Credentials credentials,
+                                       int agentId, String agentUid) {
+        super(admin, agentId, agentUid);
         this.serviceID = serviceID;
         this.gsc = gsc;
         this.credentials = credentials;

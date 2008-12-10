@@ -1,4 +1,4 @@
-package org.openspaces.admin.agent;
+package org.openspaces.admin.gsa;
 
 import org.openspaces.admin.AdminAware;
 

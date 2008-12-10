@@ -1,6 +1,6 @@
 package org.openspaces.admin.gsc;
 
-import org.openspaces.admin.GridComponent;
+import org.openspaces.admin.AgentGridComponent;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author kimchy
  */
-public interface GridServiceContainer extends GridComponent, Iterable<ProcessingUnitInstance> {
+public interface GridServiceContainer extends AgentGridComponent, Iterable<ProcessingUnitInstance> {
 
     boolean waitFor(int numberOfProcessingUnitInstances);
 

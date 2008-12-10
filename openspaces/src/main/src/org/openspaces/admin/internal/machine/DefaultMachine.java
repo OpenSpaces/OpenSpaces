@@ -1,12 +1,12 @@
 package org.openspaces.admin.internal.machine;
 
 import com.gigaspaces.operatingsystem.OSDetails;
-import org.openspaces.admin.agent.GridServiceAgents;
+import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.agent.DefaultGridServiceAgents;
-import org.openspaces.admin.internal.agent.InternalGridServiceAgents;
+import org.openspaces.admin.internal.gsa.DefaultGridServiceAgents;
+import org.openspaces.admin.internal.gsa.InternalGridServiceAgents;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainers;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainers;
 import org.openspaces.admin.internal.gsm.DefaultGridServiceManagers;

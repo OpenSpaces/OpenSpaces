@@ -1,4 +1,4 @@
-package org.openspaces.admin.agent;
+package org.openspaces.admin.gsa;
 
 import org.openspaces.admin.GridComponent;
 
@@ -8,4 +8,8 @@ import org.openspaces.admin.GridComponent;
 public interface GridServiceAgent extends GridComponent {
 
     void startGridServiceManager();
+
+    void startGridServiceContainer();
+
+    void startLookupService();
 }

@@ -1,10 +1,10 @@
 package org.openspaces.admin.lus;
 
-import org.openspaces.admin.GridComponent;
+import org.openspaces.admin.AgentGridComponent;
 
 /**
  * @author kimchy
  */
-public interface LookupService extends GridComponent {
+public interface LookupService extends AgentGridComponent {
 
 }

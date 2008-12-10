@@ -5,7 +5,7 @@ import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.operatingsystem.OSDetails;
 import com.j_spaces.core.IJSpace;
 import org.openspaces.admin.Admin;
-import org.openspaces.admin.internal.agent.InternalGridServiceAgent;
+import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.lus.InternalLookupService;

@@ -1,4 +1,4 @@
-package org.openspaces.admin.internal.agent;
+package org.openspaces.admin.internal.gsa;
 
 import com.gigaspaces.grid.gsa.GSA;
 import com.gigaspaces.grid.gsa.GSProcessOptions;
@@ -52,6 +52,22 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
             gsa.startProcess(new GSProcessOptions(GSProcessOptions.Type.GSM).setUseScript(true));
         } catch (IOException e) {
             throw new AdminException("Failed to start GSM", e);
+        }
+    }
+
+    public void startGridServiceContainer() {
+        try {
+            gsa.startProcess(new GSProcessOptions(GSProcessOptions.Type.GSC).setUseScript(true));
+        } catch (IOException e) {
+            throw new AdminException("Failed to start GSC", e);
+        }
+    }
+
+    public void startLookupService() {
+        try {
+            gsa.startProcess(new GSProcessOptions(GSProcessOptions.Type.LUS).setUseScript(true));
+        } catch (IOException e) {
+            throw new AdminException("Failed to start LUS", e);
         }
     }
 

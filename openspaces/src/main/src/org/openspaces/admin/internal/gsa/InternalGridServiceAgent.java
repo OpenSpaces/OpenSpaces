@@ -1,8 +1,8 @@
-package org.openspaces.admin.internal.agent;
+package org.openspaces.admin.internal.gsa;
 
 import com.gigaspaces.grid.gsa.GSA;
 import net.jini.core.lookup.ServiceID;
-import org.openspaces.admin.agent.GridServiceAgent;
+import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.internal.support.InternalGridComponent;
 
 /**

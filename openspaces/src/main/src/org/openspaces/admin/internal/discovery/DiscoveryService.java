@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.discovery;
 
+import com.gigaspaces.grid.gsa.AgentIdAware;
 import com.gigaspaces.grid.gsa.GSA;
 import com.gigaspaces.grid.gsc.GSC;
 import com.gigaspaces.grid.gsm.GSM;
@@ -32,8 +33,8 @@ import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.BootUtil;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.agent.DefaultGridServiceAgent;
-import org.openspaces.admin.internal.agent.InternalGridServiceAgent;
+import org.openspaces.admin.internal.gsa.DefaultGridServiceAgent;
+import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainer;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.gsm.DefaultGridServiceManager;
@@ -135,8 +136,9 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
     public void discovered(DiscoveryEvent disEvent) {
         for (ServiceRegistrar registrar : disEvent.getRegistrars()) {
-            InternalLookupService lookupService = new DefaultLookupService(registrar, registrar.getServiceID(), admin);
             try {
+                InternalLookupService lookupService = new DefaultLookupService(registrar, registrar.getServiceID(), admin,
+                        ((AgentIdAware) registrar.getRegistrar()).getAgentId(), ((AgentIdAware) registrar.getRegistrar()).getGSAServiceID());
                 // get the details here, on the thread pool
                 NIODetails nioDetails = lookupService.getNIODetails();
                 OSDetails osDetails = lookupService.getOSDetails();
@@ -164,7 +166,8 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 if (gsm.isSecured()) {
                     credentials = gsm.authenticate(admin.getUsername(), admin.getPassword());
                 }
-                InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, gsm, admin, credentials);
+                InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, gsm, admin, credentials,
+                        gsm.getAgentId(), gsm.getGSAServiceID());
                 // get the details here, on the thread pool
                 NIODetails nioDetails = gridServiceManager.getNIODetails();
                 OSDetails osDetails = gridServiceManager.getOSDetails();
@@ -196,7 +199,8 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 if (gsc.isSecured()) {
                     credentials = gsc.authenticate(admin.getUsername(), admin.getPassword());
                 }
-                InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(serviceID, gsc, admin, credentials);
+                InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(serviceID, gsc, admin, credentials,
+                        gsc.getAgentId(), gsc.getGSAServiceID());
                 // get the details here, on the thread pool
                 NIODetails nioDetails = gridServiceContainer.getNIODetails();
                 OSDetails osDetails = gridServiceContainer.getOSDetails();

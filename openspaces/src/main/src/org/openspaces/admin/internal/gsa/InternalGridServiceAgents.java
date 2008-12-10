@@ -1,6 +1,6 @@
-package org.openspaces.admin.internal.agent;
+package org.openspaces.admin.internal.gsa;
 
-import org.openspaces.admin.agent.GridServiceAgents;
+import org.openspaces.admin.gsa.GridServiceAgents;
 
 /**
  * @author kimchy

@@ -1,7 +1,7 @@
 package org.openspaces.admin.vm;
 
 import org.openspaces.admin.StatisticsMonitor;
-import org.openspaces.admin.agent.GridServiceAgent;
+import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.machine.MachineAware;

@@ -1,6 +1,6 @@
 package org.openspaces.admin.internal.vm;
 
-import org.openspaces.admin.agent.GridServiceAgents;
+import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.internal.machine.InternalMachineAware;

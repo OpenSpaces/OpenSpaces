@@ -18,7 +18,7 @@ import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
-import org.openspaces.admin.internal.support.AbstractGridComponent;
+import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
 import org.openspaces.admin.internal.support.NetworkExceptionHelper;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * @author kimchy
  */
-public class DefaultGridServiceManager extends AbstractGridComponent implements InternalGridServiceManager {
+public class DefaultGridServiceManager extends AbstractAgentGridComponent implements InternalGridServiceManager {
 
     private final ServiceID serviceID;
 
@@ -49,8 +49,9 @@ public class DefaultGridServiceManager extends AbstractGridComponent implements 
 
     private final Credentials credentials;
 
-    public DefaultGridServiceManager(ServiceID serviceID, GSM gsm, InternalAdmin admin, Credentials credentials) throws RemoteException {
-        super(admin);
+    public DefaultGridServiceManager(ServiceID serviceID, GSM gsm, InternalAdmin admin, Credentials credentials,
+                                     int agentId, String agentUid) throws RemoteException {
+        super(admin, agentId, agentUid);
         this.serviceID = serviceID;
         this.gsm = gsm;
         this.gsmAdmin = (ProvisionMonitorAdmin) gsm.getAdmin();

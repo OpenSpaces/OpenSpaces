@@ -12,21 +12,22 @@ import com.gigaspaces.operatingsystem.OSStatistics;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceRegistrar;
 import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.support.AbstractGridComponent;
+import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
 
 import java.rmi.RemoteException;
 
 /**
  * @author kimchy
  */
-public class DefaultLookupService extends AbstractGridComponent implements InternalLookupService {
+public class DefaultLookupService extends AbstractAgentGridComponent implements InternalLookupService {
 
-    private ServiceRegistrar registrar;
+    private final ServiceRegistrar registrar;
 
-    private ServiceID serviceID;
+    private final ServiceID serviceID;
 
-    public DefaultLookupService(ServiceRegistrar registrar, ServiceID serviceID, InternalAdmin admin) {
-        super(admin);
+    public DefaultLookupService(ServiceRegistrar registrar, ServiceID serviceID, InternalAdmin admin,
+                                int agentId, String agentUid) {
+        super(admin, agentId, agentUid);
         this.registrar = registrar;
         this.serviceID = serviceID;
     }
