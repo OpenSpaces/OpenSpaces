@@ -12,21 +12,21 @@ import java.util.concurrent.TimeUnit;
  */
 public interface GridServiceAgent extends GridComponent {
 
-    void startGridServiceManager();
+    void startGridService(GridServiceManagerOptions options);
 
-    GridServiceManager startGridServiceManagerAndWait();
+    GridServiceManager startGridServiceAndWait(GridServiceManagerOptions options);
 
-    GridServiceManager startGridServiceManagerAndWait(long timeout, TimeUnit timeUnit);
+    GridServiceManager startGridServiceAndWait(GridServiceManagerOptions options, long timeout, TimeUnit timeUnit);
 
-    void startGridServiceContainer();
+    void startGridService(GridServiceContainerOptions options);
 
-    GridServiceContainer startGridServiceContainerAndWait();
+    GridServiceContainer startGridServiceAndWait(GridServiceContainerOptions options);
 
-    GridServiceContainer startGridServiceContainerAndWait(long timeout, TimeUnit timeUnit);
+    GridServiceContainer startGridServiceAndWait(GridServiceContainerOptions options, long timeout, TimeUnit timeUnit);
 
-    void startLookupService();
+    void startGridService(LookupServiceOptions options);
 
-    LookupService startLookupServiceAndWait();
+    LookupService startGridServiceAndWait(LookupServiceOptions options);
 
-    LookupService startLookupServiceAndWait(long timeout, TimeUnit timeUnit);
+    LookupService startGridServiceAndWait(LookupServiceOptions options, long timeout, TimeUnit timeUnit);
 }

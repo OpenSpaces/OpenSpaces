@@ -1,7 +1,6 @@
 package org.openspaces.admin.internal.gsa;
 
 import com.gigaspaces.grid.gsa.GSA;
-import com.gigaspaces.grid.gsa.GSProcessOptions;
 import com.gigaspaces.grid.security.Credentials;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.jvm.JVMStatistics;
@@ -11,6 +10,9 @@ import com.gigaspaces.operatingsystem.OSDetails;
 import com.gigaspaces.operatingsystem.OSStatistics;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.gsa.GridServiceContainerOptions;
+import org.openspaces.admin.gsa.GridServiceManagerOptions;
+import org.openspaces.admin.gsa.LookupServiceOptions;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
 import org.openspaces.admin.gsm.GridServiceManager;
@@ -59,22 +61,22 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
         return this.gsa;
     }
 
-    public void startGridServiceManager() {
+    public void startGridService(GridServiceManagerOptions options) {
         if (credentials != null && credentials != Credentials.FULL) {
             throw new AdminException("No credentials to start a GSM");
         }
         try {
-            gsa.startProcess(new GSProcessOptions(GSProcessOptions.Type.GSM).setUseScript(true));
+            gsa.startProcess(options.getOptions());
         } catch (IOException e) {
             throw new AdminException("Failed to start GSM", e);
         }
     }
 
-    public GridServiceManager startGridServiceManagerAndWait() {
-        return startGridServiceManagerAndWait(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    public GridServiceManager startGridServiceAndWait(GridServiceManagerOptions options) {
+        return startGridServiceAndWait(options, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     }
 
-    public GridServiceManager startGridServiceManagerAndWait(long timeout, TimeUnit timeUnit) {
+    public GridServiceManager startGridServiceAndWait(GridServiceManagerOptions options, long timeout, TimeUnit timeUnit) {
         if (credentials != null && credentials != Credentials.FULL) {
             throw new AdminException("No credentials to start a GSM");
         }
@@ -96,7 +98,7 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
         // reset the refernece
         ref.set(null);
         try {
-            startGridServiceManager();
+            startGridService(options);
             synchronized (monitor) {
                 monitor.wait(timeUnit.toMillis(timeout));
             }
@@ -108,22 +110,22 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
         }
     }
 
-    public void startGridServiceContainer() {
+    public void startGridService(GridServiceContainerOptions options) {
         if (credentials != null && credentials != Credentials.FULL) {
             throw new AdminException("No credentials to start a GSC");
         }
         try {
-            gsa.startProcess(new GSProcessOptions(GSProcessOptions.Type.GSC).setUseScript(true));
+            gsa.startProcess(options.getOptions());
         } catch (IOException e) {
             throw new AdminException("Failed to start GSC", e);
         }
     }
 
-    public GridServiceContainer startGridServiceContainerAndWait() {
-        return startGridServiceContainerAndWait(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    public GridServiceContainer startGridServiceAndWait(GridServiceContainerOptions options) {
+        return startGridServiceAndWait(options, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     }
 
-    public GridServiceContainer startGridServiceContainerAndWait(long timeout, TimeUnit timeUnit) {
+    public GridServiceContainer startGridServiceAndWait(GridServiceContainerOptions options, long timeout, TimeUnit timeUnit) {
         if (credentials != null && credentials != Credentials.FULL) {
             throw new AdminException("No credentials to start a GSM");
         }
@@ -146,7 +148,7 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
         // reset the refernece
         ref.set(null);
         try {
-            startGridServiceContainer();
+            startGridService(options);
             synchronized (monitor) {
                 monitor.wait(timeUnit.toMillis(timeout));
             }
@@ -158,22 +160,22 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
         }
     }
 
-    public void startLookupService() {
+    public void startGridService(LookupServiceOptions options) {
         if (credentials != null && credentials != Credentials.FULL) {
             throw new AdminException("No credentials to start a LUS");
         }
         try {
-            gsa.startProcess(new GSProcessOptions(GSProcessOptions.Type.LUS).setUseScript(true));
+            gsa.startProcess(options.getOptions());
         } catch (IOException e) {
             throw new AdminException("Failed to start LUS", e);
         }
     }
 
-    public LookupService startLookupServiceAndWait() {
-        return startLookupServiceAndWait(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    public LookupService startGridServiceAndWait(LookupServiceOptions options) {
+        return startGridServiceAndWait(options, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     }
 
-    public LookupService startLookupServiceAndWait(long timeout, TimeUnit timeUnit) {
+    public LookupService startGridServiceAndWait(LookupServiceOptions options, long timeout, TimeUnit timeUnit) {
         if (credentials != null && credentials != Credentials.FULL) {
             throw new AdminException("No credentials to start a GSM");
         }
@@ -195,7 +197,7 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
         // reset the refernece
         ref.set(null);
         try {
-            startLookupService();
+            startGridService(options);
             synchronized (monitor) {
                 monitor.wait(timeUnit.toMillis(timeout));
             }

@@ -3,6 +3,8 @@ package org.openspaces.admin.samples;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.gsa.GridServiceContainerOptions;
+import org.openspaces.admin.gsa.GridServiceManagerOptions;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -21,10 +23,10 @@ public class TestAgent {
 
         System.out.println("Starting 1 GSM and 2 GSC");
 
-        GridServiceManager gridServiceManager = gridServiceAgent.startGridServiceManagerAndWait();
+        GridServiceManager gridServiceManager = gridServiceAgent.startGridServiceAndWait(new GridServiceManagerOptions());
 
-        GridServiceContainer gsc1 = gridServiceAgent.startGridServiceContainerAndWait();
-        GridServiceContainer gsc2 = gridServiceAgent.startGridServiceContainerAndWait();
+        GridServiceContainer gsc1 = gridServiceAgent.startGridServiceAndWait(new GridServiceContainerOptions());
+        GridServiceContainer gsc2 = gridServiceAgent.startGridServiceAndWait(new GridServiceContainerOptions());
 
         System.out.println("Deploying a space");
         ProcessingUnit processingUnit = gridServiceManager.deploy(new SpaceDeployment("test").numberOfInstances(2).numberOfBackups(1));
