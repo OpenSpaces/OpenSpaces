@@ -21,12 +21,13 @@ public class TestAgent {
         System.out.println("Waiting for at least one agent");
         GridServiceAgent gridServiceAgent = admin.getGridServiceAgents().waitForAtLeastOne();
 
-        System.out.println("Starting 1 GSM and 2 GSC");
+        System.out.println("Starting 2 GSM and 2 GSC");
 
-        GridServiceManager gridServiceManager = gridServiceAgent.startGridServiceAndWait(new GridServiceManagerOptions());
+        GridServiceManager gridServiceManager = gridServiceAgent.startGridServiceAndWait(new GridServiceManagerOptions().useScript());
+        gridServiceAgent.startGridService(new GridServiceManagerOptions());
 
-        GridServiceContainer gsc1 = gridServiceAgent.startGridServiceAndWait(new GridServiceContainerOptions());
-        GridServiceContainer gsc2 = gridServiceAgent.startGridServiceAndWait(new GridServiceContainerOptions());
+        GridServiceContainer gsc1 = gridServiceAgent.startGridServiceAndWait(new GridServiceContainerOptions().addInputParameter("-Xmx512m"));
+        GridServiceContainer gsc2 = gridServiceAgent.startGridServiceAndWait(new GridServiceContainerOptions().useScript());
 
         System.out.println("Deploying a space");
         ProcessingUnit processingUnit = gridServiceManager.deploy(new SpaceDeployment("test").numberOfInstances(2).numberOfBackups(1));
