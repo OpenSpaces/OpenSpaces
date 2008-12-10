@@ -1,5 +1,6 @@
 package org.openspaces.admin.machine;
 
+import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
@@ -26,6 +27,12 @@ public interface Machine {
     String getHost();
 
     LookupServices getLookupServices();
+
+    /**
+     * Returns the first grid service agent. Note, there will usually be only a
+     * single agent per machine.
+     */
+    GridServiceAgent getGridServiceAgent();
 
     GridServiceAgents getGridServiceAgents();
 

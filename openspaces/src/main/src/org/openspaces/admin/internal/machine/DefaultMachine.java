@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.machine;
 
 import com.gigaspaces.operatingsystem.OSDetails;
+import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
@@ -34,6 +35,8 @@ import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
+
+import java.util.Iterator;
 
 /**
  * @author kimchy
@@ -84,6 +87,14 @@ public class DefaultMachine implements InternalMachine {
 
     public String getHost() {
         return this.host;
+    }
+
+    public GridServiceAgent getGridServiceAgent() {
+        Iterator<GridServiceAgent> it = gridServiceAgents.iterator();
+        if (it.hasNext()) {
+            return it.next();
+        }
+        return null;
     }
 
     public GridServiceAgents getGridServiceAgents() {

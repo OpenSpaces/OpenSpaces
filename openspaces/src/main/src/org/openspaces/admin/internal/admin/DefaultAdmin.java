@@ -559,6 +559,10 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     private void processAgentOnServiceAddition(InternalAgentGridComponent agentGridComponent) {
+        if (agentGridComponent.getAgentUid() == null) {
+            // did not start by an agent, disard
+            return;
+        }
         GridServiceAgent gridServiceAgent = gridServiceAgents.getAgentByUID(agentGridComponent.getAgentUid());
         if (gridServiceAgent == null) {
             orphanedAgentGridComponents.put(agentGridComponent.getUid(), agentGridComponent);

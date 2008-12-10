@@ -8,4 +8,8 @@ import org.openspaces.admin.gsa.GridServiceAgent;
 public interface AgentGridComponent extends GridComponent {
 
     GridServiceAgent getGridServiceAgent();
+
+    void kill();
+
+    void restart();
 }

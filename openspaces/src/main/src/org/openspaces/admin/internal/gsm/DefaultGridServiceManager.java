@@ -84,6 +84,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         };
         processingUnit.getSpaceCorrelated().add(correlated);
         try {
+            // TODO make this configurable
             latch.await(20, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             // do nothing

@@ -3,6 +3,7 @@ package org.openspaces.admin.internal.gsa;
 import com.gigaspaces.grid.gsa.GSA;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.internal.support.InternalAgentGridComponent;
 import org.openspaces.admin.internal.support.InternalGridComponent;
 
 /**
@@ -13,4 +14,8 @@ public interface InternalGridServiceAgent extends GridServiceAgent, InternalGrid
     ServiceID getServiceID();
 
     GSA getGSA();
+
+    void kill(InternalAgentGridComponent agentGridComponent);
+
+    void restart(InternalAgentGridComponent agentGridComponent);
 }
