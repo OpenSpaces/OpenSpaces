@@ -374,6 +374,8 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             throw new CannotCreateContainerException("Failed to bind jetty to port with retries [" + retryPortCount + "]");
         }
 
+        logger.info("Using Jetty server with port [" + jettyHolder.getServer().getConnectors()[0].getPort() + "]");
+
         try {
             jettyHolder.start();
         } catch (Exception e) {
@@ -533,7 +535,10 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                     }
                 }
             }
-            return new JettyProcessingUnitContainer(applicationContext, webAppContext, container, jettyHolder);
+
+            JettyProcessingUnitContainer processingUnitContainer = new JettyProcessingUnitContainer(applicationContext, webAppContext, container, jettyHolder);
+            logger.info("Deployed web application [" + processingUnitContainer.getJeeDetails().getDescription() + "]");
+            return processingUnitContainer;
         } catch (Exception e) {
             try {
                 jettyHolder.stop();

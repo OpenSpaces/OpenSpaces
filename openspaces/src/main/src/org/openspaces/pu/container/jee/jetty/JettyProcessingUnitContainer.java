@@ -73,17 +73,21 @@ public class JettyProcessingUnitContainer implements org.openspaces.pu.container
     }
 
     public ProcessingUnitServiceDetails[] getServicesDetails() {
+        return new ProcessingUnitServiceDetails[] {getJeeDetails()};
+    }
+
+    public JeeProcessingUnitServiceDetails getJeeDetails() {
         int port = jettyHolder.getServer().getConnectors()[0].getPort();
         String host = jettyHolder.getServer().getConnectors()[0].getHost();
         if (host == null) {
             try {
-                host = BootUtil.getHostAddressFromProperty("java.rmi.server.hostname");
+                host = BootUtil.getHostAddress();
             } catch (UnknownHostException e) {
                 logger.warn("Unknown host exception", e);
             }
         }
         InetSocketAddress addr = host == null ? new InetSocketAddress(port) : new InetSocketAddress(host, port);
-        ProcessingUnitServiceDetails details = new JeeProcessingUnitServiceDetails("jetty:" + addr.getAddress().getHostAddress() + ":" + port,
+        JeeProcessingUnitServiceDetails details = new JeeProcessingUnitServiceDetails("jetty:" + addr.getAddress().getHostAddress() + ":" + port,
                 addr.getAddress().getHostAddress(),
                 port,
                 jettyHolder.getServer().getConnectors()[0].getConfidentialPort(),
@@ -91,7 +95,7 @@ public class JettyProcessingUnitContainer implements org.openspaces.pu.container
                 jettyHolder.isSingleInstance(),
                 "jetty",
                 JeeType.JETTY);
-        return new ProcessingUnitServiceDetails[] {details};
+        return details;
     }
 
     /**
