@@ -34,7 +34,7 @@ import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterat
 import java.util.List;
 
 /**
- * The default Hiberante external data source implementation. Based on Hibernate {@link Session}.
+ * The default Hibernate external data source implementation. Based on Hibernate {@link Session}.
  *
  * @author kimchy
  */
@@ -43,7 +43,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
     private boolean useMerge = false;
 
     /**
-     * If set to <code>true</code>, will use Hiberante <code>merge</code> to perform the create/update, and will
+     * If set to <code>true</code>, will use Hibernate <code>merge</code> to perform the create/update, and will
      * merge before calling delete. This might be required for complex mappings (depends on Hibernate) at the
      * expense of slower performance. Defaults to <code>false</code>.
      */
@@ -145,7 +145,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
     }
 
     /**
-     * Performs the initial load operation. Iterates over the {@link #setInitialLoadEntries(String[])} inital load
+     * Performs the initial load operation. Iterates over the {@link #setInitialLoadEntries(String[])} initial load
      * entries. If {@link #getInitialLoadChunkSize()} is set to <code>-1</code>, will use
      * {@link org.openspaces.persistency.hibernate.iterator.DefaultScrollableDataIterator} for each entity. If
      * {@link # getInitalLoadChunkSize ()} is set to a non <code>-1</code> value, will use the
