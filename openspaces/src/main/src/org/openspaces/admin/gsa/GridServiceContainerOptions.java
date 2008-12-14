@@ -10,23 +10,13 @@ import java.util.List;
  */
 public class GridServiceContainerOptions {
 
-    private final List<String> inputParameters = new ArrayList<String>();
+    private final List<String> vmInputArguments = new ArrayList<String>();
 
-    private boolean overrideInputParameters = false;
+    private boolean overrideVmInputArguments = false;
 
     private boolean useScript = false;
 
     public GridServiceContainerOptions() {
-    }
-
-    public GridServiceContainerOptions addInputParameter(String inputParameter) {
-        inputParameters.add(inputParameter);
-        return this;
-    }
-
-    public GridServiceContainerOptions overrideInputParameters() {
-        this.overrideInputParameters = true;
-        return this;
     }
 
     public GridServiceContainerOptions useScript() {
@@ -34,13 +24,23 @@ public class GridServiceContainerOptions {
         return this;
     }
 
+    public GridServiceContainerOptions overrideVmInputArguments() {
+        overrideVmInputArguments = true;
+        return this;
+    }
+
+    public GridServiceContainerOptions vmInputArgument(String vmInputArgument) {
+        vmInputArguments.add(vmInputArgument);
+        return this;
+    }
+
     public GSProcessOptions getOptions() {
-        GSProcessOptions options = new GSProcessOptions(GSProcessOptions.Type.GSC);
+        GSProcessOptions options = new GSProcessOptions("gsc");
         options.setUseScript(useScript);
-        if (overrideInputParameters) {
-            options.setInputArguments(inputParameters.toArray(new String[inputParameters.size()]));
+        if (overrideVmInputArguments) {
+            options.setVmInputArguments(vmInputArguments.toArray(new String[vmInputArguments.size()]));
         } else {
-            options.setAppendableInputArguments(inputParameters.toArray(new String[inputParameters.size()]));
+            options.setVmAppendableInputArguments(vmInputArguments.toArray(new String[vmInputArguments.size()]));
         }
         return options;
     }

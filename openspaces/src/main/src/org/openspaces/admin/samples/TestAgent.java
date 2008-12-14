@@ -23,14 +23,14 @@ public class TestAgent {
 
         System.out.println("Starting 2 GSM and 2 GSC");
 
-        GridServiceManager gridServiceManager = gridServiceAgent.startGridServiceAndWait(new GridServiceManagerOptions().useScript());
-        gridServiceAgent.startGridService(new GridServiceManagerOptions());
+        GridServiceManager gsm1 = gridServiceAgent.startGridServiceAndWait(new GridServiceManagerOptions().useScript());
+        GridServiceManager gsm2 = gridServiceAgent.startGridServiceAndWait(new GridServiceManagerOptions());
 
-        GridServiceContainer gsc1 = gridServiceAgent.startGridServiceAndWait(new GridServiceContainerOptions().addInputParameter("-Xmx512m"));
+        GridServiceContainer gsc1 = gridServiceAgent.startGridServiceAndWait(new GridServiceContainerOptions().vmInputArgument("-Xmx512m"));
         GridServiceContainer gsc2 = gridServiceAgent.startGridServiceAndWait(new GridServiceContainerOptions().useScript());
 
         System.out.println("Deploying a space");
-        ProcessingUnit processingUnit = gridServiceManager.deploy(new SpaceDeployment("test").numberOfInstances(2).numberOfBackups(1));
+        ProcessingUnit processingUnit = gsm1.deploy(new SpaceDeployment("test").numberOfInstances(2).numberOfBackups(1));
         Space space = processingUnit.waitForSpace();
         System.out.println("Waiting for all instances to be up");
         space.waitFor(4);
@@ -41,7 +41,8 @@ public class TestAgent {
 
         gsc1.kill();
         gsc2.kill();
-        gridServiceManager.kill();
+        gsm1.kill();
+        gsm2.kill();
 
         admin.close();
     }
