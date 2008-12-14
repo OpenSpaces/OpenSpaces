@@ -84,7 +84,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
     }
 
     /**
-     * Sets all the entries this Hibernate data source will work with. By default, will use Hiberante meta
+     * Sets all the entries this Hibernate data source will work with. By default, will use Hibernate meta
      * data API in order to get the list of all the given entities it handles.
      *
      * <p>This list is used to filter out entities when performing all data source operations exception for
@@ -136,7 +136,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
     }
 
     /**
-     * When performing intial load, this flag indicates if the generated query will order to results by
+     * When performing initial load, this flag indicates if the generated query will order to results by
      * the id. By default set to <code>true</code> as it most times results in better initial load performance.
      */
     public void setPerformOrderById(boolean performOrderById) {
@@ -144,7 +144,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
     }
 
     /**
-     * When performing intial load, this flag indicates if the generated query will order to results by
+     * When performing initial load, this flag indicates if the generated query will order to results by
      * the id. By default set to <code>true</code> as it most times results in better initial load performance.
      */
     protected boolean isPerformOrderById() {
@@ -153,7 +153,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
 
     /**
      * Sets a list of entries that will be used to perform the {@link #initialLoad()} operation. By default, will
-     * try and build a sensible list basde on Hiberante meta data.
+     * try and build a sensible list based on Hibernate meta data.
      *
      * <p>Note, sometimes an explicit list should be provided. For example, if we have a class A and class B, and
      * A has a relationship to B which is not component. If in the space, we only wish to have A, and have B just
@@ -171,7 +171,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      *
      * <p>Note, sometimes an explicit list should be provided. For example, if we have a class A and class B, and
      * A has a relationship to B which is not component. If in the space, we only wish to have A, and have B just
-     * as a field in A (and not as an Entry), then we need to explciitly set the list just to A. By default, if
+     * as a field in A (and not as an Entry), then we need to explicitly set the list just to A. By default, if
      * we won't set it, it will result in two entries existing in the Space, A and B, with A having a field of B
      * as well.
      */
@@ -200,7 +200,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
     }
 
     /**
-     * By default, the inital load process will chunk large tables and will iterate over the table (entity) per
+     * By default, the initial load process will chunk large tables and will iterate over the table (entity) per
      * chunk (concurrently). This setting allows to control the chunk size to split the table by. By default, set
      * to <code>100,000</code>. Batching can be disabled by setting <code>-1</code>.
      */
@@ -209,14 +209,14 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
     }
 
     /**
-     * Controls if scrollable resultsets will be used with inital load operation. Defeaults to <code>true</code>.
+     * Controls if scrollable resultsets will be used with inital load operation. Defaults to <code>true</code>.
      */
     protected boolean isUseScrollableResultSet() {
         return useScrollableResultSet;
     }
 
     /**
-     * Controls if scrollable resultsets will be used with inital load operation. Defeaults to <code>true</code>.
+     * Controls if scrollable resultsets will be used with inital load operation. Defaults to <code>true</code>.
      */
     public void setUseScrollableResultSet(boolean useScrollableResultSet) {
         this.useScrollableResultSet = useScrollableResultSet;
@@ -226,7 +226,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      * Initializes the hibernate data source. Called by the Space.
      *
      * <p>If the session factory was not injected using {@link #setSessionFactory(org.hibernate.SessionFactory)}, will
-     * try can create it from the Proeprties file expecting to find a property called <code>hibernate-config-file</code>
+     * try can create it from the Properties file expecting to find a property called <code>hibernate-config-file</code>
      * with the location of the Hibernate config file.
      *
      * <p>Initializes the {@link #setManagedEntries(String[])} if they were not set explicitly by iterating over all
