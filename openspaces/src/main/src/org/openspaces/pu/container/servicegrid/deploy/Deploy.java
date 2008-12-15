@@ -187,6 +187,10 @@ public class Deploy {
 
     public void deployAndWait(String[] args) throws Exception {
         OperationalString opString = buildOperationalString(args);
+        if (deployAdmin.hasDeployed(opString.getName())) {
+            info("Processing Unit already deployed, exiting");
+            return;
+        }
         int totalPlanned = sumUpServices(opString);
         DeployListener listener = new DeployListener();
         Configuration config = ServiceConfigLoader.getConfiguration();
