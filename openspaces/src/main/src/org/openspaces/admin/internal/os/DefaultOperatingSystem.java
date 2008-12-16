@@ -87,11 +87,12 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
         if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
             return lastStatistics;
         }
+        OperatingSystemStatistics previousStats = lastStatistics;
         lastStatistics = NA_STATS;
         lastStatisticsTimestamp = currentTime;
         for (InternalOperatingSystemInfoProvider provider : operatingSystemInfoProviders) {
             try {
-                lastStatistics = new DefaultOperatingSystemStatistics(provider.getOSStatistics());
+                lastStatistics = new DefaultOperatingSystemStatistics(provider.getOSStatistics(), getDetails(), previousStats);
             } catch (RemoteException e) {
                 // simply try the next one
             }

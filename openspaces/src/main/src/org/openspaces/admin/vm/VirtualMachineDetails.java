@@ -17,11 +17,19 @@ public interface VirtualMachineDetails {
 
     long getStartTime();
 
-    long getMemoryHeapInit();
+    long getMemoryHeapInitInBytes();
+    double getMemoryHeapInitInMB();
+    double getMemoryHeapInitInGB();
 
-    long getMemoryHeapMax();
+    long getMemoryHeapMaxInBytes();
+    double getMemoryHeapMaxInMB();
+    double getMemoryHeapMaxInGB();
 
-    long getMemoryNonHeapInit();
+    long getMemoryNonHeapInitInBytes();
+    double getMemoryNonHeapInitInMB();
+    double getMemoryNonHeapInitInGB();
 
-    long getMemoryNonHeapMax();
+    long getMemoryNonHeapMaxInBytes();
+    double getMemoryNonHeapMaxInMB();
+    double getMemoryNonHeapMaxInGB();
 }

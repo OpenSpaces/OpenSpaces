@@ -84,11 +84,14 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
         }
         lastStatisticsTimestamp = currentTime;
         List<OperatingSystemStatistics> stats = new ArrayList<OperatingSystemStatistics>();
+        List<OperatingSystemDetails> details = new ArrayList<OperatingSystemDetails>();
         for (OperatingSystem os : operatingSystemsByUID.values()) {
             stats.add(os.getStatistics());
+            details.add(os.getDetails());
         }
-        lastStatistics = new DefaultOperatingSystemsStatistics(stats.toArray(new OperatingSystemStatistics[stats.size()]));
-        return lastStatistics; 
+        lastStatistics = new DefaultOperatingSystemsStatistics(stats.toArray(new OperatingSystemStatistics[stats.size()]),
+                lastStatistics, new DefaultOperatingSystemsDetails(details.toArray(new OperatingSystemDetails[details.size()])));
+        return lastStatistics;
     }
 
     public synchronized void setStatisticsInterval(long interval, TimeUnit timeUnit) {

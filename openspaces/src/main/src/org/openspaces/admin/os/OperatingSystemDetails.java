@@ -16,4 +16,16 @@ public interface OperatingSystemDetails {
     String getVersion();
 
     int getAvailableProcessors();
+
+    long getTotalSwapSpaceSizeInBytes();
+
+    double getTotalSwapSpaceSizeInMB();
+
+    double getTotalSwapSpaceSizeInGB();
+
+    long getTotalPhysicalMemorySizeInBytes();
+    
+    double getTotalPhysicalMemorySizeInMB();
+
+    double getTotalPhysicalMemorySizeInGB();
 }

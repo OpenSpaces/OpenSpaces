@@ -5,6 +5,22 @@ package org.openspaces.admin.support;
  */
 public class StatisticsUtils {
 
+    static double megabytesFactor = 9.53674316 * Math.pow(10, -7);
+
+    static double gigabyesFactor = 9.53674316 * Math.pow(10, -10);
+
+    public static double convertToKilobytes(long bytes) {
+        return 0.0009765625 * bytes;
+    }
+
+    public static double convertToMB(long bytes) {
+        return megabytesFactor * bytes;
+    }
+
+    public static double convertToGB(long bytes) {
+        return gigabyesFactor * bytes;
+    }
+
     public static double computePerc(int value, int max) {
         return ((double) value) / max * 100;
     }

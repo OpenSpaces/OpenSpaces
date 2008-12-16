@@ -14,22 +14,30 @@ public interface VirtualMachinesDetails {
     String[] getVmVendor();
 
     /**
-     * Retuns an aggregation of all the different virtual machines {@link VirtualMachineDetails#getMemoryHeapInit()}
+     * Retuns an aggregation of all the different virtual machines {@link VirtualMachineDetails#getMemoryHeapInitInBytes()}
      */
-    long getMemoryHeapInit();
+    long getMemoryHeapInitInBytes();
+    double getMemoryHeapInitInMB();
+    double getMemoryHeapInitInGB();
 
     /**
-     * Retuns an aggregation of all the different virtual machines {@link VirtualMachineDetails#getMemoryHeapMax()}
+     * Retuns an aggregation of all the different virtual machines {@link VirtualMachineDetails#getMemoryHeapMaxInBytes()}
      */
-    long getMemoryHeapMax();
+    long getMemoryHeapMaxInBytes();
+    double getMemoryHeapMaxInMB();
+    double getMemoryHeapMaxInGB();
 
     /**
-     * Retuns an aggregation of all the different virtual machines {@link VirtualMachineDetails#getMemoryNonHeapInit()}
+     * Retuns an aggregation of all the different virtual machines {@link VirtualMachineDetails#getMemoryNonHeapInitInBytes()}
      */
-    long getMemoryNonHeapInit();
+    long getMemoryNonHeapInitInBytes();
+    double getMemoryNonHeapInitInMB();
+    double getMemoryNonHeapInitInGB();
 
     /**
-     * Retuns an aggregation of all the different virtual machines {@link VirtualMachineDetails#getMemoryNonHeapMax()}
+     * Retuns an aggregation of all the different virtual machines {@link VirtualMachineDetails#getMemoryNonHeapMaxInBytes()}
      */
-    long getMemoryNonHeapMax();
+    long getMemoryNonHeapMaxInBytes();
+    double getMemoryNonHeapMaxInMB();
+    double getMemoryNonHeapMaxInGB();
 }

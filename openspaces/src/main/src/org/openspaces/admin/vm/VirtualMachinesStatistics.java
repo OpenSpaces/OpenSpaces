@@ -19,9 +19,13 @@ public interface VirtualMachinesStatistics {
 
     long getUptime();
 
-    long getMemoryHeapCommitted();
+    long getMemoryHeapCommittedInBytes();
+    double getMemoryHeapCommittedInMB();
+    double getMemoryHeapCommittedInGB();
 
-    long getMemoryHeapUsed();
+    long getMemoryHeapUsedInBytes();
+    double getMemoryHeapUsedInMB();
+    double getMemoryHeapUsedInGB();
 
     /**
      * Returns the memory heap percentage from used to the max.
@@ -33,9 +37,13 @@ public interface VirtualMachinesStatistics {
      */
     double getMemoryHeapCommittedPerc();
 
-    long getMemoryNonHeapCommitted();
+    long getMemoryNonHeapCommittedInBytes();
+    double getMemoryNonHeapCommittedInMB();
+    double getMemoryNonHeapCommittedInGB();
 
-    long getMemoryNonHeapUsed();
+    long getMemoryNonHeapUsedInBytes();
+    double getMemoryNonHeapUsedInMB();
+    double getMemoryNonHeapUsedInGB();
 
     /**
      * Returns the memory non heap percentage from used to the max.

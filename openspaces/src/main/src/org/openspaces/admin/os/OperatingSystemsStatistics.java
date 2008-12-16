@@ -10,4 +10,32 @@ public interface OperatingSystemsStatistics {
     long getTimestamp();
 
     int getSize();
+
+    OperatingSystemsStatistics getPrevious();
+
+    OperatingSystemsDetails getDetails();
+
+
+    long getCommittedVirtualMemorySizeInBytes();
+
+    double getCommittedVirtualMemorySizeInMB();
+
+    double getCommittedVirtualMemorySizeInGB();
+
+    long getFreeSwapSpaceSizeInBytes();
+
+    double getFreeSwapSpaceSizeInMB();
+
+    double getFreeSwapSpaceSizeInGB();
+
+    long getFreePhysicalMemorySizeInBytes();
+
+    double getFreePhysicalMemorySizeInMB();
+
+    double getFreePhysicalMemorySizeInGB();
+    
+
+    double getTotalSystemLoadAverage();
+
+    double getSystemLoadAverage();
 }

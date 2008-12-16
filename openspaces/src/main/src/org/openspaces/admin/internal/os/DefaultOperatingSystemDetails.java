@@ -2,6 +2,7 @@ package org.openspaces.admin.internal.os;
 
 import com.gigaspaces.operatingsystem.OSDetails;
 import org.openspaces.admin.os.OperatingSystemDetails;
+import org.openspaces.admin.support.StatisticsUtils;
 
 /**
  * @author kimchy
@@ -36,5 +37,29 @@ public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
 
     public int getAvailableProcessors() {
         return details.getAvailableProcessors();
+    }
+
+    public long getTotalSwapSpaceSizeInBytes() {
+        return details.getTotalSwapSpaceSize();
+    }
+
+    public double getTotalSwapSpaceSizeInMB() {
+        return StatisticsUtils.convertToMB(getTotalSwapSpaceSizeInBytes());
+    }
+
+    public double getTotalSwapSpaceSizeInGB() {
+        return StatisticsUtils.convertToGB(getTotalSwapSpaceSizeInBytes());
+    }
+
+    public long getTotalPhysicalMemorySizeInBytes() {
+        return details.getTotalPhysicalMemorySize();
+    }
+
+    public double getTotalPhysicalMemorySizeInMB() {
+        return StatisticsUtils.convertToMB(getTotalPhysicalMemorySizeInBytes());
+    }
+
+    public double getTotalPhysicalMemorySizeInGB() {
+        return StatisticsUtils.convertToGB(getTotalPhysicalMemorySizeInBytes());
     }
 }

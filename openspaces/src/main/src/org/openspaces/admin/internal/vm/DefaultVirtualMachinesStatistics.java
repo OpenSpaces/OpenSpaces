@@ -61,60 +61,92 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
         return total;
     }
 
-    public long getMemoryHeapCommitted() {
+    public long getMemoryHeapCommittedInBytes() {
         long total = 0;
         for (VirtualMachineStatistics stats : virutualMachinesStatistics) {
             if (!stats.isNA()) {
-                total += stats.getMemoryHeapCommitted();
+                total += stats.getMemoryHeapCommittedInBytes();
             }
         }
         return total;
     }
 
-    public long getMemoryHeapUsed() {
+    public double getMemoryHeapCommittedInMB() {
+        return StatisticsUtils.convertToMB(getMemoryHeapCommittedInBytes());
+    }
+
+    public double getMemoryHeapCommittedInGB() {
+        return StatisticsUtils.convertToGB(getMemoryHeapCommittedInBytes());
+    }
+
+    public long getMemoryHeapUsedInBytes() {
         long total = 0;
         for (VirtualMachineStatistics stats : virutualMachinesStatistics) {
             if (!stats.isNA()) {
-                total += stats.getMemoryHeapUsed();
+                total += stats.getMemoryHeapUsedInBytes();
             }
         }
         return total;
+    }
+
+    public double getMemoryHeapUsedInMB() {
+        return StatisticsUtils.convertToMB(getMemoryHeapUsedInBytes());
+    }
+
+    public double getMemoryHeapUsedInGB() {
+        return StatisticsUtils.convertToGB(getMemoryHeapUsedInBytes());
     }
 
     public double getMemoryHeapPerc() {
-        return StatisticsUtils.computePerc(getMemoryHeapUsed(), getDetails().getMemoryHeapMax());
+        return StatisticsUtils.computePerc(getMemoryHeapUsedInBytes(), getDetails().getMemoryHeapMaxInBytes());
     }
 
     public double getMemoryHeapCommittedPerc() {
-        return StatisticsUtils.computePerc(getMemoryHeapUsed(), getMemoryHeapCommitted());
+        return StatisticsUtils.computePerc(getMemoryHeapUsedInBytes(), getMemoryHeapCommittedInBytes());
     }
 
-    public long getMemoryNonHeapCommitted() {
+    public long getMemoryNonHeapCommittedInBytes() {
         long total = 0;
         for (VirtualMachineStatistics stats : virutualMachinesStatistics) {
             if (!stats.isNA()) {
-                total += stats.getMemoryNonHeapCommitted();
+                total += stats.getMemoryNonHeapCommittedInBytes();
             }
         }
         return total;
     }
 
-    public long getMemoryNonHeapUsed() {
+    public double getMemoryNonHeapCommittedInMB() {
+        return StatisticsUtils.convertToMB(getMemoryNonHeapCommittedInBytes());
+    }
+
+    public double getMemoryNonHeapCommittedInGB() {
+        return StatisticsUtils.convertToGB(getMemoryNonHeapCommittedInBytes());
+    }
+
+    public long getMemoryNonHeapUsedInBytes() {
         long total = 0;
         for (VirtualMachineStatistics stats : virutualMachinesStatistics) {
             if (!stats.isNA()) {
-                total += stats.getMemoryNonHeapUsed();
+                total += stats.getMemoryNonHeapUsedInBytes();
             }
         }
         return total;
+    }
+
+    public double getMemoryNonHeapUsedInMB() {
+        return StatisticsUtils.convertToMB(getMemoryNonHeapUsedInBytes());
+    }
+
+    public double getMemoryNonHeapUsedInGB() {
+        return StatisticsUtils.convertToGB(getMemoryNonHeapUsedInBytes());
     }
 
     public double getMemoryNonHeapPerc() {
-        return StatisticsUtils.computePerc(getMemoryNonHeapUsed(), getDetails().getMemoryNonHeapMax());
+        return StatisticsUtils.computePerc(getMemoryNonHeapUsedInBytes(), getDetails().getMemoryNonHeapMaxInBytes());
     }
 
     public double getMemoryNonHeapCommittedPerc() {
-        return StatisticsUtils.computePerc(getMemoryNonHeapUsed(), getMemoryNonHeapCommitted());
+        return StatisticsUtils.computePerc(getMemoryNonHeapUsedInBytes(), getMemoryNonHeapCommittedInBytes());
     }
 
     public int getThreadCount() {
