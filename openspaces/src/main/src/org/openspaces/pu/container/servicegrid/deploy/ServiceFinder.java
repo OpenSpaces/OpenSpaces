@@ -58,7 +58,7 @@ public class ServiceFinder {
                     attributes
             );
 
-            result = sdm.lookup(template, Integer.MAX_VALUE, Integer.MAX_VALUE,  null, wait);
+            result = sdm.lookup(template, 1, 1,  null, wait);
         } catch (Exception e) {
             // TODO add proper exception here
             e.printStackTrace();

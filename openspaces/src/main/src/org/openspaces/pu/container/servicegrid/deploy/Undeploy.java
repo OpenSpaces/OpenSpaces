@@ -21,9 +21,7 @@ import com.j_spaces.kernel.PlatformVersion;
 import net.jini.core.lookup.ServiceItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jini.rio.core.OperationalString;
 import org.jini.rio.core.OperationalStringManager;
-import org.jini.rio.monitor.DeployAdmin;
 import org.openspaces.pu.container.support.CommandLineParser;
 
 import java.util.Arrays;
@@ -126,35 +124,23 @@ public class Undeploy {
 
         GSM[] gsms = findGSMs();
         //try undeploying using name first
-        DeployAdmin primary = findDeployAdmin(gsms, puName);
-        if (primary != null) {
-            primary.undeploy(puName);
+        OperationalStringManager operationalStringManager = findDeployAdmin(gsms, puName);
+        if (operationalStringManager != null) {
+            operationalStringManager.undeploy();
         } else {
             throw new GSMNotFoundException(getGroups(), lookupTimeout);
         }
     }
 
-    static DeployAdmin findDeployAdmin(GSM[] items, String opstringName) {
-        DeployAdmin primary = null;
-        for (int i = 0; i < items.length; i++) {
+    static OperationalStringManager findDeployAdmin(GSM[] items, String opstringName) {
+        if (items.length > 0) {
             try {
-                DeployAdmin deployAdmin =
-                        (DeployAdmin) items[i].getAdmin();
-                OperationalStringManager[] opMgrs =
-                        deployAdmin.getOperationalStringManagers();
-                for (int j = 0; j < opMgrs.length; j++) {
-                    OperationalString opString = opMgrs[j].getOperationalString();
-                    if (opString.getName().equals(opstringName) &&
-                            opMgrs[j].isManaging()) {
-                        primary = deployAdmin;
-                        break;
-                    }
-                }
+                return items[0].getPrimary(opstringName);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        return (primary);
+        return (null);
     }
 
     public static void main(String[] args) throws Exception {
