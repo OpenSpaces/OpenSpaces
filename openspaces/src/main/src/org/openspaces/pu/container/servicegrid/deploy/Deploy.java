@@ -92,6 +92,12 @@ public class Deploy {
 
     private static boolean sout = false;
 
+    private static boolean disableInfoLogging = false;
+
+    public static void setDisableInfoLogging(boolean disableInfoLogging) {
+        Deploy.disableInfoLogging = disableInfoLogging;
+    }
+
     public GSM[] findGSMs() {
         if (this.gsms != null) {
             return gsms;
@@ -490,6 +496,8 @@ public class Deploy {
         }
 
         //sla
+        int numberOfInstances = sla.getNumberOfInstances();
+        int numberOfBackups = sla.getNumberOfBackups();
         Policy policy = sla.getPolicy();
         if (policy != null) {
             String type;
@@ -505,6 +513,7 @@ public class Deploy {
             //todo: make sure max is greater then num of instances
             if (policy instanceof ScaleUpPolicy) {
                 max = String.valueOf(((ScaleUpPolicy) policy).getMaxInstances());
+                numberOfInstances = ((ScaleUpPolicy) policy).getMaxInstances();
             }
             String[] configParms = getSLAConfigArgs(type, max, policy.getLowerDampener(), policy.getUpperDampener());
             org.jini.rio.core.SLA slaElement = new org.jini.rio.core.SLA(
@@ -541,6 +550,8 @@ public class Deploy {
 
         // pass the SLA as an init parameter so the GSC won't need to parse the XML again
         element.getServiceBeanConfig().addInitParameter("sla", new MarshalledObject(sla));
+        element.getServiceBeanConfig().addInitParameter("numberOfInstances", numberOfInstances);
+        element.getServiceBeanConfig().addInitParameter("numberOfBackups", numberOfBackups);
         // add pu names, path and code server so it can be used on the service bean side
         element.getServiceBeanConfig().addInitParameter("puName", puName);
         element.getServiceBeanConfig().addInitParameter("puPath", puPath);
@@ -752,6 +763,9 @@ public class Deploy {
 
 
     private static void info(String message) {
+        if (disableInfoLogging) {
+            return;
+        }
         if (sout) {
             System.out.println(message);
         }

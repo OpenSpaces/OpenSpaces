@@ -99,6 +99,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             throw new AdminException("No credentials to deploy a processing unit");
         }
         Deploy deploy = new Deploy();
+        Deploy.setDisableInfoLogging(true);
         deploy.setGroups(getAdmin().getGroups());
         StringBuilder locatorsString = new StringBuilder();
         for (LookupLocator locator : getAdmin().getLocators()) {
@@ -139,6 +140,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         } catch (Exception e) {
             throw new AdminException("Failed to deploy [" + deployment.getProcessingUnit() + "]", e);
         } finally {
+            Deploy.setDisableInfoLogging(false);
             getAdmin().getProcessingUnits().getProcessingUnitAdded().remove(added);
         }
     }
