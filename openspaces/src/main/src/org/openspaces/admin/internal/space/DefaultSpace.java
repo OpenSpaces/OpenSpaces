@@ -170,7 +170,7 @@ public class DefaultSpace implements InternalSpace {
         }, -1);
     }
 
-    public SpaceInstance[] getInstnaces() {
+    public SpaceInstance[] getInstances() {
         return spaceInstancesByUID.values().toArray(new SpaceInstance[0]);
     }
 
@@ -379,7 +379,7 @@ public class DefaultSpace implements InternalSpace {
     }
 
     public SpaceInstance[] getSpaceInstances() {
-        return getInstnaces();
+        return getInstances();
     }
 
     public SpaceInstanceAddedEventManager getSpaceInstanceAdded() {

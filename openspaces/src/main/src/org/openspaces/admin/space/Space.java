@@ -28,7 +28,7 @@ public interface Space extends Iterable<SpaceInstance>, StatisticsMonitor {
 
     int getNumberOfBackups();
 
-    SpaceInstance[] getInstnaces();
+    SpaceInstance[] getInstances();
 
     SpacePartition[] getPartitions();
 
