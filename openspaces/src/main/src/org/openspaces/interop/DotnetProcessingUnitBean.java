@@ -11,6 +11,7 @@ import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertiesAware;
+import org.openspaces.core.space.SpaceServiceDetails;
 import org.openspaces.pu.container.DeployableProcessingUnitContainerProvider;
 import org.openspaces.pu.service.ServiceDetails;
 import org.openspaces.pu.service.ServiceDetailsProvider;
@@ -52,8 +53,6 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
 
     /**
      * Injects the .Net processing unit implementation's assembly file
-     * 
-     * @param assemblyFile
      */
     public void setAssemblyFile(String assemblyFile) {
         this.assemblyFile = assemblyFile;
@@ -61,8 +60,6 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
 
     /**
      * Injects the .Net processing unit implementation class name
-     * 
-     * @param implementationName
      */
     public void setImplementationClassName(String implementationClassName) {
         this.implementationClassName = implementationClassName;
@@ -70,8 +67,6 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
 
     /**
      * Injects the .Net processing unit implementation's dependencies
-     * 
-     * @param dependencies
      */
     public void setDependencies(String[] dependencies) {
         this.dependencies = dependencies;
@@ -87,8 +82,6 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
     /**
      * Injects the .Net processing unit properties that will be passed
      * to the init method
-     * 
-     * @param customProperties
      */
     public void setCustomProperties(Properties customProperties)
     {
@@ -147,29 +140,23 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         proxy.close();
         proxy = null;
     }
-    /**
-     * {@inheritDoc}
-     */
+    
     public void setBeanLevelProperties(BeanLevelProperties beanLevelProperties) {
         this.beanLevelProperties = beanLevelProperties;
-    }
-    /**
-     * {@inheritDoc}
-     */
-    public IJSpace[] getSpaces() {
-        return proxy.getContextProxies();
     }
 
     public ServiceDetails[] getServicesDetails() {
         PUDetailsHolder puDetails = proxy.getPUDetailsHolder();
         ArrayList<ServiceDetails> dotnetServiceDetails = new ArrayList<ServiceDetails>();
-        // TODO EITAN FIX ID
-        dotnetServiceDetails.add(new DotnetContainerServiceDetails("na", "interop", puDetails.getDotnetPUContainerShortName(), puDetails.getDotnetPUContainerQualifiedName()));
-        BuildServiceDetails(puDetails, dotnetServiceDetails);
+        dotnetServiceDetails.add(new DotnetContainerServiceDetails(puDetails.getDotnetPUContainerShortName(), "interop", puDetails.getDotnetPUContainerShortName(), puDetails.getDotnetPUContainerQualifiedName()));
+        for (IJSpace space : proxy.getContextProxies()) {
+            dotnetServiceDetails.add(new SpaceServiceDetails(space));
+        }
+        buildServiceDetails(puDetails, dotnetServiceDetails);
         return dotnetServiceDetails.toArray(new ServiceDetails[dotnetServiceDetails.size()]);
     }
 
-    private void BuildServiceDetails(PUDetailsHolder puDetails, ArrayList<ServiceDetails> serviceDetails) {
+    private void buildServiceDetails(PUDetailsHolder puDetails, ArrayList<ServiceDetails> serviceDetails) {
         ServicesDetails details = puDetails.getServicesDetails();
         if (details != null)
         {
@@ -179,8 +166,8 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
             String[] longDescriptions = details.getLongDescriptions();
             for(int i = 0; i < descriptions.length; ++i)
             {
-                //TODO EITAN FIX ID
-                serviceDetails.add(new DotnetServiceDetails("na", types[i], serviceTypes[i], descriptions[i], longDescriptions[i]));
+                // TODO pass ids from dotnet
+                serviceDetails.add(new DotnetServiceDetails(descriptions[i], types[i], serviceTypes[i], descriptions[i], longDescriptions[i]));
             }
         }
     }
