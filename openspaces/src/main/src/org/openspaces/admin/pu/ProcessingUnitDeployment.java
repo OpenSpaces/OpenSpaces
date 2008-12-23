@@ -1,5 +1,6 @@
 package org.openspaces.admin.pu;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,10 @@ public class ProcessingUnitDeployment {
 
     public ProcessingUnitDeployment(String processingUnit) {
         this.processingUnit = processingUnit;
+    }
+
+    public ProcessingUnitDeployment(File processingUnit) {
+        this.processingUnit = processingUnit.getAbsolutePath();
     }
 
     public String getProcessingUnit() {
