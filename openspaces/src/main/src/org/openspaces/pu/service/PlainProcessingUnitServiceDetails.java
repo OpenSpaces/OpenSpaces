@@ -4,6 +4,8 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A simple implementation of {@link ProcessingUnitServiceDetails}.
@@ -12,21 +14,30 @@ import java.io.ObjectOutput;
  */
 public class PlainProcessingUnitServiceDetails implements ProcessingUnitServiceDetails, Externalizable {
 
-    private String id;
+    protected String id;
 
-    private String serviceType;
+    protected String serviceType;
 
-    private String type;
+    protected String type;
 
-    private String description;
+    protected String description;
 
-    private String longDescription;
+    protected String longDescription;
+
+    protected Map<String, Object> attributes = new HashMap<String, Object>();
 
     // Just for externalizable
     public PlainProcessingUnitServiceDetails() {
     }
 
-    public PlainProcessingUnitServiceDetails(String id, String serviceType, String type, String description, String longDescription) {
+    public PlainProcessingUnitServiceDetails(String id, String serviceType, String type,
+                                             String description, String longDescription) {
+        this(id, serviceType, type, description, longDescription, null);
+    }
+
+    public PlainProcessingUnitServiceDetails(String id, String serviceType, String type,
+                                             String description, String longDescription,
+                                             Map<String, Object> attributes) {
         this.id = id;
         this.serviceType = serviceType;
         this.type = type;
@@ -38,6 +49,7 @@ public class PlainProcessingUnitServiceDetails implements ProcessingUnitServiceD
         if (this.longDescription == null) {
             this.longDescription = "";
         }
+        this.attributes = attributes;
     }
 
     public String getId() {
@@ -60,12 +72,25 @@ public class PlainProcessingUnitServiceDetails implements ProcessingUnitServiceD
         return this.longDescription;
     }
 
+    public Map<String, Object> getAttributes() {
+        return this.attributes;
+    }
+
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeUTF(id);
         out.writeUTF(serviceType);
         out.writeUTF(type);
         out.writeUTF(description);
         out.writeUTF(longDescription);
+        if (attributes == null) {
+            out.writeInt(0);
+        } else {
+            out.writeInt(attributes.size());
+            for (Map.Entry<String, Object> entry : attributes.entrySet()) {
+                out.writeObject(entry.getKey());
+                out.writeObject(entry.getValue());
+            }
+        }
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
@@ -74,5 +99,12 @@ public class PlainProcessingUnitServiceDetails implements ProcessingUnitServiceD
         type = in.readUTF();
         description = in.readUTF();
         longDescription = in.readUTF();
+        attributes = new HashMap<String, Object>();
+        int attributesSize = in.readInt();
+        for (int i = 0; i < attributesSize; i++) {
+            String key = (String) in.readObject();
+            Object value = in.readObject();
+            attributes.put(key, value);
+        }
     }
 }

@@ -16,9 +16,8 @@
 
 package org.openspaces.interop;
 
-import org.openspaces.pu.service.ProcessingUnitServiceDetails;
+import org.openspaces.pu.service.PlainProcessingUnitServiceDetails;
 
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -28,46 +27,13 @@ import java.io.ObjectOutput;
  *
  * @author kimchy
  */
-public class DotnetProcessingUnitContainerServiceDetails implements ProcessingUnitServiceDetails, Externalizable {
+public class DotnetProcessingUnitContainerServiceDetails extends PlainProcessingUnitServiceDetails {
 
-    private static final long serialVersionUID = 1L;
-
-    private String id;
-    
-    private String type;
-    
-    private String description;
-
-    private String longDescription;
-    
     public DotnetProcessingUnitContainerServiceDetails() {
     }
 
     public DotnetProcessingUnitContainerServiceDetails(String id, String type, String description, String longDescription) {
-        this.id = id;
-        this.type = type;
-        this.description = description;
-        this.longDescription = longDescription;
-    }
-
-    public String getId() {
-        return this.id;
-    }
-
-    public String getServiceType() {
-        return "dotnet";
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getLongDescription() {
-        return longDescription;
-    }
-
-    public String getType() {
-        return type;
+        super(id, "dotnet", type, description, longDescription);
     }
 
     public void setType(String type) {
@@ -75,16 +41,10 @@ public class DotnetProcessingUnitContainerServiceDetails implements ProcessingUn
     }
 
     public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeUTF(id);
-        out.writeUTF(type);
-        out.writeUTF(description);
-        out.writeUTF(longDescription);
+        super.writeExternal(out);
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        id = in.readUTF();
-        type = in.readUTF();
-        description = in.readUTF();
-        longDescription = in.readUTF();
+        super.readExternal(in);
     }
 }

@@ -1,6 +1,7 @@
 package org.openspaces.pu.service;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * A generic service that exists within a processing unit.
@@ -34,4 +35,9 @@ public interface ProcessingUnitServiceDetails extends Serializable {
      * Returns the long description
      */
     String getLongDescription();
+
+    /**
+     * Returns extra atrributes the service details wishes to expose.
+     */
+    Map<String, Object> getAttributes();
 }
