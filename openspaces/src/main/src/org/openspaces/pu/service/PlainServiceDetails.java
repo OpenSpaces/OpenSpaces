@@ -31,13 +31,7 @@ public class PlainServiceDetails implements ServiceDetails, Externalizable {
     }
 
     public PlainServiceDetails(String id, String serviceType, String type,
-                                             String description, String longDescription) {
-        this(id, serviceType, type, description, longDescription, null);
-    }
-
-    public PlainServiceDetails(String id, String serviceType, String type,
-                                             String description, String longDescription,
-                                             Map<String, Object> attributes) {
+                               String description, String longDescription) {
         this.id = id;
         this.serviceType = serviceType;
         this.type = type;
@@ -49,7 +43,6 @@ public class PlainServiceDetails implements ServiceDetails, Externalizable {
         if (this.longDescription == null) {
             this.longDescription = "";
         }
-        this.attributes = attributes;
     }
 
     public String getId() {
@@ -74,6 +67,18 @@ public class PlainServiceDetails implements ServiceDetails, Externalizable {
 
     public Map<String, Object> getAttributes() {
         return this.attributes;
+    }
+
+    public AggregatedServiceDetails aggregateByServiceType(ServiceDetails[] servicesDetails) {
+        return null;
+    }
+
+    public AggregatedServiceDetails aggregateByType(ServiceDetails[] servicesDetails) {
+        return null;
+    }
+
+    public AggregatedServiceDetails aggregateById(ServiceDetails[] servicesDetails) {
+        return null;
     }
 
     public void writeExternal(ObjectOutput out) throws IOException {

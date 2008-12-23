@@ -29,13 +29,14 @@ import java.io.ObjectOutput;
  */
 public class JeeServiceDetails extends PlainServiceDetails {
 
-    public static final String ATTRIBUTE_HOST = "host";
-    public static final String ATTRIBUTE_PORT = "port";
-    public static final String ATTRIBUTE_SSLPORT = "ssl-port";
-    public static final String ATTRIBUTE_CONTEXTPATH = "context-path";
-    public static final String ATTRIBUTE_SHARED = "shared";
-    public static final String ATTRIBUTE_TYPE = "type";
-    public static final String ATTRIBUTE_JEETYPE = "jee-type";
+    public static final class Attributes {
+        public static final String HOST = "host";
+        public static final String PORT = "port";
+        public static final String SSLPORT = "ssl-port";
+        public static final String CONTEXTPATH = "context-path";
+        public static final String SHARED = "shared";
+        public static final String JEETYPE = "jee-type";
+    }
 
     public JeeServiceDetails() {
     }
@@ -43,41 +44,40 @@ public class JeeServiceDetails extends PlainServiceDetails {
     public JeeServiceDetails(String id, String host, int port, int sslPort, String contextPath, boolean shared,
                                            String type, JeeType jeeType) {
         super(id, "jee-container", type, host + ":" + port + contextPath, host + ":" + port + contextPath);
-        getAttributes().put(ATTRIBUTE_HOST, host);
-        getAttributes().put(ATTRIBUTE_PORT, port);
-        getAttributes().put(ATTRIBUTE_SSLPORT, sslPort);
-        getAttributes().put(ATTRIBUTE_CONTEXTPATH, contextPath);
-        getAttributes().put(ATTRIBUTE_SHARED, shared);
-        getAttributes().put(ATTRIBUTE_TYPE, type);
-        getAttributes().put(ATTRIBUTE_JEETYPE, jeeType);
+        getAttributes().put(Attributes.HOST, host);
+        getAttributes().put(Attributes.PORT, port);
+        getAttributes().put(Attributes.SSLPORT, sslPort);
+        getAttributes().put(Attributes.CONTEXTPATH, contextPath);
+        getAttributes().put(Attributes.SHARED, shared);
+        getAttributes().put(Attributes.JEETYPE, jeeType);
     }
 
     /**
      * Returns the host of where the service is running on.
      */
     public String getHost() {
-        return (String) getAttributes().get(ATTRIBUTE_HOST);
+        return (String) getAttributes().get(Attributes.HOST);
     }
 
     /**
      * Returns the port of where the service is running on.
      */
     public int getPort() {
-        return (Integer) getAttributes().get(ATTRIBUTE_PORT);
+        return (Integer) getAttributes().get(Attributes.PORT);
     }
 
     /**
      * Returns the ssl port of where the service is running on.
      */
     public int getSslPort() {
-        return (Integer) getAttributes().get(ATTRIBUTE_SSLPORT);
+        return (Integer) getAttributes().get(Attributes.SSLPORT);
     }
 
     /**
      * Returns the context path of the web application.
      */
     public String getContextPath() {
-        return (String) getAttributes().get(ATTRIBUTE_CONTEXTPATH);
+        return (String) getAttributes().get(Attributes.CONTEXTPATH);
     }
 
     /**
@@ -86,7 +86,7 @@ public class JeeServiceDetails extends PlainServiceDetails {
      * own dedicated web container.
      */
     public boolean isShared() {
-        return (Boolean) getAttributes().get(ATTRIBUTE_SHARED);
+        return (Boolean) getAttributes().get(Attributes.SHARED);
     }
 
     public void writeExternal(ObjectOutput out) throws IOException {

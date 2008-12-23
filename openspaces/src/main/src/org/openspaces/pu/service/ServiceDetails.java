@@ -40,4 +40,22 @@ public interface ServiceDetails extends Serializable {
      * Returns extra atrributes the service details wishes to expose.
      */
     Map<String, Object> getAttributes();
+
+    /**
+     * Aggregates an array of service details into an aggregated view of it. All service details are of the same
+     * service type. Can return <code>null</code> if no aggregation can be performed.
+     */
+    AggregatedServiceDetails aggregateByServiceType(ServiceDetails[] servicesDetails);
+
+    /**
+     * Aggregates an array of service details into an aggregated view of it. All service details are of the same
+     * service type and type. Can return <code>null</code> if no aggregation can be performed.
+     */
+    AggregatedServiceDetails aggregateByType(ServiceDetails[] servicesDetails);
+
+    /**
+     * Aggregates an array of service details into an aggregated view of it. All service details are of the same
+     * id (and service type and type). Can return <code>null</code> if no aggregation can be performed.
+     */
+    AggregatedServiceDetails aggregateById(ServiceDetails[] servicesDetails);
 }
