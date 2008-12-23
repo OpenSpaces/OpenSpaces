@@ -1,6 +1,5 @@
 package org.openspaces.interop;
 
-import com.j_spaces.core.IJSpace;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.CannotCloseContainerException;
@@ -36,10 +35,6 @@ public class DotnetProcessingUnitContainer implements ProcessingUnitContainer, S
         }
     }
     
-    public IJSpace[] getSpaces() {
-        return dotnetProcessingUnitBean.getSpaces();
-    }
-
     public ServiceDetails[] getServicesDetails() {
         ServiceDetails[] details = dotnetProcessingUnitBean.getServicesDetails();
         if (details != null) {
