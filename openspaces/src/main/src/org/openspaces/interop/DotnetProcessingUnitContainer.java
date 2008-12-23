@@ -6,14 +6,14 @@ import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
-import org.openspaces.pu.service.ProcessingUnitServiceDetails;
-import org.openspaces.pu.service.ProcessingUnitServiceDetailsProvider;
+import org.openspaces.pu.service.ServiceDetails;
+import org.openspaces.pu.service.ServiceDetailsProvider;
 
 /**
  * @author kimchy
  * @since 6.6
  */
-public class DotnetProcessingUnitContainer implements ProcessingUnitContainer, ProcessingUnitServiceDetailsProvider {
+public class DotnetProcessingUnitContainer implements ProcessingUnitContainer, ServiceDetailsProvider {
        
     private DotnetProcessingUnitBean dotnetProcessingUnitBean;
     
@@ -40,12 +40,12 @@ public class DotnetProcessingUnitContainer implements ProcessingUnitContainer, P
         return dotnetProcessingUnitBean.getSpaces();
     }
 
-    public ProcessingUnitServiceDetails[] getServicesDetails() {
-        ProcessingUnitServiceDetails[] details = dotnetProcessingUnitBean.getServicesDetails();
+    public ServiceDetails[] getServicesDetails() {
+        ServiceDetails[] details = dotnetProcessingUnitBean.getServicesDetails();
         if (details != null) {
-            for (ProcessingUnitServiceDetails detail : details) {
-                if (detail instanceof DotnetProcessingUnitContainerServiceDetails) {
-                    ((DotnetProcessingUnitContainerServiceDetails) detail).setType("pure");
+            for (ServiceDetails detail : details) {
+                if (detail instanceof DotnetContainerServiceDetails) {
+                    ((DotnetContainerServiceDetails) detail).setType("pure");
                 }
             }
         }

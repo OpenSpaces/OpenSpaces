@@ -16,7 +16,7 @@
 
 package org.openspaces.interop;
 
-import org.openspaces.pu.service.PlainProcessingUnitServiceDetails;
+import org.openspaces.pu.service.PlainServiceDetails;
 
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -27,7 +27,7 @@ import java.io.ObjectOutput;
  *
  * @author kimchy
  */
-public class DotnetServiceDetails extends PlainProcessingUnitServiceDetails {
+public class DotnetServiceDetails extends PlainServiceDetails {
 
     public DotnetServiceDetails() {
     }

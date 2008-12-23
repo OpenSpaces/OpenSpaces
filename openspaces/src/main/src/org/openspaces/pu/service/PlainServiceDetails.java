@@ -8,11 +8,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A simple implementation of {@link ProcessingUnitServiceDetails}.
+ * A simple implementation of {@link ServiceDetails}.
  *
  * @author kimchy
  */
-public class PlainProcessingUnitServiceDetails implements ProcessingUnitServiceDetails, Externalizable {
+public class PlainServiceDetails implements ServiceDetails, Externalizable {
 
     protected String id;
 
@@ -27,15 +27,15 @@ public class PlainProcessingUnitServiceDetails implements ProcessingUnitServiceD
     protected Map<String, Object> attributes = new HashMap<String, Object>();
 
     // Just for externalizable
-    public PlainProcessingUnitServiceDetails() {
+    public PlainServiceDetails() {
     }
 
-    public PlainProcessingUnitServiceDetails(String id, String serviceType, String type,
+    public PlainServiceDetails(String id, String serviceType, String type,
                                              String description, String longDescription) {
         this(id, serviceType, type, description, longDescription, null);
     }
 
-    public PlainProcessingUnitServiceDetails(String id, String serviceType, String type,
+    public PlainServiceDetails(String id, String serviceType, String type,
                                              String description, String longDescription,
                                              Map<String, Object> attributes) {
         this.id = id;

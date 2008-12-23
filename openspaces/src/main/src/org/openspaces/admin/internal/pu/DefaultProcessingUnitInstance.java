@@ -19,12 +19,12 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.core.cluster.ClusterInfo;
-import org.openspaces.core.space.SpaceProcessingUnitServiceDetails;
+import org.openspaces.core.space.SpaceServiceDetails;
 import org.openspaces.core.space.SpaceType;
-import org.openspaces.pu.container.jee.JeeProcessingUnitServiceDetails;
+import org.openspaces.pu.container.jee.JeeServiceDetails;
 import org.openspaces.pu.container.servicegrid.PUDetails;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
-import org.openspaces.pu.service.ProcessingUnitServiceDetails;
+import org.openspaces.pu.service.ServiceDetails;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -54,13 +54,13 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private volatile ProcessingUnitPartition processingUnitPartition;
 
-    private final SpaceProcessingUnitServiceDetails[] embeddedSpacesDetails;
+    private final SpaceServiceDetails[] embeddedSpacesDetails;
 
-    private final SpaceProcessingUnitServiceDetails[] spacesDetails;
+    private final SpaceServiceDetails[] spacesDetails;
 
-    private final JeeProcessingUnitServiceDetails jeeDetails;
+    private final JeeServiceDetails jeeDetails;
 
-    private final Map<String, ProcessingUnitServiceDetails[]> servicesDetailsByServiceId;
+    private final Map<String, ServiceDetails[]> servicesDetailsByServiceId;
 
     private final InternalSpaceInstances spaceInstances;
 
@@ -73,39 +73,39 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
         this.spaceInstances = new DefaultSpaceInstances(admin);
 
-        ArrayList<SpaceProcessingUnitServiceDetails> embeddedSpacesEmbeddedList = new ArrayList<SpaceProcessingUnitServiceDetails>();
-        ArrayList<SpaceProcessingUnitServiceDetails> spacesDetailsList = new ArrayList<SpaceProcessingUnitServiceDetails>();
-        JeeProcessingUnitServiceDetails jeeDetailsX = null;
+        ArrayList<SpaceServiceDetails> embeddedSpacesEmbeddedList = new ArrayList<SpaceServiceDetails>();
+        ArrayList<SpaceServiceDetails> spacesDetailsList = new ArrayList<SpaceServiceDetails>();
+        JeeServiceDetails jeeDetailsX = null;
 
-        Map<String, List<ProcessingUnitServiceDetails>> servicesDetailsByServiceIdList = new HashMap<String, List<ProcessingUnitServiceDetails>>();
+        Map<String, List<ServiceDetails>> servicesDetailsByServiceIdList = new HashMap<String, List<ServiceDetails>>();
 
-        for (ProcessingUnitServiceDetails serviceDetails : puDetails.getDetails()) {
+        for (ServiceDetails serviceDetails : puDetails.getDetails()) {
 
-            List<ProcessingUnitServiceDetails> list = servicesDetailsByServiceIdList.get(serviceDetails.getServiceType());
+            List<ServiceDetails> list = servicesDetailsByServiceIdList.get(serviceDetails.getServiceType());
             if (list == null) {
-                list = new ArrayList<ProcessingUnitServiceDetails>();
+                list = new ArrayList<ServiceDetails>();
                 servicesDetailsByServiceIdList.put(serviceDetails.getServiceType(), list);
             }
             list.add(serviceDetails);
 
-            if (serviceDetails instanceof SpaceProcessingUnitServiceDetails) {
-                SpaceProcessingUnitServiceDetails spaceDetails = (SpaceProcessingUnitServiceDetails) serviceDetails;
+            if (serviceDetails instanceof SpaceServiceDetails) {
+                SpaceServiceDetails spaceDetails = (SpaceServiceDetails) serviceDetails;
                 spacesDetailsList.add(spaceDetails);
                 if (spaceDetails.getSpaceType() == SpaceType.EMBEDDED) {
-                    embeddedSpacesEmbeddedList.add((SpaceProcessingUnitServiceDetails) serviceDetails);
+                    embeddedSpacesEmbeddedList.add((SpaceServiceDetails) serviceDetails);
                 }
-            } else if (serviceDetails instanceof JeeProcessingUnitServiceDetails) {
-                jeeDetailsX = (JeeProcessingUnitServiceDetails) serviceDetails;
+            } else if (serviceDetails instanceof JeeServiceDetails) {
+                jeeDetailsX = (JeeServiceDetails) serviceDetails;
             }
         }
 
         jeeDetails = jeeDetailsX;
-        embeddedSpacesDetails = embeddedSpacesEmbeddedList.toArray(new SpaceProcessingUnitServiceDetails[embeddedSpacesEmbeddedList.size()]);
-        spacesDetails = spacesDetailsList.toArray(new SpaceProcessingUnitServiceDetails[spacesDetailsList.size()]);
+        embeddedSpacesDetails = embeddedSpacesEmbeddedList.toArray(new SpaceServiceDetails[embeddedSpacesEmbeddedList.size()]);
+        spacesDetails = spacesDetailsList.toArray(new SpaceServiceDetails[spacesDetailsList.size()]);
 
-        Map<String, ProcessingUnitServiceDetails[]> servicesDetailsTemp = new HashMap<String, ProcessingUnitServiceDetails[]>();
-        for (Map.Entry<String, List<ProcessingUnitServiceDetails>> entry : servicesDetailsByServiceIdList.entrySet()) {
-            servicesDetailsTemp.put(entry.getKey(), entry.getValue().toArray(new ProcessingUnitServiceDetails[entry.getValue().size()]));
+        Map<String, ServiceDetails[]> servicesDetailsTemp = new HashMap<String, ServiceDetails[]>();
+        for (Map.Entry<String, List<ServiceDetails>> entry : servicesDetailsByServiceIdList.entrySet()) {
+            servicesDetailsTemp.put(entry.getKey(), entry.getValue().toArray(new ServiceDetails[entry.getValue().size()]));
         }
         servicesDetailsByServiceId = servicesDetailsTemp;
     }
@@ -145,26 +145,26 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         return puDetails.getClusterInfo();
     }
 
-    public Iterator<ProcessingUnitServiceDetails> iterator() {
+    public Iterator<ServiceDetails> iterator() {
         return Arrays.asList(puDetails.getDetails()).iterator();
     }
 
-    public SpaceProcessingUnitServiceDetails[] getSpaceServiceDetails() {
+    public SpaceServiceDetails[] getSpaceServiceDetails() {
         return spacesDetails;
     }
 
-    public SpaceProcessingUnitServiceDetails getEmbeddedSpaceServiceDetails() {
+    public SpaceServiceDetails getEmbeddedSpaceServiceDetails() {
         if (embeddedSpacesDetails.length == 0) {
             return null;
         }
         return embeddedSpacesDetails[0];
     }
 
-    public SpaceProcessingUnitServiceDetails[] getEmbeddedSpacesServiceDetails() {
+    public SpaceServiceDetails[] getEmbeddedSpacesServiceDetails() {
         return embeddedSpacesDetails;
     }
 
-    public ProcessingUnitServiceDetails[] getServicesDetails() {
+    public ServiceDetails[] getServicesDetails() {
         return puDetails.getDetails();
     }
 
@@ -209,7 +209,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public void addSpaceInstnaceIfMatching(SpaceInstance spaceInstance) {
-        for (SpaceProcessingUnitServiceDetails spaceDetails : embeddedSpacesDetails) {
+        for (SpaceServiceDetails spaceDetails : embeddedSpacesDetails) {
             if (((InternalSpaceInstance) spaceInstance).getServiceID().equals(spaceDetails.getServiceID())) {
                 spaceInstances.addSpaceInstance(spaceInstance);
                 processingUnit.addEmbeddedSpace(spaceInstance.getSpace());
@@ -225,15 +225,15 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         return jeeDetails != null;
     }
 
-    public JeeProcessingUnitServiceDetails getJeeDetails() {
+    public JeeServiceDetails getJeeDetails() {
         return jeeDetails;
     }
 
-    public ProcessingUnitServiceDetails[] getServicesDetailsByServiceType(String serviceType) {
+    public ServiceDetails[] getServicesDetailsByServiceType(String serviceType) {
         return servicesDetailsByServiceId.get(serviceType);
     }
 
-    public Map<String, ProcessingUnitServiceDetails[]> getServiceDetailsByServiceType() {
+    public Map<String, ServiceDetails[]> getServiceDetailsByServiceType() {
         return Collections.unmodifiableMap(servicesDetailsByServiceId);
     }
 

@@ -8,7 +8,7 @@ import java.util.Map;
  *
  * @author kimchy
  */
-public interface ProcessingUnitServiceDetails extends Serializable {
+public interface ServiceDetails extends Serializable {
 
     /**
      * Returns the id of the processing unit (usually the bean id).

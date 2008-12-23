@@ -12,8 +12,8 @@ import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertiesAware;
 import org.openspaces.pu.container.DeployableProcessingUnitContainerProvider;
-import org.openspaces.pu.service.ProcessingUnitServiceDetails;
-import org.openspaces.pu.service.ProcessingUnitServiceDetailsProvider;
+import org.openspaces.pu.service.ServiceDetails;
+import org.openspaces.pu.service.ServiceDetailsProvider;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -30,7 +30,7 @@ import java.util.UUID;
  * @since 6.5
  */
 public class DotnetProcessingUnitBean implements InitializingBean, DisposableBean, ClusterInfoAware, BeanLevelPropertiesAware,
-        ProcessingUnitServiceDetailsProvider {
+        ServiceDetailsProvider {
     
     protected final Log log = LogFactory.getLog(getClass());
     
@@ -160,16 +160,16 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         return proxy.getContextProxies();
     }
 
-    public ProcessingUnitServiceDetails[] getServicesDetails() {
+    public ServiceDetails[] getServicesDetails() {
         PUDetailsHolder puDetails = proxy.getPUDetailsHolder();
-        ArrayList<ProcessingUnitServiceDetails> dotnetServiceDetails = new ArrayList<ProcessingUnitServiceDetails>();
+        ArrayList<ServiceDetails> dotnetServiceDetails = new ArrayList<ServiceDetails>();
         // TODO EITAN FIX ID
-        dotnetServiceDetails.add(new DotnetProcessingUnitContainerServiceDetails("na", "interop", puDetails.getDotnetPUContainerShortName(), puDetails.getDotnetPUContainerQualifiedName()));
+        dotnetServiceDetails.add(new DotnetContainerServiceDetails("na", "interop", puDetails.getDotnetPUContainerShortName(), puDetails.getDotnetPUContainerQualifiedName()));
         BuildServiceDetails(puDetails, dotnetServiceDetails);
-        return dotnetServiceDetails.toArray(new ProcessingUnitServiceDetails[dotnetServiceDetails.size()]);
+        return dotnetServiceDetails.toArray(new ServiceDetails[dotnetServiceDetails.size()]);
     }
 
-    private void BuildServiceDetails(PUDetailsHolder puDetails, ArrayList<ProcessingUnitServiceDetails> serviceDetails) {
+    private void BuildServiceDetails(PUDetailsHolder puDetails, ArrayList<ServiceDetails> serviceDetails) {
         ServicesDetails details = puDetails.getServicesDetails();
         if (details != null)
         {

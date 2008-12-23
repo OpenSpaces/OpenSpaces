@@ -22,7 +22,7 @@ import com.gigaspaces.lrmi.nio.info.NIOInfoProvider;
 import com.gigaspaces.operatingsystem.OSInfoProvider;
 import com.j_spaces.core.client.SpaceURL;
 import org.openspaces.core.cluster.ClusterInfo;
-import org.openspaces.pu.service.ProcessingUnitServiceDetails;
+import org.openspaces.pu.service.ServiceDetails;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -42,7 +42,7 @@ public interface PUServiceBean extends NIOInfoProvider, OSInfoProvider, JVMInfoP
      */
     boolean isAlive() throws RemoteException;
 
-    ProcessingUnitServiceDetails[] listServiceDetails() throws RemoteException;
+    ServiceDetails[] listServiceDetails() throws RemoteException;
 
     ClusterInfo getClusterInfo() throws RemoteException;
 

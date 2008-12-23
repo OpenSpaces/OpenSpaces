@@ -21,9 +21,9 @@ import org.apache.commons.logging.LogFactory;
 import org.glassfish.embed.Application;
 import org.jini.rio.boot.BootUtil;
 import org.openspaces.pu.container.CannotCloseContainerException;
-import org.openspaces.pu.container.jee.JeeProcessingUnitServiceDetails;
+import org.openspaces.pu.container.jee.JeeServiceDetails;
 import org.openspaces.pu.container.jee.JeeType;
-import org.openspaces.pu.service.ProcessingUnitServiceDetails;
+import org.openspaces.pu.service.ServiceDetails;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.web.context.ContextLoader;
@@ -67,7 +67,7 @@ public class GlassfishProcessingUnitContainer implements org.openspaces.pu.conta
         return webApplicationContext;
     }
 
-    public ProcessingUnitServiceDetails[] getServicesDetails() {
+    public ServiceDetails[] getServicesDetails() {
         int port = glassfishHolder.getPort();
         String host = null;
         if (host == null) {
@@ -78,7 +78,7 @@ public class GlassfishProcessingUnitContainer implements org.openspaces.pu.conta
             }
         }
         InetSocketAddress addr = host == null ? new InetSocketAddress(port) : new InetSocketAddress(host, port);
-        ProcessingUnitServiceDetails details = new JeeProcessingUnitServiceDetails("glassfish:"+addr.getAddress().getHostAddress() + ":" + port,
+        ServiceDetails details = new JeeServiceDetails("glassfish:"+addr.getAddress().getHostAddress() + ":" + port,
                 addr.getAddress().getHostAddress(),
                 port,
                 -1,
@@ -86,7 +86,7 @@ public class GlassfishProcessingUnitContainer implements org.openspaces.pu.conta
                 glassfishHolder.isSingleInstance(),
                 "glassfish",
                 JeeType.GLASSFISH);
-        return new ProcessingUnitServiceDetails[]{details};
+        return new ServiceDetails[]{details};
     }
 
     /**

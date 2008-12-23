@@ -68,7 +68,7 @@ public class TestSampler {
 //                        if (processingUnitInstance.isEmbeddedSpaces()) {
 //                            System.out.println("      -> Embedded Space [" + processingUnitInstance.getSpaceInstance().getUid() + "]");
 //                        }
-//                        for (ProcessingUnitServiceDetails details : processingUnitInstance) {
+//                        for (ServiceDetails details : processingUnitInstance) {
 //                            System.out.println("      -> Service [" + details.getId() + "] type [" + details.getType() + "]");
 //                        }
 //                    }

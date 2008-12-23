@@ -16,7 +16,7 @@
 
 package org.openspaces.pu.container.jee;
 
-import org.openspaces.pu.service.PlainProcessingUnitServiceDetails;
+import org.openspaces.pu.service.PlainServiceDetails;
 
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -27,7 +27,7 @@ import java.io.ObjectOutput;
  *
  * @author kimchy
  */
-public class JeeProcessingUnitServiceDetails extends PlainProcessingUnitServiceDetails {
+public class JeeServiceDetails extends PlainServiceDetails {
 
     public static final String ATTRIBUTE_HOST = "host";
     public static final String ATTRIBUTE_PORT = "port";
@@ -37,10 +37,10 @@ public class JeeProcessingUnitServiceDetails extends PlainProcessingUnitServiceD
     public static final String ATTRIBUTE_TYPE = "type";
     public static final String ATTRIBUTE_JEETYPE = "jee-type";
 
-    public JeeProcessingUnitServiceDetails() {
+    public JeeServiceDetails() {
     }
 
-    public JeeProcessingUnitServiceDetails(String id, String host, int port, int sslPort, String contextPath, boolean shared,
+    public JeeServiceDetails(String id, String host, int port, int sslPort, String contextPath, boolean shared,
                                            String type, JeeType jeeType) {
         super(id, "jee-container", type, host + ":" + port + contextPath, host + ":" + port + contextPath);
         getAttributes().put(ATTRIBUTE_HOST, host);

@@ -4,16 +4,16 @@ import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.core.cluster.ClusterInfo;
-import org.openspaces.core.space.SpaceProcessingUnitServiceDetails;
-import org.openspaces.pu.container.jee.JeeProcessingUnitServiceDetails;
-import org.openspaces.pu.service.ProcessingUnitServiceDetails;
+import org.openspaces.core.space.SpaceServiceDetails;
+import org.openspaces.pu.container.jee.JeeServiceDetails;
+import org.openspaces.pu.service.ServiceDetails;
 
 import java.util.Map;
 
 /**
  * @author kimchy
  */
-public interface ProcessingUnitInstance extends GridComponent, Iterable<ProcessingUnitServiceDetails> {
+public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceDetails> {
 
     /**
      * Destroy the instance. If breaches the SLA, will instanstiate the instance again.
@@ -41,27 +41,27 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<Processi
 
     ProcessingUnitPartition getPartition();
 
-    ProcessingUnitServiceDetails[] getServicesDetails();
+    ServiceDetails[] getServicesDetails();
 
-    ProcessingUnitServiceDetails[] getServicesDetailsByServiceType(String serviceType);
+    ServiceDetails[] getServicesDetailsByServiceType(String serviceType);
 
-    Map<String, ProcessingUnitServiceDetails[]> getServiceDetailsByServiceType();
+    Map<String, ServiceDetails[]> getServiceDetailsByServiceType();
 
     /**
      * Returns the space service details as described by the service started within the processing unit.
      */
-    SpaceProcessingUnitServiceDetails[] getSpaceServiceDetails();
+    SpaceServiceDetails[] getSpaceServiceDetails();
 
     /**
      * Returns the embedded space service details as described by the service started within the processing unit.
      * <code>null</code> if no embedded space was started within the processing unit.
      */
-    SpaceProcessingUnitServiceDetails getEmbeddedSpaceServiceDetails();
+    SpaceServiceDetails getEmbeddedSpaceServiceDetails();
 
     /**
      * Returns the embedded space service details as described by the service started within the processing unit.
      */
-    SpaceProcessingUnitServiceDetails[] getEmbeddedSpacesServiceDetails();
+    SpaceServiceDetails[] getEmbeddedSpacesServiceDetails();
 
     /**
      * Returns <code>true</code> if there are embedded spaces started within this processing
@@ -90,5 +90,5 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<Processi
     /**
      * Returns the jee service details of the jee container that was started within this processign unit.
      */
-    JeeProcessingUnitServiceDetails getJeeDetails();
+    JeeServiceDetails getJeeDetails();
 }

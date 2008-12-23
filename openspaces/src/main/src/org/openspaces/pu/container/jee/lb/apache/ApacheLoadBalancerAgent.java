@@ -31,10 +31,10 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.jini.rio.boot.BootUtil;
 import org.openspaces.core.cluster.ClusterInfo;
-import org.openspaces.pu.container.jee.JeeProcessingUnitServiceDetails;
+import org.openspaces.pu.container.jee.JeeServiceDetails;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
 import org.openspaces.pu.container.support.CommandLineParser;
-import org.openspaces.pu.service.ProcessingUnitServiceDetails;
+import org.openspaces.pu.service.ServiceDetails;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.BufferedReader;
@@ -230,17 +230,17 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
     public synchronized void serviceAdded(ServiceDiscoveryEvent event) {
         PUServiceBean service = (PUServiceBean) event.getPostEventServiceItem().service;
         try {
-            ProcessingUnitServiceDetails[] details = service.listServiceDetails();
+            ServiceDetails[] details = service.listServiceDetails();
             ClusterInfo clusterInfo = service.getClusterInfo();
-            for (ProcessingUnitServiceDetails detail : details) {
-                if (detail instanceof JeeProcessingUnitServiceDetails) {
-                    JeeProcessingUnitServiceDetails jeeDetails = (JeeProcessingUnitServiceDetails) detail;
+            for (ServiceDetails detail : details) {
+                if (detail instanceof JeeServiceDetails) {
+                    JeeServiceDetails jeeDetails = (JeeServiceDetails) detail;
                     LoadBalancerInfo loadBalancersInfo = loadBalancersInfoMap.get(clusterInfo.getName());
                     if (loadBalancersInfo == null) {
                         loadBalancersInfo = new LoadBalancerInfo(clusterInfo.getName());
                         loadBalancersInfoMap.put(clusterInfo.getName(), loadBalancersInfo);
                     }
-                    loadBalancersInfo.putNode(new LoadBalancerNodeInfo(clusterInfo, (JeeProcessingUnitServiceDetails) detail));
+                    loadBalancersInfo.putNode(new LoadBalancerNodeInfo(clusterInfo, (JeeServiceDetails) detail));
                     loadBalancersInfo.setDirty(true);
 
                     System.out.println("[" + clusterInfo.getName() + "]: Adding [" + clusterInfo.getRunningNumberOffset1() + "] [" + jeeDetails.getHost() + ":" + jeeDetails.getPort() + jeeDetails.getContextPath() + "]");
@@ -255,16 +255,16 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
     public synchronized void serviceRemoved(ServiceDiscoveryEvent event) {
         PUServiceBean service = (PUServiceBean) event.getPreEventServiceItem().service;
         try {
-            ProcessingUnitServiceDetails[] details = service.listServiceDetails();
+            ServiceDetails[] details = service.listServiceDetails();
             ClusterInfo clusterInfo = service.getClusterInfo();
-            for (ProcessingUnitServiceDetails detail : details) {
-                JeeProcessingUnitServiceDetails jeeDetails = (JeeProcessingUnitServiceDetails) detail;
-                if (detail instanceof JeeProcessingUnitServiceDetails) {
+            for (ServiceDetails detail : details) {
+                JeeServiceDetails jeeDetails = (JeeServiceDetails) detail;
+                if (detail instanceof JeeServiceDetails) {
                     LoadBalancerInfo loadBalancersInfo = loadBalancersInfoMap.get(clusterInfo.getName());
                     if (loadBalancersInfo == null) {
                         continue;
                     }
-                    loadBalancersInfo.removeNode(new LoadBalancerNodeInfo(clusterInfo, (JeeProcessingUnitServiceDetails) detail));
+                    loadBalancersInfo.removeNode(new LoadBalancerNodeInfo(clusterInfo, (JeeServiceDetails) detail));
                     loadBalancersInfo.setDirty(true);
                     System.out.println("[" + clusterInfo.getName() + "]: Removing [" + clusterInfo.getRunningNumberOffset1() + "] [" + jeeDetails.getHost() + ":" + jeeDetails.getPort() + jeeDetails.getContextPath() + "]");
                 }
