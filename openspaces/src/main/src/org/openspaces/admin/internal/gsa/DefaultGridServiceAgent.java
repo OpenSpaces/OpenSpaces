@@ -214,7 +214,7 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
             throw new AdminException("No credentials to kill");
         }
         try {
-            gsa.stopProcess(agentGridComponent.getAgentId());
+            gsa.killProcess(agentGridComponent.getAgentId());
         } catch (RemoteException e) {
             throw new AdminException("Failed to kill [" + agentGridComponent.getUid() + "]", e);
         }
