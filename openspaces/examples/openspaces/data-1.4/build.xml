@@ -24,12 +24,12 @@
     <property name="feeder-src" value="${feeder.dir}/src"/>
     <property name="feeder-pu" value="${feeder.dir}/pu/data-feeder"/>
     <property name="feeder-pujar" value="${feeder.dir}/pu/data-feeder.jar"/>
-    <property name="feeder-lib" value="${feeder-pu}/shared-lib"/>
+    <property name="feeder-lib" value="${feeder-pu}/lib"/>
 
     <property name="processor-src" value="${processor.dir}/src"/>
     <property name="processor-pu" value="${processor.dir}/pu/data-processor"/>
     <property name="processor-pujar" value="${processor.dir}/pu/data-processor.jar"/>
-    <property name="processor-lib" value="${processor-pu}/shared-lib"/>
+    <property name="processor-lib" value="${processor-pu}/lib"/>
 
     <path id="all-libs">
         <fileset dir="${gshome.dir}/lib">

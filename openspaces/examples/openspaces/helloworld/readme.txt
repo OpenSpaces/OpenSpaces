@@ -27,8 +27,7 @@ file will be under META-INF/spring and is called pu.xml.
 
 Running 'build.(sh/bat) dist' will finalize the Processing Unit structure by copying the commons
 math jar file into the 'pu/helloworld/lib' directory thus creating a self sufficient deployable
-unit. Note, in this simple example, the commons math library resides under the lib directory
-and not the shared-lib directory.
+unit. 
 
 There are two options running/deploying the processing unit example. The first is by using
 the puInstance script located under the bin directory of the product installation. In order

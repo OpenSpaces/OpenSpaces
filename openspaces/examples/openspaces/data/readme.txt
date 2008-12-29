@@ -40,9 +40,9 @@ Running 'build.(sh/bat) build' will compile all the different modules. In case o
 and Feeder modules, it will compile the classes directly into their respective PU structure.
 
 Running 'build.(sh/bat) dist' will finalize the processing unit structure of both the Processor
-and the Feeder by copying the Common module jar file into the 'shared-lib' directory within the 
+and the Feeder by copying the Common module jar file into the 'lib' directory within the 
 processing unit structure. In case of the processor module, it will copy the jar file to
-'processor/pu/data-processpr/shared-lib', and will make 'processor/pu/data-processor' a ready
+'processor/pu/data-processpr/lib', and will make 'processor/pu/data-processor' a ready
 to use processing unit.
 
 In order to deploy the data example onto the Service Grid, a GSM and *two* GSCs will need to be
