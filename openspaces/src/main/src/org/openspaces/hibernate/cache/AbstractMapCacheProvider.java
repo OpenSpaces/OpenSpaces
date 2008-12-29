@@ -1,8 +1,8 @@
 package org.openspaces.hibernate.cache;
 
+import com.gigaspaces.client.cache.ISpaceLocalCache;
 import com.j_spaces.core.Constants;
 import com.j_spaces.core.client.FinderException;
-import com.j_spaces.core.client.cache.ISpaceLocalCache;
 import com.j_spaces.map.CacheFinder;
 import com.j_spaces.map.IMap;
 import org.apache.commons.logging.Log;
