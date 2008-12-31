@@ -295,7 +295,6 @@ public class Deploy {
 
         //list remote files, only works with webster
         URL root = new URL(codeserver);
-        HTTPFileSystemView view = new HTTPFileSystemView(root);
 
         //read pu xml
         String puString = "";

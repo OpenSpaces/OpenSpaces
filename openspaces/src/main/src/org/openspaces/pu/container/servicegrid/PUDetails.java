@@ -28,7 +28,7 @@ public class PUDetails implements Externalizable {
         this.clusterInfo = clusterInfo;
         this.details = details;
         if (details == null) {
-            details = new ServiceDetails[0];
+            this.details = new ServiceDetails[0];
         }
     }
 
