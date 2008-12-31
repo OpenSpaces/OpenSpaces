@@ -16,8 +16,7 @@
 
 package org.openspaces.events.polling;
 
-import org.openspaces.events.EventContainerServiceDetails;
-import org.openspaces.pu.service.AggregatedServiceDetails;
+import org.openspaces.pu.service.PlainAggregatedServiceDetails;
 import org.openspaces.pu.service.ServiceDetails;
 
 import java.io.IOException;
@@ -25,37 +24,38 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * Polling container service details.
- *
  * @author kimchy
  */
-public class PollingEventContainerServiceDetails extends EventContainerServiceDetails {
+public class AggregatedPollingEventContainerServiceDetails extends PlainAggregatedServiceDetails {
 
-    public static final String SERVICE_SUB_TYPE = "polling";
-
-    public static class Attributes extends EventContainerServiceDetails.Attributes {
+    public static class Attributes {
         public static final String RECEIVE_TIMEOUT = "receive-timeout";
         public static final String RECEIVE_OPERATION_HANDLER = "receive-operating-handler";
         public static final String TRIGGER_OPERATION_HANDLER = "trigger-operating-handler";
         public static final String CONCURRENT_CONSUMERS = "concurrent-consumers";
         public static final String MAX_CONCURRENT_CONSUMERS = "max-concurrent-consumers";
         public static final String PASS_ARRAY_AS_IS = "pass-array-as-is";
+        public static final String TEMPLATE = "template";
     }
 
-    public PollingEventContainerServiceDetails() {
+    public AggregatedPollingEventContainerServiceDetails() {
         super();
     }
 
-    public PollingEventContainerServiceDetails(String id, String gigaSpace, Object template, boolean performSnapshot, long receiveTimeout,
-                                               String receiveOperationHandler, String triggerOperationHandler,
-                                               int concurrentConsumers, int maxConcurrentConsumers, boolean passArrayAsIs) {
-        super(id, SERVICE_SUB_TYPE, gigaSpace, "Polling event container", "Polling event container, template [" + template + "]", template, performSnapshot);
-        getAttributes().put(Attributes.RECEIVE_TIMEOUT, receiveTimeout);
-        getAttributes().put(Attributes.RECEIVE_OPERATION_HANDLER, receiveOperationHandler);
-        getAttributes().put(Attributes.TRIGGER_OPERATION_HANDLER, triggerOperationHandler);
+    public AggregatedPollingEventContainerServiceDetails(String serviceType, ServiceDetails[] details) {
+        super(serviceType, details);
+        int concurrentConsumers = 0;
+        int maxConcurrentConsumers = 0;
+        for (ServiceDetails detail : details) {
+            if (!(detail instanceof PollingEventContainerServiceDetails)) {
+                throw new IllegalArgumentException("Details [" + detail.getClass().getName() + "] is of wrong type");
+            }
+            PollingEventContainerServiceDetails pollingServiceDetails = (PollingEventContainerServiceDetails) detail;
+            concurrentConsumers += pollingServiceDetails.getConcurrentConsumers();
+            maxConcurrentConsumers += pollingServiceDetails.getMaxConcurrentConsumers();
+        }
         getAttributes().put(Attributes.CONCURRENT_CONSUMERS, concurrentConsumers);
         getAttributes().put(Attributes.MAX_CONCURRENT_CONSUMERS, maxConcurrentConsumers);
-        getAttributes().put(Attributes.PASS_ARRAY_AS_IS, passArrayAsIs);
     }
 
     public long getReceiveTimeout() {
@@ -80,16 +80,6 @@ public class PollingEventContainerServiceDetails extends EventContainerServiceDe
 
     public boolean isPassArrayAsIs() {
         return (Boolean) getAttributes().get(Attributes.PASS_ARRAY_AS_IS);
-    }
-
-    @Override
-    public AggregatedServiceDetails aggregateByServiceSubType(ServiceDetails[] servicesDetails) {
-        return new AggregatedPollingEventContainerServiceDetails(serviceType, servicesDetails);
-    }
-
-    @Override
-    public AggregatedServiceDetails aggregateById(ServiceDetails[] servicesDetails) {
-        return new AggregatedPollingEventContainerServiceDetails(serviceType, servicesDetails);
     }
 
     @Override

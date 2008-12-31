@@ -17,7 +17,7 @@
 package org.openspaces.events.asyncpolling;
 
 import org.openspaces.events.EventContainerServiceDetails;
-import org.openspaces.pu.service.AggregatedServiceDetails;
+import org.openspaces.pu.service.PlainAggregatedServiceDetails;
 import org.openspaces.pu.service.ServiceDetails;
 
 import java.io.IOException;
@@ -29,23 +29,27 @@ import java.io.ObjectOutput;
  *
  * @author kimchy
  */
-public class AsyncPollingEventContainerServiceDetails extends EventContainerServiceDetails {
-
-    public static final String SERVICE_SUB_TYPE = "async-polling";
+public class AggregatedAsyncPollingEventContainerServiceDetails extends PlainAggregatedServiceDetails {
 
     public static class Attributes extends EventContainerServiceDetails.Attributes {
         public static final String RECEIVE_TIMEOUT = "receive-timeout";
         public static final String CONCURRENT_CONSUMERS = "concurrent-consumers";
     }
 
-    public AsyncPollingEventContainerServiceDetails() {
+    public AggregatedAsyncPollingEventContainerServiceDetails() {
         super();
     }
 
-    public AsyncPollingEventContainerServiceDetails(String id, String gigaSpace, Object template, boolean performSnapshot, long receiveTimeout,
-                                                    int concurrentConsumers) {
-        super(id, SERVICE_SUB_TYPE, gigaSpace, "Async Polling event container", "Async Polling event container, template [" + template + "]", template, performSnapshot);
-        getAttributes().put(Attributes.RECEIVE_TIMEOUT, receiveTimeout);
+    public AggregatedAsyncPollingEventContainerServiceDetails(String serviceType, ServiceDetails[] details) {
+        super(serviceType, details);
+        int concurrentConsumers = 0;
+        for (ServiceDetails detail : details) {
+            if (!(detail instanceof AsyncPollingEventContainerServiceDetails)) {
+                throw new IllegalArgumentException("Details [" + detail.getClass().getName() + "] is of wrong type");
+            }
+            AsyncPollingEventContainerServiceDetails asyncPOllingServiceDetails = (AsyncPollingEventContainerServiceDetails) detail;
+            concurrentConsumers += asyncPOllingServiceDetails.getConcurrentConsumers();
+        }
         getAttributes().put(Attributes.CONCURRENT_CONSUMERS, concurrentConsumers);
     }
 
@@ -55,16 +59,6 @@ public class AsyncPollingEventContainerServiceDetails extends EventContainerServ
 
     public int getConcurrentConsumers() {
         return (Integer) getAttributes().get(Attributes.CONCURRENT_CONSUMERS);
-    }
-
-    @Override
-    public AggregatedServiceDetails aggregateByServiceSubType(ServiceDetails[] servicesDetails) {
-        return new AggregatedAsyncPollingEventContainerServiceDetails(serviceType, servicesDetails);
-    }
-
-    @Override
-    public AggregatedServiceDetails aggregateById(ServiceDetails[] servicesDetails) {
-        return new AggregatedAsyncPollingEventContainerServiceDetails(serviceType, servicesDetails);
     }
 
     @Override

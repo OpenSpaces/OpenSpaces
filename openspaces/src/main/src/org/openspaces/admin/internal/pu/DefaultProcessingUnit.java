@@ -60,6 +60,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     private final InternalProcessingUnitSpaceCorrelatedEventManager spaceCorrelatedEventManager;
 
+
     public DefaultProcessingUnit(InternalAdmin admin, InternalProcessingUnits processingUnits, PUDetails details) {
         this.admin = admin;
         this.processingUnits = processingUnits;

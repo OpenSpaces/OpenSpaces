@@ -17,7 +17,7 @@
 package org.openspaces.events.notify;
 
 import org.openspaces.events.EventContainerServiceDetails;
-import org.openspaces.pu.service.AggregatedServiceDetails;
+import org.openspaces.pu.service.PlainAggregatedServiceDetails;
 import org.openspaces.pu.service.ServiceDetails;
 
 import java.io.IOException;
@@ -29,9 +29,7 @@ import java.io.ObjectOutput;
  *
  * @author kimchy
  */
-public class NotifyEventContainerServiceDetails extends EventContainerServiceDetails {
-
-    public static final String SERVICE_SUB_TYPE = "notify";
+public class AggregatedNotifyEventContainerServiceDetails extends PlainAggregatedServiceDetails {
 
     public static class Attributes extends EventContainerServiceDetails.Attributes {
         public static final String COMM_TYPE = "comm-type";
@@ -50,48 +48,12 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
         public static final String PASS_ARRAY_AS_IS = "pass-array-as-is";
     }
 
-    public NotifyEventContainerServiceDetails() {
+    public AggregatedNotifyEventContainerServiceDetails() {
         super();
     }
 
-    public NotifyEventContainerServiceDetails(String id, String gigaSpace, Object template, boolean performSnapshot, int commType,
-                                              boolean fifo, Integer batchSize, Integer batchTime, boolean autoRenew,
-                                              Boolean notifyAll, Boolean notifyWrite, Boolean notifyUpdate, Boolean notifyTake, Boolean notifyLeaseExpire, Boolean notifyUnmatched,
-                                              Boolean triggerNotifyTemplate, Boolean replicateNotifyTemplate,
-                                              boolean performTakeOnNotify, boolean passArrayAsIs) {
-        super(id, SERVICE_SUB_TYPE, gigaSpace, "Notify event container", "Notify event container, template [" + template + "]", template, performSnapshot);
-        switch (commType) {
-            case 0:
-                getAttributes().put(Attributes.COMM_TYPE, "unicast");
-                break;
-            case 1:
-                getAttributes().put(Attributes.COMM_TYPE, "multiplex");
-                break;
-            case 2:
-                getAttributes().put(Attributes.COMM_TYPE, "multicast");
-                break;
-        }
-        getAttributes().put(Attributes.FIFO, fifo);
-        getAttributes().put(Attributes.BATCH_SIZE, batchSize);
-        getAttributes().put(Attributes.BATCH_TIME, batchTime);
-        getAttributes().put(Attributes.AUTO_RENEW, autoRenew);
-        if (notifyAll != null && notifyAll) {
-            getAttributes().put(Attributes.NOTIFY_WRITE, true);
-            getAttributes().put(Attributes.NOTIFY_UPDATE, true);
-            getAttributes().put(Attributes.NOTIFY_TAKE, true);
-            getAttributes().put(Attributes.NOTIFY_LEASE_EXPIRE, true);
-            getAttributes().put(Attributes.NOTIFY_UNMATCHED, true);
-        } else {
-            getAttributes().put(Attributes.NOTIFY_WRITE, notifyWrite == null ? false : notifyWrite);
-            getAttributes().put(Attributes.NOTIFY_UPDATE, notifyUpdate == null ? false : notifyUpdate);
-            getAttributes().put(Attributes.NOTIFY_TAKE, notifyTake == null ? false : notifyTake);
-            getAttributes().put(Attributes.NOTIFY_LEASE_EXPIRE, notifyLeaseExpire == null ? false : notifyLeaseExpire);
-            getAttributes().put(Attributes.NOTIFY_UNMATCHED, notifyUnmatched == null ? false : notifyUnmatched);
-        }
-        getAttributes().put(Attributes.TRIGGER_NOTIFY_TEMPLATE, triggerNotifyTemplate);
-        getAttributes().put(Attributes.REPLICATE_NOTIFY_TEMPLATE, replicateNotifyTemplate);
-        getAttributes().put(Attributes.PERFORM_TAKE_ON_NOTIFY, performTakeOnNotify);
-        getAttributes().put(Attributes.PASS_ARRAY_AS_IS, passArrayAsIs);
+    public AggregatedNotifyEventContainerServiceDetails(String serviceType, ServiceDetails[] details) {
+        super(serviceType, details);
     }
 
     public String getCommType() {
@@ -148,16 +110,6 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
 
     public boolean isPassArrayAsIs() {
         return (Boolean) getAttributes().get(Attributes.PASS_ARRAY_AS_IS);
-    }
-
-    @Override
-    public AggregatedServiceDetails aggregateById(ServiceDetails[] servicesDetails) {
-        return new AggregatedNotifyEventContainerServiceDetails(serviceType, servicesDetails);
-    }
-
-    @Override
-    public AggregatedServiceDetails aggregateByServiceSubType(ServiceDetails[] servicesDetails) {
-        return new AggregatedNotifyEventContainerServiceDetails(serviceType, servicesDetails);
     }
 
     @Override
