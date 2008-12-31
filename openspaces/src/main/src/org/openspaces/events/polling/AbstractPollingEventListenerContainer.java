@@ -101,6 +101,10 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTran
         this.passArrayAsIs = passArrayAsIs;
     }
 
+    protected boolean isPassArrayAsIs() {
+        return this.passArrayAsIs;
+    }
+
     /**
      * Set the timeout to use for receive calls, in <b>milliseconds</b>. The default is 60000 ms,
      * that is, 1 minute.
@@ -130,6 +134,10 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTran
         this.receiveOperationHandler = receiveOperationHandler;
     }
 
+    protected ReceiveOperationHandler getReceiveOperationHandler() {
+        return this.receiveOperationHandler;
+    }
+
     /**
      * An advance feature allows for pluggable
      * {@link TriggerOperationHandler triggerOperationHandler} which mainly makes sense when using
@@ -141,6 +149,10 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTran
      */
     public void setTriggerOperationHandler(TriggerOperationHandler triggerOperationHandler) {
         this.triggerOperationHandler = triggerOperationHandler;
+    }
+
+    protected TriggerOperationHandler getTriggerOperationHandler() {
+        return this.triggerOperationHandler;
     }
 
     public void initialize() {

@@ -26,6 +26,7 @@ import org.openspaces.core.GigaSpace;
 import org.openspaces.core.space.mode.AfterSpaceModeChangeEvent;
 import org.openspaces.core.space.mode.BeforeSpaceModeChangeEvent;
 import org.openspaces.core.util.SpaceUtils;
+import org.openspaces.pu.service.ServiceDetailsProvider;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -69,7 +70,7 @@ import java.util.List;
  * @author kimchy
  */
 public abstract class AbstractSpaceListeningContainer implements Lifecycle, BeanNameAware, InitializingBean,
-        DisposableBean, ApplicationListener {
+        DisposableBean, ApplicationListener, ServiceDetailsProvider {
 
     protected final Log logger = LogFactory.getLog(getClass());
 
@@ -79,7 +80,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
 
     private boolean registerSpaceModeListener = false;
 
-    private String beanName;
+    protected String beanName;
 
     private volatile boolean active = false;
 

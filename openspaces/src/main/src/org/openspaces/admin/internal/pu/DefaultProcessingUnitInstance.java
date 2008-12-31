@@ -21,6 +21,10 @@ import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.space.SpaceServiceDetails;
 import org.openspaces.core.space.SpaceType;
+import org.openspaces.events.EventContainerServiceDetails;
+import org.openspaces.events.asyncpolling.AsyncPollingEventContainerServiceDetails;
+import org.openspaces.events.notify.NotifyEventContainerServiceDetails;
+import org.openspaces.events.polling.PollingEventContainerServiceDetails;
 import org.openspaces.pu.container.jee.JeeServiceDetails;
 import org.openspaces.pu.container.servicegrid.PUDetails;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
@@ -58,9 +62,14 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private final SpaceServiceDetails[] spacesDetails;
 
+    private Map<String, EventContainerServiceDetails> eventContainerServiceDetails = new HashMap<String, EventContainerServiceDetails>();
+    private Map<String, PollingEventContainerServiceDetails> pollingEventContainerServiceDetails = new HashMap<String, PollingEventContainerServiceDetails>();
+    private Map<String, NotifyEventContainerServiceDetails> notifyEventContainerServiceDetails = new HashMap<String, NotifyEventContainerServiceDetails>();
+    private Map<String, AsyncPollingEventContainerServiceDetails> asyncPollingEventContainerServiceDetails = new HashMap<String, AsyncPollingEventContainerServiceDetails>();
+
     private final JeeServiceDetails jeeDetails;
 
-    private final Map<String, ServiceDetails[]> servicesDetailsByServiceId;
+    private final Map<String, ServiceDetails[]> servicesDetailsByServiceType;
 
     private final InternalSpaceInstances spaceInstances;
 
@@ -96,8 +105,21 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
                 }
             } else if (serviceDetails instanceof JeeServiceDetails) {
                 jeeDetailsX = (JeeServiceDetails) serviceDetails;
+            } else if (serviceDetails instanceof EventContainerServiceDetails) {
+                eventContainerServiceDetails.put(serviceDetails.getId(), (EventContainerServiceDetails) serviceDetails);
+                if (serviceDetails instanceof PollingEventContainerServiceDetails) {
+                    pollingEventContainerServiceDetails.put(serviceDetails.getId(), (PollingEventContainerServiceDetails) serviceDetails);
+                } else if (serviceDetails instanceof NotifyEventContainerServiceDetails) {
+                    notifyEventContainerServiceDetails.put(serviceDetails.getId(), (NotifyEventContainerServiceDetails) serviceDetails);
+                } else if (serviceDetails instanceof AsyncPollingEventContainerServiceDetails) {
+                    asyncPollingEventContainerServiceDetails.put(serviceDetails.getId(), (AsyncPollingEventContainerServiceDetails) serviceDetails);
+                }
             }
         }
+        eventContainerServiceDetails = Collections.unmodifiableMap(eventContainerServiceDetails);
+        pollingEventContainerServiceDetails = Collections.unmodifiableMap(pollingEventContainerServiceDetails);
+        notifyEventContainerServiceDetails = Collections.unmodifiableMap(notifyEventContainerServiceDetails);
+        asyncPollingEventContainerServiceDetails = Collections.unmodifiableMap(asyncPollingEventContainerServiceDetails);
 
         jeeDetails = jeeDetailsX;
         embeddedSpacesDetails = embeddedSpacesEmbeddedList.toArray(new SpaceServiceDetails[embeddedSpacesEmbeddedList.size()]);
@@ -107,7 +129,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         for (Map.Entry<String, List<ServiceDetails>> entry : servicesDetailsByServiceIdList.entrySet()) {
             servicesDetailsTemp.put(entry.getKey(), entry.getValue().toArray(new ServiceDetails[entry.getValue().size()]));
         }
-        servicesDetailsByServiceId = servicesDetailsTemp;
+        servicesDetailsByServiceType = servicesDetailsTemp;
     }
 
     public String getUid() {
@@ -147,6 +169,22 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     public Iterator<ServiceDetails> iterator() {
         return Arrays.asList(puDetails.getDetails()).iterator();
+    }
+
+    public Map<String, EventContainerServiceDetails> getEventContainerServiceDetails() {
+        return this.eventContainerServiceDetails;
+    }
+
+    public Map<String, PollingEventContainerServiceDetails> getPollingEventContainerServiceDetails() {
+        return this.pollingEventContainerServiceDetails;
+    }
+
+    public Map<String, NotifyEventContainerServiceDetails> getNotifyEventContainerServiceDetails() {
+        return this.notifyEventContainerServiceDetails;
+    }
+
+    public Map<String, AsyncPollingEventContainerServiceDetails> getAsyncPollingEventContainerServiceDetails() {
+        return this.asyncPollingEventContainerServiceDetails;
     }
 
     public SpaceServiceDetails[] getSpaceServiceDetails() {
@@ -230,11 +268,11 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public ServiceDetails[] getServicesDetailsByServiceType(String serviceType) {
-        return servicesDetailsByServiceId.get(serviceType);
+        return servicesDetailsByServiceType.get(serviceType);
     }
 
     public Map<String, ServiceDetails[]> getServiceDetailsByServiceType() {
-        return Collections.unmodifiableMap(servicesDetailsByServiceId);
+        return Collections.unmodifiableMap(servicesDetailsByServiceType);
     }
 
     public void destroy() {

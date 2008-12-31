@@ -165,6 +165,10 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         this.comType = comType;
     }
 
+    protected int getCommType() {
+        return this.comType;
+    }
+
     /**
      * Sets the communication protocol for the notification registration.
      *
@@ -186,6 +190,10 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         this.fifo = fifo;
     }
 
+    protected boolean isFifo() {
+        return this.fifo;
+    }
+
     /**
      * If set, turns batching event notifications where the server space accumalates notifications to
      * be sent and then send them in batch. The batch size controls the number of notifications that
@@ -194,6 +202,10 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
      */
     public void setBatchSize(Integer batchSize) {
         this.batchSize = batchSize;
+    }
+
+    protected Integer getBatchSize() {
+        return this.batchSize;
     }
 
     /**
@@ -206,6 +218,10 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         this.batchTime = batchTime;
     }
 
+    protected Integer getBatchTime() {
+        return this.batchTime;
+    }
+
     /**
      * If {@link #setListenerLease(long)} is set, automatically performs lease renewal. Defaults to
      * <code>false</code>.
@@ -214,6 +230,10 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
      */
     public void setAutoRenew(boolean autoRenew) {
         this.autoRenew = autoRenew;
+    }
+
+    protected boolean isAutoRenew() {
+        return this.autoRenew;
     }
 
     /**
@@ -250,6 +270,10 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         this.notifyWrite = notifyWrite;
     }
 
+    protected Boolean isNotifyWrite() {
+        return this.notifyWrite;
+    }
+
     /**
      * Turns on notifications for update operations. Defaults to <code>false</code>.
      */
@@ -257,11 +281,19 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         this.notifyUpdate = notifyUpdate;
     }
 
+    protected Boolean isNotifyUpdate() {
+        return this.notifyUpdate;
+    }
+
     /**
      * Turns on notifications for take operations. Defaults to <code>false</code>.
      */
     public void setNotifyTake(Boolean notifyTake) {
         this.notifyTake = notifyTake;
+    }
+
+    protected Boolean isNotifyTake() {
+        return this.notifyTake;
     }
 
     /**
@@ -272,11 +304,19 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         this.notifyAll = notifyAll;
     }
 
+    protected Boolean isNotifyAll() {
+        return this.notifyAll;
+    }
+
     /**
      * Turns on notification for least expiration. Defaults to <code>false</code>.
      */
     public void setNotifyLeaseExpire(Boolean notifyLeaseExpire) {
         this.notifyLeaseExpire = notifyLeaseExpire;
+    }
+
+    protected Boolean isNotifyLeaseExpire() {
+        return this.notifyLeaseExpire;
     }
 
     /**
@@ -287,6 +327,10 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         this.notifyUnmatched = notifyUnmatched;
     }
 
+    protected Boolean isNotifyUnmatched() {
+        return this.notifyUnmatched;
+    }
+
     /**
      * If using a replicated space controls if the listener that are replicated to cluster members
      * will raise notifications.
@@ -295,6 +339,10 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
      */
     public void setTriggerNotifyTemplate(boolean triggerNotifyTemplate) {
         this.triggerNotifyTemplate = triggerNotifyTemplate;
+    }
+
+    protected Boolean isTriggerNotifyTemplate() {
+        return this.triggerNotifyTemplate;
     }
 
     /**
@@ -311,12 +359,20 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         this.replicateNotifyTemplate = replicateNotifyTemplate;
     }
 
+    protected Boolean isReplicateNotifyTemplate() {
+        return this.replicateNotifyTemplate;
+    }
+
     /**
      * When batching is turned on, should the batch of events be passed as an <code>Object[]</code> to
      * the listener. Default to <code>false</code> which means it will be passed one event at a time.
      */
     public void setPassArrayAsIs(boolean passArrayAsIs) {
         this.passArrayAsIs = passArrayAsIs;
+    }
+
+    protected boolean isPassArrayAsIs() {
+        return this.passArrayAsIs;
     }
 
     protected Boolean getNotifyWrite() {

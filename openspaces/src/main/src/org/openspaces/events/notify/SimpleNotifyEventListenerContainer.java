@@ -26,6 +26,7 @@ import net.jini.core.event.RemoteEventListener;
 import net.jini.core.event.UnknownEventException;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.UnusableEntryException;
+import org.openspaces.pu.service.ServiceDetails;
 import org.springframework.dao.DataAccessException;
 import org.springframework.util.ClassUtils;
 
@@ -170,6 +171,13 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
                 dataEventSession = null;
             }
         }
+    }
+
+    public ServiceDetails[] getServicesDetails() {
+        return new ServiceDetails[] {new NotifyEventContainerServiceDetails(beanName, getGigaSpace().getName(), getTemplate(), isPerformSnapshot(),
+                getCommType(), isFifo(), getBatchSize(), getBatchTime(), isAutoRenew(),
+                isNotifyAll(), isNotifyWrite(), isNotifyUpdate(), isNotifyWrite(), isNotifyLeaseExpire(), isNotifyUnmatched(),
+                isTriggerNotifyTemplate(), isReplicateNotifyTemplate(), isPerformSnapshot(), isPassArrayAsIs())};
     }
 
     /**

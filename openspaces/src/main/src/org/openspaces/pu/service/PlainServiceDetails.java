@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -24,7 +25,7 @@ public class PlainServiceDetails implements ServiceDetails, Externalizable {
 
     protected String longDescription;
 
-    protected Map<String, Object> attributes = new HashMap<String, Object>();
+    protected Map<String, Object> attributes = new LinkedHashMap<String, Object>();
 
     // Just for externalizable
     public PlainServiceDetails() {
@@ -111,5 +112,16 @@ public class PlainServiceDetails implements ServiceDetails, Externalizable {
             Object value = in.readObject();
             attributes.put(key, value);
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("id[").append(id).append("] ");
+        sb.append("type[").append(serviceType).append("/").append(serviceSubType).append("] ");
+        for (Map.Entry<String, Object> entry : attributes.entrySet()) {
+            sb.append(entry.getKey()).append("[").append(entry.getValue()).append("] ");
+        }
+        return sb.toString();
     }
 }

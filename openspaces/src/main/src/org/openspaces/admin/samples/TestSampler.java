@@ -2,7 +2,12 @@ package org.openspaces.admin.samples;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
+import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.machine.Machine;
+import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.ProcessingUnitPartition;
+import org.openspaces.pu.service.ServiceDetails;
 
 /**
  * @author kimchy
@@ -50,29 +55,29 @@ public class TestSampler {
 //                        System.out.println("   -> PU [" + processingUnitInstance.getUid() + "]");
 //                    }
                 }
-//                for (ProcessingUnit processingUnit : admin.getProcessingUnits()) {
-//                    System.out.println("Processing Unit: " + processingUnit.getName() + " status: " + processingUnit.getStatus());
-//                    if (processingUnit.isManaged()) {
-//                        System.out.println("   -> Managing GSM: " + processingUnit.getManagingGridServiceManager().getUid());
-//                    } else {
-//                        System.out.println("   -> Managing GSM: NA");
-//                    }
-//                    for (GridServiceManager backupGSM : processingUnit.getBackupGridServiceManagers()) {
-//                        System.out.println("   -> Backup GSM: " + backupGSM.getUid());
-//                    }
-//                    for (ProcessingUnitPartition partition : processingUnit.getPartitions()) {
-//                        System.out.println("   : Partition [" + partition.getPartitiondId() + "] Instances [" + partition.getInstances().length + "]");
-//                    }
-//                    for (ProcessingUnitInstance processingUnitInstance : processingUnit) {
-//                        System.out.println("   [" + processingUnitInstance.getClusterInfo() + "] on GSC [" + processingUnitInstance.getGridServiceContainer().getUid() + "] partition [" + processingUnitInstance.getPartition().getPartitiondId() + "]");
-//                        if (processingUnitInstance.isEmbeddedSpaces()) {
-//                            System.out.println("      -> Embedded Space [" + processingUnitInstance.getSpaceInstance().getUid() + "]");
-//                        }
-//                        for (ServiceDetails details : processingUnitInstance) {
-//                            System.out.println("      -> Service [" + details.getId() + "] type [" + details.getType() + "]");
-//                        }
-//                    }
-//                }
+                for (ProcessingUnit processingUnit : admin.getProcessingUnits()) {
+                    System.out.println("Processing Unit: " + processingUnit.getName() + " status: " + processingUnit.getStatus());
+                    if (processingUnit.isManaged()) {
+                        System.out.println("   -> Managing GSM: " + processingUnit.getManagingGridServiceManager().getUid());
+                    } else {
+                        System.out.println("   -> Managing GSM: NA");
+                    }
+                    for (GridServiceManager backupGSM : processingUnit.getBackupGridServiceManagers()) {
+                        System.out.println("   -> Backup GSM: " + backupGSM.getUid());
+                    }
+                    for (ProcessingUnitPartition partition : processingUnit.getPartitions()) {
+                        System.out.println("   : Partition [" + partition.getPartitiondId() + "] Instances [" + partition.getInstances().length + "]");
+                    }
+                    for (ProcessingUnitInstance processingUnitInstance : processingUnit) {
+                        System.out.println("   [" + processingUnitInstance.getClusterInfo() + "] on GSC [" + processingUnitInstance.getGridServiceContainer().getUid() + "] partition [" + processingUnitInstance.getPartition().getPartitiondId() + "]");
+                        if (processingUnitInstance.isEmbeddedSpaces()) {
+                            System.out.println("      -> Embedded Space [" + processingUnitInstance.getSpaceInstance().getUid() + "]");
+                        }
+                        for (ServiceDetails details : processingUnitInstance) {
+                            System.out.println("      -> Service " + details);
+                        }
+                    }
+                }
 //                for (Space space : admin.getSpaces()) {
 //                    System.out.println("Space [" + space.getUid() + "] numberOfInstances [" + space.getNumberOfInstances() + "] numberOfbackups [" + space.getNumberOfBackups() + "]");
 //                    System.out.println("  Stats: Write [" + space.getStatistics().getWriteCount() + "/" + space.getStatistics().getWritePerSecond() + "], Take [" + space.getStatistics().getTakeCount() + "/" + space.getStatistics().getTakePerSecond() + "]");

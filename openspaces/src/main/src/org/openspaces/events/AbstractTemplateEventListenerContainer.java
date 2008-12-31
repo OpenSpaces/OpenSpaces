@@ -123,4 +123,8 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
     public void setPerformSnapshot(boolean performSnapshot) {
         this.performSnapshot = performSnapshot;
     }
+
+    protected boolean isPerformSnapshot() {
+        return this.performSnapshot;
+    }
 }

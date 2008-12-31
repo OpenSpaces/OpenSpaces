@@ -17,8 +17,12 @@
 package org.openspaces.events.support;
 
 import org.openspaces.events.AbstractEventListenerContainer;
+import org.openspaces.pu.service.ServiceDetails;
+import org.openspaces.pu.service.ServiceDetailsProvider;
 import org.springframework.beans.factory.DisposableBean;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -26,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author kimchy
  */
-public class EventContainersBus implements DisposableBean {
+public class EventContainersBus implements DisposableBean, ServiceDetailsProvider {
 
     public static final String SUFFIX = "_eventContainer";
 
@@ -47,6 +51,14 @@ public class EventContainersBus implements DisposableBean {
 
     public AbstractEventListenerContainer getEventContaienr(String name) {
         return containers.get(name + SUFFIX);
+    }
+
+    public ServiceDetails[] getServicesDetails() {
+        ArrayList<ServiceDetails> list = new ArrayList<ServiceDetails>();
+        for (AbstractEventListenerContainer container : containers.values()) {
+            Collections.addAll(list, container.getServicesDetails());
+        }
+        return list.toArray(new ServiceDetails[list.size()]);
     }
 
     public void destroy() throws Exception {

@@ -17,6 +17,7 @@
 package org.openspaces.events.polling;
 
 import org.openspaces.events.SpaceDataEventListener;
+import org.openspaces.pu.service.ServiceDetails;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.dao.DataAccessException;
@@ -580,7 +581,13 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
         }
     }
 
-// -------------------------------------------------------------------------
+    public ServiceDetails[] getServicesDetails() {
+        return new ServiceDetails[]{new PollingEventContainerServiceDetails(beanName, getGigaSpace().getName(), getTemplate(), isPerformSnapshot(),
+                getReceiveTimeout(), getReceiveOperationHandler().getClass().getName(), getTriggerOperationHandler() != null ? getTriggerOperationHandler().getClass().getName() : null,
+                getConcurrentConsumers(), getMaxConcurrentConsumers(), isPassArrayAsIs())};
+    }
+
+    // -------------------------------------------------------------------------
     // Inner classes used as internal adapters
     // -------------------------------------------------------------------------
 

@@ -22,6 +22,7 @@ import org.openspaces.core.transaction.internal.TransactionalAsyncFutureListener
 import org.openspaces.events.AbstractTransactionalEventListenerContainer;
 import org.openspaces.events.asyncpolling.receive.AsyncOperationHandler;
 import org.openspaces.events.asyncpolling.receive.SingleTakeAsyncOperationHandler;
+import org.openspaces.pu.service.ServiceDetails;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.TransactionDefinition;
@@ -100,6 +101,11 @@ public class SimpleAsyncPollingEventListenerContainer extends AbstractTransactio
      */
     public void setConcurrentConsumers(int concurrentConsumers) {
         this.concurrentConsumers = concurrentConsumers;
+    }
+
+    public ServiceDetails[] getServicesDetails() {
+        return new ServiceDetails[] {new AsyncPollingEventContainerServiceDetails(beanName, getGigaSpace().getName(), getTemplate(),
+                isPerformSnapshot(), receiveTimeout, concurrentConsumers)};
     }
 
     @Override

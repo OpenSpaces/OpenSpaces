@@ -5,6 +5,10 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.space.SpaceServiceDetails;
+import org.openspaces.events.EventContainerServiceDetails;
+import org.openspaces.events.asyncpolling.AsyncPollingEventContainerServiceDetails;
+import org.openspaces.events.notify.NotifyEventContainerServiceDetails;
+import org.openspaces.events.polling.PollingEventContainerServiceDetails;
 import org.openspaces.pu.container.jee.JeeServiceDetails;
 import org.openspaces.pu.service.ServiceDetails;
 
@@ -46,6 +50,11 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
     ServiceDetails[] getServicesDetailsByServiceType(String serviceType);
 
     Map<String, ServiceDetails[]> getServiceDetailsByServiceType();
+
+    Map<String, EventContainerServiceDetails> getEventContainerServiceDetails();
+    Map<String, PollingEventContainerServiceDetails> getPollingEventContainerServiceDetails();
+    Map<String, NotifyEventContainerServiceDetails> getNotifyEventContainerServiceDetails();
+    Map<String, AsyncPollingEventContainerServiceDetails> getAsyncPollingEventContainerServiceDetails();
 
     /**
      * Returns the space service details as described by the service started within the processing unit.
