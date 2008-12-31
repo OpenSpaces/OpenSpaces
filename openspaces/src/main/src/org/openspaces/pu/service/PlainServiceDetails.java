@@ -53,7 +53,7 @@ public class PlainServiceDetails implements ServiceDetails, Externalizable {
         return this.serviceType;
     }
 
-    public String getType() {
+    public String getServiceSubType() {
         return this.type;
     }
 

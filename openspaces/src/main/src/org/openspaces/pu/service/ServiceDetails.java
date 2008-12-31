@@ -24,7 +24,7 @@ public interface ServiceDetails extends Serializable {
      * Returns the type of the serive details. For example, in case of
      * space, it can be localcache, proxy, ... .
      */
-    String getType();
+    String getServiceSubType();
 
     /**
      * Returns a short description of the service.
