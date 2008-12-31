@@ -32,12 +32,12 @@ public class DotnetContainerServiceDetails extends PlainServiceDetails {
     public DotnetContainerServiceDetails() {
     }
 
-    public DotnetContainerServiceDetails(String id, String type, String description, String longDescription) {
-        super(id, "dotnet", type, description, longDescription);
+    public DotnetContainerServiceDetails(String id, String serviceSubType, String description, String longDescription) {
+        super(id, "dotnet", serviceSubType, description, longDescription);
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setSubType(String type) {
+        this.serviceSubType = type;
     }
 
     public void writeExternal(ObjectOutput out) throws IOException {

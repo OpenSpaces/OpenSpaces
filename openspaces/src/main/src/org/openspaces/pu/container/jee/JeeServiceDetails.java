@@ -42,8 +42,8 @@ public class JeeServiceDetails extends PlainServiceDetails {
     }
 
     public JeeServiceDetails(String id, String host, int port, int sslPort, String contextPath, boolean shared,
-                                           String type, JeeType jeeType) {
-        super(id, "jee-container", type, host + ":" + port + contextPath, host + ":" + port + contextPath);
+                                           String serviceSubType, JeeType jeeType) {
+        super(id, "jee-container", serviceSubType, host + ":" + port + contextPath, host + ":" + port + contextPath);
         getAttributes().put(Attributes.HOST, host);
         getAttributes().put(Attributes.PORT, port);
         getAttributes().put(Attributes.SSLPORT, sslPort);

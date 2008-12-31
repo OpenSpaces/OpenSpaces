@@ -40,7 +40,7 @@ public class DotnetProcessingUnitContainer implements ProcessingUnitContainer, S
         if (details != null) {
             for (ServiceDetails detail : details) {
                 if (detail instanceof DotnetContainerServiceDetails) {
-                    ((DotnetContainerServiceDetails) detail).setType("pure");
+                    ((DotnetContainerServiceDetails) detail).setSubType("pure");
                 }
             }
         }

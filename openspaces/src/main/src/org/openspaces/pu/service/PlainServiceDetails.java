@@ -18,7 +18,7 @@ public class PlainServiceDetails implements ServiceDetails, Externalizable {
 
     protected String serviceType;
 
-    protected String type;
+    protected String serviceSubType;
 
     protected String description;
 
@@ -30,11 +30,11 @@ public class PlainServiceDetails implements ServiceDetails, Externalizable {
     public PlainServiceDetails() {
     }
 
-    public PlainServiceDetails(String id, String serviceType, String type,
+    public PlainServiceDetails(String id, String serviceType, String serviceSubType,
                                String description, String longDescription) {
         this.id = id;
         this.serviceType = serviceType;
-        this.type = type;
+        this.serviceSubType = serviceSubType;
         this.description = description;
         if (this.description == null) {
             this.description = "";
@@ -54,7 +54,7 @@ public class PlainServiceDetails implements ServiceDetails, Externalizable {
     }
 
     public String getServiceSubType() {
-        return this.type;
+        return this.serviceSubType;
     }
 
     public String getDescription() {
@@ -84,7 +84,7 @@ public class PlainServiceDetails implements ServiceDetails, Externalizable {
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeUTF(id);
         out.writeUTF(serviceType);
-        out.writeUTF(type);
+        out.writeUTF(serviceSubType);
         out.writeUTF(description);
         out.writeUTF(longDescription);
         if (attributes == null) {
@@ -101,7 +101,7 @@ public class PlainServiceDetails implements ServiceDetails, Externalizable {
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         id = in.readUTF();
         serviceType = in.readUTF();
-        type = in.readUTF();
+        serviceSubType = in.readUTF();
         description = in.readUTF();
         longDescription = in.readUTF();
         attributes = new HashMap<String, Object>();

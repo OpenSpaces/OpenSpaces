@@ -32,8 +32,8 @@ public class DotnetServiceDetails extends PlainServiceDetails {
     public DotnetServiceDetails() {
     }
 
-    public DotnetServiceDetails(String id, String type, String serviceType, String description, String longDescription) {
-        super(id, type, serviceType, description, longDescription);
+    public DotnetServiceDetails(String id, String serviceSubType, String serviceType, String description, String longDescription) {
+        super(id, serviceSubType, serviceType, description, longDescription);
     }
 
     public void writeExternal(ObjectOutput out) throws IOException {
