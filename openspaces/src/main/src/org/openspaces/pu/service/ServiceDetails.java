@@ -49,13 +49,13 @@ public interface ServiceDetails extends Serializable {
 
     /**
      * Aggregates an array of service details into an aggregated view of it. All service details are of the same
-     * service type and type. Can return <code>null</code> if no aggregation can be performed.
+     * service type and service sub type. Can return <code>null</code> if no aggregation can be performed.
      */
-    AggregatedServiceDetails aggregateByType(ServiceDetails[] servicesDetails);
+    AggregatedServiceDetails aggregateByServiceSubType(ServiceDetails[] servicesDetails);
 
     /**
      * Aggregates an array of service details into an aggregated view of it. All service details are of the same
-     * id (and service type and type). Can return <code>null</code> if no aggregation can be performed.
+     * id (and service type and service sub type). Can return <code>null</code> if no aggregation can be performed.
      */
     AggregatedServiceDetails aggregateById(ServiceDetails[] servicesDetails);
 }

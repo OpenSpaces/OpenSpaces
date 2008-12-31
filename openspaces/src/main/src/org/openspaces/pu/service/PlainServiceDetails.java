@@ -73,7 +73,7 @@ public class PlainServiceDetails implements ServiceDetails, Externalizable {
         return null;
     }
 
-    public AggregatedServiceDetails aggregateByType(ServiceDetails[] servicesDetails) {
+    public AggregatedServiceDetails aggregateByServiceSubType(ServiceDetails[] servicesDetails) {
         return null;
     }
 
