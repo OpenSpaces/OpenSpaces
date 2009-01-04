@@ -28,7 +28,7 @@
       <useProjectArtifact>false</useProjectArtifact>
       <useTransitiveDependencies>true</useTransitiveDependencies>
       <useTransitiveFiltering>true</useTransitiveFiltering>
-      <outputDirectory>shared-lib</outputDirectory>
+      <outputDirectory>lib</outputDirectory>
       <includes>
         <include>${puGroupId}:common</include>
       </includes>
