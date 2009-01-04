@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.gsa;
 
+import com.gigaspaces.grid.gsa.AgentProcessesDetails;
 import com.gigaspaces.grid.gsa.GSA;
 import com.gigaspaces.grid.security.Credentials;
 import com.gigaspaces.jvm.JVMDetails;
@@ -42,15 +43,26 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
 
     private final Credentials credentials;
 
-    public DefaultGridServiceAgent(ServiceID serviceID, GSA gsa, InternalAdmin admin, Credentials credentials) {
+    private volatile AgentProcessesDetails processesDetails;
+
+    public DefaultGridServiceAgent(ServiceID serviceID, GSA gsa, InternalAdmin admin, AgentProcessesDetails processesDetails, Credentials credentials) {
         super(admin);
         this.serviceID = serviceID;
         this.gsa = gsa;
+        this.processesDetails = processesDetails;
         this.credentials = credentials;
     }
 
     public String getUid() {
         return this.serviceID.toString();
+    }
+
+    public AgentProcessesDetails getProcessesDetails() {
+        return processesDetails;
+    }
+
+    public void setProcessesDetails(AgentProcessesDetails processesDetails) {
+        this.processesDetails = processesDetails;
     }
 
     public ServiceID getServiceID() {

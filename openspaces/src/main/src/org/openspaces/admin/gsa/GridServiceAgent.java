@@ -1,5 +1,6 @@
 package org.openspaces.admin.gsa;
 
+import com.gigaspaces.grid.gsa.AgentProcessesDetails;
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
@@ -11,6 +12,8 @@ import java.util.concurrent.TimeUnit;
  * @author kimchy
  */
 public interface GridServiceAgent extends GridComponent {
+
+    AgentProcessesDetails getProcessesDetails();
 
     void startGridService(GridServiceManagerOptions options);
 

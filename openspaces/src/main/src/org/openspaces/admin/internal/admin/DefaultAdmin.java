@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.admin;
 
+import com.gigaspaces.grid.gsa.GSA;
 import com.gigaspaces.grid.gsm.PUDetails;
 import com.gigaspaces.grid.gsm.PUsDetails;
 import com.gigaspaces.jvm.JVMDetails;
@@ -132,7 +133,11 @@ public class DefaultAdmin implements InternalAdmin {
 
     private volatile long scheduledProcessingUnitMonitorInterval = 1000; // default to one second
 
+    private volatile long scheduledAgentProcessessMonitorInterval = 5000; // defaults to 5 seconds
+
     private volatile long scheduledSpaceMonitorInterval = 1000; // default to one second
+
+    private Future scheduledAgentProcessessMonitorFuture;
 
     private Future scheduledProcessingUnitMonitorFuture;
 
@@ -219,6 +224,8 @@ public class DefaultAdmin implements InternalAdmin {
         this.scheduledExecutorService = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(5);
         scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(
                 new ScheduledProcessingUnitMonitor(), scheduledProcessingUnitMonitorInterval, scheduledProcessingUnitMonitorInterval, TimeUnit.MILLISECONDS);
+        scheduledAgentProcessessMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(new ScheduledAgentProcessessMonitor(),
+                scheduledAgentProcessessMonitorInterval, scheduledAgentProcessessMonitorInterval, TimeUnit.MILLISECONDS);
     }
 
     public void setProcessingUnitMonitorInterval(long interval, TimeUnit timeUnit) {
@@ -229,6 +236,17 @@ public class DefaultAdmin implements InternalAdmin {
         if (scheduledProcessingUnitMonitorFuture != null) { // during initialization
             scheduledProcessingUnitMonitorFuture.cancel(false);
             scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(new ScheduledProcessingUnitMonitor(), interval, interval, timeUnit);
+        }
+    }
+
+    public void setAgentProcessessMonitorInterval(long interval, TimeUnit timeUnit) {
+        if (closed) {
+            throw new IllegalStateException("Admin already closed");
+        }
+        this.scheduledAgentProcessessMonitorInterval = timeUnit.toMillis(interval);
+        if (scheduledAgentProcessessMonitorFuture != null) { // during initialization
+            scheduledAgentProcessessMonitorFuture.cancel(false);
+            scheduledAgentProcessessMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(new ScheduledAgentProcessessMonitor(), interval, interval, timeUnit);
         }
     }
 
@@ -682,6 +700,19 @@ public class DefaultAdmin implements InternalAdmin {
         if (!os.hasOperatingSystemInfoProviders()) {
             operatingSystems.removeOperatingSystem(os.getUid());
             ((InternalMachine) machineAware.getMachine()).setOperatingSystem(null);
+        }
+    }
+
+    private class ScheduledAgentProcessessMonitor implements Runnable {
+        public void run() {
+            for (GridServiceAgent gridServiceAgent : gridServiceAgents) {
+                GSA gsa = ((InternalGridServiceAgent) gridServiceAgent).getGSA();
+                try {
+                    ((InternalGridServiceAgent) gridServiceAgent).setProcessesDetails(gsa.getDetails());
+                } catch (Exception e) {
+                    // failed to get the info, do nothing
+                }
+            }
         }
     }
 

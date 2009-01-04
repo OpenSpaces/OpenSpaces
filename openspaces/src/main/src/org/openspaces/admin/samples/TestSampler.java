@@ -1,13 +1,17 @@
 package org.openspaces.admin.samples;
 
+import com.gigaspaces.grid.gsa.AgentProcessDetails;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
+import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.pu.service.ServiceDetails;
+
+import java.util.Arrays;
 
 /**
  * @author kimchy
@@ -33,6 +37,12 @@ public class TestSampler {
 //                        System.out.println("   -> PU [" + processingUnitInstance.getClusterInfo() + "]");
 //                    }
 //                }
+                for (GridServiceAgent gridServiceAgent : admin.getGridServiceAgents()) {
+                    System.out.println("GSA [" + gridServiceAgent.getUid() + "]");
+                    for (AgentProcessDetails processDetails : gridServiceAgent.getProcessesDetails().getProcessDetails()) {
+                        System.out.println("   -> Process [" + Arrays.toString(processDetails.getCommand()) + "]");
+                    }
+                }
 //                System.out.println("VM TOTAL STATS: Heap Committed [" + admin.getVirtualMachines().getStatistics().getMemoryHeapCommittedInBytes() +"]");
 //                System.out.println("VM TOTAL STATS: GC PERC [" + admin.getVirtualMachines().getStatistics().getGcCollectionPerc() + "], Heap Used [" + admin.getVirtualMachines().getStatistics().getMemoryHeapPerc() + "%]");
 //                for (VirtualMachine virtualMachine : admin.getVirtualMachines()) {

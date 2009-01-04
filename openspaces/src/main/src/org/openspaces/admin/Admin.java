@@ -24,6 +24,8 @@ public interface Admin extends StatisticsMonitor {
 
     void setProcessingUnitMonitorInterval(long interval, TimeUnit timeUnit);
 
+    void setAgentProcessessMonitorInterval(long interval, TimeUnit timeUnit);
+
     void setSpaceMonitorInterval(long interval, TimeUnit timeUnit);
 
     void setSchedulerCorePoolSize(int coreThreads);

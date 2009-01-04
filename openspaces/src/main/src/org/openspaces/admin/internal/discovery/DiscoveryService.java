@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.discovery;
 
 import com.gigaspaces.grid.gsa.AgentIdAware;
+import com.gigaspaces.grid.gsa.AgentProcessesDetails;
 import com.gigaspaces.grid.gsa.GSA;
 import com.gigaspaces.grid.gsc.GSC;
 import com.gigaspaces.grid.gsm.GSM;
@@ -183,7 +184,8 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                     if (gsa.isSecured()) {
                         credentials = gsa.authenticate(admin.getUsername(), admin.getPassword());
                     }
-                    InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, gsa, admin, credentials);
+                    AgentProcessesDetails processesDetails = gsa.getDetails();
+                    InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, gsa, admin, processesDetails, credentials);
                     // get the details here, on the thread pool
                     NIODetails nioDetails = gridServiceAgent.getNIODetails();
                     OSDetails osDetails = gridServiceAgent.getOSDetails();
