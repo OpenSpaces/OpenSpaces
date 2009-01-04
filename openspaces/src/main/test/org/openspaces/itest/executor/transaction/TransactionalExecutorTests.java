@@ -237,7 +237,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
     }
 
     @AutowireTask
-    private class SimpleDistributedTask1 implements DistributedTask<Integer, Integer> {
+    private static class SimpleDistributedTask1 implements DistributedTask<Integer, Integer> {
 
         @Resource(name = "gigaSpace1")
         transient GigaSpace gigaSpace1;
@@ -264,7 +264,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
     }
 
     @AutowireTask
-    private class SimpleTask1 implements Task<Integer> {
+    private static class SimpleTask1 implements Task<Integer> {
 
         @Resource(name = "gigaSpace1")
         transient GigaSpace gigaSpace;

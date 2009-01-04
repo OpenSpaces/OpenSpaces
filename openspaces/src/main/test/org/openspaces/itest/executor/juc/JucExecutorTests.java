@@ -6,6 +6,7 @@ import org.openspaces.core.executor.TaskExecutors;
 import org.openspaces.core.executor.juc.TaskExecutorService;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
+import java.io.Serializable;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -45,31 +46,35 @@ public class JucExecutorTests extends AbstractDependencyInjectionSpringContextTe
     }
 
     public void testSimpleCallableExecution() throws Exception {
-        Future<Integer> result = executorService.submit(new Callable<Integer>() {
-
-            @SpaceRouting
-            public int routing() {
-                return 1;
-            }
-
-            public Integer call() throws Exception {
-                return 1;
-            }
-        });
+        Future<Integer> result = executorService.submit(new MyCallable1());
         assertEquals(1, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
     public void testSimpleRunnableExecution() throws Exception {
-        Future<Integer> result = executorService.submit(new Runnable() {
-
-            @SpaceRouting
-            public int routing() {
-                return 1;
-            }
-
-            public void run() {
-            }
-        }, 1);
+        Future<Integer> result = executorService.submit(new MyRunnable1(), 1);
         assertEquals(1, (int) result.get(1000, TimeUnit.MILLISECONDS));
+    }
+
+    private static class MyCallable1 implements Callable<Integer>, Serializable {
+
+        @SpaceRouting
+        public int routing() {
+            return 1;
+        }
+
+        public Integer call() throws Exception {
+            return 1;
+        }
+    }
+
+    private static class MyRunnable1 implements Runnable, Serializable {
+
+        @SpaceRouting
+        public int routing() {
+            return 1;
+        }
+
+        public void run() {
+        }
     }
 }

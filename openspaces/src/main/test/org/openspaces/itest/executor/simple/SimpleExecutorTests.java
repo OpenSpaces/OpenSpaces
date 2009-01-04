@@ -63,56 +63,17 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     }
 
     public void testSimpleTaskExecution() throws Exception {
-        AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new Task<Integer>() {
-
-            @SpaceRouting
-            public int routing() {
-                return 1;
-            }
-
-            public Integer execute() throws Exception {
-                return 1;
-            }
-        });
+        AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MyTask());
         assertEquals(1, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
-    public void testSimpleTaskExecutionNoRoutingException() throws Exception {
-        try {
-            AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new Task<Integer>() {
-                public Integer execute() throws Exception {
-                    return 1;
-                }
-            });
-            fail();
-        } catch (IllegalArgumentException e) {
-            // all is well
-        }
-    }
-
     public void testSimpleTaskExecutionWithRouting() throws Exception {
-        AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new Task<Integer>() {
-            public Integer execute() throws Exception {
-                return 1;
-            }
-        }, 1);
+        AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MyTask2(), 1);
         assertEquals(1, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
     public void testMultiRoutingExecution() throws Exception {
-        AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new DistributedTask<Integer, Integer>() {
-            public Integer execute() throws Exception {
-                return 1;
-            }
-
-            public Integer reduce(List<AsyncResult<Integer>> asyncResults) {
-                int sum = 0;
-                for (AsyncResult<Integer> res : asyncResults) {
-                    sum += res.getResult();
-                }
-                return sum;
-            }
-        }, 1, 2);
+        AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MyDistributedTask1(), 1, 2);
         assertEquals(2, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
@@ -190,19 +151,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     }
 
     public void testBroadcastExecution() throws Exception {
-        AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new DistributedTask<Integer, Integer>() {
-            public Integer execute() throws Exception {
-                return 1;
-            }
-
-            public Integer reduce(List<AsyncResult<Integer>> asyncResults) {
-                int sum = 0;
-                for (AsyncResult<Integer> res : asyncResults) {
-                    sum += res.getResult();
-                }
-                return sum;
-            }
-        });
+        AsyncFuture<Integer> result = clusteredGigaSpace1.execute(new MyDistributedTask2());
         assertEquals(2, (int) result.get(1000, TimeUnit.MILLISECONDS));
     }
 
@@ -225,18 +174,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     }
 
     public void testInjection3() throws TimeoutException, ExecutionException, InterruptedException {
-        AsyncFuture result = clusteredGigaSpace1.execute(new Task() {
-
-            @TaskGigaSpace
-            private GigaSpace gigaSpace;
-
-            public Serializable execute() throws Exception {
-                if (gigaSpace == null) {
-                    throw new NullPointerException();
-                }
-                return null;
-            }
-        }, 1);
+        AsyncFuture result = clusteredGigaSpace1.execute(new MyTask3(), 1);
         assertNull(result.get(1000, TimeUnit.MILLISECONDS));
     }
 
@@ -285,7 +223,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         assertEquals(500, (int) listener.waitForResult()[1].get());
     }
 
-    private class DelayedTask implements Task<Integer> {
+    private static class DelayedTask implements Task<Integer> {
 
         private int waitTime;
 
@@ -304,19 +242,19 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         }
     }
 
-    private class Task1 implements Task<Integer> {
+    private static class Task1 implements Task<Integer> {
         public Integer execute() throws Exception {
             return 1;
         }
     }
 
-    private class TaskException implements Task<Integer> {
+    private static class TaskException implements Task<Integer> {
         public Integer execute() throws Exception {
             throw new IllegalArgumentException("test");
         }
     }
 
-    private class IncrementalTask implements Task<Integer> {
+    private static class IncrementalTask implements Task<Integer> {
 
         private AtomicInteger val = new AtomicInteger();
 
@@ -325,7 +263,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         }
     }
 
-    private class Task1Routing implements Task<Integer> {
+    private static class Task1Routing implements Task<Integer> {
 
         private int routing;
 
@@ -343,7 +281,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         }
     }
 
-    private class AggregatorContinue implements DistributedTask<Integer, Integer>, AsyncResultFilter<Integer> {
+    private static class AggregatorContinue implements DistributedTask<Integer, Integer>, AsyncResultFilter<Integer> {
 
         public Integer execute() throws Exception {
             return 1;
@@ -362,7 +300,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         }
     }
 
-    private class AggregatorBreak implements DistributedTask<Integer, Integer>, AsyncResultFilter<Integer> {
+    private static class AggregatorBreak implements DistributedTask<Integer, Integer>, AsyncResultFilter<Integer> {
 
         public Integer execute() throws Exception {
             return 1;
@@ -385,7 +323,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
     }
 
     @AutowireTask
-    private class ApplicationContextInjectable extends AggregatorContinue implements ApplicationContextAware {
+    private static class ApplicationContextInjectable extends AggregatorContinue implements ApplicationContextAware {
 
         private transient ApplicationContext applicationContext;
 
@@ -401,7 +339,7 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
         }
     }
 
-    public class TaskGigaSpaceInjectable extends AggregatorContinue {
+    public static class TaskGigaSpaceInjectable extends AggregatorContinue {
 
         @TaskGigaSpace
         public transient GigaSpace gigaSpace;
@@ -435,6 +373,71 @@ public class SimpleExecutorTests extends AbstractDependencyInjectionSpringContex
                 sum += res.getResult();
             }
             return sum;
+        }
+    }
+
+    private static class MyTask implements Task<Integer> {
+
+        @SpaceRouting
+        public int routing() {
+            return 1;
+        }
+
+        public Integer execute() throws Exception {
+            return 1;
+        }
+    }
+
+    private static class MyTask2 implements Task<Integer> {
+        public Integer execute() throws Exception {
+            return 1;
+        }
+    }
+
+    private static class MyDistributedTask1 implements DistributedTask<Integer, Integer> {
+        public Integer execute() throws Exception {
+            return 1;
+        }
+
+        public Integer reduce(List<AsyncResult<Integer>> asyncResults) {
+            int sum = 0;
+            for (AsyncResult<Integer> res : asyncResults) {
+                sum += res.getResult();
+            }
+            return sum;
+        }
+    }
+
+    private static class MyDistributedTask2 implements DistributedTask<Integer, Integer> {
+        public Integer execute() throws Exception {
+            return 1;
+        }
+
+        public Integer reduce(List<AsyncResult<Integer>> asyncResults) {
+            int sum = 0;
+            for (AsyncResult<Integer> res : asyncResults) {
+                sum += res.getResult();
+            }
+            return sum;
+        }
+    }
+
+    private static class MyTask3 implements Task {
+
+        @TaskGigaSpace
+            private GigaSpace gigaSpace;
+
+        public Serializable execute() throws Exception {
+            if (gigaSpace == null) {
+                throw new NullPointerException();
+            }
+            return null;
+        }
+    }
+
+    private static class MyTask4 implements Task<Integer> {
+        public Integer execute() throws Exception {
+            return 1;
         }
     }
 }
