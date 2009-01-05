@@ -13,6 +13,7 @@ import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsa.GridServiceContainerOptions;
 import org.openspaces.admin.gsa.GridServiceManagerOptions;
+import org.openspaces.admin.gsa.GridServiceOptions;
 import org.openspaces.admin.gsa.LookupServiceOptions;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
@@ -71,6 +72,17 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
 
     public GSA getGSA() {
         return this.gsa;
+    }
+
+    public void startGridService(GridServiceOptions options) {
+        if (credentials != null && credentials != Credentials.FULL) {
+            throw new AdminException("No credentials to start a service");
+        }
+        try {
+            gsa.startProcess(options.getOptions());
+        } catch (IOException e) {
+            throw new AdminException("Failed to start Grid Service", e);
+        }
     }
 
     public void startGridService(GridServiceManagerOptions options) {

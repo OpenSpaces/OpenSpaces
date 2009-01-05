@@ -1,3 +1,19 @@
+/*
+ * Copyright 2006-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openspaces.admin.gsa;
 
 import com.gigaspaces.grid.gsa.GSProcessOptions;
@@ -6,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * A generic process options.
+ *
  * @author kimchy
  */
 public class GridServiceOptions {
@@ -22,35 +40,59 @@ public class GridServiceOptions {
 
     private boolean overrideArguments;
 
+    /**
+     * Constructs a new grid service options with the given process type. By defualt, will use JVM to start it.
+     */
     public GridServiceOptions(String type) {
         this.type = type;
     }
 
+    /**
+     * Will use a scipt to start the process, and not a pure JVM process.
+     */
     public GridServiceOptions useScript() {
         this.useScript = true;
         return this;
     }
 
+    /**
+     * Will cause JVM options added using {@link #vmInputArgument(String)} to override all the vm arguments
+     * that the JVM will start by default with.
+     */
     public GridServiceOptions overrideVmInputArguments() {
         overrideVmInputArguments = true;
         return this;
     }
 
+    /**
+     * Will add a JVM level argument when the process is executed using pure JVM. For example, the memory
+     * can be controlled using <code>-Xmx512m</code>.
+     */
     public GridServiceOptions vmInputArgument(String vmInputArgument) {
         vmInputArguments.add(vmInputArgument);
         return this;
     }
 
+    /**
+     * Will cause the process arguments added using {@link #argument(String)} to override any arguments defined
+     * in the process descriptor.
+     */
     public GridServiceOptions overrideArguments() {
         overrideArguments = true;
         return this;
     }
 
+    /**
+     * Will add a process level argument.
+     */
     public GridServiceOptions argument(String argument) {
         arguments.add(argument);
         return this;
     }
 
+    /**
+     * Returns the agent process options that represents what was set on this generic service options.
+     */
     public GSProcessOptions getOptions() {
         GSProcessOptions options = new GSProcessOptions(type);
         options.setUseScript(useScript);

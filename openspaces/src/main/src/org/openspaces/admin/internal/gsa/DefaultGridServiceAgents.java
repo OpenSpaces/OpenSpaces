@@ -29,6 +29,10 @@ public class DefaultGridServiceAgents implements InternalGridServiceAgents {
 
     private final Map<String, GridServiceAgent> agents = new SizeConcurrentHashMap<String, GridServiceAgent>();
 
+    private final Map<String, GridServiceAgent> agentsByHostAddress = new SizeConcurrentHashMap<String, GridServiceAgent>();
+
+    private final Map<String, GridServiceAgent> agentsByHostNames = new SizeConcurrentHashMap<String, GridServiceAgent>();
+
     private final InternalGridServiceAgentAddedEventManager gridServiceAgentAddedEventManager;
 
     private final InternalGridServiceAgentRemovedEventManager gridServiceAgentRemovedEventManager;
@@ -53,6 +57,14 @@ public class DefaultGridServiceAgents implements InternalGridServiceAgents {
 
     public Map<String, GridServiceAgent> getUids() {
         return Collections.unmodifiableMap(agents);
+    }
+
+    public Map<String, GridServiceAgent> getHostAddress() {
+        return Collections.unmodifiableMap(agentsByHostAddress);
+    }
+
+    public Map<String, GridServiceAgent> getHostNames() {
+        return Collections.unmodifiableMap(agentsByHostNames);
     }
 
     public int getSize() {
@@ -132,6 +144,8 @@ public class DefaultGridServiceAgents implements InternalGridServiceAgents {
 
     public void addGridServiceAgent(InternalGridServiceAgent gridServiceAgent) {
         GridServiceAgent existing = agents.put(gridServiceAgent.getUid(), gridServiceAgent);
+        agentsByHostAddress.put(gridServiceAgent.getTransport().getLocalHostAddress(), gridServiceAgent);
+        agentsByHostNames.put(gridServiceAgent.getTransport().getLocalHostName(), gridServiceAgent);
         if (existing == null) {
             gridServiceAgentAddedEventManager.gridServiceAgentAdded(gridServiceAgent);
         }
@@ -140,6 +154,8 @@ public class DefaultGridServiceAgents implements InternalGridServiceAgents {
     public InternalGridServiceAgent removeGridServiceAgent(String uid) {
         InternalGridServiceAgent existing = (InternalGridServiceAgent) agents.remove(uid);
         if (existing != null) {
+            agentsByHostAddress.remove(existing.getTransport().getLocalHostAddress());
+            agentsByHostAddress.remove(existing.getTransport().getLocalHostName());
             gridServiceAgentRemovedEventManager.gridServiceAgentRemoved(existing);
         }
         return existing;
