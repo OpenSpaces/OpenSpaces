@@ -58,7 +58,7 @@ public class DefaultLookupServices implements InternalLookupServices {
         return Collections.unmodifiableMap(lookupServiceMap);
     }
 
-    public int size() {
+    public int getSize() {
         return lookupServiceMap.size();
     }
 
