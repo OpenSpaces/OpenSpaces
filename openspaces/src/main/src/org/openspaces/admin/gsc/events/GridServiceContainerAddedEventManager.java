@@ -20,6 +20,7 @@ package org.openspaces.admin.gsc.events;
  * An event manager allowing to remove and add {@link GridServiceContainerAddedEventListener}s.
  * 
  * @author kimchy
+ * @see org.openspaces.admin.gsc.GridServiceContainers#getGridServiceContainerAdded()
  */
 public interface GridServiceContainerAddedEventManager {
 

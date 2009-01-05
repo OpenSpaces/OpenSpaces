@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  * discoverted.
  *
  * <p>Provides simple means to get all the current containers, as well as as registering for
- * agent lifecycle (added and removed) events.
+ * container lifecycle (added and removed) events.
  * 
  * @author kimchy
  */
@@ -41,7 +41,7 @@ public interface GridServiceContainers extends AdminAware, Iterable<GridServiceC
     GridServiceContainer[] getContainers();
 
     /**
-     * Returns an agent based on its uid.
+     * Returns a container based on its uid.
      *
      * @see GridServiceContainer#getUid()
      */
@@ -71,19 +71,21 @@ public interface GridServiceContainers extends AdminAware, Iterable<GridServiceC
 
     /**
      * Waits for the given timeout (in time unit) till the provided number of containers are up.
+     * Returns <code>true</code> if the required number of containers were discovered, <code>false</code>
+     * if the timeout expired.
      *
      * @param numberOfGridServiceContainers The number of containers to wait for
      */
     boolean waitFor(int numberOfGridServiceContainers, long timeout, TimeUnit timeUnit);
 
     /**
-     * Returns the grid service agent added event manager allowing to add and remove
+     * Returns the grid service container added event manager allowing to add and remove
      * {@link org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener}s.
      */
     GridServiceContainerAddedEventManager getGridServiceContainerAdded();
 
     /**
-     * Returns the grid service agent added event manager allowing to add and remove
+     * Returns the grid service container added event manager allowing to add and remove
      * {@link org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventListener}s.
      */
     GridServiceContainerRemovedEventManager getGridServiceContainerRemoved();
