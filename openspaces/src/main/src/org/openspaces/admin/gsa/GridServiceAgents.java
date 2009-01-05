@@ -65,7 +65,7 @@ public interface GridServiceAgents extends AdminAware, Iterable<GridServiceAgent
     Map<String, GridServiceAgent> getHostNames();
 
     /**
-     * Returns the number of agenst current discovered.
+     * Returns the number of agents current discovered.
      */
     int getSize();
 

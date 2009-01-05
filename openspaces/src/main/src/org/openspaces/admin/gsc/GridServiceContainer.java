@@ -1,3 +1,19 @@
+/*
+ * Copyright 2006-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openspaces.admin.gsc;
 
 import org.openspaces.admin.AgentGridComponent;
@@ -9,21 +25,46 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * A Grid Service Container is a container for {@link org.openspaces.admin.pu.ProcessingUnitInstance}s
+ * allocated to it through the {@link org.openspaces.admin.gsm.GridServiceManager} that manages it.
+ *
  * @author kimchy
  */
 public interface GridServiceContainer extends AgentGridComponent, Iterable<ProcessingUnitInstance> {
 
+    /**
+     * Waits indefinitely for the given number of processing unit instances to run within the container.
+     */
     boolean waitFor(int numberOfProcessingUnitInstances);
 
+    /**
+     * Waits for timeout value (in time unit) for the given number of processing unit instances to run within the container.
+     * Returns <code>true</code> if the number was reached, <code>false</code> if the timeout expired.
+     */
     boolean waitFor(int numberOfProcessingUnitInstances, long timeout, TimeUnit timeUnit);
 
+    /**
+     * Returns the processing unit instances that are currently deployed within the grid service container.
+     */
     ProcessingUnitInstance[] getProcessingUnitInsances();
 
+    /**
+     * Returns an event manager allowing to register for processing unit instance additions to the container.
+     */
     ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded();
 
+    /**
+     * Returns an event manager allowing to register for processing unit instance removals from the container.
+     */
     ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved();
 
+    /**
+     * Adds a processing unit lifecycle listener to the container.
+     */
     void addProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
+    /**
+     * Removes a processing unit lifecycle listener to the container.
+     */
     void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 }
