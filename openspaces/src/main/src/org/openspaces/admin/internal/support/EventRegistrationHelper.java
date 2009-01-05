@@ -10,6 +10,8 @@ import org.openspaces.admin.lus.events.LookupServiceAddedEventListener;
 import org.openspaces.admin.lus.events.LookupServiceRemovedEventListener;
 import org.openspaces.admin.machine.events.MachineAddedEventListener;
 import org.openspaces.admin.machine.events.MachineRemovedEventListener;
+import org.openspaces.admin.os.events.OperatingSystemStatisticsChangedEventListener;
+import org.openspaces.admin.os.events.OperatingSystemsStatisticsChangedEventListener;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventListener;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
@@ -21,10 +23,16 @@ import org.openspaces.admin.space.events.ReplicationStatusChangedEventListener;
 import org.openspaces.admin.space.events.SpaceAddedEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceAddedEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventListener;
+import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEventListener;
 import org.openspaces.admin.space.events.SpaceModeChangedEventListener;
 import org.openspaces.admin.space.events.SpaceRemovedEventListener;
+import org.openspaces.admin.space.events.SpaceStatisticsChangedEventListener;
+import org.openspaces.admin.transport.events.TransportStatisticsChangedEventListener;
+import org.openspaces.admin.transport.events.TransportsStatisticsChangedEventListener;
 import org.openspaces.admin.vm.events.VirtualMachineAddedEventListener;
 import org.openspaces.admin.vm.events.VirtualMachineRemovedEventListener;
+import org.openspaces.admin.vm.events.VirtualMachineStatisticsChangedEventListener;
+import org.openspaces.admin.vm.events.VirtualMachinesStatisticsChangedEventListener;
 
 /**
  * @author kimchy
@@ -43,6 +51,24 @@ public abstract class EventRegistrationHelper {
         }
         if (eventListener instanceof VirtualMachineRemovedEventListener) {
             admin.getVirtualMachines().getVirtualMachineRemoved().add((VirtualMachineRemovedEventListener) eventListener);
+        }
+        if (eventListener instanceof VirtualMachineStatisticsChangedEventListener) {
+            admin.getVirtualMachines().getVirtualMachineStatisticsChanged().add((VirtualMachineStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof VirtualMachinesStatisticsChangedEventListener) {
+            admin.getVirtualMachines().getStatisticsChanged().add((VirtualMachinesStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof TransportsStatisticsChangedEventListener) {
+            admin.getTransports().getStatisticsChanged().add((TransportsStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof TransportStatisticsChangedEventListener) {
+            admin.getTransports().getTransportStatisticsChanged().add((TransportStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof OperatingSystemsStatisticsChangedEventListener) {
+            admin.getOperatingSystems().getStatisticsChanged().add((OperatingSystemsStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof OperatingSystemStatisticsChangedEventListener) {
+            admin.getOperatingSystems().getOperatingSystemStatisticsChanged().add((OperatingSystemStatisticsChangedEventListener) eventListener);
         }
         if (eventListener instanceof LookupServiceAddedEventListener) {
             admin.getLookupServices().getLookupServiceAdded().add((LookupServiceAddedEventListener) eventListener);
@@ -101,6 +127,12 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof ReplicationStatusChangedEventListener) {
             admin.getSpaces().getReplicationStatusChanged().add((ReplicationStatusChangedEventListener) eventListener);
         }
+        if (eventListener instanceof SpaceStatisticsChangedEventListener) {
+            admin.getSpaces().getSpaceStatisticsChanged().add((SpaceStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceInstanceStatisticsChangedEventListener) {
+            admin.getSpaces().getSpaceInstanceStatisticsChanged().add((SpaceInstanceStatisticsChangedEventListener) eventListener);
+        }
     }
 
     public static void removeEventListener(InternalAdmin admin, AdminEventListener eventListener) {
@@ -115,6 +147,24 @@ public abstract class EventRegistrationHelper {
         }
         if (eventListener instanceof VirtualMachineRemovedEventListener) {
             admin.getVirtualMachines().getVirtualMachineRemoved().remove((VirtualMachineRemovedEventListener) eventListener);
+        }
+        if (eventListener instanceof VirtualMachineStatisticsChangedEventListener) {
+            admin.getVirtualMachines().getVirtualMachineStatisticsChanged().remove((VirtualMachineStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof VirtualMachinesStatisticsChangedEventListener) {
+            admin.getVirtualMachines().getStatisticsChanged().remove((VirtualMachinesStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof TransportsStatisticsChangedEventListener) {
+            admin.getTransports().getStatisticsChanged().remove((TransportsStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof TransportStatisticsChangedEventListener) {
+            admin.getTransports().getTransportStatisticsChanged().remove((TransportStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof OperatingSystemsStatisticsChangedEventListener) {
+            admin.getOperatingSystems().getStatisticsChanged().remove((OperatingSystemsStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof OperatingSystemStatisticsChangedEventListener) {
+            admin.getOperatingSystems().getOperatingSystemStatisticsChanged().remove((OperatingSystemStatisticsChangedEventListener) eventListener);
         }
         if (eventListener instanceof LookupServiceAddedEventListener) {
             admin.getLookupServices().getLookupServiceAdded().remove((LookupServiceAddedEventListener) eventListener);
@@ -172,6 +222,12 @@ public abstract class EventRegistrationHelper {
         }
         if (eventListener instanceof ReplicationStatusChangedEventListener) {
             admin.getSpaces().getReplicationStatusChanged().remove((ReplicationStatusChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceStatisticsChangedEventListener) {
+            admin.getSpaces().getSpaceStatisticsChanged().remove((SpaceStatisticsChangedEventListener) eventListener);
+        }
+        if (eventListener instanceof SpaceInstanceStatisticsChangedEventListener) {
+            admin.getSpaces().getSpaceInstanceStatisticsChanged().remove((SpaceInstanceStatisticsChangedEventListener) eventListener);
         }
     }
 }

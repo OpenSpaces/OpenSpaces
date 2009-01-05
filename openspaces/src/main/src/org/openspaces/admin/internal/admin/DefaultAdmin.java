@@ -68,6 +68,7 @@ import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.machine.Machines;
 import org.openspaces.admin.os.OperatingSystem;
+import org.openspaces.admin.os.OperatingSystems;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnits;
@@ -305,6 +306,10 @@ public class DefaultAdmin implements InternalAdmin {
 
     public VirtualMachines getVirtualMachines() {
         return this.virtualMachines;
+    }
+
+    public OperatingSystems getOperatingSystems() {
+        return operatingSystems;
     }
 
     public ProcessingUnits getProcessingUnits() {
