@@ -26,6 +26,7 @@ import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
+import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Set;
@@ -582,7 +583,11 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
     }
 
     public ServiceDetails[] getServicesDetails() {
-        return new ServiceDetails[]{new PollingEventContainerServiceDetails(beanName, getGigaSpace().getName(), getTemplate(), isPerformSnapshot(),
+        Object tempalte = getTemplate();
+        if (!(tempalte instanceof Serializable)) {
+            tempalte = null;
+        }
+        return new ServiceDetails[]{new PollingEventContainerServiceDetails(beanName, getGigaSpace().getName(), template, isPerformSnapshot(),
                 getReceiveTimeout(), getReceiveOperationHandler().getClass().getName(), getTriggerOperationHandler() != null ? getTriggerOperationHandler().getClass().getName() : null,
                 getConcurrentConsumers(), getMaxConcurrentConsumers(), isPassArrayAsIs())};
     }

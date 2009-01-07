@@ -30,6 +30,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -104,7 +105,11 @@ public class SimpleAsyncPollingEventListenerContainer extends AbstractTransactio
     }
 
     public ServiceDetails[] getServicesDetails() {
-        return new ServiceDetails[] {new AsyncPollingEventContainerServiceDetails(beanName, getGigaSpace().getName(), getTemplate(),
+        Object tempalte = getTemplate();
+        if (!(tempalte instanceof Serializable)) {
+            tempalte = null;
+        }
+        return new ServiceDetails[] {new AsyncPollingEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte,
                 isPerformSnapshot(), receiveTimeout, concurrentConsumers)};
     }
 

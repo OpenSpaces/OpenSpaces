@@ -30,6 +30,7 @@ import org.openspaces.pu.service.ServiceDetails;
 import org.springframework.dao.DataAccessException;
 import org.springframework.util.ClassUtils;
 
+import java.io.Serializable;
 import java.rmi.RemoteException;
 
 /**
@@ -174,7 +175,11 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
     }
 
     public ServiceDetails[] getServicesDetails() {
-        return new ServiceDetails[] {new NotifyEventContainerServiceDetails(beanName, getGigaSpace().getName(), getTemplate(), isPerformSnapshot(),
+        Object tempalte = getTemplate();
+        if (!(tempalte instanceof Serializable)) {
+            tempalte = null;
+        }
+        return new ServiceDetails[] {new NotifyEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte, isPerformSnapshot(),
                 getCommType(), isFifo(), getBatchSize(), getBatchTime(), isAutoRenew(),
                 isNotifyAll(), isNotifyWrite(), isNotifyUpdate(), isNotifyWrite(), isNotifyLeaseExpire(), isNotifyUnmatched(),
                 isTriggerNotifyTemplate(), isReplicateNotifyTemplate(), isPerformSnapshot(), isPassArrayAsIs())};
