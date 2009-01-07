@@ -579,7 +579,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
         return spaceUrls.toArray(new SpaceURL[spaceUrls.size()]);
     }
-    
+
     public SpaceMode[] listSpacesModes() throws RemoteException {
         List<SpaceMode> spacesModes = new ArrayList<SpaceMode>();
         for (ServiceDetails serviceDetails : puDetails.getDetails()) {
