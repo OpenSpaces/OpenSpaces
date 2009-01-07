@@ -119,8 +119,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private volatile ScheduledExecutorService executorService;
 
-    private volatile ClassLoader contextClassLoader;
-
     private volatile MemberAliveIndicator[] memberAliveIndicators;
 
     private volatile File deployPath;
@@ -141,7 +139,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     public PUServiceBeanImpl() {
-        contextClassLoader = Thread.currentThread().getContextClassLoader();
+        super();
     }
 
     @Override
@@ -210,7 +208,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             stopPU();
         } finally {
             Thread.currentThread().setContextClassLoader(origClassLoader);
-            contextClassLoader = null;
         }
     }
 
