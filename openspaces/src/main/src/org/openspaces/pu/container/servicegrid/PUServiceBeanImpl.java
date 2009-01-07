@@ -210,6 +210,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             stopPU();
         } finally {
             Thread.currentThread().setContextClassLoader(origClassLoader);
+            contextClassLoader = null;
         }
     }
 
