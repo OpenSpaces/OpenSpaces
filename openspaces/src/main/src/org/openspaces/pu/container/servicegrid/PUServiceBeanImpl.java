@@ -89,6 +89,7 @@ import java.net.URL;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -359,7 +360,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         // handles class loader libraries
         if (downloadPU) {
             List<URL> libUrls = new ArrayList<URL>();
-            libUrls.add(deployPath.toURI().toURL());
             File libDir = new File(deployPath, "lib");
             if (libDir.exists()) {
                 File[] libFiles = libDir.listFiles();
@@ -367,9 +367,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                     libUrls.add(libFile.toURI().toURL());
                 }
             }
-            ((ServiceClassLoader) contextClassLoader).addURLs(libUrls.toArray(new URL[libUrls.size()]));
+            ((ServiceClassLoader) contextClassLoader).setSlashPath(deployPath.toURI().toURL());
+            ((ServiceClassLoader) contextClassLoader).setLibPath(libUrls.toArray(new URL[libUrls.size()]));
             if (logger.isDebugEnabled()) {
-                logger.debug(logMessage("Service Class Loader " + libUrls));
+                logger.debug(logMessage("Service Class Loader " + Arrays.toString(((ServiceClassLoader) contextClassLoader).getURLs())));
             }
             // add to common class loader
             List<URL> sharedlibUrls = new ArrayList<URL>();
@@ -396,15 +397,15 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         } else {
             // add to service class loader
             List<URL> libUrls = new ArrayList<URL>();
-            libUrls.add(new URL(codeserver + puPath + "/"));
             WebsterFile libDir = new WebsterFile(new URL(codeserver + puPath + "/lib"));
             File[] libFiles = libDir.listFiles();
             for (int i = 0; i < libFiles.length; i++) {
                 libUrls.add(new URL(codeserver + puPath + "/lib/" + libFiles[i].getName()));
             }
-            ((ServiceClassLoader) contextClassLoader).addURLs(libUrls.toArray(new URL[libUrls.size()]));
+            ((ServiceClassLoader) contextClassLoader).setSlashPath(new URL(codeserver + puPath + "/"));
+            ((ServiceClassLoader) contextClassLoader).setLibPath(libUrls.toArray(new URL[libUrls.size()]));
             if (logger.isDebugEnabled()) {
-                logger.debug(logMessage("Service Class Loader " + libUrls));
+                logger.debug(logMessage("Service Class Loader " + Arrays.toString(((ServiceClassLoader) contextClassLoader).getURLs())));
             }
             // add to common class loader
             WebsterFile sharedlibDir = new WebsterFile(new URL(codeserver + puPath + "/shared-lib"));
