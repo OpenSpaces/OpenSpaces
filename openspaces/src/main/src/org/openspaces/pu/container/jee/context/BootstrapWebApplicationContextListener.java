@@ -60,13 +60,23 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
 
     private static final Log logger = LogFactory.getLog(BootstrapWebApplicationContextListener.class);
 
+    private static final String BOOTSTRAP_CONTEXT_KEY = BootstrapWebApplicationContextListener.class.getName() + ".bootstraped";
+
     private static final String MARSHALLED_STORE = "/WEB-INF/gsstore";
     private static final String MARSHALLED_CLUSTER_INFO = MARSHALLED_STORE + "/cluster-info";
     private static final String MARSHALLED_BEAN_LEVEL_PROPERTIES = MARSHALLED_STORE + "/bean-level-properties";
 
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        logger.info("Booting OpenSpaces Web Application Support");
         ServletContext servletContext = servletContextEvent.getServletContext();
+
+        Boolean bootstraped = (Boolean) servletContext.getAttribute(BOOTSTRAP_CONTEXT_KEY);
+        if (bootstraped != null && bootstraped) {
+            logger.debug("Already performed bootstrap, ignoring");
+            return;
+        }
+        servletContext.setAttribute(BOOTSTRAP_CONTEXT_KEY, true);
+        
+        logger.info("Booting OpenSpaces Web Application Support");
         ClusterInfo clusterInfo = null;
         BeanLevelProperties beanLevelProperties = null;
 
