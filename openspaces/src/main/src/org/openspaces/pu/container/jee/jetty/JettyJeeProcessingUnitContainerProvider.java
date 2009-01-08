@@ -39,6 +39,7 @@ import org.openspaces.jee.sessions.jetty.GigaSessionManager;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
+import org.openspaces.pu.container.jee.context.BootstrapWebApplicationContextListener;
 import org.openspaces.pu.container.jee.jetty.support.JdkLogger;
 import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
 import org.openspaces.pu.container.support.ClusterInfoParser;
@@ -60,9 +61,6 @@ import java.util.List;
  * An implementation of {@link org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider} that
  * can run web applications (war files) using Jetty.
  *
- * <p>The implementation uses a specific Spring context xml to configure and load Jetty. This spring
- * context xml is different than the optional <code>pu.xml</code> (which is also loaded if exists).
- *
  * <p>The jetty xml configuration is loaded from {@link #DEFAULT_JETTY_PU} location if it exists. If
  * it does not exists, two defaults exists, one is the <code>jetty.plain.pu.xml</code> and the other
  * is <code>jetty.shared.xml</code>. By default, if nothing is passed, the <code>jetty.plain.xml<code>
@@ -73,12 +71,8 @@ import java.util.List;
  * shared mode uses the same jetty instance for all web applications. The default is plain mode
  * as it is usually the simpler and preferred way to use it.
  *
- * <p>The web application started stores within the web servlet context several objects. It stores
- * all the beans defined within the optional <code>pu.xml</code> under their respective bean
- * names (this allows to define a space within the <code>pu.xml</code> and then get it from within
- * the servlet context). Other objects, such as the {@link org.openspaces.core.cluster.ClusterInfo},
- * {@link BeanLevelProperties}, and the acutal {@link ApplicationContext} are also passed to the
- * servlet context.
+ * <p>The web application will be enabled automatically for OpenSpaces bootstraping using
+ * {@link org.openspaces.pu.container.jee.context.BootstrapWebApplicationContextListener}.
  *
  * <p>Post processing of the <code>web.xml</code> and <code>jetty-web.xml</code> is perfomed allowing
  * to use <code>${...}</code> notation within them (for example, using system proeprties, deployed
@@ -282,14 +276,6 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
      * See the header javadoc.
      */
     public ProcessingUnitContainer createContainer() throws CannotCreateContainerException {
-        if (configResources.size() == 0) {
-            try {
-                addConfigLocation(DEFAULT_PU_CONTEXT_LOCATION);
-            } catch (IOException e) {
-                throw new CannotCreateContainerException("Failed to read config files from " + DEFAULT_PU_CONTEXT_LOCATION, e);
-            }
-        }
-
         Resource jettyPuResource = new ClassPathResource(DEFAULT_JETTY_PU);
         if (!jettyPuResource.exists()) {
             String instanceProp = beanLevelProperties.getContextProperties().getProperty(JETTY_INSTANCE_PROP, INSTANCE_PLAIN);
@@ -429,16 +415,14 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             setCurrentBeanLevelProperties(beanLevelProperties);
             setCurrentClusterInfo(clusterInfo);
 
+            BootstrapWebApplicationContextListener.prepareForBoot(deployPath, clusterInfo, beanLevelProperties);
+
             // we disable the smart getUrl in the common class loader so the JSP classpath will be built correclty
             CommonClassLoader.getInstance().setDisableSmartGetUrl(true);
             
             WebAppContext webAppContext = (WebAppContext) applicationContext.getBean("webAppContext");
 
             webAppContext.setExtractWAR(true);
-
-            webAppContext.setAttribute(APPLICATION_CONTEXT_CONTEXT, applicationContext);
-            webAppContext.setAttribute(CLUSTER_INFO_CONTEXT, clusterInfo);
-            webAppContext.setAttribute(BEAN_LEVEL_PROPERTIES_CONTEXT, beanLevelProperties);
 
             // allow aliases so load balancing will work on static content
             if (!webAppContext.getInitParams().containsKey("org.mortbay.jetty.servlet.Default.aliases")) {
@@ -448,11 +432,6 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             // resulting in not being able to deploy again the application (failure to write the file again)
             if (!webAppContext.getInitParams().containsKey("org.mortbay.jetty.servlet.Default.useFileMappedBuffer")) {
                 webAppContext.getInitParams().put("org.mortbay.jetty.servlet.Default.useFileMappedBuffer", "false");
-            }
-
-            String[] beanNames = applicationContext.getBeanDefinitionNames();
-            for (String beanName : beanNames) {
-                webAppContext.setAttribute(beanName, applicationContext.getBean(beanName));
             }
 
             // automatically enable GigaSpaces Session Manager when passing the relevant property
@@ -524,6 +503,9 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                 } catch (Exception e) {
                     throw new CannotCreateContainerException("Failed to start web app context", e);
                 }
+            }
+            if (webAppContext.isFailed()) {
+                throw new CannotCreateContainerException("Failed to start web app context");
             }
             // automatically set the worker name
             if (webAppContext.getSessionHandler().getSessionManager().getIdManager() instanceof HashSessionIdManager) {

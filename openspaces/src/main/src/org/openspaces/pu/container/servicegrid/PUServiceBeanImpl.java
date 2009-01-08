@@ -391,6 +391,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             if (logger.isDebugEnabled()) {
                 logger.debug(logMessage("Common Class Loader " + sharedlibUrls));
             }
+            prepareWebApplication();
+
         } else {
             // add to service class loader
             List<URL> libUrls = new ArrayList<URL>();
@@ -781,6 +783,57 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
     }
 
+    private void prepareWebApplication() {
+        if (!(new File(deployPath, "WEB-INF/web.xml").exists())) {
+            return;
+        }
+        // if we download, we can delete JSpaces and jini jars from the WEB-INF/lib (they are already in the
+        // common class loader).
+        File webInfLib = new File(deployPath, "WEB-INF/lib");
+        webInfLib.mkdirs();
+        if (webInfLib.exists()) {
+            File[] wenInfJars = webInfLib.listFiles();
+            ArrayList<String> deleted = new ArrayList<String>();
+            for (File webInfJarFile : wenInfJars) {
+                boolean delete = false;
+                if (webInfJarFile.getName().startsWith("JSpaces")) {
+                    delete = true;
+                } else if (webInfJarFile.getName().startsWith("gs-")) {
+                    delete = true;
+                } else if (webInfJarFile.getName().startsWith("jsk-")) {
+                    delete = true;
+                } else if (webInfJarFile.getName().startsWith("mahalo")) {
+                    delete = true;
+                } else if (webInfJarFile.getName().startsWith("reggie")) {
+                    delete = true;
+                } else if (webInfJarFile.getName().startsWith("start")) {
+                    delete = true;
+                } else if (webInfJarFile.getName().startsWith("tools")) {
+                    delete = true;
+                }
+                if (delete) {
+                    deleted.add(webInfJarFile.getName());
+                    webInfJarFile.delete();
+                }
+            }
+            if (!deleted.isEmpty()) {
+                logger.debug(logMessage("Deleted the following jars from the web application: " + deleted));
+            }
+            try {
+                FileCopyUtils.copy(new File(Environment.getHomeDirectory() + "/lib/openspaces/openspaces.jar"), new File(deployPath, "WEB-INF/lib/openspaces.jar"));
+                logger.debug(logMessage("Added openspaces jar to web application"));
+            } catch (IOException e) {
+                // don't copy it
+            }
+            try {
+                FileSystemUtils.copyRecursively(new File(Environment.getHomeDirectory() + "/lib/spring"), new File(deployPath, "WEB-INF/lib"));
+                logger.debug(logMessage("Added spring jars to web application"));
+            } catch (IOException e) {
+                // don't copy it
+            }
+        }
+    }
+    
     public NIODetails getNIODetails() throws RemoteException {
         return NIOInfoHelper.getConfiguration();
     }

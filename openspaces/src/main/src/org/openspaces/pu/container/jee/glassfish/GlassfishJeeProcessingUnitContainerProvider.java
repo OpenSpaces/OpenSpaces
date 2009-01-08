@@ -38,6 +38,7 @@ import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ClassLoaderAwareProcessingUnitContainerProvider;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
+import org.openspaces.pu.container.jee.context.BootstrapWebApplicationContextListener;
 import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
@@ -289,14 +290,6 @@ public class GlassfishJeeProcessingUnitContainerProvider implements JeeProcessin
     }
 
     public ProcessingUnitContainer createContainer() throws CannotCreateContainerException {
-        if (configResources.size() == 0) {
-            try {
-                addConfigLocation(DEFAULT_PU_CONTEXT_LOCATION);
-            } catch (IOException e) {
-                throw new CannotCreateContainerException("Failed to read config files from " + DEFAULT_PU_CONTEXT_LOCATION, e);
-            }
-        }
-
         Resource glassfishPuResource = new ClassPathResource(DEFAULT_GLASSFISH_PU);
         if (!glassfishPuResource.exists()) {
             String defaultLocation = System.getProperty(GLASSFISH_LOCATION_PREFIX_SYSPROP, INTERNAL_GLASSFISH_PU_PREFIX) + "shared.pu.xml";
@@ -376,6 +369,8 @@ public class GlassfishJeeProcessingUnitContainerProvider implements JeeProcessin
             setCurrentBeanLevelProperties(beanLevelProperties);
             setCurrentClusterInfo(clusterInfo);
 
+            BootstrapWebApplicationContextListener.prepareForBoot(deployPath, clusterInfo, beanLevelProperties);
+
             // we disable the smart getUrl in the common class loader so the JSP classpath will be built correclty
             CommonClassLoader.getInstance().setDisableSmartGetUrl(true);
 
@@ -391,16 +386,6 @@ public class GlassfishJeeProcessingUnitContainerProvider implements JeeProcessin
             System.setProperty("com.sun.enterprise.taglisteners", sb.toString());
 
             WebappConfiguration webappConfiguration = (WebappConfiguration) applicationContext.getBean("webAppConfiguration");
-
-            // TODO how to set this here
-//            webAppContext.setAttribute(APPLICATION_CONTEXT_CONTEXT, applicationContext);
-//            webAppContext.setAttribute(CLUSTER_INFO_CONTEXT, clusterInfo);
-//            webAppContext.setAttribute(BEAN_LEVEL_PROPERTIES_CONTEXT, beanLevelProperties);
-
-//            String[] beanNames = applicationContext.getBeanDefinitionNames();
-//            for (String beanName : beanNames) {
-//                webAppContext.setAttribute(beanName, applicationContext.getBean(beanName));
-//            }
 
             ReadableArchive archive = getArchiveFactory(glassfishHolder.getServer()).openArchive(new File(webappConfiguration.getWar()));
             Properties params = new Properties();
