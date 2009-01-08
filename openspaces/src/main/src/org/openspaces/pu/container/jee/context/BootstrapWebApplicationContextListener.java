@@ -162,9 +162,11 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
                     writer.println(line);
                 }
                 // now append our context listener
+                writer.println("<!-- GigaSpaces CHANGE START: Boot Listener -->");
                 writer.println("<listener>");
                 writer.println("    <listener-class>" + BootstrapWebApplicationContextListener.class.getName() + "</listener-class>");
                 writer.println("</listener>");
+                writer.println("<!-- GigaSpaces CHANGE END: Boot Listener -->");
             } else {
                 writer.println(line);
             }
