@@ -157,8 +157,8 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
         PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(warPath, "/WEB-INF/web.xml"), false))));
         String line;
         while ((line = reader.readLine()) != null) {
+            line = line.replace("org.springframework.web.context.ContextLoaderListener", "org.openspaces.pu.container.jee.context.ProcessingUnitContextLoaderListener");
             if (line.indexOf("<web-app") != -1) {
-                line = line.replace("org.springframework.web.context.ContextLoaderListener", "org.openspaces.pu.container.jee.context.ProcessingUnitContextLoaderListener");
                 writer.println(line);
                 if (line.indexOf('>') == -1) {
                     // the tag is not closed
