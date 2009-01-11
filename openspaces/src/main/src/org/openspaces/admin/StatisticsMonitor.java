@@ -19,17 +19,44 @@ package org.openspaces.admin;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Components implement this interface indicating that they can be monitored for statistics.
+ *
+ * <p>Components will allow to get their respective statistics without being monitoring (while caching
+ * the calles for the provided statistics interval).
+ *
+ * <p>Monitoring statisics is only required when wanting to receive statistics change events.
+ *
+ * <p>The statistics interval controls either for how long the latest statistics call will be cached, or,
+ * when monitoring is enabled, the interval the statistics will be pooled. Its default value is 5 seconds. 
+ *
  * @author kimchy
  */
 public interface StatisticsMonitor {
 
+    /**
+     * The default statistics interval which is 5 seconds.
+     */
     static final long DEFAULT_MONITOR_INTERVAL = 5000;
 
+    /**
+     * Sets the statistics interval, autmatically updating the monitoring scheduled tasks if
+     * monitoring is enabled.
+     */
     void setStatisticsInterval(long interval, TimeUnit timeUnit);
 
+    /**
+     * Starts the statistics monitor, starting a scheduled monitor that polls for statistics. Monitoring
+     * is required only when wanting to receive statistics change events.
+     */
     void startStatisticsMonitor();
 
+    /**
+     * Stops the statistics monitor.
+     */
     void stopStatisticsMontior();
 
+    /**
+     * Returns <code>true</code> if statistics are now being monitored.
+     */
     boolean isMonitoring();
 }

@@ -65,7 +65,7 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
         return operatingSystemsByUID.values().iterator();
     }
 
-    public int size() {
+    public int getSize() {
         return operatingSystemsByUID.size();
     }
 
