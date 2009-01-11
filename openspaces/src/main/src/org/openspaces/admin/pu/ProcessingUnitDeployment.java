@@ -44,6 +44,42 @@ public class ProcessingUnitDeployment {
         return this;
     }
 
+    /**
+     * A convenient method allowing to easily configure the space deployment to deploy a
+     * paritioned topology with <code>numberOfParitions</code> instances each with
+     * <code>numberOfBackups</code>.
+     *
+     * <p>Exactly the same like calling <code>clusterSchema("partitioned-sync2backup")</code>,
+     * followed by <code>numberOfInstances(numberOfParitions)</code> and <code>numberOfBackups(numberOfBackups)</code>.
+     *
+     * @param numberOfParitions The number of partitions
+     * @param numberOfBackups   The number of backups
+     * @return This space deployment
+     */
+    public ProcessingUnitDeployment partitioned(int numberOfParitions, int numberOfBackups) {
+        clusterSchema("partitioned-sync2backup");
+        numberOfInstances(numberOfParitions);
+        numberOfBackups(numberOfBackups);
+        return this;
+    }
+
+    /**
+     * A convenient method allowing to easily configure the space deployment to deploy a
+     * replicated topology with <code>numberOfInstances</code> instances.
+     *
+     * <p>Exactly the same like calling <code>clusterSchema("replicated")</code>,
+     * followed by <code>numberOfInstances(numberOfInstances)</code> and <code>numberOfBackups(0)</code>.
+     *
+     * @param numberOfInstances The number of instances to form the replicated space
+     * @return This space deployment
+     */
+    public ProcessingUnitDeployment replicated(int numberOfInstances) {
+        clusterSchema("replicated");
+        numberOfInstances(numberOfInstances);
+        numberOfBackups(0);
+        return this;
+    }
+
     public ProcessingUnitDeployment clusterSchema(String clusterSchema) {
         this.clusterSchema = clusterSchema;
         return this;

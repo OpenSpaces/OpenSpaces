@@ -1,3 +1,35 @@
+/*
+ * Copyright 2006-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * Copyright 2006-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openspaces.admin.space;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
@@ -9,6 +41,9 @@ import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
 import org.openspaces.core.GigaSpace;
 
 /**
+ * A Space Instnace is a single instnace of a space running as a part of a {@link Space}. For example, when deploying
+ * a 2 paritions each with one backup topology, there will be 4 space instances running.
+ *
  * @author kimchy
  */
 public interface SpaceInstance extends GridComponent, StatisticsMonitor {
@@ -18,8 +53,14 @@ public interface SpaceInstance extends GridComponent, StatisticsMonitor {
      */
     int getInstanceId();
 
+    /**
+     * Retrunst the backup id (if it is a topology with backups) of the space instance.
+     */
     int getBackupId();
 
+    /**
+     * Returns the space mode, indicating if the space is primary or backup.
+     */
     SpaceMode getMode();
 
     /**
@@ -27,17 +68,40 @@ public interface SpaceInstance extends GridComponent, StatisticsMonitor {
      */
     GigaSpace getGigaSpace();
 
+    /**
+     * Retruns the space instance statistics.
+     */
     SpaceInstanceStatistics getStatistics();
 
+    /**
+     * Retruns the space this instnace is part of.
+     */
     Space getSpace();
 
+    /**
+     * Retruns the partition this instance is part of.
+     */
     SpacePartition getPartition();
 
+    /**
+     * Retruns the replication targets this space instance is replicating to.
+     */
     ReplicationTarget[] getReplicationTargets();
 
+    /**
+     * Allows to register for {@link org.openspaces.admin.space.events.SpaceModeChangedEvent}s.
+     */
     SpaceModeChangedEventManager getSpaceModeChanged();
 
+    /**
+     * Allows to register for {@link org.openspaces.admin.space.events.ReplicationStatusChangedEvent}s.
+     */
     ReplicationStatusChangedEventManager getReplicationStatusChanged();
 
+    /**
+     * Allows to register for {@link org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEvent}s.
+     *
+     * <p>Note, monitoring must be started using {@link #startStatisticsMonitor()} for events to occur.
+     */
     SpaceInstanceStatisticsChangedEventManager getStatisticsChanged();
 }

@@ -46,8 +46,8 @@ import java.util.Map;
  * Grid Service Containers hold all the different {@link VirtualMachine}s that are currently
  * discoverted.
  *
- * <p>Provides simple means to get all the current containers, as well as as registering for
- * container lifecycle (added and removed) events.
+ * <p>Provides simple means to get all the current virtual machines, as well as as registering for
+ * virtual machine lifecycle (added and removed) events.
  *
  * <p>Provides the ability to start a statistics monitor on all current virtual machines using
  * {@link #startStatisticsMonitor()}. Newly discovered virtual machines will automatically use
