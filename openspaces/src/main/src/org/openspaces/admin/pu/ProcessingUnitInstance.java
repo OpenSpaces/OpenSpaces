@@ -1,3 +1,35 @@
+/*
+ * Copyright 2006-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * Copyright 2006-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openspaces.admin.pu;
 
 import org.openspaces.admin.GridComponent;
@@ -15,6 +47,9 @@ import org.openspaces.pu.service.ServiceDetails;
 import java.util.Map;
 
 /**
+ * A processing unit instnace is an actual running instnace of a processing unit. For example, when deploying
+ * a processing unit with 4 instance, there will be eventually 4 instances of the processing unit.
+ *
  * @author kimchy
  */
 public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceDetails> {
@@ -26,34 +61,88 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
 
     /**
      * Decrements the instance (and destroying it in the process). Will not attempt to create it again.
+     *
+     * @see ProcessingUnit#canDecrementInstance()
      */
     void decrement();
 
+    /**
+     * Relocates the instance to the provided {@link org.openspaces.admin.gsc.GridServiceContainer}.
+     */
     void relocate(GridServiceContainer gridServiceContainerToRelocateTo);
 
+    /**
+     * Retruns the instance id of the processing unit instance.
+     */
     int getInstanceId();
 
+    /**
+     * Retruns the backup id of the processing unit instance.
+     */
     int getBackupId();
 
+    /**
+     * Returns the processing unit this processing unit instance if part of.
+     */
     ProcessingUnit getProcessingUnit();
 
+    /**
+     * Retruns the name of the processing unit.
+     */
     String getName();
 
+    /**
+     * Retruns the cluster info of the processing unit instance.
+     */
     ClusterInfo getClusterInfo();
 
+    /**
+     * Returns the {@link org.openspaces.admin.gsc.GridServiceContainer} the processing unit is running on.
+     */
     GridServiceContainer getGridServiceContainer();
 
+    /**
+     * Returns the processing unit partition this processing unit instance is part of.
+     */
     ProcessingUnitPartition getPartition();
 
+    /**
+     * Returns all the service details running within this processing unit instance.
+     */
     ServiceDetails[] getServicesDetails();
 
+    /**
+     * Returns the service details by a service type {@link org.openspaces.pu.service.ServiceDetails#getServiceType()}.
+     */
     ServiceDetails[] getServicesDetailsByServiceType(String serviceType);
 
+    /**
+     * Returns a map of service details by service type.
+     */
     Map<String, ServiceDetails[]> getServiceDetailsByServiceType();
 
+    /**
+     * Returns a map of {@link org.openspaces.events.EventContainerServiceDetails} keyed by their
+     * {@link org.openspaces.pu.service.ServiceDetails#getId()}.
+     */
     Map<String, EventContainerServiceDetails> getEventContainerServiceDetails();
+
+    /**
+     * Returns a map of {@link org.openspaces.events.polling.PollingEventContainerServiceDetails} keyed by their
+     * {@link org.openspaces.pu.service.ServiceDetails#getId()}.
+     */
     Map<String, PollingEventContainerServiceDetails> getPollingEventContainerServiceDetails();
+
+    /**
+     * Returns a map of {@link org.openspaces.events.notify.NotifyEventContainerServiceDetails} keyed by their
+     * {@link org.openspaces.pu.service.ServiceDetails#getId()}.
+     */
     Map<String, NotifyEventContainerServiceDetails> getNotifyEventContainerServiceDetails();
+    
+    /**
+     * Returns a map of {@link org.openspaces.events.asyncpolling.AsyncPollingEventContainerServiceDetails} keyed by their
+     * {@link org.openspaces.pu.service.ServiceDetails#getId()}.
+     */
     Map<String, AsyncPollingEventContainerServiceDetails> getAsyncPollingEventContainerServiceDetails();
 
     /**

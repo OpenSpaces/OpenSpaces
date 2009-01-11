@@ -1,3 +1,35 @@
+/*
+ * Copyright 2006-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * Copyright 2006-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openspaces.admin.pu;
 
 import java.io.File;
@@ -7,7 +39,11 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
+ * A deployment of processing unit.
+ *
  * @author kimchy
+ * @see org.openspaces.admin.gsm.GridServiceManager#deploy(ProcessingUnitDeployment)
+ * @see org.openspaces.admin.gsm.GridServiceManagers#deploy(ProcessingUnitDeployment)
  */
 public class ProcessingUnitDeployment {
 
@@ -27,18 +63,33 @@ public class ProcessingUnitDeployment {
 
     private Properties contextProperties = new Properties();
 
+    /**
+     * Constucts a processing unit deployment based on the specificed processing unit name (should
+     * exists under the <code>[GS ROOT]/deply</code> directory.
+     */
     public ProcessingUnitDeployment(String processingUnit) {
         this.processingUnit = processingUnit;
     }
 
+    /**
+     * Constucts a processing unit deployment based on the specificed processing unit file path (points either
+     * to a processing unit jar file or a directory).
+     */
     public ProcessingUnitDeployment(File processingUnit) {
         this.processingUnit = processingUnit.getAbsolutePath();
     }
 
+    /**
+     * Returns the processing unit that will be deployed.
+     */
     public String getProcessingUnit() {
         return processingUnit;
     }
 
+    /**
+     * Sets the processing unit name that will be deployed. By default it will be based on the
+     * parameter passed in the constructor.
+     */
     public ProcessingUnitDeployment name(String name) {
         this.name = name;
         return this;
@@ -80,36 +131,72 @@ public class ProcessingUnitDeployment {
         return this;
     }
 
+    /**
+     * Constrols the cluster schema of the deployment. Only make sense to set it when there is an embedded space
+     * defined within the processing unit.
+     */
     public ProcessingUnitDeployment clusterSchema(String clusterSchema) {
         this.clusterSchema = clusterSchema;
         return this;
     }
 
-    public ProcessingUnitDeployment numberOfInstances(Integer numberOfInstances) {
+    /**
+     * Sets the number of instances that will be deployed as part of this processing unit instnace.
+     */
+    public ProcessingUnitDeployment numberOfInstances(int numberOfInstances) {
         this.numberOfInstances = numberOfInstances;
         return this;
     }
 
-    public ProcessingUnitDeployment numberOfBackups(Integer numberOfBackups) {
+    /**
+     * Sets the number of backups that will be deployed as part of this processing unit. Only applicable
+     * when the processing unit has an embedded space.
+     */
+    public ProcessingUnitDeployment numberOfBackups(int numberOfBackups) {
         this.numberOfBackups = numberOfBackups;
         return this;
     }
 
-    public ProcessingUnitDeployment maxInstancesPerVM(Integer maxInstancesPerVM) {
+    /**
+     * Sets the maximum number of instances per virtual machine.
+     *
+     * <p>On partitioned topology with backups topology, controls that a primary and a backup won't run
+     * on the same virtual machine if set to <code>1</code>.
+     *
+     * <p>On a non partitioned with backups topology, controls the maximum number of instances running on
+     * the same virtual machine.
+     */
+    public ProcessingUnitDeployment maxInstancesPerVM(int maxInstancesPerVM) {
         this.maxInstancesPerVM = maxInstancesPerVM;
         return this;
     }
 
-    public ProcessingUnitDeployment maxInstancesPerMachine(Integer maxInstancesPerMachine) {
+    /**
+     * Sets the maximum number of instances per machine.
+     *
+     * <p>On partitioned topology with backups topology, controls that a primary and a backup won't run
+     * on the same machine if set to <code>1</code>.
+     *
+     * <p>On a non partitioned with backups topology, controls the maximum number of instances running on
+     * the same machine.
+     */
+    public ProcessingUnitDeployment maxInstancesPerMachine(int maxInstancesPerMachine) {
         this.maxInstancesPerMachine = maxInstancesPerMachine;
         return this;
     }
 
+    /**
+     * Sets a context deploy time property overriding any <code>${...}</code> defined within a processing
+     * unit configuration.
+     */
     public ProcessingUnitDeployment setContextProperty(String key, String value) {
         contextProperties.put(key, value);
         return this;
     }
 
+    /**
+     * Transforms this deployment into a set of deployment options.
+     */
     public String[] getDeploymentOptions() {
         List<String> deployOptions = new ArrayList<String>();
 

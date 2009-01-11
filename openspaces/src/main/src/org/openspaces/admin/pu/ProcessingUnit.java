@@ -1,3 +1,35 @@
+/*
+ * Copyright 2006-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * Copyright 2006-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openspaces.admin.pu;
 
 import org.openspaces.admin.AdminAware;
@@ -14,16 +46,30 @@ import org.openspaces.admin.space.Space;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * A processing unit holds one or more {@link org.openspaces.admin.pu.ProcessingUnitInstance}s.
+ *
  * @author kimchy
  */
 public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminAware {
 
+    /**
+     * Returns the name of the processing unit.
+     */
     String getName();
 
+    /**
+     * Retruns the number of instances of the processing unit.
+     */
     int getNumberOfInstances();
 
+    /**
+     * Returns the number of backups (if the topology is a backup one) per instance.
+     */
     int getNumberOfBackups();
 
+    /**
+     * Returns the deployment status of the processing unit.
+     */
     DeploymentStatus getStatus();
 
     /**
@@ -46,10 +92,19 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      */
     Space waitForSpace(long timeout, TimeUnit timeUnit);
 
+    /**
+     * Returns <code>true</code> if this processing unit allows to increment instances on it.
+     */
     boolean canIncrementInstance();
 
+    /**
+     * Returns <code>true</code> if this processing unit allows to decrement instances on it.
+     */
     boolean canDecrementInstance();
 
+    /**
+     * Will increment a processing unit instance.
+     */
     void incrementInstance();
 
     /**
@@ -63,12 +118,24 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      */
     boolean isManaged();
 
+    /**
+     * Returns the managing (primary) GSM for the processing unit.
+     */
     GridServiceManager getManagingGridServiceManager();
 
+    /**
+     * Returns the backup GSMs for the processing unit.
+     */
     GridServiceManager[] getBackupGridServiceManagers();
 
+    /**
+     * Returns the backup GSM matching the provided UID.
+     */
     GridServiceManager getBackupGridServiceManager(String gridServiceManagerUID);
 
+    /**
+     * Undeploys the processing unit.
+     */
     void undeploy();
 
     /**
@@ -85,25 +152,58 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      */
     Space[] getSpaces();
 
+    /**
+     * Returns the processing unit instances currently discovered.
+     */
     ProcessingUnitInstance[] getInstances();
 
+    /**
+     * Returns the processing unit paritions of this processing unit.
+     */
     ProcessingUnitPartition[] getPartitions();
 
+    /**
+     * Retruns a processign unit parititon based on the specified partition id.
+     */
     ProcessingUnitPartition getPartition(int partitionId);
 
-    void addLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
-
-    void removeLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
-
-    ManagingGridServiceManagerChangedEventManager getManagingGridServiceManagerChanged();
-
-    BackupGridServiceManagerChangedEventManager getBackupGridServiceManagerChanged();
-
-    ProcessingUnitStatusChangedEventManager getProcessingUnitStatusChanged();
-
+    /**
+     * Retruns an event manager allowing to register {@link org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener}s.
+     */
     ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded();
 
+    /**
+     * Retruns an event manager allowing to register {@link org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventListener}s.
+     */
     ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved();
 
+    /**
+     * Adds a {@link ProcessingUnitInstanceLifecycleEventListener}.
+     */
+    void addLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
+
+    /**
+     * Removes a {@link ProcessingUnitInstanceLifecycleEventListener}.
+     */
+    void removeLifecycleListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
+
+    /**
+     * Returns an event manger allowing to listen for {@link org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEvent}s.
+     */
+    ManagingGridServiceManagerChangedEventManager getManagingGridServiceManagerChanged();
+
+    /**
+     * Returns an event manager allowing to listen for {@link org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEvent}s.
+     */
+    BackupGridServiceManagerChangedEventManager getBackupGridServiceManagerChanged();
+
+    /**
+     * Retruns an event manager allowing to listen for {@link org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent}s.
+     */
+    ProcessingUnitStatusChangedEventManager getProcessingUnitStatusChanged();
+
+    /**
+     * Returns an event manager allowing to listen for {@link org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEvent}s.
+     */
     ProcessingUnitSpaceCorrelatedEventManager getSpaceCorrelated();
 }
