@@ -32,16 +32,31 @@ import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 import org.openspaces.admin.vm.events.VirtualMachineStatisticsChangedEventManager;
 
 /**
+ * A virtual machine is a JVM that runs grid components.
+ *
  * @author kimchy
  */
 public interface VirtualMachine extends MachineAware, StatisticsMonitor {
 
+    /**
+     * Retruns the uid of the virtual machine.
+     */
     String getUid();
 
+    /**
+     * Returns the details (non changeable information) of the virtual machine.
+     */
     VirtualMachineDetails getDetails();
 
+    /**
+     * Returns the statistics of the virtual machine.
+     */
     VirtualMachineStatistics getStatistics();
 
+    /**
+     * Returns the grid service agent started within this virutal machine.
+     * Returns <code>null</code> if no grid service agent was started within it.
+     */
     GridServiceAgent getGridServiceAgent();
 
     /**
@@ -66,21 +81,58 @@ public interface VirtualMachine extends MachineAware, StatisticsMonitor {
      */
     SpaceInstance[] getSpaceInstances();
 
+    /**
+     * Returns an event manager allowing to register {@link org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener}s
+     * for processing unit instances added on this virutal machine.
+     */
     ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded();
 
+    /**
+     * Returns an event manager allowing to register {@link org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener}s
+     * for processing unit instances removed on this virutal machine.
+     */
     ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved();
 
+    /**
+     * Adds an {@link ProcessingUnitInstanceLifecycleEventListener} allowing to be notified when a processing unit
+     * instance was added or removed from this virutal machine.
+     */
     void addProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
+    /**
+     * Removes an {@link ProcessingUnitInstanceLifecycleEventListener} allowing to be notified when a processing unit
+     * instance was added or removed from this virutal machine.
+     */
     void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
+    /**
+     * Returns an event manager allowing to register for {@link org.openspaces.admin.space.events.SpaceInstanceAddedEventListener}s
+     * for space instances added on this virtual machine.
+     */
     SpaceInstanceAddedEventManager getSpaceInstanceAdded();
 
+    /**
+     * Returns an event manager allowing to register for {@link org.openspaces.admin.space.events.SpaceInstanceRemovedEventListener}s
+     * for space instances added on this virtual machine.
+     */
     SpaceInstanceRemovedEventManager getSpaceInstanceRemoved();
 
+    /**
+     * Adds an {@link SpaceInstanceLifecycleEventListener} allowing to be notified when a space
+     * instance was added or removed from this virutal machine.
+     */
     void addLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
 
+    /**
+     * Removes an {@link SpaceInstanceLifecycleEventListener} allowing to be notified when a space
+     * instance was added or removed from this virutal machine.
+     */
     void removeLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
 
+    /**
+     * Retruns an event manager allowing to register for {@link org.openspaces.admin.vm.events.VirtualMachineStatisticsChangedEvent}s.
+     *
+     * <p>Note, the events will be raised only when the {@link #startStatisticsMonitor()} is called.
+     */
     VirtualMachineStatisticsChangedEventManager getVirtualMachineStatisticsChanged();
 }

@@ -43,7 +43,7 @@ import org.openspaces.admin.vm.events.VirtualMachinesStatisticsChangedEventManag
 import java.util.Map;
 
 /**
- * Grid Service Containers hold all the different {@link VirtualMachine}s that are currently
+ * Virtual Machines hold all the different {@link VirtualMachine}s that are currently
  * discoverted.
  *
  * <p>Provides simple means to get all the current virtual machines, as well as as registering for

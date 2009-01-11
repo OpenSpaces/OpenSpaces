@@ -91,7 +91,7 @@ public class DefaultTransports implements InternalTransports {
         return transportsByUID.get(uid);
     }
 
-    public int size() {
+    public int getSize() {
         return transportsByUID.size();
     }
 
