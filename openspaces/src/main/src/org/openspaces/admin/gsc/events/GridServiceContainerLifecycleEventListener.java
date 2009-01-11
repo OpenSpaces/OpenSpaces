@@ -17,11 +17,11 @@
 package org.openspaces.admin.gsc.events;
 
 /**
- * A simple lifecyle event listener that implements both the container added and container removed event lisetners.
+ * A simple lifecyle event listener that implements both the container added and container removed event listeners.
  *
  * @author kimchy
- * @see org.openspaces.admin.gsc.GridServiceContainers#getGridServiceContainerAdded()
- * @see org.openspaces.admin.gsc.GridServiceContainers#getGridServiceContainerRemoved()
+ * @see org.openspaces.admin.gsc.GridServiceContainers#addLifecycleListener(GridServiceContainerLifecycleEventListener)
+ * @see org.openspaces.admin.gsc.GridServiceContainers#removeLifecycleListener(GridServiceContainerLifecycleEventListener)
  */
 public interface GridServiceContainerLifecycleEventListener extends GridServiceContainerAddedEventListener, GridServiceContainerRemovedEventListener {
 }
