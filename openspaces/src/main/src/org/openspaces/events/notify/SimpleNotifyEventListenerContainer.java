@@ -179,6 +179,8 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
         if (!(tempalte instanceof Serializable)) {
             tempalte = null;
         }
+        // TODO Fix later LRMI class loading in the UI 
+        tempalte = null;
         return new ServiceDetails[] {new NotifyEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte, isPerformSnapshot(),
                 getCommType(), isFifo(), getBatchSize(), getBatchTime(), isAutoRenew(),
                 isNotifyAll(), isNotifyWrite(), isNotifyUpdate(), isNotifyWrite(), isNotifyLeaseExpire(), isNotifyUnmatched(),
