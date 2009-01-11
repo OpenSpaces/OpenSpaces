@@ -33,7 +33,7 @@ public class DefaultMachines implements InternalMachines {
 
     private final Map<String, Machine> machinesById = new SizeConcurrentHashMap<String, Machine>();
 
-    private final Map<String, Machine> machinesByHost = new ConcurrentHashMap<String, Machine>();
+    private final Map<String, Machine> machinesByHostAddress = new ConcurrentHashMap<String, Machine>();
 
     public DefaultMachines(InternalAdmin admin) {
         this.admin = admin;
@@ -94,16 +94,16 @@ public class DefaultMachines implements InternalMachines {
         return machinesById.get(uid);
     }
 
-    public Machine getMachineByHost(String ipAddress) {
-        return machinesByHost.get(ipAddress);
+    public Machine getMachineByHostAddress(String ipAddress) {
+        return machinesByHostAddress.get(ipAddress);
     }
 
     public Map<String, Machine> getUids() {
         return Collections.unmodifiableMap(machinesById);
     }
 
-    public Map<String, Machine> getHosts() {
-        return Collections.unmodifiableMap(machinesByHost);
+    public Map<String, Machine> getHostsByAddress() {
+        return Collections.unmodifiableMap(machinesByHostAddress);
     }
 
     public void addLifecycleListener(MachineLifecycleEventListener eventListener) {
@@ -117,7 +117,7 @@ public class DefaultMachines implements InternalMachines {
     }
 
     public void addMachine(final InternalMachine machine) {
-        machinesByHost.put(machine.getHost(), machine);
+        machinesByHostAddress.put(machine.getHostAddress(), machine);
         Machine existingMachine = machinesById.put(machine.getUid(), machine);
         if (existingMachine == null) {
             machineAddedEventManager.machineAdded(machine);
@@ -125,7 +125,7 @@ public class DefaultMachines implements InternalMachines {
     }
 
     public void removeMachine(final Machine machine) {
-        machinesByHost.remove(machine.getHost());
+        machinesByHostAddress.remove(machine.getHostAddress());
         final Machine existingMachine = machinesById.remove(machine.getUid());
         if (existingMachine != null) {
             machineRemovedEventManager.machineRemoved(machine);

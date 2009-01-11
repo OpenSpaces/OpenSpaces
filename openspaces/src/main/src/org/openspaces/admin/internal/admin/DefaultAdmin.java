@@ -622,7 +622,7 @@ public class DefaultAdmin implements InternalAdmin {
     private InternalMachine processMachineOnServiceAddition(TransportDetails transportDetails,
                                                             InternalTransport transport, OperatingSystem operatingSystem,
                                                             VirtualMachine virtualMachine, InternalMachineAware... machineAwares) {
-        InternalMachine machine = (InternalMachine) machines.getMachineByHost(transportDetails.getLocalHostAddress());
+        InternalMachine machine = (InternalMachine) machines.getMachineByHostAddress(transportDetails.getLocalHostAddress());
         if (machine == null) {
             machine = new DefaultMachine(this, transportDetails.getLocalHostAddress(), transportDetails.getLocalHostAddress());
             machine.setOperatingSystem(operatingSystem);

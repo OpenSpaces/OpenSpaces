@@ -1,3 +1,19 @@
+/*
+ * Copyright 2006-2007 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.openspaces.admin.machine;
 
 import org.openspaces.admin.AdminAware;
@@ -9,37 +25,84 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Machines hold all the different {@link Machine}s that are currently
+ * discoverted.
+ *
+ * <p>Provides simple means to get all the current machines, as well as as registering for
+ * machine lifecycle (added and removed) events.
+ *
  * @author kimchy
  */
 public interface Machines extends AdminAware, Iterable<Machine> {
 
+    /**
+     * Returns all currently discovered machines.
+     */
     Machine[] getMachines();
 
-    Machine getMachineByHost(String host);
+    /**
+     * Returns the machine by the host address.
+     *
+     * @param hostAddress The host address to lookup the machine by
+     * @return The machine correlated to the specified host address, <code>null</code> if there is no one
+     */
+    Machine getMachineByHostAddress(String hostAddress);
 
+    /**
+     * Returns a map of machines with the key as the uid.
+     */
     Map<String, Machine> getUids();
 
-    Map<String, Machine> getHosts();
+    /**
+     * Retruns a map of machines by host address.
+     */
+    Map<String, Machine> getHostsByAddress();
 
+    /**
+     * Returns the number of machines current discovered.
+     */
     int getSize();
 
+    /**
+     * Returns <code>true</code> if there are no machines, <code>false</code> otherwise.
+     */
     boolean isEmpty();
 
     /**
-     * Waits till at least the provided number of Machines are up.
+     * Waits indefinitely till the provided number of machines are up.
+     *
+     * @param numberOfMachines The number of containers to wait for
      */
     boolean waitFor(int numberOfMachines);
 
     /**
-     * Waits till at least the provided number of Machines are up for the specified timeout.
+     * Waits for the given timeout (in time unit) till the provided number of machines are up.
+     * Returns <code>true</code> if the required number of machines were discovered, <code>false</code>
+     * if the timeout expired.
+     *
+     * @param numberOfMachines The number of containers to wait for
      */
     boolean waitFor(int numberOfMachines, long timeout, TimeUnit timeUnit);
-    
-    void addLifecycleListener(MachineLifecycleEventListener eventListener);
 
-    void removeLifeycleListener(MachineLifecycleEventListener eventListener);
-
+    /**
+     * Returns the machines added event manager allowing to add and remove
+     * {@link org.openspaces.admin.machine.events.MachineAddedEventListener}s.
+     */
     MachineAddedEventManager getMachineAdded();
 
+    /**
+     * Returns the grid service container added event manager allowing to add and remove
+     * {@link org.openspaces.admin.machine.events.MachineRemovedEventListener}s.
+     */
     MachineRemovedEventManager getMachineRemoved();
+    
+    /**
+     * Allows to add a {@link MachineLifecycleEventListener}.
+     */
+    void addLifecycleListener(MachineLifecycleEventListener eventListener);
+
+    /**
+     * Allows to remove a {@link MachineLifecycleEventListener}.
+     */
+    void removeLifeycleListener(MachineLifecycleEventListener eventListener);
 }

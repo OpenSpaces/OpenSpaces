@@ -47,7 +47,7 @@ public class DefaultMachine implements InternalMachine {
 
     private String uid;
 
-    private String host;
+    private String hostAddress;
 
     private final InternalLookupServices lookupServices;
 
@@ -67,10 +67,10 @@ public class DefaultMachine implements InternalMachine {
 
     private volatile OperatingSystem operatingSystem;
 
-    public DefaultMachine(InternalAdmin admin, String uid, String host) {
+    public DefaultMachine(InternalAdmin admin, String uid, String hostAddress) {
         this.admin = admin;
         this.uid = uid;
-        this.host = host;
+        this.hostAddress = hostAddress;
         this.gridServiceAgents = new DefaultGridServiceAgents(admin);
         this.lookupServices = new DefaultLookupServices(admin);
         this.gridServiceManagers = new DefaultGridServiceManagers(admin);
@@ -85,8 +85,8 @@ public class DefaultMachine implements InternalMachine {
         return this.uid;
     }
 
-    public String getHost() {
-        return this.host;
+    public String getHostAddress() {
+        return this.hostAddress;
     }
 
     public GridServiceAgent getGridServiceAgent() {
