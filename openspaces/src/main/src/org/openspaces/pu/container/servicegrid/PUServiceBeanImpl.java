@@ -143,32 +143,21 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         super();
     }
 
+
     @Override
-    public void initialize(ServiceBeanContext context) throws Exception {
+    protected Object doStart(ServiceBeanContext context) throws Exception {
+        this.context = context;
         org.openspaces.pu.sla.SLA sla = getSLA(context);
         if (sla.getMonitors() != null) {
             for (Monitor monitor : sla.getMonitors()) {
                 String watchName = monitor.getName();
                 Watch watch = new GaugeWatch(watchName, context.getConfiguration());
                 watch.getWatchDataSource().setSize(monitor.getHistorySize());
-                watchRegistry.register(watch);
+                context.getWatchRegistry().register(watch);
                 watchTasks.add(new WatchTask(monitor, watch));
             }
         }
-        super.initialize(context);
-    }
 
-    @Override
-    public void destroy() {
-        for (WatchTask watchTask : watchTasks) {
-            watchRegistry.deregister(watchTask.getWatch());
-        }
-        watchTasks.clear();
-        super.destroy();
-    }
-
-    @Override
-    public void doAdvertise() throws IOException {
         String springXML = (String) context.getInitParameter("pu");
         clusterGroup = Integer.parseInt((String) context.getInitParameter("clusterGroup"));
         String sInstanceId = (String) context.getInitParameter("instanceId");
@@ -196,20 +185,32 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             Thread.currentThread().setContextClassLoader(origClassLoader);
         }
 
-        super.doAdvertise();
+        try {
+            // we set the context class loader so we export with it
+            // Note, when we support web application monitoring, we need to set here the web app class loader
+            Thread.currentThread().setContextClassLoader(contextClassLoader);
+            return super.doStart(context);
+        } finally {
+            Thread.currentThread().setContextClassLoader(origClassLoader);
+        }
     }
 
     @Override
-    public void unadvertise() {
-        super.unadvertise();
-
+    public void stop(boolean force) {
         ClassLoader origClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(contextClassLoader);
             stopPU();
         } finally {
             Thread.currentThread().setContextClassLoader(origClassLoader);
+            
+            for (WatchTask watchTask : watchTasks) {
+                watchRegistry.deregister(watchTask.getWatch());
+            }
+            watchTasks.clear();
         }
+        
+        super.stop(force);
     }
 
     private void startPU(String springXml) throws IOException, ClassNotFoundException {
@@ -834,7 +835,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
         }
     }
-    
+
     public NIODetails getNIODetails() throws RemoteException {
         return NIOInfoHelper.getConfiguration();
     }
