@@ -87,6 +87,14 @@ public @interface Notify {
     boolean fifo() default false;
 
     /**
+     * When batching is turned on, should the batch of events be passed as an <code>Object[]</code> to
+     * the listener. Default to <code>false</code> which means it will be passed one event at a time.
+     *
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setPassArrayAsIs(boolean) 
+     */
+    boolean passArrayAsIs() default false;
+
+    /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyFilter(com.j_spaces.core.client.INotifyDelegatorFilter)
      */
     Class<INotifyDelegatorFilter> notifyFilter() default INotifyDelegatorFilter.class;

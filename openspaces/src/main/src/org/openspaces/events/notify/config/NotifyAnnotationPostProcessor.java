@@ -86,6 +86,7 @@ public class NotifyAnnotationPostProcessor implements BeanPostProcessor, Applica
         notifyContainerConfigurer.comType(notify.commType().value());
 
         notifyContainerConfigurer.fifo(notify.fifo());
+        notifyContainerConfigurer.passArrayAsIs(notify.passArrayAsIs());
 
         notifyContainerConfigurer.autoStart(notify.autoStart());
 
