@@ -85,8 +85,23 @@ public interface GridServiceManagers extends AdminAware, Iterable<GridServiceMan
      */
     boolean waitFor(int numberOfGridServiceManagers, long timeout, TimeUnit timeUnit);
 
+    /**
+     * Deploys a processing unit based on the processing unit deployment information on a random grid
+     * service manager (it will act as the primary GSM for the deployed processing unit).
+     *
+     * <p>The deployment process will wait and return the actual processing unit that can be used.
+     */
     ProcessingUnit deploy(ProcessingUnitDeployment deployment);
 
+    /**
+     * Deploys a space based on the space deployment information on a random grid
+     * service manager (it will act as the primary GSM for the deployed processing unit).
+     *
+     * <p>The deployment process will wait and return the actual processing unit that can be used.
+     *
+     * <p>Note, deploying just a space is simply deploying a built in processing unit that starts
+     * just an embedded space.
+     */
     ProcessingUnit deploy(SpaceDeployment deployment);
 
     /**
