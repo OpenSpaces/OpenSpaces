@@ -16,6 +16,7 @@
 
 package org.openspaces.admin.lus;
 
+import net.jini.core.discovery.LookupLocator;
 import org.openspaces.admin.AgentGridComponent;
 
 /**
@@ -26,4 +27,7 @@ import org.openspaces.admin.AgentGridComponent;
  */
 public interface LookupService extends AgentGridComponent {
 
+    String[] getLookupGroups();
+
+    LookupLocator getLookupLocator();
 }

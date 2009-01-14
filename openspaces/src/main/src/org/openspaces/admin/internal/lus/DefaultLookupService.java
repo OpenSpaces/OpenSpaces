@@ -9,8 +9,10 @@ import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.operatingsystem.OSDetails;
 import com.gigaspaces.operatingsystem.OSInfoProvider;
 import com.gigaspaces.operatingsystem.OSStatistics;
+import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceRegistrar;
+import org.openspaces.admin.AdminException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
 
@@ -38,6 +40,22 @@ public class DefaultLookupService extends AbstractAgentGridComponent implements 
 
     public ServiceID getServiceID() {
         return this.serviceID;
+    }
+
+    public String[] getLookupGroups() {
+        try {
+            return registrar.getGroups();
+        } catch (RemoteException e) {
+            throw new AdminException("Failed to get groups", e);
+        }
+    }
+
+    public LookupLocator getLookupLocator() {
+        try {
+            return registrar.getLocator();
+        } catch (RemoteException e) {
+            throw new AdminException("Failed to get locator", e);
+        }
     }
 
     public ServiceRegistrar getRegistrar() {
