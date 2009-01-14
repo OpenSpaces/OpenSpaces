@@ -40,7 +40,7 @@ import static com.sun.enterprise.universal.glassfish.SystemPropertyConstants.INS
 import static com.sun.enterprise.universal.glassfish.SystemPropertyConstants.INSTANCE_ROOT_PROPERTY;
 import com.sun.enterprise.universal.io.SmartFile;
 import com.sun.enterprise.util.io.FileUtils;
-import org.openspaces.pu.container.jee.glassfish.GlassfishJeeProcessingUnitContainerProvider;
+import org.openspaces.pu.container.jee.glassfish.holder.SharedResources;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -139,7 +139,7 @@ public final class EmbeddedFileSystem {
         System.setProperty(INSTALL_ROOT_PROPERTY, installRoot.getPath());
     }
     // GIGASPACES CHANGE
-    private static final File defaultRoots = GlassfishJeeProcessingUnitContainerProvider.getGlassfishInstanceWorkDir();
+    private static final File defaultRoots = SharedResources.getGlassfishInstanceWorkDir();
     private static final EmbeddedFileSystem efs = new EmbeddedFileSystem();
     private File installRoot;
     private File instanceRoot;

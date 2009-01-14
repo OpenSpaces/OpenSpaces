@@ -1,4 +1,4 @@
-package org.openspaces.pu.container.jee.glassfish;
+package org.openspaces.pu.container.jee.glassfish.holder;
 
 /**
  * @author kimchy

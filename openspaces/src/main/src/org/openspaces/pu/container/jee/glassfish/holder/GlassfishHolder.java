@@ -14,42 +14,33 @@
  * limitations under the License.
  */
 
-package org.openspaces.pu.container.jee.jetty;
+package org.openspaces.pu.container.jee.glassfish.holder;
 
-import org.mortbay.jetty.Server;
+import org.glassfish.embed.Server;
 
 /**
- * A generic holder that holds a Jetty server and controls its lifecycle. Note,
- * make not to call start and stop on {@link org.mortbay.jetty.Server}.
- *
  * @author kimchy
  */
-public interface JettyHolder {
+public interface GlassfishHolder {
 
     /**
-     * Open Jetty ports.
-     */
-    void openConnectors() throws Exception;
-
-    /**
-     * Closes Jetty ports.
-     */
-    void closeConnectors() throws Exception;
-
-    /**
-     * Start Jetty. Note, if this fails, make sure to call {@link #stop()}
+     * Start Glassfish. Note, if this fails, make sure to call {@link #stop()}
      */
     void start() throws Exception;
 
     /**
-     * Stops Jetty.
+     * Stops Glassfish.
      */
     void stop() throws Exception;
 
     /**
-     * Returns the jetty server.
+     * Returns the Glassfish server.
      */
     Server getServer();
+
+    int getPort();
+
+    void incPort();
 
     boolean isSingleInstance();
 }

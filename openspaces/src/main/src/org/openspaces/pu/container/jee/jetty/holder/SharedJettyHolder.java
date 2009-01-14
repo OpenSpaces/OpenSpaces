@@ -1,4 +1,4 @@
-package org.openspaces.pu.container.jee.jetty;
+package org.openspaces.pu.container.jee.jetty.holder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -38,7 +38,11 @@ import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ClassLoaderAwareProcessingUnitContainerProvider;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
-import org.openspaces.pu.container.jee.context.BootstrapWebApplicationContextListener;
+import org.openspaces.pu.container.jee.glassfish.holder.GlassfishHolder;
+import org.openspaces.pu.container.jee.glassfish.holder.GlassfishServer;
+import org.openspaces.pu.container.jee.glassfish.holder.SharedGlassfishHolder;
+import org.openspaces.pu.container.jee.glassfish.holder.SharedResources;
+import org.openspaces.pu.container.jee.glassfish.holder.WebappConfiguration;
 import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
@@ -49,12 +53,10 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
 import java.net.URL;
-import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -111,114 +113,6 @@ public class GlassfishJeeProcessingUnitContainerProvider implements JeeProcessin
     private ClassLoader classLoader;
 
     private File deployPath;
-
-    private static File glassfishGlobalWorkDir;
-    private static File glassfishInstanceWorkDir;
-    // HACK to manage ports, store a JVM level file lock with the port number as file
-    // this means that once started, Glassfish will use that port even when stopped.
-    // in glassfish (the version we use), even when stopping the server causes it to still use the same port
-    private static RandomAccessFile portFile;
-    private static FileLock portFileLock;
-    private static int portNumber;
-
-    static {
-        glassfishGlobalWorkDir = new File(System.getProperty("com.gs.work", Environment.getHomeDirectory() + "/work") + "/glassfish");
-        File portDir = new File(glassfishGlobalWorkDir, "ports");
-        portDir.mkdirs();
-        int startFromPort = Integer.getInteger("com.gs.glassfish.port", 9008);
-        int retryCount = 20;
-        for (int i = 0; i < retryCount; i++) {
-            portNumber = startFromPort + i;
-            File portF = new File(portDir, portNumber + ".port");
-            try {
-                portFile = new RandomAccessFile(portF, "rw");
-            } catch (FileNotFoundException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to open port marker file [" + portF.getAbsolutePath() + "]", e);
-                }
-                // can't get this one, continue
-                continue;
-            }
-            try {
-                portFileLock = portFile.getChannel().tryLock();
-                if (portFileLock == null) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Can't get lock for [" + portF.getAbsolutePath() + "], try another");
-                    }
-                    continue;
-                }
-            } catch (IOException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Faield to get lock file for [" + portF.getAbsolutePath() + "]", e);
-                }
-                // failed to get the lock, continue
-                continue;
-            }
-            // all is well, break
-            break;
-        }
-        if (portFileLock == null) {
-            portNumber = -1;
-            throw new IllegalStateException("Failed to acquire port file lock, tried for [" + retryCount + "], basePort [" + startFromPort + "]");
-        }
-        glassfishInstanceWorkDir = new File(glassfishGlobalWorkDir, "" + portNumber);
-        glassfishInstanceWorkDir.mkdirs();
-        System.setProperty("com.gs.glassfish.port", "" + portNumber);
-        logger.info("Glassfish instance will use port [" + portNumber + "] and location [" + glassfishInstanceWorkDir.getAbsolutePath() + "]");
-    }
-
-    public static int getPortNumber() {
-        return portNumber;
-    }
-
-    public static File getGlassfishGlobalWorkDir() {
-        return glassfishGlobalWorkDir;
-    }
-
-    public static File getGlassfishInstanceWorkDir() {
-        return glassfishInstanceWorkDir;
-    }
-
-    private static final ThreadLocal<ApplicationContext> currentApplicationContext = new ThreadLocal<ApplicationContext>();
-
-    private static final ThreadLocal<ClusterInfo> currentClusterInfo = new ThreadLocal<ClusterInfo>();
-
-    private static final ThreadLocal<BeanLevelProperties> currentBeanLevelProperties = new ThreadLocal<BeanLevelProperties>();
-
-    /**
-     * Allows to get the current application context (loaded from <code>pu.xml</code>) during web application
-     * startup. Can be used to access beans defined within it (like a Space) by components loaded (such as
-     * session storage). Note, this is only applicable during web application startup. It is cleared right
-     * afterwards.
-     */
-    public static ApplicationContext getCurrentApplicationContext() {
-        return currentApplicationContext.get();
-    }
-
-    /**
-     * Intenrall used to set the applicationn context loaded from the <code>pu.xml</code> on a thread local
-     * so components within the web container (such as session storge) will be able to access it during
-     * startup time of the web application using {@link #getCurrentApplicationContext()}.
-     */
-    private static void setCurrentApplicationContext(ApplicationContext applicationContext) {
-        currentApplicationContext.set(applicationContext);
-    }
-
-    public static ClusterInfo getCurrentClusterInfo() {
-        return currentClusterInfo.get();
-    }
-
-    private static void setCurrentClusterInfo(ClusterInfo clusterInfo) {
-        currentClusterInfo.set(clusterInfo);
-    }
-
-    public static BeanLevelProperties getCurrentBeanLevelProperties() {
-        return currentBeanLevelProperties.get();
-    }
-
-    private static void setCurrentBeanLevelProperties(BeanLevelProperties beanLevelProperties) {
-        currentBeanLevelProperties.set(beanLevelProperties);
-    }
 
     /**
      * Sets Spring parent {@link org.springframework.context.ApplicationContext} that will be used
@@ -335,7 +229,7 @@ public class GlassfishJeeProcessingUnitContainerProvider implements JeeProcessin
         if (!domainXml.exists()) {
             throw new IllegalStateException("Failed to find domain xml to process from [" + domainXml.getAbsolutePath() + "]");
         }
-        File generatedDomainXml = new File(getGlassfishInstanceWorkDir(), "generated-domain.xml");
+        File generatedDomainXml = new File(SharedResources.getGlassfishInstanceWorkDir(), "generated-domain.xml");
         try {
             FileCopyUtils.copy(domainXml, generatedDomainXml);
             BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, generatedDomainXml);
@@ -346,7 +240,7 @@ public class GlassfishJeeProcessingUnitContainerProvider implements JeeProcessin
         GlassfishServer server;
         try {
             // TODO pass the domain xml path (bean context with system property)
-            server = new GlassfishServer(portNumber, generatedDomainXml.toURL());
+            server = new GlassfishServer(SharedResources.getPortNumber(), generatedDomainXml.toURL());
         } catch (Exception e) {
             throw new CannotCreateContainerException("Failed to create glassfish server", e);
         }
@@ -362,15 +256,25 @@ public class GlassfishJeeProcessingUnitContainerProvider implements JeeProcessin
         } catch (IOException e) {
             throw new CannotCreateContainerException("Failed to resolve properties on WEB-INF/web.xml", e);
         }
-        // TODO post process glassfish files
+        try {
+            BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, new File(deployPath, "WEB-INF/sun-web.xml"));
+        } catch (IOException e) {
+            throw new CannotCreateContainerException("Failed to resolve properties on WEB-INF/web.xml", e);
+        }
+
+        // Copy over the default sun-web.xml if one does not exists so we fix the class loader to always
+        // be parent last (delegate = false).
+        File sunWebXml = new File(deployPath, "WEB-INF/sun-web.xml");
+        if (!sunWebXml.exists()) {
+            try {
+                FileCopyUtils.copy(getClass().getClassLoader().getResourceAsStream("org/openspaces/pu/container/jee/glassfish/holder/sun-web.xml"),
+                        new FileOutputStream(sunWebXml));
+            } catch (IOException e) {
+                throw new CannotCreateContainerException("Failed to copy default sun-web.xml", e);
+            }
+        }
 
         try {
-            setCurrentApplicationContext(applicationContext);
-            setCurrentBeanLevelProperties(beanLevelProperties);
-            setCurrentClusterInfo(clusterInfo);
-
-            BootstrapWebApplicationContextListener.prepareForBoot(deployPath, clusterInfo, beanLevelProperties);
-
             // we disable the smart getUrl in the common class loader so the JSP classpath will be built correclty
             CommonClassLoader.getInstance().setDisableSmartGetUrl(true);
 
@@ -401,9 +305,6 @@ public class GlassfishJeeProcessingUnitContainerProvider implements JeeProcessin
             }
             throw new CannotCreateContainerException("Failed to start web application", e);
         } finally {
-            setCurrentApplicationContext(null);
-            setCurrentBeanLevelProperties(null);
-            setCurrentClusterInfo(null);
             CommonClassLoader.getInstance().setDisableSmartGetUrl(false);
         }
     }

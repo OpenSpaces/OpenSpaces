@@ -95,12 +95,11 @@
                 <include name="org/openspaces/**"/>
                 <exclude name="org/mule/**"/>
                 <exclude name="org/openspaces/esb/mule/**"/>
-                <exclude name="org/openspaces/pu/container/jee/jetty/**"/>
-                <exclude name="org/openspaces/pu/container/jee/glassfish/**"/>
+                <exclude name="org/openspaces/pu/container/jee/jetty/holder/**"/>
+                <exclude name="org/openspaces/pu/container/jee/glassfish/holder/**"/>
                 <exclude name="org/glassfish/**"/>
                 <exclude name="org/apache/catalina/**"/>
                 <exclude name="com/sun/**"/>
-                <exclude name="org/openspaces/jee/sessions/**"/>
                 <exclude name="META-INF/services/org/mule/**"/>
                 <exclude name="META-INF/mule-spring.handlers"/>
                 <exclude name="META-INF/mule-spring.schemas"/>
@@ -152,8 +151,7 @@
         <delete file="${lib.dir}/${name}/openspaces-jetty.jar"/>
         <jar jarfile="${lib.dir}/${name}/openspaces-jetty.jar">
             <fileset dir="${target.classes.dir}">
-                <include name="org/openspaces/pu/container/jee/jetty/**"/>
-                <include name="org/openspaces/jee/sessions/jetty/**" />
+                <include name="org/openspaces/pu/container/jee/jetty/holder/**"/>
             </fileset>
             <manifest>
                 <attribute name="Implementation-Title" value="${openspaces-title}"/>
@@ -165,7 +163,7 @@
         <delete file="${lib.dir}/${name}/openspaces-glassfish.jar"/>
         <jar jarfile="${lib.dir}/${name}/openspaces-glassfish.jar">
             <fileset dir="${target.classes.dir}">
-                <include name="org/openspaces/pu/container/jee/glassfish/**"/>
+                <include name="org/openspaces/pu/container/jee/glassfish/holder/**"/>
                 <include name="org/glassfish/**" />
                 <include name="com/sun/**" />
                 <include name="org/apache/catalina/**"/>

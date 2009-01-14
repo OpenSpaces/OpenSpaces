@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.pu.container.jee.glassfish;
+package org.openspaces.pu.container.jee.glassfish.holder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

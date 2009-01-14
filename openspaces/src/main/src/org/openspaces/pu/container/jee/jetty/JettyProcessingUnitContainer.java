@@ -24,6 +24,7 @@ import org.mortbay.jetty.webapp.WebAppContext;
 import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.jee.JeeServiceDetails;
 import org.openspaces.pu.container.jee.JeeType;
+import org.openspaces.pu.container.jee.jetty.holder.JettyHolder;
 import org.openspaces.pu.service.ServiceDetails;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -34,7 +35,7 @@ import java.net.UnknownHostException;
 
 /**
  * The actual contianer simply holding the jetty web application context, the application context,
- * and the {@link org.openspaces.pu.container.jee.jetty.JettyHolder}. They are used when closing
+ * and the {@link org.openspaces.pu.container.jee.jetty.holder.JettyHolder}. They are used when closing
  * this container.
  *
  * @author kimchy

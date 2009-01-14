@@ -982,6 +982,7 @@
         <root url="file://$PROJECT_DIR$/../../../glassfish/v3_prelude_release/web/web-glue/src/main/java" />
         <root url="file://$PROJECT_DIR$/../../../glassfish/v3_prelude_release/deployment/common/src/main/java" />
         <root url="file://$PROJECT_DIR$/../../../glassfish/v3_prelude_release/common/internal-api/src/main/java" />
+        <root url="file://$PROJECT_DIR$/../../../glassfish/v3_prelude_release/web/war-util/src/main/java" />
       </SOURCES>
     </library>
   </component>

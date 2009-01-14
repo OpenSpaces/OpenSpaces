@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.pu.container.jee.jetty;
+package org.openspaces.pu.container.jee.jetty.holder;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;

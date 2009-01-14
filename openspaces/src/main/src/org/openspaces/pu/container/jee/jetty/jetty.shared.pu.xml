@@ -58,7 +58,7 @@
         </property>
     </bean>
 
-    <bean id="jettyHolder" class="org.openspaces.pu.container.jee.jetty.SharedJettyHolder">
+    <bean id="jettyHolder" class="org.openspaces.pu.container.jee.jetty.holder.SharedJettyHolder">
         <constructor-arg ref="jetty" />
     </bean>
 

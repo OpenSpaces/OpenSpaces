@@ -52,14 +52,14 @@
         </property>
     </bean>
 
-    <bean id="jettyHolder" class="org.openspaces.pu.container.jee.jetty.PlainJettyHolder">
+    <bean id="jettyHolder" class="org.openspaces.pu.container.jee.jetty.holder.PlainJettyHolder">
         <constructor-arg ref="jetty" />
     </bean>
 
     <bean id="jetty" class="org.mortbay.jetty.Server">
 
         <property name="threadPool">
-            <bean class="org.openspaces.pu.container.jee.jetty.SharedThreadPool">
+            <bean class="org.openspaces.pu.container.jee.jetty.holder.SharedThreadPool">
                 <constructor-arg>
                     <bean class="org.mortbay.thread.QueuedThreadPool">
                         <property name="minThreads" value="${web.threadPool.minThreads}"/>

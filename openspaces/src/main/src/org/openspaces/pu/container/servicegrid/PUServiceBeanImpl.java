@@ -33,6 +33,7 @@ import com.j_spaces.kernel.Environment;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.CommonClassLoader;
+import org.jini.rio.boot.JeeClassLoaders;
 import org.jini.rio.boot.ServiceClassLoader;
 import org.jini.rio.core.JSBInstantiationException;
 import org.jini.rio.core.SLA;
@@ -57,6 +58,7 @@ import org.openspaces.pu.container.DeployableProcessingUnitContainerProvider;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.ProcessingUnitContainerProvider;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
+import org.openspaces.pu.container.jee.context.BootstrapWebApplicationContextListener;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
 import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
@@ -91,6 +93,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -129,6 +132,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private volatile PUDetails puDetails;
 
     private static Field spaceDetails;
+
+    private static final Map<String, ClassLoader> jeeClassLoaders = new HashMap<String, ClassLoader>();
 
     static {
         try {
@@ -203,13 +208,13 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             stopPU();
         } finally {
             Thread.currentThread().setContextClassLoader(origClassLoader);
-            
+
             for (WatchTask watchTask : watchTasks) {
                 watchRegistry.deregister(watchTask.getWatch());
             }
             watchTasks.clear();
         }
-        
+
         super.stop(force);
     }
 
@@ -304,7 +309,14 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         if (webXml != null) {
             webXml.close();
             downloadPU = true;
-            String jeeContainer = System.getProperty("com.gs.jee.container", "jetty");
+            String jeeContainer = beanLevelProperties.getContextProperties().getProperty("jee.container", "jetty");
+            // setup class loaders correcly
+            try {
+                ((ServiceClassLoader) contextClassLoader).setParentClassLoader(JeeClassLoaders.getJeeClassLoader(jeeContainer));
+            } catch (Exception e) {
+                throw new CannotCreateContainerException("Failed to configure JEE class loader", e);
+            }
+
             String className = StringUtils.capitalize(jeeContainer) + "JeeProcessingUnitContainerProvider";
             processingUnitContainerProviderClass = "org.openspaces.pu.container.jee." + jeeContainer + "." + className;
         } else if (puConfig != null) {
@@ -357,7 +369,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
         }
 
-        CommonClassLoader commonClassLoader = (CommonClassLoader) contextClassLoader.getParent();
+        CommonClassLoader commonClassLoader = CommonClassLoader.getInstance();
         // handles class loader libraries
         if (downloadPU) {
             List<URL> libUrls = new ArrayList<URL>();
@@ -393,7 +405,11 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             if (logger.isDebugEnabled()) {
                 logger.debug(logMessage("Common Class Loader " + sharedlibUrls));
             }
-            prepareWebApplication();
+            try {
+                prepareWebApplication(deployPath, clusterInfo, beanLevelProperties);
+            } catch (Exception e) {
+                throw new CannotCreateContainerException("Failed to bootstrap web applciation", e);
+            }
 
         } else {
             // add to service class loader
@@ -785,10 +801,12 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
     }
 
-    private void prepareWebApplication() {
+    private void prepareWebApplication(File deployPath, ClusterInfo clusterInfo, BeanLevelProperties beanLevelProperties) throws Exception {
         if (!(new File(deployPath, "WEB-INF/web.xml").exists())) {
             return;
         }
+        BootstrapWebApplicationContextListener.prepareForBoot(deployPath, clusterInfo, beanLevelProperties);
+
         // if we download, we can delete JSpaces and jini jars from the WEB-INF/lib (they are already in the
         // common class loader).
         File webInfLib = new File(deployPath, "WEB-INF/lib");

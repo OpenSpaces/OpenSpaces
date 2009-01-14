@@ -19,7 +19,7 @@
         <property name="separator" value="${web.context.separator}" />
     </bean>
     
-    <bean id="webAppConfiguration" class="org.openspaces.pu.container.jee.glassfish.WebappConfiguration">
+    <bean id="webAppConfiguration" class="org.openspaces.pu.container.jee.glassfish.holder.WebappConfiguration">
         <property name="contextPath" ref="context" />
         <property name="war" value="${jee.deployPath}" />
     </bean>

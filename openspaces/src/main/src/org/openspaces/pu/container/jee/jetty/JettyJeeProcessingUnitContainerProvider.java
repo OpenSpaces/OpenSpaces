@@ -39,7 +39,7 @@ import org.openspaces.jee.sessions.jetty.GigaSessionManager;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
-import org.openspaces.pu.container.jee.context.BootstrapWebApplicationContextListener;
+import org.openspaces.pu.container.jee.jetty.holder.JettyHolder;
 import org.openspaces.pu.container.jee.jetty.support.JdkLogger;
 import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
 import org.openspaces.pu.container.support.ClusterInfoParser;
@@ -325,41 +325,43 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             // do nothing
         }
 
-        boolean success = false;
-        for (int i = 0; i < retryPortCount; i++) {
-            try {
-                jettyHolder.openConnectors();
-                success = true;
-                break;
-            } catch (BindException e) {
+        // only check ports if the server is not running already
+        if (!jettyHolder.getServer().isStarted()) {
+            boolean success = false;
+            for (int i = 0; i < retryPortCount; i++) {
                 try {
-                    jettyHolder.closeConnectors();
-                } catch (Exception e1) {
-                    logger.debug(e1);
-                    // ignore
-                }
-                for (Connector connector : jettyHolder.getServer().getConnectors()) {
-                    connector.setPort(connector.getPort() + 1);
-                    if (connector instanceof AbstractConnector) {
-                        ((AbstractConnector) connector).setConfidentialPort(connector.getConfidentialPort() + 1);
+                    jettyHolder.openConnectors();
+                    success = true;
+                    break;
+                } catch (BindException e) {
+                    try {
+                        jettyHolder.closeConnectors();
+                    } catch (Exception e1) {
+                        logger.debug(e1);
+                        // ignore
                     }
+                    for (Connector connector : jettyHolder.getServer().getConnectors()) {
+                        connector.setPort(connector.getPort() + 1);
+                        if (connector instanceof AbstractConnector) {
+                            ((AbstractConnector) connector).setConfidentialPort(connector.getConfidentialPort() + 1);
+                        }
+                    }
+                } catch (Exception e) {
+                    try {
+                        jettyHolder.closeConnectors();
+                    } catch (Exception e1) {
+                        logger.debug(e1);
+                        // ignore
+                    }
+                    if (e instanceof CannotCreateContainerException)
+                        throw (CannotCreateContainerException) e;
+                    throw new CannotCreateContainerException("Failed to start jetty server", e);
                 }
-            } catch (Exception e) {
-                try {
-                    jettyHolder.closeConnectors();
-                } catch (Exception e1) {
-                    logger.debug(e1);
-                    // ignore
-                }
-                if (e instanceof CannotCreateContainerException)
-                    throw (CannotCreateContainerException) e;
-                throw new CannotCreateContainerException("Failed to start jetty server", e);
+            }
+            if (!success) {
+                throw new CannotCreateContainerException("Failed to bind jetty to port with retries [" + retryPortCount + "]");
             }
         }
-        if (!success) {
-            throw new CannotCreateContainerException("Failed to bind jetty to port with retries [" + retryPortCount + "]");
-        }
-
         logger.info("Using Jetty server with port [" + jettyHolder.getServer().getConnectors()[0].getPort() + "]");
 
         try {
@@ -414,8 +416,6 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             setCurrentApplicationContext(applicationContext);
             setCurrentBeanLevelProperties(beanLevelProperties);
             setCurrentClusterInfo(clusterInfo);
-
-            BootstrapWebApplicationContextListener.prepareForBoot(deployPath, clusterInfo, beanLevelProperties);
 
             // we disable the smart getUrl in the common class loader so the JSP classpath will be built correclty
             CommonClassLoader.getInstance().setDisableSmartGetUrl(true);

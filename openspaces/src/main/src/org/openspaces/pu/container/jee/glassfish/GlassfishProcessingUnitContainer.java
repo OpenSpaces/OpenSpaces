@@ -23,6 +23,8 @@ import org.jini.rio.boot.BootUtil;
 import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.jee.JeeServiceDetails;
 import org.openspaces.pu.container.jee.JeeType;
+import org.openspaces.pu.container.jee.glassfish.holder.GlassfishHolder;
+import org.openspaces.pu.container.jee.glassfish.holder.WebappConfiguration;
 import org.openspaces.pu.service.ServiceDetails;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
