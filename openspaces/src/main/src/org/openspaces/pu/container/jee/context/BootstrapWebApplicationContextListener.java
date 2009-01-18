@@ -18,6 +18,7 @@ package org.openspaces.pu.container.jee.context;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jini.rio.boot.SharedServiceData;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
 import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
@@ -132,6 +133,11 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
             }
         } else {
             logger.debug("No [" + ApplicationContextProcessingUnitContainerProvider.DEFAULT_PU_CONTEXT_LOCATION + "] to load");
+        }
+
+        // set the class loader used so the service bean can use it
+        if (clusterInfo != null) {
+            SharedServiceData.putWebAppClassLoader(clusterInfo.getName() + clusterInfo.getRunningNumber(), Thread.currentThread().getContextClassLoader());
         }
     }
 

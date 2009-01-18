@@ -33,8 +33,8 @@ import com.j_spaces.kernel.Environment;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.CommonClassLoader;
-import org.jini.rio.boot.JeeClassLoaders;
 import org.jini.rio.boot.ServiceClassLoader;
+import org.jini.rio.boot.SharedServiceData;
 import org.jini.rio.core.JSBInstantiationException;
 import org.jini.rio.core.SLA;
 import org.jini.rio.core.ServiceLevelAgreements;
@@ -93,7 +93,6 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -132,8 +131,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private volatile PUDetails puDetails;
 
     private static Field spaceDetails;
-
-    private static final Map<String, ClassLoader> jeeClassLoaders = new HashMap<String, ClassLoader>();
 
     static {
         try {
@@ -192,7 +189,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         try {
             // we set the context class loader so we export with it
-            // Note, when we support web application monitoring, we need to set here the web app class loader
+            ClassLoader webAppClassLoader = SharedServiceData.removeWebAppClassLoader(clusterInfo.getName() + clusterInfo.getRunningNumber());
+            if (webAppClassLoader != null) {
+                contextClassLoader = webAppClassLoader;
+            }
             Thread.currentThread().setContextClassLoader(contextClassLoader);
             return super.doStart(context);
         } finally {
@@ -202,6 +202,11 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     @Override
     public void stop(boolean force) {
+        // make sure to clean the web app class loader
+        if (clusterInfo != null) {
+            SharedServiceData.removeWebAppClassLoader(clusterInfo.getName() + clusterInfo.getRunningNumber());
+        }
+
         ClassLoader origClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(contextClassLoader);
@@ -312,7 +317,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             String jeeContainer = beanLevelProperties.getContextProperties().getProperty("jee.container", "jetty");
             // setup class loaders correcly
             try {
-                ((ServiceClassLoader) contextClassLoader).setParentClassLoader(JeeClassLoaders.getJeeClassLoader(jeeContainer));
+                ((ServiceClassLoader) contextClassLoader).setParentClassLoader(SharedServiceData.getJeeClassLoader(jeeContainer));
             } catch (Exception e) {
                 throw new CannotCreateContainerException("Failed to configure JEE class loader", e);
             }
