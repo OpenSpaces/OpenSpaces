@@ -91,20 +91,14 @@ public abstract class ClusterInfoParser {
 
     /**
      * Guess the cluster schema if not set. If the number of instances is higher than 1 and the number
-     * of backups it higher than 0, the cluster schema will be <code>partitioned_sync2backup</code>. If just
-     * the number of instnaces is higher than one (with no backups) the cluster schema will be
-     * <code>partitioned</code>.
+     * of backups it higher than 0, the cluster schema will be <code>partitioned_sync2backup</code>. 
      */
     public static void guessSchema(ClusterInfo clusterInfo) {
         if (clusterInfo.getSchema() != null) {
             return;
         }
         if (clusterInfo.getNumberOfInstances() != null && clusterInfo.getNumberOfInstances() > 1) {
-            if (clusterInfo.getNumberOfBackups() != null && clusterInfo.getNumberOfBackups() > 0) {
-                clusterInfo.setSchema("partitioned-sync2backup");
-            } else {
-                clusterInfo.setSchema("partitioned");
-            }
+            clusterInfo.setSchema("partitioned-sync2backup");
         } else if (clusterInfo.getNumberOfInstances() != null && clusterInfo.getNumberOfInstances() == 1 &&
                 clusterInfo.getNumberOfBackups() != null && clusterInfo.getNumberOfBackups() > 0) {
             clusterInfo.setSchema("partitioned-sync2backup");

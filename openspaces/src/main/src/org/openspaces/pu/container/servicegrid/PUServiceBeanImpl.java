@@ -62,6 +62,7 @@ import org.openspaces.pu.container.jee.context.BootstrapWebApplicationContextLis
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
 import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
+import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.WebsterFile;
 import org.openspaces.pu.service.ServiceDetails;
 import org.openspaces.pu.service.ServiceDetailsProvider;
@@ -266,6 +267,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         clusterInfo.setInstanceId(instanceId);
         clusterInfo.setBackupId(backupId);
         clusterInfo.setName(puName);
+
+        ClusterInfoParser.guessSchema(clusterInfo);
 
         logger.info(logMessage("ClusterInfo [" + clusterInfo + "]"));
 
