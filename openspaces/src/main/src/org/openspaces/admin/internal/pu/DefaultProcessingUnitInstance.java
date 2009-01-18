@@ -52,6 +52,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private final PUDetails puDetails;
 
+    private final ServiceDetails[] serviceDetails;
+
     private volatile InternalProcessingUnit processingUnit;
 
     private volatile GridServiceContainer gridServiceContainer;
@@ -82,13 +84,18 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
         this.spaceInstances = new DefaultSpaceInstances(admin);
 
+        this.serviceDetails = new ServiceDetails[puDetails.getDetails().length];
+        for (int i = 0; i < puDetails.getDetails().length; i++) {
+            this.serviceDetails[i] = (ServiceDetails) puDetails.getDetails()[i];
+        }
+
         ArrayList<SpaceServiceDetails> embeddedSpacesEmbeddedList = new ArrayList<SpaceServiceDetails>();
         ArrayList<SpaceServiceDetails> spacesDetailsList = new ArrayList<SpaceServiceDetails>();
         JeeServiceDetails jeeDetailsX = null;
 
         Map<String, List<ServiceDetails>> servicesDetailsByServiceIdList = new HashMap<String, List<ServiceDetails>>();
 
-        for (ServiceDetails serviceDetails : puDetails.getDetails()) {
+        for (ServiceDetails serviceDetails : this.serviceDetails) {
 
             List<ServiceDetails> list = servicesDetailsByServiceIdList.get(serviceDetails.getServiceType());
             if (list == null) {
@@ -168,7 +175,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public Iterator<ServiceDetails> iterator() {
-        return Arrays.asList(puDetails.getDetails()).iterator();
+        return Arrays.asList(this.serviceDetails).iterator();
     }
 
     public Map<String, EventContainerServiceDetails> getEventContainerServiceDetails() {
@@ -203,7 +210,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public ServiceDetails[] getServicesDetails() {
-        return puDetails.getDetails();
+        return this.serviceDetails;
     }
 
     public ServiceID getGridServiceContainerServiceID() {

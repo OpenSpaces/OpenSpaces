@@ -28,6 +28,8 @@ import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
 import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
+import org.openspaces.pu.service.ServiceDetails;
+import org.openspaces.pu.service.ServiceDetailsProvider;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -37,6 +39,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.Callable;
 
 /**
  * Bootstap servlet context listener allowing to get the {@link org.openspaces.core.cluster.ClusterInfo},
@@ -76,7 +82,7 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
             return;
         }
         servletContext.setAttribute(BOOTSTRAP_CONTEXT_KEY, true);
-        
+
         logger.info("Booting OpenSpaces Web Application Support");
         ClusterInfo clusterInfo = null;
         BeanLevelProperties beanLevelProperties = null;
@@ -113,7 +119,7 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
         if (resources != null && resources.length > 0) {
             logger.debug("Loading [" + ApplicationContextProcessingUnitContainerProvider.DEFAULT_PU_CONTEXT_LOCATION + "]");
             // create the Spring application context
-            ResourceApplicationContext applicationContext = new ResourceApplicationContext(resources, null);
+            final ResourceApplicationContext applicationContext = new ResourceApplicationContext(resources, null);
             // add config information if provided
             if (beanLevelProperties != null) {
                 applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties, clusterInfo));
@@ -131,6 +137,25 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
             for (String beanName : beanNames) {
                 servletContext.setAttribute(beanName, applicationContext.getBean(beanName));
             }
+
+            if (clusterInfo != null) {
+                SharedServiceData.putServiceDetails(clusterInfo.getName() + clusterInfo.getRunningNumber(), new Callable() {
+                    public Object call() throws Exception {
+                        ArrayList<ServiceDetails> serviceDetails = new ArrayList<ServiceDetails>();
+                        Map map = applicationContext.getBeansOfType(ServiceDetailsProvider.class);
+                        for (Iterator it = map.values().iterator(); it.hasNext();) {
+                            ServiceDetails[] details = ((ServiceDetailsProvider) it.next()).getServicesDetails();
+                            if (details != null) {
+                                for (ServiceDetails detail : details) {
+                                    serviceDetails.add(detail);
+                                }
+                            }
+                        }
+                        return serviceDetails.toArray(new Object[serviceDetails.size()]);
+                    }
+                });
+            }
+
         } else {
             logger.debug("No [" + ApplicationContextProcessingUnitContainerProvider.DEFAULT_PU_CONTEXT_LOCATION + "] to load");
         }

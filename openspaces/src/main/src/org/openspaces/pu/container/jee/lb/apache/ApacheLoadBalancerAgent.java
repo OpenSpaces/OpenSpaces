@@ -34,7 +34,6 @@ import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.pu.container.jee.JeeServiceDetails;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
 import org.openspaces.pu.container.support.CommandLineParser;
-import org.openspaces.pu.service.ServiceDetails;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.BufferedReader;
@@ -230,9 +229,9 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
     public synchronized void serviceAdded(ServiceDiscoveryEvent event) {
         PUServiceBean service = (PUServiceBean) event.getPostEventServiceItem().service;
         try {
-            ServiceDetails[] details = service.listServiceDetails();
+            Object[] details = service.listServiceDetails();
             ClusterInfo clusterInfo = service.getClusterInfo();
-            for (ServiceDetails detail : details) {
+            for (Object detail : details) {
                 if (detail instanceof JeeServiceDetails) {
                     JeeServiceDetails jeeDetails = (JeeServiceDetails) detail;
                     LoadBalancerInfo loadBalancersInfo = loadBalancersInfoMap.get(clusterInfo.getName());
@@ -255,9 +254,9 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
     public synchronized void serviceRemoved(ServiceDiscoveryEvent event) {
         PUServiceBean service = (PUServiceBean) event.getPreEventServiceItem().service;
         try {
-            ServiceDetails[] details = service.listServiceDetails();
+            Object[] details = service.listServiceDetails();
             ClusterInfo clusterInfo = service.getClusterInfo();
-            for (ServiceDetails detail : details) {
+            for (Object detail : details) {
                 JeeServiceDetails jeeDetails = (JeeServiceDetails) detail;
                 if (detail instanceof JeeServiceDetails) {
                     LoadBalancerInfo loadBalancersInfo = loadBalancersInfoMap.get(clusterInfo.getName());

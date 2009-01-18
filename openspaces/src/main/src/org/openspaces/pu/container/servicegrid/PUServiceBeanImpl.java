@@ -86,6 +86,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -93,11 +94,13 @@ import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -130,17 +133,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private ClusterInfo clusterInfo;
 
     private volatile PUDetails puDetails;
-
-    private static Field spaceDetails;
-
-    static {
-        try {
-            spaceDetails = SpaceServiceDetails.class.getDeclaredField("space");
-            spaceDetails.setAccessible(true);
-        } catch (NoSuchFieldException e) {
-            logger.error("Internal failure in openspaces", e);
-        }
-    }
 
     public PUServiceBeanImpl() {
         super();
@@ -500,7 +492,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
         }
 
-        ArrayList<ServiceDetails> serviceDetails = new ArrayList<ServiceDetails>();
+        ArrayList<Object> serviceDetails = new ArrayList<Object>();
 
         if (container instanceof ServiceDetailsProvider) {
             ServiceDetails[] details = ((ServiceDetailsProvider) container).getServicesDetails();
@@ -523,7 +515,18 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 }
             }
         }
-        this.puDetails = new PUDetails(context.getParentServiceID(), clusterInfo, serviceDetails.toArray(new ServiceDetails[serviceDetails.size()]));
+
+        Callable serviceDetailsProvider = SharedServiceData.removeServiceDetails(clusterInfo.getName() + clusterInfo.getRunningNumber());
+        if (serviceDetailsProvider != null) {
+            try {
+                Object[] details = (Object[]) serviceDetailsProvider.call();
+                Collections.addAll(serviceDetails, details);
+            } catch (Exception e) {
+                logger.error("Failed to add service details from custom provider", e);
+            }
+        }
+
+        this.puDetails = new PUDetails(context.getParentServiceID(), clusterInfo, serviceDetails.toArray(new Object[serviceDetails.size()]));
     }
 
     private org.openspaces.pu.sla.SLA getSLA(ServiceBeanContext context) throws IOException, ClassNotFoundException {
@@ -592,16 +595,18 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     public SpaceURL[] listSpacesURLs() throws RemoteException {
         List<SpaceURL> spaceUrls = new ArrayList<SpaceURL>();
-        for (ServiceDetails serviceDetails : puDetails.getDetails()) {
-            if (serviceDetails instanceof SpaceServiceDetails) {
-                SpaceServiceDetails spaceServiceDetails = (SpaceServiceDetails) serviceDetails;
-                if (spaceServiceDetails.getSpaceType() == SpaceType.EMBEDDED) {
-                    try {
+        for (Object serviceDetails : puDetails.getDetails()) {
+            if (serviceDetails.getClass().getName().equals(SpaceServiceDetails.class.getName())) {
+                try {
+                    Method spaceType = serviceDetails.getClass().getMethod("getSpaceType");
+                    if (spaceType.invoke(serviceDetails).toString().equals(SpaceType.EMBEDDED.toString())) {
+                        Field spaceDetails = serviceDetails.getClass().getDeclaredField("space");
+                        spaceDetails.setAccessible(true);
                         IJSpace space = (IJSpace) spaceDetails.get(serviceDetails);
                         spaceUrls.add(space.getFinderURL());
-                    } catch (IllegalAccessException e) {
-                        throw new RemoteException("Failed to access field", e);
                     }
+                } catch (Exception e) {
+                    throw new RemoteException("Failed to get space url", e);
                 }
             }
         }
@@ -610,16 +615,18 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     public SpaceMode[] listSpacesModes() throws RemoteException {
         List<SpaceMode> spacesModes = new ArrayList<SpaceMode>();
-        for (ServiceDetails serviceDetails : puDetails.getDetails()) {
-            if (serviceDetails instanceof SpaceServiceDetails) {
-                SpaceServiceDetails spaceServiceDetails = (SpaceServiceDetails) serviceDetails;
-                if (spaceServiceDetails.getSpaceType() == SpaceType.EMBEDDED) {
-                    try {
+        for (Object serviceDetails : puDetails.getDetails()) {
+            if (serviceDetails.getClass().getName().equals(SpaceServiceDetails.class.getName())) {
+                try {
+                    Method spaceType = serviceDetails.getClass().getMethod("getSpaceType");
+                    if (spaceType.invoke(serviceDetails).toString().equals(SpaceType.EMBEDDED.toString())) {
+                        Field spaceDetails = serviceDetails.getClass().getDeclaredField("space");
+                        spaceDetails.setAccessible(true);
                         IJSpace space = (IJSpace) spaceDetails.get(serviceDetails);
                         spacesModes.add(((IInternalRemoteJSpaceAdmin) space.getAdmin()).getSpaceMode());
-                    } catch (IllegalAccessException e) {
-                        throw new RemoteException("Failed to access field", e);
                     }
+                } catch (Exception e) {
+                    throw new RemoteException("Failed to get space mode", e);
                 }
             }
         }
@@ -634,7 +641,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         return this.clusterInfo;
     }
 
-    public ServiceDetails[] listServiceDetails() throws RemoteException {
+    public Object[] listServiceDetails() throws RemoteException {
         if (puDetails == null) {
             return new ServiceDetails[0];
         }

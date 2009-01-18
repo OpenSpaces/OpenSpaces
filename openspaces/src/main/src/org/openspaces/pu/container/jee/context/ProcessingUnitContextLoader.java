@@ -16,6 +16,7 @@
 
 package org.openspaces.pu.container.jee.context;
 
+import org.jini.rio.boot.SharedServiceData;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
 import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
@@ -23,12 +24,19 @@ import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
 import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
 import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
+import org.openspaces.pu.service.ServiceDetails;
+import org.openspaces.pu.service.ServiceDetailsProvider;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.servlet.ServletContext;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.Callable;
 
 /**
  * Same as Spring {@link org.springframework.web.context.ContextLoader}. Different in two aspects:
@@ -43,6 +51,30 @@ import javax.servlet.ServletContext;
  * @author kimchy
  */
 public class ProcessingUnitContextLoader extends ContextLoader {
+
+    @Override
+    public WebApplicationContext initWebApplicationContext(ServletContext servletContext) throws IllegalStateException, BeansException {
+        final WebApplicationContext context = super.initWebApplicationContext(servletContext);
+        ClusterInfo clusterInfo = (ClusterInfo) servletContext.getAttribute(JeeProcessingUnitContainerProvider.CLUSTER_INFO_CONTEXT);
+        if (clusterInfo != null) {
+            SharedServiceData.putServiceDetails(clusterInfo.getName() + clusterInfo.getRunningNumber(), new Callable() {
+                public Object call() throws Exception {
+                    ArrayList<ServiceDetails> serviceDetails = new ArrayList<ServiceDetails>();
+                    Map map = BeanFactoryUtils.beansOfTypeIncludingAncestors(context, ServiceDetailsProvider.class);
+                    for (Iterator it = map.values().iterator(); it.hasNext();) {
+                        ServiceDetails[] details = ((ServiceDetailsProvider) it.next()).getServicesDetails();
+                        if (details != null) {
+                            for (ServiceDetails detail : details) {
+                                serviceDetails.add(detail);
+                            }
+                        }
+                    }
+                    return serviceDetails.toArray(new Object[serviceDetails.size()]);
+                }
+            });
+        }
+        return context;
+    }
 
     /**
      * Returns the application context bound under {@link org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider#APPLICATION_CONTEXT_CONTEXT}

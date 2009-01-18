@@ -18,12 +18,12 @@ public class PUDetails implements Externalizable {
 
     private ClusterInfo clusterInfo;
 
-    private ServiceDetails[] details;
+    private Object[] details;
 
     public PUDetails() {
     }
 
-    public PUDetails(ServiceID gscServiceID, ClusterInfo clusterInfo, ServiceDetails[] details) {
+    public PUDetails(ServiceID gscServiceID, ClusterInfo clusterInfo, Object[] details) {
         this.gscServiceID = gscServiceID;
         this.clusterInfo = clusterInfo;
         this.details = details;
@@ -40,15 +40,15 @@ public class PUDetails implements Externalizable {
         return clusterInfo;
     }
 
-    public ServiceDetails[] getDetails() {
-        return details;
+    public Object[] getDetails() {
+        return this.details;
     }
 
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeObject(gscServiceID);
         out.writeObject(clusterInfo);
         out.writeInt(details.length);
-        for (ServiceDetails details : this.details) {
+        for (Object details : this.details) {
             out.writeObject(details);
         }
     }
@@ -59,7 +59,7 @@ public class PUDetails implements Externalizable {
         int size = in.readInt();
         this.details = new ServiceDetails[size];
         for (int i = 0; i < size; i++) {
-            details[i] = (ServiceDetails) in.readObject();
+            details[i] = in.readObject();
         }
     }
 }
