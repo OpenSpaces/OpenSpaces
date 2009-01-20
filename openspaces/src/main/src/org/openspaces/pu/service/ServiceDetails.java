@@ -7,6 +7,7 @@ import java.util.Map;
  * A generic service that exists within a processing unit.
  *
  * @author kimchy
+ * @see org.openspaces.pu.service.PlainServiceDetails
  */
 public interface ServiceDetails extends Serializable {
 
