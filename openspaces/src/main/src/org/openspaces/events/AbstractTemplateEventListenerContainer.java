@@ -24,9 +24,9 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * A simple base class that provides support methods for Tempalte based event listeners.
+ * A simple base class that provides support methods for Template based event listeners.
  *
- * <p>There are several ways a tempalte can be provided. The first is by explicitly setting it using
+ * <p>There are several ways a template can be provided. The first is by explicitly setting it using
  * {@link #setTemplate(Object)}. The second option is for the event listener to implement an interface
  * called {@link org.openspaces.events.EventTemplateProvider}. The last option is to annotate a method
  * within the event listener that will return the actual template using {@link org.openspaces.events.EventTemplate}
@@ -98,7 +98,7 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
     }
 
     /**
-     * Returns the tempalte that will be used. Note, in order to perform receive operations, the
+     * Returns the template that will be used. Note, in order to perform receive operations, the
      * {@link #getReceiveTemplate()} should be used.
      */
     protected Object getTemplate() {
