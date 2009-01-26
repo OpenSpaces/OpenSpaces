@@ -77,6 +77,11 @@ public @interface Notify {
     boolean ignoreEventOnNullTake() default false;
 
     /**
+     * @see SimpleNotifyEventListenerContainer#setGuaranteed(Boolean)
+     */
+    boolean guaranteed() default false;
+
+    /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setComType(int)
      */
     NotifyComType commType() default NotifyComType.UNICAST;

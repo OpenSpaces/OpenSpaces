@@ -16,6 +16,7 @@
 
 package org.openspaces.events.notify;
 
+import com.gigaspaces.cluster.activeelection.SpaceInitializationIndicator;
 import com.gigaspaces.events.DataEventSession;
 import com.gigaspaces.events.EventSessionFactory;
 import com.gigaspaces.events.batching.BatchRemoteEvent;
@@ -39,13 +40,6 @@ import java.rmi.RemoteException;
  * Uses {@link AbstractNotifyEventListenerContainer} for configuration of different notification
  * registration parameters and transactional semantics.
  *
- * <p>Allows to control using {@link #setRegisterOnStartup(boolean)} if the listener will be registered
- * for notification on startup or registration will be controlled by the {@link #doStart()} and
- * {@link #doStop()} callbacks (which by default are triggered based on the current space mode -
- * <code>PRIMARY</code> or <code>BACKUP</code>). Default is <code>false</code> which means
- * registration will occur when the space moves into <code>PRIMARY</code> mode (assuming that
- * {@link #setActiveWhenPrimary(boolean)} is set to <code>true</code>, which is the default).
- *
  * <p>The container can automatically take the notified event data (using {@link GigaSpace#take(Object)})
  * if the {@link #setPerformTakeOnNotify(boolean)} is set to <code>true</code>. Defaults to
  * <code>false</code>. If the flag is set to <code>true</code>, {@link #setIgnoreEventOnNullTake(boolean)}
@@ -56,16 +50,15 @@ import java.rmi.RemoteException;
  */
 public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListenerContainer {
 
-    private boolean registerOnStartup = false;
-
     private boolean performTakeOnNotify = false;
 
     private boolean ignoreEventOnNullTake = false;
 
     private DataEventSession dataEventSession;
 
-    public void setRegisterOnStartup(boolean registerOnStartup) {
-        this.registerOnStartup = registerOnStartup;
+    public SimpleNotifyEventListenerContainer() {
+        // we register for notifications even when the embedded space is backup
+        setActiveWhenPrimary(false);
     }
 
     /**
@@ -86,9 +79,6 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
     }
 
     protected void doInitialize() throws DataAccessException {
-        if (registerOnStartup) {
-            registerListener();
-        }
     }
 
     protected void doShutdown() throws DataAccessException {
@@ -97,9 +87,7 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
 
     protected void doAfterStart() throws DataAccessException {
         super.doAfterStart();
-        if (!registerOnStartup) {
-            registerListener();
-        }
+        registerListener();
         if (logger.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder();
             sb.append("[").append(getBeanName()).append("] ").append("Started");
@@ -132,9 +120,7 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
 
     protected void doBeforeStop() throws DataAccessException {
         super.doBeforeStop();
-        if (!registerOnStartup) {
-            closeSession();
-        }
+        closeSession();
         if (logger.isDebugEnabled()) {
             logger.debug("Stopped notify event container");
         }
@@ -145,18 +131,23 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
             // we already registered the listener, just return.
             return;
         }
-        EventSessionFactory factory = createEventSessionFactory();
-        dataEventSession = createDataEventSession(factory);
+        SpaceInitializationIndicator.setInitializer();
         try {
-            if (isBatchEnabled()) {
-                registerListener(dataEventSession, new BatchNotifyListenerDelegate());
-            } else {
-                registerListener(dataEventSession, new NotifyListenerDelegate());
+            EventSessionFactory factory = createEventSessionFactory();
+            dataEventSession = createDataEventSession(factory);
+            try {
+                if (isBatchEnabled()) {
+                    registerListener(dataEventSession, new BatchNotifyListenerDelegate());
+                } else {
+                    registerListener(dataEventSession, new NotifyListenerDelegate());
+                }
+            } catch (NotifyListenerRegistrationException ex) {
+                // in case of an exception, close the session
+                closeSession();
+                throw ex;
             }
-        } catch (NotifyListenerRegistrationException ex) {
-            // in case of an exception, close the session
-            closeSession();
-            throw ex;
+        } finally {
+            SpaceInitializationIndicator.unsetInitializer();
         }
     }
 
@@ -199,11 +190,9 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
     private class NotifyListenerDelegate implements RemoteEventListener {
 
         public void notify(RemoteEvent remoteEvent) throws UnknownEventException, RemoteException {
-            if (registerOnStartup) {
-                if (!isRunning()) {
-                    return;
-                }
-            }
+//            if (!isRunning()) {
+//                return;
+//            }
             Object eventData;
             try {
                 eventData = ((EntryArrivedRemoteEvent) remoteEvent).getObject();
@@ -220,20 +209,16 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
     private class BatchNotifyListenerDelegate implements BatchRemoteEventListener {
 
         public void notifyBatch(BatchRemoteEvent batchRemoteEvent) throws UnknownEventException, RemoteException {
-            if (registerOnStartup) {
-                if (!isRunning()) {
-                    return;
-                }
-            }
+//            if (!isRunning()) {
+//                return;
+//            }
             invokeListenerWithTransaction(batchRemoteEvent, performTakeOnNotify, ignoreEventOnNullTake);
         }
 
         public void notify(RemoteEvent remoteEvent) throws UnknownEventException, RemoteException {
-            if (registerOnStartup) {
-                if (!isRunning()) {
-                    return;
-                }
-            }
+//            if (!isRunning()) {
+//                return;
+//            }
             Object eventData;
             try {
                 eventData = ((EntryArrivedRemoteEvent) remoteEvent).getObject();

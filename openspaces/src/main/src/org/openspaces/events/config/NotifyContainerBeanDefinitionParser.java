@@ -36,6 +36,8 @@ public class NotifyContainerBeanDefinitionParser extends AbstractTxEventContaine
 
     private static final String FIFO = "fifo";
 
+    private static final String GUARANTEED = "guaranteed";
+
     private static final String TRIGGER_NOTIFY_TEMPLATE = "trigger-notify-template";
 
     private static final String REPLICATE_NOTIFY_TEMPLATE = "replicate-notify-template";
@@ -145,6 +147,11 @@ public class NotifyContainerBeanDefinitionParser extends AbstractTxEventContaine
         String fifo = element.getAttribute(FIFO);
         if (StringUtils.hasLength(fifo)) {
             builder.addPropertyValue("fifo", fifo);
+        }
+
+        String guaranteed = element.getAttribute(GUARANTEED);
+        if (StringUtils.hasLength(guaranteed)) {
+            builder.addPropertyValue("guaranteed", guaranteed);
         }
 
         String triggerNotifyTemplate = element.getAttribute(TRIGGER_NOTIFY_TEMPLATE);

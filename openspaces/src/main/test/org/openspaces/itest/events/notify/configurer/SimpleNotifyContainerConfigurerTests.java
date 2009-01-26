@@ -63,10 +63,10 @@ public class SimpleNotifyContainerConfigurerTests extends TestCase {
         final AtomicBoolean backupEventCalled = new AtomicBoolean();
 
         UrlSpaceConfigurer urlSpaceConfigurerPrimary = new UrlSpaceConfigurer("/./spaceEventConfigurer")
-                .clusterInfo(new ClusterInfo("primary_backup", 1, null, 1, 1)).lookupGroups(System.getProperty("user.name"));
+                .clusterInfo(new ClusterInfo("partitioned-sync2backup", 1, null, 1, 1)).lookupGroups(System.getProperty("user.name"));
 
         UrlSpaceConfigurer urlSpaceConfigurerBackup = new UrlSpaceConfigurer("/./spaceEventConfigurer")
-                .clusterInfo(new ClusterInfo("primary_backup", 1, 1, 1, 1)).lookupGroups(System.getProperty("user.name"));
+                .clusterInfo(new ClusterInfo("partitioned-sync2backup", 1, 1, 1, 1)).lookupGroups(System.getProperty("user.name"));
 
         GigaSpace gigaSpacePrimary = new GigaSpaceConfigurer(urlSpaceConfigurerPrimary.space()).gigaSpace();
         SimpleNotifyEventListenerContainer notifyEventListenerContainerPrimary = new SimpleNotifyContainerConfigurer(gigaSpacePrimary)
@@ -93,9 +93,20 @@ public class SimpleNotifyContainerConfigurerTests extends TestCase {
         assertTrue(primaryEventCalled.get());
         assertFalse(backupEventCalled.get());
 
+        primaryEventCalled.set(false);
+        backupEventCalled.set(false);
 
         notifyEventListenerContainerPrimary.destroy();
-        notifyEventListenerContainerBackup.destroy();
         urlSpaceConfigurerPrimary.destroy();
+        Thread.sleep(2000);
+
+        urlSpaceConfigurerClient.space().write(new TestMessage("test"), null, 50000);
+        Thread.sleep(2000);
+
+        assertFalse(primaryEventCalled.get());
+        assertTrue(backupEventCalled.get());
+
+        notifyEventListenerContainerBackup.destroy();
+        urlSpaceConfigurerBackup.destroy();
     }
 }

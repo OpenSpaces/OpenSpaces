@@ -216,6 +216,14 @@ public class SimpleNotifyContainerConfigurer {
     }
 
     /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setGuaranteed(Boolean)
+     */
+    public SimpleNotifyContainerConfigurer guaranteed(boolean guaranteed) {
+        notifyEventListenerContainer.setGuaranteed(guaranteed);
+        return this;
+    }
+
+    /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setTriggerNotifyTemplate(boolean)
      */
     public SimpleNotifyContainerConfigurer triggerNotifyTemplate(boolean triggerNotifyTemplate) {
@@ -319,7 +327,8 @@ public class SimpleNotifyContainerConfigurer {
 
     public SimpleNotifyEventListenerContainer notifyContainer() {
         if (!initialized) {
-            notifyEventListenerContainer.setRegisterSpaceModeListener(true);
+            // NO need, we always register a notify listener on embedded space, even if it is backup
+//            notifyEventListenerContainer.setRegisterSpaceModeListener(true);
             notifyEventListenerContainer.afterPropertiesSet();
             initialized = true;
         }

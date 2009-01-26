@@ -152,6 +152,8 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
 
     private Boolean replicateNotifyTemplate;
 
+    private Boolean guaranteed;
+
     private boolean passArrayAsIs = false;
 
     /**
@@ -364,6 +366,18 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     }
 
     /**
+     * Controls if notifications will be guaraneteed (at least once) in case of failover.
+     */
+    public void setGuaranteed(Boolean guaranteed) {
+        this.guaranteed = guaranteed;
+    }
+
+    protected Boolean getGuaranteed() {
+        return guaranteed;
+    }
+
+
+    /**
      * When batching is turned on, should the batch of events be passed as an <code>Object[]</code> to
      * the listener. Default to <code>false</code> which means it will be passed one event at a time.
      */
@@ -403,13 +417,18 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     }
 
     public void initialize() throws DataAccessException {
-        // if we are using a Space that was started in embedded mode, no need to replicate notify template
-        // by default
-        if (replicateNotifyTemplate == null && !SpaceUtils.isRemoteProtocol(getGigaSpace().getSpace())) {
-            if (logger.isTraceEnabled()) {
-                logger.trace(message("Setting replicateNotifyTemplate to true since working with an embedded Space"));
+        if (SpaceUtils.isRemoteProtocol(getGigaSpace().getSpace())) {
+            
+        } else {
+            // if we are using a Space that was started in embedded mode, no need to replicate notify template
+            // by default
+
+            if (replicateNotifyTemplate == null && !SpaceUtils.isRemoteProtocol(getGigaSpace().getSpace())) {
+                if (logger.isTraceEnabled()) {
+                    logger.trace(message("Setting replicateNotifyTemplate to false since working with an embedded Space"));
+                }
+                replicateNotifyTemplate = false;
             }
-            replicateNotifyTemplate = false;
         }
         if (replicateNotifyTemplate == null && triggerNotifyTemplate != null && triggerNotifyTemplate) {
             if (logger.isTraceEnabled()) {
@@ -497,6 +516,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         }
         if (replicateNotifyTemplate != null) {
             eventSessionConfig.setReplicateNotifyTemplate(replicateNotifyTemplate);
+        }
+        if (guaranteed != null) {
+            eventSessionConfig.setGuaranteedNotifications(guaranteed);
         }
         return eventSessionConfig;
     }

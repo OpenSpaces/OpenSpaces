@@ -522,6 +522,13 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
+                    <xsd:attribute name="guaranteed" type="xsd:boolean">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                Controls if the notifications will be guaranteed (at least once) in case of fail over.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
                     <xsd:attribute name="trigger-notify-template" type="xsd:boolean">
                         <xsd:annotation>
                             <xsd:documentation>
