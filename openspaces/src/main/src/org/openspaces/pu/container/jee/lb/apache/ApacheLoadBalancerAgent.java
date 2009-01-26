@@ -180,7 +180,7 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
 
         loadBalancersInfoMap.clear();
         // list all the files and init with empty load balancers
-        System.out.println("Detecting exising config files...");
+        System.out.println("Detecting existing config files...");
         new File(configLocation).listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name) {
                 String clusterName = name.substring(0, name.length() - ".conf".length());
@@ -189,7 +189,7 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
                 return false;
             }
         });
-        System.out.println("Done detecting exising config files");
+        System.out.println("Done detecting existing config files");
         System.out.println("");
 
         ldm = new LookupDiscoveryManager(getGroups(), BootUtil.toLookupLocators(getLocators()), this, ServiceConfigLoader.getConfiguration());
