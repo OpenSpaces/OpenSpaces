@@ -93,14 +93,14 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         ArrayList<SpaceServiceDetails> spacesDetailsList = new ArrayList<SpaceServiceDetails>();
         JeeServiceDetails jeeDetailsX = null;
 
-        Map<String, List<ServiceDetails>> servicesDetailsByServiceIdList = new HashMap<String, List<ServiceDetails>>();
+        Map<String, List<ServiceDetails>> servicesDetailsByServiceTypeList = new HashMap<String, List<ServiceDetails>>();
 
         for (ServiceDetails serviceDetails : this.serviceDetails) {
 
-            List<ServiceDetails> list = servicesDetailsByServiceIdList.get(serviceDetails.getServiceType());
+            List<ServiceDetails> list = servicesDetailsByServiceTypeList.get(serviceDetails.getServiceType());
             if (list == null) {
                 list = new ArrayList<ServiceDetails>();
-                servicesDetailsByServiceIdList.put(serviceDetails.getServiceType(), list);
+                servicesDetailsByServiceTypeList.put(serviceDetails.getServiceType(), list);
             }
             list.add(serviceDetails);
 
@@ -133,7 +133,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         spacesDetails = spacesDetailsList.toArray(new SpaceServiceDetails[spacesDetailsList.size()]);
 
         Map<String, ServiceDetails[]> servicesDetailsTemp = new HashMap<String, ServiceDetails[]>();
-        for (Map.Entry<String, List<ServiceDetails>> entry : servicesDetailsByServiceIdList.entrySet()) {
+        for (Map.Entry<String, List<ServiceDetails>> entry : servicesDetailsByServiceTypeList.entrySet()) {
             servicesDetailsTemp.put(entry.getKey(), entry.getValue().toArray(new ServiceDetails[entry.getValue().size()]));
         }
         servicesDetailsByServiceType = servicesDetailsTemp;
