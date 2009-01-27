@@ -587,6 +587,8 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
         if (!(tempalte instanceof Serializable)) {
             tempalte = null;
         }
+        // for now, LRMI class loader problems
+        tempalte = null;
         return new ServiceDetails[]{new PollingEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte, isPerformSnapshot(),
                 getReceiveTimeout(), getReceiveOperationHandler().getClass().getName(), getTriggerOperationHandler() != null ? getTriggerOperationHandler().getClass().getName() : null,
                 getConcurrentConsumers(), getMaxConcurrentConsumers(), isPassArrayAsIs())};
