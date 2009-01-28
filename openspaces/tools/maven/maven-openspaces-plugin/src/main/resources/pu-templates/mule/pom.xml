@@ -23,12 +23,6 @@
         </dependency>
         <dependency>
             <groupId>org.openspaces</groupId>
-            <artifactId>mule-os-boot</artifactId>
-            <version>${gsVersion}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openspaces</groupId>
             <artifactId>mule-os</artifactId>
             <version>${gsVersion}</version>
             <scope>provided</scope>

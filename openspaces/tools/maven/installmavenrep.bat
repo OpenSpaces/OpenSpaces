@@ -35,7 +35,6 @@ call mvn install:install-file -DgroupId=com.gigaspaces.core -DartifactId=gs-lib 
 call mvn install:install-file -DgroupId=com.gigaspaces.core -DartifactId=JSpaces -Dversion=%VERSION% -DpomFile=%TEMP%/JSpaces-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/JSpaces.jar"
 call mvn install:install-file -DgroupId=org.openspaces -DartifactId=openspaces -Dversion=%VERSION% -DpomFile=%TEMP%/openspaces-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/openspaces/openspaces.jar"
 call mvn install:install-file -DgroupId=org.openspaces -DartifactId=mule-os -Dversion=%VERSION% -Dpackaging=jar -DpomFile=%TEMP%/mule-os-pom.xml -Dfile="%JSHOMEDIR%/lib/openspaces/mule-os.jar"
-call mvn install:install-file -DgroupId=org.openspaces -DartifactId=mule-os-boot -Dversion=%VERSION% -Dpackaging=jar -DpomFile=%TEMP%/mule-os-boot-pom.xml -Dfile="%JSHOMEDIR%/lib/openspaces/mule-os-boot.jar"
 
 REM JMX Jars
 call mvn install:install-file -DgroupId=com.sun.jdmk -DartifactId=jmxtools -Dversion=1.2.1 -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jmx/jmxtools.jar"
@@ -61,6 +60,5 @@ del %TEMP%\gs-lib-pom.xml
 del %TEMP%\JSpaces-pom.xml
 del %TEMP%\openspaces-pom.xml
 del %TEMP%\mule-os-pom.xml
-del %TEMP%\mule-os-boot-pom.xml
 
 :END
