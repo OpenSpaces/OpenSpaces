@@ -296,8 +296,12 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
         if (!autoStart) {
             autoStart = true ;
         }
-        if (currentSpaceMode != null && currentSpaceMode == SpaceMode.PRIMARY) {
-            doStart();           
+        if (!activeWhenPrimary) {
+            doStart();
+        } else {
+            if (currentSpaceMode != null && currentSpaceMode == SpaceMode.PRIMARY) {
+                doStart();
+            }
         }
     }
 
