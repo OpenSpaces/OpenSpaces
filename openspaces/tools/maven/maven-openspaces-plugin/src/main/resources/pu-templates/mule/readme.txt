@@ -34,15 +34,18 @@ BUILDING, PACKAGING, RUNNING, DEPLOYING
 
   In order to use Mule with GigaSpaces, mule jar files must be copied to the GigaSpaces
 installation under GSHOME/lib/mule (if the mule directory does not exists, create it).
-In order to obtain the mule jar files, please download mule 2.1 from http://mule.mulesource.org.
+In order to obtain the mule jar files, please download mule 2.1.2 from http://mule.mulesource.org.
 
 The following needs to be copied:
-  - From GSHOME/lib/openspaces and into GSHOME/lib/mule: muls-os.jar.
   - From MULEHOME/lib/mule and into GSHOME/lib/mule: mule-core, mule-module-client,
 mule-module-spring-config, mule-module-spring-extras, mule-transport-quartz, mule-transport-stdio,
 mule-transport-vm, mule-transport-http.
   - From MULEHOME/lib/opt and into GSHOME/lib/mule: commons-beanutils, commons-collections,
 commons-io, commons-lang, commons-pool, jug.osgi-2.0.0, quartz-all.
+
+The above creates the ability to deploy a mule processing unit that does not have the mule jars files
+in it. It is also possible to package the mule jar files into the processing unit "lib" directory, without
+the need to create the GSHOME/lib/mule directory at all.
 
 Quick list:
 

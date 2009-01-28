@@ -136,18 +136,6 @@
             </manifest>
         </jar>
 
-        <delete file="${lib.dir}/${name}/mule-os-boot.jar"/>
-        <jar jarfile="${lib.dir}/${name}/mule-os-boot.jar">
-            <fileset dir="${target.classes.dir}">
-                <include name="org/mule/**"/>
-            </fileset>
-            <manifest>
-                <attribute name="Implementation-Title" value="${openspaces-title}"/>
-                <attribute name="Implementation-Version" value="${openspaces-version}"/>
-                <attribute name="OpenSpaces-Version" value="${openspaces-version}"/>
-            </manifest>
-        </jar>
-
         <delete file="${lib.dir}/${name}/openspaces-jetty.jar"/>
         <jar jarfile="${lib.dir}/${name}/openspaces-jetty.jar">
             <fileset dir="${target.classes.dir}">

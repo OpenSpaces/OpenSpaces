@@ -32,6 +32,7 @@ import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.kernel.Environment;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jini.rio.boot.BootUtil;
 import org.jini.rio.boot.CommonClassLoader;
 import org.jini.rio.boot.ServiceClassLoader;
 import org.jini.rio.boot.SharedServiceData;
@@ -367,6 +368,17 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                     BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, input);
                 }
             }
+        }
+
+        // handle mule os if there is one class loader
+        try {
+            ClassUtils.forName("org.mule.api.MuleContext");
+            ((ServiceClassLoader) contextClassLoader).addURLs(BootUtil.toURLs(new String[]
+                    {
+                            Environment.getHomeDirectory() + "/lib/openspaces/mule-os.jar"
+                    }));
+        } catch (Exception e) {
+            // no mule
         }
 
         CommonClassLoader commonClassLoader = CommonClassLoader.getInstance();
