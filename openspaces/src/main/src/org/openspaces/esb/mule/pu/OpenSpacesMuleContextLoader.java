@@ -16,6 +16,7 @@
 
 package org.openspaces.esb.mule.pu;
 
+import org.mule.MuleServer;
 import org.mule.api.MuleContext;
 import org.mule.api.context.MuleContextFactory;
 import org.mule.config.ConfigResource;
@@ -111,6 +112,7 @@ public class OpenSpacesMuleContextLoader implements ApplicationContextAware, Ini
             } finally {
                 muleContext = null;
                 muleApplicationContext = null;
+                MuleServer.setMuleContext(null);
             }
         }
     }
