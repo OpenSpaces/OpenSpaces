@@ -370,17 +370,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
         }
 
-        // handle mule os if there is one class loader
-        try {
-            ClassUtils.forName("org.mule.api.MuleContext");
-            ((ServiceClassLoader) contextClassLoader).addURLs(BootUtil.toURLs(new String[]
-                    {
-                            Environment.getHomeDirectory() + "/lib/openspaces/mule-os.jar"
-                    }));
-        } catch (Exception e) {
-            // no mule
-        }
-
         CommonClassLoader commonClassLoader = CommonClassLoader.getInstance();
         // handles class loader libraries
         if (downloadPU) {
@@ -454,6 +443,17 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
         }
 
+        // handle mule os if there is one class loader
+        try {
+            ClassUtils.forName("org.mule.api.MuleContext");
+            ((ServiceClassLoader) contextClassLoader).addURLs(BootUtil.toURLs(new String[]
+                    {
+                            Environment.getHomeDirectory() + "/lib/openspaces/mule-os.jar"
+                    }));
+        } catch (Exception e) {
+            // no mule
+        }
+        
         factory = createContainerProvider(processingUnitContainerProviderClass);
         if (factory instanceof DeployableProcessingUnitContainerProvider) {
             ((DeployableProcessingUnitContainerProvider) factory).setDeployPath(deployPath);
