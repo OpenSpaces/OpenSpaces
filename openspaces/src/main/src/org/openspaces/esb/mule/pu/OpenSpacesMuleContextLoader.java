@@ -16,12 +16,13 @@
 
 package org.openspaces.esb.mule.pu;
 
-import org.mule.MuleServer;
 import org.mule.api.MuleContext;
 import org.mule.api.context.MuleContextFactory;
 import org.mule.config.ConfigResource;
 import org.mule.config.spring.SpringXmlConfigurationBuilder;
 import org.mule.context.DefaultMuleContextFactory;
+import org.openspaces.pu.service.ServiceDetails;
+import org.openspaces.pu.service.ServiceDetailsProvider;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -32,6 +33,10 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.AbstractApplicationContext;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+
 /**
  * <code> OpenSpacesMuleContextLoader</code> used for loading Mule configuration that refrenced from PU configuration
  * file.
@@ -41,7 +46,7 @@ import org.springframework.context.support.AbstractApplicationContext;
  *
  * @author yitzhaki
  */
-public class OpenSpacesMuleContextLoader implements ApplicationContextAware, InitializingBean, DisposableBean, ApplicationListener {
+public class OpenSpacesMuleContextLoader implements ApplicationContextAware, InitializingBean, DisposableBean, ApplicationListener, ServiceDetailsProvider {
 
     private static final String DEFAULT_LOCATION = "META-INF/spring/mule.xml";
 
@@ -50,6 +55,8 @@ public class OpenSpacesMuleContextLoader implements ApplicationContextAware, Ini
     private ApplicationContext applicationContext;
 
     private MuleContextFactory muleContextFactory;
+
+    private ApplicationContext muleApplicationContext;
 
     private MuleContext muleContext;
 
@@ -84,6 +91,7 @@ public class OpenSpacesMuleContextLoader implements ApplicationContextAware, Ini
                         protected ApplicationContext createApplicationContext(MuleContext muleContext, ConfigResource[] configResources) throws Exception {
                             AbstractApplicationContext context = (AbstractApplicationContext) super.createApplicationContext(muleContext, configResources);
                             context.setParent(applicationContext);
+                            muleApplicationContext = context;
                             return context;
                         }
                     };
@@ -102,8 +110,24 @@ public class OpenSpacesMuleContextLoader implements ApplicationContextAware, Ini
                 muleContext.dispose();
             } finally {
                 muleContext = null;
-                MuleServer.setMuleContext(null);
+                muleApplicationContext = null;
             }
         }
+    }
+
+    public ServiceDetails[] getServicesDetails() {
+        ArrayList<Object> serviceDetails = new ArrayList<Object>();
+        if (muleApplicationContext != null) {
+            Map map = muleApplicationContext.getBeansOfType(ServiceDetailsProvider.class);
+            for (Iterator it = map.values().iterator(); it.hasNext();) {
+                ServiceDetails[] details = ((ServiceDetailsProvider) it.next()).getServicesDetails();
+                if (details != null) {
+                    for (ServiceDetails detail : details) {
+                        serviceDetails.add(detail);
+                    }
+                }
+            }
+        }
+        return serviceDetails.toArray(new ServiceDetails[serviceDetails.size()]);
     }
 }
