@@ -104,9 +104,7 @@ import java.util.logging.Logger;
  * @author Costin Manolache
  */
 
-/**
- * GIGAPSACES: JarPathElement is always local so tlds will be found from the common class loader
- */
+// GIGASPACES CHANGE: Changed to not include the jstl core in the system tlds that are not scanned (strange!)
 public final class TldConfig  {
 
     // Names of JARs that are known not to contain any TLDs with listeners
@@ -132,7 +130,8 @@ public final class TldConfig  {
     static {
         systemTldUrisJsf.add("http://java.sun.com/jsf/core");
         systemTldUrisJsf.add("http://java.sun.com/jsf/html");
-        systemTldUris.add("http://java.sun.com/jsp/jstl/core");
+        // GIGASPACES: For some reason, when this is enabled, it can't find the URI when compiling the JSP
+//        systemTldUris.add("http://java.sun.com/jsp/jstl/core");
     }
 
     // ----------------------------------------------------- Instance Variables
@@ -399,7 +398,6 @@ public final class TldConfig  {
      * @exception Exception if a fatal input/output or parsing error occurs
      */
     public void execute() throws Exception {
-
 
         long t1=System.currentTimeMillis();
 
@@ -940,11 +938,8 @@ public final class TldConfig  {
                     if (loader == webappLoader
                             || (tldListeners != null &&
                                 tldListeners.contains(file.getName()))) {
-//                        JarPathElement elem = new JarPathElement(
-//                                file, loader == webappLoader);
-                        // GIGASPACES: changed local to true so ti will be processed from the common class loader
                         JarPathElement elem = new JarPathElement(
-                                file, true);
+                                file, loader == webappLoader);
                         if (jarPathMap == null) {
                             jarPathMap = new HashMap<String, JarPathElement>();
                             jarPathMap.put(path, elem);

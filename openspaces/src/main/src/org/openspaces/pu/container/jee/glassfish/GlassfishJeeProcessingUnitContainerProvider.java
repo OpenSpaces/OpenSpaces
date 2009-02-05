@@ -27,6 +27,7 @@ import org.glassfish.api.deployment.archive.ReadableArchive;
 import org.glassfish.embed.Application;
 import org.glassfish.embed.Server;
 import org.jini.rio.boot.CommonClassLoader;
+import org.jini.rio.boot.SharedServiceData;
 import org.jvnet.hk2.component.Habitat;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
@@ -57,6 +58,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -280,9 +282,9 @@ public class GlassfishJeeProcessingUnitContainerProvider implements JeeProcessin
 
             // we want to scan parent class loaders for TLDs
             TldConfig.setScanParentTldListener(true);
-            URL[] commonURLs = CommonClassLoader.getInstance().getURLs();
+            URL[] glassfishUrls = ((URLClassLoader) SharedServiceData.getJeeClassLoader("glassfish")).getURLs();
             StringBuilder sb = new StringBuilder();
-            for (URL url : commonURLs) {
+            for (URL url : glassfishUrls) {
                 String urlForm = url.toExternalForm();
                 urlForm = urlForm.replace('\\', '/');
                 sb.append(urlForm.substring(urlForm.lastIndexOf('/') + 1)).append(',');
