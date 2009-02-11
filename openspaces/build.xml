@@ -311,7 +311,7 @@
 
     <target name="dist">
         <antcall target="dist_1_5"/>
-        <antcall target="dist_1_4"/>
+        <!--antcall target="dist_1_4"/-->
     </target>
 
     <target name="install_1_5" depends="dist_1_5">
