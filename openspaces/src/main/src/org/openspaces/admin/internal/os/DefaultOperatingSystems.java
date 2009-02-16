@@ -157,6 +157,7 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
     public void addOperatingSystem(OperatingSystem operatingSystem) {
         OperatingSystem existing = operatingSystemsByUID.put(operatingSystem.getUid(), operatingSystem);
         if (existing == null) {
+            operatingSystem.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
             if (isMonitoring()) {
                 operatingSystem.startStatisticsMonitor();
             }

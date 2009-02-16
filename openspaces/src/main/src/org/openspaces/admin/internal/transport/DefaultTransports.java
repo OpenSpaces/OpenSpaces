@@ -170,6 +170,7 @@ public class DefaultTransports implements InternalTransports {
         transportsByUID.put(transport.getUid(), transport);
         Set<Transport> transportByHost = transportsByHost.get(transport.getHost());
         if (transportByHost == null) {
+            transport.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
             if (isMonitoring()) {
                 transport.startStatisticsMonitor();
             }

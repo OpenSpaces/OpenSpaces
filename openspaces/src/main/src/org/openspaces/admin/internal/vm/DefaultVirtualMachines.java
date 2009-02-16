@@ -192,6 +192,7 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
     public void addVirtualMachine(final VirtualMachine virtualMachine) {
         VirtualMachine existingVM = virtualMachinesByUID.put(virtualMachine.getUid(), virtualMachine);
         if (existingVM == null) {
+            virtualMachine.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
             if (isMonitoring()) {
                 virtualMachine.startStatisticsMonitor();
             }
