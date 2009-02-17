@@ -16,7 +16,10 @@
 
 package org.openspaces.admin;
 
+import java.util.concurrent.TimeUnit;
+
 import net.jini.core.discovery.LookupLocator;
+
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
@@ -27,8 +30,6 @@ import org.openspaces.admin.pu.ProcessingUnits;
 import org.openspaces.admin.space.Spaces;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * The main interface for accessing Admin API. Created using the {@link org.openspaces.admin.AdminFactory}
@@ -103,8 +104,8 @@ public interface Admin extends StatisticsMonitor {
     void setSpaceMonitorInterval(long interval, TimeUnit timeUnit);
 
     /**
-     * The Admin API uses a shared scheulder thread pool to perform *all* scheuled operations (monitoring,
-     * statistics monitoring). The numner of threads used can be set here.
+     * The Admin API uses a shared scheduler thread pool to perform *all* scheduled operations (monitoring,
+     * statistics monitoring). The number of threads used can be set here.
      *
      * <p>Defaults to 10 threads.
      *
@@ -113,7 +114,7 @@ public interface Admin extends StatisticsMonitor {
     void setSchedulerCorePoolSize(int coreThreads);
 
     /**
-     * Closes the Admin, releasing any resource and stops listening for events from the lookup serivce.
+     * Closes the Admin, releasing any resource and stops listening for events from the lookup service.
      */
     void close();
 
