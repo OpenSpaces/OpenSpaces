@@ -16,12 +16,14 @@
 
 package org.openspaces.pu.sla.monitor;
 
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.util.MethodInvoker;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 
 /**
  * The bean property monitor allows to register a Spring bean reference and a proeprty name which will
@@ -70,9 +72,11 @@ public class BeanPropertyMonitor extends AbstractMonitor implements ApplicationC
         Assert.notNull(getName(), "name property is required");
         Assert.notNull(ref, "ref property is required");
         Assert.notNull(propertyName, "propertyName property is required");
-        Object bean = applicationContext.getBean(ref);
-        if (bean == null) {
-            throw new IllegalArgumentException("Monitor did not find bean [" + bean + "] under Spring application context");
+        Object bean;
+        try {
+            bean = applicationContext.getBean(ref);
+        } catch (NoSuchBeanDefinitionException e) {
+            throw new IllegalArgumentException("Monitor did not find bean [" + ref + "] under Spring application context, availalbe beans are " + Arrays.toString(applicationContext.getBeanDefinitionNames()));
         }
 
         methodInvoker = new MethodInvoker();
