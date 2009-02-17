@@ -46,7 +46,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author kimchy
  */
 @EventDriven
-@Notify
+@Notify(value = "dataProcessedCounter")
 @NotifyBatch(size = 10, time = 5000)
 @NotifyType(write = true, update = true)
 public class DataProcessedCounter {
