@@ -140,6 +140,10 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
         throw new UnsupportedOperationException();
     }
 
+    public void setClassLoader(ClassLoader classLoader) {
+        // do nothing here
+    }
+
     /**
      * <p>
      * Creates a new {@link StandaloneProcessingUnitContainer} based on the configured parameters. A
