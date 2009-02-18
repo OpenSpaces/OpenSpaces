@@ -342,7 +342,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         if (downloadPU) {
             String deployName = puName + "_" + clusterInfo.getRunningNumberOffset1();
 
-            String deployedProcessingUnitsLocation = workLocation.getAbsolutePath() + "/deployed-processing-units";
+            String deployedProcessingUnitsLocation = workLocation.getAbsolutePath() + "/processing-units";
 
             deployPath = new File(deployedProcessingUnitsLocation + "/" + deployName);
             FileSystemUtils.deleteRecursively(deployPath);
@@ -564,23 +564,23 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
 
         // clean the deploy path directory
-        if (deployPath != null) {
-            boolean deleted = false;
-            for (int i = 0; i < 2; i++) {
-                deleted = FileSystemUtils.deleteRecursively(deployPath);
-                if (deleted) {
-                    break;
-                }
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    // do nothing
-                }
-            }
-            if (!deleted) {
-                logger.debug("Failed to delete deployed processing unit from [" + deployPath + "]");
-            }
-        }
+//        if (deployPath != null) {
+//            boolean deleted = false;
+//            for (int i = 0; i < 2; i++) {
+//                deleted = FileSystemUtils.deleteRecursively(deployPath);
+//                if (deleted) {
+//                    break;
+//                }
+//                try {
+//                    Thread.sleep(100);
+//                } catch (InterruptedException e) {
+//                    // do nothing
+//                }
+//            }
+//            if (!deleted) {
+//                logger.debug("Failed to delete deployed processing unit from [" + deployPath + "]");
+//            }
+//        }
     }
 
     public boolean isMemberAliveEnabled() {
