@@ -54,6 +54,9 @@ public class AsyncPollingAnnotationPostProcessor implements BeanPostProcessor, A
 
     public Object postProcessAfterInitialization(final Object bean, String beanName) throws BeansException {
         Class<?> beanClass = this.getBeanClass(bean);
+        if (beanClass == null) {
+            return bean;
+        }
 
         AsyncPolling polling = AnnotationUtils.findAnnotation(beanClass, AsyncPolling.class);
         if (polling == null) {

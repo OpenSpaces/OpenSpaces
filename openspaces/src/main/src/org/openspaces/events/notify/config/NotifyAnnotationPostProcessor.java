@@ -59,6 +59,9 @@ public class NotifyAnnotationPostProcessor implements BeanPostProcessor, Applica
 
     public Object postProcessAfterInitialization(final Object bean, String beanName) throws BeansException {
         Class<?> beanClass = this.getBeanClass(bean);
+        if (beanClass == null) {
+            return bean;
+        }
 
         Notify notify = AnnotationUtils.findAnnotation(beanClass, Notify.class);
         if (notify == null) {

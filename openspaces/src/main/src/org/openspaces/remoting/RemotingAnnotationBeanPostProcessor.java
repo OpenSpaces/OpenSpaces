@@ -44,7 +44,11 @@ public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 
     @Override
     public boolean postProcessAfterInstantiation(final Object bean, String beanName) throws BeansException {
-        ReflectionUtils.doWithFields(AopUtils.getTargetClass(bean), new ReflectionUtils.FieldCallback() {
+        Class beanClass = AopUtils.getTargetClass(bean);
+        if (beanClass == null) {
+            return true;
+        }
+        ReflectionUtils.doWithFields(beanClass, new ReflectionUtils.FieldCallback() {
             public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
                 SyncScriptingExecutor syncScriptingExecutor = field.getAnnotation(SyncScriptingExecutor.class);
                 if (syncScriptingExecutor != null) {
@@ -135,7 +139,7 @@ public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanP
         });
 
 
-        RemotingService remotingService = AnnotationUtils.findAnnotation(AopUtils.getTargetClass(bean), RemotingService.class);
+        RemotingService remotingService = AnnotationUtils.findAnnotation(beanClass, RemotingService.class);
         if (remotingService != null) {
             SpaceRemotingServiceExporter exporter;
             if (StringUtils.hasLength(remotingService.exporter())) {
