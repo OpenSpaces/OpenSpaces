@@ -266,7 +266,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         logger.info(logMessage("ClusterInfo [" + clusterInfo + "]"));
 
         MarshalledObject beanLevelPropertiesMarshObj =
-                (MarshalledObject) getServiceBeanContext().getInitParameter("beanLevelProperties");
+            (MarshalledObject) getServiceBeanContext().getInitParameter("beanLevelProperties");
         BeanLevelProperties beanLevelProperties = null;
         if (beanLevelPropertiesMarshObj != null) {
             beanLevelProperties = (BeanLevelProperties) beanLevelPropertiesMarshObj.get();
@@ -447,13 +447,13 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         try {
             ClassUtils.forName("org.mule.api.MuleContext");
             ((ServiceClassLoader) contextClassLoader).addURLs(BootUtil.toURLs(new String[]
-                    {
-                            Environment.getHomeDirectory() + "/lib/openspaces/mule-os.jar"
-                    }));
+                                                                                         {
+                    Environment.getHomeDirectory() + "/lib/openspaces/mule-os.jar"
+                                                                                         }));
         } catch (Exception e) {
             // no mule
         }
-        
+
         factory = createContainerProvider(processingUnitContainerProviderClass);
         if (factory instanceof DeployableProcessingUnitContainerProvider) {
             ((DeployableProcessingUnitContainerProvider) factory).setDeployPath(deployPath);
@@ -564,23 +564,23 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
 
         // clean the deploy path directory
-//        if (deployPath != null) {
-//            boolean deleted = false;
-//            for (int i = 0; i < 2; i++) {
-//                deleted = FileSystemUtils.deleteRecursively(deployPath);
-//                if (deleted) {
-//                    break;
-//                }
-//                try {
-//                    Thread.sleep(100);
-//                } catch (InterruptedException e) {
-//                    // do nothing
-//                }
-//            }
-//            if (!deleted) {
-//                logger.debug("Failed to delete deployed processing unit from [" + deployPath + "]");
-//            }
-//        }
+        if (deployPath != null) {
+            boolean deleted = false;
+            for (int i = 0; i < 2; i++) {
+                deleted = FileSystemUtils.deleteRecursively(deployPath);
+                if (deleted) {
+                    break;
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    // do nothing
+                }
+            }
+            if (!deleted) {
+                logger.debug("Failed to delete deployed processing unit from [" + deployPath + "]");
+            }
+        }
     }
 
     public boolean isMemberAliveEnabled() {
@@ -682,11 +682,11 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private int getSLAMax(ServiceBeanContext context) {
         int max = -1;
         ServiceLevelAgreements slas =
-                context.getServiceElement().getServiceLevelAgreements();
+            context.getServiceElement().getServiceLevelAgreements();
         SLA[] spaceSLAs = slas.getServiceSLAs();
         for (SLA spaceSLA : spaceSLAs) {
             int count =
-                    getMaxServiceCount(spaceSLA.getConfigArgs());
+                getMaxServiceCount(spaceSLA.getConfigArgs());
             if (count != -1) {
                 max = count;
                 break;
