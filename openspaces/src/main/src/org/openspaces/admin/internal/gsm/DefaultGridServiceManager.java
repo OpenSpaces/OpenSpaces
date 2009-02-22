@@ -128,8 +128,10 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         final CountDownLatch latch = new CountDownLatch(1);
         ProcessingUnitAddedEventListener added = new ProcessingUnitAddedEventListener() {
             public void processingUnitAdded(ProcessingUnit processingUnit) {
-                ref.set(processingUnit);
-                latch.countDown();
+                if (operationalString.getName().equals(processingUnit.getName())) {
+                    ref.set(processingUnit);
+                    latch.countDown();
+                }
             }
         };
         getAdmin().getProcessingUnits().getProcessingUnitAdded().add(added);
