@@ -104,4 +104,8 @@ public abstract class AbstractTransactionalEventListenerContainer extends Abstra
             }
         }
     }
+
+    protected boolean isTransactional() {
+        return transactionManager != null;
+    }
 }

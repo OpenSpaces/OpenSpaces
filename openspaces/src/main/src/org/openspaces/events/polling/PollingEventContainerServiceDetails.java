@@ -46,10 +46,11 @@ public class PollingEventContainerServiceDetails extends EventContainerServiceDe
         super();
     }
 
-    public PollingEventContainerServiceDetails(String id, String gigaSpace, Object template, boolean performSnapshot, long receiveTimeout,
+    public PollingEventContainerServiceDetails(String id, String gigaSpace, Object template, boolean performSnapshot, boolean transactional,
+                                               long receiveTimeout,
                                                String receiveOperationHandler, String triggerOperationHandler,
                                                int concurrentConsumers, int maxConcurrentConsumers, boolean passArrayAsIs) {
-        super(id, SERVICE_SUB_TYPE, gigaSpace, "Polling event container", "Polling event container, template [" + template + "]", template, performSnapshot);
+        super(id, SERVICE_SUB_TYPE, gigaSpace, "Polling event container", "Polling event container, template [" + template + "]", template, performSnapshot, transactional);
         getAttributes().put(Attributes.RECEIVE_TIMEOUT, receiveTimeout);
         getAttributes().put(Attributes.RECEIVE_OPERATION_HANDLER, receiveOperationHandler);
         getAttributes().put(Attributes.TRIGGER_OPERATION_HANDLER, triggerOperationHandler);

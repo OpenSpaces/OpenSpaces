@@ -54,12 +54,13 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
         super();
     }
 
-    public NotifyEventContainerServiceDetails(String id, String gigaSpace, Object template, boolean performSnapshot, int commType,
+    public NotifyEventContainerServiceDetails(String id, String gigaSpace, Object template, boolean performSnapshot, boolean transactional, 
+                                              int commType,
                                               boolean fifo, Integer batchSize, Integer batchTime, boolean autoRenew,
                                               Boolean notifyAll, Boolean notifyWrite, Boolean notifyUpdate, Boolean notifyTake, Boolean notifyLeaseExpire, Boolean notifyUnmatched,
                                               Boolean triggerNotifyTemplate, Boolean replicateNotifyTemplate,
                                               boolean performTakeOnNotify, boolean passArrayAsIs) {
-        super(id, SERVICE_SUB_TYPE, gigaSpace, "Notify event container", "Notify event container, template [" + template + "]", template, performSnapshot);
+        super(id, SERVICE_SUB_TYPE, gigaSpace, "Notify event container", "Notify event container, template [" + template + "]", template, performSnapshot, transactional);
         switch (commType) {
             case 0:
                 getAttributes().put(Attributes.COMM_TYPE, "unicast");

@@ -113,7 +113,7 @@ public class SimpleAsyncPollingEventListenerContainer extends AbstractTransactio
         // for now, LRMI class loader problems
         tempalte = null;
         return new ServiceDetails[]{new AsyncPollingEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte,
-                isPerformSnapshot(), receiveTimeout, concurrentConsumers)};
+                isPerformSnapshot(), isTransactional(), receiveTimeout, concurrentConsumers)};
     }
 
     public ServiceMonitors[] getServicesMonitors() {

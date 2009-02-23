@@ -42,9 +42,9 @@ public class AsyncPollingEventContainerServiceDetails extends EventContainerServ
         super();
     }
 
-    public AsyncPollingEventContainerServiceDetails(String id, String gigaSpace, Object template, boolean performSnapshot, long receiveTimeout,
-                                                    int concurrentConsumers) {
-        super(id, SERVICE_SUB_TYPE, gigaSpace, "Async Polling event container", "Async Polling event container, template [" + template + "]", template, performSnapshot);
+    public AsyncPollingEventContainerServiceDetails(String id, String gigaSpace, Object template, boolean performSnapshot, boolean transactional,
+                                                    long receiveTimeout, int concurrentConsumers) {
+        super(id, SERVICE_SUB_TYPE, gigaSpace, "Async Polling event container", "Async Polling event container, template [" + template + "]", template, performSnapshot, transactional);
         getAttributes().put(Attributes.RECEIVE_TIMEOUT, receiveTimeout);
         getAttributes().put(Attributes.CONCURRENT_CONSUMERS, concurrentConsumers);
     }

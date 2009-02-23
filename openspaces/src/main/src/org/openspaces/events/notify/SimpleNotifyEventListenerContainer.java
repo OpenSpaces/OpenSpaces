@@ -173,7 +173,7 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
         }
         // for now, LRMI class loader problems
         tempalte = null;
-        return new ServiceDetails[]{new NotifyEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte, isPerformSnapshot(),
+        return new ServiceDetails[]{new NotifyEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte, isPerformSnapshot(), isTransactional(),
                 getCommType(), isFifo(), getBatchSize(), getBatchTime(), isAutoRenew(),
                 isNotifyAll(), isNotifyWrite(), isNotifyUpdate(), isNotifyWrite(), isNotifyLeaseExpire(), isNotifyUnmatched(),
                 isTriggerNotifyTemplate(), isReplicateNotifyTemplate(), isPerformSnapshot(), isPassArrayAsIs())};

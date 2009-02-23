@@ -35,6 +35,7 @@ public class EventContainerServiceDetails extends PlainServiceDetails {
         public static final String TEMPLATE = "template";
         public static final String PERFORM_SNAPSHOT = "perform-snapshot";
         public static final String GIGA_SPACE = "giga-space";
+        public static final String TRANSACTIONAL = "transactional";
     }
     
     public EventContainerServiceDetails() {
@@ -42,11 +43,12 @@ public class EventContainerServiceDetails extends PlainServiceDetails {
     }
 
     public EventContainerServiceDetails(String id, String serviceSubType, String gigaSpace, String description, String longDescription,
-                                        Object template, boolean performSnapshot) {
+                                        Object template, boolean performSnapshot, boolean transactional) {
         super(id, SERVICE_TYPE, serviceSubType, description, longDescription);
         getAttributes().put(Attributes.TEMPLATE, template);
         getAttributes().put(Attributes.GIGA_SPACE, gigaSpace);
         getAttributes().put(Attributes.PERFORM_SNAPSHOT, performSnapshot);
+        getAttributes().put(Attributes.TRANSACTIONAL, transactional);
     }
 
     public Object getTemplate() {
@@ -59,6 +61,10 @@ public class EventContainerServiceDetails extends PlainServiceDetails {
 
     public String getGigaSpace() {
         return (String) getAttributes().get(Attributes.GIGA_SPACE);
+    }
+
+    public boolean isTransactional() {
+        return (Boolean) getAttributes().get(Attributes.TRANSACTIONAL);
     }
 
     @Override
