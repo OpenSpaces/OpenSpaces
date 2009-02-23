@@ -168,4 +168,12 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
      */
     protected void invokeExceptionListener(Exception e) {
     }
+
+    public long getProcessedEvents() {
+        return processedEvents.get();
+    }
+
+    public long getFailedEvents() {
+        return failedEvents.get();
+    }
 }

@@ -32,6 +32,13 @@ import java.lang.annotation.Target;
 public @interface RemotingService {
 
     /**
+     * The value may indicate a suggestion for a logical component name,
+     * to be turned into a Spring bean in case of an autodetected component.
+     * @return the suggested component name, if any
+     */
+    String value() default "";
+    
+    /**
      * Sets the service exporter bean that it should register with. This is
      * optional as if there is just a single exporter, then it will automatically
      * be used.

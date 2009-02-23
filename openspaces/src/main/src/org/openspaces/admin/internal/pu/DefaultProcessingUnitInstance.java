@@ -38,6 +38,7 @@ import org.openspaces.pu.container.servicegrid.PUServiceBean;
 import org.openspaces.pu.service.PlainServiceMonitors;
 import org.openspaces.pu.service.ServiceDetails;
 import org.openspaces.pu.service.ServiceMonitors;
+import org.openspaces.remoting.RemotingServiceDetails;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -80,6 +81,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     private Map<String, NotifyEventContainerServiceDetails> notifyEventContainerServiceDetails = new HashMap<String, NotifyEventContainerServiceDetails>();
     private Map<String, AsyncPollingEventContainerServiceDetails> asyncPollingEventContainerServiceDetails = new HashMap<String, AsyncPollingEventContainerServiceDetails>();
 
+    private final RemotingServiceDetails remotingServiceDetails;
+
     private final JeeServiceDetails jeeDetails;
 
     private final Map<String, ServiceDetails> servicesDetailsByServiceId;
@@ -117,6 +120,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         ArrayList<SpaceServiceDetails> embeddedSpacesEmbeddedList = new ArrayList<SpaceServiceDetails>();
         ArrayList<SpaceServiceDetails> spacesDetailsList = new ArrayList<SpaceServiceDetails>();
         JeeServiceDetails jeeDetailsX = null;
+        RemotingServiceDetails remotingServiceDetailsX = null;
 
         Map<String, List<ServiceDetails>> servicesDetailsByServiceTypeList = new HashMap<String, List<ServiceDetails>>();
 
@@ -138,6 +142,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
                 }
             } else if (serviceDetails instanceof JeeServiceDetails) {
                 jeeDetailsX = (JeeServiceDetails) serviceDetails;
+            } else if (serviceDetails instanceof RemotingServiceDetails) {
+                remotingServiceDetailsX = (RemotingServiceDetails) serviceDetails;
             } else if (serviceDetails instanceof EventContainerServiceDetails) {
                 eventContainerServiceDetails.put(serviceDetails.getId(), (EventContainerServiceDetails) serviceDetails);
                 if (serviceDetails instanceof PollingEventContainerServiceDetails) {
@@ -155,6 +161,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         asyncPollingEventContainerServiceDetails = Collections.unmodifiableMap(asyncPollingEventContainerServiceDetails);
 
         jeeDetails = jeeDetailsX;
+        remotingServiceDetails = remotingServiceDetailsX;
         embeddedSpacesDetails = embeddedSpacesEmbeddedList.toArray(new SpaceServiceDetails[embeddedSpacesEmbeddedList.size()]);
         spacesDetails = spacesDetailsList.toArray(new SpaceServiceDetails[spacesDetailsList.size()]);
 
@@ -299,6 +306,10 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     public JeeServiceDetails getJeeDetails() {
         return jeeDetails;
+    }
+
+    public RemotingServiceDetails getRemotingServiceDetails() {
+        return remotingServiceDetails;
     }
 
     public ServiceDetails getServiceDetailsByServiceId(String serviceId) {

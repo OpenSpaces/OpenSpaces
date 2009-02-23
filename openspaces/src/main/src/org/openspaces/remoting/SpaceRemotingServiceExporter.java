@@ -36,6 +36,11 @@ import org.openspaces.core.space.filter.FilterProviderFactory;
 import org.openspaces.core.transaction.manager.ExistingJiniTransactionManager;
 import org.openspaces.events.EventTemplateProvider;
 import org.openspaces.events.SpaceDataEventListener;
+import org.openspaces.pu.service.ServiceDetails;
+import org.openspaces.pu.service.ServiceDetailsProvider;
+import org.openspaces.pu.service.ServiceMonitors;
+import org.openspaces.pu.service.ServiceMonitorsProvider;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -54,6 +59,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -92,8 +98,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * @see org.openspaces.remoting.AsyncSpaceRemotingEntry
  * @see AsyncSpaceRemotingProxyFactoryBean
  */
-public class SpaceRemotingServiceExporter implements SpaceDataEventListener<AsyncSpaceRemotingEntry>, InitializingBean, ApplicationContextAware,
-        EventTemplateProvider, FilterProviderFactory, ClusterInfoAware, ApplicationListener {
+public class SpaceRemotingServiceExporter implements SpaceDataEventListener<AsyncSpaceRemotingEntry>, InitializingBean, ApplicationContextAware, BeanNameAware,
+        EventTemplateProvider, FilterProviderFactory, ClusterInfoAware, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProvider {
 
     public static final String DEFAULT_ASYNC_INTERFACE_SUFFIX = "Async";
 
@@ -101,7 +107,17 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
     private List<Object> services = new ArrayList<Object>();
 
+    private List<ServiceInfo> servicesInfo = new ArrayList<ServiceInfo>();
+
+    private IdentityHashMap<Object, ServiceInfo> serviceToServiceInfoMap = new IdentityHashMap<Object, ServiceInfo>();
+
+    private AtomicLong processed = new AtomicLong();
+
+    private AtomicLong failed = new AtomicLong();
+
     private ApplicationContext applicationContext;
+
+    private String beanName;
 
     private Map<String, Object> interfaceToService = new HashMap<String, Object>();
 
@@ -201,6 +217,10 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
         this.applicationContext = applicationContext;
     }
 
+    public void setBeanName(String name) {
+        this.beanName = name;
+    }
+
     /**
      * Cluster Info injected
      */
@@ -208,11 +228,11 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
         this.clusterInfo = clusterInfo;
     }
 
-    public void addService(Object service) throws IllegalStateException {
+    public void addService(String beanId, Object service) throws IllegalStateException {
         if (initialized) {
             throw new IllegalStateException("Can't add a service once the exporter has initialized");
         }
-        this.services.add(service);
+        this.servicesInfo.add(new ServiceInfo(beanId, service.getClass().getName(), service));
     }
 
     public void afterPropertiesSet() throws Exception {
@@ -221,6 +241,9 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
         filterProvider.setActiveWhenBackup(false);
         filterProvider.setEnabled(true);
         filterProvider.setOpCodes(FilterOperationCodes.BEFORE_READ_MULTIPLE, FilterOperationCodes.BEFORE_TAKE_MULTIPLE);
+        if (beanName == null) {
+            beanName = "serviceExporter";
+        }
     }
 
     public void onApplicationEvent(ApplicationEvent applicationEvent) {
@@ -228,15 +251,24 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             initialized = true;
             Assert.notNull(services, "services property is required");
             // go over the services and create the interface to service lookup
+            int naCounter = 0;
             for (Object service : services) {
                 if (service instanceof ServiceRef) {
-                    service = applicationContext.getBean(((ServiceRef) service).getRef());
+                    String ref = ((ServiceRef) service).getRef();
+                    service = applicationContext.getBean(ref);
+                    this.servicesInfo.add(new ServiceInfo(ref, service.getClass().getName(), service));
+                } else {
+                    this.servicesInfo.add(new ServiceInfo("NA" + (++naCounter), service.getClass().getName(), service));
                 }
-                Class<?>[] interfaces = ClassUtils.getAllInterfaces(service);
+            }
+            for (ServiceInfo serviceInfo : servicesInfo) {
+                Class<?>[] interfaces = ClassUtils.getAllInterfaces(serviceInfo.getService());
                 for (Class<?> anInterface : interfaces) {
-                    interfaceToService.put(anInterface.getName(), service);
-                    methodInvocationCache.addService(anInterface, service);
+                    interfaceToService.put(anInterface.getName(), serviceInfo.getService());
+                    methodInvocationCache.addService(anInterface, serviceInfo.getService());
                 }
+
+                serviceToServiceInfoMap.put(serviceInfo.getService(), serviceInfo);
             }
         }
     }
@@ -254,6 +286,22 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             logger.debug("Registering async remoting service tempalte [" + remotingEntry + "]");
         }
         return remotingEntry;
+    }
+
+    public ServiceDetails[] getServicesDetails() {
+        ArrayList<RemotingServiceDetails.RemoteService> remoteServices = new ArrayList<RemotingServiceDetails.RemoteService>();
+        for (ServiceInfo serviceInfo : servicesInfo) {
+            remoteServices.add(new RemotingServiceDetails.RemoteService(serviceInfo.getBeanId(), serviceInfo.getClassName()));
+        }
+        return new ServiceDetails[] {new RemotingServiceDetails(beanName, remoteServices.toArray(new RemotingServiceDetails.RemoteService[remoteServices.size()]))};
+    }
+
+    public ServiceMonitors[] getServicesMonitors() {
+        ArrayList<RemotingServiceMonitors.RemoteServiceStats> remoteServiceStats = new ArrayList<RemotingServiceMonitors.RemoteServiceStats>();
+        for (ServiceInfo serviceInfo : servicesInfo) {
+            remoteServiceStats.add(new RemotingServiceMonitors.RemoteServiceStats(serviceInfo.getBeanId(), serviceInfo.getProcessed().get(), serviceInfo.getFailures().get()));
+        }
+        return new ServiceMonitors[] {new RemotingServiceMonitors(beanName, processed.get(), failed.get(), remoteServiceStats.toArray(new RemotingServiceMonitors.RemoteServiceStats[remoteServiceStats.size()]))};
     }
 
     /**
@@ -298,6 +346,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
         try {
             method = methodInvocationCache.findMethod(lookupName, service, remotingEntry.methodName, remotingEntry.arguments);
         } catch (Exception e) {
+            failedExecution(service);
             writeResponse(gigaSpace, remotingEntry, new RemoteLookupFailureException("Failed to find method ["
                     + remotingEntry.methodName + "] for lookup [" + remotingEntry.lookupName + "]", e));
             return;
@@ -310,12 +359,16 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                 retVal = method.invoke(service, remotingEntry.arguments);
             }
             writeResponse(gigaSpace, remotingEntry, retVal);
+            processedExecution(service);
         } catch (InvocationTargetException e) {
+            failedExecution(service);
             writeResponse(gigaSpace, remotingEntry, e.getTargetException());
         } catch (IllegalAccessException e) {
+            failedExecution(service);
             writeResponse(gigaSpace, remotingEntry, new RemoteLookupFailureException("Failed to access method ["
                     + remotingEntry.methodName + "] for lookup [" + remotingEntry.lookupName + "]", e));
         } catch (Throwable e) {
+            failedExecution(service);
             writeResponse(gigaSpace, remotingEntry, e);
         }
     }
@@ -406,6 +459,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
         try {
             method = methodInvocationCache.findMethod(lookupName, service, task.getMethodName(), task.getArguments());
         } catch (Exception e) {
+            failedExecution(service);
             throw new RemoteLookupFailureException("Failed to find method [" + task.getMethodName() + "] for lookup [" + task.getLookupName() + "]");
         }
         try {
@@ -415,12 +469,25 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             } else {
                 retVal = method.invoke(service, task.getArguments());
             }
+            processedExecution(service);
             return retVal;
         } catch (InvocationTargetException e) {
+            failedExecution(service);
             throw e.getTargetException();
         } catch (IllegalAccessException e) {
+            failedExecution(service);
             throw new RemoteLookupFailureException("Failed to access method [" + task.getMethodName() + "] for lookup [" + task.getLookupName() + "]");
         }
+    }
+
+    private void processedExecution(Object service) {
+        processed.incrementAndGet();
+        serviceToServiceInfoMap.get(service).getProcessed().incrementAndGet();
+    }
+
+    private void failedExecution(Object service) {
+        failed.incrementAndGet();
+        serviceToServiceInfoMap.get(service).getFailures().incrementAndGet();
     }
 
     // Sync execution
@@ -511,6 +578,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                 try {
                     method = methodInvocationCache.findMethod(lookupName, service, remotingEntry.methodName, remotingEntry.arguments);
                 } catch (Exception e) {
+                    failedExecution(service);
                     writeResponse(space, entry, remotingEntry, new RemoteLookupFailureException("Failed to find method ["
                             + remotingEntry.getMethodName() + "] for lookup [" + remotingEntry.getLookupName() + "]", e));
                     return;
@@ -523,12 +591,16 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                         retVal = method.invoke(service, remotingEntry.arguments);
                     }
                     writeResponse(space, entry, remotingEntry, retVal);
+                    processedExecution(service);
                 } catch (InvocationTargetException e) {
+                    failedExecution(service);
                     writeResponse(space, entry, remotingEntry, e.getTargetException());
                 } catch (IllegalAccessException e) {
+                    failedExecution(service);
                     writeResponse(space, entry, remotingEntry, new RemoteLookupFailureException("Failed to access method ["
                             + remotingEntry.getMethodName() + "] for lookup [" + remotingEntry.getLookupName() + "]", e));
                 } catch (Throwable e) {
+                    failedExecution(service);
                     writeResponse(space, entry, remotingEntry, e);
                 }
             } finally {
@@ -683,6 +755,40 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
                 }
                 parametersPerMethodMap.put(method.getParameterTypes().length, list);
             }
+        }
+    }
+
+    private static class ServiceInfo {
+        private final String beanId;
+        private final String className;
+        private final Object service;
+        private final AtomicLong processed = new AtomicLong();
+        private final AtomicLong failures = new AtomicLong();
+
+        private ServiceInfo(String beanId, String className, Object service) {
+            this.beanId = beanId;
+            this.className = className;
+            this.service = service;
+        }
+
+        public String getBeanId() {
+            return beanId;
+        }
+
+        public String getClassName() {
+            return className;
+        }
+
+        public Object getService() {
+            return service;
+        }
+
+        public AtomicLong getProcessed() {
+            return processed;
+        }
+
+        public AtomicLong getFailures() {
+            return failures;
         }
     }
 }

@@ -157,7 +157,7 @@ public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanP
                 }
                 exporter = (SpaceRemotingServiceExporter) exporters.values().iterator().next();
             }
-            exporter.addService(bean);
+            exporter.addService(beanName, bean);
         }
         return true;
     }

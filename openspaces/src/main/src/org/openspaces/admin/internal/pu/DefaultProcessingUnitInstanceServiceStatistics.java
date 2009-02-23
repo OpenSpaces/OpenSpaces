@@ -6,6 +6,7 @@ import org.openspaces.events.asyncpolling.AsyncPollingEventContainerServiceMonit
 import org.openspaces.events.notify.NotifyEventContainerServiceMonitors;
 import org.openspaces.events.polling.PollingEventContainerServiceMonitors;
 import org.openspaces.pu.service.ServiceMonitors;
+import org.openspaces.remoting.RemotingServiceMonitors;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,23 +28,29 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
     private final Map<String, NotifyEventContainerServiceMonitors> notifyEventContainerServiceMonitors = new HashMap<String, NotifyEventContainerServiceMonitors>();
     private final Map<String, AsyncPollingEventContainerServiceMonitors> asyncPollingEventContainerServiceMonitors = new HashMap<String, AsyncPollingEventContainerServiceMonitors>();
 
+    private final RemotingServiceMonitors remotingServiceMonitors;
+
     public DefaultProcessingUnitInstanceServiceStatistics(long timestamp, Map<String, ServiceMonitors> serviceMonitorsById, ProcessingUnitInstanceStatistics previous) {
         this.timestamp = timestamp;
         this.serviceMonitorsById = serviceMonitorsById;
         this.previous = previous;
+        RemotingServiceMonitors remotingServiceMonitorsX = null;
         for (ServiceMonitors monitors : serviceMonitorsById.values()) {
             if (monitors instanceof EventContainerServiceMonitors) {
                 eventContainerServiceMonitors.put(monitors.getId(), (EventContainerServiceMonitors) monitors);
+                if (monitors instanceof PollingEventContainerServiceMonitors) {
+                    pollingEventContainerServiceMonitors.put(monitors.getId(), (PollingEventContainerServiceMonitors) monitors);
+                } else if (monitors instanceof NotifyEventContainerServiceMonitors) {
+                    notifyEventContainerServiceMonitors.put(monitors.getId(), (NotifyEventContainerServiceMonitors) monitors);
+                } else if (monitors instanceof AsyncPollingEventContainerServiceMonitors) {
+                    asyncPollingEventContainerServiceMonitors.put(monitors.getId(), (AsyncPollingEventContainerServiceMonitors) monitors);
+                }
+            } else if (monitors instanceof RemotingServiceMonitors) {
+                remotingServiceMonitorsX = (RemotingServiceMonitors) monitors;
             }
 
-            if (monitors instanceof PollingEventContainerServiceMonitors) {
-                pollingEventContainerServiceMonitors.put(monitors.getId(), (PollingEventContainerServiceMonitors) monitors);
-            } else if (monitors instanceof NotifyEventContainerServiceMonitors) {
-                notifyEventContainerServiceMonitors.put(monitors.getId(), (NotifyEventContainerServiceMonitors) monitors);
-            } else if (monitors instanceof AsyncPollingEventContainerServiceMonitors) {
-                asyncPollingEventContainerServiceMonitors.put(monitors.getId(), (AsyncPollingEventContainerServiceMonitors) monitors);
-            }
         }
+        this.remotingServiceMonitors = remotingServiceMonitorsX;
     }
 
     public long getTimestamp() {
@@ -72,6 +79,10 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
 
     public Map<String, AsyncPollingEventContainerServiceMonitors> getAsyncPollingEventContainerMonitorsById() {
         return this.asyncPollingEventContainerServiceMonitors;
+    }
+
+    public RemotingServiceMonitors getRemotingServiceMonitors() {
+        return this.remotingServiceMonitors;
     }
 
     public ProcessingUnitInstanceStatistics getPrevious() {

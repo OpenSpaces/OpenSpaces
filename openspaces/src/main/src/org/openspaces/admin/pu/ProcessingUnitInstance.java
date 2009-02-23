@@ -44,6 +44,7 @@ import org.openspaces.events.notify.NotifyEventContainerServiceDetails;
 import org.openspaces.events.polling.PollingEventContainerServiceDetails;
 import org.openspaces.pu.container.jee.JeeServiceDetails;
 import org.openspaces.pu.service.ServiceDetails;
+import org.openspaces.remoting.RemotingServiceDetails;
 
 import java.util.Map;
 
@@ -150,6 +151,11 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
      * {@link org.openspaces.pu.service.ServiceDetails#getId()}.
      */
     Map<String, AsyncPollingEventContainerServiceDetails> getAsyncPollingEventContainerServiceDetails();
+
+    /**
+     * Returns the remoting service details (the exporter) if configured within the processing unit.
+     */
+    RemotingServiceDetails getRemotingServiceDetails();
 
     /**
      * Returns the space service details as described by the service started within the processing unit.
