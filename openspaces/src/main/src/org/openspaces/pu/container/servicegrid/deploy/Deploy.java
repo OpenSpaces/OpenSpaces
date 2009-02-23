@@ -51,6 +51,7 @@ import org.openspaces.pu.sla.requirement.RangeRequirement;
 import org.openspaces.pu.sla.requirement.Requirement;
 import org.openspaces.pu.sla.requirement.SystemRequirement;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.PropertyResourceConfigurer;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -68,6 +69,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.JarOutputStream;
@@ -347,6 +349,10 @@ public class Deploy {
         if (StringUtils.hasText(slaString)) {
             resource = new ByteArrayResource(slaString.getBytes());
             XmlBeanFactory xmlBeanFactory = new XmlBeanFactory(resource);
+            Map<String, PropertyResourceConfigurer> map = xmlBeanFactory.getBeansOfType(PropertyResourceConfigurer.class);
+            for (PropertyResourceConfigurer cfg : map.values()) {
+                cfg.postProcessBeanFactory(xmlBeanFactory);
+            }
             try {
                 sla = (SLA) xmlBeanFactory.getBean("SLA");
             } catch (NoSuchBeanDefinitionException e) {
