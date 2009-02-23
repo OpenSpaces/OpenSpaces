@@ -33,12 +33,14 @@
 package org.openspaces.admin.pu;
 
 import org.openspaces.admin.AdminAware;
+import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
 import org.openspaces.admin.space.Space;
@@ -50,7 +52,12 @@ import java.util.concurrent.TimeUnit;
  *
  * @author kimchy
  */
-public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminAware {
+public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminAware, StatisticsMonitor {
+
+    /**
+     * Returns the handle to all the different processing units.
+     */
+    ProcessingUnits getProcessingUnits();
 
     /**
      * Returns the name of the processing unit.
@@ -206,4 +213,13 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * Returns an event manager allowing to listen for {@link org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEvent}s.
      */
     ProcessingUnitSpaceCorrelatedEventManager getSpaceCorrelated();
+
+    /**
+     * Returns a processing unit instance statistics change event manger allowing to register for
+     * events of {@link org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEvent}.
+     *
+     * <p>Note, in order to receive events, the virtual machines need to be in a "statistics" monitored
+     * state.
+     */
+    ProcessingUnitInstanceStatisticsChangedEventManager getProcessingUnitInstanceStatisticsChange();
 }

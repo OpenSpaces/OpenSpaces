@@ -2,6 +2,7 @@ package org.openspaces.admin.internal.pu;
 
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.events.*;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -40,6 +41,12 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
 
     private final InternalProcessingUnitInstanceRemovedEventManager processingUnitInstanceRemovedEventManager;
 
+    private final InternalProcessingUnitInstanceStatisticsChangedEventManager processingUnitInstanceStatisticsChangedEventManager;
+
+    private volatile long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
+
+    private volatile boolean scheduledStatisticsMonitor = false;
+    
     public DefaultProcessingUnits(InternalAdmin admin) {
         this.admin = admin;
         this.processingUnitAddedEventManager = new DefaultProcessingUnitAddedEventManager(this);
@@ -51,6 +58,8 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
 
         this.processingUnitInstanceAddedEventManager = new DefaultProcessingUnitInstanceAddedEventManager(this, admin);
         this.processingUnitInstanceRemovedEventManager = new DefaultProcessingUnitInstanceRemovedEventManager(admin);
+
+        this.processingUnitInstanceStatisticsChangedEventManager = new DefaultProcessingUnitInstanceStatisticsChangedEventManager(admin);
     }
 
     public Admin getAdmin() {
@@ -176,12 +185,46 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
         if (existingProcessingUnit == null) {
             processingUnitAddedEventManager.processingUnitAdded(processingUnit);
         }
+        processingUnit.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
+        if (isMonitoring()) {
+            processingUnit.startStatisticsMonitor();
+        }
     }
 
     public void removeProcessingUnit(String name) {
         final ProcessingUnit existingProcessingUnit = processingUnits.remove(name);
         if (existingProcessingUnit != null) {
+            existingProcessingUnit.stopStatisticsMontior();
             processingUnitRemovedEventManager.processingUnitRemoved(existingProcessingUnit);
         }
+    }
+
+    public ProcessingUnitInstanceStatisticsChangedEventManager getProcessingUnitInstanceStatisticsChange() {
+        return this.processingUnitInstanceStatisticsChangedEventManager;
+    }
+
+    public void setStatisticsInterval(long interval, TimeUnit timeUnit) {
+        statisticsInterval = timeUnit.toMillis(interval);
+        for (ProcessingUnit processingUnit : processingUnits.values()) {
+            processingUnit.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    public void startStatisticsMonitor() {
+        scheduledStatisticsMonitor = true;
+        for (ProcessingUnit processingUnit : processingUnits.values()) {
+            processingUnit.startStatisticsMonitor();
+        }
+    }
+
+    public void stopStatisticsMontior() {
+        scheduledStatisticsMonitor = false;
+        for (ProcessingUnit processingUnit : processingUnits.values()) {
+            processingUnit.stopStatisticsMontior();
+        }
+    }
+
+    public boolean isMonitoring() {
+        return scheduledStatisticsMonitor;
     }
 }

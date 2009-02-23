@@ -208,7 +208,7 @@ public class DefaultSpaces implements InternalSpaces {
             spaceAddedEventManager.spaceAdded(space);
         }
         space.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
-        if (scheduledStatisticsMonitor) {
+        if (isMonitoring()) {
             space.startStatisticsMonitor();
         }
     }

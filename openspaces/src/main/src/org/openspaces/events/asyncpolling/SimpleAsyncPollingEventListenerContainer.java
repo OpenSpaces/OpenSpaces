@@ -23,6 +23,7 @@ import org.openspaces.events.AbstractTransactionalEventListenerContainer;
 import org.openspaces.events.asyncpolling.receive.AsyncOperationHandler;
 import org.openspaces.events.asyncpolling.receive.SingleTakeAsyncOperationHandler;
 import org.openspaces.pu.service.ServiceDetails;
+import org.openspaces.pu.service.ServiceMonitors;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.TransactionDefinition;
@@ -48,7 +49,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * operations performed based on the inital number of concurrent consumers.
  *
  * <p>The actual execution of an async operation is abstracted using {@link org.openspaces.events.asyncpolling.receive.AsyncOperationHandler}
- * with default implementation for take, read, and exclusive read lock. 
+ * with default implementation for take, read, and exclusive read lock.
  *
  * @author kimchy
  */
@@ -111,8 +112,12 @@ public class SimpleAsyncPollingEventListenerContainer extends AbstractTransactio
         }
         // for now, LRMI class loader problems
         tempalte = null;
-        return new ServiceDetails[] {new AsyncPollingEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte,
+        return new ServiceDetails[]{new AsyncPollingEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte,
                 isPerformSnapshot(), receiveTimeout, concurrentConsumers)};
+    }
+
+    public ServiceMonitors[] getServicesMonitors() {
+        return new ServiceMonitors[]{new AsyncPollingEventContainerServiceMonitors(beanName, processedEvents.get(), failedEvents.get())};
     }
 
     @Override

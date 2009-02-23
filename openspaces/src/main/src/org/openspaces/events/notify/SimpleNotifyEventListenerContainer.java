@@ -28,6 +28,7 @@ import net.jini.core.event.UnknownEventException;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.UnusableEntryException;
 import org.openspaces.pu.service.ServiceDetails;
+import org.openspaces.pu.service.ServiceMonitors;
 import org.springframework.dao.DataAccessException;
 import org.springframework.util.ClassUtils;
 
@@ -172,10 +173,14 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
         }
         // for now, LRMI class loader problems
         tempalte = null;
-        return new ServiceDetails[] {new NotifyEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte, isPerformSnapshot(),
+        return new ServiceDetails[]{new NotifyEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte, isPerformSnapshot(),
                 getCommType(), isFifo(), getBatchSize(), getBatchTime(), isAutoRenew(),
                 isNotifyAll(), isNotifyWrite(), isNotifyUpdate(), isNotifyWrite(), isNotifyLeaseExpire(), isNotifyUnmatched(),
                 isTriggerNotifyTemplate(), isReplicateNotifyTemplate(), isPerformSnapshot(), isPassArrayAsIs())};
+    }
+
+    public ServiceMonitors[] getServicesMonitors() {
+        return new ServiceMonitors[]{new NotifyEventContainerServiceMonitors(beanName, processedEvents.get(), failedEvents.get())};
     }
 
     /**

@@ -22,6 +22,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.TransactionStatus;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * A simple based class for {@link SpaceDataEventListener} based containers. Allowing to register a
  * listener and provides several support methods like
@@ -37,6 +39,10 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
     private String eventListenerRef;
 
     private ApplicationContext applicationContext;
+
+    protected final AtomicLong processedEvents = new AtomicLong();
+
+    protected final AtomicLong failedEvents = new AtomicLong();
 
     /**
      * Sets the event listener implementation that will be used to delegate events to. Also see
@@ -134,6 +140,7 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
     protected void invokeListener(SpaceDataEventListener eventListener, Object eventData, TransactionStatus txStatus, Object source)
             throws DataAccessException {
         eventListener.onEvent(eventData, getGigaSpace(), txStatus, source);
+        processedEvents.incrementAndGet();
     }
 
     /**
@@ -146,6 +153,7 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
             invokeExceptionListener((Exception) ex);
         }
         if (isActive()) {
+            failedEvents.incrementAndGet();
             // Regular case: failed while active. Log at error level.
             logger.error(message("Execution of event listener failed"), ex);
         } else {

@@ -17,6 +17,7 @@
 package org.openspaces.events;
 
 import com.gigaspaces.cluster.activeelection.ISpaceModeListener;
+import com.gigaspaces.cluster.activeelection.SpaceInitializationIndicator;
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
@@ -27,6 +28,7 @@ import org.openspaces.core.space.mode.AfterSpaceModeChangeEvent;
 import org.openspaces.core.space.mode.BeforeSpaceModeChangeEvent;
 import org.openspaces.core.util.SpaceUtils;
 import org.openspaces.pu.service.ServiceDetailsProvider;
+import org.openspaces.pu.service.ServiceMonitorsProvider;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -70,7 +72,7 @@ import java.util.List;
  * @author kimchy
  */
 public abstract class AbstractSpaceListeningContainer implements Lifecycle, BeanNameAware, InitializingBean,
-        DisposableBean, ApplicationListener, ServiceDetailsProvider {
+        DisposableBean, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProvider {
 
     protected final Log logger = LogFactory.getLog(getClass());
 
@@ -197,8 +199,13 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
                             + "]", e);
                 }
             }
-            onApplicationEvent(new BeforeSpaceModeChangeEvent(gigaSpace.getSpace(), currentMode));
-            onApplicationEvent(new AfterSpaceModeChangeEvent(gigaSpace.getSpace(), currentMode));
+            SpaceInitializationIndicator.setInitializer();
+            try {
+                onApplicationEvent(new BeforeSpaceModeChangeEvent(gigaSpace.getSpace(), currentMode));
+                onApplicationEvent(new AfterSpaceModeChangeEvent(gigaSpace.getSpace(), currentMode));
+            } finally {
+                SpaceInitializationIndicator.unsetInitializer();
+            }
         }
 
         doInitialize();

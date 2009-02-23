@@ -67,6 +67,8 @@ import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.WebsterFile;
 import org.openspaces.pu.service.ServiceDetails;
 import org.openspaces.pu.service.ServiceDetailsProvider;
+import org.openspaces.pu.service.ServiceMonitors;
+import org.openspaces.pu.service.ServiceMonitorsProvider;
 import org.openspaces.pu.sla.monitor.ApplicationContextMonitor;
 import org.openspaces.pu.sla.monitor.Monitor;
 import org.springframework.context.ApplicationContext;
@@ -134,6 +136,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private ClusterInfo clusterInfo;
 
     private volatile PUDetails puDetails;
+
+    private List<Callable> serviceMonitors = new ArrayList<Callable>();
 
     public PUServiceBeanImpl() {
         super();
@@ -266,7 +270,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         logger.info(logMessage("ClusterInfo [" + clusterInfo + "]"));
 
         MarshalledObject beanLevelPropertiesMarshObj =
-            (MarshalledObject) getServiceBeanContext().getInitParameter("beanLevelProperties");
+                (MarshalledObject) getServiceBeanContext().getInitParameter("beanLevelProperties");
         BeanLevelProperties beanLevelProperties = null;
         if (beanLevelPropertiesMarshObj != null) {
             beanLevelProperties = (BeanLevelProperties) beanLevelPropertiesMarshObj.get();
@@ -447,9 +451,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         try {
             ClassUtils.forName("org.mule.api.MuleContext");
             ((ServiceClassLoader) contextClassLoader).addURLs(BootUtil.toURLs(new String[]
-                                                                                         {
-                    Environment.getHomeDirectory() + "/lib/openspaces/mule-os.jar"
-                                                                                         }));
+                    {
+                            Environment.getHomeDirectory() + "/lib/openspaces/mule-os.jar"
+                    }));
         } catch (Exception e) {
             // no mule
         }
@@ -515,6 +519,14 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
         }
 
+        if (container instanceof ServiceMonitorsProvider) {
+            serviceMonitors.add(new Callable() {
+                public Object call() throws Exception {
+                    return ((ServiceMonitorsProvider) container).getServicesMonitors();
+                }
+            });
+        }
+
         if (container instanceof ApplicationContextProcessingUnitContainer) {
             ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
             Map map = applicationContext.getBeansOfType(ServiceDetailsProvider.class);
@@ -526,16 +538,39 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                     }
                 }
             }
+
+            final Map monitorsMap = applicationContext.getBeansOfType(ServiceMonitorsProvider.class);
+            serviceMonitors.add(new Callable() {
+                public Object call() throws Exception {
+                    ArrayList<ServiceMonitors> retMonitors = new ArrayList<ServiceMonitors>();
+                    for (Iterator it = monitorsMap.values().iterator(); it.hasNext();) {
+                        ServiceMonitors[] monitors = ((ServiceMonitorsProvider) it.next()).getServicesMonitors();
+                        if (monitors != null) {
+                            for (ServiceMonitors mon : monitors) {
+                                retMonitors.add(mon);
+                            }
+                        }
+                    }
+                    return retMonitors.toArray(new Object[retMonitors.size()]);
+                }
+            });
         }
 
-        Callable serviceDetailsProvider = SharedServiceData.removeServiceDetails(clusterInfo.getName() + clusterInfo.getRunningNumber());
+        List<Callable> serviceDetailsProvider = SharedServiceData.removeServiceDetails(clusterInfo.getName() + clusterInfo.getRunningNumber());
         if (serviceDetailsProvider != null) {
-            try {
-                Object[] details = (Object[]) serviceDetailsProvider.call();
-                Collections.addAll(serviceDetails, details);
-            } catch (Exception e) {
-                logger.error("Failed to add service details from custom provider", e);
+            for (Callable serProvider : serviceDetailsProvider) {
+                try {
+                    Object[] details = (Object[]) serProvider.call();
+                    Collections.addAll(serviceDetails, details);
+                } catch (Exception e) {
+                    logger.error("Failed to add service details from custom provider", e);
+                }
             }
+        }
+
+        List<Callable> sharedMonitors = SharedServiceData.removeServiceMonitors(clusterInfo.getName() + clusterInfo.getRunningNumber());
+        if (sharedMonitors != null) {
+            serviceMonitors.addAll(sharedMonitors);
         }
 
         this.puDetails = new PUDetails(context.getParentServiceID(), clusterInfo, serviceDetails.toArray(new Object[serviceDetails.size()]));
@@ -547,6 +582,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     private void stopPU() {
+        serviceMonitors.clear();
         if (executorService != null) {
             executorService.shutdown();
             executorService = null;
@@ -645,6 +681,18 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         return spacesModes.toArray(new SpaceMode[spacesModes.size()]);
     }
 
+    public PUMonitors getPUMonitors() throws RemoteException {
+        ArrayList<Object> monitors = new ArrayList<Object>();
+        for (Callable call : serviceMonitors) {
+            try {
+                Collections.addAll(monitors, (Object[]) call.call());
+            } catch (Exception e) {
+                logger.error(logMessage("Failed to get monitor information, ignoring it"), e);
+            }
+        }
+        return new PUMonitors(monitors.toArray(new Object[monitors.size()]));
+    }
+
     public PUDetails getPUDetails() throws RemoteException {
         return this.puDetails;
     }
@@ -682,11 +730,11 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private int getSLAMax(ServiceBeanContext context) {
         int max = -1;
         ServiceLevelAgreements slas =
-            context.getServiceElement().getServiceLevelAgreements();
+                context.getServiceElement().getServiceLevelAgreements();
         SLA[] spaceSLAs = slas.getServiceSLAs();
         for (SLA spaceSLA : spaceSLAs) {
             int count =
-                getMaxServiceCount(spaceSLA.getConfigArgs());
+                    getMaxServiceCount(spaceSLA.getConfigArgs());
             if (count != -1) {
                 max = count;
                 break;

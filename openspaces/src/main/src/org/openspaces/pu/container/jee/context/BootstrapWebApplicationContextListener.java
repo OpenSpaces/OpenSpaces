@@ -30,6 +30,8 @@ import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer
 import org.openspaces.pu.container.support.ResourceApplicationContext;
 import org.openspaces.pu.service.ServiceDetails;
 import org.openspaces.pu.service.ServiceDetailsProvider;
+import org.openspaces.pu.service.ServiceMonitors;
+import org.openspaces.pu.service.ServiceMonitorsProvider;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -139,7 +141,7 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
             }
 
             if (clusterInfo != null) {
-                SharedServiceData.putServiceDetails(clusterInfo.getName() + clusterInfo.getRunningNumber(), new Callable() {
+                SharedServiceData.addServiceDetails(clusterInfo.getName() + clusterInfo.getRunningNumber(), new Callable() {
                     public Object call() throws Exception {
                         ArrayList<ServiceDetails> serviceDetails = new ArrayList<ServiceDetails>();
                         Map map = applicationContext.getBeansOfType(ServiceDetailsProvider.class);
@@ -152,6 +154,22 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
                             }
                         }
                         return serviceDetails.toArray(new Object[serviceDetails.size()]);
+                    }
+                });
+
+                SharedServiceData.addServiceMonitors(clusterInfo.getName() + clusterInfo.getRunningNumber(), new Callable() {
+                    public Object call() throws Exception {
+                        ArrayList<ServiceMonitors> serviceMonitors = new ArrayList<ServiceMonitors>();
+                        Map map = applicationContext.getBeansOfType(ServiceMonitorsProvider.class);
+                        for (Iterator it = map.values().iterator(); it.hasNext();) {
+                            ServiceMonitors[] monitors = ((ServiceMonitorsProvider) it.next()).getServicesMonitors();
+                            if (monitors != null) {
+                                for (ServiceMonitors monitor : monitors) {
+                                    serviceMonitors.add(monitor);
+                                }
+                            }
+                        }
+                        return serviceMonitors.toArray(new Object[serviceMonitors.size()]);
                     }
                 });
             }

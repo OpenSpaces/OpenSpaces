@@ -55,4 +55,16 @@ public interface ProcessingUnitPartition {
      * Returns the processing unit this parittion is part of.
      */
     ProcessingUnit getProcessingUnit();
+
+    /**
+     * If the processing unit has an embedded space, will return the processing unit instance that holds a
+     * the primary space instance.
+     */
+    ProcessingUnitInstance getPrimary();
+
+    /**
+     * If the processing unit has an embedded space, will return the processing unit instance that holds a
+     * the backup space instance.
+     */
+    ProcessingUnitInstance getBackup();
 }

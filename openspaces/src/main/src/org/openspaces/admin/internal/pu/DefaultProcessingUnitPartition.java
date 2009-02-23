@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.pu;
 
+import com.gigaspaces.cluster.activeelection.SpaceMode;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 
@@ -33,6 +34,24 @@ public class DefaultProcessingUnitPartition implements InternalProcessingUnitPar
 
     public ProcessingUnit getProcessingUnit() {
         return this.processingUnit;
+    }
+
+    public ProcessingUnitInstance getPrimary() {
+        for (ProcessingUnitInstance processingUnitInstance : this) {
+            if (processingUnitInstance.isEmbeddedSpaces() && processingUnitInstance.getSpaceInstance().getMode() == SpaceMode.PRIMARY) {
+                return processingUnitInstance;
+            }
+        }
+        return null;
+    }
+
+    public ProcessingUnitInstance getBackup() {
+        for (ProcessingUnitInstance processingUnitInstance : this) {
+            if (processingUnitInstance.isEmbeddedSpaces() && processingUnitInstance.getSpaceInstance().getMode() == SpaceMode.BACKUP) {
+                return processingUnitInstance;
+            }
+        }
+        return null;
     }
 
     public Iterator<ProcessingUnitInstance> iterator() {

@@ -12,7 +12,7 @@ import org.openspaces.admin.vm.VirtualMachine;
  */
 public abstract class AbstractGridComponent implements InternalGridComponent {
 
-    private final InternalAdmin admin;
+    protected final InternalAdmin admin;
 
     private volatile Machine machine;
 

@@ -29,6 +29,8 @@ import java.io.ObjectOutput;
  */
 public class JeeServiceDetails extends PlainServiceDetails {
 
+    public static final String SERVICE_TYPE = "jee-container";
+
     public static final class Attributes {
         public static final String HOST = "host";
         public static final String PORT = "port";
@@ -43,7 +45,7 @@ public class JeeServiceDetails extends PlainServiceDetails {
 
     public JeeServiceDetails(String id, String host, int port, int sslPort, String contextPath, boolean shared,
                                            String serviceSubType, JeeType jeeType) {
-        super(id, "jee-container", serviceSubType, host + ":" + port + contextPath, host + ":" + port + contextPath);
+        super(id, SERVICE_TYPE, serviceSubType, host + ":" + port + contextPath, host + ":" + port + contextPath);
         getAttributes().put(Attributes.HOST, host);
         getAttributes().put(Attributes.PORT, port);
         getAttributes().put(Attributes.SSLPORT, sslPort);

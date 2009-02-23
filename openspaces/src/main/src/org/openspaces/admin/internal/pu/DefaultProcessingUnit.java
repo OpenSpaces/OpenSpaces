@@ -3,6 +3,7 @@ package org.openspaces.admin.internal.pu;
 import com.gigaspaces.grid.gsm.PUDetails;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
@@ -10,6 +11,7 @@ import org.openspaces.admin.internal.pu.events.*;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
+import org.openspaces.admin.pu.ProcessingUnits;
 import org.openspaces.admin.pu.events.*;
 import org.openspaces.admin.space.Space;
 
@@ -61,6 +63,12 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     private final InternalProcessingUnitSpaceCorrelatedEventManager spaceCorrelatedEventManager;
 
 
+    private final InternalProcessingUnitInstanceStatisticsChangedEventManager processingUnitInstanceStatisticsChangedEventManager;
+
+    private volatile long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
+
+    private volatile boolean scheduledStatisticsMonitor = false;
+
     public DefaultProcessingUnit(InternalAdmin admin, InternalProcessingUnits processingUnits, PUDetails details) {
         this.admin = admin;
         this.processingUnits = processingUnits;
@@ -83,6 +91,11 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         this.processingUnitInstanceAddedEventManager = new DefaultProcessingUnitInstanceAddedEventManager(this, admin);
         this.processingUnitInstanceRemovedEventManager = new DefaultProcessingUnitInstanceRemovedEventManager(admin);
         this.spaceCorrelatedEventManager = new DefaultProcessingUnitSpaceCorrelatedEventManager(this);
+        this.processingUnitInstanceStatisticsChangedEventManager = new DefaultProcessingUnitInstanceStatisticsChangedEventManager(admin);
+    }
+
+    public ProcessingUnits getProcessingUnits() {
+        return this.processingUnits;
     }
 
     public Admin getAdmin() {
@@ -347,6 +360,10 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
         // handle events
         if (existingProcessingUnitInstance == null) {
+            processingUnitInstance.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
+            if (isMonitoring()) {
+                processingUnitInstance.startStatisticsMonitor();
+            }
             processingUnitInstanceAddedEventManager.processingUnitInstanceAdded(processingUnitInstance);
             ((InternalProcessingUnitInstanceAddedEventManager) processingUnits.getProcessingUnitInstanceAdded()).processingUnitInstanceAdded(processingUnitInstance);
         }
@@ -355,6 +372,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     public void removeProcessingUnitInstance(String uid) {
         final ProcessingUnitInstance processingUnitInstance = processingUnitInstances.remove(uid);
         if (processingUnitInstance != null) {
+            processingUnitInstance.stopStatisticsMontior();
             InternalProcessingUnitPartition partition = getPartition(processingUnitInstance);
             partition.removeProcessingUnitInstance(uid);
 
@@ -372,7 +390,36 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
         return partition;
     }
-    
+
+    public ProcessingUnitInstanceStatisticsChangedEventManager getProcessingUnitInstanceStatisticsChange() {
+        return this.processingUnitInstanceStatisticsChangedEventManager;
+    }
+
+    public synchronized void setStatisticsInterval(long interval, TimeUnit timeUnit) {
+        statisticsInterval = timeUnit.toMillis(interval);
+        for (ProcessingUnitInstance processingUnitInstance : processingUnitInstances.values()) {
+            processingUnitInstance.setStatisticsInterval(interval, timeUnit);
+        }
+    }
+
+    public synchronized void startStatisticsMonitor() {
+        scheduledStatisticsMonitor = true;
+        for (ProcessingUnitInstance processingUnitInstance : processingUnitInstances.values()) {
+            processingUnitInstance.startStatisticsMonitor();
+        }
+    }
+
+    public synchronized void stopStatisticsMontior() {
+        scheduledStatisticsMonitor = false;
+        for (ProcessingUnitInstance processingUnitInstance : processingUnitInstances.values()) {
+            processingUnitInstance.stopStatisticsMontior();
+        }
+    }
+
+    public synchronized boolean isMonitoring() {
+        return scheduledStatisticsMonitor;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -191,6 +191,7 @@ public class DefaultAdmin implements InternalAdmin {
         this.virtualMachines.setStatisticsInterval(interval, timeUnit);
         this.transports.setStatisticsInterval(interval, timeUnit);
         this.operatingSystems.setStatisticsInterval(interval, timeUnit);
+        this.processingUnits.setStatisticsInterval(interval, timeUnit);
     }
 
     public synchronized void startStatisticsMonitor() {
@@ -199,6 +200,7 @@ public class DefaultAdmin implements InternalAdmin {
         this.virtualMachines.startStatisticsMonitor();
         this.transports.startStatisticsMonitor();
         this.operatingSystems.startStatisticsMonitor();
+        this.processingUnits.startStatisticsMonitor();
     }
 
     public synchronized void stopStatisticsMontior() {
@@ -207,6 +209,7 @@ public class DefaultAdmin implements InternalAdmin {
         this.virtualMachines.stopStatisticsMontior();
         this.transports.stopStatisticsMontior();
         this.operatingSystems.stopStatisticsMontior();
+        this.processingUnits.stopStatisticsMontior();
     }
 
     public boolean isMonitoring() {

@@ -26,8 +26,9 @@ import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
 import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
 import org.openspaces.pu.service.ServiceDetails;
 import org.openspaces.pu.service.ServiceDetailsProvider;
+import org.openspaces.pu.service.ServiceMonitors;
+import org.openspaces.pu.service.ServiceMonitorsProvider;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
@@ -57,10 +58,10 @@ public class ProcessingUnitContextLoader extends ContextLoader {
         final WebApplicationContext context = super.initWebApplicationContext(servletContext);
         ClusterInfo clusterInfo = (ClusterInfo) servletContext.getAttribute(JeeProcessingUnitContainerProvider.CLUSTER_INFO_CONTEXT);
         if (clusterInfo != null) {
-            SharedServiceData.putServiceDetails(clusterInfo.getName() + clusterInfo.getRunningNumber(), new Callable() {
+            SharedServiceData.addServiceDetails(clusterInfo.getName() + clusterInfo.getRunningNumber(), new Callable() {
                 public Object call() throws Exception {
-                    ArrayList<ServiceDetails> serviceDetails = new ArrayList<ServiceDetails>();
-                    Map map = BeanFactoryUtils.beansOfTypeIncludingAncestors(context, ServiceDetailsProvider.class);
+                    ArrayList<Object> serviceDetails = new ArrayList<Object>();
+                    Map map = context.getBeansOfType(ServiceDetailsProvider.class);
                     for (Iterator it = map.values().iterator(); it.hasNext();) {
                         ServiceDetails[] details = ((ServiceDetailsProvider) it.next()).getServicesDetails();
                         if (details != null) {
@@ -70,6 +71,22 @@ public class ProcessingUnitContextLoader extends ContextLoader {
                         }
                     }
                     return serviceDetails.toArray(new Object[serviceDetails.size()]);
+                }
+            });
+
+            SharedServiceData.addServiceMonitors(clusterInfo.getName() + clusterInfo.getRunningNumber(), new Callable() {
+                public Object call() throws Exception {
+                    ArrayList<ServiceMonitors> serviceMonitors = new ArrayList<ServiceMonitors>();
+                    Map map = context.getBeansOfType(ServiceMonitorsProvider.class);
+                    for (Iterator it = map.values().iterator(); it.hasNext();) {
+                        ServiceMonitors[] monitors = ((ServiceMonitorsProvider) it.next()).getServicesMonitors();
+                        if (monitors != null) {
+                            for (ServiceMonitors monitor : monitors) {
+                                serviceMonitors.add(monitor);
+                            }
+                        }
+                    }
+                    return serviceMonitors.toArray(new Object[serviceMonitors.size()]);
                 }
             });
         }

@@ -8,15 +8,21 @@ import com.gigaspaces.operatingsystem.OSDetails;
 import com.gigaspaces.operatingsystem.OSStatistics;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceStatisticsChangedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceStatisticsChangedEventManager;
 import org.openspaces.admin.internal.space.DefaultSpaceInstances;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
 import org.openspaces.admin.internal.space.InternalSpaceInstances;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.ProcessingUnitInstanceStatistics;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEvent;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.space.SpaceServiceDetails;
@@ -27,8 +33,11 @@ import org.openspaces.events.notify.NotifyEventContainerServiceDetails;
 import org.openspaces.events.polling.PollingEventContainerServiceDetails;
 import org.openspaces.pu.container.jee.JeeServiceDetails;
 import org.openspaces.pu.container.servicegrid.PUDetails;
+import org.openspaces.pu.container.servicegrid.PUMonitors;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
+import org.openspaces.pu.service.PlainServiceMonitors;
 import org.openspaces.pu.service.ServiceDetails;
+import org.openspaces.pu.service.ServiceMonitors;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -38,6 +47,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author kimchy
@@ -71,9 +82,21 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private final JeeServiceDetails jeeDetails;
 
+    private final Map<String, ServiceDetails> servicesDetailsByServiceId;
     private final Map<String, ServiceDetails[]> servicesDetailsByServiceType;
 
     private final InternalSpaceInstances spaceInstances;
+
+
+    private long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
+
+    private long lastStatisticsTimestamp = 0;
+
+    private ProcessingUnitInstanceStatistics lastStatistics;
+
+    private Future scheduledStatisticsMonitor;
+
+    private final InternalProcessingUnitInstanceStatisticsChangedEventManager statisticsChangedEventManager;
 
     public DefaultProcessingUnitInstance(ServiceID serviceID, PUDetails puDetails, PUServiceBean puServiceBean, InternalAdmin admin) {
         super(admin);
@@ -83,6 +106,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         this.puServiceBean = puServiceBean;
 
         this.spaceInstances = new DefaultSpaceInstances(admin);
+
+        this.statisticsChangedEventManager = new DefaultProcessingUnitInstanceStatisticsChangedEventManager(admin);
 
         this.serviceDetails = new ServiceDetails[puDetails.getDetails().length];
         for (int i = 0; i < puDetails.getDetails().length; i++) {
@@ -95,8 +120,9 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
         Map<String, List<ServiceDetails>> servicesDetailsByServiceTypeList = new HashMap<String, List<ServiceDetails>>();
 
+        Map<String, ServiceDetails> serviceDetailsByServiceId = new HashMap<String, ServiceDetails>();
         for (ServiceDetails serviceDetails : this.serviceDetails) {
-
+            serviceDetailsByServiceId.put(serviceDetails.getId(), serviceDetails);
             List<ServiceDetails> list = servicesDetailsByServiceTypeList.get(serviceDetails.getServiceType());
             if (list == null) {
                 list = new ArrayList<ServiceDetails>();
@@ -132,11 +158,12 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         embeddedSpacesDetails = embeddedSpacesEmbeddedList.toArray(new SpaceServiceDetails[embeddedSpacesEmbeddedList.size()]);
         spacesDetails = spacesDetailsList.toArray(new SpaceServiceDetails[spacesDetailsList.size()]);
 
+        this.servicesDetailsByServiceId = Collections.unmodifiableMap(serviceDetailsByServiceId);
         Map<String, ServiceDetails[]> servicesDetailsTemp = new HashMap<String, ServiceDetails[]>();
         for (Map.Entry<String, List<ServiceDetails>> entry : servicesDetailsByServiceTypeList.entrySet()) {
             servicesDetailsTemp.put(entry.getKey(), entry.getValue().toArray(new ServiceDetails[entry.getValue().size()]));
         }
-        servicesDetailsByServiceType = servicesDetailsTemp;
+        servicesDetailsByServiceType = Collections.unmodifiableMap(servicesDetailsTemp);
     }
 
     public String getUid() {
@@ -274,12 +301,20 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         return jeeDetails;
     }
 
+    public ServiceDetails getServiceDetailsByServiceId(String serviceId) {
+        return servicesDetailsByServiceId.get(serviceId);
+    }
+
+    public Map<String, ServiceDetails> getServiceDetailsByServiceId() {
+        return servicesDetailsByServiceId;
+    }
+
     public ServiceDetails[] getServicesDetailsByServiceType(String serviceType) {
         return servicesDetailsByServiceType.get(serviceType);
     }
 
     public Map<String, ServiceDetails[]> getServiceDetailsByServiceType() {
-        return Collections.unmodifiableMap(servicesDetailsByServiceType);
+        return servicesDetailsByServiceType;
     }
 
     public void destroy() {
@@ -301,6 +336,66 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             throw new AdminException("No managing grid service manager for processing unit");
         }
         ((InternalGridServiceManager) processingUnit.getManagingGridServiceManager()).decrementInstance(this);
+    }
+
+    public synchronized ProcessingUnitInstanceStatistics getStatistics() {
+        long currentTime = System.currentTimeMillis();
+        if ((currentTime - lastStatisticsTimestamp) < statisticsInterval) {
+            return lastStatistics;
+        }
+        ProcessingUnitInstanceStatistics previousStatistics = lastStatistics;
+        Map<String, ServiceMonitors> serviceMonitorsById = new HashMap<String, ServiceMonitors>();
+        lastStatisticsTimestamp = currentTime;
+        PUMonitors puMonitors;
+        try {
+            puMonitors = puServiceBean.getPUMonitors();
+        } catch (RemoteException e) {
+            throw new AdminException("Failed to get montiors for processing unit instnace", e);
+        }
+        for (Object monitor : puMonitors.getMonitors()) {
+            ServiceMonitors serviceMonitors = (ServiceMonitors) monitor;
+            if (serviceMonitors instanceof PlainServiceMonitors) {
+                ((PlainServiceMonitors) serviceMonitors).setDetails(servicesDetailsByServiceId.get(serviceMonitors.getId()));
+            }
+            serviceMonitorsById.put(serviceMonitors.getId(), serviceMonitors);
+        }
+        lastStatistics = new DefaultProcessingUnitInstanceServiceStatistics(puMonitors.getTimestamp(), serviceMonitorsById, previousStatistics);
+        return lastStatistics;
+    }
+
+    public synchronized void setStatisticsInterval(long interval, TimeUnit timeUnit) {
+        this.statisticsInterval = timeUnit.toMillis(interval);
+        if (scheduledStatisticsMonitor != null) {
+            stopStatisticsMontior();
+            startStatisticsMonitor();
+        }
+    }
+
+    public synchronized void startStatisticsMonitor() {
+        if (scheduledStatisticsMonitor != null) {
+            scheduledStatisticsMonitor.cancel(false);
+        }
+        final ProcessingUnitInstance processingUnitInstance = this;
+        scheduledStatisticsMonitor = admin.getScheduler().scheduleWithFixedDelay(new Runnable() {
+            public void run() {
+                ProcessingUnitInstanceStatistics stats = processingUnitInstance.getStatistics();
+                ProcessingUnitInstanceStatisticsChangedEvent event = new ProcessingUnitInstanceStatisticsChangedEvent(processingUnitInstance, stats);
+                statisticsChangedEventManager.processingUnitInstanceStatisticsChanged(event);
+                ((InternalProcessingUnitInstanceStatisticsChangedEventManager) processingUnit.getProcessingUnitInstanceStatisticsChange()).processingUnitInstanceStatisticsChanged(event);
+                ((InternalProcessingUnitInstanceStatisticsChangedEventManager) processingUnit.getProcessingUnits().getProcessingUnitInstanceStatisticsChange()).processingUnitInstanceStatisticsChanged(event);
+            }
+        }, 0, statisticsInterval, TimeUnit.MILLISECONDS);
+    }
+
+    public synchronized void stopStatisticsMontior() {
+        if (scheduledStatisticsMonitor != null) {
+            scheduledStatisticsMonitor.cancel(false);
+            scheduledStatisticsMonitor = null;
+        }
+    }
+
+    public synchronized boolean isMonitoring() {
+        return scheduledStatisticsMonitor != null;
     }
 
     // info providers

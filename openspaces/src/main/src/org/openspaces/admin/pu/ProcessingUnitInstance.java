@@ -33,6 +33,7 @@
 package org.openspaces.admin.pu;
 
 import org.openspaces.admin.GridComponent;
+import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.core.cluster.ClusterInfo;
@@ -52,7 +53,7 @@ import java.util.Map;
  *
  * @author kimchy
  */
-public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceDetails> {
+public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceDetails>, StatisticsMonitor {
 
     /**
      * Destroy the instance. If breaches the SLA, will instanstiate the instance again.
@@ -107,9 +108,14 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
     ProcessingUnitPartition getPartition();
 
     /**
-     * Returns all the service details running within this processing unit instance.
+     * Returns the service details for a specific service id.
      */
-    ServiceDetails[] getServicesDetails();
+    ServiceDetails getServiceDetailsByServiceId(String serviceId);
+
+    /**
+     * Returns a map of serivce details by service id.
+     */
+    Map<String, ServiceDetails> getServiceDetailsByServiceId();
 
     /**
      * Returns the service details by a service type {@link org.openspaces.pu.service.ServiceDetails#getServiceType()}.
@@ -189,4 +195,6 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
      * Returns the jee service details of the jee container that was started within this processign unit.
      */
     JeeServiceDetails getJeeDetails();
+
+    ProcessingUnitInstanceStatistics getStatistics();
 }

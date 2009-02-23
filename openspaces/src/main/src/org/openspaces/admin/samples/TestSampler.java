@@ -14,7 +14,7 @@ import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.SpacePartition;
 import org.openspaces.admin.transport.Transport;
 import org.openspaces.admin.vm.VirtualMachine;
-import org.openspaces.pu.service.ServiceDetails;
+import org.openspaces.pu.service.ServiceMonitors;
 
 import java.util.Arrays;
 
@@ -86,11 +86,8 @@ public class TestSampler {
                     }
                     for (ProcessingUnitInstance processingUnitInstance : processingUnit) {
                         System.out.println("   [" + processingUnitInstance.getClusterInfo() + "] on GSC [" + processingUnitInstance.getGridServiceContainer().getUid() + "]");
-                        if (processingUnitInstance.isEmbeddedSpaces()) {
-                            System.out.println("      -> Embedded Space [" + processingUnitInstance.getSpaceInstance().getUid() + "]");
-                        }
-                        for (ServiceDetails details : processingUnitInstance) {
-                            System.out.println("      -> Service " + details);
+                        for (ServiceMonitors monitors : processingUnitInstance.getStatistics()) {
+                            System.out.println("      -> Service [" + monitors.getDetails().getId() + "] " + monitors.getMonitors());
                         }
                     }
                 }

@@ -18,6 +18,7 @@ package org.openspaces.events.polling;
 
 import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.pu.service.ServiceDetails;
+import org.openspaces.pu.service.ServiceMonitors;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.dao.DataAccessException;
@@ -592,6 +593,10 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
         return new ServiceDetails[]{new PollingEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte, isPerformSnapshot(),
                 getReceiveTimeout(), getReceiveOperationHandler().getClass().getName(), getTriggerOperationHandler() != null ? getTriggerOperationHandler().getClass().getName() : null,
                 getConcurrentConsumers(), getMaxConcurrentConsumers(), isPassArrayAsIs())};
+    }
+
+    public ServiceMonitors[] getServicesMonitors() {
+        return new ServiceMonitors[] {new PollingEventContainerServiceMonitors(beanName, processedEvents.get(), failedEvents.get(), getConcurrentConsumers())};
     }
 
     // -------------------------------------------------------------------------

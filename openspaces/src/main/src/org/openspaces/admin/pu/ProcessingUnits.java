@@ -33,15 +33,8 @@
 package org.openspaces.admin.pu;
 
 import org.openspaces.admin.AdminAware;
-import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
-import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitAddedEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitLifecycleEventListener;
-import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.StatisticsMonitor;
+import org.openspaces.admin.pu.events.*;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -51,7 +44,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author kimchy
  */
-public interface ProcessingUnits extends Iterable<ProcessingUnit>, AdminAware {
+public interface ProcessingUnits extends Iterable<ProcessingUnit>, AdminAware, StatisticsMonitor {
 
     /**
      * Retruns the number of currently deployed {@link org.openspaces.admin.pu.ProcessingUnit}s.
@@ -148,4 +141,13 @@ public interface ProcessingUnits extends Iterable<ProcessingUnit>, AdminAware {
      * occuring on any processing unit.
      */
     ProcessingUnitStatusChangedEventManager getProcessingUnitStatusChanged();
+
+    /**
+     * Returns a processing unit instance statistics change event manger allowing to register for
+     * events of {@link org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEvent}.
+     *
+     * <p>Note, in order to receive events, the virtual machines need to be in a "statistics" monitored
+     * state.
+     */
+    ProcessingUnitInstanceStatisticsChangedEventManager getProcessingUnitInstanceStatisticsChange();
 }
