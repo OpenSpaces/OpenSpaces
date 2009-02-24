@@ -96,6 +96,7 @@
                 <exclude name="org/mule/**"/>
                 <exclude name="org/openspaces/esb/mule/**"/>
                 <exclude name="org/openspaces/pu/container/jee/jetty/holder/**"/>
+                <exclude name="org/openspaces/pu/container/jee/jetty/support/**"/>
                 <exclude name="org/openspaces/pu/container/jee/glassfish/holder/**"/>
                 <exclude name="org/glassfish/**"/>
                 <exclude name="org/apache/catalina/**"/>
@@ -140,6 +141,7 @@
         <jar jarfile="${lib.dir}/${name}/openspaces-jetty.jar">
             <fileset dir="${target.classes.dir}">
                 <include name="org/openspaces/pu/container/jee/jetty/holder/**"/>
+                <include name="org/openspaces/pu/container/jee/jetty/support/**"/>
             </fileset>
             <manifest>
                 <attribute name="Implementation-Title" value="${openspaces-title}"/>

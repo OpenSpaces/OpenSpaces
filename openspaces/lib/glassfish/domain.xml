@@ -45,6 +45,10 @@
        <property name="adminConsoleFolder" value="${com.sun.aas.installRoot}/lib/install/applications"/>
    </admin-service>
 
+   <!--<monitoring-service>-->
+       <!--<module-monitoring-levels http-service="HIGH" web-container="HIGH" thread-pool="HIGH" />-->
+   <!--</monitoring-service>-->
+
    <web-container>
      <session-config>
        <session-manager>

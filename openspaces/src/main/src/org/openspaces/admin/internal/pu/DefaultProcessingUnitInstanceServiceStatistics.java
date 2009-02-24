@@ -5,6 +5,7 @@ import org.openspaces.events.EventContainerServiceMonitors;
 import org.openspaces.events.asyncpolling.AsyncPollingEventContainerServiceMonitors;
 import org.openspaces.events.notify.NotifyEventContainerServiceMonitors;
 import org.openspaces.events.polling.PollingEventContainerServiceMonitors;
+import org.openspaces.pu.container.jee.stats.JeeRequestServiceMonitors;
 import org.openspaces.pu.service.ServiceMonitors;
 import org.openspaces.remoting.RemotingServiceMonitors;
 
@@ -29,12 +30,14 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
     private final Map<String, AsyncPollingEventContainerServiceMonitors> asyncPollingEventContainerServiceMonitors = new HashMap<String, AsyncPollingEventContainerServiceMonitors>();
 
     private final RemotingServiceMonitors remotingServiceMonitors;
+    private final JeeRequestServiceMonitors jeeRequestServiceMonitors;
 
     public DefaultProcessingUnitInstanceServiceStatistics(long timestamp, Map<String, ServiceMonitors> serviceMonitorsById, ProcessingUnitInstanceStatistics previous) {
         this.timestamp = timestamp;
         this.serviceMonitorsById = serviceMonitorsById;
         this.previous = previous;
         RemotingServiceMonitors remotingServiceMonitorsX = null;
+        JeeRequestServiceMonitors jeeRequestServiceMonitorsX = null;
         for (ServiceMonitors monitors : serviceMonitorsById.values()) {
             if (monitors instanceof EventContainerServiceMonitors) {
                 eventContainerServiceMonitors.put(monitors.getId(), (EventContainerServiceMonitors) monitors);
@@ -47,10 +50,13 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
                 }
             } else if (monitors instanceof RemotingServiceMonitors) {
                 remotingServiceMonitorsX = (RemotingServiceMonitors) monitors;
+            } else if (monitors instanceof JeeRequestServiceMonitors) {
+                jeeRequestServiceMonitorsX = (JeeRequestServiceMonitors) monitors;
             }
 
         }
         this.remotingServiceMonitors = remotingServiceMonitorsX;
+        this.jeeRequestServiceMonitors = jeeRequestServiceMonitorsX;
     }
 
     public long getTimestamp() {
@@ -83,6 +89,10 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
 
     public RemotingServiceMonitors getRemotingServiceMonitors() {
         return this.remotingServiceMonitors;
+    }
+
+    public JeeRequestServiceMonitors getJeeRequestServiceMonitors() {
+        return this.jeeRequestServiceMonitors;
     }
 
     public ProcessingUnitInstanceStatistics getPrevious() {

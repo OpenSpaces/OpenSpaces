@@ -4,6 +4,7 @@ import org.openspaces.events.EventContainerServiceMonitors;
 import org.openspaces.events.asyncpolling.AsyncPollingEventContainerServiceMonitors;
 import org.openspaces.events.notify.NotifyEventContainerServiceMonitors;
 import org.openspaces.events.polling.PollingEventContainerServiceMonitors;
+import org.openspaces.pu.container.jee.stats.JeeRequestServiceMonitors;
 import org.openspaces.pu.service.ServiceMonitors;
 import org.openspaces.remoting.RemotingServiceMonitors;
 
@@ -53,6 +54,11 @@ public interface ProcessingUnitInstanceStatistics extends Iterable<ServiceMonito
      * Returns the remoting service (if configured) monitors infomration.
      */
     RemotingServiceMonitors getRemotingServiceMonitors();
+
+    /**
+     * Returns statistics of JEE requests.
+     */
+    JeeRequestServiceMonitors getJeeRequestServiceMonitors();
 
     /**
      * Returns the previous statistics.

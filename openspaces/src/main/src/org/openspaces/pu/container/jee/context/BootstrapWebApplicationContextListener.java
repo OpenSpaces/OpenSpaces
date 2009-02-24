@@ -26,6 +26,7 @@ import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
 import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
 import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
+import org.openspaces.pu.container.jee.stats.RequestStatisticsFilter;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
 import org.openspaces.pu.service.ServiceDetails;
@@ -191,6 +192,9 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
         }
     }
 
+    /**
+     * Changes the web.xml to include the bootstrap context listener and the request statistics filter
+     */
     public static void prepareForBoot(File warPath, ClusterInfo clusterInfo, BeanLevelProperties beanLevelProperties) throws Exception {
         File gsStore = new File(warPath, MARSHALLED_STORE);
         gsStore.mkdirs();
@@ -226,6 +230,16 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
                 writer.println("    <listener-class>" + BootstrapWebApplicationContextListener.class.getName() + "</listener-class>");
                 writer.println("</listener>");
                 writer.println("<!-- GigaSpaces CHANGE END: Boot Listener -->");
+                writer.println("<!-- GigaSpaces CHANGE START: Request Statistics Listener -->");
+                writer.println("<filter>");
+                writer.println("    <filter-name>gs-request-statistics</filter-name>");
+                writer.println("    <filter-class>" + RequestStatisticsFilter.class.getName() + "</filter-class>");
+                writer.println("</filter>");
+                writer.println("<filter-mapping>");
+                writer.println("    <filter-name>gs-request-statistics</filter-name>");
+                writer.println("    <url-pattern>/*</url-pattern>");
+                writer.println("</filter-mapping>");
+                writer.println("<!-- GigaSpaces CHANGE END: Request Statistics Listener -->");
             } else {
                 writer.println(line);
             }

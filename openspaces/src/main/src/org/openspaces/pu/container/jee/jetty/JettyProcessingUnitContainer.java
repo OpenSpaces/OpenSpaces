@@ -88,8 +88,7 @@ public class JettyProcessingUnitContainer implements org.openspaces.pu.container
             }
         }
         InetSocketAddress addr = host == null ? new InetSocketAddress(port) : new InetSocketAddress(host, port);
-        JeeServiceDetails details = new JeeServiceDetails("jetty:" + addr.getAddress().getHostAddress() + ":" + port,
-                addr.getAddress().getHostAddress(),
+        JeeServiceDetails details = new JeeServiceDetails(addr.getAddress().getHostAddress(),
                 port,
                 jettyHolder.getServer().getConnectors()[0].getConfidentialPort(),
                 webAppContext.getContextPath(),

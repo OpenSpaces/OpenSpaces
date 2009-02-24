@@ -84,8 +84,7 @@ public class GlassfishProcessingUnitContainer implements org.openspaces.pu.conta
             }
         }
         InetSocketAddress addr = host == null ? new InetSocketAddress(port) : new InetSocketAddress(host, port);
-        return new JeeServiceDetails("glassfish:" + addr.getAddress().getHostAddress() + ":" + port,
-                addr.getAddress().getHostAddress(),
+        return new JeeServiceDetails(addr.getAddress().getHostAddress(),
                 port,
                 -1,
                 webappConfiguration.getContextPath(),

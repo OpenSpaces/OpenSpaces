@@ -17,6 +17,7 @@
 package org.openspaces.pu.container.jee.glassfish;
 
 import com.j_spaces.kernel.Environment;
+import com.sun.appserv.management.monitor.statistics.HTTPListenerStats;
 import com.sun.enterprise.deploy.shared.ArchiveFactory;
 import com.sun.enterprise.v3.services.impl.GrizzlyService;
 import org.apache.catalina.startup.TldConfig;
@@ -26,6 +27,7 @@ import org.glassfish.api.admin.ParameterNames;
 import org.glassfish.api.deployment.archive.ReadableArchive;
 import org.glassfish.embed.Application;
 import org.glassfish.embed.Server;
+import org.glassfish.web.admin.monitor.statistics.HTTPListenerStatsImpl;
 import org.jini.rio.boot.CommonClassLoader;
 import org.jini.rio.boot.SharedServiceData;
 import org.jvnet.hk2.component.Habitat;
@@ -313,11 +315,15 @@ public class GlassfishJeeProcessingUnitContainerProvider implements JeeProcessin
         }
     }
 
-    private static ArchiveFactory getArchiveFactory(Server server) throws Exception {
+    public static ArchiveFactory getArchiveFactory(Server server) throws Exception {
         return getHabitat(server).getComponent(ArchiveFactory.class);
     }
 
-    private static GrizzlyService getGrizzlyService(Server server) throws Exception {
+    public static HTTPListenerStats getHTTPListenerStats(Server server) throws Exception {
+        return getHabitat(server).getComponent(HTTPListenerStatsImpl.class);
+    }
+
+    public static GrizzlyService getGrizzlyService(Server server) throws Exception {
         return getHabitat(server).getComponent(GrizzlyService.class);
     }
 
