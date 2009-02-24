@@ -18,6 +18,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.Ordered;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -28,7 +29,7 @@ import java.util.Map;
 /**
  * @author kimchy
  */
-public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter implements ApplicationContextAware {
+public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter implements ApplicationContextAware, Ordered {
 
     private static final Log logger = LogFactory.getLog(RemotingAnnotationBeanPostProcessor.class);
 
@@ -38,8 +39,47 @@ public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 
     private GigaSpace uniqueGs;
 
+    private int order = Ordered.LOWEST_PRECEDENCE;
+
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        Class beanClass = AopUtils.getTargetClass(bean);
+        if (beanClass == null) {
+            return bean;
+        }
+        RemotingService remotingService = AnnotationUtils.findAnnotation(beanClass, RemotingService.class);
+        if (remotingService != null) {
+            SpaceRemotingServiceExporter exporter;
+            if (StringUtils.hasLength(remotingService.exporter())) {
+                exporter = (SpaceRemotingServiceExporter) applicationContext.getBean(remotingService.exporter());
+                if (exporter == null) {
+                    throw new IllegalArgumentException("Failed to find exporter under name [" + remotingService.exporter() + "] for bean [" + beanName + "]");
+                }
+            } else {
+                Map exporters = applicationContext.getBeansOfType(SpaceRemotingServiceExporter.class);
+                if (exporters.isEmpty()) {
+                    throw new IllegalArgumentException("No service exporters are defined within the context, can't register remote service bean [" + beanName + "]");
+                }
+                if (exporters.size() > 1) {
+                    throw new IllegalStateException("More than one service exporter are defined within the context, please specify the exact service exported to register with");
+                }
+                exporter = (SpaceRemotingServiceExporter) exporters.values().iterator().next();
+            }
+            exporter.addService(beanName, bean);
+        }
+        return bean;
     }
 
     @Override
@@ -138,27 +178,6 @@ public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanP
             }
         });
 
-
-        RemotingService remotingService = AnnotationUtils.findAnnotation(beanClass, RemotingService.class);
-        if (remotingService != null) {
-            SpaceRemotingServiceExporter exporter;
-            if (StringUtils.hasLength(remotingService.exporter())) {
-                exporter = (SpaceRemotingServiceExporter) applicationContext.getBean(remotingService.exporter());
-                if (exporter == null) {
-                    throw new IllegalArgumentException("Failed to find exporter under name [" + remotingService.exporter() + "] for bean [" + beanName + "]");
-                }
-            } else {
-                Map exporters = applicationContext.getBeansOfType(SpaceRemotingServiceExporter.class);
-                if (exporters.isEmpty()) {
-                    throw new IllegalArgumentException("No service exporters are defined within the context, can't register remote service bean [" + beanName + "]");
-                }
-                if (exporters.size() > 1) {
-                    throw new IllegalStateException("More than one service exporter are defined within the context, please specify the exact service exported to register with");
-                }
-                exporter = (SpaceRemotingServiceExporter) exporters.values().iterator().next();
-            }
-            exporter.addService(beanName, bean);
-        }
         return true;
     }
 
