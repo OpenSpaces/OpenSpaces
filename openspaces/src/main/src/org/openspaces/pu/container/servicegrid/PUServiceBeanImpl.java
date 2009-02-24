@@ -573,7 +573,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             serviceMonitors.addAll(sharedMonitors);
         }
 
-        this.puDetails = new PUDetails(context.getParentServiceID(), clusterInfo, serviceDetails.toArray(new Object[serviceDetails.size()]));
+        this.puDetails = new PUDetails(context.getParentServiceID(), clusterInfo, beanLevelProperties, serviceDetails.toArray(new Object[serviceDetails.size()]));
     }
 
     private org.openspaces.pu.sla.SLA getSLA(ServiceBeanContext context) throws IOException, ClassNotFoundException {

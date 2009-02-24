@@ -2,6 +2,7 @@ package org.openspaces.pu.container.servicegrid;
 
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.service.ServiceDetails;
 
 import java.io.Externalizable;
@@ -18,14 +19,17 @@ public class PUDetails implements Externalizable {
 
     private ClusterInfo clusterInfo;
 
+    private BeanLevelProperties beanLevelProperties;
+
     private Object[] details;
 
     public PUDetails() {
     }
 
-    public PUDetails(ServiceID gscServiceID, ClusterInfo clusterInfo, Object[] details) {
+    public PUDetails(ServiceID gscServiceID, ClusterInfo clusterInfo, BeanLevelProperties beanLevelProperties, Object[] details) {
         this.gscServiceID = gscServiceID;
         this.clusterInfo = clusterInfo;
+        this.beanLevelProperties = beanLevelProperties;
         this.details = details;
         if (details == null) {
             this.details = new ServiceDetails[0];
@@ -38,6 +42,10 @@ public class PUDetails implements Externalizable {
 
     public ClusterInfo getClusterInfo() {
         return clusterInfo;
+    }
+
+    public BeanLevelProperties getBeanLevelProperties() {
+        return beanLevelProperties;
     }
 
     public Object[] getDetails() {

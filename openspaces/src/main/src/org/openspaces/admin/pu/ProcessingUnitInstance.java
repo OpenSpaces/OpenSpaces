@@ -37,6 +37,7 @@ import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.space.SpaceServiceDetails;
 import org.openspaces.events.EventContainerServiceDetails;
 import org.openspaces.events.asyncpolling.AsyncPollingEventContainerServiceDetails;
@@ -97,6 +98,11 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
      * Retruns the cluster info of the processing unit instance.
      */
     ClusterInfo getClusterInfo();
+
+    /**
+     * Return the proeprties the processing unit was deployed with.
+     */
+    BeanLevelProperties getProperties();
 
     /**
      * Returns the {@link org.openspaces.admin.gsc.GridServiceContainer} the processing unit is running on.

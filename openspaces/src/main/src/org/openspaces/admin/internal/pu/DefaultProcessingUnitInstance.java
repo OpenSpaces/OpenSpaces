@@ -25,6 +25,7 @@ import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEvent;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.space.SpaceServiceDetails;
 import org.openspaces.core.space.SpaceType;
 import org.openspaces.events.EventContainerServiceDetails;
@@ -206,6 +207,10 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     public ClusterInfo getClusterInfo() {
         return puDetails.getClusterInfo();
+    }
+
+    public BeanLevelProperties getProperties() {
+        return puDetails.getBeanLevelProperties();
     }
 
     public Iterator<ServiceDetails> iterator() {
