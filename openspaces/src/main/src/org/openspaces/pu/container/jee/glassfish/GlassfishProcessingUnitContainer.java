@@ -70,6 +70,10 @@ public class GlassfishProcessingUnitContainer implements org.openspaces.pu.conta
     }
 
     public ServiceDetails[] getServicesDetails() {
+        return new ServiceDetails[]{getJeeDetails()};
+    }
+
+    public JeeServiceDetails getJeeDetails() {
         int port = glassfishHolder.getPort();
         String host = null;
         if (host == null) {
@@ -80,7 +84,7 @@ public class GlassfishProcessingUnitContainer implements org.openspaces.pu.conta
             }
         }
         InetSocketAddress addr = host == null ? new InetSocketAddress(port) : new InetSocketAddress(host, port);
-        ServiceDetails details = new JeeServiceDetails("glassfish:"+addr.getAddress().getHostAddress() + ":" + port,
+        return new JeeServiceDetails("glassfish:" + addr.getAddress().getHostAddress() + ":" + port,
                 addr.getAddress().getHostAddress(),
                 port,
                 -1,
@@ -88,7 +92,6 @@ public class GlassfishProcessingUnitContainer implements org.openspaces.pu.conta
                 glassfishHolder.isSingleInstance(),
                 "glassfish",
                 JeeType.GLASSFISH);
-        return new ServiceDetails[]{details};
     }
 
     /**

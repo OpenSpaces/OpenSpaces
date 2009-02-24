@@ -298,7 +298,9 @@ public class GlassfishJeeProcessingUnitContainerProvider implements JeeProcessin
             params.setProperty(ParameterNames.CONTEXT_ROOT, webappConfiguration.getContextPath());
             Application application = glassfishHolder.getServer().deploy(archive, params);
 
-            return new GlassfishProcessingUnitContainer(applicationContext, application, glassfishHolder, webappConfiguration);
+            GlassfishProcessingUnitContainer processingUnitContainer = new GlassfishProcessingUnitContainer(applicationContext, application, glassfishHolder, webappConfiguration);
+            logger.info("Deployed web application [" + processingUnitContainer.getJeeDetails().getDescription() + "]");
+            return processingUnitContainer;
         } catch (Exception e) {
             try {
                 glassfishHolder.stop();
