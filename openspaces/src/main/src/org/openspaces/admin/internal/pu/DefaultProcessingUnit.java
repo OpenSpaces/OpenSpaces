@@ -175,6 +175,10 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         this.numberOfBackups = numberOfBackups;
     }
 
+    public int getTotalNumberOfInstances() {
+        return getNumberOfInstances() * (getNumberOfBackups() + 1);
+    }
+
     public DeploymentStatus getStatus() {
         return this.deploymentStatus;
     }
