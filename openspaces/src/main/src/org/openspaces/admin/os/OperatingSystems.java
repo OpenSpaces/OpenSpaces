@@ -25,12 +25,12 @@ import java.util.Map;
 
 /**
  * Machines hold all the different {@link OperatingSystem}s that are currently
- * discoverted.
+ * discovered.
  *
  * <p>Provides simple means to get all the current operating systems, as well as as registering for
  * operating system lifecycle (added and removed) events.
  *
- * <p>Provides the ability to start monitoring statisitcs in a polling fashion. Once monitoring is performed,
+ * <p>Provides the ability to start monitoring statistics in a polling fashion. Once monitoring is performed,
  * a statistics event listener can be registered in order to receive statistics change events. Accessing the
  * statistics (without actively monitoring them) is also possible using the {@link #getStatistics()}.
  *
@@ -47,7 +47,7 @@ public interface OperatingSystems extends Iterable<OperatingSystem>, AdminAware,
     OperatingSystem[] getOperatingSystems();
 
     /**
-     * Retruns the operating system matching its uid.
+     * Returns the operating system matching its uid.
      */
     OperatingSystem getByUID(String uid);
 
@@ -62,12 +62,12 @@ public interface OperatingSystems extends Iterable<OperatingSystem>, AdminAware,
     int getSize();
 
     /**
-     * Retruns an aggregated view of all the operating systems details.
+     * Returns an aggregated view of all the operating systems details.
      */
     OperatingSystemsDetails getDetails();
 
     /**
-     * Retruns an aggregated view of all the operating systems statistics.
+     * Returns an aggregated view of all the operating systems statistics.
      */
     OperatingSystemsStatistics getStatistics();
 

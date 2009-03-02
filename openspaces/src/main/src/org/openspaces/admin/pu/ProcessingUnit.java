@@ -65,7 +65,7 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     String getName();
 
     /**
-     * Retruns the number of instances of the processing unit.
+     * Returns the number of instances of the processing unit.
      */
     int getNumberOfInstances();
 
@@ -171,22 +171,22 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     ProcessingUnitInstance[] getInstances();
 
     /**
-     * Returns the processing unit paritions of this processing unit.
+     * Returns the processing unit partitions of this processing unit.
      */
     ProcessingUnitPartition[] getPartitions();
 
     /**
-     * Retruns a processign unit parititon based on the specified partition id.
+     * Returns a processing unit partition based on the specified partition id.
      */
     ProcessingUnitPartition getPartition(int partitionId);
 
     /**
-     * Retruns an event manager allowing to register {@link org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener}s.
+     * Returns an event manager allowing to register {@link org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener}s.
      */
     ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded();
 
     /**
-     * Retruns an event manager allowing to register {@link org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventListener}s.
+     * Returns an event manager allowing to register {@link org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventListener}s.
      */
     ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved();
 
@@ -211,7 +211,7 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     BackupGridServiceManagerChangedEventManager getBackupGridServiceManagerChanged();
 
     /**
-     * Retruns an event manager allowing to listen for {@link org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent}s.
+     * Returns an event manager allowing to listen for {@link org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent}s.
      */
     ProcessingUnitStatusChangedEventManager getProcessingUnitStatusChanged();
 

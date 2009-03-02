@@ -44,7 +44,7 @@ import java.util.Map;
 
 /**
  * Virtual Machines hold all the different {@link VirtualMachine}s that are currently
- * discoverted.
+ * discovered.
  *
  * <p>Provides simple means to get all the current virtual machines, as well as as registering for
  * virtual machine lifecycle (added and removed) events.
@@ -58,22 +58,22 @@ import java.util.Map;
 public interface VirtualMachines extends AdminAware, Iterable<VirtualMachine>, StatisticsMonitor {
 
     /**
-     * Retruns the currently discovered virtual machines.
+     * Returns the currently discovered virtual machines.
      */
     VirtualMachine[] getVirtualMachines();
 
     /**
-     * Retruns the aggregated details of all virtual machines.
+     * Returns the aggregated details of all virtual machines.
      */
     VirtualMachinesDetails getDetails();
 
     /**
-     * Retruns the aggregated statistics of all virtual machines.
+     * Returns the aggregated statistics of all virtual machines.
      */
     VirtualMachinesStatistics getStatistics();
 
     /**
-     * Retrun a virtual machine by its uid.
+     * Return a virtual machine by its uid.
      */
     VirtualMachine getVirtualMachineByUID(String uid);
 
@@ -115,7 +115,7 @@ public interface VirtualMachines extends AdminAware, Iterable<VirtualMachine>, S
     void removeLifecycleListener(VirtualMachineLifecycleEventListener eventListener);
 
     /**
-     * Retruns a virtual machines statistics change event manager allowing to register for events
+     * Returns a virtual machines statistics change event manager allowing to register for events
      * of {@link org.openspaces.admin.vm.events.VirtualMachinesStatisticsChangedEvent}.
      *
      * <p>Note, in order to receive events, the virtual machines need to be in a "statistics" monitored

@@ -39,7 +39,7 @@ import org.openspaces.admin.transport.events.TransportsStatisticsChangedEventMan
 
 /**
  * Transports hold all the different {@link org.openspaces.admin.transport.Transport}s that are currently
- * discoverted.
+ * siscovered.
  *
  * <p>Provides simple means to get all the current transports, as well as as registering for
  * transport lifecycle (added and removed) events.
@@ -53,14 +53,14 @@ import org.openspaces.admin.transport.events.TransportsStatisticsChangedEventMan
 public interface Transports extends Iterable<Transport>, AdminAware, StatisticsMonitor {
 
     /**
-     * Retruns all the currently discovered transports.
+     * Returns all the currently discovered transports.
      */
     Transport[] getTransports();
 
     /**
-     * Returns all the trasnpsorts bounded on the specified host.
+     * Returns all the transports bounded on the specified host.
      *
-     * @see Transport#getHost() 
+     * @see Transport#getHost()
      */
     Transport[] getTransports(String host);
 
@@ -83,12 +83,12 @@ public interface Transports extends Iterable<Transport>, AdminAware, StatisticsM
     int getSize();
 
     /**
-     * Returns the aggreagted details (non changeable) of all the currently discovered transports.
+     * Returns the aggregated details (non changeable) of all the currently discovered transports.
      */
     TransportsDetails getDetails();
 
     /**
-     * Retruns the aggregated statistics of all the currently discovered transports.
+     * Returns the aggregated statistics of all the currently discovered transports.
      */
     TransportsStatistics getStatistics();
 

@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Grid Service Containers hold all the different {@link GridServiceManager}s that are currently
- * discoverted.
+ * discovered.
  *
  * <p>Provides simple means to get all the current managers, as well as as registering for
  * manager lifecycle (added and removed) events.

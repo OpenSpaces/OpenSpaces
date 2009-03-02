@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Machines hold all the different {@link Machine}s that are currently
- * discoverted.
+ * discovered.
  *
  * <p>Provides simple means to get all the current machines, as well as as registering for
  * machine lifecycle (added and removed) events.
@@ -54,7 +54,7 @@ public interface Machines extends AdminAware, Iterable<Machine> {
     Map<String, Machine> getUids();
 
     /**
-     * Retruns a map of machines by host address.
+     * Returns a map of machines by host address.
      */
     Map<String, Machine> getHostsByAddress();
 
@@ -95,7 +95,7 @@ public interface Machines extends AdminAware, Iterable<Machine> {
      * {@link org.openspaces.admin.machine.events.MachineRemovedEventListener}s.
      */
     MachineRemovedEventManager getMachineRemoved();
-    
+
     /**
      * Allows to add a {@link MachineLifecycleEventListener}.
      */

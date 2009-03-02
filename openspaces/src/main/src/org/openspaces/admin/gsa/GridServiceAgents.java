@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Grid Service Agents hold all the different {@link GridServiceAgent} that are currently
- * discoverted.
+ * discovered.
  *
  * <p>Provides simple means to get all the current agents, as well as as registering for
  * agent lifecycle (added and removed) events.

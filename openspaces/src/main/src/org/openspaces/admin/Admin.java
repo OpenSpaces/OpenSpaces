@@ -77,18 +77,18 @@ public interface Admin extends StatisticsMonitor {
      * <p>Defaults to 1 second.
      *
      * @param interval The interval to use.
-     * @param timeUnit The timeunit the interval is at.
+     * @param timeUnit The time unit the interval is at.
      */
     void setProcessingUnitMonitorInterval(long interval, TimeUnit timeUnit);
 
     /**
-     * Sets the Grid Service Agent processess monitor (not statistics) interval. The monitor
+     * Sets the Grid Service Agent processes monitor (not statistics) interval. The monitor
      * basically updates the list of processes the agent manages ({@link org.openspaces.admin.gsa.GridServiceAgent#getProcessesDetails()}.
      *
      * <p>Defaults to 5 seconds.
      *
      * @param interval The interval to use.
-     * @param timeUnit The timeunit the interval is at.
+     * @param timeUnit The time unit the interval is at.
      */
     void setAgentProcessessMonitorInterval(long interval, TimeUnit timeUnit);
 
@@ -99,7 +99,7 @@ public interface Admin extends StatisticsMonitor {
      * <p>Defaults to 1 second.
      *
      * @param interval The interval to use.
-     * @param timeUnit The timeunit the interval is at.
+     * @param timeUnit The time unit the interval is at.
      */
     void setSpaceMonitorInterval(long interval, TimeUnit timeUnit);
 

@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Lookup Services hold all the different {@link LookupService}s that are currently
- * discoverted.
+ * discovered.
  *
  * <p>Provides simple means to get all the current lus, as well as as registering for
  * lus lifecycle (added and removed) events.

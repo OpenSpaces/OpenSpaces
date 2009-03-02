@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Grid Service Containers hold all the different {@link GridServiceContainer}s that are currently
- * discoverted.
+ * discovered.
  *
  * <p>Provides simple means to get all the current containers, as well as as registering for
  * container lifecycle (added and removed) events.
