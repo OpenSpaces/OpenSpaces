@@ -14,6 +14,10 @@ public abstract class NetworkExceptionHelper {
             if (e.getCause() instanceof ClosedChannelException || e.getCause() instanceof java.net.ConnectException) {
                 return true;
             }
+
+            if (e.getCause() instanceof IOException && e.getCause().getMessage().contains("aborted")) {
+                return true;
+            }
         }
         if (e instanceof IOException) {
             if (e.getMessage().startsWith("Connection reset by peer")) {

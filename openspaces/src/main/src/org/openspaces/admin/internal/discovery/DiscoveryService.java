@@ -64,7 +64,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
     private String locators = null;
 
-    private InternalAdmin admin;
+    private final InternalAdmin admin;
 
     private volatile boolean started = false;
 
@@ -167,7 +167,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 if (gsm.isSecured()) {
                     credentials = gsm.authenticate(admin.getUsername(), admin.getPassword());
                 }
-                InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, gsm, admin, credentials,
+                InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, gsm, admin,
                         gsm.getAgentId(), gsm.getGSAServiceID());
                 // get the details here, on the thread pool
                 NIODetails nioDetails = gridServiceManager.getNIODetails();
@@ -178,22 +178,22 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 logger.warn("Failed to add GSM with uid [" + serviceID + "]", e);
             }
         } else if (service instanceof GSA) {
-                try {
-                    GSA gsa = (GSA) service;
-                    Credentials credentials = null;
-                    if (gsa.isSecured()) {
-                        credentials = gsa.authenticate(admin.getUsername(), admin.getPassword());
-                    }
-                    AgentProcessesDetails processesDetails = gsa.getDetails();
-                    InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, gsa, admin, processesDetails, credentials);
-                    // get the details here, on the thread pool
-                    NIODetails nioDetails = gridServiceAgent.getNIODetails();
-                    OSDetails osDetails = gridServiceAgent.getOSDetails();
-                    JVMDetails jvmDetails = gridServiceAgent.getJVMDetails();
-                    admin.addGridServiceAgent(gridServiceAgent, nioDetails, osDetails, jvmDetails);
-                } catch (Exception e) {
-                    logger.warn("Failed to add GSA with uid [" + serviceID + "]", e);
+            try {
+                GSA gsa = (GSA) service;
+                Credentials credentials = null;
+                if (gsa.isSecured()) {
+                    credentials = gsa.authenticate(admin.getUsername(), admin.getPassword());
                 }
+                AgentProcessesDetails processesDetails = gsa.getDetails();
+                InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, gsa, admin, processesDetails, credentials);
+                // get the details here, on the thread pool
+                NIODetails nioDetails = gridServiceAgent.getNIODetails();
+                OSDetails osDetails = gridServiceAgent.getOSDetails();
+                JVMDetails jvmDetails = gridServiceAgent.getJVMDetails();
+                admin.addGridServiceAgent(gridServiceAgent, nioDetails, osDetails, jvmDetails);
+            } catch (Exception e) {
+                logger.warn("Failed to add GSA with uid [" + serviceID + "]", e);
+            }
         } else if (service instanceof GSC) {
             try {
                 GSC gsc = (GSC) service;
@@ -238,7 +238,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 if (securityContext != null) {
                     direcyIjspace.setSecurityContext(securityContext);
                 }
-                
+
                 IInternalRemoteJSpaceAdmin spaceAdmin = (IInternalRemoteJSpaceAdmin) direcyIjspace.getAdmin();
 
                 SpaceConfig spaceConfig = spaceAdmin.getConfig();

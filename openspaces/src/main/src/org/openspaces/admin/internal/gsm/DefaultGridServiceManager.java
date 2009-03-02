@@ -1,7 +1,7 @@
 package org.openspaces.admin.internal.gsm;
 
 import com.gigaspaces.grid.gsm.GSM;
-import com.gigaspaces.grid.security.Credentials;
+import com.gigaspaces.grid.security.exception.SecurityException;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.jvm.JVMStatistics;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
@@ -47,15 +47,12 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
 
     private final ProvisionMonitorAdmin gsmAdmin;
 
-    private final Credentials credentials;
-
-    public DefaultGridServiceManager(ServiceID serviceID, GSM gsm, InternalAdmin admin, Credentials credentials,
-                                     int agentId, String agentUid) throws RemoteException {
+    public DefaultGridServiceManager(ServiceID serviceID, GSM gsm, InternalAdmin admin, int agentId, String agentUid)
+    throws RemoteException {
         super(admin, agentId, agentUid);
         this.serviceID = serviceID;
         this.gsm = gsm;
         this.gsmAdmin = (ProvisionMonitorAdmin) gsm.getAdmin();
-        this.credentials = credentials;
     }
 
     public String getUid() {
@@ -95,9 +92,6 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     public ProcessingUnit deploy(ProcessingUnitDeployment deployment) {
-        if (credentials != null && credentials != Credentials.FULL) {
-            throw new AdminException("No credentials to deploy a processing unit");
-        }
         Deploy deploy = new Deploy();
         Deploy.setDisableInfoLogging(true);
         deploy.setGroups(getAdmin().getGroups());
@@ -139,6 +133,8 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             getGSMAdmin().deploy(operationalString);
             latch.await(20, TimeUnit.SECONDS);
             return ref.get();
+        } catch(SecurityException se) {
+            throw new AdminException("Not authorized to deploy a processing unit", se);
         } catch (Exception e) {
             throw new AdminException("Failed to deploy [" + deployment.getProcessingUnit() + "]", e);
         } finally {
@@ -148,76 +144,71 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     public void undeployProcessingUnit(String processingUnitName) {
-        if (credentials != null && credentials != Credentials.FULL) {
-            throw new AdminException("No credentials to deploy a processing unit");
-        }
         try {
             getGSMAdmin().undeploy(processingUnitName);
+        } catch (SecurityException se) {
+            throw new AdminException("Not authorized to undeploy a processing unit", se);
         } catch (Exception e) {
-            throw new AdminException("Failed to undeploy processing unit [" + processingUnitName + "]");
+            throw new AdminException("Failed to undeploy processing unit [" + processingUnitName + "]", e);
         }
     }
 
     public void destroyInstance(ProcessingUnitInstance processingUnitInstance) {
-        if (credentials != null && credentials != Credentials.FULL) {
-            throw new AdminException("No credentials to destroy a processing unit instance");
-        }
         try {
             ((InternalProcessingUnitInstance) processingUnitInstance).getPUServiceBean().destroy();
+        } catch (SecurityException se) {
+            throw new AdminException("Not authorized to destroy a processing unit instance", se);
         } catch (Exception e) {
             if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
                 // all is well
             } else {
-                throw new AdminException("Faield to destroy procesing unit instance", e);
+                throw new AdminException("Failed to destroy procesing unit instance", e);
             }
         }
     }
 
     public void decrementInstance(ProcessingUnitInstance processingUnitInstance) {
-        if (credentials != null && credentials != Credentials.FULL) {
-            throw new AdminException("No credentials to decrement a processing unit instance");
-        }
         if (!processingUnitInstance.getProcessingUnit().canDecrementInstance()) {
             throw new AdminException("Processing unit does not allow to decrement instances on it");
         }
         try {
             gsm.decrement(processingUnitInstance.getProcessingUnit().getName(), ((InternalProcessingUnitInstance) processingUnitInstance).getServiceID(), true);
+        } catch (SecurityException se) {
+            throw new AdminException("Not authorized to decrement a processing unit instance", se);
         } catch (Exception e) {
             if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
                 // all is well
             } else {
-                throw new AdminException("Faield to destroy procesing unit instance", e);
+                throw new AdminException("Failed to destroy procesing unit instance", e);
             }
         }
     }
 
     public void incrementInstance(ProcessingUnit processingUnit) {
-        if (credentials != null && credentials != Credentials.FULL) {
-            throw new AdminException("No credentials to increment a processing unit instance");
-        }
         if (!processingUnit.canIncrementInstance()) {
             throw new AdminException("Processing unit does not allow to increment instances on it");
         }
         try {
             gsm.increment(processingUnit.getName(), null);
+        } catch (SecurityException se) {
+            throw new AdminException("Not authorized to increment a processing unit instance", se);
         } catch (Exception e) {
             if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
                 // all is well
             } else {
-                throw new AdminException("Faield to destroy procesing unit instance", e);
+                throw new AdminException("Failed to destroy procesing unit instance", e);
             }
         }
     }
 
     public void relocate(ProcessingUnitInstance processingUnitInstance, GridServiceContainer gridServiceContainer) {
-        if (credentials != null && credentials != Credentials.FULL) {
-            throw new AdminException("No credentials to destroy a processing unit instance");
-        }
         try {
             gsm.relocate(processingUnitInstance.getProcessingUnit().getName(), ((InternalProcessingUnitInstance) processingUnitInstance).getServiceID(),
                     ((InternalGridServiceContainer) gridServiceContainer).getServiceID(), null);
+        } catch (SecurityException se) {
+            throw new AdminException("Not authorized to relocate a processing unit instance", se);
         } catch (Exception e) {
-            throw new AdminException("Failed to relocate processing unit instnace to grid service container", e);
+            throw new AdminException("Failed to relocate processing unit instance to grid service container", e);
         }
     }
 
