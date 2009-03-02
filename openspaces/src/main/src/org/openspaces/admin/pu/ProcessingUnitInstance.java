@@ -50,7 +50,7 @@ import org.openspaces.remoting.RemotingServiceDetails;
 import java.util.Map;
 
 /**
- * A processing unit instnace is an actual running instnace of a processing unit. For example, when deploying
+ * A processing unit instance is an actual running instance of a processing unit. For example, when deploying
  * a processing unit with 4 instance, there will be eventually 4 instances of the processing unit.
  *
  * @author kimchy
@@ -58,7 +58,7 @@ import java.util.Map;
 public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceDetails>, StatisticsMonitor {
 
     /**
-     * Destroy the instance. If breaches the SLA, will instanstiate the instance again.
+     * Destroy the instance. If breaches the SLA, will instantiate the instance again.
      */
     void destroy();
 
@@ -75,12 +75,17 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
     void relocate(GridServiceContainer gridServiceContainerToRelocateTo);
 
     /**
-     * Retruns the instance id of the processing unit instance.
+     * Relocates the instance to any suitable {@link org.openspaces.admin.gsc.GridServiceContainer}.
+     */
+    void relocate();
+
+    /**
+     * Returns the instance id of the processing unit instance.
      */
     int getInstanceId();
 
     /**
-     * Retruns the backup id of the processing unit instance.
+     * Returns the backup id of the processing unit instance.
      */
     int getBackupId();
 
@@ -90,17 +95,17 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
     ProcessingUnit getProcessingUnit();
 
     /**
-     * Retruns the name of the processing unit.
+     * Returns the name of the processing unit.
      */
     String getName();
 
     /**
-     * Retruns the cluster info of the processing unit instance.
+     * Returns the cluster info of the processing unit instance.
      */
     ClusterInfo getClusterInfo();
 
     /**
-     * Return the proeprties the processing unit was deployed with.
+     * Return the properties the processing unit was deployed with.
      */
     BeanLevelProperties getProperties();
 
@@ -120,7 +125,7 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
     ServiceDetails getServiceDetailsByServiceId(String serviceId);
 
     /**
-     * Returns a map of serivce details by service id.
+     * Returns a map of service details by service id.
      */
     Map<String, ServiceDetails> getServiceDetailsByServiceId();
 
@@ -151,7 +156,7 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
      * {@link org.openspaces.pu.service.ServiceDetails#getId()}.
      */
     Map<String, NotifyEventContainerServiceDetails> getNotifyEventContainerServiceDetails();
-    
+
     /**
      * Returns a map of {@link org.openspaces.events.asyncpolling.AsyncPollingEventContainerServiceDetails} keyed by their
      * {@link org.openspaces.pu.service.ServiceDetails#getId()}.
@@ -186,13 +191,13 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
     boolean isEmbeddedSpaces();
 
     /**
-     * Returns a space instance that was started within the processing unit instnace. Will
+     * Returns a space instance that was started within the processing unit instance. Will
      * return <code>null</code> if no embedded space instances were started (or none has been detected yet).
      */
     SpaceInstance getSpaceInstance();
 
     /**
-     * Returns all the space instnaces that were stared within the processing unit instnace.
+     * Returns all the space instances that were stared within the processing unit instance.
      * Will return an empty array if no space instances were started within this processing unit (or none has
      * been detected yet).
      */
@@ -204,7 +209,7 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
     boolean isJee();
 
     /**
-     * Returns the jee service details of the jee container that was started within this processign unit.
+     * Returns the jee service details of the jee container that was started within this processing unit.
      */
     JeeServiceDetails getJeeDetails();
 

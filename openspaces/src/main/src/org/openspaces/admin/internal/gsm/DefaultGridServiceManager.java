@@ -201,10 +201,20 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         }
     }
 
+    /**
+     * @param processingUnitInstance
+     *            The processing unit instance to relocate
+     * @param gridServiceContainer
+     *            The GSC to relocate to, or <code>null</code> if the GSM should decide on a
+     *            suitable GSC to relocate to.
+     */
     public void relocate(ProcessingUnitInstance processingUnitInstance, GridServiceContainer gridServiceContainer) {
         try {
-            gsm.relocate(processingUnitInstance.getProcessingUnit().getName(), ((InternalProcessingUnitInstance) processingUnitInstance).getServiceID(),
-                    ((InternalGridServiceContainer) gridServiceContainer).getServiceID(), null);
+            gsm.relocate(
+                    processingUnitInstance.getProcessingUnit().getName(),
+                    ((InternalProcessingUnitInstance) processingUnitInstance).getServiceID(),
+                    (gridServiceContainer == null ? null : ((InternalGridServiceContainer) gridServiceContainer).getServiceID()),
+                    null);
         } catch (SecurityException se) {
             throw new AdminException("Not authorized to relocate a processing unit instance", se);
         } catch (Exception e) {
