@@ -4,18 +4,18 @@
 
     <import file="build.xml" />
 	
-	<taskdef name="svn" classname="org.tigris.subversion.svnant.SvnTask" />
+	<!--taskdef name="svn" classname="org.tigris.subversion.svnant.SvnTask" /-->
 	
 	<property name="backup_srv_folder" value="//backup-srv/openspaces" />
 	<property name="project.properties.file" value="project.properties" />
 	<property name="svnant.repository.user" value="opencm" />
 	<property name="svnant.repository.passwd" value="opencm" />
 	
-	<target name="update_version" depends="replace_version" unless="gs.internal.systems.not.available">
+	<!--target name="update_version" depends="replace_version" unless="gs.internal.systems.not.available">
 		<svn javahl="false" username="${svnant.repository.user}" password="${svnant.repository.passwd}">
 			<commit message="GS-803 Build version advanced to ${openspaces-version}" file="${project.properties.file}" />
 		</svn>     
-    </target>
+	</target-->
 	
 	<target name="replace_version">
 		<property name="openspaces.version" value="openspaces-version" />
@@ -25,10 +25,4 @@
 	</target>
 	
 	<target name="full-dist" depends="dist"/>
-	
-	<target name="copy-release-files" unless="gs.internal.systems.not.available">
-		<exec executable="smbclient">
-			<arg line='--user=ca -W=GSPACES -c "lcd ${dist.dir}; prompt; recurse; mput ${openspaces-version}" ${backup_srv_folder} password' />
-		</exec>
-	</target>
 </project>
