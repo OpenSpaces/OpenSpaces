@@ -24,7 +24,7 @@
                          replace='${openspaces.version}=${new.version}'/>
 	</target>
 	
-	<target name="full-dist" depends="dist,copy-release-files"/>
+	<target name="full-dist" depends="dist"/>
 	
 	<target name="copy-release-files" unless="gs.internal.systems.not.available">
 		<exec executable="smbclient">

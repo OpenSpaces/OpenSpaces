@@ -9,9 +9,9 @@ if [ "${JSHOMEDIR}" = "" ] ; then
 fi
 export JSHOMEDIR
 export TMPDIR="/tmp"
-export VERSION=`${JAVACMD} -cp ${JSHOMEDIR}/lib/JSpaces.jar:${JSHOMEDIR}/lib/openspaces/openspaces.jar org.openspaces.maven.support.OutputVersion`
+export VERSION=`${JAVACMD} -cp ${GS_JARS} org.openspaces.maven.support.OutputVersion`
 
-${JAVACMD} -cp ${JSHOMEDIR}/lib/JSpaces.jar:${JSHOMEDIR}/lib/openspaces/openspaces.jar:${JSHOMEDIR}/lib/spring/spring.jar org.openspaces.maven.support.POMGenerator $TMPDIR $VERSION "${JSHOMEDIR}/tools/maven/maven-openspaces-plugin"
+${JAVACMD} -cp ${GS_JARS} org.openspaces.maven.support.POMGenerator $TMPDIR $VERSION "${JSHOMEDIR}/tools/maven/maven-openspaces-plugin"
 
 echo ""
 echo ""

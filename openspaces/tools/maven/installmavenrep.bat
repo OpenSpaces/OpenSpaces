@@ -6,13 +6,13 @@ if "%1" == ""  (
 )
 
 if "%1" == "version"  (
-%JAVACMD% -cp "%JSHOMEDIR%/lib/JSpaces.jar";"%JSHOMEDIR%/lib/openspaces/openspaces.jar" org.openspaces.maven.support.OutputVersion
+%JAVACMD% -cp %GS_JARS% org.openspaces.maven.support.OutputVersion
 goto END
 )
 
 FOR /F "usebackq tokens=*" %%i IN (`installmavenrep.bat version`) DO @set VERSION=%%i
 
-%JAVACMD% -cp "%JSHOMEDIR%/lib/JSpaces.jar";"%JSHOMEDIR%/lib/openspaces/openspaces.jar";"%JSHOMEDIR%/lib/spring/spring.jar" org.openspaces.maven.support.POMGenerator "%TEMP%" %VERSION% "%JSHOMEDIR%/tools/maven/maven-openspaces-plugin"
+%JAVACMD% -cp %GS_JARS% org.openspaces.maven.support.POMGenerator "%TEMP%" %VERSION% "%JSHOMEDIR%/tools/maven/maven-openspaces-plugin"
 
 echo ""
 echo ""

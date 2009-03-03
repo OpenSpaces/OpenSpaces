@@ -9,9 +9,12 @@
 
         <fileset dir="${lib.dir}">
             <include name="**/*.jar"/>
-            <exclude name="openspaces/**"/>
+            <exclude name="gigaspaces/gs-openspaces.jar"/>
+            <exclude name="opt/openspaces/**"/>
             <exclude name="ant/**"/>
         </fileset>
+    	<path path="${basedir}/../jini/classes" />
+    	<path path="${basedir}/../gigaspaces/classes" />
 
     </path>
 
@@ -68,13 +71,6 @@
     </target>
 
 
-    <target name="buildexamples" description="Build the examples that come with OpenSpaces">
-
-        <ant antfile="build.xml" dir="examples/openspaces/helloworld/" target="dist"/>
-        <ant antfile="build.xml" dir="examples/openspaces/data/" target="dist"/>
-        <ant antfile="build.xml" dir="examples/openspaces/data-1.4/" target="dist"/>
-    </target>
-
     <target name="build_1_5" depends="clean, buildmain" description="Compile main sources"/>
 
     <target name="build_1_4" depends="clean, buildmain" description="Compile main sources">
@@ -85,11 +81,10 @@
 
     <target name="fulljar" description="Create full JAR file with all OpenSpaces classes">
 
-        <mkdir dir="${lib.dir}/${name}"/>
-        <delete file="${lib.dir}/${name}/${name}.jar"/>
+        <mkdir dir="${lib.dir}/gigaspaces"/>
+        <delete file="${lib.dir}/gigaspaces/gs-openspaces.jar"/>
 
-
-        <jar jarfile="${lib.dir}/${name}/${name}.jar">
+        <jar jarfile="${lib.dir}/gigaspaces/gs-openspaces.jar">
             <fileset dir="${target.classes.dir}">
                 <include name="META-INF/**"/>
                 <include name="org/openspaces/**"/>
@@ -121,9 +116,10 @@
         <copy file="${target.classes.dir}/META-INF/mule-spring.schemas"
               tofile="${target.classes.dir}/META-INF/spring.schemas" overwrite="true"/>
 
+        <mkdir dir="${lib.dir}/opt/openspaces"/>
 
-        <delete file="${lib.dir}/${name}/mule-os.jar"/>
-        <jar jarfile="${lib.dir}/${name}/mule-os.jar">
+        <delete file="${lib.dir}/opt/openspaces/mule-os.jar"/>
+        <jar jarfile="${lib.dir}/opt/openspaces/mule-os.jar">
             <fileset dir="${target.classes.dir}">
                 <include name="org/openspaces/esb/mule/**"/>
                 <include name="META-INF/services/org/mule/**"/>
@@ -137,8 +133,8 @@
             </manifest>
         </jar>
 
-        <delete file="${lib.dir}/${name}/openspaces-jetty.jar"/>
-        <jar jarfile="${lib.dir}/${name}/openspaces-jetty.jar">
+        <delete file="${lib.dir}/opt/openspaces/gs-openspaces-jetty.jar"/>
+        <jar jarfile="${lib.dir}/opt/openspaces/gs-openspaces-jetty.jar">
             <fileset dir="${target.classes.dir}">
                 <include name="org/openspaces/pu/container/jee/jetty/holder/**"/>
                 <include name="org/openspaces/pu/container/jee/jetty/support/**"/>
@@ -150,8 +146,8 @@
             </manifest>
         </jar>
 
-        <delete file="${lib.dir}/${name}/openspaces-glassfish.jar"/>
-        <jar jarfile="${lib.dir}/${name}/openspaces-glassfish.jar">
+        <delete file="${lib.dir}/opt/openspaces/gs-openspaces-glassfish.jar"/>
+        <jar jarfile="${lib.dir}/opt/openspaces/gs-openspaces-glassfish.jar">
             <fileset dir="${target.classes.dir}">
                 <include name="org/openspaces/pu/container/jee/glassfish/holder/**"/>
                 <include name="org/glassfish/**" />
@@ -176,9 +172,9 @@
 
     <target name="srczip" description="Create source ZIP (containing Java sources)">
 
-        <delete file="lib/${name}/openspaces-src.zip"/>
+        <delete file="${lib.dir}/opt/openspaces/gs-openspaces-src.zip"/>
 
-        <zip zipfile="lib/${name}/openspaces-src.zip">
+        <zip zipfile="${lib.dir}/opt/openspaces/gs-openspaces-src.zip">
             <fileset dir="${main.src.dir}">
                 <include name="org/openspaces/**"/>
             </fileset>
@@ -222,8 +218,9 @@
     </target>
 
     <target name="schema" description="Copy over schema files">
-        <delete dir="lib/${name}/schema"/>
-        <copy todir="lib/${name}/schema" flatten="true">
+        <delete dir="lib/opt/openspaces/schema"/>
+    	<mkdir dir="lib/opt/openspaces/schema"/>
+        <copy todir="lib/opt/openspaces/schema" flatten="true">
             <fileset dir="${main.src.dir}">
                 <include name="**/*.xsd"/>
             </fileset>
@@ -231,12 +228,13 @@
     </target>
 
     <target name="license" description="Copy over license files">
-        <copy todir="lib/${name}" file="${basedir}/openspaces.license.txt"/>
-        <copy todir="lib/${name}" file="${basedir}/openspaces.notice.txt"/>
+    	<mkdir dir="lib/opt/openspaces"/>
+        <copy todir="lib/opt/openspaces" file="${basedir}/openspaces.license.txt"/>
+        <copy todir="lib/opt/openspaces" file="${basedir}/openspaces.notice.txt"/>
     </target>
 
     <target name="dist_1_4"
-            depends="build_1_4, fulljar, buildexamples, srczip, javadoc, schema, license"
+            depends="build_1_4, fulljar, srczip, javadoc, schema, license"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}"/>
         <delete file="${dist.dir}/${name}-1.4.zip"/>
@@ -278,7 +276,7 @@
     </target>
 
     <target name="dist_1_5"
-            depends="build_1_5, fulljar, buildexamples, srczip, javadoc, schema, license"
+            depends="build_1_5, fulljar, srczip, javadoc, schema, license"
             description="Creates the OpenSpaces distribution">
         <mkdir dir="${dist.dir}"/>
         <delete file="${dist.dir}/${name}-1.5.zip"/>
@@ -291,24 +289,22 @@
             	<exclude name="tools/maven/maven-openspaces-plugin/target/**" />
                 <exclude name="tools/**/*.iml" />
 
-                <include name="examples/**"/>
-                <exclude name="examples/openspaces/data-1.4/**"/>
-                <exclude name="examples/**/*.iml"/>
-                <exclude name="examples/**/.cvsignore"/>
-                <include name="lib/${name}/**"/>
-                <include name="lib/groovy/**"/>
-                <include name="lib/spring/spring.jar" />
-                <include name="lib/j2ee/common-annotations.jar" />
-                <include name="lib/j2ee/activation.jar" />
-                <include name="lib/j2ee/jta.jar" />
-                <include name="lib/j2ee/connector.jar" />
-                <include name="lib/jetty/**" />
+                <include name="lib/gigaspaces/gs-openspaces.jar"/>
+            	<include name="lib/gigaspaces/spring.jar"/>
+                <include name="lib/opt/openspaces/**"/>
+                <include name="lib/opt/spring/**"/>
+                <include name="lib/platform/groovy/**"/>
+                <include name="lib/platform/jee/common-annotations.jar" />
+                <include name="lib/platform/jee/activation.jar" />
+                <include name="lib/platform/jee/jta.jar" />
+                <include name="lib/platform/jee/connector.jar" />
+                <include name="lib/platform/jetty/**" />
                 <!--<include name="lib/glassfish/**" />-->
-                <include name="lib/velocity/**" />
+                <include name="lib/platform/velocity/**" />
             </zipfileset>
+        	<zipfileset dir="${lib.dir}/external/common" includes="commons-logging.jar" prefix="lib/gigaspaces">
+        	</zipfileset>
         </zip>
-        <mkdir dir="${dist.dir}/1.5"/>
-        <copy todir="${dist.dir}/1.5" file="${lib.dir}/${name}/${name}.jar"/>
     </target>
 
     <target name="dist">

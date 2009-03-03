@@ -891,19 +891,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             ArrayList<String> deleted = new ArrayList<String>();
             for (File webInfJarFile : wenInfJars) {
                 boolean delete = false;
-                if (webInfJarFile.getName().startsWith("JSpaces")) {
-                    delete = true;
-                } else if (webInfJarFile.getName().startsWith("gs-")) {
-                    delete = true;
-                } else if (webInfJarFile.getName().startsWith("jsk-")) {
-                    delete = true;
-                } else if (webInfJarFile.getName().startsWith("mahalo")) {
-                    delete = true;
-                } else if (webInfJarFile.getName().startsWith("reggie")) {
-                    delete = true;
-                } else if (webInfJarFile.getName().startsWith("start")) {
-                    delete = true;
-                } else if (webInfJarFile.getName().startsWith("tools")) {
+                if (webInfJarFile.getName().startsWith("gs-runtime")) {
                     delete = true;
                 }
                 if (delete) {
@@ -915,13 +903,14 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 logger.debug(logMessage("Deleted the following jars from the web application: " + deleted));
             }
             try {
-                FileCopyUtils.copy(new File(Environment.getHomeDirectory() + "/lib/openspaces/openspaces.jar"), new File(deployPath, "WEB-INF/lib/openspaces.jar"));
+                FileCopyUtils.copy(new File(Environment.getHomeDirectory() + "/lib/gigaspaces/gs-openspaces.jar"), new File(deployPath, "WEB-INF/lib/gs-openspaces.jar"));
                 logger.debug(logMessage("Added openspaces jar to web application"));
             } catch (IOException e) {
                 // don't copy it
             }
             try {
-                FileSystemUtils.copyRecursively(new File(Environment.getHomeDirectory() + "/lib/spring"), new File(deployPath, "WEB-INF/lib"));
+                FileCopyUtils.copy(new File(Environment.getHomeDirectory() + "/lib/gigaspaces/spring.jar"), new File(deployPath, "WEB-INF/lib/spring.jar"));
+                FileSystemUtils.copyRecursively(new File(Environment.getHomeDirectory() + "/lib/opt/spring"), new File(deployPath, "WEB-INF/lib"));
                 logger.debug(logMessage("Added spring jars to web application"));
             } catch (IOException e) {
                 // don't copy it
@@ -952,7 +941,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     public JVMStatistics getJVMStatistics() throws RemoteException {
         return JVMHelper.getStatistics();
     }
-
+    
     public void runGc() throws RemoteException {
         System.gc();
     }
