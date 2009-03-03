@@ -135,6 +135,10 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
         return gsc.getJVMStatistics();
     }
 
+    public void runGc() throws RemoteException {
+        gsc.runGc();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

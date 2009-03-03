@@ -331,4 +331,8 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     public JVMStatistics getJVMStatistics() throws RemoteException {
         return spaceAdmin.getJVMStatistics();
     }
+
+    public void runGc() throws RemoteException {
+        spaceAdmin.runGc();
+    }
 }

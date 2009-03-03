@@ -278,4 +278,8 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     public JVMStatistics getJVMStatistics() throws RemoteException {
         return gsa.getJVMStatistics();
     }
+
+    public void runGc() throws RemoteException {
+        gsa.runGc();
+    }
 }

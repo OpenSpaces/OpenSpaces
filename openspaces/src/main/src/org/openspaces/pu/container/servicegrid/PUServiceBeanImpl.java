@@ -952,4 +952,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     public JVMStatistics getJVMStatistics() throws RemoteException {
         return JVMHelper.getStatistics();
     }
+
+    public void runGc() throws RemoteException {
+        System.gc();
+    }
 }

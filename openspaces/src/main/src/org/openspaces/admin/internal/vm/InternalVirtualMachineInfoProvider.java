@@ -13,4 +13,6 @@ public interface InternalVirtualMachineInfoProvider extends InternalVirtualMachi
     JVMDetails getJVMDetails() throws RemoteException;
 
     JVMStatistics getJVMStatistics() throws RemoteException;
+
+    void runGc() throws RemoteException;
 }

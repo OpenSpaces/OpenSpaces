@@ -54,6 +54,11 @@ public interface VirtualMachine extends MachineAware, StatisticsMonitor {
     VirtualMachineStatistics getStatistics();
 
     /**
+     * Runs GC on the virtual machine.
+     */
+    void runGc();
+
+    /**
      * Returns the grid service agent started within this virutal machine.
      * Returns <code>null</code> if no grid service agent was started within it.
      */

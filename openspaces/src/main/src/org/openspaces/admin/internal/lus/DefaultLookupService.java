@@ -86,6 +86,10 @@ public class DefaultLookupService extends AbstractAgentGridComponent implements 
         return ((JVMInfoProvider) registrar.getRegistrar()).getJVMStatistics();
     }
 
+    public void runGc() throws RemoteException {
+        ((JVMInfoProvider) registrar.getRegistrar()).runGc();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

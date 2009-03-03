@@ -443,4 +443,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     public JVMStatistics getJVMStatistics() throws RemoteException {
         return puServiceBean.getJVMStatistics();
     }
+
+    public void runGc() throws RemoteException {
+        puServiceBean.runGc();
+    }
 }

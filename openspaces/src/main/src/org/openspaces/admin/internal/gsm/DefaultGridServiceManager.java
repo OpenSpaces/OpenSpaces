@@ -248,6 +248,10 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         return gsm.getJVMStatistics();
     }
 
+    public void runGc() throws RemoteException {
+        gsm.runGc();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

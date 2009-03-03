@@ -217,6 +217,17 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
         spaceInstances.removeSpaceInstance(uid);
     }
 
+    public void runGc() {
+        for (InternalVirtualMachineInfoProvider provider : virtualMachineInfoProviders) {
+            try {
+                provider.runGc();
+                break;
+            } catch (RemoteException e) {
+                // continue to the next one
+            }
+        }
+    }
+
     private static final VirtualMachineStatistics NA_STATS = new DefaultVirtualMachineStatistics();
 
     public synchronized VirtualMachineStatistics getStatistics() {
