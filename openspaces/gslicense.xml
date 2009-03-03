@@ -1,8 +1,0 @@
-<com>
-  <j_spaces>
-        <kernel>
-        	<!-- can also be set via system property using -Dcom.gs.licensekey -->
-            <licensekey>May 24, 2009~GigaSpaces-eval@OSQN1WNPK5PPOStASVrZ#PREMIUM^7.0XAPPremium%UNBOUND</licensekey>
-       </kernel>
-  </j_spaces>
-</com>
