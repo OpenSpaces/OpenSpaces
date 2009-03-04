@@ -8,10 +8,8 @@ import java.io.*;
  * @author kimchy
  */
 public class POMGenerator {
-    
-    public static final String GS_JINI_GROUP =  "com.gigaspaces.jini";
-    public static final String GS_CORE_GROUP =  "com.gigaspaces.core";
-    public static final String GS_OS_GROUP   =  "org.openspaces";
+
+    public static final String GS_GROUP = "com.gigaspaces";
 
     public static void main(String[] args) throws Exception {
         String templDir = System.getProperty("java.io.tmpdir");
@@ -25,30 +23,11 @@ public class POMGenerator {
         File dir = new File(templDir);
         dir.mkdirs();
 
-        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "jini-start");
-        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "jini-jsk-lib");
-        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "jini-jsk-platform");
-        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "jini-jsk-resources");
-        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "jini-reggie");
-        writeSimplePom(dir, version, POMGenerator.GS_JINI_GROUP, "jini-mahalo");
-        
-        writeSimplePom(dir, version, POMGenerator.GS_CORE_GROUP, "gs-boot");
-        writeSimplePom(dir, version, POMGenerator.GS_CORE_GROUP, "gs-service");
-        writeSimplePom(dir, version, POMGenerator.GS_CORE_GROUP, "gs-lib");
+        writeSimplePom(dir, version, POMGenerator.GS_GROUP, "gs-openspaces");
 
-        PrintWriter writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "JSpaces-pom.xml")))));
-        printHeader(writer, version, POMGenerator.GS_CORE_GROUP, "JSpaces");
-        printDependency(writer, POMGenerator.GS_JINI_GROUP, "jini-start");
-        printDependency(writer, POMGenerator.GS_JINI_GROUP, "jini-jsk-lib");
-        printDependency(writer, POMGenerator.GS_JINI_GROUP, "jini-jsk-platform");
-        printDependency(writer, POMGenerator.GS_JINI_GROUP, "jini-jsk-resources");
-        printDependency(writer, POMGenerator.GS_JINI_GROUP, "jini-reggie");
-        printDependency(writer, POMGenerator.GS_JINI_GROUP, "jini-mahalo");
+        PrintWriter writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "gs-runtime-pom.xml")))));
+        printHeader(writer, version, POMGenerator.GS_GROUP, "gs-runtime");
 
-        printDependency(writer, POMGenerator.GS_CORE_GROUP, "gs-boot");
-        printDependency(writer, POMGenerator.GS_CORE_GROUP, "gs-service");
-        printDependency(writer, POMGenerator.GS_CORE_GROUP, "gs-lib");
-        
         // jmx
         if (!JdkVersion.isAtLeastJava15()) {
             printDependency(writer, "com.sun.jdmk", "jmxtools", "1.2.1");
@@ -60,9 +39,9 @@ public class POMGenerator {
         printFooter(writer);
         writer.close();
 
-        writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "openspaces-pom.xml")))));
-        printHeader(writer, version, POMGenerator.GS_OS_GROUP, "openspaces");
-        printDependency(writer, POMGenerator.GS_CORE_GROUP, "JSpaces");
+        writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "gs-openspaces-pom.xml")))));
+        printHeader(writer, version, POMGenerator.GS_GROUP, "gs-openspaces");
+        printDependency(writer, POMGenerator.GS_GROUP, "gs-runtime");
         printDependency(writer, "org.springframework", "spring", "2.5.6");
         printDependency(writer, "commons-logging", "commons-logging", "1.1.1");
         // add javax.annotations (@PostConstruct) for JDK 1.5 (no need for 1.6 since it is there)
@@ -73,10 +52,10 @@ public class POMGenerator {
         writer.close();
 
         writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "mule-os-pom.xml")))));
-        printHeader(writer, version, POMGenerator.GS_OS_GROUP, "mule-os");
+        printHeader(writer, version, POMGenerator.GS_GROUP, "mule-os");
         printFooter(writer);
         writer.close();
-        
+
         if (args.length > 2) {
             String directory = args[2];
             replaceVersionInPluginPom(version, directory);

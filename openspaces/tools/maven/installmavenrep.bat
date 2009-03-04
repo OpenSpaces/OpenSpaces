@@ -20,21 +20,10 @@ echo "Installing Version %VERSION%"
 echo ""
 echo ""
 
-REM Jini Jars
-call mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jini-start -Dversion=%VERSION% -DpomFile=%TEMP%/jini-start-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/start.jar"
-call mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jini-jsk-lib -Dversion=%VERSION% -DpomFile=%TEMP%/jini-jsk-lib-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/jsk-lib.jar"
-call mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jini-jsk-platform -Dversion=%VERSION% -DpomFile=%TEMP%/jini-jsk-platform-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/jsk-platform.jar"
-call mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jini-jsk-resources -Dversion=%VERSION% -DpomFile=%TEMP%/jini-jsk-resources-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/jsk-resources.jar"
-call mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jini-reggie -Dversion=%VERSION% -DpomFile=%TEMP%/jini-reggie-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/reggie.jar"
-call mvn install:install-file -DgroupId=com.gigaspaces.jini -DartifactId=jini-mahalo -Dversion=%VERSION% -DpomFile=%TEMP%/jini-mahalo-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jini/mahalo.jar"
-
 REM GigaSpaces Jars
-call mvn install:install-file -DgroupId=com.gigaspaces.core -DartifactId=gs-boot -Dversion=%VERSION% -DpomFile=%TEMP%/gs-boot-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/ServiceGrid/gs-boot.jar"
-call mvn install:install-file -DgroupId=com.gigaspaces.core -DartifactId=gs-service -Dversion=%VERSION% -DpomFile=%TEMP%/gs-service-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/ServiceGrid/gs-service.jar"
-call mvn install:install-file -DgroupId=com.gigaspaces.core -DartifactId=gs-lib -Dversion=%VERSION% -DpomFile=%TEMP%/gs-lib-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/ServiceGrid/gs-lib.jar"
-call mvn install:install-file -DgroupId=com.gigaspaces.core -DartifactId=JSpaces -Dversion=%VERSION% -DpomFile=%TEMP%/JSpaces-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/JSpaces.jar"
-call mvn install:install-file -DgroupId=org.openspaces -DartifactId=openspaces -Dversion=%VERSION% -DpomFile=%TEMP%/openspaces-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/openspaces/openspaces.jar"
-call mvn install:install-file -DgroupId=org.openspaces -DartifactId=mule-os -Dversion=%VERSION% -Dpackaging=jar -DpomFile=%TEMP%/mule-os-pom.xml -Dfile="%JSHOMEDIR%/lib/openspaces/mule-os.jar"
+call mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-runtime -Dversion=%VERSION% -DpomFile=%TEMP%/gs-runtime-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/gigaspaces/gs-runtime.jar"
+call mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -Dversion=%VERSION% -DpomFile=%TEMP%/gs-openspaces-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/gigaspaces/gs-openspaces.jar"
+call mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=mule-os -Dversion=%VERSION% -Dpackaging=jar -DpomFile=%TEMP%/mule-os-pom.xml -Dfile="%JSHOMEDIR%/lib/opt/openspaces/mule-os.jar"
 
 REM JMX Jars
 call mvn install:install-file -DgroupId=com.sun.jdmk -DartifactId=jmxtools -Dversion=1.2.1 -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/jmx/jmxtools.jar"
@@ -48,17 +37,8 @@ REM Copy licenese file
 call mvn os:install-license -Dfile="%JSHOMEDIR%\gslicense.xml" -Dversion=%VERSION%
 
 REM remove temp files
-del %TEMP%\jini-start-pom.xml
-del %TEMP%\jini-jsk-lib-pom.xml
-del %TEMP%\jini-jsk-platform-pom.xml
-del %TEMP%\jini-jsk-resources-pom.xml
-del %TEMP%\jini-reggie-pom.xml
-del %TEMP%\jini-mahalo-pom.xml
-del %TEMP%\gs-boot-pom.xml
-del %TEMP%\gs-service-pom.xml
-del %TEMP%\gs-lib-pom.xml
-del %TEMP%\JSpaces-pom.xml
-del %TEMP%\openspaces-pom.xml
+del %TEMP%\gs-runtime-pom.xml
+del %TEMP%\gs-openspaces-pom.xml
 del %TEMP%\mule-os-pom.xml
 
 :END
