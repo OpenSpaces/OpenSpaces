@@ -15,7 +15,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/sandbox/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/sandbox/test" isTestSource="true" />
     </content>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="xml">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/platform/xml" />
@@ -27,7 +27,7 @@
     </orderEntry>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="hibernate">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/external/hibernate" />
@@ -37,7 +37,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/external/hibernate" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="antlr">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/external/antlr" />
@@ -47,7 +47,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/external/antlr" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="asm">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/external/asm" />
@@ -57,7 +57,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/external/asm" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="atomikos">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/external/atomikos" />
@@ -67,7 +67,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/external/atomikos" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="common">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/external/common" />
@@ -77,7 +77,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/external/common" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="dom4j">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/external/dom4j" />
@@ -87,7 +87,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/external/dom4j" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="javassist">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/external/javassist" />
@@ -97,7 +97,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/external/javassist" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="jbossts">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/external/jbossts" />
@@ -107,7 +107,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/external/jbossts" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="jmock">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/external/jmock" />
@@ -117,7 +117,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/external/jmock" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="jotm">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/external/jotm" />
@@ -127,7 +127,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/external/jotm" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="jsr223">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/external/jsr223" />
@@ -137,7 +137,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/external/jsr223" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="junit">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/external/junit" />
@@ -147,7 +147,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/external/junit" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="maven">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/external/maven" />
@@ -157,7 +157,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/external/maven" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="spring">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/lib/external/spring/spring-test.jar!/" />
@@ -170,7 +170,7 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="ant">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/platform/ant" />
@@ -180,7 +180,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/platform/ant" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="glassfish">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/platform/glassfish" />
@@ -190,7 +190,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/platform/glassfish" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="groovy">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/platform/groovy" />
@@ -200,7 +200,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/platform/groovy" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="jdbc">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/platform/jdbc" />
@@ -210,7 +210,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/platform/jdbc" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="jee">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/platform/jee" />
@@ -220,7 +220,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/platform/jee" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="jetty">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/platform/jetty" />
@@ -230,7 +230,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/platform/jetty" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="jmx">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/platform/jmx" />
@@ -240,7 +240,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/platform/jmx" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="jruby">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/platform/jruby" />
@@ -250,7 +250,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/platform/jruby" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="mule">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/platform/mule" />
@@ -262,7 +262,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/platform/mule" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="velocity">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/platform/velocity" />
@@ -272,7 +272,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/platform/velocity" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="backport">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/lib/gigaspaces/backport-util-concurrent.jar!/" />
@@ -281,12 +281,159 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="gigaspaces" />
+    <orderEntry type="module" module-name="gigaspaces" exported="" />
   </component>
   <component name="copyright">
     <Base>
       <setting name="state" value="2" />
     </Base>
+    <LanguageOptions name="HTML">
+      <option name="templateOptions">
+        <value>
+          <option name="block" value="true" />
+          <option name="separateBefore" value="false" />
+          <option name="separateAfter" value="false" />
+          <option name="prefixLines" value="true" />
+          <option name="lenBefore" value="80" />
+          <option name="lenAfter" value="80" />
+          <option name="box" value="false" />
+          <option name="filler" value=" " />
+        </value>
+      </option>
+      <option name="notice" value="Copyright (c) &amp;#36;today.year, Your Corporation. All Rights Reserved." />
+      <option name="keyword" value="Copyright" />
+      <option name="fileTypeOverride" value="2" />
+      <option name="relativeBefore" value="true" />
+      <option name="addBlankAfter" value="true" />
+      <option name="fileLocation" value="1" />
+      <option name="useAlternate" value="false" />
+    </LanguageOptions>
+    <LanguageOptions name="JAVA">
+      <option name="templateOptions">
+        <value>
+          <option name="block" value="true" />
+          <option name="separateBefore" value="false" />
+          <option name="separateAfter" value="false" />
+          <option name="prefixLines" value="true" />
+          <option name="lenBefore" value="80" />
+          <option name="lenAfter" value="80" />
+          <option name="box" value="false" />
+          <option name="filler" value=" " />
+        </value>
+      </option>
+      <option name="notice" value="Copyright (c) &amp;#36;today.year, Your Corporation. All Rights Reserved." />
+      <option name="keyword" value="Copyright" />
+      <option name="fileTypeOverride" value="2" />
+      <option name="relativeBefore" value="true" />
+      <option name="addBlankAfter" value="true" />
+      <option name="fileLocation" value="1" />
+      <option name="useAlternate" value="false" />
+    </LanguageOptions>
+    <LanguageOptions name="JSP">
+      <option name="templateOptions">
+        <value>
+          <option name="block" value="true" />
+          <option name="separateBefore" value="false" />
+          <option name="separateAfter" value="false" />
+          <option name="prefixLines" value="true" />
+          <option name="lenBefore" value="80" />
+          <option name="lenAfter" value="80" />
+          <option name="box" value="false" />
+          <option name="filler" value=" " />
+        </value>
+      </option>
+      <option name="notice" value="Copyright (c) &amp;#36;today.year, Your Corporation. All Rights Reserved." />
+      <option name="keyword" value="Copyright" />
+      <option name="fileTypeOverride" value="2" />
+      <option name="relativeBefore" value="true" />
+      <option name="addBlankAfter" value="true" />
+      <option name="fileLocation" value="1" />
+      <option name="useAlternate" value="false" />
+    </LanguageOptions>
+    <LanguageOptions name="JavaScript">
+      <option name="templateOptions">
+        <value>
+          <option name="block" value="true" />
+          <option name="separateBefore" value="false" />
+          <option name="separateAfter" value="false" />
+          <option name="prefixLines" value="true" />
+          <option name="lenBefore" value="80" />
+          <option name="lenAfter" value="80" />
+          <option name="box" value="false" />
+          <option name="filler" value=" " />
+        </value>
+      </option>
+      <option name="notice" value="Copyright (c) &amp;#36;today.year, Your Corporation. All Rights Reserved." />
+      <option name="keyword" value="Copyright" />
+      <option name="fileTypeOverride" value="2" />
+      <option name="relativeBefore" value="true" />
+      <option name="addBlankAfter" value="true" />
+      <option name="fileLocation" value="1" />
+      <option name="useAlternate" value="false" />
+    </LanguageOptions>
+    <LanguageOptions name="Properties">
+      <option name="templateOptions">
+        <value>
+          <option name="block" value="true" />
+          <option name="separateBefore" value="false" />
+          <option name="separateAfter" value="false" />
+          <option name="prefixLines" value="true" />
+          <option name="lenBefore" value="80" />
+          <option name="lenAfter" value="80" />
+          <option name="box" value="false" />
+          <option name="filler" value=" " />
+        </value>
+      </option>
+      <option name="notice" value="Copyright (c) &amp;#36;today.year, Your Corporation. All Rights Reserved." />
+      <option name="keyword" value="Copyright" />
+      <option name="fileTypeOverride" value="2" />
+      <option name="relativeBefore" value="true" />
+      <option name="addBlankAfter" value="true" />
+      <option name="fileLocation" value="1" />
+      <option name="useAlternate" value="false" />
+    </LanguageOptions>
+    <LanguageOptions name="XML">
+      <option name="templateOptions">
+        <value>
+          <option name="block" value="true" />
+          <option name="separateBefore" value="false" />
+          <option name="separateAfter" value="false" />
+          <option name="prefixLines" value="true" />
+          <option name="lenBefore" value="80" />
+          <option name="lenAfter" value="80" />
+          <option name="box" value="false" />
+          <option name="filler" value=" " />
+        </value>
+      </option>
+      <option name="notice" value="Copyright (c) &amp;#36;today.year, Your Corporation. All Rights Reserved." />
+      <option name="keyword" value="Copyright" />
+      <option name="fileTypeOverride" value="2" />
+      <option name="relativeBefore" value="true" />
+      <option name="addBlankAfter" value="true" />
+      <option name="fileLocation" value="1" />
+      <option name="useAlternate" value="false" />
+    </LanguageOptions>
+    <LanguageOptions name="__TEMPLATE__">
+      <option name="templateOptions">
+        <value>
+          <option name="block" value="true" />
+          <option name="separateBefore" value="false" />
+          <option name="separateAfter" value="false" />
+          <option name="prefixLines" value="true" />
+          <option name="lenBefore" value="80" />
+          <option name="lenAfter" value="80" />
+          <option name="box" value="false" />
+          <option name="filler" value=" " />
+        </value>
+      </option>
+      <option name="notice" value="Copyright (c) &amp;#36;today.year, Your Corporation. All Rights Reserved." />
+      <option name="keyword" value="Copyright" />
+      <option name="fileTypeOverride" value="4" />
+      <option name="relativeBefore" value="true" />
+      <option name="addBlankAfter" value="true" />
+      <option name="fileLocation" value="1" />
+      <option name="useAlternate" value="false" />
+    </LanguageOptions>
   </component>
 </module>
 
