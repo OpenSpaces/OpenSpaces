@@ -294,7 +294,6 @@
                 <include name="lib/opt/openspaces/**"/>
                 <include name="lib/opt/spring/**"/>
                 <include name="lib/platform/groovy/**"/>
-                <include name="lib/platform/jee/common-annotations.jar" />
                 <include name="lib/platform/jee/activation.jar" />
                 <include name="lib/platform/jee/jta.jar" />
                 <include name="lib/platform/jee/connector.jar" />

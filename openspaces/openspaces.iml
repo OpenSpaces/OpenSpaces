@@ -163,6 +163,7 @@
           <root url="jar://$MODULE_DIR$/lib/external/spring/spring-test.jar!/" />
           <root url="jar://$MODULE_DIR$/lib/gigaspaces/spring.jar!/" />
           <root url="jar://$MODULE_DIR$/lib/opt/spring/cglib-nodep-2.1_3.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/opt/spring/common-annotations.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
@@ -208,16 +209,6 @@
         <JAVADOC />
         <SOURCES />
         <jarDirectory url="file://$MODULE_DIR$/lib/platform/jdbc" recursive="false" />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library name="jee">
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/lib/platform/jee" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-        <jarDirectory url="file://$MODULE_DIR$/lib/platform/jee" recursive="false" />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
@@ -270,6 +261,16 @@
         <JAVADOC />
         <SOURCES />
         <jarDirectory url="file://$MODULE_DIR$/lib/platform/velocity" recursive="false" />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library name="jee">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/lib/platform/jee" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/lib/platform/jee" recursive="false" />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
