@@ -5,10 +5,6 @@
 	<classpathentry kind="src" output="target/sandbox-classes" path="src/sandbox/src"/>
 	<classpathentry kind="src" output="target/sandbox-test-classes" path="src/sandbox/test"/>
 	<classpathentry kind="src" output="target/main-test-classes" path="src/main/test"/>
-	<classpathentry kind="src" output="examples/openspaces/helloworld/pu/helloworld" path="examples/openspaces/helloworld/src"/>
-	<classpathentry kind="src" output="examples/openspaces/data/common/classes" path="examples/openspaces/data/common/src"/>
-	<classpathentry kind="src" output="examples/openspaces/data/processor/pu/data-processor" path="examples/openspaces/data/processor/src"/>
-	<classpathentry kind="src" output="examples/openspaces/data/feeder/pu/data-feeder" path="examples/openspaces/data/feeder/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/gigaspaces"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jini"/>
