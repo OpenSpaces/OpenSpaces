@@ -1,7 +1,6 @@
 package org.openspaces.admin.internal.gsc;
 
 import com.gigaspaces.grid.gsc.GSC;
-import com.gigaspaces.grid.security.Credentials;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.jvm.JVMStatistics;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
@@ -35,14 +34,10 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
 
     private final InternalProcessingUnitInstances processingUnitInstances;
 
-    private final Credentials credentials;
-
-    public DefaultGridServiceContainer(ServiceID serviceID, GSC gsc, InternalAdmin admin, Credentials credentials,
-                                       int agentId, String agentUid) {
+    public DefaultGridServiceContainer(ServiceID serviceID, GSC gsc, InternalAdmin admin, int agentId, String agentUid) {
         super(admin, agentId, agentUid);
         this.serviceID = serviceID;
         this.gsc = gsc;
-        this.credentials = credentials;
         this.processingUnitInstances = new DefaultProcessingUnitInstances(admin);
     }
 

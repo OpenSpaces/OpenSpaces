@@ -163,9 +163,8 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         if (service instanceof GSM) {
             try {
                 GSM gsm = (GSM) service;
-                Credentials credentials = null;
                 if (gsm.isSecured()) {
-                    credentials = gsm.authenticate(admin.getUsername(), admin.getPassword());
+                    gsm.authenticate(admin.getUsername(), admin.getPassword());
                 }
                 InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, gsm, admin,
                         gsm.getAgentId(), gsm.getGSAServiceID());
@@ -197,12 +196,11 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         } else if (service instanceof GSC) {
             try {
                 GSC gsc = (GSC) service;
-                Credentials credentials = null;
                 if (gsc.isSecured()) {
-                    credentials = gsc.authenticate(admin.getUsername(), admin.getPassword());
+                    gsc.authenticate(admin.getUsername(), admin.getPassword());
                 }
-                InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(serviceID, gsc, admin, credentials,
-                        gsc.getAgentId(), gsc.getGSAServiceID());
+                InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(serviceID, gsc,
+                        admin, gsc.getAgentId(), gsc.getGSAServiceID());
                 // get the details here, on the thread pool
                 NIODetails nioDetails = gridServiceContainer.getNIODetails();
                 OSDetails osDetails = gridServiceContainer.getOSDetails();
