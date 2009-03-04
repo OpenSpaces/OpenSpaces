@@ -87,7 +87,7 @@ public class DefaultSpace implements InternalSpace {
         this.name = name;
 
         this.space = clusteredSpace;
-        this.gigaSpace = new GigaSpaceConfigurer(space).gigaSpace();
+        this.gigaSpace = new GigaSpaceConfigurer(space).clustered(true).gigaSpace();
         
         this.spaceInstanceAddedEventManager = new DefaultSpaceInstanceAddedEventManager(admin, this);
         this.spaceInstanceRemovedEventManager = new DefaultSpaceInstanceRemovedEventManager(admin);
