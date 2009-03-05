@@ -228,6 +228,37 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         }
     }
 
+    public GridServiceManager waitForManaged() {
+        return waitForManaged(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public GridServiceManager waitForManaged(long timeout, TimeUnit timeUnit) {
+        if (isManaged()) {
+            return managingGridServiceManager;
+        }
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<GridServiceManager> ref = new AtomicReference<GridServiceManager>();
+        ManagingGridServiceManagerChangedEventListener listener = new ManagingGridServiceManagerChangedEventListener() {
+            public void processingUnitManagingGridServiceManagerChanged(ManagingGridServiceManagerChangedEvent event) {
+                ref.set(event.getNewGridServiceManager());
+                latch.countDown();
+            }
+        };
+        getManagingGridServiceManagerChanged().add(listener);
+        if (isManaged()) {
+            getManagingGridServiceManagerChanged().remove(listener);
+            return managingGridServiceManager;
+        }
+        try {
+            latch.await(timeout, timeUnit);
+            return ref.get();
+        } catch (InterruptedException e) {
+            return null;
+        } finally {
+            getManagingGridServiceManagerChanged().remove(listener);
+        }
+    }
+
     public boolean canIncrementInstance() {
         return getSpaces().length == 0;
     }

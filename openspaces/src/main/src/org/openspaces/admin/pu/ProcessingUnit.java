@@ -106,6 +106,17 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     Space waitForSpace(long timeout, TimeUnit timeUnit);
 
     /**
+     * Waits till there is a managing {@link org.openspaces.admin.gsm.GridServiceManager} for the processing unit.  
+     */
+    GridServiceManager waitForManaged();
+
+    /**
+     * Waits till there is a managing {@link org.openspaces.admin.gsm.GridServiceManager} for the processing unit
+     * for the specified timeout.
+     */
+    GridServiceManager waitForManaged(long timeout, TimeUnit timeUnit);
+
+    /**
      * Returns <code>true</code> if this processing unit allows to increment instances on it.
      */
     boolean canIncrementInstance();
