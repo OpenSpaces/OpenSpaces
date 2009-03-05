@@ -16,7 +16,6 @@
 	<classpathentry kind="lib" path="lib/platform/groovy/groovy-all-1.5.7.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jdbc/hsqldb.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jee/activation.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jee/common-annotations.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jee/connector.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jee/ejb.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jee/jaxrpc.jar"/>
@@ -92,5 +91,6 @@
 	<classpathentry kind="lib" path="lib/external/spring/spring-test.jar"/>
 	<classpathentry kind="lib" path="lib/opt/spring/cglib-nodep-2.1_3.jar"/>
 	<classpathentry kind="lib" path="tools/maven/apache-maven-2.0.9/lib/maven-2.0.9-uber.jar"/>
+	<classpathentry kind="lib" path="lib/opt/spring/common-annotations.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
