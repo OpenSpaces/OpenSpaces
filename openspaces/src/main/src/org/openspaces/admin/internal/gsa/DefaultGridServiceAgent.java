@@ -2,7 +2,7 @@ package org.openspaces.admin.internal.gsa;
 
 import com.gigaspaces.grid.gsa.AgentProcessesDetails;
 import com.gigaspaces.grid.gsa.GSA;
-import com.gigaspaces.grid.security.Credentials;
+import com.gigaspaces.grid.security.exception.SecurityException;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.jvm.JVMStatistics;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
@@ -42,16 +42,13 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
 
     private final GSA gsa;
 
-    private final Credentials credentials;
-
     private volatile AgentProcessesDetails processesDetails;
 
-    public DefaultGridServiceAgent(ServiceID serviceID, GSA gsa, InternalAdmin admin, AgentProcessesDetails processesDetails, Credentials credentials) {
+    public DefaultGridServiceAgent(ServiceID serviceID, GSA gsa, InternalAdmin admin, AgentProcessesDetails processesDetails) {
         super(admin);
         this.serviceID = serviceID;
         this.gsa = gsa;
         this.processesDetails = processesDetails;
-        this.credentials = credentials;
     }
 
     public String getUid() {
@@ -75,22 +72,20 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public void startGridService(GridServiceOptions options) {
-        if (credentials != null && credentials != Credentials.FULL) {
-            throw new AdminException("No credentials to start a service");
-        }
         try {
             gsa.startProcess(options.getOptions());
+        } catch (SecurityException se) {
+            throw new AdminException("No credentials to start a service", se);
         } catch (IOException e) {
             throw new AdminException("Failed to start Grid Service", e);
         }
     }
 
     public void startGridService(GridServiceManagerOptions options) {
-        if (credentials != null && credentials != Credentials.FULL) {
-            throw new AdminException("No credentials to start a GSM");
-        }
         try {
             gsa.startProcess(options.getOptions());
+        } catch (SecurityException se) {
+            throw new AdminException("No credentials to start a GSM", se);
         } catch (IOException e) {
             throw new AdminException("Failed to start GSM", e);
         }
@@ -101,9 +96,6 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public GridServiceManager startGridServiceAndWait(GridServiceManagerOptions options, long timeout, TimeUnit timeUnit) {
-        if (credentials != null && credentials != Credentials.FULL) {
-            throw new AdminException("No credentials to start a GSM");
-        }
         final Object monitor = new Object();
         final AtomicReference<GridServiceManager> ref = new AtomicReference<GridServiceManager>();
         GridServiceManagerAddedEventListener added = new GridServiceManagerAddedEventListener() {
@@ -135,11 +127,10 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public void startGridService(GridServiceContainerOptions options) {
-        if (credentials != null && credentials != Credentials.FULL) {
-            throw new AdminException("No credentials to start a GSC");
-        }
         try {
             gsa.startProcess(options.getOptions());
+        } catch (SecurityException se) {
+            throw new AdminException("No credentials to start a GSC", se);
         } catch (IOException e) {
             throw new AdminException("Failed to start GSC", e);
         }
@@ -150,9 +141,6 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public GridServiceContainer startGridServiceAndWait(GridServiceContainerOptions options, long timeout, TimeUnit timeUnit) {
-        if (credentials != null && credentials != Credentials.FULL) {
-            throw new AdminException("No credentials to start a GSM");
-        }
         final Object monitor = new Object();
         final AtomicReference<GridServiceContainer> ref = new AtomicReference<GridServiceContainer>();
         GridServiceContainerAddedEventListener added = new GridServiceContainerAddedEventListener() {
@@ -185,11 +173,10 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public void startGridService(LookupServiceOptions options) {
-        if (credentials != null && credentials != Credentials.FULL) {
-            throw new AdminException("No credentials to start a LUS");
-        }
         try {
             gsa.startProcess(options.getOptions());
+        } catch (SecurityException se) {
+            throw new AdminException("No credentials to start a Lookup Service", se);
         } catch (IOException e) {
             throw new AdminException("Failed to start LUS", e);
         }
@@ -200,9 +187,6 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public LookupService startGridServiceAndWait(LookupServiceOptions options, long timeout, TimeUnit timeUnit) {
-        if (credentials != null && credentials != Credentials.FULL) {
-            throw new AdminException("No credentials to start a GSM");
-        }
         final Object monitor = new Object();
         final AtomicReference<LookupService> ref = new AtomicReference<LookupService>();
         LookupServiceAddedEventListener added = new LookupServiceAddedEventListener() {
@@ -234,22 +218,20 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public void kill(InternalAgentGridComponent agentGridComponent) {
-        if (credentials != null && credentials != Credentials.FULL) {
-            throw new AdminException("No credentials to kill");
-        }
         try {
             gsa.killProcess(agentGridComponent.getAgentId());
+        } catch (SecurityException se) {
+            throw new AdminException("No credentials to kill", se);
         } catch (RemoteException e) {
             throw new AdminException("Failed to kill [" + agentGridComponent.getUid() + "]", e);
         }
     }
 
     public void restart(InternalAgentGridComponent agentGridComponent) {
-        if (credentials != null && credentials != Credentials.FULL) {
-            throw new AdminException("No credentials to restart");
-        }
         try {
             gsa.restartProcess(agentGridComponent.getAgentId());
+        } catch (SecurityException se) {
+            throw new AdminException("No credentials to restart", se);
         } catch (IOException e) {
             throw new AdminException("Failed to restart [" + agentGridComponent.getUid() + "]", e);
         }
@@ -280,6 +262,10 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public void runGc() throws RemoteException {
-        gsa.runGc();
+        try {
+            gsa.runGc();
+        } catch (SecurityException se) {
+            throw new AdminException("Not authorized to run Garbage Collection", se);
+        }
     }
 }

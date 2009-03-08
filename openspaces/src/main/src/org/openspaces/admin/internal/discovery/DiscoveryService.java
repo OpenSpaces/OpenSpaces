@@ -179,12 +179,11 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         } else if (service instanceof GSA) {
             try {
                 GSA gsa = (GSA) service;
-                Credentials credentials = null;
                 if (gsa.isSecured()) {
-                    credentials = gsa.authenticate(admin.getUsername(), admin.getPassword());
+                    gsa.authenticate(admin.getUsername(), admin.getPassword());
                 }
                 AgentProcessesDetails processesDetails = gsa.getDetails();
-                InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, gsa, admin, processesDetails, credentials);
+                InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, gsa, admin, processesDetails);
                 // get the details here, on the thread pool
                 NIODetails nioDetails = gridServiceAgent.getNIODetails();
                 OSDetails osDetails = gridServiceAgent.getOSDetails();

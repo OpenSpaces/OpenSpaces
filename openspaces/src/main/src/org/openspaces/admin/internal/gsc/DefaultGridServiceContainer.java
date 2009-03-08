@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.gsc;
 
 import com.gigaspaces.grid.gsc.GSC;
+import com.gigaspaces.grid.security.exception.SecurityException;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.jvm.JVMStatistics;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
@@ -8,6 +9,8 @@ import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.operatingsystem.OSDetails;
 import com.gigaspaces.operatingsystem.OSStatistics;
 import net.jini.core.lookup.ServiceID;
+
+import org.openspaces.admin.AdminException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
@@ -131,7 +134,11 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
     }
 
     public void runGc() throws RemoteException {
-        gsc.runGc();
+        try {
+            gsc.runGc();
+        } catch (SecurityException se) {
+            throw new AdminException("Not authorized to run Garbage Collection", se);
+        }
     }
 
     @Override
