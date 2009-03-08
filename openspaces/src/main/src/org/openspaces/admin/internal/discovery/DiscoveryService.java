@@ -5,7 +5,6 @@ import com.gigaspaces.grid.gsa.AgentProcessesDetails;
 import com.gigaspaces.grid.gsa.GSA;
 import com.gigaspaces.grid.gsc.GSC;
 import com.gigaspaces.grid.gsm.GSM;
-import com.gigaspaces.grid.security.Credentials;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.operatingsystem.OSDetails;
