@@ -273,6 +273,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     }
 
     protected Boolean isNotifyWrite() {
+        if (notifyWrite == null) {
+            return false;
+        }
         return this.notifyWrite;
     }
 
@@ -284,6 +287,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     }
 
     protected Boolean isNotifyUpdate() {
+        if (notifyUpdate == null) {
+            return false;
+        }
         return this.notifyUpdate;
     }
 
@@ -295,6 +301,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     }
 
     protected Boolean isNotifyTake() {
+        if (notifyTake == null) {
+            return false;
+        }
         return this.notifyTake;
     }
 
@@ -307,6 +316,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     }
 
     protected Boolean isNotifyAll() {
+        if (notifyAll == null) {
+            return false;
+        }
         return this.notifyAll;
     }
 
@@ -318,6 +330,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     }
 
     protected Boolean isNotifyLeaseExpire() {
+        if (notifyLeaseExpire == null) {
+            return false;
+        }
         return this.notifyLeaseExpire;
     }
 
@@ -330,6 +345,9 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     }
 
     protected Boolean isNotifyUnmatched() {
+        if (notifyUnmatched == null) {
+            return false;
+        }
         return this.notifyUnmatched;
     }
 
@@ -372,7 +390,10 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         this.guaranteed = guaranteed;
     }
 
-    protected Boolean getGuaranteed() {
+    protected Boolean isGuaranteed() {
+        if (guaranteed == null) {
+            return false;
+        }
         return guaranteed;
     }
 

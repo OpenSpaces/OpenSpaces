@@ -48,6 +48,7 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
         public static final String REPLICATE_NOTIFY_TEMPLATE = "replicate-notify-template";
         public static final String PERFORM_TAKE_ON_NOTIFY = "replicate-notify-template";
         public static final String PASS_ARRAY_AS_IS = "pass-array-as-is";
+        public static final String GUARANTEED = "guaranteed";
     }
 
     public NotifyEventContainerServiceDetails() {
@@ -59,7 +60,7 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
                                               boolean fifo, Integer batchSize, Integer batchTime, boolean autoRenew,
                                               Boolean notifyAll, Boolean notifyWrite, Boolean notifyUpdate, Boolean notifyTake, Boolean notifyLeaseExpire, Boolean notifyUnmatched,
                                               Boolean triggerNotifyTemplate, Boolean replicateNotifyTemplate,
-                                              boolean performTakeOnNotify, boolean passArrayAsIs) {
+                                              boolean performTakeOnNotify, boolean passArrayAsIs, boolean guaranteed) {
         super(id, SERVICE_SUB_TYPE, gigaSpace, "Notify event container", "Notify event container, template [" + template + "]", template, performSnapshot, transactionManager);
         switch (commType) {
             case 0:
@@ -93,6 +94,7 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
         getAttributes().put(Attributes.REPLICATE_NOTIFY_TEMPLATE, replicateNotifyTemplate);
         getAttributes().put(Attributes.PERFORM_TAKE_ON_NOTIFY, performTakeOnNotify);
         getAttributes().put(Attributes.PASS_ARRAY_AS_IS, passArrayAsIs);
+        getAttributes().put(Attributes.GUARANTEED, guaranteed);
     }
 
     public String getCommType() {
@@ -149,6 +151,10 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
 
     public boolean isPassArrayAsIs() {
         return (Boolean) getAttributes().get(Attributes.PASS_ARRAY_AS_IS);
+    }
+
+    public boolean isGuaranteed() {
+        return (Boolean) getAttributes().get(Attributes.GUARANTEED);
     }
 
     @Override
