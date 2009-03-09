@@ -20,9 +20,9 @@ echo ""
 echo ""
 
 # GigaSpaces Jars
-mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-runtime -Dversion=$VERSION -DpomFile=$TMPDIR/gs-runtime-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/gigaspaces/gs-runtime.jar
-mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -Dversion=$VERSION -DpomFile=$TMPDIR/gs-openspaces-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/gigsspaces/gs-openspaces.jar
-mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=mule-os -Dversion=$VERSION -Dpackaging=jar -DpomFile=$TMPDIR/mule-os-pom.xml -Dfile=${JSHOMEDIR}/lib/opt/openspaces/mule-os.jar
+mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-runtime -Dversion=$VERSION -DpomFile=$TMPDIR/gs-runtime-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/required/gs-runtime.jar
+mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -Dversion=$VERSION -DpomFile=$TMPDIR/gs-openspaces-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/required/gs-openspaces.jar
+mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=mule-os -Dversion=$VERSION -Dpackaging=jar -DpomFile=$TMPDIR/mule-os-pom.xml -Dfile=${JSHOMEDIR}/lib/optional/openspaces/mule-os.jar
 
 # JMX Jars
 mvn install:install-file -DgroupId=com.sun.jdmk -DartifactId=jmxtools -Dversion=1.2.1 -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/platform/jmx/jmxtools.jar
