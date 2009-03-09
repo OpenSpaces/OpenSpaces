@@ -24,6 +24,8 @@ import org.mule.config.spring.SpringXmlConfigurationBuilder;
 import org.mule.context.DefaultMuleContextFactory;
 import org.openspaces.pu.service.ServiceDetails;
 import org.openspaces.pu.service.ServiceDetailsProvider;
+import org.openspaces.pu.service.ServiceMonitorsProvider;
+import org.openspaces.pu.service.ServiceMonitors;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -47,7 +49,8 @@ import java.util.Map;
  *
  * @author yitzhaki
  */
-public class OpenSpacesMuleContextLoader implements ApplicationContextAware, InitializingBean, DisposableBean, ApplicationListener, ServiceDetailsProvider {
+public class OpenSpacesMuleContextLoader implements ApplicationContextAware, InitializingBean, DisposableBean, ApplicationListener,
+        ServiceDetailsProvider, ServiceMonitorsProvider {
 
     private static final String DEFAULT_LOCATION = "META-INF/spring/mule.xml";
 
@@ -131,5 +134,21 @@ public class OpenSpacesMuleContextLoader implements ApplicationContextAware, Ini
             }
         }
         return serviceDetails.toArray(new ServiceDetails[serviceDetails.size()]);
+    }
+
+    public ServiceMonitors[] getServicesMonitors() {
+        ArrayList<ServiceMonitors> serviceMonitors = new ArrayList<ServiceMonitors>();
+        if (muleApplicationContext != null) {
+            Map map = muleApplicationContext.getBeansOfType(ServiceMonitorsProvider.class);
+            for (Iterator it = map.values().iterator(); it.hasNext();) {
+                ServiceMonitors[] monitors = ((ServiceMonitorsProvider) it.next()).getServicesMonitors();
+                if (monitors != null) {
+                    for (ServiceMonitors monitor : monitors) {
+                        serviceMonitors.add(monitor);
+                    }
+                }
+            }
+        }
+        return serviceMonitors.toArray(new ServiceMonitors[serviceMonitors.size()]);
     }
 }
