@@ -273,6 +273,16 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/platform/jee" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library name="backport">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/lib/external/backport" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/lib/external/backport" recursive="false" />
+      </library>
+    </orderEntry>
     <orderEntry type="module" module-name="gigaspaces" exported="" />
   </component>
   <component name="copyright">
