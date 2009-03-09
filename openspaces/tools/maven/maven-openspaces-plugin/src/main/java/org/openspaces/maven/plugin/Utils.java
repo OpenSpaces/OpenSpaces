@@ -43,7 +43,7 @@ import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 
 import sun.misc.URLClassPath;
-import edu.emory.mathcs.backport.java.util.Collections;
+import java.util.Collections;
 
 
 /**
