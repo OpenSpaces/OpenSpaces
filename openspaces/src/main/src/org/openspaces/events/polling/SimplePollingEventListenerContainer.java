@@ -590,7 +590,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
         }
         // for now, LRMI class loader problems
         tempalte = null;
-        return new ServiceDetails[]{new PollingEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte, isPerformSnapshot(), isTransactional(),
+        return new ServiceDetails[]{new PollingEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte, isPerformSnapshot(), getTransactionManagerName(),
                 getReceiveTimeout(), getReceiveOperationHandler().getClass().getName(), getTriggerOperationHandler() != null ? getTriggerOperationHandler().getClass().getName() : null,
                 getConcurrentConsumers(), getMaxConcurrentConsumers(), isPassArrayAsIs())};
     }

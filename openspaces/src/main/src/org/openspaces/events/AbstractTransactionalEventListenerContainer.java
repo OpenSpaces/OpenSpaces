@@ -3,6 +3,7 @@ package org.openspaces.events;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.openspaces.core.transaction.manager.JiniPlatformTransactionManager;
 
 /**
  * @author kimchy
@@ -103,6 +104,16 @@ public abstract class AbstractTransactionalEventListenerContainer extends Abstra
                         "but GigaSpace is not transactional. Please pass the transaction manager to the GigaSpace bean as well"));
             }
         }
+    }
+
+    public String getTransactionManagerName() {
+        if (transactionManager instanceof JiniPlatformTransactionManager) {
+            return ((JiniPlatformTransactionManager) transactionManager).getBeanName();
+        }
+        if (transactionManager != null) {
+            return "<<unknown>>";
+        }
+        return null;
     }
 
     protected boolean isTransactional() {
