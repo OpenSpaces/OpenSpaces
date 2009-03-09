@@ -47,8 +47,6 @@
 	<classpathentry kind="lib" path="lib/platform/mule/mule-transport-stdio-2.1.2.jar"/>
 	<classpathentry kind="lib" path="lib/platform/mule/mule-transport-vm-2.1.2.jar"/>
 	<classpathentry kind="lib" path="lib/platform/velocity/velocity-dep-1.5.jar"/>
-	<classpathentry kind="lib" path="lib/gigaspaces/backport-util-concurrent.jar"/>
-	<classpathentry kind="lib" path="lib/gigaspaces/spring.jar"/>
 	<classpathentry kind="lib" path="lib/external/antlr/antlr-2.7.6.jar"/>
 	<classpathentry kind="lib" path="lib/external/asm/asm-2.2.3.jar"/>
 	<classpathentry kind="lib" path="lib/external/asm/asm-commons-2.2.3.jar"/>
@@ -89,8 +87,10 @@
 	<classpathentry kind="lib" path="lib/external/maven/maven-dependency-tree-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/external/retrotranslator/retrotranslator-runtime.jar"/>
 	<classpathentry kind="lib" path="lib/external/spring/spring-test.jar"/>
-	<classpathentry kind="lib" path="lib/opt/spring/cglib-nodep-2.1_3.jar"/>
 	<classpathentry kind="lib" path="tools/maven/apache-maven-2.0.9/lib/maven-2.0.9-uber.jar"/>
-	<classpathentry kind="lib" path="lib/opt/spring/common-annotations.jar"/>
+	<classpathentry kind="lib" path="lib/required/backport-util-concurrent.jar"/>
+	<classpathentry kind="lib" path="lib/optional/spring/cglib-nodep-2.1_3.jar"/>
+	<classpathentry kind="lib" path="lib/optional/spring/common-annotations.jar"/>
+	<classpathentry kind="lib" path="lib/required/spring.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

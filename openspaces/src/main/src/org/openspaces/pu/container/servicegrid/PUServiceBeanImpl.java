@@ -452,7 +452,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             ClassUtils.forName("org.mule.api.MuleContext");
             ((ServiceClassLoader) contextClassLoader).addURLs(BootUtil.toURLs(new String[]
                     {
-                            Environment.getHomeDirectory() + "/lib/openspaces/mule-os.jar"
+                            Environment.getHomeDirectory() + "/lib/optional/openspaces/mule-os.jar"
                     }));
         } catch (Exception e) {
             // no mule
