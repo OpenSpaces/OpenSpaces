@@ -88,7 +88,6 @@
 	<classpathentry kind="lib" path="lib/external/retrotranslator/retrotranslator-runtime.jar"/>
 	<classpathentry kind="lib" path="lib/external/spring/spring-test.jar"/>
 	<classpathentry kind="lib" path="tools/maven/apache-maven-2.0.9/lib/maven-2.0.9-uber.jar"/>
-	<classpathentry kind="lib" path="lib/required/backport-util-concurrent.jar"/>
 	<classpathentry kind="lib" path="lib/optional/spring/cglib-nodep-2.1_3.jar"/>
 	<classpathentry kind="lib" path="lib/optional/spring/common-annotations.jar"/>
 	<classpathentry kind="lib" path="lib/required/spring.jar"/>
