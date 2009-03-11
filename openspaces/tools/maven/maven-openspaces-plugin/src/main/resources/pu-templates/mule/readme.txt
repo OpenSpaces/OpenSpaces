@@ -41,7 +41,7 @@ The following needs to be copied:
 mule-module-spring-config, mule-module-spring-extras, mule-transport-quartz, mule-transport-stdio,
 mule-transport-vm, mule-transport-http.
   - From MULEHOME/lib/opt and into GSHOME/lib/platform/mule: commons-beanutils, commons-collections,
-commons-io, commons-lang, commons-pool, jug.osgi-2.0.0, quartz-all.
+commons-io, commons-lang, commons-pool, jug.osgi-2.0.0, quartz-all, backport-util-concurrent.
 
 The above creates the ability to deploy a mule processing unit that does not have the mule jars files
 in it. It is also possible to package the mule jar files into the processing unit "lib" directory, without
