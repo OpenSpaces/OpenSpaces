@@ -26,6 +26,7 @@ import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.operatingsystem.OSDetails;
 import com.gigaspaces.operatingsystem.OSHelper;
 import com.gigaspaces.operatingsystem.OSStatistics;
+import com.gigaspaces.start.Locator;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.client.SpaceURL;
@@ -902,15 +903,18 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             if (!deleted.isEmpty()) {
                 logger.debug(logMessage("Deleted the following jars from the web application: " + deleted));
             }
+            String gsRequired = System.getProperty(Locator.GS_LIB_REQUIRED);
+            String gsOptional = System.getProperty(Locator.GS_LIB_OPTIONAL);
             try {
-                FileCopyUtils.copy(new File(Environment.getHomeDirectory() + "/lib/gigaspaces/gs-openspaces.jar"), new File(deployPath, "WEB-INF/lib/gs-openspaces.jar"));
+                FileCopyUtils.copy(new File(gsRequired + "/gs-openspaces.jar"), new File(deployPath, "WEB-INF/lib/gs-openspaces.jar"));
                 logger.debug(logMessage("Added openspaces jar to web application"));
             } catch (IOException e) {
                 // don't copy it
             }
             try {
-                FileCopyUtils.copy(new File(Environment.getHomeDirectory() + "/lib/gigaspaces/spring.jar"), new File(deployPath, "WEB-INF/lib/spring.jar"));
-                FileSystemUtils.copyRecursively(new File(Environment.getHomeDirectory() + "/lib/opt/spring"), new File(deployPath, "WEB-INF/lib"));
+                FileCopyUtils.copy(new File(gsRequired + "/spring.jar"), new File(deployPath, "WEB-INF/lib/spring.jar"));
+                FileCopyUtils.copy(new File(gsRequired + "/commons-logging.jar"), new File(deployPath, "WEB-INF/lib/commons-logging.jar"));
+                FileSystemUtils.copyRecursively(new File(gsOptional + "/spring"), new File(deployPath, "WEB-INF/lib"));
                 logger.debug(logMessage("Added spring jars to web application"));
             } catch (IOException e) {
                 // don't copy it
