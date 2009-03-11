@@ -22,8 +22,8 @@
             <version>1.1</version>
         </dependency>
         <dependency>
-            <groupId>org.openspaces</groupId>
-            <artifactId>openspaces</artifactId>
+            <groupId>com.gigaspaces</groupId>
+            <artifactId>gs-openspaces</artifactId>
             <version>${pluginVersion}</version>
             <scope>compile</scope>
         </dependency>
