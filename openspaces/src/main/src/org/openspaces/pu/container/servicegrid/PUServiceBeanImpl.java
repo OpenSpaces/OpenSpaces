@@ -467,7 +467,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             ((ClassLoaderAwareProcessingUnitContainerProvider) factory).setClassLoader(contextClassLoader);
         }
 
-        if (factory instanceof ApplicationContextProcessingUnitContainerProvider) {
+        // only load the spring xml file if it is not a web application (if it is a web application, we will load it with the Bootstrap servlet context loader)
+        if (webXml == null && factory instanceof ApplicationContextProcessingUnitContainerProvider) {
             if (StringUtils.hasText(springXml)) {
                 Resource resource = new ByteArrayResource(springXml.getBytes());
                 ((ApplicationContextProcessingUnitContainerProvider) factory).addConfigLocation(resource);

@@ -66,7 +66,7 @@ public class GlassfishProcessingUnitContainer implements org.openspaces.pu.conta
      * Returns the spring application context this processing unit container wraps.
      */
     public ApplicationContext getApplicationContext() {
-        return webApplicationContext;
+        return applicationContext;
     }
 
     public ServiceDetails[] getServicesDetails() {

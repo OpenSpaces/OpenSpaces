@@ -70,7 +70,7 @@ public class JettyProcessingUnitContainer implements org.openspaces.pu.container
      * Returns the spring application context this processing unit container wraps.
      */
     public ApplicationContext getApplicationContext() {
-        return webApplicationContext;
+        return applicationContext;
     }
 
     public ServiceDetails[] getServicesDetails() {
