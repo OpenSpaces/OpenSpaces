@@ -217,7 +217,9 @@
           <root url="file://$MODULE_DIR$/lib/platform/jetty" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../../../../opt/jetty/jetty-6.1.14-src/modules/jetty/src/main/java" />
+        </SOURCES>
         <jarDirectory url="file://$MODULE_DIR$/lib/platform/jetty" recursive="false" />
       </library>
     </orderEntry>

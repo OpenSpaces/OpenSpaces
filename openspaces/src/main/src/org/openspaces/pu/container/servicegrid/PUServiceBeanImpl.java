@@ -318,9 +318,12 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             String jeeContainer = beanLevelProperties.getContextProperties().getProperty("jee.container", "jetty");
             // setup class loaders correcly
             try {
+                Thread.currentThread().setContextClassLoader(CommonClassLoader.getInstance());
                 ((ServiceClassLoader) contextClassLoader).setParentClassLoader(SharedServiceData.getJeeClassLoader(jeeContainer));
             } catch (Exception e) {
                 throw new CannotCreateContainerException("Failed to configure JEE class loader", e);
+            } finally {
+                Thread.currentThread().setContextClassLoader(contextClassLoader);
             }
 
             String className = StringUtils.capitalize(jeeContainer) + "JeeProcessingUnitContainerProvider";

@@ -19,10 +19,7 @@ package org.openspaces.pu.container.jee.jetty;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.CommonClassLoader;
-import org.mortbay.jetty.AbstractConnector;
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.HandlerContainer;
+import org.mortbay.jetty.*;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.servlet.HashSessionIdManager;
@@ -53,6 +50,7 @@ import javax.management.MBeanServer;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Field;
 import java.net.BindException;
 import java.util.ArrayList;
 import java.util.List;
@@ -91,6 +89,8 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
 
     static {
         System.setProperty("org.mortbay.log.class", JdkLogger.class.getName());
+        // disable jetty server shutdown hook
+        System.setProperty("JETTY_NO_SHUTDOWN_HOOK", "true");
     }
 
     private static final Log logger = LogFactory.getLog(JettyJeeProcessingUnitContainerProvider.class);
@@ -391,6 +391,8 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             mBeanContainer.start();
         }
 
+        clearShutdownThreadContextClassLoader(jettyHolder.getServer());
+
         try {
             BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, new File(deployPath, "WEB-INF/web.xml"));
         } catch (IOException e) {
@@ -534,6 +536,20 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             setCurrentClusterInfo(null);
 
             CommonClassLoader.getInstance().setDisableSmartGetUrl(false);
+        }
+    }
+
+    private void clearShutdownThreadContextClassLoader(Server server) {
+        try {
+            Field hookThreadField = server.getClass().getDeclaredField("hookThread");
+            hookThreadField.setAccessible(true);
+            Thread thread = (Thread) hookThreadField.get(null);
+            if (thread != null) {
+                thread.setContextClassLoader(null);
+            }
+            hookThreadField.set(null, null);
+        } catch (Exception e) {
+            logger.warn("Failed to clean the context class loader from Jetty server", e);
         }
     }
 }
