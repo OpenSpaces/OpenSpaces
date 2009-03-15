@@ -91,6 +91,6 @@
 	<classpathentry kind="lib" path="lib/optional/spring/cglib-nodep-2.1_3.jar"/>
 	<classpathentry kind="lib" path="lib/optional/spring/common-annotations.jar"/>
 	<classpathentry kind="lib" path="lib/required/spring.jar"/>
-	<classpathentry kind="lib" path="lib/required/backport-util-concurrent.jar"/>
+	<classpathentry kind="lib" path="lib/external/backport/backport-util-concurrent.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
