@@ -738,7 +738,7 @@ public class Deploy {
     public static String getUsage() {
         StringBuilder sb = new StringBuilder();
         sb.append("Usage: Deploy [-sla ...] [-cluster ...] [-groups groups] [-timeout timeoutValue] [-properties ...] PU_Name");
-        sb.append("\n    PU_Name: The name of the processing unit under the deploy directory");
+        sb.append("\n    PU_Name: The name of the processing unit under the deploy directory, or packaged jar file");
         sb.append("\n    -sla [sla-location]                      : Location of an optional xml file holding the SLA element");
         sb.append("\n    -cluster [cluster properties]            : Allows to override the cluster parameters of the SLA elements");
         sb.append("\n             schema=partitioned              : The cluster schema to override");
