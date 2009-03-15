@@ -22,7 +22,9 @@ import java.util.jar.JarFile;
  * A specific pattern resolver that handles the following:
  *
  * 1. Allows to create matching on "file system" resource which actually resides on webster
- * 2. Fixes a possible Spring bug (or atleast in our case we need it). See: http://jira.springframework.org/browse/SPR-4875
+ *
+ * Note: This is only applicable when not downloading the processing unit. Or when we are downloading
+ * the processing unit, and shared-lib is used (which is not longer recommended in 7.0).
  *
  * @author kimchy
  */
@@ -61,68 +63,12 @@ public class PUPathMatchingResourcePatternResolver extends PathMatchingResourceP
         try {
             return super.doFindPathMatchingJarResources(rootDirResource, subPattern);
         } catch (IOException e) {
-            // continue here, since Spring does not try in its based class checking for JarURLConnection
-            // It has this !!!! :) :
-            // if (false && con instanceof JarURLConnection)
-        }
-        URLConnection con = rootDirResource.getURL().openConnection();
-        JarFile jarFile = null;
-        String jarFileUrl = null;
-        String rootEntryPath = null;
-        boolean newJarFile = false;
-
-        if (con instanceof JarURLConnection) {
-            // Should usually be the case for traditional JAR files.
-            JarURLConnection jarCon = (JarURLConnection) con;
-            jarCon.setUseCaches(false);
-            jarFile = jarCon.getJarFile();
-            jarFileUrl = jarCon.getJarFileURL().toExternalForm();
-            JarEntry jarEntry = jarCon.getJarEntry();
-            rootEntryPath = (jarEntry != null ? jarEntry.getName() : "");
-        } else {
-            // No JarURLConnection -> need to resort to URL file parsing.
-            // We'll assume URLs of the format "jar:path!/entry", with the protocol
-            // being arbitrary as long as following the entry format.
-            // We'll also handle paths with and without leading "file:" prefix.
-            String urlFile = rootDirResource.getURL().getFile();
-            int separatorIndex = urlFile.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
-            if (separatorIndex != -1) {
-                jarFileUrl = urlFile.substring(0, separatorIndex);
-                rootEntryPath = urlFile.substring(separatorIndex + ResourceUtils.JAR_URL_SEPARATOR.length());
-                jarFile = getJarFile(jarFileUrl);
-            } else {
-                jarFile = new JarFile(urlFile);
-                jarFileUrl = urlFile;
-                rootEntryPath = "";
+            // ignore exceptions on shraed-lib, since they come and go when we undeploy and deploy from the FS
+            // but still remain in the CommonClassLoader
+            if (rootDirResource.getURL().toExternalForm().indexOf("shared-lib") != -1) {
+                return new LinkedHashSet();
             }
-            newJarFile = true;
-        }
-
-        try {
-            if (!"".equals(rootEntryPath) && !rootEntryPath.endsWith("/")) {
-                // Root entry path must end with slash to allow for proper matching.
-                // The Sun JRE does not return a slash here, but BEA JRockit does.
-                rootEntryPath = rootEntryPath + "/";
-            }
-            Set result = new LinkedHashSet(8);
-            for (Enumeration entries = jarFile.entries(); entries.hasMoreElements();) {
-                JarEntry entry = (JarEntry) entries.nextElement();
-                String entryPath = entry.getName();
-                if (entryPath.startsWith(rootEntryPath)) {
-                    String relativePath = entryPath.substring(rootEntryPath.length());
-                    if (getPathMatcher().match(subPattern, relativePath)) {
-                        result.add(rootDirResource.createRelative(relativePath));
-                    }
-                }
-            }
-            return result;
-        }
-        finally {
-            // Close jar file, but only if freshly obtained -
-            // not from JarURLConnection, which might cache the file reference.
-            if (newJarFile) {
-                jarFile.close();
-            }
+            throw e;
         }
     }
 }
