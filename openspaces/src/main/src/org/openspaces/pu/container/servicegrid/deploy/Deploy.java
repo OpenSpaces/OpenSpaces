@@ -497,6 +497,7 @@ public class Deploy {
 
         if (beanLevelProperties != null) {
             element.getServiceBeanConfig().addInitParameter("beanLevelProperties", new MarshalledObject(beanLevelProperties));
+            element.getServiceBeanConfig().addInitParameter("jee.container", beanLevelProperties.getContextProperties().getProperty("jee.container", "jetty"));
         }
 
         //sla
