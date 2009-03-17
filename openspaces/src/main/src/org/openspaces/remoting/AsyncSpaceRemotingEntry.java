@@ -259,7 +259,7 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
                 result = in.readObject();
             }
             if (!isFieldNull(bitMask, EX_BIT_MASK)) {
-                ex = (Exception) in.readObject();
+                ex = (Throwable) in.readObject();
             }
             if (!isFieldNull(bitMask, ROUTING_BIT_MASK)) {
                 routing = in.readInt();
