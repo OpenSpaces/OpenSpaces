@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -103,7 +104,16 @@ public class WebsterFile extends File {
         String line;
         try {
             List<File> filesList = new ArrayList<File>();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setDoOutput(false);
+            conn.setDoInput(true);
+            conn.setAllowUserInteraction(false);
+            conn.setUseCaches(false);
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("list", "true");
+            conn.connect();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             while ((line = reader.readLine()) != null) {
                 StringTokenizer tokenizer = new StringTokenizer(line, "\t");
                 String name = tokenizer.nextToken();
@@ -114,6 +124,11 @@ public class WebsterFile extends File {
                 filesList.add(add);
             }
             reader.close();
+            try {
+                conn.disconnect();
+            } catch (Exception e) {
+                // no matter, failed to close
+            }
             return filesList.toArray(new File[filesList.size()]);
         } catch (Exception e) {
             return new File[0];
