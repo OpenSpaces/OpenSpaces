@@ -81,14 +81,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
@@ -840,6 +833,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             InputStream in = new BufferedInputStream(conn.getInputStream());
             FileCopyUtils.copy(in, new FileOutputStream(tempFile));
             conn.disconnect();
+
+            RandomAccessFile ras = new RandomAccessFile(tempFile, "rw");
+            ras.getFD().sync();
+            ras.close();
         } catch (IOException e) {
             throw new CannotCreateContainerException("Failed to read processing unit [" + puName + "] from [" + url.toString() + "] into [" + tempFile.getAbsolutePath() + "]", e);
         }
@@ -872,6 +869,18 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                     dest.flush();
                     dest.close();
                     is.close();
+
+                    // sync the file to the file system
+                    RandomAccessFile ras = new RandomAccessFile(file, "rw");
+                    try {
+                        ras.getFD().sync();
+                    } finally {
+                        try {
+                            ras.close();
+                        } catch (Exception e1) {
+                            // ignore
+                        }
+                    }
                 }
             }
             zipFile.close();
