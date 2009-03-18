@@ -33,10 +33,7 @@ import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.kernel.Environment;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jini.rio.boot.BootUtil;
-import org.jini.rio.boot.CommonClassLoader;
-import org.jini.rio.boot.ServiceClassLoader;
-import org.jini.rio.boot.SharedServiceData;
+import org.jini.rio.boot.*;
 import org.jini.rio.core.JSBInstantiationException;
 import org.jini.rio.core.SLA;
 import org.jini.rio.core.ServiceLevelAgreements;
@@ -54,11 +51,7 @@ import org.openspaces.core.properties.BeanLevelPropertiesAware;
 import org.openspaces.core.space.SpaceServiceDetails;
 import org.openspaces.core.space.SpaceType;
 import org.openspaces.interop.DotnetProcessingUnitContainerProvider;
-import org.openspaces.pu.container.CannotCreateContainerException;
-import org.openspaces.pu.container.ClassLoaderAwareProcessingUnitContainerProvider;
-import org.openspaces.pu.container.DeployableProcessingUnitContainerProvider;
-import org.openspaces.pu.container.ProcessingUnitContainer;
-import org.openspaces.pu.container.ProcessingUnitContainerProvider;
+import org.openspaces.pu.container.*;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
 import org.openspaces.pu.container.jee.context.BootstrapWebApplicationContextListener;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
@@ -81,28 +74,20 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 /**
  * @author kimchy
@@ -784,109 +769,11 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         } catch (MalformedURLException e) {
             throw new CannotCreateContainerException("Failed to construct URL to download procdessing unit, url [" + (codeserver + puPath) + "]", e);
         }
-        HttpURLConnection conn = null;
-        try {
-            conn = (HttpURLConnection) url.openConnection();
-        } catch (IOException e) {
-            throw new CannotCreateContainerException("Failed to connect to [" + url.toString() + "] in order to download processing unit [" + puName + "]", e);
-        }
-        conn.setRequestProperty("Package", "true");
-        int responseCode = 0;
-        try {
-            responseCode = conn.getResponseCode();
-        } catch (IOException e) {
-            throw new CannotCreateContainerException("Failed to read response code from [" + url.toString() + "] in order to download processing unit [" + puName + "]", e);
-        }
-        if (responseCode != 200 && responseCode != 201) {
-            try {
-                if (responseCode == 404) {
-                    throw new CannotCreateContainerException("Processing Unit [" + puName + "] not found on server [" + url.toString() + "]");
-                }
-                StringBuilder sb = new StringBuilder();
-                try {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        sb.append(line);
-                    }
-                    reader.close();
-                } catch (Exception e) {
-                    // ignore this exception, failed to read input
-                }
-                throw new CannotCreateContainerException("Failed to connect/download (failure on the web server side) from  [" + url.toString() + "], response code [" + responseCode + "], response [" + sb.toString() + "]");
-            } finally {
-                conn.disconnect();
-            }
-        }
 
-        if (puName.length() < 3) {
-            puName = "zzz" + puName;
-        }
-
-        File tempFile = null;
         try {
-            tempFile = File.createTempFile(puName, "jar", tempPath);
-        } catch (IOException e) {
-            throw new CannotCreateContainerException("Failed to create temporary file for downloading processing unit [" + puName + "] at [" + tempPath.getAbsolutePath() + "]", e);
-        }
-        try {
-            InputStream in = new BufferedInputStream(conn.getInputStream());
-            FileCopyUtils.copy(in, new FileOutputStream(tempFile));
-            conn.disconnect();
-
-            RandomAccessFile ras = new RandomAccessFile(tempFile, "rw");
-            ras.getFD().sync();
-            ras.close();
-        } catch (IOException e) {
-            throw new CannotCreateContainerException("Failed to read processing unit [" + puName + "] from [" + url.toString() + "] into [" + tempFile.getAbsolutePath() + "]", e);
-        }
-
-        // extract the file
-        try {
-            final int bufferSize = 4098;
-            byte data[] = new byte[bufferSize];
-            ZipFile zipFile = new ZipFile(tempFile);
-            Enumeration e = zipFile.entries();
-            while (e.hasMoreElements()) {
-                ZipEntry entry = (ZipEntry) e.nextElement();
-                if (entry.isDirectory()) {
-                    File dir = new File(path.getAbsolutePath() + "/" + entry.getName().replace('\\', '/'));
-                    for (int i = 0; i < 5; i++) {
-                        dir.mkdirs();
-                    }
-                } else {
-                    BufferedInputStream is = new BufferedInputStream(zipFile.getInputStream(entry));
-                    int count;
-                    File file = new File(path.getAbsolutePath() + "/" + entry.getName().replace('\\', '/'));
-                    if (file.getParentFile() != null) {
-                        file.getParentFile().mkdirs();
-                    }
-                    FileOutputStream fos = new FileOutputStream(file);
-                    BufferedOutputStream dest = new BufferedOutputStream(fos, bufferSize);
-                    while ((count = is.read(data, 0, bufferSize)) != -1) {
-                        dest.write(data, 0, count);
-                    }
-                    dest.flush();
-                    dest.close();
-                    is.close();
-
-                    // sync the file to the file system
-                    RandomAccessFile ras = new RandomAccessFile(file, "rw");
-                    try {
-                        ras.getFD().sync();
-                    } finally {
-                        try {
-                            ras.close();
-                        } catch (Exception e1) {
-                            // ignore
-                        }
-                    }
-                }
-            }
-            zipFile.close();
-            tempFile.delete();
-        } catch (IOException e) {
-            throw new CannotCreateContainerException("Failed to extract processing unit [" + puName + "] downloaded temp zip file from [" + tempFile.getAbsolutePath() + "] into [" + path.getAbsolutePath() + "]", e);
+            PUZipUtils.downloadProcessingUnit(puName, url, path, tempPath);
+        } catch (Exception e) {
+            throw new CannotCreateContainerException("Faile to download processing unit [" + puName + "]");
         }
     }
 
@@ -958,7 +845,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     public JVMStatistics getJVMStatistics() throws RemoteException {
         return JVMHelper.getStatistics();
     }
-    
+
     public void runGc() throws RemoteException {
         System.gc();
     }
