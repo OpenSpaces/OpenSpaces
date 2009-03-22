@@ -52,6 +52,7 @@ public class TestSampler {
                 System.out.println("VM TOTAL STATS: GC PERC [" + admin.getVirtualMachines().getStatistics().getGcCollectionPerc() + "], Heap Used [" + admin.getVirtualMachines().getStatistics().getMemoryHeapPerc() + "%]");
                 for (VirtualMachine virtualMachine : admin.getVirtualMachines()) {
                     System.out.println("VM [" + virtualMachine.getUid() + "] " +
+                            "PID [" + virtualMachine.getDetails().getPid() + "] " +
                             "Host [" + virtualMachine.getMachine().getHostAddress() + "] " +
                             "GC Perc [" + virtualMachine.getStatistics().getGcCollectionPerc() + "], " +
                             "Heap Usage [" + virtualMachine.getStatistics().getMemoryHeapPerc() + "%]");
@@ -64,9 +65,9 @@ public class TestSampler {
                     }
                 }
                 for (Machine machine : admin.getMachines()) {
-                    System.out.println("Machine [" + machine.getUid() + "], " +
-                            "TotalPhysicalMem [" + machine.getOperatingSystem().getDetails().getTotalPhysicalMemorySizeInGB() + "GB], " +
-                            "FreePhysicalMem [" + machine.getOperatingSystem().getStatistics().getFreePhysicalMemorySizeInGB() + "GB]]");
+                    System.out.println("Machine [" + machine.getUid() + "], Processors [" + machine.getOperatingSystem().getDetails().getAvailableProcessors() + "] CPU [" + machine.getOperatingSystem().getStatistics().getCpuPerc() + "]");
+                    System.out.println("   -> Mem Total [" + machine.getOperatingSystem().getDetails().getTotalPhysicalMemorySizeInGB() + "GB], " + "Free [" + machine.getOperatingSystem().getStatistics().getFreePhysicalMemorySizeInGB() + "GB]");
+                    System.out.println("   -> Swap Total [" + machine.getOperatingSystem().getDetails().getTotalSwapSpaceSizeInGB() + "GB], " + "Free [" + machine.getOperatingSystem().getStatistics().getFreeSwapSpaceSizeInGB() + "GB]");
                     for (SpaceInstance spaceInstance : machine.getSpaceInstances()) {
                         System.out.println("   -> Space [" + spaceInstance.getUid() + "]");
                     }

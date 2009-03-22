@@ -57,6 +57,8 @@ public interface VirtualMachineDetails {
 
     long getStartTime();
 
+    long getPid();
+
     long getMemoryHeapInitInBytes();
     double getMemoryHeapInitInMB();
     double getMemoryHeapInitInGB();

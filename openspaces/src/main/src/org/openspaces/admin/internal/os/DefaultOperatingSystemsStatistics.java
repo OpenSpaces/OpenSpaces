@@ -45,24 +45,6 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
         return this.details;
     }
 
-    public long getCommittedVirtualMemorySizeInBytes() {
-        long total = 0;
-        for (OperatingSystemStatistics stat : stats) {
-            if (stat.getCommittedVirtualMemorySizeInBytes() != -1) {
-                total += stat.getCommittedVirtualMemorySizeInBytes();
-            }
-        }
-        return total;
-    }
-
-    public double getCommittedVirtualMemorySizeInMB() {
-        return StatisticsUtils.convertToMB(getCommittedVirtualMemorySizeInBytes());
-    }
-
-    public double getCommittedVirtualMemorySizeInGB() {
-        return StatisticsUtils.convertToGB(getCommittedVirtualMemorySizeInBytes());
-    }
-
     public long getFreeSwapSpaceSizeInBytes() {
         long total = 0;
         for (OperatingSystemStatistics stat : stats) {
@@ -122,5 +104,24 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
             return -1;
         }
         return total / count;
+    }
+
+    public double getCpuPerc() {
+        int count = 0;
+        double total = 0;
+        for (OperatingSystemStatistics stat : stats) {
+            if (stat.getCpuPerc() != -1) {
+                count++;
+                total += stat.getCpuPerc();
+            }
+        }
+        if (count == 0) {
+            return -1;
+        }
+        return total / count;
+    }
+
+    public String getCpuPercFormatted() {
+        return StatisticsUtils.formatPerc(getCpuPerc());
     }
 }

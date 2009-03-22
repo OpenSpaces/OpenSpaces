@@ -30,10 +30,19 @@ public class StatisticsUtils {
     }
 
     public static double computePercByTime(long currentTime, long previousTime, long currentTimestamp, long previousTimestamp) {
-        return ((double)(currentTime - previousTime)) / (currentTimestamp - previousTimestamp);
+        return ((double) (currentTime - previousTime)) / (currentTimestamp - previousTimestamp);
     }
 
     public static double computePerSecond(long currentCount, long previousCount, long currentTimestamp, long previousTimestamp) {
         return ((double) (currentCount - previousCount)) / (currentTimestamp - previousTimestamp) * 1000;
+    }
+
+    public static String formatPerc(double perc) {
+        if (perc == -1) {
+            return "NA";
+        }
+        String p = String.valueOf(perc * 100.0);
+        int ix = p.indexOf(".") + 1;
+        return p.substring(0, ix) + p.substring(ix, ix + 1) + '%';
     }
 }

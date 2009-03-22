@@ -43,12 +43,6 @@ public interface OperatingSystemStatistics {
      */
     OperatingSystemStatistics getPrevious();
 
-    long getCommittedVirtualMemorySizeInBytes();
-
-    double getCommittedVirtualMemorySizeInMB();
-
-    double getCommittedVirtualMemorySizeInGB();
-
     long getFreeSwapSpaceSizeInBytes();
 
     double getFreeSwapSpaceSizeInMB();
@@ -62,4 +56,11 @@ public interface OperatingSystemStatistics {
     double getFreePhysicalMemorySizeInGB();
 
     double getSystemLoadAverage();
+
+    /**
+     * Returns the combined cpu perc (User + Sys + Nice + Wait)
+     */
+    double getCpuPerc();
+
+    String getCpuPercFormatted();
 }

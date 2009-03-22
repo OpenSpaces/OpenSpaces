@@ -44,28 +44,16 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
         return this.previosStats;
     }
 
-    public long getCommittedVirtualMemorySizeInBytes() {
-        return stats.getCommittedVirtualMemorySize();
-    }
-
-    public double getCommittedVirtualMemorySizeInMB() {
-        return StatisticsUtils.convertToMB(getCommittedVirtualMemorySizeInBytes());
-    }
-
-    public double getCommittedVirtualMemorySizeInGB() {
-        return StatisticsUtils.convertToGB(getCommittedVirtualMemorySizeInBytes());
-    }
-
     public long getFreeSwapSpaceSizeInBytes() {
         return stats.getFreeSwapSpaceSize();
     }
 
     public double getFreeSwapSpaceSizeInMB() {
-        return StatisticsUtils.convertToMB(getFreePhysicalMemorySizeInBytes());
+        return StatisticsUtils.convertToMB(getFreeSwapSpaceSizeInBytes());
     }
 
     public double getFreeSwapSpaceSizeInGB() {
-        return StatisticsUtils.convertToGB(getFreePhysicalMemorySizeInBytes());
+        return StatisticsUtils.convertToGB(getFreeSwapSpaceSizeInBytes());
     }
 
     public long getFreePhysicalMemorySizeInBytes() {
@@ -82,5 +70,13 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
 
     public double getSystemLoadAverage() {
         return stats.getSystemLoadAverage();
+    }
+
+    public double getCpuPerc() {
+        return stats.getCpuPerc();
+    }
+
+    public String getCpuPercFormatted() {
+        return StatisticsUtils.formatPerc(getCpuPerc());
     }
 }

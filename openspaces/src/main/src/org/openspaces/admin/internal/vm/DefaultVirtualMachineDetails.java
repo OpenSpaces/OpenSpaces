@@ -43,6 +43,10 @@ public class DefaultVirtualMachineDetails implements VirtualMachineDetails {
         return details.getStartTime();
     }
 
+    public long getPid() {
+        return details.getPid();
+    }
+
     public long getMemoryHeapInitInBytes() {
         return details.getMemoryHeapInit();
     }

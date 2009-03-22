@@ -93,6 +93,7 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
         for (InternalOperatingSystemInfoProvider provider : operatingSystemInfoProviders) {
             try {
                 lastStatistics = new DefaultOperatingSystemStatistics(provider.getOSStatistics(), getDetails(), previousStats);
+                break;
             } catch (RemoteException e) {
                 // simply try the next one
             }
