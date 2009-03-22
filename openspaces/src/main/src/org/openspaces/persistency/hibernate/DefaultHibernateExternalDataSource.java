@@ -16,20 +16,12 @@
 
 package org.openspaces.persistency.hibernate;
 
-import com.gigaspaces.datasource.BulkDataPersister;
-import com.gigaspaces.datasource.BulkItem;
-import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.datasource.DataSourceException;
-import com.gigaspaces.datasource.SQLDataProvider;
+import com.gigaspaces.datasource.*;
 import com.j_spaces.core.client.SQLQuery;
-import org.hibernate.NonUniqueObjectException;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.openspaces.persistency.hibernate.iterator.DefaultChunkListDataIterator;
-import org.openspaces.persistency.hibernate.iterator.DefaultChunkScrollableDataIterator;
-import org.openspaces.persistency.hibernate.iterator.DefaultListQueryDataIterator;
-import org.openspaces.persistency.hibernate.iterator.DefaultScrollableDataIterator;
-import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
+import org.openspaces.persistency.hibernate.iterator.*;
 
 import java.util.List;
 
@@ -53,7 +45,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
 
     /**
      * Perform the given bulk changes using Hibernate {@link org.hibernate.Session}.
-     *
+     * <p/>
      * <p>Note, this implementation relies on Hibernate {@link org.hibernate.NonUniqueObjectException} in case
      * the entity is already associated with the given session, and in such a case, will result in performing
      * merge operation (which is more expensive).
@@ -82,7 +74,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                         } else {
                             try {
                                 session.delete(entry);
-                            } catch (NonUniqueObjectException e) {
+                            } catch (HibernateException e) {
                                 session.delete(session.merge(entry));
                             }
                         }
@@ -96,7 +88,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                         } else {
                             try {
                                 session.saveOrUpdate(entry);
-                            } catch (NonUniqueObjectException e) {
+                            } catch (HibernateException e) {
                                 session.merge(entry);
                             }
                         }
@@ -110,7 +102,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                         } else {
                             try {
                                 session.saveOrUpdate(entry);
-                            } catch (NonUniqueObjectException e) {
+                            } catch (HibernateException e) {
                                 session.merge(entry);
                             }
                         }

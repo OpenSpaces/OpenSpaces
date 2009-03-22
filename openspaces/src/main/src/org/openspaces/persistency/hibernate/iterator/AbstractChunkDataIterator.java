@@ -18,10 +18,7 @@ package org.openspaces.persistency.hibernate.iterator;
 
 import com.gigaspaces.datasource.DataIterator;
 import com.j_spaces.core.client.SQLQuery;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
+import org.hibernate.*;
 import org.hibernate.criterion.Projections;
 import org.openspaces.persistency.support.ConcurrentMultiDataIterator;
 import org.openspaces.persistency.support.MultiDataIterator;
@@ -155,17 +152,32 @@ public abstract class AbstractChunkDataIterator implements MultiDataIterator {
             try {
                 Criteria criteria = session.createCriteria(entityName);
                 criteria.setProjection(Projections.rowCount());
-                int count = ((Number) criteria.uniqueResult()).intValue();
-                int from = 0;
-                while (from < count) {
-                    if (entityName != null) {
-                        itList.add(createIteartorByEntityName(entityName, sessionFactory, fetchSize, perfromOrderById, from, chunkSize));
-                    } else if (sqlQuery != null) {
-                        itList.add(createIteartorBySQLQuery(sqlQuery, sessionFactory, fetchSize, perfromOrderById, from, chunkSize));
-                    } else if (hQuery != null) {
-                        itList.add(createIteartorByHibernateQuery(hQuery, sessionFactory, fetchSize, from, chunkSize));
+                int count;
+                try {
+                    count = ((Number) criteria.uniqueResult()).intValue();
+                } catch (HibernateException e) {
+                    count = -1;
+                }
+                if (count != -1) {
+                    int from = 0;
+                    while (from < count) {
+                        if (entityName != null) {
+                            itList.add(createIteartorByEntityName(entityName, sessionFactory, fetchSize, perfromOrderById, from, chunkSize));
+                        } else if (sqlQuery != null) {
+                            itList.add(createIteartorBySQLQuery(sqlQuery, sessionFactory, fetchSize, perfromOrderById, from, chunkSize));
+                        } else if (hQuery != null) {
+                            itList.add(createIteartorByHibernateQuery(hQuery, sessionFactory, fetchSize, from, chunkSize));
+                        }
+                        from += chunkSize;
                     }
-                    from += chunkSize;
+                } else {
+                    if (entityName != null) {
+                        itList.add(createIteartorByEntityName(entityName, sessionFactory, fetchSize, perfromOrderById, -1, -1));
+                    } else if (sqlQuery != null) {
+                        itList.add(createIteartorBySQLQuery(sqlQuery, sessionFactory, fetchSize, perfromOrderById, -1, -1));
+                    } else if (hQuery != null) {
+                        itList.add(createIteartorByHibernateQuery(hQuery, sessionFactory, fetchSize, -1, -1));
+                    }
                 }
                 iterators = itList.toArray(new DataIterator[itList.size()]);
             } finally {
