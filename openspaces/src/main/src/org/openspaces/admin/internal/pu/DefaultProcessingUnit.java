@@ -14,6 +14,8 @@ import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.pu.ProcessingUnits;
 import org.openspaces.admin.pu.events.*;
 import org.openspaces.admin.space.Space;
+import org.openspaces.core.properties.BeanLevelProperties;
+import org.openspaces.pu.sla.SLA;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -22,6 +24,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.io.IOException;
 
 /**
  * @author kimchy
@@ -37,6 +40,10 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     private volatile int numberOfInstances;
 
     private volatile int numberOfBackups;
+
+    private final BeanLevelProperties beanLevelProperties;
+
+    private final SLA sla;
 
     private volatile DeploymentStatus deploymentStatus = DeploymentStatus.NA;
 
@@ -75,6 +82,17 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         this.name = details.getName();
         this.numberOfInstances = details.getNumberOfInstances();
         this.numberOfBackups = details.getNumberOfBackups();
+        try {
+            this.beanLevelProperties = (BeanLevelProperties) details.getBeanLevelProperties().get();
+        } catch (Exception e) {
+            throw new AdminException("Failed to get bean level properties", e);
+        }
+
+        try {
+            this.sla = (SLA) details.getSla().get();
+        } catch (Exception e) {
+            throw new AdminException("Failed to get sla", e);
+        }
 
         if (numberOfBackups == 0) {
             // if we have no backup, its actually just a "single partition"
@@ -104,6 +122,10 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     public String getName() {
         return this.name;
+    }
+
+    public BeanLevelProperties getBeanLevelProperties() {
+        return beanLevelProperties;
     }
 
     public ManagingGridServiceManagerChangedEventManager getManagingGridServiceManagerChanged() {
@@ -177,6 +199,14 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     public int getTotalNumberOfInstances() {
         return getNumberOfInstances() * (getNumberOfBackups() + 1);
+    }
+
+    public int getMaxInstancesPerVM() {
+        return sla.getMaxInstancesPerVM();
+    }
+
+    public int getMaxInstancesPerMachine() {
+        return sla.getMaxInstancesPerMachine();
     }
 
     public DeploymentStatus getStatus() {

@@ -44,6 +44,7 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEve
 import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
 import org.openspaces.admin.space.Space;
+import org.openspaces.core.properties.BeanLevelProperties;
 
 import java.util.concurrent.TimeUnit;
 
@@ -79,11 +80,20 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * {@link #getNumberOfInstances()}. If there are backups, will return {@link #getNumberOfInstances()} * ({@link #getNumberOfBackups()}  + 1)
      */
     int getTotalNumberOfInstances();
+    
+    int getMaxInstancesPerVM();
+
+    int getMaxInstancesPerMachine();
 
     /**
      * Returns the deployment status of the processing unit.
      */
     DeploymentStatus getStatus();
+
+    /**
+     * Return the deploy time properties of the processing unit.
+     */
+    BeanLevelProperties getBeanLevelProperties();
 
     /**
      * Waits till at least the provided number of Processing Unit Instances are up.
