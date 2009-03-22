@@ -23,6 +23,7 @@ import org.mule.api.endpoint.OutboundEndpoint;
 import org.mule.api.transport.DispatchException;
 import org.mule.config.i18n.CoreMessages;
 import org.mule.transport.AbstractMessageDispatcher;
+import org.openspaces.core.util.SpaceUtils;
 
 /**
  * Dispatches (writes) a message to an intenral queue. The queue is a virtualized queue represented
@@ -35,9 +36,12 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
 
     private final OpenSpacesQueueConnector connector;
 
+    private final boolean isRemoteSpace;
+
     public OpenSpacesQueueMessageDispatcher(OutboundEndpoint endpoint) {
         super(endpoint);
         this.connector = (OpenSpacesQueueConnector) endpoint.getConnector();
+        this.isRemoteSpace = SpaceUtils.isRemoteProtocol(connector.getGigaSpaceObj().getSpace());
     }
 
     protected void doDispatch(MuleEvent event) throws Exception {

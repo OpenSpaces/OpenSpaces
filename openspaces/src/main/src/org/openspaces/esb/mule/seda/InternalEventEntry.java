@@ -18,6 +18,7 @@ package org.openspaces.esb.mule.seda;
 
 import com.j_spaces.core.client.MetaDataEntry;
 import org.mule.api.MuleEvent;
+import org.openspaces.core.util.ThreadLocalMarshaller;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -35,9 +36,9 @@ public class InternalEventEntry extends MetaDataEntry implements Externalizable 
 
     public String name;
 
-    public MuleEvent event;
+    private MuleEvent event;
 
-    private MarshalledObject marshalledObject;
+    public byte[] marshalledObject;
 
     public InternalEventEntry() {
     }
@@ -53,15 +54,26 @@ public class InternalEventEntry extends MetaDataEntry implements Externalizable 
 
     public void writeExternal(ObjectOutput out) throws IOException {
         super._writeExternal(out);
-        MarshalledObject marshalledObject = new MarshalledObject(event);
         out.writeUTF(name);
-        out.writeObject(marshalledObject);
+        if (event != null) {
+            marshalledObject = ThreadLocalMarshaller.objectToByteBuffer(event);
+        }
+        if (marshalledObject == null) {
+            out.writeInt(-1);
+        } else {
+            out.writeInt(marshalledObject.length);
+            out.write(marshalledObject);
+        }
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super._readExternal(in);
         name = in.readUTF();
-        marshalledObject = (MarshalledObject) in.readObject();
+        int size = in.readInt();
+        if (size != -1) {
+            marshalledObject = new byte[size];
+            in.readFully(marshalledObject);
+        }
     }
 
     public String getName() {
@@ -76,7 +88,10 @@ public class InternalEventEntry extends MetaDataEntry implements Externalizable 
         if (event != null) {
             return event;
         }
-        event = (MuleEvent) marshalledObject.get();
+        if (marshalledObject == null) {
+            return null;
+        }
+        event = (MuleEvent) ThreadLocalMarshaller.objectFromByteBuffer(marshalledObject);
         marshalledObject = null;
         return event;
     }

@@ -18,12 +18,12 @@ package org.openspaces.esb.mule.queue;
 
 import com.j_spaces.core.client.MetaDataEntry;
 import org.mule.api.MuleMessage;
+import org.openspaces.core.util.ThreadLocalMarshaller;
 
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.rmi.MarshalledObject;
 
 /**
  * An internal queue entry holding the endopint address and the actual message.
@@ -34,9 +34,9 @@ public class InternalQueueEntry extends MetaDataEntry implements Externalizable 
 
     public String endpointURI;
 
-    public MuleMessage message;
+    private MuleMessage message;
 
-    private MarshalledObject marshalledObject;
+    public byte[] marshalledObject;
 
     public static String[] __getSpaceIndexedFields() {
         return new String[]{"endpointURI"};
@@ -44,15 +44,26 @@ public class InternalQueueEntry extends MetaDataEntry implements Externalizable 
 
     public void writeExternal(ObjectOutput out) throws IOException {
         super._writeExternal(out);
-        MarshalledObject marshalledObject = new MarshalledObject(message);
         out.writeUTF(endpointURI);
-        out.writeObject(marshalledObject);
+        if (message != null) {
+            marshalledObject = ThreadLocalMarshaller.objectToByteBuffer(message);
+        }
+        if (marshalledObject == null) {
+            out.writeInt(-1);
+        } else {
+            out.writeInt(marshalledObject.length);
+            out.write(marshalledObject);
+        }
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super._readExternal(in);
         endpointURI = in.readUTF();
-        marshalledObject = (MarshalledObject) in.readObject();
+        int size = in.readInt();
+        if (size != -1) {
+            marshalledObject = new byte[size];
+            in.readFully(marshalledObject);
+        }
     }
 
     public void setEndpointURI(String endpointURI) {
@@ -66,12 +77,15 @@ public class InternalQueueEntry extends MetaDataEntry implements Externalizable 
     public void setMessage(MuleMessage message) {
         this.message = message;
     }
-    
+
     public MuleMessage getMessage() throws IOException, ClassNotFoundException {
         if (message != null) {
             return message;
         }
-        message = (MuleMessage) marshalledObject.get();
+        if (marshalledObject == null) {
+            return null;
+        }
+        message = (MuleMessage) ThreadLocalMarshaller.objectFromByteBuffer(marshalledObject);
         marshalledObject = null;
         return message;
     }
