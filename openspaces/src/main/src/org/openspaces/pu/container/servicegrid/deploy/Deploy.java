@@ -541,7 +541,7 @@ public class Deploy {
         element.setTotalNumberOfServices(sla.getNumberOfInstances());
 
         // set for each service to have the operation string name
-        element.getServiceBeanConfig().setName(element.getOperationalStringName().replace(' ', '-') + "." + element.getName());
+        element.getServiceBeanConfig().setName(element.getOperationalStringName().replace(' ', '-'));
 
         // pass the SLA as an init parameter so the GSC won't need to parse the XML again
         element.getServiceBeanConfig().addInitParameter("sla", new MarshalledObject(sla));

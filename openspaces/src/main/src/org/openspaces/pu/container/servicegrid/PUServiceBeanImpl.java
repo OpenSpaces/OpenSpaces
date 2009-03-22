@@ -727,7 +727,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     private String logMessage(String message) {
-        return "[" + getServiceBeanContext().getServiceElement().getName() + "] " + message;
+        return message;
     }
 
     private class WatchTask implements Runnable {
