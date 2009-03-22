@@ -24,7 +24,6 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.rmi.MarshalledObject;
 
 /**
  * An intenral entry holding the name of the serice (that has the SEDA queue) and the
