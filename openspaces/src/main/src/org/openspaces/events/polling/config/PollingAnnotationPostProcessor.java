@@ -56,6 +56,9 @@ public class PollingAnnotationPostProcessor implements BeanPostProcessor, Applic
     }
 
     public Object postProcessAfterInitialization(final Object bean, String beanName) throws BeansException {
+        if (bean == null) {
+            return bean;
+        }
         Class<?> beanClass = this.getBeanClass(bean);
         if (beanClass == null) {
             return bean;

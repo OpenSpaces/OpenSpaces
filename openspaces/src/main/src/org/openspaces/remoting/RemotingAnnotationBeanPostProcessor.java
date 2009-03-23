@@ -55,6 +55,9 @@ public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        if (bean  == null) {
+            return bean;
+        }
         Class beanClass = AopUtils.getTargetClass(bean);
         if (beanClass == null) {
             return bean;
