@@ -68,6 +68,6 @@ public class RequestStatisticsFilter implements Filter, ServiceMonitorsProvider 
     }
 
     public ServiceMonitors[] getServicesMonitors() {
-        return new ServiceMonitors[]{new JeeRequestServiceMonitors(JeeServiceDetails.ID, requests.get(), reqeustsActive.get(), requestsDurationTotal.get())};
+        return new ServiceMonitors[]{new WebRequestsServiceMonitors(JeeServiceDetails.ID, requests.get(), reqeustsActive.get(), requestsDurationTotal.get())};
     }
 }
