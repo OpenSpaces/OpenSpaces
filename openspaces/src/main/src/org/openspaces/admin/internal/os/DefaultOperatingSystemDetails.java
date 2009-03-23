@@ -62,4 +62,8 @@ public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
     public double getTotalPhysicalMemorySizeInGB() {
         return StatisticsUtils.convertToGB(getTotalPhysicalMemorySizeInBytes());
     }
+
+    public long getOpenFilesMax() {
+        return details.getOpenFilesMax();
+    }
 }

@@ -63,4 +63,9 @@ public interface OperatingSystemStatistics {
     double getCpuPerc();
 
     String getCpuPercFormatted();
+
+    /**
+     * Returns the current open files descriptors.
+     */
+    long getOpenFilesCur();
 }

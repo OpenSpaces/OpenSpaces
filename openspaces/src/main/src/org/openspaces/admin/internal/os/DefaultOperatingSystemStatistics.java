@@ -76,6 +76,10 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
         return stats.getCpuPerc();
     }
 
+    public long getOpenFilesCur() {
+        return stats.getOpenFilesCur();
+    }
+
     public String getCpuPercFormatted() {
         return StatisticsUtils.formatPerc(getCpuPerc());
     }

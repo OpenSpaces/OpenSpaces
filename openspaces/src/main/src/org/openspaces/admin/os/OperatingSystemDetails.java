@@ -102,4 +102,9 @@ public interface OperatingSystemDetails {
      * <p>Note, currently only available on SUN VM.
      */
     double getTotalPhysicalMemorySizeInGB();
+
+    /**
+     * Returns the maximum open files descriptors allowed for the operating system.
+     */
+    long getOpenFilesMax();
 }
