@@ -90,7 +90,7 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
     int getBackupId();
 
     /**
-     * Returns the processing unit this processing unit instance if part of.
+     * Returns the processing unit this processing unit instance belongs to.
      */
     ProcessingUnit getProcessingUnit();
 
