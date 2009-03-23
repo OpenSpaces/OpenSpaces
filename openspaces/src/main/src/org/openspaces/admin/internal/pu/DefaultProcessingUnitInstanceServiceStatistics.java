@@ -67,31 +67,31 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
         return serviceMonitorsById.values().iterator();
     }
 
-    public Map<String, ServiceMonitors> getMonitorsById() {
+    public Map<String, ServiceMonitors> getMonitors() {
         return this.serviceMonitorsById;
     }
 
-    public Map<String, EventContainerServiceMonitors> getEventContainerMonitorsById() {
+    public Map<String, EventContainerServiceMonitors> getEventContainers() {
         return this.eventContainerServiceMonitors;
     }
 
-    public Map<String, PollingEventContainerServiceMonitors> getPollingEventContainerMonitorsById() {
+    public Map<String, PollingEventContainerServiceMonitors> getPollingEventContainers() {
         return this.pollingEventContainerServiceMonitors;
     }
 
-    public Map<String, NotifyEventContainerServiceMonitors> getNotifyEventContainerMonitorsById() {
+    public Map<String, NotifyEventContainerServiceMonitors> getNotifyEventContainers() {
         return this.notifyEventContainerServiceMonitors;
     }
 
-    public Map<String, AsyncPollingEventContainerServiceMonitors> getAsyncPollingEventContainerMonitorsById() {
+    public Map<String, AsyncPollingEventContainerServiceMonitors> getAsyncPollingEventContainers() {
         return this.asyncPollingEventContainerServiceMonitors;
     }
 
-    public RemotingServiceMonitors getRemotingServiceMonitors() {
+    public RemotingServiceMonitors getRemoting() {
         return this.remotingServiceMonitors;
     }
 
-    public JeeRequestServiceMonitors getJeeRequestServiceMonitors() {
+    public JeeRequestServiceMonitors getJeeRequests() {
         return this.jeeRequestServiceMonitors;
     }
 

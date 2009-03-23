@@ -28,37 +28,37 @@ public interface ProcessingUnitInstanceStatistics extends Iterable<ServiceMonito
      * Returns a map of the {@link org.openspaces.pu.service.ServiceMonitors} per processing unit
      * service id (bean id or bean name).
      */
-    Map<String, ServiceMonitors> getMonitorsById();
+    Map<String, ServiceMonitors> getMonitors();
 
     /**
      * Returns all the different event containers monitors keyed by the service id.
      */
-    Map<String, EventContainerServiceMonitors> getEventContainerMonitorsById();
+    Map<String, EventContainerServiceMonitors> getEventContainers();
 
     /**
      * Returns all the different polling event containers monitors keyed by the service id.
      */
-    Map<String, PollingEventContainerServiceMonitors> getPollingEventContainerMonitorsById();
+    Map<String, PollingEventContainerServiceMonitors> getPollingEventContainers();
 
     /**
      * Returns all the different notify event containers monitors keyed by the service id.
      */
-    Map<String, NotifyEventContainerServiceMonitors> getNotifyEventContainerMonitorsById();
+    Map<String, NotifyEventContainerServiceMonitors> getNotifyEventContainers();
 
     /**
      * Returns all the different async polling event containers monitors keyed by the service id.
      */
-    Map<String, AsyncPollingEventContainerServiceMonitors> getAsyncPollingEventContainerMonitorsById();
+    Map<String, AsyncPollingEventContainerServiceMonitors> getAsyncPollingEventContainers();
 
     /**
      * Returns the remoting service (if configured) monitors infomration.
      */
-    RemotingServiceMonitors getRemotingServiceMonitors();
+    RemotingServiceMonitors getRemoting();
 
     /**
      * Returns statistics of JEE requests.
      */
-    JeeRequestServiceMonitors getJeeRequestServiceMonitors();
+    JeeRequestServiceMonitors getJeeRequests();
 
     /**
      * Returns the previous statistics.
