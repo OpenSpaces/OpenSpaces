@@ -1,4 +1,4 @@
-package org.openspaces.itest.remoting.simple;
+package org.openspaces.itest.remoting.simple.plain;
 
 import org.openspaces.remoting.AsyncProxy;
 import org.openspaces.remoting.ExecutorProxy;

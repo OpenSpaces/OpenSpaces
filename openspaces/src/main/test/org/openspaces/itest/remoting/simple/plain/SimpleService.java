@@ -1,4 +1,4 @@
-package org.openspaces.itest.remoting.simple;
+package org.openspaces.itest.remoting.simple.plain;
 
 import org.openspaces.remoting.AutowireArguments;
 import org.openspaces.remoting.Routing;

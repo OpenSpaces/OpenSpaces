@@ -1,4 +1,4 @@
-package org.openspaces.itest.remoting.simple;
+package org.openspaces.itest.remoting.simple.plain;
 
 import java.util.concurrent.Future;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.itest.remoting.simple;
+package org.openspaces.itest.remoting.simple.plain;
 
 import com.gigaspaces.async.AsyncFuture;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -54,7 +54,7 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
     }
 
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/remoting/simple/simple-remoting.xml"};
+        return new String[]{"/org/openspaces/itest/remoting/simple/plain/simple-remoting.xml"};
     }
 
 
