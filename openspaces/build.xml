@@ -16,6 +16,25 @@
         </fileset>
     	<path path="${basedir}/../jini/classes" />
     	<path path="${basedir}/../gigaspaces/classes" />
+        <path path="${basedir}/../gigaspaces/src/java/resources" />
+
+    </path>
+
+    <path id="tests-libs">
+
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar"/>
+            <exclude name="platform/ant/*.jar"/>
+            <exclude name="platform/glassfish/*.jar"/>
+            <exclude name="platform/jetty/*.jar"/>
+            <exclude name="required/gs-openspaces.jar"/>
+            <exclude name="optional/openspaces/**"/>
+            <exclude name="platform/openspaces/**"/>
+            <exclude name="ant/**"/>
+        </fileset>
+    	<path path="${basedir}/../jini/classes" />
+    	<path path="${basedir}/../gigaspaces/classes" />
+        <path path="${basedir}/../gigaspaces/src/java/resources" />
 
     </path>
 
@@ -367,7 +386,7 @@
             <!-- Need files loaded as resources -->
             <classpath location="${main.test.dir}"/>
 
-            <classpath refid="all-libs"/>
+            <classpath refid="tests-libs"/>
 
             <formatter type="plain" usefile="false"/>
 
@@ -403,7 +422,7 @@
             <!-- Need files loaded as resources -->
             <classpath location="${main.test.dir}"/>
 
-            <classpath refid="all-libs"/>
+            <classpath refid="tests-libs"/>
 
             <formatter type="plain" usefile="false"/>
             <formatter type="xml"/>
