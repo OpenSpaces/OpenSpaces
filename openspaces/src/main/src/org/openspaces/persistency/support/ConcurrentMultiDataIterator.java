@@ -38,6 +38,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class ConcurrentMultiDataIterator implements MultiDataIterator {
 
+    private volatile boolean closed = false;
+
     private int threadPoolSize;
 
     private DataIterator[] iterators;
@@ -119,6 +121,10 @@ public class ConcurrentMultiDataIterator implements MultiDataIterator {
     }
 
     public void close() {
+        if (closed) {
+            return;
+        }
+        closed = true;
         for (DataIteratorRunnable runnable : runnables) {
             runnable.stop();
         }

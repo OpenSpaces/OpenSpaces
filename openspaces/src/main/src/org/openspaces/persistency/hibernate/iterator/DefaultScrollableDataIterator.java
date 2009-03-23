@@ -118,9 +118,15 @@ public class DefaultScrollableDataIterator extends AbstractScrollableDataIterato
 
     protected void doClose() {
         try {
+            if (transaction == null) {
+                return;
+            }
             transaction.commit();
         } finally {
-            session.close();
+            transaction = null;
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
         }
     }
 

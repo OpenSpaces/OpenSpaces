@@ -181,6 +181,7 @@ public abstract class AbstractScrollableDataIterator implements DataIterator {
         try {
             cursor.close();
         } finally {
+            cursor = null;
             doClose();
         }
     }

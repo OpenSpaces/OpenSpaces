@@ -116,9 +116,19 @@ public class StatelessScrollableDataIterator extends AbstractScrollableDataItera
 
     protected void doClose() {
         try {
+            if (transaction == null) {
+                return;
+            }
             transaction.commit();
         } finally {
-            session.close();
+            transaction = null;
+            if (session != null) {
+                try {
+                    session.close();
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
         }
     }
 

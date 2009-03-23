@@ -73,7 +73,7 @@ public class DefaultCriteriaByExampleDataIterator implements DataIterator {
             transaction.commit();
         } finally {
             transaction = null;
-            if (session.isOpen()) {
+            if (session != null && session.isOpen()) {
                 session.close();
             }
         }

@@ -105,7 +105,15 @@ public class StatelessListQueryDataIterator implements DataIterator {
             transaction.commit();
         } finally {
             transaction = null;
-            session.close();
+            try {
+                if (session != null) {
+                    session.close();
+                }
+            } catch (Exception e) {
+                // ignore
+            } finally {
+                session = null;
+            }
         }
     }
 
