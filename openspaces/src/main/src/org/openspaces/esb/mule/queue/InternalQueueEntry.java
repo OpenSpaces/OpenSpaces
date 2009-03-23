@@ -34,7 +34,7 @@ public class InternalQueueEntry extends MetaDataEntry implements Externalizable 
 
     public String endpointURI;
 
-    private MuleMessage message;
+    public MuleMessage message;
 
     public byte[] marshalledObject;
 
@@ -48,6 +48,8 @@ public class InternalQueueEntry extends MetaDataEntry implements Externalizable 
         if (message != null) {
             marshalledObject = ThreadLocalMarshaller.objectToByteBuffer(message);
         }
+        // null the message so it won't be stored in the space when working remotely
+        message = null;
         if (marshalledObject == null) {
             out.writeInt(-1);
         } else {

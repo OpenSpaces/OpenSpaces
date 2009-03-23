@@ -35,7 +35,7 @@ public class InternalEventEntry extends MetaDataEntry implements Externalizable 
 
     public String name;
 
-    private MuleEvent event;
+    public MuleEvent event;
 
     public byte[] marshalledObject;
 
@@ -57,6 +57,8 @@ public class InternalEventEntry extends MetaDataEntry implements Externalizable 
         if (event != null) {
             marshalledObject = ThreadLocalMarshaller.objectToByteBuffer(event);
         }
+        // null the event so it won't be stored in the space when working remotely
+        event = null;
         if (marshalledObject == null) {
             out.writeInt(-1);
         } else {
