@@ -219,34 +219,34 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         return Arrays.asList(this.serviceDetails).iterator();
     }
 
-    public Map<String, EventContainerServiceDetails> getEventContainerServiceDetails() {
+    public Map<String, EventContainerServiceDetails> getEventContainerDetails() {
         return this.eventContainerServiceDetails;
     }
 
-    public Map<String, PollingEventContainerServiceDetails> getPollingEventContainerServiceDetails() {
+    public Map<String, PollingEventContainerServiceDetails> getPollingEventContainerDetails() {
         return this.pollingEventContainerServiceDetails;
     }
 
-    public Map<String, NotifyEventContainerServiceDetails> getNotifyEventContainerServiceDetails() {
+    public Map<String, NotifyEventContainerServiceDetails> getNotifyEventContainerDetails() {
         return this.notifyEventContainerServiceDetails;
     }
 
-    public Map<String, AsyncPollingEventContainerServiceDetails> getAsyncPollingEventContainerServiceDetails() {
+    public Map<String, AsyncPollingEventContainerServiceDetails> getAsyncPollingEventContainerDetails() {
         return this.asyncPollingEventContainerServiceDetails;
     }
 
-    public SpaceServiceDetails[] getSpaceServiceDetails() {
+    public SpaceServiceDetails[] getSpaceDetails() {
         return spacesDetails;
     }
 
-    public SpaceServiceDetails getEmbeddedSpaceServiceDetails() {
+    public SpaceServiceDetails getEmbeddedSpaceDetails() {
         if (embeddedSpacesDetails.length == 0) {
             return null;
         }
         return embeddedSpacesDetails[0];
     }
 
-    public SpaceServiceDetails[] getEmbeddedSpacesServiceDetails() {
+    public SpaceServiceDetails[] getEmbeddedSpacesDetails() {
         return embeddedSpacesDetails;
     }
 
@@ -315,7 +315,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         return jeeDetails;
     }
 
-    public RemotingServiceDetails getRemotingServiceDetails() {
+    public RemotingServiceDetails getRemotingDetails() {
         return remotingServiceDetails;
     }
 

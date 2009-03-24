@@ -143,46 +143,46 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
      * Returns a map of {@link org.openspaces.events.EventContainerServiceDetails} keyed by their
      * {@link org.openspaces.pu.service.ServiceDetails#getId()}.
      */
-    Map<String, EventContainerServiceDetails> getEventContainerServiceDetails();
+    Map<String, EventContainerServiceDetails> getEventContainerDetails();
 
     /**
      * Returns a map of {@link org.openspaces.events.polling.PollingEventContainerServiceDetails} keyed by their
      * {@link org.openspaces.pu.service.ServiceDetails#getId()}.
      */
-    Map<String, PollingEventContainerServiceDetails> getPollingEventContainerServiceDetails();
+    Map<String, PollingEventContainerServiceDetails> getPollingEventContainerDetails();
 
     /**
      * Returns a map of {@link org.openspaces.events.notify.NotifyEventContainerServiceDetails} keyed by their
      * {@link org.openspaces.pu.service.ServiceDetails#getId()}.
      */
-    Map<String, NotifyEventContainerServiceDetails> getNotifyEventContainerServiceDetails();
+    Map<String, NotifyEventContainerServiceDetails> getNotifyEventContainerDetails();
 
     /**
      * Returns a map of {@link org.openspaces.events.asyncpolling.AsyncPollingEventContainerServiceDetails} keyed by their
      * {@link org.openspaces.pu.service.ServiceDetails#getId()}.
      */
-    Map<String, AsyncPollingEventContainerServiceDetails> getAsyncPollingEventContainerServiceDetails();
+    Map<String, AsyncPollingEventContainerServiceDetails> getAsyncPollingEventContainerDetails();
 
     /**
      * Returns the remoting service details (the exporter) if configured within the processing unit.
      */
-    RemotingServiceDetails getRemotingServiceDetails();
+    RemotingServiceDetails getRemotingDetails();
 
     /**
      * Returns the space service details as described by the service started within the processing unit.
      */
-    SpaceServiceDetails[] getSpaceServiceDetails();
+    SpaceServiceDetails[] getSpaceDetails();
 
     /**
      * Returns the embedded space service details as described by the service started within the processing unit.
      * <code>null</code> if no embedded space was started within the processing unit.
      */
-    SpaceServiceDetails getEmbeddedSpaceServiceDetails();
+    SpaceServiceDetails getEmbeddedSpaceDetails();
 
     /**
      * Returns the embedded space service details as described by the service started within the processing unit.
      */
-    SpaceServiceDetails[] getEmbeddedSpacesServiceDetails();
+    SpaceServiceDetails[] getEmbeddedSpacesDetails();
 
     /**
      * Returns <code>true</code> if there are embedded spaces started within this processing
@@ -213,5 +213,8 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
      */
     JeeServiceDetails getJeeDetails();
 
+    /**
+     * Returns the processing unit instance statistics.
+     */
     ProcessingUnitInstanceStatistics getStatistics();
 }
