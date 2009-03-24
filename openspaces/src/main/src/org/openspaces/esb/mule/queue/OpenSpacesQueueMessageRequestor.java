@@ -16,9 +16,12 @@
 
 package org.openspaces.esb.mule.queue;
 
+import com.j_spaces.core.exception.SpaceUnavailableException;
 import org.mule.api.MuleMessage;
+import org.mule.api.ThreadSafeAccess;
 import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.transport.AbstractMessageRequester;
+import org.openspaces.core.SpaceClosedException;
 import org.openspaces.core.SpaceInterruptedException;
 
 /**
@@ -62,11 +65,20 @@ public class OpenSpacesQueueMessageRequestor extends AbstractMessageRequester {
                     message = entry.getMessage();
                 }
             } catch (SpaceInterruptedException e) {
-                logger.debug("Failed to receive message from queue on interruption: " + endpoint.getEndpointURI());
+                // do nothing, we are being stopped
+            } catch (SpaceClosedException e) {
+                // do nothing, we are being stopped
+            } catch (SpaceUnavailableException e) {
+                // do nothing, we are being stopped
             }
             if (message != null) {
+                //The message will contain old thread information, we need to reset it
+                if(message instanceof ThreadSafeAccess)
+                {
+                    ((ThreadSafeAccess)message).resetAccessControl();
+                }
                 if (logger.isDebugEnabled()) {
-                    logger.debug("SimpleMessage received: " + message);
+                    logger.debug("Message received: " + message);
                 }
                 return message;
             } else {

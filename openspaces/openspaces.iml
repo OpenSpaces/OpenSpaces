@@ -250,7 +250,7 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/lib/platform/mule/mule-2.1.2-src.zip!/" />
+          <root url="jar://$MODULE_DIR$/lib/platform/mule/mule-2.2.0-src.zip!/" />
         </SOURCES>
         <jarDirectory url="file://$MODULE_DIR$/lib/platform/mule" recursive="false" />
       </library>

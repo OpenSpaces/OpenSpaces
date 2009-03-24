@@ -18,11 +18,13 @@ package org.openspaces.esb.mule.queue;
 
 import org.mule.api.MuleEvent;
 import org.mule.api.MuleMessage;
+import org.mule.api.transaction.TransactionCallback;
 import org.mule.api.endpoint.EndpointURI;
 import org.mule.api.endpoint.OutboundEndpoint;
 import org.mule.api.transport.DispatchException;
 import org.mule.config.i18n.CoreMessages;
 import org.mule.transport.AbstractMessageDispatcher;
+import org.mule.transaction.TransactionTemplate;
 import org.openspaces.core.util.SpaceUtils;
 
 /**
@@ -71,10 +73,10 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
         }
     }
 
-    protected MuleMessage doSend(MuleEvent event) throws Exception {
+    protected MuleMessage doSend(final MuleEvent event) throws Exception {
         MuleMessage retMessage;
         EndpointURI endpointUri = event.getEndpoint().getEndpointURI();
-        OpenSpacesQueueMessageReceiver receiver = connector.getReceiver(endpointUri);
+        final OpenSpacesQueueMessageReceiver receiver = connector.getReceiver(endpointUri);
         //Apply any outbound transformers on this event before we dispatch
         event.transformMessage();
         if (receiver == null) {
@@ -89,7 +91,17 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
 
         MuleMessage message = event.getMessage();
         connector.getSessionHandler().storeSessionInfoToMessage(event.getSession(), message);
-        retMessage = (MuleMessage) receiver.onCall(message, event.isSynchronous());
+
+        TransactionTemplate tt = new TransactionTemplate(receiver.getEndpoint().getTransactionConfig(),
+            connector.getExceptionListener(), event.getMuleContext());
+        TransactionCallback cb = new TransactionCallback()
+        {
+            public Object doInTransaction() throws Exception
+            {
+                return receiver.onCall(event.getMessage(), true);
+            }
+        };
+        retMessage = (MuleMessage) tt.execute(cb);
 
         if (logger.isDebugEnabled()) {
             logger.debug("sent event on endpointUri: " + event.getEndpoint().getEndpointURI());

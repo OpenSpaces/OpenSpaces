@@ -1,4 +1,4 @@
-<mule xmlns="http://www.mulesource.org/schema/mule/core/2.1"
+<mule xmlns="http://www.mulesource.org/schema/mule/core/2.2"
        xmlns:os-events="http://www.openspaces.org/schema/events"
        xmlns:os-core="http://www.openspaces.org/schema/core"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -9,7 +9,7 @@
        xsi:schemaLocation="http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
            http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-           http://www.mulesource.org/schema/mule/core/2.1 http://www.mulesource.org/schema/mule/core/2.1/mule.xsd
+           http://www.mulesource.org/schema/mule/core/2.2 http://www.mulesource.org/schema/mule/core/2.2/mule.xsd
            http://www.openspaces.org/schema/mule/os-eventcontainer http://www.openspaces.org/schema/mule/mule-os-eventcontainer.xsd
            http://www.openspaces.org/schema/mule/os-queue http://www.openspaces.org/schema/mule/mule-os-queue.xsd
            http://www.openspaces.org/schema/mule/os-seda http://www.openspaces.org/schema/mule/mule-os-seda.xsd">

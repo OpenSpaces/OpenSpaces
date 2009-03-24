@@ -95,7 +95,7 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
              */
             int maxThreads = connector.getReceiverThreadingProfile().getMaxThreadsActive();
             // also make sure batchSize is always at least 1
-            int batchSize = Math.max(1, Math.min(connector.getGigaSpaceObj().count(template), ((maxThreads / 2) - 1)));
+            int batchSize = Math.max(1, ((maxThreads / 2) - 1));
             
             InternalQueueEntry entry = (InternalQueueEntry) connector.getGigaSpaceObj().take(template, connector.getTimeout());
 
