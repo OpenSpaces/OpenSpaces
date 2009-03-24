@@ -40,6 +40,8 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
 
     private volatile long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
+    private volatile int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
+
     private long lastStatisticsTimestamp = 0;
 
     private OperatingSystemsStatistics lastStatistics;
@@ -90,7 +92,7 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
             details.add(os.getDetails());
         }
         lastStatistics = new DefaultOperatingSystemsStatistics(stats.toArray(new OperatingSystemStatistics[stats.size()]),
-                lastStatistics, new DefaultOperatingSystemsDetails(details.toArray(new OperatingSystemDetails[details.size()])));
+                lastStatistics, new DefaultOperatingSystemsDetails(details.toArray(new OperatingSystemDetails[details.size()])), statisticsHistorySize);
         return lastStatistics;
     }
 
@@ -101,6 +103,13 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
         }
         for (OperatingSystem operatingSystem : operatingSystemsByUID.values()) {
             operatingSystem.setStatisticsInterval(interval, timeUnit);
+        }
+    }
+
+    public void setStatisticsHistorySize(int historySize) {
+        this.statisticsHistorySize = historySize;
+        for (OperatingSystem operatingSystem : operatingSystemsByUID.values()) {
+            operatingSystem.setStatisticsHistorySize(statisticsHistorySize);
         }
     }
 
@@ -157,6 +166,7 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
     public void addOperatingSystem(OperatingSystem operatingSystem) {
         OperatingSystem existing = operatingSystemsByUID.put(operatingSystem.getUid(), operatingSystem);
         if (existing == null) {
+            operatingSystem.setStatisticsHistorySize(statisticsHistorySize);
             operatingSystem.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
             if (isMonitoring()) {
                 operatingSystem.startStatisticsMonitor();

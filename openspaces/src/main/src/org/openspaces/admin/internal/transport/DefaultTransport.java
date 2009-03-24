@@ -37,6 +37,8 @@ public class DefaultTransport implements InternalTransport {
 
     private long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
+    private int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
+
     private long lastStatisticsTimestamp = 0;
 
     private TransportStatistics lastStatistics;
@@ -114,7 +116,7 @@ public class DefaultTransport implements InternalTransport {
         lastStatisticsTimestamp = currentTime;
         for (InternalTransportInfoProvider provider : transportInfoProviders) {
             try {
-                lastStatistics = new DefaultTransportStatistics(provider.getNIOStatistics(), previousStats, getDetails());
+                lastStatistics = new DefaultTransportStatistics(provider.getNIOStatistics(), previousStats, getDetails(), statisticsHistorySize);
             } catch (RemoteException e) {
                 // failed to get it, try next one
             }
@@ -128,6 +130,10 @@ public class DefaultTransport implements InternalTransport {
             stopStatisticsMontior();
             startStatisticsMonitor();
         }
+    }
+
+    public synchronized void setStatisticsHistorySize(int historySize) {
+        this.statisticsHistorySize = historySize;
     }
 
     public synchronized void startStatisticsMonitor() {

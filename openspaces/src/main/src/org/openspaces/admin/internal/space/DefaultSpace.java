@@ -74,9 +74,19 @@ public class DefaultSpace implements InternalSpace {
 
     private volatile long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
+    private volatile int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
+
     private long lastStatisticsTimestamp = 0;
 
+    private long lastPrimariesStatisticsTimestamp = 0;
+
+    private long lastBackupsStatisticsTimestamp = 0;
+
     private SpaceStatistics lastStatistics;
+
+    private SpaceStatistics lastPrimariesStatistics;
+
+    private SpaceStatistics lastBackupStatistics;
 
     private Future scheduledStatisticsMonitor;
 
@@ -116,6 +126,13 @@ public class DefaultSpace implements InternalSpace {
         }
         for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
             spaceInstance.setStatisticsInterval(interval, timeUnit);
+        }
+    }
+
+    public void setStatisticsHistorySize(int historySize) {
+        statisticsHistorySize = historySize;
+        for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
+            spaceInstance.setStatisticsHistorySize(historySize);
         }
     }
 
@@ -212,28 +229,40 @@ public class DefaultSpace implements InternalSpace {
         for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
             stats.add(spaceInstance.getStatistics());
         }
-        lastStatistics = new DefaultSpaceStatistics(stats.toArray(new SpaceInstanceStatistics[stats.size()]));
+        lastStatistics = new DefaultSpaceStatistics(stats.toArray(new SpaceInstanceStatistics[stats.size()]), lastStatistics, statisticsHistorySize);
         return lastStatistics;
     }
 
-    public SpaceStatistics getPrimariesStatistics() {
+    public synchronized SpaceStatistics getPrimariesStatistics() {
+        long currentTime = System.currentTimeMillis();
+        if ((currentTime - lastPrimariesStatisticsTimestamp) < statisticsInterval) {
+            return lastPrimariesStatistics;
+        }
+        lastPrimariesStatisticsTimestamp = currentTime;
         List<SpaceInstanceStatistics> stats = new ArrayList<SpaceInstanceStatistics>();
         for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
             if (spaceInstance.getMode() == SpaceMode.PRIMARY) {
                 stats.add(spaceInstance.getStatistics());
             }
         }
-        return new DefaultSpaceStatistics(stats.toArray(new SpaceInstanceStatistics[stats.size()]));
+        lastPrimariesStatistics = new DefaultSpaceStatistics(stats.toArray(new SpaceInstanceStatistics[stats.size()]), lastPrimariesStatistics, statisticsHistorySize);
+        return lastPrimariesStatistics;
     }
 
-    public SpaceStatistics getBackupsStatistics() {
+    public synchronized SpaceStatistics getBackupsStatistics() {
+        long currentTime = System.currentTimeMillis();
+        if ((currentTime - lastBackupsStatisticsTimestamp) < statisticsInterval) {
+            return lastStatistics;
+        }
+        lastBackupsStatisticsTimestamp = currentTime;
         List<SpaceInstanceStatistics> stats = new ArrayList<SpaceInstanceStatistics>();
         for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
             if (spaceInstance.getMode() == SpaceMode.BACKUP) {
                 stats.add(spaceInstance.getStatistics());
             }
         }
-        return new DefaultSpaceStatistics(stats.toArray(new SpaceInstanceStatistics[stats.size()]));
+        lastBackupStatistics = new DefaultSpaceStatistics(stats.toArray(new SpaceInstanceStatistics[stats.size()]), lastBackupStatistics, statisticsHistorySize);
+        return lastBackupStatistics;
     }
 
     public void addInstance(SpaceInstance spaceInstance) {
@@ -262,6 +291,7 @@ public class DefaultSpace implements InternalSpace {
         }
 
         spaceInstance.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
+        spaceInstance.setStatisticsHistorySize(statisticsHistorySize);
         if (isMonitoring()) {
             spaceInstance.startStatisticsMonitor();
         }

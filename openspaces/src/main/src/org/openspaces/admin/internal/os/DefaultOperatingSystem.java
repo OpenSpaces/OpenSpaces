@@ -37,6 +37,8 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
 
     private long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
+    private int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
+
     private long lastStatisticsTimestamp = 0;
 
     private OperatingSystemStatistics lastStatistics;
@@ -92,7 +94,7 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
         lastStatisticsTimestamp = currentTime;
         for (InternalOperatingSystemInfoProvider provider : operatingSystemInfoProviders) {
             try {
-                lastStatistics = new DefaultOperatingSystemStatistics(provider.getOSStatistics(), getDetails(), previousStats);
+                lastStatistics = new DefaultOperatingSystemStatistics(provider.getOSStatistics(), getDetails(), previousStats, statisticsHistorySize);
                 break;
             } catch (RemoteException e) {
                 // simply try the next one
@@ -107,6 +109,10 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
             stopStatisticsMontior();
             startStatisticsMonitor();
         }
+    }
+
+    public synchronized void setStatisticsHistorySize(int historySize) {
+        this.statisticsHistorySize = historySize;
     }
 
     public synchronized void startStatisticsMonitor() {

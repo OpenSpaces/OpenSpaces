@@ -50,6 +50,8 @@ public class DefaultSpaces implements InternalSpaces {
 
     private volatile long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
+    private volatile int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
+
     private volatile boolean scheduledStatisticsMonitor = false;
     
     public DefaultSpaces(InternalAdmin admin) {
@@ -72,6 +74,13 @@ public class DefaultSpaces implements InternalSpaces {
         statisticsInterval = timeUnit.toMillis(interval);
         for (Space space : spacesByUID.values()) {
             space.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    public void setStatisticsHistorySize(int historySize) {
+        this.statisticsHistorySize = historySize;
+        for (Space space : spacesByUID.values()) {
+            space.setStatisticsHistorySize(historySize);
         }
     }
 
@@ -208,6 +217,7 @@ public class DefaultSpaces implements InternalSpaces {
             spaceAddedEventManager.spaceAdded(space);
         }
         space.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
+        space.setStatisticsHistorySize(statisticsHistorySize);
         if (isMonitoring()) {
             space.startStatisticsMonitor();
         }

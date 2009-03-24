@@ -51,6 +51,8 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
 
     private long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
+    private int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
+
     private long lastStatisticsTimestamp = 0;
 
     private VirtualMachinesStatistics lastStatistics;
@@ -115,7 +117,7 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
         }
         lastStatistics = new DefaultVirtualMachinesStatistics(stats.toArray(new VirtualMachineStatistics[stats.size()]),
                 new DefaultVirtualMachinesDetails(details.toArray(new VirtualMachineDetails[details.size()])),
-                lastStatistics);
+                lastStatistics, statisticsHistorySize);
         return lastStatistics;
     }
 
@@ -134,6 +136,13 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
         }
         for (VirtualMachine virualMachine : virtualMachinesByUID.values()) {
             virualMachine.setStatisticsInterval(interval, timeUnit);
+        }
+    }
+
+    public synchronized void setStatisticsHistorySize(int historySize) {
+        this.statisticsHistorySize = historySize;
+        for (VirtualMachine virualMachine : virtualMachinesByUID.values()) {
+            virualMachine.setStatisticsHistorySize(historySize);
         }
     }
 
@@ -193,6 +202,7 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
         VirtualMachine existingVM = virtualMachinesByUID.put(virtualMachine.getUid(), virtualMachine);
         if (existingVM == null) {
             virtualMachine.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
+            virtualMachine.setStatisticsHistorySize(statisticsHistorySize);
             if (isMonitoring()) {
                 virtualMachine.startStatisticsMonitor();
             }

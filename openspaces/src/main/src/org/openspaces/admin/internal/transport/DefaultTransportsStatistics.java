@@ -13,15 +13,27 @@ public class DefaultTransportsStatistics implements TransportsStatistics {
 
     private final TransportStatistics[] stats;
 
-    private final TransportsStatistics previousStats;
+    private volatile TransportsStatistics previousStats;
 
     private final TransportsDetails details;
 
-    public DefaultTransportsStatistics(TransportStatistics[] stats, TransportsStatistics previousStats, TransportsDetails details) {
+    public DefaultTransportsStatistics(TransportStatistics[] stats, TransportsStatistics previousStats, TransportsDetails details, int historySize) {
         this.stats = stats;
         this.timestamp = System.currentTimeMillis();
         this.previousStats = previousStats;
         this.details = details;
+
+        TransportsStatistics lastStats = null;
+        for (int i = 0; i < historySize; i++) {
+            if (getPrevious() == null) {
+                lastStats = null;
+                break;
+            }
+            lastStats = getPrevious();
+        }
+        if (lastStats != null) {
+            ((DefaultTransportsStatistics) lastStats).setPreviousStats(null);
+        }
     }
 
     public boolean isNA() {
@@ -45,6 +57,10 @@ public class DefaultTransportsStatistics implements TransportsStatistics {
 
     public TransportsStatistics getPrevious() {
         return this.previousStats;
+    }
+
+    public void setPreviousStats(TransportsStatistics previousStats) {
+        this.previousStats = previousStats;
     }
 
     public TransportsDetails getDetails() {

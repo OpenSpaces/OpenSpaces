@@ -16,14 +16,26 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
 
     private final VirtualMachinesDetails details;
 
-    private final VirtualMachinesStatistics previousStats;
+    private volatile VirtualMachinesStatistics previousStats;
 
     public DefaultVirtualMachinesStatistics(VirtualMachineStatistics[] virutualMachinesStatistics, VirtualMachinesDetails details,
-                                            VirtualMachinesStatistics previousStats) {
+                                            VirtualMachinesStatistics previousStats, int historySize) {
         this.timestamp = System.currentTimeMillis();
         this.virutualMachinesStatistics = virutualMachinesStatistics;
         this.details = details;
         this.previousStats = previousStats;
+
+        VirtualMachinesStatistics lastStats = null;
+        for (int i = 0; i < historySize; i++) {
+            if (getPrevious() == null) {
+                lastStats = null;
+                break;
+            }
+            lastStats = getPrevious();
+        }
+        if (lastStats != null) {
+            ((DefaultVirtualMachinesStatistics) lastStats).setPreviousStats(null);
+        }
     }
 
     public boolean isNA() {
@@ -43,6 +55,10 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
 
     public VirtualMachinesStatistics getPrevious() {
         return previousStats;
+    }
+
+    public void setPreviousStats(VirtualMachinesStatistics previousStats) {
+        this.previousStats = previousStats;
     }
 
     public int getSize() {

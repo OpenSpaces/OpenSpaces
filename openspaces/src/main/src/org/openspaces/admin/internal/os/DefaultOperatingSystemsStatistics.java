@@ -14,15 +14,28 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
 
     private final OperatingSystemStatistics[] stats;
 
-    private final OperatingSystemsStatistics previousStats;
+    private volatile OperatingSystemsStatistics previousStats;
 
     private final OperatingSystemsDetails details;
 
-    public DefaultOperatingSystemsStatistics(OperatingSystemStatistics[] stats, OperatingSystemsStatistics previousStats, OperatingSystemsDetails details) {
+    public DefaultOperatingSystemsStatistics(OperatingSystemStatistics[] stats, OperatingSystemsStatistics previousStats, OperatingSystemsDetails details,
+                                             int historySize) {
         this.timestamp = System.currentTimeMillis();
         this.stats = stats;
         this.previousStats = previousStats;
         this.details = details;
+
+        OperatingSystemsStatistics lastStats = null;
+        for (int i = 0; i < historySize; i++) {
+            if (getPrevious() == null) {
+                lastStats = null;
+                break;
+            }
+            lastStats = getPrevious();
+        }
+        if (lastStats != null) {
+            ((DefaultOperatingSystemsStatistics) lastStats).setPreviousStats(null);
+        }
     }
 
     public boolean isNA() {
@@ -39,6 +52,10 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
 
     public OperatingSystemsStatistics getPrevious() {
         return this.previousStats;
+    }
+
+    public void setPreviousStats(OperatingSystemsStatistics previousStats) {
+        this.previousStats = previousStats;
     }
 
     public OperatingSystemsDetails getDetails() {

@@ -16,16 +16,28 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
 
     private final OperatingSystemDetails details;
 
-    private final OperatingSystemStatistics previosStats;
+    private volatile OperatingSystemStatistics previosStats;
 
     public DefaultOperatingSystemStatistics() {
-        this(NA_STATS, null, null);
+        this(NA_STATS, null, null, 0);
     }
 
-    public DefaultOperatingSystemStatistics(OSStatistics stats, OperatingSystemDetails details, OperatingSystemStatistics previosStats) {
+    public DefaultOperatingSystemStatistics(OSStatistics stats, OperatingSystemDetails details, OperatingSystemStatistics previosStats,
+                                            int historySize) {
         this.stats = stats;
         this.details = details;
         this.previosStats = previosStats;
+        OperatingSystemStatistics lastStats = null;
+        for (int i = 0; i < historySize; i++) {
+            if (getPrevious() == null) {
+                lastStats = null;
+                break;
+            }
+            lastStats = getPrevious();
+        }
+        if (lastStats != null) {
+            ((DefaultOperatingSystemStatistics) lastStats).setPreviosStats(null);
+        }
     }
 
     public boolean isNA() {
@@ -42,6 +54,10 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
 
     public OperatingSystemStatistics getPrevious() {
         return this.previosStats;
+    }
+
+    public void setPreviosStats(OperatingSystemStatistics previosStats) {
+        this.previosStats = previosStats;
     }
 
     public long getFreeSwapSpaceSizeInBytes() {

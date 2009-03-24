@@ -45,6 +45,8 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
 
     private volatile long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
+    private volatile int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
+
     private volatile boolean scheduledStatisticsMonitor = false;
     
     public DefaultProcessingUnits(InternalAdmin admin) {
@@ -186,6 +188,7 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
             processingUnitAddedEventManager.processingUnitAdded(processingUnit);
         }
         processingUnit.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
+        processingUnit.setStatisticsHistorySize(statisticsHistorySize);
         if (isMonitoring()) {
             processingUnit.startStatisticsMonitor();
         }
@@ -207,6 +210,13 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
         statisticsInterval = timeUnit.toMillis(interval);
         for (ProcessingUnit processingUnit : processingUnits.values()) {
             processingUnit.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    public void setStatisticsHistorySize(int historySize) {
+        this.statisticsHistorySize = historySize;
+        for (ProcessingUnit processingUnit : processingUnits.values()) {
+            processingUnit.setStatisticsHistorySize(statisticsHistorySize);
         }
     }
 

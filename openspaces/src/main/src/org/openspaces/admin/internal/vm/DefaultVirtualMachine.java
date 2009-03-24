@@ -72,6 +72,8 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     private long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
+    private int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
+
     private long lastStatisticsTimestamp = 0;
 
     private VirtualMachineStatistics lastStatistics;
@@ -240,7 +242,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
         lastStatisticsTimestamp = currentTime;
         for (InternalVirtualMachineInfoProvider provider : virtualMachineInfoProviders) {
             try {
-                lastStatistics = new DefaultVirtualMachineStatistics(provider.getJVMStatistics(), previousStatistics, getDetails());
+                lastStatistics = new DefaultVirtualMachineStatistics(provider.getJVMStatistics(), previousStatistics, getDetails(), statisticsHistorySize);
                 break;
             } catch (RemoteException e) {
                 // continue to the next one
@@ -255,6 +257,10 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
             stopStatisticsMontior();
             startStatisticsMonitor();
         }
+    }
+
+    public synchronized void setStatisticsHistorySize(int historySize) {
+        this.statisticsHistorySize = historySize;
     }
 
     public synchronized void startStatisticsMonitor() {

@@ -94,6 +94,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
+    private int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
+
     private long lastStatisticsTimestamp = 0;
 
     private ProcessingUnitInstanceStatistics lastStatistics;
@@ -379,7 +381,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             }
             serviceMonitorsById.put(serviceMonitors.getId(), serviceMonitors);
         }
-        lastStatistics = new DefaultProcessingUnitInstanceServiceStatistics(puMonitors.getTimestamp(), serviceMonitorsById, previousStatistics);
+        lastStatistics = new DefaultProcessingUnitInstanceServiceStatistics(puMonitors.getTimestamp(), serviceMonitorsById, previousStatistics, statisticsHistorySize);
         return lastStatistics;
     }
 
@@ -389,6 +391,10 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             stopStatisticsMontior();
             startStatisticsMonitor();
         }
+    }
+
+    public void setStatisticsHistorySize(int historySize) {
+        this.statisticsHistorySize = historySize;
     }
 
     public synchronized void startStatisticsMonitor() {

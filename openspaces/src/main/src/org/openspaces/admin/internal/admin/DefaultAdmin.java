@@ -194,6 +194,14 @@ public class DefaultAdmin implements InternalAdmin {
         this.processingUnits.setStatisticsInterval(interval, timeUnit);
     }
 
+    public void setStatisticsHistorySize(int historySize) {
+        this.spaces.setStatisticsHistorySize(historySize);
+        this.virtualMachines.setStatisticsHistorySize(historySize);
+        this.transports.setStatisticsHistorySize(historySize);
+        this.operatingSystems.setStatisticsHistorySize(historySize);
+        this.processingUnits.setStatisticsHistorySize(historySize);
+    }
+
     public synchronized void startStatisticsMonitor() {
         scheduledStatisticsMonitor = true;
         this.spaces.startStatisticsMonitor();

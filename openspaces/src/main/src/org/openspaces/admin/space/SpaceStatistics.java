@@ -50,6 +50,11 @@ public interface SpaceStatistics {
     int getSize();
 
     /**
+     * Retruns the previous statstics, <code>null</code> if not available.
+     */
+    SpaceStatistics getPrevious();
+
+    /**
      * Retruns the timestamp this space statistics were taken.
      */
     long getTimestamp();

@@ -90,6 +90,8 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     private long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
+    private int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
+
     private long lastStatisticsTimestamp = 0;
 
     private SpaceInstanceStatistics lastStatistics;
@@ -157,6 +159,10 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
             stopStatisticsMontior();
             startStatisticsMonitor();
         }
+    }
+
+    public void setStatisticsHistorySize(int historySize) {
+        this.statisticsHistorySize = historySize;
     }
 
     public synchronized void startStatisticsMonitor() {
@@ -246,7 +252,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         return this.spaceMode;
     }
 
-    private static final SpaceInstanceStatistics NA_STATISTICS = new DefaultSpaceInstanceStatistics(new StatisticsHolder(new long[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}), null);
+    private static final SpaceInstanceStatistics NA_STATISTICS = new DefaultSpaceInstanceStatistics(new StatisticsHolder(new long[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}), null, 0);
 
     public synchronized SpaceInstanceStatistics getStatistics() {
         long currentTime = System.currentTimeMillis();
@@ -255,7 +261,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         }
         lastStatisticsTimestamp = currentTime;
         try {
-            lastStatistics = new DefaultSpaceInstanceStatistics(((StatisticsAdmin) spaceAdmin).getHolder(), lastStatistics);
+            lastStatistics = new DefaultSpaceInstanceStatistics(((StatisticsAdmin) spaceAdmin).getHolder(), lastStatistics, statisticsHistorySize);
         } catch (RemoteException e) {
             lastStatistics = NA_STATISTICS;
         }

@@ -43,6 +43,8 @@ public class DefaultTransports implements InternalTransports {
 
     private long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
 
+    private int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
+
     private long lastStatisticsTimestamp = 0;
 
     private TransportsStatistics lastStatistics;
@@ -116,7 +118,7 @@ public class DefaultTransports implements InternalTransports {
             details.add(transport.getDetails());
         }
         lastStatistics = new DefaultTransportsStatistics(stats.toArray(new TransportStatistics[stats.size()]), lastStatistics,
-                new DefaultTransportsDetails(details.toArray(new TransportDetails[details.size()])));
+                new DefaultTransportsDetails(details.toArray(new TransportDetails[details.size()])), statisticsHistorySize);
         return lastStatistics;
     }
 
@@ -125,9 +127,15 @@ public class DefaultTransports implements InternalTransports {
         if (isMonitoring()) {
             rescheduleStatisticsMonitor();
         }
-        rescheduleStatisticsMonitor();
         for (Transport transport : transportsByUID.values()) {
             transport.setStatisticsInterval(interval, timeUnit);
+        }
+    }
+
+    public synchronized void setStatisticsHistorySize(int historySize) {
+        this.statisticsHistorySize = historySize;
+        for (Transport transport : transportsByUID.values()) {
+            transport.setStatisticsHistorySize(historySize);
         }
     }
 
@@ -171,6 +179,7 @@ public class DefaultTransports implements InternalTransports {
         Set<Transport> transportByHost = transportsByHost.get(transport.getHost());
         if (transportByHost == null) {
             transport.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
+            transport.setStatisticsHistorySize(statisticsHistorySize);
             if (isMonitoring()) {
                 transport.startStatisticsMonitor();
             }

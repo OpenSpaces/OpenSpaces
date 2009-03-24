@@ -12,13 +12,36 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
 
     private final SpaceInstanceStatistics[] stats;
 
-    public DefaultSpaceStatistics(SpaceInstanceStatistics[] stats) {
+    private volatile SpaceStatistics previos;
+
+    public DefaultSpaceStatistics(SpaceInstanceStatistics[] stats, SpaceStatistics previos, int historySize) {
         this.stats = stats;
         this.timestamp = System.currentTimeMillis();
+        this.previos = previos;
+
+        SpaceStatistics lastStats = null;
+        for (int i = 0; i < historySize; i++) {
+            if (getPrevious() == null) {
+                lastStats = null;
+                break;
+            }
+            lastStats = getPrevious();
+        }
+        if (lastStats != null) {
+            ((DefaultSpaceStatistics) lastStats).setPrevios(null);
+        }
     }
 
     public boolean isNA() {
         return stats == null || stats[0].isNA();
+    }
+
+    public SpaceStatistics getPrevious() {
+        return previos;
+    }
+
+    public void setPrevios(SpaceStatistics previos) {
+        this.previos = previos;
     }
 
     public int getSize() {

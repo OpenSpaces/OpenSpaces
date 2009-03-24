@@ -22,7 +22,7 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
 
     private final Map<String, ServiceMonitors> serviceMonitorsById;
 
-    private final ProcessingUnitInstanceStatistics previous;
+    private volatile ProcessingUnitInstanceStatistics previous;
 
     private final Map<String, EventContainerServiceMonitors> eventContainerServiceMonitors = new HashMap<String, EventContainerServiceMonitors>();
     private final Map<String, PollingEventContainerServiceMonitors> pollingEventContainerServiceMonitors = new HashMap<String, PollingEventContainerServiceMonitors>();
@@ -32,7 +32,8 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
     private final RemotingServiceMonitors remotingServiceMonitors;
     private final WebRequestsServiceMonitors webRequestsServiceMonitors;
 
-    public DefaultProcessingUnitInstanceServiceStatistics(long timestamp, Map<String, ServiceMonitors> serviceMonitorsById, ProcessingUnitInstanceStatistics previous) {
+    public DefaultProcessingUnitInstanceServiceStatistics(long timestamp, Map<String, ServiceMonitors> serviceMonitorsById, ProcessingUnitInstanceStatistics previous,
+                                                          int historySize) {
         this.timestamp = timestamp;
         this.serviceMonitorsById = serviceMonitorsById;
         this.previous = previous;
@@ -57,6 +58,18 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
         }
         this.remotingServiceMonitors = remotingServiceMonitorsX;
         this.webRequestsServiceMonitors = jeeRequestServiceMonitorsX;
+
+        ProcessingUnitInstanceStatistics lastStats = null;
+        for (int i = 0; i < historySize; i++) {
+            if (getPrevious() == null) {
+                lastStats = null;
+                break;
+            }
+            lastStats = getPrevious();
+        }
+        if (lastStats != null) {
+            ((DefaultProcessingUnitInstanceServiceStatistics) lastStats).setPrevious(null);
+        }
     }
 
     public long getTimestamp() {
@@ -97,5 +110,9 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
 
     public ProcessingUnitInstanceStatistics getPrevious() {
         return this.previous;
+    }
+
+    public void setPrevious(ProcessingUnitInstanceStatistics previous) {
+        this.previous = previous;
     }
 }

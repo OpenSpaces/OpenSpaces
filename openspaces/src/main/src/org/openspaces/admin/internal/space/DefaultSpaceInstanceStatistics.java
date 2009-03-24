@@ -11,11 +11,24 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
 
     private final StatisticsHolder statisticsHolder;
 
-    private final SpaceInstanceStatistics previousStats;
+    private volatile SpaceInstanceStatistics previousStats;
 
-    public DefaultSpaceInstanceStatistics(StatisticsHolder statisticsHolder, SpaceInstanceStatistics previousStats) {
+    public DefaultSpaceInstanceStatistics(StatisticsHolder statisticsHolder, SpaceInstanceStatistics previousStats, int historySize) {
         this.statisticsHolder = statisticsHolder;
         this.previousStats = previousStats;
+
+        SpaceInstanceStatistics lastStats = null;
+        for (int i = 0; i < historySize; i++) {
+            if (getPrevious() == null) {
+                lastStats = null;
+                break;
+            }
+            lastStats = getPrevious();
+        }
+        if (lastStats != null) {
+            ((DefaultSpaceInstanceStatistics) lastStats).setPreviousStats(null);
+        }
+
     }
 
     public boolean isNA() {
@@ -35,6 +48,10 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
 
     public SpaceInstanceStatistics getPrevious() {
         return previousStats;
+    }
+
+    public void setPreviousStats(SpaceInstanceStatistics previousStats) {
+        this.previousStats = previousStats;
     }
 
     public long getWriteCount() {

@@ -16,16 +16,28 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
 
     private final VirtualMachineDetails details;
 
-    private final VirtualMachineStatistics previousStats;
+    private volatile VirtualMachineStatistics previousStats;
 
     public DefaultVirtualMachineStatistics() {
-        this(NA_STATS, null, null);
+        this(NA_STATS, null, null, 0);
     }
 
-    public DefaultVirtualMachineStatistics(JVMStatistics stats, VirtualMachineStatistics previousStats, VirtualMachineDetails details) {
+    public DefaultVirtualMachineStatistics(JVMStatistics stats, VirtualMachineStatistics previousStats, VirtualMachineDetails details, int historySize) {
         this.stats = stats;
         this.previousStats = previousStats;
         this.details = details;
+
+        VirtualMachineStatistics lastStats = null;
+        for (int i = 0; i < historySize; i++) {
+            if (getPrevious() == null) {
+                lastStats = null;
+                break;
+            }
+            lastStats = getPrevious();
+        }
+        if (lastStats != null) {
+            ((DefaultVirtualMachineStatistics) lastStats).setPreviousStats(null);
+        }
     }
 
     public boolean isNA() {
@@ -42,6 +54,10 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
 
     public VirtualMachineStatistics getPrevious() {
         return previousStats;
+    }
+
+    public void setPreviousStats(VirtualMachineStatistics previousStats) {
+        this.previousStats = previousStats;
     }
 
     public long getPreviousTimestamp() {
