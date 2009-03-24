@@ -20,6 +20,7 @@ import com.gigaspaces.logger.GSLogConfigLoader;
 import com.j_spaces.core.service.ServiceConfigLoader;
 import com.j_spaces.kernel.PlatformVersion;
 import net.jini.core.lookup.ServiceTemplate;
+import net.jini.core.lookup.ServiceID;
 import net.jini.discovery.DiscoveryEvent;
 import net.jini.discovery.DiscoveryListener;
 import net.jini.discovery.LookupDiscoveryManager;
@@ -76,6 +77,10 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
 
     private Map<String, LoadBalancerInfo> loadBalancersInfoMap = new ConcurrentHashMap<String, LoadBalancerInfo>();
 
+    private Map<ServiceID, ClusterInfo> clusterInfoMap = new ConcurrentHashMap<ServiceID, ClusterInfo>();
+
+    private Map<ServiceID, JeeServiceDetails> jeeServiceDetailsMap = new ConcurrentHashMap<ServiceID, JeeServiceDetails>();
+    
     private volatile boolean running = false;
 
     private Thread configThread;
@@ -239,10 +244,12 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
                         loadBalancersInfo = new LoadBalancerInfo(clusterInfo.getName());
                         loadBalancersInfoMap.put(clusterInfo.getName(), loadBalancersInfo);
                     }
-                    loadBalancersInfo.putNode(new LoadBalancerNodeInfo(clusterInfo, (JeeServiceDetails) detail));
+                    clusterInfoMap.put(event.getPostEventServiceItem().serviceID, clusterInfo);
+                    jeeServiceDetailsMap.put(event.getPostEventServiceItem().serviceID, jeeDetails);
+                    loadBalancersInfo.putNode(new LoadBalancerNodeInfo(event.getPostEventServiceItem().serviceID, clusterInfo, (JeeServiceDetails) detail));
                     loadBalancersInfo.setDirty(true);
 
-                    System.out.println("[" + clusterInfo.getName() + "]: Adding [" + clusterInfo.getRunningNumberOffset1() + "] [" + jeeDetails.getHost() + ":" + jeeDetails.getPort() + jeeDetails.getContextPath() + "]");
+                    System.out.println("[" + clusterInfo.getName() + "]: Adding [" + event.getPostEventServiceItem().serviceID + "] [" + jeeDetails.getHost() + ":" + jeeDetails.getPort() + jeeDetails.getContextPath() + "]");
                 }
             }
         } catch (Exception e) {
@@ -252,20 +259,15 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
     }
 
     public synchronized void serviceRemoved(ServiceDiscoveryEvent event) {
-        PUServiceBean service = (PUServiceBean) event.getPreEventServiceItem().service;
         try {
-            Object[] details = service.listServiceDetails();
-            ClusterInfo clusterInfo = service.getClusterInfo();
-            for (Object detail : details) {
-                JeeServiceDetails jeeDetails = (JeeServiceDetails) detail;
-                if (detail instanceof JeeServiceDetails) {
-                    LoadBalancerInfo loadBalancersInfo = loadBalancersInfoMap.get(clusterInfo.getName());
-                    if (loadBalancersInfo == null) {
-                        continue;
-                    }
-                    loadBalancersInfo.removeNode(new LoadBalancerNodeInfo(clusterInfo, (JeeServiceDetails) detail));
+            ClusterInfo clusterInfo = clusterInfoMap.remove(event.getPreEventServiceItem().serviceID);
+            JeeServiceDetails jeeServiceDetails = jeeServiceDetailsMap.remove(event.getPreEventServiceItem().serviceID);
+            if (clusterInfo != null) {
+                LoadBalancerInfo loadBalancersInfo = loadBalancersInfoMap.get(clusterInfo.getName());
+                if (loadBalancersInfo != null) {
+                    loadBalancersInfo.removeNode(new LoadBalancerNodeInfo(event.getPreEventServiceItem().serviceID, clusterInfo, jeeServiceDetails));
                     loadBalancersInfo.setDirty(true);
-                    System.out.println("[" + clusterInfo.getName() + "]: Removing [" + clusterInfo.getRunningNumberOffset1() + "] [" + jeeDetails.getHost() + ":" + jeeDetails.getPort() + jeeDetails.getContextPath() + "]");
+                    System.out.println("[" + clusterInfo.getName() + "]: Removing [" + event.getPreEventServiceItem().serviceID + "] [" + jeeServiceDetails.getHost() + ":" + jeeServiceDetails.getPort() + jeeServiceDetails.getContextPath() + "]");
                 }
             }
         } catch (Exception e) {

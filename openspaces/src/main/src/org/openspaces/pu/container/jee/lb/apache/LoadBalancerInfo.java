@@ -16,6 +16,8 @@
 
 package org.openspaces.pu.container.jee.lb.apache;
 
+import net.jini.core.lookup.ServiceID;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,7 +30,7 @@ public class LoadBalancerInfo {
 
     private String name;
 
-    private Map<Integer, LoadBalancerNodeInfo> balancers = new ConcurrentHashMap<Integer, LoadBalancerNodeInfo>();
+    private Map<ServiceID, LoadBalancerNodeInfo> balancers = new ConcurrentHashMap<ServiceID, LoadBalancerNodeInfo>();
 
     private volatile boolean dirty = true;
 
@@ -52,11 +54,11 @@ public class LoadBalancerInfo {
     }
 
     public void putNode(LoadBalancerNodeInfo balancerInfo) {
-        balancers.put(balancerInfo.getClusterInfo().getRunningNumberOffset1(), balancerInfo);
+        balancers.put(balancerInfo.getServiceID(), balancerInfo);
     }
 
     public void removeNode(LoadBalancerNodeInfo balancerInfo) {
-        balancers.remove(balancerInfo.getClusterInfo().getRunningNumberOffset1());
+        balancers.remove(balancerInfo.getServiceID());
     }
 
     /**

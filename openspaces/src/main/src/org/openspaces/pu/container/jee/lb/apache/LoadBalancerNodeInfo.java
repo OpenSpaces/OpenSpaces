@@ -18,6 +18,7 @@ package org.openspaces.pu.container.jee.lb.apache;
 
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.pu.container.jee.JeeServiceDetails;
+import net.jini.core.lookup.ServiceID;
 
 /**
  * Node level information for the load balancer.
@@ -26,13 +27,20 @@ import org.openspaces.pu.container.jee.JeeServiceDetails;
  */
 public class LoadBalancerNodeInfo {
 
+    private ServiceID serviceID;
+
     private ClusterInfo clusterInfo;
 
     private JeeServiceDetails serviceDetails;
 
-    public LoadBalancerNodeInfo(ClusterInfo clusterInfo, JeeServiceDetails serviceDetails) {
+    public LoadBalancerNodeInfo(ServiceID serviceID, ClusterInfo clusterInfo, JeeServiceDetails serviceDetails) {
+        this.serviceID = serviceID;
         this.clusterInfo = clusterInfo;
         this.serviceDetails = serviceDetails;
+    }
+
+    public ServiceID getServiceID() {
+        return serviceID;
     }
 
     /**
