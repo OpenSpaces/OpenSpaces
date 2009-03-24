@@ -49,7 +49,7 @@ public class DefaultTransport implements InternalTransport {
 
     public DefaultTransport(NIODetails nioDetails, InternalTransports transports) {
         this.transportDetails = new DefaultTransportDetails(nioDetails);
-        this.uid = getHost() + ":" + getPort();
+        this.uid = getBindHost() + ":" + getPort();
         this.transports = transports;
         this.admin = (InternalAdmin) transports.getAdmin();
 
@@ -76,16 +76,16 @@ public class DefaultTransport implements InternalTransport {
         return this.uid;
     }
 
-    public String getLocalHostAddress() {
-        return transportDetails.getLocalHostAddress();
+    public String getHostAddress() {
+        return transportDetails.getHostAddress();
     }
 
-    public String getLocalHostName() {
-        return transportDetails.getLocalHostName();
+    public String getHostName() {
+        return transportDetails.getHostName();
     }
 
-    public String getHost() {
-        return transportDetails.getHost();
+    public String getBindHost() {
+        return transportDetails.getBindHost();
     }
 
     public int getPort() {

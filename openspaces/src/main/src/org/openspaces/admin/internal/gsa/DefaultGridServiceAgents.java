@@ -144,8 +144,8 @@ public class DefaultGridServiceAgents implements InternalGridServiceAgents {
 
     public void addGridServiceAgent(InternalGridServiceAgent gridServiceAgent) {
         GridServiceAgent existing = agents.put(gridServiceAgent.getUid(), gridServiceAgent);
-        agentsByHostAddress.put(gridServiceAgent.getTransport().getLocalHostAddress(), gridServiceAgent);
-        agentsByHostNames.put(gridServiceAgent.getTransport().getLocalHostName(), gridServiceAgent);
+        agentsByHostAddress.put(gridServiceAgent.getTransport().getHostAddress(), gridServiceAgent);
+        agentsByHostNames.put(gridServiceAgent.getTransport().getHostName(), gridServiceAgent);
         if (existing == null) {
             gridServiceAgentAddedEventManager.gridServiceAgentAdded(gridServiceAgent);
         }
@@ -154,8 +154,8 @@ public class DefaultGridServiceAgents implements InternalGridServiceAgents {
     public InternalGridServiceAgent removeGridServiceAgent(String uid) {
         InternalGridServiceAgent existing = (InternalGridServiceAgent) agents.remove(uid);
         if (existing != null) {
-            agentsByHostAddress.remove(existing.getTransport().getLocalHostAddress());
-            agentsByHostAddress.remove(existing.getTransport().getLocalHostName());
+            agentsByHostAddress.remove(existing.getTransport().getHostAddress());
+            agentsByHostAddress.remove(existing.getTransport().getHostName());
             gridServiceAgentRemovedEventManager.gridServiceAgentRemoved(existing);
         }
         return existing;

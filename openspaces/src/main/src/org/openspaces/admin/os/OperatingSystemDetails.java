@@ -104,6 +104,16 @@ public interface OperatingSystemDetails {
     double getTotalPhysicalMemorySizeInGB();
 
     /**
+     * Returns the (local) host name of the OS.
+     */
+    String getHostName();
+
+    /**
+     * Returns the (local) host address of the OS. 
+     */
+    String getHostAddress();
+
+    /**
      * Returns the maximum open files descriptors allowed for the operating system.
      */
     long getOpenFilesMax();

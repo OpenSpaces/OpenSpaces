@@ -633,9 +633,9 @@ public class DefaultAdmin implements InternalAdmin {
     private InternalMachine processMachineOnServiceAddition(TransportDetails transportDetails,
                                                             InternalTransport transport, OperatingSystem operatingSystem,
                                                             VirtualMachine virtualMachine, InternalMachineAware... machineAwares) {
-        InternalMachine machine = (InternalMachine) machines.getMachineByHostAddress(transportDetails.getLocalHostAddress());
+        InternalMachine machine = (InternalMachine) machines.getMachineByHostAddress(transportDetails.getHostAddress());
         if (machine == null) {
-            machine = new DefaultMachine(this, transportDetails.getLocalHostAddress(), transportDetails.getLocalHostAddress());
+            machine = new DefaultMachine(this, transportDetails.getHostAddress(), transportDetails.getHostAddress());
             machine.setOperatingSystem(operatingSystem);
             machines.addMachine(machine);
         }
@@ -679,7 +679,7 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     private InternalTransport processTransportOnServiceAddition(InternalTransportInfoProvider txProvider, NIODetails nioDetails, VirtualMachine virtualMachine) {
-        InternalTransport transport = (InternalTransport) transports.getTransportByHostAndPort(nioDetails.getHost(), nioDetails.getPort());
+        InternalTransport transport = (InternalTransport) transports.getTransportByHostAndPort(nioDetails.getBindHost(), nioDetails.getPort());
         if (transport == null) {
             transport = new DefaultTransport(nioDetails, transports);
             transport.setVirtualMachine(virtualMachine);

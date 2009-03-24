@@ -14,22 +14,22 @@ public class DefaultTransportDetails implements TransportDetails {
         this.nioDetails = nioDetails;
     }
 
-    public String getHost() {
-        return nioDetails.getHost();
+    public String getBindHost() {
+        return nioDetails.getBindHost();
     }
 
-    public String getLocalHostAddress() {
-        if (nioDetails.getLocalHostAddress().length() == 0) {
-            return nioDetails.getHost();
+    public String getHostAddress() {
+        if (nioDetails.getHostAddress().length() == 0) {
+            return nioDetails.getBindHost();
         }
-        return nioDetails.getLocalHostAddress();
+        return nioDetails.getHostAddress();
     }
 
-    public String getLocalHostName() {
-        if (nioDetails.getLocalHostName().length() == 0) {
-            return nioDetails.getHost();
+    public String getHostName() {
+        if (nioDetails.getHostName().length() == 0) {
+            return nioDetails.getBindHost();
         }
-        return nioDetails.getLocalHostName();
+        return nioDetails.getHostName();
     }
 
     public int getPort() {

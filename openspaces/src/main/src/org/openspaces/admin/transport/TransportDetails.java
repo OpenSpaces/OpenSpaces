@@ -44,19 +44,19 @@ public interface TransportDetails {
      *
      * @see java.net.InetAddress#getLocalHost()#getLocalHostAddress()
      */
-    String getLocalHostAddress();
+    String getHostAddress();
 
     /**
      * Returns the local host address of the transport.
      *
      * @see java.net.InetAddress#getLocalHost()#getLocalHostName()
      */
-    String getLocalHostName();
+    String getHostName();
 
     /**
      * Returns the host name or address the communication layer bounded on.
      */
-    String getHost();
+    String getBindHost();
 
     /**
      * Returns the host name or address the communication layer bounded on.

@@ -63,6 +63,14 @@ public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
         return StatisticsUtils.convertToGB(getTotalPhysicalMemorySizeInBytes());
     }
 
+    public String getHostName() {
+        return details.getHostName();
+    }
+
+    public String getHostAddress() {
+        return details.getHostAddress();
+    }
+
     public long getOpenFilesMax() {
         return details.getOpenFilesMax();
     }
