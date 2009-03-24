@@ -38,14 +38,14 @@
 	<classpathentry kind="lib" path="lib/platform/jetty/servlet-api-2.5-6.1.14.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jmx/jmxri.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jruby/jruby.jar"/>
-	<classpathentry kind="lib" path="lib/platform/mule/jug.osgi-2.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/platform/mule/mule-core-2.1.2.jar"/>
-	<classpathentry kind="lib" path="lib/platform/mule/mule-module-client-2.1.2.jar"/>
-	<classpathentry kind="lib" path="lib/platform/mule/mule-module-spring-config-2.1.2.jar"/>
-	<classpathentry kind="lib" path="lib/platform/mule/mule-module-spring-extras-2.1.2.jar"/>
-	<classpathentry kind="lib" path="lib/platform/mule/mule-transport-http-2.1.2.jar"/>
-	<classpathentry kind="lib" path="lib/platform/mule/mule-transport-stdio-2.1.2.jar"/>
-	<classpathentry kind="lib" path="lib/platform/mule/mule-transport-vm-2.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/platform/mule/jug-2.0.0-osgi-asl.jar"/>
+	<classpathentry kind="lib" path="lib/platform/mule/mule-core-2.2.0.jar"/>
+	<classpathentry kind="lib" path="lib/platform/mule/mule-module-client-2.2.0.jar"/>
+	<classpathentry kind="lib" path="lib/platform/mule/mule-module-spring-config-2.2.0.jar"/>
+	<classpathentry kind="lib" path="lib/platform/mule/mule-module-spring-extras-2.2.0.jar"/>
+	<classpathentry kind="lib" path="lib/platform/mule/mule-transport-http-2.2.0.jar"/>
+	<classpathentry kind="lib" path="lib/platform/mule/mule-transport-stdio-2.2.0.jar"/>
+	<classpathentry kind="lib" path="lib/platform/mule/mule-transport-vm-2.2.0.jar"/>
 	<classpathentry kind="lib" path="lib/platform/velocity/velocity-dep-1.5.jar"/>
 	<classpathentry kind="lib" path="lib/external/antlr/antlr-2.7.6.jar"/>
 	<classpathentry kind="lib" path="lib/external/asm/asm-2.2.3.jar"/>
