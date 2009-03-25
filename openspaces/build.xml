@@ -275,7 +275,6 @@
                 <exclude name="examples/**/.cvsignore"/>
 
                 <include name="lib/${name}/**"/>
-                <include name="lib/groovy/**"/>
                 <include name="lib/spring/spring.jar" />
                 <include name="lib/j2ee/activation.jar" />
                 <include name="lib/j2ee/jta.jar" />
@@ -316,7 +315,6 @@
                 <include name="lib/optional/openspaces/**"/>
                 <include name="lib/optional/spring/**"/>
                 <include name="lib/platform/openspaces/**" />
-                <include name="lib/platform/groovy/**"/>
                 <include name="lib/platform/jee/activation.jar" />
                 <include name="lib/platform/jee/jta.jar" />
                 <include name="lib/platform/jee/connector.jar" />

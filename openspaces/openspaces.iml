@@ -25,6 +25,7 @@
         <jarDirectory url="file://$MODULE_DIR$/lib/platform/xml" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="groovy-1.6.0" level="application" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library" exported="">
@@ -189,16 +190,6 @@
         <JAVADOC />
         <SOURCES />
         <jarDirectory url="file://$MODULE_DIR$/lib/platform/glassfish" recursive="false" />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library name="groovy">
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/lib/platform/groovy" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-        <jarDirectory url="file://$MODULE_DIR$/lib/platform/groovy" recursive="false" />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
