@@ -14,6 +14,7 @@
             <exclude name="platform/openspaces/**"/>
             <exclude name="ant/**"/>
         </fileset>
+        <path path="${basedir}/tools/groovy/embeddable/groovy-all-1.6.0.jar" />
     	<path path="${basedir}/../jini/classes" />
     	<path path="${basedir}/../gigaspaces/classes" />
         <path path="${basedir}/../gigaspaces/src/java/resources" />
@@ -32,6 +33,7 @@
             <exclude name="platform/openspaces/**"/>
             <exclude name="ant/**"/>
         </fileset>
+        <path path="${basedir}/tools/groovy/embeddable/groovy-all-1.6.0.jar" />
     	<path path="${basedir}/../jini/classes" />
     	<path path="${basedir}/../gigaspaces/classes" />
         <path path="${basedir}/../gigaspaces/src/java/resources" />
@@ -101,6 +103,7 @@
 
     <target name="fulljar" description="Create full JAR file with all OpenSpaces classes">
 
+        <mkdir dir="${target.classes.dir}" />
         <mkdir dir="${lib.dir}/required"/>
         <delete file="${lib.dir}/required/gs-openspaces.jar"/>
 
