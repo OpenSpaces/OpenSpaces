@@ -3,6 +3,8 @@ package org.openspaces.gshell.commands.main
 import org.openspaces.gshell.Groovysh
 import org.openspaces.admin.machine.Machines
 import org.openspaces.gshell.command.support.CommandSupport
+import org.openspaces.gshell.ContextItem
+import jline.SimpleCompletor
 
 /**
  * @author kimchy
@@ -11,6 +13,13 @@ public class CDCommand extends CommandSupport {
 
     CDCommand(final Groovysh shell) {
         super(shell, 'cd', '\\c')
+    }
+
+    protected List createCompletors() {
+        return [
+            new SimpleCompletor("machines"),
+            null
+        ]
     }
 
     public Object execute(List args) {

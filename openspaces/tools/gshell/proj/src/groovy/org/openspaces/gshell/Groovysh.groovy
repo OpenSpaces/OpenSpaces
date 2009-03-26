@@ -34,7 +34,7 @@ import org.codehaus.groovy.tools.shell.IO
 import org.codehaus.groovy.tools.shell.ExitNotification
 import org.openspaces.admin.Admin
 import org.openspaces.admin.AdminFactory
-import org.openspaces.gshell.commands.main.ContextItem
+import org.openspaces.gshell.ContextItem
 
 /**
  * An interactive shell for evaluating Groovy code from the command-line (aka. groovysh).
@@ -103,7 +103,7 @@ class Groovysh
     }
 
 
-    // Context
+    // START Context (GigaSpaces Change)
 
     void cdToContext(ContextItem contextItem) {
         contextItems << contextItem;
@@ -127,7 +127,17 @@ class Groovysh
 
         def r = new XmlCommandRegistrar(this, interp.classLoader)
         r.register(Groovysh.getResource("commands/${contextItem.type}/commands.xml"))
+
+        if (runner) {
+            runner.completor.list.clear()
+            for (command in registry) {
+                runner.completor << command
+            }
+            runner.completor.refresh()
+        }
     }
+
+    // END Context (GigaSpaces Change)
 
     //
     // Execution
@@ -448,7 +458,7 @@ class Groovysh
 
                 // Setup the history
                 runner.history = history = new History()
-                runner.historyFile = new File(userStateDirectory, 'groovysh.history')
+                runner.historyFile = new File(userStateDirectory, 'gshell.history')
 
                 // Setup the error handler
                 runner.errorHandler = this.&displayError
@@ -467,8 +477,7 @@ class Groovysh
                     }
 
                     io.out.println(messages.format('startup_banner.0', com.j_spaces.kernel.PlatformVersion.getVersionAndBuild(), System.properties['java.version']))
-                    io.out.println("@|bold Groups:| ${admin.groups}")
-                    io.out.println("@|bold Locators:| ${admin.locators}")
+                    io.out.println("@|bold Groups:| ${admin.groups} @|bold Locators:| ${admin.locators}")
                     io.out.println(messages['startup_banner.1'])
                     io.out.println('-' * (width - 1))
                 }

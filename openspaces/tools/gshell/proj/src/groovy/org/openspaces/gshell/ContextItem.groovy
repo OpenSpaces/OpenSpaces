@@ -1,4 +1,4 @@
-package org.openspaces.gshell.commands.main
+package org.openspaces.gshell
 /**
  * @author kimchy
  */
