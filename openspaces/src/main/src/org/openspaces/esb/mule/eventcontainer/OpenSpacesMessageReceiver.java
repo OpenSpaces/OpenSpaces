@@ -57,6 +57,8 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
 
     private boolean workManager = false;
 
+    private volatile boolean disposed = false;
+
     /**
      * Creates a OpenSpacesMessageReceiver and resister it as a SpaceDataEventListener to
      * the Polling/Notify container that declared as umoEndpoint.EndpointURI.address.
@@ -123,6 +125,10 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
             TransactionTemplate tt = new TransactionTemplate(endpoint.getTransactionConfig(),
                     connector.getExceptionListener(), connector.getMuleContext());
             try {
+                if (disposed) {
+                    txStatus.setRollbackOnly();
+                    return;
+                }
                 tt.execute(new TransactionCallback() {
                     public Object doInTransaction() throws Exception {
                         doReceiveEvent(data, gigaSpace, txStatus, source);
@@ -133,6 +139,9 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
                 txStatus.setRollbackOnly();
             }
         } else {
+            if (disposed) {
+                return;
+            }
             try {
                 doReceiveEvent(data, gigaSpace, txStatus, source);
             } catch (Exception e) {
@@ -181,5 +190,6 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
     }
 
     protected void doDispose() {
+        disposed = true;
     }
 }
