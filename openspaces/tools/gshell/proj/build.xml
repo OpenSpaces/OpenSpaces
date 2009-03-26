@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+
+<project name="openspaces" default="dist" basedir=".">
+
+    <path id="classpath">
+
+        <path path="${basedir}/../../../../jini/classes" />
+        <path path="${basedir}/../../../../gigaspaces/classes" />
+        <path path="${basedir}/../../../../gigaspaces/src/java/resources" />
+        
+        <fileset dir="${basedir}/../../../lib">
+            <include name="**/*.jar"/>
+        </fileset>
+        <fileset dir="${basedir}/../../../tools/groovy">
+            <include name="lib/**/*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="dist">
+        <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc" classpathref="classpath"/>
+        <delete dir="${basedir}/target/classes" />
+        <mkdir dir="${basedir}/target/classes" />
+        <groovyc srcdir="${basedir}/src/groovy" destdir="${basedir}/target/classes" />
+
+        <copy todir="${basedir}/target/classes" preservelastmodified="true">
+            <fileset dir="${basedir}/src/groovy">
+                <include name="**/*.properties"/>
+                <include name="**/*.xml"/>
+            </fileset>
+        </copy>
+
+        <jar jarfile="${basedir}/../gshell.jar" basedir="${basedir}/target/classes" />
+    </target>
+</project>

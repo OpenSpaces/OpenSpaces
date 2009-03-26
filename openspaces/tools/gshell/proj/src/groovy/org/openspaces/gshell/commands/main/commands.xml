@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<commands>
+    <command>org.codehaus.groovy.tools.shell.commands.HelpCommand</command>
+    <command>org.codehaus.groovy.tools.shell.commands.ExitCommand</command>
+    <command>org.openspaces.gshell.commands.main.LSCommand</command>
+    <command>org.openspaces.gshell.commands.main.CDCommand</command>
+</commands>
+
