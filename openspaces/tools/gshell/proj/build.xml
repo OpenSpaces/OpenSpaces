@@ -23,7 +23,7 @@
         <groovyc srcdir="${basedir}/src/groovy" destdir="${basedir}/target/classes" />
 
         <copy todir="${basedir}/target/classes" preservelastmodified="true">
-            <fileset dir="${basedir}/src/groovy">
+            <fileset dir="groovy">
                 <include name="**/*.properties"/>
                 <include name="**/*.xml"/>
             </fileset>
