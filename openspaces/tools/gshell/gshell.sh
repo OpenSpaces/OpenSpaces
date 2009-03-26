@@ -9,7 +9,7 @@
 GROOVY_APP_NAME=GShell
 DIRNAME=`dirname "$0"`
 GS_GROOVY_HOME=$DIRNAME/../groovy
-CP=$DIRNAME/gshell.jar
+CP=$DIRNAME/groovy
 . "$DIRNAME/../groovy/bin/startGroovy"
 
-startGroovy org.openspaces.gshell.Main "$@"
+startGroovy groovy.ui.GroovyMain $DIRNAME/groovy/org/openspaces/gshell/Main.groovy "$@"
