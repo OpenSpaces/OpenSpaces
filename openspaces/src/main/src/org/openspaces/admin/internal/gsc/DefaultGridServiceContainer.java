@@ -85,6 +85,29 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
         }
     }
 
+    public boolean waitFor(String processingUnitName, int numberOfProcessingUnitInstances) {
+        return waitFor(processingUnitName, numberOfProcessingUnitInstances, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public boolean waitFor(final String processingUnitName, int numberOfProcessingUnitInstances, long timeout, TimeUnit timeUnit) {
+        final CountDownLatch latch = new CountDownLatch(numberOfProcessingUnitInstances);
+        ProcessingUnitInstanceAddedEventListener added = new ProcessingUnitInstanceAddedEventListener() {
+            public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstance) {
+                if (processingUnitInstance.getName().equals(processingUnitName)) {
+                    latch.countDown();
+                }
+            }
+        };
+        getProcessingUnitInstanceAdded().add(added);
+        try {
+            return latch.await(timeout, timeUnit);
+        } catch (InterruptedException e) {
+            return false;
+        } finally {
+            getProcessingUnitInstanceAdded().remove(added);
+        }
+    }
+
     public void addProcessingUnitInstance(ProcessingUnitInstance processingUnitInstance) {
         processingUnitInstances.addInstance(processingUnitInstance);
     }

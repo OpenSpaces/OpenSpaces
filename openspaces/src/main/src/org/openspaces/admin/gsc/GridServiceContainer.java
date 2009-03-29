@@ -44,6 +44,18 @@ public interface GridServiceContainer extends AgentGridComponent, Iterable<Proce
     boolean waitFor(int numberOfProcessingUnitInstances, long timeout, TimeUnit timeUnit);
 
     /**
+     * Waits indefinitely for the given number of processing unit instances of the specified name to run within the container.
+     */
+    boolean waitFor(String processingUnitName, int numberOfProcessingUnitInstances);
+
+    /**
+     * Waits for timeout value (in time unit) for the given number of processing unit instances of the specified name
+     * to run within the container. Returns <code>true</code> if the number was reached, <code>false</code> if the
+     * timeout expired.
+     */
+    boolean waitFor(String processingUnitName, int numberOfProcessingUnitInstances, long timeout, TimeUnit timeUnit);
+
+    /**
      * Returns the processing unit instances that are currently deployed within the grid service container.
      */
     ProcessingUnitInstance[] getProcessingUnitInsances();
