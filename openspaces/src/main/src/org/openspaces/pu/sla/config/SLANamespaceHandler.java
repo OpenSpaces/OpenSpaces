@@ -31,6 +31,7 @@ public class SLANamespaceHandler extends NamespaceHandlerSupport {
         registerBeanDefinitionParser("scale-up-policy", new ScaleUpPolicyBeanDefinitionParser());
         registerBeanDefinitionParser("bean-property-monitor", new BeanPropertyMonitorBeanDefinitionParser());
         registerBeanDefinitionParser("host", new HostRequirementBeanDefinitionParser());
+        registerBeanDefinitionParser("zone", new ZoneRequirementBeanDefinitionParser());
         registerBeanDefinitionParser("cpu", new CpuRequirementBeanDefinitionParser());
         registerBeanDefinitionParser("memory", new MemoryBeanDefinitionParser());
         registerBeanDefinitionParser("range", new RangeRequirementBeanDefinitionParser());

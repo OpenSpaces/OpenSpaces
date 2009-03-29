@@ -21,6 +21,9 @@ import org.openspaces.pu.sla.requirement.Requirement;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
+
+import com.gigaspaces.grid.zone.ZoneHelper;
 
 /**
  * A set of definitions controlling the nature of a processing unit deployment
@@ -78,6 +81,8 @@ public class SLA implements Serializable {
     private int maxInstancesPerVM;
 
     private int maxInstancesPerMachine;
+
+    private Map<String, Integer> maxInstancesPerZone;
 
     private List<InstanceSLA> instanceSLAs;
 
@@ -183,6 +188,18 @@ public class SLA implements Serializable {
      */
     public void setMaxInstancesPerMachine(int maxInstancesPerMachine) {
         this.maxInstancesPerMachine = maxInstancesPerMachine;
+    }
+
+    public Map<String, Integer> getMaxInstancesPerZone() {
+        return maxInstancesPerZone;
+    }
+
+    public void setMaxInstancesPerZone(Map<String, Integer> maxInstancesPerZone) {
+        this.maxInstancesPerZone = maxInstancesPerZone;
+    }
+
+    public void setMaxInstancesPerZoneAsString(String maxInstancesPerZone) {
+        this.maxInstancesPerZone = ZoneHelper.parse(maxInstancesPerZone);
     }
 
     /**

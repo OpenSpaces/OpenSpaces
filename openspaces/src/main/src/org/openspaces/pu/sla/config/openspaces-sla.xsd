@@ -293,6 +293,16 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:attribute>
+            <xsd:attribute name="max-instances-per-zone" type="xsd:string" use="optional">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Controls how many instances can be deployed per zone. When using a topology without backups,
+                        will control the number of instances based on all the processing unit instances. When working
+                        with a topology that has backups will control the number of a partition and its backups per
+                        machine. Format is: "zone1/1", and several zones is: "zoneX/1,zoneY/2".
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
         </xsd:complexType>
     </xsd:element>
 
@@ -309,6 +319,17 @@
                         <xsd:annotation>
                             <xsd:documentation>
                                 Controls the ip of the machine a processing unit can be deployed to.
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="zone">
+                <xsd:complexType>
+                    <xsd:attribute name="name" type="xsd:string" use="required">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                Controls teh zone of the GSC belongs to where the processing unit can be deployed.
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>

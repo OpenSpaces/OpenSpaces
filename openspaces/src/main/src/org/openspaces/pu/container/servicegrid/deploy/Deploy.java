@@ -17,6 +17,7 @@
 package org.openspaces.pu.container.servicegrid.deploy;
 
 import com.gigaspaces.grid.gsm.GSM;
+import com.gigaspaces.grid.zone.ZoneHelper;
 import com.gigaspaces.logger.GSLogConfigLoader;
 import com.j_spaces.core.service.ServiceConfigLoader;
 import com.j_spaces.kernel.PlatformVersion;
@@ -39,10 +40,7 @@ import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.CommandLineParser;
 import org.openspaces.pu.sla.*;
 import org.openspaces.pu.sla.SLA;
-import org.openspaces.pu.sla.requirement.HostRequirement;
-import org.openspaces.pu.sla.requirement.RangeRequirement;
-import org.openspaces.pu.sla.requirement.Requirement;
-import org.openspaces.pu.sla.requirement.SystemRequirement;
+import org.openspaces.pu.sla.requirement.*;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ByteArrayResource;
@@ -380,6 +378,11 @@ public class Deploy {
                 sla.setMaxInstancesPerMachine(Integer.valueOf(maxInstancePerMachine));
                 info("Overrding SLA maxInstancesPerMachine with [" + maxInstancePerMachine + "]");
             }
+            if (param.getName().equalsIgnoreCase("max-instances-per-zone")) {
+                String maxInstancePerZone = param.getArguments()[0];
+                sla.setMaxInstancesPerZone(ZoneHelper.parse(maxInstancePerZone));
+                info("Overrding SLA maxInstancesPerZone with [" + maxInstancePerZone + "]");
+            }
         }
 
         if (logger.isDebugEnabled()) {
@@ -537,6 +540,7 @@ public class Deploy {
         if (sla.getMaxInstancesPerMachine() > 0) {
             element.setMaxPerPhysicalMachine(sla.getMaxInstancesPerMachine());
         }
+        element.setMaxPerZone(sla.getMaxInstancesPerZone());
 
         element.setTotalNumberOfServices(sla.getNumberOfInstances());
 
@@ -640,6 +644,8 @@ public class Deploy {
                 element.getServiceLevelAgreements().addSystemThreshold(range.getWatch(), thresholdValues);
             } else if (requirement instanceof HostRequirement) {
                 hosts.add(((HostRequirement) requirement).getIp());
+            } else if (requirement instanceof ZoneRequirement) {
+                element.addRequiredZone(((ZoneRequirement) requirement).getZone());
             } else if (requirement instanceof SystemRequirement) {
                 SystemRequirement systemAttributes = (SystemRequirement) requirement;
                 ServiceLevelAgreements.SystemRequirement systemRequirement = new ServiceLevelAgreements.SystemRequirement(
