@@ -468,6 +468,107 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
         Thread.currentThread().setContextClassLoader(contextClassLoader);
 
+        buildMembersAliveIndicators();
+
+        ArrayList<Object> serviceDetails = buildServiceDetails();
+
+        buildServiceMonitors();
+        
+        this.puDetails = new PUDetails(context.getParentServiceID(), clusterInfo, beanLevelProperties, serviceDetails.toArray(new Object[serviceDetails.size()]));
+
+        if (container instanceof ApplicationContextProcessingUnitContainer) {
+            ApplicationContext applicationContext = ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
+
+            // inject the application context to all the monitors and schedule them
+            // currently use the number of threads in relation to the number of monitors
+            int numberOfThreads = watchTasks.size() / 5;
+            if (numberOfThreads == 0) {
+                numberOfThreads = 1;
+            }
+            executorService = Executors.newScheduledThreadPool(numberOfThreads);
+            for (WatchTask watchTask : watchTasks) {
+                if (watchTask.getMonitor() instanceof ApplicationContextMonitor) {
+                    ((ApplicationContextMonitor) watchTask.getMonitor()).setApplicationContext(applicationContext);
+                }
+                executorService.scheduleAtFixedRate(watchTask, watchTask.getMonitor().getPeriod(), watchTask.getMonitor().getPeriod(), TimeUnit.MILLISECONDS);
+            }
+        }
+    }
+
+    private void buildServiceMonitors() {
+        if (container instanceof ServiceMonitorsProvider) {
+            serviceMonitors.add(new Callable() {
+                public Object call() throws Exception {
+                    return ((ServiceMonitorsProvider) container).getServicesMonitors();
+                }
+            });
+        }
+
+        if (container instanceof ApplicationContextProcessingUnitContainer) {
+            ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
+            final Map monitorsMap = applicationContext.getBeansOfType(ServiceMonitorsProvider.class);
+            serviceMonitors.add(new Callable() {
+                public Object call() throws Exception {
+                    ArrayList<ServiceMonitors> retMonitors = new ArrayList<ServiceMonitors>();
+                    for (Iterator it = monitorsMap.values().iterator(); it.hasNext();) {
+                        ServiceMonitors[] monitors = ((ServiceMonitorsProvider) it.next()).getServicesMonitors();
+                        if (monitors != null) {
+                            for (ServiceMonitors mon : monitors) {
+                                retMonitors.add(mon);
+                            }
+                        }
+                    }
+                    return retMonitors.toArray(new Object[retMonitors.size()]);
+                }
+            });
+        }
+
+        List<Callable> sharedMonitors = SharedServiceData.removeServiceMonitors(clusterInfo.getName() + clusterInfo.getRunningNumber());
+        if (sharedMonitors != null) {
+            serviceMonitors.addAll(sharedMonitors);
+        }
+    }
+
+    private ArrayList<Object> buildServiceDetails() {
+        ArrayList<Object> serviceDetails = new ArrayList<Object>();
+
+        if (container instanceof ServiceDetailsProvider) {
+            ServiceDetails[] details = ((ServiceDetailsProvider) container).getServicesDetails();
+            if (details != null) {
+                for (ServiceDetails detail : details) {
+                    serviceDetails.add(detail);
+                }
+            }
+        }
+
+        if (container instanceof ApplicationContextProcessingUnitContainer) {
+            ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
+            Map map = applicationContext.getBeansOfType(ServiceDetailsProvider.class);
+            for (Iterator it = map.values().iterator(); it.hasNext();) {
+                ServiceDetails[] details = ((ServiceDetailsProvider) it.next()).getServicesDetails();
+                if (details != null) {
+                    for (ServiceDetails detail : details) {
+                        serviceDetails.add(detail);
+                    }
+                }
+            }
+        }
+
+        List<Callable> serviceDetailsProvider = SharedServiceData.removeServiceDetails(clusterInfo.getName() + clusterInfo.getRunningNumber());
+        if (serviceDetailsProvider != null) {
+            for (Callable serProvider : serviceDetailsProvider) {
+                try {
+                    Object[] details = (Object[]) serProvider.call();
+                    Collections.addAll(serviceDetails, details);
+                } catch (Exception e) {
+                    logger.error("Failed to add service details from custom provider", e);
+                }
+            }
+        }
+        return serviceDetails;
+    }
+
+    private void buildMembersAliveIndicators() {
         // Handle Member Alive Indicators
         ArrayList<Callable<Boolean>> maIndicators = new ArrayList<Callable<Boolean>>();
         if (container instanceof ApplicationContextProcessingUnitContainer) {
@@ -492,92 +593,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
         }
         memberAliveIndicators = maIndicators.toArray(new Callable[maIndicators.size()]);
-
-
-        if (container instanceof ApplicationContextProcessingUnitContainer) {
-            ApplicationContext applicationContext = ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
-
-            // inject the application context to all the monitors and schedule them
-            // currently use the number of threads in relation to the number of monitors
-            int numberOfThreads = watchTasks.size() / 5;
-            if (numberOfThreads == 0) {
-                numberOfThreads = 1;
-            }
-            executorService = Executors.newScheduledThreadPool(numberOfThreads);
-            for (WatchTask watchTask : watchTasks) {
-                if (watchTask.getMonitor() instanceof ApplicationContextMonitor) {
-                    ((ApplicationContextMonitor) watchTask.getMonitor()).setApplicationContext(applicationContext);
-                }
-                executorService.scheduleAtFixedRate(watchTask, watchTask.getMonitor().getPeriod(), watchTask.getMonitor().getPeriod(), TimeUnit.MILLISECONDS);
-            }
-        }
-
-        ArrayList<Object> serviceDetails = new ArrayList<Object>();
-
-        if (container instanceof ServiceDetailsProvider) {
-            ServiceDetails[] details = ((ServiceDetailsProvider) container).getServicesDetails();
-            if (details != null) {
-                for (ServiceDetails detail : details) {
-                    serviceDetails.add(detail);
-                }
-            }
-        }
-
-        if (container instanceof ServiceMonitorsProvider) {
-            serviceMonitors.add(new Callable() {
-                public Object call() throws Exception {
-                    return ((ServiceMonitorsProvider) container).getServicesMonitors();
-                }
-            });
-        }
-
-        if (container instanceof ApplicationContextProcessingUnitContainer) {
-            ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
-            Map map = applicationContext.getBeansOfType(ServiceDetailsProvider.class);
-            for (Iterator it = map.values().iterator(); it.hasNext();) {
-                ServiceDetails[] details = ((ServiceDetailsProvider) it.next()).getServicesDetails();
-                if (details != null) {
-                    for (ServiceDetails detail : details) {
-                        serviceDetails.add(detail);
-                    }
-                }
-            }
-
-            final Map monitorsMap = applicationContext.getBeansOfType(ServiceMonitorsProvider.class);
-            serviceMonitors.add(new Callable() {
-                public Object call() throws Exception {
-                    ArrayList<ServiceMonitors> retMonitors = new ArrayList<ServiceMonitors>();
-                    for (Iterator it = monitorsMap.values().iterator(); it.hasNext();) {
-                        ServiceMonitors[] monitors = ((ServiceMonitorsProvider) it.next()).getServicesMonitors();
-                        if (monitors != null) {
-                            for (ServiceMonitors mon : monitors) {
-                                retMonitors.add(mon);
-                            }
-                        }
-                    }
-                    return retMonitors.toArray(new Object[retMonitors.size()]);
-                }
-            });
-        }
-
-        List<Callable> serviceDetailsProvider = SharedServiceData.removeServiceDetails(clusterInfo.getName() + clusterInfo.getRunningNumber());
-        if (serviceDetailsProvider != null) {
-            for (Callable serProvider : serviceDetailsProvider) {
-                try {
-                    Object[] details = (Object[]) serProvider.call();
-                    Collections.addAll(serviceDetails, details);
-                } catch (Exception e) {
-                    logger.error("Failed to add service details from custom provider", e);
-                }
-            }
-        }
-
-        List<Callable> sharedMonitors = SharedServiceData.removeServiceMonitors(clusterInfo.getName() + clusterInfo.getRunningNumber());
-        if (sharedMonitors != null) {
-            serviceMonitors.addAll(sharedMonitors);
-        }
-
-        this.puDetails = new PUDetails(context.getParentServiceID(), clusterInfo, beanLevelProperties, serviceDetails.toArray(new Object[serviceDetails.size()]));
     }
 
     private org.openspaces.pu.sla.SLA getSLA(ServiceBeanContext context) throws IOException, ClassNotFoundException {
