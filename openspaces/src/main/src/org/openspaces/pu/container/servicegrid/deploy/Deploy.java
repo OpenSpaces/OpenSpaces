@@ -237,7 +237,7 @@ public class Deploy {
             deletePUFile = true;
         }
 
-        if (puFile.exists() && (puFile.getName().endsWith(".jar") || puFile.getName().endsWith(".war"))) {
+        if (puFile.exists() && (puFile.getName().endsWith(".zip") || puFile.getName().endsWith(".jar") || puFile.getName().endsWith(".war"))) {
             overridePuName = puFile.getName().substring(0, puFile.getName().length() - 4);
             puPath = overridePuName;
         }
