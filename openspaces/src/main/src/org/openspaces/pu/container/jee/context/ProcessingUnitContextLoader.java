@@ -20,6 +20,7 @@ import org.jini.rio.boot.SharedServiceData;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
 import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
+import org.openspaces.core.cluster.MemberAliveIndicator;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
 import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
@@ -41,10 +42,10 @@ import java.util.concurrent.Callable;
 
 /**
  * Same as Spring {@link org.springframework.web.context.ContextLoader}. Different in two aspects:
- *
+ * <p/>
  * <p>The first, it automatillcay loads the binded <code>META-INF/spring/pu.xml</code> (binded into the servlet
  * context) as the parent application context. See {@link #loadParentContext(javax.servlet.ServletContext)}.
- *
+ * <p/>
  * <p>Second, it overrides the creation of {@link org.springframework.web.context.WebApplicationContext} and
  * automatically adds {@link org.openspaces.core.cluster.ClusterInfo} and {@link org.openspaces.core.properties.BeanLevelProperties}
  * handling. It also delegates the objects to the web context level Spring application context.
@@ -58,7 +59,9 @@ public class ProcessingUnitContextLoader extends ContextLoader {
         final WebApplicationContext context = super.initWebApplicationContext(servletContext);
         ClusterInfo clusterInfo = (ClusterInfo) servletContext.getAttribute(JeeProcessingUnitContainerProvider.CLUSTER_INFO_CONTEXT);
         if (clusterInfo != null) {
-            SharedServiceData.addServiceDetails(clusterInfo.getName() + clusterInfo.getRunningNumber(), new Callable() {
+            String key = clusterInfo.getName() + clusterInfo.getRunningNumber();
+
+            SharedServiceData.addServiceDetails(key, new Callable() {
                 public Object call() throws Exception {
                     ArrayList<Object> serviceDetails = new ArrayList<Object>();
                     Map map = context.getBeansOfType(ServiceDetailsProvider.class);
@@ -74,7 +77,7 @@ public class ProcessingUnitContextLoader extends ContextLoader {
                 }
             });
 
-            SharedServiceData.addServiceMonitors(clusterInfo.getName() + clusterInfo.getRunningNumber(), new Callable() {
+            SharedServiceData.addServiceMonitors(key, new Callable() {
                 public Object call() throws Exception {
                     ArrayList<ServiceMonitors> serviceMonitors = new ArrayList<ServiceMonitors>();
                     Map map = context.getBeansOfType(ServiceMonitorsProvider.class);
@@ -89,6 +92,18 @@ public class ProcessingUnitContextLoader extends ContextLoader {
                     return serviceMonitors.toArray(new Object[serviceMonitors.size()]);
                 }
             });
+
+            Map map = context.getBeansOfType(MemberAliveIndicator.class);
+            for (Iterator it = map.values().iterator(); it.hasNext();) {
+                final MemberAliveIndicator memberAliveIndicator = (MemberAliveIndicator) it.next();
+                if (memberAliveIndicator.isMemberAliveEnabled()) {
+                    SharedServiceData.addMemberAliveIndicator(key, new Callable<Boolean>() {
+                        public Boolean call() throws Exception {
+                            return memberAliveIndicator.isAlive();
+                        }
+                    });
+                }
+            }
         }
         return context;
     }
@@ -103,7 +118,7 @@ public class ProcessingUnitContextLoader extends ContextLoader {
 
     /**
      * Creates a Spring {@link org.springframework.web.context.WebApplicationContext} - {@link org.openspaces.pu.container.jee.context.ProcessingUnitWebApplicationContext}.
-     *
+     * <p/>
      * <p>Adds support to {@link ClusterInfo} and {@link org.openspaces.core.properties.BeanLevelProperties} processors. The objects
      * themself are bounded in the {@link javax.servlet.ServletContext}.
      */

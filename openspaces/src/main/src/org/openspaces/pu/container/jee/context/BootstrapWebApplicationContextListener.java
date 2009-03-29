@@ -22,6 +22,7 @@ import org.jini.rio.boot.SharedServiceData;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
 import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
+import org.openspaces.core.cluster.MemberAliveIndicator;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
 import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
@@ -51,15 +52,15 @@ import java.util.concurrent.Callable;
  * Bootstap servlet context listener allowing to get the {@link org.openspaces.core.cluster.ClusterInfo},
  * {@link org.openspaces.core.properties.BeanLevelProperties}, and handle an optional pu.xml file within
  * META-INF/spring by loading it.
- *
+ * <p/>
  * <p>The different web containers support in OpenSpaces will use {@link #prepareForBoot(java.io.File, org.openspaces.core.cluster.ClusterInfo, org.openspaces.core.properties.BeanLevelProperties)}
  * before the web application is started. It will basically marshall the ClusterInfo and BeanLevelProperties so they
  * can be read when the {@link #contextInitialized(javax.servlet.ServletContextEvent)} is called. It will also
  * change the web.xml in order to add this class as a context listener.
- *
+ * <p/>
  * <p>During context initializtion, the marshalled ClusterInfo and BeanLevelProperties can be read and
  * put in the servlet context (allowing us to support any web container).
- *
+ * <p/>
  * <p>If there is a pu.xml file, it will be started as well, with the application context itself set in the
  * servlet context (can then be used by the {@link org.openspaces.pu.container.jee.context.ProcessingUnitContextLoaderListener}
  * as well as all its beans read and set in the servlet context under their respective names.
@@ -142,7 +143,9 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
             }
 
             if (clusterInfo != null) {
-                SharedServiceData.addServiceDetails(clusterInfo.getName() + clusterInfo.getRunningNumber(), new Callable() {
+                final String key = clusterInfo.getName() + clusterInfo.getRunningNumber();
+
+                SharedServiceData.addServiceDetails(key, new Callable() {
                     public Object call() throws Exception {
                         ArrayList<ServiceDetails> serviceDetails = new ArrayList<ServiceDetails>();
                         Map map = applicationContext.getBeansOfType(ServiceDetailsProvider.class);
@@ -158,7 +161,7 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
                     }
                 });
 
-                SharedServiceData.addServiceMonitors(clusterInfo.getName() + clusterInfo.getRunningNumber(), new Callable() {
+                SharedServiceData.addServiceMonitors(key, new Callable() {
                     public Object call() throws Exception {
                         ArrayList<ServiceMonitors> serviceMonitors = new ArrayList<ServiceMonitors>();
                         Map map = applicationContext.getBeansOfType(ServiceMonitorsProvider.class);
@@ -173,8 +176,19 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
                         return serviceMonitors.toArray(new Object[serviceMonitors.size()]);
                     }
                 });
-            }
 
+                Map map = applicationContext.getBeansOfType(MemberAliveIndicator.class);
+                for (Iterator it = map.values().iterator(); it.hasNext();) {
+                    final MemberAliveIndicator memberAliveIndicator = (MemberAliveIndicator) it.next();
+                    if (memberAliveIndicator.isMemberAliveEnabled()) {
+                        SharedServiceData.addMemberAliveIndicator(key, new Callable<Boolean>() {
+                            public Boolean call() throws Exception {
+                                return memberAliveIndicator.isAlive();
+                            }
+                        });
+                    }
+                }
+            }
         } else {
             logger.debug("No [" + ApplicationContextProcessingUnitContainerProvider.DEFAULT_PU_CONTEXT_LOCATION + "] to load");
         }

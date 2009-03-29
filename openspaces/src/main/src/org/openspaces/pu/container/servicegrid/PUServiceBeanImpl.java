@@ -108,7 +108,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private volatile ScheduledExecutorService executorService;
 
-    private volatile MemberAliveIndicator[] memberAliveIndicators;
+    private volatile Callable<Boolean>[] memberAliveIndicators;
 
     private volatile File deployPath;
 
@@ -165,11 +165,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
 
         try {
-            // we set the context class loader so we export with it
-            ClassLoader webAppClassLoader = SharedServiceData.removeWebAppClassLoader(clusterInfo.getName() + clusterInfo.getRunningNumber());
-            if (webAppClassLoader != null) {
-                contextClassLoader = webAppClassLoader;
-            }
+            // we set the context class loader so we export with it (note, if it is a web app class loader, we already set it)
             Thread.currentThread().setContextClassLoader(contextClassLoader);
             return super.doStart(context);
         } finally {
@@ -464,17 +460,42 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         container = factory.createContainer();
 
+        // set the context class loader to the web app class loader if there is one
+        // this menas that from now on, and the exported service, will use the context class loader
+        ClassLoader webAppClassLoader = SharedServiceData.removeWebAppClassLoader(clusterInfo.getName() + clusterInfo.getRunningNumber());
+        if (webAppClassLoader != null) {
+            contextClassLoader = webAppClassLoader;
+        }
+        Thread.currentThread().setContextClassLoader(contextClassLoader);
+
+        // Handle Member Alive Indicators
+        ArrayList<Callable<Boolean>> maIndicators = new ArrayList<Callable<Boolean>>();
         if (container instanceof ApplicationContextProcessingUnitContainer) {
             ApplicationContext applicationContext = ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
             Map map = applicationContext.getBeansOfType(MemberAliveIndicator.class);
-            ArrayList<MemberAliveIndicator> maiList = new ArrayList<MemberAliveIndicator>();
             for (Iterator it = map.values().iterator(); it.hasNext();) {
-                MemberAliveIndicator memberAliveIndicator = (MemberAliveIndicator) it.next();
+                final MemberAliveIndicator memberAliveIndicator = (MemberAliveIndicator) it.next();
                 if (memberAliveIndicator.isMemberAliveEnabled()) {
-                    maiList.add(memberAliveIndicator);
+                    maIndicators.add(new Callable<Boolean>() {
+                        public Boolean call() throws Exception {
+                            return memberAliveIndicator.isAlive();
+                        }
+                    });
                 }
             }
-            memberAliveIndicators = maiList.toArray(new MemberAliveIndicator[maiList.size()]);
+        }
+
+        List<Callable<Boolean>> memberAliveIndicatorProvider = SharedServiceData.removeMemberAliveIndicator(clusterInfo.getName() + clusterInfo.getRunningNumber());
+        if (memberAliveIndicatorProvider != null) {
+            for (Callable<Boolean> c : memberAliveIndicatorProvider) {
+                maIndicators.add(c);
+            }
+        }
+        memberAliveIndicators = maIndicators.toArray(new Callable[maIndicators.size()]);
+
+
+        if (container instanceof ApplicationContextProcessingUnitContainer) {
+            ApplicationContext applicationContext = ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
 
             // inject the application context to all the monitors and schedule them
             // currently use the number of threads in relation to the number of monitors
@@ -611,9 +632,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             return true;
         }
         boolean alive = false;
-        for (MemberAliveIndicator memberAliveIndicator : memberAliveIndicators) {
+        for (Callable<Boolean> memberAliveIndicator : memberAliveIndicators) {
             try {
-                alive = memberAliveIndicator.isAlive();
+                alive = memberAliveIndicator.call();
                 if (!alive) {
                     break;
                 }
