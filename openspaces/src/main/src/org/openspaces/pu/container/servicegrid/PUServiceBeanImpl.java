@@ -27,6 +27,7 @@ import com.gigaspaces.operatingsystem.OSDetails;
 import com.gigaspaces.operatingsystem.OSHelper;
 import com.gigaspaces.operatingsystem.OSStatistics;
 import com.gigaspaces.start.Locator;
+import com.gigaspaces.grid.zone.ZoneHelper;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.client.SpaceURL;
@@ -885,5 +886,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     public void runGc() throws RemoteException {
         System.gc();
+    }
+
+    public String[] getZones() throws RemoteException {
+        return ZoneHelper.getSystemZones();
     }
 }
