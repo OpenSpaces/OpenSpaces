@@ -186,7 +186,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             stopPU();
         } finally {
             Thread.currentThread().setContextClassLoader(origClassLoader);
-
+            this.serviceMonitors.clear();
+            this.memberAliveIndicators = null;
             for (WatchTask watchTask : watchTasks) {
                 watchRegistry.deregister(watchTask.getWatch());
             }
