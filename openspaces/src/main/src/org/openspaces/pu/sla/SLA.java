@@ -22,6 +22,7 @@ import org.openspaces.pu.sla.requirement.Requirement;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
 import com.gigaspaces.grid.zone.ZoneHelper;
 
@@ -74,7 +75,7 @@ public class SLA implements Serializable {
 
     private Policy policy;
 
-    private List<Requirement> requirements;
+    private List<Requirement> requirements = new ArrayList<Requirement>();
 
     private List<Monitor> monitors;
 

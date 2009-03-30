@@ -56,10 +56,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -379,9 +376,18 @@ public class Deploy {
                 info("Overrding SLA maxInstancesPerMachine with [" + maxInstancePerMachine + "]");
             }
             if (param.getName().equalsIgnoreCase("max-instances-per-zone")) {
-                String maxInstancePerZone = param.getArguments()[0];
-                sla.setMaxInstancesPerZone(ZoneHelper.parse(maxInstancePerZone));
-                info("Overrding SLA maxInstancesPerZone with [" + maxInstancePerZone + "]");
+                Map<String, Integer> map = new HashMap<String, Integer>();
+                for (String arg : param.getArguments()) {
+                    map.putAll(ZoneHelper.parse(arg));
+                }
+                sla.setMaxInstancesPerZone(map);
+                info("Overrding SLA maxInstancesPerZone with [" + ZoneHelper.unparse(map) + "]");
+            }
+            if (param.getName().equalsIgnoreCase("zones")) {
+                for (String arg : param.getArguments()) {
+                    sla.getRequirements().add(new ZoneRequirement(arg));
+                    info("Adding SLA required zone with [" + arg + "]");
+                }
             }
         }
 
@@ -633,7 +639,7 @@ public class Deploy {
     }
 
     private void applyRequirements(ServiceElement element, List<Requirement> requirements) {
-        if (requirements == null) {
+        if (requirements == null || requirements.isEmpty()) {
             return;
         }
         List<String> hosts = new ArrayList<String>();
@@ -748,6 +754,8 @@ public class Deploy {
         sb.append("\n    -override-name [override pu name]        : An override pu name, useful when using pu as a template");
         sb.append("\n    -max-instances-per-vm [number]           : Allows to set the SLA number of instances per VM");
         sb.append("\n    -max-instances-per-machine [number]      : Allows to set the SLA number of instances per machine");
+        sb.append("\n    -max-instances-per-zone [zone/number,...]: Allows to set the SLA number of instances per zone");
+        sb.append("\n    -zones [zoneName] [zoneName] ...         : Allows to set the SLA zone requirements");
         sb.append("\n");
         sb.append("\n");
         sb.append("\nSome Examples:");

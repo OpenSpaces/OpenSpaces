@@ -32,11 +32,10 @@
 
 package org.openspaces.admin.pu;
 
+import com.gigaspaces.grid.zone.ZoneHelper;
+
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * A deployment of processing unit.
@@ -60,6 +59,10 @@ public class ProcessingUnitDeployment {
     private Integer maxInstancesPerVM;
 
     private Integer maxInstancesPerMachine;
+
+    private Map<String, Integer> maxInstancesPerZone = new HashMap<String, Integer>();
+
+    private List<String> zones = new ArrayList<String>();
 
     private Properties contextProperties = new Properties();
 
@@ -186,6 +189,28 @@ public class ProcessingUnitDeployment {
     }
 
     /**
+     * Sets the maximum number of instances per zone.
+     *
+     * <p>On partitioned topology with backups topology, controls that a primary and a backup won't run
+     * on the same zone if set to <code>1</code>. Note, for each zone this will have to be set.
+     *
+     * <p>On a non partitioned with backups topology, controls the maximum number of instances running on
+     * the same zone.
+     */
+    public ProcessingUnitDeployment maxInstancesPerZone(String zone, int maxInstancesPerZone) {
+        this.maxInstancesPerZone.put(zone, maxInstancesPerZone);
+        return this;
+    }
+
+    /**
+     * Adds a zone where the processing unit is allowed to be deployed on.
+     */
+    public ProcessingUnitDeployment addZone(String zone) {
+        zones.add(zone);
+        return this;
+    }
+
+    /**
      * Sets a context deploy time property overriding any <code>${...}</code> defined within a processing
      * unit configuration.
      */
@@ -224,6 +249,16 @@ public class ProcessingUnitDeployment {
         if (maxInstancesPerMachine != null) {
             deployOptions.add("-max-instances-per-machine");
             deployOptions.add(maxInstancesPerMachine.toString());
+        }
+        if (!maxInstancesPerZone.isEmpty()) {
+            deployOptions.add("-max-instances-per-zone");
+            deployOptions.add(ZoneHelper.unparse(maxInstancesPerZone));
+        }
+        if (!zones.isEmpty()) {
+            deployOptions.add("-zones");
+            for (String requiredZone : zones) {
+                deployOptions.add(requiredZone);
+            }
         }
         for (Map.Entry entry : contextProperties.entrySet()) {
             deployOptions.add("-properties");

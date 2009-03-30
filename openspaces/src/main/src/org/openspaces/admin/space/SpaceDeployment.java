@@ -158,6 +158,28 @@ public class SpaceDeployment {
     }
 
     /**
+     * Sets the maximum number of instances per zone.
+     *
+     * <p>On partitioned topology with backups topology, controls that a primary and a backup won't run
+     * on the same zone if set to <code>1</code>. Note, for each zone this will have to be set.
+     *
+     * <p>On a non partitioned with backups topology, controls the maximum number of instances running on
+     * the same zone.
+     */
+    public SpaceDeployment maxInstancesPerZone(String zone, int maxInstancesPerZone) {
+        deployment.maxInstancesPerZone(zone, maxInstancesPerZone);
+        return this;
+    }
+
+    /**
+     * Adds a zone where the processing unit is allowed to be deployed on.
+     */
+    public SpaceDeployment addZone(String zone) {
+        deployment.addZone(zone);
+        return this;
+    }
+
+    /**
      * Sets a context deploy time property overriding any <code>${...}</code> defined within a processing
      * unit configuration.
      */

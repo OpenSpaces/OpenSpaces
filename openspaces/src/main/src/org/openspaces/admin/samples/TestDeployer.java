@@ -19,7 +19,7 @@ public class TestDeployer {
         admin.getGridServiceContainers().waitFor(2);
         System.out.println("Found at least 2 GSC");
         ProcessingUnit procesingUnit = admin.getGridServiceManagers().deploy(new SpaceDeployment("test")
-                .numberOfInstances(2).maxInstancesPerVM(1));
+                .numberOfInstances(2).maxInstancesPerVM(1).addZone("zone3"));
         System.out.println("Deployed space, waiting...");
         procesingUnit.waitFor(2);
         System.out.println("Deployed space");

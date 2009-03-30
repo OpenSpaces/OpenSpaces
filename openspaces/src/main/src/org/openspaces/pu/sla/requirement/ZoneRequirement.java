@@ -7,6 +7,13 @@ public class ZoneRequirement implements Requirement {
 
     private String zone;
 
+    public ZoneRequirement() {
+    }
+
+    public ZoneRequirement(String zone) {
+        this.zone = zone;
+    }
+
     public String getZone() {
         return zone;
     }
