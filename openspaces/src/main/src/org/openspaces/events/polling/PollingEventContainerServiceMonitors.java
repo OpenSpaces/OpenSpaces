@@ -37,8 +37,8 @@ public class PollingEventContainerServiceMonitors extends EventContainerServiceM
         super();
     }
 
-    public PollingEventContainerServiceMonitors(String id, long processedEvents, long failedEvents, int consumers) {
-        super(id, processedEvents, failedEvents);
+    public PollingEventContainerServiceMonitors(String id, long processedEvents, long failedEvents, String status, int consumers) {
+        super(id, processedEvents, failedEvents, status);
         getMonitors().put(Attributes.CONSUMERS, consumers);
     }
 

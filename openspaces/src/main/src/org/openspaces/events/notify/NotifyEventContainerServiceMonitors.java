@@ -36,8 +36,8 @@ public class NotifyEventContainerServiceMonitors extends EventContainerServiceMo
         super();
     }
 
-    public NotifyEventContainerServiceMonitors(String id, long processedEvents, long failedEvents) {
-        super(id, processedEvents, failedEvents);
+    public NotifyEventContainerServiceMonitors(String id, long processedEvents, long failedEvents, String status) {
+        super(id, processedEvents, failedEvents, status);
     }
 
     public NotifyEventContainerServiceDetails getNotifyEventDetails() {

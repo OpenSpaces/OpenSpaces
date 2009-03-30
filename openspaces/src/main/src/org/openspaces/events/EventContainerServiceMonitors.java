@@ -32,16 +32,18 @@ public class EventContainerServiceMonitors extends PlainServiceMonitors {
     public static class Attributes {
         public static final String PROCESSED_EVENTS = "processed-events";
         public static final String FAILED_EVENTS = "failed-events";
+        public static final String STATUS = "status";
     }
 
     public EventContainerServiceMonitors() {
         super();
     }
 
-    public EventContainerServiceMonitors(String id, long processedEvents, long failedEvents) {
+    public EventContainerServiceMonitors(String id, long processedEvents, long failedEvents, String status) {
         super(id);
         getMonitors().put(Attributes.PROCESSED_EVENTS, processedEvents);
         getMonitors().put(Attributes.FAILED_EVENTS, failedEvents);
+        getMonitors().put(Attributes.STATUS, status);
     }
 
     public EventContainerServiceDetails getEventDetails() {

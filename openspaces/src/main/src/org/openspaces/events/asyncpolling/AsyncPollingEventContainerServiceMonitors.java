@@ -36,8 +36,8 @@ public class AsyncPollingEventContainerServiceMonitors extends EventContainerSer
         super();
     }
 
-    public AsyncPollingEventContainerServiceMonitors(String id, long processedEvents, long failedEvents) {
-        super(id, processedEvents, failedEvents);
+    public AsyncPollingEventContainerServiceMonitors(String id, long processedEvents, long failedEvents, String status) {
+        super(id, processedEvents, failedEvents, status);
     }
 
     public AsyncPollingEventContainerServiceDetails getAsyncPollingDetails() {

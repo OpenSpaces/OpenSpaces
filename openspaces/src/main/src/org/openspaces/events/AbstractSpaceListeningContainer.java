@@ -372,6 +372,14 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
         return this.running;
     }
 
+    protected String getStatus() {
+        if (running) {
+            return "started";
+        } else {
+            return "stopped";
+        }
+    }
+
     /**
      * Wait while this container is not running.
      *
