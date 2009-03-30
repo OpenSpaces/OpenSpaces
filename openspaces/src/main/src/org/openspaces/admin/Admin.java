@@ -30,6 +30,7 @@ import org.openspaces.admin.pu.ProcessingUnits;
 import org.openspaces.admin.space.Spaces;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
+import org.openspaces.admin.zone.Zones;
 
 /**
  * The main interface for accessing Admin API. Created using the {@link org.openspaces.admin.AdminFactory}
@@ -142,6 +143,11 @@ public interface Admin extends StatisticsMonitor {
      * Returns the machines discovered.
      */
     Machines getMachines();
+
+    /**
+     * Returns the zones discovered.
+     */
+    Zones getZones();
 
     /**
      * Returns the transports discovered.

@@ -1,53 +1,50 @@
-package org.openspaces.admin.internal.machine;
+package org.openspaces.admin.internal.zone;
 
-import com.gigaspaces.operatingsystem.OSDetails;
-import org.openspaces.admin.gsa.GridServiceAgent;
-import org.openspaces.admin.gsa.GridServiceAgents;
-import org.openspaces.admin.gsc.GridServiceContainers;
-import org.openspaces.admin.gsm.GridServiceManagers;
-import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.gsa.DefaultGridServiceAgents;
-import org.openspaces.admin.internal.gsa.InternalGridServiceAgents;
-import org.openspaces.admin.internal.gsc.DefaultGridServiceContainers;
-import org.openspaces.admin.internal.gsc.InternalGridServiceContainers;
-import org.openspaces.admin.internal.gsm.DefaultGridServiceManagers;
-import org.openspaces.admin.internal.gsm.InternalGridServiceManagers;
-import org.openspaces.admin.internal.lus.DefaultLookupServices;
 import org.openspaces.admin.internal.lus.InternalLookupServices;
-import org.openspaces.admin.internal.os.DefaultOperatingSystem;
-import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
-import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
-import org.openspaces.admin.internal.space.DefaultSpaceInstances;
-import org.openspaces.admin.internal.space.InternalSpaceInstances;
-import org.openspaces.admin.internal.transport.DefaultTransports;
+import org.openspaces.admin.internal.lus.DefaultLookupServices;
+import org.openspaces.admin.internal.gsa.InternalGridServiceAgents;
+import org.openspaces.admin.internal.gsa.DefaultGridServiceAgents;
+import org.openspaces.admin.internal.gsm.InternalGridServiceManagers;
+import org.openspaces.admin.internal.gsm.DefaultGridServiceManagers;
+import org.openspaces.admin.internal.gsc.InternalGridServiceContainers;
+import org.openspaces.admin.internal.gsc.DefaultGridServiceContainers;
 import org.openspaces.admin.internal.transport.InternalTransports;
-import org.openspaces.admin.internal.vm.DefaultVirtualMachines;
+import org.openspaces.admin.internal.transport.DefaultTransports;
 import org.openspaces.admin.internal.vm.InternalVirtualMachines;
+import org.openspaces.admin.internal.vm.DefaultVirtualMachines;
+import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
+import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
+import org.openspaces.admin.internal.space.InternalSpaceInstances;
+import org.openspaces.admin.internal.space.DefaultSpaceInstances;
+import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.machine.InternalMachines;
+import org.openspaces.admin.internal.machine.DefaultMachines;
+import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.lus.LookupServices;
-import org.openspaces.admin.os.OperatingSystem;
-import org.openspaces.admin.pu.ProcessingUnitInstance;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
-import org.openspaces.admin.space.SpaceInstance;
-import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
-import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
-import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
+import org.openspaces.admin.gsm.GridServiceManagers;
+import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
-
-import java.util.Iterator;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
+import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
+import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
+import org.openspaces.admin.machine.Machines;
 
 /**
  * @author kimchy
  */
-public class DefaultMachine implements InternalMachine {
+public class DefaultZone implements InternalZone {
 
-    private InternalAdmin admin;
+    private final String name;
 
-    private String uid;
+    private final InternalAdmin admin;
 
-    private String hostAddress;
+    private final InternalMachines machines;
 
     private final InternalLookupServices lookupServices;
 
@@ -65,12 +62,11 @@ public class DefaultMachine implements InternalMachine {
 
     private final InternalSpaceInstances spaceInstances;
 
-    private volatile OperatingSystem operatingSystem;
 
-    public DefaultMachine(InternalAdmin admin, String uid, String hostAddress) {
+    public DefaultZone(InternalAdmin admin, String name) {
         this.admin = admin;
-        this.uid = uid;
-        this.hostAddress = hostAddress;
+        this.name = name;
+        this.machines = new DefaultMachines(admin);
         this.gridServiceAgents = new DefaultGridServiceAgents(admin);
         this.lookupServices = new DefaultLookupServices(admin);
         this.gridServiceManagers = new DefaultGridServiceManagers(admin);
@@ -81,24 +77,12 @@ public class DefaultMachine implements InternalMachine {
         this.transports = new DefaultTransports(admin);
     }
 
-    public String getUid() {
-        return this.uid;
+    public String getName() {
+        return this.name;
     }
 
-    public String getHostAddress() {
-        return this.hostAddress;
-    }
-
-    public String getHostName() {
-        return operatingSystem.getDetails().getHostName();
-    }
-
-    public GridServiceAgent getGridServiceAgent() {
-        Iterator<GridServiceAgent> it = gridServiceAgents.iterator();
-        if (it.hasNext()) {
-            return it.next();
-        }
-        return null;
+    public Machines getMachines() {
+        return this.machines;
     }
 
     public GridServiceAgents getGridServiceAgents() {
@@ -125,23 +109,6 @@ public class DefaultMachine implements InternalMachine {
         return transports;
     }
 
-    public void setOperatingSystem(OperatingSystem operatingSystem) {
-        this.operatingSystem = operatingSystem;
-    }
-
-    public boolean hasOperatingSystem() {
-        return operatingSystem != null;
-    }
-
-    private static OperatingSystem NA_OPERATING_SYSTEM = new DefaultOperatingSystem(new OSDetails(), null);
-
-    public OperatingSystem getOperatingSystem() {
-        if (operatingSystem == null) {
-            return NA_OPERATING_SYSTEM;
-        }
-        return this.operatingSystem;
-    }
-
     public VirtualMachines getVirtualMachines() {
         return this.virtualMachines;
     }
@@ -154,11 +121,11 @@ public class DefaultMachine implements InternalMachine {
         return processingUnitInstances.getProcessingUnitInstanceRemoved();
     }
 
-    public void addLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
+    public void addProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
         processingUnitInstances.addProcessingUnitInstanceLifecycleEventListener(eventListener);
     }
 
-    public void removeLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
+    public void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
         processingUnitInstances.removeProcessingUnitInstanceLifecycleEventListener(eventListener);
     }
 
@@ -206,12 +173,12 @@ public class DefaultMachine implements InternalMachine {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DefaultMachine that = (DefaultMachine) o;
-        return uid.equals(that.uid);
+        DefaultZone that = (DefaultZone) o;
+        return name.equals(that.name);
     }
 
     @Override
     public int hashCode() {
-        return uid.hashCode();
+        return name.hashCode();
     }
 }

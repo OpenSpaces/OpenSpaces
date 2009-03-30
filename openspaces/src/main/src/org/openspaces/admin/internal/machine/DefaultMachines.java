@@ -132,11 +132,14 @@ public class DefaultMachines implements InternalMachines {
     }
 
     public void removeMachine(final Machine machine) {
-        machinesByHostAddress.remove(machine.getHostAddress());
-        machinesByHostNames.remove(machine.getHostName());
-        final Machine existingMachine = machinesById.remove(machine.getUid());
-        if (existingMachine != null) {
-            machineRemovedEventManager.machineRemoved(machine);
+        // if no vms on the machine, we can remove them
+        if (machine.getVirtualMachines().isEmpty()) {
+            machinesByHostAddress.remove(machine.getHostAddress());
+            machinesByHostNames.remove(machine.getHostName());
+            final Machine existingMachine = machinesById.remove(machine.getUid());
+            if (existingMachine != null) {
+                machineRemovedEventManager.machineRemoved(machine);
+            }
         }
     }
 }

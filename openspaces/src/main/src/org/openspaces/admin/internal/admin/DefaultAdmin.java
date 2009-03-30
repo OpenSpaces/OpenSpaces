@@ -29,41 +29,16 @@ import org.openspaces.admin.internal.gsm.InternalGridServiceManagers;
 import org.openspaces.admin.internal.lus.DefaultLookupServices;
 import org.openspaces.admin.internal.lus.InternalLookupService;
 import org.openspaces.admin.internal.lus.InternalLookupServices;
-import org.openspaces.admin.internal.machine.DefaultMachine;
-import org.openspaces.admin.internal.machine.DefaultMachines;
-import org.openspaces.admin.internal.machine.InternalMachine;
-import org.openspaces.admin.internal.machine.InternalMachineAware;
-import org.openspaces.admin.internal.machine.InternalMachines;
-import org.openspaces.admin.internal.os.DefaultOperatingSystem;
-import org.openspaces.admin.internal.os.DefaultOperatingSystems;
-import org.openspaces.admin.internal.os.InternalOperatingSystem;
-import org.openspaces.admin.internal.os.InternalOperatingSystemInfoProvider;
-import org.openspaces.admin.internal.os.InternalOperatingSystems;
-import org.openspaces.admin.internal.pu.DefaultProcessingUnit;
-import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
-import org.openspaces.admin.internal.pu.DefaultProcessingUnits;
-import org.openspaces.admin.internal.pu.InternalProcessingUnit;
-import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
-import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
-import org.openspaces.admin.internal.pu.InternalProcessingUnits;
-import org.openspaces.admin.internal.space.DefaultSpace;
-import org.openspaces.admin.internal.space.DefaultSpaces;
-import org.openspaces.admin.internal.space.InternalSpace;
-import org.openspaces.admin.internal.space.InternalSpaceInstance;
-import org.openspaces.admin.internal.space.InternalSpaces;
+import org.openspaces.admin.internal.machine.*;
+import org.openspaces.admin.internal.os.*;
+import org.openspaces.admin.internal.pu.*;
+import org.openspaces.admin.internal.space.*;
 import org.openspaces.admin.internal.support.EventRegistrationHelper;
 import org.openspaces.admin.internal.support.InternalAgentGridComponent;
 import org.openspaces.admin.internal.support.NetworkExceptionHelper;
-import org.openspaces.admin.internal.transport.DefaultTransport;
-import org.openspaces.admin.internal.transport.DefaultTransports;
-import org.openspaces.admin.internal.transport.InternalTransport;
-import org.openspaces.admin.internal.transport.InternalTransportInfoProvider;
-import org.openspaces.admin.internal.transport.InternalTransports;
-import org.openspaces.admin.internal.vm.DefaultVirtualMachine;
-import org.openspaces.admin.internal.vm.DefaultVirtualMachines;
-import org.openspaces.admin.internal.vm.InternalVirtualMachine;
-import org.openspaces.admin.internal.vm.InternalVirtualMachineInfoProvider;
-import org.openspaces.admin.internal.vm.InternalVirtualMachines;
+import org.openspaces.admin.internal.transport.*;
+import org.openspaces.admin.internal.vm.*;
+import org.openspaces.admin.internal.zone.*;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.machine.Machines;
@@ -79,17 +54,15 @@ import org.openspaces.admin.transport.TransportDetails;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.admin.vm.VirtualMachines;
+import org.openspaces.admin.zone.Zone;
+import org.openspaces.admin.zone.ZoneAware;
+import org.openspaces.admin.zone.Zones;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @author kimchy
@@ -103,6 +76,8 @@ public class DefaultAdmin implements InternalAdmin {
     private final DiscoveryService discoveryService;
 
     private final InternalLookupServices lookupServices = new DefaultLookupServices(this);
+
+    private final InternalZones zones = new DefaultZones(this);
 
     private final InternalMachines machines = new DefaultMachines(this);
 
@@ -311,6 +286,10 @@ public class DefaultAdmin implements InternalAdmin {
         return this.machines;
     }
 
+    public Zones getZones() {
+        return this.zones;
+    }
+
     public Transports getTransports() {
         return this.transports;
     }
@@ -360,7 +339,7 @@ public class DefaultAdmin implements InternalAdmin {
         eventsExecutorServices[Math.abs(listener.hashCode()) % eventsExecutorServices.length].submit(new LoggerRunnable(notifier));
     }
 
-    public synchronized void addGridServiceAgent(InternalGridServiceAgent gridServiceAgent, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
+    public synchronized void addGridServiceAgent(InternalGridServiceAgent gridServiceAgent, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceAgent, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceAgent, jvmDetails);
         InternalTransport transport = processTransportOnServiceAddition(gridServiceAgent, nioDetails, virtualMachine);
@@ -369,10 +348,16 @@ public class DefaultAdmin implements InternalAdmin {
                 transport, operatingSystem, virtualMachine,
                 (InternalMachineAware) virtualMachine, gridServiceAgent);
 
+        processZonesOnServiceAddition(zones, gridServiceAgent.getUid(), transport, virtualMachine, machine, gridServiceAgent);
+
         ((InternalGridServiceAgents) machine.getGridServiceAgents()).addGridServiceAgent(gridServiceAgent);
         ((InternalGridServiceAgents) ((InternalVirtualMachine) virtualMachine).getGridServiceAgents()).addGridServiceAgent(gridServiceAgent);
+        for (Zone zone : gridServiceAgent.getZones().values()) {
+            ((InternalGridServiceAgents) zone.getGridServiceAgents()).addGridServiceAgent(gridServiceAgent);
+        }
 
         gridServiceAgents.addGridServiceAgent(gridServiceAgent);
+
 
         for (Iterator<Map.Entry<String, InternalAgentGridComponent>> it = orphanedAgentGridComponents.entrySet().iterator(); it.hasNext();) {
             Map.Entry<String, InternalAgentGridComponent> entry = it.next();
@@ -388,11 +373,19 @@ public class DefaultAdmin implements InternalAdmin {
     public synchronized void removeGridServiceAgent(String uid) {
         InternalGridServiceAgent gridServiceAgent = gridServiceAgents.removeGridServiceAgent(uid);
         if (gridServiceAgent != null) {
-            processTransportOnServiceRemoval(gridServiceAgent, gridServiceAgent);
+            processTransportOnServiceRemoval(gridServiceAgent, gridServiceAgent, gridServiceAgent);
             processOperatingSystemOnServiceRemoval(gridServiceAgent, gridServiceAgent);
-            processVirtualMachineOnServiceRemoval(gridServiceAgent, gridServiceAgent);
-            processMachineOnServiceRemoval(gridServiceAgent);
+
+            processVirtualMachineOnServiceRemoval(gridServiceAgent, gridServiceAgent, gridServiceAgent);
+            ((InternalGridServiceAgents) ((InternalVirtualMachine) gridServiceAgent.getVirtualMachine()).getGridServiceAgents()).removeGridServiceAgent(uid);
+
+            processMachineOnServiceRemoval(gridServiceAgent, gridServiceAgent);
             ((InternalGridServiceAgents) ((InternalMachine) gridServiceAgent.getMachine()).getGridServiceAgents()).removeGridServiceAgent(uid);
+
+            processZonesOnServiceRemoval(uid, gridServiceAgent);
+            for (Zone zone : gridServiceAgent.getZones().values()) {
+                ((InternalGridServiceAgents) zone.getGridServiceAgents()).removeGridServiceAgent(uid);
+            }
 
             for (Iterator<Map.Entry<String, InternalAgentGridComponent>> it = orphanedAgentGridComponents.entrySet().iterator(); it.hasNext();) {
                 Map.Entry<String, InternalAgentGridComponent> entry = it.next();
@@ -406,7 +399,7 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void addLookupService(InternalLookupService lookupService,
-                                              NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
+                                              NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(lookupService, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(lookupService, jvmDetails);
         InternalTransport transport = processTransportOnServiceAddition(lookupService, nioDetails, virtualMachine);
@@ -415,9 +408,14 @@ public class DefaultAdmin implements InternalAdmin {
                 transport, operatingSystem, virtualMachine,
                 (InternalMachineAware) virtualMachine, lookupService);
 
+        processZonesOnServiceAddition(zones, lookupService.getUid(), transport, virtualMachine, machine, lookupService);
+        processAgentOnServiceAddition(lookupService);
+        
         ((InternalLookupServices) machine.getLookupServices()).addLookupService(lookupService);
 
-        processAgentOnServiceAddition(lookupService);
+        for (Zone zone : lookupService.getZones().values()) {
+            ((InternalLookupServices) zone.getLookupServices()).addLookupService(lookupService);
+        }
 
         lookupServices.addLookupService(lookupService);
 
@@ -427,18 +425,24 @@ public class DefaultAdmin implements InternalAdmin {
     public synchronized void removeLookupService(String uid) {
         InternalLookupService lookupService = lookupServices.removeLookupService(uid);
         if (lookupService != null) {
-            processTransportOnServiceRemoval(lookupService, lookupService);
+            processTransportOnServiceRemoval(lookupService, lookupService, lookupService);
             processOperatingSystemOnServiceRemoval(lookupService, lookupService);
-            processVirtualMachineOnServiceRemoval(lookupService, lookupService);
-            processMachineOnServiceRemoval(lookupService);
+            processVirtualMachineOnServiceRemoval(lookupService, lookupService, lookupService);
+
+            processMachineOnServiceRemoval(lookupService, lookupService);
             ((InternalLookupServices) ((InternalMachine) lookupService.getMachine()).getLookupServices()).removeLookupService(uid);
+            
+            processZonesOnServiceRemoval(uid, lookupService);
+            for (Zone zone : lookupService.getZones().values()) {
+                ((InternalLookupServices) zone.getLookupServices()).removeLookupService(uid);
+            }
         }
 
         flushEvents();
     }
 
     public synchronized void addGridServiceManager(InternalGridServiceManager gridServiceManager,
-                                                   NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
+                                                   NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceManager, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceManager, jvmDetails);
         InternalTransport transport = processTransportOnServiceAddition(gridServiceManager, nioDetails, virtualMachine);
@@ -447,10 +451,14 @@ public class DefaultAdmin implements InternalAdmin {
                 transport, operatingSystem, virtualMachine,
                 (InternalMachineAware) virtualMachine, gridServiceManager);
 
+        processAgentOnServiceAddition(gridServiceManager);
+        processZonesOnServiceAddition(zones, gridServiceManager.getUid(), transport, virtualMachine, machine, gridServiceManager);
+
         ((InternalGridServiceManagers) machine.getGridServiceManagers()).addGridServiceManager(gridServiceManager);
         ((InternalGridServiceManagers) ((InternalVirtualMachine) virtualMachine).getGridServiceManagers()).addGridServiceManager(gridServiceManager);
-
-        processAgentOnServiceAddition(gridServiceManager);
+        for (Zone zone : gridServiceManager.getZones().values()) {
+            ((InternalGridServiceManagers) zone.getGridServiceManagers()).addGridServiceManager(gridServiceManager);
+        }
 
         gridServiceManagers.addGridServiceManager(gridServiceManager);
 
@@ -460,18 +468,26 @@ public class DefaultAdmin implements InternalAdmin {
     public synchronized void removeGridServiceManager(String uid) {
         InternalGridServiceManager gridServiceManager = gridServiceManagers.removeGridServiceManager(uid);
         if (gridServiceManager != null) {
-            processTransportOnServiceRemoval(gridServiceManager, gridServiceManager);
+            processTransportOnServiceRemoval(gridServiceManager, gridServiceManager, gridServiceManager);
             processOperatingSystemOnServiceRemoval(gridServiceManager, gridServiceManager);
-            processVirtualMachineOnServiceRemoval(gridServiceManager, gridServiceManager);
-            processMachineOnServiceRemoval(gridServiceManager);
+
+            processVirtualMachineOnServiceRemoval(gridServiceManager, gridServiceManager, gridServiceManager);
+            ((InternalGridServiceManagers) ((InternalVirtualMachine) gridServiceManager.getVirtualMachine()).getGridServiceManagers()).removeGridServiceManager(uid);
+
+            processMachineOnServiceRemoval(gridServiceManager, gridServiceManager);
             ((InternalGridServiceManagers) ((InternalMachine) gridServiceManager.getMachine()).getGridServiceManagers()).removeGridServiceManager(uid);
+
+            processZonesOnServiceRemoval(uid, gridServiceManager);
+            for (Zone zone : gridServiceManager.getZones().values()) {
+                ((InternalGridServiceManagers) zone.getGridServiceManagers()).removeGridServiceManager(uid);
+            }
         }
 
         flushEvents();
     }
 
     public synchronized void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer,
-                                                     NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
+                                                     NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceContainer, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceContainer, jvmDetails);
         InternalTransport transport = processTransportOnServiceAddition(gridServiceContainer, nioDetails, virtualMachine);
@@ -480,11 +496,16 @@ public class DefaultAdmin implements InternalAdmin {
                 transport, operatingSystem, virtualMachine,
                 (InternalMachineAware) virtualMachine, gridServiceContainer);
 
+        processAgentOnServiceAddition(gridServiceContainer);
+
+        processZonesOnServiceAddition(zones, gridServiceContainer.getUid(), transport, virtualMachine, machine, gridServiceContainer);
+
         ((InternalGridServiceContainers) machine.getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
         ((InternalGridServiceContainers) ((InternalVirtualMachine) virtualMachine).getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
+        for (Zone zone : gridServiceContainer.getZones().values()) {
+            ((InternalGridServiceContainers) zone.getGridServiceContainers()).addGridServiceContainer(gridServiceContainer);
+        }
 
-        processAgentOnServiceAddition(gridServiceContainer);
-        
         gridServiceContainers.addGridServiceContainer(gridServiceContainer);
 
         flushEvents();
@@ -493,17 +514,25 @@ public class DefaultAdmin implements InternalAdmin {
     public synchronized void removeGridServiceContainer(String uid) {
         InternalGridServiceContainer gridServiceContainer = gridServiceContainers.removeGridServiceContainer(uid);
         if (gridServiceContainer != null) {
-            processTransportOnServiceRemoval(gridServiceContainer, gridServiceContainer);
+            processTransportOnServiceRemoval(gridServiceContainer, gridServiceContainer, gridServiceContainer);
             processOperatingSystemOnServiceRemoval(gridServiceContainer, gridServiceContainer);
-            processVirtualMachineOnServiceRemoval(gridServiceContainer, gridServiceContainer);
-            processMachineOnServiceRemoval(gridServiceContainer);
+
+            processVirtualMachineOnServiceRemoval(gridServiceContainer, gridServiceContainer, gridServiceContainer);
+            ((InternalGridServiceContainers) ((InternalVirtualMachine) gridServiceContainer.getVirtualMachine()).getGridServiceContainers()).removeGridServiceContainer(uid);
+
+            processMachineOnServiceRemoval(gridServiceContainer, gridServiceContainer);
             ((InternalGridServiceContainers) ((InternalMachine) gridServiceContainer.getMachine()).getGridServiceContainers()).removeGridServiceContainer(uid);
+
+            processZonesOnServiceRemoval(uid, gridServiceContainer);
+            for (Zone zone : gridServiceContainer.getZones().values()) {
+                ((InternalGridServiceContainers) zone.getGridServiceContainers()).removeGridServiceContainer(uid);
+            }
         }
 
         flushEvents();
     }
 
-    public synchronized void addProcessingUnitInstance(InternalProcessingUnitInstance processingUnitInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
+    public synchronized void addProcessingUnitInstance(InternalProcessingUnitInstance processingUnitInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(processingUnitInstance, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(processingUnitInstance, jvmDetails);
         InternalTransport transport = processTransportOnServiceAddition(processingUnitInstance, nioDetails, virtualMachine);
@@ -511,6 +540,8 @@ public class DefaultAdmin implements InternalAdmin {
         InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
                 transport, operatingSystem, virtualMachine,
                 (InternalMachineAware) virtualMachine, processingUnitInstance);
+
+        processZonesOnServiceAddition(zones, processingUnitInstance.getUid(), transport, virtualMachine, machine, processingUnitInstance);
 
         InternalProcessingUnit processingUnit = (InternalProcessingUnit) processingUnits.getProcessingUnit(processingUnitInstance.getClusterInfo().getName());
         if (processingUnit == null) {
@@ -530,17 +561,21 @@ public class DefaultAdmin implements InternalAdmin {
             ((InternalGridServiceContainer) processingUnitInstance.getGridServiceContainer()).removeProcessingUnitInstance(uid);
             ((InternalVirtualMachine) processingUnitInstance.getVirtualMachine()).removeProcessingUnitInstance(processingUnitInstance.getUid());
             ((InternalMachine) processingUnitInstance.getMachine()).removeProcessingUnitInstance(processingUnitInstance.getUid());
+            for (Zone zone : processingUnitInstance.getZones().values()) {
+                ((InternalZone) zone).removeProcessingUnitInstance(processingUnitInstance.getUid());
+            }
 
-            processTransportOnServiceRemoval(processingUnitInstance, processingUnitInstance);
+            processTransportOnServiceRemoval(processingUnitInstance, processingUnitInstance, processingUnitInstance);
             processOperatingSystemOnServiceRemoval(processingUnitInstance, processingUnitInstance);
-            processVirtualMachineOnServiceRemoval(processingUnitInstance, processingUnitInstance);
-            processMachineOnServiceRemoval(processingUnitInstance);
+            processVirtualMachineOnServiceRemoval(processingUnitInstance, processingUnitInstance, processingUnitInstance);
+            processMachineOnServiceRemoval(processingUnitInstance, processingUnitInstance);
+            processZonesOnServiceRemoval(processingUnitInstance.getUid(), processingUnitInstance);
         }
 
         flushEvents();
     }
 
-    public synchronized void addSpaceInstance(InternalSpaceInstance spaceInstance, IJSpace clusteredIjspace, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails) {
+    public synchronized void addSpaceInstance(InternalSpaceInstance spaceInstance, IJSpace clusteredIjspace, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(spaceInstance, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(spaceInstance, jvmDetails);
         InternalTransport transport = processTransportOnServiceAddition(spaceInstance, nioDetails, virtualMachine);
@@ -548,6 +583,8 @@ public class DefaultAdmin implements InternalAdmin {
         InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
                 transport, operatingSystem, virtualMachine,
                 (InternalMachineAware) virtualMachine, spaceInstance);
+
+        processZonesOnServiceAddition(zones, spaceInstance.getUid(), transport, virtualMachine, machine, spaceInstance);
 
         InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
         if (space == null) {
@@ -567,6 +604,9 @@ public class DefaultAdmin implements InternalAdmin {
 
         machine.addSpaceInstance(spaceInstance);
         ((InternalVirtualMachine) virtualMachine).addSpaceInstance(spaceInstance);
+        for (Zone zone : spaceInstance.getZones().values()) {
+            ((InternalZone) zone).addSpaceInstance(spaceInstance);
+        }
 
         flushEvents();
     }
@@ -582,11 +622,15 @@ public class DefaultAdmin implements InternalAdmin {
             }
             ((InternalVirtualMachine) spaceInstance.getVirtualMachine()).removeSpaceInstance(spaceInstance.getUid());
             ((InternalMachine) spaceInstance.getMachine()).removeSpaceInstance(spaceInstance.getUid());
+            for (Zone zone : spaceInstance.getZones().values()) {
+                ((InternalZone) zone).removeSpaceInstance(uid);
+            }
 
-            processTransportOnServiceRemoval(spaceInstance, spaceInstance);
+            processTransportOnServiceRemoval(spaceInstance, spaceInstance, spaceInstance);
             processOperatingSystemOnServiceRemoval(spaceInstance, spaceInstance);
-            processVirtualMachineOnServiceRemoval(spaceInstance, spaceInstance);
-            processMachineOnServiceRemoval(spaceInstance);
+            processVirtualMachineOnServiceRemoval(spaceInstance, spaceInstance, spaceInstance);
+            processMachineOnServiceRemoval(spaceInstance, spaceInstance);
+            processZonesOnServiceRemoval(uid, spaceInstance);
         }
 
         flushEvents();
@@ -619,6 +663,9 @@ public class DefaultAdmin implements InternalAdmin {
 
         ((InternalMachine) processingUnitInstance.getMachine()).addProcessingUnitInstance(processingUnitInstance);
         ((InternalVirtualMachine) processingUnitInstance.getVirtualMachine()).addProcessingUnitInstance(processingUnitInstance);
+        for (Zone zone : processingUnitInstance.getZones().values()) {
+            ((InternalZone) zone).addProcessingUnitInstance(processingUnitInstance);
+        }
 
         // go over all the space instances, and add the matched one to the processing unit
         for (Space space : spaces) {
@@ -628,6 +675,33 @@ public class DefaultAdmin implements InternalAdmin {
         }
 
         processingUnitInstances.addInstance(processingUnitInstance);
+    }
+
+    private void processZonesOnServiceAddition(String[] zonesNames, String zoneUidProvider,
+                                               InternalTransport transport, VirtualMachine virtualMachine, Machine machine,
+                                               InternalZoneAware... zoneAwares) {
+        if (zonesNames == null) {
+            return;
+        }
+        for (String zoneName : zonesNames) {
+            InternalZone zone = (InternalZone) zones.getByName(zoneName);
+            if (zone == null) {
+                zone = new DefaultZone(this, zoneName);
+                zones.addZone(zone, zoneUidProvider);
+            }
+            ((InternalTransports) zone.getTransports()).addTransport(transport);
+            ((InternalVirtualMachines) zone.getVirtualMachines()).addVirtualMachine(virtualMachine);
+            ((InternalMachines) zone.getMachines()).addMachine((InternalMachine) machine);
+            for (InternalZoneAware zoneAware : zoneAwares) {
+                zoneAware.addZone(zone);
+            }
+        }
+    }
+
+    private void processZonesOnServiceRemoval(String zoneUidProvider, ZoneAware zoneAware) {
+        for (Zone zone : zoneAware.getZones().values()) {
+            zones.removeProvider(zone, zoneUidProvider);
+        }
     }
 
     private InternalMachine processMachineOnServiceAddition(TransportDetails transportDetails,
@@ -647,13 +721,13 @@ public class DefaultAdmin implements InternalAdmin {
         return machine;
     }
 
-    private void processMachineOnServiceRemoval(InternalMachineAware machineAware) {
+    private void processMachineOnServiceRemoval(InternalMachineAware machineAware, ZoneAware zoneAware) {
         Machine machine = machineAware.getMachine();
         machine = machines.getMachineByUID(machine.getUid());
         if (machine != null) {
-            if (machine.getVirtualMachines().isEmpty()) {
-                // no more virtual machines on the machine, we can remove it
-                machines.removeMachine(machine);
+            machines.removeMachine(machine);
+            for (Zone zone : zoneAware.getZones().values()) {
+                ((InternalMachines) zone.getMachines()).removeMachine(machine);
             }
         }
     }
@@ -669,12 +743,15 @@ public class DefaultAdmin implements InternalAdmin {
         return virtualMachine;
     }
 
-    private void processVirtualMachineOnServiceRemoval(InternalVirtualMachineInfoProvider vmProvider, InternalMachineAware machineAware) {
+    private void processVirtualMachineOnServiceRemoval(InternalVirtualMachineInfoProvider vmProvider, InternalMachineAware machineAware, ZoneAware zoneAware) {
         InternalVirtualMachine virtualMachine = (InternalVirtualMachine) vmProvider.getVirtualMachine();
         virtualMachine.removeVirtualMachineInfoProvider(vmProvider);
         if (!virtualMachine.hasVirtualMachineInfoProviders()) {
             virtualMachines.removeVirtualMachine(virtualMachine.getUid());
             ((InternalVirtualMachines) machineAware.getMachine().getVirtualMachines()).removeVirtualMachine(virtualMachine.getUid());
+            for (Zone zone : zoneAware.getZones().values()) {
+                ((InternalVirtualMachines) zone.getVirtualMachines()).removeVirtualMachine(virtualMachine.getUid());
+            }
         }
     }
 
@@ -690,12 +767,15 @@ public class DefaultAdmin implements InternalAdmin {
         return transport;
     }
 
-    private void processTransportOnServiceRemoval(InternalTransportInfoProvider txProvider, InternalMachineAware machineAware) {
+    private void processTransportOnServiceRemoval(InternalTransportInfoProvider txProvider, InternalMachineAware machineAware, ZoneAware zoneAware) {
         InternalTransport transport = ((InternalTransport) txProvider.getTransport());
         transport.removeTransportInfoProvider(txProvider);
         if (!transport.hasTransportInfoProviders()) {
             transports.removeTransport(transport.getUid());
             ((InternalTransports) machineAware.getMachine().getTransports()).removeTransport(transport.getUid());
+            for (Zone zone : zoneAware.getZones().values()) {
+                ((InternalTransports) zone.getTransports()).removeTransport(transport.getUid());
+            }
         }
     }
 
@@ -715,7 +795,6 @@ public class DefaultAdmin implements InternalAdmin {
         os.removeOperatingSystemInfoProvider(osProvider);
         if (!os.hasOperatingSystemInfoProviders()) {
             operatingSystems.removeOperatingSystem(os.getUid());
-            ((InternalMachine) machineAware.getMachine()).setOperatingSystem(null);
         }
     }
 

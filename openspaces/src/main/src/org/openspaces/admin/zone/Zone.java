@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package org.openspaces.admin.machine;
+package org.openspaces.admin.zone;
 
-import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.lus.LookupServices;
-import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
@@ -32,66 +30,45 @@ import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
+import org.openspaces.admin.machine.Machines;
 
 /**
- * A Machine is a logical entity identified by a host address. Once a grid service is running on a machine
- * ({@link org.openspaces.admin.gsa.GridServiceAgent}, {@link org.openspaces.admin.gsm.GridServiceManager},
- * {@link org.openspaces.admin.gsc.GridServiceContainer}, {@link org.openspaces.admin.lus.LookupService},
- * {@link org.openspaces.admin.space.SpaceInstance}) it is discovered (created) by the admin API.
- *
  * @author kimchy
  */
-public interface Machine {
+public interface Zone {
 
     /**
-     * Returns the UID of the machine.
+     * Returns name of the zone.
      */
-    String getUid();
+    String getName();
 
     /**
-     * Returns the host address of the machine.
+     * Returns the machines running within the zone.
      */
-    String getHostAddress();
+    Machines getMachines();
 
     /**
-     * Retruns the host name of the machine.
-     */
-    String getHostName();
-
-    /**
-     * Retruns the lookup services that are running on the machine.
+     * Retruns the lookup services that are running within the zone.
      */
     LookupServices getLookupServices();
 
     /**
-     * Returns the first grid service agent. Note, there will usually be only a
-     * single agent per machine. Returns <code>null</code> if there is no
-     * {@link org.openspaces.admin.gsa.GridServiceAgent} running on the machine.
-     */
-    GridServiceAgent getGridServiceAgent();
-
-    /**
-     * Retruns the grid service agents running on the machine.
+     * Retruns the grid service agents running within the zone.
      */
     GridServiceAgents getGridServiceAgents();
 
     /**
-     * Retruns the grid service managers running on the machine.
+     * Retruns the grid service managers running within the zone.
      */
     GridServiceManagers getGridServiceManagers();
 
     /**
-     * Returns the grid service containers running on the machine.
+     * Returns the grid service containers running within the zone.
      */
     GridServiceContainers getGridServiceContainers();
 
     /**
-     * Retruns the operating system of the machine.
-     */
-    OperatingSystem getOperatingSystem();
-
-    /**
-     * Retruns the virtual machines running on the machine.
+     * Retruns the virtual machines running within the zone.
      */
     VirtualMachines getVirtualMachines();
 
@@ -101,12 +78,12 @@ public interface Machine {
     boolean hasGridComponents();
 
     /**
-     * Retruns the transports "running" on the machine.
+     * Retruns the transports "running"  within the zone.
      */
     Transports getTransports();
 
     /**
-     * Retruns all the processing unit instances running on the machine.
+     * Retruns all the processing unit instances running  within the zone.
      */
     ProcessingUnitInstance[] getProcessingUnitInstances();
 
@@ -123,17 +100,17 @@ public interface Machine {
     ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved();
 
     /**
-     * Allows to add a {@link ProcessingUnitInstanceLifecycleEventListener}.
+     * Allows to add a {@link org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener}.
      */
-    void addLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
+    void addProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
     /**
      * Allows to remove a {@link ProcessingUnitInstanceLifecycleEventListener}.
      */
-    void removeLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
+    void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
     /**
-     * Retruns all the space instances running on the machine.
+     * Retruns all the space instances running within the zone.
      */
     SpaceInstance[] getSpaceInstances();
 
@@ -150,7 +127,7 @@ public interface Machine {
     SpaceInstanceRemovedEventManager getSpaceInstanceRemoved();
 
     /**
-     * Allows to add a {@link SpaceInstanceLifecycleEventListener}.
+     * Allows to add a {@link org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener}.
      */
     void addLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
 

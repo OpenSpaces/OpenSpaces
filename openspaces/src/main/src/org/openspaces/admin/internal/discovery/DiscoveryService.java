@@ -5,6 +5,7 @@ import com.gigaspaces.grid.gsa.AgentProcessesDetails;
 import com.gigaspaces.grid.gsa.GSA;
 import com.gigaspaces.grid.gsc.GSC;
 import com.gigaspaces.grid.gsm.GSM;
+import com.gigaspaces.grid.zone.GridZoneProvider;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.operatingsystem.OSDetails;
@@ -143,7 +144,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 NIODetails nioDetails = lookupService.getNIODetails();
                 OSDetails osDetails = lookupService.getOSDetails();
                 JVMDetails jvmDetails = lookupService.getJVMDetails();
-                admin.addLookupService(lookupService, nioDetails, osDetails, jvmDetails);
+                admin.addLookupService(lookupService, nioDetails, osDetails, jvmDetails, ((GridZoneProvider) registrar.getRegistrar()).getZones());
             } catch (Exception e) {
                 logger.warn("Failed to add lookup service with id [" + registrar.getServiceID() + "]", e);
             }
@@ -171,7 +172,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 NIODetails nioDetails = gridServiceManager.getNIODetails();
                 OSDetails osDetails = gridServiceManager.getOSDetails();
                 JVMDetails jvmDetails = gridServiceManager.getJVMDetails();
-                admin.addGridServiceManager(gridServiceManager, nioDetails, osDetails, jvmDetails);
+                admin.addGridServiceManager(gridServiceManager, nioDetails, osDetails, jvmDetails, gsm.getZones());
             } catch (Exception e) {
                 logger.warn("Failed to add GSM with uid [" + serviceID + "]", e);
             }
@@ -187,7 +188,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 NIODetails nioDetails = gridServiceAgent.getNIODetails();
                 OSDetails osDetails = gridServiceAgent.getOSDetails();
                 JVMDetails jvmDetails = gridServiceAgent.getJVMDetails();
-                admin.addGridServiceAgent(gridServiceAgent, nioDetails, osDetails, jvmDetails);
+                admin.addGridServiceAgent(gridServiceAgent, nioDetails, osDetails, jvmDetails, gsa.getZones());
             } catch (Exception e) {
                 logger.warn("Failed to add GSA with uid [" + serviceID + "]", e);
             }
@@ -203,7 +204,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 NIODetails nioDetails = gridServiceContainer.getNIODetails();
                 OSDetails osDetails = gridServiceContainer.getOSDetails();
                 JVMDetails jvmDetails = gridServiceContainer.getJVMDetails();
-                admin.addGridServiceContainer(gridServiceContainer, nioDetails, osDetails, jvmDetails);
+                admin.addGridServiceContainer(gridServiceContainer, nioDetails, osDetails, jvmDetails, gsc.getZones());
             } catch (Exception e) {
                 logger.warn("Failed to add GSC with uid [" + serviceID + "]", e);
             }
@@ -215,7 +216,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 NIODetails nioDetails = processingUnitInstance.getNIODetails();
                 OSDetails osDetails = processingUnitInstance.getOSDetails();
                 JVMDetails jvmDetails = processingUnitInstance.getJVMDetails();
-                admin.addProcessingUnitInstance(processingUnitInstance, nioDetails, osDetails, jvmDetails);
+                admin.addProcessingUnitInstance(processingUnitInstance, nioDetails, osDetails, jvmDetails, puServiceBean.getZones());
             } catch (Exception e) {
                 logger.warn("Failed to add Processing Unit with uid [" + serviceID + "]", e);
             }
@@ -242,7 +243,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 NIODetails nioDetails = spaceInstance.getNIODetails();
                 OSDetails osDetails = spaceInstance.getOSDetails();
                 JVMDetails jvmDetails = spaceInstance.getJVMDetails();
-                admin.addSpaceInstance(spaceInstance, clusteredIjspace, nioDetails, osDetails, jvmDetails);
+                admin.addSpaceInstance(spaceInstance, clusteredIjspace, nioDetails, osDetails, jvmDetails, spaceAdmin.getZones());
             } catch (Exception e) {
                 logger.warn("Failed to add Space with uid [" + serviceID + "]", e);
             }

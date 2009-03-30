@@ -2,6 +2,7 @@ package org.openspaces.admin.internal.vm;
 
 import com.gigaspaces.jvm.JVMDetails;
 import org.openspaces.admin.StatisticsMonitor;
+import org.openspaces.admin.zone.Zone;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainer;
@@ -40,8 +41,10 @@ import org.openspaces.core.util.ConcurrentHashSet;
 import java.rmi.RemoteException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author kimchy
@@ -60,6 +63,8 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     private volatile Machine machine;
 
+    private final Map<String, Zone> zones = new ConcurrentHashMap<String, Zone>();
+    
     private final InternalGridServiceAgents gridServiceAgents;
 
     private final InternalGridServiceManagers gridServiceManagers;
@@ -117,6 +122,10 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     public VirtualMachineDetails getDetails() {
         return this.details;
+    }
+
+    public Map<String, Zone> getZones() {
+        return zones;
     }
 
     public Machine getMachine() {

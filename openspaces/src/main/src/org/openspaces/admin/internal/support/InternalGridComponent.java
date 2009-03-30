@@ -5,10 +5,11 @@ import org.openspaces.admin.internal.machine.InternalMachineAware;
 import org.openspaces.admin.internal.os.InternalOperatingSystemInfoProvider;
 import org.openspaces.admin.internal.transport.InternalTransportInfoProvider;
 import org.openspaces.admin.internal.vm.InternalVirtualMachineInfoProvider;
+import org.openspaces.admin.internal.zone.InternalZoneAware;
 
 /**
  * @author kimchy
  */
 public interface InternalGridComponent extends GridComponent, InternalMachineAware,
-        InternalTransportInfoProvider, InternalOperatingSystemInfoProvider, InternalVirtualMachineInfoProvider {
+        InternalTransportInfoProvider, InternalOperatingSystemInfoProvider, InternalVirtualMachineInfoProvider, InternalZoneAware {
 }

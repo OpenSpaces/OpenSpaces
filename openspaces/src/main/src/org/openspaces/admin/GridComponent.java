@@ -20,6 +20,7 @@ import org.openspaces.admin.machine.MachineAware;
 import org.openspaces.admin.os.OperatingSystemAware;
 import org.openspaces.admin.transport.TransportAware;
 import org.openspaces.admin.vm.VirtualMachineAware;
+import org.openspaces.admin.zone.ZoneAware;
 
 /**
  * Grid Component is an element that can provide information on the machine it is running one, the transport
@@ -27,7 +28,7 @@ import org.openspaces.admin.vm.VirtualMachineAware;
  *
  * @author kimchy
  */
-public interface GridComponent extends AdminAware, MachineAware, TransportAware, OperatingSystemAware, VirtualMachineAware {
+public interface GridComponent extends AdminAware, MachineAware, TransportAware, OperatingSystemAware, VirtualMachineAware, ZoneAware {
 
     /**
      * Returns the unique id of the grid component.
