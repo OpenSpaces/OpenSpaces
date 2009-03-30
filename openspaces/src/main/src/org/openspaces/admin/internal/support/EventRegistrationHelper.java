@@ -1,6 +1,8 @@
 package org.openspaces.admin.internal.support;
 
 import org.openspaces.admin.AdminEventListener;
+import org.openspaces.admin.zone.events.ZoneAddedEventListener;
+import org.openspaces.admin.zone.events.ZoneRemovedEventListener;
 import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
 import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventListener;
 import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventListener;
@@ -40,6 +42,12 @@ import org.openspaces.admin.vm.events.VirtualMachinesStatisticsChangedEventListe
 public abstract class EventRegistrationHelper {
 
     public static void addEventListener(InternalAdmin admin, AdminEventListener eventListener) {
+        if (eventListener instanceof ZoneAddedEventListener) {
+            admin.getZones().getZoneAdded().add((ZoneAddedEventListener) eventListener);
+        }
+        if (eventListener instanceof ZoneRemovedEventListener) {
+            admin.getZones().getZoneRemoved().add((ZoneRemovedEventListener) eventListener);
+        }
         if (eventListener instanceof MachineAddedEventListener) {
             admin.getMachines().getMachineAdded().add((MachineAddedEventListener) eventListener);
         }
@@ -136,6 +144,12 @@ public abstract class EventRegistrationHelper {
     }
 
     public static void removeEventListener(InternalAdmin admin, AdminEventListener eventListener) {
+        if (eventListener instanceof ZoneAddedEventListener) {
+            admin.getZones().getZoneAdded().remove((ZoneAddedEventListener) eventListener);
+        }
+        if (eventListener instanceof ZoneRemovedEventListener) {
+            admin.getZones().getZoneRemoved().remove((ZoneRemovedEventListener) eventListener);
+        }
         if (eventListener instanceof MachineAddedEventListener) {
             admin.getMachines().getMachineAdded().remove((MachineAddedEventListener) eventListener);
         }

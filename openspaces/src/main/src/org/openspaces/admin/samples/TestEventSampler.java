@@ -2,6 +2,8 @@ package org.openspaces.admin.samples;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
+import org.openspaces.admin.zone.events.ZoneLifecycleEventListener;
+import org.openspaces.admin.zone.Zone;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsc.events.GridServiceContainerLifecycleEventListener;
 import org.openspaces.admin.gsm.GridServiceManager;
@@ -41,7 +43,8 @@ public class TestEventSampler implements MachineLifecycleEventListener,
         SpaceLifecycleEventListener,
         SpaceInstanceLifecycleEventListener,
         SpaceModeChangedEventListener,
-        ReplicationStatusChangedEventListener {
+        ReplicationStatusChangedEventListener,
+        ZoneLifecycleEventListener {
 
     public static void main(String[] args) throws Exception {
         TestEventSampler eventSampler = new TestEventSampler();
@@ -146,5 +149,13 @@ public class TestEventSampler implements MachineLifecycleEventListener,
 
     public void replicationStatusChanged(ReplicationStatusChangedEvent event) {
         System.out.println("Space Instance [" + event.getSpaceInstance().getUid() + "] replication status changed from [" + event.getPreviousStatus() + "] to [" + event.getNewStatus() + "]");
+    }
+
+    public void zoneAdded(Zone zone) {
+        System.out.println("Zone Added [" + zone.getName() + "]");
+    }
+
+    public void zoneRemoved(Zone zone) {
+        System.out.println("Zone Removed [" + zone.getName() + "]");
     }
 }

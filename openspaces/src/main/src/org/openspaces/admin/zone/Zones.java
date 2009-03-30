@@ -17,6 +17,9 @@
 package org.openspaces.admin.zone;
 
 import org.openspaces.admin.AdminAware;
+import org.openspaces.admin.zone.events.ZoneAddedEventManager;
+import org.openspaces.admin.zone.events.ZoneLifecycleEventListener;
+import org.openspaces.admin.zone.events.ZoneRemovedEventManager;
 
 import java.util.Map;
 
@@ -28,4 +31,26 @@ public interface Zones extends AdminAware, Iterable<Zone> {
     Zone getByName(String name);
 
     Map<String, Zone> getNames();
+
+    /**
+     * Returns the machines added event manager allowing to add and remove
+     * {@link org.openspaces.admin.zone.events.ZoneAddedEventListener}s.
+     */
+    ZoneAddedEventManager getZoneAdded();
+
+    /**
+     * Returns the grid service container added event manager allowing to add and remove
+     * {@link org.openspaces.admin.zone.events.ZoneRemovedEventListener}s.
+     */
+    ZoneRemovedEventManager getZoneRemoved();
+
+    /**
+     * Allows to add a {@link ZoneLifecycleEventListener}.
+     */
+    void addLifecycleListener(ZoneLifecycleEventListener eventListener);
+
+    /**
+     * Allows to remove a {@link ZoneLifecycleEventListener}.
+     */
+    void removeLifeycleListener(ZoneLifecycleEventListener eventListener);
 }
