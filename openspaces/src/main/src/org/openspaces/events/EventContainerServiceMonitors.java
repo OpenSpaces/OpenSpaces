@@ -57,6 +57,10 @@ public class EventContainerServiceMonitors extends PlainServiceMonitors {
     public long getFailedEvents() {
         return (Long) getMonitors().get(Attributes.FAILED_EVENTS);
     }
+    
+    public String getStatus() {
+        return (String) getMonitors().get(Attributes.STATUS);
+    }
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
