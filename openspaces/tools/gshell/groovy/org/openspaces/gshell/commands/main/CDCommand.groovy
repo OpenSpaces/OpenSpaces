@@ -31,7 +31,7 @@ public class CDCommand extends CommandSupport {
         switch (command) {
             case "machines":
                 Machines machines = shell.admin.machines
-                shell.cdToContext(new ContextItem("machines", "machines", machines))
+                shell.cdToContext(new ContextItem("machines", "machines", machines, {"(" + machines.size + ")"}))
                 break;
             default:
                 fail("Paramaeter ${command} unknown") // TODO: i18n

@@ -16,7 +16,7 @@ public class LSCommand extends CommandSupport {
 
     public Object execute(List list) {
         Machines machines = shell.currentContext.value
-        machines.each { Machine m -> io.out.println("@|bold ${m.operatingSystem.details.hostName}/${m.operatingSystem.details.hostAddress}|: ") }
+        machines.each { Machine m -> io.out.println("@|bold,green ${m.operatingSystem.details.hostName}/${m.operatingSystem.details.hostAddress}|:\tpu-instances(${m.processingUnitInstances.length})\tgs-agents(${m.gridServiceAgents.size})\tgs-managers(${m.gridServiceManagers.size})\tgs-containers(${m.gridServiceContainers.size})") }
         return null
     }
 }

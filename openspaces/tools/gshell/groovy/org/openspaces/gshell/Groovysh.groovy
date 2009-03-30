@@ -61,7 +61,7 @@ class Groovysh
 
     final Admin admin
 
-    final List contextItems = []
+    final List<ContextItem> contextItems = new ArrayList<ContextItem>();
 
     Groovysh(final ClassLoader classLoader, final Binding binding, final IO io, final Closure registrar) {
         super(io)
@@ -76,7 +76,7 @@ class Groovysh
 
         interp = new Interpreter(classLoader, binding)
 
-        cdToContext(new ContextItem("main", "main", admin))
+        cdToContext(new ContextItem("", "main", admin, {return ""}))
     }
 
     private static Closure createDefaultRegistrar() {
@@ -111,7 +111,7 @@ class Groovysh
     }
 
     ContextItem getCurrentContext() {
-        contextItems.last()
+        return contextItems.last()
     }
 
     void removeContext() {
@@ -237,7 +237,7 @@ class Groovysh
     private String renderPrompt() {
 //        def lineNum = formatLineNumber(buffers.current().size())
         def contextPrompt = ""
-        contextItems.each { item -> contextPrompt = contextPrompt + item.name + '/' }
+        contextItems.each { ContextItem item -> contextPrompt = contextPrompt + item.name + item.context.call() + '/' }
         return prompt.render("@|bold gshell:|${contextPrompt}@|bold >| ")
     }
 

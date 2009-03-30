@@ -59,6 +59,11 @@ public interface Machines extends AdminAware, Iterable<Machine> {
     Map<String, Machine> getHostsByAddress();
 
     /**
+     * Retruns a map of machines by host names.
+     */
+    Map<String, Machine> getHostsByName();
+
+    /**
      * Returns the number of machines current discovered.
      */
     int getSize();

@@ -89,6 +89,10 @@ public class DefaultMachine implements InternalMachine {
         return this.hostAddress;
     }
 
+    public String getHostName() {
+        return operatingSystem.getDetails().getHostName();
+    }
+
     public GridServiceAgent getGridServiceAgent() {
         Iterator<GridServiceAgent> it = gridServiceAgents.iterator();
         if (it.hasNext()) {

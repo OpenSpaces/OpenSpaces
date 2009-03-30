@@ -35,6 +35,8 @@ public class DefaultMachines implements InternalMachines {
 
     private final Map<String, Machine> machinesByHostAddress = new ConcurrentHashMap<String, Machine>();
 
+    private final Map<String, Machine> machinesByHostNames = new ConcurrentHashMap<String, Machine>();
+
     public DefaultMachines(InternalAdmin admin) {
         this.admin = admin;
         this.machineAddedEventManager = new DefaultMachineAddedEventManager(this);
@@ -106,6 +108,10 @@ public class DefaultMachines implements InternalMachines {
         return Collections.unmodifiableMap(machinesByHostAddress);
     }
 
+    public Map<String, Machine> getHostsByName() {
+        return Collections.unmodifiableMap(machinesByHostNames);
+    }
+
     public void addLifecycleListener(MachineLifecycleEventListener eventListener) {
         getMachineAdded().add(eventListener);
         getMachineRemoved().add(eventListener);
@@ -118,6 +124,7 @@ public class DefaultMachines implements InternalMachines {
 
     public void addMachine(final InternalMachine machine) {
         machinesByHostAddress.put(machine.getHostAddress(), machine);
+        machinesByHostNames.put(machine.getHostName(), machine);
         Machine existingMachine = machinesById.put(machine.getUid(), machine);
         if (existingMachine == null) {
             machineAddedEventManager.machineAdded(machine);
@@ -126,6 +133,7 @@ public class DefaultMachines implements InternalMachines {
 
     public void removeMachine(final Machine machine) {
         machinesByHostAddress.remove(machine.getHostAddress());
+        machinesByHostNames.remove(machine.getHostName());
         final Machine existingMachine = machinesById.remove(machine.getUid());
         if (existingMachine != null) {
             machineRemovedEventManager.machineRemoved(machine);

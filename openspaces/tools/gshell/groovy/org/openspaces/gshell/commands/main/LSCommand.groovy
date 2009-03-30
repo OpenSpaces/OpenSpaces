@@ -15,6 +15,7 @@ public class LSCommand extends CommandSupport {
 
     public Object execute(List list) {
         Admin admin = shell.admin
-        io.out.println("@|bold machines|: [${admin.machines.size}] Machines")
+        io.out.print("machines(${admin.machines.size})")
+        io.out.println()
     }
 }

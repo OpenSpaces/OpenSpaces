@@ -54,6 +54,11 @@ public interface Machine {
     String getHostAddress();
 
     /**
+     * Retruns the host name of the machine.
+     */
+    String getHostName();
+
+    /**
      * Retruns the lookup services that are running on the machine.
      */
     LookupServices getLookupServices();
