@@ -252,6 +252,10 @@ public class Deploy {
             }
         }
 
+        if (!gsm.hasPUUnderDeploy(puPath)) {
+            throw new ProcessingUnitNotFoundException(puName, gsm);
+        }
+
         String codeserver = getCodebase(deployAdmin);
         if (logger.isDebugEnabled()) {
             logger.debug("Using codeserver [" + codeserver + "]");
