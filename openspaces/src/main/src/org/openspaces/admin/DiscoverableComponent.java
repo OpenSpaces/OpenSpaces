@@ -16,22 +16,16 @@
 
 package org.openspaces.admin;
 
-import org.openspaces.admin.machine.MachineAware;
-import org.openspaces.admin.os.OperatingSystemAware;
-import org.openspaces.admin.transport.TransportAware;
-import org.openspaces.admin.vm.VirtualMachineAware;
-import org.openspaces.admin.zone.ZoneAware;
-
 /**
- * Grid Component is an element that can provide information on the machine it is running one, the transport
- * it ues, the Operating system it is runnign on, and the virtual machine that started it.
+ * A discoveralbe component is a component that is found from the lookup service.
  *
  * @author kimchy
  */
-public interface GridComponent extends DiscoverableComponent, AdminAware, MachineAware, TransportAware, OperatingSystemAware, VirtualMachineAware, ZoneAware {
+public interface DiscoverableComponent {
 
     /**
-     * Returns the unique id of the grid component.
+     * Returns <code>true</code> if the component is currently discovered from the lookup service.
+     * <code>false</code> if an event of component removal was sent from the lookup service.
      */
-    String getUid();
+    boolean isDiscovered();
 }

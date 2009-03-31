@@ -27,6 +27,9 @@ public abstract class AbstractGridComponent implements InternalGridComponent {
 
     private volatile VirtualMachine virtualMachine;
 
+    // initialized to true, since we create it on an event from the lookup service
+    private volatile boolean discovered = true;
+
     private final Map<String, Zone> zones = new ConcurrentHashMap<String, Zone>();
 
     protected AbstractGridComponent(InternalAdmin admin) {
@@ -67,6 +70,14 @@ public abstract class AbstractGridComponent implements InternalGridComponent {
 
     public VirtualMachine getVirtualMachine() {
         return this.virtualMachine;
+    }
+
+    public boolean isDiscovered() {
+        return discovered;
+    }
+
+    public void setDiscovered(boolean discovered) {
+        this.discovered = discovered;
     }
 
     public Map<String, Zone> getZones() {

@@ -10,6 +10,6 @@ import org.openspaces.admin.internal.zone.InternalZoneAware;
 /**
  * @author kimchy
  */
-public interface InternalGridComponent extends GridComponent, InternalMachineAware,
+public interface InternalGridComponent extends GridComponent, InternalDiscoverableComponent, InternalMachineAware,
         InternalTransportInfoProvider, InternalOperatingSystemInfoProvider, InternalVirtualMachineInfoProvider, InternalZoneAware {
 }

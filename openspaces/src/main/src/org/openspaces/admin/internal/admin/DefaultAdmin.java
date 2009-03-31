@@ -373,6 +373,7 @@ public class DefaultAdmin implements InternalAdmin {
     public synchronized void removeGridServiceAgent(String uid) {
         InternalGridServiceAgent gridServiceAgent = gridServiceAgents.removeGridServiceAgent(uid);
         if (gridServiceAgent != null) {
+            gridServiceAgent.setDiscovered(false);
             processTransportOnServiceRemoval(gridServiceAgent, gridServiceAgent, gridServiceAgent);
             processOperatingSystemOnServiceRemoval(gridServiceAgent, gridServiceAgent);
 
@@ -425,6 +426,7 @@ public class DefaultAdmin implements InternalAdmin {
     public synchronized void removeLookupService(String uid) {
         InternalLookupService lookupService = lookupServices.removeLookupService(uid);
         if (lookupService != null) {
+            lookupService.setDiscovered(false);
             processTransportOnServiceRemoval(lookupService, lookupService, lookupService);
             processOperatingSystemOnServiceRemoval(lookupService, lookupService);
             processVirtualMachineOnServiceRemoval(lookupService, lookupService, lookupService);
@@ -468,6 +470,7 @@ public class DefaultAdmin implements InternalAdmin {
     public synchronized void removeGridServiceManager(String uid) {
         InternalGridServiceManager gridServiceManager = gridServiceManagers.removeGridServiceManager(uid);
         if (gridServiceManager != null) {
+            gridServiceManager.setDiscovered(false);
             processTransportOnServiceRemoval(gridServiceManager, gridServiceManager, gridServiceManager);
             processOperatingSystemOnServiceRemoval(gridServiceManager, gridServiceManager);
 
@@ -514,6 +517,7 @@ public class DefaultAdmin implements InternalAdmin {
     public synchronized void removeGridServiceContainer(String uid) {
         InternalGridServiceContainer gridServiceContainer = gridServiceContainers.removeGridServiceContainer(uid);
         if (gridServiceContainer != null) {
+            gridServiceContainer.setDiscovered(false);
             processTransportOnServiceRemoval(gridServiceContainer, gridServiceContainer, gridServiceContainer);
             processOperatingSystemOnServiceRemoval(gridServiceContainer, gridServiceContainer);
 
@@ -557,6 +561,7 @@ public class DefaultAdmin implements InternalAdmin {
         processingUnitInstances.removeOrphaned(uid);
         InternalProcessingUnitInstance processingUnitInstance = (InternalProcessingUnitInstance) processingUnitInstances.removeInstnace(uid);
         if (processingUnitInstance != null) {
+            processingUnitInstance.setDiscovered(false);
             ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
             ((InternalGridServiceContainer) processingUnitInstance.getGridServiceContainer()).removeProcessingUnitInstance(uid);
             ((InternalVirtualMachine) processingUnitInstance.getVirtualMachine()).removeProcessingUnitInstance(processingUnitInstance.getUid());
@@ -614,6 +619,7 @@ public class DefaultAdmin implements InternalAdmin {
     public synchronized void removeSpaceInstance(String uid) {
         InternalSpaceInstance spaceInstance = (InternalSpaceInstance) spaces.removeSpaceInstance(uid);
         if (spaceInstance != null) {
+            spaceInstance.setDiscovered(false);
             InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
             space.removeInstance(uid);
             if (space.getSize() == 0) {
