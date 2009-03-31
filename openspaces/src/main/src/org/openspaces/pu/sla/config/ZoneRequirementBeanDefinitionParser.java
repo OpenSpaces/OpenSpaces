@@ -16,7 +16,6 @@
 
 package org.openspaces.pu.sla.config;
 
-import org.openspaces.pu.sla.requirement.HostRequirement;
 import org.openspaces.pu.sla.requirement.ZoneRequirement;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;

@@ -18,8 +18,6 @@ package org.openspaces.pu.container.servicegrid.deploy;
 
 import org.springframework.core.NestedRuntimeException;
 
-import java.util.Arrays;
-
 import com.gigaspaces.grid.gsm.GSM;
 
 /**
