@@ -14,7 +14,6 @@ import org.jini.rio.core.OperationalString;
 import org.jini.rio.monitor.ProvisionMonitorAdmin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
@@ -30,8 +29,6 @@ import org.openspaces.admin.space.SpaceDeployment;
 import org.openspaces.pu.container.servicegrid.deploy.Deploy;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -48,7 +45,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     private final ProvisionMonitorAdmin gsmAdmin;
 
     public DefaultGridServiceManager(ServiceID serviceID, GSM gsm, InternalAdmin admin, int agentId, String agentUid)
-    throws RemoteException {
+            throws RemoteException {
         super(admin, agentId, agentUid);
         this.serviceID = serviceID;
         this.gsm = gsm;
@@ -100,12 +97,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             locatorsString.append(locator).append(',');
         }
         deploy.setLocators(locatorsString.toString());
-        deploy.setDeployAdmin(getGSMAdmin());
-        List<GSM> gsms = new ArrayList<GSM>();
-        for (GridServiceManager gridServiceManager : getAdmin().getGridServiceManagers()) {
-            gsms.add(((InternalGridServiceManager) gridServiceManager).getGSM());
-        }
-        deploy.setGSMs(gsms.toArray(new GSM[gsms.size()]));
+        deploy.initializeDiscovery(gsm, getGSMAdmin());
 
         final OperationalString operationalString;
         try {
@@ -133,7 +125,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             getGSMAdmin().deploy(operationalString);
             latch.await(20, TimeUnit.SECONDS);
             return ref.get();
-        } catch(SecurityException se) {
+        } catch (SecurityException se) {
             throw new AdminException("Not authorized to deploy a processing unit", se);
         } catch (Exception e) {
             throw new AdminException("Failed to deploy [" + deployment.getProcessingUnit() + "]", e);
@@ -202,11 +194,9 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     /**
-     * @param processingUnitInstance
-     *            The processing unit instance to relocate
-     * @param gridServiceContainer
-     *            The GSC to relocate to, or <code>null</code> if the GSM should decide on a
-     *            suitable GSC to relocate to.
+     * @param processingUnitInstance The processing unit instance to relocate
+     * @param gridServiceContainer   The GSC to relocate to, or <code>null</code> if the GSM should decide on a
+     *                               suitable GSC to relocate to.
      */
     public void relocate(ProcessingUnitInstance processingUnitInstance, GridServiceContainer gridServiceContainer) {
         try {

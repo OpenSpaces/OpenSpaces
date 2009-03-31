@@ -1,10 +1,10 @@
 package org.openspaces.pu.container.servicegrid.deploy;
 
-import org.jini.rio.core.ServiceProvisionListener;
-import org.jini.rio.core.OperationalString;
-import org.jini.rio.monitor.DeployAdmin;
 import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.logger.GSLogConfigLoader;
+import org.jini.rio.core.OperationalString;
+import org.jini.rio.core.ServiceProvisionListener;
+import org.jini.rio.monitor.DeployAdmin;
 
 import java.util.ArrayList;
 
@@ -23,12 +23,8 @@ public class SpaceDeploy {
         Deploy.setSout(soutVal);
     }
 
-    public void setGSMs(GSM[] gsms) {
-        deploy.setGSMs(gsms);
-    }
-
-    public void setDeployAdmin(DeployAdmin deployAdmin) {
-        deploy.setDeployAdmin(deployAdmin);
+    public void initializeDiscovery(GSM gsm, DeployAdmin deployAdmin) {
+        deploy.initializeDiscovery(gsm, deployAdmin);
     }
 
     public void setGroups(String[] groups) {

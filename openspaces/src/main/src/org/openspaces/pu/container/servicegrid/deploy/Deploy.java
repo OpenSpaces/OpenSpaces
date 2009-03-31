@@ -65,9 +65,9 @@ public class Deploy {
 
     private static final Log logger = LogFactory.getLog(Deploy.class);
 
-    private DeployAdmin deployAdmin;
+    private GSM gsm = null;
 
-    private GSM[] gsms = null;
+    private DeployAdmin deployAdmin;
 
     private String[] groups;
 
@@ -83,45 +83,27 @@ public class Deploy {
         Deploy.disableInfoLogging = disableInfoLogging;
     }
 
-    public GSM[] findGSMs() {
-        if (this.gsms != null) {
-            return gsms;
+    private void initGSM() {
+        if (this.gsm != null) {
+            return;
         }
-        GSM[] gsms;
-        info("Searching for GSMs in groups " + Arrays.asList(getGroups()) + " and locators [" + getLocators() + "]");
+        info("Searching for GSM in groups " + Arrays.asList(getGroups()) + " and locators [" + getLocators() + "]");
         ServiceItem[] result = ServiceFinder.find(null, GSM.class, lookupTimeout, getGroups(), getLocators());
         if (result != null && result.length > 0) {
-            gsms = new GSM[result.length];
-            for (int i = 0; i < result.length; i++) {
-                gsms[i] = (GSM) result[i].service;
-            }
+            gsm = (GSM) result[0].service;
         } else {
-            gsms = new GSM[0];
+            throw new GSMNotFoundException(getGroups(), lookupTimeout);
         }
-        return gsms;
     }
 
-    public void initDeployAdmin(GSM[] gsms) throws GSMNotFoundException {
-        GSM gsm = null;
-        if (deployAdmin == null) {
-            if (gsms == null) {
-                gsms = findGSMs();
-            }
-            if (gsms.length > 0) {
-                try {
-                    gsm = gsms[0];
-                } catch (Exception e) {
-                    throw new GSMNotFoundException(getGroups(), lookupTimeout, e);
-                }
-            }
-            if (gsm == null) {
-                throw new GSMNotFoundException(getGroups(), lookupTimeout);
-            }
-            try {
-                deployAdmin = (DeployAdmin) gsm.getAdmin();
-            } catch (RemoteException e) {
-                throw new GSMNotFoundException(getGroups(), lookupTimeout);
-            }
+    private void initDeployAdmin() {
+        if (deployAdmin != null) {
+            return;
+        }
+        try {
+            deployAdmin = (DeployAdmin) gsm.getAdmin();
+        } catch (RemoteException e) {
+            throw new RuntimeException("Failed to get deploy admin", e);
         }
     }
 
@@ -129,11 +111,8 @@ public class Deploy {
         sout = soutVal;
     }
 
-    public void setGSMs(GSM[] gsms) {
-        this.gsms = gsms;
-    }
-
-    public void setDeployAdmin(DeployAdmin deployAdmin) {
+    public void initializeDiscovery(GSM gsm, DeployAdmin deployAdmin) {
+        this.gsm = gsm;
         this.deployAdmin = deployAdmin;
     }
 
@@ -261,18 +240,18 @@ public class Deploy {
 
         info("Deploying [" + puName + "] with name [" + overridePuName + "] under groups " + Arrays.asList(getGroups()) + " and locators [" + getLocators() + "]");
 
+        initGSM();
+        initDeployAdmin();
+
         // check if the pu to deploy is an actual file on the file system and ends with jar
         if (puFile.exists() && (puFile.getName().endsWith(".jar") || puFile.getName().endsWith(".war"))) {
             // we deploy a jar file, upload it to all the GSMs
-            gsms = findGSMs();
-            uploadPU(puPath, puFile, gsms);
+            uploadPU(puPath, puFile);
             if (deletePUFile) {
                 puFile.delete();
             }
         }
 
-        //get codebase from service
-        initDeployAdmin(gsms);
         String codeserver = getCodebase(deployAdmin);
         if (logger.isDebugEnabled()) {
             logger.debug("Using codeserver [" + codeserver + "]");
@@ -668,45 +647,43 @@ public class Deploy {
         }
     }
 
-    private void uploadPU(String puPath, File puFile, GSM[] gsms) throws IOException {
+    private void uploadPU(String puPath, File puFile) throws IOException {
         byte[] buffer = new byte[4098];
-        for (GSM gsm : gsms) {
-            String codebase = getCodebase((DeployAdmin) gsm.getAdmin());
-            info("Uploading [" + puPath + "] to [" + codebase + "]");
-            HttpURLConnection conn = (HttpURLConnection) new URL(codebase + puFile.getName()).openConnection();
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            conn.setAllowUserInteraction(false);
-            conn.setUseCaches(false);
-            conn.setRequestMethod("PUT");
-            conn.setRequestProperty("Content-Length", "" + puFile.length());
-            conn.setRequestProperty("Extract", "true");
-            conn.connect();
-            OutputStream out = new BufferedOutputStream(conn.getOutputStream());
-            InputStream in = new BufferedInputStream(new FileInputStream(puFile));
-            int byteCount = 0;
-            int bytesRead = -1;
-            while ((bytesRead = in.read(buffer)) != -1) {
-                out.write(buffer, 0, bytesRead);
-                byteCount += bytesRead;
-            }
-            out.flush();
-            out.close();
-            in.close();
+        String codebase = getCodebase((DeployAdmin) gsm.getAdmin());
+        info("Uploading [" + puPath + "] to [" + codebase + "]");
+        HttpURLConnection conn = (HttpURLConnection) new URL(codebase + puFile.getName()).openConnection();
+        conn.setDoOutput(true);
+        conn.setDoInput(true);
+        conn.setAllowUserInteraction(false);
+        conn.setUseCaches(false);
+        conn.setRequestMethod("PUT");
+        conn.setRequestProperty("Content-Length", "" + puFile.length());
+        conn.setRequestProperty("Extract", "true");
+        conn.connect();
+        OutputStream out = new BufferedOutputStream(conn.getOutputStream());
+        InputStream in = new BufferedInputStream(new FileInputStream(puFile));
+        int byteCount = 0;
+        int bytesRead = -1;
+        while ((bytesRead = in.read(buffer)) != -1) {
+            out.write(buffer, 0, bytesRead);
+            byteCount += bytesRead;
+        }
+        out.flush();
+        out.close();
+        in.close();
 
-            int responseCode = conn.getResponseCode();
+        int responseCode = conn.getResponseCode();
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            StringBuffer sb = new StringBuffer();
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
-            reader.close();
-            conn.disconnect();
-            if (responseCode != 200 && responseCode != 201) {
-                throw new RuntimeException("Failed to upload file, response code [" + responseCode + "], response: " + sb.toString());
-            }
+        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        String line;
+        StringBuffer sb = new StringBuffer();
+        while ((line = reader.readLine()) != null) {
+            sb.append(line);
+        }
+        reader.close();
+        conn.disconnect();
+        if (responseCode != 200 && responseCode != 201) {
+            throw new RuntimeException("Failed to upload file, response code [" + responseCode + "], response: " + sb.toString());
         }
     }
 
