@@ -313,6 +313,7 @@
                 <include name="tools/**"/>
             	<exclude name="tools/maven/maven-openspaces-plugin/target/**" />
                 <exclude name="tools/**/*.iml" />
+                <exclude name="tools/gshell/**" />
 
                 <include name="lib/required/gs-openspaces.jar"/>
             	<include name="lib/required/spring.jar"/>
