@@ -52,6 +52,30 @@ public class PUDetails implements Externalizable {
         return this.details;
     }
 
+    /**
+     * Return the name representing this Processing Unit (as shown in the UI).
+     * 
+     * @return <tt>service-name</tt>.<tt>instance-id</tt> [<tt>backup-id</tt>] or
+     *         <tt>service-name</tt> [<tt>instance-id</tt>]
+     */
+    public String getPresentationName() {
+        String name = "null";
+        if (clusterInfo != null) {
+            name = clusterInfo.getName();
+            Integer id = clusterInfo.getInstanceId();
+            if (clusterInfo.getNumberOfBackups() > 0) {
+                Integer bid = clusterInfo.getBackupId();
+                if (bid == null) {
+                    bid = Integer.valueOf(0);
+                }
+                name += "."+id+" ["+(bid+1)+"]";
+            } else {
+                name += " ["+id+"]";
+            }
+        }
+        return name;
+    }
+
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeObject(gscServiceID);
         out.writeObject(clusterInfo);

@@ -19,6 +19,8 @@ package org.openspaces.pu.container.servicegrid;
 import com.sun.jini.config.Config;
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
+import net.jini.core.lookup.ServiceID;
+
 import org.jini.rio.resources.client.AbstractFaultDetectionHandler;
 
 import java.rmi.RemoteException;
@@ -28,7 +30,7 @@ import java.util.logging.Logger;
 
 /**
  * A processing unit fault detection handler. Invokes {@link PUServiceBean#isAlive()}.
- *
+ * 
  * @author kimchy
  */
 public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
@@ -37,12 +39,11 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
     /**
      * Component name, used for config and logger
      */
-    private static final String COMPONENT =
-            "org.openspaces.pu.container.servicegrid.PUFaultDetectionHandler";
+    private static final String COMPONENT = "org.openspaces.pu.container.servicegrid.PUFaultDetectionHandler";
     /**
      * A Logger
      */
-    static Logger logger = Logger.getLogger(COMPONENT);
+    private static final Logger logger = Logger.getLogger(COMPONENT);
 
     /**
      * @see org.jini.rio.core.FaultDetectionHandler#setConfiguration
@@ -56,23 +57,11 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
 
             this.config = ConfigurationProvider.getInstance(configArgs);
 
-            invocationDelay = Config.getLongEntry(config,
-                    COMPONENT,
-                    INVOCATION_DELAY_KEY,
-                    DEFAULT_INVOCATION_DELAY,
-                    0,
+            invocationDelay = Config.getLongEntry(config, COMPONENT, INVOCATION_DELAY_KEY, DEFAULT_INVOCATION_DELAY, 0,
                     Long.MAX_VALUE);
-            retryCount = Config.getIntEntry(config,
-                    COMPONENT,
-                    RETRY_COUNT_KEY,
-                    DEFAULT_RETRY_COUNT,
-                    0,
+            retryCount = Config.getIntEntry(config, COMPONENT, RETRY_COUNT_KEY, DEFAULT_RETRY_COUNT, 0,
                     Integer.MAX_VALUE);
-            retryTimeout = Config.getLongEntry(config,
-                    COMPONENT,
-                    RETRY_TIMEOUT_KEY,
-                    DEFAULT_RETRY_TIMEOUT,
-                    0,
+            retryTimeout = Config.getLongEntry(config, COMPONENT, RETRY_TIMEOUT_KEY, DEFAULT_RETRY_TIMEOUT, 0,
                     Long.MAX_VALUE);
 
             if (logger.isLoggable(Level.CONFIG)) {
@@ -81,7 +70,7 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
                 buffer.append("\n invocation delay=" + invocationDelay);
                 buffer.append("\n retry count=" + retryCount + ", ");
                 buffer.append("\n retry timeout=" + retryTimeout);
-                buffer.append("\n configArgs: " + Arrays.toString( configArgs));
+                buffer.append("\n configArgs: " + Arrays.toString(configArgs));
                 logger.config(buffer.toString());
             }
         } catch (ConfigurationException e) {
@@ -92,52 +81,86 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
     /**
      * Get the class which implements the ServiceMonitor
      */
+    @Override
     protected ServiceMonitor getServiceMonitor() throws Exception {
         return new ServiceAdminManager();
     }
 
     class ServiceAdminManager implements ServiceMonitor {
 
+        Throwable lastThrown;
+        ServiceDetails serviceDetails = new ServiceDetails();
+
+        /**
+         * printable service details
+         */
+        class ServiceDetails {
+            ServiceID serviceId;
+            String presentationName;
+            String host;
+
+            @Override
+            public String toString() {
+                String toString = "[" + presentationName + "] on: [" + host + "]";
+                if (logger.isLoggable(Level.FINE)) {
+                    toString += " Id: [" + getServiceID() + "]";
+                }
+                return toString;
+            }
+        }
+
+        public ServiceAdminManager() {
+            serviceDetails.serviceId = getServiceID();
+            try {
+                serviceDetails.presentationName = ((PUServiceBean) proxy).getPUDetails().getPresentationName();
+                serviceDetails.host = ((PUServiceBean) proxy).getNIODetails().getHostName() + "/"
+                + ((PUServiceBean) proxy).getNIODetails().getHostAddress();
+            } catch (RemoteException re) {
+                serviceDetails.presentationName = proxy.toString();
+            }
+        }
+
         /**
          * Its all over
          */
         public void drop() {
+
             if (logger.isLoggable(Level.FINE)) {
-                logger.fine("Dropping monitor for service: [" + getServiceID() +"]" );
+                logger.fine("Dropping monitor for service: " + serviceDetails);
+            }
+
+            if (logger.isLoggable(Level.WARNING)) {
+                logger.log(Level.WARNING, "Detected failure of service: " + serviceDetails + ", Reason: " + lastThrown,
+                        lastThrown);
             }
         }
 
         /**
-         * Verify service can be reached. If the service cannot be reached
-         * return false
+         * Verify service can be reached. If the service cannot be reached return false
          */
         public boolean verify() {
             try {
                 if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("Requesting isAlive() on service: [" + getServiceID() +"]" );
+                    logger.finest("Requesting isAlive() on service: " + serviceDetails);
                 }
-                
+
                 final boolean isAlive = ((PUServiceBean) proxy).isAlive();
 
                 if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("isAlive() succesfully returned: ["+isAlive+"] for service: [" + getServiceID() +"]" );
+                    logger.finest("isAlive() succesfully returned: [" + isAlive + "] for service: " + serviceDetails);
                 }
-                
+
                 return isAlive;
-            } catch (RemoteException e) {
-                if(logger.isLoggable(Level.FINER)) {
-                    logger.log( Level.FINER, "RemoteException reaching service: ["
-                            + getServiceID() + "]  - service cannot be reached", e);
-                }
-                return false;
             } catch (Exception e) {
-                if(logger.isLoggable(Level.WARNING)) {
-                    logger.log( Level.WARNING, "Exception reaching service: ["
-                            +  getServiceID() + "] ", e);
+
+                if (logger.isLoggable(Level.FINER)) {
+                    logger.log(Level.FINER, "Failed reaching service: " + serviceDetails + ", Reason: " + e, e);
                 }
+
+                lastThrown = e;
+
                 return false;
             }
         }
     }
-
 }
