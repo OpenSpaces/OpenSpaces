@@ -101,9 +101,9 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
 
             @Override
             public String toString() {
-                String toString = "[" + presentationName + "] on: [" + host + "]";
+                String toString = "[" + presentationName + "] at host: [" + host + "]";
                 if (logger.isLoggable(Level.FINE)) {
-                    toString += " Id: [" + getServiceID() + "]";
+                    toString += " Id: [" + serviceId + "]";
                 }
                 return toString;
             }
