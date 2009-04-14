@@ -202,7 +202,7 @@ public class SimpleNotifyContainerConfigurer {
     /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setNotifyUnmatched(Boolean)
      */
-    public SimpleNotifyContainerConfigurer notifyUnamtched(boolean notifyUnmatched) {
+    public SimpleNotifyContainerConfigurer notifyUnmatched(boolean notifyUnmatched) {
         notifyEventListenerContainer.setNotifyUnmatched(notifyUnmatched);
         return this;
     }
