@@ -28,8 +28,7 @@ import org.openspaces.core.GigaSpace;
  * GigaSpace gigaSpace = new GigaSpaceConfigurer(space).gigaSpace();
  * MyBusinessInterface proxy = new ExecutorRemotingProxyConfigurer&lt;MyBusinessInterface&gt;(gigaSpace, MyBusinessInterface.class)
  *                                         .broadcast(true)
- *                                         .voidOneWay(true)
- *                                         .syncProxy();
+ *                                         .proxy();
  * proxy.businessMethod(...);
  * </pre>
  *
@@ -56,8 +55,8 @@ public class ExecutorRemotingProxyConfigurer<T> {
     /**
      * @see org.openspaces.remoting.ExecutorSpaceRemotingProxyFactoryBean#setBroadcast(boolean)
      */
-    public ExecutorRemotingProxyConfigurer<T> broadcast(boolean broadcat) {
-        executorFactoryBean.setBroadcast(broadcat);
+    public ExecutorRemotingProxyConfigurer<T> broadcast(boolean broadcast) {
+        executorFactoryBean.setBroadcast(broadcast);
         return this;
     }
 
