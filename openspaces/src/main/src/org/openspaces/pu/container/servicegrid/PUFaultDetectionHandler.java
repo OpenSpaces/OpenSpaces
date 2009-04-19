@@ -128,7 +128,9 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
             if (logger.isLoggable(Level.FINE)) {
                 logger.fine("Dropping monitor for service: " + serviceDetails);
             }
+        }
 
+        public void reportLastError() {
             if (logger.isLoggable(Level.WARNING)) {
                 logger.log(Level.WARNING, "Detected failure of service: " + serviceDetails + ", Reason: " + lastThrown,
                         lastThrown);
