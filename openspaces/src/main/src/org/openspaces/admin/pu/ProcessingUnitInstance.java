@@ -80,6 +80,13 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
     void relocate();
 
     /**
+     * Restarts the processing unit instance. Note, if this instance is running an embedded space instance,
+     * and the space instance is primary and there is a backup around as well, this method is handy to "turn"
+     * the backup to primary.
+     */
+    void restart();
+
+    /**
      * Returns the instance id of the processing unit instance.
      */
     int getInstanceId();

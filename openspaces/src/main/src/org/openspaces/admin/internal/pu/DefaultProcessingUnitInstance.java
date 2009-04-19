@@ -353,6 +353,13 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         relocate(null); //null to relocate to any suitable GSC
     }
 
+    public void restart() {
+        if (!processingUnit.isManaged()) {
+            throw new AdminException("No managing grid service manager for processing unit");
+        }
+        ((InternalGridServiceManager) processingUnit.getManagingGridServiceManager()).relocate(this, getGridServiceContainer());
+    }
+
     public void decrement() {
         if (!processingUnit.isManaged()) {
             throw new AdminException("No managing grid service manager for processing unit");
