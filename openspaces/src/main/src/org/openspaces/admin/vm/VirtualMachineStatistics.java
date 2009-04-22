@@ -116,4 +116,11 @@ public interface VirtualMachineStatistics {
      * and the previous one. If there is no previous one, will reutrn -1.
      */
     double getGcCollectionPerc();
+
+    /**
+     * Returns the cpu percentage this virtual machine is using.
+     */
+    double getCpuPerc();
+
+    String getCpuPercFormatted();
 }

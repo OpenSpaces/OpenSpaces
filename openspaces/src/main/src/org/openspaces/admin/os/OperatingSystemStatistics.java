@@ -71,18 +71,36 @@ public interface OperatingSystemStatistics {
      */
     long getOpenFilesCur();
 
+    /**
+     * Returns the network statistics per network device.
+     */
     Map<String, NetworkStatistics> getNetworkStats();
 
     interface NetworkStatistics {
 
+        /**
+         * The name of the network device.
+         */
         String getName();
 
+        /**
+         * The total rx bytes received.
+         */
         long getRxBytes();
 
+        /**
+         * The number of bytes received per second (computed against the previous sampled stats).
+         */
         double getRxBytesPerSecond();
 
+        /**
+         * The total tx bytes transmitted.
+         */
         long getTxBytes();
 
+        /**
+         * The number of bytes transmitted per second (computed against the previous sampled stats).
+         */
         double getTxBytesPerSecond();
 
         long getRxPackets();

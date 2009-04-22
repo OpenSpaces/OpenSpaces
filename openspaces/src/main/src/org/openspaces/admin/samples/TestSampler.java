@@ -51,20 +51,21 @@ public class TestSampler {
 //                }
 //                System.out.println("VM TOTAL STATS: Heap Committed [" + admin.getVirtualMachines().getStatistics().getMemoryHeapCommittedInGB() + "GB]");
 //                System.out.println("VM TOTAL STATS: GC PERC [" + admin.getVirtualMachines().getStatistics().getGcCollectionPerc() + "], Heap Used [" + admin.getVirtualMachines().getStatistics().getMemoryHeapPerc() + "%]");
-//                for (VirtualMachine virtualMachine : admin.getVirtualMachines()) {
-//                    System.out.println("VM [" + virtualMachine.getUid() + "] " +
-//                            "PID [" + virtualMachine.getDetails().getPid() + "] " +
-//                            "Host [" + virtualMachine.getMachine().getHostAddress() + "] " +
-//                            "GC Perc [" + virtualMachine.getStatistics().getGcCollectionPerc() + "], " +
-//                            "Heap Usage [" + virtualMachine.getStatistics().getMemoryHeapPerc() + "%]");
-//
+                for (VirtualMachine virtualMachine : admin.getVirtualMachines()) {
+                    System.out.println("VM [" + virtualMachine.getUid() + "] " +
+                            "PID [" + virtualMachine.getDetails().getPid() + "] " +
+                            "Host [" + virtualMachine.getMachine().getHostAddress() + "] " +
+                            "CPU [" + virtualMachine.getStatistics().getCpuPercFormatted() + "] " +
+                            "GC Perc [" + virtualMachine.getStatistics().getGcCollectionPerc() + "], " +
+                            "Heap Usage [" + virtualMachine.getStatistics().getMemoryHeapPerc() + "%]");
+
 //                    for (ProcessingUnitInstance processingUnitInstance : virtualMachine.getProcessingUnitInstances()) {
 //                        System.out.println("   -> PU [" + processingUnitInstance.getUid() + "]");
 //                    }
 //                    for (SpaceInstance spaceInstance : virtualMachine.getSpaceInstances()) {
 //                        System.out.println("   -> Space [" + spaceInstance.getUid() + "]");
 //                    }
-//                }
+                }
                 for (Machine machine : admin.getMachines()) {
                     System.out.println("Machine [" + machine.getUid() + "], Processors [" + machine.getOperatingSystem().getDetails().getAvailableProcessors() + "] CPU [" + machine.getOperatingSystem().getStatistics().getCpuPerc() + "]");
                     for (OperatingSystemStatistics.NetworkStatistics netStats : machine.getOperatingSystem().getStatistics().getNetworkStats().values()) {

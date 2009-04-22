@@ -169,4 +169,12 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
         }
         return StatisticsUtils.computePercByTime(getGcCollectionTime(), previousStats.getGcCollectionTime(), getTimestamp(), getPreviousTimestamp());
     }
+
+    public double getCpuPerc() {
+        return stats.getCpuPerc();
+    }
+
+    public String getCpuPercFormatted() {
+        return StatisticsUtils.formatPerc(getCpuPerc());
+    }
 }
