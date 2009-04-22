@@ -32,6 +32,8 @@
 
 package org.openspaces.admin.vm;
 
+import java.util.Map;
+
 /**
  * Details (non changeable information) of a single virutal machine.
  *
@@ -58,6 +60,11 @@ public interface VirtualMachineDetails {
     long getStartTime();
 
     long getPid();
+
+    String getBootClassPath();
+    String getClassPath();
+    String[] getInputArguments();
+    Map<String, String> getSystemProperties();
 
     long getMemoryHeapInitInBytes();
     double getMemoryHeapInitInMB();

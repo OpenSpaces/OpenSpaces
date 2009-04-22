@@ -4,6 +4,8 @@ import com.gigaspaces.jvm.JVMDetails;
 import org.openspaces.admin.support.StatisticsUtils;
 import org.openspaces.admin.vm.VirtualMachineDetails;
 
+import java.util.Map;
+
 /**
  * @author kimchy
  */
@@ -45,6 +47,22 @@ public class DefaultVirtualMachineDetails implements VirtualMachineDetails {
 
     public long getPid() {
         return details.getPid();
+    }
+
+    public String getBootClassPath() {
+        return details.getBootClassPath();
+    }
+
+    public String getClassPath() {
+        return details.getClassPath();
+    }
+
+    public String[] getInputArguments() {
+        return details.getInputArguments();
+    }
+
+    public Map<String, String> getSystemProperties() {
+        return details.getSystemProperties();
     }
 
     public long getMemoryHeapInitInBytes() {
