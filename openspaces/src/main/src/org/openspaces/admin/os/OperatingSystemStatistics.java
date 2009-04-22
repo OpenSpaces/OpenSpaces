@@ -16,6 +16,8 @@
 
 package org.openspaces.admin.os;
 
+import java.util.Map;
+
 /**
  * Statistics of a specific {@link org.openspaces.admin.os.OperatingSystem}.
  *
@@ -68,4 +70,38 @@ public interface OperatingSystemStatistics {
      * Returns the current open files descriptors.
      */
     long getOpenFilesCur();
+
+    Map<String, NetworkStatistics> getNetworkStats();
+
+    interface NetworkStatistics {
+
+        String getName();
+
+        long getRxBytes();
+
+        double getRxBytesPerSecond();
+
+        long getTxBytes();
+
+        double getTxBytesPerSecond();
+
+        long getRxPackets();
+
+        double getRxPacketsPerSecond();
+
+        long getTxPackets();
+
+        double getTxPacketsPerSecond();
+
+        long getRxErrors();
+
+        long getTxErrors();
+
+        long getRxDropped();
+
+        long getTxDropped();
+
+
+        NetworkStatistics getPrevious();
+    }
 }

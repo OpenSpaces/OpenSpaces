@@ -3,6 +3,7 @@ package org.openspaces.admin.samples;
 import com.gigaspaces.grid.gsa.AgentProcessDetails;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
+import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
@@ -33,47 +34,50 @@ public class TestSampler {
 //                for (LookupService lookupService : admin.getLookupServices()) {
 //                    System.out.println("Lookup [" + lookupService.getUid() + "] : " + lookupService.getMachine());
 //                }
-                for (GridServiceManager gsm : admin.getGridServiceManagers()) {
-                    System.out.println("GSM [" + gsm.getUid() + "] running on Machine " + gsm.getMachine().getHostAddress());
-                }
-                for (GridServiceContainer gsc : admin.getGridServiceContainers()) {
-                    System.out.println("GSC [" + gsc.getUid() + "] running on Machine " + gsc.getMachine().getHostAddress());
-                    for (ProcessingUnitInstance puInstance : gsc) {
-                        System.out.println("   -> PU [" + puInstance.getName() + "][" + puInstance.getInstanceId() + "][" + puInstance.getBackupId() + "]");
-                    }
-                }
-                for (GridServiceAgent gsa : admin.getGridServiceAgents()) {
-                    System.out.println("GSA [" + gsa.getUid() + "] running on Machine [" + gsa.getMachine().getHostAddress());
-                    for (AgentProcessDetails processDetails : gsa.getProcessesDetails()) {
-                        System.out.println("   -> Process [" + Arrays.toString(processDetails.getCommand()) + "]");
-                    }
-                }
-                System.out.println("VM TOTAL STATS: Heap Committed [" + admin.getVirtualMachines().getStatistics().getMemoryHeapCommittedInGB() + "GB]");
-                System.out.println("VM TOTAL STATS: GC PERC [" + admin.getVirtualMachines().getStatistics().getGcCollectionPerc() + "], Heap Used [" + admin.getVirtualMachines().getStatistics().getMemoryHeapPerc() + "%]");
-                for (VirtualMachine virtualMachine : admin.getVirtualMachines()) {
-                    System.out.println("VM [" + virtualMachine.getUid() + "] " +
-                            "PID [" + virtualMachine.getDetails().getPid() + "] " +
-                            "Host [" + virtualMachine.getMachine().getHostAddress() + "] " +
-                            "GC Perc [" + virtualMachine.getStatistics().getGcCollectionPerc() + "], " +
-                            "Heap Usage [" + virtualMachine.getStatistics().getMemoryHeapPerc() + "%]");
-
-                    for (ProcessingUnitInstance processingUnitInstance : virtualMachine.getProcessingUnitInstances()) {
-                        System.out.println("   -> PU [" + processingUnitInstance.getUid() + "]");
-                    }
-                    for (SpaceInstance spaceInstance : virtualMachine.getSpaceInstances()) {
-                        System.out.println("   -> Space [" + spaceInstance.getUid() + "]");
-                    }
-                }
+//                for (GridServiceManager gsm : admin.getGridServiceManagers()) {
+//                    System.out.println("GSM [" + gsm.getUid() + "] running on Machine " + gsm.getMachine().getHostAddress());
+//                }
+//                for (GridServiceContainer gsc : admin.getGridServiceContainers()) {
+//                    System.out.println("GSC [" + gsc.getUid() + "] running on Machine " + gsc.getMachine().getHostAddress());
+//                    for (ProcessingUnitInstance puInstance : gsc) {
+//                        System.out.println("   -> PU [" + puInstance.getName() + "][" + puInstance.getInstanceId() + "][" + puInstance.getBackupId() + "]");
+//                    }
+//                }
+//                for (GridServiceAgent gsa : admin.getGridServiceAgents()) {
+//                    System.out.println("GSA [" + gsa.getUid() + "] running on Machine [" + gsa.getMachine().getHostAddress());
+//                    for (AgentProcessDetails processDetails : gsa.getProcessesDetails()) {
+//                        System.out.println("   -> Process [" + Arrays.toString(processDetails.getCommand()) + "]");
+//                    }
+//                }
+//                System.out.println("VM TOTAL STATS: Heap Committed [" + admin.getVirtualMachines().getStatistics().getMemoryHeapCommittedInGB() + "GB]");
+//                System.out.println("VM TOTAL STATS: GC PERC [" + admin.getVirtualMachines().getStatistics().getGcCollectionPerc() + "], Heap Used [" + admin.getVirtualMachines().getStatistics().getMemoryHeapPerc() + "%]");
+//                for (VirtualMachine virtualMachine : admin.getVirtualMachines()) {
+//                    System.out.println("VM [" + virtualMachine.getUid() + "] " +
+//                            "PID [" + virtualMachine.getDetails().getPid() + "] " +
+//                            "Host [" + virtualMachine.getMachine().getHostAddress() + "] " +
+//                            "GC Perc [" + virtualMachine.getStatistics().getGcCollectionPerc() + "], " +
+//                            "Heap Usage [" + virtualMachine.getStatistics().getMemoryHeapPerc() + "%]");
+//
+//                    for (ProcessingUnitInstance processingUnitInstance : virtualMachine.getProcessingUnitInstances()) {
+//                        System.out.println("   -> PU [" + processingUnitInstance.getUid() + "]");
+//                    }
+//                    for (SpaceInstance spaceInstance : virtualMachine.getSpaceInstances()) {
+//                        System.out.println("   -> Space [" + spaceInstance.getUid() + "]");
+//                    }
+//                }
                 for (Machine machine : admin.getMachines()) {
                     System.out.println("Machine [" + machine.getUid() + "], Processors [" + machine.getOperatingSystem().getDetails().getAvailableProcessors() + "] CPU [" + machine.getOperatingSystem().getStatistics().getCpuPerc() + "]");
-                    System.out.println("   -> Mem Total [" + machine.getOperatingSystem().getDetails().getTotalPhysicalMemorySizeInGB() + "GB], " + "Free [" + machine.getOperatingSystem().getStatistics().getFreePhysicalMemorySizeInGB() + "GB]");
-                    System.out.println("   -> Swap Total [" + machine.getOperatingSystem().getDetails().getTotalSwapSpaceSizeInGB() + "GB], " + "Free [" + machine.getOperatingSystem().getStatistics().getFreeSwapSpaceSizeInGB() + "GB]");
-                    for (SpaceInstance spaceInstance : machine.getSpaceInstances()) {
-                        System.out.println("   -> Space [" + spaceInstance.getUid() + "]");
+                    for (OperatingSystemStatistics.NetworkStatistics netStats : machine.getOperatingSystem().getStatistics().getNetworkStats().values()) {
+                        System.out.println("   -> " + netStats.getName() + ", Rx " + netStats.getRxBytes() + ", Tx " + netStats.getTxBytes() + ", RxPerSecond " + netStats.getRxBytesPerSecond() + ", TxPerSecond " + netStats.getTxBytesPerSecond());
                     }
-                    for (ProcessingUnitInstance processingUnitInstance : machine.getProcessingUnitInstances()) {
-                        System.out.println("   -> PU [" + processingUnitInstance.getUid() + "]");
-                    }
+//                    System.out.println("   -> Mem Total [" + machine.getOperatingSystem().getDetails().getTotalPhysicalMemorySizeInGB() + "GB], " + "Free [" + machine.getOperatingSystem().getStatistics().getFreePhysicalMemorySizeInGB() + "GB]");
+//                    System.out.println("   -> Swap Total [" + machine.getOperatingSystem().getDetails().getTotalSwapSpaceSizeInGB() + "GB], " + "Free [" + machine.getOperatingSystem().getStatistics().getFreeSwapSpaceSizeInGB() + "GB]");
+//                    for (SpaceInstance spaceInstance : machine.getSpaceInstances()) {
+//                        System.out.println("   -> Space [" + spaceInstance.getUid() + "]");
+//                    }
+//                    for (ProcessingUnitInstance processingUnitInstance : machine.getProcessingUnitInstances()) {
+//                        System.out.println("   -> PU [" + processingUnitInstance.getUid() + "]");
+//                    }
                 }
                 for (ProcessingUnit processingUnit : admin.getProcessingUnits()) {
                     System.out.println("Processing Unit: " + processingUnit.getName() + " status: " + processingUnit.getStatus());
@@ -108,10 +112,10 @@ public class TestSampler {
                         }
                     }
                 }
-                System.out.println("Transport TOTAL: ActiveThreads [" + admin.getTransports().getStatistics().getActiveThreadsCount() + "], CompletedTaskPerSecond [" + admin.getTransports().getStatistics().getCompletedTaskPerSecond() + "]");
-                for (Transport transport : admin.getTransports()) {
-                    System.out.println("Transport [" + transport.getUid() + "] ActiveThreads [" + transport.getStatistics().getActiveThreadsCount() + "], CompletedTaskPerSecond [" + transport.getStatistics().getCompletedTaskPerSecond() + "]");
-                }
+//                System.out.println("Transport TOTAL: ActiveThreads [" + admin.getTransports().getStatistics().getActiveThreadsCount() + "], CompletedTaskPerSecond [" + admin.getTransports().getStatistics().getCompletedTaskPerSecond() + "]");
+//                for (Transport transport : admin.getTransports()) {
+//                    System.out.println("Transport [" + transport.getUid() + "] ActiveThreads [" + transport.getStatistics().getActiveThreadsCount() + "], CompletedTaskPerSecond [" + transport.getStatistics().getCompletedTaskPerSecond() + "]");
+//                }
                 System.out.println("*********************************************************************");
             } catch (Exception e) {
                 e.printStackTrace();
