@@ -96,16 +96,10 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
     }
 
     public double getMemoryHeapPerc() {
-        if (previousStats == null) {
-            return -1;
-        }
         return StatisticsUtils.computePerc(getMemoryHeapUsedInBytes(), getDetails().getMemoryHeapMaxInBytes());
     }
 
     public double getMemoryHeapCommittedPerc() {
-        if (previousStats == null) {
-            return -1;
-        }
         return StatisticsUtils.computePerc(getMemoryHeapUsedInBytes(), getMemoryHeapCommittedInBytes());
     }
 
@@ -134,16 +128,10 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
     }
 
     public double getMemoryNonHeapPerc() {
-        if (previousStats == null) {
-            return -1;
-        }
         return StatisticsUtils.computePerc(getMemoryNonHeapUsedInBytes(), getDetails().getMemoryNonHeapMaxInBytes());
     }
 
     public double getMemoryNonHeapCommittedPerc() {
-        if (previousStats == null) {
-            return -1;
-        }
         return StatisticsUtils.computePerc(getMemoryNonHeapUsedInBytes(), getMemoryNonHeapCommittedInBytes());
     }
 
