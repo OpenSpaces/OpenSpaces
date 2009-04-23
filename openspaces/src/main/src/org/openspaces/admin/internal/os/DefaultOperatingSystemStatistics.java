@@ -75,6 +75,10 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
         return StatisticsUtils.convertToGB(getFreeSwapSpaceSizeInBytes());
     }
 
+    public double getSwapSpaceUsedPerc() {
+        return StatisticsUtils.computePerc(getDetails().getTotalSwapSpaceSizeInBytes() - getFreeSwapSpaceSizeInBytes(), getDetails().getTotalSwapSpaceSizeInBytes());
+    }
+
     public long getFreePhysicalMemorySizeInBytes() {
         return stats.getFreePhysicalMemorySize();
     }
@@ -85,6 +89,10 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
 
     public double getFreePhysicalMemorySizeInGB() {
         return StatisticsUtils.convertToGB(getFreePhysicalMemorySizeInBytes());
+    }
+
+    public double getPhysicalMemoryUsedPerc() {
+        return StatisticsUtils.computePerc(getDetails().getTotalPhysicalMemorySizeInBytes() - getFreePhysicalMemorySizeInBytes(), getDetails().getTotalPhysicalMemorySizeInBytes());
     }
 
     public double getSystemLoadAverage() {

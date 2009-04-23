@@ -78,12 +78,12 @@ public interface VirtualMachineStatistics {
     /**
      * Returns the memory heap percentage from used to the max.
      */
-    double getMemoryHeapPerc();
+    double getMemoryHeapUsedPerc();
 
     /**
      * Returns the memory heap percentage from used to committed.
      */
-    double getMemoryHeapCommittedPerc();
+    double getMemoryHeapCommittedUsedPerc();
 
     long getMemoryNonHeapCommittedInBytes();
     double getMemoryNonHeapCommittedInMB();
@@ -96,12 +96,12 @@ public interface VirtualMachineStatistics {
     /**
      * Returns the memory non heap percentage from used to the max.
      */
-    double getMemoryNonHeapPerc();
+    double getMemoryNonHeapUsedPerc();
 
     /**
      * Returns the memory non heap percentage from used to committed.
      */
-    double getMemoryNonHeapCommittedPerc();
+    double getMemoryNonHeapCommittedUsedPerc();
 
     int getThreadCount();
 

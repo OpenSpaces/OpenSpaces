@@ -1,11 +1,8 @@
 package org.openspaces.admin.samples;
 
-import com.gigaspaces.grid.gsa.AgentProcessDetails;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.os.OperatingSystemStatistics;
-import org.openspaces.admin.gsa.GridServiceAgent;
-import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -13,11 +10,8 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.SpacePartition;
-import org.openspaces.admin.transport.Transport;
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.pu.service.ServiceMonitors;
-
-import java.util.Arrays;
 
 /**
  * @author kimchy
@@ -57,7 +51,7 @@ public class TestSampler {
                             "Host [" + virtualMachine.getMachine().getHostAddress() + "] " +
                             "CPU [" + virtualMachine.getStatistics().getCpuPercFormatted() + "] " +
                             "GC Perc [" + virtualMachine.getStatistics().getGcCollectionPerc() + "], " +
-                            "Heap Usage [" + virtualMachine.getStatistics().getMemoryHeapPerc() + "%]");
+                            "Heap Usage [" + virtualMachine.getStatistics().getMemoryHeapUsedPerc() + "%]");
 
 //                    for (ProcessingUnitInstance processingUnitInstance : virtualMachine.getProcessingUnitInstances()) {
 //                        System.out.println("   -> PU [" + processingUnitInstance.getUid() + "]");
