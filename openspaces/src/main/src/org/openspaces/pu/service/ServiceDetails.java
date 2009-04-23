@@ -42,21 +42,21 @@ public interface ServiceDetails extends Serializable {
      */
     Map<String, Object> getAttributes();
 
-    /**
-     * Aggregates an array of service details into an aggregated view of it. All service details are of the same
-     * service type. Can return <code>null</code> if no aggregation can be performed.
-     */
-    AggregatedServiceDetails aggregateByServiceType(ServiceDetails[] servicesDetails);
-
-    /**
-     * Aggregates an array of service details into an aggregated view of it. All service details are of the same
-     * service type and service sub type. Can return <code>null</code> if no aggregation can be performed.
-     */
-    AggregatedServiceDetails aggregateByServiceSubType(ServiceDetails[] servicesDetails);
-
-    /**
-     * Aggregates an array of service details into an aggregated view of it. All service details are of the same
-     * id (and service type and service sub type). Can return <code>null</code> if no aggregation can be performed.
-     */
-    AggregatedServiceDetails aggregateById(ServiceDetails[] servicesDetails);
+//    /**
+//     * Aggregates an array of service details into an aggregated view of it. All service details are of the same
+//     * service type. Can return <code>null</code> if no aggregation can be performed.
+//     */
+//    AggregatedServiceDetails aggregateByServiceType(ServiceDetails[] servicesDetails);
+//
+//    /**
+//     * Aggregates an array of service details into an aggregated view of it. All service details are of the same
+//     * service type and service sub type. Can return <code>null</code> if no aggregation can be performed.
+//     */
+//    AggregatedServiceDetails aggregateByServiceSubType(ServiceDetails[] servicesDetails);
+//
+//    /**
+//     * Aggregates an array of service details into an aggregated view of it. All service details are of the same
+//     * id (and service type and service sub type). Can return <code>null</code> if no aggregation can be performed.
+//     */
+//    AggregatedServiceDetails aggregateById(ServiceDetails[] servicesDetails);
 }
