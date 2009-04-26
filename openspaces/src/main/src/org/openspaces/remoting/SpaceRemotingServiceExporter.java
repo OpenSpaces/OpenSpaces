@@ -679,7 +679,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
      * <p>Also note, this cache is *not* thread safe. The idea here is that this cache is initlaized at startup
      * and then never updated.
      */
-    private class MethodInvocationCache {
+    private static class MethodInvocationCache {
 
         private Map<String, MethodsCacheEntry> serviceToMethodCacheMap = new HashMap<String, MethodsCacheEntry>();
 

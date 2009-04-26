@@ -108,7 +108,7 @@ public class HTTPFileSystemView {
         return f.equals(getRoots()[0]);
     }
 
-    class HTTPFile extends File {
+    static class HTTPFile extends File {
         private long time;
         private boolean dir;
 

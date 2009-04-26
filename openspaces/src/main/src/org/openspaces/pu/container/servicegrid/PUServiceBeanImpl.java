@@ -768,7 +768,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         return message;
     }
 
-    private class WatchTask implements Runnable {
+    private static class WatchTask implements Runnable {
 
         private final Monitor monitor;
 

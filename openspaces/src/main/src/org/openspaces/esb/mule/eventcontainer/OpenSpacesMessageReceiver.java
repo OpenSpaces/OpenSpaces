@@ -162,7 +162,7 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
     }
 
 
-    protected class GigaSpaceWorker extends AbstractReceiverWorker {
+    protected static class GigaSpaceWorker extends AbstractReceiverWorker {
 
         public GigaSpaceWorker(Object message, AbstractMessageReceiver receiver) {
             super(new ArrayList(1), receiver);

@@ -428,7 +428,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
         }
     }
 
-    private class ExecutorAsyncResult implements AsyncResult {
+    private static class ExecutorAsyncResult implements AsyncResult {
 
         private Object result;
 
@@ -451,7 +451,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
         }
     }
 
-    private class ExecutorSpaceRemotingResult<T extends Serializable> implements SpaceRemotingResult<T> {
+    private static class ExecutorSpaceRemotingResult<T extends Serializable> implements SpaceRemotingResult<T> {
 
         private AsyncResult<ExecutorRemotingTask.InternalExecutorResult<T>> asyncResult;
 
