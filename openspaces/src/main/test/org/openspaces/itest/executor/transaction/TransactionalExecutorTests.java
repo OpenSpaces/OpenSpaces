@@ -209,7 +209,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         assertEquals(0, distGigaSpace.count(null));
     }
 
-    private class Listener implements AsyncFutureListener<Integer> {
+    private static class Listener implements AsyncFutureListener<Integer> {
 
         private volatile AsyncResult<Integer> result;
 
@@ -222,7 +222,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         }
     }
 
-    private class ExceptionListener implements AsyncFutureListener<Integer> {
+    private static class ExceptionListener implements AsyncFutureListener<Integer> {
 
         private volatile boolean called = false;
 
@@ -276,7 +276,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
     }
 
     @AutowireTask
-    private class DelayedSimpleTask1 implements Task<Integer> {
+    private static class DelayedSimpleTask1 implements Task<Integer> {
 
         @Resource(name = "gigaSpace1")
         transient GigaSpace gigaSpace;
