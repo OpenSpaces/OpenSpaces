@@ -811,7 +811,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         try {
             PUZipUtils.downloadProcessingUnit(puName, url, path, tempPath);
         } catch (Exception e) {
-            throw new CannotCreateContainerException("Faile to download processing unit [" + puName + "]");
+            throw new CannotCreateContainerException("Faile to download processing unit [" + puName + "]", e);
         }
     }
 
