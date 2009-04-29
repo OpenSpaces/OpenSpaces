@@ -83,7 +83,7 @@ public interface Space extends Iterable<SpaceInstance>, StatisticsMonitor {
     String getName();
 
     /**
-     * Returns the number of instances as per the Space topolofy. Will return 4 if we have a replicated
+     * Returns the number of instances as per the Space topology. Will return 4 if we have a replicated
      * topolgy, and 2 if we have a 2 paritions each with one backup topology.
      */
     int getNumberOfInstances();
