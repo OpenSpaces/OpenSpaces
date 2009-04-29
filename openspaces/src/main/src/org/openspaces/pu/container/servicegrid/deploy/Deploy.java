@@ -459,7 +459,7 @@ public class Deploy {
 
     private OperationalString loadDeployment(String puString, String codeserver, SLA sla, String puPath,
                                              String puName, BeanLevelProperties beanLevelProperties) throws Exception {
-        URL opstringURL = Deploy.class.getResource("/org/openspaces/pu/container/servicegrid/puservicebean.xml");
+        InputStream opstringURL = Deploy.class.getResourceAsStream("/org/openspaces/pu/container/servicegrid/puservicebean.xml");
         OperationalString opString;
 
         //load the servicebean opstring
