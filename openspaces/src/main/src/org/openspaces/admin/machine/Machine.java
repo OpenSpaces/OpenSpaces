@@ -133,7 +133,7 @@ public interface Machine {
     void removeLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
     /**
-     * Retruns all the space instances running on the machine.
+     * Returns all the space instances running on the machine.
      */
     SpaceInstance[] getSpaceInstances();
 
