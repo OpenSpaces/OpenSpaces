@@ -45,17 +45,17 @@ public interface SpaceStatistics {
     boolean isNA();
 
     /**
-     * Returns the number of {@link org.openspaces.admin.space.SpaceInstanceStatistics} that are being aggreagted.
+     * Returns the number of {@link org.openspaces.admin.space.SpaceInstanceStatistics} that are being aggregated.
      */
     int getSize();
 
     /**
-     * Retruns the previous statstics, <code>null</code> if not available.
+     * Returns the previous statistics, <code>null</code> if not available.
      */
     SpaceStatistics getPrevious();
 
     /**
-     * Retruns the timestamp this space statistics were taken.
+     * Returns the timestamp this space statistics were taken.
      */
     long getTimestamp();
 

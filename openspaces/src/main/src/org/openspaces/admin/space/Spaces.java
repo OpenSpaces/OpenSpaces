@@ -54,17 +54,17 @@ import java.util.concurrent.TimeUnit;
 public interface Spaces extends Iterable<Space>, AdminAware, StatisticsMonitor {
 
     /**
-     * Retruns all the currently discovered {@link org.openspaces.admin.space.Space}s.
+     * Returns all the currently discovered {@link org.openspaces.admin.space.Space}s.
      */
     Space[] getSpaces();
 
     /**
-     * Retruns a space based on its uid.
+     * Returns a space based on its uid.
      */
     Space getSpaceByUID(String uid);
 
     /**
-     * Retruns a space based on its name.
+     * Returns a space based on its name.
      */
     Space getSpaceByName(String name);
 
@@ -110,14 +110,14 @@ public interface Spaces extends Iterable<Space>, AdminAware, StatisticsMonitor {
     void removeLifecycleListener(SpaceLifecycleEventListener eventListener);
 
     /**
-     * Returns an event mananger allowing to globablly add {@link org.openspaces.admin.space.events.SpaceInstanceAddedEventListener}
-     * that will be called for any space instnace discovered.
+     * Returns an event manager allowing to globally add {@link org.openspaces.admin.space.events.SpaceInstanceAddedEventListener}
+     * that will be called for any space instance discovered.
      */
     SpaceInstanceAddedEventManager getSpaceInstanceAdded();
 
     /**
-     * Returns an event mananger allowing to globablly remove {@link org.openspaces.admin.space.events.SpaceInstanceAddedEventListener}
-     * that will be called for any space instnace discovered.
+     * Returns an event manager allowing to globally remove {@link org.openspaces.admin.space.events.SpaceInstanceAddedEventListener}
+     * that will be called for any space instance discovered.
      */
     SpaceInstanceRemovedEventManager getSpaceInstanceRemoved();
 
@@ -135,18 +135,18 @@ public interface Spaces extends Iterable<Space>, AdminAware, StatisticsMonitor {
 
     /**
      * Returns an event manager allowing to globally register for {@link org.openspaces.admin.space.events.SpaceModeChangedEvent}s
-     * that happen on any Space instnace currently discovered.
+     * that happen on any Space instance currently discovered.
      */
     SpaceModeChangedEventManager getSpaceModeChanged();
 
     /**
      * Returns an event manager allowing to globally register for {@link org.openspaces.admin.space.events.ReplicationStatusChangedEvent}s
-     * that happen on any Space instnace currently discovered.
+     * that happen on any Space instance currently discovered.
      */
     ReplicationStatusChangedEventManager getReplicationStatusChanged();
 
     /**
-     * Retruns an event manager allowing to register for {@link org.openspaces.admin.space.events.SpaceStatisticsChangedEvent}s
+     * Returns an event manager allowing to register for {@link org.openspaces.admin.space.events.SpaceStatisticsChangedEvent}s
      * that occur on all the currently discovered {@link org.openspaces.admin.space.Space}s.
      *
      * <p>Note, {@link #startStatisticsMonitor()} must be called in order to start monitor statistics.

@@ -21,14 +21,14 @@ import org.openspaces.admin.transport.events.TransportStatisticsChangedEventMana
 import org.openspaces.admin.vm.VirtualMachineAware;
 
 /**
- * A tranport holds information on the communication layer that is used by a grid component.
+ * A transport holds information on the communication layer that is used by a grid component.
  *
  * @author kimchy
  */
 public interface Transport extends VirtualMachineAware, StatisticsMonitor {
 
     /**
-     * Retruns the UID of the transport.
+     * Returns the UID of the transport.
      */
     String getUid();
 

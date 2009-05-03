@@ -37,7 +37,7 @@ public class OperatingSystemsStatisticsChangedEvent {
     }
 
     /**
-     * Retruns the operating systems component associated with the event.
+     * Returns the operating systems component associated with the event.
      */
     public OperatingSystems getOperatingSystems() {
         return operatingSystems;

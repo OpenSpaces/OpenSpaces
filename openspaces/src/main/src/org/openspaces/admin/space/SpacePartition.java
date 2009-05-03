@@ -47,7 +47,7 @@ public interface SpacePartition extends Iterable<SpaceInstance> {
     int getPartitiondId();
 
     /**
-     * Retruns all the space instnaces that form the partition.
+     * Returns all the space instances that form the partition.
      */
     SpaceInstance[] getInstances();
 
@@ -57,7 +57,7 @@ public interface SpacePartition extends Iterable<SpaceInstance> {
     Space getSpace();
 
     /**
-     * Returns the primary space instnace, <code>null</code> if currently there is no primary.
+     * Returns the primary space instance, <code>null</code> if currently there is no primary.
      */
     SpaceInstance getPrimary();
 

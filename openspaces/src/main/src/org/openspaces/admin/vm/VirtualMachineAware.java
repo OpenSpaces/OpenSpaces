@@ -41,7 +41,7 @@ package org.openspaces.admin.vm;
 public interface VirtualMachineAware {
 
     /**
-     * Retruns the virtual machine the grid component is running within.
+     * Returns the virtual machine the grid component is running within.
      */
     VirtualMachine getVirtualMachine();
 }

@@ -24,12 +24,12 @@ package org.openspaces.admin.os;
 public interface OperatingSystemDetails {
 
     /**
-     * Retruns <code>true</code> if the details are not available.
+     * Returns <code>true</code> if the details are not available.
      */
     boolean isNA();
 
     /**
-     * Retruns the uid of the operating system.
+     * Returns the uid of the operating system.
      */
     String getUid();
 
@@ -88,7 +88,7 @@ public interface OperatingSystemDetails {
      * <p>Note, currently only available on SUN VM.
      */
     long getTotalPhysicalMemorySizeInBytes();
-    
+
     /**
      * Returns the total physical memory size in mega bytes.
      *
@@ -109,7 +109,7 @@ public interface OperatingSystemDetails {
     String getHostName();
 
     /**
-     * Returns the (local) host address of the OS. 
+     * Returns the (local) host address of the OS.
      */
     String getHostAddress();
 

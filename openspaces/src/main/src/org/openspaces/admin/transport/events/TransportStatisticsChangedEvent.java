@@ -42,7 +42,7 @@ public class TransportStatisticsChangedEvent {
     }
 
     /**
-     * Retruns the associated transport with the event.
+     * Returns the associated transport with the event.
      */
     public Transport getTransport() {
         return transport;

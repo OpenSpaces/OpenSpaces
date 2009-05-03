@@ -44,7 +44,7 @@ public class OperatingSystemStatisticsChangedEvent {
     }
 
     /**
-     * Retruns the operating system statistics associated with the event.
+     * Returns the operating system statistics associated with the event.
      */
     public OperatingSystemStatistics getStatistics() {
         return statistics;

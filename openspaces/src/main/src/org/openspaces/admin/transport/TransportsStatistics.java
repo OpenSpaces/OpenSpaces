@@ -56,7 +56,7 @@ public interface TransportsStatistics {
     long getTimestamp();
 
     /**
-     * Retruns the previous statistics timestamp. Returns <code>-1</code> if this is the first one. 
+     * Returns the previous statistics timestamp. Returns <code>-1</code> if this is the first one.
      */
     long getPreviousTimestamp();
 

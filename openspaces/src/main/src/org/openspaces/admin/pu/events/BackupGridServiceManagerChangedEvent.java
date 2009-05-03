@@ -69,7 +69,7 @@ public class BackupGridServiceManagerChangedEvent {
     }
 
     /**
-     * Retruns the backup GSM that was either added or removed for the given Processing Unit.
+     * Returns the backup GSM that was either added or removed for the given Processing Unit.
      */
     public GridServiceManager getGridServiceManager() {
         return gridServiceManager;

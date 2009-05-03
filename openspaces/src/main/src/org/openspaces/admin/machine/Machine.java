@@ -54,12 +54,12 @@ public interface Machine {
     String getHostAddress();
 
     /**
-     * Retruns the host name of the machine.
+     * Returns the host name of the machine.
      */
     String getHostName();
 
     /**
-     * Retruns the lookup services that are running on the machine.
+     * Returns the lookup services that are running on the machine.
      */
     LookupServices getLookupServices();
 
@@ -71,12 +71,12 @@ public interface Machine {
     GridServiceAgent getGridServiceAgent();
 
     /**
-     * Retruns the grid service agents running on the machine.
+     * Returns the grid service agents running on the machine.
      */
     GridServiceAgents getGridServiceAgents();
 
     /**
-     * Retruns the grid service managers running on the machine.
+     * Returns the grid service managers running on the machine.
      */
     GridServiceManagers getGridServiceManagers();
 
@@ -86,27 +86,27 @@ public interface Machine {
     GridServiceContainers getGridServiceContainers();
 
     /**
-     * Retruns the operating system of the machine.
+     * Returns the operating system of the machine.
      */
     OperatingSystem getOperatingSystem();
 
     /**
-     * Retruns the virtual machines running on the machine.
+     * Returns the virtual machines running on the machine.
      */
     VirtualMachines getVirtualMachines();
 
     /**
-     * Retruns <code>true</code> if there are grid components.
+     * Returns <code>true</code> if there are grid components.
      */
     boolean hasGridComponents();
 
     /**
-     * Retruns the transports "running" on the machine.
+     * Returns the transports "running" on the machine.
      */
     Transports getTransports();
 
     /**
-     * Retruns all the processing unit instances running on the machine.
+     * Returns all the processing unit instances running on the machine.
      */
     ProcessingUnitInstance[] getProcessingUnitInstances();
 

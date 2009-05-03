@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit;
 public interface ProcessingUnits extends Iterable<ProcessingUnit>, AdminAware, StatisticsMonitor {
 
     /**
-     * Retruns the number of currently deployed {@link org.openspaces.admin.pu.ProcessingUnit}s.
+     * Returns the number of currently deployed {@link org.openspaces.admin.pu.ProcessingUnit}s.
      */
     int getSize();
 
@@ -62,23 +62,23 @@ public interface ProcessingUnits extends Iterable<ProcessingUnit>, AdminAware, S
     ProcessingUnit[] getProcessingUnits();
 
     /**
-     * Retruns the {@link org.openspaces.admin.pu.ProcessingUnit} for the given processing unit name.
+     * Returns the {@link org.openspaces.admin.pu.ProcessingUnit} for the given processing unit name.
      */
     ProcessingUnit getProcessingUnit(String name);
 
     /**
-     * Retruns a map of {@link org.openspaces.admin.pu.ProcessingUnit} keyed by their respective names.
+     * Returns a map of {@link org.openspaces.admin.pu.ProcessingUnit} keyed by their respective names.
      */
     Map<String, ProcessingUnit> getNames();
 
     /**
-     * Waits indefinitely till the processing unit is identified as deployed. Retruns the
+     * Waits indefinitely till the processing unit is identified as deployed. Returns the
      * {@link org.openspaces.admin.pu.ProcessingUnit}.
      */
     ProcessingUnit waitFor(String processingUnitName);
 
     /**
-     * Waits for the specified timeout (in time interval) till the processing unit is identified as deployed. Retruns the
+     * Waits for the specified timeout (in time interval) till the processing unit is identified as deployed. Returns the
      * {@link org.openspaces.admin.pu.ProcessingUnit}. Return <code>null</code> if the processing unit is not deployed
      * within the specified timeout.
      */

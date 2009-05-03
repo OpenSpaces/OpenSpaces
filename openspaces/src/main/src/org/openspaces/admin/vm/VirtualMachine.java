@@ -40,7 +40,7 @@ import org.openspaces.admin.vm.events.VirtualMachineStatisticsChangedEventManage
 public interface VirtualMachine extends MachineAware, ZoneAware, StatisticsMonitor {
 
     /**
-     * Retruns the uid of the virtual machine.
+     * Returns the uid of the virtual machine.
      */
     String getUid();
 
@@ -60,7 +60,7 @@ public interface VirtualMachine extends MachineAware, ZoneAware, StatisticsMonit
     void runGc();
 
     /**
-     * Returns the grid service agent started within this virutal machine.
+     * Returns the grid service agent started within this virtual machine.
      * Returns <code>null</code> if no grid service agent was started within it.
      */
     GridServiceAgent getGridServiceAgent();
@@ -78,36 +78,36 @@ public interface VirtualMachine extends MachineAware, ZoneAware, StatisticsMonit
     GridServiceContainer getGridServiceContainer();
 
     /**
-     * Returns the processing unit instnaces started within this virtual machine.
+     * Returns the processing unit instances started within this virtual machine.
      */
     ProcessingUnitInstance[] getProcessingUnitInstances();
 
     /**
-     * Returns the space instnaces started within this virtual machine.
+     * Returns the space instances started within this virtual machine.
      */
     SpaceInstance[] getSpaceInstances();
 
     /**
      * Returns an event manager allowing to register {@link org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener}s
-     * for processing unit instances added on this virutal machine.
+     * for processing unit instances added on this virtual machine.
      */
     ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded();
 
     /**
      * Returns an event manager allowing to register {@link org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener}s
-     * for processing unit instances removed on this virutal machine.
+     * for processing unit instances removed on this virtual machine.
      */
     ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved();
 
     /**
      * Adds an {@link ProcessingUnitInstanceLifecycleEventListener} allowing to be notified when a processing unit
-     * instance was added or removed from this virutal machine.
+     * instance was added or removed from this virtual machine.
      */
     void addProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
     /**
      * Removes an {@link ProcessingUnitInstanceLifecycleEventListener} allowing to be notified when a processing unit
-     * instance was added or removed from this virutal machine.
+     * instance was added or removed from this virtual machine.
      */
     void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
@@ -125,18 +125,18 @@ public interface VirtualMachine extends MachineAware, ZoneAware, StatisticsMonit
 
     /**
      * Adds an {@link SpaceInstanceLifecycleEventListener} allowing to be notified when a space
-     * instance was added or removed from this virutal machine.
+     * instance was added or removed from this virtual machine.
      */
     void addLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
 
     /**
      * Removes an {@link SpaceInstanceLifecycleEventListener} allowing to be notified when a space
-     * instance was added or removed from this virutal machine.
+     * instance was added or removed from this virtual machine.
      */
     void removeLifecycleListener(SpaceInstanceLifecycleEventListener eventListener);
 
     /**
-     * Retruns an event manager allowing to register for {@link org.openspaces.admin.vm.events.VirtualMachineStatisticsChangedEvent}s.
+     * Returns an event manager allowing to register for {@link org.openspaces.admin.vm.events.VirtualMachineStatisticsChangedEvent}s.
      *
      * <p>Note, the events will be raised only when the {@link #startStatisticsMonitor()} is called.
      */

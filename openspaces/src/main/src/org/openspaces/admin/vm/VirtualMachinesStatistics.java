@@ -66,7 +66,7 @@ public interface VirtualMachinesStatistics {
     VirtualMachinesDetails getDetails();
 
     /**
-     * Retruns the number of statistics (virtual machines) aggregated.
+     * Returns the number of statistics (virtual machines) aggregated.
      */
     int getSize();
 

@@ -54,7 +54,7 @@ public interface SpaceInstance extends GridComponent, StatisticsMonitor {
     int getInstanceId();
 
     /**
-     * Retrunst the backup id (if it is a topology with backups) of the space instance.
+     * Returns the backup id (if it is a topology with backups) of the space instance.
      */
     int getBackupId();
 
@@ -69,22 +69,22 @@ public interface SpaceInstance extends GridComponent, StatisticsMonitor {
     GigaSpace getGigaSpace();
 
     /**
-     * Retruns the space instance statistics.
+     * Returns the space instance statistics.
      */
     SpaceInstanceStatistics getStatistics();
 
     /**
-     * Retruns the space this instnace is part of.
+     * Returns the space this instance is part of.
      */
     Space getSpace();
 
     /**
-     * Retruns the partition this instance is part of.
+     * Returns the partition this instance is part of.
      */
     SpacePartition getPartition();
 
     /**
-     * Retruns the replication targets this space instance is replicating to.
+     * Returns the replication targets this space instance is replicating to.
      */
     ReplicationTarget[] getReplicationTargets();
 

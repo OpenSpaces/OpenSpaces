@@ -50,7 +50,7 @@ public interface TransportStatistics {
     long getTimestamp();
 
     /**
-     * Returns the previous statistics timestamp. Retruns <code>-1</code> if this is the first one.
+     * Returns the previous statistics timestamp. Returns <code>-1</code> if this is the first one.
      */
     long getPreviousTimestamp();
 
@@ -70,17 +70,17 @@ public interface TransportStatistics {
     long getCompletedTaskCount();
 
     /**
-     * Returns the number of completed commnication level tasks per second.
+     * Returns the number of completed communication level tasks per second.
      */
     double getCompletedTaskPerSecond();
 
     /**
-     * Retruns the number of active threads currently processing a communication task.
+     * Returns the number of active threads currently processing a communication task.
      */
     int getActiveThreadsCount();
 
     /**
-     * Retruns the percentage of active threads out of the maximum threads.
+     * Returns the percentage of active threads out of the maximum threads.
      */
     double getActiveThreadsPerc();
 

@@ -30,7 +30,7 @@ import org.openspaces.admin.os.events.OperatingSystemStatisticsChangedEventManag
 public interface OperatingSystem extends AdminAware, StatisticsMonitor {
 
     /**
-     * Retruns the uid of the operating system.
+     * Returns the uid of the operating system.
      */
     String getUid();
 

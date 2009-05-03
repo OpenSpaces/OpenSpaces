@@ -33,14 +33,14 @@
 package org.openspaces.admin.vm;
 
 /**
- * An aggreagted details of all the currently discovered virtual machines.
+ * An aggregated details of all the currently discovered virtual machines.
  *
  * @author kimchy
  */
 public interface VirtualMachinesDetails {
 
     /**
-     * Retruns the number of {@link org.openspaces.admin.vm.VirtualMachineDetails} that are being aggregated.
+     * Returns the number of {@link org.openspaces.admin.vm.VirtualMachineDetails} that are being aggregated.
      */
     int getSize();
 
@@ -51,28 +51,28 @@ public interface VirtualMachinesDetails {
     String[] getVmVendor();
 
     /**
-     * Retuns an aggregation of all the different virtual machines {@link VirtualMachineDetails#getMemoryHeapInitInBytes()}
+     * Returns an aggregation of all the different virtual machines {@link VirtualMachineDetails#getMemoryHeapInitInBytes()}
      */
     long getMemoryHeapInitInBytes();
     double getMemoryHeapInitInMB();
     double getMemoryHeapInitInGB();
 
     /**
-     * Retuns an aggregation of all the different virtual machines {@link VirtualMachineDetails#getMemoryHeapMaxInBytes()}
+     * Returns an aggregation of all the different virtual machines {@link VirtualMachineDetails#getMemoryHeapMaxInBytes()}
      */
     long getMemoryHeapMaxInBytes();
     double getMemoryHeapMaxInMB();
     double getMemoryHeapMaxInGB();
 
     /**
-     * Retuns an aggregation of all the different virtual machines {@link VirtualMachineDetails#getMemoryNonHeapInitInBytes()}
+     * Returns an aggregation of all the different virtual machines {@link VirtualMachineDetails#getMemoryNonHeapInitInBytes()}
      */
     long getMemoryNonHeapInitInBytes();
     double getMemoryNonHeapInitInMB();
     double getMemoryNonHeapInitInGB();
 
     /**
-     * Retuns an aggregation of all the different virtual machines {@link VirtualMachineDetails#getMemoryNonHeapMaxInBytes()}
+     * Returns an aggregation of all the different virtual machines {@link VirtualMachineDetails#getMemoryNonHeapMaxInBytes()}
      */
     long getMemoryNonHeapMaxInBytes();
     double getMemoryNonHeapMaxInMB();

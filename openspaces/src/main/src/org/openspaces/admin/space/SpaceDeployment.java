@@ -60,7 +60,7 @@ public class SpaceDeployment {
     }
 
     /**
-     * Retruns the Space name of the deployment.
+     * Returns the Space name of the deployment.
      */
     public String getSpaceName() {
         return spaceName;
@@ -68,7 +68,7 @@ public class SpaceDeployment {
 
     /**
      * A convenient method allowing to easily configure the space deployment to deploy a
-     * paritioned topology with <code>numberOfParitions</code> instances each with
+     * Partitioned topology with <code>numberOfParitions</code> instances each with
      * <code>numberOfBackups</code>.
      *
      * <p>Exactly the same like calling <code>clusterSchema("partitioned-sync2backup")</code>,
@@ -106,7 +106,7 @@ public class SpaceDeployment {
      * Sets the cluster schema of the Space.
      *
      * @see #partitioned(int, int)
-     * @see #replicated(int) 
+     * @see #replicated(int)
      */
     public SpaceDeployment clusterSchema(String clusterSchema) {
         deployment.clusterSchema(clusterSchema);
@@ -189,8 +189,8 @@ public class SpaceDeployment {
     }
 
     /**
-     * Transforms the space deplyoment to a processing unit deployment (it is a processing unit after all,
-     * that simply starts an embedded space). 
+     * Transforms the space deployment to a processing unit deployment (it is a processing unit after all,
+     * that simply starts an embedded space).
      */
     public ProcessingUnitDeployment toProcessingUnitDeployment() {
         return deployment;

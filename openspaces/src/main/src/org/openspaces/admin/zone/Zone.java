@@ -48,17 +48,17 @@ public interface Zone {
     Machines getMachines();
 
     /**
-     * Retruns the lookup services that are running within the zone.
+     * Returns the lookup services that are running within the zone.
      */
     LookupServices getLookupServices();
 
     /**
-     * Retruns the grid service agents running within the zone.
+     * Returns the grid service agents running within the zone.
      */
     GridServiceAgents getGridServiceAgents();
 
     /**
-     * Retruns the grid service managers running within the zone.
+     * Returns the grid service managers running within the zone.
      */
     GridServiceManagers getGridServiceManagers();
 
@@ -68,22 +68,22 @@ public interface Zone {
     GridServiceContainers getGridServiceContainers();
 
     /**
-     * Retruns the virtual machines running within the zone.
+     * Returns the virtual machines running within the zone.
      */
     VirtualMachines getVirtualMachines();
 
     /**
-     * Retruns <code>true</code> if there are grid components.
+     * Returns <code>true</code> if there are grid components.
      */
     boolean hasGridComponents();
 
     /**
-     * Retruns the transports "running"  within the zone.
+     * Returns the transports "running"  within the zone.
      */
     Transports getTransports();
 
     /**
-     * Retruns all the processing unit instances running  within the zone.
+     * Returns all the processing unit instances running  within the zone.
      */
     ProcessingUnitInstance[] getProcessingUnitInstances();
 
@@ -110,7 +110,7 @@ public interface Zone {
     void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
     /**
-     * Retruns all the space instances running within the zone.
+     * Returns all the space instances running within the zone.
      */
     SpaceInstance[] getSpaceInstances();
 

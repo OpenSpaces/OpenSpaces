@@ -33,7 +33,7 @@
 package org.openspaces.admin.space;
 
 /**
- * Retruns {@link org.openspaces.admin.space.SpaceInstance} level statistics.
+ * Returns {@link org.openspaces.admin.space.SpaceInstance} level statistics.
  *
  * @author kimchy
  */
@@ -45,7 +45,7 @@ public interface SpaceInstanceStatistics {
     boolean isNA();
 
     /**
-     * Returns the timestamp the statistcs were taken at.
+     * Returns the timestamp the statistics were taken at.
      */
     long getTimestamp();
 
@@ -55,7 +55,7 @@ public interface SpaceInstanceStatistics {
     long getPreviousTimestamp();
 
     /**
-     * Retruns the previous statistics. 
+     * Returns the previous statistics.
      */
     SpaceInstanceStatistics getPrevious();
 

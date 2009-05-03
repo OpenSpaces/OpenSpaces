@@ -46,11 +46,11 @@ import org.openspaces.core.GigaSpace;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A space is composed of sevral {@link org.openspaces.admin.space.SpaceInstance}s the form a
+ * A space is composed of several {@link org.openspaces.admin.space.SpaceInstance}s the form a
  * topology.
  *
- * <p>There are two main logical of topolgies, one that has backups to each space instance, and
- * one that is without backups. For example, a partitioned topolgy of 2 paritions, each with one
+ * <p>There are two main logical of topologies, one that has backups to each space instance, and
+ * one that is without backups. For example, a partitioned topology of 2 partitions, each with one
  * backup will return 2 for {@link #getNumberOfInstances()} and 1 for {@link #getNumberOfBackups()}.
  * A replicated topology of 4 will return 4 for {@link #getNumberOfInstances()} and 0 for
  * {@link #getNumberOfBackups()}.
@@ -84,7 +84,7 @@ public interface Space extends Iterable<SpaceInstance>, StatisticsMonitor {
 
     /**
      * Returns the number of instances as per the Space topology. Will return 4 if we have a replicated
-     * topolgy, and 2 if we have a 2 paritions each with one backup topology.
+     * topology, and 2 if we have a 2 partitions each with one backup topology.
      */
     int getNumberOfInstances();
 
@@ -100,22 +100,22 @@ public interface Space extends Iterable<SpaceInstance>, StatisticsMonitor {
     SpaceInstance[] getInstances();
 
     /**
-     * Returns all the partitions that form this Space topology. 
+     * Returns all the partitions that form this Space topology.
      */
     SpacePartition[] getPartitions();
 
     /**
-     * Retruns a parition for a specific partition id.
+     * Returns a partition for a specific partition id.
      */
     SpacePartition getPartition(int partitionId);
 
     /**
-     * Retruns the number of currently discovered space instances.
+     * Returns the number of currently discovered space instances.
      */
     int getSize();
 
     /**
-     * Retruns <code>true</code> if there are currently no space instnaces discovered.
+     * Returns <code>true</code> if there are currently no space instances discovered.
      */
     boolean isEmpty();
 
@@ -135,7 +135,7 @@ public interface Space extends Iterable<SpaceInstance>, StatisticsMonitor {
     boolean waitFor(int numberOfSpaceInstances, long timeout, TimeUnit timeUnit);
 
     /**
-     * Waits till at least the provided number of Space Instances that are of the space mode typw are up.
+     * Waits till at least the provided number of Space Instances that are of the space mode type are up.
      */
     boolean waitFor(int numberOfSpaceInstances, SpaceMode spaceMode);
 
@@ -160,14 +160,14 @@ public interface Space extends Iterable<SpaceInstance>, StatisticsMonitor {
     SpaceStatistics getBackupsStatistics();
 
     /**
-     * Allows to registed {@link org.openspaces.admin.space.events.SpaceInstanceAddedEventListener} to be notified
-     * when space instnaces are added.
+     * Allows to registered {@link org.openspaces.admin.space.events.SpaceInstanceAddedEventListener} to be notified
+     * when space instances are added.
      */
     SpaceInstanceAddedEventManager getSpaceInstanceAdded();
 
     /**
-     * Allows to registed {@link org.openspaces.admin.space.events.SpaceInstanceRemovedEventListener} to be notified
-     * when space instnaces are removed.
+     * Allows to registered {@link org.openspaces.admin.space.events.SpaceInstanceRemovedEventListener} to be notified
+     * when space instances are removed.
      */
     SpaceInstanceRemovedEventManager getSpaceInstanceRemoved();
 

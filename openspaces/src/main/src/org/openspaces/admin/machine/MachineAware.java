@@ -24,7 +24,7 @@ package org.openspaces.admin.machine;
 public interface MachineAware {
 
     /**
-     * Retruns the machine the component is running on.
+     * Returns the machine the component is running on.
      */
     Machine getMachine();
 }
