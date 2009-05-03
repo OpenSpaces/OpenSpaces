@@ -17,11 +17,11 @@
 package org.openspaces.admin.lus.events;
 
 /**
- * A simple lifecyle event listener that implements both the lookup service added and lookup service removed event lisetners.
+ * A simple lifecyle event listener that implements both the lookup service added and lookup service removed event listeners.
  *
  * @author kimchy
  * @see org.openspaces.admin.lus.LookupServices#addLifecycleListener(LookupServiceLifecycleEventListener)
- * @see org.openspaces.admin.lus.LookupServices#removeLifecycleListener(LookupServiceLifecycleEventListener)  
+ * @see org.openspaces.admin.lus.LookupServices#removeLifecycleListener(LookupServiceLifecycleEventListener)
  */
 public interface LookupServiceLifecycleEventListener extends LookupServiceAddedEventListener, LookupServiceRemovedEventListener {
 }

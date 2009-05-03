@@ -47,12 +47,12 @@ public interface ProcessingUnitPartition {
     int getPartitiondId();
 
     /**
-     * Returns the processing unit instnaces associated with this partition.
+     * Returns the processing unit instances associated with this partition.
      */
     ProcessingUnitInstance[] getInstances();
 
     /**
-     * Returns the processing unit this parittion is part of.
+     * Returns the processing unit this partition is part of.
      */
     ProcessingUnit getProcessingUnit();
 

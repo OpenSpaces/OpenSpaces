@@ -55,7 +55,7 @@ public class BackupGridServiceManagerChangedEvent {
     }
 
     /**
-     * Returns the Processing Unit that the backup GSM event occured on.
+     * Returns the Processing Unit that the backup GSM event occurred on.
      */
     public ProcessingUnit getProcessingUnit() {
         return processingUnit;

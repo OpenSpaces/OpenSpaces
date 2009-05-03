@@ -21,7 +21,7 @@ import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.os.events.OperatingSystemStatisticsChangedEventManager;
 
 /**
- * An operating system is a virutal entity that container information about the operating system one
+ * An operating system is a virtual entity that container information about the operating system one
  * or more grid components are running within. An operating system is bounded to a {@link org.openspaces.admin.machine.Machine}
  * and shares the same lifecycle.
  *

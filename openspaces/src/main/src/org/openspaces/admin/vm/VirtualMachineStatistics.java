@@ -113,7 +113,7 @@ public interface VirtualMachineStatistics {
 
     /**
      * The percentage of the gc collection time between the current sampled statistics
-     * and the previous one. If there is no previous one, will reutrn -1.
+     * and the previous one. If there is no previous one, will return -1.
      */
     double getGcCollectionPerc();
 

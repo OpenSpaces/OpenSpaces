@@ -33,7 +33,7 @@ public interface AgentGridComponent extends GridComponent {
 
     /**
      * Kills the grid component. The Grid Service Agent will not try to start it (as it does when abnormal
-     * terminiation of the component occurs).
+     * termination of the component occurs).
      */
     void kill();
 

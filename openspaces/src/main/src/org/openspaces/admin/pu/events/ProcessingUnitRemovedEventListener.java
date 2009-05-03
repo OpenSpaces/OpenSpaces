@@ -28,7 +28,7 @@ import org.openspaces.admin.pu.ProcessingUnit;
 public interface ProcessingUnitRemovedEventListener extends AdminEventListener {
 
     /**
-     * A callback inidicating that a Processing Unit was removed (undeployed).
+     * A callback indicating that a Processing Unit was removed (undeployed).
      */
     void processingUnitRemoved(ProcessingUnit processingUnit);
 }

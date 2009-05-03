@@ -20,7 +20,7 @@ import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.admin.vm.VirtualMachineStatistics;
 
 /**
- * An event indicating that a virutal machine level statistics has changed.
+ * An event indicating that a virtual machine level statistics has changed.
  *
  * <p>Note, monitoring needs to be enabled in order to receive the events.
  *

@@ -35,7 +35,7 @@ package org.openspaces.admin.vm;
 import java.util.Map;
 
 /**
- * Details (non changeable information) of a single virutal machine.
+ * Details (non changeable information) of a single virtual machine.
  *
  * @author kimchy
  */

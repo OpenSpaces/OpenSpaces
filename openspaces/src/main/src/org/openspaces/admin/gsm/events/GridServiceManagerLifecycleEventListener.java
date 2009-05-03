@@ -17,7 +17,7 @@
 package org.openspaces.admin.gsm.events;
 
 /**
- * A simple lifecyle event listener that implements both the container added and manager removed event lisetners.
+ * A simple lifecyle event listener that implements both the container added and manager removed event listeners.
  *
  * @author kimchy
  * @see org.openspaces.admin.gsm.GridServiceManagers#addLifecycleListener(GridServiceManagerLifecycleEventListener)

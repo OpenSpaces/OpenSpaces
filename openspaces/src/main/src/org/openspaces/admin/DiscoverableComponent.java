@@ -17,7 +17,7 @@
 package org.openspaces.admin;
 
 /**
- * A discoveralbe component is a component that is found from the lookup service.
+ * A discoverable component is a component that is found from the lookup service.
  *
  * @author kimchy
  */

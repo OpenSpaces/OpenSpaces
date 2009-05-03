@@ -22,12 +22,12 @@ import java.util.concurrent.TimeUnit;
  * Components implement this interface indicating that they can be monitored for statistics.
  *
  * <p>Components will allow to get their respective statistics without being monitoring (while caching
- * the calles for the provided statistics interval).
+ * the calls for the provided statistics interval).
  *
- * <p>Monitoring statisics is only required when wanting to receive statistics change events.
+ * <p>Monitoring statistics is only required when wanting to receive statistics change events.
  *
  * <p>The statistics interval controls either for how long the latest statistics call will be cached, or,
- * when monitoring is enabled, the interval the statistics will be pooled. Its default value is 5 seconds. 
+ * when monitoring is enabled, the interval the statistics will be pooled. Its default value is 5 seconds.
  *
  * @author kimchy
  */

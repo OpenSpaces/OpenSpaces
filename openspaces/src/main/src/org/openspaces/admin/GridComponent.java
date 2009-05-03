@@ -24,7 +24,7 @@ import org.openspaces.admin.zone.ZoneAware;
 
 /**
  * Grid Component is an element that can provide information on the machine it is running one, the transport
- * it ues, the Operating system it is runnign on, and the virtual machine that started it.
+ * it uses, the Operating system it is running on, and the virtual machine that started it.
  *
  * @author kimchy
  */

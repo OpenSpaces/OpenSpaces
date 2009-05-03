@@ -126,19 +126,19 @@ public interface ProcessingUnits extends Iterable<ProcessingUnit>, AdminAware, S
 
     /**
      * Returns an event manager allowing to globally register for any {@link org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEvent}s
-     * occuring on any processing unit.
+     * occurring on any processing unit.
      */
     ManagingGridServiceManagerChangedEventManager getManagingGridServiceManagerChanged();
 
     /**
      * Returns an event manager allowing to globally register for any {@link org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEvent}s
-     * occuring on any processing unit.
+     * occurring on any processing unit.
      */
     BackupGridServiceManagerChangedEventManager getBackupGridServiceManagerChanged();
 
     /**
      * Returns an event manager allowing to globally register for any {@link org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEvent}s
-     * occuring on any processing unit.
+     * occurring on any processing unit.
      */
     ProcessingUnitStatusChangedEventManager getProcessingUnitStatusChanged();
 

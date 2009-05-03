@@ -17,7 +17,7 @@
 package org.openspaces.admin.gsa.events;
 
 /**
- * A simple lifecyle event listener that implements both the agent added and agent removed event lisetners.
+ * A simple lifecyle event listener that implements both the agent added and agent removed event listeners.
  *
  * @author kimchy
  * @see org.openspaces.admin.gsa.GridServiceAgents#addLifecycleListener(GridServiceAgentLifecycleEventListener)

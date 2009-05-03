@@ -17,7 +17,7 @@
 package org.openspaces.admin.os;
 
 /**
- * A gric components that is operating system aware allows to get the {@link OperatingSystem} that it
+ * A grid components that is operating system aware allows to get the {@link OperatingSystem} that it
  * runs within.
  *
  * @author kimchy

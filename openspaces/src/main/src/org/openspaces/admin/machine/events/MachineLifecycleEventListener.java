@@ -17,7 +17,7 @@
 package org.openspaces.admin.machine.events;
 
 /**
- * A simple lifecyle event listener that implements both the machine added and machine removed event lisetners.
+ * A simple lifecyle event listener that implements both the machine added and machine removed event listeners.
  *
  * @author kimchy
  * @see org.openspaces.admin.machine.Machines#addLifecycleListener(MachineLifecycleEventListener)

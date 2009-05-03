@@ -20,7 +20,7 @@ import net.jini.core.discovery.LookupLocator;
 import org.openspaces.admin.AgentGridComponent;
 
 /**
- * A lookup serivce acts a lookup server where different grid components register and maintain
+ * A lookup service acts a lookup server where different grid components register and maintain
  * a lease against. It provides the ability to discover these grid components.
  *
  * @author kimchy

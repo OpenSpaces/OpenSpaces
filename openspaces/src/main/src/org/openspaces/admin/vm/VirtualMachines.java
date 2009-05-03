@@ -124,7 +124,7 @@ public interface VirtualMachines extends AdminAware, Iterable<VirtualMachine>, S
     VirtualMachinesStatisticsChangedEventManager getStatisticsChanged();
 
     /**
-     * Returns a virtual machien statistics change event manger allowing to register for
+     * Returns a virtual machine statistics change event manger allowing to register for
      * events of {@link org.openspaces.admin.vm.events.VirtualMachineStatisticsChangedEvent}.
      *
      * <p>Note, in order to receive events, the virtual machines need to be in a "statistics" monitored

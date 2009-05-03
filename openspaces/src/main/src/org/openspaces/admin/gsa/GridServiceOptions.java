@@ -41,7 +41,7 @@ public class GridServiceOptions {
     private boolean overrideArguments;
 
     /**
-     * Constructs a new grid service options with the given process type. By defualt, will use JVM to start it.
+     * Constructs a new grid service options with the given process type. By default, will use JVM to start it.
      */
     public GridServiceOptions(String type) {
         this.type = type;
