@@ -117,7 +117,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private volatile PUDetails puDetails;
 
-    private List<Callable> serviceMonitors = new ArrayList<Callable>();
+    final private List<Callable> serviceMonitors = new ArrayList<Callable>();
 
     public PUServiceBeanImpl() {
         super();
