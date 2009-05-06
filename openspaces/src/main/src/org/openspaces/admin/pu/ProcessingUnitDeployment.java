@@ -60,22 +60,22 @@ public class ProcessingUnitDeployment {
 
     private Integer maxInstancesPerMachine;
 
-    private Map<String, Integer> maxInstancesPerZone = new HashMap<String, Integer>();
+    private final Map<String, Integer> maxInstancesPerZone = new HashMap<String, Integer>();
 
-    private List<String> zones = new ArrayList<String>();
+    private final List<String> zones = new ArrayList<String>();
 
-    private Properties contextProperties = new Properties();
+    private final Properties contextProperties = new Properties();
 
     /**
-     * Constucts a processing unit deployment based on the specificed processing unit name (should
-     * exists under the <code>[GS ROOT]/deply</code> directory.
+     * Constructs a processing unit deployment based on the specified processing unit name (should
+     * exists under the <code>[GS ROOT]/deploy</code> directory.
      */
     public ProcessingUnitDeployment(String processingUnit) {
         this.processingUnit = processingUnit;
     }
 
     /**
-     * Constucts a processing unit deployment based on the specificed processing unit file path (points either
+     * Constructs a processing unit deployment based on the specified processing unit file path (points either
      * to a processing unit jar file or a directory).
      */
     public ProcessingUnitDeployment(File processingUnit) {
@@ -100,7 +100,7 @@ public class ProcessingUnitDeployment {
 
     /**
      * A convenient method allowing to easily configure the space deployment to deploy a
-     * paritioned topology with <code>numberOfParitions</code> instances each with
+     * partitioned topology with <code>numberOfParitions</code> instances each with
      * <code>numberOfBackups</code>.
      *
      * <p>Exactly the same like calling <code>clusterSchema("partitioned-sync2backup")</code>,
@@ -135,7 +135,7 @@ public class ProcessingUnitDeployment {
     }
 
     /**
-     * Constrols the cluster schema of the deployment. Only make sense to set it when there is an embedded space
+     * Controls the cluster schema of the deployment. Only make sense to set it when there is an embedded space
      * defined within the processing unit.
      */
     public ProcessingUnitDeployment clusterSchema(String clusterSchema) {
@@ -144,7 +144,7 @@ public class ProcessingUnitDeployment {
     }
 
     /**
-     * Sets the number of instances that will be deployed as part of this processing unit instnace.
+     * Sets the number of instances that will be deployed as part of this processing unit instance.
      */
     public ProcessingUnitDeployment numberOfInstances(int numberOfInstances) {
         this.numberOfInstances = numberOfInstances;
