@@ -45,7 +45,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     private final ProvisionMonitorAdmin gsmAdmin;
 
     public DefaultGridServiceManager(ServiceID serviceID, GSM gsm, InternalAdmin admin, int agentId, String agentUid)
-            throws RemoteException {
+    throws RemoteException {
         super(admin, agentId, agentUid);
         this.serviceID = serviceID;
         this.gsm = gsm;
@@ -127,6 +127,8 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             return ref.get();
         } catch (SecurityException se) {
             throw new AdminException("Not authorized to deploy a processing unit", se);
+        } catch (com.gigaspaces.security.SecurityException se) {
+            throw new AdminException("No privileges to deploy a processing unit", se);
         } catch (Exception e) {
             throw new AdminException("Failed to deploy [" + deployment.getProcessingUnit() + "]", e);
         } finally {
@@ -140,6 +142,8 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             getGSMAdmin().undeploy(processingUnitName);
         } catch (SecurityException se) {
             throw new AdminException("Not authorized to undeploy a processing unit", se);
+        } catch (com.gigaspaces.security.SecurityException se) {
+            throw new AdminException("No privileges to undeploy a processing unit", se);
         } catch (Exception e) {
             throw new AdminException("Failed to undeploy processing unit [" + processingUnitName + "]", e);
         }
@@ -150,6 +154,8 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             ((InternalProcessingUnitInstance) processingUnitInstance).getPUServiceBean().destroy();
         } catch (SecurityException se) {
             throw new AdminException("Not authorized to destroy a processing unit instance", se);
+        } catch (com.gigaspaces.security.SecurityException se) {
+            throw new AdminException("No privileges to destroy a processing unit instance", se);
         } catch (Exception e) {
             if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
                 // all is well
@@ -167,6 +173,8 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             gsm.decrement(processingUnitInstance.getProcessingUnit().getName(), ((InternalProcessingUnitInstance) processingUnitInstance).getServiceID(), true);
         } catch (SecurityException se) {
             throw new AdminException("Not authorized to decrement a processing unit instance", se);
+        } catch (com.gigaspaces.security.SecurityException se) {
+            throw new AdminException("No privileges to decrement a processing unit instance", se);
         } catch (Exception e) {
             if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
                 // all is well
@@ -184,6 +192,8 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             gsm.increment(processingUnit.getName(), null);
         } catch (SecurityException se) {
             throw new AdminException("Not authorized to increment a processing unit instance", se);
+        } catch (com.gigaspaces.security.SecurityException se) {
+            throw new AdminException("No privileges to increment a processing unit instance", se);
         } catch (Exception e) {
             if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
                 // all is well
@@ -207,6 +217,8 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
                     null);
         } catch (SecurityException se) {
             throw new AdminException("Not authorized to relocate a processing unit instance", se);
+        } catch (com.gigaspaces.security.SecurityException se) {
+            throw new AdminException("No privileges to relocate a processing unit instance", se);
         } catch (Exception e) {
             throw new AdminException("Failed to relocate processing unit instance to grid service container", e);
         }
@@ -243,6 +255,8 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             gsm.runGc();
         } catch (SecurityException se) {
             throw new AdminException("Not authorized to run Garbage Collection", se);
+        } catch (com.gigaspaces.security.SecurityException se) {
+            throw new AdminException("No privileges to run Garbage Collection", se);
         }
     }
 

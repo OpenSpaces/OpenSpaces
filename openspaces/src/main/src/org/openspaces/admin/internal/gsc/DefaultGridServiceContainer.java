@@ -161,6 +161,8 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
             gsc.runGc();
         } catch (SecurityException se) {
             throw new AdminException("Not authorized to run Garbage Collection", se);
+        } catch (com.gigaspaces.security.SecurityException se) {
+            throw new AdminException("No privileges to run Garbage Collection", se);
         }
     }
 

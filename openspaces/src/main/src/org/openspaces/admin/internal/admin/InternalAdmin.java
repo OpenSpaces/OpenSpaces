@@ -3,6 +3,7 @@ package org.openspaces.admin.internal.admin;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.operatingsystem.OSDetails;
+import com.gigaspaces.security.UserDetails;
 import com.j_spaces.core.IJSpace;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
@@ -26,6 +27,8 @@ public interface InternalAdmin extends Admin {
     String getUsername();
 
     String getPassword();
+
+    UserDetails getUserDetails();
 
     void pushEvent(Object listener, Runnable notifier);
 

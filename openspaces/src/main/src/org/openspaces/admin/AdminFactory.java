@@ -18,11 +18,13 @@ package org.openspaces.admin;
 
 import org.openspaces.admin.internal.admin.DefaultAdmin;
 
+import com.gigaspaces.security.UserDetails;
+
 /**
  * A factory allowing to create {@link org.openspaces.admin.Admin} instance.
  *
  * <p>Allows to set the Lookup Service Groups and Locators. The Admin listens for events
- * from the lookup serivce of components added and removed. It will monitor all components
+ * from the lookup service of components added and removed. It will monitor all components
  * that work within the specified group and locator.
  *
  * <p>Allows to set the username and password that will be used to authenticate when secured
@@ -32,7 +34,7 @@ import org.openspaces.admin.internal.admin.DefaultAdmin;
  */
 public class AdminFactory {
 
-    private DefaultAdmin admin = new DefaultAdmin();
+    private final DefaultAdmin admin = new DefaultAdmin();
 
     /**
      * Adds a lookup group that will be used to find Lookup Services (using multicast)
@@ -69,7 +71,15 @@ public class AdminFactory {
     }
 
     /**
-     * Creats the admin and begins its listening for events from the lookup service.
+     * Sets the user details that will be used when discovering secured services.
+     */
+    public AdminFactory setUserDetails(UserDetails userDetails) {
+        admin.setUserDetails(userDetails);
+        return this;
+    }
+
+    /**
+     * Creates the admin and begins its listening for events from the lookup service.
      */
     public Admin createAdmin() {
         admin.begin();

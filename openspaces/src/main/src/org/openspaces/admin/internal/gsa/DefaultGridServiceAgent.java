@@ -76,6 +76,8 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
             gsa.startProcess(options.getOptions());
         } catch (SecurityException se) {
             throw new AdminException("No credentials to start a service", se);
+        } catch (com.gigaspaces.security.SecurityException se) {
+            throw new AdminException("No privileges to start a service", se);
         } catch (IOException e) {
             throw new AdminException("Failed to start Grid Service", e);
         }
@@ -86,6 +88,8 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
             gsa.startProcess(options.getOptions());
         } catch (SecurityException se) {
             throw new AdminException("No credentials to start a GSM", se);
+        } catch (com.gigaspaces.security.SecurityException se) {
+            throw new AdminException("No privileges to start a GSM", se);
         } catch (IOException e) {
             throw new AdminException("Failed to start GSM", e);
         }
@@ -131,6 +135,8 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
             gsa.startProcess(options.getOptions());
         } catch (SecurityException se) {
             throw new AdminException("No credentials to start a GSC", se);
+        } catch (com.gigaspaces.security.SecurityException se) {
+            throw new AdminException("No privileges to start a GSC", se);
         } catch (IOException e) {
             throw new AdminException("Failed to start GSC", e);
         }
@@ -177,6 +183,8 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
             gsa.startProcess(options.getOptions());
         } catch (SecurityException se) {
             throw new AdminException("No credentials to start a Lookup Service", se);
+        } catch (com.gigaspaces.security.SecurityException se) {
+            throw new AdminException("No privileges to start a Lookup Service", se);
         } catch (IOException e) {
             throw new AdminException("Failed to start LUS", e);
         }
@@ -222,6 +230,8 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
             gsa.killProcess(agentGridComponent.getAgentId());
         } catch (SecurityException se) {
             throw new AdminException("No credentials to kill", se);
+        } catch (com.gigaspaces.security.SecurityException se) {
+            throw new AdminException("No privileges to kill", se);
         } catch (RemoteException e) {
             throw new AdminException("Failed to kill [" + agentGridComponent.getUid() + "]", e);
         }
@@ -232,6 +242,8 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
             gsa.restartProcess(agentGridComponent.getAgentId());
         } catch (SecurityException se) {
             throw new AdminException("No credentials to restart", se);
+        } catch (com.gigaspaces.security.SecurityException se) {
+            throw new AdminException("No privileges to restart", se);
         } catch (IOException e) {
             throw new AdminException("Failed to restart [" + agentGridComponent.getUid() + "]", e);
         }
@@ -266,6 +278,8 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
             gsa.runGc();
         } catch (SecurityException se) {
             throw new AdminException("Not authorized to run Garbage Collection", se);
+        } catch (com.gigaspaces.security.SecurityException se) {
+            throw new AdminException("No privileges to run Garbage Collection", se);
         }
     }
 }

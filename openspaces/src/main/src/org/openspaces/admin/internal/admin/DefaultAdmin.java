@@ -6,6 +6,7 @@ import com.gigaspaces.grid.gsm.PUsDetails;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.operatingsystem.OSDetails;
+import com.gigaspaces.security.UserDetails;
 import com.j_spaces.core.IJSpace;
 import net.jini.core.discovery.LookupLocator;
 import org.apache.commons.logging.Log;
@@ -103,7 +104,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     private ExecutorService[] eventsExecutorServices;
 
-    private int eventsNumberOfThreads = 10;
+    private final int eventsNumberOfThreads = 10;
 
     private LinkedList<Runnable>[] eventsQueue;
 
@@ -124,6 +125,8 @@ public class DefaultAdmin implements InternalAdmin {
     private volatile String username;
 
     private volatile String password;
+
+    private volatile UserDetails userDetails;
 
     public DefaultAdmin() {
         this.discoveryService = new DiscoveryService(this);
@@ -151,6 +154,14 @@ public class DefaultAdmin implements InternalAdmin {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public UserDetails getUserDetails() {
+        return userDetails;
+    }
+
+    public void setUserDetails(UserDetails userDetails) {
+        this.userDetails = userDetails;
     }
 
     public void addGroup(String group) {
@@ -400,7 +411,7 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void addLookupService(InternalLookupService lookupService,
-                                              NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
+            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(lookupService, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(lookupService, jvmDetails);
         InternalTransport transport = processTransportOnServiceAddition(lookupService, nioDetails, virtualMachine);
@@ -411,7 +422,7 @@ public class DefaultAdmin implements InternalAdmin {
 
         processZonesOnServiceAddition(zones, lookupService.getUid(), transport, virtualMachine, machine, lookupService);
         processAgentOnServiceAddition(lookupService);
-        
+
         ((InternalLookupServices) machine.getLookupServices()).addLookupService(lookupService);
 
         for (Zone zone : lookupService.getZones().values()) {
@@ -433,7 +444,7 @@ public class DefaultAdmin implements InternalAdmin {
 
             processMachineOnServiceRemoval(lookupService, lookupService);
             ((InternalLookupServices) ((InternalMachine) lookupService.getMachine()).getLookupServices()).removeLookupService(uid);
-            
+
             processZonesOnServiceRemoval(uid, lookupService);
             for (Zone zone : lookupService.getZones().values()) {
                 ((InternalLookupServices) zone.getLookupServices()).removeLookupService(uid);
@@ -444,7 +455,7 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void addGridServiceManager(InternalGridServiceManager gridServiceManager,
-                                                   NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
+            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceManager, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceManager, jvmDetails);
         InternalTransport transport = processTransportOnServiceAddition(gridServiceManager, nioDetails, virtualMachine);
@@ -490,7 +501,7 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer,
-                                                     NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
+            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceContainer, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceContainer, jvmDetails);
         InternalTransport transport = processTransportOnServiceAddition(gridServiceContainer, nioDetails, virtualMachine);
@@ -684,8 +695,8 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     private void processZonesOnServiceAddition(String[] zonesNames, String zoneUidProvider,
-                                               InternalTransport transport, VirtualMachine virtualMachine, Machine machine,
-                                               InternalZoneAware... zoneAwares) {
+            InternalTransport transport, VirtualMachine virtualMachine, Machine machine,
+            InternalZoneAware... zoneAwares) {
         if (zonesNames == null) {
             return;
         }
@@ -711,8 +722,8 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     private InternalMachine processMachineOnServiceAddition(TransportDetails transportDetails,
-                                                            InternalTransport transport, OperatingSystem operatingSystem,
-                                                            VirtualMachine virtualMachine, InternalMachineAware... machineAwares) {
+            InternalTransport transport, OperatingSystem operatingSystem,
+            VirtualMachine virtualMachine, InternalMachineAware... machineAwares) {
         InternalMachine machine = (InternalMachine) machines.getMachineByHostAddress(transportDetails.getHostAddress());
         if (machine == null) {
             machine = new DefaultMachine(this, transportDetails.getHostAddress(), transportDetails.getHostAddress());

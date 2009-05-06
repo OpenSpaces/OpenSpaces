@@ -9,6 +9,8 @@ import com.gigaspaces.grid.zone.GridZoneProvider;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.operatingsystem.OSDetails;
+import com.gigaspaces.security.User;
+import com.gigaspaces.security.UserDetails;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.SecurityContext;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
@@ -166,6 +168,9 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 if (gsm.isSecured()) {
                     gsm.authenticate(admin.getUsername(), admin.getPassword());
                 }
+                if (gsm.isServiceSecured()) {
+                    gsm.login(getUserDetails());
+                }
                 InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, gsm, admin,
                         gsm.getAgentId(), gsm.getGSAServiceID());
                 // get the details here, on the thread pool
@@ -182,6 +187,9 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 if (gsa.isSecured()) {
                     gsa.authenticate(admin.getUsername(), admin.getPassword());
                 }
+                if (gsa.isServiceSecured()) {
+                    gsa.login(getUserDetails());
+                }
                 AgentProcessesDetails processesDetails = gsa.getDetails();
                 InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, gsa, admin, processesDetails);
                 // get the details here, on the thread pool
@@ -197,6 +205,9 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 GSC gsc = (GSC) service;
                 if (gsc.isSecured()) {
                     gsc.authenticate(admin.getUsername(), admin.getPassword());
+                }
+                if (gsc.isServiceSecured()) {
+                    gsc.login(getUserDetails());
                 }
                 InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(serviceID, gsc,
                         admin, gsc.getAgentId(), gsc.getGSAServiceID());
@@ -225,6 +236,11 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 SecurityContext securityContext = null;
                 if (admin.getUsername() != null) {
                     securityContext = new SecurityContext(admin.getUsername(), admin.getPassword());
+                }
+                if (admin.getUserDetails() != null) {
+                    //TODO moran - call login
+                    securityContext = new SecurityContext(admin.getUserDetails().getUsername(), admin.getUserDetails()
+                            .getPassword());
                 }
                 IJSpace clusteredIjspace = (IJSpace) service;
                 if (securityContext != null) {
@@ -304,5 +320,13 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             }
         }
         return BootUtil.toLookupLocators(locators);
+    }
+
+    private UserDetails getUserDetails() {
+        UserDetails userDetails = admin.getUserDetails();
+        if (userDetails == null) {
+            userDetails = new User(admin.getUsername(), admin.getPassword());
+        }
+        return userDetails;
     }
 }
