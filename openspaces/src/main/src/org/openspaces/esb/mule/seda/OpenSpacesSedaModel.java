@@ -28,7 +28,7 @@ import org.springframework.context.ApplicationContextAware;
  * be used to communicate with the Space by the {@link OpenSpacesSedaService}.
  *
  * <p>If the giga space reference is defined ({@link #setGigaSpace(String)}, will use it to find the
- * {@link org.openspaces.core.GigaSpace} instnace defined. If it is not defined, will try to get
+ * {@link org.openspaces.core.GigaSpace} instance defined. If it is not defined, will try to get
  * GigaSpace instances from Spring and if there is only one defined, will used it.
  *
  * <p>Also holds other attributes related to the written and read entry. Such as if the entry will be
@@ -55,6 +55,7 @@ public class OpenSpacesSedaModel extends SedaModel implements ApplicationContext
      *
      * @return the model type
      */
+    @Override
     public String getType() {
         return "os-seda";
     }
@@ -91,6 +92,7 @@ public class OpenSpacesSedaModel extends SedaModel implements ApplicationContext
         return this.gigaSpace;
     }
 
+    @Override
     public void initialise() throws InitialisationException {
         super.initialise();
         if (gigaSpaceRef == null) {

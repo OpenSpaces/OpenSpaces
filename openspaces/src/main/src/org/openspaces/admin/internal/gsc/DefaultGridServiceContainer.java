@@ -113,7 +113,7 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
     }
 
     public void removeProcessingUnitInstance(String uid) {
-        processingUnitInstances.removeInstnace(uid);
+        processingUnitInstances.removeInstance(uid);
     }
 
     public ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded() {

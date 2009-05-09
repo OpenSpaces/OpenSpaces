@@ -30,7 +30,7 @@ import java.io.ObjectOutput;
  * @author kimchy
  */
 public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemotingInvocation, SpaceRemotingResult,
-        Cloneable, Externalizable {
+Cloneable, Externalizable {
 
     static int bitIndexCounter=0;
     private static final int LOOKUP_NAME_BIT_MASK = 1 << bitIndexCounter++;
@@ -166,6 +166,7 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
         }
     }
 
+    @Override
     protected Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
@@ -192,7 +193,7 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
             if (oneWay != null && oneWay) {
                 out.writeBoolean(true);
             }
-            
+
             if (arguments != null && arguments.length != 0) {
                 out.writeInt(arguments.length);
                 for (Object argument : arguments) {
@@ -214,7 +215,7 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
             }
             if (routing != null) {
                 out.writeInt(routing);
-            }             
+            }
             if (instanceId != null) {
                 out.writeInt(instanceId);
             }
@@ -270,6 +271,7 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
         }
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         if (isInvocation) {
@@ -285,14 +287,14 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
                 sb.append("ex").append(ex).append("]");
             }
             sb.append(" routing[").append(routing).append("]");
-            sb.append(" instnaceId[").append(instanceId).append("]");
+            sb.append(" instanceId[").append(instanceId).append("]");
         }
         return sb.toString();
     }
 
     /**
      * Returns a bit mask. Fields with non-null values have 1 in their respective index, fields with
-     * null values have 0.  
+     * null values have 0.
      */
     private short getNullableFieldsBitMask() {
         int bitMask = 0;
@@ -310,6 +312,6 @@ public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemot
 
     private boolean isFieldNull(short bitMask, int fieldBitMask) {
         return (bitMask & fieldBitMask) == 0;
-        
+
     }
 }

@@ -38,7 +38,7 @@ import java.util.Iterator;
  * be used to communicate with the Space by the dispatcher, receiver, and requestor.
  *
  * <p>If the giga space reference is defined ({@link #setGigaSpace(String)}, will use it to find the
- * {@link org.openspaces.core.GigaSpace} instnace defined. If it is not defined, will try to get
+ * {@link org.openspaces.core.GigaSpace} instance defined. If it is not defined, will try to get
  * GigaSpace instances from Spring and if there is only one defined, will used it.
  *
  * <p>Also holds other attributes related to the written and read entry. Such as if the entry will be
@@ -83,7 +83,7 @@ public class OpenSpacesQueueConnector extends AbstractConnector implements Appli
 
     /**
      * Sets the GigaSpace bean id reference to be retrieved from Spring. If not defined, will try
-     * to get all the GigaSpace instnaces from Spring, and if there is only one, will use it.
+     * to get all the GigaSpace instances from Spring, and if there is only one, will use it.
      */
     public void setGigaSpace(String gigaSpaceRef) {
         this.gigaSpaceRef = gigaSpaceRef;
@@ -91,7 +91,7 @@ public class OpenSpacesQueueConnector extends AbstractConnector implements Appli
 
     /**
      * Returns the GigaSpace bean id reference to be retrieved from Spring. If not defined, will try
-     * to get all the GigaSpace instnaces from Spring, and if there is only one, will use it.
+     * to get all the GigaSpace instances from Spring, and if there is only one, will use it.
      */
     public String getGigaSpace() {
         return gigaSpaceRef;
@@ -141,18 +141,23 @@ public class OpenSpacesQueueConnector extends AbstractConnector implements Appli
         this.timeout = timeout;
     }
 
+    @Override
     protected void doInitialise() throws InitialisationException {
     }
 
+    @Override
     protected void doDispose() {
     }
 
+    @Override
     protected void doStart() throws MuleException {
     }
 
+    @Override
     protected void doStop() throws MuleException {
     }
 
+    @Override
     protected void doConnect() throws Exception {
         if (gigaSpaceRef == null) {
             String[] beansNames = applicationContext.getBeanNamesForType(GigaSpace.class);
@@ -166,6 +171,7 @@ public class OpenSpacesQueueConnector extends AbstractConnector implements Appli
         }
     }
 
+    @Override
     protected void doDisconnect() throws Exception {
     }
 

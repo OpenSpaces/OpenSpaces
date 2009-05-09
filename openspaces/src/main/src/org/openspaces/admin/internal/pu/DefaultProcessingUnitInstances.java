@@ -21,9 +21,9 @@ public class DefaultProcessingUnitInstances implements InternalProcessingUnitIns
 
     private final InternalAdmin admin;
 
-    private final Map<String, ProcessingUnitInstance> orphanedProcessingUnitInstnaces = new ConcurrentHashMap<String, ProcessingUnitInstance>();
+    private final Map<String, ProcessingUnitInstance> orphanedProcessingUnitInstances = new ConcurrentHashMap<String, ProcessingUnitInstance>();
 
-    private final Map<String, ProcessingUnitInstance> processingUnitInstnaces = new ConcurrentHashMap<String, ProcessingUnitInstance>();
+    private final Map<String, ProcessingUnitInstance> processingUnitInstances = new ConcurrentHashMap<String, ProcessingUnitInstance>();
 
     private final InternalProcessingUnitInstanceAddedEventManager processingUnitInstanceAddedEventManager;
 
@@ -36,22 +36,22 @@ public class DefaultProcessingUnitInstances implements InternalProcessingUnitIns
     }
 
     public void addOrphaned(ProcessingUnitInstance processingUnitInstance) {
-        orphanedProcessingUnitInstnaces.put(processingUnitInstance.getUid(), processingUnitInstance);
+        orphanedProcessingUnitInstances.put(processingUnitInstance.getUid(), processingUnitInstance);
     }
 
     public ProcessingUnitInstance removeOrphaned(String uid) {
-        return orphanedProcessingUnitInstnaces.remove(uid);
+        return orphanedProcessingUnitInstances.remove(uid);
     }
 
     public void addInstance(ProcessingUnitInstance processingUnitInstance) {
-        ProcessingUnitInstance existingPU = processingUnitInstnaces.put(processingUnitInstance.getUid(), processingUnitInstance);
+        ProcessingUnitInstance existingPU = processingUnitInstances.put(processingUnitInstance.getUid(), processingUnitInstance);
         if (existingPU == null) {
             processingUnitInstanceAddedEventManager.processingUnitInstanceAdded(processingUnitInstance);
         }
     }
 
-    public ProcessingUnitInstance removeInstnace(String uid) {
-        ProcessingUnitInstance processingUnitInstance = processingUnitInstnaces.remove(uid);
+    public ProcessingUnitInstance removeInstance(String uid) {
+        ProcessingUnitInstance processingUnitInstance = processingUnitInstances.remove(uid);
         if (processingUnitInstance != null) {
             processingUnitInstanceRemovedEventManager.processingUnitInstanceRemoved(processingUnitInstance);
         }
@@ -59,11 +59,11 @@ public class DefaultProcessingUnitInstances implements InternalProcessingUnitIns
     }
 
     public ProcessingUnitInstance[] getOrphaned() {
-        return orphanedProcessingUnitInstnaces.values().toArray(new ProcessingUnitInstance[0]);
+        return orphanedProcessingUnitInstances.values().toArray(new ProcessingUnitInstance[0]);
     }
 
     public Iterator<ProcessingUnitInstance> getInstancesIt() {
-        return processingUnitInstnaces.values().iterator();
+        return processingUnitInstances.values().iterator();
     }
 
     public ProcessingUnitInstance[] getProcessingUnitInstances() {
@@ -71,7 +71,7 @@ public class DefaultProcessingUnitInstances implements InternalProcessingUnitIns
     }
 
     public ProcessingUnitInstance[] getInstances() {
-        return processingUnitInstnaces.values().toArray(new ProcessingUnitInstance[0]);
+        return processingUnitInstances.values().toArray(new ProcessingUnitInstance[0]);
     }
 
     public ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded() {

@@ -35,7 +35,7 @@ package org.openspaces.admin.space;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
 
 /**
- * Represnts a replication target from one {@link org.openspaces.admin.space.SpaceInstance} to the
+ * Represents a replication target from one {@link org.openspaces.admin.space.SpaceInstance} to the
  * other.
  *
  * @author kimchy
@@ -52,7 +52,7 @@ public class ReplicationTarget {
     }
 
     /**
-     * Retuns the space instnace that will be replicated to. Can be <code>null</code>
+     * Returns the space instance that will be replicated to. Can be <code>null</code>
      * if replication is disabled/disconnected.
      */
     public InternalSpaceInstance getSpaceInstance() {

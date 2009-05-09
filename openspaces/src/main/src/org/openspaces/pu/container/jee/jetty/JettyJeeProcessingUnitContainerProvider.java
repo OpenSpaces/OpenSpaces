@@ -64,23 +64,23 @@ import java.util.List;
  * is <code>jetty.shared.xml</code>. By default, if nothing is passed, the <code>jetty.plain.xml<code>
  * is loaded.
  *
- * <p>The difference between plain and shared mode is only indicated by the buit in jerry spring
+ * <p>The difference between plain and shared mode is only indicated by the built in jerry spring
  * application context. The plain mode starts a jetty instance per web application instance. The
  * shared mode uses the same jetty instance for all web applications. The default is plain mode
  * as it is usually the simpler and preferred way to use it.
  *
- * <p>The web application will be enabled automatically for OpenSpaces bootstraping using
+ * <p>The web application will be enabled automatically for OpenSpaces bootstrapping using
  * {@link org.openspaces.pu.container.jee.context.BootstrapWebApplicationContextListener}.
  *
- * <p>Post processing of the <code>web.xml</code> and <code>jetty-web.xml</code> is perfomed allowing
- * to use <code>${...}</code> notation within them (for example, using system proeprties, deployed
+ * <p>Post processing of the <code>web.xml</code> and <code>jetty-web.xml</code> is performed allowing
+ * to use <code>${...}</code> notation within them (for example, using system properties, deployed
  * properties, or <code>${clusterInfo...}</code>).
  *
  * <p>JMX in jetty can be enabled by passing a deployment property {@link #JETTY_JMX_PROP}. If set
  * to <code>true</code> jetty will be configured with JMX. In plain mode, where there can be more
- * than one instnace of jetty within the same JVM, the domain each instnace will be registed under
+ * than one instance of jetty within the same JVM, the domain each instance will be registered under
  * will be <code>gigaspaces.jetty.${clusterInfo.name}.${clusterInfo.runningNumberOffset1}</code>.
- * In shraed mode, where there is only one instance of jetty in a single JVM, jetty JMX will be registered
+ * In shared mode, where there is only one instance of jetty in a single JVM, jetty JMX will be registered
  * with a domain called <code>gigaspaces.jetty</code>.
  *
  * @author kimchy
@@ -151,7 +151,7 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
 
     private ApplicationContext parentContext;
 
-    private List<Resource> configResources = new ArrayList<Resource>();
+    private final List<Resource> configResources = new ArrayList<Resource>();
 
     private BeanLevelProperties beanLevelProperties;
 
@@ -421,7 +421,7 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
 
             // we disable the smart getUrl in the common class loader so the JSP classpath will be built correclty
             CommonClassLoader.getInstance().setDisableSmartGetUrl(true);
-            
+
             WebAppContext webAppContext = (WebAppContext) applicationContext.getBean("webAppContext");
 
             webAppContext.setExtractWAR(true);

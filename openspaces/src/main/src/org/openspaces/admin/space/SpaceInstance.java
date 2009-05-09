@@ -41,8 +41,8 @@ import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
 import org.openspaces.core.GigaSpace;
 
 /**
- * A Space Instnace is a single instnace of a space running as a part of a {@link Space}. For example, when deploying
- * a 2 paritions each with one backup topology, there will be 4 space instances running.
+ * A Space Instance is a single instance of a space running as a part of a {@link Space}. For example, when deploying
+ * a 2 partitions each with one backup topology, there will be 4 space instances running.
  *
  * @author kimchy
  */

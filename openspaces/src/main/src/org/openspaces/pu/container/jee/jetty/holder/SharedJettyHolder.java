@@ -7,7 +7,7 @@ import org.mortbay.jetty.Server;
 import org.mortbay.util.MultiException;
 
 /**
- * A shared jetty holder that keeps upon first construction will store a static jetty instnace and will
+ * A shared jetty holder that keeps upon first construction will store a static jetty instance and will
  * reused it from then on. Upon the "last" call to stop, will actually stop the jetty instance.
  *
  * @author kimchy

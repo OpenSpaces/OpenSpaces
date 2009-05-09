@@ -19,12 +19,12 @@ public class TestDeployer {
         admin.getGridServiceContainers().waitFor(2);
         System.out.println("Found at least 2 GSC");
         ProcessingUnit procesingUnit = admin.getGridServiceManagers().deploy(new SpaceDeployment("test")
-                .numberOfInstances(2).maxInstancesPerVM(1).addZone("zone3"));
+        .numberOfInstances(2).maxInstancesPerVM(1).addZone("zone3"));
         System.out.println("Deployed space, waiting...");
         procesingUnit.waitFor(2);
         System.out.println("Deployed space");
 
-        System.out.println("Destroying instnace");
+        System.out.println("Destroying instance");
         procesingUnit.getInstances()[0].destroy();
         System.out.println("Waiting again for all processing unit instances to be up");
         procesingUnit.waitFor(2);

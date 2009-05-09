@@ -570,7 +570,7 @@ public class DefaultAdmin implements InternalAdmin {
 
     public synchronized void removeProcessingUnitInstance(String uid) {
         processingUnitInstances.removeOrphaned(uid);
-        InternalProcessingUnitInstance processingUnitInstance = (InternalProcessingUnitInstance) processingUnitInstances.removeInstnace(uid);
+        InternalProcessingUnitInstance processingUnitInstance = (InternalProcessingUnitInstance) processingUnitInstances.removeInstance(uid);
         if (processingUnitInstance != null) {
             processingUnitInstance.setDiscovered(false);
             ((InternalProcessingUnit) processingUnitInstance.getProcessingUnit()).removeProcessingUnitInstance(uid);
@@ -611,10 +611,10 @@ public class DefaultAdmin implements InternalAdmin {
         space.addInstance(spaceInstance);
         spaces.addSpaceInstance(spaceInstance);
 
-        // go over all the processing unit instnaces and add the space if matching
+        // go over all the processing unit instances and add the space if matching
         for (ProcessingUnit processingUnit : processingUnits) {
             for (ProcessingUnitInstance processingUnitInstance : processingUnit) {
-                ((InternalProcessingUnitInstance) processingUnitInstance).addSpaceInstnaceIfMatching(spaceInstance);
+                ((InternalProcessingUnitInstance) processingUnitInstance).addSpaceInstanceIfMatching(spaceInstance);
             }
         }
 
@@ -634,7 +634,7 @@ public class DefaultAdmin implements InternalAdmin {
             InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
             space.removeInstance(uid);
             if (space.getSize() == 0) {
-                // no more instnaces, remove it completely
+                // no more instances, remove it completely
                 spaces.removeSpace(space.getUid());
             }
             ((InternalVirtualMachine) spaceInstance.getVirtualMachine()).removeSpaceInstance(spaceInstance.getUid());
@@ -687,7 +687,7 @@ public class DefaultAdmin implements InternalAdmin {
         // go over all the space instances, and add the matched one to the processing unit
         for (Space space : spaces) {
             for (SpaceInstance spaceInstance : space) {
-                processingUnitInstance.addSpaceInstnaceIfMatching(spaceInstance);
+                processingUnitInstance.addSpaceInstanceIfMatching(spaceInstance);
             }
         }
 

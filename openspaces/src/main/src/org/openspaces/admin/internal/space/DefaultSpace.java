@@ -98,7 +98,7 @@ public class DefaultSpace implements InternalSpace {
 
         this.space = clusteredSpace;
         this.gigaSpace = new GigaSpaceConfigurer(space).clustered(true).gigaSpace();
-        
+
         this.spaceInstanceAddedEventManager = new DefaultSpaceInstanceAddedEventManager(admin, this);
         this.spaceInstanceRemovedEventManager = new DefaultSpaceInstanceRemovedEventManager(admin);
         this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(this, admin);
@@ -461,18 +461,18 @@ public class DefaultSpace implements InternalSpace {
                         if (memberNames[i] == null) {
                             continue;
                         }
-                        SpaceInstance targetSpaceInstance = spaceInstancesByMemberName.get((String) memberNames[i]);
+                        SpaceInstance targetSpaceInstance = spaceInstancesByMemberName.get(memberNames[i]);
                         ReplicationStatus replStatus = null;
                         switch (replicationStatus[i]) {
-                            case IRemoteJSpaceAdmin.REPLICATION_STATUS_ACTIVE:
-                                replStatus = ReplicationStatus.ACTIVE;
-                                break;
-                            case IRemoteJSpaceAdmin.REPLICATION_STATUS_DISCONNECTED:
-                                replStatus = ReplicationStatus.DISCONNECTED;
-                                break;
-                            case IRemoteJSpaceAdmin.REPLICATION_STATUS_DISABLED:
-                                replStatus = ReplicationStatus.DISABLED;
-                                break;
+                        case IRemoteJSpaceAdmin.REPLICATION_STATUS_ACTIVE:
+                            replStatus = ReplicationStatus.ACTIVE;
+                            break;
+                        case IRemoteJSpaceAdmin.REPLICATION_STATUS_DISCONNECTED:
+                            replStatus = ReplicationStatus.DISCONNECTED;
+                            break;
+                        case IRemoteJSpaceAdmin.REPLICATION_STATUS_DISABLED:
+                            replStatus = ReplicationStatus.DISABLED;
+                            break;
                         }
                         replicationTargets[i] = new ReplicationTarget((InternalSpaceInstance) targetSpaceInstance, replStatus);
                     }
@@ -481,7 +481,7 @@ public class DefaultSpace implements InternalSpace {
             } catch (SpaceUnavailableException e) {
                 // space is going shutdown or abort process
             } catch (InactiveSpaceException e) {
-                // ignore this (maybe we should add it as a state to a Space instnace?)
+                // ignore this (maybe we should add it as a state to a Space instance?)
             } catch (Exception e) {
                 if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
                     // Space is down, ignore

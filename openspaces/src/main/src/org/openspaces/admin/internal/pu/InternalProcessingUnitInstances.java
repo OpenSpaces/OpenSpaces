@@ -18,7 +18,7 @@ public interface InternalProcessingUnitInstances extends InternalProcessingUnitI
 
     void addInstance(ProcessingUnitInstance processingUnitInstance);
 
-    ProcessingUnitInstance removeInstnace(String uid);
+    ProcessingUnitInstance removeInstance(String uid);
 
     ProcessingUnitInstance[] getOrphaned();
 

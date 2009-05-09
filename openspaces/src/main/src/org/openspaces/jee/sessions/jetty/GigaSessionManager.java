@@ -70,7 +70,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
 
     private volatile static int totalNumberOfScavangers = 0;
 
-    // not static, we want to schedule one for each instnace of the session manager
+    // not static, we want to schedule one for each instance of the session manager
     private volatile ScheduledFuture scavengerFuture;
 
     private static final Object executorMonitor = new Object();
@@ -86,6 +86,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
      *
      * @see org.mortbay.jetty.servlet.AbstractSessionManager#doStart()
      */
+    @Override
     public void doStart() throws Exception {
         if (space == null) {
             if (spaceUrl == null)
@@ -106,7 +107,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
                 }
             } else {
                 urlSpaceConfigurer = new UrlSpaceConfigurer(spaceUrl)
-                        .clusterInfo(JettyJeeProcessingUnitContainerProvider.getCurrentClusterInfo());
+                .clusterInfo(JettyJeeProcessingUnitContainerProvider.getCurrentClusterInfo());
                 space = urlSpaceConfigurer.space();
             }
         }
@@ -143,6 +144,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
      *
      * @see org.mortbay.jetty.servlet.AbstractSessionManager#doStop()
      */
+    @Override
     public void doStop() throws Exception {
         synchronized (executorMonitor) {
             scavengerFuture.cancel(true);
@@ -234,6 +236,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
      *
      * @see org.mortbay.jetty.servlet.AbstractSessionManager#getSession(java.lang.String)
      */
+    @Override
     public Session getSession(String idInCluster) {
         // TODO do we really need to syncronize on (this) here? It used to be like that
         try {
@@ -259,11 +262,13 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
     }
 
 
+    @Override
     public Map getSessionMap() {
         // TODO we might want to read some sessions and give it back...
         return new HashMap();
     }
 
+    @Override
     public int getSessions() {
         long now = System.currentTimeMillis();
         if (lastSessionCount == -1 || (now - lastCountSessionsTime) > countSessionPeriod) {
@@ -277,11 +282,13 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
         return lastSessionCount;
     }
 
+    @Override
     public void resetStats() {
         lastSessionCount = -1;
         super.resetStats();
     }
 
+    @Override
     protected void invalidateSessions() {
         //Do nothing - we don't want to remove and
         //invalidate all the sessions because this
@@ -291,10 +298,12 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
         //any other nodes
     }
 
+    @Override
     protected Session newSession(HttpServletRequest request) {
         return new Session(request);
     }
 
+    @Override
     protected void removeSession(String idInCluster) {
         try {
             delete(idInCluster);
@@ -304,6 +313,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
     }
 
 
+    @Override
     public void removeSession(org.mortbay.jetty.servlet.AbstractSessionManager.Session abstractSession, boolean invalidate) {
         if (!(abstractSession instanceof GigaSessionManager.Session))
             throw new IllegalStateException("Session is not a GigaspacesSessionManager.Session " + abstractSession);
@@ -342,6 +352,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
         }
     }
 
+    @Override
     protected void addSession(org.mortbay.jetty.servlet.AbstractSessionManager.Session abstractSession) {
         if (abstractSession == null)
             return;
@@ -438,7 +449,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
      * A session in memory of a Context. Adds behaviour around SessionData.
      */
     public class Session extends org.mortbay.jetty.servlet.AbstractSessionManager.Session {
-        private SessionData _data;
+        private final SessionData _data;
 
         private volatile boolean _dirty = false;
 
@@ -464,10 +475,12 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
             if (Log.isDebugEnabled()) Log.debug("New Session from existing session data " + _data.toStringExtended());
         }
 
+        @Override
         protected void cookieSet() {
             _data.setCookieSet(_data.getAccessed());
         }
 
+        @Override
         protected Map newAttributeMap() {
             if (_data.getAttributeMap() == null) {
                 _data.setAttributeMap(new ConcurrentHashMap());
@@ -475,11 +488,13 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
             return _data.getAttributeMap();
         }
 
+        @Override
         public void setAttribute(String name, Object value) {
             super.setAttribute(name, value);
             _dirty = true;
         }
 
+        @Override
         public void removeAttribute(String name) {
             super.removeAttribute(name);
             _dirty = true;
@@ -491,6 +506,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
          *
          * @see org.mortbay.jetty.servlet.AbstractSessionManager.Session#access(long)
          */
+        @Override
         protected void access(long time) {
             super.access(time);
             _data.setLastAccessed(_data.getAccessed());
@@ -501,6 +517,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
         /**
          * We override it here so we can reset the expiry time based on the
          */
+        @Override
         public void setMaxInactiveInterval(int seconds) {
             super.setMaxInactiveInterval(seconds);
             _data.setExpiryTime(_maxIdleMs < 0 ? Long.MAX_VALUE : (System.currentTimeMillis() + _maxIdleMs));
@@ -520,6 +537,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
          *
          * @see org.mortbay.jetty.servlet.AbstractSessionManager.Session#complete()
          */
+        @Override
         protected void complete() {
             super.complete();
             try {
@@ -539,23 +557,28 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
             }
         }
 
+        @Override
         protected void timeout() throws IllegalStateException {
             if (Log.isDebugEnabled()) Log.debug("Timing out session id=" + getClusterId());
             super.timeout();
         }
 
+        @Override
         protected void willPassivate() {
             super.willPassivate();
         }
 
+        @Override
         protected void didActivate() {
             super.didActivate();
         }
 
+        @Override
         public String getClusterId() {
             return super.getClusterId();
         }
 
+        @Override
         public String getNodeId() {
             return super.getNodeId();
         }

@@ -22,15 +22,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Holds information on all the different load balancer nodes (web processing unit instnaces).
+ * Holds information on all the different load balancer nodes (web processing unit instances).
  *
  * @author kimchy
  */
 public class LoadBalancerInfo {
 
-    private String name;
+    private final String name;
 
-    private Map<ServiceID, LoadBalancerNodeInfo> balancers = new ConcurrentHashMap<ServiceID, LoadBalancerNodeInfo>();
+    private final Map<ServiceID, LoadBalancerNodeInfo> balancers = new ConcurrentHashMap<ServiceID, LoadBalancerNodeInfo>();
 
     private volatile boolean dirty = true;
 

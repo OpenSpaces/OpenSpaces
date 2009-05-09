@@ -35,19 +35,22 @@ import java.util.List;
  */
 public class SLABeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
+    @Override
     protected Class<SLA> getBeanClass(Element element) {
         return SLA.class;
     }
 
+    @Override
     protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) throws BeanDefinitionStoreException {
         // there can be only one SLA bean within a processing unit application context, and its name must be SLA
         return "SLA";
     }
 
+    @Override
     protected void doParse(Element element, BeanDefinitionBuilder builder) {
-        String numberOfInstnaces = element.getAttribute("number-of-instances");
-        if (StringUtils.hasLength(numberOfInstnaces)) {
-            builder.addPropertyValue("numberOfInstances", numberOfInstnaces);
+        String numberOfInstances = element.getAttribute("number-of-instances");
+        if (StringUtils.hasLength(numberOfInstances)) {
+            builder.addPropertyValue("numberOfInstances", numberOfInstances);
         }
 
         String numberOfBackups = element.getAttribute("number-of-backups");
@@ -74,6 +77,7 @@ public class SLABeanDefinitionParser extends AbstractSingleBeanDefinitionParser 
         }
     }
 
+    @Override
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
         super.doParse(element, parserContext, builder);
 

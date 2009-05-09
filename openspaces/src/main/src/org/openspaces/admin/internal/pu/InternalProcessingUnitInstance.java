@@ -25,9 +25,9 @@ public interface InternalProcessingUnitInstance extends ProcessingUnitInstance, 
     void setProcessingUnitPartition(ProcessingUnitPartition processingUnitPartition);
 
     /**
-     * Adds a space instnace only if it is one that the processing unit has started.
+     * Adds a space instance only if it is one that the processing unit has started.
      */
-    void addSpaceInstnaceIfMatching(SpaceInstance spaceInstance);
+    void addSpaceInstanceIfMatching(SpaceInstance spaceInstance);
 
     void removeSpaceInstance(String uid);
 

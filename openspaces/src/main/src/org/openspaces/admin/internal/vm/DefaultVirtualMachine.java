@@ -217,7 +217,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
     }
 
     public void removeProcessingUnitInstance(String uid) {
-        processingUnitInstances.removeInstnace(uid);
+        processingUnitInstances.removeInstance(uid);
     }
 
     public void addSpaceInstance(SpaceInstance spaceInstance) {

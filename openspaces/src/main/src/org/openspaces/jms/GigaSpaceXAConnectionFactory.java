@@ -28,8 +28,8 @@ import org.springframework.beans.factory.InitializingBean;
  * <code>XAConnectionFactory</code> based on a Space instance.
  *
  * <p>Note, the {@link org.openspaces.core.GigaSpace} is used to acquire the
- * {@link com.j_spaces.core.IJSpace} instnace allowing to get the "clustered"
- * flag beaviour. Transacitonal support should use plain JMS transactional
+ * {@link com.j_spaces.core.IJSpace} instance allowing to get the "clustered"
+ * flag behavior. Transactional support should use plain JMS transactional
  * handling and GigaSpace support for automatic transaction joining is not
  * used in this case.
  *
@@ -46,12 +46,12 @@ public class GigaSpaceXAConnectionFactory implements FactoryBean, InitializingBe
 
 
     /**
-     * The GigaSpace instnace to acquire the {@link com.j_spaces.core.IJSpace}
+     * The GigaSpace instance to acquire the {@link com.j_spaces.core.IJSpace}
      * from.
      *
      * <p>Note, the {@link org.openspaces.core.GigaSpace} is used to acquire the
-     * {@link com.j_spaces.core.IJSpace} instnace allowing to get the "clustered"
-     * flag beaviour. Transacitonal support should use plain JMS transactional
+     * {@link com.j_spaces.core.IJSpace} instance allowing to get the "clustered"
+     * flag behavior. Transactional support should use plain JMS transactional
      * handling and GigaSpace support for automatic transaction joining is not
      * used in this case.
      */

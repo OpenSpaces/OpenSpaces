@@ -294,7 +294,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         return spaceInstances.getSpaceInstances();
     }
 
-    public void addSpaceInstnaceIfMatching(SpaceInstance spaceInstance) {
+    public void addSpaceInstanceIfMatching(SpaceInstance spaceInstance) {
         for (SpaceServiceDetails spaceDetails : embeddedSpacesDetails) {
             if (((InternalSpaceInstance) spaceInstance).getServiceID().equals(spaceDetails.getServiceID())) {
                 spaceInstances.addSpaceInstance(spaceInstance);
@@ -379,7 +379,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         try {
             puMonitors = puServiceBean.getPUMonitors();
         } catch (RemoteException e) {
-            throw new AdminException("Failed to get montiors for processing unit instnace", e);
+            throw new AdminException("Failed to get montiors for processing unit instance", e);
         }
         for (Object monitor : puMonitors.getMonitors()) {
             ServiceMonitors serviceMonitors = (ServiceMonitors) monitor;

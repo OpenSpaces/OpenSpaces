@@ -24,11 +24,11 @@ import org.openspaces.core.cluster.ClusterInfo;
  * 
  * <p>
  * The following arguments to the -cluster parameters are allowed: <code>total_members=1,1</code>
- * (1,1 is an example value), <code>id=1</code> (1 is an example value), <code>backupid=1</code>
+ * (1,1 is an example value), <code>id=1</code> (1 is an example value), <code>backup_id=1</code>
  * (1 is an example value) and <code>schema=primary_backup</code> (primary_backup is an example
  * value).
  *
- * <p>The container allows not to specifiy explicit <code>instnaceId</code> or <code>backupId</code>. In
+ * <p>The container allows not to specify explicit <code>instanceId</code> or <code>backupId</code>. In
  * this case, it will create several processing units that run embedded within the JVM.
  * 
  * @author kimchy
@@ -91,7 +91,7 @@ public abstract class ClusterInfoParser {
 
     /**
      * Guess the cluster schema if not set. If the number of instances is higher than 1 and the number
-     * of backups it higher than 0, the cluster schema will be <code>partitioned_sync2backup</code>. 
+     * of backups it higher than 0, the cluster schema will be <code>partitioned_sync2backup</code>.
      */
     public static void guessSchema(ClusterInfo clusterInfo) {
         if (clusterInfo.getSchema() != null) {

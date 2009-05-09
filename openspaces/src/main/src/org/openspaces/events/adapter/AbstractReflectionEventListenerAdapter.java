@@ -59,7 +59,7 @@ import java.lang.reflect.Method;
  * <p>
  * Having more than one event listening method allows for writing specific listener methods handling
  * different data event types (usually different types within the same inheritance tree). This
- * allows to remove the need for <code>instnaceof</code> checks within the listener code. If a
+ * allows to remove the need for <code>instanceof</code> checks within the listener code. If a
  * single listening method is used, it can still have a specific class type for the event data
  * object thanks to Java reflection, though if the event listener will be invoked with a different
  * type a reflection exception will be thrown.
@@ -67,7 +67,7 @@ import java.lang.reflect.Method;
  * @author kimchy
  */
 public abstract class AbstractReflectionEventListenerAdapter extends AbstractResultEventListenerAdapter implements
-        InitializingBean, EventListenerAdapter {
+InitializingBean, EventListenerAdapter {
 
     /**
      * Logger available to subclasses
@@ -148,6 +148,7 @@ public abstract class AbstractReflectionEventListenerAdapter extends AbstractRes
      * cached reflection Method. If more than one event listener delegate method is configured uses
      * reflection to dynamically find the relevant event listener method.
      */
+    @Override
     protected Object onEventWithResult(Object data, GigaSpace gigaSpace, TransactionStatus txStatus, Object source) {
         Method listenerMethod = listenerMethods[0];
 
