@@ -51,7 +51,7 @@ import java.util.List;
  * <p>
  * Provide lifecycle support for containers using {@link #doStart()} and {@link #doStop()}. By
  * default, the container lifecycle will be bound to the space mode, starting when the space mode is
- * <code>PRIMARY</code> and stopping otherwise. This behaviour is controlled by
+ * <code>PRIMARY</code> and stopping otherwise. This behavior is controlled by
  * {@link #setActiveWhenPrimary(boolean)}. Note that most operations can not be performed directly
  * against a backup space cluster member (when working with the
  * {@link org.openspaces.core.GigaSpaceFactoryBean#setClustered(boolean)} flag set to
@@ -72,7 +72,7 @@ import java.util.List;
  * @author kimchy
  */
 public abstract class AbstractSpaceListeningContainer implements Lifecycle, BeanNameAware, InitializingBean,
-        DisposableBean, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProvider {
+DisposableBean, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProvider {
 
     protected final Log logger = LogFactory.getLog(getClass());
 
@@ -105,7 +105,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
     public void setGigaSpace(GigaSpace gigaSpace) {
         this.gigaSpace = gigaSpace;
     }
-    
+
     /**
      * Set whether this container will start once instantiated.
      *
@@ -156,7 +156,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
      */
     public void afterPropertiesSet() {
         validateConfiguration();
-        initialize();      
+        initialize();
     }
 
     /**
@@ -192,7 +192,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
                 try {
                     IJSpace clusterMemberSpace = SpaceUtils.getClusterMemberSpace(gigaSpace.getSpace());
                     ISpaceModeListener remoteListener = (ISpaceModeListener) clusterMemberSpace.getStubHandler()
-                            .exportObject(primaryBackupListener);
+                    .exportObject(primaryBackupListener);
                     currentMode = ((IInternalRemoteJSpaceAdmin) clusterMemberSpace.getAdmin()).addSpaceModeListener(remoteListener);
                 } catch (RemoteException e) {
                     throw new InvalidDataAccessResourceUsageException("Failed to register space mode listener with space [" + gigaSpace.getSpace()
@@ -238,7 +238,7 @@ public abstract class AbstractSpaceListeningContainer implements Lifecycle, Bean
                 IJSpace clusterMemberSpace = SpaceUtils.getClusterMemberSpace(gigaSpace.getSpace());
                 try {
                     ISpaceModeListener remoteListener = (ISpaceModeListener) clusterMemberSpace.getStubHandler()
-                            .exportObject(primaryBackupListener);
+                    .exportObject(primaryBackupListener);
                     ((IInternalRemoteJSpaceAdmin) clusterMemberSpace.getAdmin()).removeSpaceModeListener(remoteListener);
                 } catch (RemoteException e) {
                     logger.warn("Failed to unregister space mode listener with space [" + gigaSpace.getSpace() + "]", e);

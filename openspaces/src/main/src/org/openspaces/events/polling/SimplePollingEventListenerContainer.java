@@ -61,7 +61,7 @@ import java.util.Set;
  * to the standard number of consumers once the load decreases. Consider adapting the
  * {@link #setIdleTaskExecutionLimit "idleTaskExecutionLimit"} setting to control the lifespan of
  * each new task, to avoid frequent scaling up and down. Note that using more than one consumer
- * might break fifo behaviour if fifo is configured by the space or the specific class type.
+ * might break fifo behavior if fifo is configured by the space or the specific class type.
  *
  * @author kimchy
  */
@@ -71,7 +71,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      * Default thread name prefix: "DefaultPollingEventListenerContainer-".
      */
     public static final String DEFAULT_THREAD_NAME_PREFIX = ClassUtils.getShortName(SimplePollingEventListenerContainer.class)
-            + "-";
+    + "-";
 
     /**
      * The default recovery interval: 5000 ms = 5 seconds.
@@ -292,6 +292,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
         }
     }
 
+    @Override
     public void initialize() {
         // Prepare taskExecutor and maxEventsPerTask.
         synchronized (this.activeInvokerMonitor) {
@@ -311,6 +312,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
         super.initialize();
     }
 
+    @Override
     protected void doAfterStart() throws DataAccessException {
         super.doAfterStart();
         if (logger.isDebugEnabled()) {
@@ -334,6 +336,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
         }
     }
 
+    @Override
     protected void doBeforeStop() throws DataAccessException {
         super.doBeforeStop();
         if (logger.isDebugEnabled()) {
@@ -363,6 +366,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      * @see #scheduleNewInvoker
      * @see #setTaskExecutor
      */
+    @Override
     protected void doInitialize() throws DataAccessException {
         synchronized (this.activeInvokerMonitor) {
             for (int i = 0; i < this.concurrentConsumers; i++) {
@@ -376,10 +380,12 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      *
      * @see #setTaskExecutor
      */
+    @Override
     protected void doRescheduleTask(Object task) {
         this.taskExecutor.execute((Runnable) task);
     }
 
+    @Override
     protected void eventReceived(Object event) {
         scheduleNewInvokerIfAppropriate();
     }
@@ -563,6 +569,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
     /**
      * Destroy the container by waiting for all the current event listeners to shutdown.
      */
+    @Override
     protected void doShutdown() throws DataAccessException {
         logger.debug(message("Waiting for shutdown of event listener invokers"));
         synchronized (this.activeInvokerMonitor) {
@@ -592,7 +599,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
         tempalte = null;
         return new ServiceDetails[]{new PollingEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte, isPerformSnapshot(), getTransactionManagerName(),
                 getReceiveTimeout(), getReceiveOperationHandler().getClass().getName(), getTriggerOperationHandler() != null ? getTriggerOperationHandler().getClass().getName() : null,
-                getConcurrentConsumers(), getMaxConcurrentConsumers(), isPassArrayAsIs())};
+                        getConcurrentConsumers(), getMaxConcurrentConsumers(), isPassArrayAsIs())};
     }
 
     public ServiceMonitors[] getServicesMonitors() {

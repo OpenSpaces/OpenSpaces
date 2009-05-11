@@ -446,7 +446,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
     /**
      * Session
      *
-     * A session in memory of a Context. Adds behaviour around SessionData.
+     * A session in memory of a Context. Adds behavior around SessionData.
      */
     public class Session extends org.mortbay.jetty.servlet.AbstractSessionManager.Session {
         private final SessionData _data;

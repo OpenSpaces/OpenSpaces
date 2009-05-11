@@ -26,7 +26,7 @@ import org.springframework.dao.DataAccessException;
  * are returned, will perform a blocking read operation using
  * {@link org.openspaces.core.GigaSpace#read(Object,long)}.
  *
- * <p>Read operations are performed under an exclusive read lock which mimics the similar behaviour
+ * <p>Read operations are performed under an exclusive read lock which mimics the similar behavior
  * as take without actually taking the entry from the space.
  *
  * @author kimchy
@@ -50,9 +50,10 @@ public class MultiExclusiveReadReceiveOperationHandler extends AbstractNonBlocki
      * values are returned, will perform a blocking read operation using
      * {@link org.openspaces.core.GigaSpace#read(Object,long)}.
      *
-     * <p>Read operations are performed under an exclusive read lock which mimics the similar behaviour
+     * <p>Read operations are performed under an exclusive read lock which mimics the similar behavior
      * as take without actually taking the entry from the space.
      */
+    @Override
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         Object[] results = gigaSpace.readMultiple(template, maxEntries, gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK);
         if (results != null && results.length > 0) {
@@ -65,9 +66,10 @@ public class MultiExclusiveReadReceiveOperationHandler extends AbstractNonBlocki
      * Perform a {@link org.openspaces.core.GigaSpace#readMultiple(Object,int)}
      * using the provided template and configured maxEntries (defaults to <code>50</code>).
      *
-     * <p>Read operations are performed under an exclusive read lock which mimics the similar behaviour
+     * <p>Read operations are performed under an exclusive read lock which mimics the similar behavior
      * as take without actually taking the entry from the space.
      */
+    @Override
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
         Object[] results = gigaSpace.readMultiple(template, maxEntries, gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK);
         if (results != null && results.length > 0) {
