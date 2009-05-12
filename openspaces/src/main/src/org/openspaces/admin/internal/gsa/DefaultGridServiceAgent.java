@@ -274,12 +274,6 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public void runGc() throws RemoteException {
-        try {
-            gsa.runGc();
-        } catch (SecurityException se) {
-            throw new AdminException("Not authorized to run Garbage Collection", se);
-        } catch (com.gigaspaces.security.SecurityException se) {
-            throw new AdminException("No privileges to run Garbage Collection", se);
-        }
+        gsa.runGc();
     }
 }
