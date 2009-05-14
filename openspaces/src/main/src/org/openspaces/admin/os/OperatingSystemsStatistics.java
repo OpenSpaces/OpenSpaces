@@ -60,7 +60,13 @@ public interface OperatingSystemsStatistics {
     double getFreePhysicalMemorySizeInMB();
 
     double getFreePhysicalMemorySizeInGB();
-    
+
+    long getActualFreePhysicalMemorySizeInBytes();
+
+    double getActualFreePhysicalMemorySizeInMB();
+
+    double getActualFreePhysicalMemorySizeInGB();
+
 
     double getTotalSystemLoadAverage();
 

@@ -91,8 +91,24 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
         return StatisticsUtils.convertToGB(getFreePhysicalMemorySizeInBytes());
     }
 
+    public long getActualFreePhysicalMemorySizeInBytes() {
+        return stats.getActualFreePhysicalMemorySize();
+    }
+
+    public double getActualFreePhysicalMemorySizeInMB() {
+        return StatisticsUtils.convertToMB(getActualFreePhysicalMemorySizeInBytes());
+    }
+
+    public double getActualFreePhysicalMemorySizeInGB() {
+        return StatisticsUtils.convertToGB(getActualFreePhysicalMemorySizeInBytes());
+    }
+
     public double getPhysicalMemoryUsedPerc() {
         return StatisticsUtils.computePerc(getDetails().getTotalPhysicalMemorySizeInBytes() - getFreePhysicalMemorySizeInBytes(), getDetails().getTotalPhysicalMemorySizeInBytes());
+    }
+
+    public double getActualPhysicalMemoryUsedPerc() {
+        return StatisticsUtils.computePerc(getDetails().getTotalPhysicalMemorySizeInBytes() - getActualFreePhysicalMemorySizeInBytes(), getDetails().getTotalPhysicalMemorySizeInBytes());
     }
 
     public double getSystemLoadAverage() {

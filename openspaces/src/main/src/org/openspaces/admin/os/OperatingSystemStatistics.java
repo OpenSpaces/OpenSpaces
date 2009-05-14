@@ -52,7 +52,7 @@ public interface OperatingSystemStatistics {
     double getFreeSwapSpaceSizeInGB();
 
     /**
-     * Returns the percentage used of swap space out of the total swap space).
+     * Returns the percentage used of swap space out of the total swap space.
      */
     double getSwapSpaceUsedPerc();
 
@@ -62,10 +62,21 @@ public interface OperatingSystemStatistics {
 
     double getFreePhysicalMemorySizeInGB();
 
+    long getActualFreePhysicalMemorySizeInBytes();
+
+    double getActualFreePhysicalMemorySizeInMB();
+
+    double getActualFreePhysicalMemorySizeInGB();
+
     /**
-     * Returns the percentage used of physical memory out of the total swap space).
+     * Returns the percentage used of physical memory out of the total physical memory space.
      */
     double getPhysicalMemoryUsedPerc();
+
+    /**
+     * Returns the percesntage used of the actual physical memory out of the total physical memory.
+     */
+    double getActualPhysicalMemoryUsedPerc();
 
 
     double getSystemLoadAverage();

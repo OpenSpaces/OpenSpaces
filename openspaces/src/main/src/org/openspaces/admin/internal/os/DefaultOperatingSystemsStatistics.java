@@ -98,6 +98,24 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
         return StatisticsUtils.convertToGB(getFreePhysicalMemorySizeInBytes());
     }
 
+    public long getActualFreePhysicalMemorySizeInBytes() {
+        long total = 0;
+        for (OperatingSystemStatistics stat : stats) {
+            if (stat.getActualFreePhysicalMemorySizeInBytes() != -1) {
+                total += stat.getActualFreePhysicalMemorySizeInBytes();
+            }
+        }
+        return total;
+    }
+
+    public double getActualFreePhysicalMemorySizeInMB() {
+        return StatisticsUtils.convertToMB(getActualFreePhysicalMemorySizeInBytes());
+    }
+
+    public double getActualFreePhysicalMemorySizeInGB() {
+        return StatisticsUtils.convertToGB(getActualFreePhysicalMemorySizeInBytes());
+    }
+
     public double getTotalSystemLoadAverage() {
         double total = 0;
         for (OperatingSystemStatistics stat : stats) {
