@@ -2,6 +2,8 @@ package org.openspaces.admin.samples;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
+import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.machine.Machine;
@@ -25,18 +27,18 @@ public class TestSampler {
 //        space1.waitFor(1, SpaceMode.PRIMARY);
         while (true) {
             try {
-//                for (LookupService lookupService : admin.getLookupServices()) {
-//                    System.out.println("Lookup [" + lookupService.getUid() + "] : " + lookupService.getMachine());
-//                }
-//                for (GridServiceManager gsm : admin.getGridServiceManagers()) {
-//                    System.out.println("GSM [" + gsm.getUid() + "] running on Machine " + gsm.getMachine().getHostAddress());
-//                }
-//                for (GridServiceContainer gsc : admin.getGridServiceContainers()) {
-//                    System.out.println("GSC [" + gsc.getUid() + "] running on Machine " + gsc.getMachine().getHostAddress());
-//                    for (ProcessingUnitInstance puInstance : gsc) {
-//                        System.out.println("   -> PU [" + puInstance.getName() + "][" + puInstance.getInstanceId() + "][" + puInstance.getBackupId() + "]");
-//                    }
-//                }
+                for (LookupService lookupService : admin.getLookupServices()) {
+                    System.out.println("Lookup [" + lookupService.getUid() + "] : " + lookupService.getMachine());
+                }
+                for (GridServiceManager gsm : admin.getGridServiceManagers()) {
+                    System.out.println("GSM [" + gsm.getUid() + "] running on Machine " + gsm.getMachine().getHostAddress());
+                }
+                for (GridServiceContainer gsc : admin.getGridServiceContainers()) {
+                    System.out.println("GSC [" + gsc.getUid() + "] running on Machine " + gsc.getMachine().getHostAddress());
+                    for (ProcessingUnitInstance puInstance : gsc) {
+                        System.out.println("   -> PU [" + puInstance.getName() + "][" + puInstance.getInstanceId() + "][" + puInstance.getBackupId() + "]");
+                    }
+                }
 //                for (GridServiceAgent gsa : admin.getGridServiceAgents()) {
 //                    System.out.println("GSA [" + gsa.getUid() + "] running on Machine [" + gsa.getMachine().getHostAddress());
 //                    for (AgentProcessDetails processDetails : gsa.getProcessesDetails()) {

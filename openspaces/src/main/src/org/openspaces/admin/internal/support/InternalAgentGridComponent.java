@@ -8,8 +8,6 @@ import org.openspaces.admin.gsa.GridServiceAgent;
  */
 public interface InternalAgentGridComponent extends AgentGridComponent, InternalGridComponent {
 
-    int getAgentId();
-
     String getAgentUid();
 
     void setGridServiceAgent(GridServiceAgent gridServiceAgent);

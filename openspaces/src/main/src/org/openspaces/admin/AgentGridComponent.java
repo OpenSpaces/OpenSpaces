@@ -32,6 +32,11 @@ public interface AgentGridComponent extends GridComponent {
     GridServiceAgent getGridServiceAgent();
 
     /**
+     * Retruns the agent id of the component.
+     */
+    int getAgentId();
+
+    /**
      * Kills the grid component. The Grid Service Agent will not try to start it (as it does when abnormal
      * termination of the component occurs).
      */
