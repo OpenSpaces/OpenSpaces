@@ -328,7 +328,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
             String deployedProcessingUnitsLocation = workLocation.getAbsolutePath() + "/processing-units";
 
-            deployPath = new File(deployedProcessingUnitsLocation + "/" + deployName);
+            deployPath = new File(deployedProcessingUnitsLocation + "/" + deployName.replace('.', '_'));
             FileSystemUtils.deleteRecursively(deployPath);
             deployPath.mkdirs();
 
