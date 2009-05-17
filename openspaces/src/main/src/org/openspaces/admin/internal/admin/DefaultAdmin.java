@@ -330,11 +330,11 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void pushEvent(Object listener, Runnable notifier) {
-        eventsQueue[Math.abs(listener.hashCode()) % eventsExecutorServices.length].add(new LoggerRunnable(notifier));
+        eventsQueue[Math.abs(listener.hashCode() % eventsExecutorServices.length)].add(new LoggerRunnable(notifier));
     }
 
     public synchronized void pushEventAsFirst(Object listener, Runnable notifier) {
-        eventsQueue[Math.abs(listener.hashCode()) % eventsExecutorServices.length].addFirst(new LoggerRunnable(notifier));
+        eventsQueue[Math.abs(listener.hashCode() % eventsExecutorServices.length)].addFirst(new LoggerRunnable(notifier));
     }
 
     public synchronized void flushEvents() {
@@ -347,7 +347,7 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void raiseEvent(Object listener, Runnable notifier) {
-        eventsExecutorServices[Math.abs(listener.hashCode()) % eventsExecutorServices.length].submit(new LoggerRunnable(notifier));
+        eventsExecutorServices[Math.abs(listener.hashCode() % eventsExecutorServices.length)].submit(new LoggerRunnable(notifier));
     }
 
     public synchronized void addGridServiceAgent(InternalGridServiceAgent gridServiceAgent, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
