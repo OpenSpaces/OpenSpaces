@@ -244,7 +244,7 @@ public class Deploy {
         initDeployAdmin();
 
         // check if the pu to deploy is an actual file on the file system and ends with jar
-        if (puFile.exists() && (puFile.getName().endsWith(".jar") || puFile.getName().endsWith(".war"))) {
+        if (puFile.exists() && (puFile.getName().endsWith(".zip") || puFile.getName().endsWith(".jar") || puFile.getName().endsWith(".war"))) {
             // we deploy a jar file, upload it to all the GSMs
             uploadPU(puPath, puFile);
             if (deletePUFile) {
