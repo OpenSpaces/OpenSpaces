@@ -48,6 +48,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import com.gigaspaces.start.SystemBoot;
+
 /**
  * Bootstap servlet context listener allowing to get the {@link org.openspaces.core.cluster.ClusterInfo},
  * {@link org.openspaces.core.properties.BeanLevelProperties}, and handle an optional pu.xml file within
@@ -131,8 +133,8 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
             }
             if (clusterInfo != null) {
                 applicationContext.addBeanPostProcessor(new ClusterInfoBeanPostProcessor(clusterInfo));
+                applicationContext.addBeanFactoryPostProcessor(new ClusterInfoPropertyPlaceholderConfigurer(clusterInfo));
             }
-            applicationContext.addBeanFactoryPostProcessor(new ClusterInfoPropertyPlaceholderConfigurer(clusterInfo));
             // "start" the application context
             applicationContext.refresh();
 
@@ -142,7 +144,7 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
                 servletContext.setAttribute(beanName, applicationContext.getBean(beanName));
             }
 
-            if (clusterInfo != null) {
+            if (clusterInfo != null && SystemBoot.isRunningWithinGSC()) {
                 final String key = clusterInfo.getName() + clusterInfo.getRunningNumber();
 
                 SharedServiceData.addServiceDetails(key, new Callable() {
@@ -194,7 +196,7 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
         }
 
         // set the class loader used so the service bean can use it
-        if (clusterInfo != null) {
+        if (clusterInfo != null && SystemBoot.isRunningWithinGSC()) {
             SharedServiceData.putWebAppClassLoader(clusterInfo.getName() + clusterInfo.getRunningNumber(), Thread.currentThread().getContextClassLoader());
         }
     }
