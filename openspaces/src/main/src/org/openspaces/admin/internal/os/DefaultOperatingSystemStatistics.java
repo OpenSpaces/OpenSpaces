@@ -111,16 +111,8 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
         return StatisticsUtils.computePerc(getDetails().getTotalPhysicalMemorySizeInBytes() - getActualFreePhysicalMemorySizeInBytes(), getDetails().getTotalPhysicalMemorySizeInBytes());
     }
 
-    public double getSystemLoadAverage() {
-        return stats.getSystemLoadAverage();
-    }
-
     public double getCpuPerc() {
         return stats.getCpuPerc();
-    }
-
-    public long getOpenFilesCur() {
-        return stats.getOpenFilesCur();
     }
 
     public String getCpuPercFormatted() {

@@ -70,8 +70,4 @@ public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
     public String getHostAddress() {
         return details.getHostAddress();
     }
-
-    public long getOpenFilesMax() {
-        return details.getOpenFilesMax();
-    }
 }

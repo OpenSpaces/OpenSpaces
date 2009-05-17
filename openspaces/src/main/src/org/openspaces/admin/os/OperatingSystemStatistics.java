@@ -79,19 +79,12 @@ public interface OperatingSystemStatistics {
     double getActualPhysicalMemoryUsedPerc();
 
 
-    double getSystemLoadAverage();
-
     /**
      * Returns the combined cpu perc (User + Sys + Nice + Wait)
      */
     double getCpuPerc();
 
     String getCpuPercFormatted();
-
-    /**
-     * Returns the current open files descriptors.
-     */
-    long getOpenFilesCur();
 
     /**
      * Returns the network statistics per network device.

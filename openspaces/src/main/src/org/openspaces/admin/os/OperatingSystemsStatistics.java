@@ -68,10 +68,6 @@ public interface OperatingSystemsStatistics {
     double getActualFreePhysicalMemorySizeInGB();
 
 
-    double getTotalSystemLoadAverage();
-
-    double getSystemLoadAverage();
-
     /**
      * Returns the combined cpu perc (User + Sys + Nice + Wait)
      */

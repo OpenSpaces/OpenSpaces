@@ -112,9 +112,4 @@ public interface OperatingSystemDetails {
      * Returns the (local) host address of the OS.
      */
     String getHostAddress();
-
-    /**
-     * Returns the maximum open files descriptors allowed for the operating system.
-     */
-    long getOpenFilesMax();
 }

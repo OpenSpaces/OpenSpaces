@@ -116,31 +116,6 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
         return StatisticsUtils.convertToGB(getActualFreePhysicalMemorySizeInBytes());
     }
 
-    public double getTotalSystemLoadAverage() {
-        double total = 0;
-        for (OperatingSystemStatistics stat : stats) {
-            if (stat.getSystemLoadAverage() != -1) {
-                total += stat.getSystemLoadAverage();
-            }
-        }
-        return total;
-    }
-
-    public double getSystemLoadAverage() {
-        int count = 0;
-        double total = 0;
-        for (OperatingSystemStatistics stat : stats) {
-            if (stat.getSystemLoadAverage() != -1) {
-                count++;
-                total += stat.getSystemLoadAverage();
-            }
-        }
-        if (count == 0) {
-            return -1;
-        }
-        return total / count;
-    }
-
     public double getCpuPerc() {
         int count = 0;
         double total = 0;
