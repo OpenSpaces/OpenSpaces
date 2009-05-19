@@ -58,7 +58,7 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
         return processingUnitInstances.getInstancesIt();
     }
 
-    public ProcessingUnitInstance[] getProcessingUnitInsances() {
+    public ProcessingUnitInstance[] getProcessingUnitInstances() {
         return processingUnitInstances.getInstances();
     }
 

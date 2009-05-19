@@ -115,35 +115,6 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
     public static final String JETTY_INSTANCE_PROP = "jetty.instance";
 
     /**
-     * A deploy property that controls if Jetty will store the session on the Space. Just by specifying the
-     * url it will automatically enable it.
-     */
-    public static final String JETTY_SESSIONS_URL = "jetty.sessions.spaceUrl";
-
-    /**
-     * How often the scavenger thread will run in order to check for expired sessions. Set in
-     * <b>seconds</b> and defaults to <code>60 * 5</code> seconds (5 minutes).
-     */
-    public static final String JETTY_SESSIONS_SCAVENGE_PERIOD = "jetty.sessions.scavengePeriod";
-
-    /**
-     * How often an actual update of a <b>non dirty</b> session will be performed to the Space. Set in
-     * <b>seconds</b> and defaults to <code>60</code> seconds.
-     */
-    public static final String JETTY_SESSIONS_SAVE_PERIOD = "jetty.sessions.savePeriod";
-
-    /**
-     * The lease of the {@link org.openspaces.jee.sessions.jetty.SessionData} that is written to the Space. Set
-     * in <b>seconds</b> and defaults to FOREVER.
-     */
-    public static final String JETTY_SESSIONS_LEASE = "jetty.sessions.lease";
-
-    /**
-     * Controls, using a deployment property, the timeout value of sessions. Set in <b>minutes</b>.
-     */
-    public static final String JETTY_SESSIONS_TIMEOUT = "jetty.sessions.timeout";
-
-    /**
      * The deployment property controlling if JMX is enabled or not. Defaults to <code>false</code>
      * (JMX is disabled).
      */
@@ -434,48 +405,6 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             // resulting in not being able to deploy again the application (failure to write the file again)
             if (!webAppContext.getInitParams().containsKey("org.mortbay.jetty.servlet.Default.useFileMappedBuffer")) {
                 webAppContext.getInitParams().put("org.mortbay.jetty.servlet.Default.useFileMappedBuffer", "false");
-            }
-
-            // automatically enable GigaSpaces Session Manager when passing the relevant property
-            String sessionsSpaceUrl = beanLevelProperties.getContextProperties().getProperty(JETTY_SESSIONS_URL);
-            if (sessionsSpaceUrl != null) {
-                GigaSessionManager gigaSessionManager = new GigaSessionManager();
-                gigaSessionManager.setSpaceUrl(sessionsSpaceUrl);
-
-                String scavangePeriod = beanLevelProperties.getContextProperties().getProperty(JETTY_SESSIONS_SCAVENGE_PERIOD);
-                if (scavangePeriod != null) {
-                    gigaSessionManager.setScavengePeriod(Integer.parseInt(scavangePeriod));
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Setting scavenge period to [" + scavangePeriod + "] seconds");
-                    }
-                }
-                String savePeriod = beanLevelProperties.getContextProperties().getProperty(JETTY_SESSIONS_SAVE_PERIOD);
-                if (savePeriod != null) {
-                    gigaSessionManager.setSavePeriod(Integer.parseInt(savePeriod));
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Setting save period to [" + savePeriod + "] seconds");
-                    }
-                }
-                String lease = beanLevelProperties.getContextProperties().getProperty(JETTY_SESSIONS_LEASE);
-                if (lease != null) {
-                    gigaSessionManager.setLease(Long.parseLong(lease));
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Setting lease to [" + lease + "] milliseconds");
-                    }
-                }
-                String sessionTimeout = beanLevelProperties.getContextProperties().getProperty(JETTY_SESSIONS_TIMEOUT);
-                if (sessionTimeout != null) {
-                    gigaSessionManager.setMaxInactiveInterval( Integer.parseInt(sessionTimeout) * 60 );
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Setting session timeout to [" + sessionTimeout + "] seconds");
-                    }
-                }
-
-                GigaSessionIdManager sessionIdManager = new GigaSessionIdManager(jettyHolder.getServer());
-                sessionIdManager.setWorkerName(clusterInfo.getName() + clusterInfo.getRunningNumberOffset1());
-                gigaSessionManager.setIdManager(sessionIdManager);
-
-                webAppContext.getSessionHandler().setSessionManager(gigaSessionManager);
             }
 
             HandlerContainer container = jettyHolder.getServer();

@@ -16,6 +16,7 @@
 
 package org.openspaces.pu.container.jee.context;
 
+import com.gigaspaces.start.SystemBoot;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.SharedServiceData;
@@ -38,6 +39,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -47,8 +49,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Callable;
-
-import com.gigaspaces.start.SystemBoot;
 
 /**
  * Bootstap servlet context listener allowing to get the {@link org.openspaces.core.cluster.ClusterInfo},
@@ -78,6 +78,8 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
     private static final String MARSHALLED_STORE = "/WEB-INF/gsstore";
     private static final String MARSHALLED_CLUSTER_INFO = MARSHALLED_STORE + "/cluster-info";
     private static final String MARSHALLED_BEAN_LEVEL_PROPERTIES = MARSHALLED_STORE + "/bean-level-properties";
+
+    private volatile ServletContextListener jeeContainerContextListener;
 
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
@@ -195,6 +197,26 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
             logger.debug("No [" + ApplicationContextProcessingUnitContainerProvider.DEFAULT_PU_CONTEXT_LOCATION + "] to load");
         }
 
+        // load jee specific context listener
+        if (beanLevelProperties != null) {
+            String jeeContainer = beanLevelProperties.getContextProperties().getProperty("jee.container", "jetty");
+            String className = "org.openspaces.pu.container.jee." + jeeContainer + "." + StringUtils.capitalize(jeeContainer) + "WebApplicationContextListener";
+            Class clazz = null;
+            try {
+                clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+            } catch (ClassNotFoundException e) {
+                // no class, ignore
+            }
+            if (clazz != null) {
+                try {
+                    jeeContainerContextListener = (ServletContextListener) clazz.newInstance();
+                    jeeContainerContextListener.contextInitialized(servletContextEvent);
+                } catch (Exception e) {
+                    logger.warn("Failed to create jee container specific context listener [" + className + "]", e);
+                }
+            }
+        }
+
         // set the class loader used so the service bean can use it
         if (clusterInfo != null && SystemBoot.isRunningWithinGSC()) {
             SharedServiceData.putWebAppClassLoader(clusterInfo.getName() + clusterInfo.getRunningNumber(), Thread.currentThread().getContextClassLoader());
@@ -202,6 +224,9 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
     }
 
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
+        if (jeeContainerContextListener != null) {
+            jeeContainerContextListener.contextDestroyed(servletContextEvent);
+        }
         ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) servletContextEvent.getServletContext().getAttribute(JeeProcessingUnitContainerProvider.APPLICATION_CONTEXT_CONTEXT);
         if (applicationContext != null && applicationContext.isActive()) {
             applicationContext.close();

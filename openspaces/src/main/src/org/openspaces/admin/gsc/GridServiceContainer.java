@@ -58,7 +58,7 @@ public interface GridServiceContainer extends AgentGridComponent, Iterable<Proce
     /**
      * Returns the processing unit instances that are currently deployed within the grid service container.
      */
-    ProcessingUnitInstance[] getProcessingUnitInsances();
+    ProcessingUnitInstance[] getProcessingUnitInstances();
 
     /**
      * Returns an event manager allowing to register for processing unit instance additions to the container.

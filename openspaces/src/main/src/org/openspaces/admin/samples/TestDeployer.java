@@ -33,7 +33,7 @@ public class TestDeployer {
         admin.getGridServiceContainers().waitFor(3);
         GridServiceContainer emptyContainer = null;
         for (GridServiceContainer gridServiceContainer : admin.getGridServiceContainers()) {
-            if (gridServiceContainer.getProcessingUnitInsances().length == 0) {
+            if (gridServiceContainer.getProcessingUnitInstances().length == 0) {
                 emptyContainer = gridServiceContainer;
                 break;
             }

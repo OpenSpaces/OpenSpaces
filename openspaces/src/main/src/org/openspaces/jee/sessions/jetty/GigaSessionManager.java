@@ -22,6 +22,8 @@ import net.jini.core.lease.Lease;
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.core.properties.BeanLevelProperties;
+import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.space.UrlSpaceConfigurer;
 import org.openspaces.pu.container.jee.jetty.JettyJeeProcessingUnitContainerProvider;
 import org.springframework.context.ApplicationContext;
@@ -58,6 +60,10 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
 
     private String spaceUrl;
 
+    private ClusterInfo clusterInfo;
+
+    private BeanLevelProperties beanLevelProperties;
+
     private long lease = Lease.FOREVER;
 
     protected int _scavengePeriodMs = 1000 * 60 * 5; //5mins
@@ -93,21 +99,9 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
                 throw new IllegalStateException("No url for space");
 
             if (spaceUrl.startsWith("bean://")) {
-                ApplicationContext applicationContext = JettyJeeProcessingUnitContainerProvider.getCurrentApplicationContext();
-                if (applicationContext == null) {
-                    throw new IllegalStateException("Failed to find thread bounded application context");
-                }
-                Object bean = applicationContext.getBean(spaceUrl.substring("bean://".length()));
-                if (bean instanceof GigaSpace) {
-                    space = ((GigaSpace) bean).getSpace();
-                } else if (bean instanceof IJSpace) {
-                    space = (IJSpace) bean;
-                } else {
-                    throw new IllegalArgumentException("Bean [" + bean + "] is not of either GigaSpace type or IJSpace type");
-                }
+                throw new IllegalArgumentException("bean:// is only supported when deploying into the service grid");
             } else {
-                urlSpaceConfigurer = new UrlSpaceConfigurer(spaceUrl)
-                .clusterInfo(JettyJeeProcessingUnitContainerProvider.getCurrentClusterInfo());
+                urlSpaceConfigurer = new UrlSpaceConfigurer(spaceUrl).clusterInfo(clusterInfo);
                 space = urlSpaceConfigurer.space();
             }
         }
@@ -218,6 +212,22 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
 
     public String getSpaceUrl() {
         return spaceUrl;
+    }
+
+    public ClusterInfo getClusterInfo() {
+        return clusterInfo;
+    }
+
+    public void setClusterInfo(ClusterInfo clusterInfo) {
+        this.clusterInfo = clusterInfo;
+    }
+
+    public BeanLevelProperties getBeanLevelProperties() {
+        return beanLevelProperties;
+    }
+
+    public void setBeanLevelProperties(BeanLevelProperties beanLevelProperties) {
+        this.beanLevelProperties = beanLevelProperties;
     }
 
     /**
