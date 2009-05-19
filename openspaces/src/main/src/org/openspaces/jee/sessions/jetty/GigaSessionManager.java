@@ -18,6 +18,7 @@ package org.openspaces.jee.sessions.jetty;
 
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.SQLQuery;
+import com.j_spaces.core.client.ISpaceProxy;
 import net.jini.core.lease.Lease;
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
@@ -54,7 +55,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessionManager {
 
-    private IJSpace space;
+    private static final String SESSION_DATA_CLASSNAME = SessionData.class.getName();
+
+    private ISpaceProxy space;
 
     private UrlSpaceConfigurer urlSpaceConfigurer;
 
@@ -102,7 +105,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
                 throw new IllegalArgumentException("bean:// is only supported when deploying into the service grid");
             } else {
                 urlSpaceConfigurer = new UrlSpaceConfigurer(spaceUrl).clusterInfo(clusterInfo);
-                space = urlSpaceConfigurer.space();
+                space = (ISpaceProxy) urlSpaceConfigurer.space();
             }
         }
 
@@ -199,7 +202,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
     }
 
     public void setSpace(IJSpace space) {
-        this.space = space;
+        this.space = (ISpaceProxy) space;
     }
 
     public IJSpace getSpace() {
@@ -250,9 +253,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
     public Session getSession(String idInCluster) {
         // TODO do we really need to syncronize on (this) here? It used to be like that
         try {
-            SessionData template = new SessionData();
-            template.setId(idInCluster);
-            SessionData data = fetch(template);
+            SessionData data = fetch(idInCluster);
 
             Session session = null;
 
@@ -443,8 +444,8 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
         if (Log.isDebugEnabled()) Log.debug("Wrote session " + data.toStringExtended());
     }
 
-    protected SessionData fetch(SessionData template) throws Exception {
-        return (SessionData) space.read(template, null, 0);
+    protected SessionData fetch(String sessionId) throws Exception {
+        return (SessionData) space.readById(SESSION_DATA_CLASSNAME, sessionId, sessionId, null, 0, 0, false, null);
     }
 
     protected Object[] findExpiredSessions(long timestamp) throws Exception {
@@ -480,6 +481,8 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
 
         protected Session(SessionData data) {
             super(data.getCreated(), data.getId());
+            _accessed = data.getAccessed();
+            _lastAccessed = data.getLastAccessed();
             _data = data;
             _values = data.getAttributeMap();
             if (Log.isDebugEnabled()) Log.debug("New Session from existing session data " + _data.toStringExtended());
