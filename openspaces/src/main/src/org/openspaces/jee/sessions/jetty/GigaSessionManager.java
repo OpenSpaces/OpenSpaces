@@ -22,12 +22,9 @@ import com.j_spaces.core.client.ISpaceProxy;
 import net.jini.core.lease.Lease;
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
-import org.openspaces.core.GigaSpace;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.space.UrlSpaceConfigurer;
-import org.openspaces.pu.container.jee.jetty.JettyJeeProcessingUnitContainerProvider;
-import org.springframework.context.ApplicationContext;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSessionEvent;

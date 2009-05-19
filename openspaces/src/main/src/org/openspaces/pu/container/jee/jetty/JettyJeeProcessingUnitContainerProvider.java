@@ -31,8 +31,6 @@ import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
 import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
-import org.openspaces.jee.sessions.jetty.GigaSessionIdManager;
-import org.openspaces.jee.sessions.jetty.GigaSessionManager;
 import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
