@@ -391,7 +391,7 @@ public class Deploy {
         } catch (Exception e) {
             // ignore, no file
         }
-        puPropsURL = new URL(root, puPath + "pu.properties");
+        puPropsURL = new URL(root, puPath + "/pu.properties");
         try {
             InputStream is = puPropsURL.openStream();
             if (is != null) {
