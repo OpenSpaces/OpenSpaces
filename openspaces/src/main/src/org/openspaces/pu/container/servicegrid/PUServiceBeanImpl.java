@@ -17,6 +17,7 @@
 package org.openspaces.pu.container.servicegrid;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
+import com.gigaspaces.grid.zone.ZoneHelper;
 import com.gigaspaces.jvm.JVMDetails;
 import com.gigaspaces.jvm.JVMHelper;
 import com.gigaspaces.jvm.JVMStatistics;
@@ -27,7 +28,6 @@ import com.gigaspaces.operatingsystem.OSDetails;
 import com.gigaspaces.operatingsystem.OSHelper;
 import com.gigaspaces.operatingsystem.OSStatistics;
 import com.gigaspaces.start.Locator;
-import com.gigaspaces.grid.zone.ZoneHelper;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.client.SpaceURL;
@@ -475,7 +475,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         ArrayList<Object> serviceDetails = buildServiceDetails();
 
         buildServiceMonitors();
-        
+
         this.puDetails = new PUDetails(context.getParentServiceID(), clusterInfo, beanLevelProperties, serviceDetails.toArray(new Object[serviceDetails.size()]));
 
         if (container instanceof ApplicationContextProcessingUnitContainer) {
@@ -644,18 +644,14 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         return (memberAliveIndicators != null && memberAliveIndicators.length > 0);
     }
 
-    public boolean isAlive() {
+    public boolean isAlive() throws Exception {
         if (memberAliveIndicators == null || memberAliveIndicators.length == 0) {
             return true;
         }
         boolean alive = false;
         for (Callable<Boolean> memberAliveIndicator : memberAliveIndicators) {
-            try {
-                alive = memberAliveIndicator.call();
-                if (!alive) {
-                    break;
-                }
-            } catch (Exception e) {
+            alive = memberAliveIndicator.call();
+            if (!alive) {
                 break;
             }
         }

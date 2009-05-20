@@ -38,9 +38,10 @@ public interface PUServiceBean extends NIOInfoProvider, OSInfoProvider, JVMInfoP
     boolean isMemberAliveEnabled() throws RemoteException;
 
     /**
-     * Return <code>true</code> if the member is alive or not.
+     * Return <code>true</code> if the member is alive or not. Exception indicates that
+     * the member is not alive (and allows for further information).
      */
-    boolean isAlive() throws RemoteException;
+    boolean isAlive() throws RemoteException, Exception;
 
     Object[] listServiceDetails() throws RemoteException;
 
