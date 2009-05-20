@@ -37,7 +37,7 @@ done
 export VELOCITY_JARS
 
 
-COMMAND_LINE="${JAVACMD} ${JAVA_OPTIONS} $bootclasspath -Dlb.vmDir="${JSHOMEDIR}/tools/apache" ${RMI_OPTIONS} ${LOOKUP_LOCATORS_PROP} ${LOOKUP_GROUPS_PROP} -Djava.security.policy=${POLICY} -Dcom.gs.home=${JSHOMEDIR} -classpath "${PRE_CLASSPATH}${CPS}${GS_JARS}${CPS}${SPRING_JARS}${CPS}${JDBC_JARS}${CPS}{VELOCITY_JARS}${CPS}${POST_CLASSPATH}" org.openspaces.pu.container.jee.lb.apache.ApacheLoadBalancerAgent $*"
+COMMAND_LINE="${JAVACMD} ${JAVA_OPTIONS} $bootclasspath -Dlb.vmDir="${JSHOMEDIR}/tools/apache" ${RMI_OPTIONS} ${LOOKUP_LOCATORS_PROP} ${LOOKUP_GROUPS_PROP} -Djava.security.policy=${POLICY} -Dcom.gs.home=${JSHOMEDIR} -classpath "${PRE_CLASSPATH}${CPS}${GS_JARS}${CPS}${SPRING_JARS}${CPS}${JDBC_JARS}${CPS}${VELOCITY_JARS}${CPS}${POST_CLASSPATH}" org.openspaces.pu.container.jee.lb.apache.ApacheLoadBalancerAgent $*"
 
 echo
 echo
