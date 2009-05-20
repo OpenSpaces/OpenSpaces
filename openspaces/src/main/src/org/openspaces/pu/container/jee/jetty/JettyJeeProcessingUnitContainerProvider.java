@@ -50,8 +50,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.net.BindException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * An implementation of {@link org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider} that
@@ -403,6 +402,15 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             // resulting in not being able to deploy again the application (failure to write the file again)
             if (!webAppContext.getInitParams().containsKey("org.mortbay.jetty.servlet.Default.useFileMappedBuffer")) {
                 webAppContext.getInitParams().put("org.mortbay.jetty.servlet.Default.useFileMappedBuffer", "false");
+            }
+
+            // by default, the web app context will delegate log4j and commons logging to the parent class loader
+            // disable that
+            if (beanLevelProperties.getContextProperties().getProperty("com.gs.pu.jee.jetty.modifySystemClasses", "true").equalsIgnoreCase("true")) {
+                Set<String> systemClasses = new HashSet<String>(Arrays.asList(webAppContext.getSystemClasses()));
+                systemClasses.remove("org.apache.commons.logging.");
+                systemClasses.remove("org.apache.log4j.");
+                webAppContext.setSystemClasses(systemClasses.toArray(new String[systemClasses.size()]));
             }
 
             HandlerContainer container = jettyHolder.getServer();
