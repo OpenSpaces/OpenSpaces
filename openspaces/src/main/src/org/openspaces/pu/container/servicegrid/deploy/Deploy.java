@@ -391,6 +391,16 @@ public class Deploy {
         } catch (Exception e) {
             // ignore, no file
         }
+        puPropsURL = new URL(root, puPath + "pu.properties");
+        try {
+            InputStream is = puPropsURL.openStream();
+            if (is != null) {
+                beanLevelProperties.getContextProperties().load(is);
+                is.close();
+            }
+        } catch (Exception e) {
+            // ignore, no file
+        }
 
         //deploy to sg
         return loadDeployment(puString, codeserver, sla, puPath, overridePuName, BeanLevelPropertiesParser.parse(beanLevelProperties, params));
