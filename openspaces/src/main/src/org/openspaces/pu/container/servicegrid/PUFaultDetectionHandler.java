@@ -88,6 +88,7 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
 
     class ServiceAdminManager implements ServiceMonitor {
 
+        int retriesCount = 0;
         Throwable lastThrown;
         ServiceDetails serviceDetails = new ServiceDetails();
 
@@ -151,20 +152,25 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
                     if (logger.isLoggable(Level.FINEST)) {
                         logger.finest("isAlive() successfully returned for service: " + serviceDetails);
                     }
+                    retriesCount = 0;
                 } else {
                     if (logger.isLoggable(Level.FINER)) {
                         logger.log(Level.FINER, "isAlive() failed for service: " + serviceDetails);
                     }
+                    ++retriesCount;
                 }
 
                 return isAlive;
             } catch (Exception e) {
 
                 if (logger.isLoggable(Level.FINER)) {
-                    logger.log(Level.FINER, "Failed reaching service: " + serviceDetails + ", Reason: " + e, e);
+                    String retryMsg = retriesCount == 0 ? "1st failure, retry..." : "retry [" + retriesCount + "]";
+                    logger.log(Level.FINER, "Failed reaching service: " + serviceDetails + ", Reason: " + e + " - "
+                            + retryMsg, e);
                 }
 
                 lastThrown = e;
+                ++retriesCount;
 
                 return false;
             }
