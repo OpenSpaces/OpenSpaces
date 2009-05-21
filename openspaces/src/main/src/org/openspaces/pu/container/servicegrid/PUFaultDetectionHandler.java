@@ -147,8 +147,14 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
 
                 final boolean isAlive = ((PUServiceBean) proxy).isAlive();
 
-                if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("isAlive() succesfully returned: [" + isAlive + "] for service: " + serviceDetails);
+                if (isAlive) {
+                    if (logger.isLoggable(Level.FINEST)) {
+                        logger.finest("isAlive() successfully returned for service: " + serviceDetails);
+                    }
+                } else {
+                    if (logger.isLoggable(Level.FINER)) {
+                        logger.log(Level.FINER, "isAlive() failed for service: " + serviceDetails);
+                    }
                 }
 
                 return isAlive;
