@@ -63,6 +63,8 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Exports a list of services (beans) as remote services with the Space as the transport layer. All
@@ -143,6 +145,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
     private MethodInvocationCache methodInvocationCache = new MethodInvocationCache();
 
     private volatile boolean initialized = false;
+
+    private CountDownLatch initializationLatch = new CountDownLatch(1);
 
     /**
      * Sets the list of services that will be exported as remote services. Each service will have
@@ -248,7 +252,6 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
     public void onApplicationEvent(ApplicationEvent applicationEvent) {
         if (applicationEvent instanceof ContextRefreshedEvent) {
-            initialized = true;
             Assert.notNull(services, "services property is required");
             // go over the services and create the interface to service lookup
             int naCounter = 0;
@@ -270,6 +273,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
 
                 serviceToServiceInfoMap.put(serviceInfo.getService(), serviceInfo);
             }
+            initialized = true;
+            initializationLatch.countDown();
         }
     }
 
@@ -320,6 +325,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
     public void onEvent(AsyncSpaceRemotingEntry remotingEntry, GigaSpace gigaSpace, TransactionStatus txStatus, Object source)
             throws RemoteAccessException {
 
+        waitTillInitialized();
+        
         String lookupName = remotingEntry.lookupName;
         if (lookupName.endsWith(asyncInterfaceSuffix)) {
             lookupName = lookupName.substring(0, lookupName.length() - asyncInterfaceSuffix.length());
@@ -435,6 +442,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
     // Executor execution
 
     public Object invokeExecutor(ExecutorRemotingTask task) throws Throwable {
+        waitTillInitialized();
         String lookupName = task.getLookupName();
         if (lookupName.endsWith(asyncInterfaceSuffix)) {
             lookupName = lookupName.substring(0, lookupName.length() - asyncInterfaceSuffix.length());
@@ -500,6 +508,20 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
         return this.filterProvider;
     }
 
+    private void waitTillInitialized() throws RemoteLookupFailureException {
+        if (initialized) {
+            return;
+        }
+        try {
+            initializationLatch.await(60, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new RemoteLookupFailureException("Space remoting service exporter interruped while waiting for initialization", e);
+        }
+        if (!initialized) {
+            throw new RemoteLookupFailureException("Space remoting service exporter not initialized yet");
+        }
+    }
+
     /**
      * The remoting service invoker is a Space filter that acts as means to preform sync remote service
      * execution including broadcast execution. The filter registers for
@@ -535,6 +557,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Asyn
             if (!SPACE_REMOTING_ENTRY_CLASSNAME.equals(entry.getClassName())) {
                 return;
             }
+            waitTillInitialized();
             SyncSpaceRemotingEntry remotingEntry;
             try {
                 remotingEntry = (SyncSpaceRemotingEntry) entry.getObject(space);
