@@ -64,6 +64,7 @@ import java.util.concurrent.Future;
  *
  * @author kimchy
  * @see org.openspaces.remoting.SpaceRemotingServiceExporter
+ * @deprecated Use {@link org.openspaces.remoting.ExecutorSpaceRemotingProxyFactoryBean} and executor based remoting instead.
  */
 public class SyncSpaceRemotingProxyFactoryBean extends RemoteAccessor implements FactoryBean, InitializingBean,
         MethodInterceptor, RemotingInvoker {

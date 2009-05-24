@@ -28,6 +28,7 @@ import java.lang.annotation.Target;
  * @author kimchy
  * @see SyncSpaceRemotingProxyFactoryBean
  * @see org.openspaces.remoting.RemotingAnnotationBeanPostProcessor
+ * @deprecated Use {@link org.openspaces.remoting.ExecutorProxy} and executor based remoting instead.
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
