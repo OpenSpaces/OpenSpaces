@@ -175,5 +175,13 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
                 return false;
             }
         }
+
+        /*
+         * @see java.lang.Object#toString()
+         */
+        @Override
+        public String toString() {
+            return super.toString() + " " + serviceDetails;
+        }
     }
 }
