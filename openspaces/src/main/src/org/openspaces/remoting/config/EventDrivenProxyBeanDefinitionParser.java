@@ -16,7 +16,7 @@
 
 package org.openspaces.remoting.config;
 
-import org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean;
+import org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -25,11 +25,11 @@ import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
 /**
- * A bean definition builder for {@link AsyncSpaceRemotingProxyFactoryBean}.
+ * A bean definition builder for {@link org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean}.
  * 
  * @author kimchy
  */
-public class AsyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
+public class EventDrivenProxyBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
     private static final String GIGA_SPACE = "giga-space";
 
@@ -49,8 +49,8 @@ public class AsyncProxyBeanDefinitionParser extends AbstractSingleBeanDefinition
 
     private static final String ASPECT = "aspect";
     
-    protected Class<AsyncSpaceRemotingProxyFactoryBean> getBeanClass(Element element) {
-        return AsyncSpaceRemotingProxyFactoryBean.class;
+    protected Class<EventDrivenSpaceRemotingProxyFactoryBean> getBeanClass(Element element) {
+        return EventDrivenSpaceRemotingProxyFactoryBean.class;
     }
 
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {

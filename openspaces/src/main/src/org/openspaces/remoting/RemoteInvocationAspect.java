@@ -23,7 +23,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * to add retry in case of a failure, security, or something similar.
  *
  * @author kimchy
- * @see AsyncSpaceRemotingProxyFactoryBean
+ * @see EventDrivenSpaceRemotingProxyFactoryBean
  * @see SyncSpaceRemotingProxyFactoryBean
  */
 public interface RemoteInvocationAspect<T> {

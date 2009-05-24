@@ -29,23 +29,23 @@ import java.util.concurrent.TimeoutException;
  *
  * @author kimchy
  */
-public class AsyncRemoteFuture<T> implements Future<T> {
+public class EventDrivenRemoteFuture<T> implements Future<T> {
 
     private GigaSpace gigaSpace;
 
-    private AsyncSpaceRemotingEntry remotingEntry;
+    private EventDrivenSpaceRemotingEntry remotingEntry;
 
     private Boolean cancelled;
 
     private SpaceRemotingResult remoteResult;
 
-    private AsyncSpaceRemotingEntry template;
+    private EventDrivenSpaceRemotingEntry template;
 
-    public AsyncRemoteFuture(GigaSpace gigaSpace, AsyncSpaceRemotingEntry remotingEntry) {
+    public EventDrivenRemoteFuture(GigaSpace gigaSpace, EventDrivenSpaceRemotingEntry remotingEntry) {
         this.gigaSpace = gigaSpace;
         this.remotingEntry = remotingEntry;
         try {
-            this.template = ((AsyncSpaceRemotingEntry) remotingEntry.clone()).buildResultTemplate();
+            this.template = ((EventDrivenSpaceRemotingEntry) remotingEntry.clone()).buildResultTemplate();
         } catch (CloneNotSupportedException e) {
             // won't happen
         }

@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
 
 /**
  * Allows to inject a {@link ScriptingExecutor} remoting proxy using
- * {@link org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean}.
+ * {@link org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean}.
  *
  * @author kimchy
  * @see org.openspaces.remoting.RemotingAnnotationBeanPostProcessor
@@ -44,7 +44,7 @@ public @interface AsyncScriptingExecutor {
     /**
      * The timeout value when using this async call in a sync manner.
      *
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setTimeout(long) 
+     * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean#setTimeout(long)
      */
     long timeout() default 5000;
 

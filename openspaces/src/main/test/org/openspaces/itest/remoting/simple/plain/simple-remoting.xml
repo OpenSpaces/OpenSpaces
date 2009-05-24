@@ -36,7 +36,7 @@
                              interface="org.openspaces.itest.remoting.simple.plain.SimpleService" timeout="150000"/>
 
 
-    <os-remoting:async-proxy id="simpleServiceAsync" giga-space="gigaSpace"
+    <os-remoting:event-driven-proxy id="simpleServiceAsync" giga-space="gigaSpace"
                              interface="org.openspaces.itest.remoting.simple.plain.SimpleServiceAsync" timeout="150000"/>
 
     <os-remoting:sync-proxy id="simpleServiceSync" giga-space="gigaSpace" interface="org.openspaces.itest.remoting.simple.plain.SimpleService" />

@@ -20,8 +20,8 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * An extension for {@link java.util.concurrent.ExecutionException} holding both the
- * {@link org.openspaces.remoting.AsyncSpaceRemotingEntry remoteInvocation} and the
- * {@link org.openspaces.remoting.AsyncSpaceRemotingEntry remoteResult} remote result.
+ * {@link SpaceRemotingInvocation remoteInvocation} and the
+ * {@link SpaceRemotingResult remoteResult} remote result.
  *
  * @author kimchy
  */

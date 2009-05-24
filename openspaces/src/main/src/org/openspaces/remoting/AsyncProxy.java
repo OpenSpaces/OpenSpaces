@@ -28,6 +28,7 @@ import java.lang.annotation.Target;
  * @author kimchy
  * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean
  * @see org.openspaces.remoting.RemotingAnnotationBeanPostProcessor
+ * @deprecated Use {@link org.openspaces.remoting.EventDrivenProxy}. Async remoting has been renamed to event driven.
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -36,76 +37,76 @@ public @interface AsyncProxy {
     /**
      * The name of the {@link org.openspaces.core.GigaSpace} instance (representing the Space)
      * that this remote invocation will occur on.
-     *
+     * 
      * <p>If there is only one instance of {@link org.openspaces.core.GigaSpace}, will defualt to
      * it. If not, will throw an exception if not defined.
      */
     String gigaSpace() default "";
 
     /**
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setFifo(boolean) 
+     * @see EventDrivenSpaceRemotingProxyFactoryBean#setFifo(boolean)
      */
     boolean fifo() default false;
 
     /**
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setTimeout(long)
+     * @see EventDrivenSpaceRemotingProxyFactoryBean#setTimeout(long)
      */
     long timeout() default 60000;
 
     /**
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setGlobalOneWay(boolean)
+     * @see EventDrivenSpaceRemotingProxyFactoryBean#setGlobalOneWay(boolean)
      */
     boolean globablOneWay() default false;
 
     /**
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setVoidOneWay(boolean)
+     * @see EventDrivenSpaceRemotingProxyFactoryBean#setVoidOneWay(boolean)
      */
     boolean voidOneWay() default false;
 
     /**
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setAsyncMethodPrefix(String)
+     * @see EventDrivenSpaceRemotingProxyFactoryBean#setAsyncMethodPrefix(String)
      */
-    String asyncMethodPrefix() default AsyncSpaceRemotingProxyFactoryBean.DEFAULT_ASYNC_METHOD_PREFIX;
+    String asyncMethodPrefix() default EventDrivenSpaceRemotingProxyFactoryBean.DEFAULT_ASYNC_METHOD_PREFIX;
 
     /**
      * The bean name that implements this interface.
      *
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setRemoteRoutingHandler(RemoteRoutingHandler)
+     * @see EventDrivenSpaceRemotingProxyFactoryBean#setRemoteRoutingHandler(RemoteRoutingHandler)
      */
     String remoteRoutingHandler() default "";
 
     /**
      * The class that implements this interface.
      *
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setRemoteRoutingHandler(RemoteRoutingHandler)
+     * @see EventDrivenSpaceRemotingProxyFactoryBean#setRemoteRoutingHandler(RemoteRoutingHandler)
      */
     Class remoteRoutingHandlerType() default Object.class;
 
     /**
      * The bean name that implements this interface.
      *
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setMetaArgumentsHandler(MetaArgumentsHandler)
+     * @see EventDrivenSpaceRemotingProxyFactoryBean#setMetaArgumentsHandler(MetaArgumentsHandler)
      */
     String metaArgumentsHandler() default "";
 
     /**
      * The Class that implements this interface.
      *
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setMetaArgumentsHandler(MetaArgumentsHandler)
+     * @see EventDrivenSpaceRemotingProxyFactoryBean#setMetaArgumentsHandler(MetaArgumentsHandler)
      */
     Class metaArgumentsHandlerType() default Object.class;
 
     /**
      * The bean name that implements this interface.
      *
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setRemoteRoutingHandler(RemoteRoutingHandler)
+     * @see EventDrivenSpaceRemotingProxyFactoryBean#setRemoteRoutingHandler(RemoteRoutingHandler)
      */
     String remoteInvocationAspect() default "";
 
     /**
      * The class that implements this interface.
      *
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setRemoteRoutingHandler(RemoteRoutingHandler)
+     * @see EventDrivenSpaceRemotingProxyFactoryBean#setRemoteRoutingHandler(RemoteRoutingHandler)
      */
     Class remoteInvocationAspectType() default Object.class;
 }

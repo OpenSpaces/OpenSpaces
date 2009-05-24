@@ -52,7 +52,7 @@ public class AsyncScriptingProxyConfigurer<T> {
     }
 
     /**
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setTimeout(long)
+     * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean#setTimeout(long)
      */
     public AsyncScriptingProxyConfigurer<T> timeout(long timeout) {
         remotingConfigurer.timeout(timeout);
@@ -60,7 +60,7 @@ public class AsyncScriptingProxyConfigurer<T> {
     }
 
     /**
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setFifo(boolean)
+     * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean#setFifo(boolean)
      */
     public AsyncScriptingProxyConfigurer<T> fifo(boolean fifo) {
         remotingConfigurer.fifo(fifo);

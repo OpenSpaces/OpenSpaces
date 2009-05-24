@@ -33,19 +33,20 @@ import org.openspaces.core.GigaSpace;
  * </pre>
  *
  * @author Uri Cohen
+ * @deprecated Use {@link org.openspaces.remoting.EventDrivenRemotingProxyConfigurer}. Async remoting renamed to event driven.
  */
 public class AsyncRemotingProxyConfigurer<T> {
 
-    private AsyncSpaceRemotingProxyFactoryBean asyncFactoryBean;
+    private EventDrivenSpaceRemotingProxyFactoryBean asyncFactoryBean;
 
     public AsyncRemotingProxyConfigurer(GigaSpace gigaSpace, Class<T> serviceInterface) {
-        asyncFactoryBean = new AsyncSpaceRemotingProxyFactoryBean();
+        asyncFactoryBean = new EventDrivenSpaceRemotingProxyFactoryBean();
         asyncFactoryBean.setGigaSpace(gigaSpace);
         asyncFactoryBean.setServiceInterface(serviceInterface);
     }
 
     /**
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setGlobalOneWay(boolean)  
+     * @see EventDrivenSpaceRemotingProxyFactoryBean#setGlobalOneWay(boolean)
      */
     public AsyncRemotingProxyConfigurer<T> globalOneWay(boolean globalOneWay) {
         asyncFactoryBean.setGlobalOneWay(globalOneWay);
@@ -53,7 +54,7 @@ public class AsyncRemotingProxyConfigurer<T> {
     }
 
     /**
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setFifo(boolean)
+     * @see EventDrivenSpaceRemotingProxyFactoryBean#setFifo(boolean)
      */
     public AsyncRemotingProxyConfigurer<T> fifo(boolean fifo) {
         asyncFactoryBean.setFifo(fifo);
@@ -61,7 +62,7 @@ public class AsyncRemotingProxyConfigurer<T> {
     }
 
     /**
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setMetaArgumentsHandler(MetaArgumentsHandler)
+     * @see EventDrivenSpaceRemotingProxyFactoryBean#setMetaArgumentsHandler(MetaArgumentsHandler)
      */
     public AsyncRemotingProxyConfigurer<T> metaArgumentsHandler(MetaArgumentsHandler metaArgumentsHandler) {
         asyncFactoryBean.setMetaArgumentsHandler(metaArgumentsHandler);
@@ -69,7 +70,7 @@ public class AsyncRemotingProxyConfigurer<T> {
     }
 
     /**
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#remoteInvocationAspect 
+     * @see EventDrivenSpaceRemotingProxyFactoryBean#remoteInvocationAspect
      */
     public AsyncRemotingProxyConfigurer<T> remoteInvocationAspect(RemoteInvocationAspect remoteInvocationAspect) {
         asyncFactoryBean.setRemoteInvocationAspect(remoteInvocationAspect);
@@ -77,7 +78,7 @@ public class AsyncRemotingProxyConfigurer<T> {
     }
 
     /**
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setVoidOneWay(boolean)
+     * @see EventDrivenSpaceRemotingProxyFactoryBean#setVoidOneWay(boolean)
      */
     public AsyncRemotingProxyConfigurer<T> voidOneWay(boolean voidOneWay) {
         asyncFactoryBean.setVoidOneWay(voidOneWay);
@@ -85,7 +86,7 @@ public class AsyncRemotingProxyConfigurer<T> {
     }
 
     /**
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setTimeout(long)
+     * @see EventDrivenSpaceRemotingProxyFactoryBean#setTimeout(long)
      */
     public AsyncRemotingProxyConfigurer<T> timeout(long timeout) {
         asyncFactoryBean.setTimeout(timeout);
@@ -93,7 +94,7 @@ public class AsyncRemotingProxyConfigurer<T> {
     }
 
     /**
-     * @see org.openspaces.remoting.AsyncSpaceRemotingProxyFactoryBean#setRemoteRoutingHandler(RemoteRoutingHandler)
+     * @see EventDrivenSpaceRemotingProxyFactoryBean#setRemoteRoutingHandler(RemoteRoutingHandler)
      */
     public AsyncRemotingProxyConfigurer<T> remoteRoutingHandler(RemoteRoutingHandler remoteRoutingHandler) {
         asyncFactoryBean.setRemoteRoutingHandler(remoteRoutingHandler);

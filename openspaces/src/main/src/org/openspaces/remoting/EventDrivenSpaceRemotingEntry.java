@@ -29,7 +29,7 @@ import java.io.ObjectOutput;
  *
  * @author kimchy
  */
-public class AsyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemotingInvocation, SpaceRemotingResult,
+public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements SpaceRemotingInvocation, SpaceRemotingResult,
 Cloneable, Externalizable {
 
     static int bitIndexCounter=0;
@@ -68,7 +68,7 @@ Cloneable, Externalizable {
      * Constructs a new Async remoting entry. By default a transient one witn that does not
      * return a lease. Also, by default, this is an invocation entry.
      */
-    public AsyncSpaceRemotingEntry() {
+    public EventDrivenSpaceRemotingEntry() {
         setNOWriteLeaseMode(true);
         makeTransient();
         isInvocation = true;
@@ -115,7 +115,7 @@ Cloneable, Externalizable {
     }
 
 
-    public AsyncSpaceRemotingEntry buildInvocation(String lookupName, String methodName, Object[] arguments) {
+    public EventDrivenSpaceRemotingEntry buildInvocation(String lookupName, String methodName, Object[] arguments) {
         clearResultData();
         this.isInvocation = true;
         this.lookupName = lookupName;
@@ -124,7 +124,7 @@ Cloneable, Externalizable {
         return this;
     }
 
-    public AsyncSpaceRemotingEntry buildResultTemplate() {
+    public EventDrivenSpaceRemotingEntry buildResultTemplate() {
         clearInvocationData();
         clearResultData();
         buildResultUID();
@@ -132,7 +132,7 @@ Cloneable, Externalizable {
         return this;
     }
 
-    public AsyncSpaceRemotingEntry buildResult(Throwable e) {
+    public EventDrivenSpaceRemotingEntry buildResult(Throwable e) {
         clearInvocationData();
         buildResultUID();
         this.isInvocation = false;
@@ -140,7 +140,7 @@ Cloneable, Externalizable {
         return this;
     }
 
-    public AsyncSpaceRemotingEntry buildResult(Object result) {
+    public EventDrivenSpaceRemotingEntry buildResult(Object result) {
         clearInvocationData();
         buildResultUID();
         this.isInvocation = false;
