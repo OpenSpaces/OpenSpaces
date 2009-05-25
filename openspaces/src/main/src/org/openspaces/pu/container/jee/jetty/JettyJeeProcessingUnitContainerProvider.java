@@ -405,8 +405,8 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             }
 
             // by default, the web app context will delegate log4j and commons logging to the parent class loader
-            // disable that
-            if (beanLevelProperties.getContextProperties().getProperty("com.gs.pu.jee.jetty.modifySystemClasses", "true").equalsIgnoreCase("true")) {
+            // allow to disable that
+            if (beanLevelProperties.getContextProperties().getProperty("com.gs.pu.jee.jetty.modifySystemClasses", "false").equalsIgnoreCase("true")) {
                 Set<String> systemClasses = new HashSet<String>(Arrays.asList(webAppContext.getSystemClasses()));
                 systemClasses.remove("org.apache.commons.logging.");
                 systemClasses.remove("org.apache.log4j.");
