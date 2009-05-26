@@ -22,6 +22,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.Arrays;
 
 /**
  * Default implementation of a remoting entry that acts both as a remote invocation and a remote
@@ -277,6 +278,7 @@ Cloneable, Externalizable {
         if (isInvocation) {
             sb.append("lookupName [").append(lookupName).append("]");
             sb.append(" methodName[").append(methodName).append("]");
+            sb.append(" arguments[").append(Arrays.toString(arguments)).append("]");
             sb.append(" routing[").append(routing).append("]");
             sb.append(" oneWay[").append(oneWay).append("]");
         } else {

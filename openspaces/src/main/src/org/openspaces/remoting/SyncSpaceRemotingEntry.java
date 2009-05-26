@@ -19,6 +19,8 @@ package org.openspaces.remoting;
 import com.j_spaces.core.client.MetaDataEntry;
 import net.jini.core.transaction.Transaction;
 
+import java.util.Arrays;
+
 /**
  * Default implementation of a remoting entry that acts both as a remote invocation and a remote
  * result.
@@ -135,6 +137,7 @@ public class SyncSpaceRemotingEntry extends MetaDataEntry implements SpaceRemoti
         if (result == null && ex == null) {
             sb.append("lookupName [").append(lookupName).append("]");
             sb.append(" methodName[").append(methodName).append("]");
+            sb.append(" arguments[").append(Arrays.toString(arguments)).append("]");
             sb.append(" routing[").append(routing).append("]");
             sb.append(" oneWay[").append(oneWay).append("]");
             sb.append(" transaction[").append(transaction).append("]");

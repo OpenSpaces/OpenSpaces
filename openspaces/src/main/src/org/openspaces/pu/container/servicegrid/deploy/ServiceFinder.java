@@ -34,15 +34,13 @@ public class ServiceFinder {
 
 // -------------------------- STATIC METHODS --------------------------
 
-    public static ServiceItem[] find(String name, Class type, long wait, String[] groups, String locators) {
+    public static ServiceItem[] find(String name, Class type, long wait, String[] groups, LookupLocator[] locators) {
         ServiceItem[] result;
         ServiceDiscoveryManager sdm = null;
 
-        LookupLocator[] lookupLocators = BootUtil.toLookupLocators(locators);
-
         try {
             sdm = new ServiceDiscoveryManager(
-                    new LookupDiscoveryManager(groups, lookupLocators, null, ServiceConfigLoader.getConfiguration()),
+                    new LookupDiscoveryManager(groups, locators, null, ServiceConfigLoader.getConfiguration()),
                     new LeaseRenewalManager(),
                     ServiceConfigLoader.getConfiguration()
             );

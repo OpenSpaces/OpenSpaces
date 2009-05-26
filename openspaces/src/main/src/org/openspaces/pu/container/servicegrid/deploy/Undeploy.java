@@ -19,9 +19,11 @@ package org.openspaces.pu.container.servicegrid.deploy;
 import com.gigaspaces.grid.gsm.GSM;
 import com.j_spaces.kernel.PlatformVersion;
 import net.jini.core.lookup.ServiceItem;
+import net.jini.core.discovery.LookupLocator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.core.OperationalStringManager;
+import org.jini.rio.boot.BootUtil;
 import org.openspaces.pu.container.support.CommandLineParser;
 
 import java.util.Arrays;
@@ -36,7 +38,7 @@ public class Undeploy {
 
     private String[] groups;
 
-    private String locators;
+    private LookupLocator[] locators;
 
     private int lookupTimeout = 5000;
 
@@ -76,18 +78,18 @@ public class Undeploy {
         this.groups = groups;
     }
 
-    public String getLocators() {
+    public LookupLocator[] getLocators() {
         if (locators == null) {
             String locatorsProperty = java.lang.System.getProperty("com.gs.jini_lus.locators");
             if (locatorsProperty != null) {
-                locators = locatorsProperty;
+                locators = BootUtil.toLookupLocators(locatorsProperty);
             }
         }
         return locators;
     }
 
     public void setLocators(String locators) {
-        this.locators = locators;
+        this.locators = BootUtil.toLookupLocators(locators);
     }
 
     public void setLookupTimeout(int lookupTimeout) {

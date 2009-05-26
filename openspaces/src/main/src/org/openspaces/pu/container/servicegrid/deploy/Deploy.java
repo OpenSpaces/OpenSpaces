@@ -23,6 +23,7 @@ import com.j_spaces.core.service.ServiceConfigLoader;
 import com.j_spaces.kernel.PlatformVersion;
 import net.jini.config.Configuration;
 import net.jini.core.lookup.ServiceItem;
+import net.jini.core.discovery.LookupLocator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.BootUtil;
@@ -71,7 +72,7 @@ public class Deploy {
 
     private String[] groups;
 
-    private String locators;
+    private LookupLocator[] locators;
 
     private int lookupTimeout = 5000;
 
@@ -87,7 +88,7 @@ public class Deploy {
         if (this.gsm != null) {
             return;
         }
-        info("Searching for GSM in groups " + Arrays.asList(getGroups()) + " and locators [" + getLocators() + "]");
+        info("Searching for GSM in groups " + Arrays.asList(getGroups()) + " and locators [" + Arrays.toString(getLocators()) + "]");
         ServiceItem[] result = ServiceFinder.find(null, GSM.class, lookupTimeout, getGroups(), getLocators());
         if (result != null && result.length > 0) {
             gsm = (GSM) result[0].service;
@@ -133,11 +134,11 @@ public class Deploy {
         return groups;
     }
 
-    public String getLocators() {
+    public LookupLocator[] getLocators() {
         if (locators == null) {
             String locatorsProperty = java.lang.System.getProperty("com.gs.jini_lus.locators");
             if (locatorsProperty != null) {
-                locators = locatorsProperty;
+                locators = BootUtil.toLookupLocators(locatorsProperty);
             }
         }
         return locators;
@@ -148,7 +149,7 @@ public class Deploy {
     }
 
     public void setLocators(String locators) {
-        this.locators = locators;
+        this.locators = BootUtil.toLookupLocators(locators);
     }
 
     public void setLookupTimeout(int lookupTimeout) {
@@ -475,7 +476,7 @@ public class Deploy {
         //load the servicebean opstring
         OpStringLoader opStringLoader = new OpStringLoader();
         opStringLoader.setDefaultGroups(getGroups());
-        opStringLoader.setDefaultLookupLocators(BootUtil.toLookupLocators(getLocators()));
+        opStringLoader.setDefaultLookupLocators(getLocators());
         opStringLoader.setCodebaseOverride(codeserver);
         opString = opStringLoader.parseOperationalString(opstringURL)[0];
         ((OpString) opString).setName(puName);

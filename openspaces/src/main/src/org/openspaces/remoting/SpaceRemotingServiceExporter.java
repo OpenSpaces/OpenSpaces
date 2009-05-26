@@ -572,7 +572,6 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
             entry.setFieldValue("arguments", null);
             entry.setFieldValue("oneWay", null);
 
-
             String lookupName = remotingEntry.lookupName;
             if (lookupName.endsWith(asyncInterfaceSuffix)) {
                 lookupName = lookupName.substring(0, lookupName.length() - asyncInterfaceSuffix.length());
@@ -675,6 +674,13 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
                         remotingEntry.instanceId = clusterInfo.getInstanceId();
                     }
                     space.write(remotingEntry, null, syncEntryWriteLease);
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Wrote(").append(remotingEntry.uid).append(")");
+                    sb.append("Result(").append(retVal).append("), Template ");
+                    for (String fieldName : entry.getFieldsNames()) {
+                        sb.append(fieldName).append("(").append(entry.getFieldValue(fieldName)).append("),");
+                    }
+                    System.out.println(sb.toString());
                 } catch (Exception e1) {
                     if (logger.isErrorEnabled()) {
                         logger.error("Failed to write remoting entry", e1);
