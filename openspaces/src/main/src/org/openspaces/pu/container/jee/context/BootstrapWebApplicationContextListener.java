@@ -37,6 +37,7 @@ import org.openspaces.pu.service.ServiceMonitors;
 import org.openspaces.pu.service.ServiceMonitorsProvider;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
@@ -48,6 +49,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
@@ -118,16 +120,15 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
             logger.debug("No bean level properties found at " + MARSHALLED_BEAN_LEVEL_PROPERTIES);
         }
 
-        Resource[] resources = null;
-        try {
-            resources = new PathMatchingResourcePatternResolver().getResources(ApplicationContextProcessingUnitContainerProvider.DEFAULT_PU_CONTEXT_LOCATION);
-        } catch (IOException e) {
-            // ignore, don't load it
+        Resource resource = null;
+        String realPath = servletContext.getRealPath("/META-INF/spring/pu.xml");
+        if (realPath != null) {
+            resource = new FileSystemResource(realPath);
         }
-        if (resources != null && resources.length > 0) {
-            logger.debug("Loading [" + ApplicationContextProcessingUnitContainerProvider.DEFAULT_PU_CONTEXT_LOCATION + "]");
+        if (resource != null) {
+            logger.debug("Loading [" + resource + "]");
             // create the Spring application context
-            final ResourceApplicationContext applicationContext = new ResourceApplicationContext(resources, null);
+            final ResourceApplicationContext applicationContext = new ResourceApplicationContext(new Resource[] {resource}, null);
             // add config information if provided
             if (beanLevelProperties != null) {
                 applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties, clusterInfo));
