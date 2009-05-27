@@ -19,6 +19,7 @@ package org.openspaces.pu.container.jee.jetty;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.CommonClassLoader;
+import org.jini.rio.boot.SharedServiceData;
 import org.mortbay.jetty.*;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerWrapper;
@@ -51,6 +52,8 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.net.BindException;
 import java.util.*;
+
+import com.j_spaces.kernel.ClassLoaderHelper;
 
 /**
  * An implementation of {@link org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider} that
@@ -435,10 +438,16 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             }
             container.addHandler(webAppContext);
             if (container.isStarted() || container.isStarting()) {
+                ClassLoader origClassLoader = Thread.currentThread().getContextClassLoader();
                 try {
+                    // we set the parent class loader of the web application to be the jee container class loader
+                    // this is to basically to hide the service class loader from it (and openspaces jars and so on)
+                    ClassLoaderHelper.setContextClassLoader(SharedServiceData.getJeeClassLoader("jetty"), true);
                     webAppContext.start();
                 } catch (Exception e) {
                     throw new CannotCreateContainerException("Failed to start web app context", e);
+                } finally {
+                    ClassLoaderHelper.setContextClassLoader(origClassLoader, true);
                 }
             }
             if (webAppContext.isFailed()) {
