@@ -354,6 +354,13 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
         }
 
+        boolean sharedLibEnabled;
+        if (beanLevelProperties.getContextProperties().containsKey("pu.shared-lib.enable")) {
+            sharedLibEnabled = beanLevelProperties.getContextProperties().getProperty("pu.shared-lib").equals("true");
+        } else {
+            sharedLibEnabled = System.getProperty("com.gs.pu.shared-lib.enable", "false").equals("true");
+        }
+
         CommonClassLoader commonClassLoader = CommonClassLoader.getInstance();
         // handles class loader libraries
         if (downloadPU) {
@@ -364,11 +371,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 for (File libFile : libFiles) {
                     libUrls.add(libFile.toURI().toURL());
                 }
-            }
-            ((ServiceClassLoader) contextClassLoader).setSlashPath(deployPath.toURI().toURL());
-            ((ServiceClassLoader) contextClassLoader).setLibPath(libUrls.toArray(new URL[libUrls.size()]));
-            if (logger.isDebugEnabled()) {
-                logger.debug(logMessage("Service Class Loader " + Arrays.toString(((ServiceClassLoader) contextClassLoader).getURLs())));
             }
             // add to common class loader
             List<URL> sharedlibUrls = new ArrayList<URL>();
@@ -386,9 +388,28 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                     sharedlibUrls.add(sharedlibFile.toURI().toURL());
                 }
             }
-            commonClassLoader.addComponent(puName, sharedlibUrls.toArray(new URL[sharedlibUrls.size()]));
-            if (logger.isDebugEnabled()) {
-                logger.debug(logMessage("Common Class Loader " + sharedlibUrls));
+
+            if (sharedLibEnabled) {
+                ((ServiceClassLoader) contextClassLoader).setSlashPath(deployPath.toURI().toURL());
+                ((ServiceClassLoader) contextClassLoader).setLibPath(libUrls.toArray(new URL[libUrls.size()]));
+                if (logger.isDebugEnabled()) {
+                    logger.debug(logMessage("Service Class Loader " + Arrays.toString(((ServiceClassLoader) contextClassLoader).getURLs())));
+                }
+
+                commonClassLoader.addComponent(puName, sharedlibUrls.toArray(new URL[sharedlibUrls.size()]));
+                if (logger.isDebugEnabled()) {
+                    logger.debug(logMessage("Common Class Loader " + sharedlibUrls));
+                }
+            } else {
+                if (sharedlibUrls.size() > 0) {
+                    logger.warn("Using old 'shared-lib' directory, will add jars under it as if it was 'lib'");
+                }
+                libUrls.addAll(sharedlibUrls);
+                ((ServiceClassLoader) contextClassLoader).setSlashPath(deployPath.toURI().toURL());
+                ((ServiceClassLoader) contextClassLoader).setLibPath(libUrls.toArray(new URL[libUrls.size()]));
+                if (logger.isDebugEnabled()) {
+                    logger.debug(logMessage("Service Class Loader " + Arrays.toString(((ServiceClassLoader) contextClassLoader).getURLs())));
+                }
             }
             try {
                 prepareWebApplication(deployPath, clusterInfo, beanLevelProperties);
@@ -404,11 +425,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             for (int i = 0; i < libFiles.length; i++) {
                 libUrls.add(new URL(codeserver + puPath + "/lib/" + libFiles[i].getName()));
             }
-            ((ServiceClassLoader) contextClassLoader).setSlashPath(new URL(codeserver + puPath + "/"));
-            ((ServiceClassLoader) contextClassLoader).setLibPath(libUrls.toArray(new URL[libUrls.size()]));
-            if (logger.isDebugEnabled()) {
-                logger.debug(logMessage("Service Class Loader " + Arrays.toString(((ServiceClassLoader) contextClassLoader).getURLs())));
-            }
+
             // add to common class loader
             WebsterFile sharedlibDir = new WebsterFile(new URL(codeserver + puPath + "/shared-lib"));
             File[] sharedlibFiles = sharedlibDir.listFiles();
@@ -421,9 +438,28 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             for (File sharedlibFile : sharedlibFiles) {
                 sharedlibUrls.add(new URL(codeserver + puPath + "/WEB-INF/shared-lib/" + sharedlibFile.getName()));
             }
-            ((CommonClassLoader) (contextClassLoader.getParent())).addComponent(puName, sharedlibUrls.toArray(new URL[sharedlibUrls.size()]));
-            if (logger.isDebugEnabled()) {
-                logger.debug(logMessage("Common Class Loader " + sharedlibUrls));
+
+            if (sharedLibEnabled) {
+                ((ServiceClassLoader) contextClassLoader).setSlashPath(deployPath.toURI().toURL());
+                ((ServiceClassLoader) contextClassLoader).setLibPath(libUrls.toArray(new URL[libUrls.size()]));
+                if (logger.isDebugEnabled()) {
+                    logger.debug(logMessage("Service Class Loader " + Arrays.toString(((ServiceClassLoader) contextClassLoader).getURLs())));
+                }
+
+                commonClassLoader.addComponent(puName, sharedlibUrls.toArray(new URL[sharedlibUrls.size()]));
+                if (logger.isDebugEnabled()) {
+                    logger.debug(logMessage("Common Class Loader " + sharedlibUrls));
+                }
+            } else {
+                if (sharedlibUrls.size() > 0) {
+                    logger.warn("Using old 'shared-lib' directory, will add jars under it as if it was 'lib'");
+                }
+                libUrls.addAll(sharedlibUrls);
+                ((ServiceClassLoader) contextClassLoader).setSlashPath(deployPath.toURI().toURL());
+                ((ServiceClassLoader) contextClassLoader).setLibPath(libUrls.toArray(new URL[libUrls.size()]));
+                if (logger.isDebugEnabled()) {
+                    logger.debug(logMessage("Service Class Loader " + Arrays.toString(((ServiceClassLoader) contextClassLoader).getURLs())));
+                }
             }
         }
 
