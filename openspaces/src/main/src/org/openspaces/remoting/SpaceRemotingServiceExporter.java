@@ -674,13 +674,6 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
                         remotingEntry.instanceId = clusterInfo.getInstanceId();
                     }
                     space.write(remotingEntry, null, syncEntryWriteLease);
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Wrote(").append(remotingEntry.uid).append(")");
-                    sb.append("Result(").append(retVal).append("), Template ");
-                    for (String fieldName : entry.getFieldsNames()) {
-                        sb.append(fieldName).append("(").append(entry.getFieldValue(fieldName)).append("),");
-                    }
-                    System.out.println(sb.toString());
                 } catch (Exception e1) {
                     if (logger.isErrorEnabled()) {
                         logger.error("Failed to write remoting entry", e1);
