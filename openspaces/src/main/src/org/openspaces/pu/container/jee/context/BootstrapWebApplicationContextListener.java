@@ -38,7 +38,6 @@ import org.openspaces.pu.service.ServiceMonitorsProvider;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 
@@ -49,7 +48,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 /**

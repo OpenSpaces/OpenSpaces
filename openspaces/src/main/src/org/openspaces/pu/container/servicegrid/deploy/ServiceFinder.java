@@ -25,7 +25,6 @@ import net.jini.discovery.LookupDiscoveryManager;
 import net.jini.lease.LeaseRenewalManager;
 import net.jini.lookup.ServiceDiscoveryManager;
 import net.jini.lookup.entry.Name;
-import org.jini.rio.boot.BootUtil;
 
 /**
  */
