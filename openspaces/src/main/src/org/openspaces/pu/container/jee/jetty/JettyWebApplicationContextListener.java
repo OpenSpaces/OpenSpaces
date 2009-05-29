@@ -142,7 +142,7 @@ public class JettyWebApplicationContextListener implements ServletContextListene
                 try {
                     sessionHandler.start();
                 } catch (Exception e) {
-                    throw new RuntimeException("Failed to start session handler to inject our own session manager, e");
+                    throw new RuntimeException("Failed to start session handler to inject our own session manager", e);
                 }
             }
         }
