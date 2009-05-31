@@ -123,7 +123,7 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
         if (realPath != null) {
             resource = new FileSystemResource(realPath);
         }
-        if (resource != null) {
+        if (resource != null && resource.exists()) {
             logger.debug("Loading [" + resource + "]");
             // create the Spring application context
             final ResourceApplicationContext applicationContext = new ResourceApplicationContext(new Resource[] {resource}, null);
