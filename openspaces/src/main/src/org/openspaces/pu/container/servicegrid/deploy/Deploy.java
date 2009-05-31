@@ -239,7 +239,8 @@ public class Deploy {
             }
         }
 
-        info("Deploying [" + puName + "] with name [" + overridePuName + "] under groups " + Arrays.asList(getGroups()) + " and locators [" + getLocators() + "]");
+        info("Deploying [" + puName + "] with name [" + overridePuName + "] under groups " + 
+                Arrays.toString(getGroups()) + " and locators " + Arrays.toString(getLocators()));
 
         initGSM();
         initDeployAdmin();
