@@ -448,7 +448,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
     protected Object[] findExpiredSessions(long timestamp) throws Exception {
         SQLQuery query = new SQLQuery<SessionData>(SessionData.class, "expiryTime < ?");
         query.setParameter(1, timestamp);
-        return space.takeMultiple(query, null, 100);
+        return space.readMultiple(query, null, 100);
     }
 
     /**
