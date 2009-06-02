@@ -17,6 +17,8 @@
 package org.openspaces.pu.container.servicegrid;
 
 import com.sun.jini.config.Config;
+import com.gigaspaces.lrmi.nio.info.NIODetails;
+import com.gigaspaces.jvm.JVMDetails;
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
 import net.jini.core.lookup.ServiceID;
@@ -99,12 +101,13 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
             ServiceID serviceId;
             String presentationName;
             String host;
+            long processId;
 
             @Override
             public String toString() {
-                String toString = "[" + presentationName + "] at host: [" + host + "]";
+                String toString = "[" + presentationName + "] pid [" + processId + " host [" + host + "]";
                 if (logger.isLoggable(Level.FINE)) {
-                    toString += " Id: [" + serviceId + "]";
+                    toString += " Id [" + serviceId + "]";
                 }
                 return toString;
             }
@@ -113,9 +116,11 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
         public ServiceAdminManager() {
             serviceDetails.serviceId = getServiceID();
             try {
+                NIODetails nioDetails = ((PUServiceBean) proxy).getNIODetails();
+                JVMDetails jvmDetails = ((PUServiceBean) proxy).getJVMDetails();
                 serviceDetails.presentationName = ((PUServiceBean) proxy).getPUDetails().getPresentationName();
-                serviceDetails.host = ((PUServiceBean) proxy).getNIODetails().getHostName() + "/"
-                + ((PUServiceBean) proxy).getNIODetails().getHostAddress();
+                serviceDetails.host = nioDetails.getHostName() + "/" + nioDetails.getHostAddress();
+                serviceDetails.processId = jvmDetails.getPid();
             } catch (RemoteException re) {
                 serviceDetails.presentationName = proxy.toString();
             }
