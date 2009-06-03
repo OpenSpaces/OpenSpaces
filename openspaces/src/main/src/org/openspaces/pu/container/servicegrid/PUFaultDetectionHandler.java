@@ -105,9 +105,9 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
 
             @Override
             public String toString() {
-                String toString = "[" + presentationName + "] pid [" + processId + "] host [" + host + "]";
+                String toString = "[" + presentationName + "] pid[" + processId + "] host[" + host + "]";
                 if (logger.isLoggable(Level.FINE)) {
-                    toString += " Id [" + serviceId + "]";
+                    toString += " Id[" + serviceId + "]";
                 }
                 return toString;
             }
