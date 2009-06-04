@@ -113,7 +113,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private volatile File deployPath;
 
-    private ClusterInfo clusterInfo;
+    private volatile ClusterInfo clusterInfo;
 
     private volatile PUDetails puDetails;
 
@@ -189,8 +189,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             Thread.currentThread().setContextClassLoader(origClassLoader);
             this.serviceMonitors.clear();
             this.memberAliveIndicators = null;
-            for (WatchTask watchTask : watchTasks) {
-                watchRegistry.deregister(watchTask.getWatch());
+            if (watchRegistry != null) {
+                for (WatchTask watchTask : watchTasks) {
+                    watchRegistry.deregister(watchTask.getWatch());
+                }
             }
             watchTasks.clear();
         }
