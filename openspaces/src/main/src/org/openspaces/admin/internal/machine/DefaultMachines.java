@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author kimchy
@@ -83,6 +84,32 @@ public class DefaultMachines implements InternalMachines {
             return latch.await(timeout, timeUnit);
         } catch (InterruptedException e) {
             return false;
+        } finally {
+            getMachineAdded().remove(added);
+        }
+    }
+
+    public Machine waitFor(String hostAddress) {
+        return waitFor(hostAddress, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public Machine waitFor(final String hostAddress, long timeout, TimeUnit timeUnit) {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<Machine> ref = new AtomicReference<Machine>();
+        MachineAddedEventListener added = new MachineAddedEventListener() {
+            public void machineAdded(Machine machine) {
+                if (machine.getHostAddress().equalsIgnoreCase(hostAddress) || machine.getHostName().equalsIgnoreCase(hostAddress)) {
+                    ref.set(machine);
+                    latch.countDown();
+                }
+            }
+        };
+        getMachineAdded().add(added);
+        try {
+            latch.await(timeout, timeUnit);
+            return ref.get();
+        } catch (InterruptedException e) {
+            return null;
         } finally {
             getMachineAdded().remove(added);
         }

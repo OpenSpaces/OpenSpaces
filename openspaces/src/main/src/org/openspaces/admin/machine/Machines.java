@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Machines hold all the different {@link Machine}s that are currently
  * discovered.
- *
+ * <p/>
  * <p>Provides simple means to get all the current machines, as well as as registering for
  * machine lifecycle (added and removed) events.
  *
@@ -88,6 +88,26 @@ public interface Machines extends AdminAware, Iterable<Machine> {
      * @param numberOfMachines The number of containers to wait for
      */
     boolean waitFor(int numberOfMachines, long timeout, TimeUnit timeUnit);
+
+    /**
+     * Waits indefinitely till the machine with the given host (name/address) is discovered.
+     *
+     * @param host The machine host name or address
+     * @return The machine discovered
+     */
+    Machine waitFor(String host);
+
+    /**
+     * Waits for the given timeout (in time unit) till the machien with the given host (name/address)
+     * is discovered. Returns the machine if it was discovered within the provided timeout, or <code>null</code>
+     * if the machine was not discovered.
+     *
+     * @param host     The machine host name or address
+     * @param timeout  The timeout value to wait
+     * @param timeUnit The time unit of the timeout value
+     * @return The machien discovered, or <code>null</code> if it was not discovered within the provided timeout
+     */
+    Machine waitFor(String host, long timeout, TimeUnit timeUnit);
 
     /**
      * Returns the machines added event manager allowing to add and remove
