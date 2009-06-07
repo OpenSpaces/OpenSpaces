@@ -1,7 +1,7 @@
 @if "%DEBUG%" == "" @echo off
 
 @rem 
-@rem $Revision: 13700 $ $Date: 2008-10-07 03:25:10 +0200 (Di, 07. Okt 2008) $
+@rem $Revision: 13700 $ $Date: 2008-10-07 11:25:10 +1000 (Tue, 07 Oct 2008) $
 @rem 
 
 @rem Set local scope for the variables with windows NT shell

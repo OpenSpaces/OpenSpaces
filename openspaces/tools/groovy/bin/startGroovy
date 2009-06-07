@@ -8,7 +8,7 @@
 
 ##
 ## $Revision: 14461 $
-## $Date: 2008-12-17 12:36:59 +0100 (Mi, 17. Dez 2008) $
+## $Date: 2008-12-17 21:36:59 +1000 (Wed, 17 Dec 2008) $
 ##
 
 PROGNAME=`basename "$0"`
@@ -127,7 +127,7 @@ fi
 if [ -z "$GROOVY_CONF" ] ; then
     GROOVY_CONF="$GS_GROOVY_HOME/conf/groovy-starter.conf"
 fi
-STARTER_CLASSPATH="$GS_GROOVY_HOME/lib/groovy-1.6.0.jar"
+STARTER_CLASSPATH="$GS_GROOVY_HOME/lib/groovy-1.6.3.jar"
 
 # Create the final classpath. Setting a classpath using the -cp or -classpath option means not to use the
 # global classpath. Groovy behaves then the same as the java interpreter
