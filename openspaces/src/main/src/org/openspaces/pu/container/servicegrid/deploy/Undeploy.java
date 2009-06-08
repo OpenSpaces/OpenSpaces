@@ -125,12 +125,15 @@ public class Undeploy {
         }
 
         GSM[] gsms = findGSMs();
+        if (gsms == null || gsms.length == 0) {
+            throw new GSMNotFoundException(getGroups(), lookupTimeout);
+        }
         //try undeploying using name first
         OperationalStringManager operationalStringManager = findDeployAdmin(gsms, puName);
         if (operationalStringManager != null) {
             operationalStringManager.undeploy();
         } else {
-            throw new GSMNotFoundException(getGroups(), lookupTimeout);
+            throw new ProcessingUnitNotFoundException(puName, gsms[0]);
         }
     }
 
