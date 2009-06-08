@@ -30,16 +30,18 @@ import org.openspaces.pu.container.support.ConfigLocationParser;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ApplicationContext;
 
+import java.util.Arrays;
+
 /**
  * The integrated processing unit container wraps Spring
  * {@link org.springframework.context.ApplicationContext ApplicationContext}. It is created using
  * {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider IntegratedProcessingUnitContainerProvider}.
- *
+ * <p/>
  * <p>An integrated processing unit container can be used to run a processing unit within an existing
  * environment. An example of what this existing environment will provide is the classpath that the
  * processing unit will run with. Examples for using the integrated processing unit container can be
  * integration tests or running the processing unit from within an IDE.
- *
+ * <p/>
  * <p>The integrated processing unit container also provides a a main method ({@link #main(String[])}
  * which uses the
  * {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider} and the
@@ -87,8 +89,8 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
      * Allows to run the integrated processing unit container. Uses the
      * {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider} and
      * the parameters provided in order to configure it.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * The following parameters are allowed:
      * <ul>
      * <li><b>-config [configLocation]</b>: Allows to add a Spring application context config
@@ -126,13 +128,16 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
             logger.info(RuntimeInfo.getEnvironmentInfo());
         }
         try {
-           final ProcessingUnitContainer container = createContainer(args);
+            logger.info("Starting processing unit(s) with " + Arrays.toString(args));
+            final ProcessingUnitContainer container = createContainer(args);
+            logger.info("Processing unit(s) started successfully");
 
             // Use the MAIN thread as the non daemon thread to keep it alive
             final Thread mainThread = Thread.currentThread();
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
                     try {
+                        logger.info("Shutting down processing unit(s)");
                         container.close();
                     } finally {
                         mainThread.interrupt();
@@ -152,7 +157,7 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
             System.exit(1);
         }
     }
-    
+
     public static ProcessingUnitContainer createContainer(String[] args) throws Exception {
         CommandLineParser.Parameter[] params = CommandLineParser.parse(args);
 
