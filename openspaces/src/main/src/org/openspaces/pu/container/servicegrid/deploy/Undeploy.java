@@ -28,6 +28,8 @@ import org.openspaces.pu.container.support.CommandLineParser;
 
 import java.util.Arrays;
 import java.util.StringTokenizer;
+import java.rmi.ConnectException;
+import java.nio.channels.ClosedChannelException;
 
 /**
  * @author kimchy
@@ -131,7 +133,16 @@ public class Undeploy {
         //try undeploying using name first
         OperationalStringManager operationalStringManager = findDeployAdmin(gsms, puName);
         if (operationalStringManager != null) {
-            operationalStringManager.undeploy();
+            try {
+                operationalStringManager.undeploy();
+            } catch (ConnectException e) {
+                if (e.getCause() instanceof ClosedChannelException) {
+                    // all is well. When we destroy a service, we get a closed channel exception
+                    // since we closed the channel it is working on
+                } else {
+                    throw e;
+                }
+            }
         } else {
             throw new ProcessingUnitNotFoundException(puName, gsms[0]);
         }
