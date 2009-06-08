@@ -105,9 +105,9 @@ public class UndeployPUMojo extends AbstractOpenSpacesMojo {
                 Class deployClass = Class.forName("org.openspaces.pu.container.servicegrid.deploy.Undeploy", true, Thread.currentThread().getContextClassLoader());
                 deployClass.getMethod("main", new Class[]{String[].class}).invoke(null, new Object[]{attributesArray});
             } catch (InvocationTargetException e) {
-                throw new MojoExecutionException(e.getTargetException().getMessage(), e.getTargetException());
+                PluginLog.getLog().info("Failed to undeploy processing unit: " + proj.getBuild().getFinalName() + " reason: " + e.getTargetException().getMessage());
             } catch (Exception e) {
-                throw new MojoExecutionException(e.getMessage(), e);
+                PluginLog.getLog().info("Failed to undeploy processing unit: " + proj.getBuild().getFinalName() + " reason: " + e.getMessage());
             }
         }
     }
