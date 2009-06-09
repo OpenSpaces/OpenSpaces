@@ -407,7 +407,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
         }
     }
 
-    private class ExecutorAsyncFutureListener implements AsyncFutureListener {
+    private static class ExecutorAsyncFutureListener implements AsyncFutureListener {
 
         private AsyncFutureListener listener;
 

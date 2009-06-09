@@ -460,7 +460,7 @@ public class SerialVersionUIDAdder extends ClassAdapter {
     // Inner classes
     // ------------------------------------------------------------------------
 
-    static class Item implements Comparable {
+    static class Item implements Comparable<Item> {
 
         String name;
 
@@ -474,8 +474,7 @@ public class SerialVersionUIDAdder extends ClassAdapter {
             this.desc = desc;
         }
 
-        public int compareTo(final Object o) {
-            Item other = (Item) o;
+        public int compareTo(final Item other) {
             int retVal = name.compareTo(other.name);
             if (retVal == 0) {
                 retVal = desc.compareTo(other.desc);

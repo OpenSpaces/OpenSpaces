@@ -756,7 +756,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
             }
         }
 
-        private class MethodCacheEntry {
+        private static class MethodCacheEntry {
 
             private Map<Integer, IMethod[]> parametersPerMethodMap = new HashMap<Integer, IMethod[]>();
 

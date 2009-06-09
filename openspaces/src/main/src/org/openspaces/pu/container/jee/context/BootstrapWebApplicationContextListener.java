@@ -301,12 +301,11 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
     }
 
     public static byte[] objectToByteBuffer(Object obj) throws Exception {
-        byte[] result = null;
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(outStream);
         out.writeObject(obj);
         out.flush();
-        result = outStream.toByteArray();
+        byte[] result = outStream.toByteArray();
         out.close();
         outStream.close();
 
