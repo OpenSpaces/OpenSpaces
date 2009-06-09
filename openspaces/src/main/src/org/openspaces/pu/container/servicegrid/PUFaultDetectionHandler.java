@@ -136,6 +136,12 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
             }
         }
 
+        public void reportFirstError() {
+            if (logger.isLoggable(Level.WARNING)) {
+                logger.log(Level.WARNING, "Suspecting failure of service: " + serviceDetails, lastThrown);
+            }
+        }
+
         public void reportLastError() {
             if (logger.isLoggable(Level.WARNING)) {
                 logger.log(Level.WARNING, "Detected failure of service: " + serviceDetails, lastThrown);
