@@ -90,9 +90,11 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
 
     class ServiceAdminManager implements ServiceMonitor {
 
-        int retriesCount = 0;
-        Throwable lastThrown;
-        ServiceDetails serviceDetails = new ServiceDetails();
+        volatile int retriesCount = 0;
+        volatile Throwable lastThrown;
+        volatile long roundtrip;
+
+        final ServiceDetails serviceDetails = new ServiceDetails();
 
         /**
          * printable service details
@@ -138,7 +140,7 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
 
         public void reportFirstError() {
             if (logger.isLoggable(Level.WARNING)) {
-                logger.log(Level.WARNING, "Suspecting failure of service: " + serviceDetails, lastThrown);
+                logger.log(Level.WARNING, "Suspecting failure of service: " + serviceDetails + " took: " + roundtrip + "ms", lastThrown);
             }
         }
 
@@ -152,36 +154,30 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
          * Verify service can be reached. If the service cannot be reached return false
          */
         public boolean verify() {
+            long start = System.currentTimeMillis();
             try {
-                if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("Requesting isAlive() on service: " + serviceDetails);
-                }
-
                 final boolean isAlive = ((PUServiceBean) proxy).isAlive();
 
                 if (isAlive) {
-                    if (logger.isLoggable(Level.FINEST)) {
-                        logger.finest("isAlive() successfully returned for service: " + serviceDetails);
-                    }
                     retriesCount = 0;
-                } else {
-                    if (logger.isLoggable(Level.FINER)) {
-                        logger.log(Level.FINER, "isAlive() failed for service: " + serviceDetails);
-                    }
-                    ++retriesCount;
-                }
 
+                    if (logger.isLoggable(Level.FINEST)) {
+                        long roundtrip = System.currentTimeMillis() - start;
+                        logger.finest("Successfully verified service: " + serviceDetails + " is alive, took: " + roundtrip + "ms");
+                    }
+                } else {
+                    throw new RuntimeException("Service indicated it is no longer alive");
+                }
                 return isAlive;
             } catch (Exception e) {
+                long end = System.currentTimeMillis();
+                lastThrown = e;
+                roundtrip = (end - start);
+                int retry = retriesCount++;
 
                 if (logger.isLoggable(Level.FINER)) {
-                    String retryMsg = retriesCount == 0 ? "1st failure, retry..." : "retry [" + retriesCount + "]";
-                    logger.log(Level.FINER, "Failed reaching service: " + serviceDetails + ", Reason: " + e + " - "
-                            + retryMsg, e);
+                    logger.log(Level.FINER, "Failed reaching service: " + serviceDetails + ", took: " + roundtrip + "ms, retry: " + retry, e);
                 }
-
-                lastThrown = e;
-                ++retriesCount;
 
                 return false;
             }
