@@ -531,6 +531,12 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         if (batchSize != null && batchTime != null) {
             eventSessionConfig.setBatch(batchSize, batchTime);
         }
+        if (leaseListener == null) {
+            Object possibleListener = getActualEventListener();
+            if (possibleListener instanceof LeaseListener) {
+                leaseListener = (LeaseListener) possibleListener;
+            }
+        }
         eventSessionConfig.setAutoRenew(autoRenew, leaseListener);
         if (triggerNotifyTemplate != null) {
             eventSessionConfig.setTriggerNotifyTemplate(triggerNotifyTemplate);
