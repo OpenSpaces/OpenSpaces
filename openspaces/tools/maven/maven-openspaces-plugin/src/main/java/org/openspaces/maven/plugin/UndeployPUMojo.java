@@ -97,6 +97,8 @@ public class UndeployPUMojo extends AbstractOpenSpacesMojo {
         // in undeploy reverse the order of projects
         Collections.reverse(projects);
 
+        int failureCount = 0;
+        Throwable lastException = null;
         for (Iterator projIt = projects.iterator(); projIt.hasNext();) {
             MavenProject proj = (MavenProject) projIt.next();
             PluginLog.getLog().info("Undeploying processing unit: " + proj.getBuild().getFinalName());
@@ -105,10 +107,16 @@ public class UndeployPUMojo extends AbstractOpenSpacesMojo {
                 Class deployClass = Class.forName("org.openspaces.pu.container.servicegrid.deploy.Undeploy", true, Thread.currentThread().getContextClassLoader());
                 deployClass.getMethod("main", new Class[]{String[].class}).invoke(null, new Object[]{attributesArray});
             } catch (InvocationTargetException e) {
+                lastException = e.getTargetException();
+                failureCount++;
                 PluginLog.getLog().info("Failed to undeploy processing unit: " + proj.getBuild().getFinalName() + " reason: " + e.getTargetException().getMessage());
             } catch (Exception e) {
+                lastException = e;
                 PluginLog.getLog().info("Failed to undeploy processing unit: " + proj.getBuild().getFinalName() + " reason: " + e.getMessage());
             }
+        }
+        if (failureCount == projects.size() && lastException != null) {
+            throw new MojoExecutionException(lastException.getMessage(), lastException);
         }
     }
 

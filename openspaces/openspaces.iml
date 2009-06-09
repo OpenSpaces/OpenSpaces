@@ -15,6 +15,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/sandbox/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/sandbox/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/tools/gshell/groovy" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/java" isTestSource="false" />
     </content>
     <orderEntry type="module-library" exported="">
       <library name="xml">
@@ -153,6 +154,7 @@
       <library name="maven">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/external/maven" />
+          <root url="jar://$MODULE_DIR$/tools/maven/apache-maven-2.0.9/lib/maven-2.0.9-uber.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
