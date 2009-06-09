@@ -50,7 +50,7 @@ public interface VirtualMachineStatistics {
     VirtualMachineDetails getDetails();
 
     /**
-     * Returns the previous statistics sampled. <code>null</code> if this is the first one.
+     * Returns the previous statistics sampled. <code>null</code> if this is the first one or bounded by the history size.
      */
     VirtualMachineStatistics getPrevious();
 
