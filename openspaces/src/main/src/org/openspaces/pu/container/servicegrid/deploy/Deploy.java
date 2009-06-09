@@ -88,7 +88,7 @@ public class Deploy {
         if (this.gsm != null) {
             return;
         }
-        info("Searching for GSM in groups " + Arrays.asList(getGroups()) + " and locators [" + Arrays.toString(getLocators()) + "]");
+        info("Searching for GSM in groups " + Arrays.toString(getGroups()) + " and locators [" + Arrays.toString(getLocators()) + "]");
         ServiceItem[] result = ServiceFinder.find(null, GSM.class, lookupTimeout, getGroups(), getLocators());
         if (result != null && result.length > 0) {
             gsm = (GSM) result[0].service;

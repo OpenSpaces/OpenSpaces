@@ -46,7 +46,7 @@ public class Undeploy {
 
     public GSM[] findGSMs() {
         GSM[] gsms;
-        logger.info("Searching for GSMs  in groups " + Arrays.asList(getGroups()) + " and locators " + Arrays.asList(getLocators()));
+        logger.info("Searching for GSMs  in groups " + Arrays.toString(getGroups()) + " and locators " + Arrays.toString(getLocators()));
         ServiceItem[] result = ServiceFinder.find(null, GSM.class, lookupTimeout, getGroups(), getLocators());
         if (result != null && result.length > 0) {
             gsms = new GSM[result.length];
