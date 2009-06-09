@@ -45,29 +45,29 @@ import java.util.ArrayList;
  * used by {@link com.gigaspaces.events.EventSessionConfig} and support methods for creating
  * {@link com.gigaspaces.events.EventSessionFactory} and
  * {@link com.gigaspaces.events.DataEventSession} objects.
- *
+ * <p/>
  * <p>The container allows to set the template object used for the notify registration. Note, this can
  * be a Pojo based template, or one of GigaSpace's query classes such as
  * {@link com.j_spaces.core.client.SQLQuery}.
- *
+ * <p/>
  * <p>Masking of which operations will cause notifications can be set using
  * {@link #setNotifyWrite(Boolean)}, {@link #setNotifyUpdate(Boolean)},
  * {@link #setNotifyTake(Boolean)} and {@link #setNotifyLeaseExpire(Boolean)}. Note, if no flag is
  * set, notifications will be send for <b>write</b> operations.
- *
+ * <p/>
  * <p>Batching of notifications can be turned on by setting both {@link #setBatchSize(Integer)} and
  * {@link #setBatchTime(Integer)}. When turning on batch notifications, the listener can choose whether
  * to receive the events as an array (by setting {@link #setPassArrayAsIs(boolean)} to <code>true</code>,
  * or to receive the notifications one by one (setting it to <code>false</code>). By default, the
  * {@link #setPassArrayAsIs(boolean)} is set to <code>false</code>.
- *
+ * <p/>
  * <p>Fifo ordering of raised notification can be controlled by setting {@link #setFifo(boolean)} flag
  * to <code>true</code>. Note, for a full fifo based ordering the relevant entries in the space
  * should be configured to be fifo as well.
- *
+ * <p/>
  * <p>Listener registration across replicated spaces can be set using
  * {@link #setReplicateNotifyTemplate(boolean)} and {@link #setTriggerNotifyTemplate(boolean)}.
- *
+ * <p/>
  * <p>The communication protocol between the space "server" and the even listener client can be
  * configured using either {@link #setComType(int)} or {@link #setComTypeName(String)}. The
  * available options are {@link #COM_TYPE_UNICAST}, {@link #COM_TYPE_MULTIPLEX} and
@@ -75,14 +75,14 @@ import java.util.ArrayList;
  * be used. If using {@link #setComTypeName(String)} the actual name of the com type can be used (<code>unicast</code>,
  * <code>multiplex</code> or <code>multicast</code>). The default communication type is
  * {@link #COM_TYPE_UNICAST}.
- *
+ * <p/>
  * <p>The {@link #setTemplate(Object)} parameter is required in order to perform matching on which
  * events to receive. If the {@link #setEventListener(org.openspaces.events.SpaceDataEventListener)}
  * implements {@link org.openspaces.events.EventTemplateProvider} and the template is directly set,
  * the event listener will be used to get the template. This feature helps when event listeners
  * directly can only work with a certain template and removes the requirement of configuring the
  * template as well.
- *
+ * <p/>
  * <p>Provides {@link #invokeListenerWithTransaction(Object,Object,boolean,boolean)} allowing to execute the
  * listener within a transactional context. Also allows for the performTakeOnNotify to control if a
  * take operation will be performed against the space with the given event data in order to remove it
@@ -129,6 +129,12 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     private Integer batchTime;
 
     private boolean autoRenew = false;
+
+    private long renewExpiration = EventSessionConfig.DEFAULT_RENEW_EXPIRATION;
+
+    private long renewDuration = EventSessionConfig.DEFAULT_RENEW_DURATION;
+    
+    private long renewRTT = EventSessionConfig.DEFAULT_RENEW_RTT;
 
     private LeaseListener leaseListener;
 
@@ -236,6 +242,66 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
 
     protected boolean isAutoRenew() {
         return this.autoRenew;
+    }
+
+    /**
+     * The period of time your notifications stop being renewed. Only applies when {@link #setAutoRenew(boolean)} is
+     * <code>true</code>.
+     *
+     * <p>Defaults to {@link com.gigaspaces.events.EventSessionConfig#DEFAULT_RENEW_EXPIRATION}.
+     */
+    protected long getRenewExpiration() {
+        return renewExpiration;
+    }
+
+    /**
+     * The period of time your notifications stop being renewed. Only applies when {@link #setAutoRenew(boolean)} is
+     * <code>true</code>.
+     *
+     * <p>Defaults to {@link com.gigaspaces.events.EventSessionConfig#DEFAULT_RENEW_EXPIRATION}.
+     */
+    public void setRenewExpiration(long renewExpiration) {
+        this.renewExpiration = renewExpiration;
+    }
+
+    /**
+     * The period of time that passes between client failure, and the time your notifications stop being sent.
+     * use more than renewRTT. Only applies when {@link #setAutoRenew(boolean)} is <code>true</code>.
+     *
+     * <p>Defaults to {@link com.gigaspaces.events.EventSessionConfig#DEFAULT_RENEW_DURATION}.
+     */
+    protected long getRenewDuration() {
+        return renewDuration;
+    }
+
+    /**
+     * The period of time that passes between client failure, and the time your notifications stop being sent.
+     * use more than renewRTT. Only applies when {@link #setAutoRenew(boolean)} is <code>true</code>.
+     *
+     * <p>Defaults to {@link com.gigaspaces.events.EventSessionConfig#DEFAULT_RENEW_DURATION}.
+     */
+    public void setRenewDuration(long renewDuration) {
+        this.renewDuration = renewDuration;
+    }
+
+    /**
+     * RoundTripTime - the time that takes to reach the server and return. Only applies when {@link #setAutoRenew(boolean)} is
+     * <code>true</code>.
+     *
+     * <p>Defaults to {@link com.gigaspaces.events.EventSessionConfig#DEFAULT_RENEW_RTT}.
+     */
+    protected long getRenewRTT() {
+        return renewRTT;
+    }
+
+    /**
+     * RoundTripTime - the time that takes to reach the server and return. Only applies when {@link #setAutoRenew(boolean)} is
+     * <code>true</code>.
+     *
+     * <p>Defaults to {@link com.gigaspaces.events.EventSessionConfig#DEFAULT_RENEW_RTT}.
+     */
+    public void setRenewRTT(long renewRTT) {
+        this.renewRTT = renewRTT;
     }
 
     /**
@@ -368,7 +434,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     /**
      * If using a replicated space controls if the listener will be replicated between all the
      * replicated cluster members.
-     *
+     * <p/>
      * <p>If working directly with a cluster memeber, the default value will be <code>false</code>.
      * Otherwise, the default value will be based on the cluster schema (which is true for clusters
      * with backups).
@@ -439,7 +505,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
 
     public void initialize() throws DataAccessException {
         if (SpaceUtils.isRemoteProtocol(getGigaSpace().getSpace())) {
-            
+
         } else {
             // if we are using a Space that was started in embedded mode, no need to replicate notify template
             // by default
@@ -537,7 +603,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
                 leaseListener = (LeaseListener) possibleListener;
             }
         }
-        eventSessionConfig.setAutoRenew(autoRenew, leaseListener);
+        eventSessionConfig.setAutoRenew(autoRenew, leaseListener, renewExpiration, renewDuration, renewRTT);
         if (triggerNotifyTemplate != null) {
             eventSessionConfig.setTriggerNotifyTemplate(triggerNotifyTemplate);
         }
@@ -724,8 +790,8 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
      * Executes the given listener. If a {@link #setTransactionManager(PlatformTransactionManager)}
      * is provided will perform the listener execution within a transaction, if not, the listener
      * execution is performed without a transaction.
-     *
-     * <p>
+     * <p/>
+     * <p/>
      * If the performTakeOnNotify flag is set to <code>true</code> will also perform take
      * operation with the given event data (i.e. remove it from the space).
      *

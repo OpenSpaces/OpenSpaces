@@ -128,6 +128,30 @@ public class SimpleNotifyContainerConfigurer {
     }
 
     /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setRenewExpiration(long)
+     */
+    public SimpleNotifyContainerConfigurer renewExpiration(long renewExpiration) {
+        notifyEventListenerContainer.setRenewExpiration(renewExpiration);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setRenewDuration(long)
+     */
+    public SimpleNotifyContainerConfigurer renewDuration(long renewDuration) {
+        notifyEventListenerContainer.setRenewDuration(renewDuration);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setRenewRTT(long)
+     */
+    public SimpleNotifyContainerConfigurer renewRTT(long renewRTT) {
+        notifyEventListenerContainer.setRenewRTT(renewRTT);
+        return this;
+    }
+
+    /**
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setLeaseListener(net.jini.lease.LeaseListener)
      */
     public SimpleNotifyContainerConfigurer leaseListener(LeaseListener leaseListener) {

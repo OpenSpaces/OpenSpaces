@@ -17,11 +17,14 @@
 package org.openspaces.events.notify;
 
 import net.jini.lease.LeaseListener;
+import net.jini.core.lease.Lease;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import com.gigaspaces.events.EventSessionConfig;
 
 /**
  * Marking with this annotation will cause the notify container to have a lease
@@ -39,7 +42,23 @@ public @interface NotifyLease {
      *
      * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setListenerLease(long)
      */
-    long lease();
+    long lease() default Lease.FOREVER;
+
+    /**
+     * The period of time your notifications stop being renewed.
+     */
+    long renewExpiration() default EventSessionConfig.DEFAULT_RENEW_EXPIRATION;
+
+    /**
+     * The period of time that passes between client failure, and the time your notifications stop being sent.
+     * use more than renewRTT.
+     */
+    long renewDuration() default EventSessionConfig.DEFAULT_RENEW_DURATION;
+
+    /**
+     * RoundTripTime - the time that takes to reach the server and return.
+     */
+    long renewRTT() default EventSessionConfig.DEFAULT_RENEW_RTT;
 
     /**
      * Sets the lease listener for the lease. Default to no listener.

@@ -155,6 +155,9 @@ public class NotifyAnnotationPostProcessor implements BeanPostProcessor, Applica
         if (notifyLease != null) {
             notifyContainerConfigurer.autoRenew(true);
             notifyContainerConfigurer.listenerLease(notifyLease.lease());
+            notifyContainerConfigurer.renewExpiration(notifyLease.renewExpiration());
+            notifyContainerConfigurer.renewDuration(notifyLease.renewDuration());
+            notifyContainerConfigurer.renewRTT(notifyLease.renewRTT());
             if (!LeaseListener.class.equals(notifyLease.leaseListener())) {
                 try {
                     LeaseListener leaseListener = notifyLease.leaseListener().newInstance();
