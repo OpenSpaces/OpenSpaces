@@ -17,8 +17,8 @@
     </modules>
     <dependencies>
         <dependency>
-            <groupId>org.openspaces</groupId>
-            <artifactId>openspaces</artifactId>
+            <groupId>com.gigaspaces</groupId>
+            <artifactId>gs-openspaces</artifactId>
             <version>${gsVersion}</version>
             <scope>provided</scope>
         </dependency>
