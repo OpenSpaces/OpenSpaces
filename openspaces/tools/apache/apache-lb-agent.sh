@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # The call to setenv.sh can be commented out if necessary.
 export JSHOMEDIR=`dirname $0`/../../
