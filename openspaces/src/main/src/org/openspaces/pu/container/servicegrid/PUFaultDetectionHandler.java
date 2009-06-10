@@ -166,7 +166,7 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
                         logger.finest("Successfully verified service: " + serviceDetails + " is alive, took: " + roundtrip + "ms");
                     }
                 } else {
-                    throw new RuntimeException("Service indicated it is no longer alive");
+                    throw new MemberReturnFalseException();
                 }
                 return isAlive;
             } catch (Exception e) {
@@ -176,7 +176,11 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
                 int retry = retriesCount++;
 
                 if (logger.isLoggable(Level.FINER)) {
-                    logger.log(Level.FINER, "Failed reaching service: " + serviceDetails + ", took: " + roundtrip + "ms, retry: " + retry, e);
+                    if (e instanceof MemberReturnFalseException) {
+                        logger.log(Level.FINER, "Service Failure (isAlive:false): " + serviceDetails + ", took: " + roundtrip + "ms, retry: " + retry);
+                    } else {
+                        logger.log(Level.FINER, "Service Failure: " + serviceDetails + ", took: " + roundtrip + "ms, retry: " + retry, e);
+                    }
                 }
 
                 return false;
@@ -190,5 +194,9 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
         public String toString() {
             return super.toString() + " " + serviceDetails;
         }
+    }
+
+    private static class MemberReturnFalseException extends Exception {
+        
     }
 }
