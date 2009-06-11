@@ -22,8 +22,8 @@ import com.gigaspaces.logger.GSLogConfigLoader;
 import com.j_spaces.core.service.ServiceConfigLoader;
 import com.j_spaces.kernel.PlatformVersion;
 import net.jini.config.Configuration;
-import net.jini.core.lookup.ServiceItem;
 import net.jini.core.discovery.LookupLocator;
+import net.jini.core.lookup.ServiceItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.BootUtil;
@@ -212,7 +212,10 @@ public class Deploy {
             deletePUFile = true;
         }
 
-        if (puFile.exists() && (puFile.getName().endsWith(".zip") || puFile.getName().endsWith(".jar") || puFile.getName().endsWith(".war"))) {
+        if (puFile.getName().endsWith(".zip") || puFile.getName().endsWith(".jar") || puFile.getName().endsWith(".war")) {
+            if (!puFile.exists()) {
+                throw new IllegalArgumentException("File [" + puFile.getAbsolutePath() + "] not found and can't be deployed");
+            }
             overridePuName = puFile.getName().substring(0, puFile.getName().length() - 4);
             puPath = overridePuName;
         }
@@ -239,7 +242,7 @@ public class Deploy {
             }
         }
 
-        info("Deploying [" + puName + "] with name [" + overridePuName + "] under groups " + 
+        info("Deploying [" + puName + "] with name [" + overridePuName + "] under groups " +
                 Arrays.toString(getGroups()) + " and locators " + Arrays.toString(getLocators()));
 
         initGSM();
