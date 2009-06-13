@@ -103,7 +103,7 @@ public class GridServiceOptions {
         }
         if (options.isUseScript()) {
             if (overrideArguments) {
-                options.setSciptArguments(arguments.toArray(new String[arguments.size()]));
+                options.setScriptArguments(arguments.toArray(new String[arguments.size()]));
             } else {
                 options.setScriptAppendableArguments(arguments.toArray(new String[arguments.size()]));
             }
