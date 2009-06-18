@@ -220,7 +220,7 @@ set CP=%CLASSPATH%;%CP%
 set STARTER_MAIN_CLASS=org.codehaus.groovy.tools.GroovyStarter
 set STARTER_CONF=%GS_GROOVY_HOME%\conf\groovy-starter.conf
 
-# GigaSpaces: Change the -Xmx to higher value
+@rem GigaSpaces: Change the -Xmx to higher value
 if "%JAVA_OPTS%" == "" set JAVA_OPTS="-Xmx512m"
 set JAVA_OPTS=%JAVA_OPTS% -Dprogram.name="%PROGNAME%"
 set JAVA_OPTS=%JAVA_OPTS% -Dgroovy.home="%GS_GROOVY_HOME%"
@@ -231,9 +231,9 @@ set JAVA_OPTS=%JAVA_OPTS% -Dscript.name="%GROOVY_SCRIPT_NAME%"
 if exist "%USERPROFILE%/.groovy/postinit.bat" call "%USERPROFILE%/.groovy/postinit.bat"
 
 @rem GigaSpaces - Call setenv
-SET JSHOMEDIR=$GS_GROOVY_HOME\..\..\
-call "%JSHOMEDIR%\bin\setenv.sh"
-set JAVA_OPTS="$JAVA_OPTS %LOOKUP_GROUPS_PROP% %LOOKUP_LOCATORS_PROP%"
+SET JSHOMEDIR=%GS_GROOVY_HOME%\..\..\
+call "%JSHOMEDIR%\bin\setenv.bat"
+set JAVA_OPTS=%JAVA_OPTS% %LOOKUP_GROUPS_PROP% %LOOKUP_LOCATORS_PROP%
 
 @rem Execute Groovy
 "%JAVA_EXE%" %JAVA_OPTS% -classpath "%STARTER_CLASSPATH%" %STARTER_MAIN_CLASS% --main %CLASS% --conf "%STARTER_CONF%" --classpath "%CP%" %CMD_LINE_ARGS%
