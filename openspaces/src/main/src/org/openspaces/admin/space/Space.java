@@ -95,6 +95,12 @@ public interface Space extends Iterable<SpaceInstance>, StatisticsMonitor {
     int getNumberOfBackups();
 
     /**
+     * Returns the total number of instances. If there are no backups, will return
+     * {@link #getNumberOfInstances()}. If there are backups, will return {@link #getNumberOfInstances()} * ({@link #getNumberOfBackups()}  + 1)
+     */
+    int getTotalNumberOfInstances();
+    
+    /**
      * Returns all the space instances that are currently discovered that are part of this Space topology.
      */
     SpaceInstance[] getInstances();

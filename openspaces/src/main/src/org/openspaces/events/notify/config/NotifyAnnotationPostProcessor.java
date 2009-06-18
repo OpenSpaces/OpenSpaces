@@ -39,7 +39,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * A {@link org.openspaces.events.notify.Notify} annotation post processor. Creates an intenral
+ * A {@link org.openspaces.events.notify.Notify} annotation post processor. Creates an internal
  * instance of {@link org.openspaces.events.notify.SimpleNotifyEventListenerContainer} that wraps the given
  * bean (if annotated) listener.
  *

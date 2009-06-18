@@ -22,7 +22,11 @@ import com.gigaspaces.lrmi.nio.info.NIOInfoProvider;
 import com.gigaspaces.operatingsystem.OSInfoProvider;
 import com.gigaspaces.grid.zone.GridZoneProvider;
 import com.j_spaces.core.client.SpaceURL;
+import com.sun.jini.start.ServiceProxyAccessor;
 import org.openspaces.core.cluster.ClusterInfo;
+import org.jini.rio.core.jsb.ServiceBean;
+import org.jini.rio.core.jsb.ServiceState;
+import org.jini.rio.resources.servicecore.Service;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -30,7 +34,7 @@ import java.rmi.RemoteException;
 /**
  * @author kimchy
  */
-public interface PUServiceBean extends NIOInfoProvider, OSInfoProvider, JVMInfoProvider, GridZoneProvider, Remote {
+public interface PUServiceBean extends NIOInfoProvider, OSInfoProvider, JVMInfoProvider, GridZoneProvider, Remote, ServiceState, ServiceProxyAccessor, Service {
 
     /**
      * Should this member be checked to see if it is alive or not.

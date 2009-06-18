@@ -34,19 +34,19 @@ public class AnnotationSupportBeanDefinitionParser implements BeanDefinitionPars
 
     public BeanDefinition parse(Element element, ParserContext parserContext) {
         BeanDefinition bd = new RootBeanDefinition(EventContainersBus.class);
-        BeanComponentDefinition bcd = new BeanComponentDefinition(bd, "intenral-eventContainerBus");
+        BeanComponentDefinition bcd = new BeanComponentDefinition(bd, "internal-eventContainerBus");
         parserContext.registerBeanComponent(bcd);
 
         bd = new RootBeanDefinition(PollingAnnotationPostProcessor.class);
-        bcd = new BeanComponentDefinition(bd, "intenral-pollingContaienrAnnotationPostProcessor");
+        bcd = new BeanComponentDefinition(bd, "internal-pollingContaienrAnnotationPostProcessor");
         parserContext.registerBeanComponent(bcd);
 
         bd = new RootBeanDefinition(NotifyAnnotationPostProcessor.class);
-        bcd = new BeanComponentDefinition(bd, "intenral-notifyContaienrAnnotationPostProcessor");
+        bcd = new BeanComponentDefinition(bd, "internal-notifyContaienrAnnotationPostProcessor");
         parserContext.registerBeanComponent(bcd);
 
         bd = new RootBeanDefinition(AsyncPollingAnnotationPostProcessor.class);
-        bcd = new BeanComponentDefinition(bd, "intenral-asyncPollingContaienrAnnotationPostProcessor");
+        bcd = new BeanComponentDefinition(bd, "internal-asyncPollingContaienrAnnotationPostProcessor");
         parserContext.registerBeanComponent(bcd);
 
         return null;

@@ -28,7 +28,7 @@ import org.mule.transaction.TransactionTemplate;
 import org.openspaces.core.util.SpaceUtils;
 
 /**
- * Dispatches (writes) a message to an intenral queue. The queue is a virtualized queue represented
+ * Dispatches (writes) a message to an internal queue. The queue is a virtualized queue represented
  * by the {@link org.openspaces.esb.mule.queue.InternalQueueEntry} with its endpoint address
  * set (and not the message).
  *

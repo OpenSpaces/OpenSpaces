@@ -19,6 +19,7 @@ import org.openspaces.pu.sla.SLA;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
@@ -208,6 +209,10 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     public int getMaxInstancesPerMachine() {
         return sla.getMaxInstancesPerMachine();
+    }
+
+    public Map<String, Integer> getMaxInstancesPerZone() {
+        return Collections.unmodifiableMap(sla.getMaxInstancesPerZone());
     }
 
     public DeploymentStatus getStatus() {

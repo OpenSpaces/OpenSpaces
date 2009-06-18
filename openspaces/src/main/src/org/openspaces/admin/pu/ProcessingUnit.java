@@ -47,6 +47,7 @@ import org.openspaces.admin.space.Space;
 import org.openspaces.core.properties.BeanLevelProperties;
 
 import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
 /**
  * A processing unit holds one or more {@link org.openspaces.admin.pu.ProcessingUnitInstance}s.
@@ -84,6 +85,8 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     int getMaxInstancesPerVM();
 
     int getMaxInstancesPerMachine();
+
+    Map<String, Integer> getMaxInstancesPerZone();
 
     /**
      * Returns the deployment status of the processing unit.

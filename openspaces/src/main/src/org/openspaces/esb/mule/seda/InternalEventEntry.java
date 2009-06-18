@@ -26,7 +26,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * An intenral entry holding the name of the serice (that has the SEDA queue) and the
+ * An internal entry holding the name of the serice (that has the SEDA queue) and the
  * actual mule event to be used.
  *
  * @author kimchy

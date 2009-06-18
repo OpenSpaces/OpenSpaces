@@ -34,7 +34,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * A {@link org.openspaces.events.asyncpolling.AsyncPolling} annotation post processor. Creates an intenral
+ * A {@link org.openspaces.events.asyncpolling.AsyncPolling} annotation post processor. Creates an internal
  * instance of {@link org.openspaces.events.asyncpolling.SimpleAsyncPollingEventListenerContainer} that wraps the given
  * bean (if annotated) listener.
  *

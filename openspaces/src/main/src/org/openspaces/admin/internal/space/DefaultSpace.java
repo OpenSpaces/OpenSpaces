@@ -171,20 +171,36 @@ public class DefaultSpace implements InternalSpace {
         }, 0, statisticsInterval, TimeUnit.MILLISECONDS);
     }
 
+    private int numberOfInstances = -1;
+
     public int getNumberOfInstances() {
-        return doWithInstance(new InstanceCallback<Integer>() {
+        if (numberOfInstances != -1) {
+            return numberOfInstances;
+        }
+        numberOfInstances = doWithInstance(new InstanceCallback<Integer>() {
             public Integer doWithinstance(InternalSpaceInstance spaceInstance) {
                 return spaceInstance.getNumberOfInstances();
             }
         }, -1);
+        return numberOfInstances;
     }
 
+    private int numberOfBackups = -1;
+
     public int getNumberOfBackups() {
-        return doWithInstance(new InstanceCallback<Integer>() {
+        if (numberOfBackups != -1) {
+            return numberOfBackups;
+        }
+        numberOfBackups = doWithInstance(new InstanceCallback<Integer>() {
             public Integer doWithinstance(InternalSpaceInstance spaceInstance) {
                 return spaceInstance.getNumberOfBackups();
             }
         }, -1);
+        return numberOfBackups;
+    }
+
+    public int getTotalNumberOfInstances() {
+        return getNumberOfInstances() * (getNumberOfBackups() + 1);
     }
 
     public SpaceInstance[] getInstances() {
