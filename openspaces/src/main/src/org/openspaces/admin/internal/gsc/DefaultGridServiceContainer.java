@@ -139,7 +139,7 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
     }
 
     public OSDetails getOSDetails() throws RemoteException {
-        return gsc.getOSConfiguration();
+        return gsc.getOSDetails();
     }
 
     public OSStatistics getOSStatistics() throws RemoteException {

@@ -442,7 +442,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public OSDetails getOSDetails() throws RemoteException {
-        return puServiceBean.getOSConfiguration();
+        return puServiceBean.getOSDetails();
     }
 
     public OSStatistics getOSStatistics() throws RemoteException {

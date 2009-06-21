@@ -235,7 +235,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     public OSDetails getOSDetails() throws RemoteException {
-        return gsm.getOSConfiguration();
+        return gsm.getOSDetails();
     }
 
     public OSStatistics getOSStatistics() throws RemoteException {

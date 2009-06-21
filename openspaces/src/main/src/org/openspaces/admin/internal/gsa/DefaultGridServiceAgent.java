@@ -258,7 +258,7 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public OSDetails getOSDetails() throws RemoteException {
-        return gsa.getOSConfiguration();
+        return gsa.getOSDetails();
     }
 
     public OSStatistics getOSStatistics() throws RemoteException {

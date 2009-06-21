@@ -71,7 +71,7 @@ public class DefaultLookupService extends AbstractAgentGridComponent implements 
     }
 
     public OSDetails getOSDetails() throws RemoteException {
-        return ((OSInfoProvider) registrar.getRegistrar()).getOSConfiguration();
+        return ((OSInfoProvider) registrar.getRegistrar()).getOSDetails();
     }
 
     public OSStatistics getOSStatistics() throws RemoteException {

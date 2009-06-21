@@ -895,15 +895,15 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     public NIODetails getNIODetails() throws RemoteException {
-        return NIOInfoHelper.getConfiguration();
+        return NIOInfoHelper.getDetails();
     }
 
     public NIOStatistics getNIOStatistics() throws RemoteException {
         return NIOInfoHelper.getNIOStatistics();
     }
 
-    public OSDetails getOSConfiguration() throws RemoteException {
-        return OSHelper.getConfiguration();
+    public OSDetails getOSDetails() throws RemoteException {
+        return OSHelper.getDetails();
     }
 
     public OSStatistics getOSStatistics() throws RemoteException {
@@ -911,7 +911,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     public JVMDetails getJVMDetails() throws RemoteException {
-        return JVMHelper.getConfiguration();
+        return JVMHelper.getDetails();
     }
 
     public JVMStatistics getJVMStatistics() throws RemoteException {

@@ -323,7 +323,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     }
 
     public OSDetails getOSDetails() throws RemoteException {
-        return spaceAdmin.getOSConfiguration();
+        return spaceAdmin.getOSDetails();
     }
 
     public OSStatistics getOSStatistics() throws RemoteException {
