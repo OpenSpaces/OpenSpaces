@@ -59,6 +59,9 @@ public interface VirtualMachineDetails {
 
     long getStartTime();
 
+    /**
+     * Returns the process id of the virtual machine.
+     */
     long getPid();
 
     String getBootClassPath();
