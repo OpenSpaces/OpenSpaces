@@ -69,7 +69,11 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     public ProcessingUnit deploy(SpaceDeployment deployment) {
-        ProcessingUnit processingUnit = deploy(deployment.toProcessingUnitDeployment());
+        return deploy(deployment, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public ProcessingUnit deploy(SpaceDeployment deployment, long timeout, TimeUnit timeUnit) {
+        ProcessingUnit processingUnit = deploy(deployment.toProcessingUnitDeployment(), timeout, timeUnit);
         final CountDownLatch latch = new CountDownLatch(1);
         ProcessingUnitSpaceCorrelatedEventListener correlated = new ProcessingUnitSpaceCorrelatedEventListener() {
             public void processingUnitSpaceCorrelated(ProcessingUnitSpaceCorrelatedEvent event) {
@@ -78,8 +82,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         };
         processingUnit.getSpaceCorrelated().add(correlated);
         try {
-            // TODO make this configurable
-            latch.await(20, TimeUnit.SECONDS);
+            latch.await(timeout, timeUnit);
         } catch (InterruptedException e) {
             // do nothing
         } finally {
@@ -89,6 +92,10 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     public ProcessingUnit deploy(ProcessingUnitDeployment deployment) {
+        return deploy(deployment, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public ProcessingUnit deploy(ProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit) {
         Deploy deploy = new Deploy();
         Deploy.setDisableInfoLogging(true);
         deploy.setGroups(getAdmin().getGroups());
@@ -123,7 +130,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         getAdmin().getProcessingUnits().getProcessingUnitAdded().add(added);
         try {
             getGSMAdmin().deploy(operationalString);
-            latch.await(20, TimeUnit.SECONDS);
+            latch.await(timeout, timeUnit);
             return ref.get();
         } catch (SecurityException se) {
             throw new AdminException("Not authorized to deploy a processing unit", se);

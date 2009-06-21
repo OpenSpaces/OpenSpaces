@@ -103,12 +103,28 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         return gridServiceManager.deploy(deployment);
     }
 
+    public ProcessingUnit deploy(ProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit) {
+        GridServiceManager gridServiceManager = getGridServiceManager();
+        if (gridServiceManager == null) {
+            throw new AdminException("No Grid Service Manager found to deploy [" + deployment.getProcessingUnit() + "]");
+        }
+        return gridServiceManager.deploy(deployment, timeout, timeUnit);
+    }
+
     public ProcessingUnit deploy(SpaceDeployment deployment) {
         GridServiceManager gridServiceManager = getGridServiceManager();
         if (gridServiceManager == null) {
             throw new AdminException("No Grid Service Manager found to deploy [" + deployment.getSpaceName() + "]");
         }
         return gridServiceManager.deploy(deployment);
+    }
+
+    public ProcessingUnit deploy(SpaceDeployment deployment, long timeout, TimeUnit timeUnit) {
+        GridServiceManager gridServiceManager = getGridServiceManager();
+        if (gridServiceManager == null) {
+            throw new AdminException("No Grid Service Manager found to deploy [" + deployment.getSpaceName() + "]");
+        }
+        return gridServiceManager.deploy(deployment, timeout, timeUnit);
     }
 
     private GridServiceManager getGridServiceManager() {
