@@ -50,15 +50,15 @@ public class DefaultChunkScrollableDataIterator extends AbstractChunkDataIterato
         super(hQuery, sessionFactory, fetchSize, chunkSize);
     }
 
-    protected DataIterator createIteartorByEntityName(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
+    protected DataIterator createIteratorByEntityName(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
         return new DefaultScrollableDataIterator(entityName, sessionFactory, fetchSize, performOrderById, from, size);
     }
 
-    protected DataIterator createIteartorBySQLQuery(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
+    protected DataIterator createIteratorBySQLQuery(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
         return new DefaultScrollableDataIterator(sqlQuery, sessionFactory, fetchSize, performOrderById, from, size);
     }
 
-    protected DataIterator createIteartorByHibernateQuery(String hQuery, SessionFactory sessionFactory, int fetchSize, int from, int size) {
+    protected DataIterator createIteratorByHibernateQuery(String hQuery, SessionFactory sessionFactory, int fetchSize, int from, int size) {
         return new DefaultScrollableDataIterator(hQuery, sessionFactory, fetchSize, from, size);
     }
 }

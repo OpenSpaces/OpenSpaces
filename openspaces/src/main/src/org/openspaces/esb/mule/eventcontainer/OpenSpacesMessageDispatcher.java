@@ -22,6 +22,7 @@ import net.jini.space.JavaSpace;
 import org.mule.api.MuleEvent;
 import org.mule.api.MuleMessage;
 import org.mule.api.MuleRuntimeException;
+import org.mule.api.lifecycle.CreateException;
 import org.mule.api.endpoint.ImmutableEndpoint;
 import org.mule.api.endpoint.OutboundEndpoint;
 import org.mule.config.i18n.CoreMessages;
@@ -56,9 +57,12 @@ public class OpenSpacesMessageDispatcher extends AbstractMessageDispatcher {
     private long updateTimeout = JavaSpace.NO_WAIT;
 
 
-    public OpenSpacesMessageDispatcher(OutboundEndpoint endpoint) {
+    public OpenSpacesMessageDispatcher(OutboundEndpoint endpoint) throws CreateException {
         super(endpoint);
         ApplicationContext applicationContext = ((OpenSpacesConnector) getConnector()).getApplicationContext();
+        if (applicationContext == null) {
+            throw new CreateException(CoreMessages.connectorWithProtocolNotRegistered(connector.getProtocol()), this);
+        }
         initWritingAttributes(endpoint);
         String spaceId = endpoint.getEndpointURI().getPath();
         if (!StringUtils.hasLength(spaceId)) {

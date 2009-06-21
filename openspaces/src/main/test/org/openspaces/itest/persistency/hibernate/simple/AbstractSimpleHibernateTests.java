@@ -116,7 +116,7 @@ public abstract class AbstractSimpleHibernateTests extends TestCase {
         assertEquals(0, existing.size());
     }
 
-    public void testCountAndIteartor() throws Exception {
+    public void testCountAndIterator() throws Exception {
         hibernateTemplate.save(new Simple(1, "test1"));
         hibernateTemplate.save(new Simple(2, "test2"));
 

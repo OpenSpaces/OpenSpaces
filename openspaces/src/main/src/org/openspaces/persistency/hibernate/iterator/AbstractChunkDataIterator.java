@@ -27,7 +27,7 @@ import org.openspaces.persistency.support.SerialMultiDataIterator;
 import java.util.ArrayList;
 
 /**
- * A base class that accespts a batch size and will create several iterators on the given
+ * A base class that accepts a batch size and will create several iterators on the given
  * entity by chunking it into batch size chuncks, each iterator will iterate only on the given
  * chunk.
  *
@@ -58,7 +58,7 @@ public abstract class AbstractChunkDataIterator implements MultiDataIterator {
      *
      * @param entityName       The entity name to scroll over
      * @param sessionFactory   The session factory to use to construct the session
-     * @param fetchSize        The fetch size of the scrollabale result set
+     * @param fetchSize        The fetch size of the scrollable result set
      * @param performOrderById Should the query perform order by id or not
      * @param chunkSize        The size of the chunks the entity table will be broken to
      */
@@ -162,21 +162,21 @@ public abstract class AbstractChunkDataIterator implements MultiDataIterator {
                     int from = 0;
                     while (from < count) {
                         if (entityName != null) {
-                            itList.add(createIteartorByEntityName(entityName, sessionFactory, fetchSize, perfromOrderById, from, chunkSize));
+                            itList.add(createIteratorByEntityName(entityName, sessionFactory, fetchSize, perfromOrderById, from, chunkSize));
                         } else if (sqlQuery != null) {
-                            itList.add(createIteartorBySQLQuery(sqlQuery, sessionFactory, fetchSize, perfromOrderById, from, chunkSize));
+                            itList.add(createIteratorBySQLQuery(sqlQuery, sessionFactory, fetchSize, perfromOrderById, from, chunkSize));
                         } else if (hQuery != null) {
-                            itList.add(createIteartorByHibernateQuery(hQuery, sessionFactory, fetchSize, from, chunkSize));
+                            itList.add(createIteratorByHibernateQuery(hQuery, sessionFactory, fetchSize, from, chunkSize));
                         }
                         from += chunkSize;
                     }
                 } else {
                     if (entityName != null) {
-                        itList.add(createIteartorByEntityName(entityName, sessionFactory, fetchSize, perfromOrderById, -1, -1));
+                        itList.add(createIteratorByEntityName(entityName, sessionFactory, fetchSize, perfromOrderById, -1, -1));
                     } else if (sqlQuery != null) {
-                        itList.add(createIteartorBySQLQuery(sqlQuery, sessionFactory, fetchSize, perfromOrderById, -1, -1));
+                        itList.add(createIteratorBySQLQuery(sqlQuery, sessionFactory, fetchSize, perfromOrderById, -1, -1));
                     } else if (hQuery != null) {
-                        itList.add(createIteartorByHibernateQuery(hQuery, sessionFactory, fetchSize, -1, -1));
+                        itList.add(createIteratorByHibernateQuery(hQuery, sessionFactory, fetchSize, -1, -1));
                     }
                 }
                 iterators = itList.toArray(new DataIterator[itList.size()]);
@@ -187,9 +187,9 @@ public abstract class AbstractChunkDataIterator implements MultiDataIterator {
         }
     }
 
-    protected abstract DataIterator createIteartorByEntityName(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size);
+    protected abstract DataIterator createIteratorByEntityName(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size);
 
-    protected abstract DataIterator createIteartorBySQLQuery(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size);
+    protected abstract DataIterator createIteratorBySQLQuery(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size);
 
-    protected abstract DataIterator createIteartorByHibernateQuery(String hQuery, SessionFactory sessionFactory, int fetchSize, int from, int size);
+    protected abstract DataIterator createIteratorByHibernateQuery(String hQuery, SessionFactory sessionFactory, int fetchSize, int from, int size);
 }

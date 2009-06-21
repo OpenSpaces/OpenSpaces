@@ -50,15 +50,15 @@ public class DefaultChunkListDataIterator extends AbstractChunkDataIterator {
         super(hQuery, sessionFactory, fetchSize, chunkSize);
     }
 
-    protected DataIterator createIteartorByEntityName(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
+    protected DataIterator createIteratorByEntityName(String entityName, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
         return new DefaultListQueryDataIterator(entityName, sessionFactory, from, size);
     }
 
-    protected DataIterator createIteartorBySQLQuery(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
+    protected DataIterator createIteratorBySQLQuery(SQLQuery sqlQuery, SessionFactory sessionFactory, int fetchSize, boolean performOrderById, int from, int size) {
         return new DefaultListQueryDataIterator(sqlQuery, sessionFactory, from, size);
     }
 
-    protected DataIterator createIteartorByHibernateQuery(String hQuery, SessionFactory sessionFactory, int fetchSize, int from, int size) {
+    protected DataIterator createIteratorByHibernateQuery(String hQuery, SessionFactory sessionFactory, int fetchSize, int from, int size) {
         throw new UnsupportedOperationException("Not supported");
     }
 }
