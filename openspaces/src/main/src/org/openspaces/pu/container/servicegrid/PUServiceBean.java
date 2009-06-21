@@ -24,7 +24,6 @@ import com.gigaspaces.grid.zone.GridZoneProvider;
 import com.j_spaces.core.client.SpaceURL;
 import com.sun.jini.start.ServiceProxyAccessor;
 import org.openspaces.core.cluster.ClusterInfo;
-import org.jini.rio.core.jsb.ServiceBean;
 import org.jini.rio.core.jsb.ServiceState;
 import org.jini.rio.resources.servicecore.Service;
 
