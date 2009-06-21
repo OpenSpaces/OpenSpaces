@@ -140,7 +140,7 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
 
         public void reportFirstError() {
             if (logger.isLoggable(Level.WARNING)) {
-                logger.log(Level.WARNING, "Suspecting failure of service: " + serviceDetails + " took: " + roundtrip + "ms", lastThrown);
+                logger.log(Level.WARNING, "Suspecting failure of service: " + serviceDetails + " - RTT[" + roundtrip + "ms]", lastThrown);
             }
         }
 
@@ -163,7 +163,7 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
 
                     if (logger.isLoggable(Level.FINEST)) {
                         long roundtrip = System.currentTimeMillis() - start;
-                        logger.finest("Successfully verified service: " + serviceDetails + " is alive, took: " + roundtrip + "ms");
+                        logger.finest("Successfully verified service: " + serviceDetails + " is alive - RTT[" + roundtrip + "ms]");
                     }
                 } else {
                     throw new MemberReturnFalseException();
@@ -177,9 +177,9 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
 
                 if (logger.isLoggable(Level.FINER)) {
                     if (e instanceof MemberReturnFalseException) {
-                        logger.log(Level.FINER, "Service Failure (isAlive:false): " + serviceDetails + ", took: " + roundtrip + "ms, retry: " + retry);
+                        logger.log(Level.FINER, "Service Failure (isAlive:false): " + serviceDetails + " - RTT[" + roundtrip + "ms], retry[" + retry+"]");
                     } else {
-                        logger.log(Level.FINER, "Service Failure: " + serviceDetails + ", took: " + roundtrip + "ms, retry: " + retry, e);
+                        logger.log(Level.FINER, "Service Failure: " + serviceDetails + " - RTT[" + roundtrip + "ms], retry[" + retry+"]", e);
                     }
                 }
 
@@ -197,6 +197,6 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
     }
 
     private static class MemberReturnFalseException extends Exception {
-        
+
     }
 }
