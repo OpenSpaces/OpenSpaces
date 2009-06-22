@@ -19,6 +19,7 @@ package org.openspaces.admin;
 import org.openspaces.admin.internal.admin.DefaultAdmin;
 
 import com.gigaspaces.security.UserDetails;
+import com.gigaspaces.logger.GSLogConfigLoader;
 
 /**
  * A factory allowing to create {@link org.openspaces.admin.Admin} instance.
@@ -35,6 +36,13 @@ import com.gigaspaces.security.UserDetails;
 public class AdminFactory {
 
     private final DefaultAdmin admin = new DefaultAdmin();
+
+    private boolean useGsLogging = true;
+
+    public AdminFactory useGsLogging(boolean useGsLogging) {
+        this.useGsLogging = useGsLogging;
+        return this;
+    }
 
     /**
      * Adds a lookup group that will be used to find Lookup Services (using multicast)
@@ -82,6 +90,9 @@ public class AdminFactory {
      * Creates the admin and begins its listening for events from the lookup service.
      */
     public Admin createAdmin() {
+        if (useGsLogging) {
+            GSLogConfigLoader.getLoader();
+        }
         admin.begin();
         return admin;
     }
