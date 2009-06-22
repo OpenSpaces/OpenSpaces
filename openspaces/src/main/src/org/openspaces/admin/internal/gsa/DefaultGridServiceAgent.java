@@ -20,16 +20,17 @@ import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventListener;
 import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.lus.InternalLookupService;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.internal.support.InternalAgentGridComponent;
+import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.lus.events.LookupServiceAddedEventListener;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -84,8 +85,12 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public void startGridService(GridServiceManagerOptions options) {
+        internalStartGridService(options);
+    }
+
+    private int internalStartGridService(GridServiceManagerOptions options) {
         try {
-            gsa.startProcess(options.getOptions());
+            return gsa.startProcess(options.getOptions());
         } catch (SecurityException se) {
             throw new AdminException("No credentials to start a GSM", se);
         } catch (com.gigaspaces.security.SecurityException se) {
@@ -100,28 +105,25 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public GridServiceManager startGridServiceAndWait(GridServiceManagerOptions options, long timeout, TimeUnit timeUnit) {
-        final Object monitor = new Object();
+        final int agentId = internalStartGridService(options);
+
+        final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<GridServiceManager> ref = new AtomicReference<GridServiceManager>();
         GridServiceManagerAddedEventListener added = new GridServiceManagerAddedEventListener() {
             public void gridServiceManagerAdded(GridServiceManager gridServiceManager) {
                 String agentUid = ((InternalGridServiceManager) gridServiceManager).getAgentUid();
                 if (agentUid != null && agentUid.equals(getUid())) {
-                    ref.set(gridServiceManager);
-                    synchronized (monitor) {
-                        monitor.notifyAll();
+                    if (agentId == gridServiceManager.getAgentId()) {
+                        ref.set(gridServiceManager);
+                        latch.countDown();
                     }
                 }
             }
         };
         // adding now, so we get all the events for existing ones
         getAdmin().getGridServiceManagers().getGridServiceManagerAdded().add(added);
-        // reset the refernece
-        ref.set(null);
         try {
-            startGridService(options);
-            synchronized (monitor) {
-                monitor.wait(timeUnit.toMillis(timeout));
-            }
+            latch.await(timeout, timeUnit);
             return ref.get();
         } catch (InterruptedException e) {
             return null;
@@ -131,8 +133,12 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public void startGridService(GridServiceContainerOptions options) {
+        internalStartGridService(options);
+    }
+
+    public int internalStartGridService(GridServiceContainerOptions options) {
         try {
-            gsa.startProcess(options.getOptions());
+            return gsa.startProcess(options.getOptions());
         } catch (SecurityException se) {
             throw new AdminException("No credentials to start a GSC", se);
         } catch (com.gigaspaces.security.SecurityException se) {
@@ -147,29 +153,26 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public GridServiceContainer startGridServiceAndWait(GridServiceContainerOptions options, long timeout, TimeUnit timeUnit) {
-        final Object monitor = new Object();
+        final int agentId = internalStartGridService(options);
+
+        final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<GridServiceContainer> ref = new AtomicReference<GridServiceContainer>();
         GridServiceContainerAddedEventListener added = new GridServiceContainerAddedEventListener() {
 
             public void gridServiceContainerAdded(GridServiceContainer gridServiceContainer) {
                 String agentUid = ((InternalGridServiceContainer) gridServiceContainer).getAgentUid();
                 if (agentUid != null && agentUid.equals(getUid())) {
-                    ref.set(gridServiceContainer);
-                    synchronized (monitor) {
-                        monitor.notifyAll();
+                    if (agentId == gridServiceContainer.getAgentId()) {
+                        ref.set(gridServiceContainer);
+                        latch.countDown();
                     }
                 }
             }
         };
         // adding now, so we get all the events for existing ones
         getAdmin().getGridServiceContainers().getGridServiceContainerAdded().add(added);
-        // reset the refernece
-        ref.set(null);
         try {
-            startGridService(options);
-            synchronized (monitor) {
-                monitor.wait(timeUnit.toMillis(timeout));
-            }
+            latch.await(timeout, timeUnit);
             return ref.get();
         } catch (InterruptedException e) {
             return null;
@@ -179,8 +182,12 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public void startGridService(LookupServiceOptions options) {
+        internalStartGridService(options);
+    }
+
+    public int internalStartGridService(LookupServiceOptions options) {
         try {
-            gsa.startProcess(options.getOptions());
+            return gsa.startProcess(options.getOptions());
         } catch (SecurityException se) {
             throw new AdminException("No credentials to start a Lookup Service", se);
         } catch (com.gigaspaces.security.SecurityException se) {
@@ -195,28 +202,25 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public LookupService startGridServiceAndWait(LookupServiceOptions options, long timeout, TimeUnit timeUnit) {
-        final Object monitor = new Object();
+        final int agentId = internalStartGridService(options);
+
+        final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<LookupService> ref = new AtomicReference<LookupService>();
         LookupServiceAddedEventListener added = new LookupServiceAddedEventListener() {
             public void lookupServiceAdded(LookupService lookupService) {
                 String agentUid = ((InternalLookupService) lookupService).getAgentUid();
                 if (agentUid != null && agentUid.equals(getUid())) {
-                    ref.set(lookupService);
-                    synchronized (monitor) {
-                        monitor.notifyAll();
+                    if (agentId == lookupService.getAgentId()) {
+                        ref.set(lookupService);
+                        latch.countDown();
                     }
                 }
             }
         };
         // adding now, so we get all the events for existing ones
         getAdmin().getLookupServices().getLookupServiceAdded().add(added);
-        // reset the refernece
-        ref.set(null);
         try {
-            startGridService(options);
-            synchronized (monitor) {
-                monitor.wait(timeUnit.toMillis(timeout));
-            }
+            latch.await(timeout, timeUnit);
             return ref.get();
         } catch (InterruptedException e) {
             return null;
