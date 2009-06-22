@@ -28,6 +28,8 @@ public interface InternalProcessingUnitInstances extends InternalProcessingUnitI
 
     ProcessingUnitInstance[] getInstances();
 
+    ProcessingUnitInstance[] getInstances(String processingUnitName);
+
     ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded();
 
     ProcessingUnitInstanceRemovedEventManager getProcessingUnitInstanceRemoved();

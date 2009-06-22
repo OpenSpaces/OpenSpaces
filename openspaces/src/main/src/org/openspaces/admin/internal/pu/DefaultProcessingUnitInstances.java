@@ -12,6 +12,7 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -81,6 +82,16 @@ public class DefaultProcessingUnitInstances implements InternalProcessingUnitIns
 
     public ProcessingUnitInstance[] getInstances() {
         return processingUnitInstances.values().toArray(new ProcessingUnitInstance[0]);
+    }
+
+    public ProcessingUnitInstance[] getInstances(String processingUnitName) {
+        ArrayList<ProcessingUnitInstance> retVal = new ArrayList<ProcessingUnitInstance>();
+        for (ProcessingUnitInstance instance : processingUnitInstances.values()) {
+            if (instance.getName().equals(processingUnitName)) {
+                retVal.add(instance);
+            }
+        }
+        return retVal.toArray(new ProcessingUnitInstance[retVal.size()]);
     }
 
     public ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded() {

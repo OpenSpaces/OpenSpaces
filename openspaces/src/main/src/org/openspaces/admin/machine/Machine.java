@@ -111,6 +111,11 @@ public interface Machine {
     ProcessingUnitInstance[] getProcessingUnitInstances();
 
     /**
+     * Returns the processing unit instances of the specified name that are currently deployed on the machine.
+     */
+    ProcessingUnitInstance[] getProcessingUnitInstances(String processingUnitName);
+
+    /**
      * Returns <code>true</code> if the processing unit instance exists within the machine.
      */
     boolean contains(ProcessingUnitInstance processingUnitInstance);
