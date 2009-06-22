@@ -10,6 +10,8 @@ import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
  */
 public interface InternalSpaceInstances extends Iterable<SpaceInstance>, InternalSpaceInstancesAware {
 
+    boolean contains(SpaceInstance spaceInstance);
+
     int size();
 
     void addSpaceInstance(SpaceInstance spaceInstance);

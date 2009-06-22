@@ -12,6 +12,8 @@ import java.util.Iterator;
  */
 public interface InternalProcessingUnitInstances extends InternalProcessingUnitInstancesAware {
 
+    boolean contains(ProcessingUnitInstance processingUnitInstance);
+
     void addOrphaned(ProcessingUnitInstance processingUnitInstance);
 
     ProcessingUnitInstance removeOrphaned(String uid);

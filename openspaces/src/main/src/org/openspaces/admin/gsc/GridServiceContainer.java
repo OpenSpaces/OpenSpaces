@@ -61,6 +61,11 @@ public interface GridServiceContainer extends AgentGridComponent, Iterable<Proce
     ProcessingUnitInstance[] getProcessingUnitInstances();
 
     /**
+     * Returns <code>true</code> if the GSC contains the provided processing unit instance.
+     */
+    boolean contains(ProcessingUnitInstance processingUnitInstance);
+
+    /**
      * Returns an event manager allowing to register for processing unit instance additions to the container.
      */
     ProcessingUnitInstanceAddedEventManager getProcessingUnitInstanceAdded();

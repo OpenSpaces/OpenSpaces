@@ -35,6 +35,15 @@ public class DefaultProcessingUnitInstances implements InternalProcessingUnitIns
         this.processingUnitInstanceRemovedEventManager = new DefaultProcessingUnitInstanceRemovedEventManager(admin);
     }
 
+    public boolean contains(ProcessingUnitInstance processingUnitInstance) {
+        for (ProcessingUnitInstance it : processingUnitInstances.values()) {
+            if (it.getUid().equals(processingUnitInstance.getUid())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void addOrphaned(ProcessingUnitInstance processingUnitInstance) {
         orphanedProcessingUnitInstances.put(processingUnitInstance.getUid(), processingUnitInstance);
     }

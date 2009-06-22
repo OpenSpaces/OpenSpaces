@@ -166,8 +166,16 @@ public class DefaultMachine implements InternalMachine {
         return processingUnitInstances.getInstances();
     }
 
+    public boolean contains(ProcessingUnitInstance processingUnitInstance) {
+        return processingUnitInstances.contains(processingUnitInstance);
+    }
+
     public SpaceInstance[] getSpaceInstances() {
         return spaceInstances.getSpaceInstances();
+    }
+
+    public boolean contains(SpaceInstance spaceInstance) {
+        return spaceInstances.contains(spaceInstance);
     }
 
     public SpaceInstanceAddedEventManager getSpaceInstanceAdded() {

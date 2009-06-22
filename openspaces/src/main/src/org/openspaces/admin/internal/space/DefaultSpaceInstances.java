@@ -33,6 +33,15 @@ public class DefaultSpaceInstances implements InternalSpaceInstances {
         this.spaceInstanceRemovedEventManager = new DefaultSpaceInstanceRemovedEventManager(admin);
     }
 
+    public boolean contains(SpaceInstance spaceInstance) {
+        for (SpaceInstance it : spaceInstances.values()) {
+            if (it.getUid().equals(spaceInstance.getUid())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public int size() {
         return spaceInstances.size();
     }

@@ -111,6 +111,11 @@ public interface Machine {
     ProcessingUnitInstance[] getProcessingUnitInstances();
 
     /**
+     * Returns <code>true</code> if the processing unit instance exists within the machine.
+     */
+    boolean contains(ProcessingUnitInstance processingUnitInstance);
+
+    /**
      * Returns the processing unit instance added event manager allowing to add and remove
      * {@link org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener}s.
      */
@@ -136,6 +141,11 @@ public interface Machine {
      * Returns all the space instances running on the machine.
      */
     SpaceInstance[] getSpaceInstances();
+
+    /**
+     * Returns <code>true</code> if the machine contains the provided space instance.
+     */
+    boolean contains(SpaceInstance spaceInstance);
 
     /**
      * Returns the space instance added event manager allowing to add and remove

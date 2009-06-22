@@ -62,6 +62,10 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
         return processingUnitInstances.getInstances();
     }
 
+    public boolean contains(ProcessingUnitInstance processingUnitInstance) {
+        return processingUnitInstances.contains(processingUnitInstance);
+    }
+
     public boolean waitFor(int numberOfProcessingUnitInstances) {
         return waitFor(numberOfProcessingUnitInstances, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     }
