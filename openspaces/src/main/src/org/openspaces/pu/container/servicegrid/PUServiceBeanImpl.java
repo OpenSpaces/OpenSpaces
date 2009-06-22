@@ -119,6 +119,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     final private List<Callable> serviceMonitors = new ArrayList<Callable>();
 
+    private volatile boolean stopping = false;
+
     public PUServiceBeanImpl() {
         super();
     }
@@ -182,10 +184,12 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
 
         ClassLoader origClassLoader = Thread.currentThread().getContextClassLoader();
+        stopping = true;
         try {
             Thread.currentThread().setContextClassLoader(contextClassLoader);
             stopPU();
         } finally {
+            stopping = false;
             Thread.currentThread().setContextClassLoader(origClassLoader);
             this.serviceMonitors.clear();
             this.memberAliveIndicators = null;
@@ -683,6 +687,11 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     public boolean isAlive() throws Exception {
+        if (stopping) {
+            // when we are stopping, don't check for member alive since the system might be in
+            // inconsistent state and we should not "bother" it with checking for liveness
+            return true;
+        }
         if (memberAliveIndicators == null || memberAliveIndicators.length == 0) {
             return true;
         }
