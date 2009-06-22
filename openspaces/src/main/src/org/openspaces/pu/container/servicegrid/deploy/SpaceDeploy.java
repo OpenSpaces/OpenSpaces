@@ -86,6 +86,10 @@ public class SpaceDeploy {
     }
 
     public static String getUsage() {
+        return getUsage(false);
+    }
+
+    public static String getUsage(boolean managed) {
         StringBuilder sb = new StringBuilder();
         sb.append("Usage: Space Deploy [-sla ...] [-cluster ...] [-groups groups] [-timeout timeoutValue] [-properties ...] Space_Name");
         sb.append("\n    Space_Name: The name of the space to deploy");
@@ -93,9 +97,11 @@ public class SpaceDeploy {
         sb.append("\n    -cluster [cluster properties]            : Allows to override the cluster parameters of the SLA elements");
         sb.append("\n             schema=partitioned              : The cluster schema to override");
         sb.append("\n             total_members=1,1               : The number of instances and number of backups to override");
-        sb.append("\n    -groups [groupName] [groupName] ...      : The lookup groups used to look up the GSM");
-        sb.append("\n    -locators [host1] [host2] ...            : The lookup locators used to look up the GSM");
-        sb.append("\n    -timeout [timeout value]                 : The timeout value of GSM lookup (defaults to 5000) in milliseconds");
+        if (!managed) {
+            sb.append("\n    -groups [groupName] [groupName] ...      : The lookup groups used to look up the GSM");
+            sb.append("\n    -locators [host1] [host2] ...            : The lookup locators used to look up the GSM");
+            sb.append("\n    -timeout [timeout value]                 : The timeout value of GSM lookup (defaults to 5000) in milliseconds");
+        }
         sb.append("\n    -properties [properties-loc]             : Location of context level properties");
         sb.append("\n    -properties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
         sb.append("\n    -max-instances-per-vm [number]           : Allows to set the SLA number of instances per VM");
