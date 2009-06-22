@@ -163,6 +163,9 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         Object service = event.getPostEventServiceItem().service;
         ServiceID serviceID = event.getPostEventServiceItem().serviceID;
         if (service instanceof GSM) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Service Added [GSM] with uid [" + serviceID + "]");
+            }
             try {
                 GSM gsm = (GSM) service;
                 if (gsm.isSecured()) {
@@ -179,9 +182,12 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 JVMDetails jvmDetails = gridServiceManager.getJVMDetails();
                 admin.addGridServiceManager(gridServiceManager, nioDetails, osDetails, jvmDetails, gsm.getZones());
             } catch (Exception e) {
-                logger.warn("Failed to add GSM with uid [" + serviceID + "]", e);
+                logger.warn("Failed to add [GSM] with uid [" + serviceID + "]", e);
             }
         } else if (service instanceof GSA) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Service Added [GSA] with uid [" + serviceID + "]");
+            }
             try {
                 GSA gsa = (GSA) service;
                 if (gsa.isSecured()) {
@@ -198,9 +204,12 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 JVMDetails jvmDetails = gridServiceAgent.getJVMDetails();
                 admin.addGridServiceAgent(gridServiceAgent, nioDetails, osDetails, jvmDetails, gsa.getZones());
             } catch (Exception e) {
-                logger.warn("Failed to add GSA with uid [" + serviceID + "]", e);
+                logger.warn("Failed to add [GSA] with uid [" + serviceID + "]", e);
             }
         } else if (service instanceof GSC) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Service Added [GSC] with uid [" + serviceID + "]");
+            }
             try {
                 GSC gsc = (GSC) service;
                 if (gsc.isSecured()) {
@@ -220,6 +229,9 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 logger.warn("Failed to add GSC with uid [" + serviceID + "]", e);
             }
         } else if (service instanceof PUServiceBean) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Service Added [Processing Unit Instance] with uid [" + serviceID + "]");
+            }
             try {
                 PUServiceBean puServiceBean = (PUServiceBean) service;
                 PUDetails puDetails = puServiceBean.getPUDetails();
@@ -229,9 +241,12 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 JVMDetails jvmDetails = processingUnitInstance.getJVMDetails();
                 admin.addProcessingUnitInstance(processingUnitInstance, nioDetails, osDetails, jvmDetails, puServiceBean.getZones());
             } catch (Exception e) {
-                logger.warn("Failed to add Processing Unit with uid [" + serviceID + "]", e);
+                logger.warn("Failed to add [Processing Unit Instance] with uid [" + serviceID + "]", e);
             }
         } else if (service instanceof IJSpace) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Service Added [Space Instance] with uid [" + serviceID + "]");
+            }
             try {
                 SecurityContext securityContext = null;
                 if (admin.getUsername() != null) {
@@ -261,7 +276,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 JVMDetails jvmDetails = spaceInstance.getJVMDetails();
                 admin.addSpaceInstance(spaceInstance, clusteredIjspace, nioDetails, osDetails, jvmDetails, spaceAdmin.getZones());
             } catch (Exception e) {
-                logger.warn("Failed to add Space with uid [" + serviceID + "]", e);
+                logger.warn("Failed to add [Space Instance] with uid [" + serviceID + "]", e);
             }
         }
     }
@@ -270,14 +285,29 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         Object service = event.getPreEventServiceItem().service;
         ServiceID serviceID = event.getPreEventServiceItem().serviceID;
         if (service instanceof GSM) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Service Removed [GSM] with uid [" + serviceID + "]");
+            }
             admin.removeGridServiceManager(serviceID.toString());
         } else if (service instanceof GSA) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Service Removed [GSA] with uid [" + serviceID + "]");
+            }
             admin.removeGridServiceAgent(serviceID.toString());
         } else if (service instanceof GSC) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Service Removed [GSC] with uid [" + serviceID + "]");
+            }
             admin.removeGridServiceContainer(serviceID.toString());
         } else if (service instanceof PUServiceBean) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Service Removed [Processing Unit Instance] with uid [" + serviceID + "]");
+            }
             admin.removeProcessingUnitInstance(serviceID.toString());
         } else if (service instanceof IJSpace) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Service Removed [Space Instance] with uid [" + serviceID + "]");
+            }
             admin.removeSpaceInstance(serviceID.toString());
         }
     }
