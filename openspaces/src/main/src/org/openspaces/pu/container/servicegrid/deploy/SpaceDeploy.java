@@ -91,7 +91,11 @@ public class SpaceDeploy {
 
     public static String getUsage(boolean managed) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Usage: Space Deploy [-sla ...] [-cluster ...] [-groups groups] [-timeout timeoutValue] [-properties ...] Space_Name");
+        if (!managed) {
+            sb.append("Usage: Space Deploy [-sla ...] [-cluster ...] [-groups groups] [-locators host1 host2] [-timeout timeoutValue] [-properties ...] Space_Name");
+        } else {
+            sb.append("Usage: Space Deploy [-sla ...] [-cluster ...] [-properties ...] Space_Name");
+        }
         sb.append("\n    Space_Name: The name of the space to deploy");
         sb.append("\n    -sla [sla-location]                      : Location of an optional xml file holding the SLA element");
         sb.append("\n    -cluster [cluster properties]            : Allows to override the cluster parameters of the SLA elements");

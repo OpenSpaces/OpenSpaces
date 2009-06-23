@@ -740,7 +740,11 @@ public class Deploy {
 
     public static String getUsage(boolean managed) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Usage: Deploy [-sla ...] [-cluster ...] [-groups groups] [-timeout timeoutValue] [-properties ...] PU_Name");
+        if (!managed) {
+            sb.append("Usage: Deploy [-sla ...] [-cluster ...] [-groups groups] [-locators hots1 hots2] [-timeout timeoutValue] [-properties ...] PU_Name");
+        } else {
+            sb.append("Usage: Deploy [-sla ...] [-cluster ...] [-properties ...] PU_Name");
+        }
         sb.append("\n    PU_Name: The name of the processing unit under the deploy directory, or packaged jar file");
         sb.append("\n    -sla [sla-location]                      : Location of an optional xml file holding the SLA element");
         sb.append("\n    -cluster [cluster properties]            : Allows to override the cluster parameters of the SLA elements");
