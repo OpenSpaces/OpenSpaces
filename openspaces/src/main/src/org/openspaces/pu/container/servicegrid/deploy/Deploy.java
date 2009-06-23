@@ -36,9 +36,12 @@ import org.jini.rio.opstring.OpStringLoader;
 import org.jini.rio.resources.servicecore.ServiceAdmin;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.properties.BeanLevelProperties;
+import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
+import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.CommandLineParser;
+import org.openspaces.pu.container.support.ResourceApplicationContext;
 import org.openspaces.pu.sla.*;
 import org.openspaces.pu.sla.SLA;
 import org.openspaces.pu.sla.requirement.*;
@@ -269,6 +272,30 @@ public class Deploy {
         //list remote files, only works with webster
         URL root = new URL(codeserver);
 
+        BeanLevelProperties beanLevelProperties = new BeanLevelProperties();
+        URL puPropsURL = new URL(root, puPath + "/META-INF/spring/pu.properties");
+        try {
+            InputStream is = puPropsURL.openStream();
+            if (is != null) {
+                beanLevelProperties.getContextProperties().load(is);
+                is.close();
+            }
+        } catch (Exception e) {
+            // ignore, no file
+        }
+        puPropsURL = new URL(root, puPath + "/pu.properties");
+        try {
+            InputStream is = puPropsURL.openStream();
+            if (is != null) {
+                beanLevelProperties.getContextProperties().load(is);
+                is.close();
+            }
+        } catch (Exception e) {
+            // ignore, no file
+        }
+        beanLevelProperties = BeanLevelPropertiesParser.parse(beanLevelProperties, params);
+        
+
         //read pu xml
         String puString = "";
         try {
@@ -281,6 +308,7 @@ public class Deploy {
             logger.debug("Using PU xml [" + puString + "]");
         }
 
+        boolean slaInPu = true;
         Resource resource;
 
         // check to see if sla was passed as a parameter
@@ -299,16 +327,19 @@ public class Deploy {
                 InputStreamReader reader = new InputStreamReader(resource.getInputStream());
                 slaString = FileCopyUtils.copyToString(reader);
                 reader.close();
+                slaInPu = false;
             }
         }
         if (slaString == puString) {
             // no sla passed as a parameter, try and load from default locations
             try {
                 slaString = readFile(root, puPath, "/META-INF/spring/sla.xml");
+                slaInPu = true;
             } catch (IOException e) {
                 // no sla string found
                 try {
                     slaString = readFile(root, puPath, "/sla.xml");
+                    slaInPu = true;
                 } catch (IOException e1) {
                     // no sla string found
                 }
@@ -319,17 +350,31 @@ public class Deploy {
         SLA sla = new SLA();
         if (StringUtils.hasText(slaString)) {
             resource = new ByteArrayResource(slaString.getBytes());
-            XmlBeanFactory xmlBeanFactory = new XmlBeanFactory(resource);
-            // TODO: Need to find how to do it
-//            Map<String, PropertyResourceConfigurer> map = xmlBeanFactory.getBeansOfType(PropertyResourceConfigurer.class);
-//            for (PropertyResourceConfigurer cfg : map.values()) {
-//                cfg.postProcessBeanFactory(xmlBeanFactory);
-//            }
-            try {
-                sla = (SLA) xmlBeanFactory.getBean("SLA");
-            } catch (NoSuchBeanDefinitionException e) {
-                info("SLA Not Found in PU.  Using Default SLA.");
-                sla = new SLA();
+            if (slaInPu) {
+                XmlBeanFactory xmlBeanFactory = new XmlBeanFactory(resource);
+                // TODO: Need to find how to do it
+    //            Map<String, PropertyResourceConfigurer> map = xmlBeanFactory.getBeansOfType(PropertyResourceConfigurer.class);
+    //            for (PropertyResourceConfigurer cfg : map.values()) {
+    //                cfg.postProcessBeanFactory(xmlBeanFactory);
+    //            }
+                try {
+                    sla = (SLA) xmlBeanFactory.getBean("SLA");
+                } catch (NoSuchBeanDefinitionException e) {
+                    info("SLA Not Found in PU.  Using Default SLA.");
+                    sla = new SLA();
+                }
+            } else {
+                // if we have specific sla file, load it as usual, so we can have deploy properties / system properties injected to it
+                ResourceApplicationContext applicationContext = new ResourceApplicationContext(new Resource[] {resource}, null);
+                if (beanLevelProperties != null) {
+                    applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties, null));
+                    applicationContext.addBeanPostProcessor(new BeanLevelPropertyBeanPostProcessor(beanLevelProperties));
+                }
+                try {
+                    sla = (SLA) applicationContext.getBean("SLA");
+                } catch (NoSuchBeanDefinitionException e) {
+                    throw new IllegalArgumentException("Failed to find SLA from in [" + slaString + "]");
+                }
             }
         }
 
@@ -384,31 +429,8 @@ public class Deploy {
         }
 
 
-        BeanLevelProperties beanLevelProperties = new BeanLevelProperties();
-
-        URL puPropsURL = new URL(root, puPath + "/META-INF/spring/pu.properties");
-        try {
-            InputStream is = puPropsURL.openStream();
-            if (is != null) {
-                beanLevelProperties.getContextProperties().load(is);
-                is.close();
-            }
-        } catch (Exception e) {
-            // ignore, no file
-        }
-        puPropsURL = new URL(root, puPath + "/pu.properties");
-        try {
-            InputStream is = puPropsURL.openStream();
-            if (is != null) {
-                beanLevelProperties.getContextProperties().load(is);
-                is.close();
-            }
-        } catch (Exception e) {
-            // ignore, no file
-        }
-
         //deploy to sg
-        return loadDeployment(puString, codeserver, sla, puPath, overridePuName, BeanLevelPropertiesParser.parse(beanLevelProperties, params));
+        return loadDeployment(puString, codeserver, sla, puPath, overridePuName, beanLevelProperties);
     }
 
     //copied from opstringloader

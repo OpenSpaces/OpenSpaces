@@ -144,7 +144,7 @@
                         </xsd:documentation>
                     </xsd:annotation>
                     <xsd:complexType>
-                        <xsd:attribute name="invocation-delay" type="xsd:positiveInteger">
+                        <xsd:attribute name="invocation-delay" type="xsd:string">
                             <xsd:annotation>
                                 <xsd:documentation>
                                     How often an instance will be checked and verfied to be alive. In milliseconds and
@@ -152,7 +152,7 @@
                                 </xsd:documentation>
                             </xsd:annotation>
                         </xsd:attribute>
-                        <xsd:attribute name="retry-count" type="xsd:nonNegativeInteger">
+                        <xsd:attribute name="retry-count" type="xsd:string">
                             <xsd:annotation>
                                 <xsd:documentation>
                                     Once a member has been indicated as not alive, how many times to check it before
@@ -160,7 +160,7 @@
                                 </xsd:documentation>
                             </xsd:annotation>
                         </xsd:attribute>
-                        <xsd:attribute name="retry-timeout" type="xsd:positiveInteger">
+                        <xsd:attribute name="retry-timeout" type="xsd:string">
                             <xsd:annotation>
                                 <xsd:documentation>
                                     Once a member has been indicated as not alive, what is the retry timeout interval.
@@ -248,7 +248,7 @@
                     </xsd:complexType>
                 </xsd:element>
             </xsd:sequence>
-            <xsd:attribute name="number-of-instances" type="xsd:positiveInteger" default="1" use="optional">
+            <xsd:attribute name="number-of-instances" type="xsd:string" default="1" use="optional">
                 <xsd:annotation>
                     <xsd:documentation>
                         Sets the number of instnaces this processing unit will have. Default value is 1. Note, when
@@ -256,7 +256,7 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:attribute>
-            <xsd:attribute name="number-of-backups" type="xsd:nonNegativeInteger" use="optional">
+            <xsd:attribute name="number-of-backups" type="xsd:string" use="optional">
                 <xsd:annotation>
                     <xsd:documentation>
                         The number of backups per instance this processing unit will have. Defaults to 0. Note, when
@@ -274,7 +274,7 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:attribute>
-            <xsd:attribute name="max-instances-per-vm" type="xsd:positiveInteger" use="optional">
+            <xsd:attribute name="max-instances-per-vm" type="xsd:string" use="optional">
                 <xsd:annotation>
                     <xsd:documentation>
                         Controls how many instances can be deployed per VM. When using a topology without backups, will
@@ -283,7 +283,7 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:attribute>
-            <xsd:attribute name="max-instances-per-machine" type="xsd:positiveInteger" use="optional">
+            <xsd:attribute name="max-instances-per-machine" type="xsd:string" use="optional">
                 <xsd:annotation>
                     <xsd:documentation>
                         Controls how many instances can be deployed per machine. When using a topology without backups,
@@ -349,14 +349,14 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="low" type="xsd:double" use="optional">
+                    <xsd:attribute name="low" type="xsd:string" use="optional">
                         <xsd:annotation>
                             <xsd:documentation>
                                 The lower threshold where value beneath it will cause the processing unit not to deploy.
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="high" type="xsd:double" use="required">
+                    <xsd:attribute name="high" type="xsd:string" use="required">
                         <xsd:annotation>
                             <xsd:documentation>
                                 The high threshold where value above it will cause the processing unit not to deploy.
@@ -372,14 +372,14 @@
                     </xsd:documentation>
                 </xsd:annotation>
                 <xsd:complexType>
-                    <xsd:attribute name="low" type="xsd:double" use="optional">
+                    <xsd:attribute name="low" type="xsd:string" use="optional">
                         <xsd:annotation>
                             <xsd:documentation>
                                 Lower values of the CPU beneath this value will cause the processing unit not to deploy.
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="high" type="xsd:double" use="required">
+                    <xsd:attribute name="high" type="xsd:string" use="required">
                         <xsd:annotation>
                             <xsd:documentation>
                                 High values of the CPU above this value will cause the processing unit not to deploy.
@@ -395,7 +395,7 @@
                     </xsd:documentation>
                 </xsd:annotation>
                 <xsd:complexType>
-                    <xsd:attribute name="low" type="xsd:double" use="optional">
+                    <xsd:attribute name="low" type="xsd:string" use="optional">
                         <xsd:annotation>
                             <xsd:documentation>
                                 Lower values of the Memory beneath this value will cause the processing unit not to
@@ -403,7 +403,7 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="high" type="xsd:double" use="required">
+                    <xsd:attribute name="high" type="xsd:string" use="required">
                         <xsd:annotation>
                             <xsd:documentation>
                                 High values of the Memory above this value will cause the processing unit not to deploy.
