@@ -98,21 +98,19 @@ public class StatelessListQueryDataIterator implements DataIterator {
     }
 
     public void close() {
-        if (transaction == null) {
-            return;
-        }
         try {
+            if (transaction == null) {
+                return;
+            }
             transaction.commit();
         } finally {
             transaction = null;
-            try {
-                if (session != null) {
+            if (session != null) {
+                try {
                     session.close();
+                } catch (Exception e) {
+                    // ignore
                 }
-            } catch (Exception e) {
-                // ignore
-            } finally {
-                session = null;
             }
         }
     }
