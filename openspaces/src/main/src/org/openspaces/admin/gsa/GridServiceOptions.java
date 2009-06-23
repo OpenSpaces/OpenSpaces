@@ -20,6 +20,8 @@ import com.gigaspaces.grid.gsa.GSProcessOptions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * A generic process options.
@@ -39,6 +41,8 @@ public class GridServiceOptions {
     private final List<String> arguments = new ArrayList<String>();
 
     private boolean overrideArguments;
+
+    private final Map<String, String> environmentVariables = new HashMap<String, String>();
 
     /**
      * Constructs a new grid service options with the given process type. By default, will use JVM to start it.
@@ -91,6 +95,14 @@ public class GridServiceOptions {
     }
 
     /**
+     * Sets an environment variable that will be passed to forked process.
+     */
+    public GridServiceOptions environmentVariable(String name, String value) {
+        environmentVariables.put(name, value);
+        return this;
+    }
+
+    /**
      * Returns the agent process options that represents what was set on this generic service options.
      */
     public GSProcessOptions getOptions() {
@@ -114,6 +126,7 @@ public class GridServiceOptions {
                 options.setVmAppendableArguments(arguments.toArray(new String[arguments.size()]));
             }
         }
+        options.setEnvironmentVariables(environmentVariables);
         return options;
     }
 }

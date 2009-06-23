@@ -20,6 +20,8 @@ import com.gigaspaces.grid.gsa.GSProcessOptions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * {@link org.openspaces.admin.gsc.GridServiceContainer} process options to be started by the
@@ -36,6 +38,8 @@ public class GridServiceContainerOptions {
 
     private boolean useScript = false;
 
+    private final Map<String, String> environmentVariables = new HashMap<String, String>();
+    
     /**
      * Constructs a new grid service container options. By default will use JVM process execution.
      */
@@ -70,6 +74,14 @@ public class GridServiceContainerOptions {
     }
 
     /**
+     * Sets an environment variable that will be passed to forked process.
+     */
+    public GridServiceContainerOptions environmentVariable(String name, String value) {
+        environmentVariables.put(name, value);
+        return this;
+    }
+
+    /**
      * Returns the agent process options that represents what was set on this GSC options.
      */
     public GSProcessOptions getOptions() {
@@ -80,6 +92,7 @@ public class GridServiceContainerOptions {
         } else {
             options.setVmAppendableInputArguments(vmInputArguments.toArray(new String[vmInputArguments.size()]));
         }
+        options.setEnvironmentVariables(environmentVariables);
         return options;
     }
 }
