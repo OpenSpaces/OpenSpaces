@@ -140,7 +140,7 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
 
         public void reportFirstError() {
             if (logger.isLoggable(Level.WARNING)) {
-                logger.log(Level.WARNING, "Suspecting failure of service: " + serviceDetails + " - RTT[" + roundtrip + "ms]", lastThrown);
+                logger.log(Level.WARNING, "Suspecting failure of service: " + serviceDetails + " - RTT[" + formatDuration(roundtrip) + "]", lastThrown);
             }
         }
 
@@ -154,7 +154,7 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
          * Verify service can be reached. If the service cannot be reached return false
          */
         public boolean verify() {
-            long start = System.currentTimeMillis();
+            long start = System.nanoTime();
             try {
                 final boolean isAlive = ((PUServiceBean) proxy).isAlive();
 
@@ -162,29 +162,52 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
                     retriesCount = 0;
 
                     if (logger.isLoggable(Level.FINEST)) {
-                        long roundtrip = System.currentTimeMillis() - start;
-                        logger.finest("Successfully verified service: " + serviceDetails + " is alive - RTT[" + roundtrip + "ms]");
+                        long roundtrip = System.nanoTime() - start;
+                        logger.finest("Successfully verified service: " + serviceDetails + " is alive - RTT[" + formatDuration(roundtrip) + "]");
                     }
                 } else {
                     throw new MemberReturnFalseException();
                 }
                 return isAlive;
             } catch (Exception e) {
-                long end = System.currentTimeMillis();
                 lastThrown = e;
-                roundtrip = (end - start);
+                roundtrip = System.nanoTime() - start;
                 int retry = retriesCount++;
 
                 if (logger.isLoggable(Level.FINER)) {
                     if (e instanceof MemberReturnFalseException) {
-                        logger.log(Level.FINER, "Service Failure (isAlive:false): " + serviceDetails + " - RTT[" + roundtrip + "ms], retry[" + retry+"]");
+                        logger.log(Level.FINER, "Service Failure (isAlive:false): " + serviceDetails + " - RTT[" + formatDuration(roundtrip) + "], retry[" + retry+"]");
                     } else {
-                        logger.log(Level.FINER, "Service Failure: " + serviceDetails + " - RTT[" + roundtrip + "ms], retry[" + retry+"]", e);
+                        logger.log(Level.FINER, "Service Failure: " + serviceDetails + " - RTT[" + formatDuration(roundtrip) + "], retry[" + retry+"]", e);
                     }
                 }
 
                 return false;
             }
+        }
+
+        /**
+         * format the duration (in nanos) to milliseconds or seconds - which ever is more
+         * representable.
+         * 
+         * @param nanos
+         *            duration in nanoseconds.
+         * @return a string representing the duration + units
+         */
+        private final String formatDuration(long nanos) {
+            String unit = " ms";
+            double value = (1.0 / 1000000) * (nanos); // to millis
+            if (value > 1000) {
+                unit = " sec";
+                value = (1.0 / 1000) * value; // to seconds
+            }
+            // trim decimals fraction digits to 2
+            String svalue = String.valueOf(value);
+            int dot = svalue.indexOf('.');
+            if (dot != -1 && (dot + 2 < svalue.length())) {
+                svalue = svalue.substring(0, dot + 2);
+            }
+            return svalue + unit;
         }
 
         /*
