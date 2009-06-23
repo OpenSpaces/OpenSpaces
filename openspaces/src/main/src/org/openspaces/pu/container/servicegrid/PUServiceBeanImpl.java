@@ -187,7 +187,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         stopping = true;
         try {
             Thread.currentThread().setContextClassLoader(contextClassLoader);
+            logger.info(logMessage("Stopping ..."));
             stopPU();
+            logger.info(logMessage("Stopped"));
         } finally {
             stopping = false;
             Thread.currentThread().setContextClassLoader(origClassLoader);
