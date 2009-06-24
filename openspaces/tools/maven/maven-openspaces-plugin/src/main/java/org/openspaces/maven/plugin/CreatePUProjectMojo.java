@@ -25,13 +25,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -328,7 +322,29 @@ public class CreatePUProjectMojo extends AbstractOpenSpacesMojo {
             HashMap jarTemplates = getJarTemplates(getJarURLFromURL(url, ""));
             templates.putAll(jarTemplates);
         }
-        return templates;
+        LinkedHashMap sortedTemplates = new LinkedHashMap();
+        String desc = (String) templates.remove("basic");
+        if (desc != null) {
+            sortedTemplates.put("basic", desc);
+        }
+        desc = (String) templates.remove("basic-async-persistency");
+        if (desc != null) {
+            sortedTemplates.put("basic-async-persistency", desc);
+        }
+        desc = (String) templates.remove("basic-xml");
+        if (desc != null) {
+            sortedTemplates.put("basic-xml", desc);
+        }
+        desc = (String) templates.remove("basic-async-persistency-xml");
+        if (desc != null) {
+            sortedTemplates.put("basic-async-persistency-xml", desc);
+        }
+        desc = (String) templates.remove("mule");
+        if (desc != null) {
+            sortedTemplates.put("mule", desc);
+        }
+        sortedTemplates.putAll(templates);
+        return sortedTemplates;
     }
     
     
