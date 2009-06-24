@@ -448,7 +448,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
 
             if (sharedLibEnabled) {
-                ((ServiceClassLoader) contextClassLoader).setSlashPath(deployPath.toURI().toURL());
+                ((ServiceClassLoader) contextClassLoader).setSlashPath(new URL(codeserver + puPath + "/"));
                 ((ServiceClassLoader) contextClassLoader).setLibPath(libUrls.toArray(new URL[libUrls.size()]));
                 if (logger.isDebugEnabled()) {
                     logger.debug(logMessage("Service Class Loader " + Arrays.toString(((ServiceClassLoader) contextClassLoader).getURLs())));
@@ -463,7 +463,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                     logger.warn("Using old 'shared-lib' directory, will add jars under it as if it was 'lib'");
                 }
                 libUrls.addAll(sharedlibUrls);
-                ((ServiceClassLoader) contextClassLoader).setSlashPath(deployPath.toURI().toURL());
+                ((ServiceClassLoader) contextClassLoader).setSlashPath(new URL(codeserver + puPath + "/"));
                 ((ServiceClassLoader) contextClassLoader).setLibPath(libUrls.toArray(new URL[libUrls.size()]));
                 if (logger.isDebugEnabled()) {
                     logger.debug(logMessage("Service Class Loader " + Arrays.toString(((ServiceClassLoader) contextClassLoader).getURLs())));
@@ -473,12 +473,12 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         // handle mule os if there is one class loader
         try {
-            ClassUtils.forName("org.mule.api.MuleContext");
+            contextClassLoader.loadClass("org.mule.api.MuleContext");
             ((ServiceClassLoader) contextClassLoader).addURLs(BootUtil.toURLs(new String[]
                     {
                             Environment.getHomeDirectory() + "/lib/optional/openspaces/mule-os.jar"
                     }));
-        } catch (Exception e) {
+        } catch (Throwable e) {
             // no mule
         }
 
