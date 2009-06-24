@@ -36,7 +36,7 @@
                             <xsd:annotation>
                                 <xsd:documentation>
                                     Configures the polling container to work under a transaction. The transaction
-                                    manager will be used to start and commit (on sucess) or rollback (on failure) a
+                                    manager will be used to start and commit (on success) or rollback (on failure) a
                                     transaction.
 
                                     The scope of the started transaction is the receive operation and the even listener
@@ -214,7 +214,7 @@
         <xsd:annotation>
             <xsd:documentation
                     source="java:org.openspaces.events.asyncpolling.SimpleAsyncPollingEventListenerContainer">
-                An event container that performs asyncronous polling receive operation (for example async take) at a
+                An event container that performs asynchronous polling receive operation (for example async take) at a
                 constant interval based on a given template and invokes a custom listener.
             </xsd:documentation>
         </xsd:annotation>
@@ -226,7 +226,7 @@
                             <xsd:annotation>
                                 <xsd:documentation>
                                     Configures the polling container to work under a transaction. The transaction
-                                    manager will be used to start and commit (on sucess) or rollback (on failure) a
+                                    manager will be used to start and commit (on success) or rollback (on failure) a
                                     transaction.
 
                                     The scope of the started transaction is the receive operation and the even listener
@@ -240,7 +240,7 @@
                             <xsd:annotation>
                                 <xsd:documentation
                                         source="java:org.openspaces.events.asyncpolling.receive.AsyncOperationHandler">
-                                    The receive operation handler controls the asyncronous receive operation.
+                                    The receive operation handler controls the asynchronous receive operation.
                                     operation.
                                 </xsd:documentation>
                             </xsd:annotation>
@@ -318,11 +318,11 @@
                             <xsd:annotation>
                                 <xsd:documentation>
                                     Configures the notify container to work under a transaction. The transaction
-                                    manager will be used to start and commit (on sucess) or rollback (on failure) a
+                                    manager will be used to start and commit (on success) or rollback (on failure) a
                                     transaction.
 
-                                    The scope of the started transaction is *after* the notification was recived. If a
-                                    transaction rollback occurs, the notification delivery will not be rolledback, just
+                                    The scope of the started transaction is *after* the notification was received. If a
+                                    transaction rollback occurs, the notification delivery will not be rolled back, just
                                     the listener operations (that operate under the transaction).
                                 </xsd:documentation>
                             </xsd:annotation>
@@ -366,7 +366,7 @@
                                 <xsd:attribute name="unmatched" type="xsd:boolean">
                                     <xsd:annotation>
                                         <xsd:documentation>
-                                            Matched entries that no longer match the templte will cause this listener
+                                            Matched entries that no longer match the template will cause this listener
                                             to be invoked.
                                         </xsd:documentation>
                                     </xsd:annotation>
@@ -379,7 +379,7 @@
                                     Allows to control the batching of notifications. Once configured, notifications will
                                     be sent in batches. The notifications will be sent once either the number of
                                     notifications breaches the size value or the time the notifications are queued
-                                    breaches the time attribute (in milliseonds).
+                                    breaches the time attribute (in milliseconds).
                                 </xsd:documentation>
                             </xsd:annotation>
                             <xsd:complexType>
@@ -387,7 +387,7 @@
                                     <xsd:annotation>
                                         <xsd:documentation>
                                             If set, turns batching event notifications where the server space
-                                            accumalates notifications to be sent and then send them in batch. The batch
+                                            accumulates notifications to be sent and then send them in batch. The batch
                                             size controls the number of notifications that will be batched before they
                                             are sent. Note, if setting this property the 'batch time' must be set as
                                             well.
@@ -474,7 +474,7 @@
                     <xsd:attribute name="com-type">
                         <xsd:annotation>
                             <xsd:documentation>
-                                Controls the communciation type of how to send the notifications. Defaults to UNICAST.
+                                Controls the communication type of how to send the notifications. Defaults to UNICAST.
                             </xsd:documentation>
                         </xsd:annotation>
                         <xsd:simpleType>
@@ -505,7 +505,7 @@
                                             Multicast propagation uses UDP multicast communication which is usually best
                                             for large amount of registered clients.
 
-                                            Note, when using mulitcast notifications make sure to enable the multicast
+                                            Note, when using multicast notifications make sure to enable the multicast
                                             worker within the Space.
                                         </xsd:documentation>
                                     </xsd:annotation>
@@ -736,7 +736,7 @@
                 </tool:annotation>
             </xsd:appinfo>
             <xsd:documentation source="java:org.openspaces.events.asyncpolling.receive.AsyncOperationHandler">
-                The receive operation handler controls the asyncronous receive operation.
+                The receive operation handler controls the asynchronous receive operation.
             </xsd:documentation>
         </xsd:annotation>
         <xsd:group ref="beans:collectionElements"/>
@@ -762,7 +762,7 @@
                 </tool:annotation>
             </xsd:appinfo>
             <xsd:documentation>
-                The trigger operation handler (if set) is called before a tranasction is started, and only if it returns
+                The trigger operation handler (if set) is called before a transaction is started, and only if it returns
                 a non null value, the transaction + receive operation + event invocation will be performed.
             </xsd:documentation>
         </xsd:annotation>
@@ -802,7 +802,7 @@
                 <xsd:attribute name="update-timeout" type="xsd:nonNegativeInteger">
                     <xsd:annotation>
                         <xsd:documentation>
-                            Sets the update timeout (im milliseconds) in case the flag 'update-or-write' is set to true.
+                            Sets the update timeout (in milliseconds) in case the flag 'update-or-write' is set to true.
                         </xsd:documentation>
                     </xsd:annotation>
                 </xsd:attribute>

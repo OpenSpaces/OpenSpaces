@@ -148,7 +148,7 @@
                                     </tool:annotation>
                                 </xsd:appinfo>
                                 <xsd:documentation>
-                                    Allows to set the meta arguemnts handler controlling the meta arguments passed with
+                                    Allows to set the meta arguments handler controlling the meta arguments passed with
                                     each remote invocation.
                                 </xsd:documentation>
                             </xsd:annotation>
@@ -189,7 +189,7 @@
                         <xsd:annotation>
                             <xsd:documentation>
                                 Sets the GigaSpace interface that will be used to work with the space as the transport
-                                layer for both writing and taking AsyncSpaceRemotingEntry.
+                                layer for both writing and taking EventDrivenSpaceRemotingEntry.
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
@@ -295,7 +295,7 @@
                                     </tool:annotation>
                                 </xsd:appinfo>
                                 <xsd:documentation>
-                                    Allows to set the meta arguemnts handler controlling the meta arguments passed with
+                                    Allows to set the meta arguments handler controlling the meta arguments passed with
                                     each remote invocation.
                                 </xsd:documentation>
                             </xsd:annotation>
@@ -398,7 +398,7 @@
 
                 Sync remoting refers to the communication protocol between the proxy and the service exporter. Sync
                 proxy executes either takeMultiple or readMultiple which are intercepted by the service exporter which
-                is registered as a filer and executes the required service. It then returns the response witin the same
+                is registered as a filer and executes the required service. It then returns the response within the same
                 invocation lifecycle.
             </xsd:documentation>
         </xsd:annotation>
@@ -463,7 +463,7 @@
                                     </tool:annotation>
                                 </xsd:appinfo>
                                 <xsd:documentation>
-                                    Allows to set the meta arguemnts handler controlling the meta arguments passed with
+                                    Allows to set the meta arguments handler controlling the meta arguments passed with
                                     each remote invocation.
                                 </xsd:documentation>
                             </xsd:annotation>
@@ -538,7 +538,7 @@
                         <xsd:annotation>
                             <xsd:documentation>
                                 If set the true (defaults to false) causes the remote invocation to be called on all
-                                active (primary) cluster memebers.
+                                active (primary) cluster members.
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
@@ -663,7 +663,7 @@
                         <xsd:annotation>
                             <xsd:documentation>
                                 Sets the GigaSpace interface that will be used to work with the space as the transport
-                                layer for both writing and taking AsyncSpaceRemotingEntry.
+                                layer for executions of Space tasks.
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
@@ -687,7 +687,7 @@
                         <xsd:annotation>
                             <xsd:documentation>
                                 If set the true (defaults to false) causes the remote invocation to be called on all
-                                active (primary) cluster memebers.
+                                active (primary) cluster members.
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
