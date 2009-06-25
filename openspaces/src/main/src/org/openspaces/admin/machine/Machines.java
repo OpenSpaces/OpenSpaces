@@ -49,6 +49,11 @@ public interface Machines extends AdminAware, Iterable<Machine> {
     Machine getMachineByHostAddress(String hostAddress);
 
     /**
+     * Returns the machine by the host name.
+     */
+    Machine getMachineByHostName(String hostName);
+
+    /**
      * Returns a map of machines with the key as the uid.
      */
     Map<String, Machine> getUids();

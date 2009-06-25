@@ -127,6 +127,10 @@ public class DefaultMachines implements InternalMachines {
         return machinesByHostAddress.get(ipAddress);
     }
 
+    public Machine getMachineByHostName(String hostName) {
+        return machinesByHostNames.get(hostName);
+    }
+
     public Map<String, Machine> getUids() {
         return Collections.unmodifiableMap(machinesById);
     }
