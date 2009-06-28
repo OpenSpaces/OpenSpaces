@@ -60,14 +60,14 @@ public interface Transports extends Iterable<Transport>, AdminAware, StatisticsM
     /**
      * Returns all the transports bounded on the specified host.
      *
-     * @see Transport#getHost()
+     * @see org.openspaces.admin.transport.Transport#getBindHost()
      */
     Transport[] getTransports(String host);
 
     /**
      * Returns the transport that is bounded on the specified host and port.
      *
-     * @see Transport#getHost()
+     * @see org.openspaces.admin.transport.Transport#getBindHost()
      * @see Transport#getPort()
      */
     Transport getTransportByHostAndPort(String host, int port);
