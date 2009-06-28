@@ -80,7 +80,7 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
     private Map<ServiceID, ClusterInfo> clusterInfoMap = new ConcurrentHashMap<ServiceID, ClusterInfo>();
 
     private Map<ServiceID, JeeServiceDetails> jeeServiceDetailsMap = new ConcurrentHashMap<ServiceID, JeeServiceDetails>();
-    
+
     private volatile boolean running = false;
 
     private Thread configThread;
@@ -537,10 +537,10 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
 
     public static void printUsage() {
         System.out.println("Usage: [-apache location] [-conf-dir location] [-update-interval value] [-restart-command command]");
-        System.out.println("    -apache [location]       : The installation location of apache. Defautls to windows/unix common locations");
+        System.out.println("    -apache [location]       : The installation location of apache. Defaults to windows/unix common locations");
         System.out.println("    -conf-dir [location]     : The directory where the load balancer config files will be created. Defaults to [apache]/conf/gigaspaces");
         System.out.println("    -update-interval [value] : The interval (in milliseconds) when the load balancer conf files will be updated");
-        System.out.println("    -restart-command [value] : The directy restart command for apache. Defualts to sensible values for windowns and unix systems");
+        System.out.println("    -restart-command [value] : The direct restart command for apache. Defaults to installation default locations for Windows and Unix systems");
         System.out.println("");
     }
 }
