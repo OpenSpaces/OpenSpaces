@@ -450,8 +450,11 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                     ClassLoaderHelper.setContextClassLoader(origClassLoader, true);
                 }
             }
+            if (webAppContext.getUnavailableException() != null) {
+                throw new CannotCreateContainerException("Failed to start web app context", webAppContext.getUnavailableException());
+            }
             if (webAppContext.isFailed()) {
-                throw new CannotCreateContainerException("Failed to start web app context");
+                throw new CannotCreateContainerException("Failed to start web app context (exception should be logged)");
             }
             // automatically set the worker name
             if (webAppContext.getSessionHandler().getSessionManager().getIdManager() instanceof HashSessionIdManager) {

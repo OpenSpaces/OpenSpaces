@@ -209,10 +209,10 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
             if (clazz != null) {
                 try {
                     jeeContainerContextListener = (ServletContextListener) clazz.newInstance();
-                    jeeContainerContextListener.contextInitialized(servletContextEvent);
                 } catch (Exception e) {
-                    logger.warn("Failed to create jee container specific context listener [" + className + "]", e);
+                    throw new RuntimeException("Failed to create JEE specific context listener [" + clazz.getName() + "]", e);
                 }
+                jeeContainerContextListener.contextInitialized(servletContextEvent);
             }
         }
 
