@@ -76,7 +76,7 @@ public class ProcessingUnitDeployment {
 
     /**
      * Constructs a processing unit deployment based on the specified processing unit file path (points either
-     * to a processing unit jar file or a directory).
+     * to a processing unit jar/zip file or a directory).
      */
     public ProcessingUnitDeployment(File processingUnit) {
         this.processingUnit = processingUnit.getAbsolutePath();
