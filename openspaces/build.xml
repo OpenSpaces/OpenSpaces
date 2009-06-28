@@ -316,7 +316,7 @@
             <zipfileset dir="${basedir}">
                 <include name="bin/pu*"/>
                 <include name="deploy/**"/>
-                <include name="docs/openspaces-javadoc/**"/>
+                <include name="docs/javadoc/**"/>
                 <include name="tools/**"/>
             	<exclude name="tools/maven/maven-openspaces-plugin/target/**" />
                 <exclude name="tools/**/*.iml" />
