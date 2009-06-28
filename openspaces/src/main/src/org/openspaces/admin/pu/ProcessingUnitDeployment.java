@@ -119,16 +119,20 @@ public class ProcessingUnitDeployment {
 
     /**
      * A convenient method allowing to easily configure the space deployment to deploy a
-     * replicated topology with <code>numberOfInstances</code> instances.
+     * replicated (either sync or async) topology with <code>numberOfInstances</code> instances.
      *
-     * <p>Exactly the same like calling <code>clusterSchema("replicated")</code>,
+     * <p>Exactly the same like calling <code>clusterSchema("sync_replicated")</code> or <code>clusterSchema("async_replicated")</code>,
      * followed by <code>numberOfInstances(numberOfInstances)</code> and <code>numberOfBackups(0)</code>.
      *
      * @param numberOfInstances The number of instances to form the replicated space
      * @return This space deployment
      */
-    public ProcessingUnitDeployment replicated(int numberOfInstances) {
-        clusterSchema("replicated");
+    public ProcessingUnitDeployment replicated(boolean async, int numberOfInstances) {
+        if (async) {
+            clusterSchema("async_replicated");
+        } else {
+            clusterSchema("sync_replicated");
+        }
         numberOfInstances(numberOfInstances);
         numberOfBackups(0);
         return this;
