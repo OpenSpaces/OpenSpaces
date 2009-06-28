@@ -476,6 +476,9 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             } catch (Exception e1) {
                 logger.debug("Failed to stop jetty after an error occured, ignoring", e);
             }
+            if (e instanceof CannotCreateContainerException) {
+                throw ((CannotCreateContainerException) e);
+            }
             throw new CannotCreateContainerException("Failed to start web application", e);
         } finally {
             setCurrentApplicationContext(null);
