@@ -190,7 +190,7 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
      * Performs the inital load operation. Iterates over the {@link #setInitialLoadEntries(String[])} inital load
      * entries. If {@link #getInitialLoadChunkSize()} is set to <code>-1</code>, will use
      * {@link org.openspaces.persistency.hibernate.iterator.StatelessScrollableDataIterator} for each entity. If
-     * {@link # getInitalLoadChunkSize ()} is set to a non <code>-1</code> value, will use the
+     * {@link #getInitalLoadChunkSize()} is set to a non <code>-1</code> value, will use the
      * {@link org.openspaces.persistency.hibernate.iterator.StatelessChunkScrollableDataIterator}.
      */
     public DataIterator initialLoad() throws DataSourceException {

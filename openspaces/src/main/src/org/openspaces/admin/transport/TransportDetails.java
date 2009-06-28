@@ -42,14 +42,14 @@ public interface TransportDetails {
     /**
      * Returns the local host address of the transport.
      *
-     * @see java.net.InetAddress#getLocalHost()#getLocalHostAddress()
+     * @see java.net.InetAddress#getLocalHost()#getHostAddress()
      */
     String getHostAddress();
 
     /**
      * Returns the local host address of the transport.
      *
-     * @see java.net.InetAddress#getLocalHost()#getLocalHostName()
+     * @see java.net.InetAddress#getLocalHost()#getHostName()
      */
     String getHostName();
 
