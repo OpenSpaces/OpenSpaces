@@ -46,11 +46,11 @@ import org.openspaces.admin.zone.Zones;
  *
  * <p>Implements the {@link org.openspaces.admin.StatisticsMonitor} interface, allowing in one single
  * call ({@link #startStatisticsMonitor()}) to start statistics monitors on all the elements it manages (such as
- * the {@link org.openspaces.admin.space.Spaces#startStatisticsMonitor()}, and {@link org.openspaces.admin.vm.VirtualMachines#startStatisticsMonitor()}.
+ * the {@link org.openspaces.admin.space.Spaces}, and {@link org.openspaces.admin.vm.VirtualMachines}.
  *
  * <p>Provides one stop shop for registering all event listeners that extend {@link org.openspaces.admin.AdminEventListener}
  * using the {@link #addEventListener(AdminEventListener)} and their removal {@link #removeEventListener(AdminEventListener)}.
- * The actual event listener interfaces will be automatically detected and added to the correct element.
+ * The actual event listener interfaces will be automatically detected and added to the correct component.
  *
  * @author kimchy
  */
