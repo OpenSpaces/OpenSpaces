@@ -1,12 +1,12 @@
 package org.openspaces.admin.internal.gsc;
 
 import com.gigaspaces.grid.gsc.GSC;
-import com.gigaspaces.jvm.JVMDetails;
-import com.gigaspaces.jvm.JVMStatistics;
+import com.gigaspaces.internal.jvm.JVMDetails;
+import com.gigaspaces.internal.jvm.JVMStatistics;
+import com.gigaspaces.internal.os.OSDetails;
+import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
-import com.gigaspaces.operatingsystem.OSDetails;
-import com.gigaspaces.operatingsystem.OSStatistics;
 import net.jini.core.lookup.ServiceID;
 
 import org.openspaces.admin.internal.admin.InternalAdmin;

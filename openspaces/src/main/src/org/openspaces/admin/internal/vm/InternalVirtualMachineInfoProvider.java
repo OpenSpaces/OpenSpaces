@@ -1,7 +1,7 @@
 package org.openspaces.admin.internal.vm;
 
-import com.gigaspaces.jvm.JVMDetails;
-import com.gigaspaces.jvm.JVMStatistics;
+import com.gigaspaces.internal.jvm.JVMDetails;
+import com.gigaspaces.internal.jvm.JVMStatistics;
 
 import java.rmi.RemoteException;
 

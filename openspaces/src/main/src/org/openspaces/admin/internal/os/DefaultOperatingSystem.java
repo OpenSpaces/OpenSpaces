@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.os;
 
-import com.gigaspaces.operatingsystem.OSDetails;
+import com.gigaspaces.internal.os.OSDetails;
+
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.internal.admin.InternalAdmin;

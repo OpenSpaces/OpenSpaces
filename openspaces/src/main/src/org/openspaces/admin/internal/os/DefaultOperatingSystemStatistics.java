@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.os;
 
-import com.gigaspaces.operatingsystem.OSStatistics;
+import com.gigaspaces.internal.os.OSStatistics;
+
 import org.openspaces.admin.os.OperatingSystemDetails;
 import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.support.StatisticsUtils;

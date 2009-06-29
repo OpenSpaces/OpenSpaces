@@ -1,14 +1,14 @@
 package org.openspaces.admin.internal.lus;
 
-import com.gigaspaces.jvm.JVMDetails;
-import com.gigaspaces.jvm.JVMInfoProvider;
-import com.gigaspaces.jvm.JVMStatistics;
+import com.gigaspaces.internal.jvm.JVMDetails;
+import com.gigaspaces.internal.jvm.JVMInfoProvider;
+import com.gigaspaces.internal.jvm.JVMStatistics;
+import com.gigaspaces.internal.os.OSDetails;
+import com.gigaspaces.internal.os.OSInfoProvider;
+import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOInfoProvider;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
-import com.gigaspaces.operatingsystem.OSDetails;
-import com.gigaspaces.operatingsystem.OSInfoProvider;
-import com.gigaspaces.operatingsystem.OSStatistics;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceRegistrar;

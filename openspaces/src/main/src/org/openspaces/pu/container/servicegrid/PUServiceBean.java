@@ -17,9 +17,9 @@
 package org.openspaces.pu.container.servicegrid;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
-import com.gigaspaces.jvm.JVMInfoProvider;
+import com.gigaspaces.internal.jvm.JVMInfoProvider;
+import com.gigaspaces.internal.os.OSInfoProvider;
 import com.gigaspaces.lrmi.nio.info.NIOInfoProvider;
-import com.gigaspaces.operatingsystem.OSInfoProvider;
 import com.gigaspaces.grid.zone.GridZoneProvider;
 import com.j_spaces.core.client.SpaceURL;
 import com.sun.jini.start.ServiceProxyAccessor;

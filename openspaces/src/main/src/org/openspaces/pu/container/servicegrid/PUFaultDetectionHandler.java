@@ -18,7 +18,8 @@ package org.openspaces.pu.container.servicegrid;
 
 import com.sun.jini.config.Config;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
-import com.gigaspaces.jvm.JVMDetails;
+import com.gigaspaces.internal.jvm.JVMDetails;
+
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
 import net.jini.core.lookup.ServiceID;

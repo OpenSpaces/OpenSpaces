@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.vm;
 
-import com.gigaspaces.jvm.JVMStatistics;
+import com.gigaspaces.internal.jvm.JVMStatistics;
+
 import org.openspaces.admin.support.StatisticsUtils;
 import org.openspaces.admin.vm.VirtualMachineDetails;
 import org.openspaces.admin.vm.VirtualMachineStatistics;

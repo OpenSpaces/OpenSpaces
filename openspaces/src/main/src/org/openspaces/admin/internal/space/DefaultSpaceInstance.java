@@ -1,12 +1,12 @@
 package org.openspaces.admin.internal.space;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
-import com.gigaspaces.jvm.JVMDetails;
-import com.gigaspaces.jvm.JVMStatistics;
+import com.gigaspaces.internal.jvm.JVMDetails;
+import com.gigaspaces.internal.jvm.JVMStatistics;
+import com.gigaspaces.internal.os.OSDetails;
+import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
-import com.gigaspaces.operatingsystem.OSDetails;
-import com.gigaspaces.operatingsystem.OSStatistics;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.SpaceConfig;
