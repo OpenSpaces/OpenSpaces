@@ -16,7 +16,7 @@
 
 package org.openspaces.remoting;
 
-import com.gigaspaces.reflect.IMethod;
+import com.gigaspaces.internal.reflection.IMethod;
 
 import java.lang.reflect.InvocationTargetException;
 

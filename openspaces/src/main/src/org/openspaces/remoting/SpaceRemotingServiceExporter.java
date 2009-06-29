@@ -16,9 +16,9 @@
 
 package org.openspaces.remoting;
 
-import com.gigaspaces.reflect.IMethod;
-import com.gigaspaces.reflect.ReflectionUtil;
-import com.gigaspaces.reflect.standard.StandardMethod;
+import com.gigaspaces.internal.reflection.IMethod;
+import com.gigaspaces.internal.reflection.ReflectionUtil;
+import com.gigaspaces.internal.reflection.standard.StandardMethod;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.SpaceContext;
 import com.j_spaces.core.filters.FilterOperationCodes;

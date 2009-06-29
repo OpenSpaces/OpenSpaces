@@ -16,9 +16,10 @@
 
 package org.openspaces.events.adapter;
 
-import com.gigaspaces.reflect.IMethod;
-import com.gigaspaces.reflect.ReflectionUtil;
-import com.gigaspaces.reflect.standard.StandardMethod;
+import com.gigaspaces.internal.reflection.IMethod;
+import com.gigaspaces.internal.reflection.ReflectionUtil;
+import com.gigaspaces.internal.reflection.standard.StandardMethod;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.GigaSpace;
