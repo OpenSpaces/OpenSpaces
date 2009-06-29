@@ -7,6 +7,7 @@ import org.openspaces.core.GigaSpace;
 import org.openspaces.core.executor.AutowireTask;
 import org.openspaces.core.executor.DistributedTask;
 import org.openspaces.core.executor.Task;
+import org.openspaces.core.executor.TaskGigaSpace;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -52,7 +53,7 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         localGigaSpace2.clear(null);
     }
 
-    public void testSimpleTransactionCommit() {
+    public void testSimpleTransactionCommit1() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager1);
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -68,11 +69,44 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
         assertEquals(1, localGigaSpace1.count(null));
     }
 
-    public void testSimpleTransactionRollback() {
+    public void testSimpleTransactionCommit2() {
+        TransactionTemplate txTemplate = new TransactionTemplate(localTxManager1);
+        txTemplate.execute(new TransactionCallbackWithoutResult() {
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                AsyncFuture<Integer> value = localGigaSpace1.execute(new SimpleTask2(), 0);
+                try {
+                    assertEquals(1, (int) value.get(1000, TimeUnit.MILLISECONDS));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    fail();
+                }
+            }
+        });
+        assertEquals(1, localGigaSpace1.count(null));
+    }
+
+    public void testSimpleTransactionRollback1() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager1);
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus status) {
                 AsyncFuture<Integer> value = localGigaSpace1.execute(new SimpleTask1(), 0);
+                try {
+                    assertEquals(1, (int) value.get(1000, TimeUnit.MILLISECONDS));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    fail();
+                }
+                status.setRollbackOnly();
+            }
+        });
+        assertEquals(0, localGigaSpace1.count(null));
+    }
+
+    public void testSimpleTransactionRollback2() {
+        TransactionTemplate txTemplate = new TransactionTemplate(localTxManager1);
+        txTemplate.execute(new TransactionCallbackWithoutResult() {
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                AsyncFuture<Integer> value = localGigaSpace1.execute(new SimpleTask2(), 0);
                 try {
                     assertEquals(1, (int) value.get(1000, TimeUnit.MILLISECONDS));
                 } catch (Exception e) {
@@ -267,6 +301,17 @@ public class TransactionalExecutorTests extends AbstractDependencyInjectionSprin
     private static class SimpleTask1 implements Task<Integer> {
 
         @Resource(name = "gigaSpace1")
+        transient GigaSpace gigaSpace;
+
+        public Integer execute() throws Exception {
+            gigaSpace.write(new Object());
+            return 1;
+        }
+    }
+
+    private static class SimpleTask2 implements Task<Integer> {
+
+        @TaskGigaSpace
         transient GigaSpace gigaSpace;
 
         public Integer execute() throws Exception {
