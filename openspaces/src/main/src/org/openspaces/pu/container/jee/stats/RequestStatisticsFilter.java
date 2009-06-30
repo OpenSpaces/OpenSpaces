@@ -57,9 +57,9 @@ public class RequestStatisticsFilter implements Filter, ServiceMonitorsProvider 
             reqeustsActive.incrementAndGet();
             filterChain.doFilter(servletRequest, servletResponse);
         } finally {
+            reqeustsActive.decrementAndGet();
             long requestDuration = System.currentTimeMillis() - now;
             requestsDurationTotal.getAndAdd(requestDuration);
-            reqeustsActive.decrementAndGet();
             requests.incrementAndGet();
         }
     }
