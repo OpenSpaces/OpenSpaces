@@ -500,7 +500,7 @@ public class DefaultSpace implements InternalSpace {
                 // ignore this (maybe we should add it as a state to a Space instance?)
             } catch (Exception e) {
                 if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
-                    // Space is down, ignore
+                    logger.debug("Failed to get runtime information", e);
                 } else {
                     logger.warn("Failed to get runtime information", e);
                 }
