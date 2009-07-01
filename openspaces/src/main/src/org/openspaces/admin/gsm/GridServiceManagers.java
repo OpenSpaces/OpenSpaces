@@ -70,6 +70,16 @@ public interface GridServiceManagers extends AdminAware, Iterable<GridServiceMan
     boolean isEmpty();
 
     /**
+     * Waits indefinitely till at least one GSM is discovered and returns it.
+     */
+    GridServiceManager waitForAtLeaseOne();
+
+    /**
+     * Waits for the given timeout (in time unit) till at least one GSM is discovered and returns it.
+     */
+    GridServiceManager waitForAtLeaseOne(long timeout, TimeUnit timeUnit);
+
+    /**
      * Waits indefinitely till the provided number of managers are up.
      *
      * @param numberOfGridServiceManagers The number of managers to wait for

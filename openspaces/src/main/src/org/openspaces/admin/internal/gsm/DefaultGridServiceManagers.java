@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author kimchy
@@ -72,6 +73,30 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
 
     public boolean isEmpty() {
         return gridServiceManagersByUID.isEmpty();
+    }
+
+    public GridServiceManager waitForAtLeaseOne() {
+        return waitForAtLeaseOne(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public GridServiceManager waitForAtLeaseOne(long timeout, TimeUnit timeUnit) {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<GridServiceManager> ref = new AtomicReference<GridServiceManager>();
+        GridServiceManagerAddedEventListener added = new GridServiceManagerAddedEventListener() {
+            public void gridServiceManagerAdded(GridServiceManager gridServiceManager) {
+                ref.set(gridServiceManager);
+                latch.countDown();
+            }
+        };
+        getGridServiceManagerAdded().add(added);
+        try {
+            latch.await(timeout, timeUnit);
+            return ref.get();
+        } catch (InterruptedException e) {
+            return null;
+        } finally {
+            getGridServiceManagerAdded().remove(added);
+        }
     }
 
     public boolean waitFor(int numberOfGridServiceManagers) {
