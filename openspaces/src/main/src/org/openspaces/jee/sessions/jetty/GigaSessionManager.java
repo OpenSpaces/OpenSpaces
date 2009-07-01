@@ -16,9 +16,9 @@
 
 package org.openspaces.jee.sessions.jetty;
 
+import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.SQLQuery;
-import com.j_spaces.core.client.ISpaceProxy;
 import net.jini.core.lease.Lease;
 import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;

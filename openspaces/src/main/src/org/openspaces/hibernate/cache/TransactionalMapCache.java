@@ -16,7 +16,7 @@
 
 package org.openspaces.hibernate.cache;
 
-import com.j_spaces.core.client.ISpaceProxy;
+import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.j_spaces.core.client.LocalTransactionManager;
 import com.j_spaces.core.client.XAResourceImpl;
 import com.j_spaces.map.Envelope;
