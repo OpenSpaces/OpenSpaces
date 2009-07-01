@@ -25,6 +25,7 @@ import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.jee.JeeServiceDetails;
 import org.openspaces.pu.container.jee.JeeType;
 import org.openspaces.pu.container.jee.jetty.holder.JettyHolder;
+import org.openspaces.pu.container.jee.jetty.support.FreePortGenerator;
 import org.openspaces.pu.service.ServiceDetails;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -32,6 +33,7 @@ import org.springframework.web.context.ContextLoader;
 
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 
 /**
  * The actual contianer simply holding the jetty web application context, the application context,
@@ -44,18 +46,21 @@ public class JettyProcessingUnitContainer implements org.openspaces.pu.container
 
     private static final Log logger = LogFactory.getLog(JettyProcessingUnitContainer.class);
 
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
     private ApplicationContext webApplicationContext;
 
-    private WebAppContext webAppContext;
+    private final WebAppContext webAppContext;
 
     private HandlerContainer container;
 
-    private JettyHolder jettyHolder;
+    private final JettyHolder jettyHolder;
+
+    private final List<FreePortGenerator.PortHandle> portHandels;
 
     public JettyProcessingUnitContainer(ApplicationContext applicationContext, WebAppContext webAppContext,
-                                        HandlerContainer container, JettyHolder jettyHolder) {
+                                        HandlerContainer container, JettyHolder jettyHolder,
+                                        List<FreePortGenerator.PortHandle> portHandels) {
         this.applicationContext = applicationContext;
         this.webAppContext = webAppContext;
         this.container = container;
@@ -64,6 +69,7 @@ public class JettyProcessingUnitContainer implements org.openspaces.pu.container
         if (webApplicationContext == null) {
             webApplicationContext = applicationContext;
         }
+        this.portHandels = portHandels;
     }
 
     /**
@@ -102,6 +108,11 @@ public class JettyProcessingUnitContainer implements org.openspaces.pu.container
      * Closes the processing unit container by destroying the web application and the Spring application context.
      */
     public void close() throws CannotCloseContainerException {
+
+        for (FreePortGenerator.PortHandle portHandle : portHandels) {
+            portHandle.release();
+        }
+        portHandels.clear();
 
         if (webAppContext.isRunning()) {
             try {

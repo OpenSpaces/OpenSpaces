@@ -37,6 +37,9 @@ import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
 import org.openspaces.pu.container.jee.jetty.holder.JettyHolder;
 import org.openspaces.pu.container.jee.jetty.support.JdkLogger;
+import org.openspaces.pu.container.jee.jetty.support.FreePortGenerator;
+import org.openspaces.pu.container.jee.jetty.support.NoOpFreePortGenerator;
+import org.openspaces.pu.container.jee.jetty.support.FileLockFreePortGenerator;
 import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
@@ -296,15 +299,42 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             // do nothing
         }
 
+        FreePortGenerator freePortGenerator = new NoOpFreePortGenerator();
+        String freePortGeneratorSetting = beanLevelProperties.getContextProperties().getProperty("jetty.freePortGenerator", "file");
+        if ("file".equalsIgnoreCase(freePortGeneratorSetting)) {
+            freePortGenerator = new FileLockFreePortGenerator();
+        }
+        List<FreePortGenerator.PortHandle> portHandles = new ArrayList<FreePortGenerator.PortHandle>();
+
         // only check ports if the server is not running already
         if (!jettyHolder.getServer().isStarted()) {
             boolean success = false;
             for (int i = 0; i < retryPortCount; i++) {
+                for (Connector connector : jettyHolder.getServer().getConnectors()) {
+                    if (connector.getPort() != 0) {
+                        FreePortGenerator.PortHandle portHandle = freePortGenerator.nextAvailablePort(connector.getPort(), retryPortCount);
+                        connector.setPort(portHandle.getPort());
+                        portHandles.add(portHandle);
+                    }
+
+                    if (connector instanceof AbstractConnector) {
+                        if (connector.getConfidentialPort() != 0) {
+                            FreePortGenerator.PortHandle portHandle = freePortGenerator.nextAvailablePort(connector.getConfidentialPort(), retryPortCount);
+                            ((AbstractConnector) connector).setConfidentialPort(portHandle.getPort());
+                            portHandles.add(portHandle);
+                        }
+                    }
+                }
+
                 try {
                     jettyHolder.openConnectors();
                     success = true;
                     break;
                 } catch (BindException e) {
+                    for (FreePortGenerator.PortHandle portHandle : portHandles) {
+                        portHandle.release();
+                    }
+                    portHandles.clear();
                     try {
                         jettyHolder.closeConnectors();
                     } catch (Exception e1) {
@@ -318,6 +348,10 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                         }
                     }
                 } catch (Exception e) {
+                    for (FreePortGenerator.PortHandle portHandle : portHandles) {
+                        portHandle.release();
+                    }
+                    portHandles.clear();
                     try {
                         jettyHolder.closeConnectors();
                     } catch (Exception e1) {
@@ -467,7 +501,7 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                 }
             }
 
-            JettyProcessingUnitContainer processingUnitContainer = new JettyProcessingUnitContainer(applicationContext, webAppContext, container, jettyHolder);
+            JettyProcessingUnitContainer processingUnitContainer = new JettyProcessingUnitContainer(applicationContext, webAppContext, container, jettyHolder, portHandles);
             logger.info("Deployed web application [" + processingUnitContainer.getJeeDetails().getDescription() + "]");
             return processingUnitContainer;
         } catch (Exception e) {
