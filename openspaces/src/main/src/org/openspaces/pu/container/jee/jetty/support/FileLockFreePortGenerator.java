@@ -52,15 +52,30 @@ public class FileLockFreePortGenerator implements FreePortGenerator {
                     if (logger.isDebugEnabled()) {
                         logger.debug("Can't get lock for [" + portF.getAbsolutePath() + "], try another");
                     }
+                    try {
+                        portFile.close();
+                    } catch (Exception e) {
+                        // ignore
+                    }
                     continue;
                 }
             } catch (OverlappingFileLockException e) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Can't get lock for [" + portF.getAbsolutePath() + "], try another, " + e.getMessage());
                 }
+                try {
+                    portFile.close();
+                } catch (Exception e1) {
+                    // ignore
+                }
             } catch (IOException e) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Failed to get lock file for [" + portF.getAbsolutePath() + "]", e);
+                }
+                try {
+                    portFile.close();
+                } catch (Exception e1) {
+                    // ignore
                 }
                 // failed to get the lock, continue
                 continue;
