@@ -8,6 +8,7 @@ import java.io.RandomAccessFile;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
 
 import com.j_spaces.kernel.Environment;
 
@@ -52,6 +53,10 @@ public class FileLockFreePortGenerator implements FreePortGenerator {
                         logger.debug("Can't get lock for [" + portF.getAbsolutePath() + "], try another");
                     }
                     continue;
+                }
+            } catch (OverlappingFileLockException e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Can't get lock for [" + portF.getAbsolutePath() + "], try another, " + e.getMessage());
                 }
             } catch (IOException e) {
                 if (logger.isDebugEnabled()) {
