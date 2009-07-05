@@ -17,6 +17,7 @@
 package org.openspaces.admin;
 
 import org.openspaces.admin.internal.admin.DefaultAdmin;
+import org.jini.rio.boot.BootUtil;
 
 import com.gigaspaces.security.UserDetails;
 import com.gigaspaces.logger.GSLogConfigLoader;
@@ -54,11 +55,33 @@ public class AdminFactory {
     }
 
     /**
+     * Adds a comma delimited string of groups that will be used to find the Lookup Services
+     * (using multicast).
+     */
+    public AdminFactory addGroups(String groups) {
+        String[] groupsArr = BootUtil.toArray(groups);
+        for (String group : groupsArr) {
+            addGroup(group);
+        }
+        return this;
+    }
+
+    /**
      * Adds a lookup locator (ip and port) of the lookup service that will be used to listen
      * for events.
      */
     public AdminFactory addLocator(String locator) {
         admin.addLocator(locator);
+        return this;
+    }
+
+    /**
+     * Adds a comma delimited lookup locators (ip and port) of the lookup service that will
+     * be used to listen for events.
+     */
+    public AdminFactory addLocators(String locators) {
+        // its already a comma delimited string, so we just add it
+        admin.addLocator(locators);
         return this;
     }
 
