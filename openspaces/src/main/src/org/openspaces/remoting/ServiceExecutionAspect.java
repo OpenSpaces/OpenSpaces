@@ -24,7 +24,7 @@ import java.lang.reflect.InvocationTargetException;
  * A service execution callback allows to wrap the execution of "server side" service. If
  * actual execution of the service is needed, the <code>invoke</code> method will need to
  * be called on the passed <code>Method</code> using the service as the actual service to
- * invoke it on, and {@link SpaceRemotingInvocation#getArguments()} as the method arguemnts.
+ * invoke it on, and {@link SpaceRemotingInvocation#getArguments()} as the method arguments.
  *
  * <p>As an example: <code>method.invoke(service, invocation.getArguments())</code>.
  *
@@ -36,7 +36,7 @@ public interface ServiceExecutionAspect {
      * A service execution callback allows to wrap the execution of "server side" service. If
      * actual execution of the service is needed, the <code>invoke</code> method will need to
      * be called on the passed <code>Method</code> using the service as the actual service to
-     * invoke it on, and {@link SpaceRemotingInvocation#getArguments()} as the method arguemnts.
+     * invoke it on, and {@link SpaceRemotingInvocation#getArguments()} as the method arguments.
      *
      * <p>As an example: <code>method.invoke(service, invocation.getArguments())</code>.
      */
