@@ -68,6 +68,8 @@ public class FileLockFreePortGenerator implements FreePortGenerator {
                 } catch (Exception e1) {
                     // ignore
                 }
+                // failed to get the lock, continue
+                continue;
             } catch (IOException e) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Failed to get lock file for [" + portF.getAbsolutePath() + "]", e);
