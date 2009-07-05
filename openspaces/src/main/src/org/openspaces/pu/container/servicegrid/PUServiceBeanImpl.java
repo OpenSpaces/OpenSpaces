@@ -181,6 +181,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         // make sure to clean the web app class loader
         if (clusterInfo != null) {
             SharedServiceData.removeWebAppClassLoader(clusterInfo.getName() + clusterInfo.getRunningNumber());
+            SharedServiceData.removeMemberAliveIndicator(clusterInfo.getName() + clusterInfo.getRunningNumber());
+            SharedServiceData.removeServiceDetails(clusterInfo.getName() + clusterInfo.getRunningNumber());
+            SharedServiceData.removeServiceMonitors(clusterInfo.getName() + clusterInfo.getRunningNumber());
         }
 
         ClassLoader origClassLoader = Thread.currentThread().getContextClassLoader();
@@ -647,6 +650,14 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     private void stopPU() {
+        // make sure to clean shared services
+        if (clusterInfo != null) {
+            SharedServiceData.removeWebAppClassLoader(clusterInfo.getName() + clusterInfo.getRunningNumber());
+            SharedServiceData.removeMemberAliveIndicator(clusterInfo.getName() + clusterInfo.getRunningNumber());
+            SharedServiceData.removeServiceDetails(clusterInfo.getName() + clusterInfo.getRunningNumber());
+            SharedServiceData.removeServiceMonitors(clusterInfo.getName() + clusterInfo.getRunningNumber());
+        }
+        
         serviceMonitors.clear();
         if (executorService != null) {
             executorService.shutdown();
