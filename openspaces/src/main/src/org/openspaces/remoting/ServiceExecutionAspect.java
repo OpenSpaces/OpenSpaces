@@ -16,8 +16,6 @@
 
 package org.openspaces.remoting;
 
-import com.gigaspaces.internal.reflection.IMethod;
-
 import java.lang.reflect.InvocationTargetException;
 
 /**
@@ -40,5 +38,13 @@ public interface ServiceExecutionAspect {
      *
      * <p>As an example: <code>method.invoke(service, invocation.getArguments())</code>.
      */
-    Object invoke(SpaceRemotingInvocation invocation, IMethod method, Object service) throws InvocationTargetException, IllegalAccessException;
+    Object invoke(SpaceRemotingInvocation invocation, MethodInvocation method, Object service) throws InvocationTargetException, IllegalAccessException;
+
+    /**
+     * A wrapper for method invocation. Allows to execute the actual method invocation. Similar to reflection
+     * based method invocation.
+     */
+    interface MethodInvocation<T> {
+        Object invoke(T obj, Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException;
+    }
 }

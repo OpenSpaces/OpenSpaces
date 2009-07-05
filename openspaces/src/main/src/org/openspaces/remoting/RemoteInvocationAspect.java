@@ -24,6 +24,7 @@ import org.aopalliance.intercept.MethodInvocation;
  *
  * @author kimchy
  * @see EventDrivenSpaceRemotingProxyFactoryBean
+ * @see org.openspaces.remoting.ExecutorSpaceRemotingProxyFactoryBean
  * @see SyncSpaceRemotingProxyFactoryBean
  */
 public interface RemoteInvocationAspect<T> {

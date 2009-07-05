@@ -361,7 +361,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
         try {
             Object retVal;
             if (serviceExecutionAspect != null) {
-                retVal = serviceExecutionAspect.invoke(remotingEntry, method, service);
+                retVal = serviceExecutionAspect.invoke(remotingEntry, new InternalMethodInvocation(method), service);
             } else {
                 retVal = method.invoke(service, remotingEntry.arguments);
             }
@@ -473,7 +473,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
         try {
             Object retVal;
             if (serviceExecutionAspect != null) {
-                retVal = serviceExecutionAspect.invoke(task, method, service);
+                retVal = serviceExecutionAspect.invoke(task, new InternalMethodInvocation(method), service);
             } else {
                 retVal = method.invoke(service, task.getArguments());
             }
@@ -608,7 +608,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
                 try {
                     Object retVal;
                     if (serviceExecutionAspect != null) {
-                        retVal = serviceExecutionAspect.invoke(remotingEntry, method, service);
+                        retVal = serviceExecutionAspect.invoke(remotingEntry, new InternalMethodInvocation(method), service);
                     } else {
                         retVal = method.invoke(service, remotingEntry.arguments);
                     }
@@ -811,6 +811,18 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
 
         public AtomicLong getFailures() {
             return failures;
+        }
+    }
+
+    private static class InternalMethodInvocation implements ServiceExecutionAspect.MethodInvocation {
+        private final IMethod method;
+
+        private InternalMethodInvocation(IMethod method) {
+            this.method = method;
+        }
+
+        public Object invoke(Object obj, Object[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+            return method.invoke(obj, args);
         }
     }
 }
