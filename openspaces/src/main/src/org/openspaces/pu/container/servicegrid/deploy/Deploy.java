@@ -334,12 +334,12 @@ public class Deploy {
             // no sla passed as a parameter, try and load from default locations
             try {
                 slaString = readFile(root, puPath, "/META-INF/spring/sla.xml");
-                slaInPu = true;
+                slaInPu = false;
             } catch (IOException e) {
                 // no sla string found
                 try {
                     slaString = readFile(root, puPath, "/sla.xml");
-                    slaInPu = true;
+                    slaInPu = false;
                 } catch (IOException e1) {
                     // no sla string found
                 }
