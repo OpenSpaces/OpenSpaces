@@ -62,6 +62,6 @@ public class SpaceDriverManagerDataSource extends AbstractDataSource implements 
     }
 
     public Connection getConnection(String username, String password) throws SQLException {
-        return GConnection.getInstance(space);
+        return GConnection.getInstance(space, username, password);
     }
 }
