@@ -23,24 +23,8 @@
     </bean>
 
     <!--
-        A bean representing a space (an IJSpace implementation).
-
-        No need to register for space mode notifications since no other beans are exists within this
-        context. Allows to use secured Space without setting username and password.
+        A bean representing an embedded space (an IJSpace implementation).
     -->
     <os-core:space id="space" url="/./${dataGridName}">
     </os-core:space>
-
-    <!-- A GigaSpace instance (that can be used within scripts) that works only against this cluster member -->
-    <os-core:giga-space id="gigaSpace" space="space" clustered="false" />
-
-    <!-- A GigaSpace instance (that can be used within scripts) that works only against the whole cluster -->
-    <os-core:giga-space id="clusteredGigaSpace" space="space" clustered="true" />
-
-    <!-- The scripting executor remoting support -->
-    <bean id="scriptingExecutorImpl" class="org.openspaces.remoting.scripting.DefaultScriptingExecutor" />
-
-    <os-remoting:service-exporter id="serviceExporter" template-lookup-name="org.openspaces.remoting.scripting.ScriptingExecutor">
-        <os-remoting:service ref="scriptingExecutorImpl"/>
-    </os-remoting:service-exporter>
 </beans>
