@@ -146,7 +146,7 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
             }
 
             if (clusterInfo != null && SystemBoot.isRunningWithinGSC()) {
-                final String key = clusterInfo.getName() + clusterInfo.getRunningNumber();
+                final String key = clusterInfo.getUniqueName();
 
                 SharedServiceData.addServiceDetails(key, new Callable() {
                     public Object call() throws Exception {
@@ -218,7 +218,7 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
 
         // set the class loader used so the service bean can use it
         if (clusterInfo != null && SystemBoot.isRunningWithinGSC()) {
-            SharedServiceData.putWebAppClassLoader(clusterInfo.getName() + clusterInfo.getRunningNumber(), Thread.currentThread().getContextClassLoader());
+            SharedServiceData.putWebAppClassLoader(clusterInfo.getUniqueName(), Thread.currentThread().getContextClassLoader());
         }
     }
 

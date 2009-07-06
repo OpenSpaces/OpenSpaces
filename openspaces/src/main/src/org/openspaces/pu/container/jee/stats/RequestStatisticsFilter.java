@@ -43,7 +43,7 @@ public class RequestStatisticsFilter implements Filter, ServiceMonitorsProvider 
         if (clusterInfo == null) {
             logger.warn("Failed to find cluster info, can't register JEE request service monitor");
         } else {
-            SharedServiceData.addServiceMonitors(clusterInfo.getName() + clusterInfo.getRunningNumber(), new Callable() {
+            SharedServiceData.addServiceMonitors(clusterInfo.getUniqueName(), new Callable() {
                 public Object call() throws Exception {
                     return RequestStatisticsFilter.this.getServicesMonitors();
                 }

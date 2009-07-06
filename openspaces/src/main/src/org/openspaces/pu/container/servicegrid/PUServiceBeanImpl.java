@@ -180,10 +180,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     public void stop(boolean force) {
         // make sure to clean the web app class loader
         if (clusterInfo != null) {
-            SharedServiceData.removeWebAppClassLoader(clusterInfo.getName() + clusterInfo.getRunningNumber());
-            SharedServiceData.removeMemberAliveIndicator(clusterInfo.getName() + clusterInfo.getRunningNumber());
-            SharedServiceData.removeServiceDetails(clusterInfo.getName() + clusterInfo.getRunningNumber());
-            SharedServiceData.removeServiceMonitors(clusterInfo.getName() + clusterInfo.getRunningNumber());
+            SharedServiceData.removeWebAppClassLoader(clusterInfo.getUniqueName());
+            SharedServiceData.removeMemberAliveIndicator(clusterInfo.getUniqueName());
+            SharedServiceData.removeServiceDetails(clusterInfo.getUniqueName());
+            SharedServiceData.removeServiceMonitors(clusterInfo.getUniqueName());
         }
 
         ClassLoader origClassLoader = Thread.currentThread().getContextClassLoader();
@@ -511,7 +511,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         // set the context class loader to the web app class loader if there is one
         // this menas that from now on, and the exported service, will use the context class loader
-        ClassLoader webAppClassLoader = SharedServiceData.removeWebAppClassLoader(clusterInfo.getName() + clusterInfo.getRunningNumber());
+        ClassLoader webAppClassLoader = SharedServiceData.removeWebAppClassLoader(clusterInfo.getUniqueName());
         if (webAppClassLoader != null) {
             contextClassLoader = webAppClassLoader;
         }
@@ -572,7 +572,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             });
         }
 
-        List<Callable> sharedMonitors = SharedServiceData.removeServiceMonitors(clusterInfo.getName() + clusterInfo.getRunningNumber());
+        List<Callable> sharedMonitors = SharedServiceData.removeServiceMonitors(clusterInfo.getUniqueName());
         if (sharedMonitors != null) {
             serviceMonitors.addAll(sharedMonitors);
         }
@@ -603,7 +603,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
         }
 
-        List<Callable> serviceDetailsProvider = SharedServiceData.removeServiceDetails(clusterInfo.getName() + clusterInfo.getRunningNumber());
+        List<Callable> serviceDetailsProvider = SharedServiceData.removeServiceDetails(clusterInfo.getUniqueName());
         if (serviceDetailsProvider != null) {
             for (Callable serProvider : serviceDetailsProvider) {
                 try {
@@ -635,7 +635,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
         }
 
-        List<Callable<Boolean>> memberAliveIndicatorProvider = SharedServiceData.removeMemberAliveIndicator(clusterInfo.getName() + clusterInfo.getRunningNumber());
+        List<Callable<Boolean>> memberAliveIndicatorProvider = SharedServiceData.removeMemberAliveIndicator(clusterInfo.getUniqueName());
         if (memberAliveIndicatorProvider != null) {
             for (Callable<Boolean> c : memberAliveIndicatorProvider) {
                 maIndicators.add(c);
@@ -652,10 +652,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private void stopPU() {
         // make sure to clean shared services
         if (clusterInfo != null) {
-            SharedServiceData.removeWebAppClassLoader(clusterInfo.getName() + clusterInfo.getRunningNumber());
-            SharedServiceData.removeMemberAliveIndicator(clusterInfo.getName() + clusterInfo.getRunningNumber());
-            SharedServiceData.removeServiceDetails(clusterInfo.getName() + clusterInfo.getRunningNumber());
-            SharedServiceData.removeServiceMonitors(clusterInfo.getName() + clusterInfo.getRunningNumber());
+            SharedServiceData.removeWebAppClassLoader(clusterInfo.getUniqueName());
+            SharedServiceData.removeMemberAliveIndicator(clusterInfo.getUniqueName());
+            SharedServiceData.removeServiceDetails(clusterInfo.getUniqueName());
+            SharedServiceData.removeServiceMonitors(clusterInfo.getUniqueName());
         }
         
         serviceMonitors.clear();

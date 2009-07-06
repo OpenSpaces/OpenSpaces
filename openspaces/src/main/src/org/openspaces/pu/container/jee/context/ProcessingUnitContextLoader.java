@@ -59,7 +59,7 @@ public class ProcessingUnitContextLoader extends ContextLoader {
         final WebApplicationContext context = super.initWebApplicationContext(servletContext);
         ClusterInfo clusterInfo = (ClusterInfo) servletContext.getAttribute(JeeProcessingUnitContainerProvider.CLUSTER_INFO_CONTEXT);
         if (clusterInfo != null) {
-            String key = clusterInfo.getName() + clusterInfo.getRunningNumber();
+            String key = clusterInfo.getUniqueName();
 
             SharedServiceData.addServiceDetails(key, new Callable() {
                 public Object call() throws Exception {
