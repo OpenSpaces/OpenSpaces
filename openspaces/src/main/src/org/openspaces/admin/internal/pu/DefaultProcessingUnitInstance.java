@@ -23,6 +23,7 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitInstanceStatistics;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEvent;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.properties.BeanLevelProperties;
@@ -51,6 +52,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author kimchy
@@ -349,8 +352,47 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         ((InternalGridServiceManager) processingUnit.getManagingGridServiceManager()).relocate(this, gridServiceContainerToRelocateTo);
     }
 
+    public ProcessingUnitInstance relocateAnsWait(GridServiceContainer gridServiceContainerToRelocateTo) {
+        return relocateAnsWait(gridServiceContainerToRelocateTo, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public ProcessingUnitInstance relocateAnsWait(GridServiceContainer gridServiceContainerToRelocateTo, long timeout, TimeUnit timeUnit) {
+        final AtomicReference<ProcessingUnitInstance> ref = new AtomicReference<ProcessingUnitInstance>();
+        final CountDownLatch latch = new CountDownLatch(1);
+        ProcessingUnitInstanceLifecycleEventListener added = new ProcessingUnitInstanceLifecycleEventListener() {
+            public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstance) {
+                // check that its the same unique number, and not the same uid (since we might get an event for this one)
+                if (!processingUnitInstance.getUid().equals(getUid()) && processingUnitInstance.getClusterInfo().getRunningNumber() == getClusterInfo().getRunningNumber()) {
+                    ref.set(processingUnitInstance);
+                    latch.countDown();
+                }
+            }
+
+            public void processingUnitInstanceRemoved(ProcessingUnitInstance processingUnitInstance) {
+            }
+        };
+        processingUnit.addLifecycleListener(added);
+        try {
+            relocate();
+            latch.await(timeout, timeUnit);
+            return ref.get();
+        } catch (InterruptedException e) {
+            return null;
+        } finally {
+            processingUnit.removeLifecycleListener(added);
+        }
+    }
+
     public void relocate() {
         relocate(null); //null to relocate to any suitable GSC
+    }
+
+    public ProcessingUnitInstance relocateAndWait() {
+        return relocateAndWait(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public ProcessingUnitInstance relocateAndWait(long timeout, TimeUnit timeUnit) {
+        return relocateAnsWait(null, timeout, timeUnit);
     }
 
     public void restart() {
@@ -358,6 +400,37 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             throw new AdminException("No managing grid service manager for processing unit");
         }
         ((InternalGridServiceManager) processingUnit.getManagingGridServiceManager()).relocate(this, getGridServiceContainer());
+    }
+
+    public ProcessingUnitInstance restartAndWait() {
+        return restartAndWait(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public ProcessingUnitInstance restartAndWait(long timeout, TimeUnit timeUnit) {
+        final AtomicReference<ProcessingUnitInstance> ref = new AtomicReference<ProcessingUnitInstance>();
+        final CountDownLatch latch = new CountDownLatch(1);
+        ProcessingUnitInstanceLifecycleEventListener added = new ProcessingUnitInstanceLifecycleEventListener() {
+            public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstance) {
+                // check that its the same unique number, and not the same uid (since we might get an event for this one)
+                if (!processingUnitInstance.getUid().equals(getUid()) && processingUnitInstance.getClusterInfo().getRunningNumber() == getClusterInfo().getRunningNumber()) {
+                    ref.set(processingUnitInstance);
+                    latch.countDown();
+                }
+            }
+
+            public void processingUnitInstanceRemoved(ProcessingUnitInstance processingUnitInstance) {
+            }
+        };
+        processingUnit.addLifecycleListener(added);
+        try {
+            restart();
+            latch.await(timeout, timeUnit);
+            return ref.get();
+        } catch (InterruptedException e) {
+            return null;
+        } finally {
+            processingUnit.removeLifecycleListener(added);
+        }
     }
 
     public void decrement() {

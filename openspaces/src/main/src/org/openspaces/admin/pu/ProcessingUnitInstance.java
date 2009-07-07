@@ -48,6 +48,7 @@ import org.openspaces.pu.service.ServiceDetails;
 import org.openspaces.remoting.RemotingServiceDetails;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A processing unit instance is an actual running instance of a processing unit. For example, when deploying
@@ -71,20 +72,72 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
 
     /**
      * Relocates the instance to the provided {@link org.openspaces.admin.gsc.GridServiceContainer}.
+     *
+     * <p>Note, the current processing instance is unusable once this call has been made. If the relocated processing
+     * unit instance is needed, or waiting for the relocation is required, use {@link #relocateAnsWait(org.openspaces.admin.gsc.GridServiceContainer)}
+     * or {@link #relocateAnsWait(org.openspaces.admin.gsc.GridServiceContainer, long, java.util.concurrent.TimeUnit)}. 
      */
     void relocate(GridServiceContainer gridServiceContainerToRelocateTo);
 
     /**
+     * Relocates the instance to the provided {@link org.openspaces.admin.gsc.GridServiceContainer}. The relocated
+     * instance will be returned waiting for it indefinitely.
+     */
+    ProcessingUnitInstance relocateAnsWait(GridServiceContainer gridServiceContainerToRelocateTo);
+
+    /**
+     * Relocates the instance to the provided {@link org.openspaces.admin.gsc.GridServiceContainer}. The relocated
+     * instance will be returned waiting for it for the provided timeout.
+     */
+    ProcessingUnitInstance relocateAnsWait(GridServiceContainer gridServiceContainerToRelocateTo, long timeout, TimeUnit timeUnit);
+
+    /**
      * Relocates the instance to any suitable {@link org.openspaces.admin.gsc.GridServiceContainer}.
+     *
+     * <p>Note, the current processing instance is unusable once this call has been made. If the relocated processing
+     * unit instance is needed, or waiting for the relocation is required, use {@link #relocateAndWait()} or
+     * {@link #relocateAndWait(long, java.util.concurrent.TimeUnit)} .
      */
     void relocate();
+
+    /**
+     * Relocates the any suitable {@link org.openspaces.admin.gsc.GridServiceContainer}. The relocated
+     * instance will be returned waiting for it indefinitely.
+     */
+    ProcessingUnitInstance relocateAndWait();
+
+    /**
+     * Relocates the any suitable {@link org.openspaces.admin.gsc.GridServiceContainer}. The relocated
+     * instance will be returned waiting for it for the provided timeout.
+     */
+    ProcessingUnitInstance relocateAndWait(long timeout, TimeUnit timeUnit);
 
     /**
      * Restarts the processing unit instance. Note, if this instance is running an embedded space instance,
      * and the space instance is primary and there is a backup around as well, this method is handy to "turn"
      * the backup to primary.
+     *
+     * <p>Note, the current processing unit instance is unusable once this call has been made. If the restarted
+     * proceaaing unit instance is needed, or waiting for the restart is required, use {@link #restartAndWait()}
+     * or {@link #restartAndWait(long, java.util.concurrent.TimeUnit)}.
      */
     void restart();
+
+    /**
+     * Restarts the processing unit instance and waits indefinitely for the restarted processing unit instnace
+     * returning it.
+     *
+     * @see #restart()
+     */
+    ProcessingUnitInstance restartAndWait();
+
+    /**
+     * Restarts the processing unit instance and waits for the restarted processing unit instnace
+     * returning it for the provided timeout.
+     *
+     * @see #restart()
+     */
+    ProcessingUnitInstance restartAndWait(long timeout, TimeUnit timeUnit);
 
     /**
      * Returns the instance id of the processing unit instance.
