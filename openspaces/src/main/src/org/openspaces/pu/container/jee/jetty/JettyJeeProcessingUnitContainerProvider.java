@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.CommonClassLoader;
 import org.jini.rio.boot.SharedServiceData;
+import org.jini.rio.boot.ServiceClassLoader;
 import org.mortbay.jetty.*;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerWrapper;
@@ -36,10 +37,7 @@ import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider;
 import org.openspaces.pu.container.jee.jetty.holder.JettyHolder;
-import org.openspaces.pu.container.jee.jetty.support.JdkLogger;
-import org.openspaces.pu.container.jee.jetty.support.FreePortGenerator;
-import org.openspaces.pu.container.jee.jetty.support.NoOpFreePortGenerator;
-import org.openspaces.pu.container.jee.jetty.support.FileLockFreePortGenerator;
+import org.openspaces.pu.container.jee.jetty.support.*;
 import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
@@ -450,6 +448,11 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                 webAppContext.setSystemClasses(systemClasses.toArray(new String[systemClasses.size()]));
             }
 
+            // Provide our own extension to jetty class loader, so we can get the name for it in our logging
+            ServiceClassLoader serviceClassLoader = (ServiceClassLoader) Thread.currentThread().getContextClassLoader();
+            JettyWebAppClassLoader webAppClassLoader = new JettyWebAppClassLoader(SharedServiceData.getJeeClassLoader("jetty"), webAppContext, serviceClassLoader.getLogName());
+            webAppContext.setClassLoader(webAppClassLoader);
+
             HandlerContainer container = jettyHolder.getServer();
 
             Handler[] contexts = jettyHolder.getServer().getChildHandlersByClass(ContextHandlerCollection.class);
@@ -471,6 +474,7 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                 }
             }
             container.addHandler(webAppContext);
+            
             if (container.isStarted() || container.isStarting()) {
                 ClassLoader origClassLoader = Thread.currentThread().getContextClassLoader();
                 try {

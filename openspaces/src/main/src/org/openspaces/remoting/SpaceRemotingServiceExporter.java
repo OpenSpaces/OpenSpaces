@@ -821,7 +821,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
             this.method = method;
         }
 
-        public Object invoke(Object obj, Object[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        public Object invoke(Object obj, Object ... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
             return method.invoke(obj, args);
         }
     }

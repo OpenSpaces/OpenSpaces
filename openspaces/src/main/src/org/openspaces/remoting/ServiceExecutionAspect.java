@@ -44,7 +44,7 @@ public interface ServiceExecutionAspect {
      * A wrapper for method invocation. Allows to execute the actual method invocation. Similar to reflection
      * based method invocation.
      */
-    interface MethodInvocation<T> {
-        Object invoke(T obj, Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException;
+    interface MethodInvocation {
+        Object invoke(Object service, Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException;
     }
 }

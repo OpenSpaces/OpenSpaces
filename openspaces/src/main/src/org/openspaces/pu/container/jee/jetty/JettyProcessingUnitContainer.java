@@ -120,6 +120,8 @@ public class JettyProcessingUnitContainer implements org.openspaces.pu.container
                 webAppContext.destroy();
             } catch (Exception e) {
                 logger.warn("Failed to stop/destroy web context", e);
+            } finally {
+                webAppContext.setClassLoader(null);
             }
 
             if (container != null) {
