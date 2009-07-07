@@ -7,6 +7,8 @@ import org.jini.rio.boot.LoggableClassLoader;
 import java.io.IOException;
 
 /**
+ * A simple extension for Jetty WebApp class loader just to make it loggable in the Service Grid.
+ *
  * @author kimchy
  */
 public class JettyWebAppClassLoader extends WebAppClassLoader implements LoggableClassLoader {
