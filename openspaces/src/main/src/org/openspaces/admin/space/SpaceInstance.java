@@ -40,6 +40,8 @@ import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEventMana
 import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
 import org.openspaces.core.GigaSpace;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * A Space Instance is a single instance of a space running as a part of a {@link Space}. For example, when deploying
  * a 2 partitions each with one backup topology, there will be 4 space instances running.
@@ -62,6 +64,13 @@ public interface SpaceInstance extends GridComponent, StatisticsMonitor {
      * Returns the space mode, indicating if the space is primary or backup.
      */
     SpaceMode getMode();
+
+    /**
+     * Waits for the space instance to move to the provided space mode. Returns
+     * <code>true</code> if the mode was changed to the required one withing the
+     * timeout, or <code>false</code> otherwise.
+     */
+    boolean waitForMode(SpaceMode requiredMode, long timeout, TimeUnit timeUnit);
 
     /**
      * Returns the <b>direct</b> proxy to the actual space instance.

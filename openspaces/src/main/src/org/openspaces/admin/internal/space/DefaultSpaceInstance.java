@@ -28,12 +28,7 @@ import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.SpaceInstanceStatistics;
 import org.openspaces.admin.space.SpacePartition;
-import org.openspaces.admin.space.events.ReplicationStatusChangedEvent;
-import org.openspaces.admin.space.events.ReplicationStatusChangedEventManager;
-import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEvent;
-import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEventManager;
-import org.openspaces.admin.space.events.SpaceModeChangedEvent;
-import org.openspaces.admin.space.events.SpaceModeChangedEventManager;
+import org.openspaces.admin.space.events.*;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceConfigurer;
 
@@ -42,6 +37,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author kimchy
@@ -250,6 +247,31 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     public SpaceMode getMode() {
         return this.spaceMode;
+    }
+
+    public boolean waitForMode(final SpaceMode requiredMode, long timeout, TimeUnit timeUnit) {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicBoolean result = new AtomicBoolean(false);
+        SpaceModeChangedEventListener changed = new SpaceModeChangedEventListener() {
+            public void spaceModeChanged(SpaceModeChangedEvent event) {
+                if (event.getNewMode().equals(requiredMode)) {
+                    result.set(true);
+                    latch.countDown();
+                }
+            }
+        };
+        spaceModeChangedEventManager.add(changed);
+        try {
+            if (spaceMode.equals(requiredMode)) {
+                return true;
+            }
+            latch.await(timeout, timeUnit);
+            return result.get();
+        } catch (InterruptedException e) {
+            return false;
+        } finally {
+            spaceModeChangedEventManager.remove(changed);
+        }
     }
 
     private static final SpaceInstanceStatistics NA_STATISTICS = new DefaultSpaceInstanceStatistics(new StatisticsHolder(new long[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}), null, 0);
