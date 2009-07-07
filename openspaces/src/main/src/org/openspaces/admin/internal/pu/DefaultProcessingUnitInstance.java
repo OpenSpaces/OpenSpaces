@@ -358,7 +358,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     public ProcessingUnitInstance relocateAnsWait(GridServiceContainer gridServiceContainerToRelocateTo, long timeout, TimeUnit timeUnit) {
         final AtomicReference<ProcessingUnitInstance> ref = new AtomicReference<ProcessingUnitInstance>();
-        final CountDownLatch latch = new CountDownLatch(1);
+        final CountDownLatch latch = new CountDownLatch(2);
         ProcessingUnitInstanceLifecycleEventListener added = new ProcessingUnitInstanceLifecycleEventListener() {
             public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstance) {
                 // check that its the same unique number, and not the same uid (since we might get an event for this one)
@@ -369,6 +369,9 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             }
 
             public void processingUnitInstanceRemoved(ProcessingUnitInstance processingUnitInstance) {
+                if (processingUnitInstance.getUid().equals(getUid())) {
+                    latch.countDown();
+                }
             }
         };
         processingUnit.addLifecycleListener(added);
@@ -408,7 +411,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     public ProcessingUnitInstance restartAndWait(long timeout, TimeUnit timeUnit) {
         final AtomicReference<ProcessingUnitInstance> ref = new AtomicReference<ProcessingUnitInstance>();
-        final CountDownLatch latch = new CountDownLatch(1);
+        final CountDownLatch latch = new CountDownLatch(2);
         ProcessingUnitInstanceLifecycleEventListener added = new ProcessingUnitInstanceLifecycleEventListener() {
             public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstance) {
                 // check that its the same unique number, and not the same uid (since we might get an event for this one)
@@ -419,6 +422,9 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             }
 
             public void processingUnitInstanceRemoved(ProcessingUnitInstance processingUnitInstance) {
+                if (processingUnitInstance.getUid().equals(getUid())) {
+                    latch.countDown();
+                }
             }
         };
         processingUnit.addLifecycleListener(added);
