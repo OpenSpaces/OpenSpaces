@@ -16,10 +16,13 @@ import org.openspaces.admin.pu.events.*;
 import org.openspaces.admin.space.Space;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.sla.SLA;
+import org.openspaces.pu.sla.requirement.Requirement;
+import org.openspaces.pu.sla.requirement.ZoneRequirement;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
@@ -213,6 +216,16 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     public Map<String, Integer> getMaxInstancesPerZone() {
         return Collections.unmodifiableMap(sla.getMaxInstancesPerZone());
+    }
+
+    public String[] getRequiredZones() {
+        ArrayList<String> zones = new ArrayList<String>();
+        for (Requirement req : sla.getRequirements()) {
+            if (req instanceof ZoneRequirement) {
+                zones.add(((ZoneRequirement) req).getZone());
+            }
+        }
+        return zones.toArray(new String[zones.size()]);
     }
 
     public DeploymentStatus getStatus() {

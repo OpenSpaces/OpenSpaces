@@ -81,12 +81,39 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * {@link #getNumberOfInstances()}. If there are backups, will return {@link #getNumberOfInstances()} * ({@link #getNumberOfBackups()}  + 1)
      */
     int getTotalNumberOfInstances();
-    
+
+    /**
+     * Returns the number of instnaces of this processing unit that can run within a VM.
+     *
+     * <p>In case of a partitioned with backup topology, it applies on a per partition level (meaning that a
+     * primary and backup will not run on the same VM).
+     *
+     * <p>In case of a non backup based topology, it applies on the number of instances of the whole processing
+     * unit that can run on the same VM).
+     */
     int getMaxInstancesPerVM();
 
+    /**
+     * Returns the number of instnaces of this processing unit that can run within a Machine.
+     *
+     * <p>In case of a partitioned with backup topology, it applies on a per partition level (meaning that a
+     * primary and backup will not run on the same Machine).
+     *
+     * <p>In case of a non backup based topology, it applies on the number of instances of the whole processing
+     * unit that can run on the same Machine). 
+     */
     int getMaxInstancesPerMachine();
 
+    /**
+     * Returns a map containing the zone name and the maximum number of instances for that zone.
+     */
     Map<String, Integer> getMaxInstancesPerZone();
+
+    /**
+     * Returns the list of zones this processing units are required to run on. If there is more than
+     * one zone, the processing unit can run on either of the zones.
+     */
+    String[] getRequiredZones();
 
     /**
      * Returns the deployment status of the processing unit.
