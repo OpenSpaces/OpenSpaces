@@ -162,6 +162,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             } catch (Exception e1) {
                 logger.debug(logMessage("Failed to destroy PU after failed start, ignoring"), e1);
             }
+            cleanClassLoaders();
             throw new JSBInstantiationException("Failed to start processing unit [" + getServiceBeanContext().getServiceElement().getName() + "]", e, false);
         } finally {
             Thread.currentThread().setContextClassLoader(origClassLoader);
