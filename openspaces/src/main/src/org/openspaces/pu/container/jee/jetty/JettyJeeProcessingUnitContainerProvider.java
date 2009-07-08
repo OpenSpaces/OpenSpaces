@@ -448,6 +448,7 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                 webAppContext.setSystemClasses(systemClasses.toArray(new String[systemClasses.size()]));
             }
 
+            webAppContext.setDisplayName("web." + clusterInfo.getName() + "." + clusterInfo.getSuffix());
             // Provide our own extension to jetty class loader, so we can get the name for it in our logging
             ServiceClassLoader serviceClassLoader = (ServiceClassLoader) Thread.currentThread().getContextClassLoader();
             JettyWebAppClassLoader webAppClassLoader = new JettyWebAppClassLoader(SharedServiceData.getJeeClassLoader("jetty"), webAppContext, serviceClassLoader.getLogName());
