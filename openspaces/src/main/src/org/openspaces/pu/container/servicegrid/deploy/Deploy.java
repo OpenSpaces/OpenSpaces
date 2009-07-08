@@ -370,10 +370,14 @@ public class Deploy {
                     applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties, null));
                     applicationContext.addBeanPostProcessor(new BeanLevelPropertyBeanPostProcessor(beanLevelProperties));
                 }
+                // start the application context
+                applicationContext.refresh();
                 try {
                     sla = (SLA) applicationContext.getBean("SLA");
                 } catch (NoSuchBeanDefinitionException e) {
                     throw new IllegalArgumentException("Failed to find SLA from in [" + slaString + "]");
+                } finally {
+                    applicationContext.close();
                 }
             }
         }
