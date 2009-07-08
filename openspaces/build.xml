@@ -221,17 +221,13 @@
                  defaultexcludes="true"
                  header='&lt;a href=\"http://www.gigaspaces.com/\" target=\"_top\"&gt;GigaSpaces XAP API&lt;/a&gt;'
         		packagenames="org.openspaces.**.*"
-        		excludepackagenames="org.openspaces.admin.internal.**.*">
+        		excludepackagenames="org.openspaces.admin.internal.**.*, org.openspaces.core.executor.internal.**.*, org.openspaces.core.internal.**.*, org.openspaces.core.transaction.internal.**.*">
             <arg value="-breakiterator"/>
             <arg value="-J-Xmx128m"/>
             <arg value="-J-XX:MaxPermSize=128m"/>
-            <doctitle><![CDATA[<h1>GigaSpaces XAP API</h1>]]></doctitle>
+            <doctitle><![CDATA[<h1>GigaSpaces XAP 7.0 API</h1>]]></doctitle>
             <bottom><![CDATA[<i>Copyright &copy; <a href="http://www.gigaspaces.com/" target="_top">GigaSpaces</a>.</i>]]></bottom>
             <classpath refid="all-libs"/>
-            <!--packageset dir="${main.src.dir}" defaultexcludes="yes">
-                <include name="org.openspaces.**"/>
-                <exclude name="org.openspaces.admin.internal.**" />
-            </packageset-->
         	<fileset dir="${basedir}/../gigaspaces/src/java" defaultexcludes="yes">
 	      		<include name="com/**"/>
 				<exclude name="com/j_spaces/jms/**" />
