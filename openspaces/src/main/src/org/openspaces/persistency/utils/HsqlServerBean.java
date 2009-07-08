@@ -87,12 +87,7 @@ public class HsqlServerBean implements InitializingBean, DisposableBean {
     }
 
     public void afterPropertiesSet() throws Exception {
-
-
         HsqlProperties configProps = new HsqlProperties(serverProperties);
-        if (configProps == null) {
-            configProps = new HsqlProperties();
-        }
 
         ServerConfiguration.translateDefaultDatabaseProperty(configProps);
 

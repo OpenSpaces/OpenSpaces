@@ -75,7 +75,7 @@ public class GlassfishProcessingUnitContainer implements org.openspaces.pu.conta
 
     public JeeServiceDetails getJeeDetails() {
         int port = glassfishHolder.getPort();
-        String host = null;
+        String host = null; // TODO get the host somehow?
         if (host == null) {
             try {
                 host = BootUtil.getHostAddress();
