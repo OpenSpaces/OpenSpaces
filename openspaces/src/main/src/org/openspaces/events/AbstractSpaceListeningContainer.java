@@ -72,7 +72,7 @@ import java.util.List;
  * @author kimchy
  */
 public abstract class AbstractSpaceListeningContainer implements Lifecycle, BeanNameAware, InitializingBean,
-DisposableBean, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProvider {
+        DisposableBean, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProvider {
 
     protected final Log logger = LogFactory.getLog(getClass());
 
@@ -96,7 +96,7 @@ DisposableBean, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProv
 
     private SpaceMode currentSpaceMode;
 
-    private volatile boolean autoStart = true ;
+    private volatile boolean autoStart = true;
 
 
     /**
@@ -113,7 +113,7 @@ DisposableBean, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProv
      * be started using {@link #start()}.
      */
     public void setAutoStart(boolean initOnStartup) {
-        this.autoStart = initOnStartup ;
+        this.autoStart = initOnStartup;
     }
 
     /**
@@ -181,6 +181,8 @@ DisposableBean, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProv
             this.lifecycleMonitor.notifyAll();
         }
 
+        doInitialize();
+
         if (!activeWhenPrimary) {
             doStart();
         }
@@ -192,7 +194,7 @@ DisposableBean, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProv
                 try {
                     IJSpace clusterMemberSpace = SpaceUtils.getClusterMemberSpace(gigaSpace.getSpace());
                     ISpaceModeListener remoteListener = (ISpaceModeListener) clusterMemberSpace.getStubHandler()
-                    .exportObject(primaryBackupListener);
+                            .exportObject(primaryBackupListener);
                     currentMode = ((IInternalRemoteJSpaceAdmin) clusterMemberSpace.getAdmin()).addSpaceModeListener(remoteListener);
                 } catch (RemoteException e) {
                     throw new InvalidDataAccessResourceUsageException("Failed to register space mode listener with space [" + gigaSpace.getSpace()
@@ -207,8 +209,6 @@ DisposableBean, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProv
                 SpaceInitializationIndicator.unsetInitializer();
             }
         }
-
-        doInitialize();
     }
 
     /**
@@ -238,7 +238,7 @@ DisposableBean, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProv
                 IJSpace clusterMemberSpace = SpaceUtils.getClusterMemberSpace(gigaSpace.getSpace());
                 try {
                     ISpaceModeListener remoteListener = (ISpaceModeListener) clusterMemberSpace.getStubHandler()
-                    .exportObject(primaryBackupListener);
+                            .exportObject(primaryBackupListener);
                     ((IInternalRemoteJSpaceAdmin) clusterMemberSpace.getAdmin()).removeSpaceModeListener(remoteListener);
                 } catch (RemoteException e) {
                     logger.warn("Failed to unregister space mode listener with space [" + gigaSpace.getSpace() + "]", e);
@@ -301,7 +301,7 @@ DisposableBean, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProv
      */
     public void start() throws DataAccessException {
         if (!autoStart) {
-            autoStart = true ;
+            autoStart = true;
         }
         if (!activeWhenPrimary) {
             doStart();
@@ -317,7 +317,7 @@ DisposableBean, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProv
      */
     protected void doStart() throws DataAccessException {
         if (!autoStart) {
-            return ;
+            return;
         }
         if (running) {
             return;
@@ -454,16 +454,12 @@ DisposableBean, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProv
     // -------------------------------------------------------------------------
 
     /**
-     * Register any invokers within this container.
-     *
-     * <p>Subclasses need to implement this method for their specific invoker management process.
+     * A callback to perform custom initialization steps.
      */
     protected abstract void doInitialize() throws DataAccessException;
 
     /**
-     * Close the registered invokers.
-     *
-     * <p>Subclasses need to implement this method for their specific invoker management process.
+     * Perform any custom shutdown operations.
      *
      * @see #shutdown()
      */

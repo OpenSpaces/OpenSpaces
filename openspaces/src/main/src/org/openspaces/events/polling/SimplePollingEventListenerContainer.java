@@ -310,6 +310,13 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
 
         // Proceed with actual listener initialization.
         super.initialize();
+
+        // now, start the scheduled threads
+        synchronized (this.activeInvokerMonitor) {
+            for (int i = 0; i < this.concurrentConsumers; i++) {
+                scheduleNewInvoker();
+            }
+        }
     }
 
     @Override
@@ -358,21 +365,6 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
         String beanName = getBeanName();
         String threadNamePrefix = (beanName != null ? beanName + "-" : DEFAULT_THREAD_NAME_PREFIX);
         return new SimpleAsyncTaskExecutor(threadNamePrefix);
-    }
-
-    /**
-     * Creates the specified number of concurrent consumers, each running in a separate thread.
-     *
-     * @see #scheduleNewInvoker
-     * @see #setTaskExecutor
-     */
-    @Override
-    protected void doInitialize() throws DataAccessException {
-        synchronized (this.activeInvokerMonitor) {
-            for (int i = 0; i < this.concurrentConsumers; i++) {
-                scheduleNewInvoker();
-            }
-        }
     }
 
     /**
@@ -564,6 +556,9 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
                 Thread.currentThread().interrupt();
             }
         }
+    }
+
+    protected void doInitialize() throws DataAccessException {
     }
 
     /**
