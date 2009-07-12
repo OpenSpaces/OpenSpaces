@@ -24,11 +24,9 @@ public class StaticResourceScript extends StaticScript {
     }
 
     public StaticResourceScript(String name, String type, String resourceLocation) {
-        Resource resource = resourceLoader.getResource(resourceLocation);
-        super.script(loadResource(resource));
+        script(resourceLocation);
         type(type);
         name(name);
-
     }
 
     public StaticScript script(String resourceLocation) {
