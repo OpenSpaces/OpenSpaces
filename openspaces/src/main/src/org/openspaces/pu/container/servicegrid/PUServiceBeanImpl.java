@@ -89,6 +89,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 /**
  * @author kimchy
@@ -350,14 +352,22 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
             beanLevelProperties.getContextProperties().setProperty(DeployableProcessingUnitContainerProvider.CONTEXT_PROPERTY_DEPLOY_PATH, deployPath.getAbsolutePath());
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("Downloading from GSM to [" + deployedProcessingUnitsLocation + "] ...");
+            if (logger.isInfoEnabled()) {
+                logger.info("Downloading from GSM [" + codeserver + "] to [" + deployPath + "] ...");
             }
 
-            downloadAndExtractPU(puName, puPath, codeserver, deployPath, new File(deployedProcessingUnitsLocation));
+            long size = downloadAndExtractPU(puName, puPath, codeserver, deployPath, new File(deployedProcessingUnitsLocation));
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("Downloaded to [" + deployedProcessingUnitsLocation + "]");
+            if (logger.isInfoEnabled()) {
+                NumberFormat nf = NumberFormat.getInstance();
+                nf.setMaximumFractionDigits(2);
+                String suffix = "kb";
+                float factor = 1024;
+                if (size > 1024*1024) {
+                    suffix = "mb";
+                    factor = 1024*1024;
+                }
+                logger.info("Downloaded [" + nf.format((float)size/factor) + suffix + "] to [" + deployPath + "]");
             }
 
             // go over listed files that needs to be resovled with properties
@@ -865,7 +875,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
     }
 
-    private void downloadAndExtractPU(String puName, String puPath, String codeserver, File path, File tempPath) {
+    private long downloadAndExtractPU(String puName, String puPath, String codeserver, File path, File tempPath) {
         URL url = null;
         try {
             url = new URL(codeserver + puPath);
@@ -874,7 +884,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
 
         try {
-            PUZipUtils.downloadProcessingUnit(puName, url, path, tempPath);
+            return PUZipUtils.downloadProcessingUnit(puName, url, path, tempPath);
         } catch (Exception e) {
             throw new CannotCreateContainerException("Faile to download processing unit [" + puName + "]", e);
         }
