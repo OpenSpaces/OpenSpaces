@@ -350,7 +350,15 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
             beanLevelProperties.getContextProperties().setProperty(DeployableProcessingUnitContainerProvider.CONTEXT_PROPERTY_DEPLOY_PATH, deployPath.getAbsolutePath());
 
+            if (logger.isDebugEnabled()) {
+                logger.debug("Downloading from GSM to [" + deployedProcessingUnitsLocation + "] ...");
+            }
+
             downloadAndExtractPU(puName, puPath, codeserver, deployPath, new File(deployedProcessingUnitsLocation));
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Downloaded to [" + deployedProcessingUnitsLocation + "]");
+            }
 
             // go over listed files that needs to be resovled with properties
             for (Map.Entry entry : beanLevelProperties.getContextProperties().entrySet()) {
