@@ -38,7 +38,7 @@ public class StaticResourceScript extends StaticScript {
         try {
             return FileCopyUtils.copyToString(new BufferedReader(new InputStreamReader(resource.getInputStream())));
         } catch (IOException e) {
-            throw new ScriptingException("Failed to load script resource [" + resource + "]");
+            throw new ScriptingException("Failed to load script resource [" + resource + "]", e);
         }
     }
 }
