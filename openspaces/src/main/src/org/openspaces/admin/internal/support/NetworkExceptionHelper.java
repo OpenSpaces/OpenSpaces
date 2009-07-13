@@ -18,6 +18,10 @@ public abstract class NetworkExceptionHelper {
             if (e.getCause() instanceof IOException && e.getCause().getMessage().contains("aborted")) {
                 return true;
             }
+
+            if (e.getCause() instanceof IOException && e.getCause().getMessage().contains("Connection reset by peer")) {
+                return true;
+            }
         }
         if (e instanceof IOException) {
             if (e.getMessage().startsWith("Connection reset by peer")) {
