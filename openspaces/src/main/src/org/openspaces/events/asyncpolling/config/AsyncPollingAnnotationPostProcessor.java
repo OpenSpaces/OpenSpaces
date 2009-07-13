@@ -112,7 +112,7 @@ public class AsyncPollingAnnotationPostProcessor implements BeanPostProcessor, A
             pollingContainerConfigurer.transactionTimeout(timeout);
         }
 
-        eventContainersBus.registerContaienr(beanName, pollingContainerConfigurer.pollingContainer());
+        eventContainersBus.registerContainer(beanName, pollingContainerConfigurer.pollingContainer());
 
         return bean;
     }

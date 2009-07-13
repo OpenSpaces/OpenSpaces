@@ -168,7 +168,7 @@ public class NotifyAnnotationPostProcessor implements BeanPostProcessor, Applica
             }
         }
 
-        eventContainersBus.registerContaienr(beanName, notifyContainerConfigurer.notifyContainer());
+        eventContainersBus.registerContainer(beanName, notifyContainerConfigurer.notifyContainer());
 
         return bean;
     }

@@ -24,7 +24,7 @@ import org.springframework.context.ApplicationContextAware;
 /**
  * A task that unregisters (stops and disposes it) a dynamically added event container
  * (using {@link org.openspaces.events.polling.Polling} or {@link org.openspaces.events.notify.Notify}.
- * Returns <code>true</code> if the event contaienr was found and unregistered correctly. 
+ * Returns <code>true</code> if the event container was found and unregistered correctly.
  *
  * @author kimchy
  */

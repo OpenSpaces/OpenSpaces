@@ -38,7 +38,7 @@ public class EventContainersBus implements DisposableBean, ServiceDetailsProvide
 
     private ConcurrentHashMap<String, AbstractEventListenerContainer> containers = new ConcurrentHashMap<String, AbstractEventListenerContainer>();
 
-    public void registerContaienr(String name, AbstractEventListenerContainer container) {
+    public void registerContainer(String name, AbstractEventListenerContainer container) {
         containers.put(name + SUFFIX, container);
     }
 
@@ -51,7 +51,7 @@ public class EventContainersBus implements DisposableBean, ServiceDetailsProvide
         return false;
     }
 
-    public AbstractEventListenerContainer getEventContaienr(String name) {
+    public AbstractEventListenerContainer getEventContainer(String name) {
         return containers.get(name + SUFFIX);
     }
 

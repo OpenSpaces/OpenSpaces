@@ -130,7 +130,7 @@ public class PollingAnnotationPostProcessor implements BeanPostProcessor, Applic
             pollingContainerConfigurer.transactionTimeout(timeout);
         }
 
-        eventContainersBus.registerContaienr(beanName, pollingContainerConfigurer.pollingContainer());
+        eventContainersBus.registerContainer(beanName, pollingContainerConfigurer.pollingContainer());
 
         return bean;
     }
