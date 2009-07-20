@@ -311,16 +311,17 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                 for (Connector connector : jettyHolder.getServer().getConnectors()) {
                     if (connector.getPort() != 0) {
                         FreePortGenerator.PortHandle portHandle = freePortGenerator.nextAvailablePort(connector.getPort(), retryPortCount);
+                        for (Connector connector1 : jettyHolder.getServer().getConnectors()) {
+                            if (connector1 instanceof AbstractConnector) {
+                                if (connector.getPort() == connector1.getConfidentialPort()) {
+                                    // if the confidential port of one connectors points to this connector that we are changing its port
+                                    // then update it as well
+                                    ((AbstractConnector) connector1).setConfidentialPort(portHandle.getPort());
+                                }
+                            }
+                        }
                         connector.setPort(portHandle.getPort());
                         portHandles.add(portHandle);
-                    }
-
-                    if (connector instanceof AbstractConnector) {
-                        if (connector.getConfidentialPort() != 0) {
-                            FreePortGenerator.PortHandle portHandle = freePortGenerator.nextAvailablePort(connector.getConfidentialPort(), retryPortCount);
-                            ((AbstractConnector) connector).setConfidentialPort(portHandle.getPort());
-                            portHandles.add(portHandle);
-                        }
                     }
                 }
 
@@ -340,10 +341,16 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                         // ignore
                     }
                     for (Connector connector : jettyHolder.getServer().getConnectors()) {
-                        connector.setPort(connector.getPort() + 1);
-                        if (connector instanceof AbstractConnector) {
-                            ((AbstractConnector) connector).setConfidentialPort(connector.getConfidentialPort() + 1);
+                        for (Connector connector1 : jettyHolder.getServer().getConnectors()) {
+                            if (connector1 instanceof AbstractConnector) {
+                                if (connector.getPort() == connector1.getConfidentialPort()) {
+                                    // if the confidential port of one connectors points to this connector that we are changing its port
+                                    // then update it as well
+                                    ((AbstractConnector) connector1).setConfidentialPort(connector.getPort() + 1);
+                                }
+                            }
                         }
+                        connector.setPort(connector.getPort() + 1);
                     }
                 } catch (Exception e) {
                     for (FreePortGenerator.PortHandle portHandle : portHandles) {
@@ -365,7 +372,9 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                 throw new CannotCreateContainerException("Failed to bind jetty to port with retries [" + retryPortCount + "]");
             }
         }
-        logger.info("Using Jetty server with port [" + jettyHolder.getServer().getConnectors()[0].getPort() + "]");
+        for (Connector connector : jettyHolder.getServer().getConnectors()) {
+            logger.info("Using Jetty server connector [" + connector.getClass().getName() + "], Host [" + connector.getHost() + "], Port [" + connector.getPort() + "], Confidential Port [" + connector.getConfidentialPort() + "]");
+        }
 
         try {
             jettyHolder.start();
