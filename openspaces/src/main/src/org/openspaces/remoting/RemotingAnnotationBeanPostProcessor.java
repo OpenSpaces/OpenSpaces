@@ -4,13 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.util.AnnotationUtils;
-import org.openspaces.remoting.scripting.AsyncScriptingExecutor;
-import org.openspaces.remoting.scripting.ExecutorScriptingExecutor;
-import org.openspaces.remoting.scripting.LazyLoadingRemoteInvocationAspect;
-import org.openspaces.remoting.scripting.ScriptingExecutor;
-import org.openspaces.remoting.scripting.ScriptingMetaArgumentsHandler;
-import org.openspaces.remoting.scripting.ScriptingRemoteRoutingHandler;
-import org.openspaces.remoting.scripting.SyncScriptingExecutor;
+import org.openspaces.remoting.scripting.*;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -124,6 +118,20 @@ public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanP
                     factoryBean.setTimeout(asyncScriptingExecutor.timeout());
                     factoryBean.setFifo(asyncScriptingExecutor.fifo());
                     factoryBean.setGigaSpace(findGigaSpaceByName(asyncScriptingExecutor.gigaSpace()));
+                    factoryBean.setMetaArgumentsHandler(new ScriptingMetaArgumentsHandler());
+                    factoryBean.setRemoteInvocationAspect(new LazyLoadingRemoteInvocationAspect());
+                    factoryBean.setRemoteRoutingHandler(new ScriptingRemoteRoutingHandler());
+                    factoryBean.setServiceInterface(ScriptingExecutor.class);
+                    factoryBean.afterPropertiesSet();
+                    field.setAccessible(true);
+                    field.set(bean, factoryBean.getObject());
+                }
+                EventDrivenScriptingExecutor eventDrivenScriptingExecutor = field.getAnnotation(EventDrivenScriptingExecutor.class);
+                if (eventDrivenScriptingExecutor != null) {
+                    EventDrivenSpaceRemotingProxyFactoryBean factoryBean = new EventDrivenSpaceRemotingProxyFactoryBean();
+                    factoryBean.setTimeout(eventDrivenScriptingExecutor.timeout());
+                    factoryBean.setFifo(eventDrivenScriptingExecutor.fifo());
+                    factoryBean.setGigaSpace(findGigaSpaceByName(eventDrivenScriptingExecutor.gigaSpace()));
                     factoryBean.setMetaArgumentsHandler(new ScriptingMetaArgumentsHandler());
                     factoryBean.setRemoteInvocationAspect(new LazyLoadingRemoteInvocationAspect());
                     factoryBean.setRemoteRoutingHandler(new ScriptingRemoteRoutingHandler());

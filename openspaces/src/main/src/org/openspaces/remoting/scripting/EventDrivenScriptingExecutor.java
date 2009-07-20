@@ -22,16 +22,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Allows to inject a {@link ScriptingExecutor} remoting proxy using
- * {@link org.openspaces.remoting.SyncSpaceRemotingProxyFactoryBean}.
- * 
+ * Allows to inject a {@link org.openspaces.remoting.scripting.ScriptingExecutor} remoting proxy using
+ * {@link org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean}.
+ *
  * @author kimchy
  * @see org.openspaces.remoting.RemotingAnnotationBeanPostProcessor
- * @deprecated Use {@link org.openspaces.remoting.scripting.ExecutorScriptingExecutor}.
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SyncScriptingExecutor {
+public @interface EventDrivenScriptingExecutor {
 
     /**
      * The name of the {@link org.openspaces.core.GigaSpace} instance (representing the Space)
@@ -40,5 +39,17 @@ public @interface SyncScriptingExecutor {
      * <p>If there is only one instance of {@link org.openspaces.core.GigaSpace}, will defualt to
      * it. If not, will throw an exception if not defined.
      */
-    String gigaSpace() default "";
+    public abstract String gigaSpace() default "";
+
+    /**
+     * The timeout value when using this async call in a sync manner.
+     *
+     * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean#setTimeout(long)
+     */
+    public abstract long timeout() default 5000;
+
+    /**
+     * Should the remote invocation operate in a fifo manner.
+     */
+    public abstract boolean fifo() default false;
 }

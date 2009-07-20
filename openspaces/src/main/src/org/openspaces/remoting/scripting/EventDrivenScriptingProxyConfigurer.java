@@ -17,18 +17,19 @@ package org.openspaces.remoting.scripting;
 
 import org.openspaces.core.GigaSpace;
 import org.openspaces.remoting.AsyncRemotingProxyConfigurer;
+import org.openspaces.remoting.EventDrivenRemotingProxyConfigurer;
 
 /**
- * A simple programmatic configurer creating a remote asyncronous scripting proxy
+ * A simple programmatic configurer creating a remote event driven scripting proxy
  *
  * <p>Usage example:
  * <pre>
  * IJSpace space = new UrlSpaceConfigurer("jini://&#42;/&#42;/mySpace")
  *                        .space();
  * GigaSpace gigaSpace = new GigaSpaceConfigurer(space).gigaSpace();
- * ScriptingExecutor<Integer> executor = new AsyncScriptingProxyConfigurer<Integer>(gigaSpace)
+ * ScriptingExecutor<Integer> executor = new EventDrivenScriptingProxyConfigurer<Integer>(gigaSpace)
  *                                       .timeout(15000)
- *                                       .asyncScriptingExecutor();
+ *                                       .scriptingExecutor();
  * Integer result = executor.execute(new StaticScript()
  *                  .type("groovy")
  *                  .name("myScript")
@@ -36,17 +37,16 @@ import org.openspaces.remoting.AsyncRemotingProxyConfigurer;
  * </pre>
  *
  * @author Uri Cohen
- * @deprecated Use {@link org.openspaces.remoting.scripting.EventDrivenScriptingProxyConfigurer}.
  */
-public class AsyncScriptingProxyConfigurer<T> {
+public class EventDrivenScriptingProxyConfigurer<T> {
 
-    private AsyncRemotingProxyConfigurer<ScriptingExecutor> remotingConfigurer;
+    private EventDrivenRemotingProxyConfigurer<ScriptingExecutor> remotingConfigurer;
 
     /**
      * Creates a new <code>AsyncScriptingProxyConfigurer</code> on top of the given space
      */
-    public AsyncScriptingProxyConfigurer(GigaSpace gigaSpace) {
-        remotingConfigurer = new AsyncRemotingProxyConfigurer<ScriptingExecutor>(gigaSpace, ScriptingExecutor.class)
+    public EventDrivenScriptingProxyConfigurer(GigaSpace gigaSpace) {
+        remotingConfigurer = new EventDrivenRemotingProxyConfigurer<ScriptingExecutor>(gigaSpace, ScriptingExecutor.class)
                              .metaArgumentsHandler(new ScriptingMetaArgumentsHandler())
                              .remoteInvocationAspect(new LazyLoadingRemoteInvocationAspect())
                              .remoteRoutingHandler(new ScriptingRemoteRoutingHandler());
@@ -55,7 +55,7 @@ public class AsyncScriptingProxyConfigurer<T> {
     /**
      * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean#setTimeout(long)
      */
-    public AsyncScriptingProxyConfigurer<T> timeout(long timeout) {
+    public EventDrivenScriptingProxyConfigurer<T> timeout(long timeout) {
         remotingConfigurer.timeout(timeout);
         return this;
     }
@@ -63,18 +63,15 @@ public class AsyncScriptingProxyConfigurer<T> {
     /**
      * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean#setFifo(boolean)
      */
-    public AsyncScriptingProxyConfigurer<T> fifo(boolean fifo) {
+    public EventDrivenScriptingProxyConfigurer<T> fifo(boolean fifo) {
         remotingConfigurer.fifo(fifo);
         return this;
     }
 
     /**
-     * Create a new async <code>ScriptingExecutor</code> proxy
+     * Create a new event driven <code>ScriptingExecutor</code> proxy
      */
-    public ScriptingExecutor<T> asyncScriptingExecutor() {
-        return remotingConfigurer.asyncProxy();
+    public ScriptingExecutor<T> scriptingExecutor() {
+        return remotingConfigurer.proxy();
     }
-
-
-
 }

@@ -27,6 +27,7 @@ import java.lang.annotation.Target;
  *
  * @author kimchy
  * @see org.openspaces.remoting.RemotingAnnotationBeanPostProcessor
+ * @deprecated Use {@link org.openspaces.remoting.scripting.EventDrivenScriptingExecutor}.
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

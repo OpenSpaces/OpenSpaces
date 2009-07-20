@@ -35,6 +35,7 @@ import org.openspaces.remoting.SyncRemotingProxyConfigurer;
  * </pre>
  *
  * @author Uri Cohen
+ * @deprecated Use {@link org.openspaces.remoting.scripting.ExecutorScriptingProxyConfigurer}.
  */
 public class SyncScriptingProxyConfigurer<T> {
 
