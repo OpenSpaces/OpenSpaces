@@ -559,11 +559,13 @@ public class DefaultAdmin implements InternalAdmin {
         processZonesOnServiceAddition(zones, processingUnitInstance.getUid(), transport, virtualMachine, machine, processingUnitInstance);
 
         InternalProcessingUnit processingUnit = (InternalProcessingUnit) processingUnits.getProcessingUnit(processingUnitInstance.getClusterInfo().getName());
-        if (processingUnit == null) {
+        InternalGridServiceContainer gridServiceContainer = (InternalGridServiceContainer) gridServiceContainers.getContainerByUID(processingUnitInstance.getGridServiceContainerServiceID().toString());
+
+        if (processingUnit == null || gridServiceContainer == null) {
             processingUnitInstances.addOrphaned(processingUnitInstance);
-            return;
+        } else {
+            processProcessingUnitInstanceAddition(processingUnit, processingUnitInstance);
         }
-        processProcessingUnitInstanceAddition(processingUnit, processingUnitInstance);
 
         flushEvents();
     }
@@ -921,10 +923,14 @@ public class DefaultAdmin implements InternalAdmin {
 
             // Now, process any orphaned processing unit instances
             synchronized (DefaultAdmin.this) {
-                for (ProcessingUnitInstance orphaned : processingUnitInstances.getOrphaned()) {
+                for (ProcessingUnitInstance orphanedX : processingUnitInstances.getOrphaned()) {
+                    InternalProcessingUnitInstance orphaned = (InternalProcessingUnitInstance) orphanedX;
+
                     InternalProcessingUnit processingUnit = (InternalProcessingUnit) processingUnits.getProcessingUnit(orphaned.getName());
-                    if (processingUnit != null) {
-                        processProcessingUnitInstanceAddition(processingUnit, (InternalProcessingUnitInstance) orphaned);
+                    InternalGridServiceContainer gridServiceContainer = (InternalGridServiceContainer) gridServiceContainers.getContainerByUID(orphaned.getGridServiceContainerServiceID().toString());
+
+                    if (processingUnit != null && gridServiceContainer != null) {
+                        processProcessingUnitInstanceAddition(processingUnit, orphaned);
                     }
                 }
 
