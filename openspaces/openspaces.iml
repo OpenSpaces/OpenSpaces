@@ -218,16 +218,6 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="jmx">
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/lib/platform/jmx" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-        <jarDirectory url="file://$MODULE_DIR$/lib/platform/jmx" recursive="false" />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
       <library name="jruby">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/platform/jruby" />
