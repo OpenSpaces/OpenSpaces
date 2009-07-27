@@ -6,7 +6,6 @@ import com.gigaspaces.serialization.pbs.openspaces.ProcessingUnitProxy;
 import com.j_spaces.core.IJSpace;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jini.rio.boot.ServiceClassLoader;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.core.properties.BeanLevelProperties;
@@ -114,22 +113,14 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
             
             this.customProperties.putAll(beanLevelProperties.getContextProperties());
         }
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            if (classLoader instanceof ServiceClassLoader) {
-                Thread.currentThread().setContextClassLoader(classLoader.getParent());
-            }
-            //Create identifier for this bean
-            UUID beanUniqueIdentifier = UUID.randomUUID();
+        //Create identifier for this bean
+        UUID beanUniqueIdentifier = UUID.randomUUID();
+        log.info("Invoking Init on the .Net processing unit");
+        if (clusterInfo == null) {
             log.info("Invoking Init on the .Net processing unit");
-            if (clusterInfo == null) {
-                log.info("Invoking Init on the .Net processing unit");
-                proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentPath, customProperties, beanUniqueIdentifier);
-            } else {                
-                proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentPath, customProperties, clusterInfo.getBackupId(), clusterInfo.getInstanceId(), clusterInfo.getNumberOfBackups(), clusterInfo.getNumberOfInstances(), clusterInfo.getSchema(), clusterInfo.getName(), beanUniqueIdentifier);
-            }
-        } finally {
-            Thread.currentThread().setContextClassLoader(classLoader);
+            proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentPath, customProperties, beanUniqueIdentifier);
+        } else {                
+            proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentPath, customProperties, clusterInfo.getBackupId(), clusterInfo.getInstanceId(), clusterInfo.getNumberOfBackups(), clusterInfo.getNumberOfInstances(), clusterInfo.getSchema(), clusterInfo.getName(), beanUniqueIdentifier);
         }
     }
 	/**
