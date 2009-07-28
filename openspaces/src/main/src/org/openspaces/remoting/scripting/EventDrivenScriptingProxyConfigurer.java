@@ -16,7 +16,6 @@
 package org.openspaces.remoting.scripting;
 
 import org.openspaces.core.GigaSpace;
-import org.openspaces.remoting.AsyncRemotingProxyConfigurer;
 import org.openspaces.remoting.EventDrivenRemotingProxyConfigurer;
 
 /**

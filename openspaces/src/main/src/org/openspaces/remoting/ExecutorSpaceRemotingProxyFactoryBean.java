@@ -355,7 +355,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
         }
     }
 
-    private class ExecutorAsyncFuture implements AsyncFuture {
+    private static class ExecutorAsyncFuture implements AsyncFuture {
 
         private AsyncFuture<ExecutorRemotingTask.InternalExecutorResult> future;
 

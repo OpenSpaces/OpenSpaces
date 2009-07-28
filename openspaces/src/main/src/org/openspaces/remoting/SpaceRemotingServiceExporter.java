@@ -735,7 +735,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
             methodsCacheEntry.addService(service.getClass());
         }
 
-        private class MethodsCacheEntry {
+        private static class MethodsCacheEntry {
 
             private Map<String, MethodCacheEntry> methodNameMap = new HashMap<String, MethodCacheEntry>();
 
