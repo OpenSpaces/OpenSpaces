@@ -115,9 +115,8 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         }
         //Create identifier for this bean
         UUID beanUniqueIdentifier = UUID.randomUUID();
-        log.info("Invoking Init on the .Net processing unit");
+        log.debug("Invoking Init on the .Net processing unit");
         if (clusterInfo == null) {
-            log.info("Invoking Init on the .Net processing unit");
             proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentPath, customProperties, beanUniqueIdentifier);
         } else {                
             proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentPath, customProperties, clusterInfo.getBackupId(), clusterInfo.getInstanceId(), clusterInfo.getNumberOfBackups(), clusterInfo.getNumberOfInstances(), clusterInfo.getSchema(), clusterInfo.getName(), beanUniqueIdentifier);
@@ -127,7 +126,7 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
 	 * {@inheritDoc}
 	 */
     public void destroy() throws Exception {
-        log.info("Invoking Dispose on the .Net processing unit");
+        log.debug("Invoking Dispose on the .Net processing unit");
         proxy.close();
         proxy = null;
     }
