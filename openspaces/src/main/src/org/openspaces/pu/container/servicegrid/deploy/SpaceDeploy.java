@@ -2,6 +2,7 @@ package org.openspaces.pu.container.servicegrid.deploy;
 
 import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.logger.GSLogConfigLoader;
+import com.gigaspaces.security.UserDetails;
 import org.jini.rio.core.OperationalString;
 import org.jini.rio.core.ServiceProvisionListener;
 import org.jini.rio.monitor.DeployAdmin;
@@ -33,6 +34,18 @@ public class SpaceDeploy {
 
     public void setLocators(String locators) {
         deploy.setLocators(locators);
+    }
+
+    public void setSecured(boolean secured) {
+        deploy.setSecured(secured);
+    }
+
+    public void setUserDetails(UserDetails userDetails) {
+        deploy.setUserDetails(userDetails);
+    }
+
+    public void setUserDetails(String userName, String password) {
+        deploy.setUserDetails(userName, password);
     }
 
     public void setLookupTimeout(int lookupTimeout) {

@@ -20,6 +20,7 @@ import org.openspaces.admin.internal.admin.DefaultAdmin;
 import org.jini.rio.boot.BootUtil;
 
 import com.gigaspaces.security.UserDetails;
+import com.gigaspaces.security.User;
 import com.gigaspaces.logger.GSLogConfigLoader;
 
 /**
@@ -86,25 +87,17 @@ public class AdminFactory {
     }
 
     /**
-     * Sets the username that will be used when discovering secured services.
+     * Sets the username and password for discovery of secured services.
      */
-    public AdminFactory setUsername(String username) {
-        admin.setUsername(username);
-        return this;
-    }
-
-    /**
-     * Sets the password that will be used when discovering secured services.
-     */
-    public AdminFactory setPassword(String password) {
-        admin.setPassword(password);
+    public AdminFactory userDetails(String userName, String password) {
+        admin.setUserDetails(new User(userName, password));
         return this;
     }
 
     /**
      * Sets the user details that will be used when discovering secured services.
      */
-    public AdminFactory setUserDetails(UserDetails userDetails) {
+    public AdminFactory userDetails(UserDetails userDetails) {
         admin.setUserDetails(userDetails);
         return this;
     }

@@ -8,6 +8,7 @@ import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
+import com.gigaspaces.security.UserDetails;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceID;
 import org.jini.rio.core.OperationalString;
@@ -105,6 +106,10 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         }
         deploy.setLocators(locatorsString.toString());
         deploy.initializeDiscovery(gsm, getGSMAdmin());
+        if (deployment.isSecured() != null) {
+            deploy.setSecured(deployment.isSecured());
+        }
+        deploy.setUserDetails(deployment.getUserDetails());
 
         final OperationalString operationalString;
         try {

@@ -122,10 +122,6 @@ public class DefaultAdmin implements InternalAdmin {
 
     private volatile boolean closed = false;
 
-    private volatile String username;
-
-    private volatile String password;
-
     private volatile UserDetails userDetails;
 
     public DefaultAdmin() {
@@ -138,22 +134,6 @@ public class DefaultAdmin implements InternalAdmin {
 
     public LookupLocator[] getLocators() {
         return discoveryService.getLocators();
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public UserDetails getUserDetails() {

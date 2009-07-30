@@ -10,10 +10,7 @@ import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
-import com.gigaspaces.security.User;
-import com.gigaspaces.security.UserDetails;
 import com.j_spaces.core.IJSpace;
-import com.j_spaces.core.SecurityContext;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.SpaceConfig;
 import com.j_spaces.core.service.ServiceConfigLoader;
@@ -168,11 +165,8 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             }
             try {
                 GSM gsm = (GSM) service;
-                if (gsm.isSecured()) {
-                    gsm.authenticate(admin.getUsername(), admin.getPassword());
-                }
                 if (gsm.isServiceSecured()) {
-                    gsm.login(getUserDetails());
+                    gsm.login(admin.getUserDetails());
                 }
                 InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, gsm, admin,
                         gsm.getAgentId(), gsm.getGSAServiceID());
@@ -190,11 +184,8 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             }
             try {
                 GSA gsa = (GSA) service;
-                if (gsa.isSecured()) {
-                    gsa.authenticate(admin.getUsername(), admin.getPassword());
-                }
                 if (gsa.isServiceSecured()) {
-                    gsa.login(getUserDetails());
+                    gsa.login(admin.getUserDetails());
                 }
                 AgentProcessesDetails processesDetails = gsa.getDetails();
                 InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, gsa, admin, processesDetails);
@@ -212,11 +203,8 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             }
             try {
                 GSC gsc = (GSC) service;
-                if (gsc.isSecured()) {
-                    gsc.authenticate(admin.getUsername(), admin.getPassword());
-                }
                 if (gsc.isServiceSecured()) {
-                    gsc.login(getUserDetails());
+                    gsc.login(admin.getUserDetails());
                 }
                 InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(serviceID, gsc,
                         admin, gsc.getAgentId(), gsc.getGSAServiceID());
@@ -248,23 +236,14 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 logger.debug("Service Added [Space Instance] with uid [" + serviceID + "]");
             }
             try {
-                SecurityContext securityContext = null;
-                if (admin.getUsername() != null) {
-                    securityContext = new SecurityContext(admin.getUsername(), admin.getPassword());
-                }
-                if (admin.getUserDetails() != null) {
-                    //TODO moran - call login
-                    securityContext = new SecurityContext(admin.getUserDetails().getUsername(), admin.getUserDetails()
-                            .getPassword());
-                }
-                IJSpace clusteredIjspace = (IJSpace) service;
-                if (securityContext != null) {
-                    clusteredIjspace.setSecurityContext(securityContext);
+                ISpaceProxy clusteredIjspace = (ISpaceProxy) service;
+                if (clusteredIjspace.isServiceSecured()) {
+                    clusteredIjspace.login(admin.getUserDetails());
                 }
 
-                IJSpace direcyIjspace = ((ISpaceProxy) clusteredIjspace).getClusterMember();
-                if (securityContext != null) {
-                    direcyIjspace.setSecurityContext(securityContext);
+                ISpaceProxy direcyIjspace = (ISpaceProxy) ((ISpaceProxy) clusteredIjspace).getClusterMember();
+                if (direcyIjspace.isServiceSecured()) {
+                    direcyIjspace.login(admin.getUserDetails());
                 }
 
                 IInternalRemoteJSpaceAdmin spaceAdmin = (IInternalRemoteJSpaceAdmin) direcyIjspace.getAdmin();
@@ -350,13 +329,5 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             }
         }
         return BootUtil.toLookupLocators(locators);
-    }
-
-    private UserDetails getUserDetails() {
-        UserDetails userDetails = admin.getUserDetails();
-        if (userDetails == null) {
-            userDetails = new User(admin.getUsername(), admin.getPassword());
-        }
-        return userDetails;
     }
 }

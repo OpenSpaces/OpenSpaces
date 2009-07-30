@@ -33,6 +33,7 @@
 package org.openspaces.admin.space;
 
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import com.gigaspaces.security.UserDetails;
 
 /**
  * A deployment of a pure {@link org.openspaces.admin.space.Space} processing unit (comes built in
@@ -110,7 +111,6 @@ public class SpaceDeployment {
      * Sets the cluster schema of the Space.
      *
      * @see #partitioned(int, int)
-     * @see #replicated(int)
      */
     public SpaceDeployment clusterSchema(String clusterSchema) {
         deployment.clusterSchema(clusterSchema);
@@ -189,6 +189,32 @@ public class SpaceDeployment {
      */
     public SpaceDeployment setContextProperty(String key, String value) {
         deployment.setContextProperty(key, value);
+        return this;
+    }
+
+    /**
+     * Will deploy a secured space. Note, by setting user details the space will be secured automatically.
+     */
+    public SpaceDeployment secured(boolean secured) {
+        deployment.secured(secured);
+        return this;
+    }
+
+    /**
+     * Advance: Sets the security user details for authentication and autherization of the
+     * processing unit.
+     */
+    public SpaceDeployment userDetails(UserDetails userDetails) {
+        deployment.userDetails(userDetails);
+        return this;
+    }
+
+    /**
+     * Sets the username and password (effectively making the processing unit secured)
+     * for the processing unit deployment.
+     */
+    public SpaceDeployment userDetails(String userName, String password) {
+        deployment.userDetails(userName, password);
         return this;
     }
 

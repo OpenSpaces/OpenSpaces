@@ -33,6 +33,8 @@
 package org.openspaces.admin.pu;
 
 import com.gigaspaces.grid.zone.ZoneHelper;
+import com.gigaspaces.security.UserDetails;
+import com.gigaspaces.security.User;
 
 import java.io.File;
 import java.util.*;
@@ -65,6 +67,10 @@ public class ProcessingUnitDeployment {
     private final List<String> zones = new ArrayList<String>();
 
     private final Properties contextProperties = new Properties();
+
+    private UserDetails userDetails;
+
+    private Boolean secured;
 
     /**
      * Constructs a processing unit deployment based on the specified processing unit name (should
@@ -221,6 +227,40 @@ public class ProcessingUnitDeployment {
     public ProcessingUnitDeployment setContextProperty(String key, String value) {
         contextProperties.put(key, value);
         return this;
+    }
+
+    /**
+     * Will deploy a secured processing unit. Note, by setting user details the processing unit will be secured automatically.
+     */
+    public ProcessingUnitDeployment secured(boolean secured) {
+        this.secured = secured;
+        return this;
+    }
+
+    /**
+     * Advance: Sets the security user details for authentication and autherization of the
+     * processing unit.
+     */
+    public ProcessingUnitDeployment userDetails(UserDetails userDetails) {
+        this.userDetails = userDetails;
+        return this;
+    }
+
+    /**
+     * Sets the username and password (effectively making the processing unit secured)
+     * for the processing unit deployment.
+     */
+    public ProcessingUnitDeployment userDetails(String userName, String password) {
+        this.userDetails = new User(userName, password);
+        return this;
+    }
+
+    public Boolean isSecured() {
+        return secured;
+    }
+
+    public UserDetails getUserDetails() {
+        return this.userDetails;
     }
 
     /**

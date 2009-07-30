@@ -19,7 +19,10 @@ package org.openspaces.pu.container.servicegrid.deploy;
 import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.grid.zone.ZoneHelper;
 import com.gigaspaces.logger.GSLogConfigLoader;
+import com.gigaspaces.security.User;
+import com.gigaspaces.security.UserDetails;
 import com.j_spaces.core.service.ServiceConfigLoader;
+import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.kernel.PlatformVersion;
 import net.jini.config.Configuration;
 import net.jini.core.discovery.LookupLocator;
@@ -36,8 +39,8 @@ import org.jini.rio.opstring.OpStringLoader;
 import org.jini.rio.resources.servicecore.ServiceAdmin;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.properties.BeanLevelProperties;
-import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
 import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
+import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
 import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.CommandLineParser;
@@ -157,6 +160,22 @@ public class Deploy {
 
     public void setLookupTimeout(int lookupTimeout) {
         this.lookupTimeout = lookupTimeout;
+    }
+
+    private Boolean secured;
+
+    public void setSecured(boolean secured) {
+        this.secured = secured;
+    }
+
+    private UserDetails userDetails;
+
+    public void setUserDetails(UserDetails userDetails) {
+        this.userDetails = userDetails;
+    }
+
+    public void setUserDetails(String userName, String password) {
+        this.userDetails = new User(userName, password);
     }
 
     public void deployAndWait(String[] args) throws Exception {
@@ -294,7 +313,7 @@ public class Deploy {
             // ignore, no file
         }
         beanLevelProperties = BeanLevelPropertiesParser.parse(beanLevelProperties, params);
-        
+
 
         //read pu xml
         String puString = "";
@@ -353,10 +372,10 @@ public class Deploy {
             if (slaInPu) {
                 XmlBeanFactory xmlBeanFactory = new XmlBeanFactory(resource);
                 // TODO: Need to find how to do it
-    //            Map<String, PropertyResourceConfigurer> map = xmlBeanFactory.getBeansOfType(PropertyResourceConfigurer.class);
-    //            for (PropertyResourceConfigurer cfg : map.values()) {
-    //                cfg.postProcessBeanFactory(xmlBeanFactory);
-    //            }
+                //            Map<String, PropertyResourceConfigurer> map = xmlBeanFactory.getBeansOfType(PropertyResourceConfigurer.class);
+                //            for (PropertyResourceConfigurer cfg : map.values()) {
+                //                cfg.postProcessBeanFactory(xmlBeanFactory);
+                //            }
                 try {
                     sla = (SLA) xmlBeanFactory.getBean("SLA");
                 } catch (NoSuchBeanDefinitionException e) {
@@ -365,7 +384,7 @@ public class Deploy {
                 }
             } else {
                 // if we have specific sla file, load it as usual, so we can have deploy properties / system properties injected to it
-                ResourceApplicationContext applicationContext = new ResourceApplicationContext(new Resource[] {resource}, null);
+                ResourceApplicationContext applicationContext = new ResourceApplicationContext(new Resource[]{resource}, null);
                 if (beanLevelProperties != null) {
                     applicationContext.addBeanFactoryPostProcessor(new BeanLevelPropertyPlaceholderConfigurer(beanLevelProperties, null));
                     applicationContext.addBeanPostProcessor(new BeanLevelPropertyBeanPostProcessor(beanLevelProperties));
@@ -430,6 +449,37 @@ public class Deploy {
 
         if (logger.isDebugEnabled()) {
             logger.debug("Using SLA " + sla);
+        }
+
+        // detive the user details if they provided using deploy time properties
+        String userName = null;
+        String password = null;
+        for (CommandLineParser.Parameter param : params) {
+            if (param.getName().equals("user")) {
+                userName = param.getArguments()[0];
+            } else if (param.getName().equals("password")) {
+                password = param.getArguments()[0];
+            } else if (param.getName().equals("secured")) {
+                setSecured(Boolean.parseBoolean(param.getArguments()[0]));
+            }
+        }
+        if (userName != null && password != null) {
+            setUserDetails(userName, password);
+        }
+        
+        if (userDetails == null) {
+            userName = (String) beanLevelProperties.getContextProperties().remove("security.username");
+            password = (String) beanLevelProperties.getContextProperties().remove("security.password");
+            if (userName != null && password != null) {
+                setUserDetails(userName, password);
+            }
+        }
+        // init the user detalis
+        if (userDetails != null) {
+            beanLevelProperties.getContextProperties().setProperty(SpaceURL.SECURED, "true");
+            beanLevelProperties.getContextProperties().put("security.userDetails", new MarshalledObject(userDetails));
+        } else if (secured != null && secured) {
+            beanLevelProperties.getContextProperties().setProperty(SpaceURL.SECURED, "true");
         }
 
 

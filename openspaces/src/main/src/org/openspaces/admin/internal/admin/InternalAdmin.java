@@ -24,10 +24,6 @@ public interface InternalAdmin extends Admin {
 
     long getScheduledSpaceMonitorInterval();
 
-    String getUsername();
-
-    String getPassword();
-
     UserDetails getUserDetails();
 
     void pushEvent(Object listener, Runnable notifier);
