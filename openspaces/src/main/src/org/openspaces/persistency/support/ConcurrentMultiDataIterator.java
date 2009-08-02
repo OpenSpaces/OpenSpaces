@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A simple implementation wrapping several iterators and exposing them as concurrent iterator using a
@@ -48,7 +49,7 @@ public class ConcurrentMultiDataIterator implements MultiDataIterator {
 
     final private DataIteratorRunnable[] runnables;
 
-    private volatile int finishedRunnables = 0;
+    final private AtomicInteger finishedRunnables = new AtomicInteger();
 
     private Object current;
 
@@ -102,7 +103,7 @@ public class ConcurrentMultiDataIterator implements MultiDataIterator {
             if (current != null) {
                 return true;
             }
-            if (finishedRunnables == iterators.length) {
+            if (finishedRunnables.get() == iterators.length) {
                 checkForExceptions();
                 break;
             }
@@ -158,7 +159,7 @@ public class ConcurrentMultiDataIterator implements MultiDataIterator {
             } catch (RuntimeException e) {
                 exception = e;
             } finally {
-                finishedRunnables++;
+                finishedRunnables.incrementAndGet();
                 iterator.close();
             }
         }
