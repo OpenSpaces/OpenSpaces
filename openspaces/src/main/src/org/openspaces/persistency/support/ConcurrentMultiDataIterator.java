@@ -40,13 +40,13 @@ public class ConcurrentMultiDataIterator implements MultiDataIterator {
 
     private volatile boolean closed = false;
 
-    private int threadPoolSize;
+    final private int threadPoolSize;
 
-    private DataIterator[] iterators;
+    final private DataIterator[] iterators;
 
-    private BlockingQueue queue;
+    final private BlockingQueue queue;
 
-    private DataIteratorRunnable[] runnables;
+    final private DataIteratorRunnable[] runnables;
 
     private volatile int finishedRunnables = 0;
 
@@ -142,7 +142,7 @@ public class ConcurrentMultiDataIterator implements MultiDataIterator {
 
         private volatile boolean running = true;
 
-        private DataIterator iterator;
+        final private DataIterator iterator;
 
         private DataIteratorRunnable(DataIterator iterator) {
             this.iterator = iterator;
@@ -165,10 +165,6 @@ public class ConcurrentMultiDataIterator implements MultiDataIterator {
 
         public void stop() {
             this.running = false;
-        }
-
-        public boolean isRunning() {
-            return running;
         }
     }
 }
