@@ -21,14 +21,14 @@ import com.gigaspaces.datasource.DataIterator;
 /**
  * A simple implementation wrapping several iterators and exposing them as a single (serial) iterator.
  *
- * <p>Note, this implemenation assumes that {@link #hasNext()} is called before {@link #next()} is called.
+ * <p>Note, this implementation assumes that {@link #hasNext()} is called before {@link #next()} is called.
  * And that {@link #next()} is called only when {@link #hasNext()} returns <code>true</code>.
  *
  * @author kimchy
  */
 public class SerialMultiDataIterator implements MultiDataIterator {
 
-    private DataIterator[] iterators;
+    final private DataIterator[] iterators;
 
     private int currentIterator;
 
