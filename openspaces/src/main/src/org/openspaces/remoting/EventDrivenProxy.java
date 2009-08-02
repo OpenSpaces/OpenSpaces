@@ -40,72 +40,72 @@ public @interface EventDrivenProxy {
      * <p>If there is only one instance of {@link org.openspaces.core.GigaSpace}, will defualt to
      * it. If not, will throw an exception if not defined.
      */
-    public abstract String gigaSpace() default "";
+    String gigaSpace() default "";
 
     /**
      * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean#setFifo(boolean)
      */
-    public abstract boolean fifo() default false;
+    boolean fifo() default false;
 
     /**
      * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean#setTimeout(long)
      */
-    public abstract long timeout() default 60000;
+    long timeout() default 60000;
 
     /**
      * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean#setGlobalOneWay(boolean)
      */
-    public abstract boolean globablOneWay() default false;
+    boolean globalOneWay() default false;
 
     /**
      * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean#setVoidOneWay(boolean)
      */
-    public abstract boolean voidOneWay() default false;
+    boolean voidOneWay() default false;
 
     /**
      * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean#setAsyncMethodPrefix(String)
      */
-    public abstract String asyncMethodPrefix() default EventDrivenSpaceRemotingProxyFactoryBean.DEFAULT_ASYNC_METHOD_PREFIX;
+    String asyncMethodPrefix() default EventDrivenSpaceRemotingProxyFactoryBean.DEFAULT_ASYNC_METHOD_PREFIX;
 
     /**
      * The bean name that implements this interface.
      *
      * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean#setRemoteRoutingHandler(org.openspaces.remoting.RemoteRoutingHandler)
      */
-    public abstract String remoteRoutingHandler() default "";
+    String remoteRoutingHandler() default "";
 
     /**
      * The class that implements this interface.
      *
      * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean#setRemoteRoutingHandler(org.openspaces.remoting.RemoteRoutingHandler)
      */
-    public abstract Class remoteRoutingHandlerType() default Object.class;
+    Class remoteRoutingHandlerType() default Object.class;
 
     /**
      * The bean name that implements this interface.
      *
      * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean#setMetaArgumentsHandler(org.openspaces.remoting.MetaArgumentsHandler)
      */
-    public abstract String metaArgumentsHandler() default "";
+    String metaArgumentsHandler() default "";
 
     /**
      * The Class that implements this interface.
      *
      * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean#setMetaArgumentsHandler(org.openspaces.remoting.MetaArgumentsHandler)
      */
-    public abstract Class metaArgumentsHandlerType() default Object.class;
+    Class metaArgumentsHandlerType() default Object.class;
 
     /**
      * The bean name that implements this interface.
      *
      * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean#setRemoteRoutingHandler(org.openspaces.remoting.RemoteRoutingHandler)
      */
-    public abstract String remoteInvocationAspect() default "";
+    String remoteInvocationAspect() default "";
 
     /**
      * The class that implements this interface.
      *
      * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean#setRemoteRoutingHandler(org.openspaces.remoting.RemoteRoutingHandler)
      */
-    public abstract Class remoteInvocationAspectType() default Object.class;
+    Class remoteInvocationAspectType() default Object.class;
 }
