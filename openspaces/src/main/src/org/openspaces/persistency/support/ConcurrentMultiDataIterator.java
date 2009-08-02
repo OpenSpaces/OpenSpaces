@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
  * fixed size thread pool. If a given iterator is a {@link org.openspaces.persistency.support.MultiDataIterator}
  * it will flatten it by getting its respective list of iterators.
  *
- * <p>Note, this implemenation assumes that {@link #hasNext()} is called before {@link #next()} is called.
+ * <p>Note, this implementation assumes that {@link #hasNext()} is called before {@link #next()} is called.
  * And that {@link #next()} is called only when {@link #hasNext()} returns <code>true</code>.
  *
  * @author kimchy
