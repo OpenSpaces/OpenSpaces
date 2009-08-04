@@ -43,4 +43,8 @@ public class DefaultTransportDetails implements TransportDetails {
     public int getMaxThreads() {
         return nioDetails.getMaxThreads();
     }
+
+    public boolean isSslEnabled() {
+        return nioDetails.isSslEnabled();
+    }
 }

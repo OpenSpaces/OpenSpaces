@@ -74,4 +74,9 @@ public interface TransportDetails {
      * layer thread pool.
      */
     int getMaxThreads();
+
+    /**
+     * Returns <code>true</code> if ssl is enabled for the transport.
+     */
+    boolean isSslEnabled();
 }
