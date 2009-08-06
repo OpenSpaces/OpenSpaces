@@ -166,11 +166,26 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
         provider.setClusterInfo(ClusterInfoParser.parse(params));
         ConfigLocationParser.parse(provider, params);
 
+        String userName = null;
+        String password = null;
+        for (CommandLineParser.Parameter param : params) {
+            if (param.getName().equals("user")) {
+                userName = param.getArguments()[0];
+            } else if (param.getName().equals("password")) {
+                password = param.getArguments()[0];
+            } else if (param.getName().equals("secured")) {
+                provider.setSecured(Boolean.parseBoolean(param.getArguments()[0]));
+            }
+        }
+        if (userName != null && password != null) {
+            provider.setUserDetails(userName, password);
+        }
+
         return provider.createContainer();
     }
 
     public static void printUsage() {
-        System.out.println("Usage: [-cluster ...] [-properties ...]");
+        System.out.println("Usage: [-cluster ...] [-properties ...] [-user xxx -password yyy] [-secured true/false]");
         System.out.println("    -cluster [cluster properties]: Allows specify cluster parameters");
         System.out.println("             schema=partitioned  : The cluster schema to use");
         System.out.println("             total_members=1,1   : The number of instances and number of backups to use");
@@ -178,6 +193,8 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
         System.out.println("             backup_id=1         : The backup id of this processing unit");
         System.out.println("    -properties [properties-loc] : Location of context level properties");
         System.out.println("    -properties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
+        System.out.println("    -user x -password y          : Configures the processing unit (space) to be secured and started with the user and password");
+        System.out.println("    -secured true                : Configures the processing unit (space) to be secured");
         System.out.println("");
         System.out.println("");
         System.out.println("Some Examples:");

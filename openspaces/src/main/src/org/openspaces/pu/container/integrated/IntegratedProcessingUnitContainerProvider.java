@@ -16,6 +16,9 @@
 
 package org.openspaces.pu.container.integrated;
 
+import com.gigaspaces.security.User;
+import com.gigaspaces.security.UserDetails;
+import com.j_spaces.core.client.SpaceURL;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.cluster.ClusterInfo;
@@ -37,6 +40,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.File;
 import java.io.IOException;
+import java.rmi.MarshalledObject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +70,7 @@ import java.util.List;
 public class IntegratedProcessingUnitContainerProvider implements ApplicationContextProcessingUnitContainerProvider {
 
     private static final Log logger = LogFactory.getLog(IntegratedProcessingUnitContainerProvider.class);
-    
+
     private ApplicationContext parentContext;
 
     private List<Resource> configResources = new ArrayList<Resource>();
@@ -76,6 +80,10 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
     private ClusterInfo clusterInfo;
 
     private ClassLoader classLoader;
+
+    private UserDetails userDetails;
+
+    private Boolean secured;
 
     /**
      * Sets Spring parent {@link org.springframework.context.ApplicationContext} that will be used
@@ -124,6 +132,18 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
      */
     public void addConfigLocation(Resource resource) {
         this.configResources.add(resource);
+    }
+
+    public void setUserDetails(UserDetails userDetails) {
+        this.userDetails = userDetails;
+    }
+
+    public void setUserDetails(String username, String password) {
+        this.userDetails = new User(username, password);
+    }
+
+    public void setSecured(Boolean secured) {
+        this.secured = secured;
     }
 
     /**
@@ -216,6 +236,17 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
             }
             setClusterInfo(origClusterInfo);
             return new CompoundProcessingUnitContainer(containers.toArray(new ProcessingUnitContainer[containers.size()]));
+        }
+
+        // handle security
+        if (userDetails != null) {
+            try {
+                beanLevelProperties.getContextProperties().put("security.userDetails", new MarshalledObject(userDetails));
+            } catch (IOException e) {
+                throw new CannotCreateContainerException("Failed to marhsall user details", e);
+            }
+        } else if (secured != null) {
+            beanLevelProperties.getContextProperties().setProperty(SpaceURL.SECURED, "true");
         }
 
         Resource[] resources = configResources.toArray(new Resource[configResources.size()]);
