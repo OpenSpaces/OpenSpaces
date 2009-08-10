@@ -23,15 +23,14 @@ public class DefaultTransportsStatistics implements TransportsStatistics {
         this.previousStats = previousStats;
         this.details = details;
 
-        TransportsStatistics lastStats = null;
-        for (int i = 0; i < historySize; i++) {
-            if (getPrevious() == null) {
-                lastStats = null;
-                break;
-            }
-            lastStats = getPrevious();
-        }
+        TransportsStatistics lastStats = previousStats;
         if (lastStats != null) {
+            for (int i = 0; i < historySize; i++) {
+                if (lastStats.getPrevious() == null) {
+                    break;
+                }
+                lastStats = lastStats.getPrevious();
+            }
             ((DefaultTransportsStatistics) lastStats).setPreviousStats(null);
         }
     }

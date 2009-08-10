@@ -27,18 +27,16 @@ public class DefaultTransportStatistics implements TransportStatistics {
         this.previousStats = previousStats;
         this.details = details;
 
-        TransportStatistics lastStats = null;
-        for (int i = 0; i < historySize; i++) {
-            if (getPrevious() == null) {
-                lastStats = null;
-                break;
-            }
-            lastStats = getPrevious();
-        }
+        TransportStatistics lastStats = previousStats;
         if (lastStats != null) {
+            for (int i = 0; i < historySize; i++) {
+                if (lastStats.getPrevious() == null) {
+                    break;
+                }
+                lastStats = lastStats.getPrevious();
+            }
             ((DefaultTransportStatistics) lastStats).setPreviousStats(null);
         }
-
     }
 
     public boolean isNA() {

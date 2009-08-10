@@ -31,16 +31,15 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
         this.stats = stats;
         this.details = details;
         this.previosStats = previosStats;
-        OperatingSystemStatistics lastStats = null;
-        for (int i = 0; i < historySize; i++) {
-            if (getPrevious() == null) {
-                lastStats = null;
-                break;
-            }
-            lastStats = getPrevious();
-        }
+        OperatingSystemStatistics lastStats = previosStats;
         if (lastStats != null) {
-            ((DefaultOperatingSystemStatistics) lastStats).setPreviosStats(null);
+            for (int i = 0; i < historySize; i++) {
+                if (lastStats.getPrevious() == null) {
+                    break;
+                }
+                lastStats = lastStats.getPrevious();
+            }
+            ((DefaultOperatingSystemStatistics) lastStats).setPreviousStats(null);
         }
     }
 
@@ -60,7 +59,7 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
         return this.previosStats;
     }
 
-    public void setPreviosStats(OperatingSystemStatistics previosStats) {
+    public void setPreviousStats(OperatingSystemStatistics previosStats) {
         this.previosStats = previosStats;
     }
 

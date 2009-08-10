@@ -25,15 +25,14 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
         this.previousStats = previousStats;
         this.details = details;
 
-        OperatingSystemsStatistics lastStats = null;
-        for (int i = 0; i < historySize; i++) {
-            if (getPrevious() == null) {
-                lastStats = null;
-                break;
-            }
-            lastStats = getPrevious();
-        }
+        OperatingSystemsStatistics lastStats = previousStats;
         if (lastStats != null) {
+            for (int i = 0; i < historySize; i++) {
+                if (lastStats.getPrevious() == null) {
+                    break;
+                }
+                lastStats = lastStats.getPrevious();
+            }
             ((DefaultOperatingSystemsStatistics) lastStats).setPreviousStats(null);
         }
     }

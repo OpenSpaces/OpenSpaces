@@ -19,16 +19,15 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         this.timestamp = System.currentTimeMillis();
         this.previos = previos;
 
-        SpaceStatistics lastStats = null;
-        for (int i = 0; i < historySize; i++) {
-            if (getPrevious() == null) {
-                lastStats = null;
-                break;
-            }
-            lastStats = getPrevious();
-        }
+        SpaceStatistics lastStats = previos;
         if (lastStats != null) {
-            ((DefaultSpaceStatistics) lastStats).setPrevios(null);
+            for (int i = 0; i < historySize; i++) {
+                if (lastStats.getPrevious() == null) {
+                    break;
+                }
+                lastStats = lastStats.getPrevious();
+            }
+            ((DefaultSpaceStatistics) lastStats).setPrevious(null);
         }
     }
 
@@ -40,7 +39,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
         return previos;
     }
 
-    public void setPrevios(SpaceStatistics previos) {
+    public void setPrevious(SpaceStatistics previos) {
         this.previos = previos;
     }
 

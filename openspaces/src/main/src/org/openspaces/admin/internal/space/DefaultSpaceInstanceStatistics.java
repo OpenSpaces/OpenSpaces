@@ -17,18 +17,16 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
         this.statisticsHolder = statisticsHolder;
         this.previousStats = previousStats;
 
-        SpaceInstanceStatistics lastStats = null;
-        for (int i = 0; i < historySize; i++) {
-            if (getPrevious() == null) {
-                lastStats = null;
-                break;
-            }
-            lastStats = getPrevious();
-        }
+        SpaceInstanceStatistics lastStats = previousStats;
         if (lastStats != null) {
+            for (int i = 0; i < historySize; i++) {
+                if (lastStats.getPrevious() == null) {
+                    break;
+                }
+                lastStats = lastStats.getPrevious();
+            }
             ((DefaultSpaceInstanceStatistics) lastStats).setPreviousStats(null);
         }
-
     }
 
     public boolean isNA() {

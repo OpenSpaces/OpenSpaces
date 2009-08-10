@@ -25,15 +25,14 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
         this.details = details;
         this.previousStats = previousStats;
 
-        VirtualMachinesStatistics lastStats = null;
-        for (int i = 0; i < historySize; i++) {
-            if (getPrevious() == null) {
-                lastStats = null;
-                break;
-            }
-            lastStats = getPrevious();
-        }
+        VirtualMachinesStatistics lastStats = previousStats;
         if (lastStats != null) {
+            for (int i = 0; i < historySize; i++) {
+                if (lastStats.getPrevious() == null) {
+                    break;
+                }
+                lastStats = lastStats.getPrevious();
+            }
             ((DefaultVirtualMachinesStatistics) lastStats).setPreviousStats(null);
         }
     }

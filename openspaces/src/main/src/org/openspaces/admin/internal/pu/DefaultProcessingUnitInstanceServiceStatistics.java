@@ -59,15 +59,14 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
         this.remotingServiceMonitors = remotingServiceMonitorsX;
         this.webRequestsServiceMonitors = jeeRequestServiceMonitorsX;
 
-        ProcessingUnitInstanceStatistics lastStats = null;
-        for (int i = 0; i < historySize; i++) {
-            if (getPrevious() == null) {
-                lastStats = null;
-                break;
-            }
-            lastStats = getPrevious();
-        }
+        ProcessingUnitInstanceStatistics lastStats = previous;
         if (lastStats != null) {
+            for (int i = 0; i < historySize; i++) {
+                if (lastStats.getPrevious() == null) {
+                    break;
+                }
+                lastStats = lastStats.getPrevious();
+            }
             ((DefaultProcessingUnitInstanceServiceStatistics) lastStats).setPrevious(null);
         }
     }
