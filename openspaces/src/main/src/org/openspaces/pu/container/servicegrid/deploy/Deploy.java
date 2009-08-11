@@ -544,8 +544,7 @@ public class Deploy {
     }
 
     private String getCodebase(DeployAdmin deployAdmin) throws MalformedURLException, RemoteException {
-        URL url = ((ServiceAdmin) deployAdmin).getServiceElement().getExportURLs()[0];
-        return url.getProtocol() + "://" + url.getHost() + ":" + url.getPort() + "/";
+        return deployAdmin.getDeployURL();
     }
 
     private OperationalString loadDeployment(String puString, String codeserver, SLA sla, String puPath,

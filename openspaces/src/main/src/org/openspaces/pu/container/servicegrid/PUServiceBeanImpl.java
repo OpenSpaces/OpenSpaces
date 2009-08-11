@@ -351,10 +351,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
             beanLevelProperties.getContextProperties().setProperty(DeployableProcessingUnitContainerProvider.CONTEXT_PROPERTY_DEPLOY_PATH, deployPath.getAbsolutePath());
 
-            if (logger.isInfoEnabled()) {
-                logger.info("Downloading from GSM [" + codeserver + "] to [" + deployPath + "] ...");
-            }
-
             long size = downloadAndExtractPU(puName, puPath, codeserver, deployPath, new File(deployedProcessingUnitsLocation));
 
             if (logger.isInfoEnabled()) {
@@ -877,9 +873,13 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private long downloadAndExtractPU(String puName, String puPath, String codeserver, File path, File tempPath) {
         URL url = null;
         try {
-            url = new URL(codeserver + puPath);
-        } catch (MalformedURLException e) {
-            throw new CannotCreateContainerException("Failed to construct URL to download procdessing unit, url [" + (codeserver + puPath) + "]", e);
+            url = new URL(context.getServiceBeanManager().getOperationalStringManager().getDeployURL() + "/" + puPath);
+        } catch (Exception e) {
+            throw new CannotCreateContainerException("Failed to construct URL to download procdessing unit", e);
+        }
+
+        if (logger.isInfoEnabled()) {
+            logger.info("Downloading from GSM [" + url.toExternalForm() + "] to [" + deployPath + "] ...");
         }
 
         try {
