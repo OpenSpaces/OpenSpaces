@@ -105,9 +105,9 @@ public class SpaceDeploy {
     public static String getUsage(boolean managed) {
         StringBuilder sb = new StringBuilder();
         if (!managed) {
-            sb.append("Usage: Space Deploy [-sla ...] [-cluster ...] [-groups groups] [-locators host1 host2] [-timeout timeoutValue] [-properties ...] Space_Name");
+            sb.append("Usage: Space Deploy [-sla ...] [-cluster ...] [-groups groups] [-locators host1 host2] [-timeout timeoutValue] [-properties ...] [-user xxx -password yyy] [-secured true/false] Space_Name");
         } else {
-            sb.append("Usage: Space Deploy [-sla ...] [-cluster ...] [-properties ...] Space_Name");
+            sb.append("Usage: deploy-space [-sla ...] [-cluster ...] [-properties ...] [-user xxx -password yyy] [-secured true/false] Space_Name");
         }
         sb.append("\n    Space_Name: The name of the space to deploy");
         sb.append("\n    -sla [sla-location]                      : Location of an optional xml file holding the SLA element");
@@ -119,6 +119,8 @@ public class SpaceDeploy {
             sb.append("\n    -locators [host1] [host2] ...            : The lookup locators used to look up the GSM");
             sb.append("\n    -timeout [timeout value]                 : The timeout value of GSM lookup (defaults to 5000) in milliseconds");
         }
+        sb.append("      -user x -password y                      : Deploys a secured space with the user and password");
+        sb.append("      -secured true                            : Deploys a secured space");
         sb.append("\n    -properties [properties-loc]             : Location of context level properties");
         sb.append("\n    -properties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
         sb.append("\n    -max-instances-per-vm [number]           : Allows to set the SLA number of instances per VM");

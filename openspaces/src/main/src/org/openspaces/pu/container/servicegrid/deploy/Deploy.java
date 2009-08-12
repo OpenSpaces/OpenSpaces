@@ -816,9 +816,9 @@ public class Deploy {
     public static String getUsage(boolean managed) {
         StringBuilder sb = new StringBuilder();
         if (!managed) {
-            sb.append("Usage: Deploy [-sla ...] [-cluster ...] [-groups groups] [-locators hots1 hots2] [-timeout timeoutValue] [-properties ...] PU_Name");
+            sb.append("Usage: Deploy [-sla ...] [-cluster ...] [-groups groups] [-locators hots1 hots2] [-timeout timeoutValue] [-properties ...] [-user xxx -password yyy] [-secured true/false] PU_Name");
         } else {
-            sb.append("Usage: Deploy [-sla ...] [-cluster ...] [-properties ...] PU_Name");
+            sb.append("Usage: deploy [-sla ...] [-cluster ...] [-properties ...] [-user xxx -password yyy] [-secured true/false] PU_Name");
         }
         sb.append("\n    PU_Name: The name of the processing unit under the deploy directory, or packaged jar file");
         sb.append("\n    -sla [sla-location]                      : Location of an optional xml file holding the SLA element");
@@ -830,6 +830,8 @@ public class Deploy {
             sb.append("\n    -locators [host1] [host2] ...            : The lookup locators used to look up the GSM");
             sb.append("\n    -timeout [timeout value]                 : The timeout value of GSM lookup (defaults to 5000) in milliseconds");
         }
+        sb.append("      -user x -password y                      : Deploys a secured processing unit with the user and password");
+        sb.append("      -secured true                            : Deploys a secured processing unit");
         sb.append("\n    -properties [properties-loc]             : Location of context level properties");
         sb.append("\n    -properties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
         sb.append("\n    -override-name [override pu name]        : An override pu name, useful when using pu as a template");
