@@ -460,7 +460,11 @@ public class Deploy {
             } else if (param.getName().equals("password")) {
                 password = param.getArguments()[0];
             } else if (param.getName().equals("secured")) {
-                setSecured(Boolean.parseBoolean(param.getArguments()[0]));
+                if (param.getArguments().length == 0) {
+                    setSecured(true);
+                } else {
+                    setSecured(Boolean.parseBoolean(param.getArguments()[0]));
+                }
             }
         }
         if (userName != null && password != null) {
