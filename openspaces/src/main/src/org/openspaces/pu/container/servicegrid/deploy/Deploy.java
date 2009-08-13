@@ -36,7 +36,6 @@ import org.jini.rio.core.*;
 import org.jini.rio.monitor.DeployAdmin;
 import org.jini.rio.opstring.OpString;
 import org.jini.rio.opstring.OpStringLoader;
-import org.jini.rio.resources.servicecore.ServiceAdmin;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
