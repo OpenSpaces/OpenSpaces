@@ -7,12 +7,14 @@ import org.openspaces.pu.container.CannotCreateContainerException;
 import org.openspaces.pu.container.ProcessingUnitContainer;
 import org.openspaces.pu.service.ServiceDetails;
 import org.openspaces.pu.service.ServiceDetailsProvider;
+import org.openspaces.pu.service.ServiceMonitors;
+import org.openspaces.pu.service.ServiceMonitorsProvider;
 
 /**
  * @author kimchy
  * @since 6.6
  */
-public class DotnetProcessingUnitContainer implements ProcessingUnitContainer, ServiceDetailsProvider {
+public class DotnetProcessingUnitContainer implements ProcessingUnitContainer, ServiceDetailsProvider, ServiceMonitorsProvider {
        
     private DotnetProcessingUnitBean dotnetProcessingUnitBean;
     
@@ -45,5 +47,9 @@ public class DotnetProcessingUnitContainer implements ProcessingUnitContainer, S
             }
         }
         return details;
+    }
+
+    public ServiceMonitors[] getServicesMonitors() {
+        return dotnetProcessingUnitBean.getServicesMonitors();
     }
 }

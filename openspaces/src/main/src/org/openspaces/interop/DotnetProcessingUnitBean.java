@@ -2,8 +2,10 @@ package org.openspaces.interop;
 
 import com.gigaspaces.serialization.pbs.commands.processingunit.PUDetailsHolder;
 import com.gigaspaces.serialization.pbs.commands.processingunit.ServicesDetails;
+import com.gigaspaces.serialization.pbs.commands.processingunit.ServicesMonitors;
 import com.gigaspaces.serialization.pbs.openspaces.ProcessingUnitProxy;
 import com.j_spaces.core.IJSpace;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.cluster.ClusterInfo;
@@ -12,12 +14,20 @@ import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertiesAware;
 import org.openspaces.core.space.SpaceServiceDetails;
 import org.openspaces.pu.container.DeployableProcessingUnitContainerProvider;
+import org.openspaces.pu.service.PlainServiceMonitors;
 import org.openspaces.pu.service.ServiceDetails;
 import org.openspaces.pu.service.ServiceDetailsProvider;
+import org.openspaces.pu.service.ServiceMonitors;
+import org.openspaces.pu.service.ServiceMonitorsProvider;
+import org.openspaces.remoting.RemotingServiceDetails;
+import org.openspaces.remoting.RemotingServiceMonitors;
+import org.openspaces.remoting.RemotingServiceDetails.RemoteService;
+import org.openspaces.remoting.RemotingServiceMonitors.RemoteServiceStats;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -30,7 +40,7 @@ import java.util.UUID;
  * @since 6.5
  */
 public class DotnetProcessingUnitBean implements InitializingBean, DisposableBean, ClusterInfoAware, BeanLevelPropertiesAware,
-        ServiceDetailsProvider {
+        ServiceDetailsProvider, ServiceMonitorsProvider {
     
     protected final Log log = LogFactory.getLog(getClass());
     
@@ -150,15 +160,83 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         ServicesDetails details = puDetails.getServicesDetails();
         if (details != null)
         {
-            String[] types = details.getTypes();
+            String[] ids = details.getIds();            
             String[] serviceTypes = details.getServiceTypes();
+            String[] subServiceTypes = details.getSubServiceTypes();
             String[] descriptions = details.getDescriptions();
             String[] longDescriptions = details.getLongDescriptions();
+            Map<String, Map<String, String>>[] properties = details.getProperties();            
             for(int i = 0; i < descriptions.length; ++i)
             {
-                // TODO pass ids from dotnet
-                serviceDetails.add(new DotnetServiceDetails(descriptions[i], types[i], serviceTypes[i], descriptions[i], longDescriptions[i]));
+                serviceDetails.add(transformDetails(ids[i], serviceTypes[i], subServiceTypes[i], descriptions[i], longDescriptions[i], properties[i]));
             }
         }
+    }
+
+    private final String REMOTING_SERVICE_DETAILS = "remoting";
+    
+    private ServiceDetails transformDetails(String id, String serviceType, String subServiceType, String description,
+            String longDescription, Map<String, Map<String, String>> properties) {
+        if (REMOTING_SERVICE_DETAILS.equals(serviceType))           
+            return buildRemotingServiceDetails(id, properties);
+        
+        return new DotnetServiceDetails(id, serviceType, subServiceType, description, longDescription);
+    }
+
+    private RemotingServiceDetails buildRemotingServiceDetails(String id, Map<String, Map<String, String>> properties) {
+        ArrayList<RemoteService> remoteServices = new ArrayList<RemoteService>();
+        for(Map.Entry<String, Map<String, String>> entry : properties.entrySet())
+        {
+            String serviceId = entry.getKey();
+            Map<String, String> serviceProps = entry.getValue();
+            String className = serviceProps.get("className");
+            //Error, should not happen
+            if (className == null)
+                className = "unknown";
+            RemoteService remoteService = new RemoteService(serviceId, className);
+            remoteServices.add(remoteService);
+        }
+        
+        return new RemotingServiceDetails(id, remoteServices.toArray(new RemoteService[remoteServices.size()]));
+    }
+
+    public ServiceMonitors[] getServicesMonitors() {
+        ServicesMonitors servicesMonitors = proxy.getServicesMonitors();
+        ServiceMonitors[] result = new ServiceMonitors[servicesMonitors.getIds().length];
+        for(int i = 0; i < result.length; ++i)
+            result[i] = transformMonitors(servicesMonitors.getInteropId()[i], servicesMonitors.getIds()[i], servicesMonitors.getServicesMonitors()[i]);
+        return result;
+    }
+
+    private final String REMOTING_SERVICE_MONITORS = "RemotingServiceMonitors";
+    
+    private ServiceMonitors transformMonitors(String interopId, String id, Map<String, Map<String, String>> monitors) {
+        if (REMOTING_SERVICE_MONITORS.equals(interopId))
+        {
+            Map<String, String> executorProperties = monitors.remove("executorMonitors");
+            String totalProcessedStr = executorProperties.get("processed");
+            String totalFailedStr = executorProperties.get("failed");
+            int totalProc = totalProcessedStr == null? 0 : Integer.parseInt(totalProcessedStr);
+            int totalFail = totalFailedStr == null? 0 : Integer.parseInt(totalFailedStr);
+            ArrayList<RemoteServiceStats> stats = new ArrayList<RemoteServiceStats>(monitors.size());
+            for(Map.Entry<String, Map<String, String>> entry : monitors.entrySet())
+            {
+                String serviceId = entry.getKey();
+                String serviceProcStr = entry.getValue().get("processed");
+                String serviceFailStr = entry.getValue().get("failed");
+                int proc = serviceProcStr == null? 0 : Integer.parseInt(serviceProcStr);
+                int fail = serviceFailStr == null? 0 : Integer.parseInt(serviceFailStr);
+                stats.add(new RemoteServiceStats(serviceId, proc, fail));
+            }
+            
+            return new RemotingServiceMonitors(id, totalProc, totalFail, stats.toArray(new RemoteServiceStats[stats.size()]));
+        }
+        
+        PlainServiceMonitors plainServiceMonitors = new PlainServiceMonitors(id);
+        Map<String, Object> plainMonitors = plainServiceMonitors.getMonitors();
+        for(Map.Entry<String, Map<String, String>> entry : monitors.entrySet())
+            plainMonitors.put(entry.getKey(), entry.getValue());
+        
+        return plainServiceMonitors;
     }
 }
