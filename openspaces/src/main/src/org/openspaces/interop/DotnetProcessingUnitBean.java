@@ -13,6 +13,8 @@ import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertiesAware;
 import org.openspaces.core.space.SpaceServiceDetails;
+import org.openspaces.events.polling.PollingEventContainerServiceDetails;
+import org.openspaces.events.polling.PollingEventContainerServiceMonitors;
 import org.openspaces.pu.container.DeployableProcessingUnitContainerProvider;
 import org.openspaces.pu.service.PlainServiceMonitors;
 import org.openspaces.pu.service.ServiceDetails;
@@ -174,13 +176,36 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
     }
 
     private final String REMOTING_SERVICE_DETAILS = "remoting";
+    private final String EVENT_LISTENER_CONTAINER_SERVICE_DETAILS = "event-container";
+    private final String POLLING_EVENT_LISTENER_CONTAINER_SERVICE_DETAILS = "polling";
     
     private ServiceDetails transformDetails(String id, String serviceType, String subServiceType, String description,
             String longDescription, Map<String, Map<String, String>> properties) {
         if (REMOTING_SERVICE_DETAILS.equals(serviceType))           
             return buildRemotingServiceDetails(id, properties);
+        if (EVENT_LISTENER_CONTAINER_SERVICE_DETAILS.equals(serviceType))
+        {
+            if (POLLING_EVENT_LISTENER_CONTAINER_SERVICE_DETAILS.equals(subServiceType))
+                return buildPollingContainerServiceDetails(id, properties);
+        }
         
         return new DotnetServiceDetails(id, serviceType, subServiceType, description, longDescription);
+    }
+
+    private PollingEventContainerServiceDetails buildPollingContainerServiceDetails(String id, Map<String, Map<String, String>> properties) {
+        Map<String, String> props = properties.get("containerProperties");
+        String space = props.get("space");
+        Object template = props.get("template");
+        boolean performSnapshot = Boolean.parseBoolean(props.get("perform-snapshot"));
+        String txManager = props.get("transaction-manager");
+        long receiveTimeout = Long.parseLong(props.get("receive-timeout"));
+        String receiveOperationHandler = props.get("receive-operating-handler");
+        String triggerOperationHandler = props.get("trigger-operating-handler");
+        int minConcurrentConsumers = Integer.parseInt(props.get("concurrent-consumers"));
+        int maxConcurrentConsumer = Integer.parseInt(props.get("max-concurrent-consumers"));
+        boolean batchProcessing = Boolean.parseBoolean(props.get("pass-array-as-is"));
+        return  new PollingEventContainerServiceDetails(id, space, template, performSnapshot, txManager, receiveTimeout, 
+                receiveOperationHandler, triggerOperationHandler, minConcurrentConsumers, maxConcurrentConsumer, batchProcessing);
     }
 
     private RemotingServiceDetails buildRemotingServiceDetails(String id, Map<String, Map<String, String>> properties) {
@@ -209,11 +234,12 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
     }
 
     private final String REMOTING_SERVICE_MONITORS = "RemotingServiceMonitors";
+    private final String POLLING_CONTAINER_MONITORS = "PollingEventContainerServiceMonitors";
     
     private ServiceMonitors transformMonitors(String interopId, String id, Map<String, Map<String, String>> monitors) {
         if (REMOTING_SERVICE_MONITORS.equals(interopId))
         {
-            Map<String, String> executorProperties = monitors.remove("executorMonitors");
+            Map<String, String> executorProperties = monitors.remove("serviceMonitors");
             String totalProcessedStr = executorProperties.get("processed");
             String totalFailedStr = executorProperties.get("failed");
             int totalProc = totalProcessedStr == null? 0 : Integer.parseInt(totalProcessedStr);
@@ -230,6 +256,16 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
             }
             
             return new RemotingServiceMonitors(id, totalProc, totalFail, stats.toArray(new RemoteServiceStats[stats.size()]));
+        }
+        if (POLLING_CONTAINER_MONITORS.equals(interopId))
+        {
+            Map<String, String> serviceMonitors = monitors.remove("serviceMonitors");
+            long procEvent = Long.parseLong(serviceMonitors.get("processedEvents"));
+            long failEvent = Long.parseLong(serviceMonitors.get("failedEvents"));
+            int activeConsumers = Integer.parseInt(serviceMonitors.get("consumers"));
+            boolean active = Boolean.parseBoolean(serviceMonitors.get("active"));
+            
+            return new PollingEventContainerServiceMonitors(id, procEvent, failEvent, active? "active" : "inactive", activeConsumers);
         }
         
         PlainServiceMonitors plainServiceMonitors = new PlainServiceMonitors(id);
