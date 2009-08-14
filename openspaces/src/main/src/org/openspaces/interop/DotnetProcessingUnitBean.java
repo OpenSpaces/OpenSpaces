@@ -13,6 +13,8 @@ import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertiesAware;
 import org.openspaces.core.space.SpaceServiceDetails;
+import org.openspaces.events.notify.NotifyEventContainerServiceDetails;
+import org.openspaces.events.notify.NotifyEventContainerServiceMonitors;
 import org.openspaces.events.polling.PollingEventContainerServiceDetails;
 import org.openspaces.events.polling.PollingEventContainerServiceMonitors;
 import org.openspaces.pu.container.DeployableProcessingUnitContainerProvider;
@@ -175,21 +177,56 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         }
     }
 
-    private final String REMOTING_SERVICE_DETAILS = "remoting";
-    private final String EVENT_LISTENER_CONTAINER_SERVICE_DETAILS = "event-container";
-    private final String POLLING_EVENT_LISTENER_CONTAINER_SERVICE_DETAILS = "polling";
+    private static final String REMOTING_SERVICE_DETAILS = "remoting";
+    private static final String EVENT_CONTAINER_SERVICE_DETAILS = "event-container";
+    private static final String POLLING_CONTAINER_SERVICE_DETAILS = "polling";
+    private static final String NOTIFY_CONTAINER_SERVICE_DETAILS = "notify";    
     
     private ServiceDetails transformDetails(String id, String serviceType, String subServiceType, String description,
             String longDescription, Map<String, Map<String, String>> properties) {
         if (REMOTING_SERVICE_DETAILS.equals(serviceType))           
             return buildRemotingServiceDetails(id, properties);
-        if (EVENT_LISTENER_CONTAINER_SERVICE_DETAILS.equals(serviceType))
+        if (EVENT_CONTAINER_SERVICE_DETAILS.equals(serviceType))
         {
-            if (POLLING_EVENT_LISTENER_CONTAINER_SERVICE_DETAILS.equals(subServiceType))
+            if (POLLING_CONTAINER_SERVICE_DETAILS.equals(subServiceType))
                 return buildPollingContainerServiceDetails(id, properties);
+            if (NOTIFY_CONTAINER_SERVICE_DETAILS.equals(subServiceType))
+                return buildNotifyContainerServiceDetails(id, properties);
         }
         
         return new DotnetServiceDetails(id, serviceType, subServiceType, description, longDescription);
+    }
+    
+    private ServiceDetails buildNotifyContainerServiceDetails(String id, Map<String, Map<String, String>> properties) {
+        Map<String, String> props = properties.get("containerProperties");
+        String space = props.get("space");
+        Object template = props.get("template");
+        boolean performSnapshot = Boolean.parseBoolean(props.get("perform-snapshot"));
+        String txManager = props.get("transaction-manager");
+        boolean batchProcessing = Boolean.parseBoolean(props.get("pass-array-as-is"));
+        String commTypeStr = props.get("comm-type");
+        int commType = 0;
+        if ("unicast".equals(commTypeStr))
+            commType = 0;
+        else if ("multiplex".equals(commTypeStr))
+            commType = 1;
+        else if ("multicast".equals(commTypeStr))
+            commType = 2;        
+        boolean fifo = Boolean.parseBoolean(props.get("fifo"));
+        Integer batchSize = props.get("batch-size") == null? null : Integer.parseInt("batch-size");
+        Integer batchTime = props.get("batch-time") == null? null : Integer.parseInt("batch-time");
+        boolean autoRenew = Boolean.parseBoolean(props.get("auto-renew"));
+        boolean notifyWrite = Boolean.parseBoolean(props.get("notify-write"));
+        boolean notifyUpdate = Boolean.parseBoolean(props.get("notify-update"));;
+        boolean notifyTake = Boolean.parseBoolean(props.get("notify-take"));;
+        boolean notifyLease = Boolean.parseBoolean(props.get("notify-lease-expire"));;
+        Boolean triggerNotifyTemplate = props.get("trigger-notify-template") == null? null : Boolean.parseBoolean(props.get("trigger-notify-template"));
+        Boolean replicateNotifyTemplate = props.get("replicate-notify-template") == null? null : Boolean.parseBoolean(props.get("replicate-notify-template"));
+        boolean performTakeOnNotify = Boolean.parseBoolean(props.get("perform-take-on-notify"));
+        boolean guaranteed = Boolean.parseBoolean(props.get("guaranteed"));
+        return new NotifyEventContainerServiceDetails(id, space, template, performSnapshot, txManager, commType, fifo, batchSize, 
+                    batchTime, autoRenew, null, notifyWrite, notifyUpdate, notifyTake, notifyLease, false, triggerNotifyTemplate, 
+                    replicateNotifyTemplate, performTakeOnNotify, batchProcessing, guaranteed);
     }
 
     private PollingEventContainerServiceDetails buildPollingContainerServiceDetails(String id, Map<String, Map<String, String>> properties) {
@@ -233,8 +270,9 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         return result;
     }
 
-    private final String REMOTING_SERVICE_MONITORS = "RemotingServiceMonitors";
-    private final String POLLING_CONTAINER_MONITORS = "PollingEventContainerServiceMonitors";
+    private static final String REMOTING_SERVICE_MONITORS = "RemotingServiceMonitors";
+    private static final String POLLING_CONTAINER_MONITORS = "PollingEventContainerServiceMonitors";
+    private static final String NOTIFY_CONTAINER_MONITORS = "NotifyEventContainerServiceMonitors";
     
     private ServiceMonitors transformMonitors(String interopId, String id, Map<String, Map<String, String>> monitors) {
         if (REMOTING_SERVICE_MONITORS.equals(interopId))
@@ -265,7 +303,16 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
             int activeConsumers = Integer.parseInt(serviceMonitors.get("consumers"));
             boolean active = Boolean.parseBoolean(serviceMonitors.get("active"));
             
-            return new PollingEventContainerServiceMonitors(id, procEvent, failEvent, active? "active" : "inactive", activeConsumers);
+            return new PollingEventContainerServiceMonitors(id, procEvent, failEvent, active? "Active" : "Inactive", activeConsumers);
+        }
+        if (NOTIFY_CONTAINER_MONITORS.equals(interopId))
+        {
+            Map<String, String> serviceMonitors = monitors.remove("serviceMonitors");
+            long procEvent = Long.parseLong(serviceMonitors.get("processedEvents"));
+            long failEvent = Long.parseLong(serviceMonitors.get("failedEvents"));            
+            boolean active = Boolean.parseBoolean(serviceMonitors.get("active"));
+            
+            return new NotifyEventContainerServiceMonitors(id, procEvent, failEvent, active? "Active" : "Inactive");
         }
         
         PlainServiceMonitors plainServiceMonitors = new PlainServiceMonitors(id);
