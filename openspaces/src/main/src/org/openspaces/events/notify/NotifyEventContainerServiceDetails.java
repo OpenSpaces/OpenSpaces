@@ -46,7 +46,7 @@ public class NotifyEventContainerServiceDetails extends EventContainerServiceDet
         public static final String NOTIFY_UNMATCHED = "notify-unmatched";
         public static final String TRIGGER_NOTIFY_TEMPLATE = "trigger-notify-template";
         public static final String REPLICATE_NOTIFY_TEMPLATE = "replicate-notify-template";
-        public static final String PERFORM_TAKE_ON_NOTIFY = "replicate-notify-template";
+        public static final String PERFORM_TAKE_ON_NOTIFY = "perform-take-on-notify";
         public static final String PASS_ARRAY_AS_IS = "pass-array-as-is";
         public static final String GUARANTEED = "guaranteed";
     }
