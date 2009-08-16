@@ -301,18 +301,18 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
             long procEvent = Long.parseLong(serviceMonitors.get("processedEvents"));
             long failEvent = Long.parseLong(serviceMonitors.get("failedEvents"));
             int activeConsumers = Integer.parseInt(serviceMonitors.get("consumers"));
-            boolean active = Boolean.parseBoolean(serviceMonitors.get("active"));
+            String status = serviceMonitors.get("status");
             
-            return new PollingEventContainerServiceMonitors(id, procEvent, failEvent, active? "Active" : "Inactive", activeConsumers);
+            return new PollingEventContainerServiceMonitors(id, procEvent, failEvent, status, activeConsumers);
         }
         if (NOTIFY_CONTAINER_MONITORS.equals(interopId))
         {
             Map<String, String> serviceMonitors = monitors.remove("serviceMonitors");
             long procEvent = Long.parseLong(serviceMonitors.get("processedEvents"));
             long failEvent = Long.parseLong(serviceMonitors.get("failedEvents"));            
-            boolean active = Boolean.parseBoolean(serviceMonitors.get("active"));
+            String status = serviceMonitors.get("status");
             
-            return new NotifyEventContainerServiceMonitors(id, procEvent, failEvent, active? "Active" : "Inactive");
+            return new NotifyEventContainerServiceMonitors(id, procEvent, failEvent, status);
         }
         
         PlainServiceMonitors plainServiceMonitors = new PlainServiceMonitors(id);
