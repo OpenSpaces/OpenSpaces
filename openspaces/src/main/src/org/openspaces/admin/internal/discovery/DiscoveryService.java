@@ -11,6 +11,7 @@ import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.jini.SharedDiscoveryManagement;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.SpaceConfig;
 import com.j_spaces.core.service.ServiceConfigLoader;
@@ -102,7 +103,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             throw new AdminException("Failed to get configuration for discovery service", e);
         }
         try {
-            ldm = new LookupDiscoveryManager(getGroups(), getLocators(), this, config);
+            ldm = SharedDiscoveryManagement.getLookupDiscoveryManager(getGroups(), getLocators(), this);
         } catch (Exception e) {
             throw new AdminException("Failed to start discovery service, Lookup Discovery Manager failed to start", e);
         }
