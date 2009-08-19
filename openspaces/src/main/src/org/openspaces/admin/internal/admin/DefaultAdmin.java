@@ -6,7 +6,7 @@ import com.gigaspaces.grid.gsm.PUsDetails;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
-import com.gigaspaces.security.UserDetails;
+import com.gigaspaces.security.directory.UserDetails;
 import com.j_spaces.core.IJSpace;
 import net.jini.core.discovery.LookupLocator;
 import org.apache.commons.logging.Log;

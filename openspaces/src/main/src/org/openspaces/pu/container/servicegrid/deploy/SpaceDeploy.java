@@ -2,7 +2,8 @@ package org.openspaces.pu.container.servicegrid.deploy;
 
 import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.logger.GSLogConfigLoader;
-import com.gigaspaces.security.UserDetails;
+import com.gigaspaces.security.directory.UserDetails;
+
 import org.jini.rio.core.OperationalString;
 import org.jini.rio.core.ServiceProvisionListener;
 import org.jini.rio.monitor.DeployAdmin;

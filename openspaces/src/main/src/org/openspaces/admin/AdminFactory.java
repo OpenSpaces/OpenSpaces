@@ -19,8 +19,8 @@ package org.openspaces.admin;
 import org.openspaces.admin.internal.admin.DefaultAdmin;
 import org.jini.rio.boot.BootUtil;
 
-import com.gigaspaces.security.UserDetails;
-import com.gigaspaces.security.User;
+import com.gigaspaces.security.directory.User;
+import com.gigaspaces.security.directory.UserDetails;
 import com.gigaspaces.logger.GSLogConfigLoader;
 
 /**

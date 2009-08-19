@@ -33,8 +33,8 @@
 package org.openspaces.admin.pu;
 
 import com.gigaspaces.grid.zone.ZoneHelper;
-import com.gigaspaces.security.UserDetails;
-import com.gigaspaces.security.User;
+import com.gigaspaces.security.directory.User;
+import com.gigaspaces.security.directory.UserDetails;
 
 import java.io.File;
 import java.util.*;

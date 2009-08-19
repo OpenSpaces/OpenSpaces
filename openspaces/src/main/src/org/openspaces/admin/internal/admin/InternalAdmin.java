@@ -3,7 +3,7 @@ package org.openspaces.admin.internal.admin;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
-import com.gigaspaces.security.UserDetails;
+import com.gigaspaces.security.directory.UserDetails;
 import com.j_spaces.core.IJSpace;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;

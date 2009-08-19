@@ -33,7 +33,8 @@
 package org.openspaces.admin.space;
 
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
-import com.gigaspaces.security.UserDetails;
+
+import com.gigaspaces.security.directory.UserDetails;
 
 /**
  * A deployment of a pure {@link org.openspaces.admin.space.Space} processing unit (comes built in

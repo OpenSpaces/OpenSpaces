@@ -16,8 +16,8 @@
 
 package org.openspaces.pu.container.integrated;
 
-import com.gigaspaces.security.User;
-import com.gigaspaces.security.UserDetails;
+import com.gigaspaces.security.directory.User;
+import com.gigaspaces.security.directory.UserDetails;
 import com.j_spaces.core.client.SpaceURL;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
