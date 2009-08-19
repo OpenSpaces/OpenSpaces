@@ -54,7 +54,7 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
 
     private static final Log logger = LogFactory.getLog(IntegratedProcessingUnitContainer.class);
 
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
     /**
      * Constructs a new integrated processing unit container based on the provided Spring
@@ -135,6 +135,7 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
             // Use the MAIN thread as the non daemon thread to keep it alive
             final Thread mainThread = Thread.currentThread();
             Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
                 public void run() {
                     try {
                         logger.info("Shutting down processing unit(s)");
@@ -193,8 +194,8 @@ public class IntegratedProcessingUnitContainer implements ApplicationContextProc
         System.out.println("             backup_id=1         : The backup id of this processing unit");
         System.out.println("    -properties [properties-loc] : Location of context level properties");
         System.out.println("    -properties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
-        System.out.println("    -user x -password y          : Configures the processing unit (space) to be secured and started with the user and password");
-        System.out.println("    -secured true                : Configures the processing unit (space) to be secured");
+        System.out.println("    -user x -password y          : Configures a secured processing unit propagated with the supplied user and password");
+        System.out.println("    -secured true                : Configures a secured processing unit (implicit when using -user/-password)");
         System.out.println("");
         System.out.println("");
         System.out.println("Some Examples:");

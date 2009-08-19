@@ -469,7 +469,7 @@ public class Deploy {
         if (userName != null && password != null) {
             setUserDetails(userName, password);
         }
-        
+
         if (userDetails == null) {
             userName = (String) beanLevelProperties.getContextProperties().remove("security.username");
             password = (String) beanLevelProperties.getContextProperties().remove("security.password");
@@ -507,28 +507,28 @@ public class Deploy {
         }
 
         String slaPolicyHandler =
-                "org.jini.rio.qos.SLAPolicyHandler.slaPolicyHandler";
+            "org.jini.rio.qos.SLAPolicyHandler.slaPolicyHandler";
         switch (handlerType) {
-            case 1:
-                args = new String[5];
-                args[0] = "-";
-                args[1] = slaPolicyHandler + "=" + "new " + handler + "((org.jini.rio.core.SLA)$data)";
-                args[2] = handler + ".MaxServices=" + max;
-                args[3] = handler + ".LowerThresholdDampeningFactor=" + lowerDampener;
-                args[4] = handler + ".UpperThresholdDampeningFactor=" + upperDampener;
-                break;
-            case 2:
-                args = new String[4];
-                args[0] = "-";
-                args[1] = slaPolicyHandler + "=" + "new " + handler + "((org.jini.rio.core.SLA)$data)";
-                args[2] = handler + ".LowerThresholdDampeningFactor=" + lowerDampener;
-                args[3] = handler + ".UpperThresholdDampeningFactor=" + upperDampener;
-                break;
-            default:
-                args = new String[2];
-                args[0] = "-";
-                args[1] = slaPolicyHandler + "=" +
-                        "new " + handler + "((org.jini.rio.core.SLA)$data)";
+        case 1:
+            args = new String[5];
+            args[0] = "-";
+            args[1] = slaPolicyHandler + "=" + "new " + handler + "((org.jini.rio.core.SLA)$data)";
+            args[2] = handler + ".MaxServices=" + max;
+            args[3] = handler + ".LowerThresholdDampeningFactor=" + lowerDampener;
+            args[4] = handler + ".UpperThresholdDampeningFactor=" + upperDampener;
+            break;
+        case 2:
+            args = new String[4];
+            args[0] = "-";
+            args[1] = slaPolicyHandler + "=" + "new " + handler + "((org.jini.rio.core.SLA)$data)";
+            args[2] = handler + ".LowerThresholdDampeningFactor=" + lowerDampener;
+            args[3] = handler + ".UpperThresholdDampeningFactor=" + upperDampener;
+            break;
+        default:
+            args = new String[2];
+        args[0] = "-";
+        args[1] = slaPolicyHandler + "=" +
+        "new " + handler + "((org.jini.rio.core.SLA)$data)";
         }
         return (args);
     }
@@ -551,7 +551,7 @@ public class Deploy {
     }
 
     private OperationalString loadDeployment(String puString, String codeserver, SLA sla, String puPath,
-                                             String puName, BeanLevelProperties beanLevelProperties) throws Exception {
+            String puName, BeanLevelProperties beanLevelProperties) throws Exception {
         InputStream opstringURL = Deploy.class.getResourceAsStream("/org/openspaces/pu/container/servicegrid/puservicebean.xml");
         OperationalString opString;
 
@@ -833,8 +833,8 @@ public class Deploy {
             sb.append("\n    -locators [host1] [host2] ...            : The lookup locators used to look up the GSM");
             sb.append("\n    -timeout [timeout value]                 : The timeout value of GSM lookup (defaults to 5000) in milliseconds");
         }
-        sb.append("      -user x -password y                      : Deploys a secured processing unit with the user and password");
-        sb.append("      -secured true                            : Deploys a secured processing unit");
+        sb.append("\n    -user xxx -password yyyy                 : Deploys a secured processing unit propagated with the supplied user and password");
+        sb.append("\n    -secured true                            : Deploys a secured processing unit (implicit when using -user/-password)");
         sb.append("\n    -properties [properties-loc]             : Location of context level properties");
         sb.append("\n    -properties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
         sb.append("\n    -override-name [override pu name]        : An override pu name, useful when using pu as a template");
@@ -873,7 +873,7 @@ public class Deploy {
 
     private static class DeployListener implements ServiceProvisionListener {
 
-        private AtomicInteger totalStarted = new AtomicInteger();
+        private final AtomicInteger totalStarted = new AtomicInteger();
 
         public void succeeded(ServiceBeanInstance jsbInstance) throws RemoteException {
             info("[" + jsbInstance.getServiceBeanConfig().getName() + "] [" + jsbInstance.getServiceBeanConfig().getInstanceID() + "] deployed successfully on [" + jsbInstance.getHostAddress() + "]");

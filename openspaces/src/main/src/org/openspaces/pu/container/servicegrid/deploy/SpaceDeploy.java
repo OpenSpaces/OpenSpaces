@@ -15,7 +15,7 @@ import java.util.ArrayList;
  */
 public class SpaceDeploy {
 
-    private Deploy deploy;
+    private final Deploy deploy;
 
     public SpaceDeploy() {
         this.deploy = new Deploy();
@@ -120,8 +120,8 @@ public class SpaceDeploy {
             sb.append("\n    -locators [host1] [host2] ...            : The lookup locators used to look up the GSM");
             sb.append("\n    -timeout [timeout value]                 : The timeout value of GSM lookup (defaults to 5000) in milliseconds");
         }
-        sb.append("      -user x -password y                      : Deploys a secured space with the user and password");
-        sb.append("      -secured true                            : Deploys a secured space");
+        sb.append("\n    -user xxx -password yyyy                 : Deploys a secured space propagated with the supplied user and password");
+        sb.append("\n    -secured true                            : Deploys a secured space (implicit when using -user/-password)");
         sb.append("\n    -properties [properties-loc]             : Location of context level properties");
         sb.append("\n    -properties [bean-name] [properties-loc] : Location of properties used applied only for a specified bean");
         sb.append("\n    -max-instances-per-vm [number]           : Allows to set the SLA number of instances per VM");
