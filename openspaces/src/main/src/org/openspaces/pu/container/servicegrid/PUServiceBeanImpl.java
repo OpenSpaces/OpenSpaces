@@ -30,6 +30,7 @@ import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.start.Locator;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
+import com.j_spaces.core.client.IProxySecurityManager;
 import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.kernel.Environment;
 import org.apache.commons.logging.Log;
@@ -55,6 +56,7 @@ import org.openspaces.interop.DotnetProcessingUnitContainerProvider;
 import org.openspaces.pu.container.*;
 import org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainerProvider;
 import org.openspaces.pu.container.jee.context.BootstrapWebApplicationContextListener;
+import org.openspaces.pu.container.servicegrid.jmxs.SecuredPUExtension;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainer;
 import org.openspaces.pu.container.spi.ApplicationContextProcessingUnitContainerProvider;
 import org.openspaces.pu.container.support.BeanLevelPropertiesUtils;
@@ -123,6 +125,17 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     public PUServiceBeanImpl() {
         super();
+    }
+
+    /*
+     * @see org.jini.rio.jsb.ServiceBeanAdapter#initializeJMX(java.lang.Object)
+     */
+    @Override
+    protected void initializeJMX(Object mbean) throws Exception {
+        if (IProxySecurityManager.NEW_SECURITY_ENABLED) {
+            mbean = new SecuredPUExtension(mbean);
+        }
+        super.initializeJMX(mbean);
     }
 
 
@@ -259,7 +272,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         logger.info(logMessage("ClusterInfo [" + clusterInfo + "]"));
 
         MarshalledObject beanLevelPropertiesMarshObj =
-                (MarshalledObject) getServiceBeanContext().getInitParameter("beanLevelProperties");
+            (MarshalledObject) getServiceBeanContext().getInitParameter("beanLevelProperties");
         BeanLevelProperties beanLevelProperties = null;
         if (beanLevelPropertiesMarshObj != null) {
             beanLevelProperties = (BeanLevelProperties) beanLevelPropertiesMarshObj.get();
@@ -361,7 +374,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                     suffix = "mb";
                     factor = 1024*1024;
                 }
-                logger.info("Downloaded [" + nf.format((float)size/factor) + suffix + "] to [" + deployPath + "]");
+                logger.info("Downloaded [" + nf.format(size/factor) + suffix + "] to [" + deployPath + "]");
             }
 
             // go over listed files that needs to be resovled with properties
@@ -491,9 +504,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         try {
             contextClassLoader.loadClass("org.mule.api.MuleContext");
             ((ServiceClassLoader) contextClassLoader).addURLs(BootUtil.toURLs(new String[]
-                    {
-                            Environment.getHomeDirectory() + "/lib/optional/openspaces/mule-os.jar"
-                    }));
+                                                                                         {
+                    Environment.getHomeDirectory() + "/lib/optional/openspaces/mule-os.jar"
+                                                                                         }));
         } catch (Throwable e) {
             // no mule
         }
@@ -670,7 +683,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             SharedServiceData.removeServiceDetails(clusterInfo.getUniqueName());
             SharedServiceData.removeServiceMonitors(clusterInfo.getUniqueName());
         }
-        
+
         serviceMonitors.clear();
         if (executorService != null) {
             executorService.shutdown();
@@ -820,11 +833,11 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private int getSLAMax(ServiceBeanContext context) {
         int max = -1;
         ServiceLevelAgreements slas =
-                context.getServiceElement().getServiceLevelAgreements();
+            context.getServiceElement().getServiceLevelAgreements();
         SLA[] spaceSLAs = slas.getServiceSLAs();
         for (SLA spaceSLA : spaceSLAs) {
             int count =
-                    getMaxServiceCount(spaceSLA.getConfigArgs());
+                getMaxServiceCount(spaceSLA.getConfigArgs());
             if (count != -1) {
                 max = count;
                 break;
