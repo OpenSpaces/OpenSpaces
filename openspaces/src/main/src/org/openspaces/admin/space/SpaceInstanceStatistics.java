@@ -32,6 +32,8 @@
 
 package org.openspaces.admin.space;
 
+import com.j_spaces.core.filters.ReplicationStatistics;
+
 /**
  * Returns {@link org.openspaces.admin.space.SpaceInstance} level statistics.
  *
@@ -101,4 +103,6 @@ public interface SpaceInstanceStatistics {
     long getRemoveCount();
 
     double getRemovePerSecond();
+
+    ReplicationStatistics getReplicationStatistics();
 }

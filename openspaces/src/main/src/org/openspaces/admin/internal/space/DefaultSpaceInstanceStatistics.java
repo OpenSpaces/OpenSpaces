@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.space;
 
 import com.j_spaces.core.filters.StatisticsHolder;
+import com.j_spaces.core.filters.ReplicationStatistics;
 import org.openspaces.admin.space.SpaceInstanceStatistics;
 import org.openspaces.admin.support.StatisticsUtils;
 
@@ -165,5 +166,9 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
             return -1;
         }
         return StatisticsUtils.computePerSecond(getRemoveCount(), getPrevious().getRemoveCount(), getTimestamp(), getPreviousTimestamp());
+    }
+
+    public ReplicationStatistics getReplicationStatistics() {
+        return statisticsHolder.getReplicationStatistics();
     }
 }
