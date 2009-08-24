@@ -90,7 +90,7 @@ public abstract class AbstractScrollableDataIterator implements DataIterator {
      *
      * @param hQuery         The hiberante query string to scroll over
      * @param sessionFactory The session factory to use to construct the session
-     * @param fetchSize      The fetch size of the scrollabale result set
+     * @param fetchSize      The fetch size of the scrollable result set
      */
     public AbstractScrollableDataIterator(String hQuery, SessionFactory sessionFactory, int fetchSize) {
         this(hQuery, sessionFactory, fetchSize, -1, -1);
@@ -100,7 +100,7 @@ public abstract class AbstractScrollableDataIterator implements DataIterator {
      * Constructs a scrollable iterator over the given hibernate query string.
      *
      * @param hQuery         The hiberante query string to scroll over
-     * @param sessionFactory The session factory to use to constrcut the session
+     * @param sessionFactory The session factory to use to construct the session
      * @param fetchSize      The fetch size of the scrollable result set
      * @param from           The from index to scroll from
      * @param size           The size of data to scroll to
@@ -132,7 +132,7 @@ public abstract class AbstractScrollableDataIterator implements DataIterator {
      * Constructs a scrollable iterator over the given GigaSpaces <code>SQLQuery</code>.
      *
      * @param sqlQuery         The <code>SQLQuery</code> to scroll over
-     * @param sessionFactory   The session factory to use to constrcut the session
+     * @param sessionFactory   The session factory to use to construct the session
      * @param fetchSize        The fetch size of the scrollable result set
      * @param performOrderById Should the query perform order by id or not
      * @param from             The from index to scroll from

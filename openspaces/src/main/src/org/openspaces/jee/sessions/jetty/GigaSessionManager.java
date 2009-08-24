@@ -467,7 +467,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
         protected Session(HttpServletRequest request) {
             super(request);
             _data = new SessionData(_clusterId);
-            _data.setMaxIdleMs(_dftMaxIdleSecs * 1000);
+            _data.setMaxIdleMs(_dftMaxIdleSecs * 1000L);
             _data.setExpiryTime(_maxIdleMs < 0 ? Long.MAX_VALUE : (System.currentTimeMillis() + _maxIdleMs));
             _data.setCookieSet(0);
             if (_data.getAttributeMap() == null)

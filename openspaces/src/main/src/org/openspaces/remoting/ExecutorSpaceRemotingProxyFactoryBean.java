@@ -267,11 +267,11 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
 
     private class DistributedExecutorAsyncFuture implements AsyncFuture {
 
-        private AsyncFuture<List<AsyncResult<ExecutorRemotingTask.InternalExecutorResult>>> future;
+        private final AsyncFuture<List<AsyncResult<ExecutorRemotingTask.InternalExecutorResult>>> future;
 
-        private RemoteResultReducer remoteResultReducer;
+        private final RemoteResultReducer remoteResultReducer;
 
-        private ExecutorRemotingTask task;
+        private final ExecutorRemotingTask task;
 
         public DistributedExecutorAsyncFuture(AsyncFuture<List<AsyncResult<ExecutorRemotingTask.InternalExecutorResult>>> future, RemoteResultReducer remoteResultReducer, ExecutorRemotingTask task) {
             this.future = future;
@@ -357,9 +357,9 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
 
     private static class ExecutorAsyncFuture implements AsyncFuture {
 
-        private AsyncFuture<ExecutorRemotingTask.InternalExecutorResult> future;
+        private final AsyncFuture<ExecutorRemotingTask.InternalExecutorResult> future;
 
-        private ExecutorRemotingTask task;
+        private final ExecutorRemotingTask task;
 
         private ExecutorAsyncFuture(AsyncFuture<ExecutorRemotingTask.InternalExecutorResult> future, ExecutorRemotingTask task) {
             this.future = future;
@@ -409,7 +409,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
 
     private static class ExecutorAsyncFutureListener implements AsyncFutureListener {
 
-        private AsyncFutureListener listener;
+        private final AsyncFutureListener listener;
 
         private ExecutorAsyncFutureListener(AsyncFutureListener listener) {
             this.listener = listener;
@@ -430,16 +430,20 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
 
     private static class ExecutorAsyncResult implements AsyncResult {
 
-        private Object result;
-
-        private Exception exception;
+        private final Object result;
+        
+        private final Exception exception;
 
         public ExecutorAsyncResult(Object result) {
-            this.result = result;
+            this(null, result);
         }
 
         public ExecutorAsyncResult(Exception exception) {
+            this(exception, null);
+        }
+        private ExecutorAsyncResult( Exception exception, Object result){
             this.exception = exception;
+            this.result = result;
         }
 
         public Object getResult() {
@@ -453,9 +457,9 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
 
     private static class ExecutorSpaceRemotingResult<T extends Serializable> implements SpaceRemotingResult<T> {
 
-        private AsyncResult<ExecutorRemotingTask.InternalExecutorResult<T>> asyncResult;
+        private final AsyncResult<ExecutorRemotingTask.InternalExecutorResult<T>> asyncResult;
 
-        private Integer routing;
+        private final Integer routing;
 
         public ExecutorSpaceRemotingResult(AsyncResult<ExecutorRemotingTask.InternalExecutorResult<T>> asyncResult, Integer routing) {
             this.asyncResult = asyncResult;
