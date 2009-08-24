@@ -162,7 +162,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
 
     public void destroyInstance(ProcessingUnitInstance processingUnitInstance) {
         try {
-            ((InternalProcessingUnitInstance) processingUnitInstance).getPUServiceBean().destroy();
+            gsm.destroy(processingUnitInstance.getProcessingUnit().getName(), ((InternalProcessingUnitInstance) processingUnitInstance).getServiceID());
         } catch (SecurityException se) {
             throw new AdminException("Not authorized to destroy a processing unit instance", se);
         } catch (com.gigaspaces.security.SecurityException se) {
@@ -171,7 +171,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
                 // all is well
             } else {
-                throw new AdminException("Failed to destroy procesing unit instance", e);
+                throw new AdminException("Failed to destroy processing unit instance", e);
             }
         }
     }
@@ -190,7 +190,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
                 // all is well
             } else {
-                throw new AdminException("Failed to destroy procesing unit instance", e);
+                throw new AdminException("Failed to destroy processing unit instance", e);
             }
         }
     }
@@ -209,7 +209,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
                 // all is well
             } else {
-                throw new AdminException("Failed to destroy procesing unit instance", e);
+                throw new AdminException("Failed to destroy processing unit instance", e);
             }
         }
     }

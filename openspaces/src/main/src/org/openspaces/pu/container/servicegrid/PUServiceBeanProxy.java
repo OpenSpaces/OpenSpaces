@@ -76,10 +76,6 @@ public class PUServiceBeanProxy extends AbstractProxy implements PUServiceBean {
         return ((PUServiceBean) server).listSpacesModes();
     }
 
-    public void destroy() throws RemoteException {
-        ((PUServiceBean) server).destroy();
-    }
-
     public int getState() throws RemoteException {
         return ((PUServiceBean) server).getState();
     }
