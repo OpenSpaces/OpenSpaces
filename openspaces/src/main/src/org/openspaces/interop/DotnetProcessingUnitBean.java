@@ -125,7 +125,7 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
             if (this.customProperties == null)
                 this.customProperties = new Properties();
             
-            this.customProperties.putAll(beanLevelProperties.getContextProperties());
+            this.customProperties.putAll(beanLevelProperties.getMergedBeanProperties("space"));
         }
         //Create identifier for this bean
         UUID beanUniqueIdentifier = UUID.randomUUID();
