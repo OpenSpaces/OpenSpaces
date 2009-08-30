@@ -27,10 +27,10 @@ import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOInfoHelper;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
+import com.gigaspaces.security.service.SecurityResolver;
 import com.gigaspaces.start.Locator;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
-import com.j_spaces.core.client.IProxySecurityManager;
 import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.kernel.Environment;
 import org.apache.commons.logging.Log;
@@ -132,7 +132,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
      */
     @Override
     protected void initializeJMX(Object mbean) throws Exception {
-        if (IProxySecurityManager.NEW_SECURITY_ENABLED) {
+        if (SecurityResolver.isSecurityEnabled()) {
             mbean = new SecuredPUExtension(mbean);
         }
         super.initializeJMX(mbean);
