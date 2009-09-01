@@ -208,13 +208,22 @@
     <orderEntry type="module-library" exported="">
       <library name="jetty">
         <CLASSES>
-          <root url="file://$MODULE_DIR$/lib/platform/jetty" />
+          <root url="jar://$MODULE_DIR$/lib/platform/jetty/servlet-api-2.5-20081211.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-util-6.1.20.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jsp-api-2.1-glassfish-9.1.1.B60.25.p2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-naming-6.1.20.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-6.1.20.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/platform/jetty/core-3.1.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-management-6.1.20.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jsp-2.1-jetty-6.1.20.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/platform/jetty/ant-1.6.5.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jsp-2.1-glassfish-9.1.1.B60.25.p2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/platform/jetty/jetty-plus-6.1.20.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="file://$MODULE_DIR$/../../../../opt/jetty/jetty-6.1.14-src/modules/jetty/src/main/java" />
+          <root url="file://$MODULE_DIR$/../../../../opt/jetty/jetty-6.1.20/modules/jetty/src/main/java" />
         </SOURCES>
-        <jarDirectory url="file://$MODULE_DIR$/lib/platform/jetty" recursive="false" />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
