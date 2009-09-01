@@ -11,20 +11,16 @@ import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.j_spaces.core.IJSpace;
-import com.j_spaces.core.jini.SharedDiscoveryManagement;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.SpaceConfig;
-import com.j_spaces.core.service.ServiceConfigLoader;
+import com.j_spaces.core.jini.SharedDiscoveryManagement;
 import com.j_spaces.kernel.PlatformVersion;
-import net.jini.config.Configuration;
-import net.jini.config.ConfigurationException;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceRegistrar;
 import net.jini.core.lookup.ServiceTemplate;
 import net.jini.discovery.DiscoveryEvent;
 import net.jini.discovery.DiscoveryListener;
-import net.jini.discovery.LookupDiscoveryManager;
 import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryListener;
@@ -68,7 +64,6 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
     private volatile boolean started = false;
 
-    private LookupDiscoveryManager ldm;
     private ServiceDiscoveryManager sdm;
     private LookupCache cache;
 
@@ -96,22 +91,9 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             return;
         }
         started = true;
-        Configuration config = null;
         try {
-            config = ServiceConfigLoader.getConfiguration();
-        } catch (ConfigurationException e) {
-            throw new AdminException("Failed to get configuration for discovery service", e);
-        }
-        try {
-            ldm = SharedDiscoveryManagement.getLookupDiscoveryManager(getGroups(), getLocators(), this);
+            sdm = SharedDiscoveryManagement.getServiceDiscoveryManager(getGroups(), getLocators(), this);
         } catch (Exception e) {
-            throw new AdminException("Failed to start discovery service, Lookup Discovery Manager failed to start", e);
-        }
-
-        try {
-            sdm = new ServiceDiscoveryManager(ldm, null, config);
-        } catch (Exception e) {
-            ldm.terminate();
             throw new AdminException("Failed to start discovery service, Service Discovery Manager failed to start", e);
         }
 
@@ -120,7 +102,6 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             cache = sdm.createLookupCache(template, null, this);
         } catch (Exception e) {
             sdm.terminate();
-            ldm.terminate();
             throw new AdminException("Failed to start discovery service, Lookup Cache failed to start", e);
         }
     }
@@ -132,7 +113,6 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         started = false;
         cache.terminate();
         sdm.terminate();
-        ldm.terminate();
     }
 
     public void discovered(DiscoveryEvent disEvent) {
