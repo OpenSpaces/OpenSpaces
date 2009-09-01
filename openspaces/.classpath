@@ -27,14 +27,11 @@
 	<classpathentry kind="lib" path="lib/platform/jee/servlet-api.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/ant-1.6.5.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/core-3.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-6.1.14.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-management-6.1.14.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-naming-6.1.14.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-plus-6.1.14.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-util-6.1.14.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jsp-2.1.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jsp-api-2.1.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/servlet-api-2.5-6.1.14.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-6.1.20.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-management-6.1.20.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-naming-6.1.20.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-plus-6.1.20.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-util-6.1.20.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jmx/jmxri.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jruby/jruby.jar"/>
 	<classpathentry kind="lib" path="lib/platform/mule/jug-2.0.0-osgi-asl.jar"/>
@@ -92,5 +89,9 @@
 	<classpathentry kind="lib" path="lib/required/spring.jar"/>
 	<classpathentry kind="lib" path="lib/external/backport/backport-util-concurrent.jar"/>
 	<classpathentry kind="lib" path="tools/groovy/embeddable/groovy-all-1.6.3.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jsp-2.1-glassfish-9.1.1.B60.25.p2.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jsp-2.1-jetty-6.1.20.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jsp-api-2.1-glassfish-9.1.1.B60.25.p2.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/servlet-api-2.5-20081211.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
