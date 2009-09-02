@@ -110,8 +110,6 @@ public class SimpleAsyncPollingEventListenerContainer extends AbstractTransactio
         if (!(tempalte instanceof Serializable)) {
             tempalte = null;
         }
-        // for now, LRMI class loader problems
-        tempalte = null;
         return new ServiceDetails[]{new AsyncPollingEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte,
                 isPerformSnapshot(), getTransactionManagerName(), receiveTimeout, concurrentConsumers)};
     }
