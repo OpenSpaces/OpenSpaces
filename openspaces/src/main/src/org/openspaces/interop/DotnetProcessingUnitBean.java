@@ -49,8 +49,8 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         ServiceDetailsProvider, ServiceMonitorsProvider {
     
     private static final String SECURITY_USER_DETAILS = "security.userDetails";
-    private static final String SECURITY_PASSWORD = "security.userDetails.password";    
-    private static final String SECURITY_USERNAME = "security.userDetails.username";
+    private static final String SECURITY_PASSWORD = "security.password";    
+    private static final String SECURITY_USERNAME = "security.username";
 
     protected final Log log = LogFactory.getLog(getClass());
     
