@@ -1,5 +1,6 @@
 package org.openspaces.interop;
 
+import com.gigaspaces.security.directory.UserDetails;
 import com.gigaspaces.serialization.pbs.commands.processingunit.PUDetailsHolder;
 import com.gigaspaces.serialization.pbs.commands.processingunit.ServicesDetails;
 import com.gigaspaces.serialization.pbs.commands.processingunit.ServicesMonitors;
@@ -30,6 +31,7 @@ import org.openspaces.remoting.RemotingServiceMonitors.RemoteServiceStats;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import java.rmi.MarshalledObject;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
@@ -46,6 +48,10 @@ import java.util.UUID;
 public class DotnetProcessingUnitBean implements InitializingBean, DisposableBean, ClusterInfoAware, BeanLevelPropertiesAware,
         ServiceDetailsProvider, ServiceMonitorsProvider {
     
+    private static final String SECURITY_USER_DETAILS = "security.userDetails";
+    private static final String SECURITY_PASSWORD = "security.userDetails.password";    
+    private static final String SECURITY_USERNAME = "security.userDetails.username";
+
     protected final Log log = LogFactory.getLog(getClass());
     
     private ProcessingUnitProxy proxy;
@@ -126,6 +132,14 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
                 this.customProperties = new Properties();
             
             this.customProperties.putAll(beanLevelProperties.getMergedBeanProperties("space"));
+            //Insert security details if needed
+            MarshalledObject marshalledUserDetails = (MarshalledObject)customProperties.remove(SECURITY_USER_DETAILS);
+            if (marshalledUserDetails != null)
+            {
+                UserDetails userDetails = (UserDetails) marshalledUserDetails.get();
+                this.customProperties.put(SECURITY_USERNAME, userDetails.getUsername());
+                this.customProperties.put(SECURITY_PASSWORD, userDetails.getPassword());
+            }
         }
         //Create identifier for this bean
         UUID beanUniqueIdentifier = UUID.randomUUID();
@@ -135,6 +149,10 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         } else {                
             proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentPath, customProperties, clusterInfo.getBackupId(), clusterInfo.getInstanceId(), clusterInfo.getNumberOfBackups(), clusterInfo.getNumberOfInstances(), clusterInfo.getSchema(), clusterInfo.getName(), beanUniqueIdentifier);
         }
+        //Remove security from properties
+        this.customProperties.remove(SECURITY_USERNAME);
+        this.customProperties.remove(SECURITY_PASSWORD);
+        beanLevelProperties.getContextProperties().remove(SECURITY_USER_DETAILS);
     }
 	/**
 	 * {@inheritDoc}
