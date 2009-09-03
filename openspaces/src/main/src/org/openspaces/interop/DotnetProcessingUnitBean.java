@@ -152,7 +152,6 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         //Remove security from properties
         this.customProperties.remove(SECURITY_USERNAME);
         this.customProperties.remove(SECURITY_PASSWORD);
-        beanLevelProperties.getContextProperties().remove(SECURITY_USER_DETAILS);
     }
 	/**
 	 * {@inheritDoc}
