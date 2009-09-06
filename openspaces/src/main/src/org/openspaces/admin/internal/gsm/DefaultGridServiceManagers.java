@@ -4,10 +4,7 @@ import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsm.GridServiceManager;
-import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventListener;
-import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventManager;
-import org.openspaces.admin.gsm.events.GridServiceManagerLifecycleEventListener;
-import org.openspaces.admin.gsm.events.GridServiceManagerRemovedEventManager;
+import org.openspaces.admin.gsm.events.*;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsm.events.DefaultGridServiceManagerAddedEventManager;
 import org.openspaces.admin.internal.gsm.events.DefaultGridServiceManagerRemovedEventManager;
@@ -104,19 +101,36 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     }
 
     public boolean waitFor(int numberOfGridServiceManagers, long timeout, TimeUnit timeUnit) {
-        final CountDownLatch latch = new CountDownLatch(numberOfGridServiceManagers);
-        GridServiceManagerAddedEventListener added = new GridServiceManagerAddedEventListener() {
-            public void gridServiceManagerAdded(GridServiceManager gridServiceManager) {
-                latch.countDown();
+        if (numberOfGridServiceManagers == 0) {
+            final CountDownLatch latch = new CountDownLatch(getSize());
+            GridServiceManagerRemovedEventListener removed = new GridServiceManagerRemovedEventListener() {
+                public void gridServiceManagerRemoved(GridServiceManager gridServiceManager) {
+                    latch.countDown();
+                }
+            };
+            getGridServiceManagerRemoved().add(removed);
+            try {
+                return latch.await(timeout, timeUnit);
+            } catch (InterruptedException e) {
+                return false;
+            } finally {
+                getGridServiceManagerRemoved().remove(removed);
             }
-        };
-        getGridServiceManagerAdded().add(added);
-        try {
-            return latch.await(timeout, timeUnit);
-        } catch (InterruptedException e) {
-            return false;
-        } finally {
-            getGridServiceManagerAdded().remove(added);
+        } else {
+            final CountDownLatch latch = new CountDownLatch(numberOfGridServiceManagers);
+            GridServiceManagerAddedEventListener added = new GridServiceManagerAddedEventListener() {
+                public void gridServiceManagerAdded(GridServiceManager gridServiceManager) {
+                    latch.countDown();
+                }
+            };
+            getGridServiceManagerAdded().add(added);
+            try {
+                return latch.await(timeout, timeUnit);
+            } catch (InterruptedException e) {
+                return false;
+            } finally {
+                getGridServiceManagerAdded().remove(added);
+            }
         }
     }
 

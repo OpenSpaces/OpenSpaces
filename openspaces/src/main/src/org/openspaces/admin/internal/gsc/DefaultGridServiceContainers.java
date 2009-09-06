@@ -3,10 +3,7 @@ package org.openspaces.admin.internal.gsc;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
-import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventManager;
-import org.openspaces.admin.gsc.events.GridServiceContainerLifecycleEventListener;
-import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventManager;
+import org.openspaces.admin.gsc.events.*;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsc.events.DefaultGridServiceContainerAddedEventManager;
 import org.openspaces.admin.internal.gsc.events.DefaultGridServiceContainerRemovedEventManager;
@@ -75,19 +72,36 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
     }
 
     public boolean waitFor(int numberOfGridServiceContainers, long timeout, TimeUnit timeUnit) {
-        final CountDownLatch latch = new CountDownLatch(numberOfGridServiceContainers);
-        GridServiceContainerAddedEventListener added = new GridServiceContainerAddedEventListener() {
-            public void gridServiceContainerAdded(GridServiceContainer gridServiceContainer) {
-                latch.countDown();
+        if (numberOfGridServiceContainers == 0) {
+            final CountDownLatch latch = new CountDownLatch(getSize());
+            GridServiceContainerRemovedEventListener removed = new GridServiceContainerRemovedEventListener() {
+                public void gridServiceContainerRemoved(GridServiceContainer gridServiceContainer) {
+                    latch.countDown();
+                }
+            };
+            getGridServiceContainerRemoved().add(removed);
+            try {
+                return latch.await(timeout, timeUnit);
+            } catch (InterruptedException e) {
+                return false;
+            } finally {
+                getGridServiceContainerRemoved().remove(removed);
             }
-        };
-        getGridServiceContainerAdded().add(added);
-        try {
-            return latch.await(timeout, timeUnit);
-        } catch (InterruptedException e) {
-            return false;
-        } finally {
-            getGridServiceContainerAdded().remove(added);
+        } else {
+            final CountDownLatch latch = new CountDownLatch(numberOfGridServiceContainers);
+            GridServiceContainerAddedEventListener added = new GridServiceContainerAddedEventListener() {
+                public void gridServiceContainerAdded(GridServiceContainer gridServiceContainer) {
+                    latch.countDown();
+                }
+            };
+            getGridServiceContainerAdded().add(added);
+            try {
+                return latch.await(timeout, timeUnit);
+            } catch (InterruptedException e) {
+                return false;
+            } finally {
+                getGridServiceContainerAdded().remove(added);
+            }
         }
     }
     

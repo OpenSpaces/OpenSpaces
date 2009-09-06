@@ -8,10 +8,7 @@ import org.openspaces.admin.internal.machine.events.DefaultMachineRemovedEventMa
 import org.openspaces.admin.internal.machine.events.InternalMachineAddedEventManager;
 import org.openspaces.admin.internal.machine.events.InternalMachineRemovedEventManager;
 import org.openspaces.admin.machine.Machine;
-import org.openspaces.admin.machine.events.MachineAddedEventListener;
-import org.openspaces.admin.machine.events.MachineAddedEventManager;
-import org.openspaces.admin.machine.events.MachineLifecycleEventListener;
-import org.openspaces.admin.machine.events.MachineRemovedEventManager;
+import org.openspaces.admin.machine.events.*;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -73,19 +70,36 @@ public class DefaultMachines implements InternalMachines {
     }
 
     public boolean waitFor(int numberOfMachines, long timeout, TimeUnit timeUnit) {
-        final CountDownLatch latch = new CountDownLatch(numberOfMachines);
-        MachineAddedEventListener added = new MachineAddedEventListener() {
-            public void machineAdded(Machine machine) {
-                latch.countDown();
+        if (numberOfMachines == 0) {
+            final CountDownLatch latch = new CountDownLatch(getSize());
+            MachineRemovedEventListener removed = new MachineRemovedEventListener() {
+                public void machineRemoved(Machine machine) {
+                    latch.countDown();
+                }
+            };
+            getMachineRemoved().add(removed);
+            try {
+                return latch.await(timeout, timeUnit);
+            } catch (InterruptedException e) {
+                return false;
+            } finally {
+                getMachineRemoved().remove(removed);
             }
-        };
-        getMachineAdded().add(added);
-        try {
-            return latch.await(timeout, timeUnit);
-        } catch (InterruptedException e) {
-            return false;
-        } finally {
-            getMachineAdded().remove(added);
+        } else {
+            final CountDownLatch latch = new CountDownLatch(numberOfMachines);
+            MachineAddedEventListener added = new MachineAddedEventListener() {
+                public void machineAdded(Machine machine) {
+                    latch.countDown();
+                }
+            };
+            getMachineAdded().add(added);
+            try {
+                return latch.await(timeout, timeUnit);
+            } catch (InterruptedException e) {
+                return false;
+            } finally {
+                getMachineAdded().remove(added);
+            }
         }
     }
 

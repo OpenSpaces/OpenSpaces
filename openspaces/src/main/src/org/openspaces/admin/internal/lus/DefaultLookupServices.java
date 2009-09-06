@@ -8,10 +8,7 @@ import org.openspaces.admin.internal.lus.events.DefaultLookupServiceRemovedEvent
 import org.openspaces.admin.internal.lus.events.InternalLookupServiceAddedEventManager;
 import org.openspaces.admin.internal.lus.events.InternalLookupServiceRemovedEventManager;
 import org.openspaces.admin.lus.LookupService;
-import org.openspaces.admin.lus.events.LookupServiceAddedEventListener;
-import org.openspaces.admin.lus.events.LookupServiceAddedEventManager;
-import org.openspaces.admin.lus.events.LookupServiceLifecycleEventListener;
-import org.openspaces.admin.lus.events.LookupServiceRemovedEventManager;
+import org.openspaces.admin.lus.events.*;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -71,19 +68,36 @@ public class DefaultLookupServices implements InternalLookupServices {
     }
 
     public boolean waitFor(int numberOfLookupServices, long timeout, TimeUnit timeUnit) {
-        final CountDownLatch latch = new CountDownLatch(numberOfLookupServices);
-        LookupServiceAddedEventListener added = new LookupServiceAddedEventListener() {
-            public void lookupServiceAdded(LookupService lookupService) {
-                latch.countDown();
+        if (numberOfLookupServices == 0) {
+            final CountDownLatch latch = new CountDownLatch(getSize());
+            LookupServiceRemovedEventListener removed = new LookupServiceRemovedEventListener() {
+                public void lookupServiceRemoved(LookupService lookupService) {
+                    latch.countDown();
+                }
+            };
+            getLookupServiceRemoved().add(removed);
+            try {
+                return latch.await(timeout, timeUnit);
+            } catch (InterruptedException e) {
+                return false;
+            } finally {
+                getLookupServiceRemoved().remove(removed);
             }
-        };
-        getLookupServiceAdded().add(added);
-        try {
-            return latch.await(timeout, timeUnit);
-        } catch (InterruptedException e) {
-            return false;
-        } finally {
-            getLookupServiceAdded().remove(added);
+        } else {
+            final CountDownLatch latch = new CountDownLatch(numberOfLookupServices);
+            LookupServiceAddedEventListener added = new LookupServiceAddedEventListener() {
+                public void lookupServiceAdded(LookupService lookupService) {
+                    latch.countDown();
+                }
+            };
+            getLookupServiceAdded().add(added);
+            try {
+                return latch.await(timeout, timeUnit);
+            } catch (InterruptedException e) {
+                return false;
+            } finally {
+                getLookupServiceAdded().remove(added);
+            }
         }
     }
 

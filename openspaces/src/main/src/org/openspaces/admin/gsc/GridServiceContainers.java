@@ -63,7 +63,8 @@ public interface GridServiceContainers extends AdminAware, Iterable<GridServiceC
     boolean isEmpty();
 
     /**
-     * Waits indefinitely till the provided number of containers are up.
+     * Waits indefinitely till the provided number of containers are up. When passing 0, will
+     * wait till there are no more grid service containers.
      *
      * @param numberOfGridServiceContainers The number of containers to wait for
      */
@@ -73,6 +74,8 @@ public interface GridServiceContainers extends AdminAware, Iterable<GridServiceC
      * Waits for the given timeout (in time unit) till the provided number of containers are up.
      * Returns <code>true</code> if the required number of containers were discovered, <code>false</code>
      * if the timeout expired.
+     *
+     * <p>When passing 0, will wait till there are not more containers.
      *
      * @param numberOfGridServiceContainers The number of containers to wait for
      */

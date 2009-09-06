@@ -80,7 +80,8 @@ public interface GridServiceManagers extends AdminAware, Iterable<GridServiceMan
     GridServiceManager waitForAtLeaseOne(long timeout, TimeUnit timeUnit);
 
     /**
-     * Waits indefinitely till the provided number of managers are up.
+     * Waits indefinitely till the provided number of managers are up. When passing 0, will wait
+     * till there are no more managers.
      *
      * @param numberOfGridServiceManagers The number of managers to wait for
      */
@@ -90,6 +91,8 @@ public interface GridServiceManagers extends AdminAware, Iterable<GridServiceMan
      * Waits for the given timeout (in time unit) till the provided number of managers are up.
      * Returns <code>true</code> if the required number of managers were discovered, <code>false</code>
      * if the timeout expired.
+     *
+     * <p>When passing 0, will wait till there are no more managers.
      *
      * @param numberOfGridServiceManagers The number of managers to wait for
      */

@@ -3,10 +3,7 @@ package org.openspaces.admin.internal.gsa;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsa.GridServiceAgent;
-import org.openspaces.admin.gsa.events.GridServiceAgentAddedEventListener;
-import org.openspaces.admin.gsa.events.GridServiceAgentAddedEventManager;
-import org.openspaces.admin.gsa.events.GridServiceAgentLifecycleEventListener;
-import org.openspaces.admin.gsa.events.GridServiceAgentRemovedEventManager;
+import org.openspaces.admin.gsa.events.*;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsa.events.DefaultGridServiceAgentAddedEventManager;
 import org.openspaces.admin.internal.gsa.events.DefaultGridServiceAgentRemovedEventManager;
@@ -108,19 +105,36 @@ public class DefaultGridServiceAgents implements InternalGridServiceAgents {
     }
 
     public boolean waitFor(int numberOfAgents, long timeout, TimeUnit timeUnit) {
-        final CountDownLatch latch = new CountDownLatch(numberOfAgents);
-        GridServiceAgentAddedEventListener added = new GridServiceAgentAddedEventListener() {
-            public void gridServiceAgentAdded(GridServiceAgent gridServiceAgent) {
-                latch.countDown();
+        if (numberOfAgents == 0) {
+            final CountDownLatch latch = new CountDownLatch(getSize());
+            GridServiceAgentRemovedEventListener removed = new GridServiceAgentRemovedEventListener() {
+                public void gridServiceAgentRemoved(GridServiceAgent gridServiceAgent) {
+                    latch.countDown();
+                }
+            };
+            getGridServiceAgentRemoved().remove(removed);
+            try {
+                return latch.await(timeout, timeUnit);
+            } catch (InterruptedException e) {
+                return false;
+            } finally {
+                getGridServiceAgentRemoved().remove(removed);
             }
-        };
-        getGridServiceAgentAdded().add(added);
-        try {
-            return latch.await(timeout, timeUnit);
-        } catch (InterruptedException e) {
-            return false;
-        } finally {
-            getGridServiceAgentAdded().remove(added);
+        } else {
+            final CountDownLatch latch = new CountDownLatch(numberOfAgents);
+            GridServiceAgentAddedEventListener added = new GridServiceAgentAddedEventListener() {
+                public void gridServiceAgentAdded(GridServiceAgent gridServiceAgent) {
+                    latch.countDown();
+                }
+            };
+            getGridServiceAgentAdded().add(added);
+            try {
+                return latch.await(timeout, timeUnit);
+            } catch (InterruptedException e) {
+                return false;
+            } finally {
+                getGridServiceAgentAdded().remove(added);
+            }
         }
     }
 
