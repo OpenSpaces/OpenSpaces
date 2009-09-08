@@ -140,7 +140,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
      * Performs the initial load operation. Iterates over the {@link #setInitialLoadEntries(String[])} initial load
      * entries. If {@link #getInitialLoadChunkSize()} is set to <code>-1</code>, will use
      * {@link org.openspaces.persistency.hibernate.iterator.DefaultScrollableDataIterator} for each entity. If
-     * {@link # getInitalLoadChunkSize ()} is set to a non <code>-1</code> value, will use the
+     * {@link #getInitialLoadChunkSize()} is set to a non <code>-1</code> value, will use the
      * {@link org.openspaces.persistency.hibernate.iterator.DefaultChunkScrollableDataIterator}.
      */
     public DataIterator initialLoad() throws DataSourceException {
