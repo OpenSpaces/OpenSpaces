@@ -150,24 +150,24 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
             if (getInitialLoadChunkSize() == -1) {
                 if (isUseScrollableResultSet()) {
                     if (logger.isTraceEnabled()) {
-                        logger.trace("Creating inital load scrollable iterator for entry [" + entityName + "]");
+                        logger.trace("Creating initial load scrollable iterator for entry [" + entityName + "]");
                     }
                     iterators[iteratorCounter++] = new DefaultScrollableDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById());
                 } else {
                     if (logger.isTraceEnabled()) {
-                        logger.trace("Creating inital load list iterator for entry [" + entityName + "]");
+                        logger.trace("Creating initial load list iterator for entry [" + entityName + "]");
                     }
                     iterators[iteratorCounter++] = new DefaultListQueryDataIterator(entityName, getSessionFactory());
                 }
             } else {
                 if (isUseScrollableResultSet()) {
                     if (logger.isTraceEnabled()) {
-                        logger.trace("Creating inital load chunk scrollable iterator for entry [" + entityName + "]");
+                        logger.trace("Creating initial load chunk scrollable iterator for entry [" + entityName + "]");
                     }
                     iterators[iteratorCounter++] = new DefaultChunkScrollableDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById(), getInitialLoadChunkSize());
                 } else {
                     if (logger.isTraceEnabled()) {
-                        logger.trace("Creating inital load chunk list iterator for entry [" + entityName + "]");
+                        logger.trace("Creating initial load chunk list iterator for entry [" + entityName + "]");
                     }
                     iterators[iteratorCounter++] = new DefaultChunkListDataIterator(entityName, getSessionFactory(), getFetchSize(), isPerformOrderById(), getInitialLoadChunkSize());
                 }
