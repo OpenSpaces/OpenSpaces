@@ -143,7 +143,7 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         }
         //Create identifier for this bean
         UUID beanUniqueIdentifier = UUID.randomUUID();
-        log.debug("Invoking Init on the .Net processing unit");
+        log.debug("Invoking Init on the .Net processing unit, pu context " + beanUniqueIdentifier);
         if (clusterInfo == null) {
             proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentPath, customProperties, beanUniqueIdentifier);
         } else {                
