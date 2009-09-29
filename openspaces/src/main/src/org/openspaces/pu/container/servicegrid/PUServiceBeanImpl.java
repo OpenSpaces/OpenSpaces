@@ -44,10 +44,7 @@ import org.jini.rio.jsb.ServiceBeanAdapter;
 import org.jini.rio.watch.Calculable;
 import org.jini.rio.watch.GaugeWatch;
 import org.jini.rio.watch.Watch;
-import org.openspaces.core.cluster.ClusterInfo;
-import org.openspaces.core.cluster.ClusterInfoAware;
-import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
-import org.openspaces.core.cluster.MemberAliveIndicator;
+import org.openspaces.core.cluster.*;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertiesAware;
 import org.openspaces.core.space.SpaceServiceDetails;
@@ -85,12 +82,12 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.text.NumberFormat;
 
 /**
  * @author kimchy
@@ -112,6 +109,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private volatile ScheduledExecutorService executorService;
 
     private volatile Callable<Boolean>[] memberAliveIndicators;
+
+    private volatile Callable[] undeployingEventListeners;
 
     private volatile File deployPath;
 
@@ -196,6 +195,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         if (clusterInfo != null) {
             SharedServiceData.removeWebAppClassLoader(clusterInfo.getUniqueName());
             SharedServiceData.removeMemberAliveIndicator(clusterInfo.getUniqueName());
+            SharedServiceData.removeUndeployingEventListeners(clusterInfo.getUniqueName());
             SharedServiceData.removeServiceDetails(clusterInfo.getUniqueName());
             SharedServiceData.removeServiceMonitors(clusterInfo.getUniqueName());
         }
@@ -272,7 +272,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         logger.info(logMessage("ClusterInfo [" + clusterInfo + "]"));
 
         MarshalledObject beanLevelPropertiesMarshObj =
-            (MarshalledObject) getServiceBeanContext().getInitParameter("beanLevelProperties");
+                (MarshalledObject) getServiceBeanContext().getInitParameter("beanLevelProperties");
         BeanLevelProperties beanLevelProperties = null;
         if (beanLevelPropertiesMarshObj != null) {
             beanLevelProperties = (BeanLevelProperties) beanLevelPropertiesMarshObj.get();
@@ -370,11 +370,11 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 nf.setMaximumFractionDigits(2);
                 String suffix = "kb";
                 float factor = 1024;
-                if (size > 1024*1024) {
+                if (size > 1024 * 1024) {
                     suffix = "mb";
-                    factor = 1024*1024;
+                    factor = 1024 * 1024;
                 }
-                logger.info("Downloaded [" + nf.format(size/factor) + suffix + "] to [" + deployPath + "]");
+                logger.info("Downloaded [" + nf.format(size / factor) + suffix + "] to [" + deployPath + "]");
             }
 
             // go over listed files that needs to be resovled with properties
@@ -504,9 +504,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         try {
             contextClassLoader.loadClass("org.mule.api.MuleContext");
             ((ServiceClassLoader) contextClassLoader).addURLs(BootUtil.toURLs(new String[]
-                                                                                         {
-                    Environment.getHomeDirectory() + "/lib/optional/openspaces/mule-os.jar"
-                                                                                         }));
+                    {
+                            Environment.getHomeDirectory() + "/lib/optional/openspaces/mule-os.jar"
+                    }));
         } catch (Throwable e) {
             // no mule
         }
@@ -544,6 +544,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         Thread.currentThread().setContextClassLoader(contextClassLoader);
 
         buildMembersAliveIndicators();
+        buildUndeployingEventListeners();
 
         ArrayList<Object> serviceDetails = buildServiceDetails();
 
@@ -643,6 +644,31 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         return serviceDetails;
     }
 
+    private void buildUndeployingEventListeners() {
+        ArrayList<Callable> undeployingListeners = new ArrayList<Callable>();
+        if (container instanceof ApplicationContextProcessingUnitContainer) {
+            ApplicationContext applicationContext = ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
+            Map map = applicationContext.getBeansOfType(ProcessingUnitUndeployingListener.class);
+            for (Iterator it = map.values().iterator(); it.hasNext();) {
+                final ProcessingUnitUndeployingListener listener = (ProcessingUnitUndeployingListener) it.next();
+                undeployingListeners.add(new Callable<Object>() {
+                    public Object call() throws Exception {
+                        listener.processingUnitUndeploying();
+                        return null;
+                    }
+                });
+            }
+        }
+
+        List<Callable> list = SharedServiceData.removeUndeployingEventListeners(clusterInfo.getUniqueName());
+        if (list != null) {
+            for (Callable c : list) {
+                undeployingListeners.add(c);
+            }
+        }
+        undeployingEventListeners = undeployingListeners.toArray(new Callable[undeployingListeners.size()]);
+    }
+
     private void buildMembersAliveIndicators() {
         // Handle Member Alive Indicators
         ArrayList<Callable<Boolean>> maIndicators = new ArrayList<Callable<Boolean>>();
@@ -680,6 +706,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         if (clusterInfo != null) {
             SharedServiceData.removeWebAppClassLoader(clusterInfo.getUniqueName());
             SharedServiceData.removeMemberAliveIndicator(clusterInfo.getUniqueName());
+            SharedServiceData.removeUndeployingEventListeners(clusterInfo.getUniqueName());
             SharedServiceData.removeServiceDetails(clusterInfo.getUniqueName());
             SharedServiceData.removeServiceMonitors(clusterInfo.getUniqueName());
         }
@@ -696,6 +723,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 logger.warn(logMessage("Failed to close"), e);
             } finally {
                 container = null;
+                undeployingEventListeners = null;
                 memberAliveIndicators = null;
                 puDetails = null;
             }
@@ -724,6 +752,16 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     @Override
     public void undeployEvent() {
         super.undeployEvent();
+        if (container instanceof UndeployingEventProcessingUnitContainer) {
+            ((UndeployingEventProcessingUnitContainer) container).processingUnitUndeploying();
+        }
+        for (Callable c : undeployingEventListeners) {
+            try {
+                c.call();
+            } catch (Exception e) {
+                // ignore
+            }
+        }
     }
 
     public boolean isMemberAliveEnabled() {
@@ -838,11 +876,11 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     private int getSLAMax(ServiceBeanContext context) {
         int max = -1;
         ServiceLevelAgreements slas =
-            context.getServiceElement().getServiceLevelAgreements();
+                context.getServiceElement().getServiceLevelAgreements();
         SLA[] spaceSLAs = slas.getServiceSLAs();
         for (SLA spaceSLA : spaceSLAs) {
             int count =
-                getMaxServiceCount(spaceSLA.getConfigArgs());
+                    getMaxServiceCount(spaceSLA.getConfigArgs());
             if (count != -1) {
                 max = count;
                 break;

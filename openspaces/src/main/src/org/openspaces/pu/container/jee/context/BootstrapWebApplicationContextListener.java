@@ -20,10 +20,7 @@ import com.gigaspaces.start.SystemBoot;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.SharedServiceData;
-import org.openspaces.core.cluster.ClusterInfo;
-import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
-import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
-import org.openspaces.core.cluster.MemberAliveIndicator;
+import org.openspaces.core.cluster.*;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.properties.BeanLevelPropertyBeanPostProcessor;
 import org.openspaces.core.properties.BeanLevelPropertyPlaceholderConfigurer;
@@ -190,6 +187,17 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
                             }
                         });
                     }
+                }
+
+                map = applicationContext.getBeansOfType(ProcessingUnitUndeployingListener.class);
+                for (Iterator it = map.values().iterator(); it.hasNext();) {
+                    final ProcessingUnitUndeployingListener listener = (ProcessingUnitUndeployingListener) it.next();
+                    SharedServiceData.addUndeployingEventListener(key, new Callable() {
+                        public Object call() throws Exception {
+                            listener.processingUnitUndeploying();
+                            return null;
+                        }
+                    });
                 }
             }
         } else {
