@@ -721,6 +721,11 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         }
     }
 
+    @Override
+    public void undeployEvent() {
+        super.undeployEvent();
+    }
+
     public boolean isMemberAliveEnabled() {
         return (memberAliveIndicators != null && memberAliveIndicators.length > 0);
     }
