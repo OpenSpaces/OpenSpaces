@@ -72,11 +72,11 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
         return gridServiceManagersByUID.isEmpty();
     }
 
-    public GridServiceManager waitForAtLeaseOne() {
-        return waitForAtLeaseOne(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    public GridServiceManager waitForAtLeastOne() {
+        return waitForAtLeastOne(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     }
 
-    public GridServiceManager waitForAtLeaseOne(long timeout, TimeUnit timeUnit) {
+    public GridServiceManager waitForAtLeastOne(long timeout, TimeUnit timeUnit) {
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<GridServiceManager> ref = new AtomicReference<GridServiceManager>();
         GridServiceManagerAddedEventListener added = new GridServiceManagerAddedEventListener() {
