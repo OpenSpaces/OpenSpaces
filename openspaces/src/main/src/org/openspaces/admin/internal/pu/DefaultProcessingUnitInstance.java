@@ -352,11 +352,11 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         ((InternalGridServiceManager) processingUnit.getManagingGridServiceManager()).relocate(this, gridServiceContainerToRelocateTo);
     }
 
-    public ProcessingUnitInstance relocateAnsWait(GridServiceContainer gridServiceContainerToRelocateTo) {
-        return relocateAnsWait(gridServiceContainerToRelocateTo, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    public ProcessingUnitInstance relocateAndWait(GridServiceContainer gridServiceContainerToRelocateTo) {
+        return relocateAndWait(gridServiceContainerToRelocateTo, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
     }
 
-    public ProcessingUnitInstance relocateAnsWait(GridServiceContainer gridServiceContainerToRelocateTo, long timeout, TimeUnit timeUnit) {
+    public ProcessingUnitInstance relocateAndWait(GridServiceContainer gridServiceContainerToRelocateTo, long timeout, TimeUnit timeUnit) {
         final AtomicReference<ProcessingUnitInstance> ref = new AtomicReference<ProcessingUnitInstance>();
         final CountDownLatch latch = new CountDownLatch(2);
         ProcessingUnitInstanceLifecycleEventListener added = new ProcessingUnitInstanceLifecycleEventListener() {
@@ -395,7 +395,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public ProcessingUnitInstance relocateAndWait(long timeout, TimeUnit timeUnit) {
-        return relocateAnsWait(null, timeout, timeUnit);
+        return relocateAndWait(null, timeout, timeUnit);
     }
 
     public void restart() {

@@ -74,8 +74,8 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
      * Relocates the instance to the provided {@link org.openspaces.admin.gsc.GridServiceContainer}.
      *
      * <p>Note, the current processing instance is unusable once this call has been made. If the relocated processing
-     * unit instance is needed, or waiting for the relocation is required, use {@link #relocateAnsWait(org.openspaces.admin.gsc.GridServiceContainer)}
-     * or {@link #relocateAnsWait(org.openspaces.admin.gsc.GridServiceContainer, long, java.util.concurrent.TimeUnit)}. 
+     * unit instance is needed, or waiting for the relocation is required, use {@link #relocateAndWait(org.openspaces.admin.gsc.GridServiceContainer)}
+     * or {@link #relocateAndWait(org.openspaces.admin.gsc.GridServiceContainer, long, java.util.concurrent.TimeUnit)}. 
      */
     void relocate(GridServiceContainer gridServiceContainerToRelocateTo);
 
@@ -83,13 +83,13 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
      * Relocates the instance to the provided {@link org.openspaces.admin.gsc.GridServiceContainer}. The relocated
      * instance will be returned waiting for it indefinitely.
      */
-    ProcessingUnitInstance relocateAnsWait(GridServiceContainer gridServiceContainerToRelocateTo);
+    ProcessingUnitInstance relocateAndWait(GridServiceContainer gridServiceContainerToRelocateTo);
 
     /**
      * Relocates the instance to the provided {@link org.openspaces.admin.gsc.GridServiceContainer}. The relocated
      * instance will be returned waiting for it for the provided timeout.
      */
-    ProcessingUnitInstance relocateAnsWait(GridServiceContainer gridServiceContainerToRelocateTo, long timeout, TimeUnit timeUnit);
+    ProcessingUnitInstance relocateAndWait(GridServiceContainer gridServiceContainerToRelocateTo, long timeout, TimeUnit timeUnit);
 
     /**
      * Relocates the instance to any suitable {@link org.openspaces.admin.gsc.GridServiceContainer}.
@@ -118,13 +118,13 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
      * the backup to primary.
      *
      * <p>Note, the current processing unit instance is unusable once this call has been made. If the restarted
-     * proceaaing unit instance is needed, or waiting for the restart is required, use {@link #restartAndWait()}
+     * processing unit instance is needed, or waiting for the restart is required, use {@link #restartAndWait()}
      * or {@link #restartAndWait(long, java.util.concurrent.TimeUnit)}.
      */
     void restart();
 
     /**
-     * Restarts the processing unit instance and waits indefinitely for the restarted processing unit instnace
+     * Restarts the processing unit instance and waits indefinitely for the restarted processing unit instance
      * returning it.
      *
      * @see #restart()
@@ -132,7 +132,7 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
     ProcessingUnitInstance restartAndWait();
 
     /**
-     * Restarts the processing unit instance and waits for the restarted processing unit instnace
+     * Restarts the processing unit instance and waits for the restarted processing unit instance
      * returning it for the provided timeout.
      *
      * @see #restart()
