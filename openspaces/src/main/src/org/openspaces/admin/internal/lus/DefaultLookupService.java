@@ -7,6 +7,7 @@ import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSInfoProvider;
 import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.internal.log.InternalLogProvider;
+import com.gigaspaces.internal.log.InternalLogHelper;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOInfoProvider;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
@@ -68,7 +69,7 @@ public class DefaultLookupService extends AbstractAgentGridComponent implements 
 
     public LogEntry[] log(LogEntryMatcher matcher) throws AdminException {
         try {
-            return ((InternalLogProvider) registrar.getRegistrar()).log(matcher);
+            return InternalLogHelper.clientSideProcess(matcher, ((InternalLogProvider) registrar.getRegistrar()).log(matcher));
         } catch (IOException e) {
             throw new AdminException("Failed to get log", e);
         }
