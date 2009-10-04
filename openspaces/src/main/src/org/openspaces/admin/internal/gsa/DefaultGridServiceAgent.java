@@ -9,6 +9,8 @@ import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.security.SecurityException;
+import com.gigaspaces.log.LogEntry;
+import com.gigaspaces.log.LogEntryMatcher;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsa.GridServiceContainerOptions;
@@ -238,6 +240,14 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
             throw new AdminException("No privileges to restart", se);
         } catch (IOException e) {
             throw new AdminException("Failed to restart [" + agentGridComponent.getUid() + "]", e);
+        }
+    }
+
+    public LogEntry[] log(LogEntryMatcher matcher) throws AdminException {
+        try {
+            return gsa.log(matcher);
+        } catch (IOException e) {
+            throw new AdminException("Failed to get log", e);
         }
     }
 

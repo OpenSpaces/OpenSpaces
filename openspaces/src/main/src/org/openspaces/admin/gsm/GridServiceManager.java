@@ -17,6 +17,7 @@
 package org.openspaces.admin.gsm;
 
 import org.openspaces.admin.AgentGridComponent;
+import org.openspaces.admin.LogProviderGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
@@ -31,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author kimchy
  */
-public interface GridServiceManager extends AgentGridComponent {
+public interface GridServiceManager extends AgentGridComponent, LogProviderGridComponent {
 
     /**
      * Deploys a processing unit based on the processing unit deployment information on the given grid

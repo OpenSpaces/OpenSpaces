@@ -7,6 +7,8 @@ import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
+import com.gigaspaces.log.LogEntry;
+import com.gigaspaces.log.LogEntryMatcher;
 import net.jini.core.lookup.ServiceID;
 
 import org.openspaces.admin.internal.admin.InternalAdmin;
@@ -18,11 +20,13 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
+import org.openspaces.admin.AdminException;
 
 import java.rmi.RemoteException;
 import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.io.IOException;
 
 /**
  * @author kimchy
@@ -136,6 +140,14 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
 
     public void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
         processingUnitInstances.removeProcessingUnitInstanceLifecycleEventListener(eventListener);
+    }
+
+    public LogEntry[] log(LogEntryMatcher matcher) throws AdminException {
+        try {
+            return gsc.log(matcher);
+        } catch (IOException e) {
+            throw new AdminException("Failed to get log", e);
+        }
     }
 
     public NIODetails getNIODetails() throws RemoteException {

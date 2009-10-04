@@ -8,6 +8,8 @@ import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
+import com.gigaspaces.log.LogEntry;
+import com.gigaspaces.log.LogEntryMatcher;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceID;
 import org.jini.rio.core.OperationalString;
@@ -32,6 +34,7 @@ import java.rmi.RemoteException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.io.IOException;
 
 /**
  * @author kimchy
@@ -220,6 +223,14 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             throw new AdminException("No privileges to relocate a processing unit instance", se);
         } catch (Exception e) {
             throw new AdminException("Failed to relocate processing unit instance to grid service container", e);
+        }
+    }
+
+    public LogEntry[] log(LogEntryMatcher matcher) throws AdminException {
+        try {
+            return gsm.log(matcher);
+        } catch (IOException e) {
+            throw new AdminException("Failed to get log", e);
         }
     }
 
