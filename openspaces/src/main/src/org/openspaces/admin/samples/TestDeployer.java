@@ -2,9 +2,29 @@ package org.openspaces.admin.samples;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
+import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.gsa.GridServiceContainerOptions;
+import org.openspaces.admin.gsa.GridServiceOptions;
+import org.openspaces.admin.machine.Machine;
+import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventListener;
+import org.openspaces.admin.gsm.events.GridServiceManagerRemovedEventListener;
 import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.ProcessingUnitPartition;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.space.SpaceDeployment;
+import org.openspaces.admin.space.Space;
+import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEventListener;
+import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEvent;
+
+import java.util.concurrent.TimeUnit;
+
+import com.gigaspaces.log.LogEntry;
+import com.gigaspaces.log.AllLogEntryMatcher;
+import com.gigaspaces.log.LastXTimeLogEntryMatcher;
 
 /**
  * @author kimchy
@@ -13,39 +33,24 @@ public class TestDeployer {
 
     public static void main(String[] args) throws Exception {
         Admin admin = new AdminFactory().addGroup("kimchy").createAdmin();
-        System.out.println("Start 1 GSM and 2 GSCs");
-        admin.getGridServiceManagers().waitFor(1);
-        System.out.println("Found at least 1 GSM");
-        admin.getGridServiceContainers().waitFor(2);
-        System.out.println("Found at least 2 GSC");
-        ProcessingUnit procesingUnit = admin.getGridServiceManagers().deploy(new SpaceDeployment("test")
-        .numberOfInstances(2).maxInstancesPerVM(1).addZone("zone3"));
-        System.out.println("Deployed space, waiting...");
-        procesingUnit.waitFor(2);
-        System.out.println("Deployed space");
 
-        System.out.println("Destroying instance");
-        procesingUnit.getInstances()[0].destroy();
-        System.out.println("Waiting again for all processing unit instances to be up");
-        procesingUnit.waitFor(2);
+        admin.getGridServiceContainers().waitFor(1);
+        GridServiceContainer container = admin.getGridServiceContainers().getContainers()[0];
 
-        System.out.println("Start another GSC, I am waiting for it!");
-        admin.getGridServiceContainers().waitFor(3);
-        GridServiceContainer emptyContainer = null;
-        for (GridServiceContainer gridServiceContainer : admin.getGridServiceContainers()) {
-            if (gridServiceContainer.getProcessingUnitInstances().length == 0) {
-                emptyContainer = gridServiceContainer;
-                break;
-            }
+        System.out.println("Getting logs...");
+        System.out.println("*****");
+        LogEntry[] logs = container.log(new LastXTimeLogEntryMatcher(2, TimeUnit.SECONDS));
+        for (LogEntry log : logs) {
+            System.out.print(log.getText());
         }
-        System.out.println("Relocating....");
-        procesingUnit.getInstances()[0].relocate(emptyContainer);
-        System.out.println("Waiting for relocation to happen");
-        emptyContainer.waitFor(1);
-        System.out.println("Relocation happened, hurray!");
+        System.out.println("*****");
+        logs = container.log(new LastXTimeLogEntryMatcher(logs[0].getTimestamp(), 2, TimeUnit.SECONDS));
+        for (LogEntry log : logs) {
+            System.out.print(log.getText());
+        }
 
-        System.out.println("Undeploying...");
-        procesingUnit.undeploy();
-        System.out.println("Done");
+
+        System.out.println("Closing Admin");
+        admin.close();
     }
 }
