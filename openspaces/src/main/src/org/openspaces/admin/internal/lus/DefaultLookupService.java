@@ -3,16 +3,16 @@ package org.openspaces.admin.internal.lus;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.jvm.JVMInfoProvider;
 import com.gigaspaces.internal.jvm.JVMStatistics;
+import com.gigaspaces.internal.log.InternalLogHelper;
+import com.gigaspaces.internal.log.InternalLogProvider;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSInfoProvider;
 import com.gigaspaces.internal.os.OSStatistics;
-import com.gigaspaces.internal.log.InternalLogProvider;
-import com.gigaspaces.internal.log.InternalLogHelper;
+import com.gigaspaces.log.LogEntries;
+import com.gigaspaces.log.LogEntryMatcher;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOInfoProvider;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
-import com.gigaspaces.log.LogEntry;
-import com.gigaspaces.log.LogEntryMatcher;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceRegistrar;
@@ -20,8 +20,8 @@ import org.openspaces.admin.AdminException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
 
-import java.rmi.RemoteException;
 import java.io.IOException;
+import java.rmi.RemoteException;
 
 /**
  * @author kimchy
@@ -67,7 +67,7 @@ public class DefaultLookupService extends AbstractAgentGridComponent implements 
         return this.registrar;
     }
 
-    public LogEntry[] log(LogEntryMatcher matcher) throws AdminException {
+    public LogEntries log(LogEntryMatcher matcher) throws AdminException {
         try {
             return InternalLogHelper.clientSideProcess(matcher, ((InternalLogProvider) registrar.getRegistrar()).log(matcher));
         } catch (IOException e) {

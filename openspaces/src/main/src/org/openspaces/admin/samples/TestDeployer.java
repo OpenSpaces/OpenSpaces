@@ -27,7 +27,7 @@ public class TestDeployer {
 
             public void run() {
                 while (true) {
-                    final LogEntry[] logs = container.log(matcher);
+                    final LogEntries logs = container.log(matcher);
                     for (LogEntry log : logs) {
                         System.out.print(log.getText());
                     }

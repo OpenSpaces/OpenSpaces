@@ -10,6 +10,7 @@ import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.log.LogEntry;
 import com.gigaspaces.log.LogEntryMatcher;
+import com.gigaspaces.log.LogEntries;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceID;
 import org.jini.rio.core.OperationalString;
@@ -226,7 +227,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         }
     }
 
-    public LogEntry[] log(LogEntryMatcher matcher) throws AdminException {
+    public LogEntries log(LogEntryMatcher matcher) throws AdminException {
         try {
             return gsm.log(matcher);
         } catch (IOException e) {

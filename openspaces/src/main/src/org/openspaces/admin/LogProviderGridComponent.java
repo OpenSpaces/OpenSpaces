@@ -1,6 +1,6 @@
 package org.openspaces.admin;
 
-import com.gigaspaces.log.LogEntry;
+import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogEntryMatcher;
 
 /**
@@ -8,5 +8,5 @@ import com.gigaspaces.log.LogEntryMatcher;
  */
 public interface LogProviderGridComponent extends GridComponent {
 
-    LogEntry[] log(LogEntryMatcher matcher) throws AdminException;
+    LogEntries log(LogEntryMatcher matcher) throws AdminException;
 }

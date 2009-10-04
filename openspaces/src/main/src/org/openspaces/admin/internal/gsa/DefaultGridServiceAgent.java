@@ -11,6 +11,7 @@ import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.security.SecurityException;
 import com.gigaspaces.log.LogEntry;
 import com.gigaspaces.log.LogEntryMatcher;
+import com.gigaspaces.log.LogEntries;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsa.GridServiceContainerOptions;
@@ -243,7 +244,7 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
         }
     }
 
-    public LogEntry[] log(LogEntryMatcher matcher) throws AdminException {
+    public LogEntries log(LogEntryMatcher matcher) throws AdminException {
         try {
             return gsa.log(matcher);
         } catch (IOException e) {

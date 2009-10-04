@@ -9,6 +9,7 @@ import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.log.LogEntry;
 import com.gigaspaces.log.LogEntryMatcher;
+import com.gigaspaces.log.LogEntries;
 import net.jini.core.lookup.ServiceID;
 
 import org.openspaces.admin.internal.admin.InternalAdmin;
@@ -142,7 +143,7 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
         processingUnitInstances.removeProcessingUnitInstanceLifecycleEventListener(eventListener);
     }
 
-    public LogEntry[] log(LogEntryMatcher matcher) throws AdminException {
+    public LogEntries log(LogEntryMatcher matcher) throws AdminException {
         try {
             return gsc.log(matcher);
         } catch (IOException e) {
