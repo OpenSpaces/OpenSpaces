@@ -4,8 +4,6 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.gsc.GridServiceContainer;
 
-import java.util.concurrent.TimeUnit;
-
 import com.gigaspaces.log.*;
 
 /**
