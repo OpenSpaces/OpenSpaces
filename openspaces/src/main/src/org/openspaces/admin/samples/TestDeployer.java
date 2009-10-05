@@ -19,24 +19,48 @@ public class TestDeployer {
 
         System.out.println("Getting logs...");
 
-        new Thread(new Runnable() {
+//        LogEntryMatcher matcher = new ReverseLogEntryMatcher(new LastNLogEntryMatcher(2));
+//        while (true) {
+//            final LogEntries logs = container.log(matcher);
+//            if (logs.logEntries().isEmpty()) {
+//                break;
+//            }
+//            for (LogEntry log : logs.logEntries()) {
+//                System.out.print(log.getTextWithLF());
+//            }
+//        }
 
-            private LogEntryMatcher matcher = new ContinuousLogEntryMatcher(new LastNLogEntryMatcher(100));
-
-            public void run() {
-                while (true) {
-                    final LogEntries logs = container.log(matcher);
-                    for (LogEntry log : logs) {
-                        System.out.print(log.getText());
-                    }
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        // ignore
-                    }
-                }
+        LogEntryMatcher matcher = new ForwardChunkLogEntryMatcher(new NLogEntryMatcher(2));
+        while (true) {
+            final LogEntries logs = container.log(matcher);
+            if (logs == null) {
+                break;
             }
-        }).start();
+            for (LogEntry log : logs.logEntries()) {
+                System.out.print(log.getTextWithLF());
+            }
+        }
+
+//        new Thread(new Runnable() {
+//
+//            private LogEntryMatcher matcher = new ContinuousLogEntryMatcher(new LastNLogEntryMatcher(100));
+//
+//            public void run() {
+//                while (true) {
+//                    final LogEntries logs = container.log(matcher);
+//                    for (LogEntry log : logs.logEntries()) {
+//                        System.out.println(log.getText());
+//                    }
+//                    try {
+//                        Thread.sleep(1000);
+//                    } catch (InterruptedException e) {
+//                        // ignore
+//                    }
+//                }
+//            }
+//        }).start();
+
+        System.out.println("done...");
 
         Thread.sleep(10000000);
 
