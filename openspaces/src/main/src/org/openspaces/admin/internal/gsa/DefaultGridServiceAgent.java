@@ -261,6 +261,10 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public LogEntries log(LogEntryMatcher matcher) throws AdminException {
+        return logDirect(matcher);
+    }
+
+    public LogEntries logDirect(LogEntryMatcher matcher) throws AdminException {
         try {
             return gsa.log(matcher);
         } catch (IOException e) {

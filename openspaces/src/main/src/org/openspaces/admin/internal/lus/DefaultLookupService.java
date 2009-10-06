@@ -10,6 +10,7 @@ import com.gigaspaces.internal.os.OSInfoProvider;
 import com.gigaspaces.internal.os.OSStatistics;
 import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogEntryMatcher;
+import com.gigaspaces.log.LogProcessType;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOInfoProvider;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
@@ -68,6 +69,13 @@ public class DefaultLookupService extends AbstractAgentGridComponent implements 
     }
 
     public LogEntries log(LogEntryMatcher matcher) throws AdminException {
+        if (getGridServiceAgent() != null) {
+            return getGridServiceAgent().log(LogProcessType.LUS, getVirtualMachine().getDetails().getPid(), matcher);
+        }
+        return logDirect(matcher);
+    }
+
+    public LogEntries logDirect(LogEntryMatcher matcher) throws AdminException {
         try {
             return InternalLogHelper.clientSideProcess(matcher, ((InternalLogProvider) registrar.getRegistrar()).log(matcher));
         } catch (IOException e) {
