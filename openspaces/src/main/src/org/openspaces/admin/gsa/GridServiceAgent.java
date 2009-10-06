@@ -20,6 +20,7 @@ import com.gigaspaces.grid.gsa.AgentProcessesDetails;
 import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogProcessType;
 import com.gigaspaces.log.LogEntryMatcher;
+import com.gigaspaces.log.CompoundLogEntries;
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.LogProviderGridComponent;
 import org.openspaces.admin.gsc.GridServiceContainer;
@@ -100,7 +101,7 @@ public interface GridServiceAgent extends GridComponent, LogProviderGridComponen
      */
     void startGridService(GridServiceOptions options);
 
-    LogEntries log(final LogProcessType type, final long pid, LogEntryMatcher matcher);
+    LogEntries logEntries(final LogProcessType type, final long pid, LogEntryMatcher matcher);
 
-    LogEntries[] log(final LogProcessType type, LogEntryMatcher matcher);
+    CompoundLogEntries logEntries(final LogProcessType type, LogEntryMatcher matcher);
 }

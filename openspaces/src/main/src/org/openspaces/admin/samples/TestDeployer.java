@@ -5,6 +5,7 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
+import static com.gigaspaces.log.LogEntryMatchers.*;
 
 /**
  * @author kimchy
@@ -19,28 +20,23 @@ public class TestDeployer {
 
         System.out.println("Getting logs...");
 
-        GridServiceAgent agent = admin.getGridServiceAgents().waitForAtLeastOne();
-        LogEntryMatcher matcher = new ForwardChunkLogEntryMatcher(new NLogEntryMatcher(2));
-        while (true) {
-            LogEntries[] entries = agent.log(LogProcessType.GSC, matcher);
-            boolean notAllNull = false;
-            for (LogEntries logEntries : entries) {
-                if (logEntries == null) {
-                    continue;
-                }
-                notAllNull = true;
-                for (LogEntry log : logEntries.logEntries()) {
-                    System.out.println(logEntries.getProcessType() + "/" + logEntries.getPid() + ": " + log.getText());
-                }
-            }
-            if (!notAllNull) {
-                break;
-            }
-        }
-
-//        LogEntryMatcher matcher = new ReverseLogEntryMatcher(new LastNLogEntryMatcher(2));
+//        GridServiceAgent agent = admin.getGridServiceAgents().waitForAtLeastOne();
+//        LogEntryMatcher matcher = forwardChunk(size(2));
 //        while (true) {
-//            final LogEntries logs = container.log(matcher);
+//            CompoundLogEntries entries = agent.logEntries(LogProcessType.GSC, matcher);
+//            if (entries.isEmpty()) {
+//                break;
+//            }
+//            for (LogEntries logEntries : entries.getSafeEntries()) {
+//                for (LogEntry log : logEntries.logEntries()) {
+//                    System.out.println(logEntries.getProcessType() + "/" + logEntries.getPid() + ": " + log.getText());
+//                }
+//            }
+//        }
+
+//        LogEntryMatcher matcher = reverse(lastN(2));
+//        while (true) {
+//            final LogEntries logs = container.logEntries(matcher);
 //            if (logs.logEntries().isEmpty()) {
 //                break;
 //            }
@@ -49,9 +45,9 @@ public class TestDeployer {
 //            }
 //        }
 
-//        LogEntryMatcher matcher = new ForwardChunkLogEntryMatcher(new NLogEntryMatcher(2));
+//        LogEntryMatcher matcher = forwardChunk(size(2));
 //        while (true) {
-//            final LogEntries logs = container.log(matcher);
+//            final LogEntries logs = container.logEntries(matcher);
 //            if (logs == null) {
 //                break;
 //            }
@@ -60,13 +56,19 @@ public class TestDeployer {
 //            }
 //        }
 
+//        LogEntryMatcher matcher = afterTime("2009-10-06 14:41:00", beforeTime("2009-10-06 14:41:20"));
+//        LogEntries logEntries = container.logEntries(matcher);
+//        for (LogEntry logEntry : logEntries.logEntries()) {
+//            System.out.println(logEntry.getText());
+//        }
+
 //        new Thread(new Runnable() {
 //
-//            private LogEntryMatcher matcher = new ContinuousLogEntryMatcher(new LastNLogEntryMatcher(100));
+//            private LogEntryMatcher matcher = continuous(lastN(100));
 //
 //            public void run() {
 //                while (true) {
-//                    final LogEntries logs = container.log(matcher);
+//                    final LogEntries logs = container.logEntries(matcher);
 //                    for (LogEntry log : logs.logEntries()) {
 //                        System.out.println(log.getText());
 //                    }

@@ -145,7 +145,7 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
 
     public LogEntries logEntries(LogEntryMatcher matcher) throws AdminException {
         if (getGridServiceAgent() != null) {
-            return getGridServiceAgent().log(LogProcessType.GSC, getVirtualMachine().getDetails().getPid(), matcher);
+            return getGridServiceAgent().logEntries(LogProcessType.GSC, getVirtualMachine().getDetails().getPid(), matcher);
         }
         return logEntriesDirect(matcher);
     }

@@ -70,7 +70,7 @@ public class DefaultLookupService extends AbstractAgentGridComponent implements 
 
     public LogEntries logEntries(LogEntryMatcher matcher) throws AdminException {
         if (getGridServiceAgent() != null) {
-            return getGridServiceAgent().log(LogProcessType.LUS, getVirtualMachine().getDetails().getPid(), matcher);
+            return getGridServiceAgent().logEntries(LogProcessType.LUS, getVirtualMachine().getDetails().getPid(), matcher);
         }
         return logEntriesDirect(matcher);
     }

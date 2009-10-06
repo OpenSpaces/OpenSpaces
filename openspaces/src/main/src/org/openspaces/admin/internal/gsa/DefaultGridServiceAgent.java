@@ -12,6 +12,7 @@ import com.gigaspaces.security.SecurityException;
 import com.gigaspaces.log.LogEntryMatcher;
 import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogProcessType;
+import com.gigaspaces.log.CompoundLogEntries;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsa.GridServiceContainerOptions;
@@ -89,7 +90,7 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
         internalStartGridService(options);
     }
 
-    public LogEntries log(LogProcessType type, long pid, LogEntryMatcher matcher) {
+    public LogEntries logEntries(LogProcessType type, long pid, LogEntryMatcher matcher) {
         try {
             return gsa.logEntries(type, pid, matcher);
         } catch (IOException e) {
@@ -97,7 +98,7 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
         }
     }
 
-    public LogEntries[] log(LogProcessType type, LogEntryMatcher matcher) {
+    public CompoundLogEntries logEntries(LogProcessType type, LogEntryMatcher matcher) {
         try {
             return gsa.logEntries(type, matcher);
         } catch (IOException e) {
