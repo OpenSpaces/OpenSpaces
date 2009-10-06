@@ -20,19 +20,19 @@ public class TestDeployer {
 
         System.out.println("Getting logs...");
 
-//        GridServiceAgent agent = admin.getGridServiceAgents().waitForAtLeastOne();
-//        LogEntryMatcher matcher = forwardChunk(size(2));
-//        while (true) {
-//            CompoundLogEntries entries = agent.logEntries(LogProcessType.GSC, matcher);
-//            if (entries.isEmpty()) {
-//                break;
-//            }
-//            for (LogEntries logEntries : entries.getSafeEntries()) {
-//                for (LogEntry log : logEntries.logEntries()) {
-//                    System.out.println(logEntries.getProcessType() + "/" + logEntries.getPid() + ": " + log.getText());
-//                }
-//            }
-//        }
+        GridServiceAgent agent = admin.getGridServiceAgents().waitForAtLeastOne();
+        LogEntryMatcher matcher = forwardChunk(size(2));
+        while (true) {
+            CompoundLogEntries entries = agent.logEntries(LogProcessType.GSC, matcher);
+            if (entries.isEmpty()) {
+                break;
+            }
+            for (LogEntries logEntries : entries.getSafeEntries()) {
+                for (LogEntry log : logEntries.logEntries()) {
+                    System.out.println(logEntries.getProcessType() + "/" + logEntries.getPid() + ": " + log.getText());
+                }
+            }
+        }
 
 //        LogEntryMatcher matcher = reverse(lastN(2));
 //        while (true) {
