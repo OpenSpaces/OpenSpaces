@@ -17,6 +17,9 @@
 package org.openspaces.admin.gsa;
 
 import com.gigaspaces.grid.gsa.AgentProcessesDetails;
+import com.gigaspaces.log.LogEntries;
+import com.gigaspaces.log.LogProcessType;
+import com.gigaspaces.log.LogEntryMatcher;
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.LogProviderGridComponent;
 import org.openspaces.admin.gsc.GridServiceContainer;
@@ -96,4 +99,8 @@ public interface GridServiceAgent extends GridComponent, LogProviderGridComponen
      * Starts a generic process of a given type.
      */
     void startGridService(GridServiceOptions options);
+
+    LogEntries log(final LogProcessType type, final long pid, LogEntryMatcher matcher);
+
+    LogEntries[] log(final LogProcessType type, LogEntryMatcher matcher);
 }

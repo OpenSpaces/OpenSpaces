@@ -11,6 +11,7 @@ import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.security.SecurityException;
 import com.gigaspaces.log.LogEntryMatcher;
 import com.gigaspaces.log.LogEntries;
+import com.gigaspaces.log.LogProcessType;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsa.GridServiceContainerOptions;
@@ -86,6 +87,22 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
 
     public void startGridService(GridServiceManagerOptions options) {
         internalStartGridService(options);
+    }
+
+    public LogEntries log(LogProcessType type, long pid, LogEntryMatcher matcher) {
+        try {
+            return gsa.offlineLog(type, pid, matcher);
+        } catch (IOException e) {
+            throw new AdminException("Failed to retrieve logs", e);
+        }
+    }
+
+    public LogEntries[] log(LogProcessType type, LogEntryMatcher matcher) {
+        try {
+            return gsa.offlineLog(type, matcher);
+        } catch (IOException e) {
+            throw new AdminException("Failed to retrieve logs", e);
+        }
     }
 
     private int internalStartGridService(GridServiceManagerOptions options) {
