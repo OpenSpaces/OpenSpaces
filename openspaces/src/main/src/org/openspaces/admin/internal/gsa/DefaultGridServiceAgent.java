@@ -91,7 +91,7 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
 
     public LogEntries log(LogProcessType type, long pid, LogEntryMatcher matcher) {
         try {
-            return gsa.offlineLog(type, pid, matcher);
+            return gsa.logEntries(type, pid, matcher);
         } catch (IOException e) {
             throw new AdminException("Failed to retrieve logs", e);
         }
@@ -99,7 +99,7 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
 
     public LogEntries[] log(LogProcessType type, LogEntryMatcher matcher) {
         try {
-            return gsa.offlineLog(type, matcher);
+            return gsa.logEntries(type, matcher);
         } catch (IOException e) {
             throw new AdminException("Failed to retrieve logs", e);
         }
@@ -260,13 +260,13 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
         }
     }
 
-    public LogEntries log(LogEntryMatcher matcher) throws AdminException {
-        return logDirect(matcher);
+    public LogEntries logEntries(LogEntryMatcher matcher) throws AdminException {
+        return logEntriesDirect(matcher);
     }
 
-    public LogEntries logDirect(LogEntryMatcher matcher) throws AdminException {
+    public LogEntries logEntriesDirect(LogEntryMatcher matcher) throws AdminException {
         try {
-            return gsa.log(matcher);
+            return gsa.logEntriesDirect(matcher);
         } catch (IOException e) {
             throw new AdminException("Failed to get log", e);
         }

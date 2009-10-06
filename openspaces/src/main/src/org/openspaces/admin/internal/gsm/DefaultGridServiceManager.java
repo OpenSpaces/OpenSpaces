@@ -227,16 +227,16 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         }
     }
 
-    public LogEntries log(LogEntryMatcher matcher) throws AdminException {
+    public LogEntries logEntries(LogEntryMatcher matcher) throws AdminException {
         if (getGridServiceAgent() != null) {
             return getGridServiceAgent().log(LogProcessType.GSM, getVirtualMachine().getDetails().getPid(), matcher);
         }
-        return logDirect(matcher);
+        return logEntriesDirect(matcher);
     }
 
-    public LogEntries logDirect(LogEntryMatcher matcher) throws AdminException {
+    public LogEntries logEntriesDirect(LogEntryMatcher matcher) throws AdminException {
         try {
-            return gsm.log(matcher);
+            return gsm.logEntriesDirect(matcher);
         } catch (IOException e) {
             throw new AdminException("Failed to get log", e);
         }

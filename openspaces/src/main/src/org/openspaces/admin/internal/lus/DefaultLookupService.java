@@ -68,16 +68,16 @@ public class DefaultLookupService extends AbstractAgentGridComponent implements 
         return this.registrar;
     }
 
-    public LogEntries log(LogEntryMatcher matcher) throws AdminException {
+    public LogEntries logEntries(LogEntryMatcher matcher) throws AdminException {
         if (getGridServiceAgent() != null) {
             return getGridServiceAgent().log(LogProcessType.LUS, getVirtualMachine().getDetails().getPid(), matcher);
         }
-        return logDirect(matcher);
+        return logEntriesDirect(matcher);
     }
 
-    public LogEntries logDirect(LogEntryMatcher matcher) throws AdminException {
+    public LogEntries logEntriesDirect(LogEntryMatcher matcher) throws AdminException {
         try {
-            return InternalLogHelper.clientSideProcess(matcher, ((InternalLogProvider) registrar.getRegistrar()).log(matcher));
+            return InternalLogHelper.clientSideProcess(matcher, ((InternalLogProvider) registrar.getRegistrar()).logEntriesDirect(matcher));
         } catch (IOException e) {
             throw new AdminException("Failed to get log", e);
         }
