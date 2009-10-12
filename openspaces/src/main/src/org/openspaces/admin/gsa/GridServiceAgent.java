@@ -103,5 +103,7 @@ public interface GridServiceAgent extends GridComponent, LogProviderGridComponen
 
     LogEntries logEntries(final LogProcessType type, final long pid, LogEntryMatcher matcher);
 
-    CompoundLogEntries logEntries(final LogProcessType type, LogEntryMatcher matcher);
+    CompoundLogEntries liveLogEntries(LogEntryMatcher matcher);
+
+    CompoundLogEntries allLogEntries(final LogProcessType type, LogEntryMatcher matcher);
 }

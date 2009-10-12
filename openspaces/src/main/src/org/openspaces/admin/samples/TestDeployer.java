@@ -20,19 +20,56 @@ public class TestDeployer {
 
         System.out.println("Getting logs...");
 
-        GridServiceAgent agent = admin.getGridServiceAgents().waitForAtLeastOne();
-        LogEntryMatcher matcher = forwardChunk(size(2));
-        while (true) {
-            CompoundLogEntries entries = agent.logEntries(LogProcessType.GSC, matcher);
-            if (entries.isEmpty()) {
-                break;
-            }
-            for (LogEntries logEntries : entries.getSafeEntries()) {
-                for (LogEntry log : logEntries.logEntries()) {
-                    System.out.println(logEntries.getProcessType() + "/" + logEntries.getPid() + ": " + log.getText());
+//        LogEntries logEntries = container.logEntries(afterTime("2009-10-02 15:12", regex("...", lastN(100))));
+//
+//
+//        for (LogEntry logEntry : logEntries.logEntries()) {
+//            System.out.println(logEntry.getText());
+//        }
+
+
+
+
+        final GridServiceAgent agent = admin.getGridServiceAgents().waitForAtLeastOne();
+        
+//        LogEntryMatcher matcher = forwardChunk(size(2));
+//        while (true) {
+//            CompoundLogEntries entries = agent.liveLogEntries(matcher);
+//            if (entries.isEmpty()) {
+//                break;
+//            }
+//            for (LogEntries logEntries : entries.getSafeEntries()) {
+//                for (LogEntry log : logEntries.logEntries()) {
+//                    System.out.println(logEntries.getProcessType() + "/" + logEntries.getPid() + ": " + log.getText());
+//                }
+//            }
+//        }
+
+        new Thread(new Runnable() {
+
+            private LogEntryMatcher matcher = continuous(lastN(100));
+
+            public void run() {
+                while (true) {
+                    CompoundLogEntries entries = agent.liveLogEntries(matcher);
+                    if (entries.isEmpty()) {
+                        System.out.println("**** EXIT");
+                        break;
+                    }
+                    for (LogEntries logEntries : entries.getSafeEntries()) {
+                        for (LogEntry log : logEntries.logEntries()) {
+                            System.out.println(logEntries.getProcessType() + "/" + logEntries.getPid() + ": " + log.getText());
+                        }
+                    }
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        // ignore
+                    }
                 }
             }
-        }
+        }).start();
+
 
 //        LogEntryMatcher matcher = reverse(lastN(2));
 //        while (true) {

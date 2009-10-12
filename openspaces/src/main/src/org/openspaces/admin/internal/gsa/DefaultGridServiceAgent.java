@@ -6,13 +6,13 @@ import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.jvm.JVMStatistics;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSStatistics;
+import com.gigaspaces.log.CompoundLogEntries;
+import com.gigaspaces.log.LogEntries;
+import com.gigaspaces.log.LogEntryMatcher;
+import com.gigaspaces.log.LogProcessType;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.security.SecurityException;
-import com.gigaspaces.log.LogEntryMatcher;
-import com.gigaspaces.log.LogEntries;
-import com.gigaspaces.log.LogProcessType;
-import com.gigaspaces.log.CompoundLogEntries;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsa.GridServiceContainerOptions;
@@ -24,16 +24,18 @@ import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventListener;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.lus.InternalLookupService;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.internal.support.InternalAgentGridComponent;
-import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.lus.events.LookupServiceAddedEventListener;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -98,7 +100,39 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
         }
     }
 
-    public CompoundLogEntries logEntries(LogProcessType type, LogEntryMatcher matcher) {
+    public CompoundLogEntries liveLogEntries(LogEntryMatcher matcher) {
+        List<LogProcessType> types = new ArrayList<LogProcessType>();
+        List<Long> pids = new ArrayList<Long>();
+        for (GridServiceManager gsm : admin.getGridServiceManagers()) {
+            if (gsm.getGridServiceAgent() != null && gsm.getGridServiceAgent() == this) {
+                types.add(LogProcessType.GSM);
+                pids.add(gsm.getVirtualMachine().getDetails().getPid());
+            }
+        }
+        for (GridServiceContainer gsc : admin.getGridServiceContainers()) {
+            if (gsc.getGridServiceAgent() != null && gsc.getGridServiceAgent() == this) {
+                types.add(LogProcessType.GSC);
+                pids.add(gsc.getVirtualMachine().getDetails().getPid());
+            }
+        }
+        for (LookupService lus : admin.getLookupServices()) {
+            if (lus.getGridServiceAgent() != null && lus.getGridServiceAgent() == this) {
+                types.add(LogProcessType.LUS);
+                pids.add(lus.getVirtualMachine().getDetails().getPid());
+            }
+        }
+        try {
+            long[] lPids = new long[pids.size()];
+            for (int i = 0; i < lPids.length; i++) {
+                lPids[i] = pids.get(i);
+            }
+            return gsa.logEntries(types.toArray(new LogProcessType[types.size()]), lPids, matcher);
+        } catch (IOException e) {
+            throw new AdminException("Failed to retrieve logs", e);
+        }
+    }
+
+    public CompoundLogEntries allLogEntries(LogProcessType type, LogEntryMatcher matcher) {
         try {
             return gsa.logEntries(type, matcher);
         } catch (IOException e) {
