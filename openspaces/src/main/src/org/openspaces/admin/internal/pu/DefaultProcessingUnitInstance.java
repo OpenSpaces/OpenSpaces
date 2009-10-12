@@ -353,7 +353,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public ProcessingUnitInstance relocateAndWait(GridServiceContainer gridServiceContainerToRelocateTo) {
-        return relocateAndWait(gridServiceContainerToRelocateTo, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return relocateAndWait(gridServiceContainerToRelocateTo, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public ProcessingUnitInstance relocateAndWait(GridServiceContainer gridServiceContainerToRelocateTo, long timeout, TimeUnit timeUnit) {
@@ -391,7 +391,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public ProcessingUnitInstance relocateAndWait() {
-        return relocateAndWait(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return relocateAndWait(admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public ProcessingUnitInstance relocateAndWait(long timeout, TimeUnit timeUnit) {
@@ -406,7 +406,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public ProcessingUnitInstance restartAndWait() {
-        return restartAndWait(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return restartAndWait(admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public ProcessingUnitInstance restartAndWait(long timeout, TimeUnit timeUnit) {

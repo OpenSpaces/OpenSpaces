@@ -73,7 +73,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     public ProcessingUnit deploy(SpaceDeployment deployment) {
-        return deploy(deployment, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return deploy(deployment, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public ProcessingUnit deploy(SpaceDeployment deployment, long timeout, TimeUnit timeUnit) {
@@ -96,7 +96,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     public ProcessingUnit deploy(ProcessingUnitDeployment deployment) {
-        return deploy(deployment, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return deploy(deployment, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public ProcessingUnit deploy(ProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit) {

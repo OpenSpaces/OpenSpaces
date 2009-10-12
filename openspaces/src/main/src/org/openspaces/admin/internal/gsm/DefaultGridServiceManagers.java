@@ -73,7 +73,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     }
 
     public GridServiceManager waitForAtLeastOne() {
-        return waitForAtLeastOne(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return waitForAtLeastOne(admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public GridServiceManager waitForAtLeastOne(long timeout, TimeUnit timeUnit) {
@@ -97,7 +97,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     }
 
     public boolean waitFor(int numberOfGridServiceManagers) {
-        return waitFor(numberOfGridServiceManagers, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return waitFor(numberOfGridServiceManagers, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public boolean waitFor(int numberOfGridServiceManagers, long timeout, TimeUnit timeUnit) {

@@ -139,7 +139,7 @@ public class DefaultSpaces implements InternalSpaces {
     }
 
     public Space waitFor(String spaceName) {
-        return waitFor(spaceName, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return waitFor(spaceName, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public Space waitFor(final String spaceName, long timeout, TimeUnit timeUnit) {

@@ -367,7 +367,7 @@ public class DefaultSpace implements InternalSpace {
     }
 
     public boolean waitFor(int numberOfSpaceInstances) {
-        return waitFor(numberOfSpaceInstances, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return waitFor(numberOfSpaceInstances, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public boolean waitFor(int numberOfSpaceInstances, long timeout, TimeUnit timeUnit) {
@@ -388,7 +388,7 @@ public class DefaultSpace implements InternalSpace {
     }
 
     public boolean waitFor(int numberOfSpaceInstances, SpaceMode spaceMode) {
-        return waitFor(numberOfSpaceInstances, spaceMode, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return waitFor(numberOfSpaceInstances, spaceMode, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public boolean waitFor(int numberOfSpaceInstances, final SpaceMode spaceMode, long timeout, TimeUnit timeUnit) {

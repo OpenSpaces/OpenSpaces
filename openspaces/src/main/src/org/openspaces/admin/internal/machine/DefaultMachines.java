@@ -66,7 +66,7 @@ public class DefaultMachines implements InternalMachines {
     }
 
     public boolean waitFor(int numberOfMachines) {
-        return waitFor(numberOfMachines, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return waitFor(numberOfMachines, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public boolean waitFor(int numberOfMachines, long timeout, TimeUnit timeUnit) {
@@ -104,7 +104,7 @@ public class DefaultMachines implements InternalMachines {
     }
 
     public Machine waitFor(String hostAddress) {
-        return waitFor(hostAddress, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return waitFor(hostAddress, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public Machine waitFor(final String hostAddress, long timeout, TimeUnit timeUnit) {

@@ -76,7 +76,7 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
     }
 
     public boolean waitFor(int numberOfProcessingUnitInstances) {
-        return waitFor(numberOfProcessingUnitInstances, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return waitFor(numberOfProcessingUnitInstances, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public boolean waitFor(int numberOfProcessingUnitInstances, long timeout, TimeUnit timeUnit) {
@@ -97,7 +97,7 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
     }
 
     public boolean waitFor(String processingUnitName, int numberOfProcessingUnitInstances) {
-        return waitFor(processingUnitName, numberOfProcessingUnitInstances, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return waitFor(processingUnitName, numberOfProcessingUnitInstances, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public boolean waitFor(final String processingUnitName, int numberOfProcessingUnitInstances, long timeout, TimeUnit timeUnit) {

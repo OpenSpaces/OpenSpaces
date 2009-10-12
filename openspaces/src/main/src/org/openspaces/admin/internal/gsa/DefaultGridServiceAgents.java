@@ -77,7 +77,7 @@ public class DefaultGridServiceAgents implements InternalGridServiceAgents {
     }
 
     public GridServiceAgent waitForAtLeastOne() {
-        return waitForAtLeastOne(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return waitForAtLeastOne(admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public GridServiceAgent waitForAtLeastOne(long timeout, TimeUnit timeUnit) {
@@ -101,7 +101,7 @@ public class DefaultGridServiceAgents implements InternalGridServiceAgents {
     }
 
     public boolean waitFor(int numberOfAgents) {
-        return waitFor(numberOfAgents, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return waitFor(numberOfAgents, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public boolean waitFor(int numberOfAgents, long timeout, TimeUnit timeUnit) {

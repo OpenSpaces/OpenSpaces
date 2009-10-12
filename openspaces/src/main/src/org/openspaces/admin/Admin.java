@@ -115,6 +115,16 @@ public interface Admin extends StatisticsMonitor {
     void setSchedulerCorePoolSize(int coreThreads);
 
     /**
+     * The default timeout to be used for operations that have a wait for mechanism, i.e. operations
+     * with overloaded methods containing <tt>(..., long timeout, TimeUnit timeUnit)</tt>. If not set, the
+     * default is <tt>Long.MAX_VALUE, TimeUnit.MILLISECONDS</tt>
+     * 
+     * @param timeout The timeout value to be used as the default operation timeout if non was provided.
+     * @param timeUnit The time-unit corresponding to the timeout.
+     */
+    void setDefaultTimeout(long timeout, TimeUnit timeUnit);
+    
+    /**
      * Closes the Admin, releasing any resource and stops listening for events from the lookup service.
      */
     void close();

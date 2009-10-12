@@ -151,7 +151,7 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public GridServiceManager startGridServiceAndWait(GridServiceManagerOptions options) {
-        return startGridServiceAndWait(options, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return startGridServiceAndWait(options, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public GridServiceManager startGridServiceAndWait(GridServiceManagerOptions options, long timeout, TimeUnit timeUnit) {
@@ -197,7 +197,7 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public GridServiceContainer startGridServiceAndWait(GridServiceContainerOptions options) {
-        return startGridServiceAndWait(options, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return startGridServiceAndWait(options, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public GridServiceContainer startGridServiceAndWait(GridServiceContainerOptions options, long timeout, TimeUnit timeUnit) {
@@ -244,7 +244,7 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public LookupService startGridServiceAndWait(LookupServiceOptions options) {
-        return startGridServiceAndWait(options, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return startGridServiceAndWait(options, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public LookupService startGridServiceAndWait(LookupServiceOptions options, long timeout, TimeUnit timeUnit) {

@@ -64,7 +64,7 @@ public class DefaultLookupServices implements InternalLookupServices {
     }
 
     public boolean waitFor(int numberOfLookupServices) {
-        return waitFor(numberOfLookupServices, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return waitFor(numberOfLookupServices, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public boolean waitFor(int numberOfLookupServices, long timeout, TimeUnit timeUnit) {

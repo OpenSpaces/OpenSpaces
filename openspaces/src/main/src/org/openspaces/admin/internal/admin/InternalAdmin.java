@@ -14,6 +14,7 @@ import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author kimchy
@@ -23,6 +24,9 @@ public interface InternalAdmin extends Admin {
     ScheduledThreadPoolExecutor getScheduler();
 
     long getScheduledSpaceMonitorInterval();
+    
+    long getDefaultTimeout();
+    TimeUnit getDefaultTimeoutTimeUnit();
 
     UserDetails getUserDetails();
 

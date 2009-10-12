@@ -68,7 +68,7 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
     }
 
     public boolean waitFor(int numberOfGridServiceContainers) {
-        return waitFor(numberOfGridServiceContainers, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return waitFor(numberOfGridServiceContainers, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public boolean waitFor(int numberOfGridServiceContainers, long timeout, TimeUnit timeUnit) {

@@ -124,6 +124,10 @@ public class DefaultAdmin implements InternalAdmin {
 
     private volatile UserDetails userDetails;
 
+    private long defaultTimeout = Long.MAX_VALUE;
+
+    private TimeUnit defaultTimeoutTimeUnit = TimeUnit.MILLISECONDS;
+
     public DefaultAdmin() {
         this.discoveryService = new DiscoveryService(this);
     }
@@ -231,6 +235,14 @@ public class DefaultAdmin implements InternalAdmin {
     public long getScheduledSpaceMonitorInterval() {
         return scheduledSpaceMonitorInterval;
     }
+    
+    public long getDefaultTimeout() {
+        return defaultTimeout;
+    }
+
+    public TimeUnit getDefaultTimeoutTimeUnit() {
+        return defaultTimeoutTimeUnit;
+    }
 
     public synchronized void setSpaceMonitorInterval(long interval, TimeUnit timeUnit) {
         this.scheduledSpaceMonitorInterval = timeUnit.toMillis(interval);
@@ -243,6 +255,11 @@ public class DefaultAdmin implements InternalAdmin {
 
     public void setSchedulerCorePoolSize(int coreThreads) {
         scheduledExecutorService.setCorePoolSize(coreThreads);
+    }
+    
+    public void setDefaultTimeout(long timeout, TimeUnit timeUnit) {
+        this.defaultTimeout = timeout;
+        this.defaultTimeoutTimeUnit = timeUnit;
     }
 
     public void close() {

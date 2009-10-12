@@ -131,7 +131,7 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
     }
 
     public ProcessingUnit waitFor(String processingUnitName) {
-        return waitFor(processingUnitName, Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return waitFor(processingUnitName, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public ProcessingUnit waitFor(final String processingUnitName, long timeout, TimeUnit timeUnit) {
