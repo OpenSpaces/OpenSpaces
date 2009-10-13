@@ -17,6 +17,7 @@ public class TestDeployer {
 
         admin.getGridServiceContainers().waitFor(1);
         final GridServiceContainer container = admin.getGridServiceContainers().getContainers()[0];
+        container.generateDump("test", null);
 
         System.out.println("Getting logs...");
 
@@ -31,7 +32,7 @@ public class TestDeployer {
 
 
         final GridServiceAgent agent = admin.getGridServiceAgents().waitForAtLeastOne();
-        
+
 //        LogEntryMatcher matcher = forwardChunk(size(2));
 //        while (true) {
 //            CompoundLogEntries entries = agent.liveLogEntries(matcher);

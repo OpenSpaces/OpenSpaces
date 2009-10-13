@@ -22,6 +22,7 @@ import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
 import org.openspaces.admin.internal.support.NetworkExceptionHelper;
+import org.openspaces.admin.internal.dump.InternalDumpResult;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
@@ -35,6 +36,7 @@ import java.rmi.RemoteException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.Map;
 import java.io.IOException;
 
 /**
@@ -239,6 +241,22 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             return gsm.logEntriesDirect(matcher);
         } catch (IOException e) {
             throw new AdminException("Failed to get log", e);
+        }
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {
+        try {
+            return new InternalDumpResult(gsm.generateDump(cause, context));
+        } catch (Exception e) {
+            throw new AdminException("Failed to generate dump", e);
+        }
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context, String... contributors) throws AdminException {
+        try {
+            return new InternalDumpResult(gsm.generateDump(cause, context, contributors));
+        } catch (Exception e) {
+            throw new AdminException("Failed to generate dump", e);
         }
     }
 

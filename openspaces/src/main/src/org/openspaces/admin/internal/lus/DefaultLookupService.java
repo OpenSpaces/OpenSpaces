@@ -8,6 +8,7 @@ import com.gigaspaces.internal.log.InternalLogProvider;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSInfoProvider;
 import com.gigaspaces.internal.os.OSStatistics;
+import com.gigaspaces.internal.dump.InternalDumpProvider;
 import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogEntryMatcher;
 import com.gigaspaces.log.LogProcessType;
@@ -20,9 +21,11 @@ import net.jini.core.lookup.ServiceRegistrar;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
+import org.openspaces.admin.internal.dump.InternalDumpResult;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.Map;
 
 /**
  * @author kimchy
@@ -80,6 +83,22 @@ public class DefaultLookupService extends AbstractAgentGridComponent implements 
             return InternalLogHelper.clientSideProcess(matcher, ((InternalLogProvider) registrar.getRegistrar()).logEntriesDirect(matcher));
         } catch (IOException e) {
             throw new AdminException("Failed to get log", e);
+        }
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {
+        try {
+            return new InternalDumpResult(((InternalDumpProvider) registrar).generateDump(cause, context));
+        } catch (Exception e) {
+            throw new AdminException("Failed to generate dump", e);
+        }
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context, String... contributors) throws AdminException {
+        try {
+            return new InternalDumpResult(((InternalDumpProvider) registrar).generateDump(cause, context, contributors));
+        } catch (Exception e) {
+            throw new AdminException("Failed to generate dump", e);
         }
     }
 

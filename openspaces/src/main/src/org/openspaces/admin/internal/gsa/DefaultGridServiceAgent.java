@@ -15,6 +15,7 @@ import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.security.SecurityException;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.DumpProviderGridComponent;
 import org.openspaces.admin.gsa.GridServiceContainerOptions;
 import org.openspaces.admin.gsa.GridServiceManagerOptions;
 import org.openspaces.admin.gsa.GridServiceOptions;
@@ -29,6 +30,7 @@ import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.lus.InternalLookupService;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.internal.support.InternalAgentGridComponent;
+import org.openspaces.admin.internal.dump.InternalDumpResult;
 import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.lus.events.LookupServiceAddedEventListener;
 
@@ -36,6 +38,7 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -97,6 +100,22 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
             return gsa.logEntries(type, pid, matcher);
         } catch (IOException e) {
             throw new AdminException("Failed to retrieve logs", e);
+        }
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {
+        try {
+            return new InternalDumpResult(gsa.generateDump(cause, context));
+        } catch (Exception e) {
+            throw new AdminException("Failed to generate dump", e);
+        }
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context, String... contributors) throws AdminException {
+        try {
+            return new InternalDumpResult(gsa.generateDump(cause, context, contributors));
+        } catch (Exception e) {
+            throw new AdminException("Failed to generate dump", e);
         }
     }
 
