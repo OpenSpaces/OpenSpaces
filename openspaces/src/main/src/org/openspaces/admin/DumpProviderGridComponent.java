@@ -4,6 +4,7 @@ import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogEntryMatcher;
 
 import java.util.Map;
+import java.io.File;
 
 /**
  * @author kimchy
@@ -15,6 +16,9 @@ public interface DumpProviderGridComponent extends GridComponent {
     DumpResult generateDump(String cause, Map<String, Object> context, String... contributors) throws AdminException;
     
     interface DumpResult {
-        String getFileLocation();
+
+        String getName();
+
+        void download(File targetDirectory, String fileName) throws AdminException;
     }
 }

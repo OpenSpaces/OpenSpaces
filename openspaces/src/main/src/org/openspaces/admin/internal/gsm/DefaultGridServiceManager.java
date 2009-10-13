@@ -246,7 +246,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
 
     public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {
         try {
-            return new InternalDumpResult(gsm.generateDump(cause, context));
+            return new InternalDumpResult(gsm, gsm.generateDump(cause, context));
         } catch (Exception e) {
             throw new AdminException("Failed to generate dump", e);
         }
@@ -254,7 +254,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
 
     public DumpResult generateDump(String cause, Map<String, Object> context, String... contributors) throws AdminException {
         try {
-            return new InternalDumpResult(gsm.generateDump(cause, context, contributors));
+            return new InternalDumpResult(gsm, gsm.generateDump(cause, context, contributors));
         } catch (Exception e) {
             throw new AdminException("Failed to generate dump", e);
         }

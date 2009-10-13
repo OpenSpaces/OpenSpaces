@@ -3,9 +3,12 @@ package org.openspaces.admin.samples;
 import com.gigaspaces.log.*;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
+import org.openspaces.admin.DumpProviderGridComponent;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import static com.gigaspaces.log.LogEntryMatchers.*;
+
+import java.io.File;
 
 /**
  * @author kimchy
@@ -17,7 +20,9 @@ public class TestDeployer {
 
         admin.getGridServiceContainers().waitFor(1);
         final GridServiceContainer container = admin.getGridServiceContainers().getContainers()[0];
-        container.generateDump("test", null);
+
+        DumpProviderGridComponent.DumpResult dumpResult = container.generateDump("test", null);
+        dumpResult.download(new File("."), "dump-test.zip");
 
         System.out.println("Getting logs...");
 
