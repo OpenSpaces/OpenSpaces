@@ -24,6 +24,9 @@ import com.gigaspaces.internal.jvm.JVMStatistics;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSHelper;
 import com.gigaspaces.internal.os.OSStatistics;
+import com.gigaspaces.internal.dump.InternalDumpProcessor;
+import com.gigaspaces.internal.dump.InternalDump;
+import com.gigaspaces.internal.dump.InternalDumpProcessorFailedException;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOInfoHelper;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
@@ -74,9 +77,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -92,7 +93,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author kimchy
  */
-public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBean {
+public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBean, InternalDumpProcessor {
 
     private static final Log logger = LogFactory.getLog(PUServiceBeanImpl.class);
 
@@ -1019,5 +1020,20 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     public String[] getZones() throws RemoteException {
         return ZoneHelper.getSystemZones();
+    }
+
+    public String getName() {
+        return puDetails.getPresentationName();
+    }
+
+    public void process(InternalDump dump) throws InternalDumpProcessorFailedException {
+        dump.addPrefix(clusterInfo.getUniqueName() + "/");
+        String springXML = (String) context.getInitParameter("pu");
+        if (springXML != null) {
+            PrintWriter writer = new PrintWriter(dump.createFileWriter("pu.xml"));
+            writer.print(springXML);
+            writer.close();
+        }
+        dump.removePrefix();
     }
 }

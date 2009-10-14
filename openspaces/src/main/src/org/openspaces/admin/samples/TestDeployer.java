@@ -21,11 +21,11 @@ public class TestDeployer {
         Admin admin = new AdminFactory().addGroup("kimchy").createAdmin();
 
         admin.getGridServiceManagers().waitFor(1);
-        admin.getGridServiceContainers().waitFor(2);
+        admin.getGridServiceContainers().waitFor(1);
         final GridServiceContainer container = admin.getGridServiceContainers().getContainers()[0];
 
         Map<String, Object> context = new HashMap<String, Object>();
-        context.put("logEntryMatcher", lastN(5));
+//        context.put("logEntryMatcher", lastN(5));
 
 //        DumpProviderGridComponent.DumpResult dumpResult = container.generateDump("test", context);
         DumpResult dumpResult = admin.generateDump("test", context);

@@ -533,6 +533,8 @@ public class Deploy {
         return (args);
     }
 
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
+
     private static String readFile(URL root, String puPath, String filePath) throws IOException {
         URL puURL = new URL(root, puPath + filePath);
         BufferedReader reader = new BufferedReader(new InputStreamReader(puURL.openStream()));
@@ -540,7 +542,7 @@ public class Deploy {
         StringBuffer buffer = new StringBuffer();
         String line;
         while ((line = reader.readLine()) != null) {
-            buffer.append(line);
+            buffer.append(line).append(LINE_SEPARATOR);
         }
         reader.close();
         return buffer.toString();
