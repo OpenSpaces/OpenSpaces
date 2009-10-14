@@ -3,6 +3,9 @@ package org.openspaces.admin.internal.gsm;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.dump.DumpResult;
+import org.openspaces.admin.dump.CompoundDumpResult;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.events.*;
 import org.openspaces.admin.internal.admin.InternalAdmin;
@@ -205,5 +208,17 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
 
     public InternalGridServiceManager replaceGridServiceManager(InternalGridServiceManager gridServiceManager) {
         return (InternalGridServiceManager) gridServiceManagersByUID.put(gridServiceManager.getUid(), gridServiceManager);
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {
+        return generateDump(cause, context, (String[]) null);
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context, String... processor) throws AdminException {
+        CompoundDumpResult dumpResult = new CompoundDumpResult();
+        for (GridServiceManager gsm : this) {
+            dumpResult.add(gsm.generateDump(cause, context, processor));
+        }
+        return dumpResult;
     }
 }

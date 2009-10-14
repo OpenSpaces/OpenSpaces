@@ -1,7 +1,9 @@
 package org.openspaces.admin.internal.gsc;
 
 import com.j_spaces.kernel.SizeConcurrentHashMap;
-import org.openspaces.admin.Admin;
+import org.openspaces.admin.*;
+import org.openspaces.admin.dump.CompoundDumpResult;
+import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsc.events.*;
 import org.openspaces.admin.internal.admin.InternalAdmin;
@@ -132,5 +134,17 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
             gridServiceContainerRemovedEventManager.gridServiceContainerRemoved(existingGSC);
         }
         return existingGSC;
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {
+        return generateDump(cause, context, (String[]) null);
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context, String... processor) throws AdminException {
+        CompoundDumpResult dumpResult = new CompoundDumpResult();
+        for (GridServiceContainer gsc : this) {
+            dumpResult.add(gsc.generateDump(cause, context, processor));
+        }
+        return dumpResult;
     }
 }

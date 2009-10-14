@@ -19,6 +19,7 @@ import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceRegistrar;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
 import org.openspaces.admin.internal.dump.InternalDumpResult;
@@ -88,7 +89,7 @@ public class DefaultLookupService extends AbstractAgentGridComponent implements 
 
     public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {
         try {
-            return new InternalDumpResult(((InternalDumpProvider) registrar), ((InternalDumpProvider) registrar).generateDump(cause, context));
+            return new InternalDumpResult(((InternalDumpProvider) registrar.getRegistrar()), ((InternalDumpProvider) registrar.getRegistrar()).generateDump(cause, context));
         } catch (Exception e) {
             throw new AdminException("Failed to generate dump", e);
         }
@@ -96,7 +97,7 @@ public class DefaultLookupService extends AbstractAgentGridComponent implements 
 
     public DumpResult generateDump(String cause, Map<String, Object> context, String... processors) throws AdminException {
         try {
-            return new InternalDumpResult(((InternalDumpProvider) registrar), ((InternalDumpProvider) registrar).generateDump(cause, context, processors));
+            return new InternalDumpResult(((InternalDumpProvider) registrar.getRegistrar()), ((InternalDumpProvider) registrar.getRegistrar()).generateDump(cause, context, processors));
         } catch (Exception e) {
             throw new AdminException("Failed to generate dump", e);
         }

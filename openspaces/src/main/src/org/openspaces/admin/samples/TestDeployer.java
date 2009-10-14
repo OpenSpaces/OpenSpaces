@@ -3,7 +3,7 @@ package org.openspaces.admin.samples;
 import com.gigaspaces.log.*;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
-import org.openspaces.admin.DumpProviderGridComponent;
+import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import static com.gigaspaces.log.LogEntryMatchers.*;
@@ -20,14 +20,16 @@ public class TestDeployer {
     public static void main(String[] args) throws Exception {
         Admin admin = new AdminFactory().addGroup("kimchy").createAdmin();
 
-        admin.getGridServiceContainers().waitFor(1);
+        admin.getGridServiceManagers().waitFor(1);
+        admin.getGridServiceContainers().waitFor(2);
         final GridServiceContainer container = admin.getGridServiceContainers().getContainers()[0];
 
         Map<String, Object> context = new HashMap<String, Object>();
         context.put("logEntryMatcher", lastN(5));
 
-        DumpProviderGridComponent.DumpResult dumpResult = container.generateDump("test", context);
-        dumpResult.download(new File("."), "/dump-test.zip");
+//        DumpProviderGridComponent.DumpResult dumpResult = container.generateDump("test", context);
+        DumpResult dumpResult = admin.generateDump("test", context);
+        dumpResult.download(new File("."), "dump-test.zip");
 
         System.out.println("Getting logs...");
 

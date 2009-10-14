@@ -2,6 +2,11 @@ package org.openspaces.admin.internal.gsa;
 
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.AdminException;
+import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.dump.DumpProvider;
+import org.openspaces.admin.dump.DumpResult;
+import org.openspaces.admin.dump.CompoundDumpResult;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.events.*;
 import org.openspaces.admin.internal.admin.InternalAdmin;
@@ -173,5 +178,17 @@ public class DefaultGridServiceAgents implements InternalGridServiceAgents {
             gridServiceAgentRemovedEventManager.gridServiceAgentRemoved(existing);
         }
         return existing;
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {
+        return generateDump(cause, context, (String[]) null);
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context, String... processor) throws AdminException {
+        CompoundDumpResult dumpResult = new CompoundDumpResult();
+        for (GridServiceAgent gsa : this) {
+            dumpResult.add(gsa.generateDump(cause, context, processor));
+        }
+        return dumpResult;
     }
 }

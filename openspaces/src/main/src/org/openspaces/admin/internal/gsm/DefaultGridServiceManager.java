@@ -16,6 +16,7 @@ import net.jini.core.lookup.ServiceID;
 import org.jini.rio.core.OperationalString;
 import org.jini.rio.monitor.ProvisionMonitorAdmin;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;

@@ -17,6 +17,7 @@
 package org.openspaces.admin.lus;
 
 import org.openspaces.admin.AdminAware;
+import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.lus.events.LookupServiceAddedEventManager;
 import org.openspaces.admin.lus.events.LookupServiceLifecycleEventListener;
 import org.openspaces.admin.lus.events.LookupServiceRemovedEventManager;
@@ -33,7 +34,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author kimchy
  */
-public interface LookupServices extends AdminAware, Iterable<LookupService> {
+public interface LookupServices extends AdminAware, Iterable<LookupService>, DumpProvider {
 
     /**
      * Returns all the currently discovered lus.

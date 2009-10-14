@@ -2,6 +2,10 @@ package org.openspaces.admin.internal.lus;
 
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.AdminException;
+import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.dump.DumpResult;
+import org.openspaces.admin.dump.CompoundDumpResult;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.lus.events.DefaultLookupServiceAddedEventManager;
 import org.openspaces.admin.internal.lus.events.DefaultLookupServiceRemovedEventManager;
@@ -132,5 +136,17 @@ public class DefaultLookupServices implements InternalLookupServices {
 
     public LookupServiceRemovedEventManager getLookupServiceRemoved() {
         return this.lookupServiceRemovedEventManager;
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {
+        return generateDump(cause, context, (String[]) null);
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context, String... processor) throws AdminException {
+        CompoundDumpResult dumpResult = new CompoundDumpResult();
+        for (LookupService lus : this) {
+            dumpResult.add(lus.generateDump(cause, context, processor));
+        }
+        return dumpResult;
     }
 }

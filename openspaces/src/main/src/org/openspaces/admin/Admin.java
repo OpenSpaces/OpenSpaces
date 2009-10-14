@@ -31,6 +31,7 @@ import org.openspaces.admin.space.Spaces;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
 import org.openspaces.admin.zone.Zones;
+import org.openspaces.admin.dump.DumpProvider;
 
 /**
  * The main interface for accessing Admin API. Created using the {@link org.openspaces.admin.AdminFactory}
@@ -54,7 +55,7 @@ import org.openspaces.admin.zone.Zones;
  *
  * @author kimchy
  */
-public interface Admin extends StatisticsMonitor {
+public interface Admin extends StatisticsMonitor, DumpProvider {
 
     /**
      * Returns the lookup groups this admin uses.

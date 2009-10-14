@@ -15,7 +15,7 @@ import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.security.SecurityException;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.AdminException;
-import org.openspaces.admin.DumpProviderGridComponent;
+import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.gsa.GridServiceContainerOptions;
 import org.openspaces.admin.gsa.GridServiceManagerOptions;
 import org.openspaces.admin.gsa.GridServiceOptions;

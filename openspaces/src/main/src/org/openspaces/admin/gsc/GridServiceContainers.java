@@ -17,6 +17,7 @@
 package org.openspaces.admin.gsc;
 
 import org.openspaces.admin.AdminAware;
+import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventManager;
 import org.openspaces.admin.gsc.events.GridServiceContainerLifecycleEventListener;
 import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventManager;
@@ -33,7 +34,7 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author kimchy
  */
-public interface GridServiceContainers extends AdminAware, Iterable<GridServiceContainer> {
+public interface GridServiceContainers extends AdminAware, Iterable<GridServiceContainer>, DumpProvider {
 
     /**
      * Returns all the currently discovered containers.

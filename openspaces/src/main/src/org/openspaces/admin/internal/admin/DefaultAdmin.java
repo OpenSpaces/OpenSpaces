@@ -12,9 +12,13 @@ import net.jini.core.discovery.LookupLocator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.AdminEventListener;
+import org.openspaces.admin.AdminException;
+import org.openspaces.admin.dump.DumpResult;
+import org.openspaces.admin.dump.CompoundDumpResult;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
+import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.internal.discovery.DiscoveryService;
@@ -41,6 +45,7 @@ import org.openspaces.admin.internal.transport.*;
 import org.openspaces.admin.internal.vm.*;
 import org.openspaces.admin.internal.zone.*;
 import org.openspaces.admin.lus.LookupServices;
+import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.machine.Machines;
 import org.openspaces.admin.os.OperatingSystem;
@@ -812,6 +817,27 @@ public class DefaultAdmin implements InternalAdmin {
         if (!os.hasOperatingSystemInfoProviders()) {
             operatingSystems.removeOperatingSystem(os.getUid());
         }
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {
+        return generateDump(cause, context, (String[]) null);
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context, String... processor) throws AdminException {
+        CompoundDumpResult dumpResult = new CompoundDumpResult();
+        for (GridServiceManager gsm : gridServiceManagers) {
+            dumpResult.add(gsm.generateDump(cause, context, processor));
+        }
+        for (GridServiceContainer gsc : gridServiceContainers) {
+            dumpResult.add(gsc.generateDump(cause, context, processor));
+        }
+        for (GridServiceAgent gsa : gridServiceAgents) {
+            dumpResult.add(gsa.generateDump(cause, context, processor));
+        }
+        for (LookupService lus : lookupServices) {
+            dumpResult.add(lus.generateDump(cause, context, processor));
+        }
+        return dumpResult;
     }
 
     private class ScheduledAgentProcessessMonitor implements Runnable {

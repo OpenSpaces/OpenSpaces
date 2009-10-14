@@ -23,6 +23,7 @@ import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.dump.DumpResult;
 
 import java.rmi.RemoteException;
 import java.util.Iterator;

@@ -17,6 +17,7 @@
 package org.openspaces.admin.gsm;
 
 import org.openspaces.admin.AdminAware;
+import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventManager;
 import org.openspaces.admin.gsm.events.GridServiceManagerLifecycleEventListener;
 import org.openspaces.admin.gsm.events.GridServiceManagerRemovedEventManager;
@@ -40,7 +41,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author kimchy
  */
-public interface GridServiceManagers extends AdminAware, Iterable<GridServiceManager> {
+public interface GridServiceManagers extends AdminAware, Iterable<GridServiceManager>, DumpProvider {
 
     /**
      * Returns all the currently discovered managers.

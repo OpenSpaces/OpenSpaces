@@ -17,6 +17,7 @@
 package org.openspaces.admin.gsa;
 
 import org.openspaces.admin.AdminAware;
+import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.gsa.events.GridServiceAgentAddedEventManager;
 import org.openspaces.admin.gsa.events.GridServiceAgentLifecycleEventListener;
 import org.openspaces.admin.gsa.events.GridServiceAgentRemovedEventManager;
@@ -33,7 +34,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author kimchy
  */
-public interface GridServiceAgents extends AdminAware, Iterable<GridServiceAgent> {
+public interface GridServiceAgents extends AdminAware, Iterable<GridServiceAgent>, DumpProvider {
 
     /**
      * Returns all the currently discovered agents.
