@@ -36,6 +36,7 @@ import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
 import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.kernel.Environment;
+import com.j_spaces.kernel.ClassLoaderHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.*;
@@ -1027,13 +1028,19 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     public void process(InternalDump dump) throws InternalDumpProcessorFailedException {
-        dump.addPrefix(clusterInfo.getUniqueName() + "/");
-        String springXML = (String) context.getInitParameter("pu");
-        if (springXML != null) {
-            PrintWriter writer = new PrintWriter(dump.createFileWriter("pu.xml"));
-            writer.print(springXML);
-            writer.close();
+        ClassLoader prevClassLoader = Thread.currentThread().getContextClassLoader();
+        ClassLoaderHelper.setContextClassLoader(contextClassLoader, true);
+        try {
+            dump.addPrefix(clusterInfo.getUniqueName() + "/");
+            String springXML = (String) context.getInitParameter("pu");
+            if (springXML != null) {
+                PrintWriter writer = new PrintWriter(dump.createFileWriter("pu.xml"));
+                writer.print(springXML);
+                writer.close();
+            }
+            dump.removePrefix();
+        } finally {
+            ClassLoaderHelper.setContextClassLoader(prevClassLoader, true);
         }
-        dump.removePrefix();
     }
 }
