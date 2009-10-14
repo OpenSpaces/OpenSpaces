@@ -13,7 +13,7 @@ public interface DumpProviderGridComponent extends GridComponent {
 
     DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException;
 
-    DumpResult generateDump(String cause, Map<String, Object> context, String... contributors) throws AdminException;
+    DumpResult generateDump(String cause, Map<String, Object> context, String... processor) throws AdminException;
     
     interface DumpResult {
 
