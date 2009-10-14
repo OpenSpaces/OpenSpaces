@@ -9,6 +9,8 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import static com.gigaspaces.log.LogEntryMatchers.*;
 
 import java.io.File;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * @author kimchy
@@ -21,8 +23,11 @@ public class TestDeployer {
         admin.getGridServiceContainers().waitFor(1);
         final GridServiceContainer container = admin.getGridServiceContainers().getContainers()[0];
 
-        DumpProviderGridComponent.DumpResult dumpResult = container.generateDump("test", null);
-        dumpResult.download(new File("."), "dump-test.zip");
+        Map<String, Object> context = new HashMap<String, Object>();
+        context.put("logEntryMatcher", lastN(5));
+
+        DumpProviderGridComponent.DumpResult dumpResult = container.generateDump("test", context);
+        dumpResult.download(new File("."), "/dump-test.zip");
 
         System.out.println("Getting logs...");
 
