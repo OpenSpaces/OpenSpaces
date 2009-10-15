@@ -27,12 +27,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.gigaspaces.internal.dump.InternalDumpProcessor;
+import com.gigaspaces.internal.dump.InternalDump;
+import com.gigaspaces.internal.dump.InternalDumpProcessorFailedException;
+
 /**
  * Holds dynamically generated event containers.
  *
  * @author kimchy
  */
-public class EventContainersBus implements DisposableBean, ServiceDetailsProvider, ServiceMonitorsProvider {
+public class EventContainersBus implements DisposableBean, ServiceDetailsProvider, ServiceMonitorsProvider, InternalDumpProcessor {
 
     public static final String SUFFIX = "_eventContainer";
 
@@ -69,6 +73,18 @@ public class EventContainersBus implements DisposableBean, ServiceDetailsProvide
             Collections.addAll(list, container.getServicesMonitors());
         }
         return list.toArray(new ServiceMonitors[list.size()]);
+    }
+
+    public String getName() {
+        return "event-container-bus";
+    }
+
+    public void process(InternalDump dump) throws InternalDumpProcessorFailedException {
+        for (AbstractEventListenerContainer container : containers.values()) {
+            if (container instanceof InternalDumpProcessor) {
+                ((InternalDumpProcessor) container).process(dump);
+            }
+        }
     }
 
     public void destroy() throws Exception {

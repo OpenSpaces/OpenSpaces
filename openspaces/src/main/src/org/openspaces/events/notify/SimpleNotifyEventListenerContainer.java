@@ -21,6 +21,9 @@ import com.gigaspaces.events.DataEventSession;
 import com.gigaspaces.events.EventSessionFactory;
 import com.gigaspaces.events.batching.BatchRemoteEvent;
 import com.gigaspaces.events.batching.BatchRemoteEventListener;
+import com.gigaspaces.internal.dump.InternalDump;
+import com.gigaspaces.internal.dump.InternalDumpProcessor;
+import com.gigaspaces.internal.dump.InternalDumpProcessorFailedException;
 import com.j_spaces.core.client.EntryArrivedRemoteEvent;
 import net.jini.core.event.RemoteEvent;
 import net.jini.core.event.RemoteEventListener;
@@ -32,6 +35,7 @@ import org.openspaces.pu.service.ServiceMonitors;
 import org.springframework.dao.DataAccessException;
 import org.springframework.util.ClassUtils;
 
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.rmi.RemoteException;
 
@@ -49,7 +53,7 @@ import java.rmi.RemoteException;
  *
  * @author kimchy
  */
-public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListenerContainer {
+public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListenerContainer implements InternalDumpProcessor {
 
     private boolean performTakeOnNotify = false;
 
@@ -173,12 +177,65 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
         }
         return new ServiceDetails[]{new NotifyEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte, isPerformSnapshot(), getTransactionManagerName(),
                 getCommType(), isFifo(), getBatchSize(), getBatchTime(), isAutoRenew(),
-                isNotifyAll(), isNotifyWrite(), isNotifyUpdate(), isNotifyWrite(), isNotifyLeaseExpire(), isNotifyUnmatched(),
+                isNotifyAll(), isNotifyWrite(), isNotifyUpdate(), isNotifyTake(), isNotifyLeaseExpire(), isNotifyUnmatched(),
                 isTriggerNotifyTemplate(), isReplicateNotifyTemplate(), isPerformSnapshot(), isPassArrayAsIs(), isGuaranteed())};
     }
 
     public ServiceMonitors[] getServicesMonitors() {
         return new ServiceMonitors[]{new NotifyEventContainerServiceMonitors(beanName, processedEvents.get(), failedEvents.get(), getStatus())};
+    }
+
+    public String getName() {
+        return beanName;
+    }
+
+    public void process(InternalDump dump) throws InternalDumpProcessorFailedException {
+        StringBuilder notifications = new StringBuilder();
+        if (isNotifyAll()) {
+            notifications.append("ALL, ");
+        }
+        if (isNotifyWrite()) {
+            notifications.append("WRITE, ");
+        }
+        if (isNotifyUpdate()) {
+            notifications.append("UPDATE, ");
+        }
+        if (isNotifyTake()) {
+            notifications.append("TAKE, ");
+        }
+        if (isNotifyLeaseExpire()) {
+            notifications.append("LEASE, ");
+        }
+        if (isNotifyUnmatched()) {
+            notifications.append("UNMATCHED, ");
+        }
+
+        dump.addPrefix("event-containers/");
+        try {
+            PrintWriter writer = new PrintWriter(dump.createFileWriter(beanName + ".txt"));
+            writer.println("TYPE: Notify Container");
+            writer.println("===== CONFIGURATION =====");
+            writer.println("GigaSpace             : [" + getGigaSpace().getName() + "]");
+            writer.println("Template              : [" + getTemplate() + "]");
+            writer.println("Transactional         : [" + getTransactionManagerName() + "]");
+            writer.println("CommType              : [" + getCommType() + "]");
+            writer.println("Fifo                  : [" + isFifo() + "]");
+            writer.println("Batching              : Size [" + getBatchSize() + "], Time [" + getBatchTime() + "]");
+            writer.println("Auto Renew            : [" + isAutoRenew() + "]");
+            writer.println("Notifications         : [" + notifications + "]");
+            writer.println("Trigger Template      : [" + isTriggerNotifyTemplate() + "]");
+            writer.println("Replication Template  : [" + isReplicateNotifyTemplate() + "]");
+            writer.println("Perform Snapshot      : [" + isPerformSnapshot() + "]");
+            writer.println("Pass Array            : [" + isPassArrayAsIs() + "]");
+            writer.println("Guaranteed            : [" + isGuaranteed() + "]");
+            writer.println();
+            writer.println("===== RUNTIME =====");
+            writer.println("Status [" + getStatus() + "]");
+            writer.println("Events: Processed [" + getProcessedEvents() + "], Failed [" + getFailedEvents() + "]");
+            writer.close();
+        } finally {
+            dump.removePrefix();
+        }
     }
 
     /**

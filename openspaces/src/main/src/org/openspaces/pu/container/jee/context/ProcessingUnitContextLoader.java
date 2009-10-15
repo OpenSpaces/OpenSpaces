@@ -37,6 +37,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import com.gigaspaces.internal.dump.InternalDumpProcessor;
+
 /**
  * Same as Spring {@link org.springframework.web.context.ContextLoader}. Different in two aspects:
  * <p/>
@@ -111,6 +113,11 @@ public class ProcessingUnitContextLoader extends ContextLoader {
                         return null;
                     }
                 });
+            }
+
+            map = context.getBeansOfType(InternalDumpProcessor.class);
+            for (Iterator it = map.values().iterator(); it.hasNext();) {
+                SharedServiceData.addDumpProcessors(key, it.next());
             }
         }
         return context;

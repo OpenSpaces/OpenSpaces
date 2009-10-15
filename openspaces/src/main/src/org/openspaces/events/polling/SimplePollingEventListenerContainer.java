@@ -28,9 +28,14 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 import java.io.Serializable;
+import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.gigaspaces.internal.dump.InternalDumpProcessor;
+import com.gigaspaces.internal.dump.InternalDump;
+import com.gigaspaces.internal.dump.InternalDumpProcessorFailedException;
 
 /**
  * Event listener container variant that uses plain Space take API, specifically a loop of
@@ -65,7 +70,7 @@ import java.util.Set;
  *
  * @author kimchy
  */
-public class SimplePollingEventListenerContainer extends AbstractPollingEventListenerContainer {
+public class SimplePollingEventListenerContainer extends AbstractPollingEventListenerContainer implements InternalDumpProcessor {
 
     /**
      * Default thread name prefix: "DefaultPollingEventListenerContainer-".
@@ -591,12 +596,43 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
             tempalte = null;
         }
         return new ServiceDetails[]{new PollingEventContainerServiceDetails(beanName, getGigaSpace().getName(), tempalte, isPerformSnapshot(), getTransactionManagerName(),
-                getReceiveTimeout(), getReceiveOperationHandler().getClass().getName(), getTriggerOperationHandler() != null ? getTriggerOperationHandler().getClass().getName() : null,
+                getReceiveTimeout(), getReceiveOperationHandler().toString(), getTriggerOperationHandler() != null ? getTriggerOperationHandler().toString() : null,
                         getConcurrentConsumers(), getMaxConcurrentConsumers(), isPassArrayAsIs())};
     }
 
     public ServiceMonitors[] getServicesMonitors() {
         return new ServiceMonitors[] {new PollingEventContainerServiceMonitors(beanName, processedEvents.get(), failedEvents.get(), getStatus(), getConcurrentConsumers())};
+    }
+
+    public String getName() {
+        return beanName;
+    }
+
+    public void process(InternalDump dump) throws InternalDumpProcessorFailedException {
+        dump.addPrefix("event-containers/");
+        try {
+            PrintWriter writer = new PrintWriter(dump.createFileWriter(beanName + ".txt"));
+            writer.println("TYPE: Polling Container");
+            writer.println("===== CONFIGURATION =====");
+            writer.println("GigaSpace             : [" + getGigaSpace().getName() + "]");
+            writer.println("Template              : [" + getTemplate() + "]");
+            writer.println("Transactional         : [" + getTransactionManagerName() + "]");
+            writer.println("Receive Timeout       : [" + getReceiveTimeout() + "]");
+            writer.println("Receive Handler       : [" + getReceiveOperationHandler().toString() + "]");
+            if (getTriggerOperationHandler() != null) {
+            writer.println("Trigger Handler       : [" + getTriggerOperationHandler().toString() + "]");
+            }
+            writer.println("Consumers             : [" + getConcurrentConsumers() + "]");
+            writer.println("Max Consumers         : [" + getMaxConcurrentConsumers() + "]");
+            writer.println("Pass Array            : [" + isPassArrayAsIs() + "]");
+            writer.println();
+            writer.println("===== RUNTIME =====");
+            writer.println("Status [" + getStatus() + "]");
+            writer.println("Events: Processed [" + getProcessedEvents() + "], Failed [" + getFailedEvents() + "]");
+            writer.close();
+        } finally {
+            dump.removePrefix();
+        }
     }
 
     // -------------------------------------------------------------------------

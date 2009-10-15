@@ -17,6 +17,7 @@
 package org.openspaces.pu.container.jee.context;
 
 import com.gigaspaces.start.SystemBoot;
+import com.gigaspaces.internal.dump.InternalDumpProcessor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.SharedServiceData;
@@ -198,6 +199,11 @@ public class BootstrapWebApplicationContextListener implements ServletContextLis
                             return null;
                         }
                     });
+                }
+
+                map = applicationContext.getBeansOfType(InternalDumpProcessor.class);
+                for (Iterator it = map.values().iterator(); it.hasNext();) {
+                    SharedServiceData.addDumpProcessors(key, it.next());
                 }
             }
         } else {

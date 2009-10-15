@@ -122,6 +122,8 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     final private List<Callable> serviceMonitors = new ArrayList<Callable>();
 
+    final private List<InternalDumpProcessor> dumpProcessors = new ArrayList<InternalDumpProcessor>();
+
     private volatile boolean stopping = false;
 
     public PUServiceBeanImpl() {
@@ -200,6 +202,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             SharedServiceData.removeUndeployingEventListeners(clusterInfo.getUniqueName());
             SharedServiceData.removeServiceDetails(clusterInfo.getUniqueName());
             SharedServiceData.removeServiceMonitors(clusterInfo.getUniqueName());
+            SharedServiceData.removeDumpProcessors(clusterInfo.getUniqueName());
         }
 
         ClassLoader origClassLoader = Thread.currentThread().getContextClassLoader();
@@ -547,6 +550,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         buildMembersAliveIndicators();
         buildUndeployingEventListeners();
+        buildDumpProcessors();
 
         ArrayList<Object> serviceDetails = buildServiceDetails();
 
@@ -604,6 +608,29 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         List<Callable> sharedMonitors = SharedServiceData.removeServiceMonitors(clusterInfo.getUniqueName());
         if (sharedMonitors != null) {
             serviceMonitors.addAll(sharedMonitors);
+        }
+    }
+
+    private void buildDumpProcessors() {
+        if (container instanceof InternalDumpProcessor) {
+            dumpProcessors.add((InternalDumpProcessor) container);
+        }
+
+        if (container instanceof ApplicationContextProcessingUnitContainer) {
+            ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
+            final Map dumpProcessorsMap = applicationContext.getBeansOfType(InternalDumpProcessor.class);
+            for (Iterator it = dumpProcessorsMap.values().iterator(); it.hasNext();) {
+                dumpProcessors.add((InternalDumpProcessor) it.next());
+            }
+        }
+
+        List<Object> sharedDumpProcessors = SharedServiceData.removeDumpProcessors(clusterInfo.getUniqueName());
+        if (sharedDumpProcessors != null) {
+            for (Object dumpProcesosr : sharedDumpProcessors) {
+                if (dumpProcesosr instanceof InternalDumpProcessor) {
+                    dumpProcessors.add((InternalDumpProcessor) dumpProcesosr);
+                }
+            }
         }
     }
 
@@ -711,6 +738,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             SharedServiceData.removeUndeployingEventListeners(clusterInfo.getUniqueName());
             SharedServiceData.removeServiceDetails(clusterInfo.getUniqueName());
             SharedServiceData.removeServiceMonitors(clusterInfo.getUniqueName());
+            SharedServiceData.removeDumpProcessors(clusterInfo.getUniqueName());
         }
 
         serviceMonitors.clear();
@@ -1031,10 +1059,11 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         ClassLoader prevClassLoader = Thread.currentThread().getContextClassLoader();
         ClassLoaderHelper.setContextClassLoader(contextClassLoader, true);
         try {
-            String prefix = "processingUnits/" + clusterInfo.getName() + "/" + clusterInfo.getInstanceId();
+            String prefix = "processing-units/" + clusterInfo.getName() + "/" + clusterInfo.getInstanceId();
             if (clusterInfo.getBackupId() != null) {
                 prefix += "/" + clusterInfo.getBackupId();
             }
+            prefix += "/";
             dump.addPrefix(prefix);
             try {
                 String springXML = (String) context.getInitParameter("pu");
@@ -1042,6 +1071,13 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                     PrintWriter writer = new PrintWriter(dump.createFileWriter("pu.xml"));
                     writer.print(springXML);
                     writer.close();
+                }
+                for (InternalDumpProcessor dumpProcessor : dumpProcessors) {
+                    try {
+                        dumpProcessor.process(dump);
+                    } catch (Exception e) {
+                        logger.warn("Failed to generate dump for [" + dumpProcessor + "]", e);
+                    }
                 }
             } finally {
                 dump.removePrefix();

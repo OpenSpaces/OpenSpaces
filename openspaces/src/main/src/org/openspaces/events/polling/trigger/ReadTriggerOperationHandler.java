@@ -55,4 +55,8 @@ public class ReadTriggerOperationHandler implements TriggerOperationHandler {
         return gigaSpace.read(template, receiveTimeout);
     }
 
+    @Override
+    public String toString() {
+        return "Read Trigger, useTriggerAsTemplate[" + useTriggerAsTemplate + "]";
+    }
 }

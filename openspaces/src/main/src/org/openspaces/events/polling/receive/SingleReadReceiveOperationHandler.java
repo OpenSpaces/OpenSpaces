@@ -41,4 +41,9 @@ public class SingleReadReceiveOperationHandler extends AbstractNonBlockingReceiv
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
         return gigaSpace.read(template, 0);
     }
+
+    @Override
+    public String toString() {
+        return "Single Read, nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor + "]";
+    }
 }

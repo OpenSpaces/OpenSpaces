@@ -18,6 +18,9 @@ package org.openspaces.events.asyncpolling;
 
 import com.gigaspaces.async.AsyncFutureListener;
 import com.gigaspaces.async.AsyncResult;
+import com.gigaspaces.internal.dump.InternalDumpProcessor;
+import com.gigaspaces.internal.dump.InternalDump;
+import com.gigaspaces.internal.dump.InternalDumpProcessorFailedException;
 import org.openspaces.core.transaction.internal.TransactionalAsyncFutureListener;
 import org.openspaces.events.AbstractTransactionalEventListenerContainer;
 import org.openspaces.events.asyncpolling.receive.AsyncOperationHandler;
@@ -32,6 +35,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.io.Serializable;
+import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -53,7 +57,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @author kimchy
  */
-public class SimpleAsyncPollingEventListenerContainer extends AbstractTransactionalEventListenerContainer {
+public class SimpleAsyncPollingEventListenerContainer extends AbstractTransactionalEventListenerContainer implements InternalDumpProcessor {
 
     /**
      * The default receive timeout: 60000 ms = 60 seconds = 1 minute.
@@ -116,6 +120,31 @@ public class SimpleAsyncPollingEventListenerContainer extends AbstractTransactio
 
     public ServiceMonitors[] getServicesMonitors() {
         return new ServiceMonitors[]{new AsyncPollingEventContainerServiceMonitors(beanName, processedEvents.get(), failedEvents.get(), getStatus())};
+    }
+
+    public String getName() {
+        return beanName;
+    }
+
+    public void process(InternalDump dump) throws InternalDumpProcessorFailedException {
+        dump.addPrefix("event-containers/");
+        try {
+            PrintWriter writer = new PrintWriter(dump.createFileWriter(beanName + ".txt"));
+            writer.println("TYPE: Async Polling Container");
+            writer.println("===== CONFIGURATION =====");
+            writer.println("GigaSpace             : [" + getGigaSpace().getName() + "]");
+            writer.println("Template              : [" + getTemplate() + "]");
+            writer.println("Transactional         : [" + getTransactionManagerName() + "]");
+            writer.println("Receive Timeout       : [" + getReceiveTimeout() + "]");
+            writer.println("Consumers             : [" + concurrentConsumers + "]");
+            writer.println();
+            writer.println("===== RUNTIME =====");
+            writer.println("Status [" + getStatus() + "]");
+            writer.println("Events: Processed [" + getProcessedEvents() + "], Failed [" + getFailedEvents() + "]");
+            writer.close();
+        } finally {
+            dump.removePrefix();
+        }
     }
 
     @Override

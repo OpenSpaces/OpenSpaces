@@ -66,4 +66,9 @@ public class MultiReadReceiveOperationHandler extends AbstractNonBlockingReceive
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        return "Multi Read, maxEntries[" + maxEntries + "], nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor + "]";
+    }
 }

@@ -77,4 +77,9 @@ public class MultiExclusiveReadReceiveOperationHandler extends AbstractNonBlocki
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        return "Multi Exclusive Read, maxEntries[" + maxEntries + "], nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor + "]";
+    }
 }

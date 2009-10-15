@@ -41,4 +41,9 @@ public class SingleTakeReceiveOperationHandler extends AbstractNonBlockingReceiv
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
         return gigaSpace.take(template, 0);
     }
+
+    @Override
+    public String toString() {
+        return "Single Take, nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor + "]";
+    }
 }

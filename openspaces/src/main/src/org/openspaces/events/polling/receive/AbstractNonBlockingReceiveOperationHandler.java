@@ -27,9 +27,9 @@ import org.springframework.dao.DataAccessException;
  */
 public abstract class AbstractNonBlockingReceiveOperationHandler implements ReceiveOperationHandler {
 
-    private boolean nonBlocking = false;
+    protected boolean nonBlocking = false;
 
-    private int nonBlockingFactor = 10;
+    protected int nonBlockingFactor = 10;
 
     /**
      * Allows to configure the take operation to be performed in a non blocking manner.

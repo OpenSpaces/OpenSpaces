@@ -55,4 +55,9 @@ public class ExclusiveReadReceiveOperationHandler extends AbstractNonBlockingRec
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
         return gigaSpace.read(template, 0, gigaSpace.getModifiersForIsolationLevel() | ReadModifiers.EXCLUSIVE_READ_LOCK);
     }
+
+    @Override
+    public String toString() {
+        return "Single Exclusive Read, nonBlocking[" + nonBlocking + "], nonBlockingFactor[" + nonBlockingFactor + "]";
+    }
 }
