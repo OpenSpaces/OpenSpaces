@@ -1031,14 +1031,21 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         ClassLoader prevClassLoader = Thread.currentThread().getContextClassLoader();
         ClassLoaderHelper.setContextClassLoader(contextClassLoader, true);
         try {
-            dump.addPrefix(clusterInfo.getUniqueName() + "/");
-            String springXML = (String) context.getInitParameter("pu");
-            if (springXML != null) {
-                PrintWriter writer = new PrintWriter(dump.createFileWriter("pu.xml"));
-                writer.print(springXML);
-                writer.close();
+            String prefix = "processingUnits/" + clusterInfo.getName() + "/" + clusterInfo.getInstanceId();
+            if (clusterInfo.getBackupId() != null) {
+                prefix += "/" + clusterInfo.getBackupId();
             }
-            dump.removePrefix();
+            dump.addPrefix(prefix);
+            try {
+                String springXML = (String) context.getInitParameter("pu");
+                if (springXML != null) {
+                    PrintWriter writer = new PrintWriter(dump.createFileWriter("pu.xml"));
+                    writer.print(springXML);
+                    writer.close();
+                }
+            } finally {
+                dump.removePrefix();
+            }
         } finally {
             ClassLoaderHelper.setContextClassLoader(prevClassLoader, true);
         }
