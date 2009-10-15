@@ -37,9 +37,13 @@ public class CompoundDumpResult implements DumpResult {
         if (!fileName.endsWith(".zip")) {
             fileName = fileName + ".zip";
         }
+        File zipFile = new File(targetDirectory, fileName);
+        download(zipFile);
+    }
+
+    public void download(File target) throws AdminException {
         try {
-            File zipFile = new File(targetDirectory, fileName);
-            ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile));
+            ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(target));
             for (DumpResult dumpResult : dumpResults) {
                 ((InternalDumpResult) dumpResult).download(zos);
             }

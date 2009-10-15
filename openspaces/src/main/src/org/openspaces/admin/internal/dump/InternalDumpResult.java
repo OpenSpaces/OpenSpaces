@@ -30,6 +30,14 @@ public class InternalDumpResult implements DumpResult {
         internalResult.download(dumpProvider, zos);
     }
 
+    public void download(File target) throws AdminException {
+        try {
+            internalResult.download(dumpProvider, target);
+        } catch (Exception e) {
+            throw new AdminException("Failed to download", e);
+        }
+    }
+
     public void download(File targetDirectory, String fileName) throws AdminException {
         try {
             internalResult.download(dumpProvider, targetDirectory, fileName);
