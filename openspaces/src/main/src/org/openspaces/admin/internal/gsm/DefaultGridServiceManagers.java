@@ -3,7 +3,6 @@ package org.openspaces.admin.internal.gsm;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
-import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.dump.CompoundDumpResult;
 import org.openspaces.admin.gsm.GridServiceManager;
