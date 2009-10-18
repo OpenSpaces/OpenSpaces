@@ -29,7 +29,7 @@ public class TestDeployer {
 
 //        DumpProviderGridComponent.DumpResult dumpResult = container.generateDump("test", context);
         DumpResult dumpResult = admin.generateDump("test", context);
-        dumpResult.download(new File("."), "dump-test.zip");
+        dumpResult.download(new File("."), "dump-test.zip", null);
 
         System.out.println("Getting logs...");
 

@@ -11,7 +11,9 @@ public interface DumpResult {
 
     String getName();
 
-    void download(File target) throws AdminException;
+    long downloadSize();
 
-    void download(File targetDirectory, String fileName) throws AdminException;
+    void download(File target, DumpDownloadListener listener) throws AdminException;
+
+    void download(File targetDirectory, String fileName, DumpDownloadListener listener) throws AdminException;
 }

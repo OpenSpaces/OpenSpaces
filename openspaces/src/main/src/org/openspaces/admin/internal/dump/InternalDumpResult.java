@@ -3,6 +3,7 @@ package org.openspaces.admin.internal.dump;
 import com.gigaspaces.internal.dump.InternalDumpProvider;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.dump.DumpResult;
+import org.openspaces.admin.dump.DumpDownloadListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,21 +27,25 @@ public class InternalDumpResult implements DumpResult {
         return internalResult.getName();
     }
 
-    public void download(ZipOutputStream zos) throws IOException {
-        internalResult.download(dumpProvider, zos);
+    public long downloadSize() {
+        return internalResult.downloadSize();
     }
 
-    public void download(File target) throws AdminException {
+    public void download(ZipOutputStream zos, DumpDownloadListener listener) throws IOException {
+        internalResult.download(dumpProvider, zos, new InternalDumpDownloadListenerAdapter(listener));
+    }
+
+    public void download(File target, DumpDownloadListener listener) throws AdminException {
         try {
-            internalResult.download(dumpProvider, target);
+            internalResult.download(dumpProvider, target, new InternalDumpDownloadListenerAdapter(listener));
         } catch (Exception e) {
             throw new AdminException("Failed to download", e);
         }
     }
 
-    public void download(File targetDirectory, String fileName) throws AdminException {
+    public void download(File targetDirectory, String fileName, DumpDownloadListener listener) throws AdminException {
         try {
-            internalResult.download(dumpProvider, targetDirectory, fileName);
+            internalResult.download(dumpProvider, targetDirectory, fileName, new InternalDumpDownloadListenerAdapter(listener));
         } catch (Exception e) {
             throw new AdminException("Failed to download", e);
         }

@@ -33,19 +33,27 @@ public class CompoundDumpResult implements DumpResult {
         return dumpResults.toArray(new DumpResult[dumpResults.size()]);
     }
 
-    public void download(File targetDirectory, String fileName) throws AdminException {
+    public long downloadSize() {
+        long downloadSize = 0;
+        for (DumpResult dumpResult : dumpResults) {
+            downloadSize += dumpResult.downloadSize();
+        }
+        return downloadSize;
+    }
+
+    public void download(File targetDirectory, String fileName, DumpDownloadListener listener) throws AdminException {
         if (!fileName.endsWith(".zip")) {
             fileName = fileName + ".zip";
         }
         File zipFile = new File(targetDirectory, fileName);
-        download(zipFile);
+        download(zipFile, listener);
     }
 
-    public void download(File target) throws AdminException {
+    public void download(File target, DumpDownloadListener listener) throws AdminException {
         try {
             ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(target));
             for (DumpResult dumpResult : dumpResults) {
-                ((InternalDumpResult) dumpResult).download(zos);
+                ((InternalDumpResult) dumpResult).download(zos, listener);
             }
             zos.close();
         } catch (IOException e) {
