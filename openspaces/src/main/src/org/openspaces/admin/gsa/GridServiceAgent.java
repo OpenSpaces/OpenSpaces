@@ -100,7 +100,9 @@ public interface GridServiceAgent extends GridComponent, LogProviderGridComponen
     /**
      * Starts a generic process of a given type.
      */
-    void startGridService(GridServiceOptions options);
+    int startGridService(GridServiceOptions options);
+
+    void killByAgentId(int agentId);
 
     LogEntries logEntries(final LogProcessType type, final long pid, LogEntryMatcher matcher);
 

@@ -81,13 +81,23 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
         return this.gsa;
     }
 
-    public void startGridService(GridServiceOptions options) {
+    public int startGridService(GridServiceOptions options) {
         try {
-            gsa.startProcess(options.getOptions());
+            return gsa.startProcess(options.getOptions());
         } catch (SecurityException se) {
             throw new AdminException("No privileges to start a service", se);
         } catch (IOException e) {
             throw new AdminException("Failed to start Grid Service", e);
+        }
+    }
+
+    public void killByAgentId(int agentId) {
+        try {
+            gsa.killProcess(agentId);
+        } catch (SecurityException se) {
+            throw new AdminException("No privileges to kill a service", se);
+        } catch (IOException e) {
+            throw new AdminException("Failed to kill agent", e);
         }
     }
 
