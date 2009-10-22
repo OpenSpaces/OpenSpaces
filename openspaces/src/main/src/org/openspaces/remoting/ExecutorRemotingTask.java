@@ -24,12 +24,10 @@ import org.openspaces.core.executor.TaskRoutingProvider;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.io.Serializable;
+import java.io.*;
 import java.util.List;
 
 /**
@@ -44,6 +42,8 @@ import java.util.List;
  */
 public class ExecutorRemotingTask<T extends Serializable> implements DistributedTask<ExecutorRemotingTask.InternalExecutorResult<T>, List<AsyncResult<ExecutorRemotingTask.InternalExecutorResult<T>>>>,
         ApplicationContextAware, ClusterInfoAware, TaskRoutingProvider, SpaceRemotingInvocation, Externalizable {
+
+    private final static transient Log logger = LogFactory.getLog(ExecutorRemotingTask.class);
 
     private String lookupName;
 
@@ -96,7 +96,7 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
             Object result = serviceExporter.invokeExecutor(this);
             return new InternalExecutorResult<T>((T) result, instanceId);
         } catch (Throwable e) {
-            throw new InternalExecutorException(e, instanceId);
+            throw new InternalExecutorException(e, instanceId, lookupName, methodName);
         }
     }
 
@@ -231,12 +231,18 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
 
         private Integer instanceId;
 
+        private transient String lookupName;
+
+        private transient String methodName;
+
         public InternalExecutorException() {
         }
 
-        public InternalExecutorException(Throwable exception, Integer instanceId) {
+        public InternalExecutorException(Throwable exception, Integer instanceId, String lookupName, String methodName) {
             this.exception = exception;
             this.instanceId = instanceId;
+            this.lookupName = lookupName;
+            this.methodName = methodName;
         }
 
         public Throwable getException() {
@@ -254,7 +260,12 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
         }
 
         public void writeExternal(ObjectOutput out) throws IOException {
-            out.writeObject(exception);
+            try {
+                out.writeObject(exception);
+            } catch (NotSerializableException e) {
+                logger.warn("Non serializable exception raised by [" + lookupName + "] and method [" + methodName + "]", e);
+                throw e;
+            }
             if (instanceId == null) {
                 out.writeBoolean(false);
             } else {
