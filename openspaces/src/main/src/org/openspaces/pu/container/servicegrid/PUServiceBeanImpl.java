@@ -1061,7 +1061,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         try {
             String prefix = "processing-units/" + clusterInfo.getName() + "/" + clusterInfo.getInstanceId();
             if (clusterInfo.getBackupId() != null) {
-                prefix += "/" + clusterInfo.getBackupId();
+                prefix += "_" + clusterInfo.getBackupId();
             }
             prefix += "/";
             dump.addPrefix(prefix);
