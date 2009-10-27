@@ -30,6 +30,11 @@ public interface VirtualMachineAddedEventManager {
     void add(VirtualMachineAddedEventListener eventListener);
 
     /**
+     * Add the event listener. Allows to control if events will be raised for existing virtual machines as well.
+     */
+    void add(VirtualMachineAddedEventListener eventListener, boolean includeExisting);
+
+    /**
      * Removes the event listener.
      */
     void remove(VirtualMachineAddedEventListener eventListener);

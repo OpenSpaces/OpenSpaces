@@ -26,9 +26,16 @@ package org.openspaces.admin.pu.events;
 public interface ProcessingUnitInstanceAddedEventManager {
 
     /**
-     * Adds an event listener.
+     * Adds an event listener, events will be raised both for existing processing unit instances
+     * and new ones.
      */
     void add(ProcessingUnitInstanceAddedEventListener eventListener);
+
+    /**
+     * Adds an event listener. <code>includeExisting</code> controls if events will be raised for existing
+     * processing unit instances as well.
+     */
+    void add(ProcessingUnitInstanceAddedEventListener eventListener, boolean includeExisting);
 
     /**
      * Removes an event listener.

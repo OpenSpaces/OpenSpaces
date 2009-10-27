@@ -32,6 +32,12 @@ public interface SpaceInstanceAddedEventManager {
     void add(SpaceInstanceAddedEventListener eventListener);
 
     /**
+     * Adds an event listener allowing to control using the <code>includeExisting</code> if events
+     * will be fired for existing space instances as well.
+     */
+    void add(SpaceInstanceAddedEventListener eventListener, boolean includeExisting);
+
+    /**
      * Removes the event listener.
      */
     void remove(SpaceInstanceAddedEventListener eventListener);

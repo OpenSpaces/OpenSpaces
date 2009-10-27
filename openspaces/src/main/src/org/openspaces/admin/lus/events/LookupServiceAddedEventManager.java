@@ -31,6 +31,11 @@ public interface LookupServiceAddedEventManager {
     void add(LookupServiceAddedEventListener eventListener);
 
     /**
+     * Add the event listener. Allows to control if events will be called for existsing lookup services as well.
+     */
+    void add(LookupServiceAddedEventListener eventListener, boolean includeExisting);
+
+    /**
      * Removes the event listener.
      */
     void remove(LookupServiceAddedEventListener eventListener);

@@ -35,15 +35,21 @@ public class DefaultVirtualMachineAddedEventManager implements InternalVirtualMa
         }
     }
 
-    public void add(final VirtualMachineAddedEventListener eventListener) {
-        admin.raiseEvent(eventListener, new Runnable() {
-            public void run() {
-                for (VirtualMachine virtualMachine : virtualMachines) {
-                    eventListener.virtualMachineAdded(virtualMachine);
+    public void add(final VirtualMachineAddedEventListener eventListener, boolean includeExisting) {
+        if (includeExisting) {
+            admin.raiseEvent(eventListener, new Runnable() {
+                public void run() {
+                    for (VirtualMachine virtualMachine : virtualMachines) {
+                        eventListener.virtualMachineAdded(virtualMachine);
+                    }
                 }
-            }
-        });
+            });
+        }
         eventListeners.add(eventListener);
+    }
+
+    public void add(final VirtualMachineAddedEventListener eventListener) {
+        add(eventListener, true);
     }
 
     public void remove(VirtualMachineAddedEventListener eventListener) {

@@ -35,15 +35,21 @@ public class DefaultGridServiceAgentAddedEventManager implements InternalGridSer
         }
     }
 
-    public void add(final GridServiceAgentAddedEventListener eventListener) {
-        admin.raiseEvent(eventListener, new Runnable() {
-            public void run() {
-                for (GridServiceAgent gridServiceAgent : gridServiceAgents) {
-                    eventListener.gridServiceAgentAdded(gridServiceAgent);
+    public void add(final GridServiceAgentAddedEventListener eventListener, boolean includeExisting) {
+        if (includeExisting) {
+            admin.raiseEvent(eventListener, new Runnable() {
+                public void run() {
+                    for (GridServiceAgent gridServiceAgent : gridServiceAgents) {
+                        eventListener.gridServiceAgentAdded(gridServiceAgent);
+                    }
                 }
-            }
-        });
+            });
+        }
         listeners.add(eventListener);
+    }
+
+    public void add(final GridServiceAgentAddedEventListener eventListener) {
+        add(eventListener, true);
     }
 
     public void remove(GridServiceAgentAddedEventListener eventListener) {

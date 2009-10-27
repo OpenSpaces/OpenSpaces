@@ -35,15 +35,21 @@ public class DefaultGridServiceManagerAddedEventManager implements InternalGridS
         }
     }
 
-    public void add(final GridServiceManagerAddedEventListener eventListener) {
-        admin.raiseEvent(eventListener, new Runnable() {
-            public void run() {
-                for (GridServiceManager gridServiceManager : gridServiceManagers) {
-                    eventListener.gridServiceManagerAdded(gridServiceManager);
+    public void add(final GridServiceManagerAddedEventListener eventListener, boolean includeExisting) {
+        if (includeExisting) {
+            admin.raiseEvent(eventListener, new Runnable() {
+                public void run() {
+                    for (GridServiceManager gridServiceManager : gridServiceManagers) {
+                        eventListener.gridServiceManagerAdded(gridServiceManager);
+                    }
                 }
-            }
-        });
+            });
+        }
         listeners.add(eventListener);
+    }
+
+    public void add(final GridServiceManagerAddedEventListener eventListener) {
+        add(eventListener, true);
     }
 
     public void remove(GridServiceManagerAddedEventListener eventListener) {

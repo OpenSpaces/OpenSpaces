@@ -31,6 +31,12 @@ public interface GridServiceContainerAddedEventManager {
     void add(GridServiceContainerAddedEventListener eventListener);
 
     /**
+     * Add the event listener. Allows to control if the event will be called for existing grid service
+     * containers as well.
+     */
+    void add(GridServiceContainerAddedEventListener eventListener, boolean includeExisting);
+
+    /**
      * Removes the event listener.
      */
     void remove(GridServiceContainerAddedEventListener eventListener);

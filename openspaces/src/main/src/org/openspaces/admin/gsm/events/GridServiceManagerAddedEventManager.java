@@ -30,6 +30,12 @@ public interface GridServiceManagerAddedEventManager {
     void add(GridServiceManagerAddedEventListener eventListener);
 
     /**
+     * Add the event listener. Allows to control if the event will be called for existing grid service
+     * managers as well.
+     */
+    void add(GridServiceManagerAddedEventListener eventListener, boolean includeExisting);
+
+    /**
      * Removes the event listener.
      */
     void remove(GridServiceManagerAddedEventListener eventListener);

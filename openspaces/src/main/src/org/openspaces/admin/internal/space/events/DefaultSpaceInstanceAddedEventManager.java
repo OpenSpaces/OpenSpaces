@@ -5,6 +5,7 @@ import org.openspaces.admin.internal.space.InternalSpaceInstancesAware;
 import org.openspaces.admin.internal.support.GroovyHelper;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.events.SpaceInstanceAddedEventListener;
+import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -35,15 +36,21 @@ public class DefaultSpaceInstanceAddedEventManager implements InternalSpaceInsta
         }
     }
 
-    public void add(final SpaceInstanceAddedEventListener eventListener) {
-        admin.raiseEvent(eventListener, new Runnable() {
-            public void run() {
-                for (SpaceInstance spaceInstance : spaceInstances.getSpaceInstances()) {
-                    eventListener.spaceInstanceAdded(spaceInstance);
+    public void add(final SpaceInstanceAddedEventListener eventListener, boolean includeExisting) {
+        if (includeExisting) {
+            admin.raiseEvent(eventListener, new Runnable() {
+                public void run() {
+                    for (SpaceInstance spaceInstance : spaceInstances.getSpaceInstances()) {
+                        eventListener.spaceInstanceAdded(spaceInstance);
+                    }
                 }
-            }
-        });
+            });
+        }
         listeners.add(eventListener);
+    }
+
+    public void add(final SpaceInstanceAddedEventListener eventListener) {
+        add(eventListener, true);
     }
 
     public void remove(SpaceInstanceAddedEventListener eventListener) {

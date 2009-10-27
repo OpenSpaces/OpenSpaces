@@ -35,15 +35,21 @@ public class DefaultMachineAddedEventManager implements InternalMachineAddedEven
         }
     }
 
-    public void add(final MachineAddedEventListener eventListener) {
-        admin.raiseEvent(eventListener, new Runnable() {
-            public void run() {
-                for (Machine machine : machines.getMachines()) {
-                    eventListener.machineAdded(machine);
+    public void add(final MachineAddedEventListener eventListener, boolean includeExisting) {
+        if (includeExisting) {
+            admin.raiseEvent(eventListener, new Runnable() {
+                public void run() {
+                    for (Machine machine : machines.getMachines()) {
+                        eventListener.machineAdded(machine);
+                    }
                 }
-            }
-        });
+            });
+        }
         machineAddedEventListeners.add(eventListener);
+    }
+
+    public void add(final MachineAddedEventListener eventListener) {
+        add(eventListener, true);
     }
 
     public void remove(MachineAddedEventListener eventListener) {

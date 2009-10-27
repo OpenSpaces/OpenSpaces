@@ -31,6 +31,11 @@ public interface MachineAddedEventManager {
     void add(MachineAddedEventListener eventListener);
 
     /**
+     * Add the event listener. Allows to control if events will be called for existing machines as well.
+     */
+    void add(MachineAddedEventListener eventListener, boolean includeExisting);
+
+    /**
      * Removes the event listener.
      */
     void remove(MachineAddedEventListener eventListener);

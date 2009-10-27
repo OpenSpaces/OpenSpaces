@@ -35,15 +35,21 @@ public class DefaultProcessingUnitInstanceAddedEventManager implements InternalP
         }
     }
 
-    public void add(final ProcessingUnitInstanceAddedEventListener eventListener) {
-        admin.raiseEvent(eventListener, new Runnable() {
-            public void run() {
-                for (ProcessingUnitInstance processingUnitInstance : processingUnits.getProcessingUnitInstances()) {
-                    eventListener.processingUnitInstanceAdded(processingUnitInstance);
+    public void add(final ProcessingUnitInstanceAddedEventListener eventListener, boolean includeExisting) {
+        if (includeExisting) {
+            admin.raiseEvent(eventListener, new Runnable() {
+                public void run() {
+                    for (ProcessingUnitInstance processingUnitInstance : processingUnits.getProcessingUnitInstances()) {
+                        eventListener.processingUnitInstanceAdded(processingUnitInstance);
+                    }
                 }
-            }
-        });
+            });
+        }
         listeners.add(eventListener);
+    }
+
+    public void add(final ProcessingUnitInstanceAddedEventListener eventListener) {
+        add(eventListener, true);
     }
 
     public void remove(ProcessingUnitInstanceAddedEventListener eventListener) {

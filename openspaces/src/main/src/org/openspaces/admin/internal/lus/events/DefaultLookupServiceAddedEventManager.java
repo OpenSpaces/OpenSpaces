@@ -35,15 +35,21 @@ public class DefaultLookupServiceAddedEventManager implements InternalLookupServ
         }
     }
 
-    public void add(final LookupServiceAddedEventListener eventListener) {
-        admin.raiseEvent(eventListener, new Runnable() {
-            public void run() {
-                for (LookupService lookupService : lookupServices) {
-                    eventListener.lookupServiceAdded(lookupService);
+    public void add(final LookupServiceAddedEventListener eventListener, boolean includeExisting) {
+        if (includeExisting) {
+            admin.raiseEvent(eventListener, new Runnable() {
+                public void run() {
+                    for (LookupService lookupService : lookupServices) {
+                        eventListener.lookupServiceAdded(lookupService);
+                    }
                 }
-            }
-        });
+            });
+        }
         listeners.add(eventListener);
+    }
+
+    public void add(final LookupServiceAddedEventListener eventListener) {
+        add(eventListener, true);
     }
 
     public void remove(LookupServiceAddedEventListener eventListener) {
