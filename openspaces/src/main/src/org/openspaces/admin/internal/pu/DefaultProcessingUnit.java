@@ -9,6 +9,7 @@ import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.pu.events.*;
 import org.openspaces.admin.pu.DeploymentStatus;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.pu.ProcessingUnits;
@@ -350,7 +351,27 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         if (!isManaged()) {
             throw new AdminException("No managing GSM to undeploy from");
         }
-        ((InternalGridServiceManager) managingGridServiceManager).undeployProcessingUnit(getName());
+        
+        final CountDownLatch latch = new CountDownLatch(1);
+        ProcessingUnitRemovedEventListener listener = new ProcessingUnitRemovedEventListener() {
+            public void processingUnitRemoved(ProcessingUnit processingUnit) {
+                if (getName().equals(processingUnit.getName())) {
+                    latch.countDown();
+                }
+            }
+        };
+        
+        getProcessingUnits().getProcessingUnitRemoved().add(listener);
+        try {
+            ((InternalGridServiceManager) managingGridServiceManager).undeployProcessingUnit(getName());
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                throw new AdminException("Failed to undeploy", e);
+            }
+        }finally {
+            getProcessingUnits().getProcessingUnitRemoved().remove(listener);
+        }
     }
 
     public void setManagingGridServiceManager(GridServiceManager gridServiceManager) {
