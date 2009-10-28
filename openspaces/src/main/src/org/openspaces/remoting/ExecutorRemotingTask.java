@@ -263,7 +263,7 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
             try {
                 out.writeObject(exception);
             } catch (NotSerializableException e) {
-                logger.warn("Non serializable exception raised by [" + lookupName + "] and method [" + methodName + "]", e);
+                logger.warn("Non serializable exception raised by [" + lookupName + "] and method [" + methodName + "], exception type [" + exception.getClass().getName() + "]", e);
                 throw e;
             }
             if (instanceId == null) {
