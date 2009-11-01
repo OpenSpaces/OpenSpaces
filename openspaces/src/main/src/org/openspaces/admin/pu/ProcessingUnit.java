@@ -62,7 +62,7 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     ProcessingUnits getProcessingUnits();
     
     /**
-     * Returns all the processing unit instances running on the machine.
+     * Returns all the processing unit instances held by this {@link ProcessingUnit}.
      */
     ProcessingUnitInstance[] getProcessingUnitInstances();
 
