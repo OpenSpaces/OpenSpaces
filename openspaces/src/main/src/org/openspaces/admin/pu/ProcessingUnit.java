@@ -60,6 +60,11 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * Returns the handle to all the different processing units.
      */
     ProcessingUnits getProcessingUnits();
+    
+    /**
+     * Returns all the processing unit instances running on the machine.
+     */
+    ProcessingUnitInstance[] getProcessingUnitInstances();
 
     /**
      * Returns the name of the processing unit.
