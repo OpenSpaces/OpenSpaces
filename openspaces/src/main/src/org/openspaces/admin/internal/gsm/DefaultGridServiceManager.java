@@ -80,22 +80,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     public ProcessingUnit deploy(SpaceDeployment deployment, long timeout, TimeUnit timeUnit) {
-        ProcessingUnit processingUnit = deploy(deployment.toProcessingUnitDeployment(), timeout, timeUnit);
-        final CountDownLatch latch = new CountDownLatch(1);
-        ProcessingUnitSpaceCorrelatedEventListener correlated = new ProcessingUnitSpaceCorrelatedEventListener() {
-            public void processingUnitSpaceCorrelated(ProcessingUnitSpaceCorrelatedEvent event) {
-                latch.countDown();
-            }
-        };
-        processingUnit.getSpaceCorrelated().add(correlated);
-        try {
-            latch.await(timeout, timeUnit);
-        } catch (InterruptedException e) {
-            // do nothing
-        } finally {
-            processingUnit.getSpaceCorrelated().remove(correlated);
-        }
-        return processingUnit;
+        return deploy(deployment.toProcessingUnitDeployment(), timeout, timeUnit);
     }
 
     public ProcessingUnit deploy(ProcessingUnitDeployment deployment) {
