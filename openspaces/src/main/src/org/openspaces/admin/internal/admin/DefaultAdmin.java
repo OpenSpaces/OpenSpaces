@@ -708,8 +708,8 @@ public class DefaultAdmin implements InternalAdmin {
             InternalZone zone = (InternalZone) zones.getByName(zoneName);
             if (zone == null) {
                 zone = new DefaultZone(this, zoneName);
-                zones.addZone(zone, zoneUidProvider);
             }
+            zones.addZone(zone, zoneUidProvider);
             ((InternalTransports) zone.getTransports()).addTransport(transport);
             ((InternalVirtualMachines) zone.getVirtualMachines()).addVirtualMachine(virtualMachine);
             ((InternalMachines) zone.getMachines()).addMachine((InternalMachine) machine);
