@@ -60,7 +60,7 @@ public class TestDeployer {
 
         new Thread(new Runnable() {
 
-            private LogEntryMatcher matcher = continuous(lastN(100));
+            private LogEntryMatcher matcher = continuous(regex(".*INFO.*", lastN(100)), regex(".*INFO.*"));
 
             public void run() {
                 while (true) {
