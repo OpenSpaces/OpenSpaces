@@ -28,8 +28,6 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
-import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEvent;
-import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEventListener;
 import org.openspaces.admin.space.SpaceDeployment;
 import org.openspaces.pu.container.servicegrid.deploy.Deploy;
 
