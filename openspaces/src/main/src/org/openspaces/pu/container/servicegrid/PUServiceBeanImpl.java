@@ -141,6 +141,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         super.initializeJMX(mbean);
     }
 
+    @Override
+    protected Object createProxy() {
+        return PUServiceBeanProxy.getInstance((PUServiceBean) getExportedProxy(), getUuid());
+    }
 
     @Override
     protected Object doStart(ServiceBeanContext context) throws Exception {
