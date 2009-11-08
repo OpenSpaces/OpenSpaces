@@ -293,7 +293,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public SpaceInstance waitForSpaceInstance() {
-        return waitForSpaceInstance(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        return waitForSpaceInstance(admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
     }
 
     public SpaceInstance waitForSpaceInstance(long timeout, TimeUnit timeUnit) {
