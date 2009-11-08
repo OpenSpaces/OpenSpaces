@@ -263,6 +263,10 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
      */
     SpaceInstance[] getSpaceInstances();
 
+    SpaceInstance waitForSpaceInstance();
+
+    SpaceInstance waitForSpaceInstance(long timeout, TimeUnit timeUnit);
+
     /**
      * Returns <code>true</code> if this processing unit is a jee processing unit.
      */

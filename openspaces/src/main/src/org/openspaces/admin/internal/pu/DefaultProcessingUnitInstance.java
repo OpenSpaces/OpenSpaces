@@ -22,9 +22,10 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitInstanceStatistics;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEvent;
 import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.space.events.SpaceInstanceAddedEventListener;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.space.SpaceServiceDetails;
@@ -43,16 +44,10 @@ import org.openspaces.pu.service.ServiceMonitors;
 import org.openspaces.remoting.RemotingServiceDetails;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -295,6 +290,35 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     public SpaceInstance[] getSpaceInstances() {
         return spaceInstances.getSpaceInstances();
+    }
+
+    public SpaceInstance waitForSpaceInstance() {
+        return waitForSpaceInstance(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+    }
+
+    public SpaceInstance waitForSpaceInstance(long timeout, TimeUnit timeUnit) {
+        final AtomicReference<SpaceInstance> ref = new AtomicReference<SpaceInstance>();
+        ref.set(getSpaceInstance());
+        if (ref.get() != null) {
+            return ref.get();
+        }
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        SpaceInstanceAddedEventListener listener = new SpaceInstanceAddedEventListener() {
+            public void spaceInstanceAdded(SpaceInstance spaceInstance) {
+                ref.set(spaceInstance);
+                latch.countDown();
+            }
+        };
+        spaceInstances.getSpaceInstanceAdded().add(listener);
+        try {
+            latch.await(timeout, timeUnit);
+            return ref.get();
+        } catch (Exception e) {
+            throw new AdminException("Failed to wait for space instance", e);
+        } finally {
+            spaceInstances.getSpaceInstanceAdded().remove(listener);
+        }
     }
 
     public void addSpaceInstanceIfMatching(SpaceInstance spaceInstance) {
