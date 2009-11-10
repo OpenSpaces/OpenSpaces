@@ -6,7 +6,6 @@ import com.gigaspaces.security.directory.UserDetails;
 
 import org.jini.rio.core.OperationalString;
 import org.jini.rio.core.ServiceProvisionListener;
-import org.jini.rio.monitor.DeployAdmin;
 
 import java.util.ArrayList;
 
