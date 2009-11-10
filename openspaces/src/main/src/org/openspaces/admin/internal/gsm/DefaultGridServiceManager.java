@@ -94,7 +94,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             locatorsString.append(locator).append(',');
         }
         deploy.setLocators(locatorsString.toString());
-        deploy.initializeDiscovery(gsm, getGSMAdmin());
+        deploy.initializeDiscovery(gsm);
         if (deployment.isSecured() != null) {
             deploy.setSecured(deployment.isSecured());
         }

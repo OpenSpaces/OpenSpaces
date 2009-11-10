@@ -117,9 +117,13 @@ public class Deploy {
         sout = soutVal;
     }
 
-    public void initializeDiscovery(GSM gsm, DeployAdmin deployAdmin) {
+    public void initializeDiscovery(GSM gsm) {
         this.gsm = gsm;
-        this.deployAdmin = deployAdmin;
+        try {
+            deployAdmin = (DeployAdmin) gsm.getAdmin();
+        } catch (RemoteException e) {
+            throw new RuntimeException("Failed to get deploy admin", e);
+        }
     }
 
     public String[] getGroups() {
@@ -748,7 +752,7 @@ public class Deploy {
 
     private void uploadPU(String puPath, File puFile) throws IOException {
         byte[] buffer = new byte[4098];
-        String codebase = getCodebase((DeployAdmin) gsm.getAdmin());
+        String codebase = getCodebase(deployAdmin);
         info("Uploading [" + puPath + "] to [" + codebase + "]");
         HttpURLConnection conn = (HttpURLConnection) new URL(codebase + puFile.getName()).openConnection();
         conn.setDoOutput(true);

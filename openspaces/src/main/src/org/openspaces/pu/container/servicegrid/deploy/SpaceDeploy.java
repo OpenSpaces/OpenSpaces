@@ -25,8 +25,8 @@ public class SpaceDeploy {
         Deploy.setSout(soutVal);
     }
 
-    public void initializeDiscovery(GSM gsm, DeployAdmin deployAdmin) {
-        deploy.initializeDiscovery(gsm, deployAdmin);
+    public void initializeDiscovery(GSM gsm) {
+        deploy.initializeDiscovery(gsm);
     }
 
     public void setGroups(String[] groups) {
