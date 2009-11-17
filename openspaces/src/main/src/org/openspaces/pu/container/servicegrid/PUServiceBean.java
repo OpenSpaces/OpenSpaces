@@ -50,6 +50,8 @@ public interface PUServiceBean extends NIOInfoProvider, OSInfoProvider, JVMInfoP
 
     ClusterInfo getClusterInfo() throws RemoteException;
 
+    String getPresentationName() throws RemoteException;
+
     PUDetails getPUDetails() throws RemoteException;
 
     PUMonitors getPUMonitors() throws RemoteException;

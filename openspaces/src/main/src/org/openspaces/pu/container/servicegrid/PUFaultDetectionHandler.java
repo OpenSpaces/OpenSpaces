@@ -121,10 +121,14 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
             try {
                 NIODetails nioDetails = ((PUServiceBean) proxy).getNIODetails();
                 JVMDetails jvmDetails = ((PUServiceBean) proxy).getJVMDetails();
-                serviceDetails.presentationName = ((PUServiceBean) proxy).getPUDetails().getPresentationName();
                 serviceDetails.host = nioDetails.getHostName() + "/" + nioDetails.getHostAddress();
                 serviceDetails.processId = jvmDetails.getPid();
-            } catch (RemoteException re) {
+            } catch (Exception re) {
+                // ignore
+            }
+            try {
+                serviceDetails.presentationName = ((PUServiceBean) proxy).getPresentationName();
+            } catch (Exception re) {
                 serviceDetails.presentationName = proxy.toString();
             }
         }

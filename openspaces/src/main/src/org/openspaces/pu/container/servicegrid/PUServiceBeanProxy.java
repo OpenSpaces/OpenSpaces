@@ -48,6 +48,16 @@ public class PUServiceBeanProxy extends AbstractProxy implements PUServiceBean {
         return clusterInfo;
     }
 
+    private transient String presentationName;
+
+    public String getPresentationName() throws RemoteException {
+        if (presentationName != null) {
+            return this.presentationName;
+        }
+        presentationName = ((PUServiceBean) server).getPresentationName();
+        return presentationName;
+    }
+
     private transient PUDetails puDetails;
 
     public PUDetails getPUDetails() throws RemoteException {

@@ -877,6 +877,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         return this.puDetails;
     }
 
+    public String getPresentationName() throws RemoteException {
+        return this.puDetails.getPresentationName();
+    }
+
     public ClusterInfo getClusterInfo() throws RemoteException {
         return this.clusterInfo;
     }
