@@ -26,7 +26,6 @@ import net.jini.core.lookup.ServiceID;
 
 import org.jini.rio.resources.client.AbstractFaultDetectionHandler;
 
-import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
