@@ -33,8 +33,10 @@ import org.springframework.beans.factory.InitializingBean;
 
 import java.rmi.MarshalledObject;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -288,20 +290,25 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
     private static final String POLLING_CONTAINER_MONITORS = "PollingEventContainerServiceMonitors";
     private static final String NOTIFY_CONTAINER_MONITORS = "NotifyEventContainerServiceMonitors";
     
-    private ServiceMonitors transformMonitors(String interopId, String id, Map<String, Map<String, String>> monitors) {
+    private ServiceMonitors transformMonitors(String interopId, String id, Map<String, String> monitors) {
         if (REMOTING_SERVICE_MONITORS.equals(interopId))
-        {
-            Map<String, String> executorProperties = monitors.remove("serviceMonitors");
-            String totalProcessedStr = executorProperties.get("processed");
-            String totalFailedStr = executorProperties.get("failed");
+        {            
+            String totalProcessedStr = monitors.remove("processed");
+            String totalFailedStr = monitors.remove("failed");
             int totalProc = totalProcessedStr == null? 0 : Integer.parseInt(totalProcessedStr);
-            int totalFail = totalFailedStr == null? 0 : Integer.parseInt(totalFailedStr);
-            ArrayList<RemoteServiceStats> stats = new ArrayList<RemoteServiceStats>(monitors.size());
-            for(Map.Entry<String, Map<String, String>> entry : monitors.entrySet())
+            int totalFail = totalFailedStr == null? 0 : Integer.parseInt(totalFailedStr);            
+            Set<String> servicesIds = new HashSet<String>();            
+            for(Map.Entry<String, String> entry : monitors.entrySet())
             {
-                String serviceId = entry.getKey();
-                String serviceProcStr = entry.getValue().get("processed");
-                String serviceFailStr = entry.getValue().get("failed");
+                String[] split = entry.getKey().split("\\.");
+                String serviceId = split[0];
+                servicesIds.add(serviceId);
+            }
+            ArrayList<RemoteServiceStats> stats = new ArrayList<RemoteServiceStats>(monitors.size());
+            for(String serviceId : servicesIds)
+            {                                
+                String serviceProcStr = monitors.get(serviceId + ".processed");
+                String serviceFailStr = monitors.get(serviceId + ".failed");
                 int proc = serviceProcStr == null? 0 : Integer.parseInt(serviceProcStr);
                 int fail = serviceFailStr == null? 0 : Integer.parseInt(serviceFailStr);
                 stats.add(new RemoteServiceStats(serviceId, proc, fail));
@@ -310,28 +317,26 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
             return new RemotingServiceMonitors(id, totalProc, totalFail, stats.toArray(new RemoteServiceStats[stats.size()]));
         }
         if (POLLING_CONTAINER_MONITORS.equals(interopId))
-        {
-            Map<String, String> serviceMonitors = monitors.remove("serviceMonitors");
-            long procEvent = Long.parseLong(serviceMonitors.get("processedEvents"));
-            long failEvent = Long.parseLong(serviceMonitors.get("failedEvents"));
-            int activeConsumers = Integer.parseInt(serviceMonitors.get("consumers"));
-            String status = serviceMonitors.get("status");
+        {            
+            long procEvent = Long.parseLong(monitors.get("processedEvents"));
+            long failEvent = Long.parseLong(monitors.get("failedEvents"));
+            int activeConsumers = Integer.parseInt(monitors.get("consumers"));
+            String status = monitors.get("status");
             
             return new PollingEventContainerServiceMonitors(id, procEvent, failEvent, status, activeConsumers);
         }
         if (NOTIFY_CONTAINER_MONITORS.equals(interopId))
-        {
-            Map<String, String> serviceMonitors = monitors.remove("serviceMonitors");
-            long procEvent = Long.parseLong(serviceMonitors.get("processedEvents"));
-            long failEvent = Long.parseLong(serviceMonitors.get("failedEvents"));            
-            String status = serviceMonitors.get("status");
+        {            
+            long procEvent = Long.parseLong(monitors.get("processedEvents"));
+            long failEvent = Long.parseLong(monitors.get("failedEvents"));            
+            String status = monitors.get("status");
             
             return new NotifyEventContainerServiceMonitors(id, procEvent, failEvent, status);
         }
         
         PlainServiceMonitors plainServiceMonitors = new PlainServiceMonitors(id);
         Map<String, Object> plainMonitors = plainServiceMonitors.getMonitors();
-        for(Map.Entry<String, Map<String, String>> entry : monitors.entrySet())
+        for(Map.Entry<String, String> entry : monitors.entrySet())
             plainMonitors.put(entry.getKey(), entry.getValue());
         
         return plainServiceMonitors;
