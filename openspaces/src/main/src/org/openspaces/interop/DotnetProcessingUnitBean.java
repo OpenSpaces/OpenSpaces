@@ -186,7 +186,7 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
             String[] subServiceTypes = details.getSubServiceTypes();
             String[] descriptions = details.getDescriptions();
             String[] longDescriptions = details.getLongDescriptions();
-            Map<String, Map<String, String>>[] properties = details.getProperties();            
+            Map<String, String>[] properties = details.getProperties();            
             for(int i = 0; i < descriptions.length; ++i)
             {
                 serviceDetails.add(transformDetails(ids[i], serviceTypes[i], subServiceTypes[i], descriptions[i], longDescriptions[i], properties[i]));
@@ -200,7 +200,7 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
     private static final String NOTIFY_CONTAINER_SERVICE_DETAILS = "notify";    
     
     private ServiceDetails transformDetails(String id, String serviceType, String subServiceType, String description,
-            String longDescription, Map<String, Map<String, String>> properties) {
+            String longDescription, Map<String, String> properties) {
         if (REMOTING_SERVICE_DETAILS.equals(serviceType))           
             return buildRemotingServiceDetails(id, properties);
         if (EVENT_CONTAINER_SERVICE_DETAILS.equals(serviceType))
@@ -214,8 +214,7 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
         return new DotnetServiceDetails(id, serviceType, subServiceType, description, longDescription);
     }
     
-    private ServiceDetails buildNotifyContainerServiceDetails(String id, Map<String, Map<String, String>> properties) {
-        Map<String, String> props = properties.get("containerProperties");
+    private ServiceDetails buildNotifyContainerServiceDetails(String id, Map<String, String> props) {        
         String space = props.get("space");
         Object template = props.get("template");
         boolean performSnapshot = Boolean.parseBoolean(props.get("perform-snapshot"));
@@ -246,8 +245,7 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
                     replicateNotifyTemplate, performTakeOnNotify, batchProcessing, guaranteed);
     }
 
-    private PollingEventContainerServiceDetails buildPollingContainerServiceDetails(String id, Map<String, Map<String, String>> properties) {
-        Map<String, String> props = properties.get("containerProperties");
+    private PollingEventContainerServiceDetails buildPollingContainerServiceDetails(String id, Map<String, String> props) {
         String space = props.get("space");
         Object template = props.get("template");
         boolean performSnapshot = Boolean.parseBoolean(props.get("perform-snapshot"));
@@ -262,13 +260,12 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
                 receiveOperationHandler, triggerOperationHandler, minConcurrentConsumers, maxConcurrentConsumer, batchProcessing);
     }
 
-    private RemotingServiceDetails buildRemotingServiceDetails(String id, Map<String, Map<String, String>> properties) {
+    private RemotingServiceDetails buildRemotingServiceDetails(String id, Map<String, String> properties) {
         ArrayList<RemoteService> remoteServices = new ArrayList<RemoteService>();
-        for(Map.Entry<String, Map<String, String>> entry : properties.entrySet())
+        for(Map.Entry<String, String> entry : properties.entrySet())
         {
             String serviceId = entry.getKey();
-            Map<String, String> serviceProps = entry.getValue();
-            String className = serviceProps.get("className");
+            String className = entry.getValue();
             //Error, should not happen
             if (className == null)
                 className = "unknown";
