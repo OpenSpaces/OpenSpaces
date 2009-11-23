@@ -12,16 +12,6 @@
       <sourceFolder url="file://$MODULE_DIR$/tools/gshell/groovy" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/java" isTestSource="false" />
     </content>
-    <orderEntry type="module-library" exported="">
-      <library name="xml">
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/lib/platform/xml" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-        <jarDirectory url="file://$MODULE_DIR$/lib/platform/xml" recursive="false" />
-      </library>
-    </orderEntry>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="groovy-1.6.3" level="application" />
