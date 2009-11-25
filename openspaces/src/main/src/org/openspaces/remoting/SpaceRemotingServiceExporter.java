@@ -703,7 +703,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
      */
     private static class MethodInvocationCache {
 
-        private Map<String, MethodsCacheEntry> serviceToMethodCacheMap = new HashMap<String, MethodsCacheEntry>();
+        private final Map<String, MethodsCacheEntry> serviceToMethodCacheMap = new HashMap<String, MethodsCacheEntry>();
 
         public IMethod findMethod(String lookupName, Object service, String methodName, Object[] arguments) throws NoSuchMethodException {
             int numberOfParameters = 0;
