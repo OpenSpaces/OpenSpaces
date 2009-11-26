@@ -57,14 +57,10 @@ import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Exports a list of services (beans) as remote services with the Space as the transport layer. All
@@ -110,6 +106,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
     private List<Object> services = new ArrayList<Object>();
 
     private List<ServiceInfo> servicesInfo = new ArrayList<ServiceInfo>();
+
+    private boolean useFastRefelction = true;
 
     private IdentityHashMap<Object, ServiceInfo> serviceToServiceInfoMap = new IdentityHashMap<Object, ServiceInfo>();
 
@@ -178,6 +176,13 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
      */
     public void setFifo(boolean fifo) {
         this.fifo = fifo;
+    }
+
+    /**
+     * Controls if executing the service should use fast reflection or not.
+     */
+    public void setUseFastRefelction(boolean useFastRefelction) {
+        this.useFastRefelction = useFastRefelction;
     }
 
     /**
@@ -268,7 +273,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
                 Class<?>[] interfaces = ClassUtils.getAllInterfaces(serviceInfo.getService());
                 for (Class<?> anInterface : interfaces) {
                     interfaceToService.put(anInterface.getName(), serviceInfo.getService());
-                    methodInvocationCache.addService(anInterface, serviceInfo.getService());
+                    methodInvocationCache.addService(anInterface, serviceInfo.getService(), useFastRefelction);
                 }
 
                 serviceToServiceInfoMap.put(serviceInfo.getService(), serviceInfo);
@@ -298,7 +303,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
         for (ServiceInfo serviceInfo : servicesInfo) {
             remoteServices.add(new RemotingServiceDetails.RemoteService(serviceInfo.getBeanId(), serviceInfo.getClassName()));
         }
-        return new ServiceDetails[] {new RemotingServiceDetails(beanName, remoteServices.toArray(new RemotingServiceDetails.RemoteService[remoteServices.size()]))};
+        return new ServiceDetails[]{new RemotingServiceDetails(beanName, remoteServices.toArray(new RemotingServiceDetails.RemoteService[remoteServices.size()]))};
     }
 
     public ServiceMonitors[] getServicesMonitors() {
@@ -306,7 +311,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
         for (ServiceInfo serviceInfo : servicesInfo) {
             remoteServiceStats.add(new RemotingServiceMonitors.RemoteServiceStats(serviceInfo.getBeanId(), serviceInfo.getProcessed().get(), serviceInfo.getFailures().get()));
         }
-        return new ServiceMonitors[] {new RemotingServiceMonitors(beanName, processed.get(), failed.get(), remoteServiceStats.toArray(new RemotingServiceMonitors.RemoteServiceStats[remoteServiceStats.size()]))};
+        return new ServiceMonitors[]{new RemotingServiceMonitors(beanName, processed.get(), failed.get(), remoteServiceStats.toArray(new RemotingServiceMonitors.RemoteServiceStats[remoteServiceStats.size()]))};
     }
 
     /**
@@ -326,7 +331,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
             throws RemoteAccessException {
 
         waitTillInitialized();
-        
+
         String lookupName = remotingEntry.lookupName;
         if (lookupName.endsWith(asyncInterfaceSuffix)) {
             lookupName = lookupName.substring(0, lookupName.length() - asyncInterfaceSuffix.length());
@@ -729,10 +734,10 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
             return invocationMethod;
         }
 
-        public void addService(Class serviceInterface, Object service) {
+        public void addService(Class serviceInterface, Object service, boolean useFastReflection) {
             MethodsCacheEntry methodsCacheEntry = new MethodsCacheEntry();
             serviceToMethodCacheMap.put(serviceInterface.getName(), methodsCacheEntry);
-            methodsCacheEntry.addService(service.getClass());
+            methodsCacheEntry.addService(service.getClass(), useFastReflection);
         }
 
         private static class MethodsCacheEntry {
@@ -743,7 +748,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
                 return methodNameMap.get(methodName);
             }
 
-            public void addService(Class service) {
+            public void addService(Class service, boolean useFastReflection) {
                 Method[] methods = service.getMethods();
                 for (Method method : methods) {
                     MethodCacheEntry methodCacheEntry = methodNameMap.get(method.getName());
@@ -751,7 +756,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
                         methodCacheEntry = new MethodCacheEntry();
                         methodNameMap.put(method.getName(), methodCacheEntry);
                     }
-                    methodCacheEntry.addMethod(method);
+                    methodCacheEntry.addMethod(method, useFastReflection);
                 }
             }
         }
@@ -764,8 +769,13 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
                 return parametersPerMethodMap.get(numberOfParams);
             }
 
-            public void addMethod(Method method) {
-                IMethod fastMethod = ReflectionUtil.createMethod(method);
+            public void addMethod(Method method, boolean useFastReflection) {
+                IMethod fastMethod;
+                if (useFastReflection) {
+                    fastMethod = ReflectionUtil.createMethod(method);
+                } else {
+                    fastMethod = new StandardMethod(method);
+                }
                 IMethod[] list = parametersPerMethodMap.get(method.getParameterTypes().length);
                 if (list == null) {
                     list = new IMethod[]{fastMethod};
@@ -821,7 +831,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
             this.method = method;
         }
 
-        public Object invoke(Object obj, Object ... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        public Object invoke(Object obj, Object... args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
             return method.invoke(obj, args);
         }
     }
