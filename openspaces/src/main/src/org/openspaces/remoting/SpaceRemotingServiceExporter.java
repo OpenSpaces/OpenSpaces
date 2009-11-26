@@ -29,6 +29,7 @@ import net.jini.core.entry.UnusableEntryException;
 import net.jini.core.lease.Lease;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jini.rio.boot.ServiceClassLoader;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoAware;
@@ -258,28 +259,37 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
     public void onApplicationEvent(ApplicationEvent applicationEvent) {
         if (applicationEvent instanceof ContextRefreshedEvent) {
             Assert.notNull(services, "services property is required");
-            // go over the services and create the interface to service lookup
-            int naCounter = 0;
-            for (Object service : services) {
-                if (service instanceof ServiceRef) {
-                    String ref = ((ServiceRef) service).getRef();
-                    service = applicationContext.getBean(ref);
-                    this.servicesInfo.add(new ServiceInfo(ref, service.getClass().getName(), service));
-                } else {
-                    this.servicesInfo.add(new ServiceInfo("NA" + (++naCounter), service.getClass().getName(), service));
-                }
+            ClassLoader origClassLoader = Thread.currentThread().getContextClassLoader();
+            if (origClassLoader instanceof ServiceClassLoader && origClassLoader.getParent() instanceof ServiceClassLoader) {
+                // Since the refreshable context causes the ContextRefreshEvent as well, under its own new class loader
+                Thread.currentThread().setContextClassLoader(origClassLoader.getParent());
             }
-            for (ServiceInfo serviceInfo : servicesInfo) {
-                Class<?>[] interfaces = ClassUtils.getAllInterfaces(serviceInfo.getService());
-                for (Class<?> anInterface : interfaces) {
-                    interfaceToService.put(anInterface.getName(), serviceInfo.getService());
-                    methodInvocationCache.addService(anInterface, serviceInfo.getService(), useFastRefelction);
+            try {
+                // go over the services and create the interface to service lookup
+                int naCounter = 0;
+                for (Object service : services) {
+                    if (service instanceof ServiceRef) {
+                        String ref = ((ServiceRef) service).getRef();
+                        service = applicationContext.getBean(ref);
+                        this.servicesInfo.add(new ServiceInfo(ref, service.getClass().getName(), service));
+                    } else {
+                        this.servicesInfo.add(new ServiceInfo("NA" + (++naCounter), service.getClass().getName(), service));
+                    }
                 }
+                for (ServiceInfo serviceInfo : servicesInfo) {
+                    Class<?>[] interfaces = ClassUtils.getAllInterfaces(serviceInfo.getService());
+                    for (Class<?> anInterface : interfaces) {
+                        interfaceToService.put(anInterface.getName(), serviceInfo.getService());
+                        methodInvocationCache.addService(anInterface, serviceInfo.getService(), useFastRefelction);
+                    }
 
-                serviceToServiceInfoMap.put(serviceInfo.getService(), serviceInfo);
+                    serviceToServiceInfoMap.put(serviceInfo.getService(), serviceInfo);
+                }
+                initialized = true;
+                initializationLatch.countDown();
+            } finally {
+                Thread.currentThread().setContextClassLoader(origClassLoader);
             }
-            initialized = true;
-            initializationLatch.countDown();
         }
     }
 
