@@ -300,15 +300,15 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
             Set<String> servicesIds = new HashSet<String>();            
             for(Map.Entry<String, String> entry : monitors.entrySet())
             {
-                String[] split = entry.getKey().split("\\.");
+                String[] split = entry.getKey().split("#");
                 String serviceId = split[0];
                 servicesIds.add(serviceId);
             }
             ArrayList<RemoteServiceStats> stats = new ArrayList<RemoteServiceStats>(monitors.size());
             for(String serviceId : servicesIds)
             {                                
-                String serviceProcStr = monitors.get(serviceId + ".processed");
-                String serviceFailStr = monitors.get(serviceId + ".failed");
+                String serviceProcStr = monitors.get(serviceId + "#processed");
+                String serviceFailStr = monitors.get(serviceId + "#failed");
                 int proc = serviceProcStr == null? 0 : Integer.parseInt(serviceProcStr);
                 int fail = serviceFailStr == null? 0 : Integer.parseInt(serviceFailStr);
                 stats.add(new RemoteServiceStats(serviceId, proc, fail));
