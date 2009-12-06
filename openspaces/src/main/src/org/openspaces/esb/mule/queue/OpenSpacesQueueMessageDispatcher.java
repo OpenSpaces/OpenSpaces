@@ -46,8 +46,8 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
         this.isRemoteSpace = SpaceUtils.isRemoteProtocol(connector.getGigaSpaceObj().getSpace());
     }
 
-    protected void doDispatch(MuleEvent event) throws Exception {
-        EndpointURI endpointUri = event.getEndpoint().getEndpointURI();
+    protected void doDispatch(final MuleEvent event) throws Exception {
+        final EndpointURI endpointUri = event.getEndpoint().getEndpointURI();
         //Apply any outbound transformers on this event before we dispatch
         event.transformMessage();
 
@@ -55,18 +55,35 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
             throw new DispatchException(
                     CoreMessages.objectIsNull("Endpoint"), event.getMessage(), event.getEndpoint());
         }
-
-        InternalQueueEntry entry = new InternalQueueEntry();
-        entry.setMessage(event.getMessage());
-        entry.setEndpointURI(endpointUri.getAddress());
-        entry.setFifo(connector.isFifo());
-        if (connector.isPersistent()) {
-            entry.makePersistent();
+        final OpenSpacesQueueMessageReceiver receiver = connector.getReceiver(endpointUri);
+        TransactionTemplate tt;
+        if (receiver == null) {
+            tt = new TransactionTemplate(event.getEndpoint().getTransactionConfig(),
+                connector.getExceptionListener(), event.getMuleContext());
         } else {
-            entry.makeTransient();
+            tt = new TransactionTemplate(receiver.getEndpoint().getTransactionConfig(),
+                connector.getExceptionListener(), event.getMuleContext());
         }
 
-        connector.getGigaSpaceObj().write(entry);
+        TransactionCallback cb = new TransactionCallback()
+        {
+            public Object doInTransaction() throws Exception
+            {
+                InternalQueueEntry entry = new InternalQueueEntry();
+                entry.setMessage(event.getMessage());
+                entry.setEndpointURI(endpointUri.getAddress());
+                entry.setFifo(connector.isFifo());
+                if (connector.isPersistent()) {
+                    entry.makePersistent();
+                } else {
+                    entry.makeTransient();
+                }
+
+                connector.getGigaSpaceObj().write(entry);
+                return null;
+            }
+        };
+        tt.execute(cb);
 
         if (logger.isDebugEnabled()) {
             logger.debug("dispatched Event on endpointUri: " + endpointUri);
