@@ -151,6 +151,16 @@ public interface Admin extends StatisticsMonitor, DumpProvider {
     GridServiceContainers getGridServiceContainers();
 
     /**
+     * Returns the Grid Component represented by this UID; e.g. GSA, LUS, GSM, GSC, etc.
+     * @see GridComponent#getUid()
+     * 
+     * @param uid The UID of the service returned by {@link GridComponent#getUid()};
+     *            <code>null</code> if no representation.
+     * @return The Grid Component represented by this UID.
+     */
+    GridComponent getGridComponentByUID(String uid);
+    
+    /**
      * Returns the machines discovered.
      */
     Machines getMachines();

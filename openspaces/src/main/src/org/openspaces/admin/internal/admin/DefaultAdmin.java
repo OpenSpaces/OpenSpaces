@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.dump.CompoundDumpResult;
 import org.openspaces.admin.gsa.GridServiceAgent;
@@ -293,6 +294,20 @@ public class DefaultAdmin implements InternalAdmin {
 
     public GridServiceContainers getGridServiceContainers() {
         return this.gridServiceContainers;
+    }
+    
+    public GridComponent getGridComponentByUID(String uid) {
+        GridComponent component = getGridServiceAgents().getAgentByUID(uid);
+        if (component == null) {
+            component = getGridServiceManagers().getManagerByUID(uid);
+            if (component == null) {
+                component = getGridServiceContainers().getContainerByUID(uid);
+                if (component == null) {
+                    component = getLookupServices().getLookupServiceByUID(uid);
+                }
+            }
+        }
+        return component;
     }
 
     public Machines getMachines() {
