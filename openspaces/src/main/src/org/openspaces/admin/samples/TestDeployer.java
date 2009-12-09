@@ -45,18 +45,18 @@ public class TestDeployer {
 
         final GridServiceAgent agent = admin.getGridServiceAgents().waitForAtLeastOne();
 
-//        LogEntryMatcher matcher = forwardChunk(size(2));
-//        while (true) {
-//            CompoundLogEntries entries = agent.liveLogEntries(matcher);
-//            if (entries.isEmpty()) {
-//                break;
-//            }
-//            for (LogEntries logEntries : entries.getSafeEntries()) {
-//                for (LogEntry log : logEntries.logEntries()) {
-//                    System.out.println(logEntries.getProcessType() + "/" + logEntries.getPid() + ": " + log.getText());
-//                }
-//            }
-//        }
+        LogEntryMatcher matcher = forwardChunk(size(100));
+        while (true) {
+            CompoundLogEntries entries = agent.liveLogEntries(matcher);
+            if (entries.isEmpty()) {
+                break;
+            }
+            for (LogEntries logEntries : entries.getSafeEntries()) {
+                for (LogEntry log : logEntries.logEntries()) {
+                    System.out.println(logEntries.getProcessType() + "/" + logEntries.getPid() + ": " + log.getText());
+                }
+            }
+        }
 
         new Thread(new Runnable() {
 
@@ -112,24 +112,24 @@ public class TestDeployer {
 //            System.out.println(logEntry.getText());
 //        }
 
-//        new Thread(new Runnable() {
-//
-//            private LogEntryMatcher matcher = continuous(lastN(100));
-//
-//            public void run() {
-//                while (true) {
-//                    final LogEntries logs = container.logEntries(matcher);
-//                    for (LogEntry log : logs.logEntries()) {
-//                        System.out.println(log.getText());
-//                    }
-//                    try {
-//                        Thread.sleep(1000);
-//                    } catch (InterruptedException e) {
-//                        // ignore
-//                    }
-//                }
-//            }
-//        }).start();
+        new Thread(new Runnable() {
+
+            private LogEntryMatcher matcher = continuous(lastN(100));
+
+            public void run() {
+                while (true) {
+                    final LogEntries logs = container.logEntries(matcher);
+                    for (LogEntry log : logs.logEntries()) {
+                        System.out.println(log.getText());
+                    }
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        // ignore
+                    }
+                }
+            }
+        }).start();
 
         System.out.println("done...");
 
