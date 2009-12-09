@@ -104,9 +104,20 @@ public interface GridServiceAgent extends GridComponent, LogProviderGridComponen
 
     void killByAgentId(int agentId);
 
+    /**
+     * Extract the log entries matching the provided matcher for the process type and process id.
+     */
     LogEntries logEntries(final LogProcessType type, final long pid, LogEntryMatcher matcher);
 
+    /**
+     * Extracts all the log entries of all the "live" runtime components that this agent is running
+     * matching the given matcher.
+     */
     CompoundLogEntries liveLogEntries(LogEntryMatcher matcher);
 
+    /**
+     * Extracts all the log entries for the provided process type including both "live" runtime
+     * components and ones that are no longer running. 
+     */
     CompoundLogEntries allLogEntries(final LogProcessType type, LogEntryMatcher matcher);
 }

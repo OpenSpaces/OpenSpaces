@@ -4,6 +4,8 @@ import com.gigaspaces.log.LogEntries;
 import com.gigaspaces.log.LogEntryMatcher;
 
 /**
+ * A grid component that can provide the ability to extract logging information.
+ *
  * @author kimchy
  */
 public interface LogProviderGridComponent extends GridComponent {
