@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.zip.ZipOutputStream;
 
 /**
+ * A dump results that holds one or more Dump reuslts.
+ *
  * @author kimchy
  */
 public class CompoundDumpResult implements DumpResult {
