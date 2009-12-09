@@ -16,6 +16,7 @@
 
 package org.openspaces.admin.machine;
 
+import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
@@ -41,7 +42,7 @@ import org.openspaces.admin.vm.VirtualMachines;
  *
  * @author kimchy
  */
-public interface Machine {
+public interface Machine extends DumpProvider {
 
     /**
      * Returns the UID of the machine.

@@ -2,9 +2,14 @@ package org.openspaces.admin.internal.machine;
 
 import com.gigaspaces.internal.os.OSDetails;
 
+import org.openspaces.admin.AdminException;
+import org.openspaces.admin.dump.CompoundDumpResult;
+import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
+import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsc.GridServiceContainers;
+import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsa.DefaultGridServiceAgents;
@@ -24,6 +29,7 @@ import org.openspaces.admin.internal.transport.DefaultTransports;
 import org.openspaces.admin.internal.transport.InternalTransports;
 import org.openspaces.admin.internal.vm.DefaultVirtualMachines;
 import org.openspaces.admin.internal.vm.InternalVirtualMachines;
+import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.os.OperatingSystem;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
@@ -38,6 +44,7 @@ import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
 
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * @author kimchy
@@ -213,6 +220,27 @@ public class DefaultMachine implements InternalMachine {
 
     public void removeSpaceInstance(String uid) {
         spaceInstances.removeSpaceInstance(uid);
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {
+        return generateDump(cause, context, (String[]) null);
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context, String... processor) throws AdminException {
+        CompoundDumpResult dumpResult = new CompoundDumpResult();
+        for (GridServiceManager gsm : gridServiceManagers) {
+            dumpResult.add(gsm.generateDump(cause, context, processor));
+        }
+        for (GridServiceContainer gsc : gridServiceContainers) {
+            dumpResult.add(gsc.generateDump(cause, context, processor));
+        }
+        for (GridServiceAgent gsa : gridServiceAgents) {
+            dumpResult.add(gsa.generateDump(cause, context, processor));
+        }
+        for (LookupService lus : lookupServices) {
+            dumpResult.add(lus.generateDump(cause, context, processor));
+        }
+        return dumpResult;
     }
 
     @Override
