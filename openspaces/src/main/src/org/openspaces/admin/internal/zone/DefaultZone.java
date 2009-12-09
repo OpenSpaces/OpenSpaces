@@ -1,5 +1,11 @@
 package org.openspaces.admin.internal.zone;
 
+import org.openspaces.admin.AdminException;
+import org.openspaces.admin.dump.CompoundDumpResult;
+import org.openspaces.admin.dump.DumpResult;
+import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.lus.InternalLookupServices;
 import org.openspaces.admin.internal.lus.DefaultLookupServices;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgents;
@@ -20,6 +26,7 @@ import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.machine.InternalMachines;
 import org.openspaces.admin.internal.machine.DefaultMachines;
 import org.openspaces.admin.gsa.GridServiceAgents;
+import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.gsc.GridServiceContainers;
@@ -34,6 +41,8 @@ import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
 import org.openspaces.admin.machine.Machines;
+
+import java.util.Map;
 
 /**
  * @author kimchy
@@ -167,6 +176,27 @@ public class DefaultZone implements InternalZone {
 
     public void removeSpaceInstance(String uid) {
         spaceInstances.removeSpaceInstance(uid);
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {
+        return generateDump(cause, context, (String[]) null);
+    }
+
+    public DumpResult generateDump(String cause, Map<String, Object> context, String... processor) throws AdminException {
+        CompoundDumpResult dumpResult = new CompoundDumpResult();
+        for (GridServiceManager gsm : gridServiceManagers) {
+            dumpResult.add(gsm.generateDump(cause, context, processor));
+        }
+        for (GridServiceContainer gsc : gridServiceContainers) {
+            dumpResult.add(gsc.generateDump(cause, context, processor));
+        }
+        for (GridServiceAgent gsa : gridServiceAgents) {
+            dumpResult.add(gsa.generateDump(cause, context, processor));
+        }
+        for (LookupService lus : lookupServices) {
+            dumpResult.add(lus.generateDump(cause, context, processor));
+        }
+        return dumpResult;
     }
 
     @Override

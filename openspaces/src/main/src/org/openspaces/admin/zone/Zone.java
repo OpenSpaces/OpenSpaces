@@ -16,6 +16,7 @@
 
 package org.openspaces.admin.zone;
 
+import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
@@ -35,7 +36,7 @@ import org.openspaces.admin.machine.Machines;
 /**
  * @author kimchy
  */
-public interface Zone {
+public interface Zone extends DumpProvider {
 
     /**
      * Returns name of the zone.
