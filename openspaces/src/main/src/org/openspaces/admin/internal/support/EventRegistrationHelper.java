@@ -1,8 +1,8 @@
 package org.openspaces.admin.internal.support;
 
 import org.openspaces.admin.AdminEventListener;
-import org.openspaces.admin.zone.events.ZoneAddedEventListener;
-import org.openspaces.admin.zone.events.ZoneRemovedEventListener;
+import org.openspaces.admin.esm.events.ElasticServiceManagerAddedEventListener;
+import org.openspaces.admin.esm.events.ElasticServiceManagerRemovedEventListener;
 import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
 import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventListener;
 import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventListener;
@@ -35,6 +35,8 @@ import org.openspaces.admin.vm.events.VirtualMachineAddedEventListener;
 import org.openspaces.admin.vm.events.VirtualMachineRemovedEventListener;
 import org.openspaces.admin.vm.events.VirtualMachineStatisticsChangedEventListener;
 import org.openspaces.admin.vm.events.VirtualMachinesStatisticsChangedEventListener;
+import org.openspaces.admin.zone.events.ZoneAddedEventListener;
+import org.openspaces.admin.zone.events.ZoneRemovedEventListener;
 
 /**
  * @author kimchy
@@ -89,6 +91,12 @@ public abstract class EventRegistrationHelper {
         }
         if (eventListener instanceof GridServiceManagerRemovedEventListener) {
             admin.getGridServiceManagers().getGridServiceManagerRemoved().add((GridServiceManagerRemovedEventListener) eventListener);
+        }
+        if (eventListener instanceof ElasticServiceManagerAddedEventListener) {
+            admin.getElasticServiceManagers().getElasticServiceManagerAdded().add((ElasticServiceManagerAddedEventListener) eventListener);
+        }
+        if (eventListener instanceof ElasticServiceManagerRemovedEventListener) {
+            admin.getElasticServiceManagers().getElasticServiceManagerRemoved().add((ElasticServiceManagerRemovedEventListener) eventListener);
         }
         if (eventListener instanceof GridServiceContainerAddedEventListener) {
             admin.getGridServiceContainers().getGridServiceContainerAdded().add((GridServiceContainerAddedEventListener) eventListener);
@@ -191,6 +199,12 @@ public abstract class EventRegistrationHelper {
         }
         if (eventListener instanceof GridServiceManagerRemovedEventListener) {
             admin.getGridServiceManagers().getGridServiceManagerRemoved().remove((GridServiceManagerRemovedEventListener) eventListener);
+        }
+        if (eventListener instanceof ElasticServiceManagerAddedEventListener) {
+            admin.getElasticServiceManagers().getElasticServiceManagerAdded().remove((ElasticServiceManagerAddedEventListener) eventListener);
+        }
+        if (eventListener instanceof ElasticServiceManagerRemovedEventListener) {
+            admin.getElasticServiceManagers().getElasticServiceManagerRemoved().remove((ElasticServiceManagerRemovedEventListener) eventListener);
         }
         if (eventListener instanceof GridServiceContainerAddedEventListener) {
             admin.getGridServiceContainers().getGridServiceContainerAdded().remove((GridServiceContainerAddedEventListener) eventListener);

@@ -2,8 +2,8 @@ package org.openspaces.admin.samples;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
-import org.openspaces.admin.zone.events.ZoneLifecycleEventListener;
-import org.openspaces.admin.zone.Zone;
+import org.openspaces.admin.esm.ElasticServiceManager;
+import org.openspaces.admin.esm.events.ElasticServiceManagerLifecycleEventListener;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsc.events.GridServiceContainerLifecycleEventListener;
 import org.openspaces.admin.gsm.GridServiceManager;
@@ -29,11 +29,14 @@ import org.openspaces.admin.space.events.SpaceModeChangedEvent;
 import org.openspaces.admin.space.events.SpaceModeChangedEventListener;
 import org.openspaces.admin.vm.VirtualMachine;
 import org.openspaces.admin.vm.events.VirtualMachineLifecycleEventListener;
+import org.openspaces.admin.zone.Zone;
+import org.openspaces.admin.zone.events.ZoneLifecycleEventListener;
 
 /**
  * @author kimchy
  */
 public class TestEventSampler implements MachineLifecycleEventListener,
+        ElasticServiceManagerLifecycleEventListener,
         GridServiceContainerLifecycleEventListener,
         GridServiceManagerLifecycleEventListener,
         ProcessingUnitLifecycleEventListener,
@@ -48,7 +51,7 @@ public class TestEventSampler implements MachineLifecycleEventListener,
 
     public static void main(String[] args) throws Exception {
         TestEventSampler eventSampler = new TestEventSampler();
-        Admin admin = new AdminFactory().addGroup("kimchy").createAdmin();
+        Admin admin = new AdminFactory().addGroup("moran-gigaspaces-7.1.0-XAPPremium-m5").createAdmin();
 
         admin.addEventListener(eventSampler);
 
@@ -157,5 +160,13 @@ public class TestEventSampler implements MachineLifecycleEventListener,
 
     public void zoneRemoved(Zone zone) {
         System.out.println("Zone Removed [" + zone.getName() + "]");
+    }
+
+    public void elasticServiceManagerAdded(ElasticServiceManager elasticServiceManager) {
+        System.out.println("ESM Added [" + elasticServiceManager.getUid() + "]");
+    }
+
+    public void elasticServiceManagerRemoved(ElasticServiceManager elasticServiceManager) {
+        System.out.println("ESM Removed [" + elasticServiceManager.getUid() + "]");
     }
 }

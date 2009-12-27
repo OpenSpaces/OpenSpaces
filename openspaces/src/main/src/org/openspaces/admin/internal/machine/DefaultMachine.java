@@ -1,10 +1,12 @@
 package org.openspaces.admin.internal.machine;
 
-import com.gigaspaces.internal.os.OSDetails;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.dump.CompoundDumpResult;
 import org.openspaces.admin.dump.DumpResult;
+import org.openspaces.admin.esm.ElasticServiceManagers;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainer;
@@ -12,6 +14,8 @@ import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.esm.DefaultElasticServiceManagers;
+import org.openspaces.admin.internal.esm.InternalElasticServiceManagers;
 import org.openspaces.admin.internal.gsa.DefaultGridServiceAgents;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgents;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainers;
@@ -43,25 +47,26 @@ import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
 
-import java.util.Iterator;
-import java.util.Map;
+import com.gigaspaces.internal.os.OSDetails;
 
 /**
  * @author kimchy
  */
 public class DefaultMachine implements InternalMachine {
 
-    private InternalAdmin admin;
+    private final InternalAdmin admin;
 
-    private String uid;
+    private final String uid;
 
-    private String hostAddress;
+    private final String hostAddress;
 
     private final InternalLookupServices lookupServices;
 
     private final InternalGridServiceAgents gridServiceAgents;
 
     private final InternalGridServiceManagers gridServiceManagers;
+    
+    private final InternalElasticServiceManagers elasticServiceManagers;
 
     private final InternalGridServiceContainers gridServiceContainers;
 
@@ -82,6 +87,7 @@ public class DefaultMachine implements InternalMachine {
         this.gridServiceAgents = new DefaultGridServiceAgents(admin);
         this.lookupServices = new DefaultLookupServices(admin);
         this.gridServiceManagers = new DefaultGridServiceManagers(admin);
+        this.elasticServiceManagers = new DefaultElasticServiceManagers(admin);
         this.gridServiceContainers = new DefaultGridServiceContainers(admin);
         this.virtualMachines = new DefaultVirtualMachines(admin);
         this.processingUnitInstances = new DefaultProcessingUnitInstances(admin);
@@ -120,13 +126,17 @@ public class DefaultMachine implements InternalMachine {
     public GridServiceManagers getGridServiceManagers() {
         return gridServiceManagers;
     }
+    
+    public ElasticServiceManagers getElasticServiceManagers() {
+        return elasticServiceManagers;
+    }
 
     public GridServiceContainers getGridServiceContainers() {
         return gridServiceContainers;
     }
 
     public boolean hasGridComponents() {
-        return !gridServiceAgents.isEmpty() || !gridServiceManagers.isEmpty() || !gridServiceContainers.isEmpty() || !lookupServices.isEmpty();
+        return !gridServiceAgents.isEmpty() || !gridServiceManagers.isEmpty() || !elasticServiceManagers.isEmpty() || !gridServiceContainers.isEmpty() || !lookupServices.isEmpty();
     }
 
     public Transports getTransports() {

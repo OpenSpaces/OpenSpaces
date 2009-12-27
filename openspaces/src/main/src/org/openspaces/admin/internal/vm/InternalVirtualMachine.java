@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.vm;
 
+import org.openspaces.admin.esm.ElasticServiceManagers;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
@@ -30,6 +31,8 @@ public interface InternalVirtualMachine extends VirtualMachine, InternalMachineA
     GridServiceAgents getGridServiceAgents();
 
     GridServiceManagers getGridServiceManagers();
+    
+    ElasticServiceManagers getElasticServiceManagers();
 
     GridServiceContainers getGridServiceContainers();
 }

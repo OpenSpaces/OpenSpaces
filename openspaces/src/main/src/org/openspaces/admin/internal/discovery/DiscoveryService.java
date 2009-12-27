@@ -1,20 +1,9 @@
 package org.openspaces.admin.internal.discovery;
 
-import com.gigaspaces.grid.gsa.AgentIdAware;
-import com.gigaspaces.grid.gsa.AgentProcessesDetails;
-import com.gigaspaces.grid.gsa.GSA;
-import com.gigaspaces.grid.gsc.GSC;
-import com.gigaspaces.grid.gsm.GSM;
-import com.gigaspaces.grid.zone.GridZoneProvider;
-import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
-import com.gigaspaces.internal.jvm.JVMDetails;
-import com.gigaspaces.internal.os.OSDetails;
-import com.gigaspaces.lrmi.nio.info.NIODetails;
-import com.j_spaces.core.IJSpace;
-import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
-import com.j_spaces.core.admin.SpaceConfig;
-import com.j_spaces.core.jini.SharedDiscoveryManagement;
-import com.j_spaces.kernel.PlatformVersion;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
+
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceRegistrar;
@@ -25,11 +14,14 @@ import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryListener;
 import net.jini.lookup.ServiceDiscoveryManager;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.BootUtil;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.esm.DefaultElasticServiceManager;
+import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
 import org.openspaces.admin.internal.gsa.DefaultGridServiceAgent;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainer;
@@ -45,9 +37,22 @@ import org.openspaces.admin.internal.space.InternalSpaceInstance;
 import org.openspaces.pu.container.servicegrid.PUDetails;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
+import com.gigaspaces.grid.esm.ESM;
+import com.gigaspaces.grid.gsa.AgentIdAware;
+import com.gigaspaces.grid.gsa.AgentProcessesDetails;
+import com.gigaspaces.grid.gsa.GSA;
+import com.gigaspaces.grid.gsc.GSC;
+import com.gigaspaces.grid.gsm.GSM;
+import com.gigaspaces.grid.zone.GridZoneProvider;
+import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
+import com.gigaspaces.internal.jvm.JVMDetails;
+import com.gigaspaces.internal.os.OSDetails;
+import com.gigaspaces.lrmi.nio.info.NIODetails;
+import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
+import com.j_spaces.core.admin.SpaceConfig;
+import com.j_spaces.core.jini.SharedDiscoveryManagement;
+import com.j_spaces.kernel.PlatformVersion;
 
 /**
  * @author kimchy
@@ -159,6 +164,25 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             } catch (Exception e) {
                 logger.warn("Failed to add [GSM] with uid [" + serviceID + "]", e);
             }
+        } else if (service instanceof ESM) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Service Added [ESM] with uid [" + serviceID + "]");
+            }
+            try {
+                ESM esm = (ESM) service;
+//                if (esm.isServiceSecured()) {
+//                    esm.login(admin.getUserDetails());
+//                }
+                InternalElasticServiceManager elasticServiceManager = new DefaultElasticServiceManager(serviceID, esm, admin,
+                        esm.getAgentId(), esm.getGSAServiceID());
+                // get the details here, on the thread pool
+                NIODetails nioDetails = elasticServiceManager.getNIODetails();
+                OSDetails osDetails = elasticServiceManager.getOSDetails();
+                JVMDetails jvmDetails = elasticServiceManager.getJVMDetails();
+                admin.addElasticServiceManager(elasticServiceManager, nioDetails, osDetails, jvmDetails, esm.getZones());
+            } catch (Exception e) {
+                logger.warn("Failed to add [ESM] with uid [" + serviceID + "]", e);
+            }
         } else if (service instanceof GSA) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Service Added [GSA] with uid [" + serviceID + "]");
@@ -222,7 +246,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                     clusteredIjspace.login(admin.getUserDetails());
                 }
 
-                ISpaceProxy direcyIjspace = (ISpaceProxy) ((ISpaceProxy) clusteredIjspace).getClusterMember();
+                ISpaceProxy direcyIjspace = (ISpaceProxy) (clusteredIjspace).getClusterMember();
                 if (direcyIjspace.isServiceSecured()) {
                     direcyIjspace.login(admin.getUserDetails());
                 }
@@ -249,6 +273,11 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 logger.debug("Service Removed [GSM] with uid [" + serviceID + "]");
             }
             admin.removeGridServiceManager(serviceID.toString());
+        } else if (service instanceof ESM) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Service Removed [ESM] with uid [" + serviceID + "]");
+            }
+            admin.removeElasticServiceManager(serviceID.toString());
         } else if (service instanceof GSA) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Service Removed [GSA] with uid [" + serviceID + "]");

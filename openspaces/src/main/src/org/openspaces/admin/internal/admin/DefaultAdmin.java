@@ -1,28 +1,36 @@
 package org.openspaces.admin.internal.admin;
 
-import com.gigaspaces.grid.gsa.GSA;
-import com.gigaspaces.grid.gsm.PUDetails;
-import com.gigaspaces.grid.gsm.PUsDetails;
-import com.gigaspaces.internal.jvm.JVMDetails;
-import com.gigaspaces.internal.os.OSDetails;
-import com.gigaspaces.lrmi.nio.info.NIODetails;
-import com.gigaspaces.security.directory.UserDetails;
-import com.j_spaces.core.IJSpace;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import net.jini.core.discovery.LookupLocator;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.GridComponent;
-import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.dump.CompoundDumpResult;
+import org.openspaces.admin.dump.DumpResult;
+import org.openspaces.admin.esm.ElasticServiceManagers;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
-import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.internal.discovery.DiscoveryService;
+import org.openspaces.admin.internal.esm.DefaultElasticServiceManagers;
+import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
+import org.openspaces.admin.internal.esm.InternalElasticServiceManagers;
 import org.openspaces.admin.internal.gsa.DefaultGridServiceAgents;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgents;
@@ -35,18 +43,48 @@ import org.openspaces.admin.internal.gsm.InternalGridServiceManagers;
 import org.openspaces.admin.internal.lus.DefaultLookupServices;
 import org.openspaces.admin.internal.lus.InternalLookupService;
 import org.openspaces.admin.internal.lus.InternalLookupServices;
-import org.openspaces.admin.internal.machine.*;
-import org.openspaces.admin.internal.os.*;
-import org.openspaces.admin.internal.pu.*;
-import org.openspaces.admin.internal.space.*;
+import org.openspaces.admin.internal.machine.DefaultMachine;
+import org.openspaces.admin.internal.machine.DefaultMachines;
+import org.openspaces.admin.internal.machine.InternalMachine;
+import org.openspaces.admin.internal.machine.InternalMachineAware;
+import org.openspaces.admin.internal.machine.InternalMachines;
+import org.openspaces.admin.internal.os.DefaultOperatingSystem;
+import org.openspaces.admin.internal.os.DefaultOperatingSystems;
+import org.openspaces.admin.internal.os.InternalOperatingSystem;
+import org.openspaces.admin.internal.os.InternalOperatingSystemInfoProvider;
+import org.openspaces.admin.internal.os.InternalOperatingSystems;
+import org.openspaces.admin.internal.pu.DefaultProcessingUnit;
+import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
+import org.openspaces.admin.internal.pu.DefaultProcessingUnits;
+import org.openspaces.admin.internal.pu.InternalProcessingUnit;
+import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
+import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
+import org.openspaces.admin.internal.pu.InternalProcessingUnits;
+import org.openspaces.admin.internal.space.DefaultSpace;
+import org.openspaces.admin.internal.space.DefaultSpaces;
+import org.openspaces.admin.internal.space.InternalSpace;
+import org.openspaces.admin.internal.space.InternalSpaceInstance;
+import org.openspaces.admin.internal.space.InternalSpaces;
 import org.openspaces.admin.internal.support.EventRegistrationHelper;
 import org.openspaces.admin.internal.support.InternalAgentGridComponent;
 import org.openspaces.admin.internal.support.NetworkExceptionHelper;
-import org.openspaces.admin.internal.transport.*;
-import org.openspaces.admin.internal.vm.*;
-import org.openspaces.admin.internal.zone.*;
-import org.openspaces.admin.lus.LookupServices;
+import org.openspaces.admin.internal.transport.DefaultTransport;
+import org.openspaces.admin.internal.transport.DefaultTransports;
+import org.openspaces.admin.internal.transport.InternalTransport;
+import org.openspaces.admin.internal.transport.InternalTransportInfoProvider;
+import org.openspaces.admin.internal.transport.InternalTransports;
+import org.openspaces.admin.internal.vm.DefaultVirtualMachine;
+import org.openspaces.admin.internal.vm.DefaultVirtualMachines;
+import org.openspaces.admin.internal.vm.InternalVirtualMachine;
+import org.openspaces.admin.internal.vm.InternalVirtualMachineInfoProvider;
+import org.openspaces.admin.internal.vm.InternalVirtualMachines;
+import org.openspaces.admin.internal.zone.DefaultZone;
+import org.openspaces.admin.internal.zone.DefaultZones;
+import org.openspaces.admin.internal.zone.InternalZone;
+import org.openspaces.admin.internal.zone.InternalZoneAware;
+import org.openspaces.admin.internal.zone.InternalZones;
 import org.openspaces.admin.lus.LookupService;
+import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.machine.Machines;
 import org.openspaces.admin.os.OperatingSystem;
@@ -65,11 +103,14 @@ import org.openspaces.admin.zone.Zone;
 import org.openspaces.admin.zone.ZoneAware;
 import org.openspaces.admin.zone.Zones;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.concurrent.*;
+import com.gigaspaces.grid.gsa.GSA;
+import com.gigaspaces.grid.gsm.PUDetails;
+import com.gigaspaces.grid.gsm.PUsDetails;
+import com.gigaspaces.internal.jvm.JVMDetails;
+import com.gigaspaces.internal.os.OSDetails;
+import com.gigaspaces.lrmi.nio.info.NIODetails;
+import com.gigaspaces.security.directory.UserDetails;
+import com.j_spaces.core.IJSpace;
 
 /**
  * @author kimchy
@@ -91,6 +132,8 @@ public class DefaultAdmin implements InternalAdmin {
     private final InternalGridServiceAgents gridServiceAgents = new DefaultGridServiceAgents(this);
 
     private final InternalGridServiceManagers gridServiceManagers = new DefaultGridServiceManagers(this);
+    
+    private final InternalElasticServiceManagers elasticServiceManagers = new DefaultElasticServiceManagers(this);
 
     private final InternalGridServiceContainers gridServiceContainers = new DefaultGridServiceContainers(this);
 
@@ -290,6 +333,11 @@ public class DefaultAdmin implements InternalAdmin {
 
     public GridServiceManagers getGridServiceManagers() {
         return this.gridServiceManagers;
+    }
+    
+
+    public ElasticServiceManagers getElasticServiceManagers() {
+        return this.elasticServiceManagers;
     }
 
     public GridServiceContainers getGridServiceContainers() {
@@ -511,6 +559,52 @@ public class DefaultAdmin implements InternalAdmin {
             processZonesOnServiceRemoval(uid, gridServiceManager);
             for (Zone zone : gridServiceManager.getZones().values()) {
                 ((InternalGridServiceManagers) zone.getGridServiceManagers()).removeGridServiceManager(uid);
+            }
+        }
+
+        flushEvents();
+    }
+    
+    public synchronized void addElasticServiceManager(InternalElasticServiceManager elasticServiceManager,
+            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
+        OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(elasticServiceManager, osDetails);
+        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(elasticServiceManager, jvmDetails);
+        InternalTransport transport = processTransportOnServiceAddition(elasticServiceManager, nioDetails, virtualMachine);
+
+        InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
+                transport, operatingSystem, virtualMachine,
+                (InternalMachineAware) virtualMachine, elasticServiceManager);
+
+        processAgentOnServiceAddition(elasticServiceManager);
+        processZonesOnServiceAddition(zones, elasticServiceManager.getUid(), transport, virtualMachine, machine, elasticServiceManager);
+
+        ((InternalElasticServiceManagers) machine.getElasticServiceManagers()).addElasticServiceManager(elasticServiceManager);
+        ((InternalElasticServiceManagers) ((InternalVirtualMachine) virtualMachine).getElasticServiceManagers()).addElasticServiceManager(elasticServiceManager);
+        for (Zone zone : elasticServiceManager.getZones().values()) {
+            ((InternalElasticServiceManagers) zone.getElasticServiceManagers()).addElasticServiceManager(elasticServiceManager);
+        }
+
+        elasticServiceManagers.addElasticServiceManager(elasticServiceManager);
+
+        flushEvents();
+    }
+
+    public synchronized void removeElasticServiceManager(String uid) {
+        InternalElasticServiceManager elasticServiceManager = elasticServiceManagers.removeElasticServiceManager(uid);
+        if (elasticServiceManager != null) {
+            elasticServiceManager.setDiscovered(false);
+            processTransportOnServiceRemoval(elasticServiceManager, elasticServiceManager, elasticServiceManager);
+            processOperatingSystemOnServiceRemoval(elasticServiceManager, elasticServiceManager);
+
+            processVirtualMachineOnServiceRemoval(elasticServiceManager, elasticServiceManager, elasticServiceManager);
+            ((InternalElasticServiceManagers) ((InternalVirtualMachine) elasticServiceManager.getVirtualMachine()).getElasticServiceManagers()).removeElasticServiceManager(uid);
+
+            processMachineOnServiceRemoval(elasticServiceManager, elasticServiceManager);
+            ((InternalElasticServiceManagers) ((InternalMachine) elasticServiceManager.getMachine()).getElasticServiceManagers()).removeElasticServiceManager(uid);
+
+            processZonesOnServiceRemoval(uid, elasticServiceManager);
+            for (Zone zone : elasticServiceManager.getZones().values()) {
+                ((InternalElasticServiceManagers) zone.getElasticServiceManagers()).removeElasticServiceManager(uid);
             }
         }
 
@@ -1005,4 +1099,5 @@ public class DefaultAdmin implements InternalAdmin {
             }
         }
     }
+
 }

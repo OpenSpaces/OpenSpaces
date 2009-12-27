@@ -1,5 +1,40 @@
 package org.openspaces.admin.internal.gsa;
 
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+import net.jini.core.lookup.ServiceID;
+
+import org.openspaces.admin.AdminException;
+import org.openspaces.admin.dump.DumpResult;
+import org.openspaces.admin.esm.ElasticServiceManager;
+import org.openspaces.admin.esm.events.ElasticServiceManagerAddedEventListener;
+import org.openspaces.admin.gsa.ElasticServiceManagerOptions;
+import org.openspaces.admin.gsa.GridServiceContainerOptions;
+import org.openspaces.admin.gsa.GridServiceManagerOptions;
+import org.openspaces.admin.gsa.GridServiceOptions;
+import org.openspaces.admin.gsa.LookupServiceOptions;
+import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
+import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventListener;
+import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.dump.InternalDumpResult;
+import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
+import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
+import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
+import org.openspaces.admin.internal.lus.InternalLookupService;
+import org.openspaces.admin.internal.support.AbstractGridComponent;
+import org.openspaces.admin.internal.support.InternalAgentGridComponent;
+import org.openspaces.admin.lus.LookupService;
+import org.openspaces.admin.lus.events.LookupServiceAddedEventListener;
+
 import com.gigaspaces.grid.gsa.AgentProcessesDetails;
 import com.gigaspaces.grid.gsa.GSA;
 import com.gigaspaces.internal.jvm.JVMDetails;
@@ -13,35 +48,6 @@ import com.gigaspaces.log.LogProcessType;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.security.SecurityException;
-import net.jini.core.lookup.ServiceID;
-import org.openspaces.admin.AdminException;
-import org.openspaces.admin.dump.DumpResult;
-import org.openspaces.admin.gsa.GridServiceContainerOptions;
-import org.openspaces.admin.gsa.GridServiceManagerOptions;
-import org.openspaces.admin.gsa.GridServiceOptions;
-import org.openspaces.admin.gsa.LookupServiceOptions;
-import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
-import org.openspaces.admin.gsm.GridServiceManager;
-import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventListener;
-import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
-import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
-import org.openspaces.admin.internal.lus.InternalLookupService;
-import org.openspaces.admin.internal.support.AbstractGridComponent;
-import org.openspaces.admin.internal.support.InternalAgentGridComponent;
-import org.openspaces.admin.internal.dump.InternalDumpResult;
-import org.openspaces.admin.lus.LookupService;
-import org.openspaces.admin.lus.events.LookupServiceAddedEventListener;
-
-import java.io.IOException;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author kimchy
@@ -210,6 +216,56 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
             getAdmin().getGridServiceManagers().getGridServiceManagerAdded().remove(added);
         }
     }
+    
+
+    public void startGridService(ElasticServiceManagerOptions options) {
+        internalStartGridService(options);
+    }
+
+    public int internalStartGridService(ElasticServiceManagerOptions options) {
+        try {
+            return gsa.startProcess(options.getOptions());
+        } catch (SecurityException se) {
+            throw new AdminException("No privileges to start an ESM", se);
+        } catch (IOException e) {
+            throw new AdminException("Failed to start ESM", e);
+        }
+    }
+
+    public ElasticServiceManager startGridServiceAndWait(ElasticServiceManagerOptions options) {
+        return startGridServiceAndWait(options, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
+    }
+
+    public ElasticServiceManager startGridServiceAndWait(ElasticServiceManagerOptions options, long timeout, TimeUnit timeUnit) {
+        final int agentId = internalStartGridService(options);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<ElasticServiceManager> ref = new AtomicReference<ElasticServiceManager>();
+        ElasticServiceManagerAddedEventListener added = new ElasticServiceManagerAddedEventListener() {
+
+            public void elasticServiceManagerAdded(ElasticServiceManager elasticServiceManager) {
+                String agentUid = ((InternalElasticServiceManager) elasticServiceManager).getAgentUid();
+                if (agentUid != null && agentUid.equals(getUid())) {
+                    if (agentId == elasticServiceManager.getAgentId()) {
+                        ref.set(elasticServiceManager);
+                        latch.countDown();
+                    }
+                }
+                
+            }
+        };
+        // adding now, so we get all the events for existing ones
+        getAdmin().getElasticServiceManagers().getElasticServiceManagerAdded().add(added);
+        try {
+            latch.await(timeout, timeUnit);
+            return ref.get();
+        } catch (InterruptedException e) {
+            return null;
+        } finally {
+            getAdmin().getElasticServiceManagers().getElasticServiceManagerAdded().remove(added);
+        }
+    }
+
 
     public void startGridService(GridServiceContainerOptions options) {
         internalStartGridService(options);

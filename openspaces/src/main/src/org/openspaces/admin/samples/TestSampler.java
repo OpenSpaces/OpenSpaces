@@ -2,11 +2,12 @@ package org.openspaces.admin.samples;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
+import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.lus.LookupService;
-import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.machine.Machine;
+import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.space.Space;
@@ -21,7 +22,7 @@ import org.openspaces.pu.service.ServiceMonitors;
 public class TestSampler {
 
     public static void main(String[] args) throws InterruptedException {
-        Admin admin = new AdminFactory().addGroup("kimchy").createAdmin();
+        Admin admin = new AdminFactory().addGroup("moran-gigaspaces-7.1.0-XAPPremium-m5").createAdmin();
 //        admin.getGridServiceManagers().waitFor(2);
 //        Space space1 = admin.getSpaces().waitFor("test");
 //        space1.waitFor(1, SpaceMode.PRIMARY);
@@ -29,6 +30,9 @@ public class TestSampler {
             try {
                 for (LookupService lookupService : admin.getLookupServices()) {
                     System.out.println("Lookup [" + lookupService.getUid() + "] : " + lookupService.getMachine());
+                }
+                for (ElasticServiceManager esm : admin.getElasticServiceManagers()) {
+                    System.out.println("ESM [" + esm.getUid() + "] running on Machine " + esm.getMachine().getHostAddress());
                 }
                 for (GridServiceManager gsm : admin.getGridServiceManagers()) {
                     System.out.println("GSM [" + gsm.getUid() + "] running on Machine " + gsm.getMachine().getHostAddress());
@@ -64,8 +68,10 @@ public class TestSampler {
                 }
                 for (Machine machine : admin.getMachines()) {
                     System.out.println("Machine [" + machine.getUid() + "], Processors [" + machine.getOperatingSystem().getDetails().getAvailableProcessors() + "] CPU [" + machine.getOperatingSystem().getStatistics().getCpuPerc() + "]");
+                    if (machine.getOperatingSystem().getStatistics().getNetworkStats() != null) {
                     for (OperatingSystemStatistics.NetworkStatistics netStats : machine.getOperatingSystem().getStatistics().getNetworkStats().values()) {
                         System.out.println("   -> " + netStats.getName() + ", Rx " + netStats.getRxBytes() + ", Tx " + netStats.getTxBytes() + ", RxPerSecond " + netStats.getRxBytesPerSecond() + ", TxPerSecond " + netStats.getTxBytesPerSecond());
+                    }
                     }
 //                    System.out.println("   -> Mem Total [" + machine.getOperatingSystem().getDetails().getTotalPhysicalMemorySizeInGB() + "GB], " + "Free [" + machine.getOperatingSystem().getStatistics().getFreePhysicalMemorySizeInGB() + "GB]");
 //                    System.out.println("   -> Swap Total [" + machine.getOperatingSystem().getDetails().getTotalSwapSpaceSizeInGB() + "GB], " + "Free [" + machine.getOperatingSystem().getStatistics().getFreeSwapSpaceSizeInGB() + "GB]");

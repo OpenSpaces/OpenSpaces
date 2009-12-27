@@ -1,9 +1,16 @@
 package org.openspaces.admin.internal.vm;
 
-import com.gigaspaces.internal.jvm.JVMDetails;
+import java.rmi.RemoteException;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.openspaces.admin.StatisticsMonitor;
-import org.openspaces.admin.zone.Zone;
+import org.openspaces.admin.esm.ElasticServiceManager;
+import org.openspaces.admin.esm.ElasticServiceManagers;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainer;
@@ -11,6 +18,8 @@ import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.esm.DefaultElasticServiceManagers;
+import org.openspaces.admin.internal.esm.InternalElasticServiceManagers;
 import org.openspaces.admin.internal.gsa.DefaultGridServiceAgents;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgents;
 import org.openspaces.admin.internal.gsc.DefaultGridServiceContainers;
@@ -37,15 +46,10 @@ import org.openspaces.admin.vm.VirtualMachineDetails;
 import org.openspaces.admin.vm.VirtualMachineStatistics;
 import org.openspaces.admin.vm.events.VirtualMachineStatisticsChangedEvent;
 import org.openspaces.admin.vm.events.VirtualMachineStatisticsChangedEventManager;
+import org.openspaces.admin.zone.Zone;
 import org.openspaces.core.util.ConcurrentHashSet;
 
-import java.rmi.RemoteException;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.ConcurrentHashMap;
+import com.gigaspaces.internal.jvm.JVMDetails;
 
 /**
  * @author kimchy
@@ -69,6 +73,8 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
     private final InternalGridServiceAgents gridServiceAgents;
 
     private final InternalGridServiceManagers gridServiceManagers;
+    
+    private final InternalElasticServiceManagers elasticServiceManagers;
 
     private final InternalGridServiceContainers gridServiceContainers;
 
@@ -95,6 +101,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
         this.uid = details.getUid();
         this.gridServiceAgents = new DefaultGridServiceAgents(admin);
         this.gridServiceManagers = new DefaultGridServiceManagers(admin);
+        this.elasticServiceManagers = new DefaultElasticServiceManagers(admin);
         this.gridServiceContainers = new DefaultGridServiceContainers(admin);
         this.processingUnitInstances = new DefaultProcessingUnitInstances(admin);
         this.spaceInstances = new DefaultSpaceInstances(admin);
@@ -156,6 +163,14 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
         }
         return null;
     }
+    
+    public ElasticServiceManager getElasticServiceManager() {
+        Iterator<ElasticServiceManager> it = elasticServiceManagers.iterator();
+        if (it.hasNext()) {
+            return it.next();
+        }
+        return null;
+    }
 
     public GridServiceContainer getGridServiceContainer() {
         Iterator<GridServiceContainer> it = gridServiceContainers.iterator();
@@ -167,6 +182,10 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     public GridServiceManagers getGridServiceManagers() {
         return gridServiceManagers;
+    }
+    
+    public ElasticServiceManagers getElasticServiceManagers() {
+        return elasticServiceManagers;
     }
 
     public GridServiceContainers getGridServiceContainers() {

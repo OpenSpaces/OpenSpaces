@@ -1,11 +1,10 @@
 package org.openspaces.admin.internal.admin;
 
-import com.gigaspaces.internal.jvm.JVMDetails;
-import com.gigaspaces.internal.os.OSDetails;
-import com.gigaspaces.lrmi.nio.info.NIODetails;
-import com.gigaspaces.security.directory.UserDetails;
-import com.j_spaces.core.IJSpace;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
@@ -13,8 +12,11 @@ import org.openspaces.admin.internal.lus.InternalLookupService;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
 
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import com.gigaspaces.internal.jvm.JVMDetails;
+import com.gigaspaces.internal.os.OSDetails;
+import com.gigaspaces.lrmi.nio.info.NIODetails;
+import com.gigaspaces.security.directory.UserDetails;
+import com.j_spaces.core.IJSpace;
 
 /**
  * @author kimchy
@@ -48,6 +50,10 @@ public interface InternalAdmin extends Admin {
 
     void removeGridServiceManager(String uid);
 
+    void addElasticServiceManager(InternalElasticServiceManager elasticServiceManager, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones);
+
+    void removeElasticServiceManager(String uid);
+    
     void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones);
 
     void removeGridServiceContainer(String uid);

@@ -17,7 +17,7 @@
 package org.openspaces.admin.vm;
 
 import org.openspaces.admin.StatisticsMonitor;
-import org.openspaces.admin.zone.ZoneAware;
+import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
@@ -31,6 +31,7 @@ import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 import org.openspaces.admin.vm.events.VirtualMachineStatisticsChangedEventManager;
+import org.openspaces.admin.zone.ZoneAware;
 
 /**
  * A virtual machine is a JVM that runs grid components.
@@ -70,6 +71,12 @@ public interface VirtualMachine extends MachineAware, ZoneAware, StatisticsMonit
      * Returns <code>null</code> if no grid service manager was started within it.
      */
     GridServiceManager getGridServiceManager();
+    
+    /**
+     * Returns the elastic service manager started within this virtual machine.
+     * Returns <code>null</code> if no elastic service manager was started within it.
+     */
+    ElasticServiceManager getElasticServiceManager();
 
     /**
      * Returns the grid service container started within this virtual machine.

@@ -17,6 +17,7 @@
 package org.openspaces.admin.machine;
 
 import org.openspaces.admin.dump.DumpProvider;
+import org.openspaces.admin.esm.ElasticServiceManagers;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
@@ -80,6 +81,11 @@ public interface Machine extends DumpProvider {
      * Returns the grid service managers running on the machine.
      */
     GridServiceManagers getGridServiceManagers();
+    
+    /**
+     * Returns the elastic service managers running on the machine.
+     */
+    ElasticServiceManagers getElasticServiceManagers();
 
     /**
      * Returns the grid service containers running on the machine.

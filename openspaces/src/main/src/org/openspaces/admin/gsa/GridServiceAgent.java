@@ -16,19 +16,21 @@
 
 package org.openspaces.admin.gsa;
 
-import com.gigaspaces.grid.gsa.AgentProcessesDetails;
-import com.gigaspaces.log.LogEntries;
-import com.gigaspaces.log.LogProcessType;
-import com.gigaspaces.log.LogEntryMatcher;
-import com.gigaspaces.log.CompoundLogEntries;
+import java.util.concurrent.TimeUnit;
+
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.LogProviderGridComponent;
 import org.openspaces.admin.dump.DumpProvider;
+import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.lus.LookupService;
 
-import java.util.concurrent.TimeUnit;
+import com.gigaspaces.grid.gsa.AgentProcessesDetails;
+import com.gigaspaces.log.CompoundLogEntries;
+import com.gigaspaces.log.LogEntries;
+import com.gigaspaces.log.LogEntryMatcher;
+import com.gigaspaces.log.LogProcessType;
 
 /**
  * A Grid Service Agent is a process manager allowing to start and stop (on the operating system process level)
@@ -62,6 +64,23 @@ public interface GridServiceAgent extends GridComponent, LogProviderGridComponen
      * for the given timeout (in time unit) until it is discovered by the admin, which is then returned.
      */
     GridServiceManager startGridServiceAndWait(GridServiceManagerOptions options, long timeout, TimeUnit timeUnit);
+
+    /**
+     * Starts a {@link org.openspaces.admin.esm.ElasticServiceManager} based on the provided options.
+     */
+    void startGridService(ElasticServiceManagerOptions options);
+
+    /**
+     * Starts a {@link org.openspaces.admin.esm.ElasticServiceManager} based on the provided options and waits
+     * indefinitely until it is discovered by the admin, which is then returned.
+     */
+    ElasticServiceManager startGridServiceAndWait(ElasticServiceManagerOptions options);
+
+    /**
+     * Starts a {@link org.openspaces.admin.esm.ElasticServiceManager} based on the provided options and waits
+     * for the given timeout (in time unit) until it is discovered by the admin, which is then returned.
+     */
+    ElasticServiceManager startGridServiceAndWait(ElasticServiceManagerOptions options, long timeout, TimeUnit timeUnit);
 
     /**
      * Starts a {@link org.openspaces.admin.gsc.GridServiceContainer} based on the provided options.

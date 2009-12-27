@@ -1,48 +1,51 @@
 package org.openspaces.admin.internal.zone;
 
+import java.util.Map;
+
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.dump.CompoundDumpResult;
 import org.openspaces.admin.dump.DumpResult;
+import org.openspaces.admin.esm.ElasticServiceManagers;
 import org.openspaces.admin.gsa.GridServiceAgent;
-import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.gsm.GridServiceManager;
-import org.openspaces.admin.internal.lus.InternalLookupServices;
-import org.openspaces.admin.internal.lus.DefaultLookupServices;
-import org.openspaces.admin.internal.gsa.InternalGridServiceAgents;
-import org.openspaces.admin.internal.gsa.DefaultGridServiceAgents;
-import org.openspaces.admin.internal.gsm.InternalGridServiceManagers;
-import org.openspaces.admin.internal.gsm.DefaultGridServiceManagers;
-import org.openspaces.admin.internal.gsc.InternalGridServiceContainers;
-import org.openspaces.admin.internal.gsc.DefaultGridServiceContainers;
-import org.openspaces.admin.internal.transport.InternalTransports;
-import org.openspaces.admin.internal.transport.DefaultTransports;
-import org.openspaces.admin.internal.vm.InternalVirtualMachines;
-import org.openspaces.admin.internal.vm.DefaultVirtualMachines;
-import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
-import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
-import org.openspaces.admin.internal.space.InternalSpaceInstances;
-import org.openspaces.admin.internal.space.DefaultSpaceInstances;
-import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.machine.InternalMachines;
-import org.openspaces.admin.internal.machine.DefaultMachines;
 import org.openspaces.admin.gsa.GridServiceAgents;
+import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.gsc.GridServiceContainers;
+import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.gsm.GridServiceManagers;
+import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.esm.DefaultElasticServiceManagers;
+import org.openspaces.admin.internal.esm.InternalElasticServiceManagers;
+import org.openspaces.admin.internal.gsa.DefaultGridServiceAgents;
+import org.openspaces.admin.internal.gsa.InternalGridServiceAgents;
+import org.openspaces.admin.internal.gsc.DefaultGridServiceContainers;
+import org.openspaces.admin.internal.gsc.InternalGridServiceContainers;
+import org.openspaces.admin.internal.gsm.DefaultGridServiceManagers;
+import org.openspaces.admin.internal.gsm.InternalGridServiceManagers;
+import org.openspaces.admin.internal.lus.DefaultLookupServices;
+import org.openspaces.admin.internal.lus.InternalLookupServices;
+import org.openspaces.admin.internal.machine.DefaultMachines;
+import org.openspaces.admin.internal.machine.InternalMachines;
+import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
+import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
+import org.openspaces.admin.internal.space.DefaultSpaceInstances;
+import org.openspaces.admin.internal.space.InternalSpaceInstances;
+import org.openspaces.admin.internal.transport.DefaultTransports;
+import org.openspaces.admin.internal.transport.InternalTransports;
+import org.openspaces.admin.internal.vm.DefaultVirtualMachines;
+import org.openspaces.admin.internal.vm.InternalVirtualMachines;
 import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.lus.LookupServices;
-import org.openspaces.admin.gsm.GridServiceManagers;
-import org.openspaces.admin.gsc.GridServiceContainers;
-import org.openspaces.admin.transport.Transports;
-import org.openspaces.admin.vm.VirtualMachines;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
-import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
+import org.openspaces.admin.machine.Machines;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
-import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
-import org.openspaces.admin.machine.Machines;
-
-import java.util.Map;
+import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
+import org.openspaces.admin.transport.Transports;
+import org.openspaces.admin.vm.VirtualMachines;
 
 /**
  * @author kimchy
@@ -60,6 +63,8 @@ public class DefaultZone implements InternalZone {
     private final InternalGridServiceAgents gridServiceAgents;
 
     private final InternalGridServiceManagers gridServiceManagers;
+    
+    private final InternalElasticServiceManagers elasticServiceManagers;
 
     private final InternalGridServiceContainers gridServiceContainers;
 
@@ -79,6 +84,7 @@ public class DefaultZone implements InternalZone {
         this.gridServiceAgents = new DefaultGridServiceAgents(admin);
         this.lookupServices = new DefaultLookupServices(admin);
         this.gridServiceManagers = new DefaultGridServiceManagers(admin);
+        this.elasticServiceManagers = new DefaultElasticServiceManagers(admin);
         this.gridServiceContainers = new DefaultGridServiceContainers(admin);
         this.virtualMachines = new DefaultVirtualMachines(admin);
         this.processingUnitInstances = new DefaultProcessingUnitInstances(admin);
@@ -105,13 +111,17 @@ public class DefaultZone implements InternalZone {
     public GridServiceManagers getGridServiceManagers() {
         return gridServiceManagers;
     }
+    
+    public ElasticServiceManagers getElasticServiceManagers() {
+        return elasticServiceManagers;
+    }
 
     public GridServiceContainers getGridServiceContainers() {
         return gridServiceContainers;
     }
 
     public boolean hasGridComponents() {
-        return !gridServiceAgents.isEmpty() || !gridServiceManagers.isEmpty() || !gridServiceContainers.isEmpty() || !lookupServices.isEmpty();
+        return !gridServiceAgents.isEmpty() || !gridServiceManagers.isEmpty() || !elasticServiceManagers.isEmpty() || !gridServiceContainers.isEmpty() || !lookupServices.isEmpty();
     }
 
     public Transports getTransports() {

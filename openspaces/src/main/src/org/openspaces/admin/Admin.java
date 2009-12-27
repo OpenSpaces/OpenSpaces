@@ -32,6 +32,7 @@ import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
 import org.openspaces.admin.zone.Zones;
 import org.openspaces.admin.dump.DumpProvider;
+import org.openspaces.admin.esm.ElasticServiceManagers;
 
 /**
  * The main interface for accessing Admin API. Created using the {@link org.openspaces.admin.AdminFactory}
@@ -144,6 +145,11 @@ public interface Admin extends StatisticsMonitor, DumpProvider {
      * Returns the grid service managers discovered.
      */
     GridServiceManagers getGridServiceManagers();
+    
+    /**
+     * Returns the elastic service managers discovered. 
+     */
+    ElasticServiceManagers getElasticServiceManagers();
 
     /**
      * Returns the grid service containers discovered.
