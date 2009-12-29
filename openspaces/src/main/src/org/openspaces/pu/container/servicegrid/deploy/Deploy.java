@@ -832,7 +832,7 @@ public class Deploy {
         sb.append("\n    PU_Name: The name of the processing unit under the deploy directory, or packaged jar file");
         sb.append("\n    -sla [sla-location]                      : Location of an optional xml file holding the SLA element");
         sb.append("\n    -cluster [cluster properties]            : Allows to override the cluster parameters of the SLA elements");
-        sb.append("\n             schema=partitioned              : The cluster schema to override");
+        sb.append("\n             schema=partitioned-sync2backup  : The cluster schema to override");
         sb.append("\n             total_members=1,1               : The number of instances and number of backups to override");
         if (!managed) {
             sb.append("\n    -groups [groupName] [groupName] ...      : The lookup groups used to look up the GSM");
