@@ -18,6 +18,7 @@ import net.jini.lookup.ServiceDiscoveryManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.BootUtil;
+import org.jini.rio.resources.servicecore.Service;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.esm.DefaultElasticServiceManager;
@@ -70,7 +71,8 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     private volatile boolean started = false;
 
     private ServiceDiscoveryManager sdm;
-    private LookupCache cache;
+    private LookupCache serivceCache;
+    private LookupCache spaceCache;
 
     public DiscoveryService(InternalAdmin admin) {
         this.admin = admin;
@@ -102,10 +104,19 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             throw new AdminException("Failed to start discovery service, Service Discovery Manager failed to start", e);
         }
 
-        ServiceTemplate template = new ServiceTemplate(null, null, null);
         try {
-            cache = sdm.createLookupCache(template, null, this);
+            ServiceTemplate template = new ServiceTemplate(null, new Class[] {Service.class}, null);
+            serivceCache = sdm.createLookupCache(template, null, this);
         } catch (Exception e) {
+            sdm.terminate();
+            throw new AdminException("Failed to start discovery service, Lookup Cache failed to start", e);
+        }
+
+        try {
+            ServiceTemplate template = new ServiceTemplate(null, new Class[] {IJSpace.class}, null);
+            spaceCache = sdm.createLookupCache(template, null, this);
+        } catch (Exception e) {
+            serivceCache.terminate();
             sdm.terminate();
             throw new AdminException("Failed to start discovery service, Lookup Cache failed to start", e);
         }
@@ -116,7 +127,10 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             return;
         }
         started = false;
-        cache.terminate();
+        serivceCache.terminate();
+        if (spaceCache != null) {
+            spaceCache.terminate();
+        }
         sdm.terminate();
     }
 
