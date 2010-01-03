@@ -6,6 +6,7 @@ import org.openspaces.admin.esm.deployment.ElasticDataGridDeployment;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceContainerOptions;
 import org.openspaces.admin.space.SpaceDeployment;
+import org.openspaces.admin.zone.Zone;
 
 public class InternalESMImpl {
     private final Admin admin = new AdminFactory().addGroup("moran-gigaspaces-7.1.0-XAPPremium-m5").createAdmin();
@@ -57,10 +58,8 @@ public class InternalESMImpl {
         }
         //wait for all GSCs started on this zone
         final String zone = deployment.getDataGridName();
-        while (admin.getZones() == null || admin.getZones().getByName(zone) == null) {
-            System.out.println("zone not yet discovered - admin.getZones()=" + admin.getZones());
-        }
-        admin.getZones().getByName(zone).getGridServiceContainers().waitFor(initialNumberOfJvms);
+        Zone zoneByName = admin.getZones().waitFor(zone);
+        zoneByName.getGridServiceContainers().waitFor(initialNumberOfJvms);
         admin.getGridServiceManagers().deploy(spaceDeployment);
     }
 }
