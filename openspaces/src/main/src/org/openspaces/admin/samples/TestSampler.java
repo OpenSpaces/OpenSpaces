@@ -22,7 +22,7 @@ import org.openspaces.pu.service.ServiceMonitors;
 public class TestSampler {
 
     public static void main(String[] args) throws InterruptedException {
-        Admin admin = new AdminFactory().addGroup("moran-gigaspaces-7.1.0-XAPPremium-m5").createAdmin();
+        Admin admin = new AdminFactory().addGroup("kimchy").discoverUnmanagedSpaces().createAdmin();
 //        admin.getGridServiceManagers().waitFor(2);
 //        Space space1 = admin.getSpaces().waitFor("test");
 //        space1.waitFor(1, SpaceMode.PRIMARY);

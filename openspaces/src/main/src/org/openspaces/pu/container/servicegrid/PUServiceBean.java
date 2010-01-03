@@ -21,8 +21,12 @@ import com.gigaspaces.internal.jvm.JVMInfoProvider;
 import com.gigaspaces.internal.os.OSInfoProvider;
 import com.gigaspaces.lrmi.nio.info.NIOInfoProvider;
 import com.gigaspaces.grid.zone.GridZoneProvider;
+import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.admin.RuntimeHolder;
 import com.j_spaces.core.client.SpaceURL;
+import com.j_spaces.core.filters.StatisticsHolder;
 import com.sun.jini.start.ServiceProxyAccessor;
+import net.jini.core.lookup.ServiceID;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.jini.rio.core.jsb.ServiceState;
 import org.jini.rio.resources.servicecore.Service;
@@ -55,6 +59,12 @@ public interface PUServiceBean extends NIOInfoProvider, OSInfoProvider, JVMInfoP
     PUDetails getPUDetails() throws RemoteException;
 
     PUMonitors getPUMonitors() throws RemoteException;
+
+    IJSpace getSpaceDirect(ServiceID serviceID) throws RemoteException;
+
+    RuntimeHolder getSpaceRuntimeHolder(ServiceID serviceID) throws RemoteException;
+
+    StatisticsHolder getSpaceStatisticsHolder(ServiceID serviceID) throws RemoteException;
 
     SpaceURL[] listSpacesURLs() throws RemoteException;
 

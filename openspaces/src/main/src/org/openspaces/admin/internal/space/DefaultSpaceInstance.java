@@ -9,35 +9,28 @@ import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
-import com.j_spaces.core.admin.SpaceConfig;
+import com.j_spaces.core.admin.RuntimeHolder;
 import com.j_spaces.core.admin.StatisticsAdmin;
 import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.core.filters.StatisticsHolder;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.space.events.DefaultReplicationStatusChangedEventManager;
-import org.openspaces.admin.internal.space.events.DefaultSpaceInstanceStatisticsChangedEventManager;
-import org.openspaces.admin.internal.space.events.DefaultSpaceModeChangedEventManager;
-import org.openspaces.admin.internal.space.events.InternalReplicationStatusChangedEventManager;
-import org.openspaces.admin.internal.space.events.InternalSpaceInstanceStatisticsChangedEventManager;
-import org.openspaces.admin.internal.space.events.InternalSpaceModeChangedEventManager;
+import org.openspaces.admin.internal.space.events.*;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
-import org.openspaces.admin.space.ReplicationTarget;
-import org.openspaces.admin.space.Space;
-import org.openspaces.admin.space.SpaceInstance;
-import org.openspaces.admin.space.SpaceInstanceStatistics;
-import org.openspaces.admin.space.SpacePartition;
+import org.openspaces.admin.space.*;
 import org.openspaces.admin.space.events.*;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceConfigurer;
+import org.openspaces.core.space.SpaceServiceDetails;
+import org.openspaces.pu.container.servicegrid.PUServiceBean;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -49,15 +42,15 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     private final ServiceID serviceID;
 
+    private final PUServiceBean puService;
+
     // direct space proxy
-    private final IJSpace ijspace;
+    private volatile IJSpace ijspace;
 
     // direct giga space
-    private final GigaSpace gigaSpace;
+    private volatile GigaSpace gigaSpace;
 
-    private final IInternalRemoteJSpaceAdmin spaceAdmin;
-
-    private final SpaceConfig spaceConfig;
+    private volatile IInternalRemoteJSpaceAdmin spaceAdmin;
 
     private final SpaceURL spaceURL;
 
@@ -95,16 +88,55 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     private Future scheduledStatisticsMonitor;
 
-    public DefaultSpaceInstance(ServiceID serviceID, IJSpace directSpace, IInternalRemoteJSpaceAdmin spaceAdmin,
-                                SpaceConfig spaceConfig, InternalAdmin admin) {
+
+    public DefaultSpaceInstance(ServiceID serviceID, IJSpace directSpace, IInternalRemoteJSpaceAdmin spaceAdmin, InternalAdmin admin) {
         super(admin);
+        this.puService = null;
         this.uid = serviceID.toString();
         this.serviceID = serviceID;
         this.ijspace = directSpace;
         this.gigaSpace = new GigaSpaceConfigurer(directSpace).gigaSpace();
         this.spaceAdmin = spaceAdmin;
-        this.spaceConfig = spaceConfig;
         this.spaceURL = ijspace.getURL();
+
+        this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(null, admin);
+        this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
+        this.statisticsChangedEventManager = new DefaultSpaceInstanceStatisticsChangedEventManager(admin);
+
+        String sInstanceId = spaceURL.getProperty(SpaceURL.CLUSTER_MEMBER_ID);
+        if (sInstanceId == null || sInstanceId.length() == 0) {
+            instanceId = 1;
+        } else {
+            instanceId = Integer.parseInt(sInstanceId);
+        }
+        String sBackupId = spaceURL.getProperty(SpaceURL.CLUSTER_BACKUP_ID);
+        if (sBackupId == null || sBackupId.length() == 0) {
+            backupId = 0;
+        } else {
+            backupId = Integer.parseInt(sBackupId);
+        }
+        String totalMembers = spaceURL.getProperty(SpaceURL.CLUSTER_TOTAL_MEMBERS);
+        if (totalMembers == null || totalMembers.length() == 0) {
+            numberOfInstances = 1;
+            numberOfBackups = 0;
+        } else {
+            int index = totalMembers.indexOf(',');
+            if (index > 0) {
+                numberOfInstances = Integer.parseInt(totalMembers.substring(0, index));
+                numberOfBackups = Integer.parseInt(totalMembers.substring(index + 1));
+            } else {
+                numberOfInstances = Integer.parseInt(totalMembers);
+                numberOfBackups = 0;
+            }
+        }
+    }
+
+    public DefaultSpaceInstance(PUServiceBean puService, SpaceServiceDetails spaceServiceDetails, InternalAdmin admin) {
+        super(admin);
+        this.uid = spaceServiceDetails.getServiceID().toString();
+        this.serviceID = spaceServiceDetails.getServiceID();
+        this.puService = puService;
+        this.spaceURL = spaceServiceDetails.getSpaceUrl();
 
         this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(null, admin);
         this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
@@ -147,6 +179,9 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     }
 
     public GigaSpace getGigaSpace() {
+        if (gigaSpace == null) {
+            gigaSpace = new GigaSpaceConfigurer(getIJSpace()).gigaSpace();
+        }
         return this.gigaSpace;
     }
 
@@ -197,8 +232,12 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         return numberOfBackups;
     }
 
+    public SpaceURL getSpaceUrl() {
+        return this.spaceURL;
+    }
+
     public String getSpaceName() {
-        return spaceConfig.getSpaceName();
+        return spaceURL.getSpaceName();
     }
 
     public SpaceModeChangedEventManager getSpaceModeChanged() {
@@ -221,16 +260,33 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         return backupId;
     }
 
-    public SpaceConfig getSpaceConfig() {
-        return this.spaceConfig;
-    }
-
     public IJSpace getIJSpace() {
+        if (this.ijspace == null) {
+            try {
+                this.ijspace = puService.getSpaceDirect(serviceID);
+            } catch (RemoteException e) {
+                // ignore....
+            }
+        }
         return this.ijspace;
     }
 
     public IInternalRemoteJSpaceAdmin getSpaceAdmin() {
+        if (spaceAdmin == null) {
+            try {
+                this.spaceAdmin = (IInternalRemoteJSpaceAdmin) getIJSpace().getAdmin();
+            } catch (RemoteException e) {
+                return null;
+            }
+        }
         return this.spaceAdmin;
+    }
+
+    public RuntimeHolder getRuntimeHolder() throws RemoteException {
+        if (spaceAdmin != null) {
+            return spaceAdmin.getRuntimeHolder();
+        }
+        return puService.getSpaceRuntimeHolder(serviceID);
     }
 
     public void setMode(SpaceMode spaceMode) {
@@ -283,7 +339,13 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         }
         lastStatisticsTimestamp = currentTime;
         try {
-            lastStatistics = new DefaultSpaceInstanceStatistics(((StatisticsAdmin) spaceAdmin).getHolder(), lastStatistics, statisticsHistorySize);
+            StatisticsHolder holder;
+            if (spaceAdmin != null) {
+                holder = ((StatisticsAdmin) spaceAdmin).getHolder();
+            } else {
+                holder = puService.getSpaceStatisticsHolder(serviceID);
+            }
+            lastStatistics = new DefaultSpaceInstanceStatistics(holder, lastStatistics, statisticsHistorySize);
         } catch (RemoteException e) {
             lastStatistics = NA_STATISTICS;
         }
@@ -337,30 +399,51 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     }
 
     public NIODetails getNIODetails() throws RemoteException {
-        return spaceAdmin.getNIODetails();
+        if (spaceAdmin != null) {
+            return spaceAdmin.getNIODetails();
+        }
+        return puService.getNIODetails();
     }
 
     public NIOStatistics getNIOStatistics() throws RemoteException {
-        return spaceAdmin.getNIOStatistics();
+        if (spaceAdmin != null) {
+            return spaceAdmin.getNIOStatistics();
+        }
+        return puService.getNIOStatistics();
     }
 
     public OSDetails getOSDetails() throws RemoteException {
-        return spaceAdmin.getOSDetails();
+        if (spaceAdmin != null) {
+            return spaceAdmin.getOSDetails();
+        }
+        return puService.getOSDetails();
     }
 
     public OSStatistics getOSStatistics() throws RemoteException {
-        return spaceAdmin.getOSStatistics();
+        if (spaceAdmin != null) {
+            return spaceAdmin.getOSStatistics();
+        }
+        return puService.getOSStatistics();
     }
 
     public JVMDetails getJVMDetails() throws RemoteException {
-        return spaceAdmin.getJVMDetails();
+        if (spaceAdmin != null) {
+            return spaceAdmin.getJVMDetails();
+        }
+        return puService.getJVMDetails();
     }
 
     public JVMStatistics getJVMStatistics() throws RemoteException {
-        return spaceAdmin.getJVMStatistics();
+        if (spaceAdmin != null) {
+            return spaceAdmin.getJVMStatistics();
+        }
+        return puService.getJVMStatistics();
     }
 
     public void runGc() throws RemoteException {
-        spaceAdmin.runGc();
+        if (spaceAdmin != null) {
+            spaceAdmin.runGc();
+        }
+        puService.runGc();
     }
 }

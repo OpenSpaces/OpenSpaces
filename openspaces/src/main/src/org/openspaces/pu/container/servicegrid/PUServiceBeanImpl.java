@@ -34,9 +34,13 @@ import com.gigaspaces.security.service.SecurityResolver;
 import com.gigaspaces.start.Locator;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
+import com.j_spaces.core.admin.RuntimeHolder;
+import com.j_spaces.core.admin.StatisticsAdmin;
 import com.j_spaces.core.client.SpaceURL;
+import com.j_spaces.core.filters.StatisticsHolder;
 import com.j_spaces.kernel.Environment;
 import com.j_spaces.kernel.ClassLoaderHelper;
+import net.jini.core.lookup.ServiceID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.*;
@@ -819,6 +823,71 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
         }
         return alive;
+    }
+
+    public IJSpace getSpaceDirect(ServiceID serviceID) throws RemoteException {
+        for (Object serviceDetails : puDetails.getDetails()) {
+            if (serviceDetails.getClass().getName().equals(SpaceServiceDetails.class.getName())) {
+                try {
+                    Method spaceType = serviceDetails.getClass().getMethod("getSpaceType");
+                    if (spaceType.invoke(serviceDetails).toString().equals(SpaceType.EMBEDDED.toString())) {
+                        Method spaceServiceId = serviceDetails.getClass().getMethod("getServiceID");
+                        if (spaceServiceId.invoke(serviceDetails).equals(serviceID)) {
+                            Field spaceDetails = serviceDetails.getClass().getDeclaredField("directSpaceA");
+                            spaceDetails.setAccessible(true);
+                            return (IJSpace) spaceDetails.get(serviceDetails);
+                        }
+                    }
+                } catch (Exception e) {
+                    throw new RemoteException("Failed to get space", e);
+                }
+            }
+        }
+        return null;
+    }
+
+    public RuntimeHolder getSpaceRuntimeHolder(ServiceID serviceID) throws RemoteException {
+        for (Object serviceDetails : puDetails.getDetails()) {
+            if (serviceDetails.getClass().getName().equals(SpaceServiceDetails.class.getName())) {
+                try {
+                    Method spaceType = serviceDetails.getClass().getMethod("getSpaceType");
+                    if (spaceType.invoke(serviceDetails).toString().equals(SpaceType.EMBEDDED.toString())) {
+                        Method spaceServiceId = serviceDetails.getClass().getMethod("getServiceID");
+                        if (spaceServiceId.invoke(serviceDetails).equals(serviceID)) {
+                            Field spaceDetails = serviceDetails.getClass().getDeclaredField("directSpaceAdmin");
+                            spaceDetails.setAccessible(true);
+                            IInternalRemoteJSpaceAdmin spaceAdmin = (IInternalRemoteJSpaceAdmin) spaceDetails.get(serviceDetails);
+                            return spaceAdmin.getRuntimeHolder();
+                        }
+                    }
+                } catch (Exception e) {
+                    throw new RemoteException("Failed to get runtime holder", e);
+                }
+            }
+        }
+        return null;
+    }
+
+    public StatisticsHolder getSpaceStatisticsHolder(ServiceID serviceID) throws RemoteException {
+        for (Object serviceDetails : puDetails.getDetails()) {
+            if (serviceDetails.getClass().getName().equals(SpaceServiceDetails.class.getName())) {
+                try {
+                    Method spaceType = serviceDetails.getClass().getMethod("getSpaceType");
+                    if (spaceType.invoke(serviceDetails).toString().equals(SpaceType.EMBEDDED.toString())) {
+                        Method spaceServiceId = serviceDetails.getClass().getMethod("getServiceID");
+                        if (spaceServiceId.invoke(serviceDetails).equals(serviceID)) {
+                            Field spaceDetails = serviceDetails.getClass().getDeclaredField("directSpaceAdmin");
+                            spaceDetails.setAccessible(true);
+                            IInternalRemoteJSpaceAdmin spaceAdmin = (IInternalRemoteJSpaceAdmin) spaceDetails.get(serviceDetails);
+                            return ((StatisticsAdmin) spaceAdmin).getHolder();
+                        }
+                    }
+                } catch (Exception e) {
+                    throw new RemoteException("Failed to get statistics holder", e);
+                }
+            }
+        }
+        return null;
     }
 
     public SpaceURL[] listSpacesURLs() throws RemoteException {

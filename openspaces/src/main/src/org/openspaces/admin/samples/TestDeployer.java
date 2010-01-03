@@ -27,7 +27,6 @@ public class TestDeployer {
         Map<String, Object> context = new HashMap<String, Object>();
 //        context.put("logEntryMatcher", lastN(5));
 
-//        DumpProviderGridComponent.DumpResult dumpResult = container.generateDump("test", context);
         DumpResult dumpResult = admin.generateDump("test", context);
         dumpResult.download(new File("."), "dump-test.zip", null);
 
@@ -58,6 +57,7 @@ public class TestDeployer {
             }
         }
 
+        
         new Thread(new Runnable() {
 
             private LogEntryMatcher matcher = continuous(regex(".*INFO.*", lastN(100)), regex(".*INFO.*"));

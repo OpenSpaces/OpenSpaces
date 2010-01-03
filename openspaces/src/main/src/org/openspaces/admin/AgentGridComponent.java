@@ -32,7 +32,7 @@ public interface AgentGridComponent extends GridComponent {
     GridServiceAgent getGridServiceAgent();
 
     /**
-     * Retruns the agent id of the component.
+     * Returns the agent id of the component.
      */
     int getAgentId();
 

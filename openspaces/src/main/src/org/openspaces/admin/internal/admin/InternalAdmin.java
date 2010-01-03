@@ -60,9 +60,9 @@ public interface InternalAdmin extends Admin {
 
     void addProcessingUnitInstance(InternalProcessingUnitInstance processingUnitInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones);
 
-    void removeProcessingUnitInstance(String uid);
+    void removeProcessingUnitInstance(String uid, boolean removeEmbeddedSpaces);
 
-    void addSpaceInstance(InternalSpaceInstance spaceInstance, IJSpace clusteredSpace, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones);
+    void addSpaceInstance(InternalSpaceInstance spaceInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones);
 
     void removeSpaceInstance(String uid);
 }

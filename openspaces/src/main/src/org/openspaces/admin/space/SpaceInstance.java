@@ -33,6 +33,7 @@
 package org.openspaces.admin.space;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
+import com.j_spaces.core.client.SpaceURL;
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.space.events.ReplicationStatusChangedEventManager;
@@ -64,6 +65,8 @@ public interface SpaceInstance extends GridComponent, StatisticsMonitor {
      * Returns the space mode, indicating if the space is primary or backup.
      */
     SpaceMode getMode();
+
+    SpaceURL getSpaceUrl();
 
     /**
      * Waits for the space instance to move to the provided space mode. Returns

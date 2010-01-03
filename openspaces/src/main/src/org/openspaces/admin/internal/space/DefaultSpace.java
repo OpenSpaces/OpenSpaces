@@ -2,10 +2,12 @@ package org.openspaces.admin.internal.space;
 
 import com.gigaspaces.cluster.activeelection.InactiveSpaceException;
 import com.gigaspaces.cluster.activeelection.SpaceMode;
+import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.RuntimeHolder;
 import com.j_spaces.core.exception.SpaceUnavailableException;
+import com.j_spaces.kernel.JSpaceUtilities;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,13 +15,7 @@ import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.space.events.*;
 import org.openspaces.admin.internal.support.NetworkExceptionHelper;
-import org.openspaces.admin.space.ReplicationStatus;
-import org.openspaces.admin.space.ReplicationTarget;
-import org.openspaces.admin.space.SpaceInstance;
-import org.openspaces.admin.space.SpaceInstanceStatistics;
-import org.openspaces.admin.space.SpacePartition;
-import org.openspaces.admin.space.SpaceStatistics;
-import org.openspaces.admin.space.Spaces;
+import org.openspaces.admin.space.*;
 import org.openspaces.admin.space.events.*;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceConfigurer;
@@ -48,9 +44,9 @@ public class DefaultSpace implements InternalSpace {
 
     private final String name;
 
-    private final IJSpace space;
+    private volatile IJSpace space;
 
-    private final GigaSpace gigaSpace;
+    private volatile GigaSpace gigaSpace;
 
     private final Map<String, SpaceInstance> spaceInstancesByUID = new SizeConcurrentHashMap<String, SpaceInstance>();
 
@@ -90,14 +86,11 @@ public class DefaultSpace implements InternalSpace {
 
     private Future scheduledStatisticsMonitor;
 
-    public DefaultSpace(InternalSpaces spaces, String uid, String name, IJSpace clusteredSpace) {
+    public DefaultSpace(InternalSpaces spaces, String uid, String name) {
         this.spaces = spaces;
         this.admin = (InternalAdmin) spaces.getAdmin();
         this.uid = uid;
         this.name = name;
-
-        this.space = clusteredSpace;
-        this.gigaSpace = new GigaSpaceConfigurer(space).clustered(true).gigaSpace();
 
         this.spaceInstanceAddedEventManager = new DefaultSpaceInstanceAddedEventManager(admin, this);
         this.spaceInstanceRemovedEventManager = new DefaultSpaceInstanceRemovedEventManager(admin);
@@ -296,7 +289,8 @@ public class DefaultSpace implements InternalSpace {
             }
         }
         SpaceInstance existing = spaceInstancesByUID.put(spaceInstance.getUid(), spaceInstance);
-        spaceInstancesByMemberName.put(((InternalSpaceInstance) spaceInstance).getSpaceConfig().getFullSpaceName(), spaceInstance);
+        String fullSpaceName = JSpaceUtilities.createFullSpaceName(spaceInstance.getSpaceUrl().getContainerName(), spaceInstance.getSpaceUrl().getContainerName());
+        spaceInstancesByMemberName.put(fullSpaceName, spaceInstance);
         InternalSpacePartition spacePartition = getPartition(internalSpaceInstance);
         internalSpaceInstance.setPartition(spacePartition);
         spacePartition.addSpaceInstance(spaceInstance);
@@ -344,6 +338,7 @@ public class DefaultSpace implements InternalSpace {
     }
 
     // no need to sync since it is synced on Admin
+
     public void refreshScheduledSpaceMonitors() {
         for (Future fetcher : scheduledRuntimeFetchers.values()) {
             fetcher.cancel(false);
@@ -362,7 +357,24 @@ public class DefaultSpace implements InternalSpace {
         return spaceInstancesByUID.size() == 0;
     }
 
+    public IJSpace getIJSpace() {
+        if (space == null) {
+            if (spaceInstancesByUID.isEmpty()) {
+                return null;
+            }
+            try {
+                space = ((ISpaceProxy) ((InternalSpaceInstance) spaceInstancesByUID.values().iterator().next()).getIJSpace()).getClusteredSpace();
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+        return space;
+    }
+
     public GigaSpace getGigaSpace() {
+        if (gigaSpace == null) {
+            this.gigaSpace = new GigaSpaceConfigurer(getIJSpace()).clustered(true).gigaSpace();
+        }
         return this.gigaSpace;
     }
 
@@ -467,7 +479,7 @@ public class DefaultSpace implements InternalSpace {
 
         public void run() {
             try {
-                RuntimeHolder runtimeHolder = spaceInstance.getSpaceAdmin().getRuntimeHolder();
+                RuntimeHolder runtimeHolder = spaceInstance.getRuntimeHolder();
                 spaceInstance.setMode(runtimeHolder.getSpaceMode());
                 if (runtimeHolder.getReplicationStatus() != null) {
                     Object[] memberNames = (Object[]) runtimeHolder.getReplicationStatus()[0];
@@ -480,15 +492,15 @@ public class DefaultSpace implements InternalSpace {
                         SpaceInstance targetSpaceInstance = spaceInstancesByMemberName.get(memberNames[i]);
                         ReplicationStatus replStatus = null;
                         switch (replicationStatus[i]) {
-                        case IRemoteJSpaceAdmin.REPLICATION_STATUS_ACTIVE:
-                            replStatus = ReplicationStatus.ACTIVE;
-                            break;
-                        case IRemoteJSpaceAdmin.REPLICATION_STATUS_DISCONNECTED:
-                            replStatus = ReplicationStatus.DISCONNECTED;
-                            break;
-                        case IRemoteJSpaceAdmin.REPLICATION_STATUS_DISABLED:
-                            replStatus = ReplicationStatus.DISABLED;
-                            break;
+                            case IRemoteJSpaceAdmin.REPLICATION_STATUS_ACTIVE:
+                                replStatus = ReplicationStatus.ACTIVE;
+                                break;
+                            case IRemoteJSpaceAdmin.REPLICATION_STATUS_DISCONNECTED:
+                                replStatus = ReplicationStatus.DISCONNECTED;
+                                break;
+                            case IRemoteJSpaceAdmin.REPLICATION_STATUS_DISABLED:
+                                replStatus = ReplicationStatus.DISABLED;
+                                break;
                         }
                         replicationTargets[i] = new ReplicationTarget((InternalSpaceInstance) targetSpaceInstance, replStatus);
                     }

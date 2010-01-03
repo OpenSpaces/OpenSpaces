@@ -1,7 +1,11 @@
 package org.openspaces.pu.container.servicegrid;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
+import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.admin.RuntimeHolder;
 import com.j_spaces.core.client.SpaceURL;
+import com.j_spaces.core.filters.StatisticsHolder;
+import net.jini.core.lookup.ServiceID;
 import net.jini.id.Uuid;
 import org.jini.rio.resources.servicecore.AbstractProxy;
 import org.openspaces.core.cluster.ClusterInfo;
@@ -70,6 +74,18 @@ public class PUServiceBeanProxy extends AbstractProxy implements PUServiceBean {
 
     public PUMonitors getPUMonitors() throws RemoteException {
         return ((PUServiceBean) server).getPUMonitors();
+    }
+
+    public IJSpace getSpaceDirect(ServiceID serviceID) throws RemoteException {
+        return ((PUServiceBean) server).getSpaceDirect(serviceID);
+    }
+
+    public RuntimeHolder getSpaceRuntimeHolder(ServiceID serviceID) throws RemoteException {
+        return ((PUServiceBean) server).getSpaceRuntimeHolder(serviceID);
+    }
+
+    public StatisticsHolder getSpaceStatisticsHolder(ServiceID serviceID) throws RemoteException {
+        return ((PUServiceBean) server).getSpaceStatisticsHolder(serviceID);
     }
 
     private transient SpaceURL[] spaceURLs;

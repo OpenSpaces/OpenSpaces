@@ -103,6 +103,15 @@ public class AdminFactory {
     }
 
     /**
+     * Enables discovery of unmanaged spaces (spaces that are not started by being deployed
+     * within the Service Grid). Defaults to <code>false</code> (unmanaged spaces are not discovered).
+     */
+    public AdminFactory discoverUnmanagedSpaces() {
+        admin.getDiscoveryService().discoverUnmanagedSpaces();
+        return this;
+    }
+
+    /**
      * Creates the admin and begins its listening for events from the lookup service.
      */
     public Admin createAdmin() {

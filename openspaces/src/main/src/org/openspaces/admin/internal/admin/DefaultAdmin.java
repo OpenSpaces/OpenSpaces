@@ -111,6 +111,8 @@ import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.security.directory.UserDetails;
 import com.j_spaces.core.IJSpace;
+import org.openspaces.core.space.SpaceServiceDetails;
+import org.openspaces.pu.service.ServiceDetails;
 
 /**
  * @author kimchy
@@ -291,6 +293,10 @@ public class DefaultAdmin implements InternalAdmin {
 
     public TimeUnit getDefaultTimeoutTimeUnit() {
         return defaultTimeoutTimeUnit;
+    }
+
+    public DiscoveryService getDiscoveryService() {
+        return this.discoveryService;
     }
 
     public synchronized void setSpaceMonitorInterval(long interval, TimeUnit timeUnit) {
@@ -681,7 +687,7 @@ public class DefaultAdmin implements InternalAdmin {
         flushEvents();
     }
 
-    public synchronized void removeProcessingUnitInstance(String uid) {
+    public synchronized void removeProcessingUnitInstance(String uid, boolean removeEmbeddedSpaces) {
         processingUnitInstances.removeOrphaned(uid);
         InternalProcessingUnitInstance processingUnitInstance = (InternalProcessingUnitInstance) processingUnitInstances.removeInstance(uid);
         if (processingUnitInstance != null) {
@@ -699,12 +705,18 @@ public class DefaultAdmin implements InternalAdmin {
             processVirtualMachineOnServiceRemoval(processingUnitInstance, processingUnitInstance, processingUnitInstance);
             processMachineOnServiceRemoval(processingUnitInstance, processingUnitInstance);
             processZonesOnServiceRemoval(processingUnitInstance.getUid(), processingUnitInstance);
+
+            if (removeEmbeddedSpaces) {
+                for (SpaceServiceDetails serviceDetails : processingUnitInstance.getEmbeddedSpacesDetails()) {
+                    removeSpaceInstance(serviceDetails.getServiceID().toString());
+                }
+            }
         }
 
         flushEvents();
     }
 
-    public synchronized void addSpaceInstance(InternalSpaceInstance spaceInstance, IJSpace clusteredIjspace, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
+    public synchronized void addSpaceInstance(InternalSpaceInstance spaceInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(spaceInstance, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(spaceInstance, jvmDetails);
         InternalTransport transport = processTransportOnServiceAddition(spaceInstance, nioDetails, virtualMachine);
@@ -717,7 +729,7 @@ public class DefaultAdmin implements InternalAdmin {
 
         InternalSpace space = (InternalSpace) spaces.getSpaceByName(spaceInstance.getSpaceName());
         if (space == null) {
-            space = new DefaultSpace(spaces, spaceInstance.getSpaceName(), spaceInstance.getSpaceName(), clusteredIjspace);
+            space = new DefaultSpace(spaces, spaceInstance.getSpaceName(), spaceInstance.getSpaceName());
             spaces.addSpace(space);
         }
         spaceInstance.setSpace(space);

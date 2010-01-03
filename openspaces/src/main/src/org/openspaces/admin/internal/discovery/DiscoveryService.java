@@ -1,9 +1,20 @@
 package org.openspaces.admin.internal.discovery;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
-
+import com.gigaspaces.grid.esm.ESM;
+import com.gigaspaces.grid.gsa.AgentIdAware;
+import com.gigaspaces.grid.gsa.AgentProcessesDetails;
+import com.gigaspaces.grid.gsa.GSA;
+import com.gigaspaces.grid.gsc.GSC;
+import com.gigaspaces.grid.gsm.GSM;
+import com.gigaspaces.grid.zone.GridZoneProvider;
+import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
+import com.gigaspaces.internal.jvm.JVMDetails;
+import com.gigaspaces.internal.os.OSDetails;
+import com.gigaspaces.lrmi.nio.info.NIODetails;
+import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
+import com.j_spaces.core.jini.SharedDiscoveryManagement;
+import com.j_spaces.kernel.PlatformVersion;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceID;
 import net.jini.core.lookup.ServiceRegistrar;
@@ -14,7 +25,6 @@ import net.jini.lookup.LookupCache;
 import net.jini.lookup.ServiceDiscoveryEvent;
 import net.jini.lookup.ServiceDiscoveryListener;
 import net.jini.lookup.ServiceDiscoveryManager;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.BootUtil;
@@ -35,25 +45,13 @@ import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstance;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.space.DefaultSpaceInstance;
 import org.openspaces.admin.internal.space.InternalSpaceInstance;
+import org.openspaces.core.space.SpaceServiceDetails;
 import org.openspaces.pu.container.servicegrid.PUDetails;
 import org.openspaces.pu.container.servicegrid.PUServiceBean;
 
-import com.gigaspaces.grid.esm.ESM;
-import com.gigaspaces.grid.gsa.AgentIdAware;
-import com.gigaspaces.grid.gsa.AgentProcessesDetails;
-import com.gigaspaces.grid.gsa.GSA;
-import com.gigaspaces.grid.gsc.GSC;
-import com.gigaspaces.grid.gsm.GSM;
-import com.gigaspaces.grid.zone.GridZoneProvider;
-import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
-import com.gigaspaces.internal.jvm.JVMDetails;
-import com.gigaspaces.internal.os.OSDetails;
-import com.gigaspaces.lrmi.nio.info.NIODetails;
-import com.j_spaces.core.IJSpace;
-import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
-import com.j_spaces.core.admin.SpaceConfig;
-import com.j_spaces.core.jini.SharedDiscoveryManagement;
-import com.j_spaces.kernel.PlatformVersion;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * @author kimchy
@@ -68,10 +66,12 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
     private final InternalAdmin admin;
 
+    private boolean discoverUnmanagedSpaces = false;
+
     private volatile boolean started = false;
 
     private ServiceDiscoveryManager sdm;
-    private LookupCache serivceCache;
+    private LookupCache serviceCache;
     private LookupCache spaceCache;
 
     public DiscoveryService(InternalAdmin admin) {
@@ -93,6 +93,10 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         }
     }
 
+    public void discoverUnmanagedSpaces() {
+        this.discoverUnmanagedSpaces = true;
+    }
+
     public void start() {
         if (started) {
             return;
@@ -105,20 +109,22 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         }
 
         try {
-            ServiceTemplate template = new ServiceTemplate(null, new Class[] {Service.class}, null);
-            serivceCache = sdm.createLookupCache(template, null, this);
+            ServiceTemplate template = new ServiceTemplate(null, new Class[]{Service.class}, null);
+            serviceCache = sdm.createLookupCache(template, null, this);
         } catch (Exception e) {
             sdm.terminate();
             throw new AdminException("Failed to start discovery service, Lookup Cache failed to start", e);
         }
 
-        try {
-            ServiceTemplate template = new ServiceTemplate(null, new Class[] {IJSpace.class}, null);
-            spaceCache = sdm.createLookupCache(template, null, this);
-        } catch (Exception e) {
-            serivceCache.terminate();
-            sdm.terminate();
-            throw new AdminException("Failed to start discovery service, Lookup Cache failed to start", e);
+        if (discoverUnmanagedSpaces) {
+            try {
+                ServiceTemplate template = new ServiceTemplate(null, new Class[]{IJSpace.class}, null);
+                spaceCache = sdm.createLookupCache(template, null, this);
+            } catch (Exception e) {
+                serviceCache.terminate();
+                sdm.terminate();
+                throw new AdminException("Failed to start discovery service, Lookup Cache failed to start", e);
+            }
         }
     }
 
@@ -127,7 +133,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             return;
         }
         started = false;
-        serivceCache.terminate();
+        serviceCache.terminate();
         if (spaceCache != null) {
             spaceCache.terminate();
         }
@@ -247,6 +253,13 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 OSDetails osDetails = processingUnitInstance.getOSDetails();
                 JVMDetails jvmDetails = processingUnitInstance.getJVMDetails();
                 admin.addProcessingUnitInstance(processingUnitInstance, nioDetails, osDetails, jvmDetails, puServiceBean.getZones());
+
+                if (!discoverUnmanagedSpaces) {
+                    for (SpaceServiceDetails serviceDetails : processingUnitInstance.getEmbeddedSpacesDetails()) {
+                        InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(puServiceBean, serviceDetails, admin);
+                        admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, getGroups());
+                    }
+                }
             } catch (Exception e) {
                 logger.warn("Failed to add [Processing Unit Instance] with uid [" + serviceID + "]", e);
             }
@@ -267,12 +280,11 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
                 IInternalRemoteJSpaceAdmin spaceAdmin = (IInternalRemoteJSpaceAdmin) direcyIjspace.getAdmin();
 
-                SpaceConfig spaceConfig = spaceAdmin.getConfig();
-                InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(serviceID, direcyIjspace, spaceAdmin, spaceConfig, admin);
+                InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(serviceID, direcyIjspace, spaceAdmin, admin);
                 NIODetails nioDetails = spaceInstance.getNIODetails();
                 OSDetails osDetails = spaceInstance.getOSDetails();
                 JVMDetails jvmDetails = spaceInstance.getJVMDetails();
-                admin.addSpaceInstance(spaceInstance, clusteredIjspace, nioDetails, osDetails, jvmDetails, spaceAdmin.getZones());
+                admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, spaceAdmin.getZones());
             } catch (Exception e) {
                 logger.warn("Failed to add [Space Instance] with uid [" + serviceID + "]", e);
             }
@@ -306,7 +318,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             if (logger.isDebugEnabled()) {
                 logger.debug("Service Removed [Processing Unit Instance] with uid [" + serviceID + "]");
             }
-            admin.removeProcessingUnitInstance(serviceID.toString());
+            admin.removeProcessingUnitInstance(serviceID.toString(), !discoverUnmanagedSpaces);
         } else if (service instanceof IJSpace) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Service Removed [Space Instance] with uid [" + serviceID + "]");
