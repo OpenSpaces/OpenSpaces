@@ -1,18 +1,28 @@
 package org.openspaces.admin.internal.zone;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.zone.events.InternalZoneRemovedEventManager;
-import org.openspaces.admin.internal.zone.events.InternalZoneAddedEventManager;
 import org.openspaces.admin.internal.zone.events.DefaultZoneAddedEventManager;
 import org.openspaces.admin.internal.zone.events.DefaultZoneRemovedEventManager;
+import org.openspaces.admin.internal.zone.events.InternalZoneAddedEventManager;
+import org.openspaces.admin.internal.zone.events.InternalZoneRemovedEventManager;
 import org.openspaces.admin.zone.Zone;
+import org.openspaces.admin.zone.events.ZoneAddedEventListener;
 import org.openspaces.admin.zone.events.ZoneAddedEventManager;
-import org.openspaces.admin.zone.events.ZoneRemovedEventManager;
 import org.openspaces.admin.zone.events.ZoneLifecycleEventListener;
-import org.openspaces.admin.Admin;
-import com.j_spaces.kernel.SizeConcurrentHashMap;
+import org.openspaces.admin.zone.events.ZoneRemovedEventManager;
 
-import java.util.*;
+import com.j_spaces.kernel.SizeConcurrentHashMap;
 
 /**
  * @author kimchy
@@ -95,6 +105,34 @@ public class DefaultZones implements InternalZones {
                     zoneRemovedEventManager.zoneRemoved(existingZone);
                 }
             }
+        }
+    }
+    
+    public Zone waitFor(String zoneByName) {
+        return waitFor(zoneByName, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
+    }
+    
+    public Zone waitFor(final String zoneByName, long timeout, TimeUnit timeUnit) {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<Zone> ref = new AtomicReference<Zone>();
+        ZoneAddedEventListener added = new ZoneAddedEventListener() {
+            
+            public void zoneAdded(Zone zone) {
+                if (zone.getName().equals(zoneByName)) {
+                    ref.set(zone);
+                    latch.countDown();
+                }
+                
+            }
+        };
+        getZoneAdded().add(added);
+        try {
+            latch.await(timeout, timeUnit);
+            return ref.get();
+        } catch (InterruptedException e) {
+            return null;
+        } finally {
+            getZoneAdded().remove(added);
         }
     }
 }

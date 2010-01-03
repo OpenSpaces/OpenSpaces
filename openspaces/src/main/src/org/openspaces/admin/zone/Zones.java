@@ -16,12 +16,13 @@
 
 package org.openspaces.admin.zone;
 
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.zone.events.ZoneAddedEventManager;
 import org.openspaces.admin.zone.events.ZoneLifecycleEventListener;
 import org.openspaces.admin.zone.events.ZoneRemovedEventManager;
-
-import java.util.Map;
 
 /**
  * @author kimchy
@@ -53,4 +54,23 @@ public interface Zones extends AdminAware, Iterable<Zone> {
      * Allows to remove a {@link ZoneLifecycleEventListener}.
      */
     void removeLifeycleListener(ZoneLifecycleEventListener eventListener);
+    
+    /**
+     * Waits indefinitely till the zone with the given name is discovered.
+     *
+     * @param zoneByName The zone name
+     * @return The discovered zone
+     */
+    Zone waitFor(String zoneByName);
+
+    /**
+     * Waits for the given timeout (in time unit) till the zone with the given name is discovered.
+     * Returns the zone if it was discovered within the provided timeout, or <code>null</code> if
+     * the zone was not discovered.
+     * 
+     * @param zoneByName The zone name
+     * @return the zone if it was discovered within the provided timeout, or <code>null</code> if
+     *         the zone was not discovered.
+     */
+    Zone waitFor(String zoneByName, long timeout, TimeUnit timeUnit);
 }
