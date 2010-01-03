@@ -18,13 +18,22 @@ public class InternalESMImpl {
         SpaceDeployment spaceDeployment = new SpaceDeployment(deployment.getDataGridName());
         int initialNumberOfJvms = MemorySettings.valueOf(deployment.getMinMemory()).dividedBy(deployment.getJvmSize());
         int maxNumberOfJvms = MemorySettings.valueOf(deployment.getMaxMemory()).dividedBy(deployment.getJvmSize());
+        int maxNumberOfPartitions = maxNumberOfJvms;
         
-        if (deployment.isHighlyAvailable()) {
-            //double the number of jvms for backup spaces
-            initialNumberOfJvms = Math.min(initialNumberOfJvms*2, maxNumberOfJvms);
-            spaceDeployment.partitioned(maxNumberOfJvms, 1);
+        boolean highlyAvailable = true;
+        if (highlyAvailable) {
+            initialNumberOfJvms *=2;
+            maxNumberOfJvms *= 2;
+            spaceDeployment.partitioned(maxNumberOfPartitions, 1);
         } else {
-            spaceDeployment.partitioned(maxNumberOfJvms, 0);
+            spaceDeployment.partitioned(maxNumberOfPartitions, 0);
+        }
+        
+        int maxInstancesPerJvm = maxNumberOfJvms/initialNumberOfJvms;
+        if (maxInstancesPerJvm > 10) {
+            //..limit to 10
+            initialNumberOfJvms = maxNumberOfJvms/10;
+            maxInstancesPerJvm = maxNumberOfJvms/initialNumberOfJvms;
         }
         
         /*
@@ -49,7 +58,7 @@ public class InternalESMImpl {
         //wait for all GSCs started on this zone
         final String zone = deployment.getDataGridName();
         while (admin.getZones() == null || admin.getZones().getByName(zone) == null) {
-            System.out.println("zone not yet discovered");
+            System.out.println("zone not yet discovered - admin.getZones()=" + admin.getZones());
         }
         admin.getZones().getByName(zone).getGridServiceContainers().waitFor(initialNumberOfJvms);
         admin.getGridServiceManagers().deploy(spaceDeployment);
