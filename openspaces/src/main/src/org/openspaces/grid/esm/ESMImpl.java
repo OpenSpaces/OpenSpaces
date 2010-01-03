@@ -13,8 +13,8 @@ import org.jini.rio.core.jsb.ServiceBeanContext;
 import org.jini.rio.jsb.ServiceBeanActivation;
 import org.jini.rio.jsb.ServiceBeanAdapter;
 import org.jini.rio.jsb.ServiceBeanActivation.LifeCycleManager;
+import org.openspaces.admin.esm.deployment.ElasticDataGridDeployment;
 
-import com.gigaspaces.grid.esm.ESM;
 import com.gigaspaces.grid.gsa.AgentHelper;
 import com.gigaspaces.grid.zone.ZoneHelper;
 import com.gigaspaces.internal.dump.InternalDumpException;
@@ -38,10 +38,10 @@ import com.sun.jini.start.LifeCycle;
 public class ESMImpl extends ServiceBeanAdapter implements ESM
 		/*, RemoteSecuredService*//*, ServiceDiscoveryListener*/ {
 
-	private static final String CONFIG_COMPONENT = "com.gigaspaces.grid.esm";
+	private static final String CONFIG_COMPONENT = "org.openspaces.grid.esm";
 	private static final Logger logger = Logger.getLogger(CONFIG_COMPONENT);
 
-	
+	private final InternalESMImpl internalESMImpl = new InternalESMImpl();
     private LifeCycle lifeCycle;
     private String[] configArgs;
 	
@@ -67,12 +67,12 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM
         try {
 
             /* Configure a FaultDetectionHandler for the ESM */
-            String fdh = "com.gigaspaces.grid.esm.ESMFaultDetectionHandler";
+            String fdh = "org.openspaces.grid.esm.ESMFaultDetectionHandler";
             Object[] fdhConfigArgs = new Object[]{new String[]{
                     "-",
-                    "com.gigaspaces.grid.esm.ESMFaultDetectionHandler.invocationDelay=" + System.getProperty("com.gigaspaces.grid.esm.ESMFaultDetectionHandler.invocationDelay", "1000"),
-                    "com.gigaspaces.grid.esm.ESMFaultDetectionHandler.retryCount=" + System.getProperty("com.gigaspaces.grid.esm.ESMFaultDetectionHandler.retryCount", "1"),
-                    "com.gigaspaces.grid.esm.ESMFaultDetectionHandler.retryTimeout=" + System.getProperty("com.gigaspaces.grid.esm.ESMFaultDetectionHandler.retryTimeout", "500")
+                    "org.openspaces.grid.esm.ESMFaultDetectionHandler.invocationDelay=" + System.getProperty("org.openspaces.grid.esm.ESMFaultDetectionHandler.invocationDelay", "1000"),
+                    "org.openspaces.grid.esm.ESMFaultDetectionHandler.retryCount=" + System.getProperty("org.openspaces.grid.esm.ESMFaultDetectionHandler.retryCount", "1"),
+                    "org.openspaces.grid.esm.ESMFaultDetectionHandler.retryTimeout=" + System.getProperty("org.openspaces.grid.esm.ESMFaultDetectionHandler.retryTimeout", "500")
             }
             };
             ClassBundle faultDetectionHandler =
@@ -201,4 +201,8 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM
         context.put("esm", this);
         return InternalDumpHelper.generateDump(cause, context, contributors);
 	}
+
+    public void deploy(ElasticDataGridDeployment deployment) {
+        internalESMImpl.deploy(deployment);
+    }
 }

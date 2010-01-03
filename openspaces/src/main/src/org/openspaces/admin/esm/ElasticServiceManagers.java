@@ -16,15 +16,16 @@
 
 package org.openspaces.admin.esm;
 
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.dump.DumpProvider;
+import org.openspaces.admin.esm.deployment.ElasticDataGridDeployment;
 import org.openspaces.admin.esm.events.ElasticServiceManagerAddedEventManager;
 import org.openspaces.admin.esm.events.ElasticServiceManagerLifecycleEventListener;
 import org.openspaces.admin.esm.events.ElasticServiceManagerRemovedEventManager;
 import org.openspaces.admin.pu.ProcessingUnit;
-
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * <p>Provides simple means to get all the current managers, as well as as registering for
@@ -95,13 +96,13 @@ public interface ElasticServiceManagers extends AdminAware, Iterable<ElasticServ
      * Deploys an 'elastic' deployment based on the deployment information and the available resources.
      * <p>The deployment process will wait indefinitely and return the actual processing unit that can be used.
      */
-    ProcessingUnit deploy(ElasticDeployment deployment);
+    ProcessingUnit deploy(ElasticDataGridDeployment deployment);
     
     /**
      * Deploys an 'elastic' deployment based on the deployment information and the available resources.
      * <p>The deployment process will wait for the given timeout and return the actual processing unit that can be used.
      */
-    ProcessingUnit deploy(ElasticDeployment deployment, long timeout, TimeUnit timeUnit);
+    ProcessingUnit deploy(ElasticDataGridDeployment deployment, long timeout, TimeUnit timeUnit);
     
 
     /**

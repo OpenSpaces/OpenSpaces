@@ -11,8 +11,8 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.dump.CompoundDumpResult;
 import org.openspaces.admin.dump.DumpResult;
-import org.openspaces.admin.esm.ElasticDeployment;
 import org.openspaces.admin.esm.ElasticServiceManager;
+import org.openspaces.admin.esm.deployment.ElasticDataGridDeployment;
 import org.openspaces.admin.esm.events.ElasticServiceManagerAddedEventListener;
 import org.openspaces.admin.esm.events.ElasticServiceManagerAddedEventManager;
 import org.openspaces.admin.esm.events.ElasticServiceManagerLifecycleEventListener;
@@ -183,12 +183,12 @@ public class DefaultElasticServiceManagers implements InternalElasticServiceMana
     }
     
 
-    public ProcessingUnit deploy(ElasticDeployment deployment) {
+    public ProcessingUnit deploy(ElasticDataGridDeployment deployment) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public ProcessingUnit deploy(ElasticDeployment deployment, long timeout, TimeUnit timeUnit) {
+    public ProcessingUnit deploy(ElasticDataGridDeployment deployment, long timeout, TimeUnit timeUnit) {
         // TODO Auto-generated method stub
         return null;
     }

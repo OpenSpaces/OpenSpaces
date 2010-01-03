@@ -3,19 +3,23 @@ package org.openspaces.admin.internal.esm;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import net.jini.core.lookup.ServiceID;
 
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.dump.DumpResult;
-import org.openspaces.admin.esm.ElasticDeployment;
+import org.openspaces.admin.esm.deployment.ElasticDataGridDeployment;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.dump.InternalDumpResult;
 import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
+import org.openspaces.grid.esm.ESM;
+import org.openspaces.pu.container.servicegrid.deploy.Deploy;
 
-import com.gigaspaces.grid.esm.ESM;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.jvm.JVMStatistics;
 import com.gigaspaces.internal.os.OSDetails;
@@ -25,6 +29,7 @@ import com.gigaspaces.log.LogEntryMatcher;
 import com.gigaspaces.log.LogProcessType;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
+import com.gigaspaces.security.SecurityException;
 
 /**
  * @author Moran Avigdor
@@ -50,12 +55,38 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
         return this.serviceID;
     }
     
-    public ProcessingUnit deploy(ElasticDeployment deployment) {
-        // TODO Auto-generated method stub
-        return null;
+    public ProcessingUnit deploy(final ElasticDataGridDeployment deployment) {
+        final AtomicReference<ProcessingUnit> ref = new AtomicReference<ProcessingUnit>();
+        ref.set(getAdmin().getProcessingUnits().getProcessingUnit(deployment.getDataGridName()));
+        if (ref.get() != null) {
+            return ref.get();
+        }
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        ProcessingUnitAddedEventListener added = new ProcessingUnitAddedEventListener() {
+            public void processingUnitAdded(ProcessingUnit processingUnit) {
+                if (deployment.getDataGridName().equals(processingUnit.getName())) {
+                    ref.set(processingUnit);
+                    latch.countDown();
+                }
+            }
+        };
+        getAdmin().getProcessingUnits().getProcessingUnitAdded().add(added);
+        try {
+            esm.deploy(deployment);
+            latch.await(); //TODO timeout, timeUnit);
+            return ref.get();
+        } catch (SecurityException se) {
+            throw new AdminException("No privileges to deploy an elastic data grid", se);
+        } catch (Exception e) {
+            throw new AdminException("Failed to deploy [" + deployment.getDataGridName() + "]", e);
+        } finally {
+            Deploy.setDisableInfoLogging(false);
+            getAdmin().getProcessingUnits().getProcessingUnitAdded().remove(added);
+        }
     }
 
-    public ProcessingUnit deploy(ElasticDeployment deployment, long timeout, TimeUnit timeUnit) {
+    public ProcessingUnit deploy(ElasticDataGridDeployment deployment, long timeout, TimeUnit timeUnit) {
         // TODO Auto-generated method stub
         return null;
     }
