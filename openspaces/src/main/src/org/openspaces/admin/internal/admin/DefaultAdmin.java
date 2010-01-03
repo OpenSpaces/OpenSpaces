@@ -110,9 +110,7 @@ import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.security.directory.UserDetails;
-import com.j_spaces.core.IJSpace;
 import org.openspaces.core.space.SpaceServiceDetails;
-import org.openspaces.pu.service.ServiceDetails;
 
 /**
  * @author kimchy
