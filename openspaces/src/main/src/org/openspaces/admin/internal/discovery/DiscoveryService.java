@@ -259,7 +259,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 if (!discoverUnmanagedSpaces) {
                     for (SpaceServiceDetails serviceDetails : processingUnitInstance.getEmbeddedSpacesDetails()) {
                         InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(puServiceBean, serviceDetails, admin);
-                        admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, getGroups());
+                        admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, puServiceBean.getZones());
                     }
                 }
             } catch (Exception e) {
