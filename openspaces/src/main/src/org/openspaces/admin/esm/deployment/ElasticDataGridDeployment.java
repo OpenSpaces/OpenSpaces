@@ -10,12 +10,13 @@ import java.io.Serializable;
 public class ElasticDataGridDeployment implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    private IsolationLevel isolationLevel = IsolationLevel.SHARED_PUBLIC;
+    private IsolationLevel isolationLevel = IsolationLevel.DEDICATED;
     private final String dataGridName;
     private String minMemory = "1GB";
     private String maxMemory = "10GB";
     private String jvmSize = "512MB";
     private boolean highlyAvailable;
+    private int maxInstancesPerJvm = 10;
     
     
     public ElasticDataGridDeployment(String dataGridName) {
@@ -24,7 +25,7 @@ public class ElasticDataGridDeployment implements Serializable {
     
     /**
      * Set the isolation level of this data grid.
-     * @param isolationLevel the isolation level requirement; Default {@link IsolationLevel#SHARED_PUBLIC}.
+     * @param isolationLevel the isolation level requirement; Default {@link IsolationLevel#PUBLIC}.
      */
     public ElasticDataGridDeployment isolationLevel(IsolationLevel isolationLevel) {
         this.isolationLevel = isolationLevel;
@@ -56,8 +57,24 @@ public class ElasticDataGridDeployment implements Serializable {
         return this;
     }
     
+    /**
+     * Sets the JVM size of a container hosting a processing unit.
+     * 
+     * @param jvmSize The JVM size; Default 512MB.
+     */
     public ElasticDataGridDeployment jvmSize(String jvmSize) {
         this.jvmSize = jvmSize;
+        return this;
+    }
+    
+    /**
+     * Set the maximum number of instances which can co-exist on the same JVM; Default is <tt>10</tt>.
+     * @param maxInstancesPerJvm max limit on the number of instances.
+     */
+    public ElasticDataGridDeployment maxInstancesPerJvm(int maxInstancesPerJvm) {
+        if (maxInstancesPerJvm < 1)
+            throw new IllegalArgumentException("Illegal value ["+maxInstancesPerJvm+"], must be greater than zero");
+        this.maxInstancesPerJvm = maxInstancesPerJvm;
         return this;
     }
     
@@ -86,5 +103,9 @@ public class ElasticDataGridDeployment implements Serializable {
     
     public String getJvmSize() {
         return jvmSize;
+    }
+    
+    public int getMaxInstancesPerJvm() {
+        return maxInstancesPerJvm;
     }
 }
