@@ -29,8 +29,23 @@ import org.openspaces.admin.zone.events.ZoneRemovedEventManager;
  */
 public interface Zones extends AdminAware, Iterable<Zone> {
 
+    /**
+     * Returns all currently discovered zones.
+     */
+    Zone[] getZones();
+    
+    /**
+     * Returns a discovered zone by its name.
+     * 
+     * @param name The name of the zone to match.
+     * @return The discovered zone; or <code>null</code> if no match has yet been discovered.
+     */
     Zone getByName(String name);
 
+    /**
+     * Returns a map of zone names to {@link Zone}s.
+     * @return a map holding all discovered zones.
+     */
     Map<String, Zone> getNames();
 
     /**

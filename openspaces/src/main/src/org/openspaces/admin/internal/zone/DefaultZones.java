@@ -45,6 +45,10 @@ public class DefaultZones implements InternalZones {
         this.zoneAddedEventManager = new DefaultZoneAddedEventManager(this);
         this.zoneRemovedEventManager = new DefaultZoneRemovedEventManager(this);
     }
+    
+    public Zone[] getZones() {
+        return zonesByName.values().toArray(new Zone[0]);
+    }
 
     public Zone getByName(String name) {
         return zonesByName.get(name);
