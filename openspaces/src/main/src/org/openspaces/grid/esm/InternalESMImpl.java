@@ -5,6 +5,7 @@ import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.openspaces.admin.Admin;
@@ -29,11 +30,11 @@ public class InternalESMImpl {
     private final static long initialDelay = TimeUnitProperty.getProperty("org.openspaces.grid.esm.initialDelay", "1m");
     private final static long fixedDelay = TimeUnitProperty.getProperty("org.openspaces.grid.esm.fixedDelay", "5s");
     
-    private final Admin admin = new AdminFactory().addGroup("moran-gigaspaces-7.1.0-XAPPremium-m5").createAdmin();
+    private final Admin admin = new AdminFactory().createAdmin();
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     
     public InternalESMImpl() {
-        //logger.setLevel(Level.ALL);
+        logger.setLevel(Level.parse(System.getProperty("logger.level", "INFO")));
         logger.config("Initial Delay: " + initialDelay + " ms");
         logger.config("Fixed Delay: " + fixedDelay + " ms");
         if (Boolean.getBoolean("server"))
@@ -86,12 +87,11 @@ public class InternalESMImpl {
             logger.finest("running");
             ProcessingUnits processingUnits = admin.getProcessingUnits();
             for (ProcessingUnit pu : processingUnits) {
-                DeploymentStatus status = pu.getStatus();
-                logger.fine(pu.getName() + " Planned: " + pu.getTotalNumberOfInstances() + " Running: "
-                        + pu.getInstances().length + " Deployment Status: " + status);
+                logger.fine(puToString(pu));
                 
                 String isolationLevelPropVal = pu.getBeanLevelProperties().getContextProperties().getProperty("isolationLevel");
                 
+                DeploymentStatus status = pu.getStatus();
                 if (IsolationLevel.valueOf(isolationLevelPropVal).equals(IsolationLevel.DEDICATED)) {
                     switch(status) {
                     case BROKEN:
@@ -101,6 +101,20 @@ public class InternalESMImpl {
                     }
                 }
             }
+        }
+        
+        private String puToString(ProcessingUnit pu) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Processing Unit Configuration:")
+            .append("\n\tName: ").append(pu.getName())
+            .append("\n\tInstances: ").append(pu.getNumberOfInstances())
+            .append("\n\tBackups: ").append(pu.getNumberOfBackups())
+            .append("\n\tInstances per-machine: ").append(pu.getMaxInstancesPerMachine())
+            .append("\n\tPlanned instances: ").append(pu.getTotalNumberOfInstances())
+            .append("\n\tActual instances: ").append(pu.getProcessingUnitInstances().length)
+            .append("\n\tDeployment status: ").append(pu.getStatus())
+            ;
+            return sb.toString();
         }
 
 
@@ -113,6 +127,8 @@ public class InternalESMImpl {
             int minNumberOfGSCs = MemorySettings.valueOf(contextProperties.getProperty("minMemory")).floorDividedBy(
                     contextProperties.getProperty("jvmSize"));
             
+            assert pu.getTotalNumberOfInstances() <= scalingFactor*minNumberOfGSCs;
+            
             int maxNumberOfGSCsPerMachine = minNumberOfGSCs;
             if (pu.getNumberOfBackups() > 0) {
                 maxNumberOfGSCsPerMachine = (int)Math.ceil(0.5*minNumberOfGSCs);
@@ -122,8 +138,7 @@ public class InternalESMImpl {
                     + ", maxNumberOfGSCsPerMachine=" + maxNumberOfGSCsPerMachine);
             
             String zoneName = pu.getRequiredZones()[0];
-            while (numberOfGSCsInZone(zoneName) < minNumberOfGSCs
-                    && pu.getProcessingUnitInstances().length < pu.getTotalNumberOfInstances()) {
+            while (numberOfGSCsInZone(zoneName) < minNumberOfGSCs) {
                 boolean startedGSC = false;
                 for (Machine machine : admin.getMachines()) {
                     if (!(machine.getGridServiceContainers().getSize() < maxNumberOfGSCsPerMachine))
@@ -142,6 +157,7 @@ public class InternalESMImpl {
                     }
                 }
                 if (!startedGSC) {
+                    logger.fine("needs another machine");
                     break; //try when scheduled again
                 }
             }
