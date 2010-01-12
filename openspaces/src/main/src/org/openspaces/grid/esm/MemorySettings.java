@@ -58,11 +58,21 @@ public class MemorySettings {
         return Integer.valueOf(memoryUnit.substring(0, memoryUnit.length() - unit));
     }
     
-    public int dividedBy(String memoryUnit) {
+    public double dividedBy(String memoryUnit) {
         MemorySettings other = MemorySettings.valueOf(memoryUnit);
         double convertedSize = doConvert(other.index - index, other.size);
-        int result = (int) (this.size / convertedSize);
+        double result = (this.size / convertedSize);
         return result;
+    }
+    
+    public int floorDividedBy(String memoryUnit) {
+        double result = Math.floor(dividedBy(memoryUnit));
+        return (int)result;
+    }
+    
+    public int ceilDividedBy(String memoryUnit) {
+        double result =  Math.ceil(dividedBy(memoryUnit));
+        return (int)result;
     }
     
     public static void main(String[] args) {
