@@ -56,11 +56,22 @@ public class InternalESMImpl {
             spaceDeployment.partitioned(numberOfParitions, 0);
         }
         
+        spaceDeployment.setContextProperty("elastic", "true");
         spaceDeployment.setContextProperty("minMemory", context.getMinMemory());
         spaceDeployment.setContextProperty("maxMemory", context.getMaxMemory());
         spaceDeployment.setContextProperty("jvmSize", context.getJvmSize());
         spaceDeployment.setContextProperty("isolationLevel", context.getIsolationLevel().name());
         spaceDeployment.setContextProperty("scalingFactor", String.valueOf(calculateScalingFactor(context)));
+
+        logger.finest("Deploying " + deployment.getDataGridName() 
+                + "\n\t Zone: " + zoneName 
+                + "\n\t Min Memory: " + context.getMinMemory()
+                + "\n\t Max Memory: " + context.getMaxMemory()
+                + "\n\t JVM Size: " + context.getJvmSize()
+                + "\n\t Isolation Level: " + context.getIsolationLevel().name()
+                + "\n\t Highly Available? " + context.isHighlyAvailable()
+                + "\n\t Partitions: " + numberOfParitions);
+        
         admin.getGridServiceManagers().waitForAtLeastOne().deploy(spaceDeployment);
     }
     
@@ -84,10 +95,15 @@ public class InternalESMImpl {
     private final class ScheduledTask implements Runnable {
 
         public void run() {
-            logger.finest("running");
+            try {
+            logger.finest("ScheduledTask is running...");
             ProcessingUnits processingUnits = admin.getProcessingUnits();
             for (ProcessingUnit pu : processingUnits) {
+                
                 logger.fine(puToString(pu));
+
+                if (!pu.getBeanLevelProperties().getContextProperties().containsKey("elastic"))
+                    continue;
                 
                 String isolationLevelPropVal = pu.getBeanLevelProperties().getContextProperties().getProperty("isolationLevel");
                 
@@ -100,6 +116,9 @@ public class InternalESMImpl {
                         break;
                     }
                 }
+            }
+            }catch(Throwable t) {
+                logger.log(Level.SEVERE, "Caught exception: " + t, t);
             }
         }
         
@@ -134,33 +153,67 @@ public class InternalESMImpl {
                 maxNumberOfGSCsPerMachine = (int)Math.ceil(0.5*minNumberOfGSCs);
             }
             
-            logger.finest("scalingFactor=" + scalingFactor + ", minNumberOfGSCs=" + minNumberOfGSCs
-                    + ", maxNumberOfGSCsPerMachine=" + maxNumberOfGSCsPerMachine);
-            
             String zoneName = pu.getRequiredZones()[0];
+
+            logger.finest("scalingFactor=" + scalingFactor + ", minNumberOfGSCs=" + minNumberOfGSCs
+                    + ", maxNumberOfGSCsPerMachine=" + maxNumberOfGSCsPerMachine + ", numberOfGSCsInZone: ["+zoneName+"]=" + numberOfGSCsInZone(zoneName));
+            
             while (numberOfGSCsInZone(zoneName) < minNumberOfGSCs) {
                 boolean startedGSC = false;
                 for (Machine machine : admin.getMachines()) {
-                    if (!(machine.getGridServiceContainers().getSize() < maxNumberOfGSCsPerMachine))
+                    if (!(machine.getGridServiceContainers().getSize() < maxNumberOfGSCsPerMachine)) {
+                        logger.finest("[X] Machine reached the scale limit of ["+maxNumberOfGSCsPerMachine+"] GSCs per machine");
                         continue;
-                    if (meetsDedicatedIsolationConstaint(machine, zoneName)) {
-                        GridServiceAgent agent = machine.getGridServiceAgent();
-                        if (agent == null) continue; //to next machine
-
-                        logger.finest("starting GSC");
-                        //TODO check how many gscs we can load on this machine
-                        agent.startGridServiceAndWait(new GridServiceContainerOptions()
-                        .vmInputArgument("-Dcom.gs.zones="+zoneName)
-                        .vmInputArgument("-Dcom.gigaspaces.grid.gsc.serviceLimit="+scalingFactor));
-                        startedGSC = true;
-                        break; //to check for min-gsc requirement
                     }
+                    if (!meetsDedicatedIsolationConstaint(machine, zoneName)) {
+                        logger.finest("[X] Machine doesn't meet dedicated isolation constraint");
+                        continue;
+                    }
+                    
+                    GridServiceAgent agent = machine.getGridServiceAgent();
+                    if (agent == null) continue; //to next machine
+
+                    if (!hasEnoughMemoryForNewGSC(contextProperties, machine)) {
+                        logger.finest("[X] Machine doesn't have enough memory to start a new GSC");
+                        continue; //can't start GSC here
+                    }
+
+                    logger.finest("[V] starting GSC");
+                    agent.startGridServiceAndWait(new GridServiceContainerOptions()
+                    .vmInputArgument("-Dcom.gs.zones="+zoneName)
+                    .vmInputArgument("-Dcom.gigaspaces.grid.gsc.serviceLimit="+scalingFactor));
+                    startedGSC = true;
+                    break; //to check for min-gsc requirement
                 }
+                
                 if (!startedGSC) {
-                    logger.fine("needs another machine");
+                    logger.fine("[X] Can't start a GSC on this machine - Another machine is required.");
                     break; //try when scheduled again
                 }
             }
+        }
+
+        private boolean hasEnoughMemoryForNewGSC(Properties contextProperties, Machine machine) {
+            
+            double totalPhysicalMemorySizeInMB = machine.getOperatingSystem().getDetails().getTotalPhysicalMemorySizeInMB();
+            int jvmSizeInMB = MemorySettings.valueOf(contextProperties.getProperty("jvmSize")).toMB();
+            int numberOfGSCsScaleLimit = (int)Math.floor(totalPhysicalMemorySizeInMB/jvmSizeInMB);
+            int numberOfGSCsOnMachine = machine.getGridServiceContainers().getSize();
+            int freePhysicalMemorySizeInMB = (int)Math.floor(machine.getOperatingSystem().getStatistics().getFreePhysicalMemorySizeInMB());
+            
+            if (logger.isLoggable(Level.FINEST)) {
+                logger.finest("\nMachine memory:"
+                        + "\n\t Total physical memory: " + machine.getOperatingSystem().getDetails().getTotalPhysicalMemorySizeInMB() +" MB"
+                        + "\n\t Free physical memory: " + machine.getOperatingSystem().getStatistics().getFreePhysicalMemorySizeInMB() +" MB"
+                        + "\n\t Total swap space: " + machine.getOperatingSystem().getDetails().getTotalSwapSpaceSizeInMB() +" MB"
+                        + "\n\t Free swap space: " + machine.getOperatingSystem().getStatistics().getFreeSwapSpaceSizeInMB() +" MB"
+                        + "\n\t Memory Used: " + machine.getOperatingSystem().getStatistics().getPhysicalMemoryUsedPerc() +"%"
+                        + "\n\t GSC JVM Size: " + contextProperties.getProperty("jvmSize")
+                        + "\n\t GSC amount: " + numberOfGSCsOnMachine + " - Scale Limit: " + numberOfGSCsScaleLimit
+                );
+            }
+            
+            return (machine.getGridServiceContainers().getSize() < numberOfGSCsScaleLimit && jvmSizeInMB < freePhysicalMemorySizeInMB);
         }
         
         
@@ -175,8 +228,8 @@ public class InternalESMImpl {
         private boolean meetsDedicatedIsolationConstaint(Machine machine, String zoneName) {
             for (GridServiceContainer gsc : machine.getGridServiceContainers()) {
                 Map<String, Zone> gscZones = gsc.getZones();
-                if (!gscZones.containsKey(zoneName)) {
-                    return false; // GSC is of another zone
+                if (gscZones.isEmpty() || !gscZones.containsKey(zoneName)) {
+                    return false; // GSC either has no zone or is of another zone
                 }
             }
 

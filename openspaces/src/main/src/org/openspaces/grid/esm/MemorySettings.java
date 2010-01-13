@@ -13,6 +13,14 @@ public class MemorySettings {
         this.size = size; 
     }
     
+    private enum MemoryUnit {
+        BYTES,
+        KILOBYTES,
+        MEGABYTES,
+        GIGABYTES,
+        TERABYTES
+    }
+    
     /** Lookup table for conversion factors */
     private static final int[] multipliers = { 
         1, 
@@ -74,6 +82,26 @@ public class MemorySettings {
         double result =  Math.ceil(dividedBy(memoryUnit));
         return (int)result;
     }
+
+    public int toB() {
+        return (int)doConvert(index - MemoryUnit.BYTES.ordinal(), size);
+    }
+    
+    public int toMB() {
+        return (int)doConvert(index - MemoryUnit.MEGABYTES.ordinal(), size);
+    }
+    
+    public int toKB() {
+        return (int)doConvert(index - MemoryUnit.KILOBYTES.ordinal(), size);
+    }
+    
+    public int toGB() {
+        return (int)doConvert(index - MemoryUnit.GIGABYTES.ordinal(), size);
+    }
+    
+    public int toTB() {
+        return (int)doConvert(index - MemoryUnit.TERABYTES.ordinal(), size);
+    }
     
     public static void main(String[] args) {
         
@@ -81,7 +109,13 @@ public class MemorySettings {
         String maxMemory = "10GB";
         String jvmSize = "512MB";
         
-        System.out.println("initial jvms: " + MemorySettings.valueOf(minMemory).dividedBy(jvmSize));
-        System.out.println("num of partitions: " + MemorySettings.valueOf(maxMemory).dividedBy(jvmSize));
+        //System.out.println("initial jvms: " + MemorySettings.valueOf(minMemory).dividedBy(jvmSize));
+        //System.out.println("num of partitions: " + MemorySettings.valueOf(maxMemory).dividedBy(jvmSize));
+        System.out.println("to MB: " + MemorySettings.valueOf("512MB").toMB());
+        System.out.println("to MB: " + MemorySettings.valueOf("1024KB").toMB());
+        System.out.println("to MB: " + MemorySettings.valueOf("1GB").toMB());
+        
+        System.out.println("to GB: " + MemorySettings.valueOf("1024MB").toGB());
     }
+
 }
