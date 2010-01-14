@@ -37,7 +37,7 @@ public class InternalESMImpl {
         logger.setLevel(Level.parse(System.getProperty("logger.level", "INFO")));
         logger.config("Initial Delay: " + initialDelay + " ms");
         logger.config("Fixed Delay: " + fixedDelay + " ms");
-        if (Boolean.getBoolean("server"))
+        if (!Boolean.getBoolean("esm.ide-mode"))
             executorService.scheduleWithFixedDelay(new ScheduledTask(), initialDelay, fixedDelay, TimeUnit.MILLISECONDS);
     }
 
