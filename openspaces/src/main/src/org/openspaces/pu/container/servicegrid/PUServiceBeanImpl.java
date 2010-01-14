@@ -833,7 +833,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                     if (spaceType.invoke(serviceDetails).toString().equals(SpaceType.EMBEDDED.toString())) {
                         Method spaceServiceId = serviceDetails.getClass().getMethod("getServiceID");
                         if (spaceServiceId.invoke(serviceDetails).equals(serviceID)) {
-                            Field spaceDetails = serviceDetails.getClass().getDeclaredField("directSpaceA");
+                            Field spaceDetails = serviceDetails.getClass().getDeclaredField("directSpace");
                             spaceDetails.setAccessible(true);
                             return (IJSpace) spaceDetails.get(serviceDetails);
                         }
