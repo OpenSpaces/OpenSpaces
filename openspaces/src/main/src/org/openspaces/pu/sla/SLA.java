@@ -20,6 +20,7 @@ import org.openspaces.pu.sla.monitor.Monitor;
 import org.openspaces.pu.sla.requirement.Requirement;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
@@ -67,6 +68,8 @@ import com.gigaspaces.grid.zone.ZoneHelper;
  */
 public class SLA implements Serializable {
 
+    private static final Map<String, Integer> EMPTY_MAP = new HashMap<String, Integer>();
+
     private int numberOfInstances = 1;
 
     private int numberOfBackups = 0;
@@ -83,7 +86,7 @@ public class SLA implements Serializable {
 
     private int maxInstancesPerMachine;
 
-    private Map<String, Integer> maxInstancesPerZone;
+    private Map<String, Integer> maxInstancesPerZone = EMPTY_MAP;
 
     private List<InstanceSLA> instanceSLAs;
 
