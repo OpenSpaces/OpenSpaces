@@ -400,7 +400,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         };
         processingUnit.addLifecycleListener(added);
         try {
-            relocate();
+            relocate(gridServiceContainerToRelocateTo);
             latch.await(timeout, timeUnit);
             return ref.get();
         } catch (InterruptedException e) {
