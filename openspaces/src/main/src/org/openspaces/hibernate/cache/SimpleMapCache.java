@@ -17,6 +17,7 @@
 package org.openspaces.hibernate.cache;
 
 import com.j_spaces.core.client.ReadModifiers;
+import com.j_spaces.core.client.cache.map.MapCache;
 import com.j_spaces.map.Envelope;
 import com.j_spaces.map.IMap;
 import org.apache.commons.logging.Log;
@@ -174,7 +175,11 @@ public class SimpleMapCache implements Cache {
         if (logger.isTraceEnabled()) {
             logger.trace("Clearing region [" + regionName + "]");
         }
-        map.clear();
+        // only clean (non master) map cache, since GSMapImpl calls clean on the remote space (all of it)
+        // and we call clear afterwards
+        if (map instanceof MapCache) {
+            map.clear();
+        }
         try {
             map.getMasterSpace().clear(new Envelope(new CacheKey(regionName, null), null), null);
         } catch (Exception e) {
