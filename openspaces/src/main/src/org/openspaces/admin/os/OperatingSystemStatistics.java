@@ -70,11 +70,12 @@ public interface OperatingSystemStatistics {
 
     /**
      * Returns the percentage used of physical memory out of the total physical memory space.
+     * Uses the total free memory e.g. e.g. Linux plus cached.
      */
     double getPhysicalMemoryUsedPerc();
 
     /**
-     * Returns the percesntage used of the actual physical memory out of the total physical memory.
+     * Returns the percentage used of the actual physical memory out of the total physical memory.
      */
     double getActualPhysicalMemoryUsedPerc();
 
