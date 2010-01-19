@@ -175,15 +175,15 @@ public class SimpleMapCache implements Cache {
         if (logger.isTraceEnabled()) {
             logger.trace("Clearing region [" + regionName + "]");
         }
-        // only clean (non master) map cache, since GSMapImpl calls clean on the remote space (all of it)
-        // and we call clear afterwards
-        if (map instanceof MapCache) {
-            map.clear();
-        }
         try {
             map.getMasterSpace().clear(new Envelope(new CacheKey(regionName, null), null), null);
         } catch (Exception e) {
             throw new CacheException("Failed to clear master space with region [" + regionName + "]", e);
+        }
+        // only clean (non master) map cache, since GSMapImpl calls clean on the remote space (all of it)
+        // and we call clear afterwards
+        if (map instanceof MapCache) {
+            map.clear();
         }
     }
 
