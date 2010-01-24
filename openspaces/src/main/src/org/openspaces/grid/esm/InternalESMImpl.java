@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,15 +30,23 @@ public class InternalESMImpl {
     private final static Logger logger = Logger.getLogger("org.openspaces.grid.esm");
     private final static long initialDelay = TimeUnitProperty.getProperty("org.openspaces.grid.esm.initialDelay", "1m");
     private final static long fixedDelay = TimeUnitProperty.getProperty("org.openspaces.grid.esm.fixedDelay", "5s");
+    private final static int memorySafetyBufferInMB = MemorySettings.valueOf(System.getProperty("org.openspaces.grid.esm.memorySafetyBuffer", "100MB")).toMB();
     
     private final Admin admin = new AdminFactory().createAdmin();
-    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
+        final ThreadFactory factory = Executors.defaultThreadFactory();
+        public Thread newThread(Runnable r) {
+            Thread newThread = factory.newThread(r);
+            newThread.setName("ESM-ScheduledTask");
+            return newThread;
+        }
+    });
     
     public InternalESMImpl() {
         logger.setLevel(Level.parse(System.getProperty("logger.level", "INFO")));
         logger.config("Initial Delay: " + initialDelay + " ms");
         logger.config("Fixed Delay: " + fixedDelay + " ms");
-        if (!Boolean.getBoolean("esm.ide-mode"))
+        if (Boolean.getBoolean("runAtServer"))
             executorService.scheduleWithFixedDelay(new ScheduledTask(), initialDelay, fixedDelay, TimeUnit.MILLISECONDS);
     }
 
@@ -94,30 +103,28 @@ public class InternalESMImpl {
     
     private final class ScheduledTask implements Runnable {
 
+        BrokenDeploymentHandler brokenDeploymentHandler = new BrokenDeploymentHandler();
+        
         public void run() {
             try {
-            logger.finest("ScheduledTask is running...");
-            ProcessingUnits processingUnits = admin.getProcessingUnits();
-            for (ProcessingUnit pu : processingUnits) {
-                
-                logger.fine(puToString(pu));
+                logger.finest("ScheduledTask is running...");
+                ProcessingUnits processingUnits = admin.getProcessingUnits();
+                for (ProcessingUnit pu : processingUnits) {
 
-                if (!pu.getBeanLevelProperties().getContextProperties().containsKey("elastic"))
-                    continue;
-                
-                String isolationLevelPropVal = pu.getBeanLevelProperties().getContextProperties().getProperty("isolationLevel");
-                
-                DeploymentStatus status = pu.getStatus();
-                if (IsolationLevel.valueOf(isolationLevelPropVal).equals(IsolationLevel.DEDICATED)) {
-                    switch(status) {
+                    logger.fine(puToString(pu));
+
+                    if (!pu.getBeanLevelProperties().getContextProperties().containsKey("elastic"))
+                        continue;
+
+                    DeploymentStatus status = pu.getStatus();
+                    switch (status) {
                     case BROKEN:
                     case COMPROMISED:
-                        handleBrokenDedicatedIsolation(pu);
+                        brokenDeploymentHandler.handle(pu);
                         break;
                     }
                 }
-            }
-            }catch(Throwable t) {
+            } catch (Throwable t) {
                 logger.log(Level.SEVERE, "Caught exception: " + t, t);
             }
         }
@@ -135,94 +142,91 @@ public class InternalESMImpl {
             ;
             return sb.toString();
         }
+    }
 
+    /**
+     * Could be broken because of failed deployment, or compromised because of service limit, or
+     * max-per-machine constraints
+     */
+    private final class BrokenDeploymentHandler {
 
-        //could be broken because of failed deployment,
-        //could be compromised because of service limit, or max-per-machine constraints
-        private void handleBrokenDedicatedIsolation(ProcessingUnit pu) {
+        DedicatedIsolationBrokenDeploymentHandler dedicatedIsolationHandler = new DedicatedIsolationBrokenDeploymentHandler();
+        
+        public void handle(ProcessingUnit pu) {
+            
+            IsolationLevel isolationLevel = IsolationLevel.valueOf(pu.getBeanLevelProperties().getContextProperties().getProperty("isolationLevel"));
+            switch(isolationLevel) {
+            case DEDICATED:
+                dedicatedIsolationHandler.handle(pu);
+                default:
+                    return;
+            }
+        }
+    }
+    
+    private final class DedicatedIsolationBrokenDeploymentHandler {
+
+        public void handle(ProcessingUnit pu) {
             Properties contextProperties = pu.getBeanLevelProperties().getContextProperties();
             int scalingFactor = Integer.valueOf(contextProperties.getProperty("scalingFactor"));
-            
+
             int minNumberOfGSCs = MemorySettings.valueOf(contextProperties.getProperty("minMemory")).floorDividedBy(
                     contextProperties.getProperty("jvmSize"));
-            
-            assert pu.getTotalNumberOfInstances() <= scalingFactor*minNumberOfGSCs;
-            
+
+            assert pu.getTotalNumberOfInstances() <= scalingFactor * minNumberOfGSCs;
+
             int maxNumberOfGSCsPerMachine = minNumberOfGSCs;
             if (pu.getNumberOfBackups() > 0) {
-                maxNumberOfGSCsPerMachine = (int)Math.ceil(0.5*minNumberOfGSCs);
+                maxNumberOfGSCsPerMachine = (int) Math.ceil(0.5 * minNumberOfGSCs);
             }
-            
+
             String zoneName = pu.getRequiredZones()[0];
 
             logger.finest("scalingFactor=" + scalingFactor + ", minNumberOfGSCs=" + minNumberOfGSCs
-                    + ", maxNumberOfGSCsPerMachine=" + maxNumberOfGSCsPerMachine + ", numberOfGSCsInZone: ["+zoneName+"]=" + numberOfGSCsInZone(zoneName));
-            
+                    + ", maxNumberOfGSCsPerMachine=" + maxNumberOfGSCsPerMachine + ", numberOfGSCsInZone: [" + zoneName
+                    + "]=" + numberOfGSCsInZone(zoneName));
+
             while (numberOfGSCsInZone(zoneName) < minNumberOfGSCs) {
                 boolean startedGSC = false;
                 for (Machine machine : admin.getMachines()) {
                     if (!(machine.getGridServiceContainers().getSize() < maxNumberOfGSCsPerMachine)) {
-                        logger.finest("[X] Machine reached the scale limit of ["+maxNumberOfGSCsPerMachine+"] GSCs per machine");
+                        logger.finest("[X] Machine reached the scale limit of [" + maxNumberOfGSCsPerMachine
+                                + "] GSCs per machine");
                         continue;
                     }
                     if (!meetsDedicatedIsolationConstaint(machine, zoneName)) {
                         logger.finest("[X] Machine doesn't meet dedicated isolation constraint");
                         continue;
                     }
-                    
+
                     GridServiceAgent agent = machine.getGridServiceAgent();
-                    if (agent == null) continue; //to next machine
+                    if (agent == null)
+                        continue; // to next machine
 
                     if (!hasEnoughMemoryForNewGSC(contextProperties, machine)) {
                         logger.finest("[X] Machine doesn't have enough memory to start a new GSC");
-                        continue; //can't start GSC here
+                        continue; // can't start GSC here
                     }
 
                     logger.finest("[V] starting GSC");
-                    agent.startGridServiceAndWait(new GridServiceContainerOptions()
-                    .vmInputArgument("-Dcom.gs.zones="+zoneName)
-                    .vmInputArgument("-Dcom.gigaspaces.grid.gsc.serviceLimit="+scalingFactor));
+                    agent.startGridServiceAndWait(new GridServiceContainerOptions().vmInputArgument(
+                            "-Dcom.gs.zones=" + zoneName).vmInputArgument(
+                                    "-Dcom.gigaspaces.grid.gsc.serviceLimit=" + scalingFactor));
                     startedGSC = true;
-                    break; //to check for min-gsc requirement
+                    break; // to check for min-gsc requirement
                 }
-                
+
                 if (!startedGSC) {
                     logger.fine("[X] Can't start a GSC on this machine - Another machine is required.");
-                    break; //try when scheduled again
+                    break; // try when scheduled again
                 }
             }
         }
 
-        private boolean hasEnoughMemoryForNewGSC(Properties contextProperties, Machine machine) {
-            
-            double totalPhysicalMemorySizeInMB = machine.getOperatingSystem().getDetails().getTotalPhysicalMemorySizeInMB();
-            int jvmSizeInMB = MemorySettings.valueOf(contextProperties.getProperty("jvmSize")).toMB();
-            int numberOfGSCsScaleLimit = (int)Math.floor(totalPhysicalMemorySizeInMB/jvmSizeInMB);
-            int numberOfGSCsOnMachine = machine.getGridServiceContainers().getSize();
-            int freePhysicalMemorySizeInMB = (int)Math.floor(machine.getOperatingSystem().getStatistics().getFreePhysicalMemorySizeInMB());
-            
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.finest("\nMachine memory:"
-                        + "\n\t Total physical memory: " + machine.getOperatingSystem().getDetails().getTotalPhysicalMemorySizeInMB() +" MB"
-                        + "\n\t Free physical memory: " + machine.getOperatingSystem().getStatistics().getFreePhysicalMemorySizeInMB() +" MB"
-                        + "\n\t Total swap space: " + machine.getOperatingSystem().getDetails().getTotalSwapSpaceSizeInMB() +" MB"
-                        + "\n\t Free swap space: " + machine.getOperatingSystem().getStatistics().getFreeSwapSpaceSizeInMB() +" MB"
-                        + "\n\t Memory Used: " + machine.getOperatingSystem().getStatistics().getPhysicalMemoryUsedPerc() +"%"
-                        + "\n\t GSC JVM Size: " + contextProperties.getProperty("jvmSize")
-                        + "\n\t GSC amount: " + numberOfGSCsOnMachine + " - Scale Limit: " + numberOfGSCsScaleLimit
-                );
-            }
-            
-            return (machine.getGridServiceContainers().getSize() < numberOfGSCsScaleLimit && jvmSizeInMB < freePhysicalMemorySizeInMB);
-        }
-        
-        
         private int numberOfGSCsInZone(String zoneName) {
             Zone zone = admin.getZones().getByName(zoneName);
             return zone == null ? 0 : zone.getGridServiceContainers().getSize();
         }
-
-
 
         // requires this machine to contain only GSCs matching the zone name provided
         private boolean meetsDedicatedIsolationConstaint(Machine machine, String zoneName) {
@@ -235,6 +239,40 @@ public class InternalESMImpl {
 
             return true;
         }
+
+        private boolean hasEnoughMemoryForNewGSC(Properties contextProperties, Machine machine) {
+
+            double totalPhysicalMemorySizeInMB = machine.getOperatingSystem()
+            .getDetails()
+            .getTotalPhysicalMemorySizeInMB();
+            int jvmSizeInMB = MemorySettings.valueOf(contextProperties.getProperty("jvmSize")).toMB();
+            int numberOfGSCsScaleLimit = (int) Math.floor(totalPhysicalMemorySizeInMB / jvmSizeInMB);
+            int numberOfGSCsOnMachine = machine.getGridServiceContainers().getSize();
+            int freePhysicalMemorySizeInMB = (int) Math.floor(machine.getOperatingSystem()
+                    .getStatistics()
+                    .getFreePhysicalMemorySizeInMB());
+
+            if (logger.isLoggable(Level.FINEST)) {
+                logger.finest("\nMachine memory:" + "\n\t Total physical memory: "
+                        + machine.getOperatingSystem().getDetails().getTotalPhysicalMemorySizeInMB() + " MB"
+                        + "\n\t Free physical memory: "
+                        + machine.getOperatingSystem().getStatistics().getFreePhysicalMemorySizeInMB() + " MB"
+                        + "\n\t Memory Saftey Buffer: "
+                        + memorySafetyBufferInMB + " MB"
+                        + "\n\t Total swap space: "
+                        + machine.getOperatingSystem().getDetails().getTotalSwapSpaceSizeInMB() + " MB"
+                        + "\n\t Free swap space: "
+                        + machine.getOperatingSystem().getStatistics().getFreeSwapSpaceSizeInMB() + " MB"
+                        + "\n\t Memory Used: "
+                        + machine.getOperatingSystem().getStatistics().getPhysicalMemoryUsedPerc() + "%"
+                        + "\n\t GSC JVM Size: " + contextProperties.getProperty("jvmSize") + "\n\t GSC amount: "
+                        + numberOfGSCsOnMachine + " - Scale Limit: " + numberOfGSCsScaleLimit);
+            }
+
+            //Check according to the calculated limit, but also check that the physical memory is enough
+            return (machine.getGridServiceContainers().getSize() < numberOfGSCsScaleLimit && jvmSizeInMB < (freePhysicalMemorySizeInMB - memorySafetyBufferInMB));
+        }
+
     }
     
     public static void main(String[] args) {
