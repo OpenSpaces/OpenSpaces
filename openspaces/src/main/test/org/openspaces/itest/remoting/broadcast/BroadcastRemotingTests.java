@@ -55,17 +55,17 @@ public class BroadcastRemotingTests extends AbstractDependencyInjectionSpringCon
         innerTestSyncBroadcast(executorService);
     }
 
-    public void testSyncSyncBroadcast() {
-        innerTestSyncBroadcast(syncService);
-    }
+//    public void testSyncSyncBroadcast() {
+//        innerTestSyncBroadcast(syncService);
+//    }
 
     public void testExecutorAsyncBroadcast() throws ExecutionException, InterruptedException {
         innerTestAsyncBroadcast(executorService);
     }
 
-    public void testSyncAsyncBroadcast() throws ExecutionException, InterruptedException {
-        innerTestAsyncBroadcast(syncService);
-    }
+//    public void testSyncAsyncBroadcast() throws ExecutionException, InterruptedException {
+//        innerTestAsyncBroadcast(syncService);
+//    }
 
     public void testExecutorAsyncException() throws ExecutionException, InterruptedException {
         innerTestAsyncException(executorService);
