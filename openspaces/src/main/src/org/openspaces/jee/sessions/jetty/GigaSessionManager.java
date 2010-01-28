@@ -500,7 +500,12 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
 
         @Override
         public void setAttribute(String name, Object value) {
-            super.setAttribute(name, value);
+            if (value == null) {
+                // CHM does not allow null values to be set, so remove the key
+                super.removeAttribute(name);
+            } else {
+                super.setAttribute(name, value);
+            }
             _dirty = true;
         }
 
