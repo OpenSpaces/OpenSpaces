@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
 
 /**
  * A method parameter annotation allowing to control the routing of a certain remote invocation
- * using an anntoation. If annotated, will use the paramter as the routing index (determines which
+ * using an annotation. If annotated, will use the parameter as the routing index (determines which
  * partition it will "hit").
  *
  * <p>The annotation value allows to set an optional method name which will be invoked on the parameter
