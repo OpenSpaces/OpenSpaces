@@ -3,6 +3,8 @@ package org.openspaces.admin.internal.support;
 import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.esm.events.ElasticServiceManagerAddedEventListener;
 import org.openspaces.admin.esm.events.ElasticServiceManagerRemovedEventListener;
+import org.openspaces.admin.gsa.events.GridServiceAgentAddedEventListener;
+import org.openspaces.admin.gsa.events.GridServiceAgentRemovedEventListener;
 import org.openspaces.admin.gsc.events.GridServiceContainerAddedEventListener;
 import org.openspaces.admin.gsc.events.GridServiceContainerRemovedEventListener;
 import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventListener;
@@ -91,6 +93,12 @@ public abstract class EventRegistrationHelper {
         }
         if (eventListener instanceof GridServiceManagerRemovedEventListener) {
             admin.getGridServiceManagers().getGridServiceManagerRemoved().add((GridServiceManagerRemovedEventListener) eventListener);
+        }
+        if (eventListener instanceof GridServiceAgentAddedEventListener) {
+            admin.getGridServiceAgents().getGridServiceAgentAdded().add((GridServiceAgentAddedEventListener) eventListener);
+        }
+        if (eventListener instanceof GridServiceAgentRemovedEventListener) {
+            admin.getGridServiceAgents().getGridServiceAgentRemoved().add((GridServiceAgentRemovedEventListener) eventListener);
         }
         if (eventListener instanceof ElasticServiceManagerAddedEventListener) {
             admin.getElasticServiceManagers().getElasticServiceManagerAdded().add((ElasticServiceManagerAddedEventListener) eventListener);
