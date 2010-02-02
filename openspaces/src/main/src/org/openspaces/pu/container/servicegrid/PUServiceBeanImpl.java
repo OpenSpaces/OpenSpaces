@@ -1062,6 +1062,15 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         File webInfLib = new File(deployPath, "WEB-INF/lib");
         webInfLib.mkdirs();
         if (webInfLib.exists()) {
+            String gsRequired = System.getProperty(Locator.GS_LIB_REQUIRED);
+            String gsOptional = System.getProperty(Locator.GS_LIB_OPTIONAL);
+            try {
+                FileSystemUtils.copyRecursively(new File(gsRequired), new File(deployPath, "WEB-INF/lib"));
+                FileSystemUtils.copyRecursively(new File(gsOptional + "/spring"), new File(deployPath, "WEB-INF/lib"));
+                logger.debug(logMessage("Added spring jars to web application"));
+            } catch (IOException e) {
+                // don't copy it
+            }
             File[] wenInfJars = webInfLib.listFiles();
             ArrayList<String> deleted = new ArrayList<String>();
             for (File webInfJarFile : wenInfJars) {
@@ -1076,22 +1085,6 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             }
             if (!deleted.isEmpty()) {
                 logger.debug(logMessage("Deleted the following jars from the web application: " + deleted));
-            }
-            String gsRequired = System.getProperty(Locator.GS_LIB_REQUIRED);
-            String gsOptional = System.getProperty(Locator.GS_LIB_OPTIONAL);
-            try {
-                FileCopyUtils.copy(new File(gsRequired + "/gs-openspaces.jar"), new File(deployPath, "WEB-INF/lib/gs-openspaces.jar"));
-                logger.debug(logMessage("Added openspaces jar to web application"));
-            } catch (IOException e) {
-                // don't copy it
-            }
-            try {
-                FileCopyUtils.copy(new File(gsRequired + "/spring.jar"), new File(deployPath, "WEB-INF/lib/spring.jar"));
-                FileCopyUtils.copy(new File(gsRequired + "/commons-logging.jar"), new File(deployPath, "WEB-INF/lib/commons-logging.jar"));
-                FileSystemUtils.copyRecursively(new File(gsOptional + "/spring"), new File(deployPath, "WEB-INF/lib"));
-                logger.debug(logMessage("Added spring jars to web application"));
-            } catch (IOException e) {
-                // don't copy it
             }
         }
     }

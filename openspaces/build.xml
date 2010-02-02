@@ -96,10 +96,6 @@
 
     <target name="build_1_5" depends="clean, buildmain" description="Compile main sources"/>
 
-    <target name="build_1_4" depends="clean, buildmain" description="Compile main sources">
-        <retrotranslator srcdir="${target.classes.dir}" verify="true" failonwarning="false"/>
-    </target>
-
     <target name="fulljar_1_5" depends="build_1_5, fulljar"/>
 
     <target name="fulljar" description="Create full JAR file with all OpenSpaces classes">
@@ -261,48 +257,6 @@
         <copy todir="lib/optional/openspaces" file="${basedir}/openspaces.notice.txt"/>
     </target>
 
-    <target name="dist_1_4"
-            depends="build_1_4, fulljar, srczip, javadoc, schema, license"
-            description="Creates the OpenSpaces distribution">
-        <mkdir dir="${dist.dir}"/>
-        <delete file="${dist.dir}/${name}-1.4.zip"/>
-        <zip zipfile="${dist.dir}/${name}-1.4.zip">
-            <zipfileset dir="${basedir}">
-                <include name="bin/pu*"/>
-                <include name="deploy/**"/>
-                <include name="docs/openspaces-javadoc/**"/>
-                <include name="tools/**"/>
-                <exclude name="tools/gshell/**" />
-                <exclude name="tools/maven/maven-openspaces-plugin/target/**" />
-                <exclude name="tools/**/*.iml" />
-
-                <include name="examples/**"/>
-                <exclude name="examples/openspaces/data/**"/>
-                <exclude name="examples/**/*.iml"/>
-                <exclude name="examples/**/.cvsignore"/>
-
-                <include name="lib/${name}/**"/>
-                <include name="lib/spring/spring.jar" />
-                <include name="lib/j2ee/activation.jar" />
-                <include name="lib/j2ee/jta.jar" />
-                <include name="lib/j2ee/connector.jar" />
-                <include name="lib/velocity/**" />
-
-            </zipfileset>
-        </zip>
-        <delete dir="${target.dir}/temp"/>
-        <mkdir dir="${target.dir}/temp"/>
-        <unzip src="${dist.dir}/${name}-1.4.zip" dest="${target.dir}/temp"/>
-        <move todir="${target.dir}/temp/examples/openspaces/data">
-            <fileset dir="${target.dir}/temp/examples/openspaces/data-1.4"/>
-        </move>
-        <zip zipfile="${dist.dir}/${name}-1.4.zip">
-            <zipfileset dir="${target.dir}/temp"/>
-        </zip>
-        <mkdir dir="${dist.dir}/1.4"/>
-        <copy todir="${dist.dir}/1.4" file="${lib.dir}/${name}/${name}.jar"/>
-    </target>
-
     <target name="dist_1_5"
             depends="build_1_5, fulljar, srczip, javadoc, schema, license"
             description="Creates the OpenSpaces distribution">
@@ -318,8 +272,7 @@
                 <exclude name="tools/**/*.iml" />
                 <exclude name="tools/gshell/**" />
 
-                <include name="lib/required/gs-openspaces.jar"/>
-            	<include name="lib/required/spring.jar"/>
+                <include name="lib/required/**"/>
                 <include name="lib/optional/openspaces/**"/>
                 <include name="lib/optional/spring/**"/>
                 <include name="lib/platform/openspaces/**" />
