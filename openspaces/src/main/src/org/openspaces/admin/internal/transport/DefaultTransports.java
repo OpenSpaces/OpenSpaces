@@ -175,18 +175,22 @@ public class DefaultTransports implements InternalTransports {
 
 
     public void addTransport(Transport transport) {
-        transportsByUID.put(transport.getUid(), transport);
-        Set<Transport> transportByHost = transportsByHost.get(transport.getBindHost());
-        if (transportByHost == null) {
+        Transport existingTransport = transportsByUID.put(transport.getUid(), transport);
+        if (existingTransport == null) {
+            // a new one, set the stats on it
             transport.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
             transport.setStatisticsHistorySize(statisticsHistorySize);
             if (isMonitoring()) {
                 transport.startStatisticsMonitor();
             }
+        }
+        Set<Transport> transportByHost = transportsByHost.get(transport.getBindHost());
+        if (transportByHost == null) {
             synchronized (transportsByHost) {
                 transportByHost = transportsByHost.get(transport.getBindHost());
                 if (transportByHost == null) {
                     transportByHost = new ConcurrentHashSet<Transport>();
+                    transportsByHost.put(transport.getBindHost(), transportByHost);
                 }
             }
         }
@@ -206,6 +210,9 @@ public class DefaultTransports implements InternalTransports {
                 transportByHost = transportsByHost.get(transport.getBindHost());
                 if (transportByHost != null) {
                     transportByHost.remove(transport);
+                    if (transportByHost.isEmpty()) {
+                        transportsByHost.remove(transport.getBindHost());
+                    }
                 }
             }
         } else {
