@@ -1,10 +1,10 @@
 package org.openspaces.admin.internal.vm;
 
-import com.gigaspaces.internal.jvm.JVMStatistics;
-
 import org.openspaces.admin.support.StatisticsUtils;
 import org.openspaces.admin.vm.VirtualMachineDetails;
 import org.openspaces.admin.vm.VirtualMachineStatistics;
+
+import com.gigaspaces.internal.jvm.JVMStatistics;
 
 /**
  * @author kimchy
@@ -96,7 +96,11 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
     }
 
     public double getMemoryHeapUsedPerc() {
-        return StatisticsUtils.computePerc(getMemoryHeapUsedInBytes(), getDetails().getMemoryHeapMaxInBytes());
+        if (isNA()) {
+            return -1;
+        } else {
+            return StatisticsUtils.computePerc(getMemoryHeapUsedInBytes(), getDetails().getMemoryHeapMaxInBytes());
+        }
     }
 
     public double getMemoryHeapCommittedUsedPerc() {
@@ -128,7 +132,11 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
     }
 
     public double getMemoryNonHeapUsedPerc() {
-        return StatisticsUtils.computePerc(getMemoryNonHeapUsedInBytes(), getDetails().getMemoryNonHeapMaxInBytes());
+        if (isNA()) {
+            return -1;
+        } else {
+            return StatisticsUtils.computePerc(getMemoryNonHeapUsedInBytes(), getDetails().getMemoryNonHeapMaxInBytes());
+        }
     }
 
     public double getMemoryNonHeapCommittedUsedPerc() {
