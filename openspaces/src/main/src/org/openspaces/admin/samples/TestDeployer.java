@@ -1,20 +1,10 @@
 package org.openspaces.admin.samples;
 
-import com.gigaspaces.log.*;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
-import org.openspaces.admin.dump.DumpResult;
-import org.openspaces.admin.gsa.GridServiceAgent;
-import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.space.SpaceDeployment;
 import org.openspaces.core.GigaSpace;
-
-import static com.gigaspaces.log.LogEntryMatchers.*;
-
-import java.io.File;
-import java.util.Map;
-import java.util.HashMap;
 
 /**
  * @author kimchy
