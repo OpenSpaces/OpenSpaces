@@ -9,6 +9,7 @@ public class DeploymentContext implements Serializable {
     private String maxMemory = "10GB";
     private String jvmSize = "512MB";
     private boolean highlyAvailable;
+    private String slaDescriptors = "";
     
     DeploymentContext(){
     }
@@ -51,5 +52,13 @@ public class DeploymentContext implements Serializable {
 
     public String getJvmSize() {
         return jvmSize;
+    }
+
+    public void addSla(String descriptor) {
+        slaDescriptors += descriptor;
     };
+    
+    public String getSlaDescriptors() {
+        return slaDescriptors;
+    }
 }

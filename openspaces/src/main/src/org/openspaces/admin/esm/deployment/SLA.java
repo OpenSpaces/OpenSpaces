@@ -1,5 +1,5 @@
 package org.openspaces.admin.esm.deployment;
 
-public class ElasticProcessingUnitDeployment {
+public interface SLA {
 
 }

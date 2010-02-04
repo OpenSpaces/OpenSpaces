@@ -76,4 +76,13 @@ public class ElasticDataGridDeployment implements Serializable {
     public DeploymentContext getContext() {
         return context;
     }
+
+    public ElasticDataGridDeployment addSla(SLA sla) {
+        String descriptor = "";
+        if (sla instanceof MemorySla) {
+            descriptor = "sla="+MemorySla.class.getSimpleName() + ",threshold="+((MemorySla)sla).getThreshold()+"/";
+        }
+        this.context.addSla(descriptor);
+        return this;
+    }
 }
