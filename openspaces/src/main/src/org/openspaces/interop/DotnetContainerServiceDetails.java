@@ -29,11 +29,13 @@ import java.io.ObjectOutput;
  */
 public class DotnetContainerServiceDetails extends PlainServiceDetails {
 
+    public static final String SERVICE_TYPE = "dotnet";
+    
     public DotnetContainerServiceDetails() {
     }
 
     public DotnetContainerServiceDetails(String id, String serviceSubType, String description, String longDescription) {
-        super(id, "dotnet", serviceSubType, description, longDescription);
+        super(id, SERVICE_TYPE, serviceSubType, description, longDescription);
     }
 
     public void setSubType(String type) {
