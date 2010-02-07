@@ -41,7 +41,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
 public class InternalESMImpl {
     private final static Logger logger = Logger.getLogger("org.openspaces.grid.esm");
     private final static long initialDelay = TimeUnitProperty.getProperty("org.openspaces.grid.esm.initialDelay", "1m");
-    private final static long fixedDelay = TimeUnitProperty.getProperty("org.openspaces.grid.esm.fixedDelay", "10s");
+    private final static long fixedDelay = TimeUnitProperty.getProperty("org.openspaces.grid.esm.fixedDelay", "5s");
     private final static int memorySafetyBufferInMB = MemorySettings.valueOf(System.getProperty("org.openspaces.grid.esm.memorySafetyBuffer", "100MB")).toMB();
     private final static NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();
     
@@ -109,14 +109,6 @@ public class InternalESMImpl {
         
         return numberOfPartitions;
     }
-    
-//    /** scaling factor is used as the service limit of each GSC */
-//    private int calculateScalingFactor(DeploymentContext context) {
-//        int maxGSCs = MemorySettings.valueOf(context.getMaxMemory()).floorDividedBy(context.getJvmSize());
-//        int minGSCs = MemorySettings.valueOf(context.getMinMemory()).floorDividedBy(context.getJvmSize());
-//        double scalingFactor = Math.ceil(1.0*maxGSCs/minGSCs);
-//        return (int)scalingFactor;
-//    }
     
     private final class ScheduledTask implements Runnable {
 
@@ -237,19 +229,6 @@ public class InternalESMImpl {
                     continue;
                 }
                 
-//                //meets max-per-machine constraint
-//                if (pu.getMaxInstancesPerMachine() > 0) {
-//                    int instancesOnMachine = 0;
-//                    for (ProcessingUnitInstance instance : pu.getProcessingUnitInstances()) {
-//                        if (instance.getMachine().equals(machine)) {
-//                            ++instancesOnMachine;
-//                        }
-//                    }
-//                    if (instancesOnMachine >= pu.getMaxInstancesPerMachine()) {
-//                        continue; //reached limit
-//                    }
-//                }
-                
                 //assumes dedicated machine!
                 if (limitNumberOfGSCsPerMachine && !(machine.getGridServiceContainers().getSize() < puCapacityPlanner.getMaxNumberOfGSCsPerMachine())) {
                     logger.finest("[X] Machine ["+machineToString(machine)+"] reached the scale limit of [" + puCapacityPlanner.getMaxNumberOfGSCsPerMachine()
@@ -269,7 +248,7 @@ public class InternalESMImpl {
                     continue; // can't start GSC here
                 }
                 
-                logger.finest("[V] starting GSC on machine ["+machineToString(machine)+"]");
+                logger.finest("[V] Scaling up, starting GSC on machine ["+machineToString(machine)+"]");
                 GridServiceContainer newGSC = agent.startGridServiceAndWait(new GridServiceContainerOptions().vmInputArgument(
                         "-Dcom.gs.zones=" + puCapacityPlanner.getZoneName()).vmInputArgument(
                                 "-Dcom.gigaspaces.grid.gsc.serviceLimit=" + puCapacityPlanner.getScalingFactor()));
@@ -403,6 +382,7 @@ public class InternalESMImpl {
                 }
             }
 
+            List<GridServiceContainer> gscsWithoutBreach = new ArrayList<GridServiceContainer>();
             List<GridServiceContainer> gscsWithBreach = new ArrayList<GridServiceContainer>();
             for (GridServiceContainer gsc : gscs) {
                 double memoryHeapUsedPerc = gsc.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc();
@@ -419,14 +399,21 @@ public class InternalESMImpl {
                 } else {
                     logger.finest("GSC [" + gscToString(gsc)
                             + "] - Memory [" + NUMBER_FORMAT.format(memoryHeapUsedPerc) + "%] is within threshold of [" + NUMBER_FORMAT.format(threshold) + "%]");
+                    gscsWithoutBreach.add(gsc);
                 }
             }
 
             //nothing to fix
-            if (gscsWithBreach.isEmpty()) {
-                return;
+            if (!gscsWithBreach.isEmpty()) {
+                handleGSCsWithBreach(pu, gscsWithBreach);
+            } else if (!gscsWithoutBreach.isEmpty()) {
+                handleGSCsWithoutBreach(pu, gscsWithoutBreach);
             }
 
+        }
+
+        private void handleGSCsWithBreach(ProcessingUnit pu, List<GridServiceContainer> gscsWithBreach) {
+            logger.finest("Handling " + gscsWithBreach.size()+" GSCs with Breach");
             //sort from high to low
             Collections.sort(gscsWithBreach, new Comparator<GridServiceContainer>() {
                 public int compare(GridServiceContainer gsc1, GridServiceContainer gsc2) {
@@ -440,6 +427,8 @@ public class InternalESMImpl {
             Zone zone = admin.getZones().getByName(puCapacityPlanner.getZoneName());
 
             for (GridServiceContainer gsc : gscsWithBreach) {
+                
+                logger.finest("Handling GSC ["+gscToString(gsc)+"] which has ["+gsc.getProcessingUnitInstances().length+"] processing unit instances");
                 
                 //try and relocate a pu instance from a breached gsc. if successful, move to next gsc
                 //if not, try the next pu instance. if no instance was moved, try and create a gsc and retry to relocate an instance to it
@@ -530,7 +519,7 @@ public class InternalESMImpl {
                         
                         DedicatedIsolationDeploymentHandler handler = new DedicatedIsolationDeploymentHandler(pu);
                         if (!handler.startGSC(machinesToExclude)) {
-                            logger.fine("[X] Can't start a GSC - Another machine is required.");
+                            logger.fine("[X] Scaling out, Can't start a GSC - Another machine is required.");
                             break; //out of retry loop
                         }
                     }
@@ -538,6 +527,110 @@ public class InternalESMImpl {
             }
         }
 
+        
+        private void handleGSCsWithoutBreach(ProcessingUnit pu, List<GridServiceContainer> gscsWithoutBreach) {
+            logger.finest("Handling " + gscsWithoutBreach.size() + " GSCs without Breach");
+          //sort from low to high
+            Collections.sort(gscsWithoutBreach, new Comparator<GridServiceContainer>() {
+                public int compare(GridServiceContainer gsc1, GridServiceContainer gsc2) {
+                    double memoryHeapUsedPerc1 = gsc1.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc();
+                    double memoryHeapUsedPerc2 = gsc2.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc();
+                    return (int)(memoryHeapUsedPerc1 - memoryHeapUsedPerc2);
+                }
+            });
+
+            PuCapacityPlanner puCapacityPlanner = new PuCapacityPlanner(pu);
+            Zone zone = admin.getZones().getByName(puCapacityPlanner.getZoneName());
+
+            for (GridServiceContainer gsc : gscsWithoutBreach) {
+                
+                logger.finest("Handling GSC ["+gscToString(gsc)+"] which has ["+gsc.getProcessingUnitInstances().length+"] processing unit instances");
+                if (gsc.getProcessingUnitInstances().length > 1) {
+                    logger.finest("Skipped GSC ["+gscToString(gsc)+"] has more than 1 processing unit");
+                    continue;
+                }
+                
+                
+                for (ProcessingUnitInstance puInstanceToMaybeRelocate : gsc.getProcessingUnitInstances()) {
+                    int estimatedMemoryHeapUsedPercPerInstance = getEstimatedMemoryHeapUsedPercPerInstance(gsc, puInstanceToMaybeRelocate);
+                    logger.finest("Finding GSC that can hold [" + puInstanceToString(puInstanceToMaybeRelocate) + "] with an estimate of ["
+                            + NUMBER_FORMAT.format(estimatedMemoryHeapUsedPercPerInstance) + "%]");
+
+
+                    List<GridServiceContainer> gscsInZone = Arrays.asList(zone.getGridServiceContainers().getContainers());
+                    //sort from low to high
+                    Collections.sort(gscsInZone, new Comparator<GridServiceContainer>() {
+                        public int compare(GridServiceContainer gsc1, GridServiceContainer gsc2) {
+                            double memoryHeapUsedPerc1 = gsc1.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc();
+                            double memoryHeapUsedPerc2 = gsc2.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc();
+                            return (int)(memoryHeapUsedPerc1 - memoryHeapUsedPerc2);
+                        }
+                    });
+
+                    for (GridServiceContainer gscToRelocateTo : gscsInZone) {
+
+                        //if gsc is the same gsc as the pu instance we are handling - skip it
+                        if (gscToRelocateTo.equals(puInstanceToMaybeRelocate.getGridServiceContainer())) {
+                            logger.finest("Skipping GSC ["+gscToString(gscToRelocateTo)+"] - same GSC as this instance");
+                            continue;
+                        }
+
+                        //if gsc reached its scale limit (of processing units) then skip it
+                        if (!(gscToRelocateTo.getProcessingUnitInstances().length < puCapacityPlanner.getScalingFactor())) {
+                            logger.finest("Skipping GSC ["+gscToString(gscToRelocateTo)+"] - reached the scale limit");
+                            continue; //can't use this GSC to scale
+                        }
+
+                        int memoryHeapUsedByThisGsc = (int)Math.ceil(gscToRelocateTo.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc());
+                        if (memoryHeapUsedByThisGsc + estimatedMemoryHeapUsedPercPerInstance > threshold) {
+                            logger.finest("Skipping GSC ["+gscToString(gscToRelocateTo)+"] - memory used ["+NUMBER_FORMAT.format(memoryHeapUsedByThisGsc)+"%]");
+                            continue;
+                        }
+                        
+                        if (estimatedMemoryHeapUsedPercPerInstance > memoryHeapUsedByThisGsc) {
+                            logger.finest("Skipping GSC ["+gscToString(gsc)+"] - memory will be increased by more than 100% if instance is moved here");
+                            continue;
+                        }
+
+                        // if GSC on same machine, no need to check for co-location constraints
+                        // since these were already checked when instance was instantiated
+                        if (!gscToRelocateTo.getMachine().equals(puInstanceToMaybeRelocate.getMachine())) {
+
+                            //TODO add max-instances-per-vm and max-instances-per-zone if necessary
+
+                            //verify max instances per machine
+                            if (pu.getMaxInstancesPerMachine() > 0) {
+                                int instancesOnMachine = 0;
+                                for (ProcessingUnitInstance instance : puInstanceToMaybeRelocate.getPartition().getInstances()) {
+                                    if (instance.getMachine().equals(gscToRelocateTo.getMachine())) {
+                                        ++instancesOnMachine;
+                                    }
+                                }
+                                if (instancesOnMachine >= pu.getMaxInstancesPerMachine()) {
+                                    logger.finest("Skipping GSC ["+gscToString(gscToRelocateTo)+"] - reached max-instances-per-machine limit");
+                                    continue; //reached limit
+                                }
+                            }                            
+                        }
+
+
+                        logger.finest("Found GSC [" + gscToString(gscToRelocateTo) + "] which has only ["+NUMBER_FORMAT.format(memoryHeapUsedByThisGsc)+"%] used.");
+                        logger.finest("Relocating ["+puInstanceToString(puInstanceToMaybeRelocate)+"] to GSC [" + gscToString(gscToRelocateTo) + "]");
+                        puInstanceToMaybeRelocate.relocateAndWait(gscToRelocateTo);
+                        if (gsc.getProcessingUnitInstances().length == 0) {
+                            logger.finest("Scaling in, trying to terminate empty GSC ["+gscToString(gsc)+"]");
+                            gsc.kill();
+                        }
+                        if (gsc.getMachine().getGridServiceContainers().getSize() == 0) {
+                            logger.finest("Scaling down, No need for machine ["+gsc.getMachine()+"]");
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+        
+        
         private int getEstimatedMemoryHeapUsedPercPerInstance(GridServiceContainer gsc, ProcessingUnitInstance puInstance) {
             
             int totalPuNumOfObjects = 0;
