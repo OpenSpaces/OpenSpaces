@@ -71,10 +71,11 @@ public class NotifyAnnotationPostProcessor implements BeanPostProcessor, Applica
             return bean;
         }
 
-        EventContainersBus eventContainersBus = AnnotationProcessorUtils.findBus(applicationContext);
 
         GigaSpace gigaSpace = AnnotationProcessorUtils.findGigaSpace(bean, notify.gigaSpace(), applicationContext, beanName);
 
+        EventContainersBus eventContainersBus = AnnotationProcessorUtils.findBus(applicationContext);
+        
         SimpleNotifyContainerConfigurer notifyContainerConfigurer = new SimpleNotifyContainerConfigurer(gigaSpace);
 
         notifyContainerConfigurer.name(beanName);

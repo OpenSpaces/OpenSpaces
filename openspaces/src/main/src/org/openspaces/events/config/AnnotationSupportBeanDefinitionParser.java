@@ -34,6 +34,7 @@ public class AnnotationSupportBeanDefinitionParser implements BeanDefinitionPars
 
     public BeanDefinition parse(Element element, ParserContext parserContext) {
         BeanDefinition bd = new RootBeanDefinition(EventContainersBus.class);
+        bd.setLazyInit(true);
         BeanComponentDefinition bcd = new BeanComponentDefinition(bd, "internal-eventContainerBus");
         parserContext.registerBeanComponent(bcd);
 

@@ -66,10 +66,11 @@ public class AsyncPollingAnnotationPostProcessor implements BeanPostProcessor, A
             return bean;
         }
 
-        EventContainersBus eventContainersBus = AnnotationProcessorUtils.findBus(applicationContext);
 
         GigaSpace gigaSpace = AnnotationProcessorUtils.findGigaSpace(bean, polling.gigaSpace(), applicationContext, beanName);
 
+        EventContainersBus eventContainersBus = AnnotationProcessorUtils.findBus(applicationContext);
+        
         SimpleAsyncPollingContainerConfigurer pollingContainerConfigurer = new SimpleAsyncPollingContainerConfigurer(gigaSpace);
 
         pollingContainerConfigurer.name(beanName);
