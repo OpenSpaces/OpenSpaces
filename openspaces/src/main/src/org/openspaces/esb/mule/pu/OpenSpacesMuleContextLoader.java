@@ -60,7 +60,7 @@ public class OpenSpacesMuleContextLoader implements ApplicationContextAware, Ini
 
     private MuleContextFactory muleContextFactory;
 
-    private ApplicationContext muleApplicationContext;
+    private AbstractApplicationContext muleApplicationContext;
 
     private MuleContext muleContext;
 
@@ -111,6 +111,8 @@ public class OpenSpacesMuleContextLoader implements ApplicationContextAware, Ini
     public void destroy() throws Exception {
         if (muleContext != null) {
             try {
+                // set the parent to null, so the close context event won't be fired to the parent as well...
+                muleApplicationContext.setParent(null);
                 muleContext.dispose();
             } finally {
                 muleContext = null;
