@@ -41,7 +41,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM
 	private static final String CONFIG_COMPONENT = "org.openspaces.grid.esm";
 	private static final Logger logger = Logger.getLogger(CONFIG_COMPONENT);
 
-	private final InternalESMImpl internalESMImpl = new InternalESMImpl();
+	private final EsmExecutor esmExecutor = new EsmExecutor();
     private LifeCycle lifeCycle;
     private String[] configArgs;
 	
@@ -203,6 +203,6 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM
 	}
 
     public void deploy(ElasticDataGridDeployment deployment) {
-        internalESMImpl.deploy(deployment);
+        esmExecutor.deploy(deployment);
     }
 }
