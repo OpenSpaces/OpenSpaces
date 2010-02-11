@@ -218,7 +218,7 @@ public class RunPUMojo extends AbstractOpenSpacesMojo {
      */
     private void executePU(MavenProject project) throws MojoExecutionException, MojoFailureException {
         if (project == null || !project.getPackaging().equalsIgnoreCase("jar")) {
-            throw new MojoExecutionException("The processing unit project '" + project.getName() +
+            throw new MojoExecutionException("The processing unit project '" + (project == null ? "unknown" : project.getName()) +
                     "' must be of type jar (packaging=jar).");
         }
 
