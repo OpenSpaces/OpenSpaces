@@ -38,17 +38,17 @@ import java.util.Map;
  */
 public class SimpleMapCache implements Cache {
 
-    private Log logger = LogFactory.getLog(getClass());
+    final static private Log logger = LogFactory.getLog(SimpleMapCache.class);
 
-    private String regionName;
+    final private String regionName;
 
-    private IMap map;
+    final private IMap map;
 
-    private long timeToLive;
+    final private long timeToLive;
 
-    private long waitForResponse;
+    final private long waitForResponse;
 
-    private LockManager lockManager;
+    final private LockManager lockManager;
 
     private static final ThreadLocal<LockHandle> lockHandlerContext = new ThreadLocal<LockHandle>();
 
