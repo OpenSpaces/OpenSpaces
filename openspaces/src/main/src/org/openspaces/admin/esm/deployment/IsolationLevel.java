@@ -16,9 +16,9 @@ package org.openspaces.admin.esm.deployment;
  */
 public enum IsolationLevel {
     /** public to all tenants */
-    PUBLIC,
+//    PUBLIC,
     /** shared by a specific tenant */
-    SHARED,
+//    SHARED,
     /** dedicated to a single tenant */
     DEDICATED;
 }
