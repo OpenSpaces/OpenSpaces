@@ -63,9 +63,13 @@ public class CacheKey implements Externalizable {
 
         CacheKey otherCacheKey = (CacheKey) other;
         if (otherCacheKey.regionName.equals(regionName)) {
-            if (otherCacheKey.key == null && key == null) {
+            if(otherCacheKey.key == key){
                 return true;
             }
+            if (key == null || otherCacheKey.key == null) {
+                return false;
+            }
+            
             return otherCacheKey.key.equals(key);
         }
         return false;
