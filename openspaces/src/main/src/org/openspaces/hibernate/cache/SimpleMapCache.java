@@ -121,12 +121,12 @@ public class SimpleMapCache implements Cache {
             if (logger.isTraceEnabled()) {
                 logger.trace("Put [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
             }
-            map.put(cacheKey, value, lockHandle.getTransaction(), timeToLive);
+            map.put(cacheKey, value, lockHandle.getTransaction(), timeToLive, waitForResponse);
         } else {
             if (logger.isTraceEnabled()) {
                 logger.trace("Put [" + cacheKey + "]");
             }
-            map.put(cacheKey, value, timeToLive);
+            map.put(cacheKey, value, timeToLive, waitForResponse);
         }
     }
 
@@ -140,12 +140,12 @@ public class SimpleMapCache implements Cache {
             if (logger.isTraceEnabled()) {
                 logger.trace("Update [" + cacheKey + "] under a lock [" + lockHandle.getTransaction() + "]");
             }
-            map.put(cacheKey, value, lockHandle.getTransaction(), timeToLive);
+            map.put(cacheKey, value, lockHandle.getTransaction(), timeToLive, waitForResponse);
         } else {
             if (logger.isTraceEnabled()) {
                 logger.trace("Update [" + cacheKey + "]");
             }
-            map.put(cacheKey, value, timeToLive);
+            map.put(cacheKey, value, timeToLive, waitForResponse);
         }
     }
 

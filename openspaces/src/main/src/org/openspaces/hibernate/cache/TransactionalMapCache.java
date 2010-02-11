@@ -110,7 +110,7 @@ public class TransactionalMapCache implements Cache {
             if (logger.isTraceEnabled()) {
                 logger.trace("Put [" + cacheKey + "] under no transaction");
             }
-            map.put(cacheKey, value, timeToLive);
+            map.put(cacheKey, value, timeToLive, waitForResponse);
         } finally {
             masterSpace.setContextTansaction(tx);
         }
@@ -125,7 +125,7 @@ public class TransactionalMapCache implements Cache {
         if (logger.isTraceEnabled()) {
             logger.trace("Update [" + cacheKey + "] under transaction [" + masterSpace.getContextTransaction() + "]");
         }
-        map.put(cacheKey, value, timeToLive);
+        map.put(cacheKey, value, timeToLive, waitForResponse);
     }
 
     /**
