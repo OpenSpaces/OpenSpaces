@@ -63,7 +63,10 @@ public class EsmExecutor {
         NUMBER_FORMAT.setMinimumFractionDigits(1);
         NUMBER_FORMAT.setMaximumFractionDigits(2);
         
-        logger.setLevel(Level.parse(System.getProperty("logger.level", "INFO")));
+        String loggerProp = System.getProperty("logger.level");
+        if (loggerProp != null)
+            logger.setLevel(Level.parse(loggerProp));
+        
         logger.config("Initial Delay: " + initialDelay + " ms");
         logger.config("Fixed Delay: " + fixedDelay + " ms");
         if (Boolean.valueOf(System.getProperty("esm.enabled", "true")))
