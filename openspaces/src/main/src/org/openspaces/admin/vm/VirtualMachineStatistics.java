@@ -32,6 +32,8 @@
 
 package org.openspaces.admin.vm;
 
+import java.util.List;
+
 /**
  * Statistics on a single virtual machine level.
  *
@@ -48,6 +50,11 @@ public interface VirtualMachineStatistics {
      * Returns the details of the virtual machine.
      */
     VirtualMachineDetails getDetails();
+
+    /**
+     * Returns the timeline (from newest to oldest) history statistics, including this one.
+     */
+    List<VirtualMachineStatistics> getTimeline();
 
     /**
      * Returns the previous statistics sampled. <code>null</code> if this is the first one or bounded by the history size.

@@ -32,6 +32,8 @@
 
 package org.openspaces.admin.vm;
 
+import java.util.List;
+
 /**
  * An aggregated statistics view of all the different virtual machines currently discovered.
  *
@@ -48,6 +50,11 @@ public interface VirtualMachinesStatistics {
      * Return the timestamp when the statistics were taken.
      */
     long getTimestamp();
+
+    /**
+     * Returns the timeline (from newest to oldest) history statistics, including this one.
+     */
+    List<VirtualMachinesStatistics> getTimeline();
 
     /**
      * Returns the previous timestamp of the statistics sampled, <code>-1</code> if this is the

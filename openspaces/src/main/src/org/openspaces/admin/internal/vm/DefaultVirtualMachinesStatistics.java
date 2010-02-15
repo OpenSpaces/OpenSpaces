@@ -5,6 +5,9 @@ import org.openspaces.admin.vm.VirtualMachineStatistics;
 import org.openspaces.admin.vm.VirtualMachinesDetails;
 import org.openspaces.admin.vm.VirtualMachinesStatistics;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author kimchy
  */
@@ -50,6 +53,16 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
             return -1;
         }
         return previousStats.getTimestamp();
+    }
+
+    public List<VirtualMachinesStatistics> getTimeline() {
+        ArrayList<VirtualMachinesStatistics> timeline = new ArrayList<VirtualMachinesStatistics>();
+        timeline.add(this);
+        VirtualMachinesStatistics current = this.getPrevious();
+        while (current != null && !current.isNA()) {
+            timeline.add(current);
+        }
+        return timeline;
     }
 
     public VirtualMachinesStatistics getPrevious() {

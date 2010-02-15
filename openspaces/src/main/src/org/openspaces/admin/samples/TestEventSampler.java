@@ -51,7 +51,7 @@ public class TestEventSampler implements MachineLifecycleEventListener,
 
     public static void main(String[] args) throws Exception {
         TestEventSampler eventSampler = new TestEventSampler();
-        Admin admin = new AdminFactory().addGroup("moran-gigaspaces-7.1.0-XAPPremium-m5").createAdmin();
+        Admin admin = new AdminFactory().addGroup("kimchy").createAdmin();
 
         admin.addEventListener(eventSampler);
 

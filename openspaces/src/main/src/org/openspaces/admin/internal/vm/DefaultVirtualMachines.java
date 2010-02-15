@@ -63,8 +63,8 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
         this.admin = admin;
         this.virtualMachineAddedEventManager = new DefaultVirtualMachineAddedEventManager(this);
         this.virtualMachineRemovedEventManager = new DefaultVirtualMachineRemovedEventManager(this);
-        this.virtualMachineStatisticsChangedEventManager = new DefaultVirtualMachineStatisticsChangedEventManager(admin);
-        this.virtualMachinesStatisticsChangedEventManager = new DefaultVirtualMachinesStatisticsChangedEventManager(admin);
+        this.virtualMachineStatisticsChangedEventManager = new DefaultVirtualMachineStatisticsChangedEventManager(admin, this);
+        this.virtualMachinesStatisticsChangedEventManager = new DefaultVirtualMachinesStatisticsChangedEventManager(admin, this);
     }
 
     public Admin getAdmin() {

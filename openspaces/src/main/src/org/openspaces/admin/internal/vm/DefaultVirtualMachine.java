@@ -105,7 +105,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
         this.gridServiceContainers = new DefaultGridServiceContainers(admin);
         this.processingUnitInstances = new DefaultProcessingUnitInstances(admin);
         this.spaceInstances = new DefaultSpaceInstances(admin);
-        this.statisticsChangedEventManager = new DefaultVirtualMachineStatisticsChangedEventManager(admin);
+        this.statisticsChangedEventManager = new DefaultVirtualMachineStatisticsChangedEventManager(admin, this);
     }
 
     public String getUid() {

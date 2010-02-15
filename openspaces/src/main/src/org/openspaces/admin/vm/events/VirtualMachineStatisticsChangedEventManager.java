@@ -29,6 +29,11 @@ public interface VirtualMachineStatisticsChangedEventManager {
     void add(VirtualMachineStatisticsChangedEventListener eventListener);
 
     /**
+     * Adds an event listener, will also fire events for history statistics.
+     */
+    void add(VirtualMachineStatisticsChangedEventListener eventListener, boolean withHistory);
+
+    /**
      * Removes an event listener.
      */
     void remove(VirtualMachineStatisticsChangedEventListener eventListener);
