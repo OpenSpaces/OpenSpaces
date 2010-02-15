@@ -41,10 +41,10 @@ public interface StatisticsMonitor {
     /**
      * The default history size stored in statistics.
      */
-    static final int DEFAULT_HISTORY_SIZE = 100;
+    static final int DEFAULT_HISTORY_SIZE = 5000;
 
     /**
-     * Sets the statistics interval, autmatically updating the monitoring scheduled tasks if
+     * Sets the statistics interval, automatically updating the monitoring scheduled tasks if
      * monitoring is enabled.
      */
     void setStatisticsInterval(long interval, TimeUnit timeUnit);

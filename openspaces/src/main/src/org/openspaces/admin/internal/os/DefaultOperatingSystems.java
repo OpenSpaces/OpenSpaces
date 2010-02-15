@@ -51,8 +51,8 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
     public DefaultOperatingSystems(InternalAdmin admin) {
         this.admin = admin;
 
-        this.statisticsChangedEventManager = new DefaultOperatingSystemsStatisticsChangedEventManager(admin);
-        this.operatingSystemStatisticsChangedEventManager = new DefaultOperatingSystemStatisticsChangedEventManager(admin);
+        this.statisticsChangedEventManager = new DefaultOperatingSystemsStatisticsChangedEventManager(admin, this);
+        this.operatingSystemStatisticsChangedEventManager = new DefaultOperatingSystemStatisticsChangedEventManager(admin, this);
     }
 
     public Admin getAdmin() {

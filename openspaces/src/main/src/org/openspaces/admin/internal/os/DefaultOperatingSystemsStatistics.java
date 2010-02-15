@@ -5,6 +5,9 @@ import org.openspaces.admin.os.OperatingSystemsDetails;
 import org.openspaces.admin.os.OperatingSystemsStatistics;
 import org.openspaces.admin.support.StatisticsUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author kimchy
  */
@@ -51,6 +54,16 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
 
     public OperatingSystemsStatistics getPrevious() {
         return this.previousStats;
+    }
+
+    public List<OperatingSystemsStatistics> getTimeline() {
+        ArrayList<OperatingSystemsStatistics> timeline = new ArrayList<OperatingSystemsStatistics>();
+        timeline.add(this);
+        OperatingSystemsStatistics current = this.getPrevious();
+        while (current != null && !current.isNA()) {
+            timeline.add(current);
+        }
+        return timeline;
     }
 
     public void setPreviousStats(OperatingSystemsStatistics previousStats) {

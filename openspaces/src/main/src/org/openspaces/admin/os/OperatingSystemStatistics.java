@@ -16,6 +16,7 @@
 
 package org.openspaces.admin.os;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,6 +40,11 @@ public interface OperatingSystemStatistics {
      * Returns the operating system details.
      */
     OperatingSystemDetails getDetails();
+
+    /**
+     * Returns the timeline (from newest to oldest) history statistics, including this one.
+     */
+    List<OperatingSystemStatistics> getTimeline();
 
     /**
      * Returns the previous statistics taken. Returns <code>null</code> if this is the fist one.

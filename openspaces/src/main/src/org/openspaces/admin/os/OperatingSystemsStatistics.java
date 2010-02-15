@@ -16,6 +16,8 @@
 
 package org.openspaces.admin.os;
 
+import java.util.List;
+
 /**
  * An aggregated statistics of all the different {@link org.openspaces.admin.os.OperatingSystemStatistics}.
  *
@@ -42,6 +44,11 @@ public interface OperatingSystemsStatistics {
      * Returns the previous {@link org.openspaces.admin.os.OperatingSystemsStatistics}.
      */
     OperatingSystemsStatistics getPrevious();
+
+    /**
+     * Returns the timeline (from newest to oldest) history statistics, including this one.
+     */
+    List<OperatingSystemsStatistics> getTimeline();
 
     /**
      * Returns the aggregated operating systems details.

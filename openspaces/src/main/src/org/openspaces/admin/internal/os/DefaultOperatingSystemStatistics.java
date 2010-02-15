@@ -6,7 +6,9 @@ import org.openspaces.admin.os.OperatingSystemDetails;
 import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.support.StatisticsUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,6 +47,16 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
 
     public boolean isNA() {
         return stats.isNA();
+    }
+
+    public List<OperatingSystemStatistics> getTimeline() {
+        ArrayList<OperatingSystemStatistics> timeline = new ArrayList<OperatingSystemStatistics>();
+        timeline.add(this);
+        OperatingSystemStatistics current = this.getPrevious();
+        while (current != null && !current.isNA()) {
+            timeline.add(current);
+        }
+        return timeline;
     }
 
     public long getTimestamp() {

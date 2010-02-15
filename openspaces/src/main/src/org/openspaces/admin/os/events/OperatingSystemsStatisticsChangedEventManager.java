@@ -29,6 +29,11 @@ public interface OperatingSystemsStatisticsChangedEventManager {
     void add(OperatingSystemsStatisticsChangedEventListener eventListener);
 
     /**
+     * Adds an event listener. An event will also be fired for all history stats.
+     */
+    void add(OperatingSystemsStatisticsChangedEventListener eventListener, boolean withHistory);
+
+    /**
      * Removes an event listener.
      */
     void remove(OperatingSystemsStatisticsChangedEventListener eventListener);
