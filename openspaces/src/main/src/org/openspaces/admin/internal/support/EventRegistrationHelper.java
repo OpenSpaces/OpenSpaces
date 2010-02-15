@@ -65,10 +65,10 @@ public abstract class EventRegistrationHelper {
             admin.getVirtualMachines().getVirtualMachineRemoved().add((VirtualMachineRemovedEventListener) eventListener);
         }
         if (eventListener instanceof VirtualMachineStatisticsChangedEventListener) {
-            admin.getVirtualMachines().getVirtualMachineStatisticsChanged().add((VirtualMachineStatisticsChangedEventListener) eventListener);
+            admin.getVirtualMachines().getVirtualMachineStatisticsChanged().add((VirtualMachineStatisticsChangedEventListener) eventListener, true);
         }
         if (eventListener instanceof VirtualMachinesStatisticsChangedEventListener) {
-            admin.getVirtualMachines().getStatisticsChanged().add((VirtualMachinesStatisticsChangedEventListener) eventListener);
+            admin.getVirtualMachines().getStatisticsChanged().add((VirtualMachinesStatisticsChangedEventListener) eventListener, true);
         }
         if (eventListener instanceof TransportsStatisticsChangedEventListener) {
             admin.getTransports().getStatisticsChanged().add((TransportsStatisticsChangedEventListener) eventListener);
