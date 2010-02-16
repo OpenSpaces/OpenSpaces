@@ -41,7 +41,7 @@ public class DefaultVirtualMachinesStatistics implements VirtualMachinesStatisti
     }
 
     public boolean isNA() {
-        return virutualMachinesStatistics == null || virutualMachinesStatistics[0].isNA();
+        return virutualMachinesStatistics == null || virutualMachinesStatistics.length == 0 || virutualMachinesStatistics[0].isNA();
     }
 
     public long getTimestamp() {
