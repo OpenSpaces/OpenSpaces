@@ -32,7 +32,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     }
 
     public boolean isNA() {
-        return stats == null || stats[0].isNA();
+        return stats == null || stats.length == 0 || stats[0].isNA();
     }
 
     public SpaceStatistics getPrevious() {
