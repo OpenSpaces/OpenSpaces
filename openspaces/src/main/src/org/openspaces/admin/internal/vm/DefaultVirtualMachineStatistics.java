@@ -61,7 +61,7 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
         VirtualMachineStatistics current = this.getPrevious();
         while (current != null && !current.isNA()) {
             timeline.add(current);
-            current.getPrevious();
+            current = current.getPrevious();
         }
         return timeline;
     }
