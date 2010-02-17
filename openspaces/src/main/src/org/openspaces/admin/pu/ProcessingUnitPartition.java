@@ -44,7 +44,7 @@ public interface ProcessingUnitPartition {
      * Returns the partition id (starting from 0). Note, {@link ProcessingUnitInstance#getInstanceId()}
      * starts from 1.
      */
-    int getPartitiondId();
+    int getPartitionId();
 
     /**
      * Returns the processing unit instances associated with this partition.

@@ -24,7 +24,7 @@ public class DefaultProcessingUnitPartition implements InternalProcessingUnitPar
         this.patitionId = patitionId;
     }
 
-    public int getPartitiondId() {
+    public int getPartitionId() {
         return this.patitionId;
     }
 
