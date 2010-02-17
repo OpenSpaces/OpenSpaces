@@ -55,6 +55,7 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
         OperatingSystemStatistics current = this.getPrevious();
         while (current != null && !current.isNA()) {
             timeline.add(current);
+            current = current.getPrevious();
         }
         return timeline;
     }
