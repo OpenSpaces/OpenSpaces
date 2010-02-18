@@ -83,18 +83,22 @@ public class PuCapacityPlanner {
             return true;
         }
         
+        int numberOfMachinesInZone = getNumberOfMachinesInZone();
+        return (numberOfMachinesInZone > 1);
+    }
+    
+    public int getNumberOfMachinesInZone() {
         Zone zone = pu.getAdmin().getZones().getByName(zoneName);
-        if (zone == null) return false;
-        int nOfMachines = zone.getMachines().getSize();
-        if (nOfMachines <= 1) {
-            return false; //fast exit
-        }
-        Set<Machine> machines = new HashSet<Machine>(nOfMachines);
+        if (zone == null) return 0;
+
+        //will include only machines which have gscs (and probably pus)
+        //an empty machine (no gscs) will not be included
+        Set<Machine> machines = new HashSet<Machine>();
         GridServiceContainers gscsInZone = zone.getGridServiceContainers();
         for (GridServiceContainer gsc : gscsInZone) {
             machines.add(gsc.getMachine());
         }
         
-        return (machines.size() > 1);
+        return (machines.size());
     }
 }

@@ -2,6 +2,7 @@ package org.openspaces.grid.esm;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -27,15 +28,15 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnits;
 import org.openspaces.admin.space.SpaceDeployment;
+import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.zone.Zone;
 
+import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.gigaspaces.internal.backport.java.util.Arrays;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.SpaceRuntimeInfo;
 import com.j_spaces.kernel.TimeUnitProperty;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class EsmExecutor {
     
@@ -121,6 +122,9 @@ public class EsmExecutor {
     
     private final class ScheduledTask implements Runnable {
 
+        public ScheduledTask() {
+        }
+        
         public void run() {
             try {
                 logger.finest("ScheduledTask is running...");
@@ -320,12 +324,12 @@ public class EsmExecutor {
                 return null;
             }
             
-            return handleMemorySla(puCapacityPlanner.getProcessingUnit(), memorySla);
+            return handleMemorySla(puCapacityPlanner, memorySla);
         }
 
-        private Command handleMemorySla(ProcessingUnit pu, MemorySla memorySla) {
+        private Command handleMemorySla(PuCapacityPlanner puCapacityPlanner, MemorySla memorySla) {
             List<GridServiceContainer> gscs = new ArrayList<GridServiceContainer>();
-            for (ProcessingUnitInstance puInstance : pu) {
+            for (ProcessingUnitInstance puInstance : puCapacityPlanner.getProcessingUnit()) {
                 GridServiceContainer gsc = puInstance.getGridServiceContainer();
                 if (!gscs.contains(gsc)) {
                     gscs.add(gsc);
@@ -354,9 +358,13 @@ public class EsmExecutor {
             }
 
             if (!gscsWithBreach.isEmpty()) {
-                return handleGSCsWithBreach(pu, memorySla, gscsWithBreach);
+                return handleGSCsWithBreach(puCapacityPlanner.getProcessingUnit(), memorySla, gscsWithBreach);
             } else if (!gscsWithoutBreach.isEmpty()) {
-                return handleGSCsWithoutBreach(pu, memorySla, gscsWithoutBreach);
+                Command c = handleGSCsWithoutBreach(puCapacityPlanner.getProcessingUnit(), memorySla, gscsWithoutBreach);
+                if (c == null) {
+                    rebalance(puCapacityPlanner);
+                }
+                return c;
             }
 
             return null;
@@ -441,7 +449,15 @@ public class EsmExecutor {
                                 }                            
                             }
 
-
+                            //precaution - if we are about to relocate make sure there is a backup in a partition-sync2backup topology.
+                            if (puInstanceToMaybeRelocate.getProcessingUnit().getNumberOfBackups() > 0) {
+                                ProcessingUnitInstance backup = puInstanceToMaybeRelocate.getPartition().getBackup();
+                                if (backup == null) {
+                                    logger.finest("---> no backup found for instance : " +ToStringHelper.puInstanceToString(puInstanceToMaybeRelocate));
+                                    return null;
+                                }
+                            }
+                            
                             logger.finest("Found GSC [" + ToStringHelper.gscToString(gscToRelocateTo) + "] which has only ["+NUMBER_FORMAT.format(memoryHeapUsedByThisGsc)+"%] used.");
                             logger.finest("Relocating ["+ToStringHelper.puInstanceToString(puInstanceToMaybeRelocate)+"] to GSC [" + ToStringHelper.gscToString(gscToRelocateTo) + "]");
                             puInstanceToMaybeRelocate.relocateAndWait(gscToRelocateTo);
@@ -450,26 +466,26 @@ public class EsmExecutor {
                     }
 
 //                    if (retry == 0) {
-                        logger.finest("Needs to scale up/out to obey memory SLA");
-                        //exclusion list indicating machines we don't want a GSC to be started on. e.g. reached max-instances-per-machine constraint
-                        List<Machine> machinesToExclude = null;
-                        if (pu.getMaxInstancesPerMachine() > 0) {
-                            machinesToExclude = new ArrayList<Machine>();
-                            for (ProcessingUnitInstance puInstance : gsc.getProcessingUnitInstances()) {
-                                for (ProcessingUnitInstance instance : puInstance.getPartition().getInstances()) {
-                                    if (!puInstance.equals(instance)) {
-                                        Machine machineToExclude = instance.getMachine();
-                                        if (!machinesToExclude.contains(machinesToExclude)) {
-                                            machinesToExclude.add(machineToExclude);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        
-                        Command command = new Command();
-                        command.machinesToExclude = machinesToExclude;
-                        return command;
+//                        logger.finest("Needs to scale up/out to obey memory SLA");
+//                        //exclusion list indicating machines we don't want a GSC to be started on. e.g. reached max-instances-per-machine constraint
+//                        List<Machine> machinesToExclude = null;
+//                        if (pu.getMaxInstancesPerMachine() > 0) {
+//                            machinesToExclude = new ArrayList<Machine>();
+//                            for (ProcessingUnitInstance puInstance : gsc.getProcessingUnitInstances()) {
+//                                for (ProcessingUnitInstance instance : puInstance.getPartition().getInstances()) {
+//                                    if (!puInstance.equals(instance)) {
+//                                        Machine machineToExclude = instance.getMachine();
+//                                        if (!machinesToExclude.contains(machinesToExclude)) {
+//                                            machinesToExclude.add(machineToExclude);
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                        
+//                        Command command = new Command();
+//                        command.machinesToExclude = machinesToExclude;
+//                        return command;
 //                        if (!handler.startGSC(machinesToExclude)) {
 //                            logger.fine("[X] Scaling out, Can't start a GSC - Another machine is required.");
 //                            break; //out of retry loop
@@ -478,7 +494,9 @@ public class EsmExecutor {
 //                }
             }
             
-            return null;
+            logger.finest("Needs to scale up/out to obey memory SLA");
+            Command command = new Command();
+            return command;            
         }
 
         
@@ -633,5 +651,278 @@ public class EsmExecutor {
             }
             return estimatedMemoryHeapUsedPerc;
         }
+    }
+
+    /*
+     * 1. calculate optimal number of primaries per machine 
+     * 
+     * 2. sort machines by number of primaries (large -> small) 
+     * 
+     * 3. stop condition: number of primaries on first machine - optimal number > 1
+     * to not run into loops 
+     * 
+     * 4. find primary processing unit that it's backup is on a machine with
+     * the least number of primaries and restart it
+     */
+    public void rebalance(PuCapacityPlanner puCapacityPlanner) {
+        
+        if (!puCapacityPlanner.getProcessingUnit().getStatus().equals(DeploymentStatus.INTACT)) {
+            return;
+        }
+        
+        List<Machine> machinesSortedByNumOfPrimaries = getMachinesSortedByNumPrimaries(puCapacityPlanner);
+        Machine firstMachine = machinesSortedByNumOfPrimaries.get(0);
+
+        int optimalNumberOfPrimariesPerMachine = (int)Math.ceil(1.0*puCapacityPlanner.getProcessingUnit().getNumberOfInstances() / puCapacityPlanner.getNumberOfMachinesInZone());
+        int numPrimariesOnMachine = getNumPrimariesOnMachine(puCapacityPlanner, firstMachine);
+        
+        logger.finest("Rebalancer - Expects " + optimalNumberOfPrimariesPerMachine + " primaries per machine");
+        if (numPrimariesOnMachine > optimalNumberOfPrimariesPerMachine) {
+            logger.finest("Rebalancer - Machine [" + ToStringHelper.machineToString(firstMachine) + " has: " + numPrimariesOnMachine + " - rebalancing...");
+            findPrimaryProcessingUnitToRestart(puCapacityPlanner, machinesSortedByNumOfPrimaries);
+//            GridServiceContainer firstGsc = getFirstGscsSortedByNumPrimaries(puCapacityPlanner, firstMachine);
+//            restartPrimaryInstance(firstGsc);
+        } else {
+            logger.finest("Rebalancer - Machines are balanced");
+        }
+    }
+    
+    private List<Machine> getMachinesSortedByNumPrimaries(final PuCapacityPlanner puCapacityPlanner) {
+        String zoneName = puCapacityPlanner.getZoneName();
+        Zone zone = admin.getZones().getByName(zoneName);
+        List<GridServiceContainer> gscList = Arrays.asList(zone.getGridServiceContainers().getContainers());
+        List<Machine> machinesInZone = new ArrayList<Machine>();
+        for (GridServiceContainer gsc : gscList) {
+            if (!machinesInZone.contains(gsc.getMachine()))
+                machinesInZone.add(gsc.getMachine());
+        }
+        
+        Collections.sort(machinesInZone, new Comparator<Machine>() {
+            public int compare(Machine m1, Machine m2) {
+                return getNumPrimariesOnMachine(puCapacityPlanner, m2) - getNumPrimariesOnMachine(puCapacityPlanner, m1);
+            }
+            
+        });
+        
+        return machinesInZone;
+    }
+    
+    //find primary processing unit that it's backup is on a machine with the least number of primaries and restart it
+    private void findPrimaryProcessingUnitToRestart(PuCapacityPlanner puCapacityPlanner, List<Machine> machinesSortedByNumOfPrimaries) {
+
+        Machine lastMachine = machinesSortedByNumOfPrimaries.get(machinesSortedByNumOfPrimaries.size() -1);
+        
+        for (Machine machine : machinesSortedByNumOfPrimaries) {
+            List<GridServiceContainer> gscsSortedByNumPrimaries = getGscsSortedByNumPrimaries(puCapacityPlanner, machine);
+            
+            for (GridServiceContainer gsc : gscsSortedByNumPrimaries) {
+                for (ProcessingUnitInstance puInstance : gsc.getProcessingUnitInstances()) {
+                    if (isPrimary(puInstance)) {
+                        ProcessingUnitInstance backup = puInstance.getPartition().getBackup();
+                        if (backup == null) {
+                            logger.finest("---> no backup found for instance : " +ToStringHelper.puInstanceToString(puInstance));
+                            return; //something is wrong, wait for next reschedule
+                        }
+                        
+                        GridServiceContainer backupGsc = backup.getGridServiceContainer();
+                        if (backupGsc.getMachine().equals(lastMachine)) {
+                            restartPrimaryInstance(puInstance);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    private List<GridServiceContainer> getGscsSortedByNumPrimaries(PuCapacityPlanner puCapacityPlanner, Machine machine) {
+        String zoneName = puCapacityPlanner.getZoneName();
+        Zone zone = admin.getZones().getByName(zoneName);
+        
+        //extract only gscs within this machine which belong to this zone
+        List<GridServiceContainer> gscList = new ArrayList<GridServiceContainer>();
+        for (GridServiceContainer gsc : zone.getGridServiceContainers().getContainers()) {
+            if (gsc.getMachine().equals(machine)) {
+                gscList.add(gsc);
+            }
+        }
+        
+        Collections.sort(gscList, new Comparator<GridServiceContainer>() {
+            public int compare(GridServiceContainer gsc1, GridServiceContainer gsc2) {
+                int puDiff = getNumPrimaries(gsc2) - getNumPrimaries(gsc1);
+                return puDiff;
+            }
+        });
+        
+        return gscList;
+    }
+
+    private GridServiceContainer getFirstGscsSortedByNumPrimaries(PuCapacityPlanner puCapacityPlanner, Machine machine) {
+        String zoneName = puCapacityPlanner.getZoneName();
+        Zone zone = admin.getZones().getByName(zoneName);
+        
+        //extract only gscs within this machine which belong to this zone
+        List<GridServiceContainer> gscList = new ArrayList<GridServiceContainer>();
+        for (GridServiceContainer gsc : zone.getGridServiceContainers().getContainers()) {
+            if (gsc.getMachine().equals(machine)) {
+                gscList.add(gsc);
+            }
+        }
+        
+        Collections.sort(gscList, new Comparator<GridServiceContainer>() {
+            public int compare(GridServiceContainer gsc1, GridServiceContainer gsc2) {
+                int puDiff = getNumPrimaries(gsc2) - getNumPrimaries(gsc1);
+                return puDiff;
+            }
+        });
+        
+        return gscList.get(0);
+    }
+    
+    private List<GridServiceContainer> getGscsSortedByNumPrimaries(PuCapacityPlanner puCapacityPlanner) {
+        String zoneName = puCapacityPlanner.getZoneName();
+        Zone zone = admin.getZones().getByName(zoneName);
+        
+        List<GridServiceContainer> gscList = Arrays.asList(zone.getGridServiceContainers().getContainers());
+        Collections.sort(gscList, new Comparator<GridServiceContainer>() {
+            public int compare(GridServiceContainer gsc1, GridServiceContainer gsc2) {
+                int puDiff = getNumPrimaries(gsc2) - getNumPrimaries(gsc1);
+                return puDiff;
+                
+//                if (puDiff != 0) {
+//                    return puDiff;
+//                }
+//                puDiff = getNumBackups(gsc2) - getNumBackups(gsc1);
+//                if (puDiff != 0) {
+//                    return puDiff;
+//                }
+//                return gsc2.getProcessingUnitInstances().length - gsc1.getProcessingUnitInstances().length;
+            }
+        });
+        return gscList;
+    }
+    
+    private int getMinNumOfInstancesOnMachine(PuCapacityPlanner puCapacityPlanner, List<Machine> machines) {
+        String zoneName = puCapacityPlanner.getZoneName();
+        int minNumOfInstances = puCapacityPlanner.getProcessingUnit().getTotalNumberOfInstances();
+        for (Machine machine : machines) {
+            int numOfInstancesOnMachine = 0;
+            for (ProcessingUnitInstance instance : machine.getProcessingUnitInstances()) {
+                if (!instance.getZones().containsKey(zoneName)) {
+                    continue;
+                }
+                numOfInstancesOnMachine++;
+            }
+            minNumOfInstances = Math.min(minNumOfInstances, numOfInstancesOnMachine);
+        }
+        return minNumOfInstances;
+    }
+    
+    private int getNumPrimariesOnMachine(PuCapacityPlanner puCapacityPlanner, Machine machine) {
+        String zoneName = puCapacityPlanner.getZoneName();
+        Zone zone = admin.getZones().getByName(zoneName);
+        int numPrimaries = 0;
+        ProcessingUnitInstance[] instances = zone.getProcessingUnitInstances();
+        for (ProcessingUnitInstance instance : instances) {
+            if (!instance.getMachine().equals(machine)) {
+                continue;
+            }
+            if (isPrimary(instance)) {
+                numPrimaries++;
+            }
+        }
+        return numPrimaries;
+    }
+
+    
+    private int getNumPrimaries(GridServiceContainer gsc) {
+        int numPrimaries = 0;
+        ProcessingUnitInstance[] instances = gsc.getProcessingUnitInstances();
+        for (ProcessingUnitInstance instance : instances) {
+            if (isPrimary(instance)) {
+                numPrimaries++;
+            }
+        }
+        return numPrimaries;
+    }
+
+    private int getNumBackups(GridServiceContainer gsc2) {
+        int numBackups = 0;
+        ProcessingUnitInstance[] instances = gsc2.getProcessingUnitInstances();
+        for (ProcessingUnitInstance instance : instances) {
+            if (isBackup(instance)) {
+                numBackups++;
+            }
+        }
+        return numBackups;
+    }
+
+    private boolean isPrimary(ProcessingUnitInstance instance) {
+        SpaceInstance spaceInstance = instance.getSpaceInstance();
+        return (spaceInstance != null && spaceInstance.getMode().equals(SpaceMode.PRIMARY));
+    }
+
+    private boolean isBackup(ProcessingUnitInstance instance) {
+        SpaceInstance spaceInstance = instance.getSpaceInstance();
+        return (spaceInstance != null && spaceInstance.getMode().equals(SpaceMode.BACKUP));
+    }
+    
+    private void restartPrimaryInstance(ProcessingUnitInstance instance) {
+        //Perquisite precaution - can happen if state changed
+        if (!instance.getProcessingUnit().getStatus().equals(DeploymentStatus.INTACT)) {
+            return;
+        }
+        
+        logger.finest("Restarting instance " + ToStringHelper.puInstanceToString(instance) + " at GSC " + ToStringHelper.gscToString(instance.getGridServiceContainer()));
+        ProcessingUnitInstance restartedInstance = instance.restartAndWait();
+        boolean isBackup = restartedInstance.waitForSpaceInstance().waitForMode(SpaceMode.BACKUP, 10, TimeUnit.SECONDS);
+        if (!isBackup) {
+            logger.finest("Waited 10 seconds, instance " + ToStringHelper.puInstanceToString(instance) + " still not registered as backup");
+            return;
+        }
+        logger.finest("Done restarting instance " + ToStringHelper.puInstanceToString(instance));
+    }
+    
+    private void restartPrimaryInstance(GridServiceContainer gsc) {
+        //Perquisite precaution - can happen if state changed 
+        if (gsc == null)
+            return;
+        
+        ProcessingUnitInstance[] instances = gsc.getProcessingUnitInstances();
+        ProcessingUnitInstance instanceToRestart = null;
+        int maxNumBackupsOnGscOfBackup = 0;
+        for (final ProcessingUnitInstance instance : instances) {
+            if (isPrimary(instance)) {
+                ProcessingUnitInstance backup = instance.getPartition().getBackup();
+                if (backup == null) {
+                    logger.finest("---> no backup found for instance : " +ToStringHelper.puInstanceToString(instance));
+                    return;
+                }
+                GridServiceContainer backupGsc = backup.getGridServiceContainer();
+                int numBackupsOnGscOfBackup = getNumBackups(backupGsc);
+                if (numBackupsOnGscOfBackup >= maxNumBackupsOnGscOfBackup) {
+                    instanceToRestart = instance;
+                    maxNumBackupsOnGscOfBackup = numBackupsOnGscOfBackup; 
+                }
+            }
+        }
+        
+        //Perquisite precaution - can happen if state changed
+        if (instanceToRestart == null)
+            return;
+        
+        //Perquisite precaution - can happen if state changed
+        if (!instanceToRestart.getProcessingUnit().getStatus().equals(DeploymentStatus.INTACT)) {
+            return;
+        }
+        
+        logger.finest("Restarting instance " + ToStringHelper.puInstanceToString(instanceToRestart) + " at GSC " + ToStringHelper.gscToString(gsc));
+        ProcessingUnitInstance restartedInstance = instanceToRestart.restartAndWait();
+        boolean isBackup = restartedInstance.waitForSpaceInstance().waitForMode(SpaceMode.BACKUP, 10, TimeUnit.SECONDS);
+        if (!isBackup) {
+            logger.finest("Waited 10 seconds, instance " + ToStringHelper.puInstanceToString(instanceToRestart) + " still not registered as backup");
+            return;
+        }
+        logger.finest("Done restarting instance " + ToStringHelper.puInstanceToString(instanceToRestart));
     }
 }

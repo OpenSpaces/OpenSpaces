@@ -4,6 +4,7 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.space.SpaceInstance;
 
 public class ToStringHelper {
     
@@ -43,10 +44,13 @@ public class ToStringHelper {
     }
     
     public static String puInstanceToString(ProcessingUnitInstance instance) {
-        String backupId = "";
-        if (instance.getProcessingUnit().getNumberOfBackups() > 0) {
-            backupId = instance.getBackupId() == 0 ? "[1]" : "[2]";
+        StringBuilder builder = new StringBuilder(16);
+        builder.append("[").append(instance.getInstanceId()).append(",").append(instance.getBackupId() + 1);
+        SpaceInstance spaceInstance = instance.getSpaceInstance();
+        if (spaceInstance != null) {
+            builder.append(",").append(spaceInstance.getMode());
         }
-        return instance.getInstanceId() + " " + backupId;
+        builder.append("]");
+        return builder.toString();
     }
 }

@@ -12,6 +12,7 @@ import org.openspaces.admin.pu.ProcessingUnit;
 public class TestESM {
  
         public static void main(String[] args) throws Exception {
+            
             Admin admin = new AdminFactory().addGroup("moran-gigaspaces-7.1.0-XAPPremium-m5").createAdmin();
             System.out.println("Waiting for at least one agent");
             GridServiceAgent gridServiceAgent = admin.getGridServiceAgents().waitForAtLeastOne();
@@ -21,7 +22,7 @@ public class TestESM {
             System.out.println("found esm, deploying 1GB-3GB");
             ProcessingUnit pu = elasticServiceManager.
             deploy(new ElasticDataGridDeployment("grid").isolationLevel(
-                    IsolationLevel.DEDICATED).highlyAvailable(false).elasticity("2GB", "6GB").addSla(new MemorySla(40)));
+                    IsolationLevel.DEDICATED).highlyAvailable(true).elasticity("2GB", "6GB").jvmSize("512MB").addSla(new MemorySla(40)));
             
             System.out.println("PU deployed: " + pu.getName() + " " + pu.getNumberOfInstances()+","+pu.getNumberOfBackups());
             System.exit(0);
