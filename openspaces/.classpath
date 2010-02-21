@@ -27,11 +27,6 @@
 	<classpathentry kind="lib" path="lib/platform/jee/servlet-api.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/ant-1.6.5.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/core-3.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-6.1.20.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-management-6.1.20.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-naming-6.1.20.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-plus-6.1.20.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jetty-util-6.1.20.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jmx/jmxri.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jruby/jruby.jar"/>
 	<classpathentry kind="lib" path="lib/platform/mule/jug-2.0.0-osgi-asl.jar"/>
@@ -86,9 +81,7 @@
 	<classpathentry kind="lib" path="lib/external/backport/backport-util-concurrent.jar"/>
 	<classpathentry kind="lib" path="tools/groovy/embeddable/groovy-all-1.6.3.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/jsp-2.1-glassfish-9.1.1.B60.25.p2.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/jsp-2.1-jetty-6.1.20.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/jsp-api-2.1-glassfish-9.1.1.B60.25.p2.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jetty/servlet-api-2.5-20081211.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/required/com.springsource.org.aopalliance-1.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.aop-3.0.0.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.asm-3.0.0.RELEASE.jar"/>
@@ -107,5 +100,21 @@
 	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.orm-3.0.0.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.web-3.0.0.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.web.servlet-3.0.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-http-7.0.1.v20091125.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-io-7.0.1.v20091125.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-jmx-7.0.1.v20091125.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-jndi-7.0.1.v20091125.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-jsp-2.1-7.0.1.v20091125.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-plus-7.0.1.v20091125.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-policy-7.0.1.v20091125.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-rewrite-7.0.1.v20091125.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-security-7.0.1.v20091125.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-server-7.0.1.v20091125.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-servlet-7.0.1.v20091125.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-servlets-7.0.1.v20091125.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-util-7.0.1.v20091125.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-webapp-7.0.1.v20091125.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/jetty-xml-7.0.1.v20091125.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jetty/servlet-api-2.5.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
