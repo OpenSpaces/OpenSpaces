@@ -16,7 +16,7 @@
 
 package org.openspaces.pu.container.jee.jetty.support;
 
-import org.mortbay.log.Logger;
+import org.eclipse.jetty.util.log.Logger;
 
 import java.util.logging.Level;
 
@@ -30,7 +30,7 @@ public class JdkLogger implements Logger {
     private java.util.logging.Logger log;
 
     public JdkLogger() {
-        this("org.mortbay.jetty");
+        this("org.eclipse.jetty");
     }
 
     public JdkLogger(String s) {
@@ -47,6 +47,22 @@ public class JdkLogger implements Logger {
 
     public Logger getLogger(String s) {
         return new JdkLogger(s);
+    }
+
+    public void info(String s) {
+        log.info(s);
+    }
+
+    public void debug(String s) {
+        log.fine(s);
+    }
+
+    public void warn(String s) {
+        log.warning(s);
+    }
+
+    public String getName() {
+        return log.getName();
     }
 
     public void info(String msg, Object arg0, Object arg1) {

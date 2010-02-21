@@ -20,8 +20,9 @@ import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.SQLQuery;
 import net.jini.core.lease.Lease;
-import org.mortbay.log.Log;
-import org.mortbay.util.LazyList;
+import org.eclipse.jetty.server.session.AbstractSessionManager;
+import org.eclipse.jetty.util.LazyList;
+import org.eclipse.jetty.util.log.Log;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.space.UrlSpaceConfigurer;
@@ -50,7 +51,7 @@ import java.util.concurrent.TimeUnit;
  * exists, any changes, including changes to the access time of the session
  * are written back out to the grid.
  */
-public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessionManager {
+public class GigaSessionManager extends AbstractSessionManager {
 
     private static final String SESSION_DATA_CLASSNAME = SessionData.class.getName();
 
@@ -89,8 +90,6 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
 
     /**
      * Start the session manager.
-     *
-     * @see org.mortbay.jetty.servlet.AbstractSessionManager#doStart()
      */
     @Override
     public void doStart() throws Exception {
@@ -135,8 +134,6 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
 
     /**
      * Stop the session manager.
-     *
-     * @see org.mortbay.jetty.servlet.AbstractSessionManager#doStop()
      */
     @Override
     public void doStop() throws Exception {
@@ -243,8 +240,6 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
      *
      * Look in the grid to see if such a session exists, as it may have moved from
      * another node.
-     *
-     * @see org.mortbay.jetty.servlet.AbstractSessionManager#getSession(java.lang.String)
      */
     @Override
     public Session getSession(String idInCluster) {
@@ -322,7 +317,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
 
 
     @Override
-    public void removeSession(org.mortbay.jetty.servlet.AbstractSessionManager.Session abstractSession, boolean invalidate) {
+    public void removeSession(AbstractSessionManager.Session abstractSession, boolean invalidate) {
         if (!(abstractSession instanceof GigaSessionManager.Session))
             throw new IllegalStateException("Session is not a GigaspacesSessionManager.Session " + abstractSession);
 
@@ -361,7 +356,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
     }
 
     @Override
-    protected void addSession(org.mortbay.jetty.servlet.AbstractSessionManager.Session abstractSession) {
+    protected void addSession(AbstractSessionManager.Session abstractSession) {
         if (abstractSession == null)
             return;
 
@@ -456,7 +451,7 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
      *
      * A session in memory of a Context. Adds behavior around SessionData.
      */
-    public class Session extends org.mortbay.jetty.servlet.AbstractSessionManager.Session {
+    public class Session extends AbstractSessionManager.Session {
         private final SessionData _data;
 
         private volatile boolean _dirty = false;
@@ -518,8 +513,6 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
         /**
          * Entry to session.
          * Called by SessionHandler on inbound request and the session already exists in this node's memory.
-         *
-         * @see org.mortbay.jetty.servlet.AbstractSessionManager.Session#access(long)
          */
         @Override
         protected void access(long time) {
@@ -549,8 +542,6 @@ public class GigaSessionManager extends org.mortbay.jetty.servlet.AbstractSessio
          * attributes. To save on serialization overheads, we only write out the
          * session when only the access time has changed if the time at which we
          * last saved the session exceeds the chosen save interval.
-         *
-         * @see org.mortbay.jetty.servlet.AbstractSessionManager.Session#complete()
          */
         @Override
         protected void complete() {

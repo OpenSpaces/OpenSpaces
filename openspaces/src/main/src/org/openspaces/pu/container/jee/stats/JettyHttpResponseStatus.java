@@ -1,7 +1,7 @@
 package org.openspaces.pu.container.jee.stats;
 
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Response;
+import org.eclipse.jetty.server.HttpConnection;
+import org.eclipse.jetty.server.Response;
 
 import javax.servlet.ServletResponse;
 

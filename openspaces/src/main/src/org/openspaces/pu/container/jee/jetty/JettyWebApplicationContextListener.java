@@ -3,11 +3,14 @@ package org.openspaces.pu.container.jee.jetty;
 import com.j_spaces.core.IJSpace;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.SessionHandler;
-import org.mortbay.jetty.servlet.AbstractSessionManager;
-import org.mortbay.util.LazyList;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.ScopedHandler;
+import org.eclipse.jetty.server.session.AbstractSessionManager;
+import org.eclipse.jetty.server.session.HashSessionIdManager;
+import org.eclipse.jetty.server.session.SessionHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.util.LazyList;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.properties.BeanLevelProperties;
@@ -76,10 +79,11 @@ public class JettyWebApplicationContextListener implements ServletContextListene
             // automatically enable GigaSpaces Session Manager when passing the relevant property
             String sessionsSpaceUrl = beanLevelProperties.getContextProperties().getProperty(JETTY_SESSIONS_URL);
             if (sessionsSpaceUrl != null) {
-                logger.info("Jetty GigaSpace Session support using space url [" + sessionsSpaceUrl + "]");
+                logger.info("Jetty GigaSpaces Session support using space url [" + sessionsSpaceUrl + "]");
                 // a hack to get the jetty context
-                Context jettyContext = (Context) ((ContextHandler.SContext) servletContext).getContextHandler();
+                ServletContextHandler jettyContext = (ServletContextHandler) ((ContextHandler.Context) servletContext).getContextHandler();
                 SessionHandler sessionHandler = jettyContext.getSessionHandler();
+
                 try {
                     sessionHandler.stop();
                 } catch (Exception e) {
@@ -134,7 +138,6 @@ public class JettyWebApplicationContextListener implements ServletContextListene
                 gigaSessionManager.setSessionCookie(sessionHandler.getSessionManager().getSessionCookie());
                 gigaSessionManager.setSessionDomain(sessionHandler.getSessionManager().getSessionDomain());
                 gigaSessionManager.setSessionPath(sessionHandler.getSessionManager().getSessionPath());
-                gigaSessionManager.setSessionURL(sessionHandler.getSessionManager().getSessionURL());
                 gigaSessionManager.setUsingCookies(sessionHandler.getSessionManager().isUsingCookies());
                 gigaSessionManager.setMaxCookieAge(sessionHandler.getSessionManager().getMaxCookieAge());
                 gigaSessionManager.setSecureCookies(sessionHandler.getSessionManager().isUsingCookies());
@@ -185,6 +188,36 @@ public class JettyWebApplicationContextListener implements ServletContextListene
                     sessionHandler.start();
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to start session handler to inject our own session manager", e);
+                }
+
+                // HACK BARK CRACK
+                // It seems like when stopping and then starting a session handler, the outerScope of the ServletHandler (the
+                // next scope after the web context) gets nulled, meaning that the handle won't be called, resulting in
+                // the session handler not being called at all.
+                // For now, set it explicitly using reflection until I figure out with jetty guys what can be done to
+                // fix this.
+                try {
+                    ServletHandler servletHandler = (ServletHandler) sessionHandler.getChildHandlerByClass(ServletHandler.class);
+                    Field outerScopeField = ScopedHandler.class.getDeclaredField("_outerScope");
+                    outerScopeField.setAccessible(true);
+                    outerScopeField.set(servletHandler, jettyContext);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to set outer scope on ServletHandler (workaround jetty bug)", e);
+                }
+
+            }
+
+            // if we have a simple hash session id manager, set its worker name automatically...
+            ServletContextHandler jettyContext = (ServletContextHandler) ((ContextHandler.Context) servletContext).getContextHandler();
+            SessionHandler sessionHandler = jettyContext.getSessionHandler();
+            // automatically set the worker name
+            if (sessionHandler.getSessionManager().getIdManager() instanceof HashSessionIdManager) {
+                HashSessionIdManager sessionIdManager = (HashSessionIdManager) sessionHandler.getSessionManager().getIdManager();
+                if (sessionIdManager.getWorkerName() == null) {
+                    sessionIdManager.setWorkerName(clusterInfo.getName() + clusterInfo.getRunningNumberOffset1());
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Automatically setting worker name to [" + sessionIdManager.getWorkerName() + "]");
+                    }
                 }
             }
         }

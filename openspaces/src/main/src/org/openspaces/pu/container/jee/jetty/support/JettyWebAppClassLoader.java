@@ -1,7 +1,7 @@
 package org.openspaces.pu.container.jee.jetty.support;
 
-import org.mortbay.jetty.webapp.WebAppClassLoader;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.webapp.WebAppClassLoader;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.jini.rio.boot.LoggableClassLoader;
 
 import java.io.IOException;

@@ -16,9 +16,9 @@
 
 package org.openspaces.pu.container.jee.jetty.holder;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Server;
-import org.mortbay.util.MultiException;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.util.MultiException;
 
 /**
  * A plain wrapper around jetty. Simply deleagate the lifecycle calls directory to jetty.

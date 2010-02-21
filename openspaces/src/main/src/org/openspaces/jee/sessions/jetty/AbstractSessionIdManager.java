@@ -16,10 +16,10 @@
 
 package org.openspaces.jee.sessions.jetty;
 
-import org.mortbay.component.AbstractLifeCycle;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.SessionIdManager;
-import org.mortbay.log.Log;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.SessionIdManager;
+import org.eclipse.jetty.util.component.AbstractLifeCycle;
+import org.eclipse.jetty.util.log.Log;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.NoSuchAlgorithmException;
@@ -31,7 +31,7 @@ import java.util.Random;
  */
 public abstract class AbstractSessionIdManager extends AbstractLifeCycle implements SessionIdManager {
 
-    private final static String __NEW_SESSION_ID = "org.mortbay.jetty.newSessionId";
+    private final static String __NEW_SESSION_ID = "org.eclipse.jetty.newSessionId";
     protected final static String SESSION_ID_RANDOM_ALGORITHM = "SHA1PRNG";
     protected final static String SESSION_ID_RANDOM_ALGORITHM_ALT = "IBMSecureRandom";
 
@@ -72,8 +72,6 @@ public abstract class AbstractSessionIdManager extends AbstractLifeCycle impleme
 
     /**
      * Create a new session id if necessary.
-     *
-     * @see org.mortbay.jetty.SessionIdManager#newSessionId(javax.servlet.http.HttpServletRequest, long)
      */
     public String newSessionId(HttpServletRequest request, long created) {
         synchronized (this) {

@@ -16,11 +16,11 @@
 
 package org.openspaces.pu.container.jee.jetty.holder;
 
-import org.mortbay.jetty.Server;
+import org.eclipse.jetty.server.Server;
 
 /**
  * A generic holder that holds a Jetty server and controls its lifecycle. Note,
- * make not to call start and stop on {@link org.mortbay.jetty.Server}.
+ * make not to call start and stop on {@link Server}.
  *
  * @author kimchy
  */

@@ -15,7 +15,6 @@
                 <prop key="web.sslPort">8443</prop>
                 <prop key="web.threadPool.minThreads">10</prop>
                 <prop key="web.threadPool.maxThreads">200</prop>
-                <prop key="web.threadPool.lowThreads">20</prop>
                 <prop key="web.selector.maxIdleTime">300000</prop>
                 <prop key="web.selector.acceptors">2</prop>
                 <prop key="web.selector.lowResourcesConnections">20000</prop>
@@ -40,7 +39,7 @@
         <property name="separator" value="${web.context.separator}" />
     </bean>
 
-    <bean id="webAppContext" class="org.mortbay.jetty.webapp.WebAppContext">
+    <bean id="webAppContext" class="org.eclipse.jetty.webapp.WebAppContext">
         <property name="contextPath" ref="context" />
         <property name="war" value="${jee.deployPath}" />
         <property name="tempDirectory" value="${jee.deployPath}/WEB-INF/work" />
@@ -48,12 +47,16 @@
         <property name="parentLoaderPriority" value="${web.context.classLoader.parentFirst}" />
         <property name="configurationClasses">
             <list>
-                <value>org.mortbay.jetty.webapp.WebInfConfiguration</value>
-                <!-- Enable JNDI configuration -->
-                <value>org.mortbay.jetty.plus.webapp.EnvConfiguration</value>
-                <value>org.mortbay.jetty.plus.webapp.Configuration</value>
-                <value>org.mortbay.jetty.webapp.JettyWebXmlConfiguration</value>
-                <value>org.mortbay.jetty.webapp.TagLibConfiguration</value>
+                <list>
+                    <value>org.eclipse.jetty.webapp.WebInfConfiguration</value>
+                    <value>org.eclipse.jetty.webapp.WebXmlConfiguration</value>
+                    <value>org.eclipse.jetty.webapp.MetaInfConfiguration</value>
+                    <value>org.eclipse.jetty.webapp.FragmentConfiguration</value>
+                    <value>org.eclipse.jetty.plus.webapp.EnvConfiguration</value>
+                    <value>org.eclipse.jetty.plus.webapp.Configuration</value>
+                    <value>org.eclipse.jetty.webapp.JettyWebXmlConfiguration</value>
+                    <value>org.eclipse.jetty.webapp.TagLibConfiguration</value>
+                </list>
             </list>
         </property>
     </bean>
@@ -62,19 +65,18 @@
         <constructor-arg ref="jetty" />
     </bean>
 
-    <bean id="jetty" class="org.mortbay.jetty.Server">
+    <bean id="jetty" class="org.eclipse.jetty.server.Server">
 
         <property name="threadPool">
-            <bean class="org.mortbay.thread.QueuedThreadPool">
+            <bean class="org.eclipse.jetty.util.thread.QueuedThreadPool">
                 <property name="minThreads" value="${web.threadPool.minThreads}"/>
                 <property name="maxThreads" value="${web.threadPool.maxThreads}"/>
-                <property name="lowThreads" value="${web.threadPool.lowThreads}"/>
             </bean>
         </property>
 
         <property name="connectors">
             <list>
-                <bean class="org.mortbay.jetty.nio.SelectChannelConnector">
+                <bean class="org.eclipse.jetty.server.nio.SelectChannelConnector">
                     <property name="port" ref="port"/>
                     <property name="maxIdleTime" value="${web.selector.maxIdleTime}"/>
                     <property name="acceptors" value="${web.selector.acceptors}"/>
@@ -87,11 +89,11 @@
             </list>
         </property>
         <property name="handler">
-            <bean class="org.mortbay.jetty.handler.HandlerCollection">
+            <bean class="org.eclipse.jetty.server.handler.HandlerCollection">
                 <property name="handlers">
                     <list>
-                        <bean class="org.mortbay.jetty.handler.ContextHandlerCollection"/>
-                        <bean class="org.mortbay.jetty.handler.DefaultHandler"/>
+                        <bean class="org.eclipse.jetty.server.handler.ContextHandlerCollection"/>
+                        <bean class="org.eclipse.jetty.server.handler.DefaultHandler"/>
                     </list>
                 </property>
             </bean>

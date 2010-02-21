@@ -18,11 +18,11 @@ package org.openspaces.pu.container.jee.jetty.holder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.component.LifeCycle;
-import org.mortbay.thread.ThreadPool;
+import org.eclipse.jetty.util.component.LifeCycle;
+import org.eclipse.jetty.util.thread.ThreadPool;
 
 /**
- * A Jetty {@link org.mortbay.thread.ThreadPool} that shares a single instance of a therad pool. The first
+ * A Jetty {@link ThreadPool} that shares a single instance of a thread pool. The first
  * thread pool passed will win and be used.
  *
  * @author kimchy

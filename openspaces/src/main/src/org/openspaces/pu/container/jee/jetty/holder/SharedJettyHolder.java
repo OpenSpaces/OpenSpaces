@@ -2,9 +2,9 @@ package org.openspaces.pu.container.jee.jetty.holder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Server;
-import org.mortbay.util.MultiException;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.util.MultiException;
 
 /**
  * A shared jetty holder that keeps upon first construction will store a static jetty instance and will

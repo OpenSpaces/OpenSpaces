@@ -19,11 +19,11 @@ package org.openspaces.jee.sessions.jetty;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.ReadModifiers;
 import net.jini.core.lease.Lease;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.AbstractSessionManager;
-import org.mortbay.jetty.webapp.WebAppContext;
-import org.mortbay.log.Log;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.session.AbstractSessionManager;
+import org.eclipse.jetty.util.log.Log;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;

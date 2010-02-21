@@ -18,9 +18,10 @@ package org.openspaces.pu.container.jee.jetty;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.jetty.server.HandlerContainer;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.jini.rio.boot.BootUtil;
-import org.mortbay.jetty.HandlerContainer;
-import org.mortbay.jetty.webapp.WebAppContext;
 import org.openspaces.pu.container.CannotCloseContainerException;
 import org.openspaces.pu.container.jee.JeeServiceDetails;
 import org.openspaces.pu.container.jee.JeeType;
@@ -52,18 +53,18 @@ public class JettyProcessingUnitContainer implements org.openspaces.pu.container
 
     private final WebAppContext webAppContext;
 
-    private HandlerContainer container;
+    private ContextHandlerCollection contextHandlerCollection;
 
     private final JettyHolder jettyHolder;
 
     private final List<FreePortGenerator.PortHandle> portHandels;
 
     public JettyProcessingUnitContainer(ApplicationContext applicationContext, WebAppContext webAppContext,
-                                        HandlerContainer container, JettyHolder jettyHolder,
+                                        ContextHandlerCollection contextHandlerCollection, JettyHolder jettyHolder,
                                         List<FreePortGenerator.PortHandle> portHandels) {
         this.applicationContext = applicationContext;
         this.webAppContext = webAppContext;
-        this.container = container;
+        this.contextHandlerCollection = contextHandlerCollection;
         this.jettyHolder = jettyHolder;
         this.webApplicationContext = ContextLoader.getCurrentWebApplicationContext();
         if (webApplicationContext == null) {
@@ -124,8 +125,8 @@ public class JettyProcessingUnitContainer implements org.openspaces.pu.container
                 webAppContext.setClassLoader(null);
             }
 
-            if (container != null) {
-                container.removeHandler(webAppContext);
+            if (contextHandlerCollection != null) {
+                contextHandlerCollection.removeHandler(webAppContext);
             }
         }
 

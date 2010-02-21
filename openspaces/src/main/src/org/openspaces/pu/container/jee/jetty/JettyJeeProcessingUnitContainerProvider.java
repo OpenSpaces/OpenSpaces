@@ -18,15 +18,15 @@ package org.openspaces.pu.container.jee.jetty;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.jetty.jmx.MBeanContainer;
+import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.handler.HandlerWrapper;
+import org.eclipse.jetty.server.session.HashSessionIdManager;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.jini.rio.boot.CommonClassLoader;
 import org.jini.rio.boot.SharedServiceData;
 import org.jini.rio.boot.ServiceClassLoader;
-import org.mortbay.jetty.*;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.handler.HandlerWrapper;
-import org.mortbay.jetty.servlet.HashSessionIdManager;
-import org.mortbay.jetty.webapp.WebAppContext;
-import org.mortbay.management.MBeanContainer;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
 import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
@@ -89,7 +89,7 @@ import com.j_spaces.kernel.ClassLoaderHelper;
 public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUnitContainerProvider {
 
     static {
-        System.setProperty("org.mortbay.log.class", JdkLogger.class.getName());
+        System.setProperty("org.eclipse.log.class", JdkLogger.class.getName());
         // disable jetty server shutdown hook
         System.setProperty("JETTY_NO_SHUTDOWN_HOOK", "true");
     }
@@ -400,7 +400,11 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             }
             mBeanContainer.setDomain(domain);
             jettyHolder.getServer().getContainer().addEventListener(mBeanContainer);
-            mBeanContainer.start();
+            try {
+                mBeanContainer.start();
+            } catch (Exception e) {
+                logger.warn("Failed to start jetty mbean container", e);
+            }
         }
 
         clearShutdownThreadContextClassLoader(jettyHolder.getServer());
@@ -439,13 +443,13 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             webAppContext.setExtractWAR(true);
 
             // allow aliases so load balancing will work on static content
-            if (!webAppContext.getInitParams().containsKey("org.mortbay.jetty.servlet.Default.aliases")) {
-                webAppContext.getInitParams().put("org.mortbay.jetty.servlet.Default.aliases", "true");
+            if (!webAppContext.getInitParams().containsKey("org.eclipse.jetty.servlet.Default.aliases")) {
+                webAppContext.getInitParams().put("org.eclipse.jetty.servlet.Default.aliases", "true");
             }
             // when using file mapped buffers, jetty does not release the files when closing the web application
             // resulting in not being able to deploy again the application (failure to write the file again)
-            if (!webAppContext.getInitParams().containsKey("org.mortbay.jetty.servlet.Default.useFileMappedBuffer")) {
-                webAppContext.getInitParams().put("org.mortbay.jetty.servlet.Default.useFileMappedBuffer", "false");
+            if (!webAppContext.getInitParams().containsKey("org.eclipse.jetty.servlet.Default.useFileMappedBuffer")) {
+                webAppContext.getInitParams().put("org.eclipse.jetty.servlet.Default.useFileMappedBuffer", "false");
             }
 
             // by default, the web app context will delegate log4j and commons logging to the parent class loader
@@ -456,6 +460,8 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                 systemClasses.remove("org.apache.log4j.");
                 webAppContext.setSystemClasses(systemClasses.toArray(new String[systemClasses.size()]));
             }
+            // don't hide server (jetty) classes from context, since we use it in the JettyWebApplicationContextListener
+            webAppContext.setServerClasses(new String[0]);
 
             webAppContext.setDisplayName("web." + clusterInfo.getName() + "." + clusterInfo.getSuffix());
             // Provide our own extension to jetty class loader, so we can get the name for it in our logging
@@ -465,9 +471,10 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
 
             HandlerContainer container = jettyHolder.getServer();
 
+            ContextHandlerCollection contextHandlerContainer = null;
             Handler[] contexts = jettyHolder.getServer().getChildHandlersByClass(ContextHandlerCollection.class);
             if (contexts != null && contexts.length > 0) {
-                container = (HandlerContainer) contexts[0];
+                contextHandlerContainer = (ContextHandlerCollection) contexts[0];
             } else {
                 while (container != null) {
                     if (container instanceof HandlerWrapper) {
@@ -476,14 +483,14 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                         if (handler == null)
                             break;
                         if (handler instanceof HandlerContainer)
-                            container = (HandlerContainer) handler;
+                            contextHandlerContainer = (ContextHandlerCollection) handler;
                         else
                             throw new IllegalStateException("No container");
                     }
                     throw new IllegalStateException("No container");
                 }
             }
-            container.addHandler(webAppContext);
+            contextHandlerContainer.addHandler(webAppContext);
             
             if (container.isStarted() || container.isStarting()) {
                 ClassLoader origClassLoader = Thread.currentThread().getContextClassLoader();
@@ -504,18 +511,8 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             if (webAppContext.isFailed()) {
                 throw new CannotCreateContainerException("Failed to start web app context (exception should be logged)");
             }
-            // automatically set the worker name
-            if (webAppContext.getSessionHandler().getSessionManager().getIdManager() instanceof HashSessionIdManager) {
-                HashSessionIdManager sessionIdManager = (HashSessionIdManager) webAppContext.getSessionHandler().getSessionManager().getIdManager();
-                if (sessionIdManager.getWorkerName() == null) {
-                    sessionIdManager.setWorkerName(clusterInfo.getName() + clusterInfo.getRunningNumberOffset1());
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Automatically setting worker name to [" + sessionIdManager.getWorkerName() + "]");
-                    }
-                }
-            }
 
-            JettyProcessingUnitContainer processingUnitContainer = new JettyProcessingUnitContainer(applicationContext, webAppContext, container, jettyHolder, portHandles);
+            JettyProcessingUnitContainer processingUnitContainer = new JettyProcessingUnitContainer(applicationContext, webAppContext, contextHandlerContainer, jettyHolder, portHandles);
             logger.info("Deployed web application [" + processingUnitContainer.getJeeDetails().getDescription() + "]");
             return processingUnitContainer;
         } catch (Exception e) {
@@ -545,7 +542,8 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             if (thread != null) {
                 thread.setContextClassLoader(null);
             }
-            hookThreadField.set(null, null);
+            // we can't do this anymore, since jetty changed this to static *final*
+//            hookThreadField.set(null, null);
         } catch (Exception e) {
             logger.warn("Failed to clean the context class loader from Jetty server", e);
         }

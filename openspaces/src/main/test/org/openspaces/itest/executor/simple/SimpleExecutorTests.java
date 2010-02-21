@@ -1,10 +1,7 @@
 package org.openspaces.itest.executor.simple;
 
 import com.gigaspaces.annotation.pojo.SpaceRouting;
-import com.gigaspaces.async.AsyncFuture;
-import com.gigaspaces.async.AsyncResult;
-import com.gigaspaces.async.AsyncResultFilter;
-import com.gigaspaces.async.AsyncResultFilterEvent;
+import com.gigaspaces.async.*;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.executor.AutowireTask;
 import org.openspaces.core.executor.AutowireTaskMarker;
