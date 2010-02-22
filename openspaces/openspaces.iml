@@ -149,84 +149,83 @@
     <orderEntry type="module-library" exported="">
       <library name="spring">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.context-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.core-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.context.support-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.beans-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.aop-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.asm-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.aspects-3.0.0.RELEASE.jar!/" />
           <root url="jar://$MODULE_DIR$/lib/required/com.springsource.org.aopalliance-1.0.0.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.transaction-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.expression-3.0.0.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.transaction-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.context.support-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.expression-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.beans-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.aspects-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.asm-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.context-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.aop-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/required/org.springframework.core-3.0.1.RELEASE-A.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.beans-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.orm-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.oxm-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.instrument-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.context-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.test-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.web.servlet-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.test-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.instrument.tomcat-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.context.support-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.transaction-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.web.struts-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.aop-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.jms-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.jdbc-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.aspects-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.asm-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.web.portlet-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.expression-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.core-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.web-sources-3.0.0.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.jdbc-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.aop-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.test-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.context.support-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.transaction-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.web.servlet-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.instrument.tomcat-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.aspects-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.core-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.web.struts-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.asm-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.context-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.orm-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.oxm-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.jms-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.web-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.web.portlet-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.expression-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.instrument-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.beans-sources-3.0.1.RELEASE-A.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library name="spring-optional">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.web-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.jms-3.0.0.RELEASE.jar!/" />
           <root url="jar://$MODULE_DIR$/lib/optional/spring/com.springsource.javax.annotation-1.0.0.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.web.servlet-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.orm-3.0.0.RELEASE.jar!/" />
           <root url="jar://$MODULE_DIR$/lib/optional/spring/com.springsource.net.sf.cglib-2.2.0.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.jdbc-3.0.0.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.web.servlet-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.jdbc-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.jms-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.orm-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.web-3.0.1.RELEASE-A.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.beans-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.orm-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.oxm-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.instrument-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.context-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.test-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.web.servlet-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.test-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.instrument.tomcat-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.context.support-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.transaction-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.web.struts-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.aop-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.jms-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.jdbc-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.aspects-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.asm-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.web.portlet-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.expression-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.core-sources-3.0.0.RELEASE.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.web-sources-3.0.0.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.jdbc-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.aop-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.test-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.test-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.context.support-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.transaction-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.web.servlet-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.instrument.tomcat-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.core-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.aspects-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.web.struts-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.context-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.asm-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.orm-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.oxm-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.jms-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.web-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.web.portlet-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.expression-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.instrument-sources-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.beans-sources-3.0.1.RELEASE-A.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library name="spring-external">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.test-3.0.0.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/spring/org.springframework.test-3.0.1.RELEASE-A.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
