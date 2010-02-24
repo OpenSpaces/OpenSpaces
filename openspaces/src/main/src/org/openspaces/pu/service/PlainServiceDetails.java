@@ -105,7 +105,7 @@ public class PlainServiceDetails implements ServiceDetails, Externalizable {
         serviceSubType = in.readUTF();
         description = in.readUTF();
         longDescription = in.readUTF();
-        attributes = new HashMap<String, Object>();
+        attributes = new LinkedHashMap<String, Object>();
         int attributesSize = in.readInt();
         for (int i = 0; i < attributesSize; i++) {
             String key = (String) in.readObject();
