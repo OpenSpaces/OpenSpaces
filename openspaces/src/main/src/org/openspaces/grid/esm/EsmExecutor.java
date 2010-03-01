@@ -123,6 +123,9 @@ public class EsmExecutor {
         
         public void run() {
             try {
+                if (logger.isLoggable(Level.OFF)) {
+                    return; //turn off cruise control
+                }
                 logger.finest("ScheduledTask is running...");
                 ProcessingUnits processingUnits = admin.getProcessingUnits();
                 for (ProcessingUnit pu : processingUnits) {
@@ -143,7 +146,7 @@ public class EsmExecutor {
                     
                 }
             } catch (Throwable t) {
-                logger.log(Level.SEVERE, "Caught exception: " + t, t);
+                logger.log(Level.WARNING, "Caught exception: " + t, t);
             }
         }
     }
