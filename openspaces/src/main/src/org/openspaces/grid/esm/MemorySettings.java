@@ -47,23 +47,24 @@ public class MemorySettings {
     }
     
     public static MemorySettings valueOf(String memoryUnit) {
-        if (memoryUnit.endsWith("KB")) {
-            return new MemorySettings(1, getMemorySize(memoryUnit, 2));
-        } else if (memoryUnit.endsWith("MB")) {
-            return new MemorySettings(2, getMemorySize(memoryUnit, 2));
-        } else if (memoryUnit.endsWith("GB")) {
-            return new MemorySettings(3, getMemorySize(memoryUnit, 2));
-        } else if (memoryUnit.endsWith("TB")) {
-            return new MemorySettings(4, getMemorySize(memoryUnit, 2));
-        } else if (memoryUnit.endsWith("B")) {
-            return new MemorySettings(0, getMemorySize(memoryUnit, 1));
+        String memoryUnitLowerCase = memoryUnit.toLowerCase();
+        if (memoryUnitLowerCase.endsWith("b")) {
+            return new MemorySettings(0, getMemorySize(memoryUnit));
+        } else if (memoryUnitLowerCase.endsWith("k")) {
+            return new MemorySettings(1, getMemorySize(memoryUnit));
+        } else if (memoryUnitLowerCase.endsWith("m")) {
+            return new MemorySettings(2, getMemorySize(memoryUnit));
+        } else if (memoryUnitLowerCase.endsWith("g")) {
+            return new MemorySettings(3, getMemorySize(memoryUnit));
+        } else if (memoryUnitLowerCase.endsWith("t")) {
+            return new MemorySettings(4, getMemorySize(memoryUnit));
         } else {
             throw new IllegalArgumentException("Unknown memory unit " + memoryUnit);
         }
     }
     
-    private static int getMemorySize(String memoryUnit, int unit) {
-        return Integer.valueOf(memoryUnit.substring(0, memoryUnit.length() - unit));
+    private static int getMemorySize(String memoryUnit) {
+        return Integer.valueOf(memoryUnit.substring(0, memoryUnit.length() - 1));
     }
     
     public double dividedBy(String memoryUnit) {
@@ -102,20 +103,4 @@ public class MemorySettings {
     public int toTB() {
         return (int)doConvert(index - MemoryUnit.TERABYTES.ordinal(), size);
     }
-    
-    public static void main(String[] args) {
-        
-        String minMemory = "1GB";
-        String maxMemory = "10GB";
-        String jvmSize = "512MB";
-        
-        //System.out.println("initial jvms: " + MemorySettings.valueOf(minMemory).dividedBy(jvmSize));
-        //System.out.println("num of partitions: " + MemorySettings.valueOf(maxMemory).dividedBy(jvmSize));
-        System.out.println("to MB: " + MemorySettings.valueOf("512MB").toMB());
-        System.out.println("to MB: " + MemorySettings.valueOf("1024KB").toMB());
-        System.out.println("to MB: " + MemorySettings.valueOf("1GB").toMB());
-        
-        System.out.println("to GB: " + MemorySettings.valueOf("1024MB").toGB());
-    }
-
 }

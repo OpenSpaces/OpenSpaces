@@ -45,9 +45,9 @@ public class EsmExecutor {
     
     private final static Logger logger = Logger.getLogger("org.openspaces.grid.esm");
     private final static Logger eventsLogger = Logger.getLogger("org.openspaces.grid.esm.events");
-    private final static long initialDelay = TimeUnitProperty.getProperty("org.openspaces.grid.esm.initialDelay", "1m");
+    private final static long initialDelay = TimeUnitProperty.getProperty("org.openspaces.grid.esm.initialDelay", "5s");
     private final static long fixedDelay = TimeUnitProperty.getProperty("org.openspaces.grid.esm.fixedDelay", "5s");
-    private final static int memorySafetyBufferInMB = MemorySettings.valueOf(System.getProperty("org.openspaces.grid.esm.memorySafetyBuffer", "100MB")).toMB();
+    private final static int memorySafetyBufferInMB = MemorySettings.valueOf(System.getProperty("org.openspaces.grid.esm.memorySafetyBuffer", "100m")).toMB();
     private final static NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();
     
     private final Admin admin = new AdminFactory().createAdmin();
@@ -90,7 +90,8 @@ public class EsmExecutor {
         spaceDeployment.setContextProperty("elastic", "true");
         spaceDeployment.setContextProperty("minMemory", context.getMinMemory());
         spaceDeployment.setContextProperty("maxMemory", context.getMaxMemory());
-        spaceDeployment.setContextProperty("jvmSize", context.getJvmSize());
+        spaceDeployment.setContextProperty("initialJavaHeapSize", context.getInitialJavaHeapSize());
+        spaceDeployment.setContextProperty("maximumJavaHeapSize", context.getMaximumJavaHeapSize());
         spaceDeployment.setContextProperty("isolationLevel", context.getIsolationLevel().name());
         spaceDeployment.setContextProperty("sla", context.getSlaDescriptors());
 
@@ -98,7 +99,8 @@ public class EsmExecutor {
                 + "\n\t Zone: " + zoneName 
                 + "\n\t Min Memory: " + context.getMinMemory()
                 + "\n\t Max Memory: " + context.getMaxMemory()
-                + "\n\t JVM Size: " + context.getJvmSize()
+                + "\n\t Initial Java Heap Size: " + context.getInitialJavaHeapSize()
+                + "\n\t Maximum Java Heap Size: " + context.getMaximumJavaHeapSize()
                 + "\n\t Isolation Level: " + context.getIsolationLevel().name()
                 + "\n\t Highly Available? " + context.isHighlyAvailable()
                 + "\n\t Partitions: " + numberOfParitions
@@ -108,7 +110,7 @@ public class EsmExecutor {
     }
     
     private int calculateNumberOfPartitions(DeploymentContext context) {
-        int numberOfPartitions = MemorySettings.valueOf(context.getMaxMemory()).floorDividedBy(context.getJvmSize());
+        int numberOfPartitions = MemorySettings.valueOf(context.getMaxMemory()).floorDividedBy(context.getMaximumJavaHeapSize());
         if (context.isHighlyAvailable()) {
             numberOfPartitions /= 2;
         }
@@ -123,7 +125,7 @@ public class EsmExecutor {
         
         public void run() {
             try {
-                if (logger.isLoggable(Level.OFF)) {
+                if (Level.OFF.equals(logger.getLevel())) {
                     return; //turn off cruise control
                 }
                 logger.finest("ScheduledTask is running...");
@@ -316,7 +318,7 @@ public class EsmExecutor {
             double totalPhysicalMemorySizeInMB = machine.getOperatingSystem()
                 .getDetails()
                 .getTotalPhysicalMemorySizeInMB();
-            int jvmSizeInMB = MemorySettings.valueOf(puCapacityPlanner.getJvmSize()).toMB();
+            int jvmSizeInMB = MemorySettings.valueOf(puCapacityPlanner.getMaxJavaHeapSize()).toMB();
             int numberOfGSCsScaleLimit = (int) Math.floor(totalPhysicalMemorySizeInMB / jvmSizeInMB);
             int freePhysicalMemorySizeInMB = (int) Math.floor(machine.getOperatingSystem()
                 .getStatistics()
@@ -331,9 +333,12 @@ public class EsmExecutor {
             logger.fine("Starting GSC on machine ["+ToStringHelper.machineToString(machine)+"]");
             
             GridServiceContainer newGSC = machine.getGridServiceAgent().startGridServiceAndWait(
-                    new GridServiceContainerOptions().vmInputArgument(
-                            "-Dcom.gs.zones=" + puCapacityPlanner.getZoneName()).vmInputArgument(
-                            "-Dcom.gigaspaces.grid.gsc.serviceLimit=" + puCapacityPlanner.getScalingFactor()), 60, TimeUnit.SECONDS);
+                    new GridServiceContainerOptions()
+                        .vmInputArgument("-Xms" + puCapacityPlanner.getInitJavaHeapSize())
+                        .vmInputArgument("-Xmx" + puCapacityPlanner.getMaxJavaHeapSize())
+                        .vmInputArgument("-Dcom.gs.zones=" + puCapacityPlanner.getZoneName())
+                        .vmInputArgument("-Dcom.gigaspaces.grid.gsc.serviceLimit=" + puCapacityPlanner.getScalingFactor())
+                        , 60, TimeUnit.SECONDS);
             
             if (newGSC == null) {
                 eventsLogger.info("Failed Scaling up - Failed to start GSC on machine ["+ToStringHelper.machineToString(machine)+"]");

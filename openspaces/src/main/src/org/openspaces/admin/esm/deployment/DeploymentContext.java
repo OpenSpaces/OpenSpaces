@@ -5,11 +5,12 @@ import java.io.Serializable;
 public class DeploymentContext implements Serializable {
     
     private IsolationLevel isolationLevel = IsolationLevel.DEDICATED;
-    private String minMemory = "1GB";
-    private String maxMemory = "10GB";
-    private String jvmSize = "512MB";
-    private boolean highlyAvailable;
+    private String minMemory = "1g";
+    private String maxMemory = "10g";
+    private boolean highlyAvailable = true;
     private String slaDescriptors = "";
+    private String initialJavaHeapSize = "512m";
+    private String maximumJavaHeapSize = "512m";
     
     DeploymentContext(){
     }
@@ -20,10 +21,6 @@ public class DeploymentContext implements Serializable {
 
     public void setMaxMemory(String maxMemory) {
         this.maxMemory = maxMemory;
-    }
-
-    public void setJvmSize(String jvmSize) {
-        this.jvmSize = jvmSize;
     }
 
     public void setIsolationLevel(IsolationLevel isolationLevel) {
@@ -50,15 +47,27 @@ public class DeploymentContext implements Serializable {
         return maxMemory;
     }
 
-    public String getJvmSize() {
-        return jvmSize;
-    }
-
     public void addSla(String descriptor) {
         slaDescriptors += descriptor;
     };
     
     public String getSlaDescriptors() {
         return slaDescriptors;
+    }
+
+    public void setInitialJavaHeapSize(String size) {
+        this.initialJavaHeapSize = size;
+    }
+    
+    public String getInitialJavaHeapSize() {
+        return initialJavaHeapSize;
+    }
+
+    public void setMaximumJavaHeapSize(String size) {
+        this.maximumJavaHeapSize = size;
+    }
+    
+    public String getMaximumJavaHeapSize() {
+        return maximumJavaHeapSize;
     }
 }

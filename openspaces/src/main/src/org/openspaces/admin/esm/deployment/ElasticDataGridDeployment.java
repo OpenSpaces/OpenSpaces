@@ -27,14 +27,14 @@ public class ElasticDataGridDeployment implements Serializable {
         this.context.setIsolationLevel(isolationLevel);
         return this;
     }
-    
+
     /**
-     * Set the memory growth of this data grid. The parameter specifies size in bytes.
-     * Abbreviations are 1KB (=1024 bytes), 1MB (=1024 KB), 1GB (=1024 MB), 1TG (=1024 GB). 
-     *  
+     * Set the memory growth of this data grid. The parameter specifies size in bytes (b), kilobytes (k), megabytes (m), gigabytes (g);
      * 
-     * @param minMemory minimum memory initially held for this data grid; Default 1GB;
-     * @param maxMemory maximum memory to allocate for this data grid; Default 10GB
+     * @param minMemory
+     *            minimum memory initially held for this data grid; Default "1g".
+     * @param maxMemory
+     *            maximum memory to allocate for this data grid; Default "10g".
      */
     public ElasticDataGridDeployment elasticity(String minMemory, String maxMemory) {
         this.context.setMinMemory(minMemory);
@@ -46,23 +46,38 @@ public class ElasticDataGridDeployment implements Serializable {
      * Set the availability of the data grid. A highly available data grid is one that has at least
      * one backup copy, for failing over to.
      * 
-     * @param enabled <code>true</code> if data grid is highly available; Default is <code>false</code>.
+     * @param enabled
+     *            <code>true</code> if data grid is highly available; false if the data is
+     *            recoverable from some storage. Default is <code>true</code>.
      */
     public ElasticDataGridDeployment highlyAvailable(boolean enabled) {
         this.context.setHighlyAvailable(enabled);
         return this;
     }
-    
+
     /**
-     * Sets the JVM size of a container hosting a processing unit.
-     * 
-     * @param jvmSize The JVM size; Default 512MB.
+     * Sets the initial Java heap size (the JVM -Xms argument) of a container hosting a processing unit.
+     * For performance optimization you should have the initial heap size the same as the maximum size.
+     * @param size The heap size in kilobytes (k), megabytes (m), gigabytes (g); Default "512m".
      */
-    public ElasticDataGridDeployment jvmSize(String jvmSize) {
-        this.context.setJvmSize(jvmSize);
+    public ElasticDataGridDeployment initialJavaHeapSize(String size) {
+        this.context.setInitialJavaHeapSize(size);
         return this;
     }
 
+    /**
+     * Sets the maximum Java heap size (the JVM -Xmx argument) of a container hosting a processing
+     * unit. In many cases the heap size is determined based on the operating system: for a 32-bit
+     * OS, a 2 GB maximum heap size is recommended, and for a 64-bit OS, a 6-10 MB maximum heap size
+     * is recommended.
+     * 
+     * @param size The heap size in kilobytes (k), megabytes (m), gigabytes (g); Default "512m".
+     */
+    public ElasticDataGridDeployment maximumJavaHeapSize(String size) {
+        this.context.setMaximumJavaHeapSize(size);
+        return this;
+    }
+    
     /**
      * @return The data grid name this deployment was constructed with.
      */

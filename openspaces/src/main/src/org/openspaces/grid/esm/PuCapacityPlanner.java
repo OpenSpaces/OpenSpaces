@@ -17,17 +17,19 @@ public class PuCapacityPlanner {
     private final int maxNumberOfGSCs;
     private int maxNumberOfGSCsPerMachine;
     private final String zoneName;
-    private final String jvmSize;
+    private final String maxJavaHeapSize;
+    private final String initJavaHeapSize;
 
     public PuCapacityPlanner(ProcessingUnit pu) {
         this.pu = pu;
         
         Properties contextProperties = pu.getBeanLevelProperties().getContextProperties();
 
-        jvmSize = contextProperties.getProperty("jvmSize");
+        initJavaHeapSize = contextProperties.getProperty("initialJavaHeapSize");
+        maxJavaHeapSize = contextProperties.getProperty("maximumJavaHeapSize");
         
-        minNumberOfGSCs = MemorySettings.valueOf(contextProperties.getProperty("minMemory")).floorDividedBy(jvmSize);
-        maxNumberOfGSCs = MemorySettings.valueOf(contextProperties.getProperty("maxMemory")).floorDividedBy(jvmSize);
+        minNumberOfGSCs = MemorySettings.valueOf(contextProperties.getProperty("minMemory")).floorDividedBy(maxJavaHeapSize);
+        maxNumberOfGSCs = MemorySettings.valueOf(contextProperties.getProperty("maxMemory")).floorDividedBy(maxJavaHeapSize);
         
         scalingFactor = (int)Math.ceil(1.0*maxNumberOfGSCs / minNumberOfGSCs);
         
@@ -61,8 +63,12 @@ public class PuCapacityPlanner {
         return zoneName;
     }
     
-    public String getJvmSize() {
-        return jvmSize;
+    public String getInitJavaHeapSize() {
+        return initJavaHeapSize;
+    }
+    
+    public String getMaxJavaHeapSize() {
+        return maxJavaHeapSize;
     }
 
     public ProcessingUnit getProcessingUnit() {
