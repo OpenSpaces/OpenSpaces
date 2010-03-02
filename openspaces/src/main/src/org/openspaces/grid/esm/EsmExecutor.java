@@ -27,6 +27,7 @@ import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnits;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
 import org.openspaces.admin.space.SpaceDeployment;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.zone.Zone;
@@ -72,6 +73,8 @@ public class EsmExecutor {
         logger.config("Fixed Delay: " + fixedDelay + " ms");
         if (Boolean.valueOf(System.getProperty("esm.enabled", "true")))
             executorService.scheduleWithFixedDelay(new ScheduledTask(), initialDelay, fixedDelay, TimeUnit.MILLISECONDS);
+        
+        admin.getProcessingUnits().addLifecycleListener(new UndeployedProcessingUnitLifecycleEventListener());
     }
 
     public void deploy(ElasticDataGridDeployment deployment) {
@@ -118,6 +121,24 @@ public class EsmExecutor {
         return numberOfPartitions;
     }
     
+    /**
+     * Life cycle listener of processing units which are un-deployed, and their resources should be scaled down.
+     */
+    private final class UndeployedProcessingUnitLifecycleEventListener implements
+            ProcessingUnitInstanceLifecycleEventListener {
+        public void processingUnitInstanceRemoved(ProcessingUnitInstance processingUnitInstance) {
+            
+            if (!PuCapacityPlanner.isElastic(processingUnitInstance.getProcessingUnit()))
+                return;
+            
+            executorService.execute(new GarbageCollectionHandler(new PuCapacityPlanner(processingUnitInstance.getProcessingUnit()), new Workflow()));
+        }
+
+        public void processingUnitInstanceAdded(ProcessingUnitInstance processingUnitInstance) {
+        }
+    }
+
+
     private final class ScheduledTask implements Runnable {
 
         public ScheduledTask() {
@@ -130,23 +151,26 @@ public class EsmExecutor {
                 }
                 logger.finest("ScheduledTask is running...");
                 ProcessingUnits processingUnits = admin.getProcessingUnits();
+                
                 for (ProcessingUnit pu : processingUnits) {
 
                     logger.finest(ToStringHelper.puToString(pu));
 
-                    if (!pu.getBeanLevelProperties().getContextProperties().containsKey("elastic"))
+                    if (!PuCapacityPlanner.isElastic(pu))
                         continue;
-
+                    
                     PuCapacityPlanner puCapacityPlanner = new PuCapacityPlanner(pu);
                     logger.finest(ToStringHelper.puCapacityPlannerToString(puCapacityPlanner));
                     
-                    Chain chain = new Chain(puCapacityPlanner);
-                    while (chain.hasNext()) {
-                        Runnable nextInChain = chain.removeFirst();
-                        nextInChain.run();
+                    Workflow workflow = new Workflow(puCapacityPlanner);
+                    while (workflow.hasNext()) {
+                        Runnable nextInWorkflow = workflow.removeFirst();
+                        nextInWorkflow.run();
                     }
                     
                 }
+                
+                
             } catch (Throwable t) {
                 logger.log(Level.WARNING, "Caught exception: " + t, t);
             }
@@ -154,11 +178,15 @@ public class EsmExecutor {
     }
 
     
-    private class Chain {
+    private class Workflow {
         private boolean isBroken = false;
         final List<Runnable> runnables = new ArrayList<Runnable>();
         
-        public Chain(PuCapacityPlanner puCapacityPlanner) {
+        /** constructs an empty workflow */
+        public Workflow() {
+        }
+        
+        public Workflow(PuCapacityPlanner puCapacityPlanner) {
             runnables.add(new UnderCapacityHandler(puCapacityPlanner, this));
             runnables.add(new MemorySlaHandler(puCapacityPlanner, this));
             runnables.add(new RebalancerHandler(puCapacityPlanner, this));
@@ -178,7 +206,7 @@ public class EsmExecutor {
             return runnables.remove(0);
         }
         
-        public void breakChain() {
+        public void breakWorkflow() {
             isBroken = true;
             runnables.clear();
         }
@@ -190,17 +218,17 @@ public class EsmExecutor {
     
     private class UnderCapacityHandler implements Runnable {
         private final PuCapacityPlanner puCapacityPlanner;
-        private final Chain chain;
+        private final Workflow workflow;
 
-        public UnderCapacityHandler(PuCapacityPlanner puCapacityPlanner, Chain chain) {
+        public UnderCapacityHandler(PuCapacityPlanner puCapacityPlanner, Workflow workflow) {
             this.puCapacityPlanner = puCapacityPlanner;
-            this.chain = chain;
+            this.workflow = workflow;
         }
 
         public void run() {
             if (underMinCapcity()) {
-                chain.breakChain();
-                chain.add(new StartGscHandler(puCapacityPlanner, chain));
+                workflow.breakWorkflow();
+                workflow.add(new StartGscHandler(puCapacityPlanner, workflow));
             }
         }
         
@@ -211,11 +239,11 @@ public class EsmExecutor {
     
     public class StartGscHandler implements Runnable {
         private final PuCapacityPlanner puCapacityPlanner;
-        private final Chain chain;
+        private final Workflow workflow;
 
-        public StartGscHandler(PuCapacityPlanner puCapacityPlanner, Chain chain) {
+        public StartGscHandler(PuCapacityPlanner puCapacityPlanner, Workflow workflow) {
             this.puCapacityPlanner = puCapacityPlanner;
-            this.chain = chain;
+            this.workflow = workflow;
         }
 
         public void run() {
@@ -343,7 +371,7 @@ public class EsmExecutor {
             if (newGSC == null) {
                 eventsLogger.info("Failed Scaling up - Failed to start GSC on machine ["+ToStringHelper.machineToString(machine)+"]");
             } else {
-                chain.breakChain();
+                workflow.breakWorkflow();
                 eventsLogger.info("Scaling up - Started GSC ["+ToStringHelper.gscToString(newGSC)+"] on machine ["+ToStringHelper.machineToString(newGSC.getMachine())+"]");
             }
         }
@@ -351,12 +379,12 @@ public class EsmExecutor {
     
     private class MemorySlaHandler implements Runnable {
         private final PuCapacityPlanner puCapacityPlanner;
-        private final Chain chain;
+        private final Workflow workflow;
         private final MemorySla memorySla;
 
-        public MemorySlaHandler(PuCapacityPlanner puCapacityPlanner, Chain chain) {
+        public MemorySlaHandler(PuCapacityPlanner puCapacityPlanner, Workflow workflow) {
             this.puCapacityPlanner = puCapacityPlanner;
-            this.chain = chain;
+            this.workflow = workflow;
             SlaExtractor slaExtractor = new SlaExtractor(puCapacityPlanner.getProcessingUnit());
             memorySla = slaExtractor.getMemorySla();
         }
@@ -371,7 +399,7 @@ public class EsmExecutor {
             
             handleBreachAboveThreshold();
             
-            if (!chain.isBroken())
+            if (!workflow.isBroken())
                 handleBreachBelowThreshold();
         }
         
@@ -491,15 +519,15 @@ public class EsmExecutor {
                         logger.finer("Found GSC [" + ToStringHelper.gscToString(gscToRelocateTo) + "] which has only ["+NUMBER_FORMAT.format(memoryHeapUsedByThisGsc)+"%] used.");
                         logger.finer("Relocating ["+ToStringHelper.puInstanceToString(puInstanceToMaybeRelocate)+"] to GSC [" + ToStringHelper.gscToString(gscToRelocateTo) + "]");
                         puInstanceToMaybeRelocate.relocateAndWait(gscToRelocateTo, 60, TimeUnit.SECONDS);
-                        chain.breakChain();
+                        workflow.breakWorkflow();
                         return; //found a gsc
                     }
                 }
             }
             
             eventsLogger.finest("Needs to scale up/out to obey memory SLA");
-            chain.breakChain();
-            chain.add(new StartGscHandler(puCapacityPlanner, chain));
+            workflow.breakWorkflow();
+            workflow.add(new StartGscHandler(puCapacityPlanner, workflow));
         }
         
         public void handleBreachBelowThreshold() {
@@ -626,7 +654,7 @@ public class EsmExecutor {
                         logger.finer("Found GSC [" + ToStringHelper.gscToString(gscToRelocateTo) + "] which has only ["+NUMBER_FORMAT.format(memoryHeapUsedPercByThisGsc)+"%] used.");
                         logger.finer("Relocating ["+ToStringHelper.puInstanceToString(puInstanceToMaybeRelocate)+"] to GSC [" + ToStringHelper.gscToString(gscToRelocateTo) + "]");
                         puInstanceToMaybeRelocate.relocateAndWait(gscToRelocateTo, 60, TimeUnit.SECONDS);
-                        chain.breakChain();
+                        workflow.breakWorkflow();
                         return;
                     }
                 }
@@ -674,11 +702,11 @@ public class EsmExecutor {
     
     private class RebalancerHandler implements Runnable {
         private final PuCapacityPlanner puCapacityPlanner;
-        private final Chain chain;
+        private final Workflow workflow;
 
-        public RebalancerHandler(PuCapacityPlanner puCapacityPlanner, Chain chain) {
+        public RebalancerHandler(PuCapacityPlanner puCapacityPlanner, Workflow workflow) {
             this.puCapacityPlanner = puCapacityPlanner;
-            this.chain = chain;
+            this.workflow = workflow;
         }
 
         public void run() {
@@ -811,7 +839,7 @@ public class EsmExecutor {
             
             logger.finest("Restarting instance " + ToStringHelper.puInstanceToString(instance) + " at GSC " + ToStringHelper.gscToString(instance.getGridServiceContainer()));
             ProcessingUnitInstance restartedInstance = instance.restartAndWait();
-            chain.breakChain();
+            workflow.breakWorkflow();
             
             boolean isBackup = restartedInstance.waitForSpaceInstance().waitForMode(SpaceMode.BACKUP, 10, TimeUnit.SECONDS);
             if (!isBackup) {
@@ -824,17 +852,18 @@ public class EsmExecutor {
     
     private class GarbageCollectionHandler implements Runnable {
         private final PuCapacityPlanner puCapacityPlanner;
-        private final Chain chain;
+        private final Workflow workflow;
 
-        public GarbageCollectionHandler(PuCapacityPlanner puCapacityPlanner, Chain chain) {
+        public GarbageCollectionHandler(PuCapacityPlanner puCapacityPlanner, Workflow workflow) {
             this.puCapacityPlanner = puCapacityPlanner;
-            this.chain = chain;
+            this.workflow = workflow;
         }
 
         public void run() {
             
             //Perquisite precaution
-            if (!puCapacityPlanner.getProcessingUnit().getStatus().equals(DeploymentStatus.INTACT)) {
+            if (!puCapacityPlanner.getProcessingUnit().getStatus().equals(DeploymentStatus.INTACT)
+                    && !puCapacityPlanner.getProcessingUnit().getStatus().equals(DeploymentStatus.UNDEPLOYED)) {
                 return;
             }
             
@@ -846,7 +875,7 @@ public class EsmExecutor {
                 if (gsc.getProcessingUnitInstances().length == 0) {
                     eventsLogger.finer("Scaling in, trying to terminate empty GSC ["+ToStringHelper.gscToString(gsc)+"]");
                     gsc.kill();
-                    chain.breakChain();
+                    workflow.breakWorkflow();
                 }
                 
                 if (gsc.getMachine().getGridServiceContainers().getSize() == 0) {
@@ -855,20 +884,20 @@ public class EsmExecutor {
             }
         }
     }
-
+    
     private final class CompromisedDeploymentHandler implements Runnable {
         private final PuCapacityPlanner puCapacityPlanner;
-        private final Chain chain;
+        private final Workflow workflow;
 
-        public CompromisedDeploymentHandler(PuCapacityPlanner puCapacityPlanner, Chain chain) {
+        public CompromisedDeploymentHandler(PuCapacityPlanner puCapacityPlanner, Workflow workflow) {
             this.puCapacityPlanner = puCapacityPlanner;
-            this.chain = chain;
+            this.workflow = workflow;
         }
         
         public void run() {
             if (deploymentStatusCompromised()) {
-                chain.breakChain();
-                chain.add(new StartGscHandler(puCapacityPlanner, chain));
+                workflow.breakWorkflow();
+                workflow.add(new StartGscHandler(puCapacityPlanner, workflow));
             }
         }
         

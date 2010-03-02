@@ -39,6 +39,10 @@ public class PuCapacityPlanner {
         zoneName = pu.getRequiredZones()[0];
     }
     
+    public static boolean isElastic(ProcessingUnit pu){
+        return (pu.getBeanLevelProperties().getContextProperties().containsKey("elastic"));
+    }
+    
     public int getMaxNumberOfGSCsPerMachine() {
         return maxNumberOfGSCsPerMachine;
     }
