@@ -31,6 +31,7 @@ public class PlainJettyHolder implements JettyHolder {
 
     public PlainJettyHolder(Server server) {
         this.server = server;
+        server.setStopAtShutdown(false);
     }
 
     public void openConnectors() throws Exception {

@@ -26,6 +26,7 @@ public class SharedJettyHolder implements JettyHolder {
         synchronized (serverLock) {
             if (server == null) {
                 server = localServer;
+                server.setStopAtShutdown(false);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Usign new jetty server [" + server + "]");
                 }

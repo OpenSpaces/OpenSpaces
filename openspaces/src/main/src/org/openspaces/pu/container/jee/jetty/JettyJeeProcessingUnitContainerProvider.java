@@ -541,6 +541,11 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             if (thread != null) {
                 thread.setContextClassLoader(null);
             }
+
+            Field inheritedAccessControlContextField = Thread.class.getDeclaredField("inheritedAccessControlContext");
+            inheritedAccessControlContextField.setAccessible(true);
+            inheritedAccessControlContextField.set(thread, null);
+
             // we can't do this anymore, since jetty changed this to static *final*
 //            hookThreadField.set(null, null);
         } catch (Exception e) {

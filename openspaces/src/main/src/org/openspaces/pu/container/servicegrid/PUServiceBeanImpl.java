@@ -329,10 +329,15 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             webXml.close();
             downloadPU = true;
             String jeeContainer = beanLevelProperties.getContextProperties().getProperty("jee.container", "jetty");
+            String[] classesToLoad = null;
+            if ("jetty".equals(jeeContainer)) {
+                // pre load the jetty server class so the static shutdown thread will be loaded under it
+                classesToLoad = new String[]{"org.eclipse.jetty.server.Server"};
+            }
             // setup class loaders correcly
             try {
                 Thread.currentThread().setContextClassLoader(CommonClassLoader.getInstance());
-                ((ServiceClassLoader) contextClassLoader).setParentClassLoader(SharedServiceData.getJeeClassLoader(jeeContainer));
+                ((ServiceClassLoader) contextClassLoader).setParentClassLoader(SharedServiceData.getJeeClassLoader(jeeContainer, classesToLoad));
             } catch (Exception e) {
                 throw new CannotCreateContainerException("Failed to configure JEE class loader", e);
             } finally {
