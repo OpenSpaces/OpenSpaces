@@ -50,6 +50,8 @@ public class EsmExecutor {
     private final static long fixedDelay = TimeUnitProperty.getProperty("org.openspaces.grid.esm.fixedDelay", "5s");
     private final static int memorySafetyBufferInMB = MemorySettings.valueOf(System.getProperty("org.openspaces.grid.esm.memorySafetyBuffer", "100m")).toMB();
     private final static NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();
+
+    private final OnDemandElasticScale elasticScale;
     
     private final Admin admin = new AdminFactory().createAdmin();
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
@@ -75,6 +77,9 @@ public class EsmExecutor {
             executorService.scheduleWithFixedDelay(new ScheduledTask(), initialDelay, fixedDelay, TimeUnit.MILLISECONDS);
         
         admin.getProcessingUnits().addLifecycleListener(new UndeployedProcessingUnitLifecycleEventListener());
+        
+        elasticScale = new NullOnDemandElasticScale();
+        elasticScale.init(new ElasticScaleConfig()); //TODO complete here
     }
 
     public void deploy(ElasticDataGridDeployment deployment) {
@@ -272,6 +277,11 @@ public class EsmExecutor {
             boolean needsNewMachine = true;
             for (Machine machine : machines) {
 
+                if (!elasticScale.accept(machine)) {
+                    logger.finest("Machine ["+ToStringHelper.machineToString(machine)+"] was filtered out by [" + elasticScale.getClass().getName()+"]");
+                    continue;
+                }
+                
                 if (!machineHasAnAgent(machine)) {
                     logger.finest("Can't start a GSC on machine ["+ToStringHelper.machineToString(machine)+"] - doesn't have an agent.");
                     continue;
@@ -284,7 +294,6 @@ public class EsmExecutor {
                 
                 if (aboveMinCapcity() && machineHasAnEmptyGSC(zoneCorrelator, machine)) {
                     logger.finest("Won't start a GSC on machine ["+ToStringHelper.machineToString(machine)+"] - already has an empty GSC.");
-                    needsNewMachine = false;
                     continue;
                 }
                 
@@ -300,6 +309,9 @@ public class EsmExecutor {
             
             if (needsNewMachine) {
                 eventsLogger.info("Can't start a GSC on the available machines - needs a new machine.");
+                ElasticScaleCommand elasticScaleCommand = new ElasticScaleCommand();
+                elasticScaleCommand.setMachines(machines);
+                elasticScale.scaleOut(elasticScaleCommand);
             }
         }
         

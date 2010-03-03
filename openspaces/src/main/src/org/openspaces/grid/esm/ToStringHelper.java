@@ -1,5 +1,7 @@
 package org.openspaces.grid.esm;
 
+import java.util.List;
+
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -33,6 +35,14 @@ public class ToStringHelper {
         .append("\n\t number of GSCs in zone: ").append(puCapacityPlanner.getZoneName()).append("=").append(puCapacityPlanner.getNumberOfGSCsInZone());
         
         return sb.toString();
+    }
+    
+    public static String machinesToString(List<Machine> machines, String delim) {
+        StringBuilder builder = new StringBuilder();
+        for (Machine machine : machines) {
+            builder.append(machineToString(machine)).append(delim);
+        }
+        return builder.toString();
     }
     
     public static String machineToString(Machine machine) {
