@@ -47,16 +47,14 @@
         <property name="parentLoaderPriority" value="${web.context.classLoader.parentFirst}" />
         <property name="configurationClasses">
             <list>
-                <list>
-                    <value>org.eclipse.jetty.webapp.WebInfConfiguration</value>
-                    <value>org.eclipse.jetty.webapp.WebXmlConfiguration</value>
-                    <value>org.eclipse.jetty.webapp.MetaInfConfiguration</value>
-                    <value>org.eclipse.jetty.webapp.FragmentConfiguration</value>
-                    <value>org.eclipse.jetty.plus.webapp.EnvConfiguration</value>
-                    <value>org.eclipse.jetty.plus.webapp.Configuration</value>
-                    <value>org.eclipse.jetty.webapp.JettyWebXmlConfiguration</value>
-                    <value>org.eclipse.jetty.webapp.TagLibConfiguration</value>
-                </list>
+                <value>org.eclipse.jetty.webapp.WebInfConfiguration</value>
+                <value>org.eclipse.jetty.webapp.WebXmlConfiguration</value>
+                <value>org.eclipse.jetty.webapp.MetaInfConfiguration</value>
+                <value>org.eclipse.jetty.webapp.FragmentConfiguration</value>
+                <value>org.eclipse.jetty.plus.webapp.EnvConfiguration</value>
+                <value>org.eclipse.jetty.plus.webapp.Configuration</value>
+                <value>org.eclipse.jetty.webapp.JettyWebXmlConfiguration</value>
+                <value>org.eclipse.jetty.webapp.TagLibConfiguration</value>
             </list>
         </property>
     </bean>
