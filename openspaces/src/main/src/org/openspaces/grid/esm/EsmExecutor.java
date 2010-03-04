@@ -83,7 +83,7 @@ public class EsmExecutor {
             admin.getProcessingUnits().addLifecycleListener(new UndeployedProcessingUnitLifecycleEventListener());
         }
         
-        elasticScale = new PcLabOnDemandElasticScale();//new NullOnDemandElasticScale();//new PcLabOnDemandElasticScale();
+        elasticScale = new NullOnDemandElasticScale();//new PcLabOnDemandElasticScale();
         elasticScale.init(new ElasticScaleConfig()); //TODO complete here
     }
 
