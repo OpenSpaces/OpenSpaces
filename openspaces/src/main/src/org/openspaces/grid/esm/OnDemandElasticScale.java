@@ -9,4 +9,6 @@ public interface OnDemandElasticScale {
     public boolean accept(Machine machine);
     
     public void scaleOut(ElasticScaleCommand command);
+    
+    public void scaleIn(Machine machine);
 }
