@@ -50,7 +50,7 @@ public class POMGenerator {
         printDependency(writer, "org.springframework", "spring-context-support", "3.0.1.RELEASE");
         printDependency(writer, "org.springframework", "spring-core", "3.0.1.RELEASE");
         printDependency(writer, "org.springframework", "spring-expression", "3.0.1.RELEASE");
-        printDependency(writer, "org.springframework", "spring-transaction", "3.0.1.RELEASE");
+        printDependency(writer, "org.springframework", "spring-tx", "3.0.1.RELEASE");
         printDependency(writer, "commons-logging", "commons-logging", "1.1.1");
         // add javax.annotations (@PostConstruct) for JDK 1.5 (no need for 1.6 since it is there)
         if (!JdkVersion.isAtLeastJava16() && JdkVersion.isAtLeastJava15()) {
