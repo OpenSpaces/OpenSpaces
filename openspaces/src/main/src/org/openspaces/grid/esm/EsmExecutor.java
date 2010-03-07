@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -54,7 +55,8 @@ public class EsmExecutor {
     private final static int memorySafetyBufferInMB = MemorySettings.valueOf(System.getProperty("org.openspaces.grid.esm.memorySafetyBuffer", "100m")).toMB();
     private final static NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();
 
-    private final OnDemandElasticScale elasticScale;
+    //maps pu-name to elastic-scale impl
+    private final Map<String, OnDemandElasticScale> elasticScaleMap = new HashMap<String, OnDemandElasticScale>();
     
     private final Admin admin = new AdminFactory().createAdmin();
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
@@ -82,9 +84,6 @@ public class EsmExecutor {
             executorService.scheduleWithFixedDelay(new ScheduledTask(), initialDelay, fixedDelay, TimeUnit.MILLISECONDS);
             admin.getProcessingUnits().addLifecycleListener(new UndeployedProcessingUnitLifecycleEventListener());
         }
-        
-        elasticScale = new NullOnDemandElasticScale();//new PcLabOnDemandElasticScale();
-        elasticScale.init(new ElasticScaleConfig()); //TODO complete here
     }
 
     public void deploy(ElasticDataGridDeployment deployment) {
@@ -108,6 +107,10 @@ public class EsmExecutor {
         spaceDeployment.setContextProperty("isolationLevel", context.getIsolationLevel().name());
         spaceDeployment.setContextProperty("sla", context.getSlaDescriptors());
 
+        if (deployment.getElasticScaleConfig() != null) {
+            spaceDeployment.setContextProperty("elasticScaleConfig", ElasticScaleConfigSerializer.toString(deployment.getElasticScaleConfig()));
+        }
+        
         logger.finest("Deploying " + deployment.getDataGridName() 
                 + "\n\t Zone: " + zoneName 
                 + "\n\t Min Memory: " + context.getMinMemory()
@@ -144,7 +147,11 @@ public class EsmExecutor {
             if (!PuCapacityPlanner.isElastic(processingUnit))
                 return;
             
-            executorService.schedule(new UndeployHandler(new PuCapacityPlanner(processingUnit)), fixedDelay, TimeUnit.MILLISECONDS);
+            try {
+                executorService.schedule(new UndeployHandler(new PuCapacityPlanner(processingUnit, getOnDemandElasticScale(processingUnit))), fixedDelay, TimeUnit.MILLISECONDS);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Failed to invoke undeploy handler for " +processingUnit.getName(), e);
+            }
         }
 
         public void processingUnitStatusChanged(ProcessingUnitStatusChangedEvent event) {
@@ -178,7 +185,7 @@ public class EsmExecutor {
                     if (!PuCapacityPlanner.isElastic(pu))
                         continue;
                     
-                    PuCapacityPlanner puCapacityPlanner = new PuCapacityPlanner(pu);
+                    PuCapacityPlanner puCapacityPlanner = new PuCapacityPlanner(pu, getOnDemandElasticScale(pu));
                     logger.finest(ToStringHelper.puCapacityPlannerToString(puCapacityPlanner));
                     
                     Workflow workflow = new Workflow(puCapacityPlanner);
@@ -192,6 +199,26 @@ public class EsmExecutor {
                 logger.log(Level.WARNING, "Caught exception: " + t, t);
             }
         }
+    }
+    
+    private OnDemandElasticScale getOnDemandElasticScale(ProcessingUnit pu) throws Exception {
+        OnDemandElasticScale onDemandElasticScale = elasticScaleMap.get(pu.getName());
+        if (onDemandElasticScale != null) {
+            return onDemandElasticScale;
+        }
+        
+        String elasticScaleConfigStr = pu.getBeanLevelProperties().getContextProperties().getProperty("elasticScaleConfig");
+        if (elasticScaleConfigStr == null) {
+            return new NullOnDemandElasticScale();
+        }
+
+        ElasticScaleConfig elasticScaleConfig = ElasticScaleConfigSerializer.fromString(elasticScaleConfigStr);
+        Class<? extends OnDemandElasticScale> clazz = Thread.currentThread().getContextClassLoader().loadClass(elasticScaleConfig.getClassName()).asSubclass(OnDemandElasticScale.class);
+        OnDemandElasticScale newInstance = clazz.newInstance();
+        newInstance.init(elasticScaleConfig);
+
+        elasticScaleMap.put(pu.getName(), newInstance);
+        return newInstance;
     }
 
     
@@ -290,8 +317,8 @@ public class EsmExecutor {
             boolean needsNewMachine = true;
             for (Machine machine : machines) {
 
-                if (!elasticScale.accept(machine)) {
-                    logger.finest("Machine ["+ToStringHelper.machineToString(machine)+"] was filtered out by [" + elasticScale.getClass().getName()+"]");
+                if (!puCapacityPlanner.getElasticScale().accept(machine)) {
+                    logger.finest("Machine ["+ToStringHelper.machineToString(machine)+"] was filtered out by [" + puCapacityPlanner.getElasticScale().getClass().getName()+"]");
                     continue;
                 }
                 
@@ -322,10 +349,10 @@ public class EsmExecutor {
             }
             
             if (needsNewMachine) {
-                eventsLogger.info("Can't start a GSC on the available machines - needs a new machine.");
+                eventsLogger.finest("Can't start a GSC on the available machines - needs a new machine.");
                 ElasticScaleCommand elasticScaleCommand = new ElasticScaleCommand();
                 elasticScaleCommand.setMachines(machines);
-                elasticScale.scaleOut(elasticScaleCommand);
+                puCapacityPlanner.getElasticScale().scaleOut(elasticScaleCommand);
             }
         }
         
@@ -910,7 +937,7 @@ public class EsmExecutor {
                 
                 if (gsc.getMachine().getGridServiceContainers().getSize() == 0) {
                     logger.info("Scaling in - No need for machine ["+ToStringHelper.machineToString(gsc.getMachine())+"]");
-                    elasticScale.scaleIn(gsc.getMachine());
+                    puCapacityPlanner.getElasticScale().scaleIn(gsc.getMachine());
                 }
             }
         }
@@ -926,11 +953,14 @@ public class EsmExecutor {
         public void run() {
             
             //Perquisite precaution
-            if (!puCapacityPlanner.getProcessingUnit().getStatus().equals(DeploymentStatus.UNDEPLOYED)) {
-                return;
-            }
+//TODO due to bug in status, postpone this check            
+//            if (!puCapacityPlanner.getProcessingUnit().getStatus().equals(DeploymentStatus.UNDEPLOYED)) {
+//                return;
+//            }
             
             logger.finest(UndeployHandler.class.getSimpleName() + " invoked");
+            
+            elasticScaleMap.remove(puCapacityPlanner.getProcessingUnit().getName());
             
             String zoneName = puCapacityPlanner.getZoneName();
             Zone zone = admin.getZones().getByName(zoneName);
@@ -947,7 +977,7 @@ public class EsmExecutor {
                 
                 if (gscsOnMachine == 0) {
                     logger.info("Scaling in - No need for machine ["+ToStringHelper.machineToString(gsc.getMachine())+"]");
-                    elasticScale.scaleIn(gsc.getMachine());
+                    puCapacityPlanner.getElasticScale().scaleIn(gsc.getMachine());
                 }
             }
         }

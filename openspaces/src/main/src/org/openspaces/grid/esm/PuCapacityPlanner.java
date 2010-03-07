@@ -19,9 +19,11 @@ public class PuCapacityPlanner {
     private final String zoneName;
     private final String maxJavaHeapSize;
     private final String initJavaHeapSize;
+    private final OnDemandElasticScale elasticScale;
 
-    public PuCapacityPlanner(ProcessingUnit pu) {
+    public PuCapacityPlanner(ProcessingUnit pu, OnDemandElasticScale elasticScale) {
         this.pu = pu;
+        this.elasticScale = elasticScale;
         
         Properties contextProperties = pu.getBeanLevelProperties().getContextProperties();
 
@@ -77,6 +79,10 @@ public class PuCapacityPlanner {
 
     public ProcessingUnit getProcessingUnit() {
         return pu;
+    }
+    
+    public OnDemandElasticScale getElasticScale() {
+        return elasticScale;
     }
     
     public int getNumberOfGSCsInZone() {

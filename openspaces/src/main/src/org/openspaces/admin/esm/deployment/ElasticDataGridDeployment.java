@@ -2,6 +2,8 @@ package org.openspaces.admin.esm.deployment;
 
 import java.io.Serializable;
 
+import org.openspaces.grid.esm.ElasticScaleConfig;
+
 
 /**
  * A deployment descriptor for a plain Data Grid.
@@ -12,6 +14,7 @@ public class ElasticDataGridDeployment implements Serializable {
     private static final long serialVersionUID = 1L;
     
     private final DeploymentContext context = new DeploymentContext();
+    private ElasticScaleConfig config;
     private final String dataGridName;
     
     
@@ -99,5 +102,14 @@ public class ElasticDataGridDeployment implements Serializable {
         }
         this.context.addSla(descriptor);
         return this;
+    }
+    
+    public ElasticDataGridDeployment elasticScaleConfig(ElasticScaleConfig config) {
+        this.config = config;
+        return this;
+    }
+    
+    public ElasticScaleConfig getElasticScaleConfig() {
+        return config;
     }
 }
