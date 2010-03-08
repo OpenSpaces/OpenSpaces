@@ -12,7 +12,13 @@ package org.openspaces.admin.esm.deployment;
  * {@link #DEDICATED} - A machine is dedicated to a single tenant. No other tenant can use this
  * machine. Only a single deployment will be exist on this machine.
  * 
- * @author Moran Avigdor
+ * <blockquote>
+ * <pre>
+ * <b>Disclaimer:</b> This interface and the elastic data grid functionality is provided as a technology preview in XAP 7.1. 
+ * As such, it is subject to API and behavior changes in the next XAP releases without going the usual deprecation process 
+ * of the XAP API.
+ * </pre>
+ * </blockquote>
  */
 public enum IsolationLevel {
     /** public to all tenants */

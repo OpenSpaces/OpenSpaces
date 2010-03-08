@@ -7,8 +7,14 @@ import org.openspaces.grid.esm.ElasticScaleConfig;
 
 /**
  * A deployment descriptor for a plain Data Grid.
- *  
- * @author Moran Avigdor
+ *
+ * <blockquote>
+ * <pre>
+ * <b>Disclaimer:</b> This interface and the elastic data grid functionality is provided as a technology preview in XAP 7.1. 
+ * As such, it is subject to API and behavior changes in the next XAP releases without going the usual deprecation process 
+ * of the XAP API.
+ * </pre>
+ * </blockquote>
  */
 public class ElasticDataGridDeployment implements Serializable {
     private static final long serialVersionUID = 1L;
