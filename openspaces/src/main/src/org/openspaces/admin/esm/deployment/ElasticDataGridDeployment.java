@@ -1,6 +1,7 @@
 package org.openspaces.admin.esm.deployment;
 
 import java.io.Serializable;
+import java.util.Properties;
 
 import org.openspaces.grid.esm.ElasticScaleConfig;
 
@@ -19,6 +20,7 @@ import org.openspaces.grid.esm.ElasticScaleConfig;
 public class ElasticDataGridDeployment implements Serializable {
     private static final long serialVersionUID = 1L;
     
+    private final Properties contextProperties = new Properties();
     private final DeploymentContext context = new DeploymentContext();
     private ElasticScaleConfig config;
     private final String dataGridName;
@@ -95,10 +97,26 @@ public class ElasticDataGridDeployment implements Serializable {
     }
     
     /**
+     * Adds a context deploy time property overriding any <code>${...}</code> defined within a processing
+     * unit configuration.
+     */
+    public ElasticDataGridDeployment addContextProperty(String key, String value) {
+        contextProperties.put(key, value);
+        return this;
+    }
+    
+    /**
      * @return The deployment context
      */
     public DeploymentContext getContext() {
         return context;
+    }
+    
+    /**
+     * @return The context deploy time properties.
+     */
+    public Properties getContextProperties() {
+        return contextProperties;
     }
 
     public ElasticDataGridDeployment addSla(SLA sla) {

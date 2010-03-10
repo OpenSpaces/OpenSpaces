@@ -8,6 +8,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -109,6 +111,13 @@ public class EsmExecutor {
 
         if (deployment.getElasticScaleConfig() != null) {
             spaceDeployment.setContextProperty("elasticScaleConfig", ElasticScaleConfigSerializer.toString(deployment.getElasticScaleConfig()));
+        }
+        
+        if (!deployment.getContextProperties().isEmpty()) {
+            Set<Entry<Object,Object>> entrySet = deployment.getContextProperties().entrySet();
+            for (Entry<Object,Object> entry : entrySet) {
+                spaceDeployment.setContextProperty((String)entry.getKey(), (String)entry.getValue());
+            }
         }
         
         logger.finest("Deploying " + deployment.getDataGridName() 
