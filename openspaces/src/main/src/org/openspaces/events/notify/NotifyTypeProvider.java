@@ -61,7 +61,7 @@ public interface NotifyTypeProvider extends SpaceDataEventListener {
     Boolean isTake();
 
     /**
-     * Should this listener be notified when unmatched tempaltes
+     * Should this listener be notified when unmatched templates
      * events occur. <code>null</code> will leave the flag un changed.
      */
     Boolean isUnamtched();

@@ -101,9 +101,9 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
             }
             sb.append(" notify event container");
             if (getTemplate() != null) {
-                sb.append(", tempalte ").append(ClassUtils.getShortName(getTemplate().getClass())).append("[").append(getTemplate()).append("]");
+                sb.append(", template ").append(ClassUtils.getShortName(getTemplate().getClass())).append("[").append(getTemplate()).append("]");
             } else {
-                sb.append(", tempalte [null]");
+                sb.append(", template [null]");
             }
             sb.append(", notifications [");
             if (getNotifyWrite() != null && getNotifyWrite()) {

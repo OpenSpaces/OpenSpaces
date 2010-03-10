@@ -303,7 +303,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
         remotingEntry.setFifo(fifo);
         remotingEntry.lookupName = templateLookupName;
         if (logger.isDebugEnabled()) {
-            logger.debug("Registering async remoting service tempalte [" + remotingEntry + "]");
+            logger.debug("Registering async remoting service template [" + remotingEntry + "]");
         }
         return remotingEntry;
     }

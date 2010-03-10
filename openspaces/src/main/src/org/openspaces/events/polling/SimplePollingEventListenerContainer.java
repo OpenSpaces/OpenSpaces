@@ -336,9 +336,9 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
             sb.append(" polling event container");
             sb.append(" with receiveTimeout [").append(getReceiveTimeout()).append("]");
             if (getTemplate() != null) {
-                sb.append(", tempalte ").append(ClassUtils.getShortName(getTemplate().getClass())).append("[").append(getTemplate()).append("]");
+                sb.append(", template ").append(ClassUtils.getShortName(getTemplate().getClass())).append("[").append(getTemplate()).append("]");
             } else {
-                sb.append(", tempalte [null]");
+                sb.append(", template [null]");
             }
             sb.append(", concurrentConsumers [").append(concurrentConsumers).append("]");
             if (maxConcurrentConsumers != concurrentConsumers) {

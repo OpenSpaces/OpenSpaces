@@ -198,9 +198,9 @@ public class SimpleAsyncPollingEventListenerContainer extends AbstractTransactio
             }
             sb.append(" async polling event container");
             if (getTemplate() != null) {
-                sb.append(", tempalte ").append(ClassUtils.getShortName(getTemplate().getClass())).append("[").append(getTemplate()).append("]");
+                sb.append(", template ").append(ClassUtils.getShortName(getTemplate().getClass())).append("[").append(getTemplate()).append("]");
             } else {
-                sb.append(", tempalte [null]");
+                sb.append(", template [null]");
             }
             logger.debug(sb.toString());
         }

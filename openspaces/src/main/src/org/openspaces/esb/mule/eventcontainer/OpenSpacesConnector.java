@@ -24,12 +24,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 /**
- * An OpenSpaces mule conntector holding Spring application context which is later used
- * by the receiver and the dispatcher to lookup regsitered beans within the application
+ * An OpenSpaces mule connector holding Spring application context which is later used
+ * by the receiver and the dispatcher to lookup registered beans within the application
  * context. For example, the dispatcher looks up a <code>GigaSpace</code> instance in order
  * to send the code using it.
  *
- * <p>Note, the conntector must be defined within mule configuration in order for it to be
+ * <p>Note, the connector must be defined within mule configuration in order for it to be
  * injected with the application context.
  *
  * @author yitzhaki
