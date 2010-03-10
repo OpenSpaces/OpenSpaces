@@ -117,4 +117,8 @@ public class PuCapacityPlanner {
         
         return (machines.size());
     }
+    
+    public String getVmArguments() {
+        return (String)pu.getBeanLevelProperties().getContextProperties().get("vmArguments");
+    }
 }

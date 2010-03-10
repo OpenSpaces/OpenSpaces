@@ -120,6 +120,10 @@ public class EsmExecutor {
             }
         }
         
+        if (deployment.getContext().getVmInputArguments()!= null) {
+           spaceDeployment.setContextProperty("vmArguments", deployment.getContext().getVmInputArguments()); 
+        }
+        
         logger.finest("Deploying " + deployment.getDataGridName() 
                 + "\n\t Zone: " + zoneName 
                 + "\n\t Min Memory: " + context.getMinMemory()
@@ -422,12 +426,21 @@ public class EsmExecutor {
         private void startGscOnMachine(Machine machine) {
             logger.info("Scaling up - Starting GSC on machine ["+ToStringHelper.machineToString(machine)+"]");
             
+            GridServiceContainerOptions vmInputArgument = new GridServiceContainerOptions()
+                .vmInputArgument("-Xms" + puCapacityPlanner.getInitJavaHeapSize())
+                .vmInputArgument("-Xmx" + puCapacityPlanner.getMaxJavaHeapSize())
+                .vmInputArgument("-Dcom.gs.zones=" + puCapacityPlanner.getZoneName())
+                .vmInputArgument("-Dcom.gigaspaces.grid.gsc.serviceLimit=" + puCapacityPlanner.getScalingFactor());
+            
+            if (puCapacityPlanner.getVmArguments() != null) {
+                String[] vmArguments = puCapacityPlanner.getVmArguments().split(",");
+                for (String vmArgument : vmArguments) {
+                    vmInputArgument.vmInputArgument(vmArgument);
+                }
+            }
+            
             GridServiceContainer newGSC = machine.getGridServiceAgent().startGridServiceAndWait(
-                    new GridServiceContainerOptions()
-                        .vmInputArgument("-Xms" + puCapacityPlanner.getInitJavaHeapSize())
-                        .vmInputArgument("-Xmx" + puCapacityPlanner.getMaxJavaHeapSize())
-                        .vmInputArgument("-Dcom.gs.zones=" + puCapacityPlanner.getZoneName())
-                        .vmInputArgument("-Dcom.gigaspaces.grid.gsc.serviceLimit=" + puCapacityPlanner.getScalingFactor())
+                    vmInputArgument
                         , 60, TimeUnit.SECONDS);
             
             if (newGSC == null) {

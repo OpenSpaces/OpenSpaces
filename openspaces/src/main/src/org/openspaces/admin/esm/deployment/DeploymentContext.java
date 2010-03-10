@@ -11,6 +11,7 @@ public class DeploymentContext implements Serializable {
     private String slaDescriptors = "";
     private String initialJavaHeapSize = "512m";
     private String maximumJavaHeapSize = "512m";
+    private String vmInputArguments = null;
     
     DeploymentContext(){
     }
@@ -69,5 +70,17 @@ public class DeploymentContext implements Serializable {
     
     public String getMaximumJavaHeapSize() {
         return maximumJavaHeapSize;
+    }
+    
+    public void addVmArgument(String arg) {
+        if (vmInputArguments == null) {
+            vmInputArguments = arg;
+        } else {
+            vmInputArguments += "," + arg;
+        }
+    }
+    
+    public String getVmInputArguments() {
+        return vmInputArguments;
     }
 }

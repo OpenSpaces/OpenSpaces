@@ -90,6 +90,15 @@ public class ElasticDataGridDeployment implements Serializable {
     }
     
     /**
+     * Adds a JVM level argument to the container hosting a processing unit. Note that the {@link #initialJavaHeapSize(String)} and
+     * {@link #maximumJavaHeapSize(String)} already define the -Xms and -Xmx vm arguments.
+     */
+    public ElasticDataGridDeployment vmInputArgument(String vmInputArgument) {
+        this.context.addVmArgument(vmInputArgument);
+        return this;
+    }
+    
+    /**
      * @return The data grid name this deployment was constructed with.
      */
     public String getDataGridName() {
