@@ -1,6 +1,5 @@
 package org.openspaces.pu.container.servicegrid.jmxs;
 
-import java.util.Arrays;
 import java.util.Date;
 
 import javax.management.ListenerNotFoundException;
@@ -89,8 +88,8 @@ public class SecuredPUExtension implements MBeanRegistration, NotificationEmitte
     /*
      * @see com.gigaspaces.grid.security.gsa.SecuredGSAExtensionMBean#getLookupGroups()
      */
-    public String getLookupGroups() {
-        return Arrays.toString(mbean.getLookupGroups());
+    public String[] getLookupGroups() {
+        return mbean.getLookupGroups();
     }
 
     /*

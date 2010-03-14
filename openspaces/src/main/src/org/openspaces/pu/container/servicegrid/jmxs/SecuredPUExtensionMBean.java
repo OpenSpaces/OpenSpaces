@@ -19,5 +19,5 @@ public interface SecuredPUExtensionMBean {
     /**
      * Get the discovery groups
      */
-    String getLookupGroups();
+    String[] getLookupGroups();
 }
