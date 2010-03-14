@@ -110,6 +110,9 @@ public class ElasticDataGridDeployment implements Serializable {
      * unit configuration.
      */
     public ElasticDataGridDeployment addContextProperty(String key, String value) {
+        if (key.contains(";") || value.contains(";"))
+            throw new IllegalArgumentException("properties should not contain the ';' delimeter");
+        
         contextProperties.put(key, value);
         return this;
     }

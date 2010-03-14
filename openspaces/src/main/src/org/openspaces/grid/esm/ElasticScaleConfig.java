@@ -26,6 +26,9 @@ public class ElasticScaleConfig implements Serializable {
     }
     
     public ElasticScaleConfig addProperty(String key, String value) {
+        if (key.contains(";") || value.contains(";"))
+            throw new IllegalArgumentException("properties should not contain the ';' delimeter");
+        
         properties.setProperty(key, value);
         return this;
     }
