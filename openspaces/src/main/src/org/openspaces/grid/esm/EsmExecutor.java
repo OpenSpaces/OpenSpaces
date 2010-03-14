@@ -42,6 +42,7 @@ import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.SpaceRuntimeInfo;
+import com.j_spaces.kernel.ClassLoaderHelper;
 import com.j_spaces.kernel.TimeUnitProperty;
 
 public class EsmExecutor {
@@ -51,7 +52,6 @@ public class EsmExecutor {
     }
     
     private final static Logger logger = Logger.getLogger("org.openspaces.grid.esm");
-    private final static Logger eventsLogger = Logger.getLogger("org.openspaces.grid.esm.events");
     private final static long initialDelay = TimeUnitProperty.getProperty("org.openspaces.grid.esm.initialDelay", "5s");
     private final static long fixedDelay = TimeUnitProperty.getProperty("org.openspaces.grid.esm.fixedDelay", "5s");
     private final static int memorySafetyBufferInMB = MemorySettings.valueOf(System.getProperty("org.openspaces.grid.esm.memorySafetyBuffer", "100m")).toMB();
@@ -226,7 +226,7 @@ public class EsmExecutor {
         }
 
         ElasticScaleConfig elasticScaleConfig = ElasticScaleConfigSerializer.fromString(elasticScaleConfigStr);
-        Class<? extends OnDemandElasticScale> clazz = Thread.currentThread().getContextClassLoader().loadClass(elasticScaleConfig.getClassName()).asSubclass(OnDemandElasticScale.class);
+        Class<? extends OnDemandElasticScale> clazz = ClassLoaderHelper.loadClass(elasticScaleConfig.getClassName()).asSubclass(OnDemandElasticScale.class);
         OnDemandElasticScale newInstance = clazz.newInstance();
         newInstance.init(elasticScaleConfig);
 
@@ -307,7 +307,7 @@ public class EsmExecutor {
         public void run() {
             
             if (reachedMaxCapacity()) {
-                eventsLogger.warning("Reached Capacity Limit");
+                logger.warning("Reached Capacity Limit");
                 return;
             }
             
@@ -362,7 +362,7 @@ public class EsmExecutor {
             }
             
             if (needsNewMachine) {
-                eventsLogger.finest("Can't start a GSC on the available machines - needs a new machine.");
+                logger.finest("Can't start a GSC on the available machines - needs a new machine.");
                 ElasticScaleCommand elasticScaleCommand = new ElasticScaleCommand();
                 elasticScaleCommand.setMachines(machines);
                 puCapacityPlanner.getElasticScale().scaleOut(elasticScaleCommand);
@@ -602,7 +602,7 @@ public class EsmExecutor {
                 }
             }
             
-            eventsLogger.finest("Needs to scale up/out to obey memory SLA");
+            logger.finest("Needs to scale up/out to obey memory SLA");
             workflow.breakWorkflow();
             workflow.add(new StartGscHandler(puCapacityPlanner, workflow));
         }
