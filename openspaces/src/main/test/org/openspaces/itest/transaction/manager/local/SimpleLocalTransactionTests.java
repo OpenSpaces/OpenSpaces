@@ -56,57 +56,57 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
 
     public void testSimpleCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
-        assertNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace.read(new Object()));
-                gigaSpace.write(new Object());
-                assertNotNull(gigaSpace.read(new Object()));
+                assertNull(gigaSpace.read(new TestData1()));
+                gigaSpace.write(new TestData1());
+                assertNotNull(gigaSpace.read(new TestData1()));
             }
         });
-        assertNotNull(gigaSpace.read(new Object()));
+        assertNotNull(gigaSpace.read(new TestData1()));
     }
 
     public void testSimpleRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
-        assertNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace.read(new Object()));
-                gigaSpace.write(new Object());
-                assertNotNull(gigaSpace.read(new Object()));
+                assertNull(gigaSpace.read(new TestData1()));
+                gigaSpace.write(new TestData1());
+                assertNotNull(gigaSpace.read(new TestData1()));
                 transactionStatus.setRollbackOnly();
             }
         });
-        assertNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new TestData1()));
     }
 
     public void testTakeRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
-        assertNull(gigaSpace.read(new Object()));
-        gigaSpace.write(new Object());
-        assertNotNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new TestData1()));
+        gigaSpace.write(new TestData1());
+        assertNotNull(gigaSpace.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNotNull(gigaSpace.take(new Object()));
+                assertNotNull(gigaSpace.take(new TestData1()));
                 transactionStatus.setRollbackOnly();
             }
         });
-        assertNotNull(gigaSpace.take(new Object()));
+        assertNotNull(gigaSpace.take(new TestData1()));
     }
 
     public void testPropogationRequiredWithCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
-        assertNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new TestData2()));
         assertNull(gigaSpace.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace.read(new Object()));
+                assertNull(gigaSpace.read(new TestData2()));
                 assertNull(gigaSpace.read(new TestData1()));
 
-                gigaSpace.write(new Object());
+                gigaSpace.write(new TestData2());
 
-                assertNotNull(gigaSpace.read(new Object()));
+                assertNotNull(gigaSpace.read(new TestData2()));
                 assertNull(gigaSpace.read(new TestData1()));
 
                 TransactionTemplate innerTxTemplate = new TransactionTemplate(localTxManager);
@@ -121,23 +121,23 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
                 assertNotNull(gigaSpace.read(new TestData1()));
             }
         });
-        assertNotNull(gigaSpace.read(new Object()));
+        assertNotNull(gigaSpace.read(new TestData2()));
         assertNotNull(gigaSpace.read(new TestData1()));
     }
 
     public void testPropogationRequiredWithRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
-        assertNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new TestData2()));
         assertNull(gigaSpace.read(new TestData1()));
         try {
             txTemplate.execute(new TransactionCallbackWithoutResult() {
                 protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                    assertNull(gigaSpace.read(new Object()));
+                    assertNull(gigaSpace.read(new TestData2()));
                     assertNull(gigaSpace.read(new TestData1()));
 
-                    gigaSpace.write(new Object());
+                    gigaSpace.write(new TestData2());
 
-                    assertNotNull(gigaSpace.read(new Object()));
+                    assertNotNull(gigaSpace.read(new TestData2()));
                     assertNull(gigaSpace.read(new TestData1()));
 
                     TransactionTemplate innerTxTemplate = new TransactionTemplate(localTxManager);
@@ -157,21 +157,21 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
             // do nothing
         }
         assertNull(gigaSpace.read(new TestData1()));
-        assertNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new TestData2()));
     }
 
     public void testPropogationRequiresNewWithCommit() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
-        assertNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new TestData2()));
         assertNull(gigaSpace.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace.read(new Object()));
+                assertNull(gigaSpace.read(new TestData2()));
                 assertNull(gigaSpace.read(new TestData1()));
 
-                gigaSpace.write(new Object());
+                gigaSpace.write(new TestData2());
 
-                assertNotNull(gigaSpace.read(new Object()));
+                assertNotNull(gigaSpace.read(new TestData2()));
                 assertNull(gigaSpace.read(new TestData1()));
 
                 TransactionTemplate innerTxTemplate = new TransactionTemplate(localTxManager);
@@ -186,22 +186,53 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
                 assertNotNull(gigaSpace.read(new TestData1()));
             }
         });
-        assertNotNull(gigaSpace.read(new Object()));
+        assertNotNull(gigaSpace.read(new TestData2()));
+        assertNotNull(gigaSpace.read(new TestData1()));
+    }
+
+    public void testPropagationNotSupportedWithRollback() {
+        TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
+        assertNull(gigaSpace.read(new TestData2()));
+        assertNull(gigaSpace.read(new TestData1()));
+        txTemplate.execute(new TransactionCallbackWithoutResult() {
+            protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+                assertNull(gigaSpace.read(new TestData2()));
+                assertNull(gigaSpace.read(new TestData1()));
+
+                gigaSpace.write(new TestData2());
+
+                assertNotNull(gigaSpace.read(new TestData2()));
+                assertNull(gigaSpace.read(new TestData1()));
+
+                TransactionTemplate innerTxTemplate = new TransactionTemplate(localTxManager);
+                innerTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
+
+                innerTxTemplate.execute(new TransactionCallbackWithoutResult() {
+                    protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+                        gigaSpace.write(new TestData1());
+                    }
+                });
+
+                assertNotNull(gigaSpace.read(new TestData1()));
+                transactionStatus.setRollbackOnly();
+            }
+        });
+        assertNull(gigaSpace.read(new TestData2()));
         assertNotNull(gigaSpace.read(new TestData1()));
     }
 
     public void testPropogationRequiresNewWithRollback() {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
-        assertNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new TestData2()));
         assertNull(gigaSpace.read(new TestData1()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace.read(new Object()));
+                assertNull(gigaSpace.read(new TestData2()));
                 assertNull(gigaSpace.read(new TestData1()));
 
-                gigaSpace.write(new Object());
+                gigaSpace.write(new TestData2());
 
-                assertNotNull(gigaSpace.read(new Object()));
+                assertNotNull(gigaSpace.read(new TestData2()));
                 assertNull(gigaSpace.read(new TestData1()));
 
                 TransactionTemplate innerTxTemplate = new TransactionTemplate(localTxManager);
@@ -217,18 +248,18 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
                 assertNull(gigaSpace.read(new TestData1()));
             }
         });
-        assertNotNull(gigaSpace.read(new Object()));
+        assertNotNull(gigaSpace.read(new TestData2()));
         assertNull(gigaSpace.read(new TestData1()));
     }
 
     public void testSimpleExistingTransactionWithCommit() throws Exception {
         TransactionTemplate txTemplate = new TransactionTemplate(localTxManager);
-        assertNull(gigaSpace.read(new Object()));
+        assertNull(gigaSpace.read(new TestData2()));
         txTemplate.execute(new TransactionCallbackWithoutResult() {
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
-                assertNull(gigaSpace.read(new Object()));
-                gigaSpace.write(new Object());
-                assertNotNull(gigaSpace.read(new Object()));
+                assertNull(gigaSpace.read(new TestData2()));
+                gigaSpace.write(new TestData2());
+                assertNotNull(gigaSpace.read(new TestData2()));
 
                 final Transaction tx = gigaSpace.getCurrentTransaction();
 
@@ -270,7 +301,7 @@ public class SimpleLocalTransactionTests extends AbstractDependencyInjectionSpri
                 }
             }
         });
-        assertNotNull(gigaSpace.read(new Object()));
+        assertNotNull(gigaSpace.read(new TestData2()));
         assertNotNull(gigaSpace.read(new TestData1()));
     }
 }
