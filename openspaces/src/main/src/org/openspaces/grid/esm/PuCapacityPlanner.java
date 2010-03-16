@@ -27,8 +27,14 @@ public class PuCapacityPlanner {
         
         Properties contextProperties = pu.getBeanLevelProperties().getContextProperties();
 
-        initJavaHeapSize = contextProperties.getProperty("initialJavaHeapSize");
-        maxJavaHeapSize = contextProperties.getProperty("maximumJavaHeapSize");
+        String initialJavaHeapSize = contextProperties.getProperty("initialJavaHeapSize");
+        String maximumJavaHeapSize = contextProperties.getProperty("maximumJavaHeapSize");
+        if (MemorySettings.valueOf(initialJavaHeapSize).isGreaterThan(MemorySettings.valueOf(maximumJavaHeapSize))) {
+            initialJavaHeapSize = maximumJavaHeapSize;
+        }
+        
+        initJavaHeapSize = initialJavaHeapSize;
+        maxJavaHeapSize = maximumJavaHeapSize;
         
         minNumberOfGSCs = MemorySettings.valueOf(contextProperties.getProperty("minMemory")).floorDividedBy(maxJavaHeapSize);
         maxNumberOfGSCs = MemorySettings.valueOf(contextProperties.getProperty("maxMemory")).floorDividedBy(maxJavaHeapSize);

@@ -109,6 +109,13 @@ public class EsmExecutor {
             spaceDeployment.partitioned(numberOfParitions, 0);
         }
         
+        String initialJavaHeapSize = context.getInitialJavaHeapSize();
+        String maximumJavaHeapSize = context.getMaximumJavaHeapSize();
+        if (MemorySettings.valueOf(initialJavaHeapSize).isGreaterThan(MemorySettings.valueOf(maximumJavaHeapSize))) {
+            initialJavaHeapSize = maximumJavaHeapSize;
+        }
+        
+        
         spaceDeployment.setContextProperty("elastic", "true");
         spaceDeployment.setContextProperty("minMemory", context.getMinMemory());
         spaceDeployment.setContextProperty("maxMemory", context.getMaxMemory());
@@ -134,10 +141,10 @@ public class EsmExecutor {
         
         logger.finest("Deploying " + deployment.getDataGridName() 
                 + "\n\t Zone: " + zoneName 
-                + "\n\t Min Memory: " + context.getMinMemory()
+                + "\n\t Context: " + context.getMinMemory()
                 + "\n\t Max Memory: " + context.getMaxMemory()
-                + "\n\t Initial Java Heap Size: " + context.getInitialJavaHeapSize()
-                + "\n\t Maximum Java Heap Size: " + context.getMaximumJavaHeapSize()
+                + "\n\t Initial Java Heap Size: " + initialJavaHeapSize
+                + "\n\t Maximum Java Heap Size: " + maximumJavaHeapSize
                 + "\n\t Isolation Level: " + context.getIsolationLevel().name()
                 + "\n\t Highly Available? " + context.isHighlyAvailable()
                 + "\n\t Partitions: " + numberOfParitions
@@ -152,7 +159,7 @@ public class EsmExecutor {
             numberOfPartitions /= 2;
         }
         
-        return numberOfPartitions;
+        return Math.max(1, numberOfPartitions);
     }
     
     /**

@@ -83,6 +83,11 @@ public class MemorySettings {
         double result =  Math.ceil(dividedBy(memoryUnit));
         return (int)result;
     }
+    
+    public boolean isGreaterThan(MemorySettings other) {
+        double convertedSize = doConvert(other.index - index, other.size);
+        return this.size > convertedSize;
+    }
 
     public int toB() {
         return (int)doConvert(index - MemoryUnit.BYTES.ordinal(), size);
