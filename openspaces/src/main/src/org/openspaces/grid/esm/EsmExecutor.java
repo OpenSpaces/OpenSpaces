@@ -50,7 +50,15 @@ public class EsmExecutor {
     public static void main(String[] args) {
         new EsmExecutor();
     }
-    
+
+    /*
+     * FINEST   - step by step actions and decisions
+     * FINER    - 
+     * FINE     - 
+     * INFO     - actions user should know about
+     * WARNING  -
+     * SEVERE   -
+     */
     private final static Logger logger = Logger.getLogger("org.openspaces.grid.esm");
     private final static long initialDelay = TimeUnitProperty.getProperty("org.openspaces.grid.esm.initialDelay", "5s");
     private final static long fixedDelay = TimeUnitProperty.getProperty("org.openspaces.grid.esm.fixedDelay", "5s");
@@ -284,6 +292,7 @@ public class EsmExecutor {
         public void run() {
             logger.finest(UnderCapacityHandler.class.getSimpleName() + " invoked");
             if (underMinCapcity()) {
+                logger.info("Starting a minimum of ["+puCapacityPlanner.getMinNumberOfGSCs()+" GSCs");
                 workflow.breakWorkflow();
                 workflow.add(new StartGscHandler(puCapacityPlanner, workflow));
             }
@@ -361,7 +370,7 @@ public class EsmExecutor {
             }
             
             if (needsNewMachine) {
-                logger.finest("Can't start a GSC on the available machines - needs a new machine.");
+                logger.fine("Can't start a GSC on the available machines - needs a new machine.");
                 ElasticScaleHandlerContext elasticScaleCommand = new ElasticScaleHandlerContext();
                 elasticScaleCommand.setMachines(machines);
                 puCapacityPlanner.getElasticScale().scaleOut(elasticScaleCommand);
@@ -508,6 +517,7 @@ public class EsmExecutor {
             
             //nothing to do
             if (gscsWithBreach.isEmpty()) {
+                logger.finest("None of the GSCs breached above the threshold of [" + NUMBER_FORMAT.format(memorySla.getThreshold()) +"]" );
                 return;
             }
             
@@ -525,8 +535,11 @@ public class EsmExecutor {
 
             for (GridServiceContainer gsc : gscsWithBreach) {
 
-                logger.finer("GSC ["+ToStringHelper.gscToString(gsc)+"] has ["+gsc.getProcessingUnitInstances().length+"] processing unit instances");
-
+                double memoryHeapUsedPerc = gsc.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc();
+                logger.finest("Trying to handle GSC [" + ToStringHelper.gscToString(gsc) + "] - Memory ["
+                        + NUMBER_FORMAT.format(memoryHeapUsedPerc) + "%] with [" + gsc.getProcessingUnitInstances().length
+                        + "] processing units");
+                
                 for (ProcessingUnitInstance puInstanceToMaybeRelocate : gsc.getProcessingUnitInstances()) {
                     int estimatedMemoryHeapUsedPercPerInstance = getEstimatedMemoryHeapUsedPercPerInstance(gsc, puInstanceToMaybeRelocate);
                     logger.finer("Finding GSC that can hold [" + ToStringHelper.puInstanceToString(puInstanceToMaybeRelocate) + "] with an estimate of ["
@@ -593,7 +606,10 @@ public class EsmExecutor {
                         }
 
                         logger.finer("Found GSC [" + ToStringHelper.gscToString(gscToRelocateTo) + "] which has only ["+NUMBER_FORMAT.format(memoryHeapUsedByThisGsc)+"%] used.");
-                        logger.finer("Relocating ["+ToStringHelper.puInstanceToString(puInstanceToMaybeRelocate)+"] to GSC [" + ToStringHelper.gscToString(gscToRelocateTo) + "]");
+                        logger.info("Memory above threshold - Relocating ["
+                                + ToStringHelper.puInstanceToString(puInstanceToMaybeRelocate) + "] from GSC ["
+                                + ToStringHelper.gscToString(gsc) + "] to GSC ["
+                                + ToStringHelper.gscToString(gscToRelocateTo) + "]");
                         puInstanceToMaybeRelocate.relocateAndWait(gscToRelocateTo, 60, TimeUnit.SECONDS);
                         workflow.breakWorkflow();
                         return; //found a gsc
@@ -727,7 +743,10 @@ public class EsmExecutor {
 
 
                         logger.finer("Found GSC [" + ToStringHelper.gscToString(gscToRelocateTo) + "] which has only ["+NUMBER_FORMAT.format(memoryHeapUsedPercByThisGsc)+"%] used.");
-                        logger.finer("Relocating ["+ToStringHelper.puInstanceToString(puInstanceToMaybeRelocate)+"] to GSC [" + ToStringHelper.gscToString(gscToRelocateTo) + "]");
+                        logger.info("Memory below threshold - Relocating ["
+                                + ToStringHelper.puInstanceToString(puInstanceToMaybeRelocate) + "] from GSC ["
+                                + ToStringHelper.gscToString(gsc) + "] to GSC ["
+                                + ToStringHelper.gscToString(gscToRelocateTo) + "]");
                         puInstanceToMaybeRelocate.relocateAndWait(gscToRelocateTo, 60, TimeUnit.SECONDS);
                         workflow.breakWorkflow();
                         return;
@@ -797,12 +816,13 @@ public class EsmExecutor {
             int optimalNumberOfPrimariesPerMachine = (int)Math.ceil(1.0*puCapacityPlanner.getProcessingUnit().getNumberOfInstances() / puCapacityPlanner.getNumberOfMachinesInZone());
             int numPrimariesOnMachine = getNumPrimariesOnMachine(puCapacityPlanner, firstMachine);
             
-            logger.finest("Rebalancer - Expects " + optimalNumberOfPrimariesPerMachine + " primaries per machine");
             if (numPrimariesOnMachine > optimalNumberOfPrimariesPerMachine) {
-                logger.finest("Rebalancer - Machine [" + ToStringHelper.machineToString(firstMachine) + " has: " + numPrimariesOnMachine + " - rebalancing...");
+                logger.finer("Rebalancer - Expects [" + optimalNumberOfPrimariesPerMachine
+                        + "] primaries per machine; Machine [" + ToStringHelper.machineToString(firstMachine) + " has: "
+                        + numPrimariesOnMachine + " - rebalancing...");
                 findPrimaryProcessingUnitToRestart(puCapacityPlanner, machinesSortedByNumOfPrimaries);
             } else {
-                logger.finest("Rebalancer - Machines are balanced");
+                logger.finest("Rebalancer - Machines are balanced; ["+optimalNumberOfPrimariesPerMachine+"] per machine");
             }
         }
         
@@ -860,7 +880,7 @@ public class EsmExecutor {
                         if (isPrimary(puInstance)) {
                             ProcessingUnitInstance backup = puInstance.getPartition().getBackup();
                             if (backup == null) {
-                                logger.finest("---> no backup found for instance : " +ToStringHelper.puInstanceToString(puInstance));
+                                logger.finest("Skipping - no backup found yet for instance : " + ToStringHelper.puInstanceToString(puInstance));
                                 return; //something is wrong, wait for next reschedule
                             }
                             
@@ -914,7 +934,7 @@ public class EsmExecutor {
                 return;
             }
             
-            logger.finest("Restarting instance " + ToStringHelper.puInstanceToString(instance) + " at GSC " + ToStringHelper.gscToString(instance.getGridServiceContainer()));
+            logger.info("Rebalancing - Restarting instance " + ToStringHelper.puInstanceToString(instance) + " at GSC " + ToStringHelper.gscToString(instance.getGridServiceContainer()));
             ProcessingUnitInstance restartedInstance = instance.restartAndWait();
             workflow.breakWorkflow();
             
