@@ -2,7 +2,7 @@ package org.openspaces.grid.esm;
 
 import org.openspaces.admin.machine.Machine;
 
-public class NullOnDemandElasticScale implements ElasticScaleHandler {
+public class NullElasticScaleHandler implements ElasticScaleHandler {
 
     public void init(ElasticScaleConfig config) {
     }

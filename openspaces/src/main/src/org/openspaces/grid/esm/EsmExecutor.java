@@ -229,7 +229,7 @@ public class EsmExecutor {
         
         String elasticScaleConfigStr = pu.getBeanLevelProperties().getContextProperties().getProperty("elasticScaleConfig");
         if (elasticScaleConfigStr == null) {
-            return new NullOnDemandElasticScale();
+            return new NullElasticScaleHandler();
         }
 
         ElasticScaleConfig elasticScaleConfig = ElasticScaleConfigSerializer.fromString(elasticScaleConfigStr);
