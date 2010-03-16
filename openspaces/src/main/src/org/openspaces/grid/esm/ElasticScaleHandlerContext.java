@@ -5,7 +5,7 @@ import java.util.List;
 import org.openspaces.admin.machine.Machine;
 
 /**
- * Elastic scale command passed as a parameter on the call to {@link OnDemandElasticScale#scaleOut(ElasticScaleCommand)}.
+ * Elastic scale command passed as a parameter on the call to {@link ElasticScaleHandler#scaleOut(ElasticScaleCommand)}.
  * It holds details such as the set of machines currently discovered.
  * 
  * <blockquote>
@@ -16,7 +16,7 @@ import org.openspaces.admin.machine.Machine;
  * </pre>
  * </blockquote>
  */
-public class ElasticScaleCommand {
+public class ElasticScaleHandlerContext {
     private List<Machine> machines;
     
     //package level

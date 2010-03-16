@@ -58,7 +58,7 @@ public class EsmExecutor {
     private final static NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();
 
     //maps pu-name to elastic-scale impl
-    private final Map<String, OnDemandElasticScale> elasticScaleMap = new HashMap<String, OnDemandElasticScale>();
+    private final Map<String, ElasticScaleHandler> elasticScaleMap = new HashMap<String, ElasticScaleHandler>();
     
     private final Admin admin = new AdminFactory().createAdmin();
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
@@ -188,9 +188,8 @@ public class EsmExecutor {
                 if (Level.OFF.equals(logger.getLevel())) {
                     return; //turn off cruise control
                 }
-                logger.finest("ScheduledTask is running...");
+
                 ProcessingUnits processingUnits = admin.getProcessingUnits();
-                
                 for (ProcessingUnit pu : processingUnits) {
 
                     logger.finest(ToStringHelper.puToString(pu));
@@ -214,8 +213,8 @@ public class EsmExecutor {
         }
     }
     
-    private OnDemandElasticScale getOnDemandElasticScale(ProcessingUnit pu) throws Exception {
-        OnDemandElasticScale onDemandElasticScale = elasticScaleMap.get(pu.getName());
+    private ElasticScaleHandler getOnDemandElasticScale(ProcessingUnit pu) throws Exception {
+        ElasticScaleHandler onDemandElasticScale = elasticScaleMap.get(pu.getName());
         if (onDemandElasticScale != null) {
             return onDemandElasticScale;
         }
@@ -226,8 +225,8 @@ public class EsmExecutor {
         }
 
         ElasticScaleConfig elasticScaleConfig = ElasticScaleConfigSerializer.fromString(elasticScaleConfigStr);
-        Class<? extends OnDemandElasticScale> clazz = ClassLoaderHelper.loadClass(elasticScaleConfig.getClassName()).asSubclass(OnDemandElasticScale.class);
-        OnDemandElasticScale newInstance = clazz.newInstance();
+        Class<? extends ElasticScaleHandler> clazz = ClassLoaderHelper.loadClass(elasticScaleConfig.getClassName()).asSubclass(ElasticScaleHandler.class);
+        ElasticScaleHandler newInstance = clazz.newInstance();
         newInstance.init(elasticScaleConfig);
 
         elasticScaleMap.put(pu.getName(), newInstance);
@@ -363,7 +362,7 @@ public class EsmExecutor {
             
             if (needsNewMachine) {
                 logger.finest("Can't start a GSC on the available machines - needs a new machine.");
-                ElasticScaleCommand elasticScaleCommand = new ElasticScaleCommand();
+                ElasticScaleHandlerContext elasticScaleCommand = new ElasticScaleHandlerContext();
                 elasticScaleCommand.setMachines(machines);
                 puCapacityPlanner.getElasticScale().scaleOut(elasticScaleCommand);
             }

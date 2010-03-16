@@ -5,7 +5,7 @@ import java.util.Properties;
 
 
 /**
- * Elastic scale configuration to be passed to the {@link OnDemandElasticScale} implementation specified by the
+ * Elastic scale configuration to be passed to the {@link ElasticScaleHandler} implementation specified by the
  * <tt>onDemandElasticScaleClassName</tt> constructor parameter. Properties can be passed using the {@link #addProperty(String, String)}.
  * 
  * <blockquote>

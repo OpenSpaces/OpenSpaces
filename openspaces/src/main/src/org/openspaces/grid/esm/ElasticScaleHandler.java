@@ -14,7 +14,7 @@ import org.openspaces.admin.machine.Machine;
  * </pre>
  * </blockquote>
  */
-public interface OnDemandElasticScale {
+public interface ElasticScaleHandler {
     
     /**
      * An initialization call, parameterized with the configuration used at deployment.
@@ -40,10 +40,10 @@ public interface OnDemandElasticScale {
      * maintain the state and not allocate new resources before the pending allocations have
      * completed. When a new machine is started, it should start a Grid Service Agent (GSA).
      * 
-     * @param command
-     *            Command details
+     * @param context
+     *            Context details
      */
-    public void scaleOut(ElasticScaleCommand command);
+    public void scaleOut(ElasticScaleHandlerContext context);
     
     /**
      * A scale in request to terminate a machine. Implementation may choose to ignore it, or decide to terminate

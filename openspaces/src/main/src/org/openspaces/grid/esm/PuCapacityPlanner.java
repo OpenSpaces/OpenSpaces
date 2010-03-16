@@ -19,9 +19,9 @@ public class PuCapacityPlanner {
     private final String zoneName;
     private final String maxJavaHeapSize;
     private final String initJavaHeapSize;
-    private final OnDemandElasticScale elasticScale;
+    private final ElasticScaleHandler elasticScale;
 
-    public PuCapacityPlanner(ProcessingUnit pu, OnDemandElasticScale elasticScale) {
+    public PuCapacityPlanner(ProcessingUnit pu, ElasticScaleHandler elasticScale) {
         this.pu = pu;
         this.elasticScale = elasticScale;
         
@@ -81,7 +81,7 @@ public class PuCapacityPlanner {
         return pu;
     }
     
-    public OnDemandElasticScale getElasticScale() {
+    public ElasticScaleHandler getElasticScale() {
         return elasticScale;
     }
     
