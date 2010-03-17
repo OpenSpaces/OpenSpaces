@@ -259,7 +259,7 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
             try {
                 eventData = ((EntryArrivedRemoteEvent) remoteEvent).getObject();
             } catch (net.jini.core.entry.UnusableEntryException e) {
-                throw new UnusableEntryException("Failute to get object from event [" + remoteEvent + "]", e);
+                throw new UnusableEntryException("Failure to get object from event [" + remoteEvent + "]", e);
             }
             if (logger.isTraceEnabled()) {
                 logger.trace(message("Received event [" + eventData + "]"));
