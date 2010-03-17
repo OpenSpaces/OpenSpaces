@@ -678,7 +678,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
                     try {
                         eventData[i] = ((EntryArrivedRemoteEvent) events[i]).getObject();
                     } catch (net.jini.core.entry.UnusableEntryException e) {
-                        throw new UnusableEntryException("Failute to get object from event [" + events[i] + "]", e);
+                        throw new UnusableEntryException("Failure to get object from event [" + events[i] + "]", e);
                     }
                     if (logger.isTraceEnabled()) {
                         logger.trace(message("Received event [" + eventData[i] + "]"));
