@@ -103,8 +103,8 @@ InitializingBean, EventListenerAdapter {
     /**
      * Controls if the listener will be invoked using fast reflection or not. Defaults to <code>true</code>.
      */
-    public void setUseFastRefelction(boolean useFastRefelction) {
-        this.useFastRefelction = useFastRefelction;
+    public void setUseFastReflection(boolean useFastReflection) {
+        this.useFastRefelction = useFastReflection;
     }
 
     public void afterPropertiesSet() {
