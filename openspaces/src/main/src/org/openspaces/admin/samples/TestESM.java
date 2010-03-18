@@ -18,12 +18,13 @@ public class TestESM {
             ElasticServiceManager elasticServiceManager = admin.getElasticServiceManagers().waitForAtLeastOne();
 
             System.out.println("found esm, deploying");
+            
             ProcessingUnit pu = elasticServiceManager.
             deploy(new ElasticDataGridDeployment("mygrid")
-            .elasticity("2g", "6g")
+            .elasticity("10m", "100m")
             .maximumJavaHeapSize("1g")
-            .addSla(new MemorySla(40))
-            //.elasticScaleConfig(new ElasticScaleConfig(PcLabOnDemandElasticScale.class.getName()).addProperty("machines", "pc-lab12,pc-lab13"))
+            .addSla(new MemorySla("40%"))
+//            .elasticScaleConfig(new ElasticScaleConfig(PcLabOnDemandElasticScale.class.getName()).addProperty("machines", "pc-lab12,pc-lab13"))
             
             );
             

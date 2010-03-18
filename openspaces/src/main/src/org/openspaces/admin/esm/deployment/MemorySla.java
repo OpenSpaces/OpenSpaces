@@ -15,8 +15,12 @@ public class MemorySla implements SLA {
     
     private final int threshold;
 
-    public MemorySla(int threshold) {
-        this.threshold = threshold;
+    public MemorySla(String threshold) {
+        if (!threshold.endsWith("%")) {
+            throw new IllegalArgumentException("Memory SLA argument should end with a precentail; e.g. 70%");
+        }
+        String value = threshold.substring(0, threshold.length() -1);
+        this.threshold = Integer.valueOf(value);
     }
     
     public int getThreshold() {

@@ -134,7 +134,7 @@ public class ElasticDataGridDeployment implements Serializable {
     public ElasticDataGridDeployment addSla(SLA sla) {
         String descriptor = "";
         if (sla instanceof MemorySla) {
-            descriptor = "sla="+MemorySla.class.getSimpleName() + ",threshold="+((MemorySla)sla).getThreshold()+"/";
+            descriptor = "sla="+MemorySla.class.getSimpleName() + ",threshold="+((MemorySla)sla).getThreshold()+"%/";
         }
         this.context.addSla(descriptor);
         return this;

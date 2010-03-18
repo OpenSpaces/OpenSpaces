@@ -22,7 +22,7 @@ public class SlaExtractor {
             if (sla.equals(MemorySla.class.getSimpleName())) {
                 beginIndex = s.indexOf("threshold=", endIndex)+"threshold=".length();
                 String threshold = s.substring(beginIndex);
-                memorySla = new MemorySla(Integer.valueOf(threshold));
+                memorySla = new MemorySla(threshold);
             }
         }
     }

@@ -82,13 +82,11 @@ public class EsmExecutor {
             
         NUMBER_FORMAT.setMinimumFractionDigits(1);
         NUMBER_FORMAT.setMaximumFractionDigits(2);
-        
-        String loggerProp = System.getProperty("logger.level");
-        if (loggerProp != null)
-            logger.setLevel(Level.parse(loggerProp));
-        
-        logger.config("Initial Delay: " + initialDelay + " ms");
-        logger.config("Fixed Delay: " + fixedDelay + " ms");
+
+        if (logger.isLoggable(Level.CONFIG)) {
+            logger.config("Initial Delay: " + initialDelay + " ms");
+            logger.config("Fixed Delay: " + fixedDelay + " ms");
+        }
         
         if (Boolean.valueOf(System.getProperty("esm.enabled", "true"))) {
             executorService.scheduleWithFixedDelay(new ScheduledTask(), initialDelay, fixedDelay, TimeUnit.MILLISECONDS);
@@ -299,7 +297,7 @@ public class EsmExecutor {
         public void run() {
             logger.finest(UnderCapacityHandler.class.getSimpleName() + " invoked");
             if (underMinCapcity()) {
-                logger.info("Starting a minimum of ["+puCapacityPlanner.getMinNumberOfGSCs()+" GSCs");
+                logger.info("Starting a minimum of ["+puCapacityPlanner.getMinNumberOfGSCs()+"] GSCs");
                 workflow.breakWorkflow();
                 workflow.add(new StartGscHandler(puCapacityPlanner, workflow));
             }
