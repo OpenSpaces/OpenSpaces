@@ -18,7 +18,7 @@ public class ToStringHelper {
         .append("\n\tBackups: ").append(pu.getNumberOfBackups())
         .append("\n\tInstances per-machine: ").append(pu.getMaxInstancesPerMachine())
         .append("\n\tPlanned instances: ").append(pu.getTotalNumberOfInstances())
-        .append("\n\tActual instances: ").append(pu.getProcessingUnitInstances().length)
+        .append("\n\tActual instances: ").append(pu.getInstances().length)
         .append("\n\tDeployment status: ").append(pu.getStatus())
         ;
         return sb.toString();
