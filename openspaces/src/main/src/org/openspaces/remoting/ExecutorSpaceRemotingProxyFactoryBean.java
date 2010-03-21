@@ -131,7 +131,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
 
     /**
      * If set the <code>true</code> (defaults to <code>false</code>) causes the remote invocation
-     * to be called on all active (primary) cluster memebers.
+     * to be called on all active (primary) cluster members.
      */
     public void setBroadcast(boolean broadcast) {
         this.broadcast = broadcast;
