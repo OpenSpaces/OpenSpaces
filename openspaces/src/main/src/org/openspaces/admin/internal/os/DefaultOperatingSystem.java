@@ -65,13 +65,19 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
                 public void run() {
                     long localTimestamp = System.currentTimeMillis();
                     long machineCurrentTimestamp = getCurrentTimeInMillis();
-                    if (machineCurrentTimestamp != -1) {
-                        timeDelta = localTimestamp - machineCurrentTimestamp;
-                    } else {
+                    if ((System.currentTimeMillis() - localTimestamp) > 200) {
+                        // if it took more than 200 millisecond to get the timestamp, something is slow with the network
+                        // try and fetch the delta again
                         admin.getScheduler().schedule(this, 50, TimeUnit.MILLISECONDS);
+                    } else {
+                        if (machineCurrentTimestamp != -1) {
+                            timeDelta = localTimestamp - machineCurrentTimestamp;
+                        } else {
+                            admin.getScheduler().schedule(this, 50, TimeUnit.MILLISECONDS);
+                        }
                     }
                 }
-            }, 1, TimeUnit.MILLISECONDS);
+            }, 10, TimeUnit.MILLISECONDS);
         }
     }
 

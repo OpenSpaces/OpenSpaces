@@ -110,6 +110,7 @@ public class TestSampler {
                                 "] backupId [" + spaceInstance.getBackupId() + "] Mode [" + spaceInstance.getMode() + "]");
                         System.out.println("         -> Host: " + spaceInstance.getMachine().getHostAddress());
                         System.out.println("         -> Stats: Write [" + spaceInstance.getStatistics().getWriteCount() + "/" + spaceInstance.getStatistics().getWritePerSecond() + "]");
+                        System.out.println("         -> Stats: Read [" + spaceInstance.getStatistics().getReadCount() + "/" + spaceInstance.getStatistics().getReadPerSecond() + "]");
                     }
                     for (SpacePartition spacePartition : space.getPartitions()) {
                         System.out.println("   -> Partition [" + spacePartition.getPartitiondId() + "]");
