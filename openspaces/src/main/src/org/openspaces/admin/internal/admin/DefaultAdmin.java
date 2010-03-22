@@ -251,8 +251,8 @@ public class DefaultAdmin implements InternalAdmin {
             eventsQueue[i] = new LinkedList<Runnable>();
         }
 
-        discoveryService.start();
         this.scheduledExecutorService = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(5);
+        discoveryService.start();
         scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(
                 new ScheduledProcessingUnitMonitor(), scheduledProcessingUnitMonitorInterval, scheduledProcessingUnitMonitorInterval, TimeUnit.MILLISECONDS);
         scheduledAgentProcessessMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(new ScheduledAgentProcessessMonitor(),
