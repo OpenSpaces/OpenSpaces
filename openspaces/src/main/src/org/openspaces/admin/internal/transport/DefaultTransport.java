@@ -127,7 +127,7 @@ public class DefaultTransport implements InternalTransport {
     public synchronized void setStatisticsInterval(long interval, TimeUnit timeUnit) {
         this.statisticsInterval = timeUnit.toMillis(interval);
         if (scheduledStatisticsMonitor != null) {
-            stopStatisticsMontior();
+            stopStatisticsMonitor();
             startStatisticsMonitor();
         }
     }
@@ -151,7 +151,7 @@ public class DefaultTransport implements InternalTransport {
         }, 0, statisticsInterval, TimeUnit.MILLISECONDS);
     }
 
-    public synchronized void stopStatisticsMontior() {
+    public synchronized void stopStatisticsMonitor() {
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
             scheduledStatisticsMonitor = null;

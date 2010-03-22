@@ -146,13 +146,13 @@ public class DefaultTransports implements InternalTransports {
         }
     }
 
-    public synchronized void stopStatisticsMontior() {
+    public synchronized void stopStatisticsMonitor() {
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
             scheduledStatisticsMonitor = null;
         }
         for (Transport transport : transportsByUID.values()) {
-            transport.stopStatisticsMontior();
+            transport.stopStatisticsMonitor();
         }
     }
 
@@ -202,7 +202,7 @@ public class DefaultTransports implements InternalTransports {
         if (transport == null) {
             return;
         }
-        transport.stopStatisticsMontior();
+        transport.stopStatisticsMonitor();
 
         Set<Transport> transportByHost = transportsByHost.get(transport.getBindHost());
         if (transportByHost == null) {

@@ -136,13 +136,13 @@ public class DefaultSpace implements InternalSpace {
         }
     }
 
-    public synchronized void stopStatisticsMontior() {
+    public synchronized void stopStatisticsMonitor() {
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
             scheduledStatisticsMonitor = null;
         }
         for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
-            spaceInstance.stopStatisticsMontior();
+            spaceInstance.stopStatisticsMonitor();
         }
     }
 
@@ -317,7 +317,7 @@ public class DefaultSpace implements InternalSpace {
     public InternalSpaceInstance removeInstance(String uid) {
         InternalSpaceInstance spaceInstance = (InternalSpaceInstance) spaceInstancesByUID.remove(uid);
         if (spaceInstance != null) {
-            spaceInstance.stopStatisticsMontior();
+            spaceInstance.stopStatisticsMonitor();
             getPartition(spaceInstance).removeSpaceInstance(uid);
             spaceInstanceRemovedEventManager.spaceInstanceRemoved(spaceInstance);
             ((InternalSpaceInstanceRemovedEventManager) spaces.getSpaceInstanceRemoved()).spaceInstanceRemoved(spaceInstance);

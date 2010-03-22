@@ -230,13 +230,13 @@ public class DefaultAdmin implements InternalAdmin {
         this.processingUnits.startStatisticsMonitor();
     }
 
-    public synchronized void stopStatisticsMontior() {
+    public synchronized void stopStatisticsMonitor() {
         scheduledStatisticsMonitor = false;
-        this.spaces.stopStatisticsMontior();
-        this.virtualMachines.stopStatisticsMontior();
-        this.transports.stopStatisticsMontior();
-        this.operatingSystems.stopStatisticsMontior();
-        this.processingUnits.stopStatisticsMontior();
+        this.spaces.stopStatisticsMonitor();
+        this.virtualMachines.stopStatisticsMonitor();
+        this.transports.stopStatisticsMonitor();
+        this.operatingSystems.stopStatisticsMonitor();
+        this.processingUnits.stopStatisticsMonitor();
     }
 
     public boolean isMonitoring() {

@@ -120,13 +120,13 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
         }
     }
 
-    public synchronized void stopStatisticsMontior() {
+    public synchronized void stopStatisticsMonitor() {
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
             scheduledStatisticsMonitor = null;
         }
         for (OperatingSystem operatingSystem : operatingSystemsByUID.values()) {
-            operatingSystem.stopStatisticsMontior();
+            operatingSystem.stopStatisticsMonitor();
         }
     }
 
@@ -177,7 +177,7 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
     public void removeOperatingSystem(String uid) {
         OperatingSystem existing = operatingSystemsByUID.remove(uid);
         if (existing != null) {
-            existing.stopStatisticsMontior();
+            existing.stopStatisticsMonitor();
         }
     }
 }

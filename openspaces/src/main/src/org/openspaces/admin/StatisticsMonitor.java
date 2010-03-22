@@ -63,7 +63,7 @@ public interface StatisticsMonitor {
     /**
      * Stops the statistics monitor.
      */
-    void stopStatisticsMontior();
+    void stopStatisticsMonitor();
 
     /**
      * Returns <code>true</code> if statistics are now being monitored.

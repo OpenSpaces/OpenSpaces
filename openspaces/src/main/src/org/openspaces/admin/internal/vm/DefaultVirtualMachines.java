@@ -153,13 +153,13 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
         }
     }
 
-    public synchronized void stopStatisticsMontior() {
+    public synchronized void stopStatisticsMonitor() {
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
             scheduledStatisticsMonitor = null;
         }
         for (VirtualMachine virtualMachine : virtualMachinesByUID.values()) {
-            virtualMachine.stopStatisticsMontior();
+            virtualMachine.stopStatisticsMonitor();
         }
     }
 
@@ -213,7 +213,7 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
     public InternalVirtualMachine removeVirtualMachine(String uid) {
         final InternalVirtualMachine existingVM = (InternalVirtualMachine) virtualMachinesByUID.remove(uid);
         if (existingVM != null) {
-            existingVM.stopStatisticsMontior();
+            existingVM.stopStatisticsMonitor();
             virtualMachineRemovedEventManager.virtualMachineRemoved(existingVM);
         }
         return existingVM;

@@ -91,10 +91,10 @@ public class DefaultSpaces implements InternalSpaces {
         }
     }
 
-    public void stopStatisticsMontior() {
+    public void stopStatisticsMonitor() {
         scheduledStatisticsMonitor = false;
         for (Space space : spacesByUID.values()) {
-            space.stopStatisticsMontior();
+            space.stopStatisticsMonitor();
         }
     }
 
@@ -226,7 +226,7 @@ public class DefaultSpaces implements InternalSpaces {
     public synchronized InternalSpace removeSpace(String uid) {
         Space space = spacesByUID.remove(uid);
         if (space != null) {
-            space.stopStatisticsMontior();
+            space.stopStatisticsMonitor();
             spacesByName.remove(space.getName());
             spaceRemovedEventManager.spaceRemoved(space);
         }

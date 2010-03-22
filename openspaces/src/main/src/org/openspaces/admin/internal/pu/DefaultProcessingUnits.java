@@ -197,7 +197,7 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
     public void removeProcessingUnit(String name) {
         final ProcessingUnit existingProcessingUnit = processingUnits.remove(name);
         if (existingProcessingUnit != null) {
-            existingProcessingUnit.stopStatisticsMontior();
+            existingProcessingUnit.stopStatisticsMonitor();
             processingUnitRemovedEventManager.processingUnitRemoved(existingProcessingUnit);
         }
     }
@@ -227,10 +227,10 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
         }
     }
 
-    public void stopStatisticsMontior() {
+    public void stopStatisticsMonitor() {
         scheduledStatisticsMonitor = false;
         for (ProcessingUnit processingUnit : processingUnits.values()) {
-            processingUnit.stopStatisticsMontior();
+            processingUnit.stopStatisticsMonitor();
         }
     }
 
