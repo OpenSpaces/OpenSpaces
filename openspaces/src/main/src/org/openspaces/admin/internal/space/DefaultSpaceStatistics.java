@@ -12,14 +12,14 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
 
     private final SpaceInstanceStatistics[] stats;
 
-    private volatile SpaceStatistics previos;
+    private volatile SpaceStatistics previous;
 
-    public DefaultSpaceStatistics(SpaceInstanceStatistics[] stats, SpaceStatistics previos, int historySize) {
+    public DefaultSpaceStatistics(SpaceInstanceStatistics[] stats, SpaceStatistics previous, int historySize) {
         this.stats = stats;
         this.timestamp = System.currentTimeMillis();
-        this.previos = previos;
+        this.previous = previous;
 
-        SpaceStatistics lastStats = previos;
+        SpaceStatistics lastStats = previous;
         if (lastStats != null) {
             for (int i = 0; i < historySize; i++) {
                 if (lastStats.getPrevious() == null) {
@@ -36,11 +36,11 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     }
 
     public SpaceStatistics getPrevious() {
-        return previos;
+        return previous;
     }
 
-    public void setPrevious(SpaceStatistics previos) {
-        this.previos = previos;
+    public void setPrevious(SpaceStatistics previous) {
+        this.previous = previous;
     }
 
     public int getSize() {
@@ -54,7 +54,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public long getWriteCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getWriteCount();
+            if (!stat.isNA()) {
+                total += stat.getWriteCount();
+            }
         }
         return total;
     }
@@ -62,7 +64,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public double getWritePerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getWritePerSecond();
+            if (!stat.isNA()) {
+                total += stat.getWritePerSecond();
+            }
         }
         return total;
     }
@@ -70,7 +74,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public long getReadCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getReadCount();
+            if (stat.isNA()) {
+                total += stat.getReadCount();
+            }
         }
         return total;
     }
@@ -78,7 +84,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public double getReadPerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getReadPerSecond();
+            if (!stat.isNA()) {
+                total += stat.getReadPerSecond();
+            }
         }
         return total;
     }
@@ -86,7 +94,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public long getTakeCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getTakeCount();
+            if (!stat.isNA()) {
+                total += stat.getTakeCount();
+            }
         }
         return total;
     }
@@ -94,7 +104,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public double getTakePerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getTakePerSecond();
+            if (!stat.isNA()) {
+                total += stat.getTakePerSecond();
+            }
         }
         return total;
     }
@@ -102,7 +114,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public long getNotifyRegistrationCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getNotifyRegistrationCount();
+            if (!stat.isNA()) {
+                total += stat.getNotifyRegistrationCount();
+            }
         }
         return total;
     }
@@ -110,7 +124,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public double getNotifyRegistrationPerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getNotifyRegistrationPerSecond();
+            if (!stat.isNA()) {
+                total += stat.getNotifyRegistrationPerSecond();
+            }
         }
         return total;
     }
@@ -118,7 +134,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public long getCleanCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getNotifyTriggerCount();
+            if (!stat.isNA()) {
+                total += stat.getCleanCount();
+            }
         }
         return total;
     }
@@ -126,7 +144,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public double getCleanPerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getCleanPerSecond();
+            if (!stat.isNA()) {
+                total += stat.getCleanPerSecond();
+            }
         }
         return total;
     }
@@ -134,7 +154,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public long getUpdateCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getUpdateCount();
+            if (!stat.isNA()) {
+                total += stat.getUpdateCount();
+            }
         }
         return total;
     }
@@ -142,7 +164,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public double getUpdatePerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getUpdatePerSecond();
+            if (!stat.isNA()) {
+                total += stat.getUpdatePerSecond();
+            }
         }
         return total;
     }
@@ -150,7 +174,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public long getNotifyTriggerCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getNotifyTriggerCount();
+            if (!stat.isNA()) {
+                total += stat.getNotifyTriggerCount();
+            }
         }
         return total;
     }
@@ -158,7 +184,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public double getNotifyTriggerPerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getNotifyRegistrationPerSecond();
+            if (!stat.isNA()) {
+                total += stat.getNotifyRegistrationPerSecond();
+            }
         }
         return total;
     }
@@ -166,7 +194,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public long getNotifyAckCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getNotifyAckCount();
+            if (!stat.isNA()) {
+                total += stat.getNotifyAckCount();
+            }
         }
         return total;
     }
@@ -174,7 +204,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public double getNotifyAckPerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getNotifyAckPerSecond();
+            if (!stat.isNA()) {
+                total += stat.getNotifyAckPerSecond();
+            }
         }
         return total;
     }
@@ -182,7 +214,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public long getExecuteCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getExecuteCount();
+            if (!stat.isNA()) {
+                total += stat.getExecuteCount();
+            }
         }
         return total;
     }
@@ -190,7 +224,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public double getExecutePerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getExecutePerSecond();
+            if (!stat.isNA()) {
+                total += stat.getExecutePerSecond();
+            }
         }
         return total;
     }
@@ -198,7 +234,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public long getRemoveCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getRemoveCount();
+            if (!stat.isNA()) {
+                total += stat.getRemoveCount();
+            }
         }
         return total;
     }
@@ -206,7 +244,9 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public double getRemovePerSecond() {
         double total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            total += stat.getRemovePerSecond();
+            if (!stat.isNA()) {
+                total += stat.getRemovePerSecond();
+            }
         }
         return total;
     }
