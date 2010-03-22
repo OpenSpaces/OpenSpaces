@@ -132,6 +132,10 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
         return esm.getNIOStatistics();
     }
 
+    public long getCurrentTimeInMillis() throws RemoteException {
+        return esm.getCurrentTimestamp();
+    }
+
     public OSDetails getOSDetails() throws RemoteException {
         return esm.getOSDetails();
     }

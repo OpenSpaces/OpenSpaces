@@ -111,6 +111,10 @@ public class DefaultLookupService extends AbstractAgentGridComponent implements 
         return ((NIOInfoProvider) registrar.getRegistrar()).getNIOStatistics();
     }
 
+    public long getCurrentTimeInMillis() throws RemoteException {
+        return ((OSInfoProvider) registrar.getRegistrar()).getCurrentTimestamp();
+    }
+
     public OSDetails getOSDetails() throws RemoteException {
         return ((OSInfoProvider) registrar.getRegistrar()).getOSDetails();
     }

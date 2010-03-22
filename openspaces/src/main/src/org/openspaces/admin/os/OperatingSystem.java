@@ -35,6 +35,17 @@ public interface OperatingSystem extends AdminAware, StatisticsMonitor {
     String getUid();
 
     /**
+     * Returns the delta between a current time taken on the admin API side, and the
+     * current time assumed by the remote machine.
+     */
+    long getTimeDelta();
+
+    /**
+     * Returns the current time of the machine in millis.
+     */
+    long getCurrentTimeInMillis();
+
+    /**
      * Returns details (static view) of the operating system.
      */
     OperatingSystemDetails getDetails();

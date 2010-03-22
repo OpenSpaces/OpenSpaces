@@ -18,6 +18,8 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
 
     private static final OSStatistics NA_STATS = new OSStatistics();
 
+    private final long timeDelta;
+
     private final OSStatistics stats;
 
     private final OperatingSystemDetails details;
@@ -25,14 +27,15 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
     private volatile OperatingSystemStatistics previosStats;
 
     public DefaultOperatingSystemStatistics() {
-        this(NA_STATS, null, null, 0);
+        this(NA_STATS, null, null, 0, -1);
     }
 
     public DefaultOperatingSystemStatistics(OSStatistics stats, OperatingSystemDetails details, OperatingSystemStatistics previosStats,
-                                            int historySize) {
+                                            int historySize, long timeDelta) {
         this.stats = stats;
         this.details = details;
         this.previosStats = previosStats;
+        this.timeDelta = timeDelta;
         OperatingSystemStatistics lastStats = previosStats;
         if (lastStats != null) {
             for (int i = 0; i < historySize; i++) {
@@ -62,6 +65,13 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
 
     public long getTimestamp() {
         return stats.getTimestamp();
+    }
+
+    public long getAdminTimestamp() {
+        if (stats.getTimestamp() != -1 && timeDelta != -1) {
+            return stats.getTimestamp() + timeDelta;
+        }
+        return -1;
     }
 
     public OperatingSystemDetails getDetails() {

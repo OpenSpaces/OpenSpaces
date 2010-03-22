@@ -37,6 +37,11 @@ public interface OperatingSystemStatistics {
     long getTimestamp();
 
     /**
+     * Returns a timestamp that is in sync with where the admin API is running.
+     */
+    long getAdminTimestamp();
+
+    /**
      * Returns the operating system details.
      */
     OperatingSystemDetails getDetails();

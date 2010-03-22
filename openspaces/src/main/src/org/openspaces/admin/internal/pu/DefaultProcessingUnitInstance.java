@@ -544,6 +544,10 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         return puServiceBean.getNIOStatistics();
     }
 
+    public long getCurrentTimeInMillis() throws RemoteException {
+        return puServiceBean.getCurrentTimestamp();
+    }
+
     public OSDetails getOSDetails() throws RemoteException {
         return puServiceBean.getOSDetails();
     }

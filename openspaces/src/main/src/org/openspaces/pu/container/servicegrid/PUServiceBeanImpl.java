@@ -1101,6 +1101,10 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         return NIOInfoHelper.getNIOStatistics();
     }
 
+    public long getCurrentTimestamp() throws RemoteException {
+        return System.currentTimeMillis();
+    }
+
     public OSDetails getOSDetails() throws RemoteException {
         return OSHelper.getDetails();
     }

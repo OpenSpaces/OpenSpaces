@@ -412,6 +412,13 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         return puService.getNIOStatistics();
     }
 
+    public long getCurrentTimeInMillis() throws RemoteException {
+        if (spaceAdmin != null) {
+            return spaceAdmin.getCurrentTimestamp();
+        }
+        return puService.getCurrentTimestamp();
+    }
+
     public OSDetails getOSDetails() throws RemoteException {
         if (spaceAdmin != null) {
             return spaceAdmin.getOSDetails();

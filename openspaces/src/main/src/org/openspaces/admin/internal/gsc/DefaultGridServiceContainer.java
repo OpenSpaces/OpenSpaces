@@ -185,6 +185,10 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
         return gsc.getNIOStatistics();
     }
 
+    public long getCurrentTimeInMillis() throws RemoteException {
+        return gsc.getCurrentTimestamp();
+    }
+
     public OSDetails getOSDetails() throws RemoteException {
         return gsc.getOSDetails();
     }

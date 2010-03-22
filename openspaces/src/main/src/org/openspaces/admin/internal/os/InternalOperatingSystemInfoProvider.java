@@ -10,6 +10,8 @@ import java.rmi.RemoteException;
  */
 public interface InternalOperatingSystemInfoProvider extends InternalOperatingSystemAware {
 
+    long getCurrentTimeInMillis() throws RemoteException;
+
     OSDetails getOSDetails() throws RemoteException;
 
     OSStatistics getOSStatistics() throws RemoteException;

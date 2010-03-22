@@ -254,6 +254,10 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         return gsm.getNIOStatistics();
     }
 
+    public long getCurrentTimeInMillis() throws RemoteException {
+        return gsm.getCurrentTimestamp();
+    }
+
     public OSDetails getOSDetails() throws RemoteException {
         return gsm.getOSDetails();
     }

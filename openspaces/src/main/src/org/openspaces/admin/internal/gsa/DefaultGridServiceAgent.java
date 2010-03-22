@@ -400,6 +400,10 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
         return gsa.getNIOStatistics();
     }
 
+    public long getCurrentTimeInMillis() throws RemoteException {
+        return gsa.getCurrentTimestamp();
+    }
+
     public OSDetails getOSDetails() throws RemoteException {
         return gsa.getOSDetails();
     }

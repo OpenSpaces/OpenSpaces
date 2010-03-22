@@ -46,6 +46,8 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
 
     private Future scheduledStatisticsMonitor;
 
+    private volatile long timeDelta = -1;
+
     public DefaultOperatingSystem(OSDetails osDetails, InternalOperatingSystems operatingSystems) {
         this.details = new DefaultOperatingSystemDetails(osDetails);
         this.uid = details.getUid();
@@ -57,6 +59,20 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
         }
 
         this.statisticsChangedEventManager = new DefaultOperatingSystemStatisticsChangedEventManager(admin, this);
+        if (admin != null) {
+            // compute the time delta on a thread pool
+            admin.getScheduler().schedule(new Runnable() {
+                public void run() {
+                    long localTimestamp = System.currentTimeMillis();
+                    long machineCurrentTimestamp = getCurrentTimeInMillis();
+                    if (machineCurrentTimestamp != -1) {
+                        timeDelta = localTimestamp - machineCurrentTimestamp;
+                    } else {
+                        admin.getScheduler().schedule(this, 50, TimeUnit.MILLISECONDS);
+                    }
+                }
+            }, 1, TimeUnit.MILLISECONDS);
+        }
     }
 
     public Admin getAdmin() {
@@ -79,6 +95,21 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
         return this.uid;
     }
 
+    public long getTimeDelta() {
+        return timeDelta;
+    }
+
+    public long getCurrentTimeInMillis() {
+        for (InternalOperatingSystemInfoProvider provider : operatingSystemInfoProviders) {
+            try {
+                return provider.getCurrentTimeInMillis();
+            } catch (RemoteException e) {
+                // simply try the next one
+            }
+        }
+        return -1;
+    }
+
     public OperatingSystemDetails getDetails() {
         return this.details;
     }
@@ -95,7 +126,7 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
         lastStatisticsTimestamp = currentTime;
         for (InternalOperatingSystemInfoProvider provider : operatingSystemInfoProviders) {
             try {
-                lastStatistics = new DefaultOperatingSystemStatistics(provider.getOSStatistics(), getDetails(), previousStats, statisticsHistorySize);
+                lastStatistics = new DefaultOperatingSystemStatistics(provider.getOSStatistics(), getDetails(), previousStats, statisticsHistorySize, timeDelta);
                 break;
             } catch (RemoteException e) {
                 // simply try the next one

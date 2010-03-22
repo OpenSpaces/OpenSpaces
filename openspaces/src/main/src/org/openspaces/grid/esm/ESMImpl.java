@@ -148,7 +148,11 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM
 		return NIOInfoHelper.getNIOStatistics();
 	}
 
-	public OSDetails getOSDetails() throws RemoteException {
+    public long getCurrentTimestamp() throws RemoteException {
+        return System.currentTimeMillis();
+    }
+
+    public OSDetails getOSDetails() throws RemoteException {
 		return OSHelper.getDetails();
 	}
 

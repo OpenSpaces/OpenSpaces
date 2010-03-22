@@ -70,6 +70,7 @@ public class TestSampler {
                 }
                 for (Machine machine : admin.getMachines()) {
                     System.out.println("Machine [" + machine.getUid() + "], Processors [" + machine.getOperatingSystem().getDetails().getAvailableProcessors() + "] CPU [" + machine.getOperatingSystem().getStatistics().getCpuPerc() + "]");
+                    System.out.println(" | " + machine.getOperatingSystem().getStatistics().getTimestamp() + " -> " + machine.getOperatingSystem().getStatistics().getAdminTimestamp());
                     if (machine.getOperatingSystem().getStatistics().getNetworkStats() != null) {
                     for (OperatingSystemStatistics.NetworkStatistics netStats : machine.getOperatingSystem().getStatistics().getNetworkStats().values()) {
                         System.out.println("   -> " + netStats.getName() + ", Rx " + netStats.getRxBytes() + ", Tx " + netStats.getTxBytes() + ", RxPerSecond " + netStats.getRxBytesPerSecond() + ", TxPerSecond " + netStats.getTxBytesPerSecond());
