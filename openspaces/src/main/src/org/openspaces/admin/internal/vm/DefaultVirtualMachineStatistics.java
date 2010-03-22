@@ -16,6 +16,8 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
 
     private static final JVMStatistics NA_STATS = new JVMStatistics();
 
+    private final long timeDelta;
+
     private final JVMStatistics stats;
 
     private final VirtualMachineDetails details;
@@ -23,13 +25,14 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
     private volatile VirtualMachineStatistics previousStats;
 
     public DefaultVirtualMachineStatistics() {
-        this(NA_STATS, null, null, 0);
+        this(NA_STATS, null, null, 0, -1);
     }
 
-    public DefaultVirtualMachineStatistics(JVMStatistics stats, VirtualMachineStatistics previousStats, VirtualMachineDetails details, int historySize) {
+    public DefaultVirtualMachineStatistics(JVMStatistics stats, VirtualMachineStatistics previousStats, VirtualMachineDetails details, int historySize, long timeDelta) {
         this.stats = stats;
         this.previousStats = previousStats;
         this.details = details;
+        this.timeDelta = timeDelta;
 
         VirtualMachineStatistics lastStats = previousStats;
         if (lastStats != null) {
@@ -49,6 +52,13 @@ public class DefaultVirtualMachineStatistics implements VirtualMachineStatistics
 
     public long getTimestamp() {
         return stats.getTimestamp();
+    }
+
+    public long getAdminTimestamp() {
+        if (stats.getTimestamp() != -1 && timeDelta != Integer.MIN_VALUE) {
+            return stats.getTimestamp() + timeDelta;
+        }
+        return -1;
     }
 
     public VirtualMachineDetails getDetails() {

@@ -72,6 +72,12 @@ public interface VirtualMachineStatistics {
      */
     long getTimestamp();
 
+    /**
+     * Returns a timestamp that is in sync with where the admin API is running. Can return
+     * -1 if the clocks have are not sync yet.
+     */
+    long getAdminTimestamp();
+
     long getUptime();
 
     long getMemoryHeapCommittedInBytes();

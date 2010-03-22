@@ -330,7 +330,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         }
     }
 
-    private static final SpaceInstanceStatistics NA_STATISTICS = new DefaultSpaceInstanceStatistics(new StatisticsHolder(new long[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}), null, 0);
+    private static final SpaceInstanceStatistics NA_STATISTICS = new DefaultSpaceInstanceStatistics(new StatisticsHolder(new long[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}), null, 0, -1);
 
     public synchronized SpaceInstanceStatistics getStatistics() {
         long currentTime = System.currentTimeMillis();
@@ -345,7 +345,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
             } else {
                 holder = puService.getSpaceStatisticsHolder(serviceID);
             }
-            lastStatistics = new DefaultSpaceInstanceStatistics(holder, lastStatistics, statisticsHistorySize);
+            lastStatistics = new DefaultSpaceInstanceStatistics(holder, lastStatistics, statisticsHistorySize, getVirtualMachine().getMachine().getOperatingSystem().getTimeDelta());
         } catch (RemoteException e) {
             lastStatistics = NA_STATISTICS;
         }

@@ -68,7 +68,7 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
     }
 
     public long getAdminTimestamp() {
-        if (stats.getTimestamp() != -1 && timeDelta != -1) {
+        if (stats.getTimestamp() != -1 && timeDelta != Integer.MIN_VALUE) {
             return stats.getTimestamp() + timeDelta;
         }
         return -1;

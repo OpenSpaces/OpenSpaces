@@ -18,6 +18,8 @@ import java.util.Map;
  */
 public class DefaultProcessingUnitInstanceServiceStatistics implements ProcessingUnitInstanceStatistics {
 
+    private final long timeDelta;
+
     private final long timestamp;
 
     private final Map<String, ServiceMonitors> serviceMonitorsById;
@@ -33,8 +35,9 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
     private final WebRequestsServiceMonitors webRequestsServiceMonitors;
 
     public DefaultProcessingUnitInstanceServiceStatistics(long timestamp, Map<String, ServiceMonitors> serviceMonitorsById, ProcessingUnitInstanceStatistics previous,
-                                                          int historySize) {
+                                                          int historySize, long timeDelta) {
         this.timestamp = timestamp;
+        this.timeDelta = timeDelta;
         this.serviceMonitorsById = serviceMonitorsById;
         this.previous = previous;
         RemotingServiceMonitors remotingServiceMonitorsX = null;
@@ -73,6 +76,13 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
 
     public long getTimestamp() {
         return this.timestamp;
+    }
+
+    public long getAdminTimestamp() {
+        if (timestamp != -1 && timeDelta != Integer.MIN_VALUE) {
+            return timestamp + timeDelta;
+        }
+        return -1;
     }
 
     public Iterator<ServiceMonitors> iterator() {

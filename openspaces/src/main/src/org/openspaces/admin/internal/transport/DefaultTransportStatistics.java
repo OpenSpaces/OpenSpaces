@@ -12,6 +12,8 @@ public class DefaultTransportStatistics implements TransportStatistics {
 
     private final static NIOStatistics NA_STATS = new NIOStatistics();
 
+    private final long timeDelta;
+
     private final NIOStatistics stats;
 
     private volatile TransportStatistics previousStats;
@@ -19,13 +21,14 @@ public class DefaultTransportStatistics implements TransportStatistics {
     private final TransportDetails details;
 
     public DefaultTransportStatistics() {
-        this(NA_STATS, null, null, 0);
+        this(NA_STATS, null, null, 0, -1);
     }
 
-    public DefaultTransportStatistics(NIOStatistics stats, TransportStatistics previousStats, TransportDetails details, int historySize) {
+    public DefaultTransportStatistics(NIOStatistics stats, TransportStatistics previousStats, TransportDetails details, int historySize, long timeDelta) {
         this.stats = stats;
         this.previousStats = previousStats;
         this.details = details;
+        this.timeDelta = timeDelta;
 
         TransportStatistics lastStats = previousStats;
         if (lastStats != null) {
@@ -47,6 +50,13 @@ public class DefaultTransportStatistics implements TransportStatistics {
         return stats.getTimestamp();
     }
 
+    public long getAdminTimestamp() {
+        if (stats.getTimestamp() != -1 && timeDelta != Integer.MIN_VALUE) {
+            return stats.getTimestamp() + timeDelta;
+        }
+        return -1;
+    }
+    
     public TransportDetails getDetails() {
         return this.details;
     }

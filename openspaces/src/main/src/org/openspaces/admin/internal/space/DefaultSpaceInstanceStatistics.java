@@ -10,13 +10,16 @@ import org.openspaces.admin.support.StatisticsUtils;
  */
 public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
 
+    private final long timeDelta;
+
     private final StatisticsHolder statisticsHolder;
 
     private volatile SpaceInstanceStatistics previousStats;
 
-    public DefaultSpaceInstanceStatistics(StatisticsHolder statisticsHolder, SpaceInstanceStatistics previousStats, int historySize) {
+    public DefaultSpaceInstanceStatistics(StatisticsHolder statisticsHolder, SpaceInstanceStatistics previousStats, int historySize, long timeDelta) {
         this.statisticsHolder = statisticsHolder;
         this.previousStats = previousStats;
+        this.timeDelta = timeDelta;
 
         SpaceInstanceStatistics lastStats = previousStats;
         if (lastStats != null) {
@@ -36,6 +39,13 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
 
     public long getTimestamp() {
         return statisticsHolder.getTimestamp();
+    }
+
+    public long getAdminTimestamp() {
+        if (statisticsHolder.getTimestamp() != -1 && timeDelta != Integer.MIN_VALUE) {
+            return statisticsHolder.getTimestamp() + timeDelta;
+        }
+        return -1;
     }
 
     public long getPreviousTimestamp() {

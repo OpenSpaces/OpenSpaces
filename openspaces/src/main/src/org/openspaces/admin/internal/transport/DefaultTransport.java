@@ -116,7 +116,7 @@ public class DefaultTransport implements InternalTransport {
         lastStatisticsTimestamp = currentTime;
         for (InternalTransportInfoProvider provider : transportInfoProviders) {
             try {
-                lastStatistics = new DefaultTransportStatistics(provider.getNIOStatistics(), previousStats, getDetails(), statisticsHistorySize);
+                lastStatistics = new DefaultTransportStatistics(provider.getNIOStatistics(), previousStats, getDetails(), statisticsHistorySize, getVirtualMachine().getMachine().getOperatingSystem().getTimeDelta());
             } catch (RemoteException e) {
                 // failed to get it, try next one
             }

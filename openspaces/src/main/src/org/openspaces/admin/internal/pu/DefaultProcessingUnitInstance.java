@@ -491,7 +491,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             }
             serviceMonitorsById.put(serviceMonitors.getId(), serviceMonitors);
         }
-        lastStatistics = new DefaultProcessingUnitInstanceServiceStatistics(puMonitors.getTimestamp(), serviceMonitorsById, previousStatistics, statisticsHistorySize);
+        lastStatistics = new DefaultProcessingUnitInstanceServiceStatistics(puMonitors.getTimestamp(), serviceMonitorsById, previousStatistics, statisticsHistorySize,
+                getVirtualMachine().getMachine().getOperatingSystem().getTimeDelta());
         return lastStatistics;
     }
 

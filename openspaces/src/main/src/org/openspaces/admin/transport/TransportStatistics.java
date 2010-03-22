@@ -50,6 +50,12 @@ public interface TransportStatistics {
     long getTimestamp();
 
     /**
+     * Returns a timestamp that is in sync with where the admin API is running. Can return
+     * -1 if the clocks have are not sync yet.
+     */
+    long getAdminTimestamp();
+    
+    /**
      * Returns the previous statistics timestamp. Returns <code>-1</code> if this is the first one.
      */
     long getPreviousTimestamp();

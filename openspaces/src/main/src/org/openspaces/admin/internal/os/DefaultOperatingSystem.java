@@ -46,7 +46,7 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
 
     private Future scheduledStatisticsMonitor;
 
-    private volatile long timeDelta = -1;
+    private volatile long timeDelta = Integer.MIN_VALUE;
 
     public DefaultOperatingSystem(OSDetails osDetails, InternalOperatingSystems operatingSystems) {
         this.details = new DefaultOperatingSystemDetails(osDetails);
