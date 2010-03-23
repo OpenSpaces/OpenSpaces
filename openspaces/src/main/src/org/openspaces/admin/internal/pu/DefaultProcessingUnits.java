@@ -9,11 +9,7 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -48,7 +44,7 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
     private volatile int statisticsHistorySize = StatisticsMonitor.DEFAULT_HISTORY_SIZE;
 
     private volatile boolean scheduledStatisticsMonitor = false;
-    
+
     public DefaultProcessingUnits(InternalAdmin admin) {
         this.admin = admin;
         this.processingUnitAddedEventManager = new DefaultProcessingUnitAddedEventManager(this);
@@ -198,6 +194,7 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
         final ProcessingUnit existingProcessingUnit = processingUnits.remove(name);
         if (existingProcessingUnit != null) {
             existingProcessingUnit.stopStatisticsMonitor();
+            ((InternalProcessingUnit) existingProcessingUnit).setStatus(0);
             processingUnitRemovedEventManager.processingUnitRemoved(existingProcessingUnit);
         }
     }
