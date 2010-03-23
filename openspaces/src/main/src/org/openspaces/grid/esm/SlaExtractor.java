@@ -9,7 +9,7 @@ public class SlaExtractor {
 
     public SlaExtractor(ProcessingUnit pu) {
         String slaDescriptors = (String)pu.getBeanLevelProperties().getContextProperties().get("sla");
-        if (slaDescriptors == null) {
+        if (slaDescriptors == null || slaDescriptors.length() == 0) {
             return; //no sla defined
         }
         
