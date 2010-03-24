@@ -1,7 +1,8 @@
 package org.openspaces.admin.esm.deployment;
 
 /**
- * Memory Service Level Agreement specifying the threshold to trigger memory breach.
+ * Memory Service Level Agreement (SLA) specifying the threshold to trigger memory breach.
+ * Threshold is breached if memory usage percentage is above or below the specified threshold. 
  * 
  * <blockquote>
  * <pre>
@@ -15,6 +16,11 @@ public class MemorySla implements SLA {
     
     private final int threshold;
 
+    /**
+     * An SLA with a memory threshold percentage.
+     * 
+     * @param threshold A memory usage percentage (e.g. 75%).
+     */
     public MemorySla(String threshold) {
         if (!threshold.endsWith("%")) {
             throw new IllegalArgumentException("Memory SLA argument should end with a precentail; e.g. 70%");
@@ -23,6 +29,10 @@ public class MemorySla implements SLA {
         this.threshold = Integer.valueOf(value);
     }
     
+    /**
+     * Returns the threshold integer value.
+     * @return threshold integer value.
+     */
     public int getThreshold() {
         return threshold;
     }
