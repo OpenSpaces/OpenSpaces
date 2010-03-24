@@ -15,7 +15,7 @@ public class PuCapacityPlanner {
     private final int scalingFactor;
     private final int minNumberOfGSCs;
     private final int maxNumberOfGSCs;
-    private int maxNumberOfGSCsPerMachine;
+    //private int maxNumberOfGSCsPerMachine;
     private final String zoneName;
     private final String maxJavaHeapSize;
     private final String initJavaHeapSize;
@@ -42,7 +42,7 @@ public class PuCapacityPlanner {
         scalingFactor = (int)Math.ceil(1.0*maxNumberOfGSCs / minNumberOfGSCs);
         
         int partitions = pu.getNumberOfInstances();
-        maxNumberOfGSCsPerMachine = (int)Math.ceil(1.0*partitions / scalingFactor);
+        //maxNumberOfGSCsPerMachine = (int)Math.ceil(1.0*partitions / scalingFactor);
 
         zoneName = pu.getRequiredZones()[0];
     }
@@ -51,14 +51,6 @@ public class PuCapacityPlanner {
         return (pu.getBeanLevelProperties().getContextProperties().containsKey("elastic"));
     }
     
-    public int getMaxNumberOfGSCsPerMachine() {
-        return maxNumberOfGSCsPerMachine;
-    }
-
-    public void setMaxNumberOfGSCsPerMachine(int maxNumberOfGSCsPerMachine) {
-        this.maxNumberOfGSCsPerMachine = maxNumberOfGSCsPerMachine;
-    }
-
     public int getScalingFactor() {
         return scalingFactor;
     }

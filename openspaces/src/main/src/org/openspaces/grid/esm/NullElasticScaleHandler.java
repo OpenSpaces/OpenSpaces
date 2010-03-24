@@ -8,7 +8,7 @@ public class NullElasticScaleHandler implements ElasticScaleHandler {
 
     private final static Logger logger = Logger.getLogger("org.openspaces.grid.esm");
     
-    public void init(ElasticScaleConfig config) {
+    public void init(ElasticScaleHandlerConfig config) {
     }
 
     public boolean accept(Machine machine) {

@@ -4,9 +4,9 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Map.Entry;
 
-class ElasticScaleConfigSerializer {
+class ElasticScaleHandlerConfigSerializer {
     
-    static String toString(ElasticScaleConfig config) {
+    static String toString(ElasticScaleHandlerConfig config) {
         StringBuilder out = new StringBuilder();
         out.append("<class>").append(config.getClassName()).append("</class>");
         Properties properties = config.getProperties();
@@ -22,13 +22,13 @@ class ElasticScaleConfigSerializer {
         return out.toString();
     }
     
-    static ElasticScaleConfig fromString(String config) {
+    static ElasticScaleHandlerConfig fromString(String config) {
         
         int s,e;
         s = config.indexOf("<class>") + "<class>".length();
         e = config.indexOf("</class>");
         String classname = config.substring(s, e);
-        ElasticScaleConfig elasticConfig = new ElasticScaleConfig(classname);
+        ElasticScaleHandlerConfig elasticConfig = new ElasticScaleHandlerConfig(classname);
         s = config.indexOf("<props>",e) + "<props>".length();
         e = config.indexOf("</props>",e);
         if (e != -1) {
@@ -55,11 +55,11 @@ class ElasticScaleConfigSerializer {
     
     
     public static void main(String[] args) {
-        String s = ElasticScaleConfigSerializer.toString(new ElasticScaleConfig("myclass").addProperty("machines",
+        String s = ElasticScaleHandlerConfigSerializer.toString(new ElasticScaleHandlerConfig("myclass").addProperty("machines",
                 "pc-lab12,pc-lab13,pc-lab15").addProperty("exclude", "pc-lab1").addProperty("timeout", "1000").addProperty("ports", "4000,5000,6000"));
         System.out.println(s);
         
-        ElasticScaleConfig fromString = ElasticScaleConfigSerializer.fromString(s);
-        System.out.println(ElasticScaleConfigSerializer.toString(fromString));
+        ElasticScaleHandlerConfig fromString = ElasticScaleHandlerConfigSerializer.fromString(s);
+        System.out.println(ElasticScaleHandlerConfigSerializer.toString(fromString));
     }
 }

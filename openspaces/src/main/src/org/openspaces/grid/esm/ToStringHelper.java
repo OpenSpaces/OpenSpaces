@@ -30,7 +30,6 @@ public class ToStringHelper {
         .append("\n\t minNumberOfGSCs=").append(puCapacityPlanner.getMinNumberOfGSCs())
         .append("\n\t maxNumberOfGSCs=").append(puCapacityPlanner.getMaxNumberOfGSCs())
         .append("\n\t actual number of GSCs: ").append(puCapacityPlanner.getProcessingUnit().getAdmin().getGridServiceContainers().getSize())
-        .append("\n\t maxNumberOfGSCsPerMachine=").append(puCapacityPlanner.getMaxNumberOfGSCsPerMachine()).append( " (initial)")
         .append("\n\t scalingFactor=").append(+puCapacityPlanner.getScalingFactor()).append(" (instances per GSC)")
         .append("\n\t number of GSCs in zone: ").append(puCapacityPlanner.getZoneName()).append("=").append(puCapacityPlanner.getNumberOfGSCsInZone());
         

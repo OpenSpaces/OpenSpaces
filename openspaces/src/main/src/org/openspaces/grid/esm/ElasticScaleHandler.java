@@ -20,7 +20,7 @@ public interface ElasticScaleHandler {
      * An initialization call, parameterized with the configuration used at deployment.
      * @param config The scale configuration.
      */
-    public void init(ElasticScaleConfig config);
+    public void init(ElasticScaleHandlerConfig config);
     
     /**
      * A machine can be accepted/not-accepted (filtered) for whatever reason at any point in time.

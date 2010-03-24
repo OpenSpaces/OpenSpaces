@@ -3,7 +3,7 @@ package org.openspaces.admin.esm.deployment;
 import java.io.Serializable;
 import java.util.Properties;
 
-import org.openspaces.grid.esm.ElasticScaleConfig;
+import org.openspaces.grid.esm.ElasticScaleHandlerConfig;
 
 
 /**
@@ -22,7 +22,7 @@ public class ElasticDataGridDeployment implements Serializable {
     
     private final Properties contextProperties = new Properties();
     private final DeploymentContext context = new DeploymentContext();
-    private ElasticScaleConfig config;
+    private ElasticScaleHandlerConfig config;
     private final String dataGridName;
     
     
@@ -47,7 +47,7 @@ public class ElasticDataGridDeployment implements Serializable {
      * @param maxMemory
      *            maximum memory to allocate for this data grid; Default "10g".
      */
-    public ElasticDataGridDeployment elasticity(String minMemory, String maxMemory) {
+    public ElasticDataGridDeployment capacity(String minMemory, String maxMemory) {
         this.context.setMinMemory(minMemory);
         this.context.setMaxMemory(maxMemory);
         return this;
@@ -140,12 +140,12 @@ public class ElasticDataGridDeployment implements Serializable {
         return this;
     }
     
-    public ElasticDataGridDeployment elasticScaleConfig(ElasticScaleConfig config) {
+    public ElasticDataGridDeployment elasticScaleHandler(ElasticScaleHandlerConfig config) {
         this.config = config;
         return this;
     }
     
-    public ElasticScaleConfig getElasticScaleConfig() {
+    public ElasticScaleHandlerConfig getElasticScaleConfig() {
         return config;
     }
 }

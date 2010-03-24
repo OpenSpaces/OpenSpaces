@@ -16,16 +16,16 @@ import java.util.Properties;
  * </pre>
  * </blockquote>
  */
-public class ElasticScaleConfig implements Serializable {
+public class ElasticScaleHandlerConfig implements Serializable {
     
     private final String className;
     private final Properties properties = new Properties();
 
-    public ElasticScaleConfig(String onDemandElasticScaleClassName) {
-        this.className = onDemandElasticScaleClassName;
+    public ElasticScaleHandlerConfig(String className) {
+        this.className = className;
     }
     
-    public ElasticScaleConfig addProperty(String key, String value) {
+    public ElasticScaleHandlerConfig addProperty(String key, String value) {
         if (key.contains(";") || value.contains(";"))
             throw new IllegalArgumentException("properties should not contain the ';' delimeter");
         

@@ -123,7 +123,7 @@ public class EsmExecutor {
         spaceDeployment.setContextProperty("sla", context.getSlaDescriptors());
 
         if (deployment.getElasticScaleConfig() != null) {
-            spaceDeployment.setContextProperty("elasticScaleConfig", ElasticScaleConfigSerializer.toString(deployment.getElasticScaleConfig()));
+            spaceDeployment.setContextProperty("elasticScaleConfig", ElasticScaleHandlerConfigSerializer.toString(deployment.getElasticScaleConfig()));
         }
         
         if (!deployment.getContextProperties().isEmpty()) {
@@ -237,7 +237,7 @@ public class EsmExecutor {
             return new NullElasticScaleHandler();
         }
 
-        ElasticScaleConfig elasticScaleConfig = ElasticScaleConfigSerializer.fromString(elasticScaleConfigStr);
+        ElasticScaleHandlerConfig elasticScaleConfig = ElasticScaleHandlerConfigSerializer.fromString(elasticScaleConfigStr);
         Class<? extends ElasticScaleHandler> clazz = ClassLoaderHelper.loadClass(elasticScaleConfig.getClassName()).asSubclass(ElasticScaleHandler.class);
         ElasticScaleHandler newInstance = clazz.newInstance();
         newInstance.init(elasticScaleConfig);

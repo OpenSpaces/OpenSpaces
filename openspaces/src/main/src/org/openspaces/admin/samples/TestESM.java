@@ -21,7 +21,7 @@ public class TestESM {
             
             ProcessingUnit pu = elasticServiceManager.
             deploy(new ElasticDataGridDeployment("mygrid")
-            .elasticity("10m", "100m")
+            .capacity("10m", "100m")
             .maximumJavaHeapSize("1g")
             .addSla(new MemorySla("40%"))
 //            .elasticScaleConfig(new ElasticScaleConfig(PcLabOnDemandElasticScale.class.getName()).addProperty("machines", "pc-lab12,pc-lab13"))
