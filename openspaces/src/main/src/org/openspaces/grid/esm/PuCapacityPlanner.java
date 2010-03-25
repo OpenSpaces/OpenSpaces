@@ -36,8 +36,8 @@ public class PuCapacityPlanner {
         initJavaHeapSize = initialJavaHeapSize;
         maxJavaHeapSize = maximumJavaHeapSize;
         
-        minNumberOfGSCs = MemorySettings.valueOf(contextProperties.getProperty("minMemory")).floorDividedBy(maxJavaHeapSize);
-        maxNumberOfGSCs = MemorySettings.valueOf(contextProperties.getProperty("maxMemory")).floorDividedBy(maxJavaHeapSize);
+        minNumberOfGSCs = Math.max(1, MemorySettings.valueOf(contextProperties.getProperty("minMemory")).floorDividedBy(maxJavaHeapSize));
+        maxNumberOfGSCs = Math.max(1, MemorySettings.valueOf(contextProperties.getProperty("maxMemory")).floorDividedBy(maxJavaHeapSize));
         
         scalingFactor = (int)Math.ceil(1.0*maxNumberOfGSCs / minNumberOfGSCs);
         
