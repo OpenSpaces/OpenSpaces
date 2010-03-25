@@ -1,14 +1,18 @@
 package org.openspaces.admin.esm.deployment;
 
-import java.io.Serializable;
 import java.util.Properties;
 
+import org.openspaces.grid.esm.ElasticScaleHandler;
 import org.openspaces.grid.esm.ElasticScaleHandlerConfig;
 
 
 /**
- * A deployment descriptor for a plain Data Grid.
- *
+ * An elastic data-grid deployment descriptor for deploying a plain data-grid.
+ * <p>
+ * The data-grid context properties can be modified by {@link #addContextProperty(String, String)}.
+ * The default is a Highly-available data-grid, consisting of 1-10 gigabytes of memory spanned across a partitioned 
+ * cluster of 10,1. Each Grid Service Container JVM is set to -Xmn512m and -Xmx512m.
+ * 
  * <blockquote>
  * <pre>
  * <b>Disclaimer:</b> This interface and the elastic data grid functionality is provided as a technology preview in XAP 7.1. 
@@ -17,17 +21,17 @@ import org.openspaces.grid.esm.ElasticScaleHandlerConfig;
  * </pre>
  * </blockquote>
  */
-public class ElasticDataGridDeployment implements Serializable {
+public class ElasticDataGridDeployment extends InternalElasticDataGridDeployment {
     private static final long serialVersionUID = 1L;
-    
     private final Properties contextProperties = new Properties();
-    private final DeploymentContext context = new DeploymentContext();
     private ElasticScaleHandlerConfig config;
-    private final String dataGridName;
     
-    
+    /**
+     * Constructs an Elastic data-grid with the specified name.
+     * @param dataGridName The data-grid name.
+     */
     public ElasticDataGridDeployment(String dataGridName) {
-        this.dataGridName = dataGridName;
+        super(dataGridName);
     }
     
     /**
@@ -35,12 +39,14 @@ public class ElasticDataGridDeployment implements Serializable {
      * @param isolationLevel the isolation level requirement; Default {@link IsolationLevel#PUBLIC}.
      */
     public ElasticDataGridDeployment isolationLevel(IsolationLevel isolationLevel) {
-        this.context.setIsolationLevel(isolationLevel);
+        getDeploymentContext().setIsolationLevel(isolationLevel);
         return this;
     }
 
     /**
-     * Set the memory growth of this data grid. The parameter specifies size in bytes (b), kilobytes (k), megabytes (m), gigabytes (g);
+     * Set the memory capacity growth of this data grid. The parameter specifies size in bytes (b),
+     * kilobytes (k), megabytes (m), gigabytes (g). These two control respectively -Xmn and -Xmx
+     * of the Grid Service Container JVM. Default it "1g"-"10g".
      * 
      * @param minMemory
      *            minimum memory initially held for this data grid; Default "1g".
@@ -48,21 +54,21 @@ public class ElasticDataGridDeployment implements Serializable {
      *            maximum memory to allocate for this data grid; Default "10g".
      */
     public ElasticDataGridDeployment capacity(String minMemory, String maxMemory) {
-        this.context.setMinMemory(minMemory);
-        this.context.setMaxMemory(maxMemory);
+        getDeploymentContext().setMinMemory(minMemory);
+        getDeploymentContext().setMaxMemory(maxMemory);
         return this;
     }
 
     /**
      * Set the availability of the data grid. A highly available data grid is one that has at least
-     * one backup copy, for failing over to.
+     * one backup copy per primary, for failing over to.
      * 
      * @param enabled
      *            <code>true</code> if data grid is highly available; false if the data is
      *            recoverable from some storage. Default is <code>true</code>.
      */
     public ElasticDataGridDeployment highlyAvailable(boolean enabled) {
-        this.context.setHighlyAvailable(enabled);
+        getDeploymentContext().setHighlyAvailable(enabled);
         return this;
     }
 
@@ -72,7 +78,7 @@ public class ElasticDataGridDeployment implements Serializable {
      * @param size The heap size in kilobytes (k), megabytes (m), gigabytes (g); Default "512m".
      */
     public ElasticDataGridDeployment initialJavaHeapSize(String size) {
-        this.context.setInitialJavaHeapSize(size);
+        getDeploymentContext().setInitialJavaHeapSize(size);
         return this;
     }
 
@@ -85,24 +91,18 @@ public class ElasticDataGridDeployment implements Serializable {
      * @param size The heap size in kilobytes (k), megabytes (m), gigabytes (g); Default "512m".
      */
     public ElasticDataGridDeployment maximumJavaHeapSize(String size) {
-        this.context.setMaximumJavaHeapSize(size);
+        getDeploymentContext().setMaximumJavaHeapSize(size);
         return this;
     }
-    
+
     /**
-     * Adds a JVM level argument to the container hosting a processing unit. Note that the {@link #initialJavaHeapSize(String)} and
-     * {@link #maximumJavaHeapSize(String)} already define the -Xms and -Xmx vm arguments.
+     * Adds a single JVM level argument to the container hosting a processing unit. Note that the
+     * {@link #initialJavaHeapSize(String)} and {@link #maximumJavaHeapSize(String)} already define
+     * the -Xms and -Xmx vm arguments.
      */
     public ElasticDataGridDeployment vmInputArgument(String vmInputArgument) {
-        this.context.addVmArgument(vmInputArgument);
+        getDeploymentContext().addVmArgument(vmInputArgument);
         return this;
-    }
-    
-    /**
-     * @return The data grid name this deployment was constructed with.
-     */
-    public String getDataGridName() {
-        return dataGridName;
     }
     
     /**
@@ -116,14 +116,7 @@ public class ElasticDataGridDeployment implements Serializable {
         contextProperties.put(key, value);
         return this;
     }
-    
-    /**
-     * @return The deployment context
-     */
-    public DeploymentContext getContext() {
-        return context;
-    }
-    
+       
     /**
      * @return The context deploy time properties.
      */
@@ -131,20 +124,36 @@ public class ElasticDataGridDeployment implements Serializable {
         return contextProperties;
     }
 
+    /**
+     * Adds an SLA to monitor and auto-scale if necessary.
+     * @see MemorySla
+     * 
+     * @param sla an SLA descriptor
+     */
     public ElasticDataGridDeployment addSla(SLA sla) {
         String descriptor = "";
         if (sla instanceof MemorySla) {
             descriptor = "sla="+MemorySla.class.getSimpleName() + ",threshold="+((MemorySla)sla).getThreshold()+"%/";
         }
-        this.context.addSla(descriptor);
+        getDeploymentContext().addSla(descriptor);
         return this;
     }
-    
+
+    /**
+     * Set an {@link ElasticScaleHandler} implementation configuration. The scale-handler (and its
+     * state) is per-deployment. The scale-handler API will be called upon when need of a GSC (either
+     * on an available machine, or a new machine)
+     * 
+     * @param config The elastic scale handler configuration
+     */
     public ElasticDataGridDeployment elasticScaleHandler(ElasticScaleHandlerConfig config) {
         this.config = config;
         return this;
     }
     
+    /**
+     * @return The elastic scale configuration
+     */
     public ElasticScaleHandlerConfig getElasticScaleConfig() {
         return config;
     }

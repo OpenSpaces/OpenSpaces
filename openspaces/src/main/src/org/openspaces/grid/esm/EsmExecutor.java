@@ -21,6 +21,7 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.esm.deployment.DeploymentContext;
 import org.openspaces.admin.esm.deployment.ElasticDataGridDeployment;
+import org.openspaces.admin.esm.deployment.InternalElasticDataGridDeployment;
 import org.openspaces.admin.esm.deployment.MemorySla;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceContainerOptions;
@@ -95,32 +96,31 @@ public class EsmExecutor {
     }
 
     public void deploy(ElasticDataGridDeployment deployment) {
-        DeploymentContext context = deployment.getContext();
+        DeploymentContext deploymentContext = ((InternalElasticDataGridDeployment)deployment).getDeploymentContext();
         final String zoneName = deployment.getDataGridName();
         SpaceDeployment spaceDeployment = new SpaceDeployment(deployment.getDataGridName());
         spaceDeployment.addZone(zoneName);
-        int numberOfParitions = calculateNumberOfPartitions(context);
-        if (context.isHighlyAvailable()) {
+        int numberOfParitions = calculateNumberOfPartitions(deploymentContext);
+        if (deploymentContext.isHighlyAvailable()) {
             spaceDeployment.maxInstancesPerMachine(1);
             spaceDeployment.partitioned(numberOfParitions, 1);
         } else {
             spaceDeployment.partitioned(numberOfParitions, 0);
         }
         
-        String initialJavaHeapSize = context.getInitialJavaHeapSize();
-        String maximumJavaHeapSize = context.getMaximumJavaHeapSize();
+        String initialJavaHeapSize = deploymentContext.getInitialJavaHeapSize();
+        String maximumJavaHeapSize = deploymentContext.getMaximumJavaHeapSize();
         if (MemorySettings.valueOf(initialJavaHeapSize).isGreaterThan(MemorySettings.valueOf(maximumJavaHeapSize))) {
             initialJavaHeapSize = maximumJavaHeapSize;
         }
         
-        
         spaceDeployment.setContextProperty("elastic", "true");
-        spaceDeployment.setContextProperty("minMemory", context.getMinMemory());
-        spaceDeployment.setContextProperty("maxMemory", context.getMaxMemory());
-        spaceDeployment.setContextProperty("initialJavaHeapSize", context.getInitialJavaHeapSize());
-        spaceDeployment.setContextProperty("maximumJavaHeapSize", context.getMaximumJavaHeapSize());
-        spaceDeployment.setContextProperty("isolationLevel", context.getIsolationLevel().name());
-        spaceDeployment.setContextProperty("sla", context.getSlaDescriptors());
+        spaceDeployment.setContextProperty("minMemory", deploymentContext.getMinMemory());
+        spaceDeployment.setContextProperty("maxMemory", deploymentContext.getMaxMemory());
+        spaceDeployment.setContextProperty("initialJavaHeapSize", deploymentContext.getInitialJavaHeapSize());
+        spaceDeployment.setContextProperty("maximumJavaHeapSize", deploymentContext.getMaximumJavaHeapSize());
+        spaceDeployment.setContextProperty("isolationLevel", deploymentContext.getIsolationLevel().name());
+        spaceDeployment.setContextProperty("sla", deploymentContext.getSlaDescriptors());
 
         if (deployment.getElasticScaleConfig() != null) {
             spaceDeployment.setContextProperty("elasticScaleConfig", ElasticScaleHandlerConfigSerializer.toString(deployment.getElasticScaleConfig()));
@@ -133,20 +133,20 @@ public class EsmExecutor {
             }
         }
         
-        if (deployment.getContext().getVmInputArguments()!= null) {
-           spaceDeployment.setContextProperty("vmArguments", deployment.getContext().getVmInputArguments()); 
+        if (deploymentContext.getVmInputArguments()!= null) {
+           spaceDeployment.setContextProperty("vmArguments", deploymentContext.getVmInputArguments()); 
         }
         
         logger.finest("Deploying " + deployment.getDataGridName() 
                 + "\n\t Zone: " + zoneName 
-                + "\n\t Context: " + context.getMinMemory()
-                + "\n\t Max Memory: " + context.getMaxMemory()
+                + "\n\t Context: " + deploymentContext.getMinMemory()
+                + "\n\t Max Memory: " + deploymentContext.getMaxMemory()
                 + "\n\t Initial Java Heap Size: " + initialJavaHeapSize
                 + "\n\t Maximum Java Heap Size: " + maximumJavaHeapSize
-                + "\n\t Isolation Level: " + context.getIsolationLevel().name()
-                + "\n\t Highly Available? " + context.isHighlyAvailable()
+                + "\n\t Isolation Level: " + deploymentContext.getIsolationLevel().name()
+                + "\n\t Highly Available? " + deploymentContext.isHighlyAvailable()
                 + "\n\t Partitions: " + numberOfParitions
-                + "\n\t SLA: " + context.getSlaDescriptors());
+                + "\n\t SLA: " + deploymentContext.getSlaDescriptors());
         
         admin.getGridServiceManagers().waitForAtLeastOne().deploy(spaceDeployment);
     }
@@ -319,7 +319,7 @@ public class EsmExecutor {
 
         public void run() {
             
-            if (reachedMaxCapacity()) {
+            if (reachedMaxCapacity() && puCapacityPlanner.hasEnoughMachines()) {
                 logger.warning("Reached Capacity Limit");
                 return;
             }
