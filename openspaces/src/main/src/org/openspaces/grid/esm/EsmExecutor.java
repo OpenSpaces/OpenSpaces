@@ -353,7 +353,7 @@ public class EsmExecutor {
                     continue;
                 }
                 
-                if (!meetsDedicatedIsolationConstaint(machine, puCapacityPlanner.getZoneName())) {
+                if (!meetsDedicatedIsolationConstraint(machine, puCapacityPlanner.getZoneName())) {
                     logger.finest("Can't start GSC on machine ["+ToStringHelper.machineToString(machine)+"] - doesn't meet dedicated isolation constraint.");
                     continue;
                 }
@@ -383,7 +383,7 @@ public class EsmExecutor {
         }
         
         // requires this machine to contain only GSCs matching the zone name provided
-        private boolean meetsDedicatedIsolationConstaint(Machine machine, String zoneName) {
+        private boolean meetsDedicatedIsolationConstraint(Machine machine, String zoneName) {
             for (GridServiceContainer gsc : machine.getGridServiceContainers()) {
                 Map<String, Zone> gscZones = gsc.getZones();
                 if (gscZones.isEmpty() || !gscZones.containsKey(zoneName)) {
