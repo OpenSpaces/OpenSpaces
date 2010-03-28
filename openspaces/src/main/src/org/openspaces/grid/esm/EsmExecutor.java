@@ -37,6 +37,7 @@ import org.openspaces.admin.pu.events.ProcessingUnitLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent;
 import org.openspaces.admin.space.SpaceDeployment;
 import org.openspaces.admin.space.SpaceInstance;
+import org.openspaces.admin.vm.VirtualMachineStatistics;
 import org.openspaces.admin.zone.Zone;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
@@ -139,8 +140,8 @@ public class EsmExecutor {
         
         logger.finest("Deploying " + deployment.getDataGridName() 
                 + "\n\t Zone: " + zoneName 
-                + "\n\t Context: " + deploymentContext.getMinMemory()
-                + "\n\t Max Memory: " + deploymentContext.getMaxMemory()
+                + "\n\t Min Capacity: " + deploymentContext.getMinMemory()
+                + "\n\t Max Capacity: " + deploymentContext.getMaxMemory()
                 + "\n\t Initial Java Heap Size: " + initialJavaHeapSize
                 + "\n\t Maximum Java Heap Size: " + maximumJavaHeapSize
                 + "\n\t Isolation Level: " + deploymentContext.getIsolationLevel().name()
@@ -508,16 +509,22 @@ public class EsmExecutor {
             List<GridServiceContainer> gscsWithBreach = new ArrayList<GridServiceContainer>();
             for (GridServiceContainer gsc : gscs) {
                 double memoryHeapUsedPerc = gsc.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc();
-                if (memoryHeapUsedPerc > memorySla.getThreshold()) {
+                double avgMemoryHeapUsedPerc = getAvgMemoryHeapUsedPerc(gsc); //
+                if (avgMemoryHeapUsedPerc > memorySla.getThreshold()) {
                     if (gsc.getProcessingUnitInstances().length == 1) {
                         logger.warning("Can't amend GSC [" + ToStringHelper.gscToString(gsc)
-                                + "] - Memory [" + NUMBER_FORMAT.format(memoryHeapUsedPerc) + "%] breached threshold of [" + NUMBER_FORMAT.format(memorySla.getThreshold()) + "%]");
+                                + "] - Memory [" + NUMBER_FORMAT.format(avgMemoryHeapUsedPerc) + "%] breached threshold of [" + NUMBER_FORMAT.format(memorySla.getThreshold()) + "%]");
                     } else {
                         logger.warning("GSC [" + ToStringHelper.gscToString(gsc)
-                                + "] - Memory [" + NUMBER_FORMAT.format(memoryHeapUsedPerc) + "%] breached threshold of [" + NUMBER_FORMAT.format(memorySla.getThreshold()) + "%]");
+                                + "] - Memory [" + NUMBER_FORMAT.format(avgMemoryHeapUsedPerc) + "%] breached threshold of [" + NUMBER_FORMAT.format(memorySla.getThreshold()) + "%]");
                         gscsWithBreach.add(gsc);
                     }
+                } else if (memoryHeapUsedPerc > memorySla.getThreshold()) {
+                    logger.warning("GSC [" + ToStringHelper.gscToString(gsc) + "] - Memory ["
+                            + NUMBER_FORMAT.format(memoryHeapUsedPerc) + "%] is fluctuating above threshold of ["
+                            + NUMBER_FORMAT.format(memorySla.getThreshold()) + "%]");
                 }
+                
             }
             
             //nothing to do
@@ -627,6 +634,20 @@ public class EsmExecutor {
             workflow.add(new StartGscHandler(puCapacityPlanner, workflow));
         }
         
+        private double getAvgMemoryHeapUsedPerc(GridServiceContainer gsc) {
+            List<VirtualMachineStatistics> timeline = gsc.getVirtualMachine().getStatistics().getTimeline();
+            
+            double avgMemoryHeapUsedPerc = 0.0;
+            for (int i=0; i<memorySla.getSubsetSize() && i<timeline.size(); ++i) {
+                VirtualMachineStatistics statistics = timeline.get(i);
+                double memoryHeapUsedPerc = statistics.getMemoryHeapUsedPerc();
+                avgMemoryHeapUsedPerc += memoryHeapUsedPerc;
+            }
+            
+            avgMemoryHeapUsedPerc /= memorySla.getSubsetSize();
+            return avgMemoryHeapUsedPerc;
+        }
+
         public void handleBreachBelowThreshold() {
            
             //handle only if deployment is intact
@@ -647,11 +668,18 @@ public class EsmExecutor {
 
             List<GridServiceContainer> gscsWithoutBreach = new ArrayList<GridServiceContainer>();
             for (GridServiceContainer gsc : gscs) {
-                double memoryHeapUsedPerc = gsc.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc();
-                if (memoryHeapUsedPerc < memorySla.getThreshold() && gsc.getProcessingUnitInstances().length == 1) {
-                    logger.finest("GSC [" + ToStringHelper.gscToString(gsc)
-                            + "] - Memory [" + NUMBER_FORMAT.format(memoryHeapUsedPerc) + "%] is below threshold of [" + NUMBER_FORMAT.format(memorySla.getThreshold()) + "%]");
-                    gscsWithoutBreach.add(gsc);
+                if (gsc.getProcessingUnitInstances().length == 1) {
+                    double memoryHeapUsedPerc = gsc.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc();
+                    double avgMemoryHeapUsedPerc = getAvgMemoryHeapUsedPerc(gsc);
+                    if (avgMemoryHeapUsedPerc < memorySla.getThreshold()) {
+                        logger.finest("GSC [" + ToStringHelper.gscToString(gsc)
+                                + "] - Memory [" + NUMBER_FORMAT.format(avgMemoryHeapUsedPerc) + "%] is below threshold of [" + NUMBER_FORMAT.format(memorySla.getThreshold()) + "%]");
+                        gscsWithoutBreach.add(gsc);
+                    }else if (memoryHeapUsedPerc < memorySla.getThreshold()) {
+                        logger.finest("GSC [" + ToStringHelper.gscToString(gsc) + "] - Memory ["
+                                + NUMBER_FORMAT.format(memoryHeapUsedPerc) + "%] is fluctuating below threshold of ["
+                                + NUMBER_FORMAT.format(memorySla.getThreshold()) + "%]");
+                    }
                 }
             }
             

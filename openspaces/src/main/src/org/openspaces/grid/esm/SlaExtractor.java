@@ -1,6 +1,7 @@
 package org.openspaces.grid.esm;
 
 import org.openspaces.admin.esm.deployment.MemorySla;
+import org.openspaces.admin.esm.deployment.MemorySlaSerializer;
 import org.openspaces.admin.pu.ProcessingUnit;
 
 public class SlaExtractor {
@@ -20,9 +21,13 @@ public class SlaExtractor {
             int endIndex = s.indexOf(',',beginIndex);
             String sla = s.substring(beginIndex, endIndex);
             if (sla.equals(MemorySla.class.getSimpleName())) {
-                beginIndex = s.indexOf("threshold=", endIndex)+"threshold=".length();
-                String threshold = s.substring(beginIndex);
-                memorySla = new MemorySla(threshold);
+                beginIndex = endIndex;
+                endIndex = s.indexOf("sla=", endIndex);
+                if (endIndex < 0) {
+                    endIndex = s.length();
+                }
+                sla = s.substring(beginIndex, endIndex);
+                memorySla = MemorySlaSerializer.fromString(sla);
             }
         }
     }

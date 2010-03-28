@@ -133,9 +133,9 @@ public class ElasticDataGridDeployment extends InternalElasticDataGridDeployment
     public ElasticDataGridDeployment addSla(SLA sla) {
         String descriptor = "";
         if (sla instanceof MemorySla) {
-            descriptor = "sla="+MemorySla.class.getSimpleName() + ",threshold="+((MemorySla)sla).getThreshold()+"%/";
+            descriptor = MemorySlaSerializer.toString(((MemorySla)sla));
         }
-        getDeploymentContext().addSla(descriptor);
+        getDeploymentContext().addSla(descriptor+"/");
         return this;
     }
 
