@@ -56,6 +56,10 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
     }
     
     public ProcessingUnit deploy(final ElasticDataGridDeployment deployment) {
+        return deploy(deployment, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
+    }
+
+    public ProcessingUnit deploy(final ElasticDataGridDeployment deployment, long timeout, TimeUnit timeUnit) {
         final AtomicReference<ProcessingUnit> ref = new AtomicReference<ProcessingUnit>();
         ref.set(getAdmin().getProcessingUnits().getProcessingUnit(deployment.getDataGridName()));
         if (ref.get() != null) {
@@ -74,7 +78,7 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
         getAdmin().getProcessingUnits().getProcessingUnitAdded().add(added);
         try {
             esm.deploy(deployment);
-            latch.await(); //TODO timeout, timeUnit);
+            latch.await(timeout, timeUnit);
             return ref.get();
         } catch (SecurityException se) {
             throw new AdminException("No privileges to deploy an elastic data grid", se);
@@ -84,11 +88,6 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
             Deploy.setDisableInfoLogging(false);
             getAdmin().getProcessingUnits().getProcessingUnitAdded().remove(added);
         }
-    }
-
-    public ProcessingUnit deploy(ElasticDataGridDeployment deployment, long timeout, TimeUnit timeUnit) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     public LogEntries logEntries(LogEntryMatcher matcher) throws AdminException {
