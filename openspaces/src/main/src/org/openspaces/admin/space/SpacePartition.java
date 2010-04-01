@@ -44,7 +44,7 @@ public interface SpacePartition extends Iterable<SpaceInstance> {
      * Returns the partition id (starting from 0). Note, {@link SpaceInstance#getInstanceId()}
      * starts from 1.
      */
-    int getPartitiondId();
+    int getPartitionId();
 
     /**
      * Returns all the space instances that form the partition.

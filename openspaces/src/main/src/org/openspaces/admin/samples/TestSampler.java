@@ -113,7 +113,7 @@ public class TestSampler {
                         System.out.println("         -> Stats: Read [" + spaceInstance.getStatistics().getReadCount() + "/" + spaceInstance.getStatistics().getReadPerSecond() + "]");
                     }
                     for (SpacePartition spacePartition : space.getPartitions()) {
-                        System.out.println("   -> Partition [" + spacePartition.getPartitiondId() + "]");
+                        System.out.println("   -> Partition [" + spacePartition.getPartitionId() + "]");
                         for (SpaceInstance spaceInstance : spacePartition) {
                             System.out.println("      -> INSTANCE [" + spaceInstance.getUid() + "]");
                         }

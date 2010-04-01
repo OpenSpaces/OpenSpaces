@@ -54,7 +54,7 @@ public class DefaultSpacePartition implements InternalSpacePartition {
         return spaceInstances.values().toArray(new SpaceInstance[0]);
     }
 
-    public int getPartitiondId() {
+    public int getPartitionId() {
         return this.partitionId;
     }
 
