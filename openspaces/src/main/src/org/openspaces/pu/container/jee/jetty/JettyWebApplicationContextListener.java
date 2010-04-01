@@ -153,7 +153,7 @@ public class JettyWebApplicationContextListener implements ServletContextListene
                 }
 
                 GigaSessionIdManager sessionIdManager = new GigaSessionIdManager(jettyContext.getServer());
-                sessionIdManager.setWorkerName(clusterInfo.getUniqueName());
+                sessionIdManager.setWorkerName(clusterInfo.getUniqueName().replace('.', '_'));
                 gigaSessionManager.setIdManager(sessionIdManager);
 
                 // copy over the session listeners
@@ -214,7 +214,7 @@ public class JettyWebApplicationContextListener implements ServletContextListene
             if (sessionHandler.getSessionManager().getIdManager() instanceof HashSessionIdManager) {
                 HashSessionIdManager sessionIdManager = (HashSessionIdManager) sessionHandler.getSessionManager().getIdManager();
                 if (sessionIdManager.getWorkerName() == null) {
-                    sessionIdManager.setWorkerName(clusterInfo.getUniqueName());
+                    sessionIdManager.setWorkerName(clusterInfo.getUniqueName().replace('.', '_'));
                     if (logger.isDebugEnabled()) {
                         logger.debug("Automatically setting worker name to [" + sessionIdManager.getWorkerName() + "]");
                     }
