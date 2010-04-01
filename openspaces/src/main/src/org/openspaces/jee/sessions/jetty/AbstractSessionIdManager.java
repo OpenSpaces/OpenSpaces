@@ -56,6 +56,10 @@ public abstract class AbstractSessionIdManager extends AbstractLifeCycle impleme
     }
 
     public void setWorkerName(String name) {
+        if (name != null) {
+            // clean '.' from the name, since we use it...
+            name = name.replace('.', '_');
+        }
         _workerName = name;
     }
 
