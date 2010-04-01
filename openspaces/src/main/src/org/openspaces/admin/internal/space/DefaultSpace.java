@@ -277,14 +277,21 @@ public class DefaultSpace implements InternalSpace {
     public void addInstance(SpaceInstance spaceInstance) {
         InternalSpaceInstance internalSpaceInstance = (InternalSpaceInstance) spaceInstance;
         // the first addition (which we make sure is added before the space becomes visible) will
-        // cause the parition to initialize
+        // cause the partition to initialize
         if (spaceInstancesByUID.size() == 0) {
-            if (internalSpaceInstance.getNumberOfBackups() == 0) {
-                // single patition when there is no backup
-                spacePartitions.put(0, new DefaultSpacePartition(this, 0));
-            } else {
+            // guess if its a partition (with no backup) since we can't tell if its replicated or just partitioned
+            if (internalSpaceInstance.getClusterSchema() != null && internalSpaceInstance.getClusterSchema().contains("partition")) {
                 for (int i = 0; i < internalSpaceInstance.getNumberOfInstances(); i++) {
                     spacePartitions.put(i, new DefaultSpacePartition(this, i));
+                }
+            } else {
+                if (internalSpaceInstance.getNumberOfBackups() == 0) {
+                    // single partition (replicated?) when there is no backup
+                    spacePartitions.put(0, new DefaultSpacePartition(this, 0));
+                } else {
+                    for (int i = 0; i < internalSpaceInstance.getNumberOfInstances(); i++) {
+                        spacePartitions.put(i, new DefaultSpacePartition(this, i));
+                    }
                 }
             }
         }
@@ -330,10 +337,14 @@ public class DefaultSpace implements InternalSpace {
     }
 
     private InternalSpacePartition getPartition(InternalSpaceInstance spaceInstance) {
-        if (spaceInstance.getNumberOfBackups() == 0) {
-            return (InternalSpacePartition) spacePartitions.get(0);
-        } else {
+        if (spaceInstance.getClusterSchema() != null && spaceInstance.getClusterSchema().contains("partition")) {
             return (InternalSpacePartition) spacePartitions.get(spaceInstance.getInstanceId() - 1);
+        } else {
+            if (spaceInstance.getNumberOfBackups() == 0) {
+                return (InternalSpacePartition) spacePartitions.get(0);
+            } else {
+                return (InternalSpacePartition) spacePartitions.get(spaceInstance.getInstanceId() - 1);
+            }
         }
     }
 

@@ -54,6 +54,8 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     private final SpaceURL spaceURL;
 
+    private final String clusterSchema;
+
     private final int numberOfInstances;
 
     private final int numberOfBackups;
@@ -103,6 +105,8 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
         this.statisticsChangedEventManager = new DefaultSpaceInstanceStatisticsChangedEventManager(admin);
 
+        this.clusterSchema = spaceURL.getProperty(SpaceURL.CLUSTER_SCHEMA);
+
         String sInstanceId = spaceURL.getProperty(SpaceURL.CLUSTER_MEMBER_ID);
         if (sInstanceId == null || sInstanceId.length() == 0) {
             instanceId = 1;
@@ -141,6 +145,8 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         this.spaceModeChangedEventManager = new DefaultSpaceModeChangedEventManager(null, admin);
         this.replicationStatusChangedEventManager = new DefaultReplicationStatusChangedEventManager(admin);
         this.statisticsChangedEventManager = new DefaultSpaceInstanceStatisticsChangedEventManager(admin);
+
+        this.clusterSchema = spaceURL.getProperty(SpaceURL.CLUSTER_SCHEMA);
 
         String sInstanceId = spaceURL.getProperty(SpaceURL.CLUSTER_MEMBER_ID);
         if (sInstanceId == null || sInstanceId.length() == 0) {
@@ -222,6 +228,10 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     public synchronized boolean isMonitoring() {
         return scheduledStatisticsMonitor != null;
+    }
+
+    public String getClusterSchema() {
+        return clusterSchema;
     }
 
     public int getNumberOfInstances() {

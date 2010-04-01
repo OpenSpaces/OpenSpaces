@@ -22,6 +22,8 @@ public interface InternalSpaceInstance extends SpaceInstance, InternalGridCompon
 
     ServiceID getServiceID();
 
+    String getClusterSchema();
+
     int getNumberOfInstances();
 
     int getNumberOfBackups();
