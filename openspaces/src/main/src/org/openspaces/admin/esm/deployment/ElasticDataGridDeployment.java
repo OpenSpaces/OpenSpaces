@@ -36,10 +36,10 @@ public class ElasticDataGridDeployment extends InternalElasticDataGridDeployment
     
     /**
      * Set the isolation level of this data grid.
-     * @param isolationLevel the isolation level requirement; Default {@link IsolationLevel#PUBLIC}.
+     * @param level the isolation level requirement; Default {@link DeploymentIsolationLevel#DEDICATED}.
      */
-    public ElasticDataGridDeployment isolationLevel(IsolationLevel isolationLevel) {
-        getDeploymentContext().setIsolationLevel(isolationLevel);
+    public ElasticDataGridDeployment deploymentIsolation(DeploymentIsolationLevel level) {
+        getDeploymentContext().setDeploymentIsolationLevel(level);
         return this;
     }
 

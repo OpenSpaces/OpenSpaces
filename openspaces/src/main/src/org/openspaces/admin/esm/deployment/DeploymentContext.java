@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class DeploymentContext implements Serializable {
     
-    private IsolationLevel isolationLevel = IsolationLevel.DEDICATED;
+    private DeploymentIsolationLevel deploymentIsolationLevel = DeploymentIsolationLevel.DEDICATED;
     private String minMemory = "1g";
     private String maxMemory = "10g";
     private boolean highlyAvailable = true;
@@ -24,8 +24,8 @@ public class DeploymentContext implements Serializable {
         this.maxMemory = maxMemory;
     }
 
-    public void setIsolationLevel(IsolationLevel isolationLevel) {
-        this.isolationLevel = isolationLevel;
+    public void setDeploymentIsolationLevel(DeploymentIsolationLevel isolationLevel) {
+        this.deploymentIsolationLevel = isolationLevel;
     }
 
     public boolean isHighlyAvailable() {
@@ -36,8 +36,8 @@ public class DeploymentContext implements Serializable {
         this.highlyAvailable = highlyAvailable;
     }
 
-    public IsolationLevel getIsolationLevel() {
-        return isolationLevel;
+    public DeploymentIsolationLevel getDeploymentIsolationLevel() {
+        return deploymentIsolationLevel;
     }
 
     public String getMinMemory() {

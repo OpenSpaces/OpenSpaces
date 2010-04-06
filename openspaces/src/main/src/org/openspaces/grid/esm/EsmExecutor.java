@@ -120,7 +120,7 @@ public class EsmExecutor {
         spaceDeployment.setContextProperty("maxMemory", deploymentContext.getMaxMemory());
         spaceDeployment.setContextProperty("initialJavaHeapSize", deploymentContext.getInitialJavaHeapSize());
         spaceDeployment.setContextProperty("maximumJavaHeapSize", deploymentContext.getMaximumJavaHeapSize());
-        spaceDeployment.setContextProperty("isolationLevel", deploymentContext.getIsolationLevel().name());
+        spaceDeployment.setContextProperty("deploymentIsolation", deploymentContext.getDeploymentIsolationLevel().name());
         spaceDeployment.setContextProperty("sla", deploymentContext.getSlaDescriptors());
 
         if (deployment.getElasticScaleConfig() != null) {
@@ -144,7 +144,7 @@ public class EsmExecutor {
                 + "\n\t Max Capacity: " + deploymentContext.getMaxMemory()
                 + "\n\t Initial Java Heap Size: " + initialJavaHeapSize
                 + "\n\t Maximum Java Heap Size: " + maximumJavaHeapSize
-                + "\n\t Isolation Level: " + deploymentContext.getIsolationLevel().name()
+                + "\n\t Deployment Isolation: " + deploymentContext.getDeploymentIsolationLevel().name()
                 + "\n\t Highly Available? " + deploymentContext.isHighlyAvailable()
                 + "\n\t Partitions: " + numberOfParitions
                 + "\n\t SLA: " + deploymentContext.getSlaDescriptors());

@@ -1,7 +1,7 @@
 package org.openspaces.admin.esm.deployment;
 
 /**
- * Specifies the isolation level of a deployment (per processing unit).
+ * Specifies the deployment isolation level (per processing unit).
  * <p>
  * {@link #PUBLIC} - A machine is shared by multiple tenants. Deployment of one tenant can co-exist
  * with other deployments.
@@ -20,7 +20,7 @@ package org.openspaces.admin.esm.deployment;
  * </pre>
  * </blockquote>
  */
-public enum IsolationLevel {
+public enum DeploymentIsolationLevel {
     /** public to all tenants */
 //    PUBLIC,
     /** shared by a specific tenant */
