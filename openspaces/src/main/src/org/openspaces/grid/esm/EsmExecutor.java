@@ -782,6 +782,7 @@ public class EsmExecutor {
                                 + ToStringHelper.gscToString(gscToRelocateTo) + "]");
                         puInstanceToMaybeRelocate.relocateAndWait(gscToRelocateTo, 60, TimeUnit.SECONDS);
                         workflow.breakWorkflow();
+                        workflow.add(new GscCollectorHandler(puCapacityPlanner, workflow));
                         return;
                     }
                 }
