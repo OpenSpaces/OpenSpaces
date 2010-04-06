@@ -5,18 +5,18 @@ import java.util.Properties;
 import org.openspaces.grid.esm.ElasticScaleHandler;
 import org.openspaces.grid.esm.ElasticScaleHandlerConfig;
 
-
 /**
  * An elastic data-grid deployment descriptor for deploying a plain data-grid.
  * <p>
  * The data-grid context properties can be modified by {@link #addContextProperty(String, String)}.
- * The default is a Highly-available data-grid, consisting of 1-10 gigabytes of memory spanned across a partitioned 
- * cluster of 10,1. Each Grid Service Container JVM is set to -Xmn512m and -Xmx512m.
+ * The default is a Highly-available data-grid, consisting of 1-10 gigabytes of memory spanned
+ * across a partitioned cluster of 10,1. Each Grid Service Container JVM is set to -Xmn512m and
+ * -Xmx512m.
  * 
  * <blockquote>
  * <pre>
  * <b>Disclaimer:</b> This interface and the elastic data grid functionality is provided as a technology preview in XAP 7.1. 
- * As such, it is subject to API and behavior changes in the next XAP releases without going the usual deprecation process 
+ * As such, it is subject to API and behavior changes in the next XAP releases without going through the usual deprecation process 
  * of the XAP API.
  * </pre>
  * </blockquote>
