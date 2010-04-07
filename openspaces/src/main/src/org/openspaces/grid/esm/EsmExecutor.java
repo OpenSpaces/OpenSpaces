@@ -689,10 +689,20 @@ public class EsmExecutor {
             }
             
             //sort from low to high
+            //first by number of processing units per machine, then by memory in each GSC
             Collections.sort(gscsWithoutBreach, new Comparator<GridServiceContainer>() {
                 public int compare(GridServiceContainer gsc1, GridServiceContainer gsc2) {
+                    
+                    int nProcessingUnits1 = gsc1.getMachine().getProcessingUnitInstances().length;
+                    int nProcessingUnits2 = gsc2.getMachine().getProcessingUnitInstances().length;
+
+                    if (nProcessingUnits1 != nProcessingUnits2) {
+                        return (nProcessingUnits1 - nProcessingUnits2);
+                    }
+                    
                     double memoryHeapUsedPerc1 = gsc1.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc();
                     double memoryHeapUsedPerc2 = gsc2.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc();
+
                     return (int)(memoryHeapUsedPerc1 - memoryHeapUsedPerc2);
                 }
             });
@@ -712,7 +722,6 @@ public class EsmExecutor {
                     logger.finer("Finding GSC that can hold [" + ToStringHelper.puInstanceToString(puInstanceToMaybeRelocate) + "] with ["
                             + NUMBER_FORMAT.format(estimatedMemoryHeapUsedPerc) + "%]");
 
-
                     List<GridServiceContainer> gscsInZone = zoneCorrelator.getGridServiceContainers();
                     //sort from low to high
                     Collections.sort(gscsInZone, new Comparator<GridServiceContainer>() {
@@ -729,6 +738,12 @@ public class EsmExecutor {
                         if (gscToRelocateTo.equals(puInstanceToMaybeRelocate.getGridServiceContainer())) {
                             //logger.finest("Skipping GSC ["+ToStringHelper.gscToString(gscToRelocateTo)+"] - same GSC as this instance");
                             continue;
+                        }
+                        
+                        //if target machine has less processing units than origin then skip it - we want to scale down not up.
+                        if (gscToRelocateTo.getMachine().getProcessingUnitInstances().length < gsc.getMachine().getProcessingUnitInstances().length) {
+                            logger.finest("Skipping GSC ["+ToStringHelper.gscToString(gscToRelocateTo)+"] - machine has less processing units than origin");
+                            continue; //can't use this GSC to scale
                         }
 
                         //if gsc reached its scale limit (of processing units) then skip it
@@ -782,7 +797,6 @@ public class EsmExecutor {
                                 + ToStringHelper.gscToString(gscToRelocateTo) + "]");
                         puInstanceToMaybeRelocate.relocateAndWait(gscToRelocateTo, 60, TimeUnit.SECONDS);
                         workflow.breakWorkflow();
-                        workflow.add(new GscCollectorHandler(puCapacityPlanner, workflow));
                         return;
                     }
                 }
