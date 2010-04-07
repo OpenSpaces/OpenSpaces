@@ -182,14 +182,27 @@ public class DefaultElasticServiceManagers implements InternalElasticServiceMana
         return dumpResult;
     }
     
-
-    public ProcessingUnit deploy(ElasticDataGridDeployment deployment) {
-        // TODO Auto-generated method stub
+    private ElasticServiceManager getElasticServiceManager() {
+        Iterator<ElasticServiceManager> it = iterator();
+        if (it.hasNext()) {
+            return it.next();
+        }
         return null;
     }
 
+    public ProcessingUnit deploy(ElasticDataGridDeployment deployment) {
+        ElasticServiceManager elasticServiceManager = getElasticServiceManager();
+        if (elasticServiceManager == null) {
+            throw new AdminException("No Elastic Service Manager found to deploy [" + deployment.getDataGridName() + "]");
+        }
+        return elasticServiceManager.deploy(deployment);
+    }
+
     public ProcessingUnit deploy(ElasticDataGridDeployment deployment, long timeout, TimeUnit timeUnit) {
-        // TODO Auto-generated method stub
-        return null;
+        ElasticServiceManager elasticServiceManager = getElasticServiceManager();
+        if (elasticServiceManager == null) {
+            throw new AdminException("No Elastic Service Manager found to deploy [" + deployment.getDataGridName() + "]");
+        }
+        return elasticServiceManager.deploy(deployment, timeout, timeUnit);
     }
 }
