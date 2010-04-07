@@ -16,14 +16,25 @@
 
 package org.openspaces.persistency.hibernate;
 
-import com.gigaspaces.datasource.*;
-import com.j_spaces.core.client.SQLQuery;
+import java.io.Serializable;
+import java.util.List;
+
+import org.hibernate.EntityMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.openspaces.persistency.hibernate.iterator.*;
+import org.openspaces.persistency.hibernate.iterator.DefaultChunkListDataIterator;
+import org.openspaces.persistency.hibernate.iterator.DefaultChunkScrollableDataIterator;
+import org.openspaces.persistency.hibernate.iterator.DefaultListQueryDataIterator;
+import org.openspaces.persistency.hibernate.iterator.DefaultScrollableDataIterator;
+import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
 
-import java.util.List;
+import com.gigaspaces.datasource.BulkDataPersister;
+import com.gigaspaces.datasource.BulkItem;
+import com.gigaspaces.datasource.DataIterator;
+import com.gigaspaces.datasource.DataSourceException;
+import com.gigaspaces.datasource.SQLDataProvider;
+import com.j_spaces.core.client.SQLQuery;
 
 /**
  * The default Hibernate external data source implementation. Based on Hibernate {@link Session}.
@@ -33,6 +44,8 @@ import java.util.List;
 public class DefaultHibernateExternalDataSource extends AbstractHibernateExternalDataSource implements BulkDataPersister, SQLDataProvider {
 
     private boolean useMerge = false;
+    private boolean deleteById = true;
+    
 
     /**
      * If set to <code>true</code>, will use Hibernate <code>merge</code> to perform the create/update, and will
@@ -41,6 +54,16 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
      */
     public void setUseMerge(boolean useMerge) {
         this.useMerge = useMerge;
+    }
+
+    /**    
+     * If set to <code>true</code> the object will be deleted using only its id.
+     * If set to <code>false</code> the object will be deleted using the whole object.
+     * Defaults to <code>true</code>.
+     * @param deleteById
+     */
+    public void setDeleteById(boolean deleteById) {
+        this.deleteById = deleteById;
     }
 
     /**
@@ -69,15 +92,32 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                         if (logger.isTraceEnabled()) {
                             logger.trace("Deleting Entry [" + entry + "]");
                         }
-                        if (useMerge) {
-                            session.delete(session.merge(entry));
+                        
+                        
+                        if (deleteById) {
+                            Serializable id = getIdentifier(entry);
+                            if (id == null)
+                                throw new DataSourceException(
+                                        "Object id is null. Make sure object space id and hibernate id are the same property.");
+    
+                            Object toDelete = session.load(entry.getClass(), id);
+                            
+                            // ignore non existing objects - avoid unnecessary failures
+                            if(toDelete != null)
+                                session.delete(toDelete);
+    
                         } else {
-                            try {
-                                session.delete(entry);
-                            } catch (HibernateException e) {
+                            if (useMerge) {
                                 session.delete(session.merge(entry));
+                            } else {
+                                try {
+                                    session.delete(entry);
+                                } catch (HibernateException e) {
+                                    session.delete(session.merge(entry));
+                                }
                             }
                         }
+
                         break;
                     case BulkItem.WRITE:
                         if (logger.isTraceEnabled()) {
@@ -188,5 +228,16 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
         if (session.isOpen()) {
             session.close();
         }
+    }
+    
+    /**
+     * Extracts and returns the hibernate object identifier
+     * @param o
+     * @return
+     */
+    protected Serializable getIdentifier(Object o) {
+
+        return getSessionFactory().getClassMetadata(o.getClass()).getIdentifier(o, EntityMode.POJO);
+      
     }
 }
