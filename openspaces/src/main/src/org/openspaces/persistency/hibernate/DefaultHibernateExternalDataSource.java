@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.hibernate.EntityMode;
 import org.hibernate.HibernateException;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.openspaces.persistency.hibernate.iterator.DefaultChunkListDataIterator;
@@ -100,11 +101,20 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
                                 throw new DataSourceException(
                                         "Object id is null. Make sure object space id and hibernate id are the same property.");
     
-                            Object toDelete = session.load(entry.getClass(), id);
+                            // ignore non existing objects - avoid unnecessary failures                            
+                            try
+                            {
+                                Object toDelete = session.load(entry.getClass(), id);
                             
-                            // ignore non existing objects - avoid unnecessary failures
-                            if(toDelete != null)
-                                session.delete(toDelete);
+                                 if(toDelete != null)
+                                    session.delete(toDelete);
+                            }catch(ObjectNotFoundException e)
+                            {  
+                               // ignore non existing objects - avoid unnecessary failures
+                                if (logger.isTraceEnabled()) {
+                                    logger.trace("Delete Entry failed [" + entry + "]",e);
+                                }
+                            }
     
                         } else {
                             if (useMerge) {
