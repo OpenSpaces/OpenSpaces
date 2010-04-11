@@ -29,9 +29,16 @@ import org.openspaces.admin.pu.ProcessingUnit;
 
 /**
  * <p>Provides simple means to get all the current managers, as well as as registering for
- * manager lifecycle (added and removed) events.
+ * manager life-cycle (added and removed) events.
  *
- * @author Moran Avigdor
+ * <blockquote>
+ * <pre>
+ * <b>Disclaimer:</b> This interface and the elastic data grid functionality is provided as a technology preview in XAP 7.1. 
+ * As such, it is subject to API and behavior changes in the next XAP releases without going through the usual deprecation process 
+ * of the XAP API.
+ * </pre>
+ * </blockquote>
+ * 
  */
 public interface ElasticServiceManagers extends AdminAware, Iterable<ElasticServiceManager>, DumpProvider {
 
