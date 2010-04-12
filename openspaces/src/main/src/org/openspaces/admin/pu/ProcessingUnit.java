@@ -278,5 +278,5 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * <p>Note, in order to receive events, the virtual machines need to be in a "statistics" monitored
      * state.
      */
-    ProcessingUnitInstanceStatisticsChangedEventManager getProcessingUnitInstanceStatisticsChange();
+    ProcessingUnitInstanceStatisticsChangedEventManager getProcessingUnitInstanceStatisticsChanged();
 }

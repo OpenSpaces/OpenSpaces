@@ -518,8 +518,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
                 ProcessingUnitInstanceStatistics stats = processingUnitInstance.getStatistics();
                 ProcessingUnitInstanceStatisticsChangedEvent event = new ProcessingUnitInstanceStatisticsChangedEvent(processingUnitInstance, stats);
                 statisticsChangedEventManager.processingUnitInstanceStatisticsChanged(event);
-                ((InternalProcessingUnitInstanceStatisticsChangedEventManager) processingUnit.getProcessingUnitInstanceStatisticsChange()).processingUnitInstanceStatisticsChanged(event);
-                ((InternalProcessingUnitInstanceStatisticsChangedEventManager) processingUnit.getProcessingUnits().getProcessingUnitInstanceStatisticsChange()).processingUnitInstanceStatisticsChanged(event);
+                ((InternalProcessingUnitInstanceStatisticsChangedEventManager) processingUnit.getProcessingUnitInstanceStatisticsChanged()).processingUnitInstanceStatisticsChanged(event);
+                ((InternalProcessingUnitInstanceStatisticsChangedEventManager) processingUnit.getProcessingUnits().getProcessingUnitInstanceStatisticsChanged()).processingUnitInstanceStatisticsChanged(event);
             }
         }, 0, statisticsInterval, TimeUnit.MILLISECONDS);
     }

@@ -497,7 +497,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         return partition;
     }
 
-    public ProcessingUnitInstanceStatisticsChangedEventManager getProcessingUnitInstanceStatisticsChange() {
+    public ProcessingUnitInstanceStatisticsChangedEventManager getProcessingUnitInstanceStatisticsChanged() {
         return this.processingUnitInstanceStatisticsChangedEventManager;
     }
 

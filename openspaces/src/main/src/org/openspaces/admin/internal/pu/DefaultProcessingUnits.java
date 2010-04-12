@@ -199,7 +199,7 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
         }
     }
 
-    public ProcessingUnitInstanceStatisticsChangedEventManager getProcessingUnitInstanceStatisticsChange() {
+    public ProcessingUnitInstanceStatisticsChangedEventManager getProcessingUnitInstanceStatisticsChanged() {
         return this.processingUnitInstanceStatisticsChangedEventManager;
     }
 
