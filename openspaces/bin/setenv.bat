@@ -33,7 +33,7 @@
 @rem NIC_ADDR 	  - The Network Interface card IP Address
 @rem 
 @rem  For additional information, refer to the GigaSpaces OnLine Documentation
-@rem  at http://www.gigaspaces.com/wiki/display/GS/System+Environment
+@rem  at http://www.gigaspaces.com/wiki/display/XAP71/System+Environment+and+Environment+Variables
 @rem *************************************************************************
 @echo off
 

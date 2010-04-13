@@ -33,7 +33,7 @@
 #  NIC_ADDR 	- The Network Interface card IP Address
 # 
 #   For additional information, refer to the GigaSpaces OnLine Documentation
-#   at http://www.gigaspaces.com/wiki/display/GS/System+Environment
+#   at http://www.gigaspaces.com/wiki/display/XAP71/System+Environment+and+Environment+Variables
 #  *************************************************************************
 
 # Set VERBOSE=true for debugging output
