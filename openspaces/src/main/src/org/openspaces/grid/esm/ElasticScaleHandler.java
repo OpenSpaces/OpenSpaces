@@ -36,7 +36,7 @@ public interface ElasticScaleHandler {
      * scaled out (which will cause the ESM to wait until the call has returned, preventing it from
      * handling other processing units). It's advised to scale out asynchronously due to long
      * startup delays. As long as the machine has not been discovered, the ESM will repeatedly call
-     * this method until a new machine has been allocated. It’s up to the implementation class to
+     * this method until a new machine has been allocated. It's up to the implementation class to
      * maintain the state and not allocate new resources before the pending allocations have
      * completed. When a new machine is started, it should start a Grid Service Agent (GSA).
      * 
