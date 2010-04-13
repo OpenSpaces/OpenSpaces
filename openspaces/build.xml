@@ -219,8 +219,8 @@
         		packagenames="org.openspaces.**.*"
         		excludepackagenames="org.openspaces.admin.internal.**.*, org.openspaces.core.executor.internal.**.*, org.openspaces.core.internal.**.*, org.openspaces.core.transaction.internal.**.*">
             <arg value="-breakiterator"/>
-            <arg value="-J-Xmx128m"/>
-            <arg value="-J-XX:MaxPermSize=128m"/>
+            <arg value="-J-Xmx256m"/>
+            <arg value="-J-XX:MaxPermSize=256m"/>
             <doctitle><![CDATA[<h1>GigaSpaces XAP 7.1 API</h1>]]></doctitle>
             <bottom><![CDATA[<i>Copyright &copy; <a href="http://www.gigaspaces.com/" target="_top">GigaSpaces</a>.</i>]]></bottom>
             <classpath refid="all-libs"/>
