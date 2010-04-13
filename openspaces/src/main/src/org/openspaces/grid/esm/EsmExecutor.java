@@ -138,16 +138,22 @@ public class EsmExecutor {
            spaceDeployment.setContextProperty("vmArguments", deploymentContext.getVmInputArguments()); 
         }
         
-        logger.finest("Deploying " + deployment.getDataGridName() 
-                + "\n\t Zone: " + zoneName 
-                + "\n\t Min Capacity: " + deploymentContext.getMinMemory()
-                + "\n\t Max Capacity: " + deploymentContext.getMaxMemory()
-                + "\n\t Initial Java Heap Size: " + initialJavaHeapSize
-                + "\n\t Maximum Java Heap Size: " + maximumJavaHeapSize
-                + "\n\t Deployment Isolation: " + deploymentContext.getDeploymentIsolationLevel().name()
-                + "\n\t Highly Available? " + deploymentContext.isHighlyAvailable()
-                + "\n\t Partitions: " + numberOfParitions
-                + "\n\t SLA: " + deploymentContext.getSlaDescriptors());
+        if (logger.isLoggable(Level.FINE)) {
+            logger.fine("Deploying " + deployment.getDataGridName() 
+                    + "\n\t Zone: " + zoneName 
+                    + "\n\t Min Capacity: " + deploymentContext.getMinMemory()
+                    + "\n\t Max Capacity: " + deploymentContext.getMaxMemory()
+                    + "\n\t Initial Java Heap Size: " + initialJavaHeapSize
+                    + "\n\t Maximum Java Heap Size: " + maximumJavaHeapSize
+                    + "\n\t Deployment Isolation: " + deploymentContext.getDeploymentIsolationLevel().name()
+                    + "\n\t Highly Available? " + deploymentContext.isHighlyAvailable()
+                    + "\n\t Partitions: " + numberOfParitions
+                    + "\n\t SLA: " + deploymentContext.getSlaDescriptors());
+        } else if (logger.isLoggable(Level.INFO)) {
+            logger.info("Deploying " + deployment.getDataGridName() + " " + numberOfParitions
+                    + (deploymentContext.isHighlyAvailable() ? ",1" : ",0") + " capacity: "
+                    + deploymentContext.getMinMemory() + " - " + deploymentContext.getMaxMemory());
+        }
         
         admin.getGridServiceManagers().waitForAtLeastOne().deploy(spaceDeployment);
     }
