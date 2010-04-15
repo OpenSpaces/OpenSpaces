@@ -8,6 +8,7 @@
     <packaging>pom</packaging>
     <properties>
         <gsVersion>${pluginVersion}</gsVersion>
+        <springVersion>3.0.1.RELEASE</springVersion>
     </properties>
     <modules>
         <module>common</module>
@@ -31,7 +32,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>3.0.1.RELEASE</version>
+            <version>${springVersion}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
