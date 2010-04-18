@@ -16,6 +16,7 @@
 
 package org.openspaces.pu.container.jee.jetty;
 
+import com.j_spaces.kernel.ClassLoaderHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.jetty.jmx.MBeanContainer;
@@ -24,8 +25,8 @@ import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.HandlerWrapper;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.jini.rio.boot.CommonClassLoader;
-import org.jini.rio.boot.SharedServiceData;
 import org.jini.rio.boot.ServiceClassLoader;
+import org.jini.rio.boot.SharedServiceData;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoBeanPostProcessor;
 import org.openspaces.core.cluster.ClusterInfoPropertyPlaceholderConfigurer;
@@ -52,8 +53,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.net.BindException;
 import java.util.*;
-
-import com.j_spaces.kernel.ClassLoaderHelper;
 
 /**
  * An implementation of {@link org.openspaces.pu.container.jee.JeeProcessingUnitContainerProvider} that
@@ -284,149 +283,162 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
         if (classLoader != null) {
             applicationContext.setClassLoader(classLoader);
         }
-        // "start" the application context
-        applicationContext.refresh();
 
-        JettyHolder jettyHolder = (JettyHolder) applicationContext.getBean("jettyHolder");
-
-        int retryPortCount = 20;
-        try {
-            retryPortCount = (Integer) applicationContext.getBean("retryPortCount");
-        } catch (Exception e) {
-            // do nothing
-        }
-
-        FreePortGenerator freePortGenerator = new NoOpFreePortGenerator();
-        String freePortGeneratorSetting = beanLevelProperties.getContextProperties().getProperty("jetty.freePortGenerator", "file");
-        if ("file".equalsIgnoreCase(freePortGeneratorSetting)) {
-            freePortGenerator = new FileLockFreePortGenerator();
-        }
+        ClassLoader origClassLoader = Thread.currentThread().getContextClassLoader();
+        JettyHolder jettyHolder = null;
         List<FreePortGenerator.PortHandle> portHandles = new ArrayList<FreePortGenerator.PortHandle>();
-
-        // only check ports if the server is not running already
-        if (!jettyHolder.getServer().isStarted()) {
-            boolean success = false;
-            for (int i = 0; i < retryPortCount; i++) {
-                for (Connector connector : jettyHolder.getServer().getConnectors()) {
-                    if (connector.getPort() != 0) {
-                        FreePortGenerator.PortHandle portHandle = freePortGenerator.nextAvailablePort(connector.getPort(), retryPortCount);
-                        for (Connector connector1 : jettyHolder.getServer().getConnectors()) {
-                            if (connector1 instanceof AbstractConnector) {
-                                if (connector.getPort() == connector1.getConfidentialPort()) {
-                                    // if the confidential port of one connectors points to this connector that we are changing its port
-                                    // then update it as well
-                                    ((AbstractConnector) connector1).setConfidentialPort(portHandle.getPort());
-                                }
-                            }
-                        }
-                        connector.setPort(portHandle.getPort());
-                        portHandles.add(portHandle);
-                    }
-                }
-
-                try {
-                    jettyHolder.openConnectors();
-                    success = true;
-                    break;
-                } catch (BindException e) {
-                    for (FreePortGenerator.PortHandle portHandle : portHandles) {
-                        portHandle.release();
-                    }
-                    portHandles.clear();
-                    try {
-                        jettyHolder.closeConnectors();
-                    } catch (Exception e1) {
-                        logger.debug(e1);
-                        // ignore
-                    }
-                    for (Connector connector : jettyHolder.getServer().getConnectors()) {
-                        for (Connector connector1 : jettyHolder.getServer().getConnectors()) {
-                            if (connector1 instanceof AbstractConnector) {
-                                if (connector.getPort() == connector1.getConfidentialPort()) {
-                                    // if the confidential port of one connectors points to this connector that we are changing its port
-                                    // then update it as well
-                                    ((AbstractConnector) connector1).setConfidentialPort(connector.getPort() + 1);
-                                }
-                            }
-                        }
-                        connector.setPort(connector.getPort() + 1);
-                    }
-                } catch (Exception e) {
-                    for (FreePortGenerator.PortHandle portHandle : portHandles) {
-                        portHandle.release();
-                    }
-                    portHandles.clear();
-                    try {
-                        jettyHolder.closeConnectors();
-                    } catch (Exception e1) {
-                        logger.debug(e1);
-                        // ignore
-                    }
-                    if (e instanceof CannotCreateContainerException)
-                        throw (CannotCreateContainerException) e;
-                    throw new CannotCreateContainerException("Failed to start jetty server", e);
-                }
-            }
-            if (!success) {
-                throw new CannotCreateContainerException("Failed to bind jetty to port with retries [" + retryPortCount + "]");
-            }
-        }
-        for (Connector connector : jettyHolder.getServer().getConnectors()) {
-            logger.info("Using Jetty server connector [" + connector.getClass().getName() + "], Host [" + connector.getHost() + "], Port [" + connector.getPort() + "], Confidential Port [" + connector.getConfidentialPort() + "]");
-        }
-
         try {
-            jettyHolder.start();
-        } catch (Exception e) {
             try {
-                jettyHolder.stop();
-            } catch (Exception e1) {
-                logger.debug(e1);
-                // ignore
-            }
-            if (e instanceof CannotCreateContainerException)
-                throw (CannotCreateContainerException) e;
-            throw new CannotCreateContainerException("Failed to start jetty server", e);
-        }
-
-        String jmxEnabled = beanLevelProperties.getContextProperties().getProperty(JETTY_JMX_PROP, "false");
-        if ("true".equals(jmxEnabled)) {
-            MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-            MBeanContainer mBeanContainer = new MBeanContainer(mBeanServer);
-            String domain = "gigaspaces.jetty";
-            if (!jettyHolder.isSingleInstance()) {
-                domain += "." + clusterInfo.getName() + "." + clusterInfo.getRunningNumberOffset1();
-            }
-            mBeanContainer.setDomain(domain);
-            jettyHolder.getServer().getContainer().addEventListener(mBeanContainer);
-            try {
-                mBeanContainer.start();
+                ClassLoaderHelper.setContextClassLoader(SharedServiceData.getJeeClassLoader("jetty"), true);
             } catch (Exception e) {
-                logger.warn("Failed to start jetty mbean container", e);
+                // ignore ...
             }
-        }
 
-        clearShutdownThreadContextClassLoader(jettyHolder.getServer());
+            // "start" the application context
+            applicationContext.refresh();
 
-        try {
-            BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, new File(deployPath, "WEB-INF/web.xml"));
-        } catch (IOException e) {
-            throw new CannotCreateContainerException("Failed to resolve properties on WEB-INF/web.xml", e);
-        }
-        try {
-            BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, new File(deployPath, "WEB-INF/jetty-web.xml"));
-        } catch (IOException e) {
-            throw new CannotCreateContainerException("Failed to resolve properties on WEB-INF/jetty-web.xml");
-        }
-        try {
-            BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, new File(deployPath, "WEB-INF/jetty6-web.xml"));
-        } catch (IOException e) {
-            throw new CannotCreateContainerException("Failed to resolve properties on WEB-INF/jetty6-web.xml");
-        }
-        try {
-            BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, new File(deployPath, "WEB-INF/web-jetty.xml"));
-        } catch (IOException e) {
-            throw new CannotCreateContainerException("Failed to resolve properties on WEB-INF/web-jetty.xml");
+            jettyHolder = (JettyHolder) applicationContext.getBean("jettyHolder");
+
+            int retryPortCount = 20;
+            try {
+                retryPortCount = (Integer) applicationContext.getBean("retryPortCount");
+            } catch (Exception e) {
+                // do nothing
+            }
+
+            FreePortGenerator freePortGenerator = new NoOpFreePortGenerator();
+            String freePortGeneratorSetting = beanLevelProperties.getContextProperties().getProperty("jetty.freePortGenerator", "file");
+            if ("file".equalsIgnoreCase(freePortGeneratorSetting)) {
+                freePortGenerator = new FileLockFreePortGenerator();
+            }
+
+            // only check ports if the server is not running already
+            if (!jettyHolder.getServer().isStarted()) {
+                boolean success = false;
+                for (int i = 0; i < retryPortCount; i++) {
+                    for (Connector connector : jettyHolder.getServer().getConnectors()) {
+                        if (connector.getPort() != 0) {
+                            FreePortGenerator.PortHandle portHandle = freePortGenerator.nextAvailablePort(connector.getPort(), retryPortCount);
+                            for (Connector connector1 : jettyHolder.getServer().getConnectors()) {
+                                if (connector1 instanceof AbstractConnector) {
+                                    if (connector.getPort() == connector1.getConfidentialPort()) {
+                                        // if the confidential port of one connectors points to this connector that we are changing its port
+                                        // then update it as well
+                                        ((AbstractConnector) connector1).setConfidentialPort(portHandle.getPort());
+                                    }
+                                }
+                            }
+                            connector.setPort(portHandle.getPort());
+                            portHandles.add(portHandle);
+                        }
+                    }
+
+                    try {
+                        jettyHolder.openConnectors();
+                        success = true;
+                        break;
+                    } catch (BindException e) {
+                        for (FreePortGenerator.PortHandle portHandle : portHandles) {
+                            portHandle.release();
+                        }
+                        portHandles.clear();
+                        try {
+                            jettyHolder.closeConnectors();
+                        } catch (Exception e1) {
+                            logger.debug(e1);
+                            // ignore
+                        }
+                        for (Connector connector : jettyHolder.getServer().getConnectors()) {
+                            for (Connector connector1 : jettyHolder.getServer().getConnectors()) {
+                                if (connector1 instanceof AbstractConnector) {
+                                    if (connector.getPort() == connector1.getConfidentialPort()) {
+                                        // if the confidential port of one connectors points to this connector that we are changing its port
+                                        // then update it as well
+                                        ((AbstractConnector) connector1).setConfidentialPort(connector.getPort() + 1);
+                                    }
+                                }
+                            }
+                            connector.setPort(connector.getPort() + 1);
+                        }
+                    } catch (Exception e) {
+                        for (FreePortGenerator.PortHandle portHandle : portHandles) {
+                            portHandle.release();
+                        }
+                        portHandles.clear();
+                        try {
+                            jettyHolder.closeConnectors();
+                        } catch (Exception e1) {
+                            logger.debug(e1);
+                            // ignore
+                        }
+                        if (e instanceof CannotCreateContainerException)
+                            throw (CannotCreateContainerException) e;
+                        throw new CannotCreateContainerException("Failed to start jetty server", e);
+                    }
+                }
+                if (!success) {
+                    throw new CannotCreateContainerException("Failed to bind jetty to port with retries [" + retryPortCount + "]");
+                }
+            }
+            for (Connector connector : jettyHolder.getServer().getConnectors()) {
+                logger.info("Using Jetty server connector [" + connector.getClass().getName() + "], Host [" + connector.getHost() + "], Port [" + connector.getPort() + "], Confidential Port [" + connector.getConfidentialPort() + "]");
+            }
+
+            try {
+                jettyHolder.start();
+            } catch (Exception e) {
+                try {
+                    jettyHolder.stop();
+                } catch (Exception e1) {
+                    logger.debug(e1);
+                    // ignore
+                }
+                if (e instanceof CannotCreateContainerException)
+                    throw (CannotCreateContainerException) e;
+                throw new CannotCreateContainerException("Failed to start jetty server", e);
+            }
+
+            String jmxEnabled = beanLevelProperties.getContextProperties().getProperty(JETTY_JMX_PROP, "false");
+            if ("true".equals(jmxEnabled)) {
+                MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+                MBeanContainer mBeanContainer = new MBeanContainer(mBeanServer);
+                String domain = "gigaspaces.jetty";
+                if (!jettyHolder.isSingleInstance()) {
+                    domain += "." + clusterInfo.getName() + "." + clusterInfo.getRunningNumberOffset1();
+                }
+                mBeanContainer.setDomain(domain);
+                jettyHolder.getServer().getContainer().addEventListener(mBeanContainer);
+                try {
+                    mBeanContainer.start();
+                } catch (Exception e) {
+                    logger.warn("Failed to start jetty mbean container", e);
+                }
+            }
+
+            clearShutdownThreadContextClassLoader(jettyHolder.getServer());
+
+            try {
+                BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, new File(deployPath, "WEB-INF/web.xml"));
+            } catch (IOException e) {
+                throw new CannotCreateContainerException("Failed to resolve properties on WEB-INF/web.xml", e);
+            }
+            try {
+                BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, new File(deployPath, "WEB-INF/jetty-web.xml"));
+            } catch (IOException e) {
+                throw new CannotCreateContainerException("Failed to resolve properties on WEB-INF/jetty-web.xml");
+            }
+            try {
+                BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, new File(deployPath, "WEB-INF/jetty6-web.xml"));
+            } catch (IOException e) {
+                throw new CannotCreateContainerException("Failed to resolve properties on WEB-INF/jetty6-web.xml");
+            }
+            try {
+                BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, new File(deployPath, "WEB-INF/web-jetty.xml"));
+            } catch (IOException e) {
+                throw new CannotCreateContainerException("Failed to resolve properties on WEB-INF/web-jetty.xml");
+            }
+        } finally {
+            ClassLoaderHelper.setContextClassLoader(origClassLoader, true);
         }
 
         try {
@@ -490,9 +502,9 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                 }
             }
             contextHandlerContainer.addHandler(webAppContext);
-            
+
             if (container.isStarted() || container.isStarting()) {
-                ClassLoader origClassLoader = Thread.currentThread().getContextClassLoader();
+                origClassLoader = Thread.currentThread().getContextClassLoader();
                 try {
                     // we set the parent class loader of the web application to be the jee container class loader
                     // this is to basically to hide the service class loader from it (and openspaces jars and so on)
