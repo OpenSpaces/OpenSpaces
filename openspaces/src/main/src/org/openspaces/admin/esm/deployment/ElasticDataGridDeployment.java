@@ -34,15 +34,22 @@ public class ElasticDataGridDeployment extends InternalElasticDataGridDeployment
         super(dataGridName);
     }
     
-    /**
-     * Set the isolation level of this data grid.
-     * @param level the isolation level requirement; Default {@link DeploymentIsolationLevel#DEDICATED}.
-     */
-    public ElasticDataGridDeployment deploymentIsolation(DeploymentIsolationLevel level) {
-        getDeploymentContext().setDeploymentIsolationLevel(level);
+    public ElasticDataGridDeployment dedicatedDeploymentIsolation() {
+        getDeploymentContext().setDeploymentIsolationLevel(DeploymentIsolationLevel.DEDICATED);
         return this;
     }
-
+    
+    public ElasticDataGridDeployment publicDeploymentIsolation() {
+        getDeploymentContext().setDeploymentIsolationLevel(DeploymentIsolationLevel.PUBLIC);
+        return this;
+    }
+    
+    public ElasticDataGridDeployment sharedDeploymentIsolation(String tenant) {
+        getDeploymentContext().setDeploymentIsolationLevel(DeploymentIsolationLevel.SHARED);
+        getDeploymentContext().setTenant(tenant);
+        return this;
+    }
+    
     /**
      * Set the memory capacity growth of this data grid. The parameter specifies size in bytes (b),
      * kilobytes (k), megabytes (m), gigabytes (g). These two control respectively -Xmn and -Xmx

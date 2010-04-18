@@ -12,6 +12,7 @@ public class DeploymentContext implements Serializable {
     private String initialJavaHeapSize = "512m";
     private String maximumJavaHeapSize = "512m";
     private String vmInputArguments = null;
+    private String tenant ="";
     
     DeploymentContext(){
     }
@@ -82,5 +83,13 @@ public class DeploymentContext implements Serializable {
     
     public String getVmInputArguments() {
         return vmInputArguments;
+    }
+
+    public void setTenant(String tenant) {
+        this.tenant = tenant;
+    }
+    
+    public String getTenant() {
+        return tenant;
     }
 }

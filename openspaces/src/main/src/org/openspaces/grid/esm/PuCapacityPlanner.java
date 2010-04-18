@@ -1,7 +1,6 @@
 package org.openspaces.grid.esm;
 
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 
 import org.openspaces.admin.gsc.GridServiceContainer;
@@ -15,40 +14,33 @@ public class PuCapacityPlanner {
     private final int scalingFactor;
     private final int minNumberOfGSCs;
     private final int maxNumberOfGSCs;
-    //private int maxNumberOfGSCsPerMachine;
-    private final String zoneName;
-    private final String maxJavaHeapSize;
-    private final String initJavaHeapSize;
     private final ElasticScaleHandler elasticScale;
+    private final DeploymentIsolationFilter deploymentIsolationFilter;
 
+    private final ElasticDeploymentContextProperties contextProperties;
+    
     public PuCapacityPlanner(ProcessingUnit pu, ElasticScaleHandler elasticScale) {
         this.pu = pu;
         this.elasticScale = elasticScale;
         
-        Properties contextProperties = pu.getBeanLevelProperties().getContextProperties();
+        contextProperties = new ElasticDeploymentContextProperties(pu.getBeanLevelProperties().getContextProperties());
 
-        String initialJavaHeapSize = contextProperties.getProperty("initialJavaHeapSize");
-        String maximumJavaHeapSize = contextProperties.getProperty("maximumJavaHeapSize");
+        String initialJavaHeapSize = contextProperties.getInitialJavaHeapSize();
+        String maximumJavaHeapSize = contextProperties.getMaximumJavaHeapSize();
         if (MemorySettings.valueOf(initialJavaHeapSize).isGreaterThan(MemorySettings.valueOf(maximumJavaHeapSize))) {
             initialJavaHeapSize = maximumJavaHeapSize;
         }
         
-        initJavaHeapSize = initialJavaHeapSize;
-        maxJavaHeapSize = maximumJavaHeapSize;
-        
-        minNumberOfGSCs = Math.max(1, MemorySettings.valueOf(contextProperties.getProperty("minMemory")).floorDividedBy(maxJavaHeapSize));
-        maxNumberOfGSCs = Math.max(1, MemorySettings.valueOf(contextProperties.getProperty("maxMemory")).floorDividedBy(maxJavaHeapSize));
+        minNumberOfGSCs = Math.max(1, MemorySettings.valueOf(contextProperties.getMinMemoryCapacity()).floorDividedBy(contextProperties.getMaximumJavaHeapSize()));
+        maxNumberOfGSCs = Math.max(1, MemorySettings.valueOf(contextProperties.getMaxMemoryCapacity()).floorDividedBy(contextProperties.getMaximumJavaHeapSize()));
         
         scalingFactor = (int)Math.ceil(1.0*maxNumberOfGSCs / minNumberOfGSCs);
         
-        int partitions = pu.getNumberOfInstances();
-        //maxNumberOfGSCsPerMachine = (int)Math.ceil(1.0*partitions / scalingFactor);
-
-        zoneName = pu.getRequiredZones()[0];
+        deploymentIsolationFilter = new DeploymentIsolationFilter(this);
     }
     
     public static boolean isElastic(ProcessingUnit pu){
-        return (pu.getBeanLevelProperties().getContextProperties().containsKey("elastic"));
+        return (pu.getBeanLevelProperties().getContextProperties().containsKey(ElasticDeploymentContextProperties.ELASTIC));
     }
     
     public int getScalingFactor() {
@@ -63,18 +55,6 @@ public class PuCapacityPlanner {
         return maxNumberOfGSCs;
     }
 
-    public String getZoneName() {
-        return zoneName;
-    }
-    
-    public String getInitJavaHeapSize() {
-        return initJavaHeapSize;
-    }
-    
-    public String getMaxJavaHeapSize() {
-        return maxJavaHeapSize;
-    }
-
     public ProcessingUnit getProcessingUnit() {
         return pu;
     }
@@ -84,7 +64,7 @@ public class PuCapacityPlanner {
     }
     
     public int getNumberOfGSCsInZone() {
-        Zone zone = pu.getAdmin().getZones().getByName(zoneName);
+        Zone zone = pu.getAdmin().getZones().getByName(contextProperties.getZoneName());
         return zone == null ? 0 : zone.getGridServiceContainers().getSize();
     }
 
@@ -102,7 +82,7 @@ public class PuCapacityPlanner {
     }
     
     public int getNumberOfMachinesInZone() {
-        Zone zone = pu.getAdmin().getZones().getByName(zoneName);
+        Zone zone = pu.getAdmin().getZones().getByName(contextProperties.getZoneName());
         if (zone == null) return 0;
 
         //will include only machines which have gscs (and probably pus)
@@ -116,7 +96,11 @@ public class PuCapacityPlanner {
         return (machines.size());
     }
     
-    public String getVmArguments() {
-        return (String)pu.getBeanLevelProperties().getContextProperties().get("vmArguments");
+    public ElasticDeploymentContextProperties getContextProperties() {
+        return contextProperties;
+    }
+    
+    public DeploymentIsolationFilter getDeploymentIsolationFilter() {
+        return deploymentIsolationFilter;
     }
 }

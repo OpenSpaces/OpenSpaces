@@ -1,5 +1,17 @@
 package org.openspaces.grid.esm;
 
+import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.DEPLOYMENT_ISOLATION;
+import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.ELASTIC;
+import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.ELASTIC_SCALE_CONFIG;
+import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.INITIAL_JAVA_HEAP_SIZE;
+import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.MAXIMUM_JAVA_HEAP_SIZE;
+import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.MAX_MEMORY;
+import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.MIN_MEMORY;
+import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.SLA;
+import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.TENANT;
+import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.VM_ARGUMENTS;
+import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.ZONE;
+
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -98,7 +110,8 @@ public class EsmExecutor {
 
     public void deploy(ElasticDataGridDeployment deployment) {
         DeploymentContext deploymentContext = ((InternalElasticDataGridDeployment)deployment).getDeploymentContext();
-        final String zoneName = deployment.getDataGridName();
+        String tenantPrefix = deploymentContext.getTenant().length() == 0 ? "" : deploymentContext.getTenant() + "-"; 
+        final String zoneName = tenantPrefix+deployment.getDataGridName();
         SpaceDeployment spaceDeployment = new SpaceDeployment(deployment.getDataGridName());
         spaceDeployment.addZone(zoneName);
         int numberOfParitions = calculateNumberOfPartitions(deploymentContext);
@@ -115,16 +128,18 @@ public class EsmExecutor {
             initialJavaHeapSize = maximumJavaHeapSize;
         }
         
-        spaceDeployment.setContextProperty("elastic", "true");
-        spaceDeployment.setContextProperty("minMemory", deploymentContext.getMinMemory());
-        spaceDeployment.setContextProperty("maxMemory", deploymentContext.getMaxMemory());
-        spaceDeployment.setContextProperty("initialJavaHeapSize", deploymentContext.getInitialJavaHeapSize());
-        spaceDeployment.setContextProperty("maximumJavaHeapSize", deploymentContext.getMaximumJavaHeapSize());
-        spaceDeployment.setContextProperty("deploymentIsolation", deploymentContext.getDeploymentIsolationLevel().name());
-        spaceDeployment.setContextProperty("sla", deploymentContext.getSlaDescriptors());
+        spaceDeployment.setContextProperty(ELASTIC, "true");
+        spaceDeployment.setContextProperty(MIN_MEMORY, deploymentContext.getMinMemory());
+        spaceDeployment.setContextProperty(MAX_MEMORY, deploymentContext.getMaxMemory());
+        spaceDeployment.setContextProperty(INITIAL_JAVA_HEAP_SIZE, deploymentContext.getInitialJavaHeapSize());
+        spaceDeployment.setContextProperty(MAXIMUM_JAVA_HEAP_SIZE, deploymentContext.getMaximumJavaHeapSize());
+        spaceDeployment.setContextProperty(DEPLOYMENT_ISOLATION, deploymentContext.getDeploymentIsolationLevel().name());
+        spaceDeployment.setContextProperty(SLA, deploymentContext.getSlaDescriptors());
+        spaceDeployment.setContextProperty(ZONE, zoneName);
+        spaceDeployment.setContextProperty(TENANT, deploymentContext.getTenant());
 
         if (deployment.getElasticScaleConfig() != null) {
-            spaceDeployment.setContextProperty("elasticScaleConfig", ElasticScaleHandlerConfigSerializer.toString(deployment.getElasticScaleConfig()));
+            spaceDeployment.setContextProperty(ELASTIC_SCALE_CONFIG, ElasticScaleHandlerConfigSerializer.toString(deployment.getElasticScaleConfig()));
         }
         
         if (!deployment.getContextProperties().isEmpty()) {
@@ -135,7 +150,7 @@ public class EsmExecutor {
         }
         
         if (deploymentContext.getVmInputArguments()!= null) {
-           spaceDeployment.setContextProperty("vmArguments", deploymentContext.getVmInputArguments()); 
+           spaceDeployment.setContextProperty(VM_ARGUMENTS, deploymentContext.getVmInputArguments()); 
         }
         
         if (logger.isLoggable(Level.FINE)) {
@@ -150,9 +165,10 @@ public class EsmExecutor {
                     + "\n\t Partitions: " + numberOfParitions
                     + "\n\t SLA: " + deploymentContext.getSlaDescriptors());
         } else if (logger.isLoggable(Level.INFO)) {
-            logger.info("Deploying " + deployment.getDataGridName() + " " + numberOfParitions
+            logger.info("Request to deploy " + deployment.getDataGridName() + " " + numberOfParitions
                     + (deploymentContext.isHighlyAvailable() ? ",1" : ",0") + " capacity: "
-                    + deploymentContext.getMinMemory() + " - " + deploymentContext.getMaxMemory());
+                    + deploymentContext.getMinMemory() + " - " + deploymentContext.getMaxMemory()
+                    + " - " + deploymentContext.getDeploymentIsolationLevel());
         }
         
         admin.getGridServiceManagers().waitForAtLeastOne().deploy(spaceDeployment);
@@ -239,7 +255,7 @@ public class EsmExecutor {
             return onDemandElasticScale;
         }
         
-        String elasticScaleConfigStr = pu.getBeanLevelProperties().getContextProperties().getProperty("elasticScaleConfig");
+        String elasticScaleConfigStr = pu.getBeanLevelProperties().getContextProperties().getProperty(ELASTIC_SCALE_CONFIG);
         if (elasticScaleConfigStr == null) {
             return new NullElasticScaleHandler();
         }
@@ -331,12 +347,12 @@ public class EsmExecutor {
                 return;
             }
             
-            final ZoneCorrelator zoneCorrelator = new ZoneCorrelator(admin, puCapacityPlanner.getZoneName());
+            final ZoneCorrelator zoneCorrelator = new ZoneCorrelator(admin, puCapacityPlanner.getContextProperties().getZoneName());
             
-            List<Machine> machines = zoneCorrelator.getMachines();
+            //machines filtered by zones, filtered by isolation level
+            List<Machine> machines = puCapacityPlanner.getDeploymentIsolationFilter().filter(zoneCorrelator.getMachines());
 
             //sort by least number of GSCs in zone
-            //TODO when not dedicated, we might need to take other GSCs into account
             Collections.sort(machines, new Comparator<Machine>() {
                 public int compare(Machine m1, Machine m2) {
                     
@@ -360,14 +376,8 @@ public class EsmExecutor {
                     continue;
                 }
                 
-                if (!meetsDedicatedIsolationConstraint(machine, puCapacityPlanner.getZoneName())) {
-                    logger.finest("Can't start GSC on machine ["+ToStringHelper.machineToString(machine)+"] - doesn't meet dedicated isolation constraint.");
-                    continue;
-                }
-                
                 if (aboveMinCapcity() && machineHasAnEmptyGSC(zoneCorrelator, machine)) {
                     logger.finest("Won't start a GSC on machine ["+ToStringHelper.machineToString(machine)+"] - already has an empty GSC.");
-//                    needsNewMachine = false;
                     continue;
                 }
                 
@@ -387,18 +397,6 @@ public class EsmExecutor {
                 elasticScaleCommand.setMachines(machines);
                 puCapacityPlanner.getElasticScale().scaleOut(elasticScaleCommand);
             }
-        }
-        
-        // requires this machine to contain only GSCs matching the zone name provided
-        private boolean meetsDedicatedIsolationConstraint(Machine machine, String zoneName) {
-            for (GridServiceContainer gsc : machine.getGridServiceContainers()) {
-                Map<String, Zone> gscZones = gsc.getZones();
-                if (gscZones.isEmpty() || !gscZones.containsKey(zoneName)) {
-                    return false; // GSC either has no zone or is of another zone
-                }
-            }
-
-            return true;
         }
         
         private boolean reachedMaxCapacity() {
@@ -432,7 +430,7 @@ public class EsmExecutor {
             double totalPhysicalMemorySizeInMB = machine.getOperatingSystem()
                 .getDetails()
                 .getTotalPhysicalMemorySizeInMB();
-            int jvmSizeInMB = MemorySettings.valueOf(puCapacityPlanner.getMaxJavaHeapSize()).toMB();
+            int jvmSizeInMB = MemorySettings.valueOf(puCapacityPlanner.getContextProperties().getMaximumJavaHeapSize()).toMB();
             int numberOfGSCsScaleLimit = (int) Math.floor(totalPhysicalMemorySizeInMB / jvmSizeInMB);
             int freePhysicalMemorySizeInMB = (int) Math.floor(machine.getOperatingSystem()
                 .getStatistics()
@@ -447,13 +445,13 @@ public class EsmExecutor {
             logger.info("Scaling up - Starting GSC on machine ["+ToStringHelper.machineToString(machine)+"]");
             
             GridServiceContainerOptions vmInputArgument = new GridServiceContainerOptions()
-                .vmInputArgument("-Xms" + puCapacityPlanner.getInitJavaHeapSize())
-                .vmInputArgument("-Xmx" + puCapacityPlanner.getMaxJavaHeapSize())
-                .vmInputArgument("-Dcom.gs.zones=" + puCapacityPlanner.getZoneName())
+                .vmInputArgument("-Xms" + puCapacityPlanner.getContextProperties().getInitialJavaHeapSize())
+                .vmInputArgument("-Xmx" + puCapacityPlanner.getContextProperties().getMaximumJavaHeapSize())
+                .vmInputArgument("-Dcom.gs.zones=" + puCapacityPlanner.getContextProperties().getZoneName())
                 .vmInputArgument("-Dcom.gigaspaces.grid.gsc.serviceLimit=" + puCapacityPlanner.getScalingFactor());
             
-            if (puCapacityPlanner.getVmArguments() != null) {
-                String[] vmArguments = puCapacityPlanner.getVmArguments().split(",");
+            if (puCapacityPlanner.getContextProperties().getVmArguments() != null) {
+                String[] vmArguments = puCapacityPlanner.getContextProperties().getVmArguments().split(",");
                 for (String vmArgument : vmArguments) {
                     vmInputArgument.vmInputArgument(vmArgument);
                 }
@@ -549,7 +547,7 @@ public class EsmExecutor {
             });
 
             ProcessingUnit pu = puCapacityPlanner.getProcessingUnit();
-            ZoneCorrelator zoneCorrelator = new ZoneCorrelator(admin, puCapacityPlanner.getZoneName());
+            ZoneCorrelator zoneCorrelator = new ZoneCorrelator(admin, puCapacityPlanner.getContextProperties().getZoneName());
 
             for (GridServiceContainer gsc : gscsWithBreach) {
 
@@ -714,7 +712,7 @@ public class EsmExecutor {
             });
 
             ProcessingUnit pu = puCapacityPlanner.getProcessingUnit();
-            ZoneCorrelator zoneCorrelator = new ZoneCorrelator(admin, puCapacityPlanner.getZoneName());
+            ZoneCorrelator zoneCorrelator = new ZoneCorrelator(admin, puCapacityPlanner.getContextProperties().getZoneName());
 
             for (GridServiceContainer gsc : gscsWithoutBreach) {
                 
@@ -881,7 +879,7 @@ public class EsmExecutor {
         }
         
         private List<Machine> getMachinesSortedByNumPrimaries(final PuCapacityPlanner puCapacityPlanner) {
-            String zoneName = puCapacityPlanner.getZoneName();
+            String zoneName = puCapacityPlanner.getContextProperties().getZoneName();
             Zone zone = admin.getZones().getByName(zoneName);
             List<GridServiceContainer> gscList = Arrays.asList(zone.getGridServiceContainers().getContainers());
             List<Machine> machinesInZone = new ArrayList<Machine>();
@@ -901,7 +899,7 @@ public class EsmExecutor {
         }
         
         private int getNumPrimariesOnMachine(PuCapacityPlanner puCapacityPlanner, Machine machine) {
-            String zoneName = puCapacityPlanner.getZoneName();
+            String zoneName = puCapacityPlanner.getContextProperties().getZoneName();
             Zone zone = admin.getZones().getByName(zoneName);
             int numPrimaries = 0;
             ProcessingUnitInstance[] instances = zone.getProcessingUnitInstances();
@@ -950,7 +948,7 @@ public class EsmExecutor {
         }
         
         private List<GridServiceContainer> getGscsSortedByNumPrimaries(PuCapacityPlanner puCapacityPlanner, Machine machine) {
-            String zoneName = puCapacityPlanner.getZoneName();
+            String zoneName = puCapacityPlanner.getContextProperties().getZoneName();
             Zone zone = admin.getZones().getByName(zoneName);
             
             //extract only gscs within this machine which belong to this zone
@@ -1019,7 +1017,7 @@ public class EsmExecutor {
             
             logger.finest(GscCollectorHandler.class.getSimpleName() + " invoked");
             
-            String zoneName = puCapacityPlanner.getZoneName();
+            String zoneName = puCapacityPlanner.getContextProperties().getZoneName();
             Zone zone = admin.getZones().getByName(zoneName);
             if (zone == null) return;
             
@@ -1057,7 +1055,7 @@ public class EsmExecutor {
             
             elasticScaleMap.remove(puCapacityPlanner.getProcessingUnit().getName());
             
-            String zoneName = puCapacityPlanner.getZoneName();
+            String zoneName = puCapacityPlanner.getContextProperties().getZoneName();
             Zone zone = admin.getZones().getByName(zoneName);
             if (zone == null) return;
             

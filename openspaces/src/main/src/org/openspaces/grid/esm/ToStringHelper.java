@@ -31,7 +31,7 @@ public class ToStringHelper {
         .append("\n\t maxNumberOfGSCs=").append(puCapacityPlanner.getMaxNumberOfGSCs())
         .append("\n\t actual number of GSCs: ").append(puCapacityPlanner.getProcessingUnit().getAdmin().getGridServiceContainers().getSize())
         .append("\n\t scalingFactor=").append(+puCapacityPlanner.getScalingFactor()).append(" (instances per GSC)")
-        .append("\n\t number of GSCs in zone: ").append(puCapacityPlanner.getZoneName()).append("=").append(puCapacityPlanner.getNumberOfGSCsInZone());
+        .append("\n\t number of GSCs in zone: ").append(puCapacityPlanner.getContextProperties().getZoneName()).append("=").append(puCapacityPlanner.getNumberOfGSCsInZone());
         
         return sb.toString();
     }
