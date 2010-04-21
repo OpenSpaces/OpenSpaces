@@ -188,9 +188,11 @@ public class ApacheLoadBalancerAgent implements DiscoveryListener, ServiceDiscov
         System.out.println("Detecting existing config files...");
         new File(configLocation).listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name) {
-                String clusterName = name.substring(0, name.length() - ".conf".length());
-                System.out.println("[" + clusterName + "]: existing config detected");
-                loadBalancersInfoMap.put(clusterName, new LoadBalancerInfo(clusterName));
+                if (name.endsWith(".conf")) {
+                    String clusterName = name.substring(0, name.length() - ".conf".length());
+                    System.out.println("[" + clusterName + "]: existing config detected");
+                    loadBalancersInfoMap.put(clusterName, new LoadBalancerInfo(clusterName));
+                }
                 return false;
             }
         });
