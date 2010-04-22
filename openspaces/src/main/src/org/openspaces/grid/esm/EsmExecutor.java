@@ -439,7 +439,7 @@ public class EsmExecutor {
             // get total free system memory + cached (getActualFreePhysicalMemorySizeInMB returns -1
             // when not using Sigar)
             int totalFreePhysicalMemorySizeInMB = (int) Math.floor(
-                    (operatingSystemStatistics.getActualFreePhysicalMemorySizeInMB() > -1 ? 
+                    (operatingSystemStatistics.getActualFreePhysicalMemorySizeInBytes() > -1 ? 
                             operatingSystemStatistics.getActualFreePhysicalMemorySizeInMB() : 
                                 operatingSystemStatistics.getFreePhysicalMemorySizeInMB()));
 
