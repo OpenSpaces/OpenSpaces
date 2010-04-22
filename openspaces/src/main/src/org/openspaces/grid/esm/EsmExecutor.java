@@ -39,6 +39,7 @@ import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceContainerOptions;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.machine.Machine;
+import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
@@ -432,13 +433,31 @@ public class EsmExecutor {
                 .getTotalPhysicalMemorySizeInMB();
             int jvmSizeInMB = MemorySettings.valueOf(puCapacityPlanner.getContextProperties().getMaximumJavaHeapSize()).toMB();
             int numberOfGSCsScaleLimit = (int) Math.floor(totalPhysicalMemorySizeInMB / jvmSizeInMB);
-            int freePhysicalMemorySizeInMB = (int) Math.floor(machine.getOperatingSystem()
-                .getStatistics()
-                .getFreePhysicalMemorySizeInMB());
+            
+            final OperatingSystemStatistics operatingSystemStatistics = machine.getOperatingSystem().getStatistics();
 
-            // Check according to the calculated limit, but also check that the physical memory is
-            // enough
-            return (machine.getGridServiceContainers().getSize() < numberOfGSCsScaleLimit && jvmSizeInMB < (freePhysicalMemorySizeInMB - memorySafetyBufferInMB));
+            // get total free system memory + cached (getActualFreePhysicalMemorySizeInMB returns -1
+            // when not using Sigar)
+            int totalFreePhysicalMemorySizeInMB = (int) Math.floor(
+                    (operatingSystemStatistics.getActualFreePhysicalMemorySizeInMB() > -1 ? 
+                            operatingSystemStatistics.getActualFreePhysicalMemorySizeInMB() : 
+                                operatingSystemStatistics.getFreePhysicalMemorySizeInMB()));
+
+            // Check according to the calculated limit, but also check that the physical memory is enough
+            boolean withinScaleLimit = machine.getGridServiceContainers().getSize() < numberOfGSCsScaleLimit;
+            boolean withingMemoryLimit = jvmSizeInMB < (totalFreePhysicalMemorySizeInMB - memorySafetyBufferInMB);
+            boolean hasEnoughMemoryForNewGSC = withinScaleLimit && withingMemoryLimit;
+            
+            if (!hasEnoughMemoryForNewGSC) {
+                if (logger.isLoggable(Level.FINEST)) {
+                    if (!withingMemoryLimit) {
+                        logger.finest("Machine ["+ToStringHelper.machineToString(machine)+"] has reached a memory limit of ["+NUMBER_FORMAT.format(totalFreePhysicalMemorySizeInMB)+"] MB");
+                    } else if (!withinScaleLimit) {
+                        logger.finest("Machine ["+ToStringHelper.machineToString(machine)+"] has reached a scale limit of ["+numberOfGSCsScaleLimit+"] GSCs");
+                    }
+                }
+            }
+            return hasEnoughMemoryForNewGSC;
         }
         
         private void startGscOnMachine(Machine machine) {
