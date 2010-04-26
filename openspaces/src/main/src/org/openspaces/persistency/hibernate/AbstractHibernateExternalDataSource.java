@@ -157,7 +157,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      *
      * <p>Note, sometimes an explicit list should be provided. For example, if we have a class A and class B, and
      * A has a relationship to B which is not component. If in the space, we only wish to have A, and have B just
-     * as a field in A (and not as an Entry), then we need to explciitly set the list just to A. By default, if
+     * as a field in A (and not as an Entry), then we need to explicitly set the list just to A. By default, if
      * we won't set it, it will result in two entries existing in the Space, A and B, with A having a field of B
      * as well.
      */
@@ -209,14 +209,14 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
     }
 
     /**
-     * Controls if scrollable resultsets will be used with inital load operation. Defaults to <code>true</code>.
+     * Controls if scrollable resultsets will be used with initial load operation. Defaults to <code>true</code>.
      */
     protected boolean isUseScrollableResultSet() {
         return useScrollableResultSet;
     }
 
     /**
-     * Controls if scrollable resultsets will be used with inital load operation. Defaults to <code>true</code>.
+     * Controls if scrollable resultsets will be used with initial load operation. Defaults to <code>true</code>.
      */
     public void setUseScrollableResultSet(boolean useScrollableResultSet) {
         this.useScrollableResultSet = useScrollableResultSet;
@@ -232,7 +232,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      * <p>Initializes the {@link #setManagedEntries(String[])} if they were not set explicitly by iterating over all
      * the mapped classes in Hibernate and adding them.
      *
-     * <p>Also initalizes the {@link #setInitialLoadEntries(String[])} if not set explicitly.
+     * <p>Also initializes the {@link #setInitialLoadEntries(String[])} if not set explicitly.
      */
     public void init(Properties properties) throws DataSourceException {
         if (logger.isDebugEnabled()) {
@@ -307,7 +307,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
     }
 
     /**
-     * A helper method that creates the initial load itertaor using the {@link org.openspaces.persistency.support.ConcurrentMultiDataIterator}
+     * A helper method that creates the initial load iterator using the {@link org.openspaces.persistency.support.ConcurrentMultiDataIterator}
      * with the provided {@link #setInitialLoadThreadPoolSize(int)} thread pool size.
      */
     protected DataIterator createInitialLoadIterator(DataIterator[] iterators) {

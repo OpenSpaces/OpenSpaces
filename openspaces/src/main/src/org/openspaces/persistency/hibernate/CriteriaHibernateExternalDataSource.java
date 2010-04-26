@@ -34,8 +34,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * An extension over the default implemenation that also implements {@link com.gigaspaces.datasource.DataProvider}
- * (not needed by default). The class main use is to override Hibernate bugs whene executing queries with composite
+ * An extension over the default implementation that also implements {@link com.gigaspaces.datasource.DataProvider}
+ * (not needed by default). The class main use is to override Hibernate bugs when executing queries with composite
  * objects.
  *
  * @author kimchy

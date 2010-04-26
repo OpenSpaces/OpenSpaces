@@ -40,7 +40,7 @@ import org.openspaces.persistency.hibernate.iterator.StatelessScrollableDataIter
 import java.util.List;
 
 /**
- * An external data source implemenation based on Hiberante {@link org.hibernate.StatelessSession}.
+ * An external data source implementation based on Hiberante {@link org.hibernate.StatelessSession}.
  *
  * <p>Note, stateless session is much faster than regular Hibernate session, but at the expense of not having
  * a first level cache, as well as not performing any cascading operations (both in read operations as well as
@@ -54,7 +54,7 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
 
     /**
      * Perform the given bulk changes using Hibernate {@link org.hibernate.StatelessSession}. First, tries to perform
-     * "optimistic" operations without checking in advance for existance of certain entity. If this fails, will
+     * "optimistic" operations without checking in advance for existence of certain entity. If this fails, will
      * try and perform the same operations again, simply with checking if the entry exists or not.
      */
     public void executeBulk(List<BulkItem> bulkItems) throws DataSourceException {
@@ -187,7 +187,7 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
     }
 
     /**
-     * Performs the inital load operation. Iterates over the {@link #setInitialLoadEntries(String[])} inital load
+     * Performs the initial load operation. Iterates over the {@link #setInitialLoadEntries(String[])} inital load
      * entries. If {@link #getInitialLoadChunkSize()} is set to <code>-1</code>, will use
      * {@link org.openspaces.persistency.hibernate.iterator.StatelessScrollableDataIterator} for each entity. If
      * {@link #getInitialLoadChunkSize()} is set to a non <code>-1</code> value, will use the
