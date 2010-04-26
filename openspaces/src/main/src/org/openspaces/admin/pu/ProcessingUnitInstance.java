@@ -257,7 +257,7 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
     SpaceInstance getSpaceInstance();
 
     /**
-     * Returns all the space instances that were stared within the processing unit instance.
+     * Returns all the space instances that were started within the processing unit instance.
      * Will return an empty array if no space instances were started within this processing unit (or none has
      * been detected yet).
      */
