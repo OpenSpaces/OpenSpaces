@@ -27,8 +27,8 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.dependency.tree.DependencyTreeBuilder;
 import org.springframework.util.ClassUtils;
 
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 //
@@ -71,7 +71,7 @@ public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
      * @parameter default-value="${reactorProjects}"
      * @readonly
      */
-    private List reactorProjects;
+    private List<MavenProject> reactorProjects;
     
     
     /**
@@ -101,7 +101,7 @@ public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
     /**
      * Container list.
      */
-    private List containers = new ArrayList();
+    final private List<Thread> containers = new ArrayList<Thread>();
 
     
     /**
@@ -179,10 +179,9 @@ public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
         System.setProperty("com.gs.printRuntimeInfo", "false");
 
         // get a list of project to execute in the order set by the reactor
-        List projects = Utils.getProjectsToExecute(reactorProjects, module);
+        List<MavenProject> projects = Utils.getProjectsToExecute(reactorProjects, module);
 
-        for (Iterator projIt = projects.iterator(); projIt.hasNext();) {
-            MavenProject proj = (MavenProject) projIt.next();
+        for (MavenProject proj : projects) {
             executePU(proj);
         }
 
@@ -191,7 +190,7 @@ public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
             public void run() {
                 try {
                     for (int i = (containers.size() - 1); i >= 0; --i) {
-                        ((Thread) containers.get(i)).interrupt();
+                        containers.get(i).interrupt();
                     }
                 } finally {
                     mainThread.interrupt();
@@ -222,8 +221,8 @@ public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
         }
 
         // resolve the classpath for the execution of the processing unit
-        List classpath = null;
-        ClassLoader classLoader = null;
+        List<URL> classpath;
+        ClassLoader classLoader;
         try {
             String[] includeScopes = Utils.convertCommaSeparatedListToArray(scopes);
             classpath = Utils.resolveExecutionClasspath(project, includeScopes, false, reactorProjects, dependencyTreeBuilder,
@@ -268,14 +267,12 @@ public class RunStandalonePUMojo extends AbstractOpenSpacesMojo {
      * @return attributes array
      */
     private String[] createAttributesArray(String name) {
-        ArrayList attlist = new ArrayList();
+        ArrayList<String> attlist = new ArrayList<String>();
         Utils.addAttributeToList(attlist, "-cluster", cluster);
         Utils.addAttributeToList(attlist, "-properties", properties);
         attlist.add(name);
         PluginLog.getLog().info("Arguments list: " + attlist);
-        String[] attArray = new String[attlist.size()];
-        attlist.toArray(attArray);
-        return attArray;
+        return attlist.toArray(new String[attlist.size()]);
     }
 
 
