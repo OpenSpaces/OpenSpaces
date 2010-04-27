@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.EntityMode;
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.AnnotationConfiguration;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterator;
@@ -229,10 +230,10 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      * try can create it from the Properties file expecting to find a property called <code>hibernate-config-file</code>
      * with the location of the Hibernate config file.
      *
-     * <p>Initializes the {@link #setManagedEntries(String[])} if they were not set explicitly by iterating over all
+     * <p>Initializes the {@link #setManagedEntries(String...)} if they were not set explicitly by iterating over all
      * the mapped classes in Hibernate and adding them.
      *
-     * <p>Also initializes the {@link #setInitialLoadEntries(String[])} if not set explicitly.
+     * <p>Also initializes the {@link #setInitialLoadEntries(String...)} if not set explicitly.
      */
     public void init(Properties properties) throws DataSourceException {
         if (logger.isDebugEnabled()) {

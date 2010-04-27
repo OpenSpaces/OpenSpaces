@@ -18,11 +18,12 @@
     <orderEntry type="module-library" exported="">
       <library name="hibernate">
         <CLASSES>
-          <root url="file://$MODULE_DIR$/lib/external/hibernate" />
+          <root url="jar://$MODULE_DIR$/lib/external/hibernate/hibernate3.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/hibernate/slf4j-api-1.5.11.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/external/hibernate/slf4j-jdk14-1.5.11.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
-        <jarDirectory url="file://$MODULE_DIR$/lib/external/hibernate" recursive="false" />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
