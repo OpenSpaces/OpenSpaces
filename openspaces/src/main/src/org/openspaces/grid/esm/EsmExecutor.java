@@ -320,6 +320,11 @@ public class EsmExecutor {
 
         public void run() {
             logger.finest(UnderCapacityHandler.class.getSimpleName() + " invoked");
+            
+            if (puCapacityPlanner.getProcessingUnit().getStatus().equals(DeploymentStatus.INTACT)) {
+                return; //no need for a new GSC if deployment is intact (not to run into an infinite loop of start/terminate empty gsc)
+            }
+            
             if (underMinCapcity()) {
                 logger.info("Starting a minimum of ["+puCapacityPlanner.getMinNumberOfGSCs()+"] GSCs");
                 workflow.breakWorkflow();
