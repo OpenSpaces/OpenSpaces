@@ -108,6 +108,9 @@ public class ElasticDataGridDeployment extends InternalElasticDataGridDeployment
      * the -Xms and -Xmx vm arguments.
      */
     public ElasticDataGridDeployment vmInputArgument(String vmInputArgument) {
+        if (vmInputArgument.length() == 0) {
+            throw new IllegalArgumentException("VM input argument should not be empty");
+        }
         getDeploymentContext().addVmArgument(vmInputArgument);
         return this;
     }
