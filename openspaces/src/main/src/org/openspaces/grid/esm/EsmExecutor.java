@@ -109,7 +109,7 @@ public class EsmExecutor {
         }
     }
     
-    public String[] getAdmin() {
+    public String[] getManagedProcessingUnits() {
         ProcessingUnits processingUnits = admin.getProcessingUnits();
         ArrayList<String> processingUnitNames = new ArrayList<String>(processingUnits.getSize());
         for (ProcessingUnit pu : processingUnits) {
