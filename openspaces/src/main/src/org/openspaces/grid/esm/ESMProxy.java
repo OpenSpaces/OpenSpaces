@@ -41,4 +41,8 @@ public class ESMProxy extends AbstractProxy implements ESM, Serializable {
     public void deploy(ElasticDataGridDeployment deployment) {
         esmServer.deploy(deployment);
     }
+
+    public String[] getManagedProcessingUnits() {
+        return esmServer.getManagedProcessingUnits();
+    }
 }

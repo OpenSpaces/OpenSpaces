@@ -108,6 +108,17 @@ public class EsmExecutor {
             admin.getProcessingUnits().addLifecycleListener(new UndeployedProcessingUnitLifecycleEventListener());
         }
     }
+    
+    public String[] getAdmin() {
+        ProcessingUnits processingUnits = admin.getProcessingUnits();
+        ArrayList<String> processingUnitNames = new ArrayList<String>(processingUnits.getSize());
+        for (ProcessingUnit pu : processingUnits) {
+            if (!PuCapacityPlanner.isElastic(pu))
+                continue;
+            processingUnitNames.add(pu.getName());
+        }
+        return processingUnitNames.toArray(new String[processingUnitNames.size()]);
+    }
 
     public void deploy(ElasticDataGridDeployment deployment) {
         DeploymentContext deploymentContext = ((InternalElasticDataGridDeployment)deployment).getDeploymentContext();

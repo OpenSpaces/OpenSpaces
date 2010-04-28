@@ -209,4 +209,8 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM
     public void deploy(ElasticDataGridDeployment deployment) {
         esmExecutor.deploy(deployment);
     }
+    
+    public String[] getManagedProcessingUnits() {
+        return esmExecutor.getManagedProcessingUnits();
+    }
 }

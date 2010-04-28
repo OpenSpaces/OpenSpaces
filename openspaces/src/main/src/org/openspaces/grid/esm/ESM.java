@@ -19,7 +19,7 @@ import com.gigaspaces.lrmi.nio.info.NIOInfoProvider;
  */
 public interface ESM extends Service, /* SecuredService, */AgentIdAware,
 		NIOInfoProvider, OSInfoProvider, JVMInfoProvider, GridZoneProvider,
-		InternalLogProvider, InternalDumpProvider {
+		InternalLogProvider, InternalDumpProvider, com.gigaspaces.grid.esm.ESM {
 
     void deploy(ElasticDataGridDeployment deployment);
 }
