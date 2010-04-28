@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-package org.openspaces.events.adapter;
+package org.openspaces.events;
 
-import org.springframework.dao.DataAccessException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Represents a listener execution failure.
- * 
- * @author kimchy
+ * An annotation marking a method as one that is responsible to return a
+ * {@link EventExceptionHandler} to be used with event containers.
  */
-public class ListenerExecutionFailedException extends DataAccessException {
-
-    private static final long serialVersionUID = 7502177620008347109L;
-
-    public ListenerExecutionFailedException(String message) {
-        super(message);
-    }
-
-    public ListenerExecutionFailedException(String message, Throwable cause) {
-        super(message, cause);
-    }
+@Target( { ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ExceptionHandler {
 }

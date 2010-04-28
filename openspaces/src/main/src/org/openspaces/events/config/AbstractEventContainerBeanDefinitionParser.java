@@ -36,6 +36,8 @@ public abstract class AbstractEventContainerBeanDefinitionParser extends Abstrac
     
     private static final String AUTO_START = "auto-start";
 
+    private static final String EXCEPTION_HANDLER = "exception-handler";
+
 
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
         super.doParse(element, parserContext, builder);
@@ -50,6 +52,13 @@ public abstract class AbstractEventContainerBeanDefinitionParser extends Abstrac
                         builder.getRawBeanDefinition(), "eventListener"));
             }
         }
+
+        Element exceptionHandlerEle = DomUtils.getChildElementByTagName(element, EXCEPTION_HANDLER);
+        if (exceptionHandlerEle != null) {
+            builder.addPropertyValue("exceptionHandler",
+                    parserContext.getDelegate().parsePropertyValue(exceptionHandlerEle, builder.getRawBeanDefinition(), "exceptionHandler"));
+        }
+
 
         String gigaSpace = element.getAttribute(GIGA_SPACE);
         builder.addPropertyReference("gigaSpace", gigaSpace);

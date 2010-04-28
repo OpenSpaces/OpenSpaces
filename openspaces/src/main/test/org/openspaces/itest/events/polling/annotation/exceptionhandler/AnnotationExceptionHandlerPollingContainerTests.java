@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.itest.events.polling.annotation;
+package org.openspaces.itest.events.polling.annotation.exceptionhandler;
 
 import org.openspaces.core.GigaSpace;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
@@ -22,31 +22,46 @@ import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 /**
  * @author kimchy
  */
-public class AnnotationPollingContainerTests extends AbstractDependencyInjectionSpringContextTests {
+public class AnnotationExceptionHandlerPollingContainerTests extends AbstractDependencyInjectionSpringContextTests {
 
 
     protected GigaSpace gigaSpace;
 
     protected TestListener testListener;
 
-    public AnnotationPollingContainerTests() {
+    public AnnotationExceptionHandlerPollingContainerTests() {
         setPopulateProtectedVariables(true);
     }
 
     protected void onSetUp() throws Exception {
         gigaSpace.clear(null);
     }
-    
+
     protected String[] getConfigLocations() {
-        return new String[]{"/org/openspaces/itest/events/polling/annotation/polling-annotation.xml"};
+        return new String[]{"/org/openspaces/itest/events/polling/annotation/exceptionhandler/polling-annotation-exceptionhandler.xml"};
     }
 
 
     public void testReceiveMessage() throws Exception{
+        testListener.reset();
         assertFalse(testListener.isReceivedMessage());
         gigaSpace.write(new Object());
         Thread.sleep(500);
         assertTrue(testListener.isReceivedMessage());
+        assertTrue(testListener.isExceptionHandlerSuccess());
+        assertFalse(testListener.isExceptionHandlerException());
+        assertFalse(testListener.isThrowException());
+
+        testListener.reset();
+        testListener.setThrowException(true);
+        assertFalse(testListener.isReceivedMessage());
+        gigaSpace.write(new Object());
+        Thread.sleep(500);
+        assertTrue(testListener.isReceivedMessage());
+        assertFalse(testListener.isExceptionHandlerSuccess());
+        assertTrue(testListener.isExceptionHandlerException());
+        assertTrue(testListener.isThrowException());
+        assertEquals(testListener.getException().getCause().getMessage(), "FAIL");
     }
 
 }

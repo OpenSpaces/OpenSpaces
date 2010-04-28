@@ -17,12 +17,16 @@
 package org.openspaces.events;
 
 import org.openspaces.events.adapter.EventListenerAdapter;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A simple based class for {@link SpaceDataEventListener} based containers. Allowing to register a
@@ -40,9 +44,23 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
 
     private ApplicationContext applicationContext;
 
+    protected EventExceptionHandler exceptionHandler;
+
     protected final AtomicLong processedEvents = new AtomicLong();
 
     protected final AtomicLong failedEvents = new AtomicLong();
+
+    protected EventExceptionHandler getExceptionHandler() {
+        return exceptionHandler;
+    }
+
+    /**
+     * Sets an exception handler that will be invoked when an exception occurs on the listener allowing to
+     * customize the handling of such cases.
+     */
+    public void setExceptionHandler(EventExceptionHandler exceptionHandler) {
+        this.exceptionHandler = exceptionHandler;
+    }
 
     /**
      * Sets the event listener implementation that will be used to delegate events to. Also see
@@ -98,6 +116,30 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
         return applicationContext.getType(eventListenerRef);
     }
 
+    @Override
+    public void initialize() throws DataAccessException {
+        if (exceptionHandler == null && getActualEventListener() != null) {
+            final AtomicReference<Method> ref = new AtomicReference<Method>();
+            ReflectionUtils.doWithMethods(AopUtils.getTargetClass(getActualEventListener()), new ReflectionUtils.MethodCallback() {
+                public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+                    if (method.isAnnotationPresent(ExceptionHandler.class)) {
+                        ref.set(method);
+                    }
+                }
+            });
+            if (ref.get() != null) {
+                ref.get().setAccessible(true);
+                try {
+                    setExceptionHandler((EventExceptionHandler) ref.get().invoke(getActualEventListener()));
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Failed to set EventExceptionHandler from method [" + ref.get().getName() + "]", e);
+                }
+            }
+
+        }
+        super.initialize();
+    }
+
     /**
      * Only start if we have a listener registered. If we don't, then
      * explicit start should be called.
@@ -119,8 +161,7 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
      * @param txStatus  An optional transaction status allowing to rollback a transaction programmatically
      * @param source    An optional source (or additional event information)
      */
-    protected void executeListener(SpaceDataEventListener eventListener, Object eventData, TransactionStatus txStatus, Object source)
-            throws DataAccessException {
+    protected void executeListener(SpaceDataEventListener eventListener, Object eventData, TransactionStatus txStatus, Object source) throws Throwable {
         if (!isRunning()) {
             return;
         }
@@ -137,9 +178,20 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
      * @param source    An optional source (or additional event information)
      * @throws DataAccessException
      */
-    protected void invokeListener(SpaceDataEventListener eventListener, Object eventData, TransactionStatus txStatus, Object source)
-            throws DataAccessException {
-        eventListener.onEvent(eventData, getGigaSpace(), txStatus, source);
+    protected void invokeListener(SpaceDataEventListener eventListener, Object eventData, TransactionStatus txStatus, Object source) throws Throwable {
+        if (exceptionHandler != null) {
+            try {
+                eventListener.onEvent(eventData, getGigaSpace(), txStatus, source);
+                exceptionHandler.onSuccess(eventData, getGigaSpace(), txStatus, source);
+            } catch (Throwable e) {
+                if (!(e instanceof ListenerExecutionFailedException)) {
+                    e = new ListenerExecutionFailedException(e.getMessage(), e);
+                }
+                exceptionHandler.onException((ListenerExecutionFailedException) e, eventData, getGigaSpace(), txStatus, source);
+            }
+        } else {
+            eventListener.onEvent(eventData, getGigaSpace(), txStatus, source);
+        }
         processedEvents.incrementAndGet();
     }
 

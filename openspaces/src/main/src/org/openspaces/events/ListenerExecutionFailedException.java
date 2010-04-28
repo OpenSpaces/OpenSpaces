@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-package org.openspaces.events.polling;
+package org.openspaces.events;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.springframework.dao.DataAccessException;
 
 /**
- * An annotation marking a method as one that is responsible to return a
- * {@link org.openspaces.events.polling.trigger.TriggerOperationHandler} to be used
- * with a polling container.
- *
+ * Represents a listener execution failure.
+ * 
  * @author kimchy
  */
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface TriggerHandler {
+public class ListenerExecutionFailedException extends DataAccessException {
+
+    private static final long serialVersionUID = 7502177620008347109L;
+
+    public ListenerExecutionFailedException(String message) {
+        super(message);
+    }
+
+    public ListenerExecutionFailedException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

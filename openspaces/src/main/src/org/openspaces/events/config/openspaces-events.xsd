@@ -67,6 +67,15 @@
                                 </xsd:documentation>
                             </xsd:annotation>
                         </xsd:element>
+                        <xsd:element name="exception-handler" type="eventExceptionHandlerType" minOccurs="0"
+                                     maxOccurs="1">
+                            <xsd:annotation>
+                                <xsd:documentation
+                                        source="java:org.openspaces.events.EventExceptionHandler">
+                                    A handler for exceptions raised by the listener.
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </xsd:element>
                         <xsd:choice>
                             <xsd:element ref="os-core:template" minOccurs="0" maxOccurs="1">
                                 <xsd:annotation>
@@ -245,6 +254,15 @@
                                 </xsd:documentation>
                             </xsd:annotation>
                         </xsd:element>
+                        <xsd:element name="exception-handler" type="eventExceptionHandlerType" minOccurs="0"
+                                     maxOccurs="1">
+                            <xsd:annotation>
+                                <xsd:documentation
+                                        source="java:org.openspaces.events.EventExceptionHandler">
+                                    A handler for exceptions raised by the listener.
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </xsd:element>
                         <xsd:choice>
                             <xsd:element ref="os-core:template" minOccurs="0" maxOccurs="1">
                                 <xsd:annotation>
@@ -324,6 +342,15 @@
                                     The scope of the started transaction is *after* the notification was received. If a
                                     transaction rollback occurs, the notification delivery will not be rolled back, just
                                     the listener operations (that operate under the transaction).
+                                </xsd:documentation>
+                            </xsd:annotation>
+                        </xsd:element>
+                        <xsd:element name="exception-handler" type="eventExceptionHandlerType" minOccurs="0"
+                                     maxOccurs="1">
+                            <xsd:annotation>
+                                <xsd:documentation
+                                        source="java:org.openspaces.events.EventExceptionHandler">
+                                    A handler for exceptions raised by the listener.
                                 </xsd:documentation>
                             </xsd:annotation>
                         </xsd:element>
@@ -772,6 +799,32 @@
                 <xsd:appinfo>
                     <tool:annotation kind="ref">
                         <tool:expected-type type="org.openspaces.events.polling.trigger.TriggerOperationHandler"/>
+                    </tool:annotation>
+                </xsd:appinfo>
+                <xsd:documentation><![CDATA[
+    A short-cut alternative to a nested "<ref bean='...'/>".
+                ]]></xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="eventExceptionHandlerType">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <tool:annotation kind="ref">
+                    <tool:expected-type type="org.openspaces.events.EventExceptionHandler"/>
+                </tool:annotation>
+            </xsd:appinfo>
+            <xsd:documentation>
+                A custom handler to handle exception raised by the event listener.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:group ref="beans:collectionElements"/>
+        <xsd:attribute name="ref" type="xsd:string">
+            <xsd:annotation>
+                <xsd:appinfo>
+                    <tool:annotation kind="ref">
+                        <tool:expected-type type="org.openspaces.events.EventExceptionHandler"/>
                     </tool:annotation>
                 </xsd:appinfo>
                 <xsd:documentation><![CDATA[

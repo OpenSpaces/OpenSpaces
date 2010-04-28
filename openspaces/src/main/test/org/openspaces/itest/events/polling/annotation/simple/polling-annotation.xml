@@ -25,5 +25,5 @@
 
     <tx:annotation-driven transaction-manager="txManager"/>
     
-    <context:component-scan base-package="org.openspaces.itest.events.polling.annotation"/>
+    <context:component-scan base-package="org.openspaces.itest.events.polling.annotation.simple" />
 </beans>

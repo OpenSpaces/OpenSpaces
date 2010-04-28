@@ -723,7 +723,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
             }
         }
 
-        private boolean invokeListener() throws DataAccessException {
+        private boolean invokeListener() throws Throwable {
             initResourcesIfNecessary();
             if (eventListener == null) {
                 eventListener = getEventListener();

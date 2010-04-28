@@ -23,6 +23,7 @@ import com.gigaspaces.internal.reflection.standard.StandardMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.events.ListenerExecutionFailedException;
 import org.openspaces.events.SpaceDataEventListener;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.PermissionDeniedDataAccessException;

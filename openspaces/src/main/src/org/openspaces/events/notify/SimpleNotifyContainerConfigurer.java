@@ -19,6 +19,7 @@ package org.openspaces.events.notify;
 import com.j_spaces.core.client.INotifyDelegatorFilter;
 import net.jini.lease.LeaseListener;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.events.EventExceptionHandler;
 import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.events.adapter.AnnotationEventListenerAdapter;
 import org.openspaces.events.adapter.MethodEventListenerAdapter;
@@ -292,6 +293,14 @@ public class SimpleNotifyContainerConfigurer {
      */
     public SimpleNotifyContainerConfigurer transactionIsolationLevel(int transactionIsolationLevel) {
         notifyEventListenerContainer.setTransactionIsolationLevel(transactionIsolationLevel);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setExceptionHandler(org.openspaces.events.EventExceptionHandler) 
+     */
+    public SimpleNotifyContainerConfigurer exceptionHandler(EventExceptionHandler exceptionHandler) {
+        notifyEventListenerContainer.setExceptionHandler(exceptionHandler);
         return this;
     }
 

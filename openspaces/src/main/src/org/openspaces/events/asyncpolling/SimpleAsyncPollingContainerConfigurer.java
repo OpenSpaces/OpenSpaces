@@ -17,6 +17,7 @@
 package org.openspaces.events.asyncpolling;
 
 import org.openspaces.core.GigaSpace;
+import org.openspaces.events.EventExceptionHandler;
 import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.events.adapter.AnnotationEventListenerAdapter;
 import org.openspaces.events.adapter.MethodEventListenerAdapter;
@@ -129,6 +130,14 @@ public class SimpleAsyncPollingContainerConfigurer {
      */
     public SimpleAsyncPollingContainerConfigurer transactionIsolationLevel(int transactionIsolationLevel) {
         pollingEventListenerContainer.setTransactionIsolationLevel(transactionIsolationLevel);
+        return this;
+    }
+
+    /**
+     * @see org.openspaces.events.asyncpolling.SimpleAsyncPollingEventListenerContainer#setExceptionHandler(org.openspaces.events.EventExceptionHandler) 
+     */
+    public SimpleAsyncPollingContainerConfigurer exceptionHandler(EventExceptionHandler exceptionHandler) {
+        pollingEventListenerContainer.setExceptionHandler(exceptionHandler);
         return this;
     }
 

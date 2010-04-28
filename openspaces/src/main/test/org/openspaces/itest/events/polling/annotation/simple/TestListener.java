@@ -1,4 +1,4 @@
-package org.openspaces.itest.events.polling.annotation;
+package org.openspaces.itest.events.polling.annotation.simple;
 
 import org.openspaces.events.EventTemplate;
 import org.openspaces.events.TransactionalEvent;

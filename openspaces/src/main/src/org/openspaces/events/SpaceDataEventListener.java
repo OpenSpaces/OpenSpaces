@@ -37,7 +37,7 @@ public interface SpaceDataEventListener<T> {
      * @param data
      *            The actual data object of the event
      * @param gigaSpace
-     *            A GigaSpace instance that can be used to perofrm additional operations against the
+     *            A GigaSpace instance that can be used to perform additional operations against the
      *            space
      * @param txStatus
      *            An optional transaction status allowing to rollback a transaction programmatically

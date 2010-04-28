@@ -210,7 +210,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTran
      *
      * @see #doReceiveAndExecute
      */
-    protected boolean receiveAndExecute(SpaceDataEventListener eventListener) throws DataAccessException, TransactionException {
+    protected boolean receiveAndExecute(SpaceDataEventListener eventListener) throws Throwable, TransactionException {
         Object template = getReceiveTemplate();
         // if trigger is configure, work using trigger outside of a possible transaction
         if (triggerOperationHandler != null) {
@@ -254,7 +254,6 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTran
             }
             return messageReceived;
         } else {
-            // Execute receive outside of transaction.
             return doReceiveAndExecute(eventListener, template, null);
         }
     }
