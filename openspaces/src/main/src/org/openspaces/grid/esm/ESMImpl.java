@@ -33,6 +33,9 @@ import com.gigaspaces.log.LogProcessType;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOInfoHelper;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
+import com.gigaspaces.security.SecurityException;
+import com.gigaspaces.security.directory.UserDetails;
+import com.gigaspaces.security.service.SecurityContext;
 import com.sun.jini.start.LifeCycle;
 
 public class ESMImpl extends ServiceBeanAdapter implements ESM
@@ -212,5 +215,13 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM
     
     public String[] getManagedProcessingUnits() {
         return esmExecutor.getManagedProcessingUnits();
+    }
+
+    public boolean isServiceSecured() throws RemoteException {
+        return false;
+    }
+
+    public SecurityContext login(UserDetails userDetails) throws SecurityException, RemoteException {
+        return null;
     }
 }

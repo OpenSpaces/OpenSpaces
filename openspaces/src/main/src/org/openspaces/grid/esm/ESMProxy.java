@@ -8,6 +8,10 @@ import net.jini.id.Uuid;
 import org.jini.rio.resources.servicecore.AbstractProxy;
 import org.openspaces.admin.esm.deployment.ElasticDataGridDeployment;
 
+import com.gigaspaces.security.SecurityException;
+import com.gigaspaces.security.directory.UserDetails;
+import com.gigaspaces.security.service.SecurityContext;
+
 public class ESMProxy extends AbstractProxy implements ESM, Serializable {
     private static final long serialVersionUID = 1L;
     
@@ -44,5 +48,13 @@ public class ESMProxy extends AbstractProxy implements ESM, Serializable {
 
     public String[] getManagedProcessingUnits() {
         return esmServer.getManagedProcessingUnits();
+    }
+
+    public boolean isServiceSecured() throws RemoteException {
+        return esmServer.isServiceSecured();
+    }
+
+    public SecurityContext login(UserDetails userDetails) throws SecurityException, RemoteException {
+        return esmServer.login( userDetails );
     }
 }
