@@ -56,9 +56,6 @@
 	<classpathentry kind="lib" path="lib/external/common/commons-math-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/external/common/commons-pool-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/external/dom4j/dom4j-1.6.1.jar"/>
-	<classpathentry kind="lib" path="lib/external/hibernate/ejb3-persistence.jar"/>
-	<classpathentry kind="lib" path="lib/external/hibernate/hibernate-annotations.jar"/>
-	<classpathentry kind="lib" path="lib/external/hibernate/hibernate-commons-annotations.jar"/>
 	<classpathentry kind="lib" path="lib/external/hibernate/hibernate3.jar"/>
 	<classpathentry kind="lib" path="lib/external/javassist/javassist.jar"/>
 	<classpathentry kind="lib" path="lib/external/jbossts/concurrent.jar"/>
