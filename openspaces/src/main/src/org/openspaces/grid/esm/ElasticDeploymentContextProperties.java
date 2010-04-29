@@ -11,6 +11,7 @@ public class ElasticDeploymentContextProperties {
     static final String DEPLOYMENT_ISOLATION = "deploymentIsolation";
     static final String VM_ARGUMENTS = "vmArguments";
     static final String ELASTIC = "elastic";
+    static final String HIGHLY_AVAILABLE = "highlyAvailable";
     static final String SLA = "sla";
     static final String ELASTIC_SCALE_CONFIG = "elasticScaleConfig";
     static final String ZONE = "zone";

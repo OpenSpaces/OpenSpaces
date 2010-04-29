@@ -3,6 +3,7 @@ package org.openspaces.grid.esm;
 import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.DEPLOYMENT_ISOLATION;
 import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.ELASTIC;
 import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.ELASTIC_SCALE_CONFIG;
+import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.HIGHLY_AVAILABLE;
 import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.INITIAL_JAVA_HEAP_SIZE;
 import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.MAXIMUM_JAVA_HEAP_SIZE;
 import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.MAX_MEMORY;
@@ -141,6 +142,7 @@ public class EsmExecutor {
         }
         
         spaceDeployment.setContextProperty(ELASTIC, "true");
+        spaceDeployment.setContextProperty(HIGHLY_AVAILABLE, String.valueOf(deploymentContext.isHighlyAvailable()));
         spaceDeployment.setContextProperty(MIN_MEMORY, deploymentContext.getMinMemory());
         spaceDeployment.setContextProperty(MAX_MEMORY, deploymentContext.getMaxMemory());
         spaceDeployment.setContextProperty(INITIAL_JAVA_HEAP_SIZE, deploymentContext.getInitialJavaHeapSize());
