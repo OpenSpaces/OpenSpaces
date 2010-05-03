@@ -275,6 +275,7 @@
                 <include name="lib/required/**"/>
                 <include name="lib/optional/openspaces/**"/>
                 <include name="lib/optional/spring/**"/>
+                <include name="lib/optional/security/**"/>
                 <include name="lib/platform/openspaces/**" />
                 <include name="lib/platform/jee/activation.jar" />
                 <include name="lib/platform/jee/jta.jar" />

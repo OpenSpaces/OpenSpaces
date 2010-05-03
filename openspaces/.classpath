@@ -113,5 +113,6 @@
 	<classpathentry kind="lib" path="lib/platform/jetty/jetty-webapp-7.0.1.v20091125.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/jetty-xml-7.0.1.v20091125.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/servlet-api-2.5.jar"/>
+	<classpathentry kind="lib" path="lib/optional/security/spring-security-core-3.0.2.RELEASE.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
