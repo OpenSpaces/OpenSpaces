@@ -196,6 +196,7 @@
           <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.jms-3.0.1.RELEASE-A.jar!/" />
           <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.orm-3.0.1.RELEASE-A.jar!/" />
           <root url="jar://$MODULE_DIR$/lib/optional/spring/org.springframework.web-3.0.1.RELEASE-A.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/optional/security/spring-security-core-3.0.2.RELEASE.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
