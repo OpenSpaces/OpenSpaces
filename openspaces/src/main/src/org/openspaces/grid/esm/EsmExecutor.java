@@ -1024,8 +1024,12 @@ public class EsmExecutor {
             }
             
             logger.info("Rebalancing - Restarting instance " + ToStringHelper.puInstanceToString(instance) + " at GSC " + ToStringHelper.gscToString(instance.getGridServiceContainer()));
-            ProcessingUnitInstance restartedInstance = instance.restartAndWait();
+            ProcessingUnitInstance restartedInstance = instance.restartAndWait(60, TimeUnit.SECONDS);
             workflow.breakWorkflow();
+            if (restartedInstance == null) {
+                logger.finest("Waited 60 seconds, for restarted instance " + ToStringHelper.puInstanceToString(instance) + " - still not restarted");
+                return;
+            }
             
             boolean isBackup = restartedInstance.waitForSpaceInstance().waitForMode(SpaceMode.BACKUP, 10, TimeUnit.SECONDS);
             if (!isBackup) {
