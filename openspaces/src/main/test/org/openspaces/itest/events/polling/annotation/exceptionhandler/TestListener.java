@@ -4,9 +4,6 @@ import org.openspaces.core.GigaSpace;
 import org.openspaces.events.*;
 import org.openspaces.events.adapter.SpaceDataEvent;
 import org.openspaces.events.polling.Polling;
-import org.openspaces.events.polling.ReceiveHandler;
-import org.openspaces.events.polling.receive.MultiTakeReceiveOperationHandler;
-import org.openspaces.events.polling.receive.ReceiveOperationHandler;
 import org.springframework.transaction.TransactionStatus;
 
 /**
