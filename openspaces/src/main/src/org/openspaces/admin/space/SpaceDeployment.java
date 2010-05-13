@@ -32,9 +32,10 @@
 
 package org.openspaces.admin.space;
 
+import com.gigaspaces.security.directory.UserDetails;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 
-import com.gigaspaces.security.directory.UserDetails;
+import java.io.File;
 
 /**
  * A deployment of a pure {@link org.openspaces.admin.space.Space} processing unit (comes built in
@@ -216,6 +217,22 @@ public class SpaceDeployment {
      */
     public SpaceDeployment userDetails(String userName, String password) {
         deployment.userDetails(userName, password);
+        return this;
+    }
+
+    /**
+     * Sets an external SLA definition location to be loaded.
+     */
+    public SpaceDeployment slaLocation(String slaLocation) {
+        deployment.slaLocation(slaLocation);
+        return this;
+    }
+
+    /**
+     * Sets an external SLA definition location to be loaded.
+     */
+    public SpaceDeployment slaLocation(File slaLocation) {
+        deployment.slaLocation(slaLocation);
         return this;
     }
 

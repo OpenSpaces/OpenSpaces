@@ -70,6 +70,8 @@ public class ProcessingUnitDeployment {
 
     private UserDetails userDetails;
 
+    private String slaLocation;
+
     private Boolean secured;
 
     /**
@@ -247,6 +249,22 @@ public class ProcessingUnitDeployment {
     }
 
     /**
+     * Sets an external SLA definition location to be loaded.
+     */
+    public ProcessingUnitDeployment slaLocation(String slaLocation) {
+        this.slaLocation = slaLocation;
+        return this;
+    }
+
+    /**
+     * Sets an external SLA definition location to be loaded.
+     */
+    public ProcessingUnitDeployment slaLocation(File slaLocation) {
+        this.slaLocation = slaLocation.getAbsolutePath();
+        return this;
+    }
+
+    /**
      * Sets the username and password (effectively making the processing unit secured)
      * for the processing unit deployment.
      */
@@ -272,6 +290,10 @@ public class ProcessingUnitDeployment {
         if (name != null) {
             deployOptions.add("-override-name");
             deployOptions.add(name);
+        }
+        if (slaLocation != null) {
+            deployOptions.add("-sla");
+            deployOptions.add(slaLocation);
         }
         if (clusterSchema != null || numberOfInstances != null || numberOfBackups != null) {
             deployOptions.add("-cluster");
