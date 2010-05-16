@@ -138,6 +138,7 @@ public class EsmExecutor {
         String initialJavaHeapSize = deploymentContext.getInitialJavaHeapSize();
         String maximumJavaHeapSize = deploymentContext.getMaximumJavaHeapSize();
         if (MemorySettings.valueOf(initialJavaHeapSize).isGreaterThan(MemorySettings.valueOf(maximumJavaHeapSize))) {
+            deploymentContext.setInitialJavaHeapSize(initialJavaHeapSize);
             initialJavaHeapSize = maximumJavaHeapSize;
         }
         
