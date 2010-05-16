@@ -32,6 +32,7 @@
 
 package org.openspaces.admin.space;
 
+import com.gigaspaces.cluster.replication.async.mirror.MirrorStatistics;
 import com.j_spaces.core.filters.ReplicationStatistics;
 
 /**
@@ -111,4 +112,8 @@ public interface SpaceInstanceStatistics {
     double getRemovePerSecond();
 
     ReplicationStatistics getReplicationStatistics();
+    
+
+    MirrorStatistics getMirrorStatistics();
+
 }

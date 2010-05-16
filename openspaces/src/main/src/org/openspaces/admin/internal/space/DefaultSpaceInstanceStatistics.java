@@ -1,9 +1,11 @@
 package org.openspaces.admin.internal.space;
 
-import com.j_spaces.core.filters.StatisticsHolder;
-import com.j_spaces.core.filters.ReplicationStatistics;
 import org.openspaces.admin.space.SpaceInstanceStatistics;
 import org.openspaces.admin.support.StatisticsUtils;
+
+import com.gigaspaces.cluster.replication.async.mirror.MirrorStatistics;
+import com.j_spaces.core.filters.ReplicationStatistics;
+import com.j_spaces.core.filters.StatisticsHolder;
 
 /**
  * @author kimchy
@@ -180,5 +182,8 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
 
     public ReplicationStatistics getReplicationStatistics() {
         return statisticsHolder.getReplicationStatistics();
+    }
+    public MirrorStatistics getMirrorStatistics() {
+        return statisticsHolder.getMirrorStatistics();
     }
 }
