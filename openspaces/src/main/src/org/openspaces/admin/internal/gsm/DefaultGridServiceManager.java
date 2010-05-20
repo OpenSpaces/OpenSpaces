@@ -1,16 +1,16 @@
 package org.openspaces.admin.internal.gsm;
 
 import com.gigaspaces.grid.gsm.GSM;
-import com.gigaspaces.security.SecurityException;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.jvm.JVMStatistics;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.internal.os.OSStatistics;
+import com.gigaspaces.log.LogEntries;
+import com.gigaspaces.log.LogEntryMatcher;
+import com.gigaspaces.log.LogProcessType;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
-import com.gigaspaces.log.LogEntryMatcher;
-import com.gigaspaces.log.LogEntries;
-import com.gigaspaces.log.LogProcessType;
+import com.gigaspaces.security.SecurityException;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceID;
 import org.jini.rio.core.OperationalString;
@@ -19,11 +19,12 @@ import org.openspaces.admin.AdminException;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.dump.InternalDumpResult;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
 import org.openspaces.admin.internal.support.NetworkExceptionHelper;
-import org.openspaces.admin.internal.dump.InternalDumpResult;
+import org.openspaces.admin.memcached.MemcachedDeployment;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
@@ -31,12 +32,12 @@ import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
 import org.openspaces.admin.space.SpaceDeployment;
 import org.openspaces.pu.container.servicegrid.deploy.Deploy;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.Map;
-import java.io.IOException;
 
 /**
  * @author kimchy
@@ -50,7 +51,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     private final ProvisionMonitorAdmin gsmAdmin;
 
     public DefaultGridServiceManager(ServiceID serviceID, GSM gsm, InternalAdmin admin, int agentId, String agentUid)
-    throws RemoteException {
+            throws RemoteException {
         super(admin, agentId, agentUid);
         this.serviceID = serviceID;
         this.gsm = gsm;
@@ -83,6 +84,14 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
 
     public ProcessingUnit deploy(ProcessingUnitDeployment deployment) {
         return deploy(deployment, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
+    }
+
+    public ProcessingUnit deploy(MemcachedDeployment deployment) {
+        return deploy(deployment, admin.getDefaultTimeout(), admin.getDefaultTimeoutTimeUnit());
+    }
+
+    public ProcessingUnit deploy(MemcachedDeployment deployment, long timeout, TimeUnit timeUnit) {
+        return deploy(deployment.toProcessingUnitDeployment(), timeout, timeUnit);
     }
 
     public ProcessingUnit deploy(ProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit) {

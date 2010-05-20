@@ -5,6 +5,7 @@ import org.openspaces.events.EventContainerServiceMonitors;
 import org.openspaces.events.asyncpolling.AsyncPollingEventContainerServiceMonitors;
 import org.openspaces.events.notify.NotifyEventContainerServiceMonitors;
 import org.openspaces.events.polling.PollingEventContainerServiceMonitors;
+import org.openspaces.memcached.MemcachedServiceMonitors;
 import org.openspaces.pu.container.jee.stats.WebRequestsServiceMonitors;
 import org.openspaces.pu.service.ServiceMonitors;
 import org.openspaces.remoting.RemotingServiceMonitors;
@@ -33,6 +34,7 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
 
     private final RemotingServiceMonitors remotingServiceMonitors;
     private final WebRequestsServiceMonitors webRequestsServiceMonitors;
+    private final MemcachedServiceMonitors memcachedServiceMonitors;
 
     public DefaultProcessingUnitInstanceServiceStatistics(long timestamp, Map<String, ServiceMonitors> serviceMonitorsById, ProcessingUnitInstanceStatistics previous,
                                                           int historySize, long timeDelta) {
@@ -42,6 +44,7 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
         this.previous = previous;
         RemotingServiceMonitors remotingServiceMonitorsX = null;
         WebRequestsServiceMonitors jeeRequestServiceMonitorsX = null;
+        MemcachedServiceMonitors memcachedServiceMonitorsX = null;
         for (ServiceMonitors monitors : serviceMonitorsById.values()) {
             if (monitors instanceof EventContainerServiceMonitors) {
                 eventContainerServiceMonitors.put(monitors.getId(), (EventContainerServiceMonitors) monitors);
@@ -56,11 +59,14 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
                 remotingServiceMonitorsX = (RemotingServiceMonitors) monitors;
             } else if (monitors instanceof WebRequestsServiceMonitors) {
                 jeeRequestServiceMonitorsX = (WebRequestsServiceMonitors) monitors;
+            } else if (monitors instanceof MemcachedServiceMonitors) {
+                memcachedServiceMonitorsX = (MemcachedServiceMonitors) monitors;
             }
 
         }
         this.remotingServiceMonitors = remotingServiceMonitorsX;
         this.webRequestsServiceMonitors = jeeRequestServiceMonitorsX;
+        this.memcachedServiceMonitors = memcachedServiceMonitorsX;
 
         ProcessingUnitInstanceStatistics lastStats = previous;
         if (lastStats != null) {
@@ -115,6 +121,10 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
 
     public WebRequestsServiceMonitors getWebRequests() {
         return this.webRequestsServiceMonitors;
+    }
+
+    public MemcachedServiceMonitors getMemcached() {
+        return this.memcachedServiceMonitors;
     }
 
     public ProcessingUnitInstanceStatistics getPrevious() {

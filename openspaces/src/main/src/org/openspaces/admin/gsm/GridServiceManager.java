@@ -19,6 +19,7 @@ package org.openspaces.admin.gsm;
 import org.openspaces.admin.AgentGridComponent;
 import org.openspaces.admin.LogProviderGridComponent;
 import org.openspaces.admin.dump.DumpProvider;
+import org.openspaces.admin.memcached.MemcachedDeployment;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
@@ -72,4 +73,26 @@ public interface GridServiceManager extends AgentGridComponent, LogProviderGridC
      * just an embedded space.
      */
     ProcessingUnit deploy(SpaceDeployment deployment, long timeout, TimeUnit timeUnit);
+
+    /**
+     * Deploys a memcached based on the space deployment information on the given grid
+     * service manager (it will act as the primary GSM for the deployed processing unit).
+     *
+     * <p>The deployment process will wait indefinitely and return the actual processing unit that can be used.
+     *
+     * <p>Note, deploying just a memcached is simply deploying a built in processing unit that starts / connects
+     * to a space (holding the memcached entries) and exposing the memcached protocol.
+     */
+    ProcessingUnit deploy(MemcachedDeployment deployment);
+
+    /**
+     * Deploys a memcached based on the space deployment information on the given grid
+     * service manager (it will act as the primary GSM for the deployed processing unit).
+     *
+     * <p>The deployment process will wait for the given timeout and return the actual processing unit that can be used.
+     *
+     * <p>Note, deploying just a memcached is simply deploying a built in processing unit that starts / connects
+     * to a space (holding the memcached entries) and exposing the memcached protocol.
+     */
+    ProcessingUnit deploy(MemcachedDeployment deployment, long timeout, TimeUnit timeUnit);
 }

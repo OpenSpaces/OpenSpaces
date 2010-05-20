@@ -12,6 +12,7 @@ import org.openspaces.admin.internal.gsm.events.DefaultGridServiceManagerAddedEv
 import org.openspaces.admin.internal.gsm.events.DefaultGridServiceManagerRemovedEventManager;
 import org.openspaces.admin.internal.gsm.events.InternalGridServiceManagerAddedEventManager;
 import org.openspaces.admin.internal.gsm.events.InternalGridServiceManagerRemovedEventManager;
+import org.openspaces.admin.memcached.MemcachedDeployment;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
@@ -166,6 +167,22 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
             throw new AdminException("No Grid Service Manager found to deploy [" + deployment.getSpaceName() + "]");
         }
         return gridServiceManager.deploy(deployment, timeout, timeUnit);
+    }
+    
+    public ProcessingUnit deploy(MemcachedDeployment deployment, long timeout, TimeUnit timeUnit) {
+        GridServiceManager gridServiceManager = getGridServiceManager();
+        if (gridServiceManager == null) {
+            throw new AdminException("No Grid Service Manager found to deploy [" + deployment.getSpaceUrl() + "]");
+        }
+        return gridServiceManager.deploy(deployment, timeout, timeUnit);
+    }
+
+    public ProcessingUnit deploy(MemcachedDeployment deployment) {
+        GridServiceManager gridServiceManager = getGridServiceManager();
+        if (gridServiceManager == null) {
+            throw new AdminException("No Grid Service Manager found to deploy [" + deployment.getSpaceUrl() + "]");
+        }
+        return gridServiceManager.deploy(deployment);
     }
 
     private GridServiceManager getGridServiceManager() {

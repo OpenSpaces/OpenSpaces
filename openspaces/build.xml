@@ -7,6 +7,10 @@
 
     <path id="all-libs">
 
+        <fileset dir="${basedir}/deploy">
+            <include name="**/*.jar"/>
+        </fileset>
+
         <fileset dir="${lib.dir}">
             <include name="**/*.jar"/>
             <exclude name="required/gs-openspaces.jar"/>

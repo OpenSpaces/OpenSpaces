@@ -21,6 +21,7 @@ import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventManager;
 import org.openspaces.admin.gsm.events.GridServiceManagerLifecycleEventListener;
 import org.openspaces.admin.gsm.events.GridServiceManagerRemovedEventManager;
+import org.openspaces.admin.memcached.MemcachedDeployment;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
@@ -125,6 +126,28 @@ public interface GridServiceManagers extends AdminAware, Iterable<GridServiceMan
      * just an embedded space.
      */
     ProcessingUnit deploy(SpaceDeployment deployment);
+
+    /**
+     * Deploys a memcached based on the space deployment information on a random grid
+     * service manager (it will act as the primary GSM for the deployed processing unit).
+     *
+     * <p>The deployment process will wait for the provided timeout and return the actual processing unit that can be used.
+     *
+     * <p>Note, deploying just a space is simply deploying a built in processing unit that starts
+     * just an embedded space.
+     */
+    ProcessingUnit deploy(MemcachedDeployment deployment, long timeout, TimeUnit timeUnit);
+
+    /**
+     * Deploys a memcached based on the space deployment information on a random grid
+     * service manager (it will act as the primary GSM for the deployed processing unit).
+     *
+     * <p>The deployment process will wait indefinitely and return the actual processing unit that can be used.
+     *
+     * <p>Note, deploying just a space is simply deploying a built in processing unit that starts
+     * just an embedded space.
+     */
+    ProcessingUnit deploy(MemcachedDeployment deployment);
 
     /**
      * Deploys a space based on the space deployment information on a random grid

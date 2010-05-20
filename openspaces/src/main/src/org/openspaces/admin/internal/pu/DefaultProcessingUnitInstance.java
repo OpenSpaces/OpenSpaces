@@ -34,6 +34,7 @@ import org.openspaces.events.EventContainerServiceDetails;
 import org.openspaces.events.asyncpolling.AsyncPollingEventContainerServiceDetails;
 import org.openspaces.events.notify.NotifyEventContainerServiceDetails;
 import org.openspaces.events.polling.PollingEventContainerServiceDetails;
+import org.openspaces.memcached.MemcachedServiceDetails;
 import org.openspaces.pu.container.jee.JeeServiceDetails;
 import org.openspaces.pu.container.servicegrid.PUDetails;
 import org.openspaces.pu.container.servicegrid.PUMonitors;
@@ -84,6 +85,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private final JeeServiceDetails jeeDetails;
 
+    private final MemcachedServiceDetails memcachedDetails;
+
     private final Map<String, ServiceDetails> servicesDetailsByServiceId;
     private final Map<String, ServiceDetails[]> servicesDetailsByServiceType;
 
@@ -121,6 +124,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         ArrayList<SpaceServiceDetails> embeddedSpacesEmbeddedList = new ArrayList<SpaceServiceDetails>();
         ArrayList<SpaceServiceDetails> spacesDetailsList = new ArrayList<SpaceServiceDetails>();
         JeeServiceDetails jeeDetailsX = null;
+        MemcachedServiceDetails memcachedDetailsX = null;
         RemotingServiceDetails remotingServiceDetailsX = null;
 
         Map<String, List<ServiceDetails>> servicesDetailsByServiceTypeList = new HashMap<String, List<ServiceDetails>>();
@@ -143,6 +147,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
                 }
             } else if (serviceDetails instanceof JeeServiceDetails) {
                 jeeDetailsX = (JeeServiceDetails) serviceDetails;
+            } else if (serviceDetails instanceof MemcachedServiceDetails) {
+                memcachedDetailsX = (MemcachedServiceDetails) serviceDetails;
             } else if (serviceDetails instanceof RemotingServiceDetails) {
                 remotingServiceDetailsX = (RemotingServiceDetails) serviceDetails;
             } else if (serviceDetails instanceof EventContainerServiceDetails) {
@@ -162,6 +168,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         asyncPollingEventContainerServiceDetails = Collections.unmodifiableMap(asyncPollingEventContainerServiceDetails);
 
         jeeDetails = jeeDetailsX;
+        memcachedDetails = memcachedDetailsX;
         remotingServiceDetails = remotingServiceDetailsX;
         embeddedSpacesDetails = embeddedSpacesEmbeddedList.toArray(new SpaceServiceDetails[embeddedSpacesEmbeddedList.size()]);
         spacesDetails = spacesDetailsList.toArray(new SpaceServiceDetails[spacesDetailsList.size()]);
@@ -340,6 +347,10 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     public JeeServiceDetails getJeeDetails() {
         return jeeDetails;
+    }
+
+    public MemcachedServiceDetails getMemcachedDetails() {
+        return memcachedDetails;
     }
 
     public RemotingServiceDetails getRemotingDetails() {

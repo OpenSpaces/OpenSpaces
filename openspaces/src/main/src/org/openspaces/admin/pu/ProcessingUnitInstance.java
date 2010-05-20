@@ -43,6 +43,7 @@ import org.openspaces.events.EventContainerServiceDetails;
 import org.openspaces.events.asyncpolling.AsyncPollingEventContainerServiceDetails;
 import org.openspaces.events.notify.NotifyEventContainerServiceDetails;
 import org.openspaces.events.polling.PollingEventContainerServiceDetails;
+import org.openspaces.memcached.MemcachedServiceDetails;
 import org.openspaces.pu.container.jee.JeeServiceDetails;
 import org.openspaces.pu.service.ServiceDetails;
 import org.openspaces.remoting.RemotingServiceDetails;
@@ -243,6 +244,8 @@ public interface ProcessingUnitInstance extends GridComponent, Iterable<ServiceD
      * Returns the embedded space service details as described by the service started within the processing unit.
      */
     SpaceServiceDetails[] getEmbeddedSpacesDetails();
+
+    MemcachedServiceDetails getMemcachedDetails();
 
     /**
      * Returns <code>true</code> if there are embedded spaces started within this processing
