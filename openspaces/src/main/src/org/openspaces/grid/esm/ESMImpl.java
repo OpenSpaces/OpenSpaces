@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.jini.rio.boot.BootUtil;
 import org.jini.rio.core.ClassBundle;
 import org.jini.rio.core.jsb.ServiceBeanContext;
 import org.jini.rio.jsb.ServiceBeanActivation;
@@ -33,9 +34,11 @@ import com.gigaspaces.log.LogProcessType;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOInfoHelper;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
+import com.gigaspaces.management.entry.JMXConnection;
 import com.gigaspaces.security.SecurityException;
 import com.gigaspaces.security.directory.UserDetails;
 import com.gigaspaces.security.service.SecurityContext;
+import com.gigaspaces.start.SystemBoot;
 import com.sun.jini.start.LifeCycle;
 
 public class ESMImpl extends ServiceBeanAdapter implements ESM
@@ -111,6 +114,19 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM
     public synchronized void initialize(ServiceBeanContext context) throws Exception {
         logger.info("Starting ESM ...");
         super.initialize(context);
+        
+        /* Get the JMX Service URL */
+        String jmxServiceURL = SystemBoot.getJMXServiceURL();
+        if (jmxServiceURL != null) {
+            String hostName = BootUtil.getHostAddress();
+            int port = SystemBoot.getRegistryPort();
+            String name = context.getServiceElement().getName() +
+                    "_" +
+                    hostName +
+                    "_" +
+                    port;
+            addAttribute(new JMXConnection(jmxServiceURL, name));
+        }
     }
     
     @Override
