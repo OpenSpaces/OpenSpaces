@@ -34,7 +34,9 @@ public class PuCapacityPlanner {
         minNumberOfGSCs = Math.max(1, MemorySettings.valueOf(contextProperties.getMinMemoryCapacity()).floorDividedBy(contextProperties.getMaximumJavaHeapSize()));
         maxNumberOfGSCs = Math.max(1, MemorySettings.valueOf(contextProperties.getMaxMemoryCapacity()).floorDividedBy(contextProperties.getMaximumJavaHeapSize()));
         
-        scalingFactor = (int)Math.ceil(1.0*maxNumberOfGSCs / minNumberOfGSCs);
+        int scaleGrowth = (int)(1.0*pu.getTotalNumberOfInstances() / minNumberOfGSCs);
+        int scaleFactor = (int)Math.ceil(1.0*maxNumberOfGSCs / minNumberOfGSCs);
+        scalingFactor = Math.max(scaleGrowth, scaleFactor);
         
         deploymentIsolationFilter = new DeploymentIsolationFilter(this);
     }

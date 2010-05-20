@@ -127,7 +127,14 @@ public class EsmExecutor {
         final String zoneName = tenantPrefix+deployment.getDataGridName();
         SpaceDeployment spaceDeployment = new SpaceDeployment(deployment.getDataGridName());
         spaceDeployment.addZone(zoneName);
-        int numberOfParitions = calculateNumberOfPartitions(deploymentContext);
+        
+        int numberOfParitions = 0;
+        if (deploymentContext.hasPartitionsSet()) {
+            numberOfParitions = deploymentContext.getPartitions();
+        } else {
+            numberOfParitions = calculateNumberOfPartitions(deploymentContext);
+        }
+        
         if (deploymentContext.isHighlyAvailable()) {
             spaceDeployment.maxInstancesPerMachine(1);
             spaceDeployment.partitioned(numberOfParitions, 1);
@@ -168,6 +175,13 @@ public class EsmExecutor {
            spaceDeployment.setContextProperty(VM_ARGUMENTS, deploymentContext.getVmInputArguments()); 
         }
         
+        if (logger.isLoggable(Level.INFO)) {
+            logger.info("Request to deploy " + deployment.getDataGridName() + " " + numberOfParitions
+                    + (deploymentContext.isHighlyAvailable() ? ",1" : ",0") + " capacity: "
+                    + deploymentContext.getMinMemory() + " - " + deploymentContext.getMaxMemory()
+                    + " - " + deploymentContext.getDeploymentIsolationLevel());
+        }
+        
         if (logger.isLoggable(Level.FINE)) {
             logger.fine("Deploying " + deployment.getDataGridName() 
                     + "\n\t Zone: " + zoneName 
@@ -179,23 +193,21 @@ public class EsmExecutor {
                     + "\n\t Highly Available? " + deploymentContext.isHighlyAvailable()
                     + "\n\t Partitions: " + numberOfParitions
                     + "\n\t SLA: " + deploymentContext.getSlaDescriptors());
-        } else if (logger.isLoggable(Level.INFO)) {
-            logger.info("Request to deploy " + deployment.getDataGridName() + " " + numberOfParitions
-                    + (deploymentContext.isHighlyAvailable() ? ",1" : ",0") + " capacity: "
-                    + deploymentContext.getMinMemory() + " - " + deploymentContext.getMaxMemory()
-                    + " - " + deploymentContext.getDeploymentIsolationLevel());
         }
         
         admin.getGridServiceManagers().waitForAtLeastOne().deploy(spaceDeployment);
     }
     
     private int calculateNumberOfPartitions(DeploymentContext context) {
-        int numberOfPartitions = MemorySettings.valueOf(context.getMaxMemory()).floorDividedBy(context.getMaximumJavaHeapSize());
-        if (context.isHighlyAvailable()) {
-            numberOfPartitions /= 2;
-        }
         
-        return Math.max(1, numberOfPartitions);
+        return 5;
+        
+//        int numberOfPartitions = MemorySettings.valueOf(context.getMaxMemory()).floorDividedBy(context.getMaximumJavaHeapSize());
+//        if (context.isHighlyAvailable()) {
+//            numberOfPartitions /= 2;
+//        }
+//        
+//        return Math.max(1, numberOfPartitions);
     }
     
     /**
@@ -243,10 +255,10 @@ public class EsmExecutor {
                 ProcessingUnits processingUnits = admin.getProcessingUnits();
                 for (ProcessingUnit pu : processingUnits) {
 
-                    logger.finest(ToStringHelper.puToString(pu));
-
-                    if (!PuCapacityPlanner.isElastic(pu))
+                    if (!PuCapacityPlanner.isElastic(pu)) {
+                        logger.finest(ToStringHelper.puToString(pu));
                         continue;
+                    }
                     
                     PuCapacityPlanner puCapacityPlanner = new PuCapacityPlanner(pu, getOnDemandElasticScale(pu));
                     logger.finest(ToStringHelper.puCapacityPlannerToString(puCapacityPlanner));
@@ -432,11 +444,11 @@ public class EsmExecutor {
         private boolean reachedMaxCapacity() {
             if (puCapacityPlanner.getProcessingUnit().getStatus().equals(DeploymentStatus.INTACT)) {
                 int numberOfGSCsInZone = puCapacityPlanner.getNumberOfGSCsInZone();
-                logger.finest("Number of GSCs in Zone: " + numberOfGSCsInZone + " - Max: " + puCapacityPlanner.getMaxNumberOfGSCs());
+                logger.finest("GSCs in zone: [" + numberOfGSCsInZone + "], max allowed [" + puCapacityPlanner.getMaxNumberOfGSCs()+"]");
                 return numberOfGSCsInZone >= puCapacityPlanner.getMaxNumberOfGSCs();
             } else {
                 int numberOfNonEmptyGSCsInZone = puCapacityPlanner.getNumberOfNonEmptyGSCsInZone();
-                logger.finest("Number of (non-empty) GSCs in Zone: " + numberOfNonEmptyGSCsInZone + " - Max: " + puCapacityPlanner.getMaxNumberOfGSCs());
+                logger.finest("(non-empty) GSCs in zone: [" + numberOfNonEmptyGSCsInZone + "], max allowed [" + puCapacityPlanner.getMaxNumberOfGSCs()+"]");
                 return numberOfNonEmptyGSCsInZone >= puCapacityPlanner.getMaxNumberOfGSCs();
             }
         }

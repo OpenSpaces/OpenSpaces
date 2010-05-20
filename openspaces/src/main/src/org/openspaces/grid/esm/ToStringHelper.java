@@ -13,25 +13,27 @@ public class ToStringHelper {
     public static String puToString(ProcessingUnit pu) {
         StringBuilder sb = new StringBuilder();
         sb.append("Processing Unit Configuration:")
-        .append("\n\tName: ").append(pu.getName())
-        .append("\n\tInstances: ").append(pu.getNumberOfInstances())
-        .append("\n\tBackups: ").append(pu.getNumberOfBackups())
-        .append("\n\tInstances per-machine: ").append(pu.getMaxInstancesPerMachine())
-        .append("\n\tPlanned instances: ").append(pu.getTotalNumberOfInstances())
-        .append("\n\tActual instances: ").append(pu.getInstances().length)
-        .append("\n\tDeployment status: ").append(pu.getStatus())
+        .append("\n\t Name: ").append(pu.getName())
+        .append("\n\t Instances: ").append(pu.getNumberOfInstances())
+        .append("\n\t Backups: ").append(pu.getNumberOfBackups())
+        .append("\n\t Instances per-machine: ").append(pu.getMaxInstancesPerMachine())
+        .append("\n\t Planned instances: ").append(pu.getTotalNumberOfInstances())
+        .append("\n\t Actual instances: ").append(pu.getInstances().length)
+        .append("\n\t Deployment status: ").append(pu.getStatus())
+        .append("\n\t Managed by ESM: ").append(PuCapacityPlanner.isElastic(pu))
         ;
         return sb.toString();
     }
 
     public static String puCapacityPlannerToString(PuCapacityPlanner puCapacityPlanner) {
         StringBuilder sb = new StringBuilder();
-        sb.append("\n\t status: ").append(puCapacityPlanner.getProcessingUnit().getStatus())
-        .append("\n\t minNumberOfGSCs=").append(puCapacityPlanner.getMinNumberOfGSCs())
-        .append("\n\t maxNumberOfGSCs=").append(puCapacityPlanner.getMaxNumberOfGSCs())
-        .append("\n\t actual number of GSCs: ").append(puCapacityPlanner.getProcessingUnit().getAdmin().getGridServiceContainers().getSize())
-        .append("\n\t scalingFactor=").append(+puCapacityPlanner.getScalingFactor()).append(" (instances per GSC)")
-        .append("\n\t number of GSCs in zone: ").append(puCapacityPlanner.getContextProperties().getZoneName()).append("=").append(puCapacityPlanner.getNumberOfGSCsInZone());
+        sb.append(puToString(puCapacityPlanner.getProcessingUnit()))
+        .append("\n\t Status: ").append(puCapacityPlanner.getProcessingUnit().getStatus())
+        .append("\n\t Min #GSCs: ").append(puCapacityPlanner.getMinNumberOfGSCs())
+        .append("\n\t Max #GSCs: ").append(puCapacityPlanner.getMaxNumberOfGSCs())
+        .append("\n\t Actual #GSCs: ").append(puCapacityPlanner.getProcessingUnit().getAdmin().getGridServiceContainers().getSize())
+        .append("\n\t Instances Per GSC: ").append(+puCapacityPlanner.getScalingFactor())
+        .append("\n\t GSCs in zone: ").append(puCapacityPlanner.getContextProperties().getZoneName()).append("=").append(puCapacityPlanner.getNumberOfGSCsInZone());
         
         return sb.toString();
     }

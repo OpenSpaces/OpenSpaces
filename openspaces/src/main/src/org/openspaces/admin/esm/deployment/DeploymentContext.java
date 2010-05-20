@@ -13,6 +13,7 @@ public class DeploymentContext implements Serializable {
     private String maximumJavaHeapSize = "512m";
     private String vmInputArguments = null;
     private String tenant ="";
+    private int numberOfPartitions = -1;
     
     DeploymentContext(){
     }
@@ -91,5 +92,17 @@ public class DeploymentContext implements Serializable {
     
     public String getTenant() {
         return tenant;
+    }
+
+    public void setPartitions(int numberOfPartitions) {
+        this.numberOfPartitions = numberOfPartitions;
+    }
+    
+    public boolean hasPartitionsSet() {
+        return this.numberOfPartitions != -1;
+    }
+    
+    public int getPartitions() {
+        return this.numberOfPartitions;
     }
 }

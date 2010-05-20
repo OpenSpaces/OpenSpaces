@@ -126,6 +126,20 @@ public class ElasticDataGridDeployment extends InternalElasticDataGridDeployment
         contextProperties.put(key, value);
         return this;
     }
+    
+    /**
+     * Sets the number of partitions to use (number of primaries if highly available). This setting will override the default
+     * calculated value for the number of partitions derived from the {@link #capacity(String, String)} parameters.
+     * 
+     * @param numberOfPartitions The number of partitions required.
+     */
+    public ElasticDataGridDeployment setPartitions(int numberOfPartitions) {
+        if (numberOfPartitions < 1)
+            throw new IllegalArgumentException("invalid partition size [" + numberOfPartitions+"] - must be at least 1");
+        
+        getDeploymentContext().setPartitions(numberOfPartitions);
+        return this;
+    }
        
     /**
      * @return The context deploy time properties.
