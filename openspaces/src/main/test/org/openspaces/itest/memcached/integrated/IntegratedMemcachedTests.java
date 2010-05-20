@@ -37,7 +37,8 @@ public class IntegratedMemcachedTests extends TestCase {
         provider.setBeanLevelProperties(levelProperties);
 
         provider.addConfigLocation("memcached/META-INF/spring/pu.xml");
-        provider.setClusterInfo(new ClusterInfo(null, null, null, 2, 1));
+        // for now, change to 2,1
+        provider.setClusterInfo(new ClusterInfo(null, null, null, 1, 0));
 
         ProcessingUnitContainer container = provider.createContainer();
 

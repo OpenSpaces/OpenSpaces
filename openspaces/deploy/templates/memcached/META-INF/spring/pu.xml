@@ -20,6 +20,7 @@
                 <prop key="url">/./memcached</prop>
                 <prop key="port">11211</prop>
                 <prop key="portRetries">10</prop>
+                <prop key="binary">false</prop>
             </props>
         </property>
     </bean>
@@ -40,5 +41,6 @@
         <property name="space" ref="gigaSpace" />
         <property name="port" value="${port}"/>
         <property name="portRetries" value="${portRetries}" />
+        <property name="binary" value="${binary}" />
     </bean>
 </beans>
