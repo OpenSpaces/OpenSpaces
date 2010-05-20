@@ -396,7 +396,7 @@ public class EsmExecutor {
                     continue;
                 }
                 
-                if (aboveMinCapcity() && machineHasAnEmptyGSC(zoneCorrelator, machine)) {
+                if (machineHasAnEmptyGSC(zoneCorrelator, machine)) {
                     logger.finest("Won't start a GSC on machine ["+ToStringHelper.machineToString(machine)+"] - already has an empty GSC.");
                     continue;
                 }
@@ -412,15 +412,33 @@ public class EsmExecutor {
             }
             
             if (needsNewMachine) {
+                if (puCapacityPlanner.getNumberOfMachinesWithEmptyGSCsInZone() >= 2) {
+                    logger.fine("Won't start a new machine - already has two machines with an empty GSC in zone");
+                    return;
+                }
+                
                 logger.fine("Can't start a GSC on the available machines - needs a new machine.");
+                
                 ElasticScaleHandlerContext elasticScaleCommand = new ElasticScaleHandlerContext();
                 elasticScaleCommand.setMachines(machines);
                 puCapacityPlanner.getElasticScale().scaleOut(elasticScaleCommand);
             }
         }
-        
+
+        /*
+         * If INTACT, base decision on the number of GSCs in zone and the max number of GSCs planned.
+         * Otherwise, don't count the number of empty GSCs since we may run short of 
+         */
         private boolean reachedMaxCapacity() {
-            return puCapacityPlanner.getNumberOfGSCsInZone() >= puCapacityPlanner.getMaxNumberOfGSCs();
+            if (puCapacityPlanner.getProcessingUnit().getStatus().equals(DeploymentStatus.INTACT)) {
+                int numberOfGSCsInZone = puCapacityPlanner.getNumberOfGSCsInZone();
+                logger.finest("Number of GSCs in Zone: " + numberOfGSCsInZone + " - Max: " + puCapacityPlanner.getMaxNumberOfGSCs());
+                return numberOfGSCsInZone >= puCapacityPlanner.getMaxNumberOfGSCs();
+            } else {
+                int numberOfNonEmptyGSCsInZone = puCapacityPlanner.getNumberOfNonEmptyGSCsInZone();
+                logger.finest("Number of (non-empty) GSCs in Zone: " + numberOfNonEmptyGSCsInZone + " - Max: " + puCapacityPlanner.getMaxNumberOfGSCs());
+                return numberOfNonEmptyGSCsInZone >= puCapacityPlanner.getMaxNumberOfGSCs();
+            }
         }
         
         private boolean aboveMinCapcity() {

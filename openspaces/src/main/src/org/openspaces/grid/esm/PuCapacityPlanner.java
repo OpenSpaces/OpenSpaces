@@ -67,6 +67,42 @@ public class PuCapacityPlanner {
         Zone zone = pu.getAdmin().getZones().getByName(contextProperties.getZoneName());
         return zone == null ? 0 : zone.getGridServiceContainers().getSize();
     }
+    
+    public int getNumberOfNonEmptyGSCsInZone() {
+        Zone zone = pu.getAdmin().getZones().getByName(contextProperties.getZoneName());
+        if (zone == null)
+            return 0;
+        
+        int numberOfNonEmptyGSCsInZoneCount = 0;
+        for (GridServiceContainer gsc : zone.getGridServiceContainers()) {
+            if (gsc.getProcessingUnitInstances().length > 0) {
+                ++numberOfNonEmptyGSCsInZoneCount;
+            }
+        }
+        
+        return numberOfNonEmptyGSCsInZoneCount;
+    }
+    
+    public int getNumberOfMachinesWithEmptyGSCsInZone() {
+        Zone zone = pu.getAdmin().getZones().getByName(contextProperties.getZoneName());
+        if (zone == null)
+            return 0;
+        
+        int numberOfMachinesWithEmptyGSC = 0;
+        Set<Machine> machines = new HashSet<Machine>();
+        GridServiceContainers gscsInZone = zone.getGridServiceContainers();
+        for (GridServiceContainer gsc : gscsInZone) {
+            if (machines.contains(gsc.getMachine())) {
+                continue;
+            }
+            machines.add(gsc.getMachine());
+            if (gsc.getProcessingUnitInstances().length == 0) {
+                ++numberOfMachinesWithEmptyGSC;
+            }
+        }
+        
+        return numberOfMachinesWithEmptyGSC;
+    }
 
     /**
      * We are looking to satisfy the max-instances-per-machine SLA.
@@ -95,6 +131,8 @@ public class PuCapacityPlanner {
         
         return (machines.size());
     }
+    
+    
     
     public ElasticDeploymentContextProperties getContextProperties() {
         return contextProperties;
