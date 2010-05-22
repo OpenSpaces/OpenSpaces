@@ -5,8 +5,6 @@ import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.memcached.MemcachedDeployment;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
-import org.openspaces.admin.space.SpaceDeployment;
-import org.openspaces.core.GigaSpace;
 
 /**
  * @author kimchy
