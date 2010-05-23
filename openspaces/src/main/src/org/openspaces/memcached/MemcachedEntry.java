@@ -16,7 +16,7 @@ import java.io.ObjectOutput;
 @SpaceClass
 public class MemcachedEntry implements Externalizable {
 
-    private String key;
+    private Key key;
 
     private byte[] value;
 
@@ -27,18 +27,18 @@ public class MemcachedEntry implements Externalizable {
     public MemcachedEntry() {
     }
 
-    public MemcachedEntry(String key, byte[] value) {
+    public MemcachedEntry(Key key, byte[] value) {
         this.key = key;
         this.value = value;
     }
 
     @SpaceId(autoGenerate = false)
     @SpaceRouting
-    public String getKey() {
+    public Key getKey() {
         return key;
     }
 
-    public void setKey(String key) {
+    public void setKey(Key key) {
         this.key = key;
     }
 
@@ -71,8 +71,7 @@ public class MemcachedEntry implements Externalizable {
         if (key == null) {
             out.writeBoolean(false);
         } else {
-            out.writeBoolean(true);
-            out.writeUTF(key);
+            key.writeExternal(out);
         }
         if (value == null) {
             out.writeBoolean(false);
@@ -87,7 +86,8 @@ public class MemcachedEntry implements Externalizable {
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         if (in.readBoolean()) {
-            key = in.readUTF();
+            key = new Key();
+            key.readExternal(in);
         }
         if (in.readBoolean()) {
             value = new byte[in.readInt()];

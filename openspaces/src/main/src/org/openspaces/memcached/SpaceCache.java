@@ -37,61 +37,46 @@ public class SpaceCache implements Cache {
     }
 
     public DeleteResponse delete(Key key, int time) {
-        try {
-            if (time > 0) {
-                // expire it later, removed from memcached, buts lets do it anyhow (but we do not block it!)
-                MemcachedEntry entry = space.readById(MemcachedEntry.class, convertKeyToString(key));
-                if (entry == null) {
-                    return DeleteResponse.NOT_FOUND;
-                }
-                space.write(entry, time);
-                return DeleteResponse.DELETED;
-            } else {
-                MemcachedEntry entry = space.takeById(MemcachedEntry.class, convertKeyToString(key));
-                return entry == null ? DeleteResponse.NOT_FOUND : DeleteResponse.DELETED;
+        if (time > 0) {
+            // expire it later, removed from memcached, buts lets do it anyhow (but we do not block it!)
+            MemcachedEntry entry = space.readById(MemcachedEntry.class, key);
+            if (entry == null) {
+                return DeleteResponse.NOT_FOUND;
             }
-        } catch (UnsupportedEncodingException e) {
-            return DeleteResponse.NOT_FOUND;
+            space.write(entry, time);
+            return DeleteResponse.DELETED;
+        } else {
+            MemcachedEntry entry = space.takeById(MemcachedEntry.class, key);
+            return entry == null ? DeleteResponse.NOT_FOUND : DeleteResponse.DELETED;
         }
     }
 
     public StoreResponse add(CacheElement e) {
         try {
-            MemcachedEntry entry = new MemcachedEntry(convertKeyToString(e.getKey()), e.getData());
+            MemcachedEntry entry = new MemcachedEntry(e.getKey(), e.getData());
             entry.setFlags(e.getFlags());
             space.write(entry, e.getExpire(), 0, UpdateModifiers.WRITE_ONLY);
             return StoreResponse.STORED;
         } catch (EntryAlreadyInSpaceException e1) {
-            return StoreResponse.NOT_FOUND;
-        } catch (UnsupportedEncodingException e1) {
             return StoreResponse.NOT_FOUND;
         }
     }
 
     public StoreResponse replace(CacheElement e) {
         try {
-            MemcachedEntry entry = new MemcachedEntry(convertKeyToString(e.getKey()), e.getData());
+            MemcachedEntry entry = new MemcachedEntry(e.getKey(), e.getData());
             entry.setFlags(e.getFlags());
             space.write(entry, e.getExpire(), 0, UpdateModifiers.UPDATE_ONLY);
             return StoreResponse.STORED;
         } catch (EntryNotInSpaceException e1) {
-            return StoreResponse.NOT_FOUND;
-        } catch (UnsupportedEncodingException e1) {
             return StoreResponse.NOT_FOUND;
         }
     }
 
     public StoreResponse append(CacheElement cacheElement) {
         // binary protocol allows to pass cas value, take it into account?
-        String key;
-        try {
-            key = convertKeyToString(cacheElement.getKey());
-        } catch (UnsupportedEncodingException e) {
-            getMisses.incrementAndGet();
-            return StoreResponse.NOT_STORED;
-        }
         while (true) {
-            MemcachedEntry entry = space.readById(MemcachedEntry.class, key);
+            MemcachedEntry entry = space.readById(MemcachedEntry.class, cacheElement.getKey());
             if (entry == null) {
                 getMisses.incrementAndGet();
                 return StoreResponse.NOT_FOUND;
@@ -111,15 +96,8 @@ public class SpaceCache implements Cache {
 
     public StoreResponse prepend(CacheElement cacheElement) {
         // binary protocol allows to pass cas value, take it into account?
-        String key;
-        try {
-            key = convertKeyToString(cacheElement.getKey());
-        } catch (UnsupportedEncodingException e) {
-            getMisses.incrementAndGet();
-            return StoreResponse.NOT_STORED;
-        }
         while (true) {
-            MemcachedEntry entry = space.readById(MemcachedEntry.class, key);
+            MemcachedEntry entry = space.readById(MemcachedEntry.class, cacheElement.getKey());
             if (entry == null) {
                 getMisses.incrementAndGet();
                 return StoreResponse.NOT_FOUND;
@@ -138,20 +116,16 @@ public class SpaceCache implements Cache {
     }
 
     public StoreResponse set(CacheElement e) {
-        try {
-            setCmds.incrementAndGet();//update stats
-            MemcachedEntry entry = new MemcachedEntry(convertKeyToString(e.getKey()), e.getData());
-            entry.setFlags(e.getFlags());
-            space.write(entry, e.getExpire());
-            return StoreResponse.STORED;
-        } catch (UnsupportedEncodingException e1) {
-            return StoreResponse.NOT_FOUND;
-        }
+        setCmds.incrementAndGet();//update stats
+        MemcachedEntry entry = new MemcachedEntry(e.getKey(), e.getData());
+        entry.setFlags(e.getFlags());
+        space.write(entry, e.getExpire());
+        return StoreResponse.STORED;
     }
 
     public StoreResponse cas(Long cas_key, CacheElement e) {
         try {
-            MemcachedEntry entry = new MemcachedEntry(convertKeyToString(e.getKey()), e.getData());
+            MemcachedEntry entry = new MemcachedEntry(e.getKey(), e.getData());
             entry.setFlags(e.getFlags());
             entry.setVersion(cas_key.intValue());
             space.write(entry, e.getExpire(), 0, UpdateModifiers.UPDATE_ONLY);
@@ -161,22 +135,12 @@ public class SpaceCache implements Cache {
         } catch (EntryNotInSpaceException e1) {
             getMisses.incrementAndGet();
             return StoreResponse.NOT_FOUND;
-        } catch (UnsupportedEncodingException e1) {
-            getMisses.incrementAndGet();
-            return StoreResponse.NOT_FOUND;
         }
     }
 
     public Integer get_add(Key key, int mod) {
-        String keyStr;
-        try {
-            keyStr = convertKeyToString(key);
-        } catch (UnsupportedEncodingException e) {
-            getMisses.incrementAndGet();
-            return null;
-        }
         while (true) {
-            MemcachedEntry entry = space.readById(MemcachedEntry.class, keyStr);
+            MemcachedEntry entry = space.readById(MemcachedEntry.class, key);
             if (entry == null) {
                 getMisses.incrementAndGet();
                 return null;
@@ -202,8 +166,7 @@ public class SpaceCache implements Cache {
         getCmds.incrementAndGet();//updates stats
         try {
             if (keys.length == 1) {
-                String key = convertKeyToString(keys[0]);
-                MemcachedEntry entry = space.readById(MemcachedEntry.class, key);
+                MemcachedEntry entry = space.readById(MemcachedEntry.class, keys[0]);
                 if (entry == null) {
                     getMisses.incrementAndGet();
                     return new CacheElement[]{null};
@@ -215,11 +178,7 @@ public class SpaceCache implements Cache {
                 int hits = 0;
                 int misses = 0;
                 CacheElement[] retVal = new CacheElement[keys.length];
-                String[] ids = new String[keys.length];
-                for (int i = 0; i < ids.length; i++) {
-                    ids[i] = convertKeyToString(keys[i]);
-                }
-                IReadByIdsResult<MemcachedEntry> result = space.readByIds(MemcachedEntry.class, ids);
+                IReadByIdsResult<MemcachedEntry> result = space.readByIds(MemcachedEntry.class, keys);
                 for (int i = 0; i < result.getResultsArray().length; i++) {
                     MemcachedEntry entry = result.getResultsArray()[i];
                     if (entry == null) {
@@ -323,16 +282,8 @@ public class SpaceCache implements Cache {
     }
 
     private CacheElement convert(MemcachedEntry entry) throws UnsupportedEncodingException {
-        LocalCacheElement element = new LocalCacheElement(new Key(convertKeyToBytes(entry.getKey())), entry.getFlags(), -1 /* not relevant, not sent back */, entry.getVersion());
+        LocalCacheElement element = new LocalCacheElement(entry.getKey(), entry.getFlags(), -1 /* not relevant, not sent back */, entry.getVersion());
         element.setData(entry.getValue());
         return element;
-    }
-
-    private String convertKeyToString(Key key) throws UnsupportedEncodingException {
-        return new String(key.bytes, "UTF8");
-    }
-
-    private byte[] convertKeyToBytes(String key) throws UnsupportedEncodingException {
-        return key.getBytes("UTF8");
     }
 }
