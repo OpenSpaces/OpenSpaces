@@ -4,12 +4,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
+import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.ServerSocketChannelFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.memcached.protocol.UnifiedProtocolDecoder;
 import org.openspaces.memcached.protocol.binary.MemcachedBinaryPipelineFactory;
 import org.openspaces.memcached.protocol.text.MemcachedPipelineFactory;
 import org.openspaces.pu.service.ServiceDetails;
@@ -38,7 +41,7 @@ public class MemCacheDaemon implements InitializingBean, DisposableBean, BeanNam
 
     private String beanName = "memcached";
 
-    private boolean binary;
+    private String protocol = "dual";
 
     private String host;
 
@@ -58,10 +61,6 @@ public class MemCacheDaemon implements InitializingBean, DisposableBean, BeanNam
         this.space = space;
     }
 
-    public void setBinary(boolean binary) {
-        this.binary = binary;
-    }
-
     public void setHost(String host) {
         this.host = host;
     }
@@ -78,6 +77,10 @@ public class MemCacheDaemon implements InitializingBean, DisposableBean, BeanNam
         this.beanName = name;
     }
 
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
     public void afterPropertiesSet() throws Exception {
         cache = new SpaceCache(space);
         channelFactory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool());
@@ -86,11 +89,16 @@ public class MemCacheDaemon implements InitializingBean, DisposableBean, BeanNam
 
         ServerBootstrap bootstrap = new ServerBootstrap(channelFactory);
 
-        ChannelPipelineFactory pipelineFactory;
-        if (binary)
+        ChannelPipelineFactory pipelineFactory = new ChannelPipelineFactory() {
+            public ChannelPipeline getPipeline() throws Exception {
+                return Channels.pipeline(new UnifiedProtocolDecoder(cache, allChannels, memcachedVersion, idleTime, false));
+            }
+        };
+        if ("binary".equalsIgnoreCase(protocol)) {
             pipelineFactory = createMemcachedBinaryPipelineFactory(cache, memcachedVersion, false, idleTime, allChannels);
-        else
+        } else if ("text".equalsIgnoreCase(protocol)) {
             pipelineFactory = createMemcachedPipelineFactory(cache, memcachedVersion, false, idleTime, frameSize, allChannels);
+        }
 
         bootstrap.setPipelineFactory(pipelineFactory);
         bootstrap.setOption("sendBufferSize", 65536);
@@ -147,10 +155,10 @@ public class MemCacheDaemon implements InitializingBean, DisposableBean, BeanNam
     }
 
     public ServiceDetails[] getServicesDetails() {
-        return new ServiceDetails[] {new MemcachedServiceDetails(beanName, space.getName(), boundedPort)};
+        return new ServiceDetails[]{new MemcachedServiceDetails(beanName, space.getName(), boundedPort)};
     }
 
     public ServiceMonitors[] getServicesMonitors() {
-        return new ServiceMonitors[] {new MemcachedServiceMonitors(beanName, cache.getGetCmds(), cache.getSetCmds(), cache.getGetHits(), cache.getGetMisses())};
+        return new ServiceMonitors[]{new MemcachedServiceMonitors(beanName, cache.getGetCmds(), cache.getSetCmds(), cache.getGetHits(), cache.getGetMisses())};
     }
 }
