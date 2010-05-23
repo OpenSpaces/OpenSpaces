@@ -350,7 +350,7 @@ public class EsmExecutor {
         public void run() {
             logger.finest(UnderCapacityHandler.class.getSimpleName() + " invoked");
             
-            if (puCapacityPlanner.getProcessingUnit().getStatus().equals(DeploymentStatus.INTACT)) {
+            if (puCapacityPlanner.isProcessingUnitIntact()) {
                 return; //no need for a new GSC if deployment is intact (not to run into an infinite loop of start/terminate empty gsc)
             }
             
@@ -445,7 +445,7 @@ public class EsmExecutor {
          * Otherwise, don't count the number of empty GSCs since we may run short of 
          */
         private boolean reachedMaxCapacity() {
-            if (puCapacityPlanner.getProcessingUnit().getStatus().equals(DeploymentStatus.INTACT)) {
+            if (puCapacityPlanner.isProcessingUnitIntact()) {
                 int numberOfGSCsInZone = puCapacityPlanner.getNumberOfGSCsInZone();
                 logger.finest("GSCs in zone: [" + numberOfGSCsInZone + "], max allowed [" + puCapacityPlanner.getMaxNumberOfGSCs()+"]");
                 return numberOfGSCsInZone >= puCapacityPlanner.getMaxNumberOfGSCs();
@@ -726,7 +726,7 @@ public class EsmExecutor {
         public void handleBreachBelowThreshold() {
            
             //handle only if deployment is intact
-            if (!puCapacityPlanner.getProcessingUnit().getStatus().equals(DeploymentStatus.INTACT)) {
+            if (!puCapacityPlanner.isProcessingUnitIntact()) {
                 return;
             }
             
@@ -927,7 +927,7 @@ public class EsmExecutor {
         }
 
         public void run() {
-            if (!puCapacityPlanner.getProcessingUnit().getStatus().equals(DeploymentStatus.INTACT)) {
+            if (!puCapacityPlanner.isProcessingUnitIntact()) {
                 return;
             }
             
@@ -1053,7 +1053,7 @@ public class EsmExecutor {
         
         private void restartPrimaryInstance(ProcessingUnitInstance instance) {
             //Perquisite precaution - can happen if state changed
-            if (!instance.getProcessingUnit().getStatus().equals(DeploymentStatus.INTACT)) {
+            if (!PuCapacityPlanner.isProcessingUnitIntact(instance.getProcessingUnit())) {
                 return;
             }
             
@@ -1086,7 +1086,7 @@ public class EsmExecutor {
         public void run() {
             
             //Perquisite precaution
-            if (!puCapacityPlanner.getProcessingUnit().getStatus().equals(DeploymentStatus.INTACT)) {
+            if (!puCapacityPlanner.isProcessingUnitIntact()) {
                 return;
             }
             

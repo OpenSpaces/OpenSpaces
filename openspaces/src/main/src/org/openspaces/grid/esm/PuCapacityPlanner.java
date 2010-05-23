@@ -6,6 +6,7 @@ import java.util.Set;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.machine.Machine;
+import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.zone.Zone;
 
@@ -142,5 +143,17 @@ public class PuCapacityPlanner {
     
     public DeploymentIsolationFilter getDeploymentIsolationFilter() {
         return deploymentIsolationFilter;
+    }
+    
+    public boolean isProcessingUnitIntact() {
+        return isProcessingUnitIntact(pu);
+    }
+    
+    public static boolean isProcessingUnitIntact (ProcessingUnit pu) {
+        int planned = pu.getTotalNumberOfInstances();
+        int actual = pu.getInstances().length;
+        
+        return pu.getStatus().equals(DeploymentStatus.INTACT) 
+            && planned == actual;
     }
 }
