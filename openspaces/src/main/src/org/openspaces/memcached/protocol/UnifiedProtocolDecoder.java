@@ -6,7 +6,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
-import org.openspaces.memcached.Cache;
+import org.openspaces.memcached.SpaceCache;
 import org.openspaces.memcached.protocol.binary.MemcachedBinaryCommandDecoder;
 import org.openspaces.memcached.protocol.binary.MemcachedBinaryResponseEncoder;
 import org.openspaces.memcached.protocol.text.MemcachedCommandDecoder;
@@ -18,7 +18,7 @@ import org.openspaces.memcached.protocol.text.MemcachedResponseEncoder;
  */
 public class UnifiedProtocolDecoder extends FrameDecoder {
 
-    private final Cache cache;
+    private final SpaceCache cache;
 
     private final DefaultChannelGroup channelGroup;
     public final String version;
@@ -26,7 +26,7 @@ public class UnifiedProtocolDecoder extends FrameDecoder {
     public final int idle_limit;
     public final boolean verbose;
 
-    public UnifiedProtocolDecoder(Cache cache, DefaultChannelGroup channelGroup, String version, int idle_limit, boolean verbose) {
+    public UnifiedProtocolDecoder(SpaceCache cache, DefaultChannelGroup channelGroup, String version, int idle_limit, boolean verbose) {
         this.cache = cache;
         this.channelGroup = channelGroup;
         this.version = version;

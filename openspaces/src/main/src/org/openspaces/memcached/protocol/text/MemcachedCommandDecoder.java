@@ -2,9 +2,9 @@ package org.openspaces.memcached.protocol.text;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.*;
-import org.openspaces.memcached.CacheElement;
 import org.openspaces.memcached.Key;
 import org.openspaces.memcached.LocalCacheElement;
+import org.openspaces.memcached.SpaceCache;
 import org.openspaces.memcached.protocol.CommandMessage;
 import org.openspaces.memcached.protocol.Op;
 import org.openspaces.memcached.protocol.SessionStatus;
@@ -168,7 +168,7 @@ public final class MemcachedCommandDecoder extends SimpleChannelUpstreamHandler 
                 // expire is relative to now, always, translates to LEASE.
                 if (expire == 0) {
                     expire = Integer.MAX_VALUE;
-                } else if (expire > CacheElement.THIRTY_DAYS) {
+                } else if (expire > SpaceCache.THIRTY_DAYS) {
                     expire = LocalCacheElement.Now() - expire;
                 }
 

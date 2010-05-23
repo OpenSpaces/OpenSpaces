@@ -4,7 +4,7 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
-import org.openspaces.memcached.Cache;
+import org.openspaces.memcached.SpaceCache;
 import org.openspaces.memcached.protocol.MemcachedCommandHandler;
 import org.openspaces.memcached.protocol.SessionStatus;
 
@@ -15,7 +15,7 @@ import java.nio.charset.Charset;
 public final class MemcachedPipelineFactory implements ChannelPipelineFactory {
     public static final Charset USASCII = Charset.forName("US-ASCII");
 
-    private Cache cache;
+    private SpaceCache cache;
     private String version;
     private boolean verbose;
     private int idleTime;
@@ -27,7 +27,7 @@ public final class MemcachedPipelineFactory implements ChannelPipelineFactory {
     private final MemcachedCommandHandler memcachedCommandHandler;
 
 
-    public MemcachedPipelineFactory(Cache cache, String version, boolean verbose, int idleTime, int frameSize, DefaultChannelGroup channelGroup) {
+    public MemcachedPipelineFactory(SpaceCache cache, String version, boolean verbose, int idleTime, int frameSize, DefaultChannelGroup channelGroup) {
         this.cache = cache;
         this.version = version;
         this.verbose = verbose;

@@ -1,7 +1,7 @@
 package org.openspaces.memcached.protocol;
 
-import org.openspaces.memcached.Cache;
-import org.openspaces.memcached.CacheElement;
+import org.openspaces.memcached.LocalCacheElement;
+import org.openspaces.memcached.SpaceCache;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -10,49 +10,49 @@ import java.util.Set;
 /**
  * Represents the response to a command.
  */
-public final class ResponseMessage<CACHE_ELEMENT extends CacheElement> implements Serializable {
+public final class ResponseMessage implements Serializable {
 
     public ResponseMessage(CommandMessage cmd) {
         this.cmd = cmd;
     }
 
-    public CommandMessage<CACHE_ELEMENT> cmd;
-    public CACHE_ELEMENT[] elements;
-    public Cache.StoreResponse response;
+    public CommandMessage cmd;
+    public LocalCacheElement[] elements;
+    public SpaceCache.StoreResponse response;
     public Map<String, Set<String>> stats;
     public String version;
-    public Cache.DeleteResponse deleteResponse;
+    public SpaceCache.DeleteResponse deleteResponse;
     public Integer incrDecrResponse;
     public boolean flushSuccess;
 
-    public ResponseMessage<CACHE_ELEMENT> withElements(CACHE_ELEMENT[] elements) {
+    public ResponseMessage withElements(LocalCacheElement[] elements) {
         this.elements = elements;
         return this;
     }
 
-    public ResponseMessage<CACHE_ELEMENT> withResponse(Cache.StoreResponse response) {
+    public ResponseMessage withResponse(SpaceCache.StoreResponse response) {
         this.response = response;
         return this;
     }
 
-    public ResponseMessage<CACHE_ELEMENT> withDeleteResponse(Cache.DeleteResponse deleteResponse) {
+    public ResponseMessage withDeleteResponse(SpaceCache.DeleteResponse deleteResponse) {
         this.deleteResponse = deleteResponse;
         return this;
     }
 
-    public ResponseMessage<CACHE_ELEMENT> withIncrDecrResponse(Integer incrDecrResp) {
+    public ResponseMessage withIncrDecrResponse(Integer incrDecrResp) {
         this.incrDecrResponse = incrDecrResp;
 
         return this;
     }
 
-    public ResponseMessage<CACHE_ELEMENT> withStatResponse(Map<String, Set<String>> stats) {
+    public ResponseMessage withStatResponse(Map<String, Set<String>> stats) {
         this.stats = stats;
 
         return this;
     }
 
-    public ResponseMessage<CACHE_ELEMENT> withFlushResponse(boolean success) {
+    public ResponseMessage withFlushResponse(boolean success) {
         this.flushSuccess = success;
 
         return this;

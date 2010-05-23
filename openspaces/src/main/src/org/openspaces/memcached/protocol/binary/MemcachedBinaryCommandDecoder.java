@@ -6,9 +6,9 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
-import org.openspaces.memcached.CacheElement;
 import org.openspaces.memcached.Key;
 import org.openspaces.memcached.LocalCacheElement;
+import org.openspaces.memcached.SpaceCache;
 import org.openspaces.memcached.protocol.CommandMessage;
 import org.openspaces.memcached.protocol.Op;
 import org.openspaces.memcached.protocol.exceptions.MalformedCommandException;
@@ -159,7 +159,7 @@ public class MemcachedBinaryCommandDecoder extends FrameDecoder {
                 // expire is relative to now, always, translates to LEASE.
                 if (expire == 0) {
                     expire = Integer.MAX_VALUE;
-                } else if (expire > CacheElement.THIRTY_DAYS) {
+                } else if (expire > SpaceCache.THIRTY_DAYS) {
                     expire = LocalCacheElement.Now() - expire;
                 }
 

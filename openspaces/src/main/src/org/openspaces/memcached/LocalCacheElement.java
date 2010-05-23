@@ -27,7 +27,7 @@ import java.util.Arrays;
 /**
  * Represents information about a cache entry.
  */
-public final class LocalCacheElement implements CacheElement, Externalizable {
+public final class LocalCacheElement implements Externalizable {
     private int expire ;
     private int flags;
     private byte[] data;

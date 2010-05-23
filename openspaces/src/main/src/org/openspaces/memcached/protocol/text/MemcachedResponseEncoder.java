@@ -5,8 +5,8 @@ import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.*;
-import org.openspaces.memcached.Cache;
-import org.openspaces.memcached.CacheElement;
+import org.openspaces.memcached.LocalCacheElement;
+import org.openspaces.memcached.SpaceCache;
 import org.openspaces.memcached.protocol.Op;
 import org.openspaces.memcached.protocol.ResponseMessage;
 import org.openspaces.memcached.protocol.exceptions.ClientException;
@@ -21,7 +21,7 @@ import static org.openspaces.memcached.protocol.text.MemcachedPipelineFactory.US
 /**
  * Response encoder for the memcached text protocol. Produces strings destined for the StringEncoder
  */
-public final class MemcachedResponseEncoder<CACHE_ELEMENT extends CacheElement> extends SimpleChannelUpstreamHandler {
+public final class MemcachedResponseEncoder extends SimpleChannelUpstreamHandler {
 
     protected final static Log logger = LogFactory.getLog(MemcachedResponseEncoder.class);
 
@@ -62,23 +62,23 @@ public final class MemcachedResponseEncoder<CACHE_ELEMENT extends CacheElement> 
 
     @Override
     public void messageReceived(ChannelHandlerContext channelHandlerContext, MessageEvent messageEvent) throws Exception {
-        ResponseMessage<CACHE_ELEMENT> command = (ResponseMessage<CACHE_ELEMENT>) messageEvent.getMessage();
+        ResponseMessage command = (ResponseMessage) messageEvent.getMessage();
 
         Op cmd = command.cmd.op;
 
         Channel channel = messageEvent.getChannel();
 
         if (cmd == Op.GET || cmd == Op.GETS) {
-            CacheElement[] results = command.elements;
+            LocalCacheElement[] results = command.elements;
             int totalBytes = 0;
-            for (CacheElement result : results) {
+            for (LocalCacheElement result : results) {
                 if (result != null) {
                     totalBytes += result.size() + 512;
                 }
             }
             ChannelBuffer writeBuffer = ChannelBuffers.dynamicBuffer(totalBytes);
 
-            for (CacheElement result : results) {
+            for (LocalCacheElement result : results) {
                 if (result != null) {
                     writeBuffer.writeBytes(VALUE.duplicate());
                     writeBuffer.writeBytes(result.getKey().bytes);
@@ -143,8 +143,8 @@ public final class MemcachedResponseEncoder<CACHE_ELEMENT extends CacheElement> 
 
     }
 
-    private ChannelBuffer deleteResponseString(Cache.DeleteResponse deleteResponse) {
-        if (deleteResponse == Cache.DeleteResponse.DELETED) return DELETED.duplicate();
+    private ChannelBuffer deleteResponseString(SpaceCache.DeleteResponse deleteResponse) {
+        if (deleteResponse == SpaceCache.DeleteResponse.DELETED) return DELETED.duplicate();
         else return NOT_FOUND.duplicate();
     }
 
@@ -163,7 +163,7 @@ public final class MemcachedResponseEncoder<CACHE_ELEMENT extends CacheElement> 
      * @param storeResponse the response code
      * @return the string to output on the network
      */
-    private ChannelBuffer storeResponse(Cache.StoreResponse storeResponse) {
+    private ChannelBuffer storeResponse(SpaceCache.StoreResponse storeResponse) {
         switch (storeResponse) {
             case EXISTS:
                 return EXISTS.duplicate();

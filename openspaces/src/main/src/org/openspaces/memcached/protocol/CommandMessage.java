@@ -15,8 +15,8 @@
  */
 package org.openspaces.memcached.protocol;
 
-import org.openspaces.memcached.CacheElement;
 import org.openspaces.memcached.Key;
+import org.openspaces.memcached.LocalCacheElement;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -25,14 +25,14 @@ import java.util.List;
 /**
  * The payload object holding the parsed message.
  */
-public final class CommandMessage<CACHE_ELEMENT extends CacheElement> implements Serializable {
+public final class CommandMessage implements Serializable {
 
     public static enum ErrorType {
         OK, ERROR, CLIENT_ERROR
     }
 
     public Op op;
-    public CACHE_ELEMENT element;
+    public LocalCacheElement element;
     public List<Key> keys;
     public boolean noreply;
     public Long cas_key;

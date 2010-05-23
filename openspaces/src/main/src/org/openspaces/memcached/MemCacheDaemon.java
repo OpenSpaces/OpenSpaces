@@ -130,12 +130,12 @@ public class MemCacheDaemon implements InitializingBean, DisposableBean, BeanNam
     }
 
     protected ChannelPipelineFactory createMemcachedBinaryPipelineFactory(
-            Cache cache, String memcachedVersion, boolean verbose, int idleTime, DefaultChannelGroup allChannels) {
+            SpaceCache cache, String memcachedVersion, boolean verbose, int idleTime, DefaultChannelGroup allChannels) {
         return new MemcachedBinaryPipelineFactory(cache, memcachedVersion, verbose, idleTime, allChannels);
     }
 
     protected ChannelPipelineFactory createMemcachedPipelineFactory(
-            Cache cache, String memcachedVersion, boolean verbose, int idleTime, int receiveBufferSize, DefaultChannelGroup allChannels) {
+            SpaceCache cache, String memcachedVersion, boolean verbose, int idleTime, int receiveBufferSize, DefaultChannelGroup allChannels) {
         return new MemcachedPipelineFactory(cache, memcachedVersion, verbose, idleTime, receiveBufferSize, allChannels);
     }
 

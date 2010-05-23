@@ -5,7 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.*;
-import org.openspaces.memcached.CacheElement;
+import org.openspaces.memcached.LocalCacheElement;
 import org.openspaces.memcached.protocol.Op;
 import org.openspaces.memcached.protocol.ResponseMessage;
 import org.openspaces.memcached.protocol.exceptions.UnknownCommandException;
@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 // TODO refactor so this can be unit tested separate from netty? scalacheck?
 @ChannelHandler.Sharable
-public class MemcachedBinaryResponseEncoder<CACHE_ELEMENT extends CacheElement> extends SimpleChannelUpstreamHandler {
+public class MemcachedBinaryResponseEncoder extends SimpleChannelUpstreamHandler {
 
     private ConcurrentHashMap<Integer, ChannelBuffer> corkedBuffers = new ConcurrentHashMap<Integer, ChannelBuffer>();
 
@@ -124,7 +124,7 @@ public class MemcachedBinaryResponseEncoder<CACHE_ELEMENT extends CacheElement> 
     @Override
     @SuppressWarnings("unchecked")
     public void messageReceived(ChannelHandlerContext channelHandlerContext, MessageEvent messageEvent) throws Exception {
-        ResponseMessage<CACHE_ELEMENT> command = (ResponseMessage<CACHE_ELEMENT>) messageEvent.getMessage();
+        ResponseMessage command = (ResponseMessage) messageEvent.getMessage();
         Object additional = messageEvent.getMessage();
 
         MemcachedBinaryCommandDecoder.BinaryOp bcmd = MemcachedBinaryCommandDecoder.BinaryOp.forCommandMessage(command.cmd);
@@ -142,7 +142,7 @@ public class MemcachedBinaryResponseEncoder<CACHE_ELEMENT extends CacheElement> 
         ChannelBuffer valueBuffer = null;
         if (command.elements != null) {
             extrasBuffer = ChannelBuffers.buffer(ByteOrder.BIG_ENDIAN, 4);
-            CacheElement element = command.elements[0];
+            LocalCacheElement element = command.elements[0];
             extrasBuffer.writeShort((short) (element != null ? element.getExpire() : 0));
             extrasBuffer.writeShort((short) (element != null ? element.getFlags() : 0));
 
