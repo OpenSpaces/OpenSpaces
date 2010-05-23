@@ -128,8 +128,13 @@ public class EsmExecutor {
         SpaceDeployment spaceDeployment = new SpaceDeployment(deployment.getDataGridName());
         spaceDeployment.addZone(zoneName);
         
-        int numberOfParitions = 0;
+        int numberOfParitions = calculateNumberOfPartitions(deploymentContext);
         if (deploymentContext.hasPartitionsSet()) {
+            if (deploymentContext.getPartitions() < numberOfParitions) {
+                throw new IllegalArgumentException("Number of set partitions [" + deploymentContext.getPartitions()
+                        + "] must be greater than [" + numberOfParitions
+                        + "] to meet the minimum requested capacity of [" + deploymentContext.getMinMemory() + "]");
+            }
             numberOfParitions = deploymentContext.getPartitions();
         } else {
             numberOfParitions = calculateNumberOfPartitions(deploymentContext);
@@ -200,14 +205,12 @@ public class EsmExecutor {
     
     private int calculateNumberOfPartitions(DeploymentContext context) {
         
-        return 5;
+        int numberOfPartitions = MemorySettings.valueOf(context.getMaxMemory()).floorDividedBy(context.getMaximumJavaHeapSize());
+        if (context.isHighlyAvailable()) {
+            numberOfPartitions /= 2;
+        }
         
-//        int numberOfPartitions = MemorySettings.valueOf(context.getMaxMemory()).floorDividedBy(context.getMaximumJavaHeapSize());
-//        if (context.isHighlyAvailable()) {
-//            numberOfPartitions /= 2;
-//        }
-//        
-//        return Math.max(1, numberOfPartitions);
+        return Math.max(1, numberOfPartitions);
     }
     
     /**
