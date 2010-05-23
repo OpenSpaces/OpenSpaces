@@ -49,6 +49,8 @@ public class MemCacheDaemon implements InitializingBean, DisposableBean, BeanNam
 
     private int portRetries = 20;
 
+    private boolean threaded = true;
+
     private int frameSize = 32768 * 1024;
     private int idleTime;
 
@@ -81,6 +83,10 @@ public class MemCacheDaemon implements InitializingBean, DisposableBean, BeanNam
         this.protocol = protocol;
     }
 
+    public void setThreaded(boolean threaded) {
+        this.threaded = threaded;
+    }
+
     public void afterPropertiesSet() throws Exception {
         cache = new SpaceCache(space);
         channelFactory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool());
@@ -91,7 +97,7 @@ public class MemCacheDaemon implements InitializingBean, DisposableBean, BeanNam
 
         ChannelPipelineFactory pipelineFactory = new ChannelPipelineFactory() {
             public ChannelPipeline getPipeline() throws Exception {
-                return Channels.pipeline(new UnifiedProtocolDecoder(cache, allChannels, memcachedVersion, idleTime, false));
+                return Channels.pipeline(new UnifiedProtocolDecoder(cache, allChannels, memcachedVersion, idleTime, false, threaded));
             }
         };
         if ("binary".equalsIgnoreCase(protocol)) {

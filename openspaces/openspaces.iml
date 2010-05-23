@@ -374,7 +374,9 @@
           <root url="jar://$MODULE_DIR$/deploy/templates/memcached/lib/netty-3.2.0.CR1.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../../../../opt/netty/3.2.0.CR1/src/main/java" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
