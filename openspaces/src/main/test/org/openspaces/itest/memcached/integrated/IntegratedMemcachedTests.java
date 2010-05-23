@@ -130,6 +130,10 @@ public class IntegratedMemcachedTests extends TestCase {
         value = memcachedClient.decr("intKey", 10);
         assertEquals(0, value);
 
+        // test invalid tokens in key
+        setResult = memcachedClient.set("key^1", 0, "value");
+        setResult.get(10, TimeUnit.SECONDS);
+
         memcachedClient.shutdown();
 
         container.close();
