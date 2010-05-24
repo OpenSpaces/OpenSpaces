@@ -35,7 +35,7 @@
         
     </os-core:local-cache>
 
-    <os-core:giga-space id="gigaSpace" space="space" />
+    <os-core:giga-space id="gigaSpace" space="localCache" />
 
     <bean id="memcached" class="org.openspaces.memcached.MemCacheDaemon">
         <property name="space" ref="gigaSpace" />

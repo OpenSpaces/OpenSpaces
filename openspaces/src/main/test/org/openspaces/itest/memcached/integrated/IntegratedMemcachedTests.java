@@ -59,43 +59,43 @@ public class IntegratedMemcachedTests extends TestCase {
         }
 
         Future<Boolean> booleanFuture = memcachedClient.replace("xkey", 0, "xvalue");
-        assertEquals(booleanFuture.get(10, TimeUnit.SECONDS), Boolean.FALSE);
+        assertEquals(Boolean.FALSE, booleanFuture.get(10, TimeUnit.SECONDS));
         String getResult = (String) memcachedClient.get("xkey");
         assertNull(getResult);
 
         booleanFuture = memcachedClient.add("xkey", 0, "xvalue");
-        assertEquals(booleanFuture.get(10, TimeUnit.SECONDS), Boolean.TRUE);
+        assertEquals(Boolean.TRUE, booleanFuture.get(10, TimeUnit.SECONDS));
         getResult = (String) memcachedClient.get("xkey");
         assertEquals("xvalue", getResult);
 
         booleanFuture = memcachedClient.add("xkey", 0, "xvalue1");
-        assertEquals(booleanFuture.get(10, TimeUnit.SECONDS), Boolean.FALSE);
+        assertEquals(Boolean.FALSE, booleanFuture.get(10, TimeUnit.SECONDS));
         getResult = (String) memcachedClient.get("xkey");
         assertEquals("xvalue", getResult);
 
 
         booleanFuture = memcachedClient.replace("xkey", 0, "xvalue1");
-        assertEquals(booleanFuture.get(10, TimeUnit.SECONDS), Boolean.TRUE);
+        assertEquals(Boolean.TRUE, booleanFuture.get(10, TimeUnit.SECONDS));
         getResult = (String) memcachedClient.get("xkey");
         assertEquals("xvalue1", getResult);
 
         booleanFuture = memcachedClient.append(0, "xkey", "append");
-        assertEquals(booleanFuture.get(10, TimeUnit.SECONDS), Boolean.TRUE);
+        assertEquals(Boolean.TRUE, booleanFuture.get(10, TimeUnit.SECONDS));
         getResult = (String) memcachedClient.get("xkey");
         assertEquals("xvalue1append", getResult);
 
         booleanFuture = memcachedClient.prepend(0, "xkey", "prepend");
-        assertEquals(booleanFuture.get(10, TimeUnit.SECONDS), Boolean.TRUE);
+        assertEquals(Boolean.TRUE, booleanFuture.get(10, TimeUnit.SECONDS));
         getResult = (String) memcachedClient.get("xkey");
         assertEquals("prependxvalue1append", getResult);
 
         booleanFuture = memcachedClient.delete("xkey");
-        assertEquals(booleanFuture.get(10, TimeUnit.SECONDS), Boolean.TRUE);
+        assertEquals(Boolean.TRUE, booleanFuture.get(10, TimeUnit.SECONDS));
         getResult = (String) memcachedClient.get("xkey");
         assertNull(getResult);
 
         booleanFuture = memcachedClient.delete("xkey");
-        assertEquals(booleanFuture.get(10, TimeUnit.SECONDS), Boolean.FALSE);
+        assertEquals(Boolean.FALSE, booleanFuture.get(10, TimeUnit.SECONDS));
 
         Future setResult = memcachedClient.set("xkey", 0, "xvalue");
         setResult.get(10, TimeUnit.SECONDS);
