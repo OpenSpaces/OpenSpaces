@@ -1,6 +1,6 @@
 package org.openspaces.memcached;
 
-import com.gigaspaces.client.IReadByIdsResult;
+import com.gigaspaces.client.ReadByIdsResult;
 import com.j_spaces.core.client.UpdateModifiers;
 import org.openspaces.core.EntryAlreadyInSpaceException;
 import org.openspaces.core.EntryNotInSpaceException;
@@ -195,7 +195,7 @@ public class SpaceCache {
                 int hits = 0;
                 int misses = 0;
                 LocalCacheElement[] retVal = new LocalCacheElement[keys.length];
-                IReadByIdsResult<MemcachedEntry> result = space.readByIds(MemcachedEntry.class, keys);
+                ReadByIdsResult<MemcachedEntry> result = space.readByIds(MemcachedEntry.class, keys);
                 for (int i = 0; i < result.getResultsArray().length; i++) {
                     MemcachedEntry entry = result.getResultsArray()[i];
                     if (entry == null) {
