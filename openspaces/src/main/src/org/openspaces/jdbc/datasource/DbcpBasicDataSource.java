@@ -811,4 +811,12 @@ public class DbcpBasicDataSource implements DataSource, InitializingBean, Dispos
             logWriter.println(message);
         }
     }
+
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        throw new UnsupportedOperationException();
+    }
 }
