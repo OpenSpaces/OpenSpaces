@@ -91,7 +91,7 @@ public class MemcachedDeploy {
         tempList.add("-properties");
         tempList.add("embed://url=" + spaceUrl);
         tempList.add("-override-name");
-        tempList.add(extractName(spaceUrl));
+        tempList.add(extractName(spaceUrl) + "-memcached");
         tempList.add("/templates/memcached");
         return tempList.toArray(new String[tempList.size()]);
     }

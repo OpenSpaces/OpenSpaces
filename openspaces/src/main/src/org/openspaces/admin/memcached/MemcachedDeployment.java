@@ -59,7 +59,7 @@ public class MemcachedDeployment {
     public MemcachedDeployment(String spaceUrl) {
         this.spaceUrl = spaceUrl;
         this.deployment = new ProcessingUnitDeployment("/templates/memcached");
-        this.deployment.name(MemcachedDeploy.extractName(spaceUrl));
+        this.deployment.name(MemcachedDeploy.extractName(spaceUrl) + "-memcached");
         this.deployment.setContextProperty("url", spaceUrl);
     }
 
