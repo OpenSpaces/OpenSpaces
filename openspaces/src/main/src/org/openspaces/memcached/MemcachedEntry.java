@@ -71,6 +71,7 @@ public class MemcachedEntry implements Externalizable {
         if (key == null) {
             out.writeBoolean(false);
         } else {
+            out.writeBoolean(true);
             key.writeExternal(out);
         }
         if (value == null) {
