@@ -16,6 +16,7 @@
 
 package org.openspaces.pu.container.jee.jetty;
 
+import com.gigaspaces.start.Locator;
 import com.j_spaces.kernel.ClassLoaderHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,6 +24,7 @@ import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.HandlerWrapper;
+import org.eclipse.jetty.util.resource.FileResource;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.jini.rio.boot.CommonClassLoader;
 import org.jini.rio.boot.ServiceClassLoader;
@@ -478,6 +480,15 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             // Provide our own extension to jetty class loader, so we can get the name for it in our logging
             ServiceClassLoader serviceClassLoader = (ServiceClassLoader) Thread.currentThread().getContextClassLoader();
             JettyWebAppClassLoader webAppClassLoader = new JettyWebAppClassLoader(SharedServiceData.getJeeClassLoader("jetty"), webAppContext, serviceClassLoader.getLogName());
+
+            // add pu-common & web-pu-common jar files
+            String gsLibOpt = System.getProperty(Locator.GS_LIB_OPTIONAL);
+            String gsPuCommon = System.getProperty("com.gs.pu-common", gsLibOpt + "pu-common");
+            String gsWebPuCommon = System.getProperty("com.gs.web-pu-common", gsLibOpt + "web-pu-common");
+            webAppClassLoader.addJars(new FileResource(new File(gsPuCommon).toURL()));
+            webAppClassLoader.addJars(new FileResource(new File(gsWebPuCommon).toURL()));
+            webAppClassLoader.addJars(new FileResource(new File(gsLibOpt + "security").toURL()));
+
             webAppContext.setClassLoader(webAppClassLoader);
 
             HandlerContainer container = jettyHolder.getServer();
