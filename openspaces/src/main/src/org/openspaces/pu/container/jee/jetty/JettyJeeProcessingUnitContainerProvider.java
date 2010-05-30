@@ -485,9 +485,8 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             String gsLibOpt = System.getProperty(Locator.GS_LIB_OPTIONAL);
             String gsPuCommon = System.getProperty("com.gs.pu-common", gsLibOpt + "pu-common");
             String gsWebPuCommon = System.getProperty("com.gs.web-pu-common", gsLibOpt + "web-pu-common");
-            webAppClassLoader.addJars(new FileResource(new File(gsPuCommon).toURL()));
-            webAppClassLoader.addJars(new FileResource(new File(gsWebPuCommon).toURL()));
-            webAppClassLoader.addJars(new FileResource(new File(gsLibOpt + "security").toURL()));
+            webAppClassLoader.addJars(new FileResource(new File(gsPuCommon).toURL().toURI().toURL()));
+            webAppClassLoader.addJars(new FileResource(new File(gsWebPuCommon).toURL().toURI().toURL()));
 
             webAppContext.setClassLoader(webAppClassLoader);
 

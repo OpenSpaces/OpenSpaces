@@ -1101,6 +1101,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             try {
                 FileSystemUtils.copyRecursively(new File(gsRequired), new File(deployPath, "WEB-INF/lib"));
                 FileSystemUtils.copyRecursively(new File(gsOptional + "/spring"), new File(deployPath, "WEB-INF/lib"));
+                FileSystemUtils.copyRecursively(new File(gsOptional + "/security"), new File(deployPath, "WEB-INF/lib"));
                 logger.debug(logMessage("Added spring jars to web application"));
             } catch (IOException e) {
                 // don't copy it
