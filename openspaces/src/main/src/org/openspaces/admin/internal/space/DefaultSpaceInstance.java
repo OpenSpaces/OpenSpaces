@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.space;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
+import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.jvm.JVMStatistics;
 import com.gigaspaces.internal.os.OSDetails;
@@ -45,7 +46,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     private final PUServiceBean puService;
 
     // direct space proxy
-    private volatile IJSpace ijspace;
+    private volatile ISpaceProxy ijspace;
 
     // direct giga space
     private volatile GigaSpace gigaSpace;
@@ -96,7 +97,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         this.puService = null;
         this.uid = serviceID.toString();
         this.serviceID = serviceID;
-        this.ijspace = directSpace;
+        this.ijspace = (ISpaceProxy) directSpace;
         this.gigaSpace = new GigaSpaceConfigurer(directSpace).gigaSpace();
         this.spaceAdmin = spaceAdmin;
         this.spaceURL = ijspace.getURL();
@@ -273,7 +274,10 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     public IJSpace getIJSpace() {
         if (this.ijspace == null) {
             try {
-                this.ijspace = puService.getSpaceDirect(serviceID);
+                this.ijspace = (ISpaceProxy) puService.getSpaceDirect(serviceID);
+                if (this.ijspace.isServiceSecured()) {
+                    this.ijspace.login(admin.getUserDetails());
+                }
             } catch (RemoteException e) {
                 // ignore....
             }
