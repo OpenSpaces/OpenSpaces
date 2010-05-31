@@ -9,7 +9,6 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/sandbox/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/sandbox/test" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/tools/gshell/groovy" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tools/maven/maven-openspaces-plugin/src/main/java" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
@@ -392,6 +391,15 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/lib/external/spymemcached/memcached-2.5.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/tools/groovy/embeddable/groovy-all-1.6.3.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
