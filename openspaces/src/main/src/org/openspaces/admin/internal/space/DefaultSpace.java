@@ -375,6 +375,9 @@ public class DefaultSpace implements InternalSpace {
             }
             try {
                 space = ((ISpaceProxy) ((InternalSpaceInstance) spaceInstancesByUID.values().iterator().next()).getIJSpace()).getClusteredSpace();
+                if (space.isSecured()) {
+                    ((ISpaceProxy)space).login(admin.getUserDetails());
+                }
             } catch (Exception e) {
                 // ignore
             }
