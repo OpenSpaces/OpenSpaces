@@ -837,7 +837,7 @@ public class EsmExecutor {
                         
                         int memoryHeapUsedInMB = (int)Math.ceil(gscToRelocateTo.getVirtualMachine().getStatistics().getMemoryHeapUsedInMB());
                         int memoryRequiredInMB = memoryHeapUsedInMB+estimatedMemoryHeapUsedInMB+memorySafetyBufferInMB;
-                        int memorySlaThresholdInMB = (int)Math.ceil((100.0-memorySla.getThreshold())*gscToRelocateTo.getVirtualMachine().getDetails().getMemoryHeapMaxInMB()/100);
+                        int memorySlaThresholdInMB = (int)Math.floor(memorySla.getThreshold()*gscToRelocateTo.getVirtualMachine().getDetails().getMemoryHeapMaxInMB()/100);
                         if (memoryRequiredInMB > memorySlaThresholdInMB) {
                             logger.finest("Skipping GSC ["+ToStringHelper.gscToString(gscToRelocateTo)+"] - required ["+NUMBER_FORMAT.format(memoryRequiredInMB)+" MB] exceeds threshold of ["+memorySlaThresholdInMB+" MB]");
                             continue;
