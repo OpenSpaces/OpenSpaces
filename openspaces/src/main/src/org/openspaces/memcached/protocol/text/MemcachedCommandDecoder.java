@@ -108,6 +108,10 @@ public final class MemcachedCommandDecoder extends SimpleChannelUpstreamHandler 
 
         switch (op) {
             case DELETE:
+                // Malformed
+                if (numParts < 2)
+                    throw new MalformedCommandException("invalid delete command");
+                
                 cmd.setKey(parts.get(1));
 
                 if (numParts >= 2) {
