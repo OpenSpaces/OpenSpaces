@@ -94,8 +94,12 @@ public class ElasticDataGridDeployment extends InternalElasticDataGridDeployment
      * unit. In many cases the heap size is determined based on the operating system: for a 32-bit
      * OS, a 2 GB maximum heap size is recommended, and for a 64-bit OS, a 6-10 MB maximum heap size
      * is recommended.
+     * <p>
+     * If set below the {@link #initialJavaHeapSize(String)} then the -Xms setting will correspond
+     * to the -Xmx setting.
      * 
-     * @param size The heap size in kilobytes (k), megabytes (m), gigabytes (g); Default "512m".
+     * @param size
+     *            The heap size in kilobytes (k), megabytes (m), gigabytes (g); Default "512m".
      */
     public ElasticDataGridDeployment maximumJavaHeapSize(String size) {
         getDeploymentContext().setMaximumJavaHeapSize(size);
@@ -110,6 +114,9 @@ public class ElasticDataGridDeployment extends InternalElasticDataGridDeployment
     public ElasticDataGridDeployment vmInputArgument(String vmInputArgument) {
         if (vmInputArgument.length() == 0) {
             throw new IllegalArgumentException("VM input argument should not be empty");
+        }
+        if (vmInputArgument.contains("-Xms") || vmInputArgument.contains("-Xmx")) {
+            throw new IllegalArgumentException("Java Heap size should be set using the 'initialJavaHeapSize' and 'maximumJavaHeapSize' methods");
         }
         getDeploymentContext().addVmArgument(vmInputArgument);
         return this;
