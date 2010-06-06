@@ -107,9 +107,8 @@ public final class MemcachedCommandDecoder extends SimpleChannelUpstreamHandler 
         CommandMessage cmd = CommandMessage.command(op);
 
         switch (op) {
-            case DELETE:
-                // Malformed
-                if (numParts < 2)
+            case DELETE: // delete <key> [<time>] [noreply]\r\n
+                if (numParts < 2 || numParts > 4) // Malformed
                     throw new MalformedCommandException("invalid delete command");
                 
                 cmd.setKey(parts.get(1));
@@ -117,24 +116,26 @@ public final class MemcachedCommandDecoder extends SimpleChannelUpstreamHandler 
                 if (numParts >= 2) {
                     if (Arrays.equals(parts.get(numParts - 1), NOREPLY)) {
                         cmd.noreply = true;
-                        if (numParts == 4)
+                        if (numParts == 4) // else --> delete <key> [noreply]
                             cmd.time = BufferUtils.atoi((parts.get(2)));
-                    } else if (numParts == 3)
+                    } else if (numParts == 3){ // delete <key> [<time>]
                         cmd.time = BufferUtils.atoi((parts.get(2)));
+                    }else{
+                        throw new MalformedCommandException("invalid delete command");
+                    }
                 }
                 Channels.fireMessageReceived(channelHandlerContext, cmd, channel.getRemoteAddress());
                 break;
 
-            case DECR:
-            case INCR:
-                // Malformed
-                if (numParts < 2 || numParts > 3)
-                    throw new MalformedCommandException("invalid increment command");
+            case DECR: // decr <key> <value> [noreply]\r\n
+            case INCR: // incr <key> <value> [noreply]\r\n
+                if (numParts < 3 || numParts > 4) // Malformed
+                    throw new MalformedCommandException("invalid incr/decr command");
 
                 cmd.setKey(parts.get(1));
-                cmd.incrAmount = Integer.parseInt(new String(parts.get(2)));
+                cmd.incrAmount = BufferUtils.atoi(parts.get(2));
 
-                if (numParts == 3 && Arrays.equals(parts.get(2), NOREPLY)) {
+                if (numParts == 4 && Arrays.equals(parts.get(4), NOREPLY)) {
                     cmd.noreply = true;
                 }
 
