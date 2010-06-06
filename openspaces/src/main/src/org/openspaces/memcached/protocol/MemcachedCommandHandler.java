@@ -123,7 +123,6 @@ public final class MemcachedCommandHandler extends SimpleChannelUpstreamHandler 
      */
 
     @Override
-    @SuppressWarnings("unchecked")
     public void messageReceived(ChannelHandlerContext channelHandlerContext, MessageEvent messageEvent) throws Exception {
         if (!(messageEvent.getMessage() instanceof CommandMessage)) {
             // Ignore what this encoder can't encode.
@@ -180,7 +179,10 @@ public final class MemcachedCommandHandler extends SimpleChannelUpstreamHandler 
             handleQuit(channel);
         } else if (cmd == Op.FLUSH_ALL) {
             handleFlush(channelHandlerContext, command, channel);
-        } else if (cmd == null) {
+        } else if (cmd == Op.VERBOSITY) {
+            handleVerbosity(channelHandlerContext, command, channel);
+        } 
+        else if (cmd == null) {
             // NOOP
             handleNoOp(channelHandlerContext, command);
         } else {
@@ -196,6 +198,10 @@ public final class MemcachedCommandHandler extends SimpleChannelUpstreamHandler 
 
     protected void handleFlush(ChannelHandlerContext channelHandlerContext, CommandMessage command, Channel channel) {
         Channels.fireMessageReceived(channelHandlerContext, new ResponseMessage(command).withFlushResponse(cache.flush_all(command.time)), channel.getRemoteAddress());
+    }
+    
+    protected void handleVerbosity(ChannelHandlerContext channelHandlerContext, CommandMessage command, Channel channel) {
+        Channels.fireMessageReceived(channelHandlerContext, new ResponseMessage(command), channel.getRemoteAddress());
     }
 
     protected void handleQuit(Channel channel) {
@@ -284,16 +290,5 @@ public final class MemcachedCommandHandler extends SimpleChannelUpstreamHandler 
     private LocalCacheElement[] get(Key... keys) {
         return cache.get(keys);
     }
-
-
-    /**
-     * @return the current time in seconds (from epoch), used for expiries, etc.
-     */
-    private static int Now() {
-        return (int) (System.currentTimeMillis() / 1000);
-    }
-
-
-
 
 }

@@ -52,6 +52,7 @@ public class MemcachedBinaryCommandDecoder extends FrameDecoder {
         FlushQ(0x18, Op.FLUSH_ALL, true),
         AppendQ(0x19, Op.APPEND, true),
         PrependQ(0x1A, Op.PREPEND, true);
+//        VERBOSITY(0x1B, Op.VERBOSITY, false);
 
         public byte code;
         public Op correspondingOp;
@@ -83,6 +84,7 @@ public class MemcachedBinaryCommandDecoder extends FrameDecoder {
 
     }
 
+    @Override
     protected Object decode(ChannelHandlerContext channelHandlerContext, Channel channel, ChannelBuffer channelBuffer) throws Exception {
 
         // need at least 24 bytes, to get header

@@ -39,7 +39,7 @@ public final class MemcachedCommandDecoder extends SimpleChannelUpstreamHandler 
      * processing commands), turn them into the correct type of command.
      *
      * @param channelHandlerContext netty channel handler context
-     * @param messageEvent the netty event that corresponds to th emessage
+     * @param messageEvent the netty event that corresponds to the message
      * @throws Exception
      */
     @Override
@@ -128,7 +128,7 @@ public final class MemcachedCommandDecoder extends SimpleChannelUpstreamHandler 
                     throw new MalformedCommandException("invalid increment command");
 
                 cmd.setKey(parts.get(1));
-                cmd.incrAmount = Integer.valueOf(new String(parts.get(2)));
+                cmd.incrAmount = Integer.parseInt(new String(parts.get(2)));
 
                 if (numParts == 3 && Arrays.equals(parts.get(2), NOREPLY)) {
                     cmd.noreply = true;
@@ -148,8 +148,17 @@ public final class MemcachedCommandDecoder extends SimpleChannelUpstreamHandler 
                 }
                 Channels.fireMessageReceived(channelHandlerContext, cmd, channel.getRemoteAddress());
                 break;
-
-            //
+            case VERBOSITY:
+                // Malformed
+                if (numParts < 2 || numParts > 3)
+                    throw new MalformedCommandException("invalid verbosity command");
+                
+                cmd.time = BufferUtils.atoi((parts.get(1))); // verbose level
+                
+                if (numParts > 1 && Arrays.equals(parts.get(2), NOREPLY)) 
+                    cmd.noreply = true;
+                Channels.fireMessageReceived(channelHandlerContext, cmd, channel.getRemoteAddress());
+                break;
             case APPEND:
             case PREPEND:
             case REPLACE:
