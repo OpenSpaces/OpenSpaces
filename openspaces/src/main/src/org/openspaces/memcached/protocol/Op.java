@@ -31,7 +31,7 @@ public enum Op {
             ops[x] = Op.values()[x].toString().toLowerCase().getBytes();
     }
 
-    public static Op FindOp(byte[] cmd) {
+    public static Op findOp(byte[] cmd) {
         for (int x = 0 ; x < ops.length; x++) {
             if (Arrays.equals(cmd, ops[x])) return Op.values()[x];
         }

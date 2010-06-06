@@ -98,7 +98,7 @@ public final class MemcachedCommandDecoder extends SimpleChannelUpstreamHandler 
         // Turn the command into an enum for matching on
         Op op;
         try {
-            op = Op.FindOp(parts.get(0));
+            op = Op.findOp(parts.get(0));
         } catch (IllegalArgumentException e) {
             throw new UnknownCommandException("unknown operation: " + new String(parts.get(0)));
         }
