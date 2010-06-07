@@ -113,7 +113,7 @@ public final class MemcachedCommandDecoder extends SimpleChannelUpstreamHandler 
                 
                 cmd.setKey(parts.get(1));
 
-                if (numParts >= 2) {
+                if (numParts > 2) {
                     if (Arrays.equals(parts.get(numParts - 1), NOREPLY)) {
                         cmd.noreply = true;
                         if (numParts == 4) // else --> delete <key> [noreply]
