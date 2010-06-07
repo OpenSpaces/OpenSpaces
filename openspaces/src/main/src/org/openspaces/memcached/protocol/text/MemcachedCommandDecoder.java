@@ -142,7 +142,7 @@ public final class MemcachedCommandDecoder extends SimpleChannelUpstreamHandler 
                 Channels.fireMessageReceived(channelHandlerContext, cmd, channel.getRemoteAddress());
                 break;
 
-            case FLUSH_ALL:
+            case FLUSH_ALL: // flush_all [time] [noreply]\r\n
                 if (numParts >= 1) {
                     if (Arrays.equals(parts.get(numParts - 1), NOREPLY)) {
                         cmd.noreply = true;
@@ -153,7 +153,7 @@ public final class MemcachedCommandDecoder extends SimpleChannelUpstreamHandler 
                 }
                 Channels.fireMessageReceived(channelHandlerContext, cmd, channel.getRemoteAddress());
                 break;
-            case VERBOSITY:
+            case VERBOSITY: // verbosity <time> [noreply]\r\n
                 // Malformed
                 if (numParts < 2 || numParts > 3)
                     throw new MalformedCommandException("invalid verbosity command");
@@ -164,14 +164,13 @@ public final class MemcachedCommandDecoder extends SimpleChannelUpstreamHandler 
                     cmd.noreply = true;
                 Channels.fireMessageReceived(channelHandlerContext, cmd, channel.getRemoteAddress());
                 break;
-            case APPEND:
+            case APPEND: // <command name> <key> <flags> <exptime> <bytes> [noreply]\r\n
             case PREPEND:
             case REPLACE:
             case ADD:
             case SET:
-            case CAS:
-                // if we don't have all the parts, it's malformed
-                if (numParts < 5) {
+            case CAS: // cas <key> <flags> <exptime> <bytes> <cas unqiue> [noreply]\r\n
+                if (numParts < 5) { //malformed
                     throw new MalformedCommandException("invalid command length");
                 }
 
@@ -192,7 +191,7 @@ public final class MemcachedCommandDecoder extends SimpleChannelUpstreamHandler 
                 if (numParts > 5) {
                     int noreply = op == Op.CAS ? 6 : 5;
                     if (op == Op.CAS) {
-                        cmd.cas_key = Long.valueOf(new String(parts.get(5)));
+                        cmd.cas_key = BufferUtils.atol(parts.get(5));
                     }
 
                     if (numParts == noreply + 1 && Arrays.equals(parts.get(noreply), NOREPLY))
@@ -203,17 +202,20 @@ public final class MemcachedCommandDecoder extends SimpleChannelUpstreamHandler 
                 // This instructs the frame decoder to start collecting data for us.
                 status.needMore(size, cmd);
                 break;
-
-            //
-            case GET:
-            case GETS:
-            case STATS:
-            case VERSION:
-            case QUIT:
+            case GET: //get <key>*\r\n
+            case GETS: //gets <key>*\r\n
+            case STATS: // stats [args]\r\n
                 // Get all the keys
                 cmd.setKeys(parts.subList(1, numParts));
 
                 // Pass it on.
+                Channels.fireMessageReceived(channelHandlerContext, cmd, channel.getRemoteAddress());
+                break;
+            case VERSION: // version\r\n
+            case QUIT: // quit\r\n
+                if (numParts > 1) { //malformed
+                    throw new MalformedCommandException("invalid command length");
+                }
                 Channels.fireMessageReceived(channelHandlerContext, cmd, channel.getRemoteAddress());
                 break;
             default:
