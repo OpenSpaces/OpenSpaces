@@ -34,16 +34,28 @@ public class ElasticDataGridDeployment extends InternalElasticDataGridDeployment
         super(dataGridName);
     }
     
+    /**
+     * Restrict this data-grid deployment to machines not shared by other deployments.
+     */
     public ElasticDataGridDeployment dedicatedDeploymentIsolation() {
         getDeploymentContext().setDeploymentIsolationLevel(DeploymentIsolationLevel.DEDICATED);
         return this;
     }
-    
+
+    /**
+     * Allow this data-grid deployment to co-exist and share the same machine resources with other deployments.
+     */
     public ElasticDataGridDeployment publicDeploymentIsolation() {
         getDeploymentContext().setDeploymentIsolationLevel(DeploymentIsolationLevel.PUBLIC);
         return this;
     }
-    
+
+    /**
+     * Allow this data-grid deployment to co-exist and share the same machine resources with other
+     * deployments of this tenant - only.
+     * 
+     * @param tenant A name representing the tenant.
+     */
     public ElasticDataGridDeployment sharedDeploymentIsolation(String tenant) {
         getDeploymentContext().setDeploymentIsolationLevel(DeploymentIsolationLevel.SHARED);
         getDeploymentContext().setTenant(tenant);
