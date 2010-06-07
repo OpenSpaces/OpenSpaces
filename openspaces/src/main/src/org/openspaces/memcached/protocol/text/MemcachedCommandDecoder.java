@@ -135,7 +135,7 @@ public final class MemcachedCommandDecoder extends SimpleChannelUpstreamHandler 
                 cmd.setKey(parts.get(1));
                 cmd.incrAmount = BufferUtils.atoi(parts.get(2));
 
-                if (numParts == 4 && Arrays.equals(parts.get(4), NOREPLY)) {
+                if (numParts == 4 && Arrays.equals(parts.get(3), NOREPLY)) {
                     cmd.noreply = true;
                 }
 
