@@ -10,7 +10,7 @@ import org.openspaces.grid.esm.ElasticScaleHandlerConfig;
  * <p>
  * The data-grid context properties can be modified by {@link #addContextProperty(String, String)}.
  * The default is a Highly-available data-grid, consisting of 1-10 gigabytes of memory spanned
- * across a partitioned cluster of 10,1. Each Grid Service Container JVM is set to -Xmn512m and
+ * across a partitioned cluster of 10,1. Each Grid Service Container JVM is set to -Xms512m and
  * -Xmx512m.
  * 
  * <blockquote>
@@ -64,7 +64,7 @@ public class ElasticDataGridDeployment extends InternalElasticDataGridDeployment
     
     /**
      * Set the memory capacity growth of this data grid. The parameter specifies size in bytes (b),
-     * kilobytes (k), megabytes (m), gigabytes (g). These two control respectively -Xmn and -Xmx
+     * kilobytes (k), megabytes (m), gigabytes (g). These two control respectively -Xms and -Xmx
      * of the Grid Service Container JVM. Default it "1g"-"10g".
      * 
      * @param minMemory
@@ -195,9 +195,9 @@ public class ElasticDataGridDeployment extends InternalElasticDataGridDeployment
     }
     
     /**
-     * @return The elastic scale configuration
+     * @return The elastic scale handler configuration
      */
-    public ElasticScaleHandlerConfig getElasticScaleConfig() {
+    public ElasticScaleHandlerConfig getElasticScaleHandlerConfig() {
         return config;
     }
 }

@@ -165,8 +165,8 @@ public class EsmExecutor {
         spaceDeployment.setContextProperty(ZONE, zoneName);
         spaceDeployment.setContextProperty(TENANT, deploymentContext.getTenant());
 
-        if (deployment.getElasticScaleConfig() != null) {
-            spaceDeployment.setContextProperty(ELASTIC_SCALE_CONFIG, ElasticScaleHandlerConfigSerializer.toString(deployment.getElasticScaleConfig()));
+        if (deployment.getElasticScaleHandlerConfig() != null) {
+            spaceDeployment.setContextProperty(ELASTIC_SCALE_CONFIG, ElasticScaleHandlerConfigSerializer.toString(deployment.getElasticScaleHandlerConfig()));
         }
         
         if (!deployment.getContextProperties().isEmpty()) {
