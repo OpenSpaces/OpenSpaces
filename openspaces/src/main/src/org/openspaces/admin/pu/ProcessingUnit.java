@@ -67,18 +67,29 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
     String getName();
 
     /**
-     * Returns the number of instances of the processing unit.
+     * Returns the number of required instances as defined in the processing unit's SLA.
+     * If there are backups, it will only return the number of primary instances and not the
+     * number of backup. To get the total number of instances please use the method {@link #getTotalNumberOfInstances()}.
+     * Note that this method does not count the number of running instances, but rather the number of planned
+     * instances for the processing unit. To count the number of active processing unit instances please use the method
+     * {@link #getInstances()}.   
      */
     int getNumberOfInstances();
 
     /**
-     * Returns the number of backups (if the topology is a backup one) per instance.
+     * Returns the number of backups (if the topology is a backup one) per instance, as defined in the
+     * processing unit's SLA. Note that this method does not return he number of running backup instances, but
+     * rather the number of planned backup instances per primary.
      */
     int getNumberOfBackups();
 
     /**
-     * Returns the total number of instances. If there are no backups, will return
-     * {@link #getNumberOfInstances()}. If there are backups, will return {@link #getNumberOfInstances()} * ({@link #getNumberOfBackups()}  + 1)
+     * Returns the total required number of instances as defined in the processing SLA.
+     * If there are no backups, will return{@link #getNumberOfInstances()}. If there are backups,
+     * will return {@link #getNumberOfInstances()} * ({@link #getNumberOfBackups()}  + 1)
+     * Note that this method does not count the number of running instances, but rather the total number of planned
+     * instances for the processing unit. To count the number of active processing unit instances please use the method
+     * {@link #getInstances()}.  
      */
     int getTotalNumberOfInstances();
 
