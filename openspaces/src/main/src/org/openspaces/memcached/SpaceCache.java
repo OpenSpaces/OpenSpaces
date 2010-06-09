@@ -62,10 +62,9 @@ public class SpaceCache {
             }
             space.write(entry, time);
             return DeleteResponse.DELETED;
-        } else {
-            MemcachedEntry entry = space.takeById(MemcachedEntry.class, key);
-            return entry == null ? DeleteResponse.NOT_FOUND : DeleteResponse.DELETED;
-        }
+        } 
+        MemcachedEntry entry = space.takeById(MemcachedEntry.class, key);
+        return entry == null ? DeleteResponse.NOT_FOUND : DeleteResponse.DELETED;
     }
 
     public StoreResponse add(LocalCacheElement e) {
@@ -187,29 +186,27 @@ public class SpaceCache {
                 if (entry == null) {
                     getMisses.incrementAndGet();
                     return new LocalCacheElement[]{null};
+                }
+                getHits.incrementAndGet();
+                return new LocalCacheElement[]{convert(entry)};
+            } 
+            int hits = 0;
+            int misses = 0;
+            LocalCacheElement[] retVal = new LocalCacheElement[keys.length];
+            ReadByIdsResult<MemcachedEntry> result = space.readByIds(MemcachedEntry.class, keys);
+            for (int i = 0; i < result.getResultsArray().length; i++) {
+                MemcachedEntry entry = result.getResultsArray()[i];
+                if (entry == null) {
+                    misses++;
+                    retVal[i] = null;
                 } else {
-                    getHits.incrementAndGet();
-                    return new LocalCacheElement[]{convert(entry)};
+                    hits++;
+                    retVal[i] = convert(entry);
                 }
-            } else {
-                int hits = 0;
-                int misses = 0;
-                LocalCacheElement[] retVal = new LocalCacheElement[keys.length];
-                ReadByIdsResult<MemcachedEntry> result = space.readByIds(MemcachedEntry.class, keys);
-                for (int i = 0; i < result.getResultsArray().length; i++) {
-                    MemcachedEntry entry = result.getResultsArray()[i];
-                    if (entry == null) {
-                        misses++;
-                        retVal[i] = null;
-                    } else {
-                        hits++;
-                        retVal[i] = convert(entry);
-                    }
-                }
-                getMisses.addAndGet(misses);
-                getHits.addAndGet(hits);
-                return retVal;
             }
+            getMisses.addAndGet(misses);
+            getHits.addAndGet(hits);
+            return retVal;
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
