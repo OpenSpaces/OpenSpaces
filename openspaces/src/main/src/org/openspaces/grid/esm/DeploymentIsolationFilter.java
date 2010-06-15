@@ -54,7 +54,7 @@ public class DeploymentIsolationFilter {
     }
     
     /** @see DeploymentIsolationLevel#PUBLIC */
-    private class PublicIsolationFilter implements Filter {
+    private static class PublicIsolationFilter implements Filter {
 
         //required this machine to contain only GSCs belonging to zones of public isolation level
         public boolean accept(Machine machine) {

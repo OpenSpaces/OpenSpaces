@@ -42,6 +42,7 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
 
     private Object receiveTemplate;
 
+    @Override
     public void afterPropertiesSet() {
         if (template == null) {
             Class eventListenerType = getEventListenerClass();
@@ -75,6 +76,7 @@ public abstract class AbstractTemplateEventListenerContainer extends AbstractEve
         super.afterPropertiesSet();
     }
 
+    @Override
     public void initialize() throws DataAccessException {
         if (performSnapshot && template != null) {
             if (logger.isTraceEnabled()) {

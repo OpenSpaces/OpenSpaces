@@ -192,10 +192,7 @@ public class Deploy {
         Configuration config = ServiceConfigLoader.getConfiguration();
         deployAdmin.deploy(opString, (ServiceProvisionListener) ExporterConfig.getExporter(config, "com.gigaspaces.transport", "defaultExporter").export(listener));
         info("Waiting for [" + totalPlanned + "] processing unit instances to be deployed...");
-        while (true) {
-            if (totalPlanned == listener.getTotalStarted()) {
-                break;
-            }
+        while (totalPlanned != listener.getTotalStarted()) {
             Thread.sleep(200);
         }
         info("Finished deploying [" + totalPlanned + "] processing unit instances");

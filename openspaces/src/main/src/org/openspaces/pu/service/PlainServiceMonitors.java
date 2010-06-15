@@ -18,7 +18,7 @@ public class PlainServiceMonitors implements ServiceMonitors, Externalizable {
 
     protected ServiceDetails details;
 
-    protected Map<String, Object> monitors = new LinkedHashMap<String, Object>();
+    final protected Map<String, Object> monitors = new LinkedHashMap<String, Object>();
 
     // Just for externalizable
     public PlainServiceMonitors() {
