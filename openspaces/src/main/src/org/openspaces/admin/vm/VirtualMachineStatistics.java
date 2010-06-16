@@ -116,12 +116,24 @@ public interface VirtualMachineStatistics {
      */
     double getMemoryNonHeapCommittedUsedPerc();
 
+    /**
+     * Returns the number of currently running threads in this virtual machine 
+     */
     int getThreadCount();
 
+    /**
+     * Returns the maximum number of of threads that were running in the VM since it has started
+     */
     int getPeakThreadCount();
 
+    /**
+     * Returns the total number of times GC was invoked for this virtual machine
+     */
     long getGcCollectionCount();
 
+    /**
+     * Returns the total time in milliseconds that this virtual machine spent doing GC  
+     */
     long getGcCollectionTime();
 
     /**
