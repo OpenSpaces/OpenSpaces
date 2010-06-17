@@ -24,7 +24,7 @@ public class IntegratedMemcachedTests extends TestCase {
     }
 
     public void testBinaryIntegratedProcessingUnit() throws Exception {
-        testIntegratedProcessingUnit(false);
+        testIntegratedProcessingUnit(true);
     }
 
     private void testIntegratedProcessingUnit(boolean binary) throws Exception {
