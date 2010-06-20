@@ -397,7 +397,7 @@ public class GigaSessionManager extends AbstractSessionManager {
             do {
                 expiredSessions = findExpiredSessions((now));
                 for (int i = 0; i < expiredSessions.length; i++) {
-                    if (Log.isDebugEnabled()) Log.debug("Timing out expired sesson " + expiredSessions[i]);
+                    if (Log.isDebugEnabled()) Log.debug("Timing out expired session " + expiredSessions[i]);
                     GigaSessionManager.Session expiredSession = new GigaSessionManager.Session((SessionData) expiredSessions[i]);
                     expiredSession.timeout();
                     if (Log.isDebugEnabled()) Log.debug("Expiring old session " + expiredSession._data);
@@ -406,10 +406,6 @@ public class GigaSessionManager extends AbstractSessionManager {
 
             // force a count
             lastSessionCount = -1;
-            int count = getSessions();
-            if (count < this._minSessions) {
-                this._minSessions = count;
-            }
         } catch (Throwable t) {
             if (t instanceof ThreadDeath)
                 throw ((ThreadDeath) t);

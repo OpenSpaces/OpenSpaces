@@ -24,6 +24,7 @@ import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.HandlerWrapper;
+import org.eclipse.jetty.util.log.JavaUtilLog;
 import org.eclipse.jetty.util.resource.FileResource;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.jini.rio.boot.CommonClassLoader;
@@ -89,7 +90,7 @@ import java.util.*;
 public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUnitContainerProvider {
 
     static {
-        System.setProperty("org.eclipse.log.class", JdkLogger.class.getName());
+        System.setProperty("org.eclipse.log.class", JavaUtilLog.class.getName());
         // disable jetty server shutdown hook
         System.setProperty("JETTY_NO_SHUTDOWN_HOOK", "true");
     }
@@ -417,8 +418,6 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
                 }
             }
 
-            clearShutdownThreadContextClassLoader(jettyHolder.getServer());
-
             try {
                 BeanLevelPropertiesUtils.resolvePlaceholders(beanLevelProperties, new File(deployPath, "WEB-INF/web.xml"));
             } catch (IOException e) {
@@ -552,26 +551,6 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             setCurrentClusterInfo(null);
 
             CommonClassLoader.getInstance().setDisableSmartGetUrl(false);
-        }
-    }
-
-    private void clearShutdownThreadContextClassLoader(Server server) {
-        try {
-            Field hookThreadField = server.getClass().getDeclaredField("hookThread");
-            hookThreadField.setAccessible(true);
-            Thread thread = (Thread) hookThreadField.get(null);
-            if (thread != null) {
-                thread.setContextClassLoader(null);
-            }
-
-            Field inheritedAccessControlContextField = Thread.class.getDeclaredField("inheritedAccessControlContext");
-            inheritedAccessControlContextField.setAccessible(true);
-            inheritedAccessControlContextField.set(thread, null);
-
-            // we can't do this anymore, since jetty changed this to static *final*
-//            hookThreadField.set(null, null);
-        } catch (Exception e) {
-            logger.warn("Failed to clean the context class loader from Jetty server", e);
         }
     }
 }
