@@ -80,23 +80,23 @@
 	<classpathentry kind="lib" path="lib/platform/jetty/jsp-2.1-glassfish-9.1.1.B60.25.p2.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/jsp-api-2.1-glassfish-9.1.1.B60.25.p2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/required/com.springsource.org.aopalliance-1.0.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.aop-3.0.1.RELEASE-A.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.asm-3.0.1.RELEASE-A.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.aspects-3.0.1.RELEASE-A.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.beans-3.0.1.RELEASE-A.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.context-3.0.1.RELEASE-A.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.context.support-3.0.1.RELEASE-A.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.core-3.0.1.RELEASE-A.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.expression-3.0.1.RELEASE-A.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.transaction-3.0.1.RELEASE-A.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/external/spring/org.springframework.test-3.0.1.RELEASE-A.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.aop-3.0.3.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.asm-3.0.3.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.aspects-3.0.3.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.beans-3.0.3.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.context-3.0.3.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.context.support-3.0.3.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.core-3.0.3.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.expression-3.0.3.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.transaction-3.0.3.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/external/spring/org.springframework.test-3.0.3.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/optional/spring/com.springsource.javax.annotation-1.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/optional/spring/com.springsource.net.sf.cglib-2.2.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.jdbc-3.0.1.RELEASE-A.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.jms-3.0.1.RELEASE-A.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.orm-3.0.1.RELEASE-A.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.web-3.0.1.RELEASE-A.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.web.servlet-3.0.1.RELEASE-A.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.jdbc-3.0.3.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.jms-3.0.3.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.orm-3.0.3.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.web-3.0.3.RELEASE.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.web.servlet-3.0.3.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/jetty-http-7.1.4.v20100610.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/jetty-io-7.1.4.v20100610.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/jetty-jmx-7.1.4.v20100610.jar"/>
