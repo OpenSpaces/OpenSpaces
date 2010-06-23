@@ -24,8 +24,6 @@ import org.openspaces.events.SpaceDataEventListener;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.TransactionStatus;
 
-import java.util.Arrays;
-
 /**
  * A base class event listener allowing for event listeners result handling by writing it back to
  * the space. Subclasses should implement
@@ -96,23 +94,15 @@ public abstract class AbstractResultEventListenerAdapter implements SpaceDataEve
         if (result != null) {
             if (result instanceof Object[]) {
                 Object[] resultArr = (Object[]) result;
-                if (updateOrWrite) {
-                    long[] leases = new long[resultArr.length];
-                    Arrays.fill(leases, writeLease);
-                    Object[] retVals = gigaSpace.updateMultiple(resultArr, leases, UpdateModifiers.UPDATE_OR_WRITE);
-                    for (Object retVal : retVals) {
-                        if (retVal instanceof DataAccessException) {
-                            throw (DataAccessException) retVal;
-                        }
-                    }
-                } else {
-                    gigaSpace.writeMultiple(resultArr, writeLease);
-                }
+                if (updateOrWrite)
+                    gigaSpace.writeMultiple(resultArr, writeLease, UpdateModifiers.UPDATE_OR_WRITE | UpdateModifiers.NO_RETURN_VALUE);
+                else
+                    gigaSpace.writeMultiple(resultArr, writeLease, UpdateModifiers.WRITE_ONLY | UpdateModifiers.NO_RETURN_VALUE);
             } else {
                 if (updateOrWrite) {
-                    gigaSpace.write(result, writeLease, updateTimeout, UpdateModifiers.UPDATE_OR_WRITE);
+                    gigaSpace.write(result, writeLease, updateTimeout, UpdateModifiers.UPDATE_OR_WRITE | UpdateModifiers.NO_RETURN_VALUE);
                 } else {
-                    gigaSpace.write(result, writeLease, updateTimeout, UpdateModifiers.WRITE_ONLY);
+                    gigaSpace.write(result, writeLease, updateTimeout, UpdateModifiers.WRITE_ONLY | UpdateModifiers.NO_RETURN_VALUE);
                 }
             }
         }
