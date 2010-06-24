@@ -34,7 +34,11 @@ public class StatisticsUtils {
     }
 
     public static double computePerSecond(long currentCount, long previousCount, long currentTimestamp, long previousTimestamp) {
-        return ((double) (currentCount - previousCount)) / (currentTimestamp - previousTimestamp) * 1000;
+        double stat =  ((double) (currentCount - previousCount)) / (currentTimestamp - previousTimestamp) * 1000;
+        if (stat < 0) {
+            return 0;
+        }
+        return stat;
     }
 
     public static String formatPerc(double perc) {
