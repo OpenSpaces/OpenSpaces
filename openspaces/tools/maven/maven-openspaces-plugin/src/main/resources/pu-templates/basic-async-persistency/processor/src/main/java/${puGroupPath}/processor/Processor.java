@@ -4,6 +4,7 @@ import ${puGroupId}.common.Data;
 
 import org.openspaces.events.adapter.SpaceDataEvent;
 
+import java.util.logging.Logger;
 
 /**
  * The processor simulates work done no un-processed Data object. The processData
@@ -11,6 +12,8 @@ import org.openspaces.events.adapter.SpaceDataEvent;
  * flag to true and returns the processed Data.
  */
 public class Processor {
+
+    Logger log= Logger.getLogger(this.getClass().getName());
 
     private long workDuration = 100;
 
@@ -37,7 +40,7 @@ public class Processor {
         }
         data.setProcessed(true);
         data.setData("PROCESSED : " + data.getRawData());
-        System.out.println(" ------ PROCESSED : " + data);
+        log.info(" ------ PROCESSED : " + data);
         return data;
     }
 

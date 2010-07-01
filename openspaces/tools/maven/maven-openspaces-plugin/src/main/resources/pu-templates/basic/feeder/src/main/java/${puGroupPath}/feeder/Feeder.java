@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
+import java.util.logging.Logger;
 
 /**
  * A feeder bean starts a scheduled task that writes a new Data objects to the space
@@ -29,6 +29,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class Feeder implements InitializingBean, DisposableBean {
 
+    Logger log= Logger.getLogger(this.getClass().getName());
+    
     private ScheduledExecutorService executorService;
 
     private ScheduledFuture<?> sf;
@@ -57,7 +59,7 @@ public class Feeder implements InitializingBean, DisposableBean {
     }
 
     public void afterPropertiesSet() throws Exception {
-        System.out.println("--- STARTING FEEDER WITH CYCLE [" + defaultDelay + "]");
+        log.info("--- STARTING FEEDER WITH CYCLE [" + defaultDelay + "]");
         executorService = Executors.newScheduledThreadPool(1);
         feederTask = new FeederTask();
         sf = executorService.scheduleAtFixedRate(feederTask, defaultDelay, defaultDelay,
@@ -84,7 +86,7 @@ public class Feeder implements InitializingBean, DisposableBean {
                 long time = System.currentTimeMillis();
                 Data data = new Data((counter++ % numberOfTypes), "FEEDER " + Long.toString(time));
                 gigaSpace.write(data);
-                System.out.println("--- FEEDER WROTE " + data);
+                log.info("--- FEEDER WROTE " + data);
             } catch (SpaceInterruptedException e) {
                 // ignore, we are being shutdown
             } catch (Exception e) {

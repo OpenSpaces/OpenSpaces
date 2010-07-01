@@ -19,7 +19,7 @@
     <!--
         A bean representing a space (an IJSpace implementation).
     -->
-    <os-core:space id="space" url="/./processorSpace" lookup-groups="processor-integrartion-tests" />
+    <os-core:space id="space" url="/./processorSpace" lookup-groups="processor-integration-tests" />
 
     <!--
         Defines a local Jini transaction manager.
