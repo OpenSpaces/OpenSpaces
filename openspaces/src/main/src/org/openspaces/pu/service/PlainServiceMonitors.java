@@ -4,6 +4,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -18,14 +19,16 @@ public class PlainServiceMonitors implements ServiceMonitors, Externalizable {
 
     protected ServiceDetails details;
 
-    final protected Map<String, Object> monitors = new LinkedHashMap<String, Object>();
+    protected Map<String, Object> monitors;
 
     // Just for externalizable
+
     public PlainServiceMonitors() {
     }
 
     public PlainServiceMonitors(String id) {
         this.id = id;
+        this.monitors = new LinkedHashMap<String, Object>();
     }
 
     public String getId() {
@@ -60,10 +63,15 @@ public class PlainServiceMonitors implements ServiceMonitors, Externalizable {
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         id = in.readUTF();
         int attributesSize = in.readInt();
-        for (int i = 0; i < attributesSize; i++) {
-            String key = (String) in.readObject();
-            Object value = in.readObject();
-            monitors.put(key, value);
+        if (attributesSize == 0) {
+            monitors = Collections.EMPTY_MAP;
+        } else {
+            monitors = new LinkedHashMap<String, Object>();
+            for (int i = 0; i < attributesSize; i++) {
+                String key = (String) in.readObject();
+                Object value = in.readObject();
+                monitors.put(key, value);
+            }
         }
     }
 

@@ -24,19 +24,19 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
 
     private final OperatingSystemDetails details;
 
-    private volatile OperatingSystemStatistics previosStats;
+    private volatile OperatingSystemStatistics previousStats;
 
     public DefaultOperatingSystemStatistics() {
         this(NA_STATS, null, null, 0, -1);
     }
 
-    public DefaultOperatingSystemStatistics(OSStatistics stats, OperatingSystemDetails details, OperatingSystemStatistics previosStats,
+    public DefaultOperatingSystemStatistics(OSStatistics stats, OperatingSystemDetails details, OperatingSystemStatistics previousStats,
                                             int historySize, long timeDelta) {
         this.stats = stats;
         this.details = details;
-        this.previosStats = previosStats;
+        this.previousStats = previousStats;
         this.timeDelta = timeDelta;
-        OperatingSystemStatistics lastStats = previosStats;
+        OperatingSystemStatistics lastStats = previousStats;
         if (lastStats != null) {
             for (int i = 0; i < historySize; i++) {
                 if (lastStats.getPrevious() == null) {
@@ -79,11 +79,11 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
     }
 
     public OperatingSystemStatistics getPrevious() {
-        return this.previosStats;
+        return this.previousStats;
     }
 
     public void setPreviousStats(OperatingSystemStatistics previosStats) {
-        this.previosStats = previosStats;
+        this.previousStats = previosStats;
     }
 
     public long getFreeSwapSpaceSizeInBytes() {
@@ -187,10 +187,10 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
         }
 
         public double getRxBytesPerSecond() {
-            if (prevNetStats == null || previosStats == null) {
+            if (prevNetStats == null || previousStats == null) {
                 return -1;
             }
-            return StatisticsUtils.computePerSecond(getRxBytes(), prevNetStats.getRxBytes(), getTimestamp(), previosStats.getTimestamp());
+            return StatisticsUtils.computePerSecond(getRxBytes(), prevNetStats.getRxBytes(), getTimestamp(), previousStats.getTimestamp());
         }
 
         public long getTxBytes() {
@@ -198,10 +198,10 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
         }
 
         public double getTxBytesPerSecond() {
-            if (prevNetStats == null || previosStats == null) {
+            if (prevNetStats == null || previousStats == null) {
                 return -1;
             }
-            return StatisticsUtils.computePerSecond(getTxBytes(), prevNetStats.getTxBytes(), getTimestamp(), previosStats.getTimestamp());
+            return StatisticsUtils.computePerSecond(getTxBytes(), prevNetStats.getTxBytes(), getTimestamp(), previousStats.getTimestamp());
         }
 
         public long getRxPackets() {
@@ -209,10 +209,10 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
         }
 
         public double getRxPacketsPerSecond() {
-            if (prevNetStats == null || previosStats == null) {
+            if (prevNetStats == null || previousStats == null) {
                 return -1;
             }
-            return StatisticsUtils.computePerSecond(getRxPackets(), prevNetStats.getRxPackets(), getTimestamp(), previosStats.getTimestamp());
+            return StatisticsUtils.computePerSecond(getRxPackets(), prevNetStats.getRxPackets(), getTimestamp(), previousStats.getTimestamp());
         }
 
         public long getTxPackets() {
@@ -220,10 +220,10 @@ public class DefaultOperatingSystemStatistics implements OperatingSystemStatisti
         }
 
         public double getTxPacketsPerSecond() {
-            if (prevNetStats == null || previosStats == null) {
+            if (prevNetStats == null || previousStats == null) {
                 return -1;
             }
-            return StatisticsUtils.computePerSecond(getTxPackets(), prevNetStats.getTxPackets(), getTimestamp(), previosStats.getTimestamp());
+            return StatisticsUtils.computePerSecond(getTxPackets(), prevNetStats.getTxPackets(), getTimestamp(), previousStats.getTimestamp());
         }
 
         public long getRxErrors() {

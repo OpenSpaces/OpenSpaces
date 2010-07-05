@@ -10,6 +10,7 @@ import org.openspaces.pu.container.jee.stats.WebRequestsServiceMonitors;
 import org.openspaces.pu.service.ServiceMonitors;
 import org.openspaces.remoting.RemotingServiceMonitors;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -27,46 +28,12 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
 
     private volatile ProcessingUnitInstanceStatistics previous;
 
-    private final Map<String, EventContainerServiceMonitors> eventContainerServiceMonitors = new HashMap<String, EventContainerServiceMonitors>();
-    private final Map<String, PollingEventContainerServiceMonitors> pollingEventContainerServiceMonitors = new HashMap<String, PollingEventContainerServiceMonitors>();
-    private final Map<String, NotifyEventContainerServiceMonitors> notifyEventContainerServiceMonitors = new HashMap<String, NotifyEventContainerServiceMonitors>();
-    private final Map<String, AsyncPollingEventContainerServiceMonitors> asyncPollingEventContainerServiceMonitors = new HashMap<String, AsyncPollingEventContainerServiceMonitors>();
-
-    private final RemotingServiceMonitors remotingServiceMonitors;
-    private final WebRequestsServiceMonitors webRequestsServiceMonitors;
-    private final MemcachedServiceMonitors memcachedServiceMonitors;
-
     public DefaultProcessingUnitInstanceServiceStatistics(long timestamp, Map<String, ServiceMonitors> serviceMonitorsById, ProcessingUnitInstanceStatistics previous,
                                                           int historySize, long timeDelta) {
         this.timestamp = timestamp;
         this.timeDelta = timeDelta;
         this.serviceMonitorsById = serviceMonitorsById;
         this.previous = previous;
-        RemotingServiceMonitors remotingServiceMonitorsX = null;
-        WebRequestsServiceMonitors jeeRequestServiceMonitorsX = null;
-        MemcachedServiceMonitors memcachedServiceMonitorsX = null;
-        for (ServiceMonitors monitors : serviceMonitorsById.values()) {
-            if (monitors instanceof EventContainerServiceMonitors) {
-                eventContainerServiceMonitors.put(monitors.getId(), (EventContainerServiceMonitors) monitors);
-                if (monitors instanceof PollingEventContainerServiceMonitors) {
-                    pollingEventContainerServiceMonitors.put(monitors.getId(), (PollingEventContainerServiceMonitors) monitors);
-                } else if (monitors instanceof NotifyEventContainerServiceMonitors) {
-                    notifyEventContainerServiceMonitors.put(monitors.getId(), (NotifyEventContainerServiceMonitors) monitors);
-                } else if (monitors instanceof AsyncPollingEventContainerServiceMonitors) {
-                    asyncPollingEventContainerServiceMonitors.put(monitors.getId(), (AsyncPollingEventContainerServiceMonitors) monitors);
-                }
-            } else if (monitors instanceof RemotingServiceMonitors) {
-                remotingServiceMonitorsX = (RemotingServiceMonitors) monitors;
-            } else if (monitors instanceof WebRequestsServiceMonitors) {
-                jeeRequestServiceMonitorsX = (WebRequestsServiceMonitors) monitors;
-            } else if (monitors instanceof MemcachedServiceMonitors) {
-                memcachedServiceMonitorsX = (MemcachedServiceMonitors) monitors;
-            }
-
-        }
-        this.remotingServiceMonitors = remotingServiceMonitorsX;
-        this.webRequestsServiceMonitors = jeeRequestServiceMonitorsX;
-        this.memcachedServiceMonitors = memcachedServiceMonitorsX;
 
         ProcessingUnitInstanceStatistics lastStats = previous;
         if (lastStats != null) {
@@ -100,31 +67,88 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
     }
 
     public Map<String, EventContainerServiceMonitors> getEventContainers() {
-        return this.eventContainerServiceMonitors;
+        Map<String, EventContainerServiceMonitors> eventContainerServiceMonitors = new HashMap<String, EventContainerServiceMonitors>();
+        for (ServiceMonitors monitors : serviceMonitorsById.values()) {
+            if (monitors instanceof EventContainerServiceMonitors) {
+                if (eventContainerServiceMonitors == Collections.EMPTY_MAP) {
+                    eventContainerServiceMonitors = new HashMap<String, EventContainerServiceMonitors>();
+                }
+                eventContainerServiceMonitors.put(monitors.getId(), (EventContainerServiceMonitors) monitors);
+            }
+        }
+        return eventContainerServiceMonitors;
     }
 
     public Map<String, PollingEventContainerServiceMonitors> getPollingEventContainers() {
-        return this.pollingEventContainerServiceMonitors;
+        Map<String, PollingEventContainerServiceMonitors> pollingEventContainerServiceMonitors = new HashMap<String, PollingEventContainerServiceMonitors>();
+        for (ServiceMonitors monitors : serviceMonitorsById.values()) {
+            if (monitors instanceof EventContainerServiceMonitors) {
+                if (monitors instanceof PollingEventContainerServiceMonitors) {
+                    if (pollingEventContainerServiceMonitors == Collections.EMPTY_MAP) {
+                        pollingEventContainerServiceMonitors = new HashMap<String, PollingEventContainerServiceMonitors>();
+                    }
+                    pollingEventContainerServiceMonitors.put(monitors.getId(), (PollingEventContainerServiceMonitors) monitors);
+                }
+            }
+        }
+        return pollingEventContainerServiceMonitors;
     }
 
     public Map<String, NotifyEventContainerServiceMonitors> getNotifyEventContainers() {
-        return this.notifyEventContainerServiceMonitors;
+        Map<String, NotifyEventContainerServiceMonitors> notifyEventContainerServiceMonitors = new HashMap<String, NotifyEventContainerServiceMonitors>();
+        for (ServiceMonitors monitors : serviceMonitorsById.values()) {
+            if (monitors instanceof EventContainerServiceMonitors) {
+                if (monitors instanceof NotifyEventContainerServiceMonitors) {
+                    if (notifyEventContainerServiceMonitors == Collections.EMPTY_MAP) {
+                        notifyEventContainerServiceMonitors = new HashMap<String, NotifyEventContainerServiceMonitors>();
+                    }
+                    notifyEventContainerServiceMonitors.put(monitors.getId(), (NotifyEventContainerServiceMonitors) monitors);
+                }
+            }
+        }
+        return notifyEventContainerServiceMonitors;
     }
 
     public Map<String, AsyncPollingEventContainerServiceMonitors> getAsyncPollingEventContainers() {
-        return this.asyncPollingEventContainerServiceMonitors;
+        Map<String, AsyncPollingEventContainerServiceMonitors> asyncPollingEventContainerServiceMonitors = new HashMap<String, AsyncPollingEventContainerServiceMonitors>();
+        for (ServiceMonitors monitors : serviceMonitorsById.values()) {
+            if (monitors instanceof EventContainerServiceMonitors) {
+                if (monitors instanceof AsyncPollingEventContainerServiceMonitors) {
+                    if (asyncPollingEventContainerServiceMonitors == Collections.EMPTY_MAP) {
+                        asyncPollingEventContainerServiceMonitors = new HashMap<String, AsyncPollingEventContainerServiceMonitors>();
+                    }
+                    asyncPollingEventContainerServiceMonitors.put(monitors.getId(), (AsyncPollingEventContainerServiceMonitors) monitors);
+                }
+            }
+        }
+        return asyncPollingEventContainerServiceMonitors;
     }
 
     public RemotingServiceMonitors getRemoting() {
-        return this.remotingServiceMonitors;
+        for (ServiceMonitors monitors : serviceMonitorsById.values()) {
+            if (monitors instanceof RemotingServiceMonitors) {
+                return (RemotingServiceMonitors) monitors;
+            }
+        }
+        return null;
     }
 
     public WebRequestsServiceMonitors getWebRequests() {
-        return this.webRequestsServiceMonitors;
+        for (ServiceMonitors monitors : serviceMonitorsById.values()) {
+            if (monitors instanceof WebRequestsServiceMonitors) {
+                return (WebRequestsServiceMonitors) monitors;
+            }
+        }
+        return null;
     }
 
     public MemcachedServiceMonitors getMemcached() {
-        return this.memcachedServiceMonitors;
+        for (ServiceMonitors monitors : serviceMonitorsById.values()) {
+            if (monitors instanceof MemcachedServiceMonitors) {
+                return (MemcachedServiceMonitors) monitors;
+            }
+        }
+        return null;
     }
 
     public ProcessingUnitInstanceStatistics getPrevious() {

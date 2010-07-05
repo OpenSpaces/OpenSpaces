@@ -487,7 +487,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             return lastStatistics;
         }
         ProcessingUnitInstanceStatistics previousStatistics = lastStatistics;
-        Map<String, ServiceMonitors> serviceMonitorsById = new HashMap<String, ServiceMonitors>();
+        Map<String, ServiceMonitors> serviceMonitorsById = Collections.EMPTY_MAP;
         lastStatisticsTimestamp = currentTime;
         PUMonitors puMonitors;
         try {
@@ -499,6 +499,9 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
             ServiceMonitors serviceMonitors = (ServiceMonitors) monitor;
             if (serviceMonitors instanceof PlainServiceMonitors) {
                 ((PlainServiceMonitors) serviceMonitors).setDetails(servicesDetailsByServiceId.get(serviceMonitors.getId()));
+            }
+            if (serviceMonitorsById == Collections.EMPTY_MAP) {
+                serviceMonitorsById = new HashMap<String, ServiceMonitors>();
             }
             serviceMonitorsById.put(serviceMonitors.getId(), serviceMonitors);
         }
