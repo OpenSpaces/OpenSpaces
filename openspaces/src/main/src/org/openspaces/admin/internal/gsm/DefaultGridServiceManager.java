@@ -22,6 +22,7 @@ import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.dump.InternalDumpResult;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
+import org.openspaces.admin.pu.ProcessingUnitAlreadyDeployedException;
 import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
 import org.openspaces.admin.internal.support.NetworkExceptionHelper;
 import org.openspaces.admin.memcached.MemcachedDeployment;
@@ -115,6 +116,15 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         } catch (Exception e) {
             throw new AdminException("Failed to deploy [" + deployment.getProcessingUnit() + "]", e);
         }
+
+        try {
+            if (getGSMAdmin().hasDeployed(operationalString.getName())) {
+                throw new ProcessingUnitAlreadyDeployedException(operationalString.getName());
+            }
+        } catch (Exception e) {
+            throw new AdminException("Failed to check if processing unit [" + operationalString.getName() + "] is deployed");
+        }
+
         final AtomicReference<ProcessingUnit> ref = new AtomicReference<ProcessingUnit>();
         ref.set(getAdmin().getProcessingUnits().getProcessingUnit(operationalString.getName()));
         if (ref.get() != null) {
@@ -143,6 +153,10 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             Deploy.setDisableInfoLogging(false);
             getAdmin().getProcessingUnits().getProcessingUnitAdded().remove(added);
         }
+    }
+
+    public void undeploy(String processingUnitName) {
+        undeployProcessingUnit(processingUnitName);
     }
 
     public void undeployProcessingUnit(String processingUnitName) {

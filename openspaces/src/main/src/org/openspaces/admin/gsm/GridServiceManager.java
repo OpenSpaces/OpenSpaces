@@ -19,6 +19,7 @@ package org.openspaces.admin.gsm;
 import org.openspaces.admin.AgentGridComponent;
 import org.openspaces.admin.LogProviderGridComponent;
 import org.openspaces.admin.dump.DumpProvider;
+import org.openspaces.admin.pu.ProcessingUnitAlreadyDeployedException;
 import org.openspaces.admin.memcached.MemcachedDeployment;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
@@ -37,12 +38,17 @@ import java.util.concurrent.TimeUnit;
 public interface GridServiceManager extends AgentGridComponent, LogProviderGridComponent, DumpProvider {
 
     /**
+     * Undeploys the processing unit based on its name.
+     */
+    void undeploy(String processingUnitName);
+
+    /**
      * Deploys a processing unit based on the processing unit deployment information on the given grid
      * service manager (it will act as the primary GSM for the deployed processing unit).
      *
      * <p>The deployment process will wait indefinitely and return the actual processing unit that can be used.
      */
-    ProcessingUnit deploy(ProcessingUnitDeployment deployment);
+    ProcessingUnit deploy(ProcessingUnitDeployment deployment) throws ProcessingUnitAlreadyDeployedException;
 
     /**
      * Deploys a processing unit based on the processing unit deployment information on the given grid
@@ -50,7 +56,7 @@ public interface GridServiceManager extends AgentGridComponent, LogProviderGridC
      *
      * <p>The deployment process will wait for the given timeout and return the actual processing unit that can be used.
      */
-    ProcessingUnit deploy(ProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit);
+    ProcessingUnit deploy(ProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
 
     /**
      * Deploys a space based on the space deployment information on the given grid
@@ -61,7 +67,7 @@ public interface GridServiceManager extends AgentGridComponent, LogProviderGridC
      * <p>Note, deploying just a space is simply deploying a built in processing unit that starts
      * just an embedded space.
      */
-    ProcessingUnit deploy(SpaceDeployment deployment);
+    ProcessingUnit deploy(SpaceDeployment deployment) throws ProcessingUnitAlreadyDeployedException;
 
     /**
      * Deploys a space based on the space deployment information on the given grid
@@ -72,7 +78,7 @@ public interface GridServiceManager extends AgentGridComponent, LogProviderGridC
      * <p>Note, deploying just a space is simply deploying a built in processing unit that starts
      * just an embedded space.
      */
-    ProcessingUnit deploy(SpaceDeployment deployment, long timeout, TimeUnit timeUnit);
+    ProcessingUnit deploy(SpaceDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
 
     /**
      * Deploys a memcached based on the space deployment information on the given grid
@@ -83,7 +89,7 @@ public interface GridServiceManager extends AgentGridComponent, LogProviderGridC
      * <p>Note, deploying just a memcached is simply deploying a built in processing unit that starts / connects
      * to a space (holding the memcached entries) and exposing the memcached protocol.
      */
-    ProcessingUnit deploy(MemcachedDeployment deployment);
+    ProcessingUnit deploy(MemcachedDeployment deployment) throws ProcessingUnitAlreadyDeployedException;
 
     /**
      * Deploys a memcached based on the space deployment information on the given grid
@@ -94,5 +100,5 @@ public interface GridServiceManager extends AgentGridComponent, LogProviderGridC
      * <p>Note, deploying just a memcached is simply deploying a built in processing unit that starts / connects
      * to a space (holding the memcached entries) and exposing the memcached protocol.
      */
-    ProcessingUnit deploy(MemcachedDeployment deployment, long timeout, TimeUnit timeUnit);
+    ProcessingUnit deploy(MemcachedDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
 }
