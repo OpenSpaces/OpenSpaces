@@ -177,6 +177,10 @@ public class ESMFaultDetectionHandler extends AbstractFaultDetectionHandler {
                 return false;
             }
         }
+        
+        public boolean shouldRetry() {
+            return true;
+        }
 
         @Override
         public String toString() {
