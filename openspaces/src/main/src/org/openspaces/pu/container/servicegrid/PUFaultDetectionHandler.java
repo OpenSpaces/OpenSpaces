@@ -19,6 +19,7 @@ package org.openspaces.pu.container.servicegrid;
 import com.sun.jini.config.Config;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.internal.jvm.JVMDetails;
+import com.j_spaces.core.SpaceUnhealthyException;
 
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
@@ -187,6 +188,17 @@ public class PUFaultDetectionHandler extends AbstractFaultDetectionHandler {
                 }
 
                 return false;
+            }
+        }
+        
+        /**
+         * Will not retry if last thrown exception is of type {@link SpaceUnhealthyException}.
+         */
+        public boolean shouldRetry() {
+            if (lastThrown != null && (lastThrown instanceof SpaceUnhealthyException)) {
+                return false;
+            } else {
+                return true;
             }
         }
 
