@@ -20,9 +20,9 @@ import com.gigaspaces.async.AsyncFuture;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.executor.support.WaitForAnyListener;
-import org.openspaces.remoting.AsyncRemotingProxyConfigurer;
+import org.openspaces.remoting.EventDrivenRemotingProxyConfigurer;
 import org.openspaces.remoting.EventDrivenSpaceRemotingEntry;
-import org.openspaces.remoting.SyncRemotingProxyConfigurer;
+import org.openspaces.remoting.ExecutorRemotingProxyConfigurer;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 import java.io.ByteArrayInputStream;
@@ -40,8 +40,6 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
     protected SimpleService simpleService;
 
     protected SimpleServiceAsync simpleServiceAsync;
-
-    protected SimpleService simpleServiceSync;
 
     protected SimpleService simpleServiceExecutor;
 
@@ -103,38 +101,6 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         assertEquals("SAY test", result.get());
     }
 
-    public void testSyncSyncExecution() {
-        String reply = simpleServiceSync.say("test");
-        assertEquals("SAY test", reply);
-    }
-
-    public void testSyncSyncExecutionWithException() {
-        try {
-            simpleServiceSync.testException();
-            fail();
-        } catch (SimpleService.MyException e) {
-            // all is well
-        }
-    }
-
-    public void testSyncAsyncExecutionWithException() {
-        try {
-            simpleServiceSync.asyncTestException().get();
-            fail();
-        } catch (InterruptedException e) {
-            fail();
-        } catch (ExecutionException e) {
-            if (!(e.getCause() instanceof SimpleService.MyException)) {
-                fail();
-            }
-        }
-    }
-
-    public void testSyncAsyncExecution() throws Exception {
-        Future<String> reply = simpleServiceSync.asyncSay("test");
-        assertEquals("SAY test", reply.get());
-    }
-
     public void testExecutorSyncExecution() {
         String reply = simpleServiceExecutor.say("test");
         assertEquals("SAY test", reply);
@@ -175,27 +141,25 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
     }
 
     public void testSimpleAnnotationExecution() {
-        String reply = simpleAnnotationBean.syncSimpleService.say("test");
-        assertEquals("SAY test", reply);
-        reply = simpleAnnotationBean.asyncSimpleService.say("test");
+        String reply = simpleAnnotationBean.eventSimpleService.say("test");
         assertEquals("SAY test", reply);
         reply = simpleAnnotationBean.executorSimpleService.say("test");
         assertEquals("SAY test", reply);
     }
 
     public void testWiredParameters() {
-        assertTrue(simpleAnnotationBean.syncSimpleService.wire(new WiredParameter()));
-        assertTrue(simpleAnnotationBean.asyncSimpleService.wire(new WiredParameter()));
+        assertTrue(simpleAnnotationBean.executorSimpleService.wire(new WiredParameter()));
+        assertTrue(simpleAnnotationBean.eventSimpleService.wire(new WiredParameter()));
     }
 
     public void testSimpleConfigurerExecution() {
-        SimpleService localSyncSimpleService = new SyncRemotingProxyConfigurer<SimpleService>(gigaSpace, SimpleService.class)
-                                               .syncProxy();
+        SimpleService localSyncSimpleService = new ExecutorRemotingProxyConfigurer<SimpleService>(gigaSpace, SimpleService.class)
+                .proxy();
         String reply = localSyncSimpleService.say("test");
         assertEquals("SAY test", reply);
-        SimpleService localAsyncSimpleService = new AsyncRemotingProxyConfigurer<SimpleService>(gigaSpace, SimpleService.class)
-                                               .timeout(15000)
-                                               .asyncProxy();
+        SimpleService localAsyncSimpleService = new EventDrivenRemotingProxyConfigurer<SimpleService>(gigaSpace, SimpleService.class)
+                .timeout(15000)
+                .proxy();
         reply = localAsyncSimpleService.say("test");
         assertEquals("SAY test", reply);
     }
@@ -216,7 +180,7 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         compareAsyncInvocationNullableFields(entry, invocation);
 
         entry = entry.buildResult("result");
-        entry.instanceId = 1; 
+        entry.instanceId = 1;
         byteArrayOutputStream = new ByteArrayOutputStream();
         oos = new ObjectOutputStream(byteArrayOutputStream);
         oos.writeObject(entry);
@@ -241,7 +205,7 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         Object[] entryMetaArgs = entry.getMetaArguments();
         if (entryMetaArgs != null) {
             Object[] invocationMetaArgs = invocation.getMetaArguments();
-            for (int i=0; i<entryMetaArgs.length; i++) {
+            for (int i = 0; i < entryMetaArgs.length; i++) {
                 assertEquals(entryMetaArgs[i], invocationMetaArgs[i]);
             }
         } else {
@@ -250,7 +214,7 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         Object[] entryArgs = entry.getArguments();
         if (entryArgs != null) {
             Object[] invocationArgs = invocation.getArguments();
-            for (int i=0; i<entryArgs.length; i++) {
+            for (int i = 0; i < entryArgs.length; i++) {
                 assertEquals(entryArgs[i], invocationArgs[i]);
             }
         } else {

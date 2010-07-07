@@ -19,13 +19,6 @@ package org.openspaces.remoting;
 import com.gigaspaces.internal.reflection.IMethod;
 import com.gigaspaces.internal.reflection.ReflectionUtil;
 import com.gigaspaces.internal.reflection.standard.StandardMethod;
-import com.j_spaces.core.IJSpace;
-import com.j_spaces.core.SpaceContext;
-import com.j_spaces.core.filters.FilterOperationCodes;
-import com.j_spaces.core.filters.FilterProvider;
-import com.j_spaces.core.filters.ISpaceFilter;
-import com.j_spaces.core.filters.entry.ISpaceFilterEntry;
-import net.jini.core.entry.UnusableEntryException;
 import net.jini.core.lease.Lease;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,8 +26,6 @@ import org.jini.rio.boot.ServiceClassLoader;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoAware;
-import org.openspaces.core.space.filter.FilterProviderFactory;
-import org.openspaces.core.transaction.manager.ExistingJiniTransactionManager;
 import org.openspaces.events.EventTemplateProvider;
 import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.pu.service.ServiceDetails;
@@ -81,15 +72,12 @@ import java.util.concurrent.atomic.AtomicLong;
  * the event container configuration there is no need to configure the template, as it uses the one
  * provided by this exported.
  *
- * <p>The exporter also implements {@link org.openspaces.core.space.filter.FilterProviderFactory} and
- * allows to execute services in a <b>sync</b> manner ({@link org.openspaces.remoting.SyncSpaceRemotingProxyFactoryBean}).
- *
  * <p>Last, the exporter provides services to executor based remoting ({@link org.openspaces.remoting.ExecutorSpaceRemotingProxyFactoryBean}).
  *
  * <p>By default, the exporter will also autowire and post process all the arguments passed, allowing
  * to inject them with "server" side beans using Spring {@link org.springframework.beans.factory.annotation.Autowired}
  * annotation for example. Note, this variables must be defined as <code>transient</code> so they won't be
- * passed back to the client. This can be disabled by setting {@link #setDisableAutowiredArguements(boolean)}
+ * passed back to the client. This can be disabled by setting {@link #setDisableAutowiredArguments(boolean)}
  * to <code>true</code>.
  *
  * @author kimchy
@@ -98,7 +86,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @see EventDrivenSpaceRemotingProxyFactoryBean
  */
 public class SpaceRemotingServiceExporter implements SpaceDataEventListener<EventDrivenSpaceRemotingEntry>, InitializingBean, ApplicationContextAware, BeanNameAware,
-        EventTemplateProvider, FilterProviderFactory, ClusterInfoAware, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProvider {
+        EventTemplateProvider, ClusterInfoAware, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProvider {
 
     public static final String DEFAULT_ASYNC_INTERFACE_SUFFIX = "Async";
 
@@ -108,7 +96,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
 
     private List<ServiceInfo> servicesInfo = new ArrayList<ServiceInfo>();
 
-    private boolean useFastRefelction = true;
+    private boolean useFastReflection = true;
 
     private IdentityHashMap<Object, ServiceInfo> serviceToServiceInfoMap = new IdentityHashMap<Object, ServiceInfo>();
 
@@ -126,7 +114,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
 
     private boolean fifo = false;
 
-    private boolean disableAutowiredArguements = false;
+    private boolean disableAutowiredArguments = false;
 
     private ServiceExecutionAspect serviceExecutionAspect;
 
@@ -135,8 +123,6 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
     // sync execution fields
 
     private long syncEntryWriteLease = Lease.FOREVER;
-
-    private FilterProvider filterProvider;
 
 
     private ClusterInfo clusterInfo;
@@ -182,16 +168,16 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
     /**
      * Controls if executing the service should use fast reflection or not.
      */
-    public void setUseFastRefelction(boolean useFastRefelction) {
-        this.useFastRefelction = useFastRefelction;
+    public void setUseFastReflection(boolean userFastReflection) {
+        this.useFastReflection = userFastReflection;
     }
 
     /**
      * Allows to disable (by default it is enabled) the autowiring of method arguments with beans that
      * exists within the server side context.
      */
-    public void setDisableAutowiredArguements(boolean disableAutowiredArguements) {
-        this.disableAutowiredArguements = disableAutowiredArguements;
+    public void setDisableAutowiredArguments(boolean disableAutowiredArguments) {
+        this.disableAutowiredArguments = disableAutowiredArguments;
     }
 
     /**
@@ -246,11 +232,6 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
     }
 
     public void afterPropertiesSet() throws Exception {
-        // create the filter provider
-        filterProvider = new FilterProvider("Remoting Filter", new RemotingServiceInvoker());
-        filterProvider.setActiveWhenBackup(false);
-        filterProvider.setEnabled(true);
-        filterProvider.setOpCodes(FilterOperationCodes.BEFORE_READ_MULTIPLE, FilterOperationCodes.BEFORE_TAKE_MULTIPLE);
         if (beanName == null) {
             beanName = "serviceExporter";
         }
@@ -280,7 +261,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
                     Class<?>[] interfaces = ClassUtils.getAllInterfaces(serviceInfo.getService());
                     for (Class<?> anInterface : interfaces) {
                         interfaceToService.put(anInterface.getName(), serviceInfo.getService());
-                        methodInvocationCache.addService(anInterface, serviceInfo.getService(), useFastRefelction);
+                        methodInvocationCache.addService(anInterface, serviceInfo.getService(), useFastReflection);
                     }
 
                     serviceToServiceInfoMap.put(serviceInfo.getService(), serviceInfo);
@@ -421,7 +402,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
     }
 
     private void autowireArguments(Object service, Object[] args) {
-        if (disableAutowiredArguements) {
+        if (disableAutowiredArguments) {
             return;
         }
         if (args == null) {
@@ -513,16 +494,6 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
         serviceToServiceInfoMap.get(service).getFailures().incrementAndGet();
     }
 
-    // Sync execution
-
-    /**
-     * Returns an instance of {@link org.openspaces.remoting.SpaceRemotingServiceExporter.RemotingServiceInvoker}
-     * filter for sync remote service execution.
-     */
-    public FilterProvider getFilterProvider() {
-        return this.filterProvider;
-    }
-
     private void waitTillInitialized() throws RemoteLookupFailureException {
         if (initialized) {
             return;
@@ -534,172 +505,6 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
         }
         if (!initialized) {
             throw new RemoteLookupFailureException("Space remoting service exporter not initialized yet");
-        }
-    }
-
-    /**
-     * The remoting service invoker is a Space filter that acts as means to preform sync remote service
-     * execution including broadcast execution. The filter registers for
-     * {@link com.j_spaces.core.filters.FilterOperationCodes#BEFORE_READ_MULTIPLE} and
-     * {@link com.j_spaces.core.filters.FilterOperationCodes#BEFORE_TAKE_MULTIPLE} operations and uses the
-     * read or take multiple template as an entry holding the actual invocation information (the template is
-     * {@link org.openspaces.remoting.SyncSpaceRemotingEntry}). The filter executes the service required
-     * and if it is not one way, it will write back the result as {@link org.openspaces.remoting.SyncSpaceRemotingEntry}
-     * back to the Space. It also changes the provided template to match against a unique id generated when writing
-     * the result to the Space. The take multiple operation is then executed and takes the result from the Space
-     * and returns it to the calling client.
-     */
-    private class RemotingServiceInvoker implements ISpaceFilter {
-
-        private final String SPACE_REMOTING_ENTRY_CLASSNAME = SyncSpaceRemotingEntry.class.getName();
-
-        private IJSpace space;
-
-        private AtomicLong idGenerator = new AtomicLong();
-
-        public void init(IJSpace space, String filterId, String url, int priority) throws RuntimeException {
-            this.space = space;
-        }
-
-        public void process(SpaceContext context, ISpaceFilterEntry entry, int operationCode) throws RuntimeException {
-            switch (operationCode) {
-                case FilterOperationCodes.BEFORE_READ_MULTIPLE:
-                case FilterOperationCodes.BEFORE_TAKE_MULTIPLE:
-                    break;
-                default:
-                    return;
-            }
-            if (!SPACE_REMOTING_ENTRY_CLASSNAME.equals(entry.getClassName())) {
-                return;
-            }
-            waitTillInitialized();
-            SyncSpaceRemotingEntry remotingEntry;
-            try {
-                remotingEntry = (SyncSpaceRemotingEntry) entry.getObject(space);
-            } catch (UnusableEntryException e) {
-                logger.error("Failed to get actual object for [" + entry.getClassName() + "], ignoring sync remoting invocation", e);
-                return;
-            }
-
-            // Reset fields to perform matching
-            entry.setFieldValue("lookupName", null);
-            entry.setFieldValue("methodName", null);
-            entry.setFieldValue("arguments", null);
-            entry.setFieldValue("oneWay", null);
-
-            String lookupName = remotingEntry.lookupName;
-            if (lookupName.endsWith(asyncInterfaceSuffix)) {
-                lookupName = lookupName.substring(0, lookupName.length() - asyncInterfaceSuffix.length());
-            }
-            Object service = interfaceToService.get(lookupName);
-            if (service == null) {
-                // we did not get an interface, maybe it is a bean name?
-                try {
-                    service = applicationContext.getBean(lookupName);
-                } catch (NoSuchBeanDefinitionException e) {
-                    // do nothing, return a proper response
-                }
-                if (service == null) {
-                    writeResponse(space, entry, remotingEntry, new RemoteLookupFailureException(
-                            "Failed to find service for lookup [" + remotingEntry.getLookupName() + "]"));
-                    return;
-                }
-            }
-
-            autowireArguments(service, remotingEntry.getArguments());
-
-            // bind current transaction
-            boolean boundedTransaction = ExistingJiniTransactionManager.bindExistingTransaction(remotingEntry.transaction);
-            try {
-                IMethod method;
-                try {
-                    method = methodInvocationCache.findMethod(lookupName, service, remotingEntry.methodName, remotingEntry.arguments);
-                } catch (Exception e) {
-                    failedExecution(service);
-                    writeResponse(space, entry, remotingEntry, new RemoteLookupFailureException("Failed to find method ["
-                            + remotingEntry.getMethodName() + "] for lookup [" + remotingEntry.getLookupName() + "]", e));
-                    return;
-                }
-                try {
-                    Object retVal;
-                    if (serviceExecutionAspect != null) {
-                        retVal = serviceExecutionAspect.invoke(remotingEntry, new InternalMethodInvocation(method), service);
-                    } else {
-                        retVal = method.invoke(service, remotingEntry.arguments);
-                    }
-                    writeResponse(space, entry, remotingEntry, retVal);
-                    processedExecution(service);
-                } catch (InvocationTargetException e) {
-                    failedExecution(service);
-                    writeResponse(space, entry, remotingEntry, e.getTargetException());
-                } catch (IllegalAccessException e) {
-                    failedExecution(service);
-                    writeResponse(space, entry, remotingEntry, new RemoteLookupFailureException("Failed to access method ["
-                            + remotingEntry.getMethodName() + "] for lookup [" + remotingEntry.getLookupName() + "]", e));
-                } catch (Throwable e) {
-                    failedExecution(service);
-                    writeResponse(space, entry, remotingEntry, e);
-                }
-            } finally {
-                if (boundedTransaction) {
-                    ExistingJiniTransactionManager.unbindExistingTransaction();
-                }
-            }
-        }
-
-        public void process(SpaceContext context, ISpaceFilterEntry[] entries, int operationCode) throws RuntimeException {
-
-        }
-
-        public void close() throws RuntimeException {
-
-        }
-
-        @SuppressWarnings("unchecked")
-        private void writeResponse(IJSpace space, ISpaceFilterEntry entry, SyncSpaceRemotingEntry remotingEntry, Throwable e) {
-            if (remotingEntry.oneWay == null || !remotingEntry.oneWay) {
-                try {
-                    remotingEntry = remotingEntry.buildResult(e);
-                    setGeneraterdUID(remotingEntry, entry);
-                    if (clusterInfo != null) {
-                        remotingEntry.instanceId = clusterInfo.getInstanceId();
-                    }
-                    space.write(remotingEntry, null, syncEntryWriteLease);
-                } catch (Exception e1) {
-                    if (logger.isErrorEnabled()) {
-                        logger.error("Failed to write remoting entry with exception [" + e.getMessage() + "]", e1);
-                    }
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("The actual exception is", e);
-                    }
-                }
-            } else {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Remoting execution is configured as one way and an exception was thrown", e);
-                }
-            }
-        }
-
-        private void writeResponse(IJSpace space, ISpaceFilterEntry entry, SyncSpaceRemotingEntry remotingEntry, Object retVal) {
-            if (remotingEntry.oneWay == null || !remotingEntry.oneWay) {
-                try {
-                    remotingEntry = remotingEntry.buildResult(retVal);
-                    setGeneraterdUID(remotingEntry, entry);
-                    if (clusterInfo != null) {
-                        remotingEntry.instanceId = clusterInfo.getInstanceId();
-                    }
-                    space.write(remotingEntry, null, syncEntryWriteLease);
-                } catch (Exception e1) {
-                    if (logger.isErrorEnabled()) {
-                        logger.error("Failed to write remoting entry", e1);
-                    }
-                }
-            }
-        }
-
-        private void setGeneraterdUID(SyncSpaceRemotingEntry remotingEntry, ISpaceFilterEntry entry) {
-            remotingEntry.uid = idGenerator.incrementAndGet();
-            entry.setFieldValue("uid", remotingEntry.uid);
         }
     }
 

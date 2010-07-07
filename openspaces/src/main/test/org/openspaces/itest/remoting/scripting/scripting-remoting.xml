@@ -11,9 +11,7 @@
 
     <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
 
-    <os-core:space id="space" url="/./spaceScriptingRemoting" lookup-groups="${user.name}">
-        <os-core:filter-provider ref="serviceExporter"/>
-    </os-core:space>
+    <os-core:space id="space" url="/./spaceScriptingRemoting" lookup-groups="${user.name}" />
 
     <os-core:giga-space id="gigaSpace" space="space"/>
 
@@ -32,7 +30,7 @@
     <bean id="scriptingAnnotationBean" class="org.openspaces.itest.remoting.scripting.ScriptingAnnotationBean" />
 
 
-    <os-remoting:async-proxy id="asyncScriptingExecutor" giga-space="gigaSpace"
+    <os-remoting:event-driven-proxy id="asyncScriptingExecutor" giga-space="gigaSpace"
                              interface="org.openspaces.remoting.scripting.ScriptingExecutor" timeout="15000">
         <os-remoting:aspect>
             <bean class="org.openspaces.remoting.scripting.LazyLoadingRemoteInvocationAspect" />
@@ -43,21 +41,8 @@
         <os-remoting:meta-arguments-handler>
             <bean class="org.openspaces.remoting.scripting.ScriptingMetaArgumentsHandler" />
         </os-remoting:meta-arguments-handler>
-    </os-remoting:async-proxy>
+    </os-remoting:event-driven-proxy>
 
-
-    <os-remoting:sync-proxy id="syncScriptingExecutor" giga-space="gigaSpace"
-                            interface="org.openspaces.remoting.scripting.ScriptingExecutor">
-        <os-remoting:aspect>
-            <bean class="org.openspaces.remoting.scripting.LazyLoadingRemoteInvocationAspect" />
-        </os-remoting:aspect>
-        <os-remoting:routing-handler>
-            <bean class="org.openspaces.remoting.scripting.ScriptingRemoteRoutingHandler" />
-        </os-remoting:routing-handler>
-        <os-remoting:meta-arguments-handler>
-            <bean class="org.openspaces.remoting.scripting.ScriptingMetaArgumentsHandler" />
-        </os-remoting:meta-arguments-handler>
-    </os-remoting:sync-proxy>
 
     <os-remoting:executor-proxy id="executorScriptingExecutor" giga-space="gigaSpace"
                             interface="org.openspaces.remoting.scripting.ScriptingExecutor">

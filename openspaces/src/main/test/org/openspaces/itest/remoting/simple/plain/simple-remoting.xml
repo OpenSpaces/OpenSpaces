@@ -15,31 +15,27 @@
 
     <context:component-scan base-package="org.openspaces.itest.remoting.simple.plain"/>
 
-    <os-core:space id="space" url="/./spaceSimpleRemoting" lookup-groups="${user.name}">
-        <os-core:filter-provider ref="serviceExporter"/>
-    </os-core:space>
+    <os-core:space id="space" url="/./spaceSimpleRemoting" lookup-groups="${user.name}"/>
 
     <os-core:giga-space id="gigaSpace" space="space"/>
 
-    <os-remoting:annotation-support />
+    <os-remoting:annotation-support/>
 
-    <bean id="simpleAnnotationBean" class="org.openspaces.itest.remoting.simple.plain.SimpleAnnotationBean" />
-    
-    <os-remoting:service-exporter id="serviceExporter" />
+    <bean id="simpleAnnotationBean" class="org.openspaces.itest.remoting.simple.plain.SimpleAnnotationBean"/>
+
+    <os-remoting:service-exporter id="serviceExporter"/>
 
     <os-events:polling-container id="remotingContainer" giga-space="gigaSpace">
         <os-events:listener ref="serviceExporter"/>
     </os-events:polling-container>
 
-
-    <os-remoting:async-proxy id="simpleService" giga-space="gigaSpace"
+    <os-remoting:executor-proxy id="simpleService" giga-space="gigaSpace"
                              interface="org.openspaces.itest.remoting.simple.plain.SimpleService" timeout="150000"/>
 
-
     <os-remoting:event-driven-proxy id="simpleServiceAsync" giga-space="gigaSpace"
-                             interface="org.openspaces.itest.remoting.simple.plain.SimpleServiceAsync" timeout="150000"/>
+                                    interface="org.openspaces.itest.remoting.simple.plain.SimpleServiceAsync"
+                                    timeout="150000"/>
 
-    <os-remoting:sync-proxy id="simpleServiceSync" giga-space="gigaSpace" interface="org.openspaces.itest.remoting.simple.plain.SimpleService" />
-
-    <os-remoting:executor-proxy id="simpleServiceExecutor" giga-space="gigaSpace" interface="org.openspaces.itest.remoting.simple.plain.SimpleService" />
+    <os-remoting:executor-proxy id="simpleServiceExecutor" giga-space="gigaSpace"
+                                interface="org.openspaces.itest.remoting.simple.plain.SimpleService"/>
 </beans>

@@ -15,35 +15,30 @@
 
     <context:component-scan base-package="org.openspaces.itest.remoting.broadcast"/>
 
-    <os-core:space id="space1" url="/./spaceBroadcastRemoting?cluster_schema=partitioned&amp;total_members=2&amp;id=1" lookup-groups="${user.name}">
-        <os-core:filter-provider ref="serviceExporter1"/>
-    </os-core:space>
+    <os-core:space id="space1" url="/./spaceBroadcastRemoting?cluster_schema=partitioned&amp;total_members=2&amp;id=1"
+                   lookup-groups="${user.name}"/>
 
-    <os-core:space id="space2" url="/./spaceBroadcastRemoting?cluster_schema=partitioned&amp;total_members=2&amp;id=2" lookup-groups="${user.name}">
-        <os-core:filter-provider ref="serviceExporter2"/>
-    </os-core:space>
+    <os-core:space id="space2" url="/./spaceBroadcastRemoting?cluster_schema=partitioned&amp;total_members=2&amp;id=2"
+                   lookup-groups="${user.name}"/>
 
-    <os-remoting:annotation-support />
+    <os-remoting:annotation-support/>
 
-    <bean id="defaultService" class="org.openspaces.itest.remoting.broadcast.DefaultSimpleService" />
-    
+    <bean id="defaultService" class="org.openspaces.itest.remoting.broadcast.DefaultSimpleService"/>
+
     <os-core:giga-space id="gigaSpace" space="space1" clustered="true"/>
 
     <os-remoting:service-exporter id="serviceExporter1">
-        <os-remoting:service ref="defaultService" />
+        <os-remoting:service ref="defaultService"/>
     </os-remoting:service-exporter>
 
     <os-remoting:service-exporter id="serviceExporter2">
-        <os-remoting:service ref="defaultService" />
+        <os-remoting:service ref="defaultService"/>
     </os-remoting:service-exporter>
 
-    <bean id="reducer" class="org.openspaces.itest.remoting.broadcast.SimpleServiceReducer" />
+    <bean id="reducer" class="org.openspaces.itest.remoting.broadcast.SimpleServiceReducer"/>
 
-    <os-remoting:sync-proxy id="syncService" giga-space="gigaSpace" interface="org.openspaces.itest.remoting.broadcast.SimpleService" broadcast="true">
-        <os-remoting:result-reducer ref="reducer" />
-    </os-remoting:sync-proxy>
-
-    <os-remoting:executor-proxy id="executorService" giga-space="gigaSpace" interface="org.openspaces.itest.remoting.broadcast.SimpleService" broadcast="true">
-        <os-remoting:result-reducer ref="reducer" />
+    <os-remoting:executor-proxy id="executorService" giga-space="gigaSpace"
+                                interface="org.openspaces.itest.remoting.broadcast.SimpleService" broadcast="true">
+        <os-remoting:result-reducer ref="reducer"/>
     </os-remoting:executor-proxy>
 </beans>

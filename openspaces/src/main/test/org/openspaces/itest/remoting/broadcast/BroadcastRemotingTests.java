@@ -29,8 +29,6 @@ import java.util.concurrent.Future;
  */
 public class BroadcastRemotingTests extends AbstractDependencyInjectionSpringContextTests {
 
-    protected SimpleService syncService;
-
     protected SimpleService executorService;
 
     protected GigaSpace gigaSpace;
@@ -43,7 +41,7 @@ public class BroadcastRemotingTests extends AbstractDependencyInjectionSpringCon
         return new String[]{"/org/openspaces/itest/remoting/broadcast/broadcast-remoting.xml"};
     }
 
-    public void testTakeMulitpleWorking() {
+    public void testTakeMultipleWorking() {
         gigaSpace.write(new Message(1));
         gigaSpace.write(new Message(2));
         Message[] result = gigaSpace.takeMultiple(new Message(), Integer.MAX_VALUE);
@@ -71,16 +69,8 @@ public class BroadcastRemotingTests extends AbstractDependencyInjectionSpringCon
         innerTestAsyncException(executorService);
     }
 
-    public void testSyncAsyncException() throws ExecutionException, InterruptedException {
-        innerTestAsyncException(syncService);
-    }
-
     public void testExecutorSyncException() throws ExecutionException, InterruptedException {
         innerTestSyncException(executorService);
-    }
-
-    public void testSyncSyncException() throws ExecutionException, InterruptedException {
-        innerTestSyncException(syncService);
     }
 
     private void innerTestSyncBroadcast(SimpleService service) {
