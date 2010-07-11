@@ -860,6 +860,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     public IJSpace getSpaceDirect(ServiceID serviceID) throws RemoteException {
+        if (puDetails == null) {
+            throw new RemoteException("processing unit shutdown");
+        }
         for (Object serviceDetails : puDetails.getDetails()) {
             if (serviceDetails.getClass().getName().equals(SpaceServiceDetails.class.getName())) {
                 try {
@@ -881,6 +884,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     public RuntimeHolder getSpaceRuntimeHolder(ServiceID serviceID) throws RemoteException {
+        if (puDetails == null) {
+            throw new RemoteException("processing unit shutdown");
+        }
         for (Object serviceDetails : puDetails.getDetails()) {
             if (serviceDetails.getClass().getName().equals(SpaceServiceDetails.class.getName())) {
                 try {
@@ -903,6 +909,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     public StatisticsHolder getSpaceStatisticsHolder(ServiceID serviceID) throws RemoteException {
+        if (puDetails == null) {
+            throw new RemoteException("processing unit shutdown");
+        }
         for (Object serviceDetails : puDetails.getDetails()) {
             if (serviceDetails.getClass().getName().equals(SpaceServiceDetails.class.getName())) {
                 try {
@@ -925,6 +934,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     public SpaceURL[] listSpacesURLs() throws RemoteException {
+        if (puDetails == null) {
+            throw new RemoteException("processing unit shutdown");
+        }
         List<SpaceURL> spaceUrls = new ArrayList<SpaceURL>();
         for (Object serviceDetails : puDetails.getDetails()) {
             if (serviceDetails.getClass().getName().equals(SpaceServiceDetails.class.getName())) {
@@ -945,6 +957,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     public SpaceMode[] listSpacesModes() throws RemoteException {
+        if (puDetails == null) {
+            throw new RemoteException("processing unit shutdown");
+        }
         List<SpaceMode> spacesModes = new ArrayList<SpaceMode>();
         for (Object serviceDetails : puDetails.getDetails()) {
             if (serviceDetails.getClass().getName().equals(SpaceServiceDetails.class.getName())) {
@@ -981,6 +996,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
     }
 
     public String getPresentationName() throws RemoteException {
+        if (puDetails == null) {
+            throw new RemoteException("processing unit shutdown");
+        }
         return this.puDetails.getPresentationName();
     }
 
