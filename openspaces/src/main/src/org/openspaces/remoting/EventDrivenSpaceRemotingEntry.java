@@ -16,6 +16,8 @@
 
 package org.openspaces.remoting;
 
+import com.gigaspaces.internal.version.PlatformLogicalVersion;
+import com.gigaspaces.lrmi.LRMIInvocationContext;
 import com.j_spaces.core.client.MetaDataEntry;
 
 import java.io.Externalizable;
@@ -31,18 +33,19 @@ import java.util.Arrays;
  * @author kimchy
  */
 public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements SpaceRemotingInvocation, SpaceRemotingResult,
-Cloneable, Externalizable {
+        Cloneable, Externalizable {
 
-    static int bitIndexCounter=0;
+    static int bitIndexCounter = 0;
     private static final int LOOKUP_NAME_BIT_MASK = 1 << bitIndexCounter++;
     private static final int METHOD_NAME_BIT_MASK = 1 << bitIndexCounter++;
     private static final int ROUTING_BIT_MASK = 1 << bitIndexCounter++;
-    private static final int ONE_WAY_BIT_MASK = 1<< bitIndexCounter++;
-    private static final int ARGUMENTS_BIT_MASK = 1<< bitIndexCounter++;
+    private static final int ONE_WAY_BIT_MASK = 1 << bitIndexCounter++;
+    private static final int ARGUMENTS_BIT_MASK = 1 << bitIndexCounter++;
     private static final int META_ARGUMENTS_BIT_MASK = 1 << bitIndexCounter++;
     private static final int RESULT_BIT_MASK = 1 << bitIndexCounter++;
     private static final int EX_BIT_MASK = 1 << bitIndexCounter++;
     private static final int INSTANCE_ID_BIT_MASK = 1 << bitIndexCounter++;
+    private static final int METHOD_HASH_BIT_MASK = 1 << bitIndexCounter++;
 
 
     public Boolean isInvocation;
@@ -50,6 +53,8 @@ Cloneable, Externalizable {
     public String lookupName;
 
     public String methodName;
+
+    public RemotingUtils.MethodHash methodHash;
 
     public Object[] arguments;
 
@@ -116,11 +121,12 @@ Cloneable, Externalizable {
     }
 
 
-    public EventDrivenSpaceRemotingEntry buildInvocation(String lookupName, String methodName, Object[] arguments) {
+    public EventDrivenSpaceRemotingEntry buildInvocation(String lookupName, String methodName, RemotingUtils.MethodHash methodHash, Object[] arguments) {
         clearResultData();
         this.isInvocation = true;
         this.lookupName = lookupName;
         this.methodName = methodName;
+        this.methodHash = methodHash;
         this.arguments = arguments;
         return this;
     }
@@ -157,6 +163,7 @@ Cloneable, Externalizable {
     private void clearInvocationData() {
         this.lookupName = null;
         this.methodName = null;
+        this.methodHash = null;
         this.arguments = null;
         this.oneWay = null;
     }
@@ -205,6 +212,12 @@ Cloneable, Externalizable {
                 out.writeInt(metaArguments.length);
                 for (Object argument : metaArguments) {
                     out.writeObject(argument);
+                }
+            }
+
+            if (LRMIInvocationContext.getEndpointLogicalVersion().greaterThan(PlatformLogicalVersion.v7_1_1)) {
+                if (methodHash != null) {
+                    methodHash.writeExternal(out);
                 }
             }
         } else {
@@ -256,6 +269,13 @@ Cloneable, Externalizable {
                     metaArguments[i] = in.readObject();
                 }
             }
+
+            if (LRMIInvocationContext.getEndpointLogicalVersion().greaterThan(PlatformLogicalVersion.v7_1_1)) {
+                if (!isFieldNull(bitMask, METHOD_HASH_BIT_MASK)) {
+                    methodHash = new RemotingUtils.MethodHash();
+                    methodHash.readExternal(in);
+                }
+            }
         } else {
             if (!isFieldNull(bitMask, RESULT_BIT_MASK)) {
                 result = in.readObject();
@@ -300,16 +320,17 @@ Cloneable, Externalizable {
      */
     private short getNullableFieldsBitMask() {
         int bitMask = 0;
-        bitMask = ((lookupName != null)  ? bitMask | LOOKUP_NAME_BIT_MASK : bitMask) ;
-        bitMask = ((methodName != null)  ? bitMask | METHOD_NAME_BIT_MASK : bitMask) ;
-        bitMask = ((routing != null)  ? bitMask | ROUTING_BIT_MASK : bitMask) ;
-        bitMask = ((oneWay != null)  ? bitMask | ONE_WAY_BIT_MASK : bitMask) ;
-        bitMask = ((arguments != null && arguments.length > 0)  ? bitMask | ARGUMENTS_BIT_MASK : bitMask) ;
-        bitMask = ((metaArguments != null && metaArguments.length > 0)  ? bitMask | META_ARGUMENTS_BIT_MASK : bitMask) ;
-        bitMask = ((result != null)  ? bitMask | RESULT_BIT_MASK : bitMask) ;
-        bitMask = ((ex != null)  ? bitMask | EX_BIT_MASK : bitMask) ;
-        bitMask = ((instanceId != null)  ? bitMask | INSTANCE_ID_BIT_MASK : bitMask) ;
-        return (short)bitMask;
+        bitMask = ((lookupName != null) ? bitMask | LOOKUP_NAME_BIT_MASK : bitMask);
+        bitMask = ((methodName != null) ? bitMask | METHOD_NAME_BIT_MASK : bitMask);
+        bitMask = ((routing != null) ? bitMask | ROUTING_BIT_MASK : bitMask);
+        bitMask = ((oneWay != null) ? bitMask | ONE_WAY_BIT_MASK : bitMask);
+        bitMask = ((arguments != null && arguments.length > 0) ? bitMask | ARGUMENTS_BIT_MASK : bitMask);
+        bitMask = ((metaArguments != null && metaArguments.length > 0) ? bitMask | META_ARGUMENTS_BIT_MASK : bitMask);
+        bitMask = ((result != null) ? bitMask | RESULT_BIT_MASK : bitMask);
+        bitMask = ((ex != null) ? bitMask | EX_BIT_MASK : bitMask);
+        bitMask = ((instanceId != null) ? bitMask | INSTANCE_ID_BIT_MASK : bitMask);
+        bitMask = ((methodHash != null) ? bitMask | METHOD_HASH_BIT_MASK : bitMask);
+        return (short) bitMask;
     }
 
     private boolean isFieldNull(short bitMask, int fieldBitMask) {

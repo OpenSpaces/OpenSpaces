@@ -120,13 +120,11 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
 
     private String templateLookupName;
 
-    // sync execution fields
-
-    private long syncEntryWriteLease = Lease.FOREVER;
-
-
     private ClusterInfo clusterInfo;
 
+    private Map<String, Map<RemotingUtils.MethodHash, IMethod>> methodInvocationLookup;
+
+    // for backward comp
     private MethodInvocationCache methodInvocationCache = new MethodInvocationCache();
 
     private volatile boolean initialized = false;
@@ -185,13 +183,6 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
      */
     public void setServiceExecutionAspect(ServiceExecutionAspect serviceExecutionAspect) {
         this.serviceExecutionAspect = serviceExecutionAspect;
-    }
-
-    /**
-     * Sets the sync entry write lease. Defaults to <code>Lease.FOREVER</code>.
-     */
-    public void setSyncEntryWriteLease(long syncEntryWriteLease) {
-        this.syncEntryWriteLease = syncEntryWriteLease;
     }
 
     /**
@@ -257,10 +248,13 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
                         this.servicesInfo.add(new ServiceInfo("NA" + (++naCounter), service.getClass().getName(), service));
                     }
                 }
+                methodInvocationLookup = new HashMap<String, Map<RemotingUtils.MethodHash, IMethod>>();
                 for (ServiceInfo serviceInfo : servicesInfo) {
                     Class<?>[] interfaces = ClassUtils.getAllInterfaces(serviceInfo.getService());
                     for (Class<?> anInterface : interfaces) {
                         interfaceToService.put(anInterface.getName(), serviceInfo.getService());
+                        methodInvocationLookup.put(anInterface.getName(), RemotingUtils.buildHashToMethodLookupForInterface(anInterface, useFastReflection));
+                        // for backward comp
                         methodInvocationCache.addService(anInterface, serviceInfo.getService(), useFastReflection);
                     }
 
@@ -345,9 +339,14 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
 
         autowireArguments(service, remotingEntry.getArguments());
 
-        IMethod method;
+        IMethod method = null;
         try {
-            method = methodInvocationCache.findMethod(lookupName, service, remotingEntry.methodName, remotingEntry.arguments);
+            if (remotingEntry.methodHash != null) {
+                method = methodInvocationLookup.get(lookupName).get(remotingEntry.methodHash);
+            }
+            if (method == null) {
+                method = methodInvocationCache.findMethod(lookupName, service, remotingEntry.methodName, remotingEntry.arguments);
+            }
         } catch (Exception e) {
             failedExecution(service);
             writeResponse(gigaSpace, remotingEntry, new RemoteLookupFailureException("Failed to find method ["
@@ -459,12 +458,17 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
 
         autowireArguments(service, task.getArguments());
 
-        IMethod method;
+        IMethod method = null;
         try {
-            method = methodInvocationCache.findMethod(lookupName, service, task.getMethodName(), task.getArguments());
+            if (task.getMethodHash() != null) {
+                method = methodInvocationLookup.get(lookupName).get(task.getMethodHash());
+            }
+            if (method == null) {
+                method = methodInvocationCache.findMethod(lookupName, service, task.getMethodName(), task.getArguments());
+            }
         } catch (Exception e) {
             failedExecution(service);
-            throw new RemoteLookupFailureException("Failed to find method [" + task.getMethodName() + "] for lookup [" + task.getLookupName() + "]");
+            throw new RemoteLookupFailureException("Failed to find method [" + task.getMethodName() + "] for lookup [" + task.getLookupName() + "]", e);
         }
         try {
             Object retVal;

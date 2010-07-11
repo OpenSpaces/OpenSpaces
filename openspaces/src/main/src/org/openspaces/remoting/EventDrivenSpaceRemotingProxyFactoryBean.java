@@ -16,6 +16,7 @@
 
 package org.openspaces.remoting;
 
+import com.sun.enterprise.admin.cli.remote.RemoteUtils;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.openspaces.core.GigaSpace;
@@ -26,6 +27,8 @@ import org.springframework.remoting.support.RemoteAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 /**
@@ -95,6 +98,8 @@ public class EventDrivenSpaceRemotingProxyFactoryBean extends RemoteAccessor imp
     private RemoteInvocationAspect remoteInvocationAspect;
 
     private Object serviceProxy;
+
+    private Map<Method, RemotingUtils.MethodHash> methodHashLookup;
 
     /**
      * Sets the GigaSpace interface that will be used to work with the space as the transport layer
@@ -179,6 +184,7 @@ public class EventDrivenSpaceRemotingProxyFactoryBean extends RemoteAccessor imp
         Assert.notNull(getServiceInterface(), "serviceInterface property is required");
         Assert.notNull(gigaSpace, "gigaSpace property is required");
         this.serviceProxy = ProxyFactory.getProxy(getServiceInterface(), this);
+        this.methodHashLookup = RemotingUtils.buildMethodToHashLookupForInterface(getServiceInterface(), asyncMethodPrefix);
     }
 
     public Object getObject() {
@@ -214,7 +220,7 @@ public class EventDrivenSpaceRemotingProxyFactoryBean extends RemoteAccessor imp
         }
 
         EventDrivenSpaceRemotingEntry remotingEntry = new EventDrivenSpaceRemotingEntry().buildInvocation(lookupName, methodName,
-                methodInvocation.getArguments());
+                methodHashLookup.get(methodInvocation.getMethod()), methodInvocation.getArguments());
 
         remotingEntry.setRouting(RemotingProxyUtils.computeRouting(remotingEntry, remoteRoutingHandler, methodInvocation));
 

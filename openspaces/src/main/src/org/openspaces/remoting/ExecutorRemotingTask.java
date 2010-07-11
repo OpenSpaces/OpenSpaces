@@ -17,6 +17,8 @@
 package org.openspaces.remoting;
 
 import com.gigaspaces.async.AsyncResult;
+import com.gigaspaces.internal.version.PlatformLogicalVersion;
+import com.gigaspaces.lrmi.LRMIInvocationContext;
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.core.executor.DistributedTask;
@@ -49,6 +51,8 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
 
     private String methodName;
 
+    private RemotingUtils.MethodHash methodHash;
+
     private Object[] arguments;
 
     private Object[] metaArguments;
@@ -65,9 +69,10 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
     public ExecutorRemotingTask() {
     }
 
-    public ExecutorRemotingTask(String lookupName, String methodName, Object[] arguments) {
+    public ExecutorRemotingTask(String lookupName, String methodName, RemotingUtils.MethodHash methodHash, Object[] arguments) {
         this.lookupName = lookupName;
         this.methodName = methodName;
+        this.methodHash = methodHash;
         this.arguments = arguments;
     }
 
@@ -120,6 +125,10 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
         return methodName;
     }
 
+    public RemotingUtils.MethodHash getMethodHash() {
+        return methodHash;
+    }
+
     public Object[] getArguments() {
         return arguments;
     }
@@ -151,6 +160,10 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
                 out.writeObject(arg);
             }
         }
+
+        if (LRMIInvocationContext.getEndpointLogicalVersion().greaterThan(PlatformLogicalVersion.v7_1_1)) {
+            methodHash.writeExternal(out);
+        }
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
@@ -169,6 +182,11 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
             for (int i = 0; i < size; i++) {
                 metaArguments[i] = in.readObject();
             }
+        }
+
+        if (LRMIInvocationContext.getEndpointLogicalVersion().greaterThan(PlatformLogicalVersion.v7_1_1)) {
+            methodHash = new RemotingUtils.MethodHash();
+            methodHash.readExternal(in);
         }
     }
 

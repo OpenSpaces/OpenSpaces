@@ -30,7 +30,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -103,6 +105,8 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
 
     private Object serviceProxy;
 
+    private Map<Method, RemotingUtils.MethodHash> methodHashLookup;
+
     /**
      * Sets the GigaSpace interface that will be used to work with the space as the transport layer.
      */
@@ -120,8 +124,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
 
     /**
      * In case of remote invocation over a partitioned space the default partitioned routing index
-     * will be random (the hashCode of the newly created
-     * {@link SyncSpaceRemotingEntry} class). This
+     * will be random. This
      * {@link org.openspaces.remoting.RemoteRoutingHandler} allows for custom routing computation
      * (for example, based on one of the service method parameters).
      */
@@ -175,6 +178,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
         Assert.notNull(getServiceInterface(), "serviceInterface property is required");
         Assert.notNull(gigaSpace, "gigaSpace property is required");
         this.serviceProxy = ProxyFactory.getProxy(getServiceInterface(), this);
+        this.methodHashLookup = RemotingUtils.buildMethodToHashLookupForInterface(getServiceInterface(), asyncMethodPrefix);
     }
 
     public Object getObject() {
@@ -209,7 +213,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
             }
         }
 
-        ExecutorRemotingTask task = new ExecutorRemotingTask(lookupName, methodName, methodInvocation.getArguments());
+        ExecutorRemotingTask task = new ExecutorRemotingTask(lookupName, methodName, methodHashLookup.get(methodInvocation.getMethod()), methodInvocation.getArguments());
 
         BroadcastIndicator broadcastIndicator = null;
         boolean shouldBroadcast = broadcast;

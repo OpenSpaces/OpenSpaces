@@ -29,6 +29,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -140,6 +143,20 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         }
     }
 
+    public void testOverloaded() throws Exception {
+        String result = simpleAnnotationBean.executorSimpleService.overloaded(Arrays.asList("test", "something"));
+        assertEquals("L2", result);
+        result = simpleAnnotationBean.executorSimpleService.asyncOverloaded(Arrays.asList("test", "something")).get();
+        assertEquals("L2", result);
+
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("test", "value");
+        result = simpleAnnotationBean.executorSimpleService.overloaded(map);
+        assertEquals("M1", result);
+        result = simpleAnnotationBean.executorSimpleService.asyncOverloaded(map).get();
+        assertEquals("M1", result);
+    }
+
     public void testSimpleAnnotationExecution() {
         String reply = simpleAnnotationBean.eventSimpleService.say("test");
         assertEquals("SAY test", reply);
@@ -166,7 +183,7 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
 
     public void testSerializationOfAsyncRemotingEntry() throws IOException, ClassNotFoundException {
         EventDrivenSpaceRemotingEntry entry = new EventDrivenSpaceRemotingEntry();
-        entry = entry.buildInvocation("test", "test", null);
+        entry = entry.buildInvocation("test", "test", null, null);
         entry.oneWay = true;
         entry.metaArguments = new Object[]{new Integer(1)};
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
