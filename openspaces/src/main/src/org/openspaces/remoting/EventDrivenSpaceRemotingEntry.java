@@ -215,7 +215,7 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
                 }
             }
 
-            if (LRMIInvocationContext.getEndpointLogicalVersion().greaterThan(PlatformLogicalVersion.v7_1_1)) {
+            if (LRMIInvocationContext.getEndpointLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v7_1_2)) {
                 if (methodHash != null) {
                     methodHash.writeExternal(out);
                 }
@@ -270,7 +270,7 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
                 }
             }
 
-            if (LRMIInvocationContext.getEndpointLogicalVersion().greaterThan(PlatformLogicalVersion.v7_1_1)) {
+            if (LRMIInvocationContext.getEndpointLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v7_1_2)) {
                 if (!isFieldNull(bitMask, METHOD_HASH_BIT_MASK)) {
                     methodHash = new RemotingUtils.MethodHash();
                     methodHash.readExternal(in);

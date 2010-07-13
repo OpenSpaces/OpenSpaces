@@ -161,7 +161,7 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
             }
         }
 
-        if (LRMIInvocationContext.getEndpointLogicalVersion().greaterThan(PlatformLogicalVersion.v7_1_1)) {
+        if (LRMIInvocationContext.getEndpointLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v7_1_2)) {
             methodHash.writeExternal(out);
         }
     }
@@ -184,7 +184,7 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
             }
         }
 
-        if (LRMIInvocationContext.getEndpointLogicalVersion().greaterThan(PlatformLogicalVersion.v7_1_1)) {
+        if (LRMIInvocationContext.getEndpointLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v7_1_2)) {
             methodHash = new RemotingUtils.MethodHash();
             methodHash.readExternal(in);
         }
