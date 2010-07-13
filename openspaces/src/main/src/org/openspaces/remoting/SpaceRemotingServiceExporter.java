@@ -19,7 +19,6 @@ package org.openspaces.remoting;
 import com.gigaspaces.internal.reflection.IMethod;
 import com.gigaspaces.internal.reflection.ReflectionUtil;
 import com.gigaspaces.internal.reflection.standard.StandardMethod;
-import net.jini.core.lease.Lease;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.ServiceClassLoader;
