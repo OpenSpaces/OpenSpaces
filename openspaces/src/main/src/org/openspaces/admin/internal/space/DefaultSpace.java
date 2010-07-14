@@ -296,7 +296,7 @@ public class DefaultSpace implements InternalSpace {
             }
         }
         SpaceInstance existing = spaceInstancesByUID.put(spaceInstance.getUid(), spaceInstance);
-        String fullSpaceName = JSpaceUtilities.createFullSpaceName(spaceInstance.getSpaceUrl().getContainerName(), spaceInstance.getSpaceUrl().getContainerName());
+        String fullSpaceName = JSpaceUtilities.createFullSpaceName(spaceInstance.getSpaceUrl().getContainerName(), spaceInstance.getSpaceUrl().getSpaceName());
         spaceInstancesByMemberName.put(fullSpaceName, spaceInstance);
         InternalSpacePartition spacePartition = getPartition(internalSpaceInstance);
         internalSpaceInstance.setPartition(spacePartition);
@@ -326,6 +326,8 @@ public class DefaultSpace implements InternalSpace {
         if (spaceInstance != null) {
             spaceInstance.stopStatisticsMonitor();
             getPartition(spaceInstance).removeSpaceInstance(uid);
+            String fullSpaceName = JSpaceUtilities.createFullSpaceName(spaceInstance.getSpaceUrl().getContainerName(), spaceInstance.getSpaceUrl().getSpaceName());
+            spaceInstancesByMemberName.remove(fullSpaceName);
             spaceInstanceRemovedEventManager.spaceInstanceRemoved(spaceInstance);
             ((InternalSpaceInstanceRemovedEventManager) spaces.getSpaceInstanceRemoved()).spaceInstanceRemoved(spaceInstance);
             Future fetcher = scheduledRuntimeFetchers.get(uid);
