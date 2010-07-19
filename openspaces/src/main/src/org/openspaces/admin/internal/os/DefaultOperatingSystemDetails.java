@@ -1,9 +1,13 @@
 package org.openspaces.admin.internal.os;
 
-import com.gigaspaces.internal.os.OSDetails;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.openspaces.admin.os.OperatingSystemDetails;
 import org.openspaces.admin.support.StatisticsUtils;
+
+import com.gigaspaces.internal.os.OSDetails;
+import com.gigaspaces.internal.os.OSDetails.OSNetInterfaceDetails;
 
 /**
  * @author kimchy
@@ -11,9 +15,18 @@ import org.openspaces.admin.support.StatisticsUtils;
 public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
 
     private final OSDetails details;
+    private Map<String, NetworkDetails> networkDetailsMap = 
+                            new HashMap<String, OperatingSystemDetails.NetworkDetails>();
 
     public DefaultOperatingSystemDetails(OSDetails details) {
         this.details = details;
+        
+        OSNetInterfaceDetails[] netInterfaceConfigs = details.getNetInterfaceConfigs();
+        for(OSNetInterfaceDetails netInterfaceConfig : netInterfaceConfigs){
+            networkDetailsMap.put( netInterfaceConfig.getName(), 
+                                new DefaultNetworkDetails( netInterfaceConfig ) );    
+        }
+        
     }
 
     public boolean isNA() {
@@ -70,5 +83,37 @@ public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
 
     public String getHostAddress() {
         return details.getHostAddress();
+    }
+
+    public Map<String, NetworkDetails> getNetworkDetails() {
+
+        return networkDetailsMap;
+    }
+    
+    private class DefaultNetworkDetails implements NetworkDetails {
+
+        private String name;
+        private String description;
+        private String address; 
+        
+        private DefaultNetworkDetails( 
+                OSDetails.OSNetInterfaceDetails networkInterfaceDetails ){
+            name = networkInterfaceDetails.getName();
+            description = networkInterfaceDetails.getDescription();
+            address = networkInterfaceDetails.getAddress();
+        }
+        
+        public String getName() {
+            return name;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+        
     }
 }

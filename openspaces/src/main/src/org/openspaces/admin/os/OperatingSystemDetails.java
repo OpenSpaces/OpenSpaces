@@ -16,6 +16,8 @@
 
 package org.openspaces.admin.os;
 
+import java.util.Map;
+
 /**
  * Operating System Details include static information (non-changeable) regarding the operating system.
  *
@@ -112,4 +114,29 @@ public interface OperatingSystemDetails {
      * Returns the (local) host address of the OS.
      */
     String getHostAddress();
+    
+    /**
+     * Returns network details  
+     */
+    Map<String,NetworkDetails> getNetworkDetails();
+    
+    
+    interface NetworkDetails {
+
+        /**
+         * Get the name of network interface
+         */
+        String getName();
+
+        /**
+         * Get the display name of network interface
+         */
+        String getDescription();
+
+        /**
+         * Returns the hardware address (usually MAC) of the interface if 
+         * it has one and if it can be accessed given the current privileges
+         */
+        String getAddress();
+    }    
 }
