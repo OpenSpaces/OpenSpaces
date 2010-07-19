@@ -111,4 +111,14 @@ public @interface Notify {
      * be started using {@link org.openspaces.events.notify.SimpleNotifyEventListenerContainer#start()}.
      */
     boolean autoStart() default true;
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setReplicateNotifyTemplate(boolean)
+     */
+    ReplicateNotifyTemplateType replicateNotifyTemplate() default ReplicateNotifyTemplateType.DEFAULT;
+
+    /**
+     * @see org.openspaces.events.notify.SimpleNotifyEventListenerContainer#setTriggerNotifyTemplate(boolean)
+     */
+    TriggerNotifyTemplateType triggerNotifyTemplate() default TriggerNotifyTemplateType.DEFAULT;
 }

@@ -435,7 +435,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
      * If using a replicated space controls if the listener will be replicated between all the
      * replicated cluster members.
      * <p/>
-     * <p>If working directly with a cluster memeber, the default value will be <code>false</code>.
+     * <p>If working directly with a cluster member, the default value will be <code>false</code>.
      * Otherwise, the default value will be based on the cluster schema (which is true for clusters
      * with backups).
      *

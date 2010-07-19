@@ -22,11 +22,7 @@ import org.openspaces.core.GigaSpace;
 import org.openspaces.core.util.AnnotationUtils;
 import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.events.TransactionalEvent;
-import org.openspaces.events.notify.Notify;
-import org.openspaces.events.notify.NotifyBatch;
-import org.openspaces.events.notify.NotifyLease;
-import org.openspaces.events.notify.NotifyType;
-import org.openspaces.events.notify.SimpleNotifyContainerConfigurer;
+import org.openspaces.events.notify.*;
 import org.openspaces.events.support.AnnotationProcessorUtils;
 import org.openspaces.events.support.EventContainersBus;
 import org.springframework.aop.support.AopUtils;
@@ -98,6 +94,14 @@ public class NotifyAnnotationPostProcessor implements BeanPostProcessor, Applica
         notifyContainerConfigurer.passArrayAsIs(notify.passArrayAsIs());
 
         notifyContainerConfigurer.autoStart(notify.autoStart());
+
+        if (notify.replicateNotifyTemplate() != ReplicateNotifyTemplateType.DEFAULT) {
+            notifyContainerConfigurer.replicateNotifyTemplate(notify.replicateNotifyTemplate() == ReplicateNotifyTemplateType.TRUE);
+        }
+
+        if (notify.triggerNotifyTemplate() != TriggerNotifyTemplateType.DEFAULT) {
+            notifyContainerConfigurer.triggerNotifyTemplate(notify.triggerNotifyTemplate() == TriggerNotifyTemplateType.TRUE);
+        }
 
         if (!INotifyDelegatorFilter.class.equals(notify.notifyFilter())) {
             try {
