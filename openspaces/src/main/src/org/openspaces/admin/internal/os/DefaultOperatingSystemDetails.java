@@ -22,11 +22,12 @@ public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
         this.details = details;
         
         OSNetInterfaceDetails[] netInterfaceConfigs = details.getNetInterfaceConfigs();
-        for(OSNetInterfaceDetails netInterfaceConfig : netInterfaceConfigs){
-            networkDetailsMap.put( netInterfaceConfig.getName(), 
-                                new DefaultNetworkDetails( netInterfaceConfig ) );    
+        if( netInterfaceConfigs != null ){
+            for(OSNetInterfaceDetails netInterfaceConfig : netInterfaceConfigs){
+                networkDetailsMap.put( netInterfaceConfig.getName(), 
+                        new DefaultNetworkDetails( netInterfaceConfig ) );    
+            }
         }
-        
     }
 
     public boolean isNA() {
