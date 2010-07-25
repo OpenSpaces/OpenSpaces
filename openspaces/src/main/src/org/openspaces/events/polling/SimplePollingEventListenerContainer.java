@@ -368,7 +368,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      */
     protected TaskExecutor createDefaultTaskExecutor() {
         String beanName = getBeanName();
-        String threadNamePrefix = (beanName != null ? beanName + "-" : DEFAULT_THREAD_NAME_PREFIX);
+        String threadNamePrefix = "GS-" + (beanName != null ? beanName + "-" : DEFAULT_THREAD_NAME_PREFIX);
         return new SimpleAsyncTaskExecutor(threadNamePrefix);
     }
 
