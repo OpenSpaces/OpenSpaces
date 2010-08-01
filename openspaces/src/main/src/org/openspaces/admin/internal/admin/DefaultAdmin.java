@@ -1,15 +1,7 @@
 package org.openspaces.admin.internal.admin;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 
 import net.jini.core.discovery.LookupLocator;
 
@@ -19,6 +11,8 @@ import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.dump.CompoundDumpResult;
+import org.openspaces.admin.dump.DumpGeneratedListener;
+import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.esm.ElasticServiceManagers;
 import org.openspaces.admin.gsa.GridServiceAgent;
@@ -936,6 +930,37 @@ public class DefaultAdmin implements InternalAdmin {
         if (!os.hasOperatingSystemInfoProviders()) {
             operatingSystems.removeOperatingSystem(os.getUid());
         }
+    }
+
+    public DumpResult generateDump(final Set<DumpProvider> dumpProviders, final DumpGeneratedListener listener, final String cause, final Map<String, Object> context, final String... processor) throws AdminException {
+        CompoundDumpResult dumpResult = new CompoundDumpResult();
+
+        ExecutorService es = Executors.newFixedThreadPool(dumpProviders.size());
+        CompletionService<DumpResult> cs = new ExecutorCompletionService<DumpResult>(es);
+
+        for (final DumpProvider dumpProvider : dumpProviders) {
+            cs.submit(new Callable<DumpResult>() {
+                public DumpResult call() throws Exception {
+                    DumpResult result = dumpProvider.generateDump(cause, context, processor);
+                    synchronized (listener) {
+                        listener.onGenerated(dumpProvider, result);
+                    }
+                    return result;
+                }
+            });
+        }
+
+        for (int i = 0; i < dumpProviders.size(); i++) {
+            try {
+                dumpResult.add(cs.take().get());
+            } catch (Exception e) {
+                // ignore it for now
+            }
+        }
+
+        es.shutdown();
+
+        return dumpResult;
     }
 
     public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {

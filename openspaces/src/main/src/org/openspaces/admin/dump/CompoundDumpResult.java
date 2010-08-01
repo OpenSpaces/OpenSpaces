@@ -1,12 +1,13 @@
 package org.openspaces.admin.dump;
 
-import org.openspaces.admin.internal.dump.InternalDumpResult;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.internal.dump.InternalDumpResult;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.zip.ZipOutputStream;
 
 /**
@@ -16,7 +17,7 @@ import java.util.zip.ZipOutputStream;
  */
 public class CompoundDumpResult implements DumpResult {
 
-    private ArrayList<DumpResult> dumpResults = new ArrayList<DumpResult>();
+    private List<DumpResult> dumpResults = new CopyOnWriteArrayList<DumpResult>();
 
     public CompoundDumpResult add(DumpResult dumpResult) {
         dumpResults.add(dumpResult);

@@ -16,10 +16,11 @@
 
 package org.openspaces.admin;
 
-import java.util.concurrent.TimeUnit;
-
 import net.jini.core.discovery.LookupLocator;
-
+import org.openspaces.admin.dump.DumpGeneratedListener;
+import org.openspaces.admin.dump.DumpProvider;
+import org.openspaces.admin.dump.DumpResult;
+import org.openspaces.admin.esm.ElasticServiceManagers;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
@@ -31,8 +32,10 @@ import org.openspaces.admin.space.Spaces;
 import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
 import org.openspaces.admin.zone.Zones;
-import org.openspaces.admin.dump.DumpProvider;
-import org.openspaces.admin.esm.ElasticServiceManagers;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The main interface for accessing Admin API. Created using the {@link org.openspaces.admin.AdminFactory}
@@ -120,12 +123,12 @@ public interface Admin extends StatisticsMonitor, DumpProvider {
      * The default timeout to be used for operations that have a wait for mechanism, i.e. operations
      * with overloaded methods containing <tt>(..., long timeout, TimeUnit timeUnit)</tt>. If not set, the
      * default is <tt>Long.MAX_VALUE, TimeUnit.MILLISECONDS</tt>
-     * 
-     * @param timeout The timeout value to be used as the default operation timeout if non was provided.
+     *
+     * @param timeout  The timeout value to be used as the default operation timeout if non was provided.
      * @param timeUnit The time-unit corresponding to the timeout.
      */
     void setDefaultTimeout(long timeout, TimeUnit timeUnit);
-    
+
     /**
      * Closes the Admin, releasing any resource and stops listening for events from the lookup service.
      */
@@ -145,9 +148,9 @@ public interface Admin extends StatisticsMonitor, DumpProvider {
      * Returns the grid service managers discovered.
      */
     GridServiceManagers getGridServiceManagers();
-    
+
     /**
-     * Returns the elastic service managers discovered. 
+     * Returns the elastic service managers discovered.
      */
     ElasticServiceManagers getElasticServiceManagers();
 
@@ -158,14 +161,14 @@ public interface Admin extends StatisticsMonitor, DumpProvider {
 
     /**
      * Returns the Grid Component represented by this UID; e.g. GSA, LUS, GSM, GSC, etc.
-     * @see GridComponent#getUid()
-     * 
+     *
      * @param uid The UID of the service returned by {@link GridComponent#getUid()};
      *            <code>null</code> if no representation.
      * @return The Grid Component represented by this UID.
+     * @see GridComponent#getUid()
      */
     GridComponent getGridComponentByUID(String uid);
-    
+
     /**
      * Returns the machines discovered.
      */
@@ -216,4 +219,9 @@ public interface Admin extends StatisticsMonitor, DumpProvider {
      * @see #addEventListener(AdminEventListener)
      */
     void removeEventListener(AdminEventListener eventListener);
+
+    /**
+     * Generates dump for an explicit set of dump providers.
+     */
+    DumpResult generateDump(Set<DumpProvider> dumpProviders, DumpGeneratedListener listener, String cause, Map<String, Object> context, String... processor) throws AdminException;
 }
