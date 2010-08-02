@@ -163,7 +163,7 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
 
     public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {
         try {
-            return new InternalDumpResult(gsc, gsc.generateDump(cause, context));
+            return new InternalDumpResult(this, gsc, gsc.generateDump(cause, context));
         } catch (Exception e) {
             throw new AdminException("Failed to generate dump", e);
         }
@@ -171,7 +171,7 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
 
     public DumpResult generateDump(String cause, Map<String, Object> context, String... processor) throws AdminException {
         try {
-            return new InternalDumpResult(gsc, gsc.generateDump(cause, context, processor));
+            return new InternalDumpResult(this, gsc, gsc.generateDump(cause, context, processor));
         } catch (Exception e) {
             throw new AdminException("Failed to generate dump", e);
         }

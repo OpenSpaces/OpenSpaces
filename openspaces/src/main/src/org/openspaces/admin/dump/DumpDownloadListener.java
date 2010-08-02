@@ -9,8 +9,8 @@ package org.openspaces.admin.dump;
 public interface DumpDownloadListener {
 
     /**
-     * Called repeatedly with the updated downloaded bytes (the total can be obtained from 
+     * Called repeatedly with the downloaded bytes since the last call (the total can be obtained from
      * {@link DumpResult#downloadSize()}.
      */
-    void onDownload(long downloadedBytes, String name, String fileName);
+    void onDownload(DumpProvider dumpProvider, long downloadedBytes, String name, String fileName);
 }

@@ -89,7 +89,7 @@ public class DefaultLookupService extends AbstractAgentGridComponent implements 
 
     public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {
         try {
-            return new InternalDumpResult(((InternalDumpProvider) registrar.getRegistrar()), ((InternalDumpProvider) registrar.getRegistrar()).generateDump(cause, context));
+            return new InternalDumpResult(this, ((InternalDumpProvider) registrar.getRegistrar()), ((InternalDumpProvider) registrar.getRegistrar()).generateDump(cause, context));
         } catch (Exception e) {
             throw new AdminException("Failed to generate dump", e);
         }
@@ -97,7 +97,7 @@ public class DefaultLookupService extends AbstractAgentGridComponent implements 
 
     public DumpResult generateDump(String cause, Map<String, Object> context, String... processors) throws AdminException {
         try {
-            return new InternalDumpResult(((InternalDumpProvider) registrar.getRegistrar()), ((InternalDumpProvider) registrar.getRegistrar()).generateDump(cause, context, processors));
+            return new InternalDumpResult(this, ((InternalDumpProvider) registrar.getRegistrar()), ((InternalDumpProvider) registrar.getRegistrar()).generateDump(cause, context, processors));
         } catch (Exception e) {
             throw new AdminException("Failed to generate dump", e);
         }

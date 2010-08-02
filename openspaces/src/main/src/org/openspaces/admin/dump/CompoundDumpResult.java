@@ -11,7 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.zip.ZipOutputStream;
 
 /**
- * A dump results that holds one or more Dump reuslts.
+ * A dump results that holds one or more Dump results.
  *
  * @author kimchy
  */

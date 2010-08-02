@@ -107,7 +107,7 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
 
     public DumpResult generateDump(String cause, Map<String, Object> context) throws AdminException {
         try {
-            return new InternalDumpResult(esm, esm.generateDump(cause, context));
+            return new InternalDumpResult(this, esm, esm.generateDump(cause, context));
         } catch (Exception e) {
             throw new AdminException("Failed to generate dump", e);
         }
@@ -115,7 +115,7 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
 
     public DumpResult generateDump(String cause, Map<String, Object> context, String... processors) throws AdminException {
         try {
-            return new InternalDumpResult(esm, esm.generateDump(cause, context, processors));
+            return new InternalDumpResult(this, esm, esm.generateDump(cause, context, processors));
         } catch (Exception e) {
             throw new AdminException("Failed to generate dump", e);
         }

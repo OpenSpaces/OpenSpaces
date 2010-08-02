@@ -2,6 +2,7 @@ package org.openspaces.admin.internal.dump;
 
 import com.gigaspaces.internal.dump.InternalDumpProvider;
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.dump.DumpDownloadListener;
 
@@ -14,12 +15,15 @@ import java.util.zip.ZipOutputStream;
  */
 public class InternalDumpResult implements DumpResult {
 
-    private final InternalDumpProvider dumpProvider;
+    private final DumpProvider dumpProvider;
+
+    private final InternalDumpProvider internalDumpProvider;
 
     private final com.gigaspaces.internal.dump.InternalDumpResult internalResult;
 
-    public InternalDumpResult(InternalDumpProvider dumpProvider, com.gigaspaces.internal.dump.InternalDumpResult internalResult) {
+    public InternalDumpResult(DumpProvider dumpProvider, InternalDumpProvider internalDumpProvider, com.gigaspaces.internal.dump.InternalDumpResult internalResult) {
         this.dumpProvider = dumpProvider;
+        this.internalDumpProvider = internalDumpProvider;
         this.internalResult = internalResult;
     }
 
@@ -32,12 +36,12 @@ public class InternalDumpResult implements DumpResult {
     }
 
     public void download(ZipOutputStream zos, DumpDownloadListener listener) throws IOException {
-        internalResult.download(dumpProvider, zos, new InternalDumpDownloadListenerAdapter(listener));
+        internalResult.download(internalDumpProvider, zos, new InternalDumpDownloadListenerAdapter(dumpProvider, listener));
     }
 
     public void download(File target, DumpDownloadListener listener) throws AdminException {
         try {
-            internalResult.download(dumpProvider, target, new InternalDumpDownloadListenerAdapter(listener));
+            internalResult.download(internalDumpProvider, target, new InternalDumpDownloadListenerAdapter(dumpProvider, listener));
         } catch (Exception e) {
             throw new AdminException("Failed to download", e);
         }
@@ -45,7 +49,7 @@ public class InternalDumpResult implements DumpResult {
 
     public void download(File targetDirectory, String fileName, DumpDownloadListener listener) throws AdminException {
         try {
-            internalResult.download(dumpProvider, targetDirectory, fileName, new InternalDumpDownloadListenerAdapter(listener));
+            internalResult.download(internalDumpProvider, targetDirectory, fileName, new InternalDumpDownloadListenerAdapter(dumpProvider, listener));
         } catch (Exception e) {
             throw new AdminException("Failed to download", e);
         }
