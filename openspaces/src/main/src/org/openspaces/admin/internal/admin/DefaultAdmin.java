@@ -2,6 +2,7 @@ package org.openspaces.admin.internal.admin;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.jini.core.discovery.LookupLocator;
 
@@ -938,12 +939,13 @@ public class DefaultAdmin implements InternalAdmin {
         ExecutorService es = Executors.newFixedThreadPool(dumpProviders.size());
         CompletionService<DumpResult> cs = new ExecutorCompletionService<DumpResult>(es);
 
+        final AtomicInteger counter = new AtomicInteger();
         for (final DumpProvider dumpProvider : dumpProviders) {
             cs.submit(new Callable<DumpResult>() {
                 public DumpResult call() throws Exception {
                     DumpResult result = dumpProvider.generateDump(cause, context, processor);
                     synchronized (listener) {
-                        listener.onGenerated(dumpProvider, result);
+                        listener.onGenerated(dumpProvider, result, counter.incrementAndGet(), dumpProviders.size());
                     }
                     return result;
                 }
