@@ -9,6 +9,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.sun.jini.admin.DestroyAdmin;
 import net.jini.core.lookup.ServiceID;
 
 import org.openspaces.admin.AdminException;
@@ -32,6 +33,7 @@ import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.lus.InternalLookupService;
 import org.openspaces.admin.internal.support.AbstractGridComponent;
 import org.openspaces.admin.internal.support.InternalAgentGridComponent;
+import org.openspaces.admin.internal.support.NetworkExceptionHelper;
 import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.lus.events.LookupServiceAddedEventListener;
 
@@ -377,6 +379,16 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
             throw new AdminException("No privileges to restart", se);
         } catch (IOException e) {
             throw new AdminException("Failed to restart [" + agentGridComponent.getUid() + "]", e);
+        }
+    }
+
+    public void shutdown() {
+        try {
+            gsa.shutdown();
+        } catch (RemoteException e) {
+            if (!NetworkExceptionHelper.isConnectOrCloseException(e)) {
+                throw new AdminException("Failed to shutdown GSA", e);
+            }
         }
     }
 

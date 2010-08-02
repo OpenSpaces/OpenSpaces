@@ -121,6 +121,9 @@ public interface GridServiceAgent extends GridComponent, LogProviderGridComponen
      */
     int startGridService(GridServiceOptions options);
 
+    /**
+     * Kills a process based on the agent id provided to it.
+     */
     void killByAgentId(int agentId);
 
     /**
@@ -139,4 +142,9 @@ public interface GridServiceAgent extends GridComponent, LogProviderGridComponen
      * components and ones that are no longer running. 
      */
     CompoundLogEntries allLogEntries(final LogProcessType type, LogEntryMatcher matcher);
+
+    /**
+     * Shuts down the GSA.
+     */
+    void shutdown();
 }
