@@ -9,7 +9,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.sun.jini.admin.DestroyAdmin;
 import net.jini.core.lookup.ServiceID;
 
 import org.openspaces.admin.AdminException;
