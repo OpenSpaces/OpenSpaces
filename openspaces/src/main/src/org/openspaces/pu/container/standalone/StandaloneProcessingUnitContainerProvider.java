@@ -208,7 +208,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
         }
 
         if (logger.isInfoEnabled()) {
-            logger.info("Starting a Standalone processing unit container with " + clusterInfo);
+            logger.info("Starting a Standalone processing unit container " + (clusterInfo != null ? "with " + clusterInfo : ""));
         }
 
         List<URL> urls = new ArrayList<URL>();
@@ -310,16 +310,16 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
             }
         }
 
-        addSharedLibToContextClassLoader(sharedUrls.toArray(new URL[sharedUrls.size()]));
+        List<URL> allUrls = new ArrayList<URL>();
+        allUrls.addAll(sharedUrls);
+        allUrls.addAll(urls);
 
-        URL[] classLoaderUrls = urls.toArray(new URL[urls.size()]);
-        URLClassLoader classLoader = new URLClassLoader(classLoaderUrls, Thread.currentThread().getContextClassLoader());
+        addUrlsToContextClassLoader(allUrls.toArray(new URL[allUrls.size()]));
 
         StandaloneContainerRunnable containerRunnable = new StandaloneContainerRunnable(beanLevelProperties,
                 clusterInfo, configLocations);
         Thread standaloneContainerThread = new Thread(containerRunnable, "Standalone Container Thread");
         standaloneContainerThread.setDaemon(false);
-        standaloneContainerThread.setContextClassLoader(classLoader);
         standaloneContainerThread.start();
 
         while (!containerRunnable.isInitialized()) {
@@ -364,7 +364,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
      * Adds the shared lib to the thread context class loader (they need to be added to where the openspaces.jar
      * class exists).
      */
-    private void addSharedLibToContextClassLoader(URL[] sharedURLs) {
+    private void addUrlsToContextClassLoader(URL[] urls) {
         if (addedSharedLibToClassLoader) {
             return;
         }
@@ -380,7 +380,7 @@ public class StandaloneProcessingUnitContainerProvider implements ApplicationCon
         try {
             Method addURL = clazz.getDeclaredMethod("addURL", URL.class);
             addURL.setAccessible(true);
-            for (URL url : sharedURLs) {
+            for (URL url : urls) {
                 addURL.invoke(classLoader, url);
             }
         } catch (Exception e) {
