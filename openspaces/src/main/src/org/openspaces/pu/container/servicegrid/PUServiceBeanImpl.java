@@ -1089,7 +1089,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         try {
             url = new URL(context.getServiceBeanManager().getOperationalStringManager().getDeployURL() + "/" + puPath);
         } catch (Exception e) {
-            throw new CannotCreateContainerException("Failed to construct URL to download procdessing unit", e);
+            throw new CannotCreateContainerException("Failed to construct URL to download processing unit", e);
         }
 
         if (logger.isInfoEnabled()) {
@@ -1099,7 +1099,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
         try {
             return PUZipUtils.downloadProcessingUnit(puName, url, path, tempPath);
         } catch (Exception e) {
-            throw new CannotCreateContainerException("Faile to download processing unit [" + puName + "]", e);
+            throw new CannotCreateContainerException("Failed to download processing unit [" + puName + "]", e);
         }
     }
 
