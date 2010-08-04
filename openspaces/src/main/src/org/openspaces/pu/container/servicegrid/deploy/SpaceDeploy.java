@@ -1,13 +1,13 @@
 package org.openspaces.pu.container.servicegrid.deploy;
 
-import com.gigaspaces.grid.gsm.GSM;
-import com.gigaspaces.logger.GSLogConfigLoader;
-import com.gigaspaces.security.directory.UserDetails;
+import java.util.ArrayList;
 
 import org.jini.rio.core.OperationalString;
 import org.jini.rio.core.ServiceProvisionListener;
 
-import java.util.ArrayList;
+import com.gigaspaces.grid.gsm.GSM;
+import com.gigaspaces.logger.GSLogConfigLoader;
+import com.gigaspaces.security.directory.UserDetails;
 
 /**
  * @author kimchy
@@ -129,13 +129,23 @@ public class SpaceDeploy {
         sb.append("\n    -zones [zoneName] [zoneName] ...         : Allows to set the SLA zone requirements");
         sb.append("\n");
         sb.append("\n");
-        sb.append("\nSome Examples:");
-        sb.append("\n1. Space Deploy test");
-        sb.append("\n    - Deploys a single instance space called test");
-        sb.append("\n2. Deploy -cluster total_members=2,1 test");
-        sb.append("\n    - Deploys a space called test with partitioned sync2backup cluster schema of 2 partitions, each with one backup");
-        sb.append("\n3. Deploy -sla file://config/sla.xml test");
-        sb.append("\n    - Deploys a space called test using an SLA element read from sla.xml");
+        if (!managed) {
+            sb.append("\nSome Examples:");
+            sb.append("\n1. Space Deploy test");
+            sb.append("\n    - Deploys a single instance space called test");
+            sb.append("\n2. Deploy -cluster total_members=2,1 test");
+            sb.append("\n    - Deploys a space called test with partitioned sync2backup cluster schema of 2 partitions, each with one backup");
+            sb.append("\n3. Deploy -sla file://config/sla.xml test");
+            sb.append("\n    - Deploys a space called test using an SLA element read from sla.xml");
+        } else {
+            sb.append("\nSome Examples:");
+            sb.append("\n1. deploy-space test");
+            sb.append("\n    - Deploys a single instance space called test");
+            sb.append("\n2. deploy-space -cluster total_members=2,1 test");
+            sb.append("\n    - Deploys a space called test with partitioned sync2backup cluster schema of 2 partitions, each with one backup");
+            sb.append("\n3. deploy-space -sla file://config/sla.xml test");
+            sb.append("\n    - Deploys a space called test using an SLA element read from sla.xml");
+        }
         return sb.toString();
     }
 }
