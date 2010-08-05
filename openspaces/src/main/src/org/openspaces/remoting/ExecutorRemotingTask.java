@@ -45,6 +45,8 @@ import java.util.List;
 public class ExecutorRemotingTask<T extends Serializable> implements DistributedTask<ExecutorRemotingTask.InternalExecutorResult<T>, List<AsyncResult<ExecutorRemotingTask.InternalExecutorResult<T>>>>,
         ApplicationContextAware, ClusterInfoAware, TaskRoutingProvider, SpaceRemotingInvocation, Externalizable {
 
+    static final long serialVersionUID = -3901451909736348231L;
+    
     private final static transient Log logger = LogFactory.getLog(ExecutorRemotingTask.class);
 
     private String lookupName;
