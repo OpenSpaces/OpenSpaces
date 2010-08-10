@@ -35,7 +35,7 @@ import java.util.Arrays;
 public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements SpaceRemotingInvocation, SpaceRemotingResult,
         Cloneable, Externalizable {
 
-    static final long serialVersionUID = 5723421441254655906L;
+    static final long serialVersionUID = 7009426586658014410L;
 
     static int bitIndexCounter = 0;
     private static final int LOOKUP_NAME_BIT_MASK = 1 << bitIndexCounter++;
