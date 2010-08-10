@@ -103,7 +103,7 @@
                             </xsd:annotation>
                         </xsd:element>
                     </xsd:choice>
-                    <xsd:attribute name="receive-timeout" type="xsd:nonNegativeInteger">
+                    <xsd:attribute name="receive-timeout" type="xsd:string">
                         <xsd:annotation>
                             <xsd:documentation>
                                 Set the timeout to use for receive calls, in milliseconds. The default is 60000 ms, that
@@ -114,7 +114,7 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="recovery-interval" type="xsd:nonNegativeInteger">
+                    <xsd:attribute name="recovery-interval" type="xsd:string">
                         <xsd:annotation>
                             <xsd:documentation>
                                 Specify the interval between recovery attempts, in milliseconds. The default is 5000 ms,
@@ -154,7 +154,7 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="max-events-per-task" type="xsd:nonNegativeInteger">
+                    <xsd:attribute name="max-events-per-task" type="xsd:string">
                         <xsd:annotation>
                             <xsd:documentation>
                                 Specify the maximum number of events to process in one task. More concretely, this
@@ -173,7 +173,7 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="idle-task-execution-limit" type="xsd:nonNegativeInteger">
+                    <xsd:attribute name="idle-task-execution-limit" type="xsd:string">
                         <xsd:annotation>
                             <xsd:documentation>
                                 Specify the limit for idle executions of a receive task, not having received any event
@@ -290,7 +290,7 @@
                             </xsd:annotation>
                         </xsd:element>
                     </xsd:choice>
-                    <xsd:attribute name="receive-timeout" type="xsd:nonNegativeInteger">
+                    <xsd:attribute name="receive-timeout" type="xsd:string">
                         <xsd:annotation>
                             <xsd:documentation>
                                 Set the timeout to use for receive calls, in milliseconds. The default is 60000 ms, that
@@ -410,7 +410,7 @@
                                 </xsd:documentation>
                             </xsd:annotation>
                             <xsd:complexType>
-                                <xsd:attribute name="size" type="xsd:nonNegativeInteger" use="required">
+                                <xsd:attribute name="size" type="xsd:string" use="required">
                                     <xsd:annotation>
                                         <xsd:documentation>
                                             If set, turns batching event notifications where the server space
@@ -421,7 +421,7 @@
                                         </xsd:documentation>
                                     </xsd:annotation>
                                 </xsd:attribute>
-                                <xsd:attribute name="time" type="xsd:nonNegativeInteger" use="required">
+                                <xsd:attribute name="time" type="xsd:string" use="required">
                                     <xsd:annotation>
                                         <xsd:documentation>
                                             If set, turns batching event notifications where the server space
@@ -448,7 +448,7 @@
                                         </xsd:documentation>
                                     </xsd:annotation>
                                 </xsd:attribute>
-                                <xsd:attribute name="timeout" type="xsd:nonNegativeInteger">
+                                <xsd:attribute name="timeout" type="xsd:string">
                                     <xsd:annotation>
                                         <xsd:documentation>
                                             Sets the timeout for the notificaiton registration. Defaults to FOREVER.
@@ -661,7 +661,7 @@
                 </xsd:documentation>
             </xsd:annotation>
         </xsd:attribute>
-        <xsd:attribute name="tx-timeout" type="xsd:nonNegativeInteger">
+        <xsd:attribute name="tx-timeout" type="xsd:string">
             <xsd:annotation>
                 <xsd:documentation>
                     Specify the transaction timeout to use for transactional wrapping, in seconds. Default is none,
@@ -837,7 +837,7 @@
     <xsd:complexType name="baseResultEventAdapter">
         <xsd:complexContent>
             <xsd:extension base="beans:identifiedType">
-                <xsd:attribute name="write-lease" type="xsd:nonNegativeInteger">
+                <xsd:attribute name="write-lease" type="xsd:string">
                     <xsd:annotation>
                         <xsd:documentation>
                             The lease time the result will be written under (in milliseconds). Defaults to FOREVER.
@@ -852,7 +852,7 @@
                         </xsd:documentation>
                     </xsd:annotation>
                 </xsd:attribute>
-                <xsd:attribute name="update-timeout" type="xsd:nonNegativeInteger">
+                <xsd:attribute name="update-timeout" type="xsd:string">
                     <xsd:annotation>
                         <xsd:documentation>
                             Sets the update timeout (in milliseconds) in case the flag 'update-or-write' is set to true.

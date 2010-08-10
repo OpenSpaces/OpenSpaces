@@ -219,7 +219,7 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="timeout" type="xsd:nonNegativeInteger">
+                    <xsd:attribute name="timeout" type="xsd:string">
                         <xsd:annotation>
                             <xsd:documentation>
                                 Sets the timeout that will be used to wait for the remote invocation response. The
@@ -361,7 +361,7 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="timeout" type="xsd:nonNegativeInteger">
+                    <xsd:attribute name="timeout" type="xsd:string">
                         <xsd:annotation>
                             <xsd:documentation>
                                 Sets the timeout that will be used to wait for the remote invocation response. The
