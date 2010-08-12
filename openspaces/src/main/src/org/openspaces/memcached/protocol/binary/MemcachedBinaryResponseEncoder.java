@@ -46,6 +46,9 @@ public class MemcachedBinaryResponseEncoder extends SimpleChannelUpstreamHandler
     public ResponseCode getStatusCode(ResponseMessage command) {
         Op cmd = command.cmd.op;
         if (cmd == Op.GET || cmd == Op.GETS) {
+            if (command.response == null){
+                return ResponseCode.KEYNF;
+            }
             return ResponseCode.OK;
         } else if (cmd == Op.SET || cmd == Op.CAS || cmd == Op.ADD || cmd == Op.REPLACE || cmd == Op.APPEND || cmd == Op.PREPEND) {
             switch (command.response) {
@@ -122,7 +125,6 @@ public class MemcachedBinaryResponseEncoder extends SimpleChannelUpstreamHandler
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void messageReceived(ChannelHandlerContext channelHandlerContext, MessageEvent messageEvent) throws Exception {
         ResponseMessage command = (ResponseMessage) messageEvent.getMessage();
         Object additional = messageEvent.getMessage();
@@ -235,11 +237,10 @@ public class MemcachedBinaryResponseEncoder extends SimpleChannelUpstreamHandler
             corkedBuffers.remove(opaque);
             corkedBuffers.put(opaque, corkedResponse);
             return corkedResponse;
-        } else {
-            ChannelBuffer buffer = ChannelBuffers.buffer(ByteOrder.BIG_ENDIAN, totalCapacity);
-            corkedBuffers.put(opaque, buffer);
-            return buffer;
         }
+        ChannelBuffer buffer = ChannelBuffers.buffer(ByteOrder.BIG_ENDIAN, totalCapacity);
+        corkedBuffers.put(opaque, buffer);
+        return buffer;
     }
 
     private void uncork(int opaque, Channel channel) {
