@@ -46,7 +46,7 @@ public class MemcachedBinaryResponseEncoder extends SimpleChannelUpstreamHandler
     public ResponseCode getStatusCode(ResponseMessage command) {
         Op cmd = command.cmd.op;
         if (cmd == Op.GET || cmd == Op.GETS) {
-            if (command.response == null){
+            if (command.elements == null || (command.elements.length==1 && command.elements[0]==null)){
                 return ResponseCode.KEYNF;
             }
             return ResponseCode.OK;
