@@ -144,16 +144,18 @@ public final class MemcachedResponseEncoder extends SimpleChannelUpstreamHandler
     }
 
     private ChannelBuffer deleteResponseString(SpaceCache.DeleteResponse deleteResponse) {
-        if (deleteResponse == SpaceCache.DeleteResponse.DELETED) return DELETED.duplicate();
-        else return NOT_FOUND.duplicate();
+        if (deleteResponse == SpaceCache.DeleteResponse.DELETED) 
+            return DELETED.duplicate();
+      
+        return NOT_FOUND.duplicate();
     }
 
 
     private ChannelBuffer incrDecrResponseString(Integer ret) {
         if (ret == null)
             return NOT_FOUND.duplicate();
-        else
-            return ChannelBuffers.copiedBuffer(valueOf(ret) + "\r\n", USASCII);
+        
+        return ChannelBuffers.copiedBuffer(valueOf(ret) + "\r\n", USASCII);
     }
 
     /**

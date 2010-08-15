@@ -54,61 +54,57 @@ public final class MemcachedFrameDecoder extends FrameDecoder {
 
                 // error, no delimiter at end of payload
                 throw new IncorrectlyTerminatedPayloadException("payload not terminated correctly");
-            } else {
-                status.processingMultiline();
+            } 
+            status.processingMultiline();
 
-                // There's enough bytes in the buffer and the delimiter is at the end. Read it.
-                ChannelBuffer result = buffer.slice(buffer.readerIndex(), status.bytesNeeded);
-                buffer.skipBytes(status.bytesNeeded + MemcachedResponseEncoder.CRLF.capacity());
+            // There's enough bytes in the buffer and the delimiter is at the end. Read it.
+            ChannelBuffer result = buffer.slice(buffer.readerIndex(), status.bytesNeeded);
+            buffer.skipBytes(status.bytesNeeded + MemcachedResponseEncoder.CRLF.capacity());
 
-                return result;
-            }
-
-        } else {
-            int minFrameLength = Integer.MAX_VALUE;
-            ChannelBuffer foundDelimiter = null;
-            int frameLength = buffer.bytesBefore(ChannelBufferIndexFinder.CRLF);
-            if (frameLength >= 0 && frameLength < minFrameLength) {
-                minFrameLength = frameLength;
-                foundDelimiter = MemcachedResponseEncoder.CRLF;
-            }
-
-            if (foundDelimiter != null) {
-                int minDelimLength = foundDelimiter.capacity();
-
-                if (discardingTooLongFrame) {
-                    // We've just finished discarding a very large frame.
-                    // Throw an exception and go back to the initial state.
-                    long tooLongFrameLength = this.tooLongFrameLength;
-                    this.tooLongFrameLength = 0L;
-                    discardingTooLongFrame = false;
-                    buffer.skipBytes(minFrameLength + minDelimLength);
-                    fail(tooLongFrameLength + minFrameLength + minDelimLength);
-                }
-
-                if (minFrameLength > maxFrameLength) {
-                    // Discard read frame.
-                    buffer.skipBytes(minFrameLength + minDelimLength);
-                    fail(minFrameLength);
-                }
-
-                ChannelBuffer frame = buffer.slice(buffer.readerIndex(), minFrameLength);
-                buffer.skipBytes(minFrameLength + minDelimLength);
-
-                status.processing();
-
-                return frame;
-            } else {
-                if (buffer.readableBytes() > maxFrameLength) {
-                    // Discard the content of the buffer until a delimiter is found.
-                    tooLongFrameLength = buffer.readableBytes();
-                    buffer.skipBytes(buffer.readableBytes());
-                    discardingTooLongFrame = true;
-                }
-
-                return null;
-            }
+            return result;
+        } 
+        int minFrameLength = Integer.MAX_VALUE;
+        ChannelBuffer foundDelimiter = null;
+        int frameLength = buffer.bytesBefore(ChannelBufferIndexFinder.CRLF);
+        if (frameLength >= 0 && frameLength < minFrameLength) {
+            minFrameLength = frameLength;
+            foundDelimiter = MemcachedResponseEncoder.CRLF;
         }
+
+        if (foundDelimiter != null) {
+            int minDelimLength = foundDelimiter.capacity();
+
+            if (discardingTooLongFrame) {
+                // We've just finished discarding a very large frame.
+                // Throw an exception and go back to the initial state.
+                long tooLongFrameLength = this.tooLongFrameLength;
+                this.tooLongFrameLength = 0L;
+                discardingTooLongFrame = false;
+                buffer.skipBytes(minFrameLength + minDelimLength);
+                fail(tooLongFrameLength + minFrameLength + minDelimLength);
+            }
+
+            if (minFrameLength > maxFrameLength) {
+                // Discard read frame.
+                buffer.skipBytes(minFrameLength + minDelimLength);
+                fail(minFrameLength);
+            }
+
+            ChannelBuffer frame = buffer.slice(buffer.readerIndex(), minFrameLength);
+            buffer.skipBytes(minFrameLength + minDelimLength);
+
+            status.processing();
+
+            return frame;
+        } 
+        if (buffer.readableBytes() > maxFrameLength) {
+            // Discard the content of the buffer until a delimiter is found.
+            tooLongFrameLength = buffer.readableBytes();
+            buffer.skipBytes(buffer.readableBytes());
+            discardingTooLongFrame = true;
+        }
+
+        return null;
     }
 
     private void fail(long frameLength) throws TooLongFrameException {
@@ -120,7 +116,7 @@ public final class MemcachedFrameDecoder extends FrameDecoder {
         if (maxFrameLength <= 0) {
             throw new IllegalArgumentException(
                     "maxFrameLength must be a positive integer: " +
-                            maxFrameLength);
+                    maxFrameLength);
         }
     }
 

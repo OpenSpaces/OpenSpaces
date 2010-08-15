@@ -35,7 +35,7 @@ public final class CommandMessage implements Serializable {
     public LocalCacheElement element;
     public List<Key> keys;
     public boolean noreply;
-    public Long cas_key;
+    public long cas_key;
     public int time = 0;
     public ErrorType error = ErrorType.OK;
     public String errorString;

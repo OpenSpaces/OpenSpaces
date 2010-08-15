@@ -85,7 +85,7 @@ public class MemcachedBinaryResponseEncoder extends SimpleChannelUpstreamHandler
         // take the ResponseMessage and turn it into a binary payload.
         ChannelBuffer header = ChannelBuffers.buffer(ByteOrder.BIG_ENDIAN, 24);
         header.writeByte((byte) 0x81);  // magic
-        header.writeByte(bcmd.code); // opcode
+        header.writeByte(bcmd.getCode()); // opcode
         short keyLength = (short) (keyBuffer != null ? keyBuffer.capacity() : 0);
 
         header.writeShort(keyLength);
@@ -136,7 +136,7 @@ public class MemcachedBinaryResponseEncoder extends SimpleChannelUpstreamHandler
 
         // write key if there is one
         ChannelBuffer keyBuffer = null;
-        if (bcmd.addKeyToResponse && command.cmd.keys != null && command.cmd.keys.size() != 0) {
+        if (bcmd.isAddKeyToResponse() && command.cmd.keys != null && command.cmd.keys.size() != 0) {
             keyBuffer = ChannelBuffers.wrappedBuffer(command.cmd.keys.get(0).bytes);
         }
 
@@ -201,7 +201,7 @@ public class MemcachedBinaryResponseEncoder extends SimpleChannelUpstreamHandler
 
             // write everything
             // is the command 'quiet?' if so, then we append to our 'corked' buffer until a non-corked command comes along
-            if (bcmd.noreply) {
+            if (bcmd.isNoreply()) {
                 int totalCapacity = headerBuffer.capacity() + (extrasBuffer != null ? extrasBuffer.capacity() : 0)
                         + (keyBuffer != null ? keyBuffer.capacity() : 0) + (valueBuffer != null ? valueBuffer.capacity() : 0);
 

@@ -53,15 +53,16 @@ public class MemcachedBinaryCommandDecoder extends FrameDecoder {
         AppendQ(0x19, Op.APPEND, true),
         PrependQ(0x1A, Op.PREPEND, true);
 
-        public byte code;
-        public Op correspondingOp;
-        public boolean noreply;
-        public boolean addKeyToResponse = false;
+        final private byte code;
+        final private Op correspondingOp;
+        final private boolean noreply;
+        final private boolean addKeyToResponse;
 
         BinaryOp(int code, Op correspondingOp, boolean noreply) {
             this.code = (byte)code;
             this.correspondingOp = correspondingOp;
             this.noreply = noreply;
+            this.addKeyToResponse = false;
         }
 
         BinaryOp(int code, Op correspondingOp, boolean noreply, boolean addKeyToResponse) {
@@ -72,13 +73,36 @@ public class MemcachedBinaryCommandDecoder extends FrameDecoder {
         }
 
         public static BinaryOp forCommandMessage(CommandMessage msg) {
-            for (BinaryOp binaryOp : values()) {
-                if (binaryOp.correspondingOp == msg.op && binaryOp.noreply == msg.noreply && binaryOp.addKeyToResponse == msg.addKeyToResponse) {
-                    return binaryOp;
+            if(Op.CAS == msg.op) // CAS is a special case since it has no opcode but uses the Set opcode 
+            {
+                if (Set.noreply == msg.noreply && Set.addKeyToResponse == msg.addKeyToResponse) 
+                    return Set;
+            }
+            else
+            {
+                for (BinaryOp binaryOp : values()) {
+                    if (binaryOp.correspondingOp == msg.op && binaryOp.noreply == msg.noreply && binaryOp.addKeyToResponse == msg.addKeyToResponse) {
+                        return binaryOp;
+                    }
                 }
             }
-
             return null;
+        }
+
+        public boolean isAddKeyToResponse() {
+            return addKeyToResponse;
+        }
+
+        public boolean isNoreply() {
+            return noreply;
+        }
+
+        public Op getCorrespondingOp() {
+            return correspondingOp;
+        }
+
+        public byte getCode() {
+            return code;
         }
 
     }
@@ -121,12 +145,12 @@ public class MemcachedBinaryCommandDecoder extends FrameDecoder {
         // This assumes correct order in the enum. If that ever changes, we will have to scan for 'code' field.
         BinaryOp bcmd = BinaryOp.values()[opcode];
 
-        Op cmdType = bcmd.correspondingOp;
+        Op cmdType = bcmd == BinaryOp.Set && cas != 0 ? Op.CAS : bcmd.getCorrespondingOp();
         CommandMessage cmdMessage = CommandMessage.command(cmdType);
-        cmdMessage.noreply = bcmd.noreply;
+        cmdMessage.noreply = bcmd.isNoreply();
         cmdMessage.cas_key = cas;
         cmdMessage.opaque = opaque;
-        cmdMessage.addKeyToResponse = bcmd.addKeyToResponse;
+        cmdMessage.addKeyToResponse = bcmd.isAddKeyToResponse();
 
         // get extras. could be empty.
         ChannelBuffer extrasBuffer = ChannelBuffers.buffer(ByteOrder.BIG_ENDIAN, extraLength);
@@ -148,7 +172,8 @@ public class MemcachedBinaryCommandDecoder extends FrameDecoder {
                     cmdType == Op.SET ||
                     cmdType == Op.REPLACE ||
                     cmdType == Op.APPEND ||
-                    cmdType == Op.PREPEND)
+                    cmdType == Op.PREPEND || 
+                    cmdType == Op.CAS)
             {
                 // TODO these are backwards from the spec, but seem to be what spymemcached demands -- which has the mistake?!
                 int expire = (short) (extrasBuffer.capacity() != 0 ? extrasBuffer.readUnsignedShort() : 0);
