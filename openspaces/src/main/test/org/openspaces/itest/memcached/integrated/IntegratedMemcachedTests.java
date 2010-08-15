@@ -2,6 +2,7 @@ package org.openspaces.itest.memcached.integrated;
 
 import junit.framework.TestCase;
 import net.spy.memcached.*;
+
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.properties.BeanLevelProperties;
 import org.openspaces.pu.container.ProcessingUnitContainer;
@@ -50,7 +51,7 @@ public class IntegratedMemcachedTests extends TestCase {
 
         for (int i = 0; i < 100; i++) {
             Future setResult = memcachedClient.set("key" + i, 0, "value" + i);
-            setResult.get(10, TimeUnit.SECONDS);
+            assertEquals( Boolean.TRUE, setResult.get(10, TimeUnit.SECONDS));
         }
 
         for (int i = 0; i < 100; i++) {
@@ -98,7 +99,7 @@ public class IntegratedMemcachedTests extends TestCase {
         assertEquals(Boolean.FALSE, booleanFuture.get(10, TimeUnit.SECONDS));
 
         Future setResult = memcachedClient.set("xkey", 0, "xvalue");
-        setResult.get(10, TimeUnit.SECONDS);
+        assertEquals( Boolean.TRUE, setResult.get(10, TimeUnit.SECONDS));
 
         CASValue<Object> casValue = memcachedClient.gets("xkey");
         assertEquals("xvalue", casValue.getValue());
