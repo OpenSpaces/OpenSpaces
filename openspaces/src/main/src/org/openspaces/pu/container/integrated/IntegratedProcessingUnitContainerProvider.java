@@ -198,7 +198,7 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
                     addConfigLocation(new FileSystemResource(DEFAULT_FS_PU_CONTEXT_LOCATION));
                     for (Resource resource : configResources) {
                         if (!resource.exists()) {
-                            throw new CannotCreateContainerException("No explicit config location, tried [" + DEFAULT_PU_CONTEXT_LOCATION + "], and [" + DEFAULT_FS_PU_CONTEXT_LOCATION + "] (relative to working director), and no configuration found");
+                            throw new CannotCreateContainerException("No explicit config location, tried [" + DEFAULT_PU_CONTEXT_LOCATION + "], [" + DEFAULT_FS_PU_CONTEXT_LOCATION + "] (relative to working director), [pu.config], and no configuration found");
                         }
                     }
                     if (logger.isDebugEnabled()) {
