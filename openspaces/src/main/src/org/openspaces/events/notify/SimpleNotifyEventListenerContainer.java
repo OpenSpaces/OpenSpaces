@@ -83,13 +83,16 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
         this.ignoreEventOnNullTake = ignoreEventOnNullTake;
     }
 
+    @Override
     protected void doInitialize() throws DataAccessException {
     }
 
+    @Override
     protected void doShutdown() throws DataAccessException {
         closeSession();
     }
 
+    @Override
     protected void doAfterStart() throws DataAccessException {
         super.doAfterStart();
         registerListener();
@@ -123,6 +126,7 @@ public class SimpleNotifyEventListenerContainer extends AbstractNotifyEventListe
         }
     }
 
+    @Override
     protected void doBeforeStop() throws DataAccessException {
         super.doBeforeStop();
         closeSession();

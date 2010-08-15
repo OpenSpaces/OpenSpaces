@@ -340,7 +340,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
 
     protected Boolean isNotifyWrite() {
         if (notifyWrite == null) {
-            return false;
+            return Boolean.FALSE;
         }
         return this.notifyWrite;
     }
@@ -383,7 +383,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
 
     protected Boolean isNotifyAll() {
         if (notifyAll == null) {
-            return false;
+            return Boolean.FALSE;
         }
         return this.notifyAll;
     }
@@ -397,7 +397,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
 
     protected Boolean isNotifyLeaseExpire() {
         if (notifyLeaseExpire == null) {
-            return false;
+            return Boolean.FALSE;
         }
         return this.notifyLeaseExpire;
     }
@@ -412,7 +412,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
 
     protected Boolean isNotifyUnmatched() {
         if (notifyUnmatched == null) {
-            return false;
+            return Boolean.FALSE;
         }
         return this.notifyUnmatched;
     }
@@ -450,7 +450,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
     }
 
     /**
-     * Controls if notifications will be guaraneteed (at least once) in case of failover.
+     * Controls if notifications will be guaranteed (at least once) in case of failover.
      */
     public void setGuaranteed(Boolean guaranteed) {
         this.guaranteed = guaranteed;
@@ -458,7 +458,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
 
     protected Boolean isGuaranteed() {
         if (guaranteed == null) {
-            return false;
+            return Boolean.FALSE;
         }
         return guaranteed;
     }
@@ -503,6 +503,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         return batchSize != null && batchTime != null;
     }
 
+    @Override
     public void initialize() throws DataAccessException {
         if (SpaceUtils.isRemoteProtocol(getGigaSpace().getSpace())) {
 
@@ -514,14 +515,14 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
                 if (logger.isTraceEnabled()) {
                     logger.trace(message("Setting replicateNotifyTemplate to false since working with an embedded Space"));
                 }
-                replicateNotifyTemplate = false;
+                replicateNotifyTemplate = Boolean.FALSE;
             }
         }
         if (replicateNotifyTemplate == null && triggerNotifyTemplate != null && triggerNotifyTemplate) {
             if (logger.isTraceEnabled()) {
                 logger.trace(message("triggerNotifyTemplate is set, automatically setting replicateNotifyTemplate to true"));
             }
-            replicateNotifyTemplate = true;
+            replicateNotifyTemplate = Boolean.TRUE;
         }
 
         if (getTemplate() instanceof NotifyTypeProvider) {
@@ -554,6 +555,7 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
         super.initialize();
     }
 
+    @Override
     protected void validateConfiguration() {
         super.validateConfiguration();
         if (batchSize == null && batchTime != null) {

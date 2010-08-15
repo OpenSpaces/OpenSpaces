@@ -118,13 +118,14 @@ public abstract class AbstractSessionIdManager extends AbstractLifeCycle impleme
     }
 
 
+    @Override
     public void doStart() {
         initRandom();
     }
 
 
     /**
-     * Set up a random number generator for the sessionids.
+     * Set up a random number generator for the session ids.
      *
      * By preference, use a SecureRandom but allow to be injected.
      */
