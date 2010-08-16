@@ -92,7 +92,7 @@ public class TransactionalMapCache implements Cache {
             if (logger.isTraceEnabled()) {
                 logger.trace("Get [" + cacheKey + "] under no transaction");
             }
-            return map.get(cacheKey, waitForResponse);
+            return map.get(cacheKey);
         } finally {
             masterSpace.setContextTansaction(tx);
         }

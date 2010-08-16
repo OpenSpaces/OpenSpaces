@@ -81,7 +81,8 @@ public class SimpleMapCache implements Cache {
             if (logger.isTraceEnabled()) {
                 logger.trace("Read [" + cacheKey + "]");
             }
-            return map.get(cacheKey, waitForResponse);
+            // no need to waitForResponse here, since we are not under a transaction
+            return map.get(cacheKey);
         }
     }
 
@@ -106,7 +107,8 @@ public class SimpleMapCache implements Cache {
             if (logger.isTraceEnabled()) {
                 logger.trace("Get [" + cacheKey + "]");
             }
-            return map.get(cacheKey, waitForResponse);
+            // no need to waitForResponse here, since we are not under a transaction
+            return map.get(cacheKey);
         }
     }
 
@@ -164,7 +166,8 @@ public class SimpleMapCache implements Cache {
             if (logger.isTraceEnabled()) {
                 logger.trace("Remove [" + cacheKey + "]");
             }
-            map.remove(cacheKey, waitForResponse);
+            // no need to waitForResponse here, since we are not under a transaction
+            map.remove(cacheKey);
         }
     }
 
