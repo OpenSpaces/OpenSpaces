@@ -386,7 +386,8 @@
 
             <!-- Need files loaded as resources -->
             <classpath location="${main.test.dir}"/>
-
+    		<classpath location="${deploy.templates.dir}"/> 
+            	
             <classpath refid="tests-libs"/>
 
             <formatter type="plain" usefile="false"/>
