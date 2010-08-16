@@ -397,7 +397,7 @@
             <formatter type="xml"/>
 
             <batchtest fork="yes" todir="${target.junit.reports.dir}">
-                <fileset dir="${target.testclasses.dir}" includes="$**/*IntegratedMemcachedTests*" excludes="${test.excludes}"/>
+                <fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
             </batchtest>
 
         </junit>
