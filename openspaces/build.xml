@@ -37,7 +37,10 @@
             <exclude name="platform/openspaces/**"/>
             <exclude name="ant/**"/>
         </fileset>
-        <path path="${basedir}/tools/groovy/embeddable/groovy-all-1.6.3.jar" />
+    	<fileset dir="${deploy.templates.dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+    	<path path="${basedir}/tools/groovy/embeddable/groovy-all-1.6.3.jar" />
     	<path path="${basedir}/../jini/classes" />
         <path path="${basedir}/../gigaspaces" />
     	<path path="${basedir}/../gigaspaces/classes" />
@@ -394,7 +397,7 @@
             <formatter type="xml"/>
 
             <batchtest fork="yes" todir="${target.junit.reports.dir}">
-                <fileset dir="${target.testclasses.dir}" includes="${test.includes}" excludes="${test.excludes}"/>
+                <fileset dir="${target.testclasses.dir}" includes="$**/*IntegratedMemcachedTests*" excludes="${test.excludes}"/>
             </batchtest>
 
         </junit>
