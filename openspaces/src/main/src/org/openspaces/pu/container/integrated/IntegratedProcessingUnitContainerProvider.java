@@ -16,9 +16,12 @@
 
 package org.openspaces.pu.container.integrated;
 
-import com.gigaspaces.security.directory.User;
-import com.gigaspaces.security.directory.UserDetails;
-import com.j_spaces.core.client.SpaceURL;
+import java.io.File;
+import java.io.IOException;
+import java.rmi.MarshalledObject;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.core.cluster.ClusterInfo;
@@ -38,11 +41,10 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-import java.io.File;
-import java.io.IOException;
-import java.rmi.MarshalledObject;
-import java.util.ArrayList;
-import java.util.List;
+import com.gigaspaces.security.directory.User;
+import com.gigaspaces.security.directory.UserDetails;
+import com.j_spaces.core.Constants;
+import com.j_spaces.core.client.SpaceURL;
 
 /**
  * An {@link org.openspaces.pu.container.integrated.IntegratedProcessingUnitContainer} provider. An
@@ -73,7 +75,7 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
 
     private ApplicationContext parentContext;
 
-    private List<Resource> configResources = new ArrayList<Resource>();
+    private final List<Resource> configResources = new ArrayList<Resource>();
 
     private BeanLevelProperties beanLevelProperties;
 
@@ -241,7 +243,7 @@ public class IntegratedProcessingUnitContainerProvider implements ApplicationCon
         // handle security
         if (userDetails != null) {
             try {
-                beanLevelProperties.getContextProperties().put("security.userDetails", new MarshalledObject(userDetails));
+                beanLevelProperties.getContextProperties().put(Constants.Security.USER_DETAILS, new MarshalledObject(userDetails));
             } catch (IOException e) {
                 throw new CannotCreateContainerException("Failed to marhsall user details", e);
             }

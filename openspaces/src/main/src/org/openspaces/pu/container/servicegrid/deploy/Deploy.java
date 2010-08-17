@@ -16,23 +16,47 @@
 
 package org.openspaces.pu.container.servicegrid.deploy;
 
-import com.gigaspaces.grid.gsm.GSM;
-import com.gigaspaces.grid.zone.ZoneHelper;
-import com.gigaspaces.logger.GSLogConfigLoader;
-import com.gigaspaces.security.directory.User;
-import com.gigaspaces.security.directory.UserDetails;
-import com.j_spaces.core.service.ServiceConfigLoader;
-import com.j_spaces.core.client.SpaceURL;
-import com.j_spaces.kernel.PlatformVersion;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.rmi.MarshalledObject;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import net.jini.config.Configuration;
 import net.jini.core.discovery.LookupLocator;
 import net.jini.core.lookup.ServiceItem;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jini.rio.boot.BootUtil;
 import org.jini.rio.boot.PUZipUtils;
 import org.jini.rio.config.ExporterConfig;
-import org.jini.rio.core.*;
+import org.jini.rio.core.OperationalString;
+import org.jini.rio.core.ServiceBeanInstance;
+import org.jini.rio.core.ServiceElement;
+import org.jini.rio.core.ServiceLevelAgreements;
+import org.jini.rio.core.ServiceProvisionListener;
+import org.jini.rio.core.ThresholdValues;
 import org.jini.rio.monitor.DeployAdmin;
 import org.jini.rio.opstring.OpString;
 import org.jini.rio.opstring.OpStringLoader;
@@ -44,9 +68,16 @@ import org.openspaces.pu.container.support.BeanLevelPropertiesParser;
 import org.openspaces.pu.container.support.ClusterInfoParser;
 import org.openspaces.pu.container.support.CommandLineParser;
 import org.openspaces.pu.container.support.ResourceApplicationContext;
-import org.openspaces.pu.sla.*;
+import org.openspaces.pu.sla.InstanceSLA;
+import org.openspaces.pu.sla.Policy;
+import org.openspaces.pu.sla.RelocationPolicy;
 import org.openspaces.pu.sla.SLA;
-import org.openspaces.pu.sla.requirement.*;
+import org.openspaces.pu.sla.ScaleUpPolicy;
+import org.openspaces.pu.sla.requirement.HostRequirement;
+import org.openspaces.pu.sla.requirement.RangeRequirement;
+import org.openspaces.pu.sla.requirement.Requirement;
+import org.openspaces.pu.sla.requirement.SystemRequirement;
+import org.openspaces.pu.sla.requirement.ZoneRequirement;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ByteArrayResource;
@@ -56,14 +87,15 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.rmi.MarshalledObject;
-import java.rmi.RemoteException;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import com.gigaspaces.grid.gsm.GSM;
+import com.gigaspaces.grid.zone.ZoneHelper;
+import com.gigaspaces.logger.GSLogConfigLoader;
+import com.gigaspaces.security.directory.User;
+import com.gigaspaces.security.directory.UserDetails;
+import com.j_spaces.core.Constants;
+import com.j_spaces.core.client.SpaceURL;
+import com.j_spaces.core.service.ServiceConfigLoader;
+import com.j_spaces.kernel.PlatformVersion;
 
 /**
  */
@@ -472,8 +504,8 @@ public class Deploy {
         }
 
         if (userDetails == null) {
-            userName = (String) beanLevelProperties.getContextProperties().remove("security.username");
-            password = (String) beanLevelProperties.getContextProperties().remove("security.password");
+            userName = (String) beanLevelProperties.getContextProperties().remove(Constants.Security.USERNAME);
+            password = (String) beanLevelProperties.getContextProperties().remove(Constants.Security.PASSWORD);
             if (userName != null && password != null) {
                 setUserDetails(userName, password);
             }
@@ -481,7 +513,7 @@ public class Deploy {
         // init the user detalis
         if (userDetails != null) {
             beanLevelProperties.getContextProperties().setProperty(SpaceURL.SECURED, "true");
-            beanLevelProperties.getContextProperties().put("security.userDetails", new MarshalledObject(userDetails));
+            beanLevelProperties.getContextProperties().put(Constants.Security.USER_DETAILS, new MarshalledObject(userDetails));
         } else if (secured != null && secured) {
             beanLevelProperties.getContextProperties().setProperty(SpaceURL.SECURED, "true");
         }

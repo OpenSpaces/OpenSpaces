@@ -1,11 +1,12 @@
 package org.openspaces.interop;
 
-import com.gigaspaces.security.directory.UserDetails;
-import com.gigaspaces.serialization.pbs.commands.processingunit.PUDetailsHolder;
-import com.gigaspaces.serialization.pbs.commands.processingunit.ServicesDetails;
-import com.gigaspaces.serialization.pbs.commands.processingunit.ServicesMonitors;
-import com.gigaspaces.serialization.pbs.openspaces.ProcessingUnitProxy;
-import com.j_spaces.core.IJSpace;
+import java.rmi.MarshalledObject;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,13 +32,13 @@ import org.openspaces.remoting.RemotingServiceMonitors.RemoteServiceStats;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
-import java.rmi.MarshalledObject;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.UUID;
+import com.gigaspaces.security.directory.UserDetails;
+import com.gigaspaces.serialization.pbs.commands.processingunit.PUDetailsHolder;
+import com.gigaspaces.serialization.pbs.commands.processingunit.ServicesDetails;
+import com.gigaspaces.serialization.pbs.commands.processingunit.ServicesMonitors;
+import com.gigaspaces.serialization.pbs.openspaces.ProcessingUnitProxy;
+import com.j_spaces.core.Constants;
+import com.j_spaces.core.IJSpace;
 
 /**
  * Dotnet processing unit bean, used as an adapter that will delegate
@@ -50,10 +51,6 @@ import java.util.UUID;
 public class DotnetProcessingUnitBean implements InitializingBean, DisposableBean, ClusterInfoAware, BeanLevelPropertiesAware,
         ServiceDetailsProvider, ServiceMonitorsProvider {
     
-    private static final String SECURITY_USER_DETAILS = "security.userDetails";
-    private static final String SECURITY_PASSWORD = "security.password";    
-    private static final String SECURITY_USERNAME = "security.username";
-
     protected final Log log = LogFactory.getLog(getClass());
     
     private ProcessingUnitProxy proxy;
@@ -135,12 +132,12 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
             
             this.customProperties.putAll(beanLevelProperties.getMergedBeanProperties("space"));
             //Insert security details if needed
-            MarshalledObject marshalledUserDetails = (MarshalledObject)customProperties.remove(SECURITY_USER_DETAILS);
+            MarshalledObject marshalledUserDetails = (MarshalledObject)customProperties.remove(Constants.Security.USER_DETAILS);
             if (marshalledUserDetails != null)
             {
                 UserDetails userDetails = (UserDetails) marshalledUserDetails.get();
-                this.customProperties.put(SECURITY_USERNAME, userDetails.getUsername());
-                this.customProperties.put(SECURITY_PASSWORD, userDetails.getPassword());
+                this.customProperties.put(Constants.Security.USERNAME, userDetails.getUsername());
+                this.customProperties.put(Constants.Security.PASSWORD, userDetails.getPassword());
             }
         }
         //Create identifier for this bean
@@ -152,8 +149,8 @@ public class DotnetProcessingUnitBean implements InitializingBean, DisposableBea
             proxy = new ProcessingUnitProxy(assemblyFile, implementationClassName, dependencies, deploymentPath, customProperties, clusterInfo.getBackupId(), clusterInfo.getInstanceId(), clusterInfo.getNumberOfBackups(), clusterInfo.getNumberOfInstances(), clusterInfo.getSchema(), clusterInfo.getName(), beanUniqueIdentifier);
         }
         //Remove security from properties
-        this.customProperties.remove(SECURITY_USERNAME);
-        this.customProperties.remove(SECURITY_PASSWORD);
+        this.customProperties.remove(Constants.Security.USERNAME);
+        this.customProperties.remove(Constants.Security.PASSWORD);
     }
 	/**
 	 * {@inheritDoc}
