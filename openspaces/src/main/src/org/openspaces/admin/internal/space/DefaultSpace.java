@@ -11,6 +11,7 @@ import com.j_spaces.kernel.JSpaceUtilities;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.space.events.*;
@@ -380,8 +381,10 @@ public class DefaultSpace implements InternalSpace {
                 if (space.isSecured()) {
                     ((ISpaceProxy)space).login(admin.getUserDetails());
                 }
+            } catch (AdminException e) {
+                throw e;
             } catch (Exception e) {
-                // ignore
+                throw new AdminException("Failed to fetch space", e);
             }
         }
         return space;

@@ -15,6 +15,7 @@ import com.j_spaces.core.admin.StatisticsAdmin;
 import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.core.filters.StatisticsHolder;
 import net.jini.core.lookup.ServiceID;
+import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.space.events.*;
@@ -279,7 +280,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
                     this.ijspace.login(admin.getUserDetails());
                 }
             } catch (RemoteException e) {
-                // ignore....
+                throw new AdminException("Failed to fetch space", e);
             }
         }
         return this.ijspace;
