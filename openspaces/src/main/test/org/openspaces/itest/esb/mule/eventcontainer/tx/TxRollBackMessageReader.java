@@ -37,9 +37,8 @@ public class TxRollBackMessageReader implements Callable {
             message.setRead(true);
             message.setMessage("rolledback");
             return message;
-        } else {
-            alreadyRollbacked = true;
-            throw new RuntimeException("Rolling back (-:");
-        }
+        } 
+        alreadyRollbacked = true;
+        throw new RuntimeException("Rolling back (-:");
     }
 }

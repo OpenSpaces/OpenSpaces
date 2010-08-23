@@ -25,6 +25,7 @@ import org.openspaces.itest.esb.mule.SimpleMessage;
  */
 public class TxRollbackEventContainerTests extends AbstractMuleTests {
 
+    @Override
     protected String[] getConfigLocations() {
         return new String[]{"org/openspaces/itest/esb/mule/eventcontainer/tx/local-tx.xml"};
     }
