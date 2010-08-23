@@ -41,9 +41,8 @@ public class HibernateProxyRemoverIterator implements MultiDataIterator {
                 retVal[i] = new HibernateProxyRemoverIterator(its[i]);
             }
             return retVal;
-        } else {
-            return new DataIterator[]{this};
-        }
+        } 
+        return new DataIterator[]{this};
     }
 
     public void close() {

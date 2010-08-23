@@ -75,18 +75,22 @@ public class OpenSpacesMessageAdapter extends AbstractMessageAdapter {
         return message;
     }
 
+    @Override
     public String getUniqueId() {
         return (String) getProperty(UniqueIdMessageHeader.UNIQUE_ID);
     }
 
+    @Override
     public String getCorrelationId() {
         return (String) getProperty(CorrelationMessageHeader.CORRELATION_ID);
     }
 
+    @Override
     public void setCorrelationId(String correlationId) {
         setProperty(CorrelationMessageHeader.CORRELATION_ID, correlationId);
     }
 
+    @Override
     public int getCorrelationSequence() {
         Object correlationSequence = getProperty(CorrelationMessageHeader.CORRELATION_SEQUENCE);
         if(correlationSequence==null){
@@ -95,10 +99,12 @@ public class OpenSpacesMessageAdapter extends AbstractMessageAdapter {
         return (Integer) correlationSequence;
     }
 
+    @Override
     public void setCorrelationSequence(int sequence) {
         setProperty(CorrelationMessageHeader.CORRELATION_SEQUENCE, sequence);
     }
 
+    @Override
     public int getCorrelationGroupSize() {
         Object correlationGroupSize = getProperty(CorrelationMessageHeader.CORRELATION_GROUP_SIZE);
         if (correlationGroupSize == null) {
@@ -107,18 +113,22 @@ public class OpenSpacesMessageAdapter extends AbstractMessageAdapter {
         return (Integer) correlationGroupSize;
     }
 
+    @Override
     public void setCorrelationGroupSize(int correlationGroupSize) {
         setProperty(CorrelationMessageHeader.CORRELATION_GROUP_SIZE, correlationGroupSize);
     }
 
+    @Override
     public Object getReplyTo() {
         return getProperty(ReplyToMessageHeader.REPLY_TO);
     }
 
+    @Override
     public void setReplyTo(Object replyTo) {
         setProperty(ReplyToMessageHeader.REPLY_TO, replyTo);
     }
 
+    @Override
     public ThreadSafeAccess newThreadCopy() {
         return new OpenSpacesMessageAdapter(this);
     }

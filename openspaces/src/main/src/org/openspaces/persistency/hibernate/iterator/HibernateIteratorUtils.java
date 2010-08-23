@@ -29,9 +29,6 @@ import org.hibernate.proxy.HibernateProxy;
 public class HibernateIteratorUtils {
 
     public static Object unproxy(Object entity) {
-        if (entity == null) {
-            return entity;
-        }
         if (entity instanceof HibernateProxy) {
             entity = ((HibernateProxy) entity).getHibernateLazyInitializer().getImplementation();
         }

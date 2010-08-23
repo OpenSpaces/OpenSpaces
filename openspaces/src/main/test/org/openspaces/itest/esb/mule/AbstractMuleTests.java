@@ -42,6 +42,7 @@ public abstract class AbstractMuleTests extends TestCase {
 
     protected MuleClient muleClient;
 
+    @Override
     protected void setUp() throws Exception {
         createApplicationContext(getConfigLocations());
         gigaSpace = new GigaSpaceConfigurer(new UrlSpaceConfigurer("jini://*/*/" + getSpaceName()).lookupGroups(System.getProperty("user.name")).space()).gigaSpace();
@@ -59,6 +60,7 @@ public abstract class AbstractMuleTests extends TestCase {
         muleClient = new MuleClient(muleContext);
     }
 
+    @Override
     protected void tearDown() throws Exception {
         muleContext.dispose();
     }
