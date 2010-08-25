@@ -539,8 +539,8 @@ public abstract class AbstractNotifyEventListenerContainer extends AbstractTrans
             if (notifyTypeProvider.isWrite() != null && notifyWrite == null) {
                 notifyWrite = notifyTypeProvider.isWrite();
             }
-            if (notifyTypeProvider.isUnamtched() != null && notifyUnmatched == null) {
-                notifyUnmatched = notifyTypeProvider.isUnamtched();
+            if (notifyTypeProvider.isUnmatched() != null && notifyUnmatched == null) {
+                notifyUnmatched = notifyTypeProvider.isUnmatched();
             }
         }
 
