@@ -261,7 +261,6 @@ public class SimpleAsyncPollingEventListenerContainer extends AbstractTransactio
 
         public void onTransactionalResult(AsyncResult asyncResult, TransactionStatus txStatus) {
             if (asyncResult.getException() != null) {
-                asyncResult.getException().printStackTrace();
                 if (logger.isWarnEnabled()) {
                     logger.warn(message("Async result operation internal exception"), asyncResult.getException());
                 }
