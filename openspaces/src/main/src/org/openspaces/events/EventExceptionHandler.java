@@ -46,7 +46,7 @@ public interface EventExceptionHandler<T> {
      * or propagate it.
      *
      * <p>If the event container is transactional, then propagating the exception will cause the transaction to
-     * rollback, which handling it will cause the transaction to commit.
+     * rollback, while handling it will cause the transaction to commit.
      *
      * <p>The {@link org.springframework.transaction.TransactionStatus} can also be used to control if the transaction
      * should be rolled back without throwing an exception.
