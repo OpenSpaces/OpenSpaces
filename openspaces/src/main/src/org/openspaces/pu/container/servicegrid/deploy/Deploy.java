@@ -250,7 +250,7 @@ public class Deploy {
         }
         String puPath = args[args.length - 1];
         File puFile = new File(puPath);
-        String puName = puFile.getName();
+        String puName = puFile.getName().replace(' ', '_');
         // override pu name allows to change the actual pu name deployed from the on under deploy directory
         String overridePuName = puName;
 
@@ -270,7 +270,7 @@ public class Deploy {
             if (!puFile.exists()) {
                 throw new IllegalArgumentException("File [" + puFile.getAbsolutePath() + "] not found and can't be deployed");
             }
-            overridePuName = puFile.getName().substring(0, puFile.getName().length() - 4);
+            overridePuName = puFile.getName().substring(0, puFile.getName().length() - 4).replace(' ', '_');
             puPath = overridePuName;
         }
 
