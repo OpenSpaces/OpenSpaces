@@ -108,6 +108,7 @@ public class ScriptingRemotingTests extends AbstractDependencyInjectionSpringCon
             assertEquals(1, value.intValue());
         }
         long nonCacheTime = System.nanoTime() - time;
+        System.out.println("jruby: cacheTime [" + cacheTime + "], non cache time [" + nonCacheTime + "]");
         assertTrue(cacheTime < nonCacheTime);
     }
 
