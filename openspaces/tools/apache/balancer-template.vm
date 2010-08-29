@@ -4,6 +4,6 @@ ProxyPass /${loadBalancerInfo.getName()} balancer://${loadBalancerInfo.getName()
 
 <Proxy balancer://${loadBalancerInfo.getName()}_cluster>
 #foreach($node in $loadBalancerInfo.getNodes())
-    BalancerMember http://${node.getServiceDetails().getHost()}:${node.getServiceDetails().getPort()}${node.getServiceDetails().getContextPath()} route=${node.getClusterInfo().getName()}${node.getClusterInfo().getRunningNumberOffset1()}
+    BalancerMember http://${node.getServiceDetails().getHost()}:${node.getServiceDetails().getPort()}${node.getServiceDetails().getContextPath()} route=${node.getClusterInfo().getUniqueName().replace('.', '_')}
 #end
 </Proxy>
