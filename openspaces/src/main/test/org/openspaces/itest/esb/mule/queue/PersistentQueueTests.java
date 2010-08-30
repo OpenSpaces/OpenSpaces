@@ -18,7 +18,7 @@ public class PersistentQueueTests extends AbstractMuleTests {
         return "muleQueuePersistent";
     }
 
-    public void testSimpleQueueHandling() throws Exception {
+    public void xtestSimpleQueueHandling() throws Exception {
         muleClient.dispatch("os-queue://test1", "testme", null);
         MuleMessage message = muleClient.request("os-queue://test2", 5000);
         assertEquals("testmeAppender1", message.getPayload());
