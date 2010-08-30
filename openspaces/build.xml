@@ -272,6 +272,7 @@
         <zip zipfile="${dist.dir}/${name}-1.5.zip">
             <zipfileset dir="${basedir}">
                 <include name="bin/pu*"/>
+                <include name="bin/gs-m*"/>
                 <include name="deploy/**"/>
                 <include name="docs/javadoc/**"/>
                 <include name="tools/**"/>
