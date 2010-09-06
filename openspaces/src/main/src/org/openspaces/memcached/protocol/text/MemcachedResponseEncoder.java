@@ -64,11 +64,11 @@ public final class MemcachedResponseEncoder extends SimpleChannelUpstreamHandler
     public void messageReceived(ChannelHandlerContext channelHandlerContext, MessageEvent messageEvent) throws Exception {
         ResponseMessage command = (ResponseMessage) messageEvent.getMessage();
 
-        Op cmd = command.cmd.op;
-
         Channel channel = messageEvent.getChannel();
-
-        if (cmd == Op.GET || cmd == Op.GETS) {
+        final Op cmd = command.cmd.op;
+        switch(cmd){
+        case GET:
+        case GETS:
             LocalCacheElement[] results = command.elements;
             int totalBytes = 0;
             for (LocalCacheElement result : results) {
@@ -100,19 +100,27 @@ public final class MemcachedResponseEncoder extends SimpleChannelUpstreamHandler
             writeBuffer.writeBytes(END.duplicate());
 
             Channels.write(channel, writeBuffer);
-        } else if (cmd == Op.SET || cmd == Op.CAS || cmd == Op.ADD || cmd == Op.REPLACE || cmd == Op.APPEND || cmd == Op.PREPEND) {
-
+            break;
+        case SET:
+        case CAS:
+        case ADD:
+        case REPLACE:
+        case APPEND:
+        case PREPEND:
             if (!command.cmd.noreply)
                 Channels.write(channel, storeResponse(command.response));
-        } else if (cmd == Op.INCR || cmd == Op.DECR) {
+            break;
+        case INCR:
+        case DECR:
             if (!command.cmd.noreply)
                 Channels.write(channel, incrDecrResponseString(command.incrDecrResponse));
+            break;
 
-        } else if (cmd == Op.DELETE) {
+        case DELETE:
             if (!command.cmd.noreply)
                 Channels.write(channel, deleteResponseString(command.deleteResponse));
-
-        } else if (cmd == Op.STATS) {
+            break;
+        case STATS:
             for (Map.Entry<String, Set<String>> stat : command.stats.entrySet()) {
                 for (String statVal : stat.getValue()) {
                     StringBuilder builder = new StringBuilder();
@@ -125,18 +133,21 @@ public final class MemcachedResponseEncoder extends SimpleChannelUpstreamHandler
                 }
             }
             Channels.write(channel, END.duplicate());
-
-        } else if (cmd == Op.VERSION) {
+            break;
+        case VERSION:
             Channels.write(channel, ChannelBuffers.copiedBuffer("VERSION " + command.version + "\r\n", USASCII));
-        } else if (cmd == Op.QUIT) {
+            break;
+        case QUIT:
             Channels.disconnect(channel);
-        } else if (cmd == Op.FLUSH_ALL) {
+            break;
+        case FLUSH_ALL:
             if (!command.cmd.noreply) {
                 ChannelBuffer ret = command.flushSuccess ? OK.duplicate() : ERROR.duplicate();
 
                 Channels.write(channel, ret);
             }
-        } else {
+            break;
+        default:
             Channels.write(channel, ERROR.duplicate());
             logger.error("error; unrecognized command: " + cmd);
         }

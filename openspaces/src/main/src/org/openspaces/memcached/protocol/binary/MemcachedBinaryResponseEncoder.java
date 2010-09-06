@@ -44,37 +44,47 @@ public class MemcachedBinaryResponseEncoder extends SimpleChannelUpstreamHandler
     }
 
     public ResponseCode getStatusCode(ResponseMessage command) {
-        Op cmd = command.cmd.op;
-        if (cmd == Op.GET || cmd == Op.GETS) {
+        final Op cmd = command.cmd.op;
+        switch(cmd){
+        case GET: 
+        case GETS:
             if (command.elements == null || (command.elements.length==1 && command.elements[0]==null)){
                 return ResponseCode.KEYNF;
             }
             return ResponseCode.OK;
-        } else if (cmd == Op.SET || cmd == Op.CAS || cmd == Op.ADD || cmd == Op.REPLACE || cmd == Op.APPEND || cmd == Op.PREPEND) {
+        case SET: 
+        case CAS: 
+        case ADD:
+        case REPLACE:
+        case APPEND:
+        case PREPEND:
             switch (command.response) {
-                case EXISTS:
-                    return ResponseCode.KEYEXISTS;
-                case NOT_FOUND:
-                    return ResponseCode.KEYNF;
-                case NOT_STORED:
-                    return ResponseCode.NOT_STORED;
-                case STORED:
-                    return ResponseCode.OK;
+            case EXISTS:
+                return ResponseCode.KEYEXISTS;
+            case NOT_FOUND:
+                return ResponseCode.KEYNF;
+            case NOT_STORED:
+                return ResponseCode.NOT_STORED;
+            case STORED:
+                return ResponseCode.OK;
             }
-        } else if (cmd == Op.INCR || cmd == Op.DECR) {
+            break;
+        case INCR:
+        case DECR:
             return command.incrDecrResponse == null ? ResponseCode.KEYNF : ResponseCode.OK;
-        } else if (cmd == Op.DELETE) {
+        case DELETE:
             switch (command.deleteResponse) {
-                case DELETED:
-                    return ResponseCode.OK;
-                case NOT_FOUND:
-                    return ResponseCode.KEYNF;
+            case DELETED:
+                return ResponseCode.OK;
+            case NOT_FOUND:
+                return ResponseCode.KEYNF;
             }
-        } else if (cmd == Op.STATS) {
+            break;
+        case STATS:
             return ResponseCode.OK;
-        } else if (cmd == Op.VERSION) {
+        case VERSION:
             return ResponseCode.OK;
-        } else if (cmd == Op.FLUSH_ALL) {
+        case FLUSH_ALL:
             return ResponseCode.OK;
         }
         return ResponseCode.UNKNOWN;
@@ -177,8 +187,8 @@ public class MemcachedBinaryResponseEncoder extends SimpleChannelUpstreamHandler
                 for (String stat : statsEntries.getValue()) {
 
                     // Move to use this in Java 6
-//                    keyBuffer = ChannelBuffers.wrappedBuffer(ByteOrder.BIG_ENDIAN, statsEntries.getKey().getBytes(MemcachedBinaryCommandDecoder.USASCII.toString()));
-//                    valueBuffer = ChannelBuffers.wrappedBuffer(ByteOrder.BIG_ENDIAN, stat.getBytes(MemcachedBinaryCommandDecoder.USASCII));
+                    //                    keyBuffer = ChannelBuffers.wrappedBuffer(ByteOrder.BIG_ENDIAN, statsEntries.getKey().getBytes(MemcachedBinaryCommandDecoder.USASCII.toString()));
+                    //                    valueBuffer = ChannelBuffers.wrappedBuffer(ByteOrder.BIG_ENDIAN, stat.getBytes(MemcachedBinaryCommandDecoder.USASCII));
 
                     keyBuffer = ChannelBuffers.wrappedBuffer(ByteOrder.BIG_ENDIAN, statsEntries.getKey().getBytes("US-ASCII"));
                     valueBuffer = ChannelBuffers.wrappedBuffer(ByteOrder.BIG_ENDIAN, stat.getBytes("US-ASCII"));
@@ -203,7 +213,7 @@ public class MemcachedBinaryResponseEncoder extends SimpleChannelUpstreamHandler
             // is the command 'quiet?' if so, then we append to our 'corked' buffer until a non-corked command comes along
             if (bcmd.isNoreply()) {
                 int totalCapacity = headerBuffer.capacity() + (extrasBuffer != null ? extrasBuffer.capacity() : 0)
-                        + (keyBuffer != null ? keyBuffer.capacity() : 0) + (valueBuffer != null ? valueBuffer.capacity() : 0);
+                + (keyBuffer != null ? keyBuffer.capacity() : 0) + (valueBuffer != null ? valueBuffer.capacity() : 0);
 
                 ChannelBuffer corkedResponse = cork(command.cmd.opaque, totalCapacity);
 

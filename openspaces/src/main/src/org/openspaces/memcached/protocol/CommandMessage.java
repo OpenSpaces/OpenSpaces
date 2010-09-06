@@ -31,7 +31,7 @@ public final class CommandMessage implements Serializable {
         OK, ERROR, CLIENT_ERROR
     }
 
-    public Op op;
+    final public Op op;
     public LocalCacheElement element;
     public List<Key> keys;
     public boolean noreply;
