@@ -16,6 +16,7 @@ import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.dump.InternalDumpResult;
 import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.ProcessingUnitAlreadyDeployedException;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
 import org.openspaces.grid.esm.ESM;
 import org.openspaces.pu.container.servicegrid.deploy.Deploy;
@@ -82,6 +83,8 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
             return ref.get();
         } catch (SecurityException se) {
             throw new AdminException("No privileges to deploy an elastic data grid", se);
+        } catch (ProcessingUnitAlreadyDeployedException e) {
+            return getAdmin().getProcessingUnits().waitFor(deployment.getDataGridName());
         } catch (Exception e) {
             throw new AdminException("Failed to deploy [" + deployment.getDataGridName() + "]", e);
         } finally {
