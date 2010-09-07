@@ -110,7 +110,7 @@
 	<classpathentry kind="lib" path="lib/platform/jetty/jetty-xml-7.1.4.v20100610.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/servlet-api-2.5.jar"/>
 	<classpathentry kind="lib" path="lib/optional/security/spring-security-core-3.0.2.RELEASE.jar"/>
-	<classpathentry kind="lib" path="deploy/templates/memcached/lib/netty-3.2.0.CR1.jar"/>
+	<classpathentry kind="lib" path="deploy/templates/memcached/lib/netty-3.2.2.Final.jar"/>
 	<classpathentry kind="lib" path="lib/external/spymemcached/memcached-2.5.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
