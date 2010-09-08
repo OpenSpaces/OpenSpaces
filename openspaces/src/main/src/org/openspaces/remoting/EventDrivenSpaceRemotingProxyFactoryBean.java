@@ -68,7 +68,7 @@ import java.util.concurrent.Future;
  *
  * <p>The actual remote invocation can be replaced with an aspect implementing {@link org.openspaces.remoting.RemoteInvocationAspect}
  * which can be set using {@link #setRemoteInvocationAspect(RemoteInvocationAspect)}. It is up the aspect to then
- * call the actual remote invocation.  
+ * call the actual remote invocation.
  *
  * @author kimchy
  * @see SpaceRemotingServiceExporter
@@ -218,7 +218,7 @@ public class EventDrivenSpaceRemotingProxyFactoryBean extends RemoteAccessor imp
             }
         }
 
-        EventDrivenSpaceRemotingEntry remotingEntry = new EventDrivenSpaceRemotingEntry().buildInvocation(lookupName, methodName,
+        EventDrivenSpaceRemotingEntry remotingEntry = new HashedEventDrivenSpaceRemotingEntry().buildInvocation(lookupName, methodName,
                 methodHashLookup.get(methodInvocation.getMethod()), methodInvocation.getArguments());
 
         remotingEntry.setRouting(RemotingProxyUtils.computeRouting(remotingEntry, remoteRoutingHandler, methodInvocation));

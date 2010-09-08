@@ -93,21 +93,21 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
 
     private List<Object> services = new ArrayList<Object>();
 
-    private List<ServiceInfo> servicesInfo = new ArrayList<ServiceInfo>();
+    final private List<ServiceInfo> servicesInfo = new ArrayList<ServiceInfo>();
 
     private boolean useFastReflection = true;
 
-    private IdentityHashMap<Object, ServiceInfo> serviceToServiceInfoMap = new IdentityHashMap<Object, ServiceInfo>();
+    final private IdentityHashMap<Object, ServiceInfo> serviceToServiceInfoMap = new IdentityHashMap<Object, ServiceInfo>();
 
-    private AtomicLong processed = new AtomicLong();
+    final private AtomicLong processed = new AtomicLong();
 
-    private AtomicLong failed = new AtomicLong();
+    final private AtomicLong failed = new AtomicLong();
 
     private ApplicationContext applicationContext;
 
     private String beanName;
 
-    private Map<String, Object> interfaceToService = new HashMap<String, Object>();
+    final private Map<String, Object> interfaceToService = new HashMap<String, Object>();
 
     private String asyncInterfaceSuffix = DEFAULT_ASYNC_INTERFACE_SUFFIX;
 
@@ -124,11 +124,11 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
     private Map<String, Map<RemotingUtils.MethodHash, IMethod>> methodInvocationLookup;
 
     // for backward comp
-    private MethodInvocationCache methodInvocationCache = new MethodInvocationCache();
+    final private MethodInvocationCache methodInvocationCache = new MethodInvocationCache();
 
     private volatile boolean initialized = false;
 
-    private CountDownLatch initializationLatch = new CountDownLatch(1);
+    final private CountDownLatch initializationLatch = new CountDownLatch(1);
 
     /**
      * Sets the list of services that will be exported as remote services. Each service will have
@@ -340,8 +340,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
 
         IMethod method = null;
         try {
-            if (remotingEntry.methodHash != null) {
-                method = methodInvocationLookup.get(lookupName).get(remotingEntry.methodHash);
+            if (remotingEntry instanceof HashedEventDrivenSpaceRemotingEntry && ((HashedEventDrivenSpaceRemotingEntry) remotingEntry).methodHash != null) {
+                method = methodInvocationLookup.get(lookupName).get(((HashedEventDrivenSpaceRemotingEntry) remotingEntry).methodHash);
             }
             if (method == null) {
                 method = methodInvocationCache.findMethod(lookupName, service, remotingEntry.methodName, remotingEntry.arguments);

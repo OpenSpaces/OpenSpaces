@@ -16,8 +16,6 @@
 
 package org.openspaces.remoting;
 
-import com.gigaspaces.internal.version.PlatformLogicalVersion;
-import com.gigaspaces.lrmi.LRMIInvocationContext;
 import com.j_spaces.core.client.MetaDataEntry;
 
 import java.io.Externalizable;
@@ -34,9 +32,8 @@ import java.util.Arrays;
  */
 public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements SpaceRemotingInvocation, SpaceRemotingResult,
         Cloneable, Externalizable {
-
+    
     static final long serialVersionUID = 7009426586658014410L;
-
     static int bitIndexCounter = 0;
     private static final int LOOKUP_NAME_BIT_MASK = 1 << bitIndexCounter++;
     private static final int METHOD_NAME_BIT_MASK = 1 << bitIndexCounter++;
@@ -47,7 +44,6 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
     private static final int RESULT_BIT_MASK = 1 << bitIndexCounter++;
     private static final int EX_BIT_MASK = 1 << bitIndexCounter++;
     private static final int INSTANCE_ID_BIT_MASK = 1 << bitIndexCounter++;
-    private static final int METHOD_HASH_BIT_MASK = 1 << bitIndexCounter++;
 
 
     public Boolean isInvocation;
@@ -55,8 +51,6 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
     public String lookupName;
 
     public String methodName;
-
-    public RemotingUtils.MethodHash methodHash;
 
     public Object[] arguments;
 
@@ -123,12 +117,11 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
     }
 
 
-    public EventDrivenSpaceRemotingEntry buildInvocation(String lookupName, String methodName, RemotingUtils.MethodHash methodHash, Object[] arguments) {
+    public EventDrivenSpaceRemotingEntry buildInvocation(String lookupName, String methodName, Object[] arguments) {
         clearResultData();
-        this.isInvocation = true;
+        this.isInvocation = Boolean.TRUE;
         this.lookupName = lookupName;
         this.methodName = methodName;
-        this.methodHash = methodHash;
         this.arguments = arguments;
         return this;
     }
@@ -137,14 +130,14 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
         clearInvocationData();
         clearResultData();
         buildResultUID();
-        this.isInvocation = false;
+        this.isInvocation = Boolean.FALSE;
         return this;
     }
 
     public EventDrivenSpaceRemotingEntry buildResult(Throwable e) {
         clearInvocationData();
         buildResultUID();
-        this.isInvocation = false;
+        this.isInvocation = Boolean.FALSE;
         this.ex = e;
         return this;
     }
@@ -152,7 +145,7 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
     public EventDrivenSpaceRemotingEntry buildResult(Object result) {
         clearInvocationData();
         buildResultUID();
-        this.isInvocation = false;
+        this.isInvocation = Boolean.FALSE;
         this.result = result;
         return this;
     }
@@ -165,7 +158,6 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
     private void clearInvocationData() {
         this.lookupName = null;
         this.methodName = null;
-        this.methodHash = null;
         this.arguments = null;
         this.oneWay = null;
     }
@@ -216,12 +208,6 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
                     out.writeObject(argument);
                 }
             }
-
-            if (LRMIInvocationContext.getEndpointLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v7_1_2)) {
-                if (methodHash != null) {
-                    methodHash.writeExternal(out);
-                }
-            }
         } else {
             if (result != null) {
                 out.writeObject(result);
@@ -269,13 +255,6 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
                 metaArguments = new Object[argumentNumber];
                 for (int i = 0; i < argumentNumber; i++) {
                     metaArguments[i] = in.readObject();
-                }
-            }
-
-            if (LRMIInvocationContext.getEndpointLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v7_1_2)) {
-                if (!isFieldNull(bitMask, METHOD_HASH_BIT_MASK)) {
-                    methodHash = new RemotingUtils.MethodHash();
-                    methodHash.readExternal(in);
                 }
             }
         } else {
@@ -331,7 +310,6 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
         bitMask = ((result != null) ? bitMask | RESULT_BIT_MASK : bitMask);
         bitMask = ((ex != null) ? bitMask | EX_BIT_MASK : bitMask);
         bitMask = ((instanceId != null) ? bitMask | INSTANCE_ID_BIT_MASK : bitMask);
-        bitMask = ((methodHash != null) ? bitMask | METHOD_HASH_BIT_MASK : bitMask);
         return (short) bitMask;
     }
 

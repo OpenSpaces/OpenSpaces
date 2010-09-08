@@ -23,6 +23,7 @@ import org.openspaces.core.executor.support.WaitForAnyListener;
 import org.openspaces.remoting.EventDrivenRemotingProxyConfigurer;
 import org.openspaces.remoting.EventDrivenSpaceRemotingEntry;
 import org.openspaces.remoting.ExecutorRemotingProxyConfigurer;
+import org.openspaces.remoting.HashedEventDrivenSpaceRemotingEntry;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 import java.io.ByteArrayInputStream;
@@ -182,7 +183,7 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
     }
 
     public void testSerializationOfAsyncRemotingEntry() throws IOException, ClassNotFoundException {
-        EventDrivenSpaceRemotingEntry entry = new EventDrivenSpaceRemotingEntry();
+		HashedEventDrivenSpaceRemotingEntry entry = new HashedEventDrivenSpaceRemotingEntry();
         entry = entry.buildInvocation("test", "test", null, null);
         entry.oneWay = true;
         entry.metaArguments = new Object[]{new Integer(1)};
