@@ -30,6 +30,7 @@ public class SingleTakeReceiveOperationHandler extends AbstractNonBlockingReceiv
      * Performs a single take operation using {@link org.openspaces.core.GigaSpace#take(Object, long)} with
      * the given timeout.
      */
+    @Override
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         return gigaSpace.take(template, receiveTimeout);
     }
@@ -38,6 +39,7 @@ public class SingleTakeReceiveOperationHandler extends AbstractNonBlockingReceiv
      * Performs a single take operation using {@link org.openspaces.core.GigaSpace#take(Object, long)} with
      * no timeout.
      */
+    @Override
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
         return gigaSpace.take(template, 0);
     }

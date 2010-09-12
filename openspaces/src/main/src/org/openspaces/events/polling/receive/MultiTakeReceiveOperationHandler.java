@@ -46,6 +46,7 @@ public class MultiTakeReceiveOperationHandler extends AbstractNonBlockingReceive
      * values are returned, will perform a blocking take operation using
      * {@link org.openspaces.core.GigaSpace#take(Object,long)}.
      */
+    @Override
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         Object[] results = gigaSpace.takeMultiple(template, maxEntries);
         if (results != null && results.length > 0) {
@@ -57,6 +58,7 @@ public class MultiTakeReceiveOperationHandler extends AbstractNonBlockingReceive
     /**
      * Performs a non blocking {@link org.openspaces.core.GigaSpace#takeMultiple(Object, int)}.
      */
+    @Override
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
         Object[] results = gigaSpace.takeMultiple(template, maxEntries);
         if (results != null && results.length > 0) {

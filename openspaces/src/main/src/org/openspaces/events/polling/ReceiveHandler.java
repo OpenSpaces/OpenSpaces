@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * An annotation marking a method as one that is responsilbe to return a
+ * An annotation marking a method as one that is responsible to return a
  * {@link org.openspaces.events.polling.receive.ReceiveOperationHandler} to be used
  * with a polling container.
  *

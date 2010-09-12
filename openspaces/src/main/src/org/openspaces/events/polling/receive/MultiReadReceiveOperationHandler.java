@@ -46,6 +46,7 @@ public class MultiReadReceiveOperationHandler extends AbstractNonBlockingReceive
      * values are returned, will perform a blocking read operation using
      * {@link org.openspaces.core.GigaSpace#read(Object,long)}.
      */
+    @Override
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         Object[] results = gigaSpace.readMultiple(template, maxEntries);
         if (results != null && results.length > 0) {
@@ -59,6 +60,7 @@ public class MultiReadReceiveOperationHandler extends AbstractNonBlockingReceive
      * using the provided template and configured maxEntries (defaults to <code>50</code>). This is a non
      * blocking operation.
      */
+    @Override
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
         Object[] results = gigaSpace.readMultiple(template, maxEntries);
         if (results != null && results.length > 0) {

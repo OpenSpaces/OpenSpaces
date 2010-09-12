@@ -449,11 +449,10 @@ public class EsmExecutor {
                 int numberOfGSCsInZone = puCapacityPlanner.getNumberOfGSCsInZone();
                 logger.finest("GSCs in zone: [" + numberOfGSCsInZone + "], max allowed [" + puCapacityPlanner.getMaxNumberOfGSCs()+"]");
                 return numberOfGSCsInZone >= puCapacityPlanner.getMaxNumberOfGSCs();
-            } else {
-                int numberOfNonEmptyGSCsInZone = puCapacityPlanner.getNumberOfNonEmptyGSCsInZone();
-                logger.finest("(non-empty) GSCs in zone: [" + numberOfNonEmptyGSCsInZone + "], max allowed [" + puCapacityPlanner.getMaxNumberOfGSCs()+"]");
-                return numberOfNonEmptyGSCsInZone >= puCapacityPlanner.getMaxNumberOfGSCs();
-            }
+            } 
+            int numberOfNonEmptyGSCsInZone = puCapacityPlanner.getNumberOfNonEmptyGSCsInZone();
+            logger.finest("(non-empty) GSCs in zone: [" + numberOfNonEmptyGSCsInZone + "], max allowed [" + puCapacityPlanner.getMaxNumberOfGSCs()+"]");
+            return numberOfNonEmptyGSCsInZone >= puCapacityPlanner.getMaxNumberOfGSCs();
         }
         
         private boolean aboveMinCapcity() {

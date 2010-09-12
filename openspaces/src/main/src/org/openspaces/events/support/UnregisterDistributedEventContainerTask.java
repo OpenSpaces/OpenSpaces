@@ -44,9 +44,9 @@ public class UnregisterDistributedEventContainerTask extends UnregisterEventCont
                 throw result.getException();
             }
             if (!result.getResult()) {
-                return false;
+                return Boolean.FALSE;
             }
         }
-        return true;
+        return Boolean.TRUE;
     }
 }

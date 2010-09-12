@@ -39,10 +39,9 @@ public class AnnotationProcessorUtils {
         Map gigaSpaces = applicationContext.getBeansOfType(GigaSpace.class);
         if (gigaSpaces.size() == 1) {
             return (GigaSpace) gigaSpaces.values().iterator().next();
-        } else {
-            throw new IllegalArgumentException("Failed to resolve GigaSpace to use with event container, " +
-                    "[" + beanName + "] does not specifiy one, has no fields of that type, and there are more than one GigaSpace beans within the context");
-        }
+        } 
+        throw new IllegalArgumentException("Failed to resolve GigaSpace to use with event container, " +
+                "[" + beanName + "] does not specifiy one, has no fields of that type, and there are more than one GigaSpace beans within the context");
     }
 
     public static PlatformTransactionManager findTxManager(String txManagerName, ApplicationContext applicationContext, String beanName) {

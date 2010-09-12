@@ -30,6 +30,7 @@ public class SingleReadReceiveOperationHandler extends AbstractNonBlockingReceiv
      * Performs single read operation using {@link org.openspaces.core.GigaSpace#read(Object,long)} with the
      * given timeout.
      */
+    @Override
     protected Object doReceiveBlocking(Object template, GigaSpace gigaSpace, long receiveTimeout) throws DataAccessException {
         return gigaSpace.read(template, receiveTimeout);
     }
@@ -38,6 +39,7 @@ public class SingleReadReceiveOperationHandler extends AbstractNonBlockingReceiv
      * Performs single read operation using {@link org.openspaces.core.GigaSpace#read(Object,long)} with no
      * timeout.
      */
+    @Override
     protected Object doReceiveNonBlocking(Object template, GigaSpace gigaSpace) throws DataAccessException {
         return gigaSpace.read(template, 0);
     }

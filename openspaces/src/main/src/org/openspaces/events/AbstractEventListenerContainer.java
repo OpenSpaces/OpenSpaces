@@ -144,6 +144,7 @@ public abstract class AbstractEventListenerContainer extends AbstractSpaceListen
      * Only start if we have a listener registered. If we don't, then
      * explicit start should be called.
      */
+    @Override
     protected void doStart() throws DataAccessException {
         if (getEventListener() != null) {
             super.doStart();

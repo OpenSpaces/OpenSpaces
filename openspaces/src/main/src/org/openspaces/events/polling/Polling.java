@@ -24,7 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks an event listener as polled event listener. It will be wrapped automtically with
+ * Marks an event listener as polled event listener. It will be wrapped automatically with
  * {@link org.openspaces.events.polling.SimplePollingEventListenerContainer}.
  *
  * <p>Template can be provided using {@link org.openspaces.events.EventTemplate} marked on
@@ -68,7 +68,7 @@ public @interface Polling {
      * scaling, consider specifying the "maxConcurrentConsumers" setting instead.
      *
      * <p>
-     * Raising the number of concurrent consumers is recommendable in order to scale the consumption
+     * Raising the number of concurrent consumers is recommended in order to scale the consumption
      * of events. However, note that any ordering guarantees are lost once multiple consumers are
      * registered. In general, stick with 1 consumer for low-volume events.
      *
@@ -86,7 +86,7 @@ public @interface Polling {
      * ("concurrentConsumers") again.
      *
      * <p>
-     * Raising the number of concurrent consumers is recommendable in order to scale the consumption
+     * Raising the number of concurrent consumers is recommended in order to scale the consumption
      * of events. However, note that any ordering guarantees are lost once multiple consumers are
      * registered. In general, stick with 1 consumer for low-volume events.
      *

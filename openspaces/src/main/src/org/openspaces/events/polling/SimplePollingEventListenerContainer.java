@@ -144,7 +144,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      * scaling, consider specifying the "maxConcurrentConsumers" setting instead.
      *
      * <p>
-     * Raising the number of concurrent consumers is recommendable in order to scale the consumption
+     * Raising the number of concurrent consumers is recommended in order to scale the consumption
      * of events. However, note that any ordering guarantees are lost once multiple consumers are
      * registered. In general, stick with 1 consumer for low-volume events.
      *
@@ -189,7 +189,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      * ("concurrentConsumers") again.
      *
      * <p>
-     * Raising the number of concurrent consumers is recommendable in order to scale the consumption
+     * Raising the number of concurrent consumers is recommended in order to scale the consumption
      * of events. However, note that any ordering guarantees are lost once multiple consumers are
      * registered. In general, stick with 1 consumer for low-volume events.
      *
@@ -455,7 +455,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      * Return the number of currently scheduled consumers.
      *
      * <p>
-     * This number will always be inbetween "concurrentConsumers" and "maxConcurrentConsumers", but
+     * This number will always be in between "concurrentConsumers" and "maxConcurrentConsumers", but
      * might be higher than "activeConsumerCount" (in case of some consumers being scheduled but not
      * executed at the moment).
      *
@@ -473,7 +473,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
      * Return the number of currently active consumers.
      *
      * <p>
-     * This number will always be inbetween "concurrentConsumers" and "maxConcurrentConsumers", but
+     * This number will always be in between "concurrentConsumers" and "maxConcurrentConsumers", but
      * might be lower than "scheduledConsumerCount". (in case of some consumers being scheduled but
      * not executed at the moment).
      *
@@ -550,7 +550,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
     }
 
     /**
-     * Sleep according to the specified recovery interval. Called inbetween recovery attempts.
+     * Sleep according to the specified recovery interval. Called in between recovery attempts.
      */
     protected void sleepInbetweenRecoveryAttempts() {
         if (this.recoveryInterval > 0) {
@@ -563,6 +563,7 @@ public class SimplePollingEventListenerContainer extends AbstractPollingEventLis
         }
     }
 
+    @Override
     protected void doInitialize() throws DataAccessException {
     }
 

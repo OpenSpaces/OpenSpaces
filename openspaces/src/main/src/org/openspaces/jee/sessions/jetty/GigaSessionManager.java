@@ -99,10 +99,9 @@ public class GigaSessionManager extends AbstractSessionManager {
 
             if (spaceUrl.startsWith("bean://")) {
                 throw new IllegalArgumentException("bean:// is only supported when deploying into the service grid");
-            } else {
-                urlSpaceConfigurer = new UrlSpaceConfigurer(spaceUrl).clusterInfo(clusterInfo);
-                space = (ISpaceProxy) urlSpaceConfigurer.space();
-            }
+            } 
+            urlSpaceConfigurer = new UrlSpaceConfigurer(spaceUrl).clusterInfo(clusterInfo);
+            space = (ISpaceProxy) urlSpaceConfigurer.space();
         }
 
         if (_sessionIdManager == null) {
@@ -172,7 +171,7 @@ public class GigaSessionManager extends AbstractSessionManager {
 
 
     /**
-     * How often the scavanger thread will run in order to check for expired sessions. Set in
+     * How often the scavenger thread will run in order to check for expired sessions. Set in
      * <b>seconds</b> and defaults to <code>60 * 5</code> seconds (5 minutes).
      */
     public int getScavengePeriod() {
@@ -180,7 +179,7 @@ public class GigaSessionManager extends AbstractSessionManager {
     }
 
     /**
-     * How often the scavanger thread will run in order to check for expired sessions. Set in
+     * How often the scavenger thread will run in order to check for expired sessions. Set in
      * <b>seconds</b> and defaults to <code>60 * 5</code> seconds (5 minutes).
      */
     public void setScavengePeriod(int seconds) {
@@ -243,7 +242,7 @@ public class GigaSessionManager extends AbstractSessionManager {
      */
     @Override
     public Session getSession(String idInCluster) {
-        // TODO do we really need to syncronize on (this) here? It used to be like that
+        // TODO do we really need to synchronize on (this) here? It used to be like that
         try {
             SessionData data = fetch(idInCluster);
 
@@ -323,7 +322,7 @@ public class GigaSessionManager extends AbstractSessionManager {
 
         GigaSessionManager.Session session = (GigaSessionManager.Session) abstractSession;
 
-        //TODO there was synctonize on both sessionIdManager and this here, do we really need it?
+        //TODO there was synchronize on both sessionIdManager and this here, do we really need it?
 
         boolean removed = false;
         try {
@@ -409,8 +408,8 @@ public class GigaSessionManager extends AbstractSessionManager {
         } catch (Throwable t) {
             if (t instanceof ThreadDeath)
                 throw ((ThreadDeath) t);
-            else
-                Log.warn("Problem scavenging sessions", t);
+
+            Log.warn("Problem scavenging sessions", t);
         } finally {
             thread.setContextClassLoader(origClassLoader);
         }
@@ -534,7 +533,7 @@ public class GigaSessionManager extends AbstractSessionManager {
          * to the cloud.
          *
          * If just the session access time changed, we don't always write out the
-         * session, because the gigaspace will serialize the unchanged sesssion
+         * session, because the gigaspace will serialize the unchanged session
          * attributes. To save on serialization overheads, we only write out the
          * session when only the access time has changed if the time at which we
          * last saved the session exceeds the chosen save interval.

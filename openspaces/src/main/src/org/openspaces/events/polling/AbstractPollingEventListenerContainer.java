@@ -155,6 +155,7 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTran
         return this.triggerOperationHandler;
     }
 
+    @Override
     public void initialize() {
         if (receiveOperationHandler == null) {
             if (getActualEventListener() != null) {
@@ -253,9 +254,9 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTran
                 }
             }
             return messageReceived;
-        } else {
-            return doReceiveAndExecute(eventListener, template, null);
         }
+        
+        return doReceiveAndExecute(eventListener, template, null);
     }
 
     protected boolean doReceiveAndExecute(SpaceDataEventListener eventListener, Object template, TransactionStatus status) {
@@ -280,11 +281,10 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTran
                             status.setRollbackOnly();
                             handleListenerException(ex);
                             return true;
-                        } else {
-                            // in case we do not work within a transaction, just handle the
-                            // exception and continue
-                            handleListenerException(ex);
-                        }
+                        } 
+                        // in case we do not work within a transaction, just handle the
+                        // exception and continue
+                        handleListenerException(ex);
                     }
                 }
             } else {
@@ -310,9 +310,8 @@ public abstract class AbstractPollingEventListenerContainer extends AbstractTran
                 }
             }
             return true;
-        } else {
-            return false;
-        }
+        } 
+        return false;
     }
 
     /**
