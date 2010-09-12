@@ -20,6 +20,7 @@ import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.DataSourceException;
 import com.gigaspaces.datasource.ManagedDataSource;
 import com.gigaspaces.datasource.hibernate.SessionFactoryBuilder;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.EntityMode;
@@ -98,7 +99,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
     }
 
     /**
-     * Returns all the entries this Hibernate data source will work with. By default, will use Hiberante meta
+     * Returns all the entries this Hibernate data source will work with. By default, will use Hibernate meta
      * data API in order to get the list of all the given entities it handles.
      *
      * <p>This list is used to filter out entities when performing all data source operations exception for
@@ -167,7 +168,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
 
     /**
      * Returns a list of entries that will be used to perform the {@link #initialLoad()} operation. By default, will
-     * try and build a sensible list basde on Hiberante meta data.
+     * try and build a sensible list based on Hibernate meta data.
      *
      * <p>Note, sometimes an explicit list should be provided. For example, if we have a class A and class B, and
      * A has a relationship to B which is not component. If in the space, we only wish to have A, and have B just
@@ -265,15 +266,15 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
         if (initialLoadEntries == null) {
             Set<String> initialLoadEntries = new HashSet<String>();
             // try and derive the managedEntries
-            Map allClassMetaData = sessionFactory.getAllClassMetadata();
-            for (Iterator it = allClassMetaData.keySet().iterator(); it.hasNext();) {
-                String entityname = (String) it.next();
-                ClassMetadata classMetadata = (ClassMetadata) allClassMetaData.get(entityname);
+            Map<String, ClassMetadata> allClassMetaData = sessionFactory.getAllClassMetadata();
+            for (Map.Entry<String, ClassMetadata> entry : allClassMetaData.entrySet()) {
+                String entityname = entry.getKey();
+                ClassMetadata classMetadata = entry.getValue();
                 if (classMetadata.isInherited()) {
                     String superClassEntityName = ((AbstractEntityPersister) classMetadata).getMappedSuperclass();
-                    ClassMetadata superClassMetadata = (ClassMetadata) allClassMetaData.get(superClassEntityName);
+                    ClassMetadata superClassMetadata = allClassMetaData.get(superClassEntityName);
                     Class superClass = superClassMetadata.getMappedClass(EntityMode.POJO);
-                    // only filter out classes that their super class has compass mappings
+                    // only filter out classes that their super class has mappings
                     if (superClass != null) {
                         if (logger.isDebugEnabled()) {
                             logger.debug("Entity [" + entityname + "] is inherited and has a super class ["
