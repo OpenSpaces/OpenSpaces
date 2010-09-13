@@ -10,15 +10,19 @@ import java.io.ObjectOutput;
 public class HashedEventDrivenSpaceRemotingEntry extends EventDrivenSpaceRemotingEntry {
 
     public RemotingUtils.MethodHash methodHash;
+    
+    public RemotingUtils.MethodHash getMethodHash() {
+        return methodHash;
+    }
 
     public HashedEventDrivenSpaceRemotingEntry buildInvocation(String lookupName, String methodName, RemotingUtils.MethodHash methodHash, Object[] arguments) {
-        this.result = null;
-        this.ex = null;
-        this.isInvocation = Boolean.TRUE;
-        this.lookupName = lookupName;
-        this.methodName = methodName;
+        setResult(null);
+        setException(null);
+        setInvocation(Boolean.TRUE);
+        setLookupName(lookupName);
+        setMethodName(methodName);
         this.methodHash = methodHash;
-        this.arguments = arguments;
+        setArguments(arguments);
         return this;
     }
 
@@ -60,6 +64,4 @@ public class HashedEventDrivenSpaceRemotingEntry extends EventDrivenSpaceRemotin
             methodHash.writeExternal(out);
         }
     }
-
-
 }

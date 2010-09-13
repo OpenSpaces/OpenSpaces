@@ -185,8 +185,8 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
     public void testSerializationOfAsyncRemotingEntry() throws IOException, ClassNotFoundException {
 		HashedEventDrivenSpaceRemotingEntry entry = new HashedEventDrivenSpaceRemotingEntry();
         entry = entry.buildInvocation("test", "test", null, null);
-        entry.oneWay = true;
-        entry.metaArguments = new Object[]{new Integer(1)};
+        entry.setOneWay(true);
+        entry.setMetaArguments(new Object[]{new Integer(1)});
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(byteArrayOutputStream);
         oos.writeObject(entry);
@@ -198,7 +198,7 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         compareAsyncInvocationNullableFields(entry, invocation);
 
         entry = entry.buildResult("result");
-        entry.instanceId = 1;
+        entry.setInstanceId(1);
         byteArrayOutputStream = new ByteArrayOutputStream();
         oos = new ObjectOutputStream(byteArrayOutputStream);
         oos.writeObject(entry);
@@ -219,7 +219,7 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
 
     private void compareAsyncInvocationNullableFields(EventDrivenSpaceRemotingEntry entry, EventDrivenSpaceRemotingEntry invocation) {
         assertEquals(entry.getRouting(), invocation.getRouting());
-        assertEquals(entry.oneWay, invocation.oneWay);
+        assertEquals(entry.getOneWay(), invocation.getOneWay());
         Object[] entryMetaArgs = entry.getMetaArguments();
         if (entryMetaArgs != null) {
             Object[] invocationMetaArgs = invocation.getMetaArguments();

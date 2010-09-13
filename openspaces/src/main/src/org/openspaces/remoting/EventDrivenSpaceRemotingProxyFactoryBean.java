@@ -224,15 +224,15 @@ public class EventDrivenSpaceRemotingProxyFactoryBean extends RemoteAccessor imp
         remotingEntry.setRouting(RemotingProxyUtils.computeRouting(remotingEntry, remoteRoutingHandler, methodInvocation));
 
         if (metaArgumentsHandler != null) {
-            remotingEntry.metaArguments = metaArgumentsHandler.obtainMetaArguments(remotingEntry);
+            remotingEntry.setMetaArguments(metaArgumentsHandler.obtainMetaArguments(remotingEntry));
         }
 
         // check if this invocation will be a one way invocation
         if (globalOneWay) {
-            remotingEntry.oneWay = Boolean.TRUE;
+            remotingEntry.setOneWay(Boolean.TRUE);
         } else {
             if (voidOneWay && methodInvocation.getMethod().getReturnType() == void.class) {
-                remotingEntry.oneWay = Boolean.TRUE;
+                remotingEntry.setOneWay(Boolean.TRUE);
             }
         }
         remotingEntry.setFifo(fifo);
@@ -240,7 +240,7 @@ public class EventDrivenSpaceRemotingProxyFactoryBean extends RemoteAccessor imp
         gigaSpace.write(remotingEntry);
 
         // if this is a one way invocation, simply return null
-        if (remotingEntry.oneWay != null && remotingEntry.oneWay) {
+        if (remotingEntry.getOneWay() != null && remotingEntry.getOneWay()) {
             return null;
         }
 

@@ -73,25 +73,49 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
     public EventDrivenSpaceRemotingEntry() {
         setNOWriteLeaseMode(true);
         makeTransient();
-        isInvocation = true;
+        setInvocation(Boolean.TRUE);
     }
 
+    public void setInvocation(Boolean invocation)
+    {
+        this.isInvocation = invocation;
+    }
+    
     public String getLookupName() {
         return lookupName;
+    }
+    public void setLookupName(String lookupName) {
+        this.lookupName = lookupName;
     }
 
     public String getMethodName() {
         return methodName;
     }
+    protected void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
 
     public Object[] getArguments() {
         return arguments;
+    }
+    protected void setArguments(Object[] arguments) {
+        this.arguments = arguments;
     }
 
     public Object[] getMetaArguments() {
         return metaArguments;
     }
+    public void setMetaArguments(Object[] metaArguments) {
+        this.metaArguments = metaArguments;
+    }
 
+    public Boolean getOneWay() { 
+        return oneWay;
+    }
+    public void setOneWay(Boolean oneWay) {
+        this.oneWay = oneWay;
+    }
+    
     public Integer getRouting() {
         return routing;
     }
@@ -103,13 +127,22 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
     public Object getResult() {
         return this.result;
     }
+    protected void setResult(Object result) {
+        this.result = result; 
+    }
 
     public Throwable getException() {
         return this.ex;
     }
+    protected void setException(Throwable exception) {
+        this.ex = exception;
+    }
 
     public Integer getInstanceId() {
         return this.instanceId;
+    }
+    public void setInstanceId(Integer instanceId) {
+        this.instanceId = instanceId;
     }
 
     public static String[] __getSpaceIndexedFields() {
@@ -119,10 +152,10 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
 
     public EventDrivenSpaceRemotingEntry buildInvocation(String lookupName, String methodName, Object[] arguments) {
         clearResultData();
-        this.isInvocation = Boolean.TRUE;
-        this.lookupName = lookupName;
-        this.methodName = methodName;
-        this.arguments = arguments;
+        setInvocation(Boolean.TRUE);
+        setLookupName(lookupName);
+        setMethodName(methodName);
+        setArguments(arguments);
         return this;
     }
 
@@ -130,36 +163,36 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
         clearInvocationData();
         clearResultData();
         buildResultUID();
-        this.isInvocation = Boolean.FALSE;
+        setInvocation(Boolean.FALSE);
         return this;
     }
 
     public EventDrivenSpaceRemotingEntry buildResult(Throwable e) {
         clearInvocationData();
         buildResultUID();
-        this.isInvocation = Boolean.FALSE;
-        this.ex = e;
+        setInvocation(Boolean.FALSE);
+        setException(e);
         return this;
     }
 
     public EventDrivenSpaceRemotingEntry buildResult(Object result) {
         clearInvocationData();
         buildResultUID();
-        this.isInvocation = Boolean.FALSE;
-        this.result = result;
+        setInvocation(Boolean.FALSE);
+        setResult(result);
         return this;
     }
 
     private void clearResultData() {
-        this.result = null;
-        this.ex = null;
+        setResult(null);
+        setException(null);
     }
 
     private void clearInvocationData() {
-        this.lookupName = null;
-        this.methodName = null;
-        this.arguments = null;
-        this.oneWay = null;
+        setLookupName(null);
+        setMethodName(null);
+        setArguments(null);
+        setOneWay(null);
     }
 
     private void buildResultUID() {

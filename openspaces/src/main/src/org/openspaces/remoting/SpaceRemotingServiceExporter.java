@@ -273,9 +273,9 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
      */
     public Object getTemplate() {
         EventDrivenSpaceRemotingEntry remotingEntry = new EventDrivenSpaceRemotingEntry();
-        remotingEntry.isInvocation = true;
+        remotingEntry.setInvocation(Boolean.TRUE);
         remotingEntry.setFifo(fifo);
-        remotingEntry.lookupName = templateLookupName;
+        remotingEntry.setLookupName(templateLookupName);
         if (logger.isDebugEnabled()) {
             logger.debug("Registering async remoting service template [" + remotingEntry + "]");
         }
@@ -316,7 +316,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
 
         waitTillInitialized();
 
-        String lookupName = remotingEntry.lookupName;
+        String lookupName = remotingEntry.getLookupName();
         if (lookupName.endsWith(asyncInterfaceSuffix)) {
             lookupName = lookupName.substring(0, lookupName.length() - asyncInterfaceSuffix.length());
         }
@@ -331,7 +331,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
             }
             if (service == null) {
                 writeResponse(gigaSpace, remotingEntry, new RemoteLookupFailureException(
-                        "Failed to find service for lookup [" + remotingEntry.lookupName + "]"));
+                        "Failed to find service for lookup [" + remotingEntry.getLookupName() + "]"));
                 return;
             }
         }
@@ -340,16 +340,16 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
 
         IMethod method = null;
         try {
-            if (remotingEntry instanceof HashedEventDrivenSpaceRemotingEntry && ((HashedEventDrivenSpaceRemotingEntry) remotingEntry).methodHash != null) {
-                method = methodInvocationLookup.get(lookupName).get(((HashedEventDrivenSpaceRemotingEntry) remotingEntry).methodHash);
+            if (remotingEntry instanceof HashedEventDrivenSpaceRemotingEntry && ((HashedEventDrivenSpaceRemotingEntry) remotingEntry).getMethodHash() != null) {
+                method = methodInvocationLookup.get(lookupName).get(((HashedEventDrivenSpaceRemotingEntry) remotingEntry).getMethodHash());
             }
             if (method == null) {
-                method = methodInvocationCache.findMethod(lookupName, service, remotingEntry.methodName, remotingEntry.arguments);
+                method = methodInvocationCache.findMethod(lookupName, service, remotingEntry.getMethodName(), remotingEntry.getArguments());
             }
         } catch (Exception e) {
             failedExecution(service);
             writeResponse(gigaSpace, remotingEntry, new RemoteLookupFailureException("Failed to find method ["
-                    + remotingEntry.methodName + "] for lookup [" + remotingEntry.lookupName + "]", e));
+                    + remotingEntry.getMethodName() + "] for lookup [" + remotingEntry.getLookupName() + "]", e));
             return;
         }
         try {
@@ -357,7 +357,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
             if (serviceExecutionAspect != null) {
                 retVal = serviceExecutionAspect.invoke(remotingEntry, new InternalMethodInvocation(method), service);
             } else {
-                retVal = method.invoke(service, remotingEntry.arguments);
+                retVal = method.invoke(service, remotingEntry.getArguments());
             }
             writeResponse(gigaSpace, remotingEntry, retVal);
             processedExecution(service);
@@ -367,7 +367,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
         } catch (IllegalAccessException e) {
             failedExecution(service);
             writeResponse(gigaSpace, remotingEntry, new RemoteLookupFailureException("Failed to access method ["
-                    + remotingEntry.methodName + "] for lookup [" + remotingEntry.lookupName + "]", e));
+                    + remotingEntry.getMethodName() + "] for lookup [" + remotingEntry.getLookupName() + "]", e));
         } catch (Throwable e) {
             failedExecution(service);
             writeResponse(gigaSpace, remotingEntry, e);
@@ -376,10 +376,10 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
 
     @SuppressWarnings("unchecked")
     private void writeResponse(GigaSpace gigaSpace, EventDrivenSpaceRemotingEntry remotingEntry, Throwable e) {
-        if (remotingEntry.oneWay == null || !remotingEntry.oneWay) {
+        if (remotingEntry.getOneWay() == null || !remotingEntry.getOneWay()) {
             EventDrivenSpaceRemotingEntry result = remotingEntry.buildResult(e);
             if (clusterInfo != null) {
-                result.instanceId = clusterInfo.getInstanceId();
+                result.setInstanceId(clusterInfo.getInstanceId());
             }
             gigaSpace.write(result);
         } else {
@@ -390,10 +390,10 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
     }
 
     private void writeResponse(GigaSpace gigaSpace, EventDrivenSpaceRemotingEntry remotingEntry, Object retVal) {
-        if (remotingEntry.oneWay == null || !remotingEntry.oneWay) {
+        if (remotingEntry.getOneWay() == null || !remotingEntry.getOneWay()) {
             EventDrivenSpaceRemotingEntry result = remotingEntry.buildResult(retVal);
             if (clusterInfo != null) {
-                result.instanceId = clusterInfo.getInstanceId();
+                result.setInstanceId(clusterInfo.getInstanceId());
             }
             gigaSpace.write(result);
         }
