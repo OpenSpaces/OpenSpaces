@@ -19,6 +19,8 @@ package org.openspaces.remoting;
 import com.gigaspaces.async.AsyncResult;
 import com.gigaspaces.internal.version.PlatformLogicalVersion;
 import com.gigaspaces.lrmi.LRMIInvocationContext;
+import com.j_spaces.kernel.JSpaceUtilities;
+
 import org.openspaces.core.cluster.ClusterInfo;
 import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.core.executor.DistributedTask;
@@ -283,7 +285,7 @@ public class ExecutorRemotingTask<T extends Serializable> implements Distributed
             try {
                 out.writeObject(exception);
             } catch (NotSerializableException e) {
-                logger.warn("Non serializable exception raised by [" + lookupName + "] and method [" + methodName + "], exception type [" + exception.getClass().getName() + "]", e);
+                logger.warn("Non serializable exception raised by [" + lookupName + "] and method [" + methodName + "], root exception: [" + JSpaceUtilities.getStackTrace(exception) + "]", e);
                 throw e;
             }
             if (instanceId == null) {
