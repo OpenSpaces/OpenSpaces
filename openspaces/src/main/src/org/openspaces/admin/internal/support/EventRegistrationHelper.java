@@ -21,6 +21,7 @@ import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventList
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventListener;
 import org.openspaces.admin.space.events.ReplicationStatusChangedEventListener;
@@ -133,6 +134,9 @@ public abstract class EventRegistrationHelper {
         if (eventListener instanceof BackupGridServiceManagerChangedEventListener) {
             admin.getProcessingUnits().getBackupGridServiceManagerChanged().add((BackupGridServiceManagerChangedEventListener) eventListener);
         }
+        if( eventListener instanceof ProcessingUnitInstanceStatisticsChangedEventListener ){
+            admin.getProcessingUnits().getProcessingUnitInstanceStatisticsChanged().add((ProcessingUnitInstanceStatisticsChangedEventListener) eventListener);
+        }
         if (eventListener instanceof SpaceAddedEventListener) {
             admin.getSpaces().getSpaceAdded().add((SpaceAddedEventListener) eventListener);
         }
@@ -240,6 +244,9 @@ public abstract class EventRegistrationHelper {
         }
         if (eventListener instanceof BackupGridServiceManagerChangedEventListener) {
             admin.getProcessingUnits().getBackupGridServiceManagerChanged().remove((BackupGridServiceManagerChangedEventListener) eventListener);
+        }
+        if( eventListener instanceof ProcessingUnitInstanceStatisticsChangedEventListener ){
+            admin.getProcessingUnits().getProcessingUnitInstanceStatisticsChanged().remove((ProcessingUnitInstanceStatisticsChangedEventListener) eventListener);
         }
         if (eventListener instanceof SpaceAddedEventListener) {
             admin.getSpaces().getSpaceAdded().remove((SpaceAddedEventListener) eventListener);
