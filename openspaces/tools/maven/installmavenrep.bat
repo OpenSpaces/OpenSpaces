@@ -24,6 +24,8 @@ REM GigaSpaces Jars
 call mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-runtime -Dversion=%VERSION% -DpomFile=%TEMP%/gs-runtime-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/required/gs-runtime.jar"
 call mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -Dversion=%VERSION% -DpomFile=%TEMP%/gs-openspaces-pom.xml -Dpackaging=jar -Dfile="%JSHOMEDIR%/lib/required/gs-openspaces.jar"
 call mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=mule-os -Dversion=%VERSION% -Dpackaging=jar -DpomFile=%TEMP%/mule-os-pom.xml -Dfile="%JSHOMEDIR%/lib/optional/openspaces/mule-os.jar"
+call mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=jetty-os -Dversion=%VERSION% -Dpackaging=jar -DpomFile=%TEMP%/jetty-os-pom.xml -Dfile="%JSHOMEDIR%/lib/platform/openspaces/gs-openspaces-jetty.jar"
+call mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=glassfish-os -Dversion=%VERSION% -Dpackaging=jar -DpomFile=%TEMP%/glassfish-os-pom.xml -Dfile="%JSHOMEDIR%/lib/platform/openspaces/gs-openspaces-glassfish.jar"
 
 REM Build and install OpenSpaces Maven Plugin 
 call mvn -f maven-openspaces-plugin/pom.xml install 
@@ -35,5 +37,7 @@ REM remove temp files
 del %TEMP%\gs-runtime-pom.xml
 del %TEMP%\gs-openspaces-pom.xml
 del %TEMP%\mule-os-pom.xml
+del %TEMP%\jetty-os-pom.xml
+del %TEMP%\glassfish-os-pom.xml
 
 :END

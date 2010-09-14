@@ -63,6 +63,16 @@ public class POMGenerator {
         printHeader(writer, version, POMGenerator.GS_GROUP, "mule-os");
         printFooter(writer);
         writer.close();
+        
+        writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "jetty-os-pom.xml")))));
+        printHeader(writer, version, POMGenerator.GS_GROUP, "jetty-os");
+        printFooter(writer);
+        writer.close();
+        
+        writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "glassfish-os-pom.xml")))));
+        printHeader(writer, version, POMGenerator.GS_GROUP, "glassfish-os");
+        printFooter(writer);
+        writer.close();
 
         if (args.length > 2) {
             String directory = args[2];
