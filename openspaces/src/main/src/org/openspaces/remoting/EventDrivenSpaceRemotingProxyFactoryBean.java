@@ -34,8 +34,8 @@ import java.util.concurrent.Future;
  * A space <b>event driven</b> remoting proxy that forward the service execution to a remote service with the space as
  * the transport layer. Services are remotely exported in the "server side" using the
  * {@link SpaceRemotingServiceExporter} which in turn is registered with an event container. This proxy builds
- * a representation of the remote invocation using {@link EventDrivenSpaceRemotingEntry} and waits
- * for a remoting response represented by {@link EventDrivenSpaceRemotingEntry}.
+ * a representation of the remote invocation using {@link SpaceRemotingEntry} and waits
+ * for a remoting response represented by {@link SpaceRemotingEntry}.
  *
  * <p>The proxy requires a {@link #setGigaSpace(org.openspaces.core.GigaSpace)} interface to be set in
  * order to write the remote invocation and wait for a response using the space API. It also
@@ -62,7 +62,7 @@ import java.util.concurrent.Future;
  * side (simply return <code>null</code>).
  *
  * <p>In case of remote invocation over a partitioned space the default partitioned routing index will
- * be random (the hashCode of the newly created {@link EventDrivenSpaceRemotingEntry} class).
+ * be random (the hashCode of the newly created {@link SpaceRemotingEntry} class).
  * The proxy allows for a pluggable routing handler implementation by setting
  * {@link #setRemoteRoutingHandler(RemoteRoutingHandler)}.
  *
@@ -82,6 +82,8 @@ public class EventDrivenSpaceRemotingProxyFactoryBean extends RemoteAccessor imp
 
     private long timeout = 60000;
 
+    private final SpaceRemotingEntryFactory remotingEntryFactory = new SpaceRemotingEntryMetadataFactory();
+    
     private RemoteRoutingHandler remoteRoutingHandler;
 
     private MetaArgumentsHandler metaArgumentsHandler;
@@ -102,7 +104,7 @@ public class EventDrivenSpaceRemotingProxyFactoryBean extends RemoteAccessor imp
 
     /**
      * Sets the GigaSpace interface that will be used to work with the space as the transport layer
-     * for both writing and taking {@link EventDrivenSpaceRemotingEntry}.
+     * for both writing and taking {@link SpaceRemotingEntry}.
      */
     public void setGigaSpace(GigaSpace gigaSpace) {
         this.gigaSpace = gigaSpace;
@@ -119,7 +121,7 @@ public class EventDrivenSpaceRemotingProxyFactoryBean extends RemoteAccessor imp
     /**
      * In case of remote invocation over a partitioned space the default partitioned routing index
      * will be random (the hashCode of the newly created
-     * {@link EventDrivenSpaceRemotingEntry} class). This
+     * {@link SpaceRemotingEntry} class). This
      * {@link RemoteRoutingHandler} allows for custom routing computation
      * (for example, based on one of the service method parameters).
      */
@@ -218,7 +220,7 @@ public class EventDrivenSpaceRemotingProxyFactoryBean extends RemoteAccessor imp
             }
         }
 
-        EventDrivenSpaceRemotingEntry remotingEntry = new HashedEventDrivenSpaceRemotingEntry().buildInvocation(lookupName, methodName,
+        SpaceRemotingEntry remotingEntry = remotingEntryFactory.createHashEntry().buildInvocation(lookupName, methodName,
                 methodHashLookup.get(methodInvocation.getMethod()), methodInvocation.getArguments());
 
         remotingEntry.setRouting(RemotingProxyUtils.computeRouting(remotingEntry, remoteRoutingHandler, methodInvocation));
@@ -249,7 +251,7 @@ public class EventDrivenSpaceRemotingProxyFactoryBean extends RemoteAccessor imp
             return new EventDrivenRemoteFuture(gigaSpace, remotingEntry);
         }
 
-        EventDrivenSpaceRemotingEntry invokeResult = gigaSpace.take(remotingEntry.buildResultTemplate(), timeout);
+        SpaceRemotingEntry invokeResult = gigaSpace.take(remotingEntry.buildResultTemplate(), timeout);
         if (invokeResult == null) {
             throw new RemoteTimeoutException("Timeout waiting for result for [" + lookupName +
                     "] and method [" + methodName + "]", timeout);

@@ -29,9 +29,10 @@ import java.util.Arrays;
  * result.
  *
  * @author kimchy
+ * @deprecated
  */
-public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements SpaceRemotingInvocation, SpaceRemotingResult,
-        Cloneable, Externalizable {
+@Deprecated
+public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements SpaceRemotingEntry, Externalizable {
     
     static final long serialVersionUID = 7009426586658014410L;
     static int bitIndexCounter = 0;
@@ -150,7 +151,7 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
     }
 
 
-    public EventDrivenSpaceRemotingEntry buildInvocation(String lookupName, String methodName, Object[] arguments) {
+    public SpaceRemotingEntry buildInvocation(String lookupName, String methodName, Object[] arguments) {
         clearResultData();
         setInvocation(Boolean.TRUE);
         setLookupName(lookupName);
@@ -159,7 +160,7 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
         return this;
     }
 
-    public EventDrivenSpaceRemotingEntry buildResultTemplate() {
+    public SpaceRemotingEntry buildResultTemplate() {
         clearInvocationData();
         clearResultData();
         buildResultUID();
@@ -167,7 +168,7 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
         return this;
     }
 
-    public EventDrivenSpaceRemotingEntry buildResult(Throwable e) {
+    public SpaceRemotingEntry buildResult(Throwable e) {
         clearInvocationData();
         buildResultUID();
         setInvocation(Boolean.FALSE);
@@ -175,7 +176,7 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
         return this;
     }
 
-    public EventDrivenSpaceRemotingEntry buildResult(Object result) {
+    public SpaceRemotingEntry buildResult(Object result) {
         clearInvocationData();
         buildResultUID();
         setInvocation(Boolean.FALSE);
@@ -202,7 +203,7 @@ public class EventDrivenSpaceRemotingEntry extends MetaDataEntry implements Spac
     }
 
     @Override
-    protected Object clone() throws CloneNotSupportedException {
+    public Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
 

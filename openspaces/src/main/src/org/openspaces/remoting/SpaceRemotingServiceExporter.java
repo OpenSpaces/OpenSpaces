@@ -81,15 +81,17 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @author kimchy
  * @see org.openspaces.events.polling.SimplePollingEventListenerContainer
- * @see EventDrivenSpaceRemotingEntry
+ * @see SpaceRemotingEntry
  * @see EventDrivenSpaceRemotingProxyFactoryBean
  */
-public class SpaceRemotingServiceExporter implements SpaceDataEventListener<EventDrivenSpaceRemotingEntry>, InitializingBean, ApplicationContextAware, BeanNameAware,
+public class SpaceRemotingServiceExporter implements SpaceDataEventListener<SpaceRemotingEntry>, InitializingBean, ApplicationContextAware, BeanNameAware,
         EventTemplateProvider, ClusterInfoAware, ApplicationListener, ServiceDetailsProvider, ServiceMonitorsProvider {
 
     public static final String DEFAULT_ASYNC_INTERFACE_SUFFIX = "Async";
 
     private static final Log logger = LogFactory.getLog(SpaceRemotingServiceExporter.class);
+    
+    final private SpaceRemotingEntryFactory remotingEntryFactory = new SpaceRemotingEntryMetadataFactory();
 
     private List<Object> services = new ArrayList<Object>();
 
@@ -133,7 +135,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
     /**
      * Sets the list of services that will be exported as remote services. Each service will have
      * all of its interfaces registered as lookups (mapping to
-     * {@link EventDrivenSpaceRemotingEntry#getLookupName()} which will then be used to invoke the correct
+     * {@link SpaceRemotingEntry#getLookupName()} which will then be used to invoke the correct
      * service.
      */
     public void setServices(List<Object> services) {
@@ -153,7 +155,7 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
     }
 
     /**
-     * Sets the template used to read async invocation (the {@link EventDrivenSpaceRemotingEntry})
+     * Sets the template used to read async invocation (the {@link SpaceRemotingEntry})
      * to be fifo. Works in with setting the {@link EventDrivenSpaceRemotingProxyFactoryBean}
      * fifo flag to <code>true</code> and allows for remoting to work in fifo mode without needing to set the whole
      * Space to work in fifo mode.
@@ -269,10 +271,10 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
 
     /**
      * The template used for receiving events. Defaults to all objects that are of type
-     * {@link EventDrivenSpaceRemotingEntry}.
+     * {@link SpaceRemotingEntry}.
      */
     public Object getTemplate() {
-        EventDrivenSpaceRemotingEntry remotingEntry = new EventDrivenSpaceRemotingEntry();
+        SpaceRemotingEntry remotingEntry = remotingEntryFactory.createEntry();
         remotingEntry.setInvocation(Boolean.TRUE);
         remotingEntry.setFifo(fifo);
         remotingEntry.setLookupName(templateLookupName);
@@ -299,19 +301,19 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
     }
 
     /**
-     * Receives a {@link EventDrivenSpaceRemotingEntry} which holds all the relevant
-     * invocation information. Looks up (based on {@link EventDrivenSpaceRemotingEntry#getLookupName()}
+     * Receives a {@link SpaceRemotingEntry} which holds all the relevant
+     * invocation information. Looks up (based on {@link SpaceRemotingEntry#getLookupName()}
      * the interface the service is registered against (which is the interface the service
      * implements) and then invokes the relevant method within it using the provided method name and
      * arguments. Write the result value or invocation exception back to the space using
-     * {@link EventDrivenSpaceRemotingEntry}.
+     * {@link SpaceRemotingEntry}.
      *
      * @param remotingEntry The remote entry object
      * @param gigaSpace     The GigaSpace interface
      * @param txStatus      A transactional status
      * @param source        An optional source event information
      */
-    public void onEvent(EventDrivenSpaceRemotingEntry remotingEntry, GigaSpace gigaSpace, TransactionStatus txStatus, Object source)
+    public void onEvent(SpaceRemotingEntry remotingEntry, GigaSpace gigaSpace, TransactionStatus txStatus, Object source)
             throws RemoteAccessException {
 
         waitTillInitialized();
@@ -340,8 +342,8 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
 
         IMethod method = null;
         try {
-            if (remotingEntry instanceof HashedEventDrivenSpaceRemotingEntry && ((HashedEventDrivenSpaceRemotingEntry) remotingEntry).getMethodHash() != null) {
-                method = methodInvocationLookup.get(lookupName).get(((HashedEventDrivenSpaceRemotingEntry) remotingEntry).getMethodHash());
+            if (remotingEntry instanceof HashedSpaceRemotingEntry && ((HashedSpaceRemotingEntry) remotingEntry).getMethodHash() != null) {
+                method = methodInvocationLookup.get(lookupName).get(((HashedSpaceRemotingEntry) remotingEntry).getMethodHash());
             }
             if (method == null) {
                 method = methodInvocationCache.findMethod(lookupName, service, remotingEntry.getMethodName(), remotingEntry.getArguments());
@@ -375,9 +377,9 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
     }
 
     @SuppressWarnings("unchecked")
-    private void writeResponse(GigaSpace gigaSpace, EventDrivenSpaceRemotingEntry remotingEntry, Throwable e) {
+    private void writeResponse(GigaSpace gigaSpace, SpaceRemotingEntry remotingEntry, Throwable e) {
         if (remotingEntry.getOneWay() == null || !remotingEntry.getOneWay()) {
-            EventDrivenSpaceRemotingEntry result = remotingEntry.buildResult(e);
+            SpaceRemotingEntry result = remotingEntry.buildResult(e);
             if (clusterInfo != null) {
                 result.setInstanceId(clusterInfo.getInstanceId());
             }
@@ -389,9 +391,9 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Even
         }
     }
 
-    private void writeResponse(GigaSpace gigaSpace, EventDrivenSpaceRemotingEntry remotingEntry, Object retVal) {
+    private void writeResponse(GigaSpace gigaSpace, SpaceRemotingEntry remotingEntry, Object retVal) {
         if (remotingEntry.getOneWay() == null || !remotingEntry.getOneWay()) {
-            EventDrivenSpaceRemotingEntry result = remotingEntry.buildResult(retVal);
+            SpaceRemotingEntry result = remotingEntry.buildResult(retVal);
             if (clusterInfo != null) {
                 result.setInstanceId(clusterInfo.getInstanceId());
             }

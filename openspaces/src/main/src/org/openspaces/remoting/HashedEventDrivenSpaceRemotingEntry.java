@@ -6,16 +6,19 @@ import java.io.ObjectOutput;
 
 /**
  * @author kimchy (shay.banon)
+ * @deprecated
  */
-public class HashedEventDrivenSpaceRemotingEntry extends EventDrivenSpaceRemotingEntry {
+@Deprecated
+public class HashedEventDrivenSpaceRemotingEntry extends EventDrivenSpaceRemotingEntry
+    implements HashedSpaceRemotingEntry {
 
     public RemotingUtils.MethodHash methodHash;
-    
+
     public RemotingUtils.MethodHash getMethodHash() {
         return methodHash;
     }
 
-    public HashedEventDrivenSpaceRemotingEntry buildInvocation(String lookupName, String methodName, RemotingUtils.MethodHash methodHash, Object[] arguments) {
+    public HashedSpaceRemotingEntry buildInvocation(String lookupName, String methodName, RemotingUtils.MethodHash methodHash, Object[] arguments) {
         setResult(null);
         setException(null);
         setInvocation(Boolean.TRUE);
@@ -27,21 +30,21 @@ public class HashedEventDrivenSpaceRemotingEntry extends EventDrivenSpaceRemotin
     }
 
     @Override
-    public EventDrivenSpaceRemotingEntry buildResultTemplate() {
+    public SpaceRemotingEntry buildResultTemplate() {
         methodHash = null;
         return super.buildResultTemplate();
     }
 
     @Override
-    public EventDrivenSpaceRemotingEntry buildResult(Throwable e) {
+    public SpaceRemotingEntry buildResult(Throwable e) {
         methodHash = null;
         return super.buildResult(e);
     }
 
     @Override
-    public HashedEventDrivenSpaceRemotingEntry buildResult(Object result) {
+    public HashedSpaceRemotingEntry buildResult(Object result) {
         methodHash = null;
-        return (HashedEventDrivenSpaceRemotingEntry) super.buildResult(result);
+        return (HashedSpaceRemotingEntry) super.buildResult(result);
     }
 
 

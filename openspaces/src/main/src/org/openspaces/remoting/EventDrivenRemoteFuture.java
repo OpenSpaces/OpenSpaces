@@ -33,19 +33,19 @@ public class EventDrivenRemoteFuture<T> implements Future<T> {
 
     private GigaSpace gigaSpace;
 
-    private EventDrivenSpaceRemotingEntry remotingEntry;
+    private SpaceRemotingEntry remotingEntry;
 
     private Boolean cancelled;
 
     private SpaceRemotingResult remoteResult;
 
-    private EventDrivenSpaceRemotingEntry template;
+    private SpaceRemotingEntry template;
 
-    public EventDrivenRemoteFuture(GigaSpace gigaSpace, EventDrivenSpaceRemotingEntry remotingEntry) {
+    public EventDrivenRemoteFuture(GigaSpace gigaSpace, SpaceRemotingEntry remotingEntry) {
         this.gigaSpace = gigaSpace;
         this.remotingEntry = remotingEntry;
         try {
-            this.template = ((EventDrivenSpaceRemotingEntry) remotingEntry.clone()).buildResultTemplate();
+            this.template = ((SpaceRemotingEntry) remotingEntry.clone()).buildResultTemplate();
         } catch (CloneNotSupportedException e) {
             // won't happen
         }

@@ -21,9 +21,11 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.executor.support.WaitForAnyListener;
 import org.openspaces.remoting.EventDrivenRemotingProxyConfigurer;
-import org.openspaces.remoting.EventDrivenSpaceRemotingEntry;
 import org.openspaces.remoting.ExecutorRemotingProxyConfigurer;
-import org.openspaces.remoting.HashedEventDrivenSpaceRemotingEntry;
+import org.openspaces.remoting.HashedSpaceRemotingEntry;
+import org.openspaces.remoting.SpaceRemotingEntry;
+import org.openspaces.remoting.SpaceRemotingEntryFactory;
+import org.openspaces.remoting.SpaceRemotingEntryMetadataFactory;
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
 
 import java.io.ByteArrayInputStream;
@@ -183,7 +185,8 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
     }
 
     public void testSerializationOfAsyncRemotingEntry() throws IOException, ClassNotFoundException {
-		HashedEventDrivenSpaceRemotingEntry entry = new HashedEventDrivenSpaceRemotingEntry();
+        SpaceRemotingEntryFactory remotingEntryFactory = new SpaceRemotingEntryMetadataFactory();
+		HashedSpaceRemotingEntry entry = remotingEntryFactory.createHashEntry();
         entry = entry.buildInvocation("test", "test", null, null);
         entry.setOneWay(true);
         entry.setMetaArguments(new Object[]{new Integer(1)});
@@ -194,10 +197,10 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         byte[] bytes = byteArrayOutputStream.toByteArray();
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
         ObjectInputStream ois = new ObjectInputStream(byteArrayInputStream);
-        EventDrivenSpaceRemotingEntry invocation = (EventDrivenSpaceRemotingEntry) ois.readObject();
+        SpaceRemotingEntry invocation = (SpaceRemotingEntry) ois.readObject();
         compareAsyncInvocationNullableFields(entry, invocation);
 
-        entry = entry.buildResult("result");
+        entry = (HashedSpaceRemotingEntry) entry.buildResult("result");
         entry.setInstanceId(1);
         byteArrayOutputStream = new ByteArrayOutputStream();
         oos = new ObjectOutputStream(byteArrayOutputStream);
@@ -206,18 +209,18 @@ public class SimpleRemotingTests extends AbstractDependencyInjectionSpringContex
         bytes = byteArrayOutputStream.toByteArray();
         byteArrayInputStream = new ByteArrayInputStream(bytes);
         ois = new ObjectInputStream(byteArrayInputStream);
-        EventDrivenSpaceRemotingEntry invocationResult = (EventDrivenSpaceRemotingEntry) ois.readObject();
+        SpaceRemotingEntry invocationResult = (SpaceRemotingEntry) ois.readObject();
         compareAsyncResultNullableFields(entry, invocationResult);
     }
 
-    private void compareAsyncResultNullableFields(EventDrivenSpaceRemotingEntry entry, EventDrivenSpaceRemotingEntry invocationResult) {
+    private void compareAsyncResultNullableFields(SpaceRemotingEntry entry, SpaceRemotingEntry invocationResult) {
         assertEquals(entry.getRouting(), invocationResult.getRouting());
         assertEquals(entry.getResult(), invocationResult.getResult());
         assertEquals(entry.getInstanceId(), invocationResult.getInstanceId());
         assertEquals(entry.getException(), invocationResult.getException());
     }
 
-    private void compareAsyncInvocationNullableFields(EventDrivenSpaceRemotingEntry entry, EventDrivenSpaceRemotingEntry invocation) {
+    private void compareAsyncInvocationNullableFields(SpaceRemotingEntry entry, SpaceRemotingEntry invocation) {
         assertEquals(entry.getRouting(), invocation.getRouting());
         assertEquals(entry.getOneWay(), invocation.getOneWay());
         Object[] entryMetaArgs = entry.getMetaArguments();
