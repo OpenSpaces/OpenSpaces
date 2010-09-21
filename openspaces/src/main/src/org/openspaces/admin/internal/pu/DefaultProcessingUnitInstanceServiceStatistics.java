@@ -1,5 +1,10 @@
 package org.openspaces.admin.internal.pu;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.openspaces.admin.pu.ProcessingUnitInstanceStatistics;
 import org.openspaces.events.EventContainerServiceMonitors;
 import org.openspaces.events.asyncpolling.AsyncPollingEventContainerServiceMonitors;
@@ -9,11 +14,6 @@ import org.openspaces.memcached.MemcachedServiceMonitors;
 import org.openspaces.pu.container.jee.stats.WebRequestsServiceMonitors;
 import org.openspaces.pu.service.ServiceMonitors;
 import org.openspaces.remoting.RemotingServiceMonitors;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * @author kimchy
@@ -44,6 +44,17 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
                 lastStats = lastStats.getPrevious();
             }
             ((DefaultProcessingUnitInstanceServiceStatistics) lastStats).setPrevious(null);
+        }
+
+        WebRequestsServiceMonitors webRequests = getWebRequests();
+        if( webRequests != null ){
+            if (previous != null) {
+                webRequests.setPrevious( previous.getWebRequests(), 
+                        getAdminTimestamp() - previous.getAdminTimestamp() );
+            }
+            else{
+                webRequests.setPrevious( null, 0 ); 
+            }
         }
     }
 

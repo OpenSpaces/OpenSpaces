@@ -91,11 +91,11 @@ public class JeeServiceDetails extends PlainServiceDetails {
     public boolean isShared() {
         return (Boolean) getAttributes().get(Attributes.SHARED);
     }
-
+    @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         super.writeExternal(out);
     }
-
+    @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
     }
