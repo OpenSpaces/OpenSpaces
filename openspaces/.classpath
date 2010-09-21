@@ -7,7 +7,6 @@
 	<classpathentry kind="src" output="target/main-test-classes" path="src/main/test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/gigaspaces"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/jini"/>
 	<classpathentry kind="lib" path="lib/platform/ant/ant-junit.jar"/>
 	<classpathentry kind="lib" path="lib/platform/ant/ant-launcher.jar"/>
 	<classpathentry kind="lib" path="lib/platform/ant/ant-trax.jar"/>
