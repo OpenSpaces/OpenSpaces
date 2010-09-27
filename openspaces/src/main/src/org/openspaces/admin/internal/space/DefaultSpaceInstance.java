@@ -385,7 +385,8 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
             for (int i = 0; i < newReplicationTargets.length; i++) {
                 ReplicationTarget newReplicationTarget = newReplicationTargets[i];
                 ReplicationTarget previousReplicationTarget = previousReplicationTargets[i];
-                if (newReplicationTarget.getReplicationStatus() != previousReplicationTarget.getReplicationStatus()) {
+                if (newReplicationTarget.getReplicationStatus() != previousReplicationTarget.getReplicationStatus()
+                        || spaceModeChanged(newReplicationTarget, previousReplicationTarget)) {
                     events.add(new ReplicationStatusChangedEvent(this, newReplicationTarget, previousReplicationTarget.getReplicationStatus(), newReplicationTarget.getReplicationStatus()));
                 }
             }
@@ -395,6 +396,23 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
             ((InternalReplicationStatusChangedEventManager) getSpace().getReplicationStatusChanged()).replicationStatusChanged(event);
             ((InternalReplicationStatusChangedEventManager) getSpace().getSpaces().getReplicationStatusChanged()).replicationStatusChanged(event);
         }
+    }
+
+    /** 
+     * A Backup Space's replication status is always disconnected since it does not replicate to the Primary Space. When the Primary Space is forcefully terminated,
+     * the Backup Space is elected as a Primary Space - but since the replication is still disconnected, we must trigger an event based on space mode change.
+     */
+    private boolean spaceModeChanged(ReplicationTarget newReplicationTarget, ReplicationTarget previousReplicationTarget) {
+        if (newReplicationTarget.getSpaceInstance() == null) {
+            if (previousReplicationTarget.getSpaceInstance() == null) {
+                return false;
+            } else if (this.getMode().equals(previousReplicationTarget.getSpaceInstance().getMode())) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        return false;
     }
 
     public Space getSpace() {
