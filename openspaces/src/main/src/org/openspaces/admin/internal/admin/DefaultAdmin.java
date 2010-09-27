@@ -15,6 +15,7 @@ import org.openspaces.admin.dump.CompoundDumpResult;
 import org.openspaces.admin.dump.DumpGeneratedListener;
 import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.dump.DumpResult;
+import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.esm.ElasticServiceManagers;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
@@ -971,6 +972,9 @@ public class DefaultAdmin implements InternalAdmin {
 
     public DumpResult generateDump(String cause, Map<String, Object> context, String... processor) throws AdminException {
         CompoundDumpResult dumpResult = new CompoundDumpResult();
+        for (ElasticServiceManager esm : elasticServiceManagers) {
+            dumpResult.add(esm.generateDump(cause, context, processor));
+        }
         for (GridServiceManager gsm : gridServiceManagers) {
             dumpResult.add(gsm.generateDump(cause, context, processor));
         }
