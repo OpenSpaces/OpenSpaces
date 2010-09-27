@@ -2,6 +2,9 @@ package org.openspaces.admin.internal.space.events;
 
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.support.GroovyHelper;
+import org.openspaces.admin.space.ReplicationTarget;
+import org.openspaces.admin.space.Space;
+import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.events.ReplicationStatusChangedEvent;
 import org.openspaces.admin.space.events.ReplicationStatusChangedEventListener;
 
@@ -31,7 +34,21 @@ public class DefaultReplicationStatusChangedEventManager implements InternalRepl
         }
     }
 
-    public void add(ReplicationStatusChangedEventListener eventListener) {
+    public void add(final ReplicationStatusChangedEventListener eventListener) {
+        //provide existing status to new listener
+        for (Space space : admin.getSpaces().getSpaces()) {
+            for (SpaceInstance spaceInstance : space.getInstances()) {
+                for (ReplicationTarget replicationTarget : spaceInstance.getReplicationTargets()) {
+                    final ReplicationStatusChangedEvent event = new ReplicationStatusChangedEvent(spaceInstance, replicationTarget, null, replicationTarget.getReplicationStatus());
+                    admin.raiseEvent(eventListener, new Runnable() {
+                        public void run() {
+                            eventListener.replicationStatusChanged(event);
+                        }
+                    });
+                }
+            }
+        }
+
         listeners.add(eventListener);
     }
 
