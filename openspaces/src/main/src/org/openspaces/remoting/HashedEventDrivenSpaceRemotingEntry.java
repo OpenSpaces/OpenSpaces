@@ -11,6 +11,8 @@ import java.io.ObjectOutput;
 @Deprecated
 public class HashedEventDrivenSpaceRemotingEntry extends EventDrivenSpaceRemotingEntry
     implements HashedSpaceRemotingEntry {
+    
+    private static final long serialVersionUID = -6752531933557296453L;
 
     public RemotingUtils.MethodHash methodHash;
 
