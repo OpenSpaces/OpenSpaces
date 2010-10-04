@@ -139,6 +139,12 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     public CompoundLogEntries liveLogEntries(LogEntryMatcher matcher) {
         List<LogProcessType> types = new ArrayList<LogProcessType>();
         List<Long> pids = new ArrayList<Long>();
+        for (ElasticServiceManager esm : admin.getElasticServiceManagers()) {
+            if (esm.getGridServiceAgent() != null && esm.getGridServiceAgent() == this) {
+                types.add(LogProcessType.ESM);
+                pids.add(esm.getVirtualMachine().getDetails().getPid());
+            }
+        }
         for (GridServiceManager gsm : admin.getGridServiceManagers()) {
             if (gsm.getGridServiceAgent() != null && gsm.getGridServiceAgent() == this) {
                 types.add(LogProcessType.GSM);

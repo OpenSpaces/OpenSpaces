@@ -347,11 +347,14 @@ public class DefaultAdmin implements InternalAdmin {
     public GridComponent getGridComponentByUID(String uid) {
         GridComponent component = getGridServiceAgents().getAgentByUID(uid);
         if (component == null) {
-            component = getGridServiceManagers().getManagerByUID(uid);
+            component = getElasticServiceManagers().getManagerByUID(uid);
             if (component == null) {
-                component = getGridServiceContainers().getContainerByUID(uid);
+                component = getGridServiceManagers().getManagerByUID(uid);
                 if (component == null) {
-                    component = getLookupServices().getLookupServiceByUID(uid);
+                    component = getGridServiceContainers().getContainerByUID(uid);
+                    if (component == null) {
+                        component = getLookupServices().getLookupServiceByUID(uid);
+                    }
                 }
             }
         }
