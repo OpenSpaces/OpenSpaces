@@ -597,6 +597,15 @@
                             </xsd:documentation>
                         </xsd:annotation>
                     </xsd:attribute>
+                    <xsd:attribute name="pass-array-as-is" type="xsd:boolean">
+                        <xsd:annotation>
+                            <xsd:documentation>
+                                If set to true will pass an array value returned from a 'receiveOperationHandler'
+                                directly to the listener without "serializing" it as one array element each time.
+                                Defaults to false
+                            </xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
                 </xsd:extension>
             </xsd:complexContent>
         </xsd:complexType>

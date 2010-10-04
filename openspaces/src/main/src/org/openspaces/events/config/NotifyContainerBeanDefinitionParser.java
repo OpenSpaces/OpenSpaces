@@ -64,10 +64,14 @@ public class NotifyContainerBeanDefinitionParser extends AbstractTxEventContaine
 
     private static final String PERFORM_SNAPSHOT = "perform-snapshot";
     
+    private static final String PASS_ARRAY_AS_IS = "pass-array-as-is";
+    
+    @Override
     protected Class<SimpleNotifyEventListenerContainer> getBeanClass(Element element) {
         return SimpleNotifyEventListenerContainer.class;
     }
 
+    @Override
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
         super.doParse(element, parserContext, builder);
 
@@ -177,6 +181,11 @@ public class NotifyContainerBeanDefinitionParser extends AbstractTxEventContaine
         String performSnapshot = element.getAttribute(PERFORM_SNAPSHOT);
         if (StringUtils.hasLength(performSnapshot)) {
             builder.addPropertyValue("performSnapshot", performSnapshot);
+        }
+        
+        String passArrayAsIs = element.getAttribute(PASS_ARRAY_AS_IS);
+        if (StringUtils.hasLength(passArrayAsIs)) {
+            builder.addPropertyValue("passArrayAsIs", passArrayAsIs);
         }
     }
 }
