@@ -73,7 +73,7 @@
 	<classpathentry kind="lib" path="lib/external/retrotranslator/retrotranslator-runtime.jar"/>
 	<classpathentry kind="lib" path="tools/maven/apache-maven-2.0.9/lib/maven-2.0.9-uber.jar"/>
 	<classpathentry kind="lib" path="lib/external/backport/backport-util-concurrent.jar"/>
-	<classpathentry kind="lib" path="tools/groovy/embeddable/groovy-all-1.6.3.jar"/>
+	<classpathentry kind="lib" path="tools/groovy/embeddable/groovy-all-1.7.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/required/com.springsource.org.aopalliance-1.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.aop-3.0.3.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/required/org.springframework.asm-3.0.3.RELEASE.jar"/>
