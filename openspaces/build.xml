@@ -18,7 +18,7 @@
             <exclude name="platform/openspaces/**"/>
             <exclude name="ant/**"/>
         </fileset>
-        <path path="${basedir}/tools/groovy/embeddable/groovy-all-1.6.3.jar" />
+        <path path="${basedir}/tools/groovy/embeddable/groovy-all-1.7.5.jar" />
     	<path path="${basedir}/../gigaspaces/classes" />
         <path path="${basedir}/../gigaspaces/src/java/resources" />
 
@@ -39,7 +39,7 @@
     	<fileset dir="${deploy.templates.dir}">
             <include name="**/*.jar"/>
         </fileset>
-    	<path path="${basedir}/tools/groovy/embeddable/groovy-all-1.6.3.jar" />
+    	<path path="${basedir}/tools/groovy/embeddable/groovy-all-1.7.5.jar" />
         <path path="${basedir}/../gigaspaces" />
     	<path path="${basedir}/../gigaspaces/classes" />
         <path path="${basedir}/../gigaspaces/src/java/resources" />
