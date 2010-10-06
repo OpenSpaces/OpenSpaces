@@ -362,7 +362,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/tools/groovy/embeddable/groovy-all-1.6.3.jar!/" />
+          <root url="jar://$MODULE_DIR$/tools/groovy/embeddable/groovy-all-1.7.5.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
