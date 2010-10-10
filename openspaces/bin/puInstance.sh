@@ -3,6 +3,16 @@
 # The call to setenv.sh can be commented out if necessary.
 . `dirname $0`/setenv.sh
 
+# Function to determine if path conversion is required
+toNative() {
+    # Check for Cygwin
+    case $OS in
+        Windows*)
+           toWindows "$@";;
+        *) echo $* ;;
+    esac
+}
+
 echo Starting a Processing Unit Instance
 bootclasspath="-Xbootclasspath/p:$(toNative $XML_JARS)"
 
