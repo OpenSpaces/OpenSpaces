@@ -289,6 +289,7 @@
                 <include name="lib/platform/jetty/**" />
                 <!--<include name="lib/glassfish/**" />-->
                 <include name="lib/platform/velocity/**" />
+            	<include name="lib/platform/jpa/**" />
             </zipfileset>
         	<zipfileset dir="${lib.dir}/external/common" includes="commons-logging.jar" prefix="lib/required">
         	</zipfileset>
