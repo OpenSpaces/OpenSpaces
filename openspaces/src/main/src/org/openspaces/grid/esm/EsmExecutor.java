@@ -89,7 +89,7 @@ public class EsmExecutor {
         final ThreadFactory factory = Executors.defaultThreadFactory();
         public Thread newThread(Runnable r) {
             Thread newThread = factory.newThread(r);
-            newThread.setName("ESM-ScheduledTask");
+            newThread.setName("GS-ESM-ScheduledTask");
             return newThread;
         }
     });
