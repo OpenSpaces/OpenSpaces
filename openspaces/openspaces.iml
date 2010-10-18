@@ -320,6 +320,16 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library">
+      <library name="jpa">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/lib/platform/jpa/openjpa" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/lib/platform/jpa/openjpa" recursive="false" />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
       <library name="backport">
         <CLASSES>
           <root url="file://$MODULE_DIR$/lib/external/backport" />
@@ -337,7 +347,7 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="file://$MODULE_DIR$/../../../../opt/netty/3.2.0.CR1/src/main/java" />
+          <root url="file://D:/opt/netty/3.2.0.CR1/src/main/java" />
         </SOURCES>
       </library>
     </orderEntry>
