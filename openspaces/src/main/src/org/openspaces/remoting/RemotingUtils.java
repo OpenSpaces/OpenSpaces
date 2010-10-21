@@ -148,8 +148,7 @@ public class RemotingUtils {
             for (Class inf : service.getInterfaces()) {
                 getAllInterfacesForInterface(inf, interfaces);
             }
-        } else {
-            interfaces.add(service);
         }
+        interfaces.add(service);
     }
 }
