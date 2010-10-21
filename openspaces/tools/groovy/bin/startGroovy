@@ -87,13 +87,13 @@ fi
 
 # For Cygwin, ensure paths are in UNIX format before anything is touched.
 if $cygwin ; then
-    [ -n "$GROOVY_HOME" ] && GROOVY_HOME=`cygpath --unix "$GROOVY_HOME"`
+    [ -n "$GS_GROOVY_HOME" ] && GS_GROOVY_HOME=`cygpath --unix "$GS_GROOVY_HOME"`
     [ -n "$JAVACMD" ] && JAVACMD=`cygpath --unix "$JAVACMD"`
     [ -n "$JAVA_HOME" ] && JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
     [ -n "$CP" ] && CP=`cygpath --path --unix "$CP"`
 else
-    if [ -n "$GROOVY_HOME" -a `expr "$GROOVY_HOME":'\/$'` ] ; then
-        GROOVY_HOME=`echo $GROOVY_HOME | sed -e 's/\/$//'`
+    if [ -n "$GS_GROOVY_HOME" -a `expr "$GS_GROOVY_HOME":'\/$'` ] ; then
+        GS_GROOVY_HOME=`echo $GS_GROOVY_HOME | sed -e 's/\/$//'`
     fi
 fi
 
@@ -103,8 +103,8 @@ then
     [ -n "$JAVA_HOME" ] && JAVA_HOME=`( cd "$JAVA_HOME" ; pwd )`
 fi
 
-# Attempt to set GROOVY_HOME if it is not already set.
-if [ -z "$GROOVY_HOME" -o ! -d "$GROOVY_HOME" ] ; then
+# Attempt to set GS_GROOVY_HOME if it is not already set.
+if [ -z "$GS_GROOVY_HOME" -o ! -d "$GS_GROOVY_HOME" ] ; then
     # Resolve links: $0 may be a link to groovy's home.
     PRG="$0"
     # Need this for relative symlinks.
@@ -119,15 +119,15 @@ if [ -z "$GROOVY_HOME" -o ! -d "$GROOVY_HOME" ] ; then
     done
     SAVED="`pwd`"
     cd "`dirname \"$PRG\"`/.."
-    GROOVY_HOME="`pwd -P`"
+    GS_GROOVY_HOME="`pwd -P`"
     cd "$SAVED"
 fi
 
 # Set the default Groovy config if no specific one is mentioned.
 if [ -z "$GROOVY_CONF" ] ; then
-    GROOVY_CONF="$GROOVY_HOME/conf/groovy-starter.conf"
+    GROOVY_CONF="$GS_GROOVY_HOME/conf/groovy-starter.conf"
 fi
-STARTER_CLASSPATH="$GROOVY_HOME/lib/groovy-1.7.5.jar"
+STARTER_CLASSPATH="$GS_GROOVY_HOME/lib/groovy-1.7.5.jar"
 
 # Create the final classpath. Setting a classpath using the -cp or -classpath option means not to use the
 # global classpath. Groovy behaves then the same as the java interpreter
@@ -194,12 +194,12 @@ TOOLS_JAR="$JAVA_HOME/lib/tools.jar"
 
 # For Darwin, add GROOVY_APP_NAME to the JAVA_OPTS as -Xdock:name
 if $darwin; then
-    JAVA_OPTS="$JAVA_OPTS -Xdock:name=$GROOVY_APP_NAME -Xdock:icon=$GROOVY_HOME/bin/groovy.icns"
+    JAVA_OPTS="$JAVA_OPTS -Xdock:name=$GROOVY_APP_NAME -Xdock:icon=$GS_GROOVY_HOME/bin/groovy.icns"
 fi
 
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin ; then
-    GROOVY_HOME=`cygpath --mixed "$GROOVY_HOME"`
+    GS_GROOVY_HOME=`cygpath --mixed "$GS_GROOVY_HOME"`
     JAVA_HOME=`cygpath --mixed "$JAVA_HOME"`
     GROOVY_CONF=`cygpath --mixed "$GROOVY_CONF"`
     CP=`cygpath --path --mixed "$CP"`    
@@ -244,6 +244,12 @@ if $cygwin ; then
 
 fi
 
+## GigaSpaces - Call setenv
+JSHOMEDIR=$GS_GROOVY_HOME/../../
+bash . $JSHOMEDIR/bin/setenv.sh
+JAVA_OPTS="-Xmx512m $JAVA_OPTS ${LOOKUP_GROUPS_PROP} ${LOOKUP_LOCATORS_PROP}"
+
+
 startGroovy ( ) {
     CLASS=$1
     shift
@@ -256,7 +262,7 @@ startGroovy ( ) {
             -Dscript.name="$SCRIPT_PATH" \
             -Dprogram.name="$PROGNAME" \
             -Dgroovy.starter.conf="$GROOVY_CONF" \
-            -Dgroovy.home="$GROOVY_HOME" \
+            -Dgroovy.home="$GS_GROOVY_HOME" \
             -Dtools.jar="$TOOLS_JAR" \
             $STARTER_MAIN_CLASS \
             --main $CLASS \
