@@ -92,9 +92,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.orm-3.0.3.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.web-3.0.3.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/optional/spring/org.springframework.web.servlet-3.0.3.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jpa/geronimo-jpa_2.0_spec-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jpa/openjpa/openjpa-all-2.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jpa/openjpa/openjpa-2.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/jetty-http-7.1.6.v20100715.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/jetty-io-7.1.6.v20100715.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/jetty-jmx-7.1.6.v20100715.jar"/>
