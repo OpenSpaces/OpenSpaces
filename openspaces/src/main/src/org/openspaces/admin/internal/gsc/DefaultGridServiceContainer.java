@@ -123,10 +123,14 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
     }
 
     public void addProcessingUnitInstance(ProcessingUnitInstance processingUnitInstance) {
+        
+        assertStateChangesPermitted();
         processingUnitInstances.addInstance(processingUnitInstance);
     }
 
     public void removeProcessingUnitInstance(String uid) {
+        
+        assertStateChangesPermitted();
         processingUnitInstances.removeInstance(uid);
     }
 

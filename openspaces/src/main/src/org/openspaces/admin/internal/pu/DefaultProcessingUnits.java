@@ -93,7 +93,7 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
     }
 
     public Iterator<ProcessingUnit> iterator() {
-        return processingUnits.values().iterator();
+        return Collections.unmodifiableCollection(processingUnits.values()).iterator();
     }
 
     public ProcessingUnit[] getProcessingUnits() {
@@ -179,6 +179,7 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
     }
 
     public void addProcessingUnit(final ProcessingUnit processingUnit) {
+        assertStateChangesPermitted();
         ProcessingUnit existingProcessingUnit = processingUnits.put(processingUnit.getName(), processingUnit);
         if (existingProcessingUnit == null) {
             processingUnitAddedEventManager.processingUnitAdded(processingUnit);
@@ -191,6 +192,7 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
     }
 
     public void removeProcessingUnit(String name) {
+        assertStateChangesPermitted();
         final ProcessingUnit existingProcessingUnit = processingUnits.remove(name);
         if (existingProcessingUnit != null) {
             existingProcessingUnit.stopStatisticsMonitor();
@@ -233,5 +235,9 @@ public class DefaultProcessingUnits implements InternalProcessingUnits {
 
     public boolean isMonitoring() {
         return scheduledStatisticsMonitor;
+    }
+    
+    private void assertStateChangesPermitted() {
+        admin.assertStateChangesPermitted();
     }
 }

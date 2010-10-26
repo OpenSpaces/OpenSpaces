@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -74,7 +75,7 @@ public class DefaultTransports implements InternalTransports {
     }
 
     public Iterator<Transport> iterator() {
-        return transportsByUID.values().iterator();
+        return Collections.unmodifiableCollection(transportsByUID.values()).iterator();
     }
 
     public Transport[] getTransports(String host) {
@@ -175,6 +176,7 @@ public class DefaultTransports implements InternalTransports {
 
 
     public void addTransport(Transport transport) {
+        assertStateChangesPermitted();
         Transport existingTransport = transportsByUID.put(transport.getUid(), transport);
         if (existingTransport == null) {
             // a new one, set the stats on it
@@ -198,6 +200,7 @@ public class DefaultTransports implements InternalTransports {
     }
 
     public void removeTransport(String uid) {
+        assertStateChangesPermitted();
         Transport transport = transportsByUID.remove(uid);
         if (transport == null) {
             return;
@@ -218,5 +221,8 @@ public class DefaultTransports implements InternalTransports {
         } else {
             transportByHost.remove(transport);
         }
+    }
+    private void assertStateChangesPermitted() {
+        admin.assertStateChangesPermitted();
     }
 }

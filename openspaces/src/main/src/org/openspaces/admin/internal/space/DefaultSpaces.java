@@ -119,7 +119,7 @@ public class DefaultSpaces implements InternalSpaces {
     }
 
     public Iterator<Space> iterator() {
-        return spacesByUID.values().iterator();
+        return Collections.unmodifiableCollection(spacesByUID.values()).iterator();
     }
 
     public SpaceAddedEventManager getSpaceAdded() {
@@ -211,6 +211,7 @@ public class DefaultSpaces implements InternalSpaces {
     }
 
     public synchronized void addSpace(Space space) {
+        assertStateChangesPermitted();
         Space existingSpace = spacesByUID.put(space.getUid(), space);
         spacesByName.put(space.getName(), space);
         if (existingSpace == null) {
@@ -224,6 +225,7 @@ public class DefaultSpaces implements InternalSpaces {
     }
 
     public synchronized InternalSpace removeSpace(String uid) {
+        assertStateChangesPermitted();
         Space space = spacesByUID.remove(uid);
         if (space != null) {
             space.stopStatisticsMonitor();
@@ -234,10 +236,12 @@ public class DefaultSpaces implements InternalSpaces {
     }
 
     public void addSpaceInstance(SpaceInstance spaceInstance) {
+        assertStateChangesPermitted();
         spacesInstances.put(spaceInstance.getUid(), spaceInstance);
     }
 
     public SpaceInstance removeSpaceInstance(String uid) {
+        assertStateChangesPermitted();
         return spacesInstances.remove(uid);
     }
 
@@ -245,5 +249,9 @@ public class DefaultSpaces implements InternalSpaces {
         for (Space space : this) {
             ((InternalSpace) space).refreshScheduledSpaceMonitors();
         }
+    }
+    
+    private void assertStateChangesPermitted() {
+        admin.assertStateChangesPermitted();
     }
 }

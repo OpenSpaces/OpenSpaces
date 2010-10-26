@@ -204,10 +204,11 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     }
 
     public Iterator<GridServiceManager> iterator() {
-        return gridServiceManagersByUID.values().iterator();
+        return Collections.unmodifiableCollection(gridServiceManagersByUID.values()).iterator();
     }
 
     public void addGridServiceManager(final InternalGridServiceManager gridServiceManager) {
+        assertStateChangePermitted();
         GridServiceManager existingGSM = gridServiceManagersByUID.put(gridServiceManager.getUid(), gridServiceManager);
         if (existingGSM == null) {
             gridServiceManagerAddedEventManager.gridServiceManagerAdded(gridServiceManager);
@@ -215,6 +216,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     }
 
     public InternalGridServiceManager removeGridServiceManager(String uid) {
+        assertStateChangePermitted();
         final InternalGridServiceManager existingGSM = (InternalGridServiceManager) gridServiceManagersByUID.remove(uid);
         if (existingGSM != null) {
             gridServiceManagerRemovedEventManager.gridServiceManagerRemoved(existingGSM);
@@ -223,6 +225,7 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
     }
 
     public InternalGridServiceManager replaceGridServiceManager(InternalGridServiceManager gridServiceManager) {
+        assertStateChangePermitted();
         return (InternalGridServiceManager) gridServiceManagersByUID.put(gridServiceManager.getUid(), gridServiceManager);
     }
 
@@ -236,5 +239,10 @@ public class DefaultGridServiceManagers implements InternalGridServiceManagers {
             dumpResult.add(gsm.generateDump(cause, context, processor));
         }
         return dumpResult;
+    }
+    
+
+    private void assertStateChangePermitted() {
+        this.admin.assertStateChangesPermitted();
     }
 }

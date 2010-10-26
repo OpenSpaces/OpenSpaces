@@ -305,6 +305,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     }
 
     public void setMode(SpaceMode spaceMode) {
+        assertStateChangesPermitted();
         SpaceMode previousSpaceMode = this.spaceMode;
         SpaceMode newSpaceMode = spaceMode;
         if (previousSpaceMode != newSpaceMode) {
@@ -372,6 +373,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     }
 
     public void setReplicationTargets(ReplicationTarget[] replicationTargets) {
+        assertStateChangesPermitted();
         ReplicationTarget[] previousReplicationTargets = this.replicationTargets;
         ReplicationTarget[] newReplicationTargets = replicationTargets;
         this.replicationTargets = replicationTargets;
@@ -420,10 +422,12 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     }
 
     public void setSpace(Space space) {
+        assertStateChangesPermitted();
         this.space = space;
     }
 
     public void setPartition(SpacePartition spacePartition) {
+        assertStateChangesPermitted();
         this.spacePartition = spacePartition;
     }
 

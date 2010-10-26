@@ -11,6 +11,7 @@ import com.j_spaces.kernel.JSpaceUtilities;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.internal.admin.InternalAdmin;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
@@ -202,7 +204,7 @@ public class DefaultSpace implements InternalSpace {
     }
 
     public Iterator<SpaceInstance> iterator() {
-        return spaceInstancesByUID.values().iterator();
+        return Collections.unmodifiableCollection(spaceInstancesByUID.values()).iterator();
     }
 
     public SpacePartition[] getPartitions() {
@@ -276,6 +278,7 @@ public class DefaultSpace implements InternalSpace {
     }
 
     public void addInstance(SpaceInstance spaceInstance) {
+        assertStateChangesPermitted();
         InternalSpaceInstance internalSpaceInstance = (InternalSpaceInstance) spaceInstance;
         // the first addition (which we make sure is added before the space becomes visible) will
         // cause the partition to initialize
@@ -323,6 +326,7 @@ public class DefaultSpace implements InternalSpace {
     }
 
     public InternalSpaceInstance removeInstance(String uid) {
+        assertStateChangesPermitted();
         InternalSpaceInstance spaceInstance = (InternalSpaceInstance) spaceInstancesByUID.remove(uid);
         if (spaceInstance != null) {
             spaceInstance.stopStatisticsMonitor();
@@ -476,6 +480,10 @@ public class DefaultSpace implements InternalSpace {
         spaceInstanceAddedEventManager.remove(eventListener);
         spaceInstanceRemovedEventManager.remove(eventListener);
     }
+    
+    public Admin getAdmin() {
+        return this.admin;
+    }
 
     private <T> T doWithInstance(InstanceCallback<T> callback, T naValue) {
         for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
@@ -498,7 +506,10 @@ public class DefaultSpace implements InternalSpace {
 
         public void run() {
             try {
-                RuntimeHolder runtimeHolder = spaceInstance.getRuntimeHolder();
+                final RuntimeHolder runtimeHolder = spaceInstance.getRuntimeHolder();
+                
+                DefaultSpace.this.admin.scheduleNonBlockingStateChange(new Runnable() {
+                    public void run() {
                 spaceInstance.setMode(runtimeHolder.getSpaceMode());
                 if (runtimeHolder.getReplicationStatus() != null) {
                     Object[] memberNames = (Object[]) runtimeHolder.getReplicationStatus()[0];
@@ -525,6 +536,7 @@ public class DefaultSpace implements InternalSpace {
                     }
                     spaceInstance.setReplicationTargets(replicationTargets);
                 }
+            }});
             } catch (SpaceUnavailableException e) {
                 // space is going shutdown or abort process
             } catch (InactiveSpaceException e) {
@@ -538,4 +550,9 @@ public class DefaultSpace implements InternalSpace {
             }
         }
     }
+    
+    private void assertStateChangesPermitted() {
+        admin.assertStateChangesPermitted();
+    }
+
 }

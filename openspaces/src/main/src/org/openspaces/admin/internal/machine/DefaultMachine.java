@@ -145,6 +145,7 @@ public class DefaultMachine implements InternalMachine {
     }
 
     public void setOperatingSystem(OperatingSystem operatingSystem) {
+        assertStateChangesPermitted();
         this.operatingSystem = operatingSystem;
     }
 
@@ -269,4 +270,9 @@ public class DefaultMachine implements InternalMachine {
     public int hashCode() {
         return uid.hashCode();
     }
+    
+    private void assertStateChangesPermitted() {
+        admin.assertStateChangesPermitted();
+    }
+
 }

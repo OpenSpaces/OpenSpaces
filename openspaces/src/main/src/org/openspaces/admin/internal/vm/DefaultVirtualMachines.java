@@ -92,7 +92,7 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
     }
 
     public Iterator<VirtualMachine> iterator() {
-        return virtualMachinesByUID.values().iterator();
+        return Collections.unmodifiableCollection(virtualMachinesByUID.values()).iterator();
     }
 
     public int getSize() {
@@ -199,6 +199,7 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
     }
 
     public void addVirtualMachine(final VirtualMachine virtualMachine) {
+        assertStateChangesPermmited();
         VirtualMachine existingVM = virtualMachinesByUID.put(virtualMachine.getUid(), virtualMachine);
         if (existingVM == null) {
             virtualMachine.setStatisticsInterval(statisticsInterval, TimeUnit.MILLISECONDS);
@@ -211,11 +212,16 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
     }
 
     public InternalVirtualMachine removeVirtualMachine(String uid) {
+        assertStateChangesPermmited();
         final InternalVirtualMachine existingVM = (InternalVirtualMachine) virtualMachinesByUID.remove(uid);
         if (existingVM != null) {
             existingVM.stopStatisticsMonitor();
             virtualMachineRemovedEventManager.virtualMachineRemoved(existingVM);
         }
         return existingVM;
+    }
+    
+    private void assertStateChangesPermmited() {
+        admin.assertStateChangesPermitted();
     }
 }

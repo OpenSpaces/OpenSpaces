@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.space;
 
+import org.openspaces.admin.Admin;
 import org.openspaces.admin.space.Space;
 import org.openspaces.admin.space.SpaceInstance;
 
@@ -13,4 +14,6 @@ public interface InternalSpace extends Space, InternalSpaceInstancesAware {
     InternalSpaceInstance removeInstance(String uid);
 
     void refreshScheduledSpaceMonitors();
+
+    Admin getAdmin();
 }

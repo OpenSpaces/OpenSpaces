@@ -41,6 +41,7 @@ public abstract class AbstractGridComponent implements InternalGridComponent {
     }
 
     public void setMachine(Machine machine) {
+        assertStateChangesPermitted();
         this.machine = machine;
     }
 
@@ -49,6 +50,7 @@ public abstract class AbstractGridComponent implements InternalGridComponent {
     }
 
     public void setTransport(Transport transport) {
+        assertStateChangesPermitted();
         this.transport = transport;
     }
 
@@ -57,6 +59,7 @@ public abstract class AbstractGridComponent implements InternalGridComponent {
     }
 
     public void setOperatingSystem(OperatingSystem operatingSystem) {
+        assertStateChangesPermitted();
         this.operatingSystem = operatingSystem;
     }
 
@@ -65,6 +68,7 @@ public abstract class AbstractGridComponent implements InternalGridComponent {
     }
 
     public void setVirtualMachine(VirtualMachine virtualMachine) {
+        assertStateChangesPermitted();
         this.virtualMachine = virtualMachine;
     }
 
@@ -77,6 +81,7 @@ public abstract class AbstractGridComponent implements InternalGridComponent {
     }
 
     public void setDiscovered(boolean discovered) {
+        assertStateChangesPermitted();
         this.discovered = discovered;
     }
 
@@ -85,6 +90,11 @@ public abstract class AbstractGridComponent implements InternalGridComponent {
     }
 
     public void addZone(Zone zone) {
+        assertStateChangesPermitted();
         zones.put(zone.getName(), zone);
+    }
+    
+    protected void assertStateChangesPermitted() {
+        this.admin.assertStateChangesPermitted();
     }
 }

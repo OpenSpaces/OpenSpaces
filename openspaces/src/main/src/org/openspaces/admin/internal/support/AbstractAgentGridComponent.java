@@ -35,6 +35,7 @@ public abstract class AbstractAgentGridComponent extends AbstractGridComponent i
     }
 
     public void setGridServiceAgent(GridServiceAgent gridServiceAgent) {
+        assertStateChangesPermitted();
         this.gridServiceAgent = gridServiceAgent;
     }
 

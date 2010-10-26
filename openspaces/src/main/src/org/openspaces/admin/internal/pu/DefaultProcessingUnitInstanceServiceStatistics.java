@@ -70,7 +70,7 @@ public class DefaultProcessingUnitInstanceServiceStatistics implements Processin
     }
 
     public Iterator<ServiceMonitors> iterator() {
-        return serviceMonitorsById.values().iterator();
+        return Collections.unmodifiableCollection(serviceMonitorsById.values()).iterator();
     }
 
     public Map<String, ServiceMonitors> getMonitors() {

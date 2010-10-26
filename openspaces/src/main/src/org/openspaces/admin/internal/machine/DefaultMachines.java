@@ -130,7 +130,7 @@ public class DefaultMachines implements InternalMachines {
     }
 
     public Iterator<Machine> iterator() {
-        return machinesById.values().iterator();
+        return Collections.unmodifiableCollection(machinesById.values()).iterator();
     }
 
     public Machine getMachineByUID(String uid) {
@@ -168,6 +168,7 @@ public class DefaultMachines implements InternalMachines {
     }
 
     public void addMachine(final InternalMachine machine) {
+        assertStateChangesPermitted();
         machinesByHostAddress.put(machine.getHostAddress(), machine);
         machinesByHostNames.put(machine.getHostName(), machine);
         Machine existingMachine = machinesById.put(machine.getUid(), machine);
@@ -177,6 +178,7 @@ public class DefaultMachines implements InternalMachines {
     }
 
     public void removeMachine(final Machine machine) {
+        assertStateChangesPermitted();
         // if no vms on the machine, we can remove them
         if (machine.getVirtualMachines().isEmpty()) {
             machinesByHostAddress.remove(machine.getHostAddress());
@@ -187,4 +189,9 @@ public class DefaultMachines implements InternalMachines {
             }
         }
     }
+    
+    private void assertStateChangesPermitted() {
+        admin.assertStateChangesPermitted();
+    }
+
 }

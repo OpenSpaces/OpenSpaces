@@ -99,6 +99,7 @@ import org.openspaces.admin.zone.Zone;
 import org.openspaces.admin.zone.ZoneAware;
 import org.openspaces.admin.zone.Zones;
 
+import com.gigaspaces.grid.gsa.AgentProcessesDetails;
 import com.gigaspaces.grid.gsa.GSA;
 import com.gigaspaces.grid.gsm.PUDetails;
 import com.gigaspaces.grid.gsm.PUsDetails;
@@ -114,6 +115,10 @@ import org.openspaces.core.space.SpaceServiceDetails;
 public class DefaultAdmin implements InternalAdmin {
 
     private static final Log logger = LogFactory.getLog(DefaultAdmin.class);
+    
+    private static final int DEFAULT_EVENT_LISTENER_THREADS = 10;
+    
+    private static final int DEFAULT_STATE_CHANGE_THREADS = 10;
 
     private ScheduledThreadPoolExecutor scheduledExecutorService;
 
@@ -149,8 +154,8 @@ public class DefaultAdmin implements InternalAdmin {
 
     private ExecutorService[] eventsExecutorServices;
 
-    private final int eventsNumberOfThreads = 10;
-
+    private ExecutorService longRunningExecutorService;
+    
     private LinkedList<Runnable>[] eventsQueue;
 
     private volatile long scheduledProcessingUnitMonitorInterval = 1000; // default to one second
@@ -173,6 +178,10 @@ public class DefaultAdmin implements InternalAdmin {
 
     private TimeUnit defaultTimeoutTimeUnit = TimeUnit.MILLISECONDS;
 
+    private boolean singleThreadedEventListeners = false;
+
+    private long executorSingleThreadId;
+    
     public DefaultAdmin() {
         this.discoveryService = new DiscoveryService(this);
     }
@@ -200,7 +209,7 @@ public class DefaultAdmin implements InternalAdmin {
     public void addLocator(String locator) {
         discoveryService.addLocator(locator);
     }
-
+    
     public void setStatisticsInterval(long interval, TimeUnit timeUnit) {
         this.spaces.setStatisticsInterval(interval, timeUnit);
         this.virtualMachines.setStatisticsInterval(interval, timeUnit);
@@ -215,6 +224,10 @@ public class DefaultAdmin implements InternalAdmin {
         this.transports.setStatisticsHistorySize(historySize);
         this.operatingSystems.setStatisticsHistorySize(historySize);
         this.processingUnits.setStatisticsHistorySize(historySize);
+    }
+
+    public void singleThreadedEventListeners() {
+      this.singleThreadedEventListeners = true;
     }
 
     public synchronized void startStatisticsMonitor() {
@@ -238,13 +251,42 @@ public class DefaultAdmin implements InternalAdmin {
     public boolean isMonitoring() {
         return scheduledStatisticsMonitor;
     }
-
+    
     public void begin() {
-        eventsExecutorServices = new ExecutorService[eventsNumberOfThreads];
-        eventsQueue = new LinkedList[eventsNumberOfThreads];
-        for (int i = 0; i < eventsNumberOfThreads; i++) {
-            eventsExecutorServices[i] = Executors.newFixedThreadPool(1);
-            eventsQueue[i] = new LinkedList<Runnable>();
+
+        longRunningExecutorService = Executors.newFixedThreadPool(DEFAULT_STATE_CHANGE_THREADS, new ThreadFactory() {
+
+            public Thread newThread(Runnable r) {
+                return new Thread(r,"Admin-state-change-thread");
+            }});
+        
+        
+        if (singleThreadedEventListeners ) { 
+            eventsExecutorServices = new ExecutorService[1];
+            eventsQueue = new LinkedList[1];
+            eventsQueue[0] = new LinkedList<Runnable>();
+            eventsExecutorServices[0] = Executors.newFixedThreadPool(1, new ThreadFactory() {
+
+                public Thread newThread(Runnable r) {
+                    Thread thread = new Thread(r,"GS-ADMIN-event-executor-tread");
+                    DefaultAdmin.this.executorSingleThreadId = thread.getId();
+                    return thread;
+                }});
+            
+        }
+        else {
+        
+            this.eventsExecutorServices = new ExecutorService[DEFAULT_EVENT_LISTENER_THREADS];
+            
+            eventsQueue = new LinkedList[DEFAULT_EVENT_LISTENER_THREADS];
+            for (int i = 0; i < DEFAULT_EVENT_LISTENER_THREADS; i++) {
+                eventsExecutorServices[i] = Executors.newFixedThreadPool(1, new ThreadFactory() {
+
+                    public Thread newThread(Runnable r) {
+                        return new Thread(r,"GS-ADMIN-event-executor-thread");
+                    }});
+                eventsQueue[i] = new LinkedList<Runnable>();
+            }
         }
 
         this.scheduledExecutorService = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(5);
@@ -262,7 +304,7 @@ public class DefaultAdmin implements InternalAdmin {
         this.scheduledProcessingUnitMonitorInterval = timeUnit.toMillis(interval);
         if (scheduledProcessingUnitMonitorFuture != null) { // during initialization
             scheduledProcessingUnitMonitorFuture.cancel(false);
-            scheduledProcessingUnitMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(new ScheduledProcessingUnitMonitor(), interval, interval, timeUnit);
+            scheduledProcessingUnitMonitorFuture = getScheduler().scheduleWithFixedDelay(new ScheduledProcessingUnitMonitor(), interval, interval, timeUnit);
         }
     }
 
@@ -273,7 +315,7 @@ public class DefaultAdmin implements InternalAdmin {
         this.scheduledAgentProcessessMonitorInterval = timeUnit.toMillis(interval);
         if (scheduledAgentProcessessMonitorFuture != null) { // during initialization
             scheduledAgentProcessessMonitorFuture.cancel(false);
-            scheduledAgentProcessessMonitorFuture = scheduledExecutorService.scheduleWithFixedDelay(new ScheduledAgentProcessessMonitor(), interval, interval, timeUnit);
+            scheduledAgentProcessessMonitorFuture = getScheduler().scheduleWithFixedDelay(new ScheduledAgentProcessessMonitor(), interval, interval, timeUnit);
         }
     }
 
@@ -320,7 +362,7 @@ public class DefaultAdmin implements InternalAdmin {
         scheduledExecutorService.shutdownNow();
         for (ExecutorService executorService : eventsExecutorServices) {
             executorService.shutdownNow();
-        }
+        }       
     }
 
     public LookupServices getLookupServices() {
@@ -406,7 +448,7 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void flushEvents() {
-        for (int i = 0; i < eventsNumberOfThreads; i++) {
+        for (int i = 0; i < eventsExecutorServices.length; i++) {
             for (Runnable notifier : eventsQueue[i]) {
                 eventsExecutorServices[i].submit(notifier);
             }
@@ -418,6 +460,28 @@ public class DefaultAdmin implements InternalAdmin {
         eventsExecutorServices[Math.abs(listener.hashCode() % eventsExecutorServices.length)].submit(new LoggerRunnable(notifier));
     }
 
+    public void scheduleNonBlockingStateChange(Runnable command) {
+        if (singleThreadedEventListeners) {
+            raiseEvent(this,command);
+        }
+        else {
+            command.run();
+        }
+    }
+    
+    public void scheduleAdminOperation(Runnable command) {
+        longRunningExecutorService.submit(command);
+    }
+    
+    public void assertStateChangesPermitted() {
+        
+        if (singleThreadedEventListeners &&
+            Thread.currentThread().getId() != executorSingleThreadId) {
+            
+            throw new IllegalStateException("Assertion Failure. Cannot change admin state from this thread. Call scheduleNonBlockingStateChange(runnable) instead.");
+        }
+    }
+    
     public synchronized void addGridServiceAgent(InternalGridServiceAgent gridServiceAgent, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceAgent, osDetails);
         VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceAgent, jvmDetails);
@@ -995,13 +1059,27 @@ public class DefaultAdmin implements InternalAdmin {
 
     private class ScheduledAgentProcessessMonitor implements Runnable {
         public void run() {
+            final Map<InternalGridServiceAgent,AgentProcessesDetails> newdetails = new HashMap<InternalGridServiceAgent,AgentProcessesDetails>();
             for (GridServiceAgent gridServiceAgent : gridServiceAgents) {
                 GSA gsa = ((InternalGridServiceAgent) gridServiceAgent).getGSA();
                 try {
-                    ((InternalGridServiceAgent) gridServiceAgent).setProcessesDetails(gsa.getDetails());
+                    newdetails.put((InternalGridServiceAgent) gridServiceAgent, gsa.getDetails());
                 } catch (Exception e) {
                     // failed to get the info, do nothing
                 }
+            }
+            
+            DefaultAdmin.this.scheduleNonBlockingStateChange(new Runnable() {
+
+                public void run() {
+                    updateState(newdetails);
+                }
+            });
+        }
+        
+        private void updateState(Map<InternalGridServiceAgent, AgentProcessesDetails> newdetails) {
+            for (InternalGridServiceAgent gridServiceAgent : newdetails.keySet()) {
+                gridServiceAgent.setProcessesDetails(newdetails.get(gridServiceAgent));
             }
         }
     }
@@ -1009,7 +1087,7 @@ public class DefaultAdmin implements InternalAdmin {
     private class ScheduledProcessingUnitMonitor implements Runnable {
 
         public void run() {
-            Map<String, Holder> holders = new HashMap<String, Holder>();
+            final Map<String, Holder> holders = new HashMap<String, Holder>();
             for (GridServiceManager gsm : gridServiceManagers) {
                 try {
                     PUsDetails pusDetails = ((InternalGridServiceManager) gsm).getGSM().getPUsDetails();
@@ -1036,6 +1114,14 @@ public class DefaultAdmin implements InternalAdmin {
                     logger.warn("Failed to get GSM details", e);
                 }
             }
+            
+            DefaultAdmin.this.scheduleNonBlockingStateChange(new Runnable(){
+                public void run() {
+                    updateState(holders);
+                }});
+        }
+
+        private void updateState(Map<String, Holder> holders) {
             // first go over all of them and remove the ones needed
             for (ProcessingUnit processingUnit : processingUnits) {
                 if (!holders.containsKey(processingUnit.getName())) {

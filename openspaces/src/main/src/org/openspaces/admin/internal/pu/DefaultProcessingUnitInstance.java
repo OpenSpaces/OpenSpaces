@@ -76,10 +76,10 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
 
     private final SpaceServiceDetails[] spacesDetails;
 
-    private Map<String, EventContainerServiceDetails> eventContainerServiceDetails = new HashMap<String, EventContainerServiceDetails>();
-    private Map<String, PollingEventContainerServiceDetails> pollingEventContainerServiceDetails = new HashMap<String, PollingEventContainerServiceDetails>();
-    private Map<String, NotifyEventContainerServiceDetails> notifyEventContainerServiceDetails = new HashMap<String, NotifyEventContainerServiceDetails>();
-    private Map<String, AsyncPollingEventContainerServiceDetails> asyncPollingEventContainerServiceDetails = new HashMap<String, AsyncPollingEventContainerServiceDetails>();
+    private final Map<String, EventContainerServiceDetails> eventContainerServiceDetails;
+    private final Map<String, PollingEventContainerServiceDetails> pollingEventContainerServiceDetails;
+    private final Map<String, NotifyEventContainerServiceDetails> notifyEventContainerServiceDetails;
+    private final Map<String, AsyncPollingEventContainerServiceDetails> asyncPollingEventContainerServiceDetails;
 
     private final RemotingServiceDetails remotingServiceDetails;
 
@@ -130,6 +130,12 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
         Map<String, List<ServiceDetails>> servicesDetailsByServiceTypeList = new HashMap<String, List<ServiceDetails>>();
 
         Map<String, ServiceDetails> serviceDetailsByServiceId = new HashMap<String, ServiceDetails>();
+        
+        Map<String, EventContainerServiceDetails> eventContainerServiceDetails = new HashMap<String, EventContainerServiceDetails>();
+        Map<String, PollingEventContainerServiceDetails> pollingEventContainerServiceDetails = new HashMap<String, PollingEventContainerServiceDetails>();
+        Map<String, NotifyEventContainerServiceDetails> notifyEventContainerServiceDetails = new HashMap<String, NotifyEventContainerServiceDetails>();
+        Map<String, AsyncPollingEventContainerServiceDetails> asyncPollingEventContainerServiceDetails = new HashMap<String, AsyncPollingEventContainerServiceDetails>();
+
         for (ServiceDetails serviceDetails : this.serviceDetails) {
             serviceDetailsByServiceId.put(serviceDetails.getId(), serviceDetails);
             List<ServiceDetails> list = servicesDetailsByServiceTypeList.get(serviceDetails.getServiceType());
@@ -162,10 +168,10 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
                 }
             }
         }
-        eventContainerServiceDetails = Collections.unmodifiableMap(eventContainerServiceDetails);
-        pollingEventContainerServiceDetails = Collections.unmodifiableMap(pollingEventContainerServiceDetails);
-        notifyEventContainerServiceDetails = Collections.unmodifiableMap(notifyEventContainerServiceDetails);
-        asyncPollingEventContainerServiceDetails = Collections.unmodifiableMap(asyncPollingEventContainerServiceDetails);
+        this.eventContainerServiceDetails = Collections.unmodifiableMap(eventContainerServiceDetails);
+        this.pollingEventContainerServiceDetails = Collections.unmodifiableMap(pollingEventContainerServiceDetails);
+        this.notifyEventContainerServiceDetails = Collections.unmodifiableMap(notifyEventContainerServiceDetails);
+        this.asyncPollingEventContainerServiceDetails = Collections.unmodifiableMap(asyncPollingEventContainerServiceDetails);
 
         jeeDetails = jeeDetailsX;
         memcachedDetails = memcachedDetailsX;
@@ -209,6 +215,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public void setProcessingUnit(ProcessingUnit processingUnit) {
+        assertStateChangesPermitted();
         this.processingUnit = (InternalProcessingUnit) processingUnit;
     }
 
@@ -264,6 +271,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public void setGridServiceContainer(GridServiceContainer gridServiceContainer) {
+        assertStateChangesPermitted();
         this.gridServiceContainer = gridServiceContainer;
     }
 
@@ -272,6 +280,7 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public void setProcessingUnitPartition(ProcessingUnitPartition processingUnitPartition) {
+        assertStateChangesPermitted();
         this.processingUnitPartition = processingUnitPartition;
     }
 

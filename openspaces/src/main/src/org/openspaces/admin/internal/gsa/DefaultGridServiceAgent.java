@@ -77,6 +77,7 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public void setProcessesDetails(AgentProcessesDetails processesDetails) {
+        assertStateChangesPermitted();
         this.processesDetails = processesDetails;
     }
 

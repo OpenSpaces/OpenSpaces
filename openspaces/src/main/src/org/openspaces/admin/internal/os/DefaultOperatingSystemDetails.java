@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.os;
 
 import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 
 import org.openspaces.admin.os.OperatingSystemDetails;
@@ -88,7 +89,7 @@ public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
 
     public Map<String, NetworkDetails> getNetworkDetails() {
 
-        return networkDetailsMap;
+        return Collections.unmodifiableMap(networkDetailsMap);
     }
     
     private class DefaultNetworkDetails implements NetworkDetails {

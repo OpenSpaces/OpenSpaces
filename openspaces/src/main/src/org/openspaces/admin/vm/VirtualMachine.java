@@ -31,14 +31,13 @@ import org.openspaces.admin.space.events.SpaceInstanceAddedEventManager;
 import org.openspaces.admin.space.events.SpaceInstanceLifecycleEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 import org.openspaces.admin.vm.events.VirtualMachineStatisticsChangedEventManager;
-import org.openspaces.admin.zone.ZoneAware;
 
 /**
  * A virtual machine is a JVM that runs grid components.
  *
  * @author kimchy
  */
-public interface VirtualMachine extends MachineAware, ZoneAware, StatisticsMonitor {
+public interface VirtualMachine extends MachineAware, StatisticsMonitor {
 
     /**
      * Returns the uid of the virtual machine.

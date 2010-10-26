@@ -110,7 +110,7 @@ public class AdminFactory {
         admin.getDiscoveryService().discoverUnmanagedSpaces();
         return this;
     }
-
+    
     /**
      * Creates the admin and begins its listening for events from the lookup service.
      */
@@ -120,5 +120,9 @@ public class AdminFactory {
         }
         admin.begin();
         return admin;
+    }
+
+    protected Admin getAdmin() {
+        return this.admin;
     }
 }

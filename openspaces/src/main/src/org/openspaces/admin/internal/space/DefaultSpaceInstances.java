@@ -13,7 +13,7 @@ import org.openspaces.admin.space.events.SpaceInstanceRemovedEventManager;
 
 import java.util.Iterator;
 import java.util.Map;
-
+import java.util.Collections;
 /**
  * @author kimchy
  */
@@ -47,7 +47,7 @@ public class DefaultSpaceInstances implements InternalSpaceInstances {
     }
 
     public Iterator<SpaceInstance> iterator() {
-        return spaceInstances.values().iterator();
+        return Collections.unmodifiableCollection(spaceInstances.values()).iterator();
     }
 
     public SpaceInstance[] getSpaceInstances() {
@@ -55,6 +55,7 @@ public class DefaultSpaceInstances implements InternalSpaceInstances {
     }
 
     public void addSpaceInstance(SpaceInstance spaceInstance) {
+        assertStateChangesPermitted();
         SpaceInstance existing = spaceInstances.put(spaceInstance.getUid(), spaceInstance);
         if (existing == null) {
             spaceInstanceAddedEventManager.spaceInstanceAdded(spaceInstance);
@@ -62,6 +63,7 @@ public class DefaultSpaceInstances implements InternalSpaceInstances {
     }
 
     public void removeSpaceInstance(String uid) {
+        assertStateChangesPermitted();
         SpaceInstance existing = spaceInstances.remove(uid);
         if (existing != null) {
             spaceInstanceRemovedEventManager.spaceInstanceRemoved(existing);
@@ -84,5 +86,9 @@ public class DefaultSpaceInstances implements InternalSpaceInstances {
     public void removeLifecycleListener(SpaceInstanceLifecycleEventListener eventListener) {
         spaceInstanceAddedEventManager.remove(eventListener);
         spaceInstanceRemovedEventManager.remove(eventListener);
+    }
+    
+    private void assertStateChangesPermitted() {
+        admin.assertStateChangesPermitted();
     }
 }

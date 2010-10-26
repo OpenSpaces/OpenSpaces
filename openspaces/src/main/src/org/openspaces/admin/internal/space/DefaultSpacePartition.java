@@ -8,6 +8,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.openspaces.admin.Admin;
+import org.openspaces.admin.internal.admin.InternalAdmin;
+
 /**
  * @author kimchy
  */
@@ -59,10 +62,17 @@ public class DefaultSpacePartition implements InternalSpacePartition {
     }
 
     public void addSpaceInstance(SpaceInstance spaceInstance) {
+        assertStateChangesPermitted();
         spaceInstances.put(spaceInstance.getUid(), spaceInstance);
     }
 
     public void removeSpaceInstance(String uid) {
+        assertStateChangesPermitted();
         spaceInstances.remove(uid);
+    }
+    
+    private void assertStateChangesPermitted() {
+        final Admin admin = ((InternalSpace)space).getAdmin();
+        ((InternalAdmin)admin).assertStateChangesPermitted();
     }
 }

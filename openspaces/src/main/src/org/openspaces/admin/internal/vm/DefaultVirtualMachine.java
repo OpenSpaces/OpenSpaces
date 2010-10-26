@@ -2,9 +2,7 @@ package org.openspaces.admin.internal.vm;
 
 import java.rmi.RemoteException;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -46,7 +44,6 @@ import org.openspaces.admin.vm.VirtualMachineDetails;
 import org.openspaces.admin.vm.VirtualMachineStatistics;
 import org.openspaces.admin.vm.events.VirtualMachineStatisticsChangedEvent;
 import org.openspaces.admin.vm.events.VirtualMachineStatisticsChangedEventManager;
-import org.openspaces.admin.zone.Zone;
 import org.openspaces.core.util.ConcurrentHashSet;
 
 import com.gigaspaces.internal.jvm.JVMDetails;
@@ -67,9 +64,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
     private final Set<InternalVirtualMachineInfoProvider> virtualMachineInfoProviders = new ConcurrentHashSet<InternalVirtualMachineInfoProvider>();
 
     private volatile Machine machine;
-
-    private final Map<String, Zone> zones = new ConcurrentHashMap<String, Zone>();
-    
+   
     private final InternalGridServiceAgents gridServiceAgents;
 
     private final InternalGridServiceManagers gridServiceManagers;
@@ -113,10 +108,12 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
     }
 
     public void addVirtualMachineInfoProvider(InternalVirtualMachineInfoProvider virtualMachineInfoProvider) {
+        assertStateChangesPermitted();
         virtualMachineInfoProviders.add(virtualMachineInfoProvider);
     }
 
     public void removeVirtualMachineInfoProvider(InternalVirtualMachineInfoProvider virtualMachineInfoProvider) {
+        assertStateChangesPermitted();
         virtualMachineInfoProviders.remove(virtualMachineInfoProvider);
     }
 
@@ -132,15 +129,12 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
         return this.details;
     }
 
-    public Map<String, Zone> getZones() {
-        return zones;
-    }
-
     public Machine getMachine() {
         return machine;
     }
 
     public void setMachine(Machine machine) {
+        assertStateChangesPermitted();
         this.machine = machine;
     }
 
@@ -329,5 +323,9 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
     @Override
     public int hashCode() {
         return uid.hashCode();
+    }
+    
+    private void assertStateChangesPermitted() {
+        admin.assertStateChangesPermitted();
     }
 }

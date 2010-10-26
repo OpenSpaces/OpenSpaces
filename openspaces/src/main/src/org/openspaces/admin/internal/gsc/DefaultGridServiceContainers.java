@@ -118,10 +118,11 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
     }
 
     public Iterator<GridServiceContainer> iterator() {
-        return containers.values().iterator();
+        return Collections.unmodifiableCollection(containers.values()).iterator();
     }
 
     public void addGridServiceContainer(final InternalGridServiceContainer gridServiceContainer) {
+        assertStateChangesPermitted();
         final GridServiceContainer existingGSC = containers.put(gridServiceContainer.getUid(), gridServiceContainer);
         if (existingGSC == null) {
             gridServiceContainerAddedEventManager.gridServiceContainerAdded(gridServiceContainer);
@@ -129,6 +130,7 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
     }
 
     public InternalGridServiceContainer removeGridServiceContainer(String uid) {
+        assertStateChangesPermitted();
         final InternalGridServiceContainer existingGSC = (InternalGridServiceContainer) containers.remove(uid);
         if (existingGSC != null) {
             gridServiceContainerRemovedEventManager.gridServiceContainerRemoved(existingGSC);
@@ -146,5 +148,9 @@ public class DefaultGridServiceContainers implements InternalGridServiceContaine
             dumpResult.add(gsc.generateDump(cause, context, processor));
         }
         return dumpResult;
+    }
+    
+    private void assertStateChangesPermitted() {
+        admin.assertStateChangesPermitted();
     }
 }

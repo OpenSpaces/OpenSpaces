@@ -64,7 +64,7 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
     }
 
     public Iterator<OperatingSystem> iterator() {
-        return operatingSystemsByUID.values().iterator();
+        return Collections.unmodifiableCollection(operatingSystemsByUID.values()).iterator();
     }
 
     public int getSize() {
@@ -164,6 +164,7 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
     }
 
     public void addOperatingSystem(OperatingSystem operatingSystem) {
+        assertStateChangesPermitted();
         OperatingSystem existing = operatingSystemsByUID.put(operatingSystem.getUid(), operatingSystem);
         if (existing == null) {
             operatingSystem.setStatisticsHistorySize(statisticsHistorySize);
@@ -175,9 +176,14 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
     }
 
     public void removeOperatingSystem(String uid) {
+        assertStateChangesPermitted();
         OperatingSystem existing = operatingSystemsByUID.remove(uid);
         if (existing != null) {
             existing.stopStatisticsMonitor();
         }
+    }
+    
+    private void assertStateChangesPermitted() {
+        admin.assertStateChangesPermitted();
     }
 }

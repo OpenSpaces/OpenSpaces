@@ -155,6 +155,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     }
 
     public void addEmbeddedSpace(Space space) {
+        assertStateChangesPermitted();
         Space existingSpace = spaces.putIfAbsent(space.getName(), space);
         if (existingSpace == null) {
             spaceCorrelatedEventManager.processingUnitSpaceCorrelated(new ProcessingUnitSpaceCorrelatedEvent(space, this));
@@ -192,6 +193,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     }
 
     public void setNumberOfInstances(int numberOfInstances) {
+        assertStateChangesPermitted();
         this.numberOfInstances = numberOfInstances;
     }
 
@@ -200,6 +202,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     }
 
     public void setNumberOfBackups(int numberOfBackups) {
+        assertStateChangesPermitted();
         this.numberOfBackups = numberOfBackups;
     }
 
@@ -375,6 +378,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     }
 
     public void setManagingGridServiceManager(GridServiceManager gridServiceManager) {
+        assertStateChangesPermitted();
         final GridServiceManager previousManaging = this.managingGridServiceManager;
         final GridServiceManager newManaging = gridServiceManager;
 
@@ -385,6 +389,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     }
 
     public void addBackupGridServiceManager(final GridServiceManager backupGridServiceManager) {
+        assertStateChangesPermitted();
         GridServiceManager gridServiceManager = this.backupGridServiceManagers.put(backupGridServiceManager.getUid(), backupGridServiceManager);
         if (gridServiceManager == null) {
             BackupGridServiceManagerChangedEvent event = new BackupGridServiceManagerChangedEvent(this, BackupGridServiceManagerChangedEvent.Type.ADDED, backupGridServiceManager);
@@ -394,6 +399,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     }
 
     public void removeBackupGridServiceManager(String gsmUID) {
+        assertStateChangesPermitted();
         final GridServiceManager existingGridServiceManager = backupGridServiceManagers.remove(gsmUID);
         if (existingGridServiceManager != null) {
             BackupGridServiceManagerChangedEvent event = new BackupGridServiceManagerChangedEvent(this, BackupGridServiceManagerChangedEvent.Type.REMOVED, existingGridServiceManager);
@@ -403,6 +409,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     }
 
     public boolean setStatus(int statusCode) {
+        assertStateChangesPermitted();
         DeploymentStatus tempStatus;
         switch (statusCode) {
             case 0:
@@ -438,7 +445,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     }
 
     public Iterator<ProcessingUnitInstance> iterator() {
-        return processingUnitInstances.values().iterator();
+        return Collections.unmodifiableCollection(processingUnitInstances.values()).iterator();
     }
 
     public ProcessingUnitInstance[] getInstances() {
@@ -458,6 +465,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     }
 
     public void addProcessingUnitInstance(final ProcessingUnitInstance processingUnitInstance) {
+        assertStateChangesPermitted();
         final ProcessingUnitInstance existingProcessingUnitInstance = processingUnitInstances.put(processingUnitInstance.getUid(), processingUnitInstance);
         InternalProcessingUnitPartition partition = getPartition(processingUnitInstance);
         partition.addProcessingUnitInstance(processingUnitInstance);
@@ -544,5 +552,9 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     @Override
     public int hashCode() {
         return name.hashCode();
+    }
+    
+    private void assertStateChangesPermitted() {
+        admin.assertStateChangesPermitted();
     }
 }

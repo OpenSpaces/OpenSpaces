@@ -86,10 +86,13 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
     }
 
     public void addOperatingSystemInfoProvider(InternalOperatingSystemInfoProvider provider) {
+        
+        assertStateChangesPermitted();
         operatingSystemInfoProviders.add(provider);
     }
 
     public void removeOperatingSystemInfoProvider(InternalOperatingSystemInfoProvider provider) {
+        assertStateChangesPermitted();
         operatingSystemInfoProviders.remove(provider);
     }
 
@@ -195,5 +198,9 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
     @Override
     public int hashCode() {
         return uid.hashCode();
+    }
+    
+    private void assertStateChangesPermitted() {
+        admin.assertStateChangesPermitted();
     }
 }

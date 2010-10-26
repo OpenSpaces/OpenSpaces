@@ -76,7 +76,7 @@ public class DefaultGridServiceAgents implements InternalGridServiceAgents {
     }
 
     public Iterator<GridServiceAgent> iterator() {
-        return agents.values().iterator();
+        return Collections.unmodifiableCollection(agents.values()).iterator();
     }
 
     public GridServiceAgent waitForAtLeastOne() {
@@ -160,6 +160,7 @@ public class DefaultGridServiceAgents implements InternalGridServiceAgents {
     }
 
     public void addGridServiceAgent(InternalGridServiceAgent gridServiceAgent) {
+        assertStateChangesPermitted();
         GridServiceAgent existing = agents.put(gridServiceAgent.getUid(), gridServiceAgent);
         agentsByHostAddress.put(gridServiceAgent.getTransport().getHostAddress(), gridServiceAgent);
         agentsByHostNames.put(gridServiceAgent.getTransport().getHostName(), gridServiceAgent);
@@ -169,6 +170,7 @@ public class DefaultGridServiceAgents implements InternalGridServiceAgents {
     }
 
     public InternalGridServiceAgent removeGridServiceAgent(String uid) {
+        assertStateChangesPermitted();
         InternalGridServiceAgent existing = (InternalGridServiceAgent) agents.remove(uid);
         if (existing != null) {
             agentsByHostAddress.remove(existing.getTransport().getHostAddress());
@@ -188,5 +190,9 @@ public class DefaultGridServiceAgents implements InternalGridServiceAgents {
             dumpResult.add(gsa.generateDump(cause, context, processor));
         }
         return dumpResult;
+    }
+    
+    private void assertStateChangesPermitted() {
+        admin.assertStateChangesPermitted();
     }
 }

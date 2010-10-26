@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.openspaces.admin.internal.admin.InternalAdmin;
 /**
  * @author kimchy
  */
@@ -59,10 +60,16 @@ public class DefaultProcessingUnitPartition implements InternalProcessingUnitPar
     }
 
     public void addProcessingUnitInstance(ProcessingUnitInstance processingUnitInstance) {
+        assertStateChangesPermitted();
         processingUnitInstances.put(processingUnitInstance.getUid(), processingUnitInstance);
     }
 
     public void removeProcessingUnitInstance(String uid) {
+        assertStateChangesPermitted();
         processingUnitInstances.remove(uid);
+    }
+    
+    private void assertStateChangesPermitted() {
+        ((InternalAdmin)this.processingUnit.getAdmin()).assertStateChangesPermitted();
     }
 }

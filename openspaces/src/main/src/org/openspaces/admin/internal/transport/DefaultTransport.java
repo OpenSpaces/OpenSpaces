@@ -61,10 +61,12 @@ public class DefaultTransport implements InternalTransport {
     }
 
     public void addTransportInfoProvider(InternalTransportInfoProvider transportInfoProvider) {
+        assertStateChangesPermitted();
         transportInfoProviders.add(transportInfoProvider);
     }
 
     public void removeTransportInfoProvider(InternalTransportInfoProvider transportInfoProvider) {
+        assertStateChangesPermitted();
         transportInfoProviders.remove(transportInfoProvider);
     }
 
@@ -97,6 +99,7 @@ public class DefaultTransport implements InternalTransport {
     }
 
     public void setVirtualMachine(VirtualMachine virtualMachine) {
+        assertStateChangesPermitted();
         this.virtualMachine = virtualMachine;
     }
 
@@ -174,4 +177,9 @@ public class DefaultTransport implements InternalTransport {
     public int hashCode() {
         return uid.hashCode();
     }
+    
+    private void assertStateChangesPermitted() {
+        admin.assertStateChangesPermitted();
+    }
+
 }

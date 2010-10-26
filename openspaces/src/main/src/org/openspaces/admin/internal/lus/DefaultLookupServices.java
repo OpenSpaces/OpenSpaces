@@ -47,7 +47,7 @@ public class DefaultLookupServices implements InternalLookupServices {
     }
 
     public Iterator<LookupService> iterator() {
-        return lookupServiceMap.values().iterator();
+        return Collections.unmodifiableCollection(lookupServiceMap.values()).iterator();
     }
 
     public LookupService getLookupServiceByUID(String id) {
@@ -115,6 +115,7 @@ public class DefaultLookupServices implements InternalLookupServices {
     }
 
     public void addLookupService(final InternalLookupService lookupService) {
+        assertStateChangesPermitted();
         LookupService existingLookupService = lookupServiceMap.put(lookupService.getUid(), lookupService);
         if (existingLookupService == null) {
             lookupServiceAddedEventManager.lookupServiceAdded(lookupService);
@@ -122,6 +123,7 @@ public class DefaultLookupServices implements InternalLookupServices {
     }
 
     public InternalLookupService removeLookupService(String UID) {
+        assertStateChangesPermitted();
         final InternalLookupService existingLookupService = (InternalLookupService) lookupServiceMap.remove(UID);
         if (existingLookupService != null) {
             lookupServiceRemovedEventManager.lookupServiceRemoved(existingLookupService);
@@ -148,4 +150,9 @@ public class DefaultLookupServices implements InternalLookupServices {
         }
         return dumpResult;
     }
+    
+    private void assertStateChangesPermitted() {
+        admin.assertStateChangesPermitted();
+    }
+
 }

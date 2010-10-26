@@ -142,29 +142,40 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         sdm.terminate();
     }
 
-    public void discovered(DiscoveryEvent disEvent) {
-        for (ServiceRegistrar registrar : disEvent.getRegistrars()) {
+    public void discovered(final DiscoveryEvent disEvent) {
+        for (final ServiceRegistrar registrar : disEvent.getRegistrars()) {
             try {
-                InternalLookupService lookupService = new DefaultLookupService(registrar, registrar.getServiceID(), admin,
+                final InternalLookupService lookupService = new DefaultLookupService(registrar, registrar.getServiceID(), admin,
                         ((AgentIdAware) registrar.getRegistrar()).getAgentId(), ((AgentIdAware) registrar.getRegistrar()).getGSAServiceID());
                 // get the details here, on the thread pool
-                NIODetails nioDetails = lookupService.getNIODetails();
-                OSDetails osDetails = lookupService.getOSDetails();
-                JVMDetails jvmDetails = lookupService.getJVMDetails();
-                admin.addLookupService(lookupService, nioDetails, osDetails, jvmDetails, ((GridZoneProvider) registrar.getRegistrar()).getZones());
+                final NIODetails nioDetails = lookupService.getNIODetails();
+                final OSDetails osDetails = lookupService.getOSDetails();
+                final JVMDetails jvmDetails = lookupService.getJVMDetails();
+                final String[] zones = ((GridZoneProvider) registrar.getRegistrar()).getZones();
+                admin.scheduleNonBlockingStateChange(new Runnable() {
+                    public void run() {
+                        admin.addLookupService(lookupService, nioDetails, osDetails, jvmDetails, zones);
+                    }
+                });
+                
             } catch (Exception e) {
                 logger.warn("Failed to add lookup service with id [" + registrar.getServiceID() + "]", e);
             }
         }
+        
     }
 
-    public void discarded(DiscoveryEvent e) {
-        for (ServiceRegistrar registrar : e.getRegistrars()) {
-            admin.removeLookupService(registrar.getServiceID().toString());
+    public void discarded(final DiscoveryEvent e) {
+        for (final ServiceRegistrar registrar : e.getRegistrars()) {
+            admin.scheduleNonBlockingStateChange(new Runnable() {
+                public void run() {
+                    admin.removeLookupService(registrar.getServiceID().toString());
+                }
+            });
         }
     }
 
-    public void serviceAdded(ServiceDiscoveryEvent event) {
+    public void serviceAdded(final ServiceDiscoveryEvent event) {
         Object service = event.getPostEventServiceItem().service;
         ServiceID serviceID = event.getPostEventServiceItem().serviceID;
         if (service instanceof GSM) {
@@ -172,17 +183,23 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 logger.debug("Service Added [GSM] with uid [" + serviceID + "]");
             }
             try {
-                GSM gsm = (GSM) service;
+                final GSM gsm = (GSM) service;
                 if (gsm.isServiceSecured()) {
                     gsm.login(admin.getUserDetails());
                 }
-                InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, gsm, admin,
+                final InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, gsm, admin,
                         gsm.getAgentId(), gsm.getGSAServiceID());
                 // get the details here, on the thread pool
-                NIODetails nioDetails = gridServiceManager.getNIODetails();
-                OSDetails osDetails = gridServiceManager.getOSDetails();
-                JVMDetails jvmDetails = gridServiceManager.getJVMDetails();
-                admin.addGridServiceManager(gridServiceManager, nioDetails, osDetails, jvmDetails, gsm.getZones());
+                final NIODetails nioDetails = gridServiceManager.getNIODetails();
+                final OSDetails osDetails = gridServiceManager.getOSDetails();
+                final JVMDetails jvmDetails = gridServiceManager.getJVMDetails();
+                final String[] zones = gsm.getZones();
+                admin.scheduleNonBlockingStateChange(new Runnable() {
+                    public void run() {
+                        admin.addGridServiceManager(gridServiceManager, nioDetails, osDetails, jvmDetails, zones);
+                    }
+                });
+                
             } catch (Exception e) {
                 logger.warn("Failed to add [GSM] with uid [" + serviceID + "]", e);
             }
@@ -195,13 +212,18 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 //                if (esm.isServiceSecured()) {
 //                    esm.login(admin.getUserDetails());
 //                }
-                InternalElasticServiceManager elasticServiceManager = new DefaultElasticServiceManager(serviceID, esm, admin,
+                final InternalElasticServiceManager elasticServiceManager = new DefaultElasticServiceManager(serviceID, esm, admin,
                         esm.getAgentId(), esm.getGSAServiceID());
                 // get the details here, on the thread pool
-                NIODetails nioDetails = elasticServiceManager.getNIODetails();
-                OSDetails osDetails = elasticServiceManager.getOSDetails();
-                JVMDetails jvmDetails = elasticServiceManager.getJVMDetails();
-                admin.addElasticServiceManager(elasticServiceManager, nioDetails, osDetails, jvmDetails, esm.getZones());
+                final NIODetails nioDetails = elasticServiceManager.getNIODetails();
+                final OSDetails osDetails = elasticServiceManager.getOSDetails();
+                final JVMDetails jvmDetails = elasticServiceManager.getJVMDetails();
+                final String[] zones = esm.getZones();
+                admin.scheduleNonBlockingStateChange(new Runnable() {
+                    public void run() {
+                        admin.addElasticServiceManager(elasticServiceManager, nioDetails, osDetails, jvmDetails, zones);
+                    }
+                });
             } catch (Exception e) {
                 logger.warn("Failed to add [ESM] with uid [" + serviceID + "]", e);
             }
@@ -215,12 +237,17 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                     gsa.login(admin.getUserDetails());
                 }
                 AgentProcessesDetails processesDetails = gsa.getDetails();
-                InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, gsa, admin, processesDetails);
+                final InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, gsa, admin, processesDetails);
                 // get the details here, on the thread pool
-                NIODetails nioDetails = gridServiceAgent.getNIODetails();
-                OSDetails osDetails = gridServiceAgent.getOSDetails();
-                JVMDetails jvmDetails = gridServiceAgent.getJVMDetails();
-                admin.addGridServiceAgent(gridServiceAgent, nioDetails, osDetails, jvmDetails, gsa.getZones());
+                final NIODetails nioDetails = gridServiceAgent.getNIODetails();
+                final OSDetails osDetails = gridServiceAgent.getOSDetails();
+                final JVMDetails jvmDetails = gridServiceAgent.getJVMDetails();
+                final String[] zones = gsa.getZones();
+                admin.scheduleNonBlockingStateChange(new Runnable() {
+                    public void run() {
+                        admin.addGridServiceAgent(gridServiceAgent, nioDetails, osDetails, jvmDetails, zones);
+                    }
+                });
             } catch (Exception e) {
                 logger.warn("Failed to add [GSA] with uid [" + serviceID + "]", e);
             }
@@ -233,13 +260,18 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 if (gsc.isServiceSecured()) {
                     gsc.login(admin.getUserDetails());
                 }
-                InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(serviceID, gsc,
+                final InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(serviceID, gsc,
                         admin, gsc.getAgentId(), gsc.getGSAServiceID());
                 // get the details here, on the thread pool
-                NIODetails nioDetails = gridServiceContainer.getNIODetails();
-                OSDetails osDetails = gridServiceContainer.getOSDetails();
-                JVMDetails jvmDetails = gridServiceContainer.getJVMDetails();
-                admin.addGridServiceContainer(gridServiceContainer, nioDetails, osDetails, jvmDetails, gsc.getZones());
+                final NIODetails nioDetails = gridServiceContainer.getNIODetails();
+                final OSDetails osDetails = gridServiceContainer.getOSDetails();
+                final JVMDetails jvmDetails = gridServiceContainer.getJVMDetails();
+                final String[] zones = gsc.getZones();
+                admin.scheduleNonBlockingStateChange(new Runnable() {
+                    public void run() {
+                        admin.addGridServiceContainer(gridServiceContainer, nioDetails, osDetails, jvmDetails, zones);
+                    }
+                });                
             } catch (Exception e) {
                 logger.warn("Failed to add GSC with uid [" + serviceID + "]", e);
             }
@@ -248,20 +280,25 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 logger.debug("Service Added [Processing Unit Instance] with uid [" + serviceID + "]");
             }
             try {
-                PUServiceBean puServiceBean = (PUServiceBean) service;
+                final PUServiceBean puServiceBean = (PUServiceBean) service;
                 PUDetails puDetails = puServiceBean.getPUDetails();
-                InternalProcessingUnitInstance processingUnitInstance = new DefaultProcessingUnitInstance(serviceID, puDetails, puServiceBean, admin);
-                NIODetails nioDetails = processingUnitInstance.getNIODetails();
-                OSDetails osDetails = processingUnitInstance.getOSDetails();
-                JVMDetails jvmDetails = processingUnitInstance.getJVMDetails();
-                admin.addProcessingUnitInstance(processingUnitInstance, nioDetails, osDetails, jvmDetails, puServiceBean.getZones());
-
-                if (!discoverUnmanagedSpaces) {
-                    for (SpaceServiceDetails serviceDetails : processingUnitInstance.getEmbeddedSpacesDetails()) {
-                        InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(puServiceBean, serviceDetails, admin);
-                        admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, puServiceBean.getZones());
+                final InternalProcessingUnitInstance processingUnitInstance = new DefaultProcessingUnitInstance(serviceID, puDetails, puServiceBean, admin);
+                final NIODetails nioDetails = processingUnitInstance.getNIODetails();
+                final OSDetails osDetails = processingUnitInstance.getOSDetails();
+                final JVMDetails jvmDetails = processingUnitInstance.getJVMDetails();
+                final String[] zones = puServiceBean.getZones();
+                admin.scheduleNonBlockingStateChange(new Runnable() {
+                    public void run() {
+                        admin.addProcessingUnitInstance(processingUnitInstance, nioDetails, osDetails, jvmDetails, zones);
+                        if (!discoverUnmanagedSpaces) {
+                            for (SpaceServiceDetails serviceDetails : processingUnitInstance.getEmbeddedSpacesDetails()) {
+                                InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(puServiceBean, serviceDetails, admin);
+                                admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, zones);
+                            }
+                        }
+        
                     }
-                }
+                });
             } catch (Exception e) {
                 logger.warn("Failed to add [Processing Unit Instance] with uid [" + serviceID + "]", e);
             }
@@ -293,7 +330,9 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         }
     }
 
-    public void serviceRemoved(ServiceDiscoveryEvent event) {
+    public void serviceRemoved(final ServiceDiscoveryEvent event) {
+        admin.scheduleNonBlockingStateChange(new Runnable() {
+            public void run() {
         Object service = event.getPreEventServiceItem().service;
         ServiceID serviceID = event.getPreEventServiceItem().serviceID;
         if (service instanceof GSM) {
@@ -327,8 +366,9 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             }
             admin.removeSpaceInstance(serviceID.toString());
         }
+         }});
     }
-
+   
     public void serviceChanged(ServiceDiscoveryEvent event) {
         // TODO do we really care about this?
     }

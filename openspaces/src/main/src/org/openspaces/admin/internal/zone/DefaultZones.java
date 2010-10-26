@@ -63,7 +63,7 @@ public class DefaultZones implements InternalZones {
     }
 
     public Iterator<Zone> iterator() {
-        return zonesByName.values().iterator();
+        return Collections.unmodifiableCollection(zonesByName.values()).iterator();
     }
 
     public ZoneAddedEventManager getZoneAdded() {
@@ -85,6 +85,7 @@ public class DefaultZones implements InternalZones {
     }
 
     public void addZone(InternalZone zone, String zoneUidProvider) {
+        assertStateChangesPermitted();
         Set<String> providers = zonesProviders.get(zone.getName());
         if (providers == null) {
             providers = new HashSet<String>();
@@ -98,6 +99,7 @@ public class DefaultZones implements InternalZones {
     }
 
     public void removeProvider(Zone zone, String zoneUidProvider) {
+        assertStateChangesPermitted();
         Set<String> providers = zonesProviders.get(zone.getName());
         if (providers != null) {
             providers.remove(zoneUidProvider);
@@ -138,5 +140,9 @@ public class DefaultZones implements InternalZones {
         } finally {
             getZoneAdded().remove(added);
         }
+    }
+    
+    private void assertStateChangesPermitted() {
+        admin.assertStateChangesPermitted();
     }
 }

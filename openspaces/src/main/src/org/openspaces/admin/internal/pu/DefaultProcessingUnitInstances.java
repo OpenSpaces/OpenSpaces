@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Collections;
 
 /**
  * @author kimchy
@@ -46,14 +47,17 @@ public class DefaultProcessingUnitInstances implements InternalProcessingUnitIns
     }
 
     public void addOrphaned(ProcessingUnitInstance processingUnitInstance) {
+        assertStateChangesPermitted();
         orphanedProcessingUnitInstances.put(processingUnitInstance.getUid(), processingUnitInstance);
     }
 
     public ProcessingUnitInstance removeOrphaned(String uid) {
+        assertStateChangesPermitted();
         return orphanedProcessingUnitInstances.remove(uid);
     }
 
     public void addInstance(ProcessingUnitInstance processingUnitInstance) {
+        assertStateChangesPermitted();
         ProcessingUnitInstance existingPU = processingUnitInstances.put(processingUnitInstance.getUid(), processingUnitInstance);
         if (existingPU == null) {
             processingUnitInstanceAddedEventManager.processingUnitInstanceAdded(processingUnitInstance);
@@ -61,6 +65,7 @@ public class DefaultProcessingUnitInstances implements InternalProcessingUnitIns
     }
 
     public ProcessingUnitInstance removeInstance(String uid) {
+        assertStateChangesPermitted();
         ProcessingUnitInstance processingUnitInstance = processingUnitInstances.remove(uid);
         if (processingUnitInstance != null) {
             processingUnitInstanceRemovedEventManager.processingUnitInstanceRemoved(processingUnitInstance);
@@ -73,7 +78,7 @@ public class DefaultProcessingUnitInstances implements InternalProcessingUnitIns
     }
 
     public Iterator<ProcessingUnitInstance> getInstancesIt() {
-        return processingUnitInstances.values().iterator();
+        return Collections.unmodifiableCollection(processingUnitInstances.values()).iterator();
     }
 
     public ProcessingUnitInstance[] getProcessingUnitInstances() {
@@ -110,5 +115,10 @@ public class DefaultProcessingUnitInstances implements InternalProcessingUnitIns
     public void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener) {
         processingUnitInstanceAddedEventManager.remove(eventListener);
         processingUnitInstanceRemovedEventManager.remove(eventListener);
+    }
+    
+
+    private void assertStateChangesPermitted() {
+        admin.assertStateChangesPermitted();
     }
 }

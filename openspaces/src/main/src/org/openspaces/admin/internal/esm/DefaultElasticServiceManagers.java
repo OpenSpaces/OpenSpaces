@@ -71,7 +71,7 @@ public class DefaultElasticServiceManagers implements InternalElasticServiceMana
     }
     
     public Iterator<ElasticServiceManager> iterator() {
-        return elasticServiceManagersByUID.values().iterator();
+        return Collections.unmodifiableCollection(elasticServiceManagersByUID.values()).iterator();
     }
     
     public ElasticServiceManagerAddedEventManager getElasticServiceManagerAdded() {
@@ -83,6 +83,7 @@ public class DefaultElasticServiceManagers implements InternalElasticServiceMana
     }
 
     public void addElasticServiceManager(final InternalElasticServiceManager elasticServiceManager) {
+        assertStateChangesPermitted();
         ElasticServiceManager existingESM = elasticServiceManagersByUID.put(elasticServiceManager.getUid(), elasticServiceManager);
         if (existingESM == null) {
             elasticServiceManagerAddedEventManager.elasticServiceManagerAdded(elasticServiceManager);
@@ -90,6 +91,7 @@ public class DefaultElasticServiceManagers implements InternalElasticServiceMana
     }
 
     public InternalElasticServiceManager removeElasticServiceManager(String uid) {
+        assertStateChangesPermitted();
         final InternalElasticServiceManager existingESM = (InternalElasticServiceManager) elasticServiceManagersByUID.remove(uid);
         if (existingESM != null) {
             elasticServiceManagerRemovedEventManager.elasticServiceManagerRemoved(existingESM);
@@ -204,5 +206,9 @@ public class DefaultElasticServiceManagers implements InternalElasticServiceMana
             throw new AdminException("No Elastic Service Manager found to deploy [" + deployment.getDataGridName() + "]");
         }
         return elasticServiceManager.deploy(deployment, timeout, timeUnit);
+    }
+    
+    protected void assertStateChangesPermitted() {
+        this.admin.assertStateChangesPermitted();
     }
 }
