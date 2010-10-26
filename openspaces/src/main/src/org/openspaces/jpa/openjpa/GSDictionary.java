@@ -22,9 +22,15 @@ public class GSDictionary extends DBDictionary {
     public GSDictionary() {
         super();
         maxTableNameLength = 256;
+        
+        // Dynamic indexes are not supported
+        maxIndexesPerTable = 0;
+        
         joinSyntax = SYNTAX_TRADITIONAL;
         schemaCase = SCHEMA_CASE_PRESERVE;
         supportsComments = false;
+        
+        batchLimit = 100;
     }
     
     /**
@@ -125,7 +131,7 @@ public class GSDictionary extends DBDictionary {
 			try {
 				String colName = trimQuotes(col.toString());				
 				Field field = cls.getDeclaredField(colName);
-				if (field.getAnnotation(SpaceRouting.class) != null) {
+				if (field.getAnnotation(PartitionIndicator.class) != null) {
 					return field.getName();
 				}
 			} catch (NoSuchFieldException e) {				
@@ -133,4 +139,5 @@ public class GSDictionary extends DBDictionary {
 		}				
 		return null;
 	}
+        
 }
