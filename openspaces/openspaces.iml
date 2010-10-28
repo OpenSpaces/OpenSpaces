@@ -343,7 +343,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/deploy/templates/memcached/lib/netty-3.2.2.Final.jar!/" />
+          <root url="jar://$MODULE_DIR$/deploy/templates/memcached/lib/netty-3.2.3.Final.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
