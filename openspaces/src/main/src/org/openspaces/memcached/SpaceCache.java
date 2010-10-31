@@ -74,7 +74,7 @@ public class SpaceCache {
             space.write(entry, e.getExpire(), 0, UpdateModifiers.WRITE_ONLY);
             return StoreResponse.STORED;
         } catch (EntryAlreadyInSpaceException e1) {
-            return StoreResponse.NOT_FOUND;
+            return StoreResponse.NOT_STORED;
         }
     }
 
