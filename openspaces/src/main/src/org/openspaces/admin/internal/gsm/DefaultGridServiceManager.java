@@ -1,5 +1,44 @@
 package org.openspaces.admin.internal.gsm;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+import net.jini.core.discovery.LookupLocator;
+import net.jini.core.lookup.ServiceID;
+
+import org.jini.rio.core.OperationalString;
+import org.jini.rio.monitor.DeployAdmin;
+import org.jini.rio.monitor.ProvisionMonitorAdmin;
+import org.jini.rio.resources.servicecore.ServiceAdmin;
+import org.openspaces.admin.AdminException;
+import org.openspaces.admin.dump.DumpResult;
+import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.dump.InternalDumpResult;
+import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
+import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
+import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
+import org.openspaces.admin.internal.support.NetworkExceptionHelper;
+import org.openspaces.admin.memcached.MemcachedDeployment;
+import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.ProcessingUnitAlreadyDeployedException;
+import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
+import org.openspaces.admin.space.SpaceDeployment;
+import org.openspaces.pu.container.servicegrid.deploy.Deploy;
+
 import com.gigaspaces.grid.gsm.GSM;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.jvm.JVMStatistics;
@@ -11,34 +50,6 @@ import com.gigaspaces.log.LogProcessType;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 import com.gigaspaces.security.SecurityException;
-import net.jini.core.discovery.LookupLocator;
-import net.jini.core.lookup.ServiceID;
-import org.jini.rio.core.OperationalString;
-import org.jini.rio.monitor.ProvisionMonitorAdmin;
-import org.openspaces.admin.AdminException;
-import org.openspaces.admin.dump.DumpResult;
-import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.dump.InternalDumpResult;
-import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
-import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
-import org.openspaces.admin.pu.ProcessingUnitAlreadyDeployedException;
-import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
-import org.openspaces.admin.internal.support.NetworkExceptionHelper;
-import org.openspaces.admin.memcached.MemcachedDeployment;
-import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.admin.pu.ProcessingUnitDeployment;
-import org.openspaces.admin.pu.ProcessingUnitInstance;
-import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
-import org.openspaces.admin.space.SpaceDeployment;
-import org.openspaces.pu.container.servicegrid.deploy.Deploy;
-
-import java.io.IOException;
-import java.rmi.RemoteException;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author kimchy
@@ -301,6 +312,36 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         gsm.runGc();
     }
 
+    public String[] listDeployDir() {
+
+        List<String> result = new ArrayList<String>();
+
+        try{
+            URL listPU = new URL( new URL(getCodebase( gsmAdmin )), "list-pu" );
+            BufferedReader reader = 
+                new BufferedReader( new InputStreamReader( listPU.openStream() ) );
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                StringTokenizer tokenizer = new StringTokenizer(line, "\t");
+                String puName = tokenizer.nextToken();
+                result.add( puName );
+            }
+        }
+        catch( IOException io ){
+            throw new AdminException( "Failed to retrive processing units available " +
+            		                    "under [GS ROOT]/deploy directory", io );
+        }
+
+        return result.toArray( new String[ 0 ]  );
+    }
+    
+    private String getCodebase(DeployAdmin deployAdmin) throws MalformedURLException, RemoteException {
+        URL url = ((ServiceAdmin) deployAdmin).getServiceElement().getExportURLs()[0];
+        return url.getProtocol() + "://" + url.getHost() + ":" + url.getPort() + "/";
+    }    
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
