@@ -1,8 +1,8 @@
 package org.openspaces.grid.esm;
 
-import org.openspaces.admin.esm.deployment.MemorySla;
-import org.openspaces.admin.esm.deployment.MemorySlaSerializer;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.elastic.MemorySla;
+import org.openspaces.admin.pu.elastic.MemorySlaSerializer;
 
 public class SlaExtractor {
     

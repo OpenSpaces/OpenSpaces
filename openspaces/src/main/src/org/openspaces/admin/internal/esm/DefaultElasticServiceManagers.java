@@ -12,7 +12,6 @@ import org.openspaces.admin.AdminException;
 import org.openspaces.admin.dump.CompoundDumpResult;
 import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.esm.ElasticServiceManager;
-import org.openspaces.admin.esm.deployment.ElasticDataGridDeployment;
 import org.openspaces.admin.esm.events.ElasticServiceManagerAddedEventListener;
 import org.openspaces.admin.esm.events.ElasticServiceManagerAddedEventManager;
 import org.openspaces.admin.esm.events.ElasticServiceManagerLifecycleEventListener;
@@ -23,7 +22,6 @@ import org.openspaces.admin.internal.esm.events.DefaultElasticServiceManagerAdde
 import org.openspaces.admin.internal.esm.events.DefaultElasticServiceManagerRemovedEventManager;
 import org.openspaces.admin.internal.esm.events.InternalElasticServiceManagerAddedEventManager;
 import org.openspaces.admin.internal.esm.events.InternalElasticServiceManagerRemovedEventManager;
-import org.openspaces.admin.pu.ProcessingUnit;
 
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 
@@ -190,22 +188,6 @@ public class DefaultElasticServiceManagers implements InternalElasticServiceMana
             return it.next();
         }
         return null;
-    }
-
-    public ProcessingUnit deploy(ElasticDataGridDeployment deployment) {
-        ElasticServiceManager elasticServiceManager = getElasticServiceManager();
-        if (elasticServiceManager == null) {
-            throw new AdminException("No Elastic Service Manager found to deploy [" + deployment.getDataGridName() + "]");
-        }
-        return elasticServiceManager.deploy(deployment);
-    }
-
-    public ProcessingUnit deploy(ElasticDataGridDeployment deployment, long timeout, TimeUnit timeUnit) {
-        ElasticServiceManager elasticServiceManager = getElasticServiceManager();
-        if (elasticServiceManager == null) {
-            throw new AdminException("No Elastic Service Manager found to deploy [" + deployment.getDataGridName() + "]");
-        }
-        return elasticServiceManager.deploy(deployment, timeout, timeUnit);
     }
     
     protected void assertStateChangesPermitted() {

@@ -14,7 +14,6 @@ import org.jini.rio.core.jsb.ServiceBeanContext;
 import org.jini.rio.jsb.ServiceBeanActivation;
 import org.jini.rio.jsb.ServiceBeanAdapter;
 import org.jini.rio.jsb.ServiceBeanActivation.LifeCycleManager;
-import org.openspaces.admin.esm.deployment.ElasticDataGridDeployment;
 
 import com.gigaspaces.grid.gsa.AgentHelper;
 import com.gigaspaces.grid.zone.ZoneHelper;
@@ -224,11 +223,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM
         context.put("esm", this);
         return InternalDumpHelper.generateDump(cause, context, contributors);
 	}
-
-    public void deploy(ElasticDataGridDeployment deployment) {
-        esmExecutor.deploy(deployment);
-    }
-    
+   
     public String[] getManagedProcessingUnits() {
         return esmExecutor.getManagedProcessingUnits();
     }

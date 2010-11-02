@@ -2,6 +2,7 @@ package org.openspaces.grid.esm;
 
 import java.util.logging.Logger;
 
+import org.openspaces.admin.internal.pu.elastic.ElasticScaleHandlerConfig;
 import org.openspaces.admin.machine.Machine;
 
 public class NullElasticScaleHandler implements ElasticScaleHandler {

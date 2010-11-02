@@ -8,6 +8,7 @@ import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.elastic.ElasticDeploymentContextProperties;
 import org.openspaces.admin.zone.Zone;
 
 public class PuCapacityPlanner {

@@ -1,4 +1,4 @@
-package org.openspaces.admin.esm.deployment;
+package org.openspaces.admin.pu.elastic;
 
 /**
  * Memory Service Level Agreement (SLA) specifying the threshold to trigger memory breach.

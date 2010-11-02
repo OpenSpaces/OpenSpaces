@@ -1,4 +1,4 @@
-package org.openspaces.admin.esm.deployment;
+package org.openspaces.admin.pu.elastic;
 
 public class MemorySlaSerializer {
     static String toString(MemorySla memorySla) {

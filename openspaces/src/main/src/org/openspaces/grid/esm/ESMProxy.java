@@ -6,7 +6,6 @@ import java.rmi.RemoteException;
 import net.jini.id.Uuid;
 
 import org.jini.rio.resources.servicecore.AbstractProxy;
-import org.openspaces.admin.esm.deployment.ElasticDataGridDeployment;
 
 import com.gigaspaces.security.SecurityException;
 import com.gigaspaces.security.directory.UserDetails;
@@ -41,10 +40,6 @@ public class ESMProxy extends AbstractProxy implements ESM, Serializable {
 		}
 		return cachedGSAServiceID;
 	}
-
-    public void deploy(ElasticDataGridDeployment deployment) {
-        esmServer.deploy(deployment);
-    }
 
     public String[] getManagedProcessingUnits() {
         return esmServer.getManagedProcessingUnits();

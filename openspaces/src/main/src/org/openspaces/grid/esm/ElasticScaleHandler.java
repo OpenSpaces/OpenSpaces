@@ -1,5 +1,6 @@
 package org.openspaces.grid.esm;
 
+import org.openspaces.admin.internal.pu.elastic.ElasticScaleHandlerConfig;
 import org.openspaces.admin.machine.Machine;
 
 /**

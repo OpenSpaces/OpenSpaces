@@ -1,4 +1,4 @@
-package org.openspaces.admin.esm.deployment;
+package org.openspaces.admin.pu.elastic;
 
 /**
  * Specifies the deployment isolation level (per processing unit).

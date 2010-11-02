@@ -1,7 +1,6 @@
 package org.openspaces.grid.esm;
 
 
-import org.openspaces.admin.esm.deployment.ElasticDataGridDeployment;
 
 
 /**
@@ -10,5 +9,4 @@ import org.openspaces.admin.esm.deployment.ElasticDataGridDeployment;
  */
 public interface ESM extends com.gigaspaces.grid.esm.ESM {
 
-    void deploy(ElasticDataGridDeployment deployment);
 }

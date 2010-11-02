@@ -8,12 +8,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.openspaces.admin.Admin;
-import org.openspaces.admin.esm.deployment.DeploymentIsolationLevel;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnits;
+import org.openspaces.admin.pu.elastic.DeploymentIsolationLevel;
+import org.openspaces.admin.pu.elastic.ElasticDeploymentContextProperties;
 import org.openspaces.admin.zone.Zone;
 
 /**

@@ -1,17 +1,6 @@
 package org.openspaces.grid.esm;
 
-import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.DEPLOYMENT_ISOLATION;
-import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.ELASTIC;
-import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.ELASTIC_SCALE_CONFIG;
-import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.HIGHLY_AVAILABLE;
-import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.INITIAL_JAVA_HEAP_SIZE;
-import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.MAXIMUM_JAVA_HEAP_SIZE;
-import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.MAX_MEMORY;
-import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.MIN_MEMORY;
-import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.SLA;
-import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.TENANT;
-import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.VM_ARGUMENTS;
-import static org.openspaces.grid.esm.ElasticDeploymentContextProperties.ZONE;
+import static org.openspaces.admin.pu.elastic.ElasticDeploymentContextProperties.ELASTIC_SCALE_CONFIG;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -21,8 +10,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -32,24 +19,21 @@ import java.util.logging.Logger;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminFactory;
-import org.openspaces.admin.esm.deployment.DeploymentContext;
-import org.openspaces.admin.esm.deployment.ElasticDataGridDeployment;
-import org.openspaces.admin.esm.deployment.InternalElasticDataGridDeployment;
-import org.openspaces.admin.esm.deployment.MemorySla;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceContainerOptions;
 import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.internal.pu.elastic.ElasticScaleHandlerConfig;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnits;
+import org.openspaces.admin.pu.elastic.MemorySla;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEvent;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEvent;
 import org.openspaces.admin.pu.events.ProcessingUnitLifecycleEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent;
-import org.openspaces.admin.space.SpaceDeployment;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.vm.VirtualMachineStatistics;
 import org.openspaces.admin.zone.Zone;
@@ -119,98 +103,6 @@ public class EsmExecutor {
             processingUnitNames.add(pu.getName());
         }
         return processingUnitNames.toArray(new String[processingUnitNames.size()]);
-    }
-
-    public void deploy(ElasticDataGridDeployment deployment) {
-        DeploymentContext deploymentContext = ((InternalElasticDataGridDeployment)deployment).getDeploymentContext();
-        String tenantPrefix = deploymentContext.getTenant().length() == 0 ? "" : deploymentContext.getTenant() + "-"; 
-        final String zoneName = tenantPrefix+deployment.getDataGridName();
-        SpaceDeployment spaceDeployment = new SpaceDeployment(deployment.getDataGridName());
-        spaceDeployment.addZone(zoneName);
-        
-        int numberOfParitions = calculateNumberOfPartitions(deploymentContext);
-        if (deploymentContext.hasPartitionsSet()) {
-            if (deploymentContext.getPartitions() < numberOfParitions) {
-                throw new IllegalArgumentException("Number of set partitions [" + deploymentContext.getPartitions()
-                        + "] must be greater than [" + numberOfParitions
-                        + "] to meet the minimum requested capacity of [" + deploymentContext.getMinMemory() + "]");
-            }
-            numberOfParitions = deploymentContext.getPartitions();
-        } else {
-            numberOfParitions = calculateNumberOfPartitions(deploymentContext);
-        }
-        
-        if (deploymentContext.isHighlyAvailable()) {
-            spaceDeployment.maxInstancesPerMachine(1);
-            spaceDeployment.partitioned(numberOfParitions, 1);
-        } else {
-            spaceDeployment.partitioned(numberOfParitions, 0);
-        }
-        
-        String initialJavaHeapSize = deploymentContext.getInitialJavaHeapSize();
-        String maximumJavaHeapSize = deploymentContext.getMaximumJavaHeapSize();
-        if (MemorySettings.valueOf(initialJavaHeapSize).isGreaterThan(MemorySettings.valueOf(maximumJavaHeapSize))) {
-            deploymentContext.setInitialJavaHeapSize(maximumJavaHeapSize);
-            initialJavaHeapSize = maximumJavaHeapSize;
-        }
-        
-        spaceDeployment.setContextProperty(ELASTIC, "true");
-        spaceDeployment.setContextProperty(HIGHLY_AVAILABLE, String.valueOf(deploymentContext.isHighlyAvailable()));
-        spaceDeployment.setContextProperty(MIN_MEMORY, deploymentContext.getMinMemory());
-        spaceDeployment.setContextProperty(MAX_MEMORY, deploymentContext.getMaxMemory());
-        spaceDeployment.setContextProperty(INITIAL_JAVA_HEAP_SIZE, deploymentContext.getInitialJavaHeapSize());
-        spaceDeployment.setContextProperty(MAXIMUM_JAVA_HEAP_SIZE, deploymentContext.getMaximumJavaHeapSize());
-        spaceDeployment.setContextProperty(DEPLOYMENT_ISOLATION, deploymentContext.getDeploymentIsolationLevel().name());
-        spaceDeployment.setContextProperty(SLA, deploymentContext.getSlaDescriptors());
-        spaceDeployment.setContextProperty(ZONE, zoneName);
-        spaceDeployment.setContextProperty(TENANT, deploymentContext.getTenant());
-
-        if (deployment.getElasticScaleHandlerConfig() != null) {
-            spaceDeployment.setContextProperty(ELASTIC_SCALE_CONFIG, ElasticScaleHandlerConfigSerializer.toString(deployment.getElasticScaleHandlerConfig()));
-        }
-        
-        if (!deployment.getContextProperties().isEmpty()) {
-            Set<Entry<Object,Object>> entrySet = deployment.getContextProperties().entrySet();
-            for (Entry<Object,Object> entry : entrySet) {
-                spaceDeployment.setContextProperty((String)entry.getKey(), (String)entry.getValue());
-            }
-        }
-        
-        if (deploymentContext.getVmInputArguments()!= null) {
-           spaceDeployment.setContextProperty(VM_ARGUMENTS, deploymentContext.getVmInputArguments()); 
-        }
-        
-        if (logger.isLoggable(Level.INFO)) {
-            logger.info("Request to deploy " + deployment.getDataGridName() + " " + numberOfParitions
-                    + (deploymentContext.isHighlyAvailable() ? ",1" : ",0") + " capacity: "
-                    + deploymentContext.getMinMemory() + " - " + deploymentContext.getMaxMemory()
-                    + " - " + deploymentContext.getDeploymentIsolationLevel());
-        }
-        
-        if (logger.isLoggable(Level.FINE)) {
-            logger.fine("Deploying " + deployment.getDataGridName() 
-                    + "\n\t Zone: " + zoneName 
-                    + "\n\t Min Capacity: " + deploymentContext.getMinMemory()
-                    + "\n\t Max Capacity: " + deploymentContext.getMaxMemory()
-                    + "\n\t Initial Java Heap Size: " + initialJavaHeapSize
-                    + "\n\t Maximum Java Heap Size: " + maximumJavaHeapSize
-                    + "\n\t Deployment Isolation: " + deploymentContext.getDeploymentIsolationLevel().name()
-                    + "\n\t Highly Available? " + deploymentContext.isHighlyAvailable()
-                    + "\n\t Partitions: " + numberOfParitions
-                    + "\n\t SLA: " + deploymentContext.getSlaDescriptors());
-        }
-        
-        admin.getGridServiceManagers().waitForAtLeastOne().deploy(spaceDeployment);
-    }
-    
-    private int calculateNumberOfPartitions(DeploymentContext context) {
-        
-        int numberOfPartitions = MemorySettings.valueOf(context.getMaxMemory()).floorDividedBy(context.getMaximumJavaHeapSize());
-        if (context.isHighlyAvailable()) {
-            numberOfPartitions /= 2;
-        }
-        
-        return Math.max(1, numberOfPartitions);
     }
     
     /**
@@ -290,7 +182,7 @@ public class EsmExecutor {
             return new NullElasticScaleHandler();
         }
 
-        ElasticScaleHandlerConfig elasticScaleConfig = ElasticScaleHandlerConfigSerializer.fromString(elasticScaleConfigStr);
+        ElasticScaleHandlerConfig elasticScaleConfig = ElasticScaleHandlerConfig.valueOf(elasticScaleConfigStr);
         Class<? extends ElasticScaleHandler> clazz = ClassLoaderHelper.loadClass(elasticScaleConfig.getClassName()).asSubclass(ElasticScaleHandler.class);
         ElasticScaleHandler newInstance = clazz.newInstance();
         newInstance.init(elasticScaleConfig);

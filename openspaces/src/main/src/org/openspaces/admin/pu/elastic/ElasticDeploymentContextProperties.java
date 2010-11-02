@@ -1,21 +1,20 @@
-package org.openspaces.grid.esm;
+package org.openspaces.admin.pu.elastic;
 
 import java.util.Properties;
 
 public class ElasticDeploymentContextProperties {
     
-    static final String INITIAL_JAVA_HEAP_SIZE = "initialJavaHeapSize";
-    static final String MAXIMUM_JAVA_HEAP_SIZE = "maximumJavaHeapSize";
-    static final String MIN_MEMORY = "minMemory";
-    static final String MAX_MEMORY = "maxMemory";
-    static final String DEPLOYMENT_ISOLATION = "deploymentIsolation";
-    static final String VM_ARGUMENTS = "vmArguments";
-    static final String ELASTIC = "elastic";
-    static final String HIGHLY_AVAILABLE = "highlyAvailable";
-    static final String SLA = "sla";
-    static final String ELASTIC_SCALE_CONFIG = "elasticScaleConfig";
-    static final String ZONE = "zone";
-    static final String TENANT = "tenant";
+    public static final String INITIAL_JAVA_HEAP_SIZE = "initialJavaHeapSize";
+    public static final String MAXIMUM_JAVA_HEAP_SIZE = "maximumJavaHeapSize";
+    public static final String MIN_MEMORY = "minMemory";
+    public static final String MAX_MEMORY = "maxMemory";
+    public static final String DEPLOYMENT_ISOLATION = "deploymentIsolation";
+    public static final String VM_ARGUMENTS = "vmArguments";
+    public static final String ELASTIC = "elastic";
+    public static final String SLA = "sla";
+    public static final String ELASTIC_SCALE_CONFIG = "elasticScaleConfig";
+    public static final String ZONE = "zone";
+    public static final String TENANT = "tenant";
 
     private final Properties properties;
 
@@ -62,7 +61,7 @@ public class ElasticDeploymentContextProperties {
     public String getZoneName() {
         return properties.getProperty(ZONE);
     }
-    
+
     public String getTenant() {
         return properties.getProperty(TENANT);
     }

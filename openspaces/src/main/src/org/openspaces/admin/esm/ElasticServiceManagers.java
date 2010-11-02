@@ -21,11 +21,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.dump.DumpProvider;
-import org.openspaces.admin.esm.deployment.ElasticDataGridDeployment;
 import org.openspaces.admin.esm.events.ElasticServiceManagerAddedEventManager;
 import org.openspaces.admin.esm.events.ElasticServiceManagerLifecycleEventListener;
 import org.openspaces.admin.esm.events.ElasticServiceManagerRemovedEventManager;
-import org.openspaces.admin.pu.ProcessingUnit;
 
 /**
  * <p>Provides simple means to get all the current managers, as well as as registering for
@@ -96,21 +94,7 @@ public interface ElasticServiceManagers extends AdminAware, Iterable<ElasticServ
      *
      * @param numberOfElasticServiceManagers The number of managers to wait for
      */
-    boolean waitFor(int numberOfElasticServiceManagers, long timeout, TimeUnit timeUnit);
-
-    
-    /**
-     * Deploys an 'elastic' deployment based on the deployment information and the available resources.
-     * <p>The deployment process will wait indefinitely and return the actual processing unit that can be used.
-     */
-    ProcessingUnit deploy(ElasticDataGridDeployment deployment);
-    
-    /**
-     * Deploys an 'elastic' deployment based on the deployment information and the available resources.
-     * <p>The deployment process will wait for the given timeout and return the actual processing unit that can be used.
-     */
-    ProcessingUnit deploy(ElasticDataGridDeployment deployment, long timeout, TimeUnit timeUnit);
-    
+    boolean waitFor(int numberOfElasticServiceManagers, long timeout, TimeUnit timeUnit);  
 
     /**
      * Returns the grid service manager added event manager allowing to add and remove

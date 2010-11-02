@@ -35,8 +35,10 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitAlreadyDeployedException;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.elastic.ElasticProcessingUnitDeployment;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
 import org.openspaces.admin.space.SpaceDeployment;
+import org.openspaces.admin.space.elastic.ElasticSpaceDeployment;
 import org.openspaces.pu.container.servicegrid.deploy.Deploy;
 
 import com.gigaspaces.grid.gsm.GSM;
@@ -106,6 +108,25 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         return deploy(deployment.toProcessingUnitDeployment(), timeout, timeUnit);
     }
 
+    public ProcessingUnit deploy(ElasticSpaceDeployment deployment) throws ProcessingUnitAlreadyDeployedException {
+        return deploy(deployment.toProcessingUnitDeployment());
+    }
+
+    public ProcessingUnit deploy(ElasticSpaceDeployment deployment, long timeout, TimeUnit timeUnit)
+            throws ProcessingUnitAlreadyDeployedException {
+        return deploy(deployment.toProcessingUnitDeployment(),timeout,timeUnit);
+    }
+
+    public ProcessingUnit deploy(ElasticProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit)
+            throws ProcessingUnitAlreadyDeployedException {
+        return deploy(deployment.toProcessingUnitDeployment(),timeout,timeUnit);
+    }
+
+    public ProcessingUnit deploy(ElasticProcessingUnitDeployment deployment)
+            throws ProcessingUnitAlreadyDeployedException {
+        return deploy(deployment.toProcessingUnitDeployment());
+    }
+    
     public ProcessingUnit deploy(ProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit) {
         Deploy deploy = new Deploy();
         Deploy.setDisableInfoLogging(true);
@@ -354,4 +375,5 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     public int hashCode() {
         return serviceID.hashCode();
     }
+
 }
