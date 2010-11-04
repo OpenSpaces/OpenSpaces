@@ -6,7 +6,6 @@ import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.MemorySla;
 import org.openspaces.admin.pu.elastic.SLA;
-import org.openspaces.admin.space.SpaceDeployment;
 import org.openspaces.grid.esm.ElasticScaleHandler;
 
 /**
