@@ -40,7 +40,7 @@ public class DefaultGridServiceManagerRemovedEventManager implements InternalGri
     }
 
     public void remove(GridServiceManagerRemovedEventListener eventListener) {
-        listeners.add(eventListener);
+        listeners.remove(eventListener);
     }
 
     public void plus(Object eventListener) {

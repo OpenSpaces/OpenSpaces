@@ -36,7 +36,7 @@ public class DefaultManagingGridServiceManagerChangedEventManager implements Int
     }
 
     public void remove(ManagingGridServiceManagerChangedEventListener eventListener) {
-        listeners.add(eventListener);
+        listeners.remove(eventListener);
     }
 
     public void plus(Object eventListener) {

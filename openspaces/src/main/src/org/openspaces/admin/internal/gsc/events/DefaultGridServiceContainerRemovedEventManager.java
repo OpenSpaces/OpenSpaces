@@ -40,7 +40,7 @@ public class DefaultGridServiceContainerRemovedEventManager implements InternalG
     }
 
     public void remove(GridServiceContainerRemovedEventListener eventListener) {
-        listeners.add(eventListener);
+        listeners.remove(eventListener);
     }
 
     public void plus(Object eventListener) {

@@ -60,7 +60,7 @@ public class DefaultOperatingSystemsStatisticsChangedEventManager implements Int
     }
 
     public void remove(OperatingSystemsStatisticsChangedEventListener eventListener) {
-        listeners.add(eventListener);
+        listeners.remove(eventListener);
     }
 
     public void plus(Object eventListener) {

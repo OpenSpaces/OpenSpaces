@@ -80,7 +80,7 @@ public class DefaultOperatingSystemStatisticsChangedEventManager implements Inte
     }
 
     public void remove(OperatingSystemStatisticsChangedEventListener eventListener) {
-        listeners.add(eventListener);
+        listeners.remove(eventListener);
     }
 
     public void plus(Object eventListener) {

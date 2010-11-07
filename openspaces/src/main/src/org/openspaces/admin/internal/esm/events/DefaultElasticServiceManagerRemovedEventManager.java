@@ -40,7 +40,7 @@ public class DefaultElasticServiceManagerRemovedEventManager implements Internal
     }
 
     public void remove(ElasticServiceManagerRemovedEventListener eventListener) {
-        listeners.add(eventListener);
+        listeners.remove(eventListener);
     }
 
     public void plus(Object eventListener) {
