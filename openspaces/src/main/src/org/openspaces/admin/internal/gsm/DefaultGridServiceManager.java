@@ -375,5 +375,15 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     public int hashCode() {
         return serviceID.hashCode();
     }
+    
+    public boolean isDeployed(String processingUnitName) {
 
+        try{
+            return gsmAdmin.hasDeployed( processingUnitName );
+        }
+        catch (Exception e) {
+            throw new AdminException( "Failed to check if processing unit [" + 
+                    processingUnitName + "] deployed", e);
+        }
+    }
 }

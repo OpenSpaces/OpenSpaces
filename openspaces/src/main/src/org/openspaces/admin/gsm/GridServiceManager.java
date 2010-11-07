@@ -137,4 +137,6 @@ public interface GridServiceManager extends AgentGridComponent, LogProviderGridC
      * to a space (holding the memcached entries) and exposing the memcached protocol.
      */
     ProcessingUnit deploy(MemcachedDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
+    
+    boolean isDeployed( String processingUnitName );
 }
