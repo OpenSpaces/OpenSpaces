@@ -248,7 +248,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
             try {
                 sessionFactory = SessionFactoryBuilder.getFactory(hibernateFile);
             } catch (Exception e) {
-                throw new DataSourceException("Failed to create session factory from properties file [" + hibernateFile + "]");
+                throw new DataSourceException("Failed to create session factory from properties file [" + hibernateFile + "]",e);
             }
         }
         if (managedEntries == null) {
