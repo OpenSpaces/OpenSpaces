@@ -258,7 +258,7 @@ public class GSStoreManager extends AbstractStoreManager {
                 }
                 // Generate an external entry template using the dirty fields
                 String[] fieldNames = new String[numberOfDirtyFields];
-                Object[] fieldValues = new String[numberOfDirtyFields];
+                Object[] fieldValues = new Object[numberOfDirtyFields];
                 int dirtyIndex = 0;
                 for (int i = 0; i < cm.getDeclaredFields().length; i++) {
                     if (sm.getDirty().get(i)) {
