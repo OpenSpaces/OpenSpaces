@@ -110,8 +110,20 @@ public class GSStoreManager extends AbstractStoreManager {
         return (GSConfiguration) getContext().getConfiguration();
     }
     
+    /**
+     * Returns whether the state manager's managed object exists in space.
+     */
     public boolean exists(OpenJPAStateManager sm, Object edata) {
-        return true;
+        ClassMetaData cm = sm.getMetaData();
+        final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);        
+        ISpaceProxy proxy = (ISpaceProxy) getConfiguration().getSpace();
+        try {
+            Object result = proxy.readById(cm.getDescribedType().getName(), ids[0], null, _transaction,
+                    0, ReadModifiers.DIRTY_READ, false, QueryResultType.EXTERNAL_ENTRY);
+            return result != null;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     public boolean isCached(List<Object> oids, BitSet edata) {
@@ -128,20 +140,21 @@ public class GSStoreManager extends AbstractStoreManager {
     public boolean initialize(OpenJPAStateManager sm, PCState state,
             FetchConfiguration fetchConfiguration, Object edata) {
 
-        // TODO: Optimization when edata != null
-        
-        final IJSpace space = getConfiguration().getSpace();        
-        final ClassMetaData cm = sm.getMetaData();        
-        final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);        
-                                
-        try {                        
-            ISpaceProxy proxy = (ISpaceProxy) space;
-            ExternalEntry res = (ExternalEntry) proxy.readById(cm.getDescribedType().getName(), ids[0],
-                    null, _transaction, 0, 0, false, QueryResultType.EXTERNAL_ENTRY);
-            
-            if (res == null)
-                return false;            
+        final ClassMetaData cm = sm.getMetaData();                                        
+        try {
+            ExternalEntry res = null;
+            // If we already have the result and only need to initialize.. (relevant for JPQL)
+            if (edata != null) {
+                res = (ExternalEntry) edata;
+            } else {
+                final ISpaceProxy proxy = (ISpaceProxy) getConfiguration().getSpace();
+                final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);        
+                res = (ExternalEntry) proxy.readById(cm.getDescribedType().getName(), ids[0],
+                        null, _transaction, 0, 0, false, QueryResultType.EXTERNAL_ENTRY);
 
+                if (res == null)
+                    return false;            
+            }
             // TODO: Handle sub-classes etc...
             sm.initialize(cm.getDescribedType(), state);                        
             
@@ -223,13 +236,11 @@ public class GSStoreManager extends AbstractStoreManager {
             ClassMetaData cm = sm.getMetaData();
             try {
                 // Remove object from space
-                Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);        
-                ExternalEntry template = new ExternalEntry(cm.getDescribedType().getName(), new Object[cm.getFields().length]);
-                for (int i = 0; i < ids.length; i++) {
-                    template.setFieldValue(cm.getPrimaryKeyFields()[i].getDeclaredIndex(), ids[i]);
-                }                
-                int removed = space.clear(template, _transaction, 0); 
-                if (removed != 1)
+                final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);
+                final ISpaceProxy proxy = (ISpaceProxy) space;
+                Object result = proxy.takeById(cm.getDescribedType().getName(), ids[0], null, _transaction,
+                        0, 0, false, QueryResultType.EXTERNAL_ENTRY);                
+                if (result == null)
                     throw new Exception("Removed object not found in space.");                
             } catch (Exception e) {
                 exceptions.add(e);
