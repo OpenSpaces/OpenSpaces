@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:os-core="http://www.openspaces.org/schema/core"
+       xmlns:os-events="http://www.openspaces.org/schema/events"
+       xmlns:os-remoting="http://www.openspaces.org/schema/remoting"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
+       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
+       http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/remoting/openspaces-remoting.xsd">
+
+    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
+
+    <os-core:space id="space" url="/./eventSpace" lookup-groups="${user.name}" />
+
+    <os-core:local-tx-manager id="txManager" space="space" />
+
+    <os-core:giga-space id="gigaSpace" space="space" tx-manager="txManager"/>
+
+	<os-events:annotation-support />
+	
+	<tx:annotation-driven transaction-manager="txManager"/>
+
+
+	<bean id="testListener" class="org.openspaces.itest.events.notify.batch.namespace.TestListener" />
+
+
+	<os-events:notify-container id="eventContainer" giga-space="gigaSpace" pass-array-as-is="true">
+		<os-events:notify write="true" />
+		<os-events:batch size="2" time="100000" />
+		<os-events:tx-support tx-manager="txManager"/>
+
+		<os-core:template>
+			<bean class="java.lang.Object">
+			</bean>
+		</os-core:template>
+
+		<os-events:listener>
+			<os-events:method-adapter method-name="iAmTheListener">
+				<os-events:delegate ref="testListener" />
+			</os-events:method-adapter>
+		</os-events:listener>
+	</os-events:notify-container>
+	
+</beans>
