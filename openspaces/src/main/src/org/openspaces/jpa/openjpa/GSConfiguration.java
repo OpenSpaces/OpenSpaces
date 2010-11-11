@@ -27,7 +27,7 @@ public class GSConfiguration extends OpenJPAConfigurationImpl {
     public GSConfiguration() {
         super();        
         // Default transaction timeout
-        setLockTimeout(1000000);
+        setLockTimeout(5000);
     }
 
     public void initialize() {
