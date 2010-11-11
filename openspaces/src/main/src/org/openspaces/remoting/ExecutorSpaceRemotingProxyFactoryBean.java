@@ -22,6 +22,7 @@ import com.gigaspaces.async.AsyncResult;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.openspaces.core.GigaSpace;
+import org.openspaces.remoting.RemotingUtils.MethodHash;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -93,7 +94,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
 
     private MetaArgumentsHandler metaArgumentsHandler;
 
-    private String asyncMethodPrefix = DEFAULT_ASYNC_METHOD_PREFIX;
+    private final String asyncMethodPrefix = DEFAULT_ASYNC_METHOD_PREFIX;
 
     private boolean broadcast = false;
 
@@ -213,7 +214,19 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
             }
         }
 
-        ExecutorRemotingTask task = new ExecutorRemotingTask(lookupName, methodName, methodHashLookup.get(methodInvocation.getMethod()), methodInvocation.getArguments());
+        //if an invoked method is not part of the interface, throw detailed exception 
+        MethodHash methodHash = methodHashLookup.get(methodInvocation.getMethod());
+        if (methodHash == null) {
+            String arguments = "";
+            for (Object obj : methodInvocation.getArguments()) {
+                if (arguments.length() > 0) {
+                    arguments+=',';
+                }
+                arguments += obj.getClass().getName();
+            }
+            throw new NoSuchMethodException(lookupName+"."+methodName+"("+arguments+")");
+        }
+        ExecutorRemotingTask task = new ExecutorRemotingTask(lookupName, methodName, methodHash, methodInvocation.getArguments());
 
         BroadcastIndicator broadcastIndicator = null;
         boolean shouldBroadcast = broadcast;
