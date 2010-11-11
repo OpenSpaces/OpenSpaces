@@ -30,6 +30,7 @@ import com.gigaspaces.internal.client.QueryResultType;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.ExternalEntry;
+import com.j_spaces.core.client.ReadModifiers;
 import com.j_spaces.core.client.UpdateModifiers;
 
 /**
@@ -248,7 +249,7 @@ public class GSStoreManager extends AbstractStoreManager {
                 Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);
                 ISpaceProxy proxy = (ISpaceProxy) space;
                 ExternalEntry result = (ExternalEntry) proxy.readById(
-                        cm.getDescribedType().getName(), ids[0], null, _transaction, 0, 0,
+                        cm.getDescribedType().getName(), ids[0], null, _transaction, 0, ReadModifiers.EXCLUSIVE_READ_LOCK,
                         false, QueryResultType.EXTERNAL_ENTRY);
                 if (result == null)
                     throw new Exception("Updated object not found in space.");
