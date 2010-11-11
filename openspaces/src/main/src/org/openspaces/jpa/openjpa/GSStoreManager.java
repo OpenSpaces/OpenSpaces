@@ -18,12 +18,16 @@ import org.apache.openjpa.conf.OpenJPAConfiguration;
 import org.apache.openjpa.kernel.FetchConfiguration;
 import org.apache.openjpa.kernel.OpenJPAStateManager;
 import org.apache.openjpa.kernel.PCState;
+import org.apache.openjpa.kernel.QueryLanguages;
 import org.apache.openjpa.kernel.StoreQuery;
+import org.apache.openjpa.kernel.exps.ExpressionParser;
 import org.apache.openjpa.lib.rop.ResultObjectProvider;
 import org.apache.openjpa.meta.ClassMetaData;
 import org.apache.openjpa.meta.FieldMetaData;
 import org.apache.openjpa.util.ApplicationIds;
 
+import com.gigaspaces.internal.client.QueryResultType;
+import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.ExternalEntry;
 import com.j_spaces.core.client.UpdateModifiers;
@@ -41,8 +45,9 @@ public class GSStoreManager extends AbstractStoreManager {
     private Transaction _transaction = null;
     
     @Override
-    protected Collection getUnsupportedOptions() {
-        Collection<String> unsupportedOptions = (Collection<String>)super.getUnsupportedOptions();
+    protected Collection<String> getUnsupportedOptions() {
+        @SuppressWarnings("unchecked")
+        Collection<String> unsupportedOptions = (Collection<String>) super.getUnsupportedOptions();
         unsupportedOptions.remove(OpenJPAConfiguration.OPTION_ID_DATASTORE);
         return unsupportedOptions;
     }
@@ -56,7 +61,8 @@ public class GSStoreManager extends AbstractStoreManager {
     @Override
     public void begin() {
         try {
-            _transaction = (TransactionFactory.create(getConfiguration().getTransactionManager(), getConfiguration().getLockTimeout())).transaction;
+            _transaction = (TransactionFactory.create(getConfiguration().getTransactionManager(),
+                    getConfiguration().getLockTimeout())).transaction;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }            
@@ -86,13 +92,12 @@ public class GSStoreManager extends AbstractStoreManager {
         getConfiguration().initialize();
     }
 
-    
     @Override
     public StoreQuery newQuery(String language) {        
-    	// Not implemented..
-        //ExpressionParser ep = QueryLanguages.parserForLanguage(language);
+        ExpressionParser ep = QueryLanguages.parserForLanguage(language);
+        // Not implemented...
         //return new GSStoreQuery(ep, this);
-    	return null;
+        return null;
     }
 
     @Override
@@ -112,10 +117,10 @@ public class GSStoreManager extends AbstractStoreManager {
         return false;
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public Collection loadAll(Collection sms, PCState state, int load,
-            FetchConfiguration fetch, Object edata) {
-            return null;
+    public Collection loadAll(Collection sms, PCState state, int load, FetchConfiguration fetch, Object edata) {
+            return super.loadAll(sms, state, load, fetch, edata);
         }
 
     @Override
@@ -127,14 +132,12 @@ public class GSStoreManager extends AbstractStoreManager {
         final IJSpace space = getConfiguration().getSpace();        
         final ClassMetaData cm = sm.getMetaData();        
         final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);        
-        final ExternalEntry template = new ExternalEntry(cm.getDescribedType().getName(), new Object[cm.getFields().length]);
-
-        for (int i = 0; i < ids.length; i++) {
-            template.setFieldValue(cm.getPrimaryKeyFields()[i].getDeclaredIndex(), ids[i]);
-        }
-        
+                                
         try {                        
-            ExternalEntry res = (ExternalEntry)space.read(template, _transaction, 0);            
+            ISpaceProxy proxy = (ISpaceProxy) space;
+            ExternalEntry res = (ExternalEntry) proxy.readById(cm.getDescribedType().getName(), ids[0],
+                    null, _transaction, 0, 0, false, QueryResultType.EXTERNAL_ENTRY);
+            
             if (res == null)
                 return false;            
 
@@ -149,7 +152,7 @@ public class GSStoreManager extends AbstractStoreManager {
                 sm.store(i, res.getFieldValue(i));
             }            
         } catch (Exception e) {
-            return false;
+            throw new RuntimeException(e.getMessage(), e);
         }
         
         return true;        
@@ -240,14 +243,13 @@ public class GSStoreManager extends AbstractStoreManager {
         // Generate a template for each state manager and use partial update for updating..         
         for (OpenJPAStateManager sm : sms) {
             ClassMetaData cm = sm.getMetaData();
-            try {
+            try {                                
                 // Read object from space
-                Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);        
-                ExternalEntry template = new ExternalEntry(cm.getDescribedType().getName(), new Object[cm.getFields().length]);
-                for (int i = 0; i < ids.length; i++) {
-                    template.setFieldValue(cm.getPrimaryKeyFields()[i].getDeclaredIndex(), ids[i]);
-                }
-                ExternalEntry result = (ExternalEntry)space.read(template, _transaction, 0);
+                Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);
+                ISpaceProxy proxy = (ISpaceProxy) space;
+                ExternalEntry result = (ExternalEntry) proxy.readById(
+                        cm.getDescribedType().getName(), ids[0], null, _transaction, 0, 0,
+                        false, QueryResultType.EXTERNAL_ENTRY);
                 if (result == null)
                     throw new Exception("Updated object not found in space.");
                 // Calculate dirty fields count
@@ -256,10 +258,10 @@ public class GSStoreManager extends AbstractStoreManager {
                     if (sm.getDirty().get(i))
                         numberOfDirtyFields++;
                 }
-                // Generate an external entry template using the dirty fields
-                String[] fieldNames = new String[numberOfDirtyFields];
-                Object[] fieldValues = new Object[numberOfDirtyFields];
-                int dirtyIndex = 0;
+                // Generate an external entry template using the dirty fields & the id field
+                String[] fieldNames = new String[numberOfDirtyFields + 1];
+                Object[] fieldValues = new Object[numberOfDirtyFields + 1];
+                int dirtyIndex = 1;
                 for (int i = 0; i < cm.getDeclaredFields().length; i++) {
                     if (sm.getDirty().get(i)) {
                         fieldNames[dirtyIndex] = cm.getDeclaredFields()[i].getName();
@@ -267,7 +269,9 @@ public class GSStoreManager extends AbstractStoreManager {
                         dirtyIndex++;
                     }
                 }
-                template = new ExternalEntry(cm.getDescribedType().getName(), fieldValues, fieldNames);
+                fieldNames[0] = result.getPrimaryKeyName();
+                fieldValues[0] = ids[0];
+                ExternalEntry template = new ExternalEntry(cm.getDescribedType().getName(), fieldValues, fieldNames);
                 template.setUID(result.getUID());
                 // Write changes to the space
                 space.write(template, _transaction, 0, 0, UpdateModifiers.PARTIAL_UPDATE);                                
