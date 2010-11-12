@@ -1,14 +1,11 @@
 package org.openspaces.jpa.openjpa;
 
-import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 
 import net.jini.core.transaction.Transaction;
 import net.jini.core.transaction.TransactionFactory;
@@ -42,8 +39,18 @@ import com.j_spaces.core.client.UpdateModifiers;
  *
  */
 public class GSStoreManager extends AbstractStoreManager {
-
+    //
     private Transaction _transaction = null;
+    private static final HashMap<Class<?>, Integer> _classesRelationStatus = new HashMap<Class<?>, Integer>();
+    private static final HashSet<Class<?>> _processedClasses = new HashSet<Class<?>>();
+    private static boolean _initializedClassRelationStatus = false;
+    
+    @Override
+    protected void open() {
+        // Specific gigaspaces initialization (space proxy)
+        getConfiguration().initialize();
+    }
+    
     
     @Override
     protected Collection<String> getUnsupportedOptions() {
@@ -87,12 +94,6 @@ public class GSStoreManager extends AbstractStoreManager {
         }        
     }    
     
-    @Override
-    protected void open() {
-        // Specific gigaspaces initialization (space proxy)
-        getConfiguration().initialize();
-    }
-
     @Override
     public StoreQuery newQuery(String language) {        
         ExpressionParser ep = QueryLanguages.parserForLanguage(language);
@@ -208,7 +209,7 @@ public class GSStoreManager extends AbstractStoreManager {
         // TODO Auto-generated method stub
         return null;
     }
-
+    
     /**
      * Flushes changes to GigaSpaces.
      * Returns a list of exceptions that occurred.
@@ -220,6 +221,9 @@ public class GSStoreManager extends AbstractStoreManager {
         IJSpace space = getConfiguration().getSpace();
                 
         ArrayList<Exception> exceptions = new ArrayList<Exception>();
+
+        if (!_initializedClassRelationStatus)
+            initializeClassRelationStatus();
         
         handleNewObjects(pNew, exceptions, space);
         handleUpdatedObjects(pDirty, exceptions, space);
@@ -234,6 +238,8 @@ public class GSStoreManager extends AbstractStoreManager {
     private void handleDeletedObjects(Collection<OpenJPAStateManager> sms, ArrayList<Exception> exceptions, IJSpace space) {
         for (OpenJPAStateManager sm : sms) {
             ClassMetaData cm = sm.getMetaData();
+            if (_classesRelationStatus.containsKey(cm.getDescribedType()))
+                continue;
             try {
                 // Remove object from space
                 final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);
@@ -296,45 +302,49 @@ public class GSStoreManager extends AbstractStoreManager {
     /**
      * Writes new persistent objects to the space.
      */
-    private void handleNewObjects(Collection<OpenJPAStateManager> sms, ArrayList<Exception> exceptions, IJSpace space) {
-
-        HashSet<Object> instancesInRelation = new HashSet<Object>();
-
+    private void handleNewObjects(Collection<OpenJPAStateManager> sms, ArrayList<Exception> exceptions, IJSpace space) {    
         for (OpenJPAStateManager sm : sms) {
-
-            try {
-                // Check if one of the fields is a relation instance and if so save the instance
-                for (FieldMetaData fieldMetaData : sm.getMetaData().getFields()) {
-                    if (fieldMetaData.getBackingMember() instanceof AnnotatedElement) {                            
-                        AnnotatedElement ae = (AnnotatedElement)fieldMetaData.getBackingMember();                            
-                        // Handle @OneToOne & @OneToMany annotations (its not necessary to take care
-                        // of @Embedded since these instances don't have their own state manager)
-                        if (ae.isAnnotationPresent(OneToOne.class)) {                                
-                            Object instanceInRelation = sm.fetch(fieldMetaData.getIndex());
-                            if (instanceInRelation != null) {
-                                instancesInRelation.add(instanceInRelation);
-                            }                                
-                        } else if (ae.isAnnotationPresent(OneToMany.class)) {
-                            Collection<?> oneToManyInstances = (Collection<?>)sm.fetch(fieldMetaData.getIndex());
-                            if (oneToManyInstances != null) {
-                                for (Object obj : oneToManyInstances) {
-                                    instancesInRelation.add(obj);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // If the current instance is not in a relation write it to the space
-                if (!instancesInRelation.contains(sm.getManagedInstance())) {
-                    space.write(sm.getManagedInstance(), _transaction, 0);
-                }
-
+            // If the current object is in a relation skip it
+            if (_classesRelationStatus.containsKey(sm.getMetaData().getDescribedType()))
+                continue;            
+            try {                                
+                space.write(sm.getManagedInstance(), _transaction, 0);
             } catch (Exception e) {
                 exceptions.add(e);
             }
         }
     }
+
+    private synchronized void initializeClassRelationStatus() {
+        if (_initializedClassRelationStatus)
+            return;
+        // Collect information regarding relationships.
+        // Eventually classes which are in a relation should not be saved to the space
+        // since we only support owned relationship and these instances will saved as nested instances
+        // of their owning instance.
+        ClassMetaData[] cms = getConfiguration().getMetaDataRepositoryInstance().getMetaDatas();
+        for (ClassMetaData cm : cms) {
+            if (!_processedClasses.contains(cm.getDescribedType())) {
+                // Process class
+                if (!_processedClasses.contains(cm.getDescribedType())) {
+                    for (FieldMetaData fmd : cm.getFields()) {
+                        if (fmd.getAssociationType() == FieldMetaData.ONE_TO_ONE) {
+                            if (!_classesRelationStatus.containsKey(fmd.getDeclaredType())) {
+                                _classesRelationStatus.put(fmd.getDeclaredType(), FieldMetaData.ONE_TO_ONE);
+                            }
+                        } else if (fmd.getAssociationType() == FieldMetaData.ONE_TO_MANY) {
+                            if (!_classesRelationStatus.containsKey(fmd.getDeclaredType())) {
+                                _classesRelationStatus.put(fmd.getElement().getDeclaredType(), FieldMetaData.ONE_TO_MANY);
+                            }
+                        }
+                    }
+                    _processedClasses.add(cm.getDescribedType());
+                }
+            }
+        }
+        _initializedClassRelationStatus = true;
+    }
+
 
     /**
      * Initializes an ExternalEntry result as a state managed Pojo.
