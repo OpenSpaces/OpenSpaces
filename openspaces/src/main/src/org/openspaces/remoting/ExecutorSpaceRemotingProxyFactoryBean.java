@@ -22,7 +22,6 @@ import com.gigaspaces.async.AsyncResult;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.openspaces.core.GigaSpace;
-import org.openspaces.remoting.RemotingUtils.MethodHash;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -194,7 +193,6 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
         return true;
     }
 
-    @SuppressWarnings("unchecked")
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
         if (remoteInvocationAspect != null) {
             return remoteInvocationAspect.invoke(methodInvocation, this);
@@ -241,32 +239,30 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
 
         if (shouldBroadcast) {
             DistributedExecutorAsyncFuture future = new DistributedExecutorAsyncFuture(gigaSpace.execute(task), internalRemoteResultReducer, task);
-            if (asyncExecution) {
+            if (asyncExecution) 
                 return future;
-            } else {
-                try {
-                    return future.get(timeout, TimeUnit.MILLISECONDS);
-                } catch (ExecutionException e) {
-                    throw e.getCause();
-                } catch (TimeoutException e) {
-                    throw new RemoteTimeoutException("Timeout waiting for result for [" + lookupName +
-                            "] and method [" + methodName + "]", timeout);
-                }
+
+            try {
+                return future.get(timeout, TimeUnit.MILLISECONDS);
+            } catch (ExecutionException e) {
+                throw e.getCause();
+            } catch (TimeoutException e) {
+                throw new RemoteTimeoutException("Timeout waiting for result for [" + lookupName +
+                        "] and method [" + methodName + "]", timeout);
             }
-        } else {
-            ExecutorAsyncFuture future = new ExecutorAsyncFuture(gigaSpace.execute(task, task.getRouting()), task);
-            if (asyncExecution) {
-                return future;
-            } else {
-                try {
-                    return future.get(timeout, TimeUnit.MILLISECONDS);
-                } catch (ExecutionException e) {
-                    throw e.getCause();
-                } catch (TimeoutException e) {
-                    throw new RemoteTimeoutException("Timeout waiting for result for [" + lookupName +
-                            "] and method [" + methodName + "]", timeout);
-                }
-            }
+        } 
+        
+        ExecutorAsyncFuture future = new ExecutorAsyncFuture(gigaSpace.execute(task, task.getRouting()), task);
+        if (asyncExecution) 
+            return future;
+
+        try {
+            return future.get(timeout, TimeUnit.MILLISECONDS);
+        } catch (ExecutionException e) {
+            throw e.getCause();
+        } catch (TimeoutException e) {
+            throw new RemoteTimeoutException("Timeout waiting for result for [" + lookupName +
+                    "] and method [" + methodName + "]", timeout);
         }
     }
 
@@ -476,19 +472,18 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
         }
 
         public T getResult() {
-            if (asyncResult.getException() != null) {
-                return null;
+            if (asyncResult.getException() == null) {
+                return asyncResult.getResult().getResult();
             }
-            return asyncResult.getResult().getResult();
+            return null;
         }
 
         public Throwable getException() {
             if (asyncResult.getException() != null) {
                 if (asyncResult.getException() instanceof ExecutorRemotingTask.InternalExecutorException) {
                     return ((ExecutorRemotingTask.InternalExecutorException) asyncResult.getException()).getException();
-                } else {
-                    return asyncResult.getException();
-                }
+                } 
+                return asyncResult.getException();
             }
             return null;
         }
@@ -497,12 +492,10 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
             if (asyncResult.getException() != null) {
                 if (asyncResult.getException() instanceof ExecutorRemotingTask.InternalExecutorException) {
                     return ((ExecutorRemotingTask.InternalExecutorException) asyncResult.getException()).getInstanceId();
-                } else {
-                    return null;
                 }
-            } else {
-                return asyncResult.getResult().getInstanceId();
-            }
+                return null;
+            } 
+            return asyncResult.getResult().getInstanceId();
         }
     }
 }
