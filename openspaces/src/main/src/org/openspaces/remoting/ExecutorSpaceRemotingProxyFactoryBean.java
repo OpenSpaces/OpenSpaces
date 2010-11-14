@@ -214,19 +214,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
             }
         }
 
-        //if an invoked method is not part of the interface, throw detailed exception 
-        MethodHash methodHash = methodHashLookup.get(methodInvocation.getMethod());
-        if (methodHash == null) {
-            String arguments = "";
-            for (Object obj : methodInvocation.getArguments()) {
-                if (arguments.length() > 0) {
-                    arguments+=',';
-                }
-                arguments += obj.getClass().getName();
-            }
-            throw new NoSuchMethodException(lookupName+"."+methodName+"("+arguments+")");
-        }
-        ExecutorRemotingTask task = new ExecutorRemotingTask(lookupName, methodName, methodHash, methodInvocation.getArguments());
+        ExecutorRemotingTask task = new ExecutorRemotingTask(lookupName, methodName, methodHashLookup.get(methodInvocation.getMethod()), methodInvocation.getArguments());
 
         BroadcastIndicator broadcastIndicator = null;
         boolean shouldBroadcast = broadcast;

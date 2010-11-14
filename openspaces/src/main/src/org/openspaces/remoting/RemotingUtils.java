@@ -119,6 +119,15 @@ public class RemotingUtils {
                     }
                 }
             }
+            //add Object.toString method to map
+            //if toString exists in service interface it will be invoked instead
+            Method toStringMethod = Object.class.getMethod("toString");
+            if (!map.containsKey(toStringMethod)) {
+                digest.reset();
+                bos.reset();
+                serializeMethod(toStringMethod, out);
+                map.put(toStringMethod, new MethodHash(digest.digest()));
+            }
             return map;
         } catch (Exception e) {
             throw new RuntimeException("Failed to build method lookup hash", e);
