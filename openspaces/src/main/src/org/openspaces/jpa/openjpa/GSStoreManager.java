@@ -23,7 +23,7 @@ import org.apache.openjpa.meta.ClassMetaData;
 import org.apache.openjpa.meta.FieldMetaData;
 import org.apache.openjpa.util.ApplicationIds;
 
-import com.gigaspaces.internal.client.QueryResultType;
+import com.gigaspaces.internal.client.QueryResultTypeInternal;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.ExternalEntry;
@@ -120,7 +120,7 @@ public class GSStoreManager extends AbstractStoreManager {
         ISpaceProxy proxy = (ISpaceProxy) getConfiguration().getSpace();
         try {
             Object result = proxy.readById(cm.getDescribedType().getName(), ids[0], null, _transaction,
-                    0, ReadModifiers.DIRTY_READ, false, QueryResultType.EXTERNAL_ENTRY);
+                    0, ReadModifiers.DIRTY_READ, false, QueryResultTypeInternal.EXTERNAL_ENTRY);
             return result != null;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -151,7 +151,7 @@ public class GSStoreManager extends AbstractStoreManager {
                 final ISpaceProxy proxy = (ISpaceProxy) getConfiguration().getSpace();
                 final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);        
                 res = (ExternalEntry) proxy.readById(cm.getDescribedType().getName(), ids[0],
-                        null, _transaction, 0, 0, false, QueryResultType.EXTERNAL_ENTRY);
+                        null, _transaction, 0, 0, false, QueryResultTypeInternal.EXTERNAL_ENTRY);
 
                 if (res == null)
                     return false;            
@@ -245,7 +245,7 @@ public class GSStoreManager extends AbstractStoreManager {
                 final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);
                 final ISpaceProxy proxy = (ISpaceProxy) space;
                 Object result = proxy.takeById(cm.getDescribedType().getName(), ids[0], null, _transaction,
-                        0, 0, false, QueryResultType.EXTERNAL_ENTRY);                
+                        0, 0, false, QueryResultTypeInternal.EXTERNAL_ENTRY);                
                 if (result == null)
                     throw new Exception("Removed object not found in space.");                
             } catch (Exception e) {
@@ -267,7 +267,7 @@ public class GSStoreManager extends AbstractStoreManager {
                 ISpaceProxy proxy = (ISpaceProxy) space;
                 ExternalEntry result = (ExternalEntry) proxy.readById(
                         cm.getDescribedType().getName(), ids[0], null, _transaction, 0, ReadModifiers.EXCLUSIVE_READ_LOCK,
-                        false, QueryResultType.EXTERNAL_ENTRY);
+                        false, QueryResultTypeInternal.EXTERNAL_ENTRY);
                 if (result == null)
                     throw new Exception("Updated object not found in space.");
                 // Calculate dirty fields count

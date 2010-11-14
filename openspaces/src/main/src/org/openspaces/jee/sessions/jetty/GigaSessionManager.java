@@ -16,7 +16,7 @@
 
 package org.openspaces.jee.sessions.jetty;
 
-import com.gigaspaces.internal.client.QueryResultType;
+import com.gigaspaces.internal.client.QueryResultTypeInternal;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.SQLQuery;
@@ -433,7 +433,7 @@ public class GigaSessionManager extends AbstractSessionManager {
     }
 
     protected SessionData fetch(String sessionId) throws Exception {
-        return (SessionData) space.readById(SESSION_DATA_CLASSNAME, sessionId, sessionId, null, 0, 0, false, QueryResultType.OBJECT);
+        return (SessionData) space.readById(SESSION_DATA_CLASSNAME, sessionId, sessionId, null, 0, 0, false, QueryResultTypeInternal.OBJECT);
     }
 
     protected Object[] findExpiredSessions(long timestamp) throws Exception {
