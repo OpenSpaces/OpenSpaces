@@ -43,25 +43,27 @@ public class RemotingUtilsTests extends TestCase {
     }
     
     private void fastReflection(boolean fastReflection) {
+        //+1 for added toString method (see case GS-8330)
+        
         Map<MethodHash, IMethod> mapA = RemotingUtils.buildHashToMethodLookupForInterface(A.class, fastReflection);
-        assertEquals(1, mapA.values().size());
+        assertEquals(1 +1, mapA.values().size());
         
         Map<MethodHash, IMethod> mapB = RemotingUtils.buildHashToMethodLookupForInterface(B.class, fastReflection);
-        assertEquals(2, mapB.values().size());
+        assertEquals(2 +1, mapB.values().size());
         
         Map<MethodHash, IMethod> mapC = RemotingUtils.buildHashToMethodLookupForInterface(C.class, fastReflection);
-        assertEquals(2, mapC.values().size());
+        assertEquals(2 +1, mapC.values().size());
     }
     
     public void testBuildMethodToHashLookupForInterface() {
         Map<Method, MethodHash> mapA = RemotingUtils.buildMethodToHashLookupForInterface(A.class, "asyncPrefix");
-        assertEquals(1, mapA.values().size());
+        assertEquals(1 +1, mapA.values().size());
         
         Map<Method, MethodHash> mapB = RemotingUtils.buildMethodToHashLookupForInterface(B.class, "asyncPrefix");
-        assertEquals(2, mapB.values().size());
+        assertEquals(2 +1, mapB.values().size());
         
         Map<Method, MethodHash> mapC = RemotingUtils.buildMethodToHashLookupForInterface(C.class, "asyncPrefix");
-        assertEquals(2, mapC.values().size());
+        assertEquals(2 +1, mapC.values().size());
     }
     
     public interface A {
