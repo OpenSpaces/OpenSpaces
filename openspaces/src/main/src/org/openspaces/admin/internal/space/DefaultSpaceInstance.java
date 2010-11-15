@@ -313,6 +313,23 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
             spaceModeChangedEventManager.spaceModeChanged(event);
             ((InternalSpaceModeChangedEventManager) getSpace().getSpaceModeChanged()).spaceModeChanged(event);
             ((InternalSpaceModeChangedEventManager) getSpace().getSpaces().getSpaceModeChanged()).spaceModeChanged(event);
+            
+            /*
+             * GS-8231: Trigger replication status changed event when backup becomes primary after failover
+             */
+            if (!SpaceMode.NONE.equals(this.spaceMode)) {
+                List<ReplicationStatusChangedEvent> events = new ArrayList<ReplicationStatusChangedEvent>();
+                for (ReplicationTarget replicationTarget : replicationTargets) {
+                    events.add(new ReplicationStatusChangedEvent(this, replicationTarget, replicationTarget.getReplicationStatus(), ReplicationStatus.DISCONNECTED));
+                }
+
+                for (ReplicationStatusChangedEvent repEvent : events) {
+                    replicationStatusChangedEventManager.replicationStatusChanged(repEvent);
+                    ((InternalReplicationStatusChangedEventManager) getSpace().getReplicationStatusChanged()).replicationStatusChanged(repEvent);
+                    ((InternalReplicationStatusChangedEventManager) getSpace().getSpaces().getReplicationStatusChanged()).replicationStatusChanged(repEvent);
+                }
+            }
+            
         }
         this.spaceMode = spaceMode;
     }
@@ -387,8 +404,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
             for (int i = 0; i < newReplicationTargets.length; i++) {
                 ReplicationTarget newReplicationTarget = newReplicationTargets[i];
                 ReplicationTarget previousReplicationTarget = previousReplicationTargets[i];
-                if (newReplicationTarget.getReplicationStatus() != previousReplicationTarget.getReplicationStatus()
-                        || spaceModeChanged(newReplicationTarget, previousReplicationTarget)) {
+                if (newReplicationTarget.getReplicationStatus() != previousReplicationTarget.getReplicationStatus()) {
                     events.add(new ReplicationStatusChangedEvent(this, newReplicationTarget, previousReplicationTarget.getReplicationStatus(), newReplicationTarget.getReplicationStatus()));
                 }
             }
@@ -398,23 +414,6 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
             ((InternalReplicationStatusChangedEventManager) getSpace().getReplicationStatusChanged()).replicationStatusChanged(event);
             ((InternalReplicationStatusChangedEventManager) getSpace().getSpaces().getReplicationStatusChanged()).replicationStatusChanged(event);
         }
-    }
-
-    /** 
-     * A Backup Space's replication status is always disconnected since it does not replicate to the Primary Space. When the Primary Space is forcefully terminated,
-     * the Backup Space is elected as a Primary Space - but since the replication is still disconnected, we must trigger an event based on space mode change.
-     */
-    private boolean spaceModeChanged(ReplicationTarget newReplicationTarget, ReplicationTarget previousReplicationTarget) {
-        if (newReplicationTarget.getSpaceInstance() == null) {
-            if (previousReplicationTarget.getSpaceInstance() == null) {
-                return false;
-            } else if (this.getMode().equals(previousReplicationTarget.getSpaceInstance().getMode())) {
-                return false;
-            } else {
-                return true;
-            }
-        }
-        return false;
     }
 
     public Space getSpace() {
@@ -489,5 +488,29 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
             spaceAdmin.runGc();
         }
         puService.runGc();
+    }
+    
+    @Override
+    public String toString() {
+        String name = this.getSpace().getName();
+        Integer id = this.getInstanceId();
+        if (this.getSpace().getNumberOfBackups() > 0) {
+            Integer bid = this.getBackupId();
+            if (bid == null) {
+                bid = Integer.valueOf(0);
+            }
+            name += "."+id+" ["+(bid+1)+"]";
+        } else {
+            name += " ["+id+"]";
+        }
+        switch(this.spaceMode) {
+        case PRIMARY:
+            name += "(P)";
+            break;
+        case BACKUP:
+            name += "(B)";
+            break;
+        }
+        return name;
     }
 }
