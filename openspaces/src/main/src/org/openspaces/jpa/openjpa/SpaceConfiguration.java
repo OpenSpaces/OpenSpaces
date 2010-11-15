@@ -19,12 +19,12 @@ import com.j_spaces.core.IJSpace;
  * @since 8.0
  * 
  */
-public class GSConfiguration extends OpenJPAConfigurationImpl {
+public class SpaceConfiguration extends OpenJPAConfigurationImpl {
 
     private IJSpace _space;
     private ITransactionManagerProvider _transactionManagerProvider;
     
-    public GSConfiguration() {
+    public SpaceConfiguration() {
         super();        
         // Default transaction timeout
         setLockTimeout(5000);

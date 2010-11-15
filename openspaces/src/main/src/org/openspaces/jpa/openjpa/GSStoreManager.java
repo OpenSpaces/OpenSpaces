@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import net.jini.core.lease.Lease;
 import net.jini.core.transaction.Transaction;
 import net.jini.core.transaction.TransactionFactory;
 
@@ -57,6 +58,7 @@ public class GSStoreManager extends AbstractStoreManager {
         @SuppressWarnings("unchecked")
         Collection<String> unsupportedOptions = (Collection<String>) super.getUnsupportedOptions();
         unsupportedOptions.remove(OpenJPAConfiguration.OPTION_ID_DATASTORE);
+        unsupportedOptions.remove(OpenJPAConfiguration.OPTION_OPTIMISTIC);
         return unsupportedOptions;
     }
 
@@ -79,7 +81,7 @@ public class GSStoreManager extends AbstractStoreManager {
     @Override
     public void commit() {
         try {
-            _transaction.commit();
+            _transaction.commit(Long.MAX_VALUE);
         } catch (Exception e) {
            throw new RuntimeException(e.getMessage(), e);
         }
@@ -97,18 +99,16 @@ public class GSStoreManager extends AbstractStoreManager {
     @Override
     public StoreQuery newQuery(String language) {        
         ExpressionParser ep = QueryLanguages.parserForLanguage(language);
-        // Not implemented...
-        //return new GSStoreQuery(ep, this);
-        return null;
+        return new SpaceStoreManagerQuery(ep, this);
     }
 
     @Override
     protected OpenJPAConfiguration newConfiguration() {
-        return new GSConfiguration();
+        return new SpaceConfiguration();
     }
 
-    public GSConfiguration getConfiguration() {
-        return (GSConfiguration) getContext().getConfiguration();
+    public SpaceConfiguration getConfiguration() {
+        return (SpaceConfiguration) getContext().getConfiguration();
     }
     
     /**
@@ -137,6 +137,7 @@ public class GSStoreManager extends AbstractStoreManager {
             return super.loadAll(sms, state, load, fetch, edata);
         }
 
+    @SuppressWarnings("deprecation")
     @Override
     public boolean initialize(OpenJPAStateManager sm, PCState state,
             FetchConfiguration fetchConfiguration, Object edata) {
@@ -292,7 +293,7 @@ public class GSStoreManager extends AbstractStoreManager {
                 ExternalEntry template = new ExternalEntry(cm.getDescribedType().getName(), fieldValues, fieldNames);
                 template.setUID(result.getUID());
                 // Write changes to the space
-                space.write(template, _transaction, 0, 0, UpdateModifiers.PARTIAL_UPDATE);                                
+                space.write(template, _transaction, Lease.FOREVER, 0, UpdateModifiers.PARTIAL_UPDATE);                                
             } catch (Exception e) { 
                 exceptions.add(e);
             }                       
@@ -308,7 +309,7 @@ public class GSStoreManager extends AbstractStoreManager {
             if (_classesRelationStatus.containsKey(sm.getMetaData().getDescribedType()))
                 continue;            
             try {                                
-                space.write(sm.getManagedInstance(), _transaction, 0);
+                space.write(sm.getManagedInstance(), _transaction, Lease.FOREVER);
             } catch (Exception e) {
                 exceptions.add(e);
             }
