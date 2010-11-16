@@ -27,7 +27,7 @@ public class FieldPathNode implements Path, ExpressionNode {
     private ClassMetaData _classMetaData;
     private FieldMetaData _fieldMetaData;
     private List<String> _path;
-    
+    private String _schemaAlias;
     public FieldPathNode() {
         _path = new ArrayList<String>();
     }
@@ -102,7 +102,7 @@ public class FieldPathNode implements Path, ExpressionNode {
     }
 
     public String getSchemaAlias() {
-        return null;
+        return _schemaAlias;
     }
 
     public XMLMetaData getXmlMapping() {
@@ -110,10 +110,11 @@ public class FieldPathNode implements Path, ExpressionNode {
     }
 
     public FieldMetaData last() {
-        return null;
+        return _fieldMetaData;
     }
 
     public void setSchemaAlias(String schemaAliasName) {
+        _schemaAlias = schemaAliasName;
     }
 
     public void setSubqueryContext(Context arg0, String arg1) {        

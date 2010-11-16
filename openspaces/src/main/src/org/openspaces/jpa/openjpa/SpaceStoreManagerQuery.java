@@ -1,20 +1,30 @@
 package org.openspaces.jpa.openjpa;
 
 
+import java.util.Map;
+
+import net.jini.core.lease.Lease;
+
 import org.apache.openjpa.kernel.ExpressionStoreQuery;
 import org.apache.openjpa.kernel.StoreQuery;
 import org.apache.openjpa.kernel.exps.ExpressionFactory;
 import org.apache.openjpa.kernel.exps.ExpressionParser;
+import org.apache.openjpa.kernel.exps.Path;
 import org.apache.openjpa.kernel.exps.QueryExpressions;
+import org.apache.openjpa.kernel.exps.Value;
 import org.apache.openjpa.lib.rop.ResultObjectProvider;
 import org.apache.openjpa.meta.ClassMetaData;
+import org.apache.openjpa.meta.FieldMetaData;
 import org.openspaces.jpa.openjpa.query.ExpressionNode;
+import org.openspaces.jpa.openjpa.query.LiteralValueNode;
 import org.openspaces.jpa.openjpa.query.QueryExpressionFactory;
 
 import com.gigaspaces.internal.metadata.converter.Pojo2ExternalEntryConverter;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.ExternalEntry;
+import com.j_spaces.core.client.ReadModifiers;
 import com.j_spaces.core.client.SQLQuery;
+import com.j_spaces.core.client.UpdateModifiers;
 
 /**
  * Executes select, update & delete SQL operations.
@@ -69,7 +79,7 @@ public class SpaceStoreManagerQuery extends ExpressionStoreQuery {
         }
         try {
             final IJSpace space = _store.getConfiguration().getSpace();        
-            final Object[] result = space.readMultiple(sqlQuery, null, Integer.MAX_VALUE);            
+            final Object[] result = space.readMultiple(sqlQuery, _store.getCurrentTransaction(), Integer.MAX_VALUE);            
             final ExternalEntry[] eeResult = new ExternalEntry[result.length];
             Pojo2ExternalEntryConverter conv = new Pojo2ExternalEntryConverter();        
             for (int i = 0; i < result.length; i++) {
@@ -109,7 +119,7 @@ public class SpaceStoreManagerQuery extends ExpressionStoreQuery {
         }
         try {
             final IJSpace space = _store.getConfiguration().getSpace();        
-            final Object[] result = space.takeMultiple(sqlQuery, null, Integer.MAX_VALUE);            
+            final Object[] result = space.takeMultiple(sqlQuery, _store.getCurrentTransaction(), Integer.MAX_VALUE);            
             return result.length;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -131,10 +141,38 @@ public class SpaceStoreManagerQuery extends ExpressionStoreQuery {
      * @return a number indicating the number of instances updated,
      * or null to execute the update in memory.
      */
-    protected Number executeUpdate(Executor ex, ClassMetaData base,
-        ClassMetaData[] types, boolean subclasses, ExpressionFactory[] facts,
-        QueryExpressions[] parsed, Object[] params) {
-        throw new RuntimeException("Update query is not supported.");
+    @SuppressWarnings("deprecation")
+    protected Number executeUpdate(Executor ex, ClassMetaData classMetaData, ClassMetaData[] types, boolean subClasses,
+            ExpressionFactory[] facts, QueryExpressions[] expressions, Object[] params)
+    {
+        final ExpressionNode expression = (ExpressionNode) expressions[0].filter;        
+        final StringBuilder sql = new StringBuilder();
+        expression.appendSql(sql);                        
+        final SQLQuery<Object> sqlQuery = new SQLQuery<Object>(classMetaData.getDescribedType().getName(), sql.toString());
+        // Set query parameters (if needed) - the parameters are ordered by index
+        for (int i = 0; i < params.length; i++) {
+            sqlQuery.setParameter(i + 1, params[i]);
+        }
+        try {
+            final IJSpace space = _store.getConfiguration().getSpace();        
+            final Object[] result = space.readMultiple(sqlQuery, _store.getCurrentTransaction(), Integer.MAX_VALUE,
+                    ReadModifiers.EXCLUSIVE_READ_LOCK);          
+            final ExternalEntry[] eeResult = new ExternalEntry[result.length];
+            Pojo2ExternalEntryConverter conv = new Pojo2ExternalEntryConverter();        
+            for (int i = 0; i < result.length; i++) {
+                eeResult[i] = (ExternalEntry) conv.pojoToEntry(result[i]);
+                // Update results with query update values
+                for (Map.Entry<Path, Value> entry : expressions[0].updates.entrySet()) {
+                    FieldMetaData fmd = entry.getKey().last();
+                    eeResult[i].setFieldValue(fmd.getDeclaredIndex(), ((LiteralValueNode) entry.getValue()).getValue());                    
+                }
+            }
+            Lease[] lease = space.writeMultiple(eeResult, _store.getCurrentTransaction(), Lease.FOREVER,
+                    UpdateModifiers.UPDATE_ONLY);            
+            return lease.length;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }        
     }
 
     /**

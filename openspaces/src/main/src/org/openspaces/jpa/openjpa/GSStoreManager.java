@@ -67,7 +67,6 @@ public class GSStoreManager extends AbstractStoreManager {
         return true;
     }
 
-    
     @Override
     public void begin() {
         try {
@@ -177,6 +176,7 @@ public class GSStoreManager extends AbstractStoreManager {
     /**
      * This method loads specific fields from the data store for updating them.
      */
+    @SuppressWarnings("deprecation")
     @Override
     public boolean load(OpenJPAStateManager sm, BitSet fields, FetchConfiguration fetch, int lockLevel, Object context) {
         // Prepare the external entry template using the objects id
@@ -215,6 +215,7 @@ public class GSStoreManager extends AbstractStoreManager {
      * Flushes changes to GigaSpaces.
      * Returns a list of exceptions that occurred.
      */
+    @SuppressWarnings("rawtypes")
     @Override
     protected Collection flush(Collection pNew, Collection pNewUpdated, Collection pNewFlushedDeleted,
             Collection pDirty, Collection pDeleted) {
@@ -258,10 +259,16 @@ public class GSStoreManager extends AbstractStoreManager {
     /**
      * Partially updates dirty fields to the space.
      */    
+    @SuppressWarnings("deprecation")
     private void handleUpdatedObjects(Collection<OpenJPAStateManager> sms, ArrayList<Exception> exceptions, IJSpace space) {
         // Generate a template for each state manager and use partial update for updating..         
         for (OpenJPAStateManager sm : sms) {
             ClassMetaData cm = sm.getMetaData();
+            if (_classesRelationStatus.containsKey(cm.getDescribedType())) {
+                exceptions.add(new RuntimeException("Updating an instance which is a part of a relation is not supported."));
+                continue;
+            }
+                
             try {                                
                 // Read object from space
                 Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);
@@ -351,6 +358,7 @@ public class GSStoreManager extends AbstractStoreManager {
      * Initializes an ExternalEntry result as a state managed Pojo.
      * (used by JPQL's query executor)
      */
+    @SuppressWarnings("deprecation")
     public Object loadObject(ClassMetaData classMetaData, ExternalEntry entry) {
         // Get object id
         Object[] primaryKeys = new Object[classMetaData.getPrimaryKeyFields().length];
@@ -361,5 +369,10 @@ public class GSStoreManager extends AbstractStoreManager {
         return getContext().find(objectId, null, null, entry, 0);
     }
 
-
+    /**
+     * Gets the current active transaction.
+     */
+    public Transaction getCurrentTransaction() {
+        return _transaction;
+    }
 }
