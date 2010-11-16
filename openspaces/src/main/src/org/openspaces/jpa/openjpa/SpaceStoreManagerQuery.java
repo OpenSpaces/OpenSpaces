@@ -54,6 +54,7 @@ public class SpaceStoreManagerQuery extends ExpressionStoreQuery {
      * @param range result range
      * @return a provider for matching objects
      */
+    @SuppressWarnings("deprecation")
     protected ResultObjectProvider executeQuery(Executor ex, ClassMetaData classMetaData,
             ClassMetaData[] types, boolean subClasses,  ExpressionFactory[] facts,
             QueryExpressions[] exps, Object[] params, Range range)
@@ -95,10 +96,24 @@ public class SpaceStoreManagerQuery extends ExpressionStoreQuery {
      * @return a number indicating the number of instances deleted,
      * or null to execute the delete in memory
      */
-    protected Number executeDelete(Executor ex, ClassMetaData base,
-        ClassMetaData[] types, boolean subclasses, ExpressionFactory[] facts,
-        QueryExpressions[] parsed, Object[] params) {
-        return null;
+    protected Number executeDelete(Executor ex, ClassMetaData classMetaData, ClassMetaData[] types, boolean subClasses,
+            ExpressionFactory[] facts, QueryExpressions[] exps, Object[] params)
+    {
+        final ExpressionNode expression = (ExpressionNode) exps[0].filter;        
+        final StringBuilder sql = new StringBuilder();
+        expression.appendSql(sql);                        
+        final SQLQuery<Object> sqlQuery = new SQLQuery<Object>(classMetaData.getDescribedType().getName(), sql.toString());
+        // Set query parameters (if needed) - the parameters are ordered by index
+        for (int i = 0; i < params.length; i++) {
+            sqlQuery.setParameter(i + 1, params[i]);
+        }
+        try {
+            final IJSpace space = _store.getConfiguration().getSpace();        
+            final Object[] result = space.takeMultiple(sqlQuery, null, Integer.MAX_VALUE);            
+            return result.length;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }        
     }
 
     /**
@@ -119,7 +134,7 @@ public class SpaceStoreManagerQuery extends ExpressionStoreQuery {
     protected Number executeUpdate(Executor ex, ClassMetaData base,
         ClassMetaData[] types, boolean subclasses, ExpressionFactory[] facts,
         QueryExpressions[] parsed, Object[] params) {
-        return null;
+        throw new RuntimeException("Update query is not supported.");
     }
 
     /**
