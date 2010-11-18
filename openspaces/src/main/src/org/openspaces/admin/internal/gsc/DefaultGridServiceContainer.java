@@ -73,6 +73,12 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
     public ProcessingUnitInstance[] getProcessingUnitInstances(String processingUnitName) {
         return processingUnitInstances.getInstances(processingUnitName);
     }
+    
+    public ProcessingUnitInstance getProcessingUnitInstance(String processingUnitInstanceUid) {
+        ProcessingUnitInstance processingUnitInstance = 
+                        processingUnitInstances.getInstance(processingUnitInstanceUid);
+        return processingUnitInstance;
+    }
 
     public boolean contains(ProcessingUnitInstance processingUnitInstance) {
         return processingUnitInstances.contains(processingUnitInstance);
