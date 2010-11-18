@@ -30,6 +30,7 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
         setLockTimeout(5000);
         setOptimistic(false);
         setLockManager("none");
+        setDynamicEnhancementAgent(false);
     }
 
     public void initialize() {
