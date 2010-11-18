@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import net.jini.core.lease.Lease;
 import net.jini.core.transaction.Transaction;
@@ -58,7 +59,6 @@ public class GSStoreManager extends AbstractStoreManager {
         @SuppressWarnings("unchecked")
         Collection<String> unsupportedOptions = (Collection<String>) super.getUnsupportedOptions();
         unsupportedOptions.remove(OpenJPAConfiguration.OPTION_ID_DATASTORE);
-        unsupportedOptions.remove(OpenJPAConfiguration.OPTION_OPTIMISTIC);
         return unsupportedOptions;
     }
 
@@ -70,8 +70,10 @@ public class GSStoreManager extends AbstractStoreManager {
     @Override
     public void begin() {
         try {
+            long timeout = (getConfiguration().getLockTimeout() == 0)?
+                    Lease.FOREVER : getConfiguration().getLockTimeout();
             _transaction = (TransactionFactory.create(getConfiguration().getTransactionManager(),
-                    getConfiguration().getLockTimeout())).transaction;
+                    timeout)).transaction;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }            
@@ -310,16 +312,29 @@ public class GSStoreManager extends AbstractStoreManager {
     /**
      * Writes new persistent objects to the space.
      */
-    private void handleNewObjects(Collection<OpenJPAStateManager> sms, ArrayList<Exception> exceptions, IJSpace space) {    
+    private void handleNewObjects(Collection<OpenJPAStateManager> sms, ArrayList<Exception> exceptions, IJSpace space) {
+        HashMap<Class<?>, ArrayList<Object>> objectsToWriteByType = new HashMap<Class<?>, ArrayList<Object>>();
+        Class<?> previousType = null;
+        ArrayList<Object> currentList = null;
         for (OpenJPAStateManager sm : sms) {
             // If the current object is in a relation skip it
             if (_classesRelationStatus.containsKey(sm.getMetaData().getDescribedType()))
-                continue;            
-            try {                                
-                space.write(sm.getManagedInstance(), _transaction, Lease.FOREVER);
-            } catch (Exception e) {
-                exceptions.add(e);
+                continue;
+            if (!sm.getMetaData().getDescribedType().equals(previousType)) {
+                currentList = objectsToWriteByType.get(sm.getMetaData().getDescribedType());
+                if (currentList == null) {
+                    currentList = new ArrayList<Object>();
+                    objectsToWriteByType.put(sm.getMetaData().getDescribedType(), currentList);
+                }
             }
+            currentList.add(sm.getManagedInstance());            
+        }
+        try {
+            for (Map.Entry<Class<?>, ArrayList<Object>> entry : objectsToWriteByType.entrySet()) {
+                space.writeMultiple(entry.getValue().toArray(), _transaction, Lease.FOREVER);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 

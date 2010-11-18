@@ -27,7 +27,7 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
     public SpaceConfiguration() {
         super();        
         // Default transaction timeout
-        setLockTimeout(5000);
+        setLockTimeout(0);
         setOptimistic(false);
         setLockManager("none");
         setDynamicEnhancementAgent(false);
