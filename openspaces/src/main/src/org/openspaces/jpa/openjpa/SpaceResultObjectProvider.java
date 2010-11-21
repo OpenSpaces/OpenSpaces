@@ -4,7 +4,7 @@ import org.apache.commons.lang.exception.NestableRuntimeException;
 import org.apache.openjpa.lib.rop.ResultObjectProvider;
 import org.apache.openjpa.meta.ClassMetaData;
 
-import com.j_spaces.core.client.ExternalEntry;
+import com.gigaspaces.internal.transport.IEntryPacket;
 
 /**
  * A wrapper for holding JPQL queries result set.
@@ -44,7 +44,7 @@ public class SpaceResultObjectProvider implements ResultObjectProvider {
      * Gets the current result as a Pojo initiated with a state manager.
      */
     public Object getResultObject() throws Exception {
-        return _store.loadObject(_classMetaData, (ExternalEntry) _result[_currentIndex]);
+        return _store.loadObject(_classMetaData, (IEntryPacket) _result[_currentIndex]);
     }
 
     public void handleCheckedException(Exception e) {

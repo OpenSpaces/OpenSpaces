@@ -20,9 +20,10 @@ import org.openspaces.jpa.openjpa.query.ExpressionNode;
 import org.openspaces.jpa.openjpa.query.LiteralValueNode;
 import org.openspaces.jpa.openjpa.query.QueryExpressionFactory;
 
-import com.gigaspaces.internal.metadata.converter.Pojo2ExternalEntryConverter;
+import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
+import com.gigaspaces.internal.client.spaceproxy.metadata.ObjectType;
+import com.gigaspaces.internal.transport.IEntryPacket;
 import com.j_spaces.core.IJSpace;
-import com.j_spaces.core.client.ExternalEntry;
 import com.j_spaces.core.client.ReadModifiers;
 import com.j_spaces.core.client.SQLQuery;
 import com.j_spaces.core.client.UpdateModifiers;
@@ -87,20 +88,20 @@ public class SpaceStoreManagerQuery extends ExpressionStoreQuery {
                     sql.append(", ");                
             }
         }
-        final SQLQuery<Object> sqlQuery = new SQLQuery<Object>(classMetaData.getDescribedType().getName(), sql.toString());
+        final SQLQuery<Object> sqlQuery = new SQLQuery<Object>(classMetaData.getDescribedType().getName(), sql.toString());        
         // Set query parameters (if needed) - the parameters are ordered by index
         for (int i = 0; i < params.length; i++) {
             sqlQuery.setParameter(i + 1, params[i]);
         }
         try {
-            final IJSpace space = _store.getConfiguration().getSpace();        
-            final Object[] result = space.readMultiple(sqlQuery, _store.getCurrentTransaction(), Integer.MAX_VALUE);            
-            final ExternalEntry[] eeResult = new ExternalEntry[result.length];
-            Pojo2ExternalEntryConverter conv = new Pojo2ExternalEntryConverter();        
+            final ISpaceProxy proxy = (ISpaceProxy) _store.getConfiguration().getSpace();        
+            final Object[] result = proxy.readMultiple(sqlQuery, _store.getCurrentTransaction(), Integer.MAX_VALUE);            
+            final IEntryPacket[] entries = new IEntryPacket[result.length];
             for (int i = 0; i < result.length; i++) {
-                eeResult[i] = (ExternalEntry) conv.pojoToEntry(result[i]);
+                entries[i] = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(result[i],
+                        ObjectType.POJO, proxy);
             }
-            return new SpaceResultObjectProvider(classMetaData, eeResult, _store);
+            return new SpaceResultObjectProvider(classMetaData, entries, _store);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }        
@@ -201,20 +202,20 @@ public class SpaceStoreManagerQuery extends ExpressionStoreQuery {
             sqlQuery.setParameter(i + 1, params[i]);
         }
         try {
-            final IJSpace space = _store.getConfiguration().getSpace();        
-            final Object[] result = space.readMultiple(sqlQuery, _store.getCurrentTransaction(), Integer.MAX_VALUE,
+            final ISpaceProxy proxy = (ISpaceProxy) _store.getConfiguration().getSpace();        
+            final Object[] result = proxy.readMultiple(sqlQuery, _store.getCurrentTransaction(), Integer.MAX_VALUE,
                     ReadModifiers.EXCLUSIVE_READ_LOCK);          
-            final ExternalEntry[] eeResult = new ExternalEntry[result.length];
-            Pojo2ExternalEntryConverter conv = new Pojo2ExternalEntryConverter();        
+            final IEntryPacket[] entries = new IEntryPacket[result.length];
             for (int i = 0; i < result.length; i++) {
-                eeResult[i] = (ExternalEntry) conv.pojoToEntry(result[i]);
+                entries[i] = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(result[i],
+                        ObjectType.POJO, proxy);
                 // Update results with query update values
                 for (Map.Entry<Path, Value> entry : expressions[0].updates.entrySet()) {
                     FieldMetaData fmd = entry.getKey().last();
-                    eeResult[i].setFieldValue(fmd.getDeclaredIndex(), ((LiteralValueNode) entry.getValue()).getValue());                    
+                    entries[i].setFieldValue(fmd.getDeclaredIndex(), ((LiteralValueNode) entry.getValue()).getValue());                    
                 }
             }
-            Lease[] lease = space.writeMultiple(eeResult, _store.getCurrentTransaction(), Lease.FOREVER,
+            Lease[] lease = proxy.writeMultiple(entries, _store.getCurrentTransaction(), Lease.FOREVER,
                     UpdateModifiers.UPDATE_ONLY);            
             return lease.length;
         } catch (Exception e) {

@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 import net.jini.core.lease.Lease;
 import net.jini.core.transaction.Transaction;
@@ -27,8 +26,13 @@ import org.apache.openjpa.util.ApplicationIds;
 
 import com.gigaspaces.internal.client.QueryResultTypeInternal;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
+import com.gigaspaces.internal.client.spaceproxy.metadata.ObjectType;
+import com.gigaspaces.internal.metadata.ITypeDesc;
+import com.gigaspaces.internal.transport.IEntryPacket;
+import com.gigaspaces.internal.transport.ITemplatePacket;
+import com.gigaspaces.internal.transport.TemplatePacketFactory;
+import com.gigaspaces.internal.transport.TransportPacketType;
 import com.j_spaces.core.IJSpace;
-import com.j_spaces.core.client.ExternalEntry;
 import com.j_spaces.core.client.ReadModifiers;
 import com.j_spaces.core.client.UpdateModifiers;
 
@@ -145,17 +149,17 @@ public class GSStoreManager extends AbstractStoreManager {
 
         final ClassMetaData cm = sm.getMetaData();                                        
         try {
-            ExternalEntry res = null;
+            IEntryPacket result = null;
             // If we already have the result and only need to initialize.. (relevant for JPQL)
             if (edata != null) {
-                res = (ExternalEntry) edata;
+                result = (IEntryPacket) edata;
             } else {
                 final ISpaceProxy proxy = (ISpaceProxy) getConfiguration().getSpace();
-                final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);        
-                res = (ExternalEntry) proxy.readById(cm.getDescribedType().getName(), ids[0],
-                        null, _transaction, 0, 0, false, QueryResultTypeInternal.EXTERNAL_ENTRY);
-
-                if (res == null)
+                final ITypeDesc typeDescriptor = proxy.getDirectProxy().getTypeManager().getTypeDesc(cm.getDescribedType().getName());                                
+                final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);
+                ITemplatePacket template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);
+                result = (IEntryPacket) proxy.read(template, _transaction, 0);                
+                if (result == null)
                     return false;            
             }
             // TODO: Handle sub-classes etc...
@@ -166,7 +170,7 @@ public class GSStoreManager extends AbstractStoreManager {
                 // Skip primary keys and non-persistent keys
                 if (fms[i].isPrimaryKey() || sm.getLoaded().get(fms[i].getIndex()))
                     continue;                
-                sm.store(i, res.getFieldValue(i));
+                sm.store(i, result.getFieldValue(i));
             }            
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -178,20 +182,16 @@ public class GSStoreManager extends AbstractStoreManager {
     /**
      * This method loads specific fields from the data store for updating them.
      */
-    @SuppressWarnings("deprecation")
     @Override
     public boolean load(OpenJPAStateManager sm, BitSet fields, FetchConfiguration fetch, int lockLevel, Object context) {
-        // Prepare the external entry template using the objects id
         ClassMetaData cm = (ClassMetaData)sm.getMetaData();
         Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);        
-        ExternalEntry template = new ExternalEntry(cm.getDescribedType().getName(), new Object[cm.getFields().length]);
-        for (int i = 0; i < ids.length; i++) {
-            template.setFieldValue(cm.getPrimaryKeyFields()[i].getDeclaredIndex(), ids[i]);
-        }
-        // Read object from space
-        IJSpace space = getConfiguration().getSpace();        
+        final IJSpace space = getConfiguration().getSpace();
+        final ITypeDesc typeDescriptor = ((ISpaceProxy) space).getDirectProxy().getTypeManager().getTypeDesc(cm.getDescribedType().getName());
+        final ITemplatePacket template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);                      
         try {        
-            ExternalEntry result = (ExternalEntry)space.read(template, _transaction, 0);
+            // Read object from space                
+            IEntryPacket result = (IEntryPacket) space.read(template, _transaction, 0); 
             if (result == null)
                 return false;
             // Process result - store only the relevant fields in the state manager
@@ -201,15 +201,13 @@ public class GSStoreManager extends AbstractStoreManager {
             }                                    
             return true;            
         } catch (Exception e) {
-            System.out.println();
+            throw new RuntimeException(e.getMessage(), e);
         }                    
-        return false;
     }
 
     @Override
     public ResultObjectProvider executeExtent(ClassMetaData classmetadata, boolean flag,
             FetchConfiguration fetchconfiguration) {
-        // TODO Auto-generated method stub
         return null;
     }
     
@@ -247,11 +245,13 @@ public class GSStoreManager extends AbstractStoreManager {
             try {
                 // Remove object from space
                 final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);
-                final ISpaceProxy proxy = (ISpaceProxy) space;
-                Object result = proxy.takeById(cm.getDescribedType().getName(), ids[0], null, _transaction,
-                        0, 0, false, QueryResultTypeInternal.EXTERNAL_ENTRY);                
-                if (result == null)
-                    throw new Exception("Removed object not found in space.");                
+                final ISpaceProxy proxy = (ISpaceProxy) space;                              
+                final ITypeDesc typeDescriptor = proxy.getDirectProxy().getTypeManager().getTypeDesc(sm.getMetaData().getDescribedType().getName());
+                final Object routing = sm.fetch(typeDescriptor.getRoutingPropertyId());                             
+                final ITemplatePacket template = TemplatePacketFactory.createIdPacket(ids[0], routing, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);                     
+                int result = proxy.clear(template, _transaction, 0);
+                if (result != 1)
+                    throw new Exception("Unable to clear object from space.");
             } catch (Exception e) {
                 exceptions.add(e);
             }
@@ -261,48 +261,24 @@ public class GSStoreManager extends AbstractStoreManager {
     /**
      * Partially updates dirty fields to the space.
      */    
-    @SuppressWarnings("deprecation")
     private void handleUpdatedObjects(Collection<OpenJPAStateManager> sms, ArrayList<Exception> exceptions, IJSpace space) {
         // Generate a template for each state manager and use partial update for updating..         
         for (OpenJPAStateManager sm : sms) {
             ClassMetaData cm = sm.getMetaData();
-            if (_classesRelationStatus.containsKey(cm.getDescribedType())) {
-                exceptions.add(new RuntimeException("Updating an instance which is a part of a relation is not supported."));
-                continue;
-            }
-                
-            try {                                
-                // Read object from space
-                Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);
-                ISpaceProxy proxy = (ISpaceProxy) space;
-                ExternalEntry result = (ExternalEntry) proxy.readById(
-                        cm.getDescribedType().getName(), ids[0], null, _transaction, 0, ReadModifiers.EXCLUSIVE_READ_LOCK,
-                        false, QueryResultTypeInternal.EXTERNAL_ENTRY);
-                if (result == null)
-                    throw new Exception("Updated object not found in space.");
-                // Calculate dirty fields count
-                int numberOfDirtyFields = 0;
+            if (_classesRelationStatus.containsKey(cm.getDescribedType()))
+                throw new RuntimeException("Updating an instance which is a part of a relation is not supported.");
+            try {
+                // Create an entry packet from the updated pojo and set all the fields but the updated & primary key to null.
+                final ISpaceProxy proxy = (ISpaceProxy) space;
+                final IEntryPacket entry = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(
+                        sm.getManagedInstance(), ObjectType.POJO, proxy);                                                
                 for (int i = 0; i < cm.getDeclaredFields().length; i++) {
-                    if (sm.getDirty().get(i))
-                        numberOfDirtyFields++;
-                }
-                // Generate an external entry template using the dirty fields & the id field
-                String[] fieldNames = new String[numberOfDirtyFields + 1];
-                Object[] fieldValues = new Object[numberOfDirtyFields + 1];
-                int dirtyIndex = 1;
-                for (int i = 0; i < cm.getDeclaredFields().length; i++) {
-                    if (sm.getDirty().get(i)) {
-                        fieldNames[dirtyIndex] = cm.getDeclaredFields()[i].getName();
-                        fieldValues[dirtyIndex] = sm.fetch(i);
-                        dirtyIndex++;
+                    if (!sm.getDirty().get(i) && !cm.getFields()[i].isPrimaryKey()) {
+                        entry.setFieldValue(i, null);
                     }
                 }
-                fieldNames[0] = result.getPrimaryKeyName();
-                fieldValues[0] = ids[0];
-                ExternalEntry template = new ExternalEntry(cm.getDescribedType().getName(), fieldValues, fieldNames);
-                template.setUID(result.getUID());
                 // Write changes to the space
-                space.write(template, _transaction, Lease.FOREVER, 0, UpdateModifiers.PARTIAL_UPDATE);                                
+                space.write(entry, _transaction, Lease.FOREVER, 0, UpdateModifiers.PARTIAL_UPDATE);                                
             } catch (Exception e) { 
                 exceptions.add(e);
             }                       
@@ -313,29 +289,42 @@ public class GSStoreManager extends AbstractStoreManager {
      * Writes new persistent objects to the space.
      */
     private void handleNewObjects(Collection<OpenJPAStateManager> sms, ArrayList<Exception> exceptions, IJSpace space) {
-        HashMap<Class<?>, ArrayList<Object>> objectsToWriteByType = new HashMap<Class<?>, ArrayList<Object>>();
-        Class<?> previousType = null;
-        ArrayList<Object> currentList = null;
         for (OpenJPAStateManager sm : sms) {
             // If the current object is in a relation skip it
             if (_classesRelationStatus.containsKey(sm.getMetaData().getDescribedType()))
                 continue;
-            if (!sm.getMetaData().getDescribedType().equals(previousType)) {
-                currentList = objectsToWriteByType.get(sm.getMetaData().getDescribedType());
-                if (currentList == null) {
-                    currentList = new ArrayList<Object>();
-                    objectsToWriteByType.put(sm.getMetaData().getDescribedType(), currentList);
-                }
+            try {
+                space.write(sm.getManagedInstance(), _transaction, Lease.FOREVER);
+            } catch (Exception e) {
+                exceptions.add(e);
             }
-            currentList.add(sm.getManagedInstance());            
         }
-        try {
-            for (Map.Entry<Class<?>, ArrayList<Object>> entry : objectsToWriteByType.entrySet()) {
-                space.writeMultiple(entry.getValue().toArray(), _transaction, Lease.FOREVER);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
+//
+//        Batching is currently commented out since there's a deadlock related to OpenJPA's entity serialization.
+//
+//        HashMap<Class<?>, ArrayList<Object>> objectsToWriteByType = new HashMap<Class<?>, ArrayList<Object>>();
+//        Class<?> previousType = null;
+//        ArrayList<Object> currentList = null;
+//        for (OpenJPAStateManager sm : sms) {
+//            // If the current object is in a relation skip it
+//            if (_classesRelationStatus.containsKey(sm.getMetaData().getDescribedType()))
+//                continue;
+//            if (!sm.getMetaData().getDescribedType().equals(previousType)) {
+//                currentList = objectsToWriteByType.get(sm.getMetaData().getDescribedType());
+//                if (currentList == null) {
+//                    currentList = new ArrayList<Object>();
+//                    objectsToWriteByType.put(sm.getMetaData().getDescribedType(), currentList);
+//                }
+//            }
+//            currentList.add(sm.getManagedInstance());            
+//        }
+//        try {
+//            for (Map.Entry<Class<?>, ArrayList<Object>> entry : objectsToWriteByType.entrySet()) {
+//                space.writeMultiple(entry.getValue().toArray(), _transaction, Lease.FOREVER, UpdateModifiers.NO_RETURN_VALUE);
+//            }
+//        } catch (Exception e) {
+//            throw new RuntimeException(e.getMessage(), e);
+//        }
     }
 
     private synchronized void initializeClassRelationStatus() {
@@ -373,8 +362,7 @@ public class GSStoreManager extends AbstractStoreManager {
      * Initializes an ExternalEntry result as a state managed Pojo.
      * (used by JPQL's query executor)
      */
-    @SuppressWarnings("deprecation")
-    public Object loadObject(ClassMetaData classMetaData, ExternalEntry entry) {
+    public Object loadObject(ClassMetaData classMetaData, IEntryPacket entry) {
         // Get object id
         Object[] primaryKeys = new Object[classMetaData.getPrimaryKeyFields().length];
         for (int i = 0; i < primaryKeys.length; i++) {
