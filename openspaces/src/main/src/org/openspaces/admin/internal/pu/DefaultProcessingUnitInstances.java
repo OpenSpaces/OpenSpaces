@@ -122,7 +122,7 @@ public class DefaultProcessingUnitInstances implements InternalProcessingUnitIns
         admin.assertStateChangesPermitted();
     }
 
-    public ProcessingUnitInstance getInstance(String processingUnitInstanceUid) {
+    public ProcessingUnitInstance getInstanceByUID(String processingUnitInstanceUid) {
         return processingUnitInstances.get(processingUnitInstanceUid);
     }
 }

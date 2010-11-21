@@ -71,8 +71,9 @@ public interface GridServiceContainer extends AgentGridComponent, Iterable<Proce
     /**
      * Returns the processing unit instance that are currently deployed within the grid service container
      * according to its uid.
+     * @since 8.0
      */
-    ProcessingUnitInstance getProcessingUnitInstance(String processingUnitInstanceUid);    
+    ProcessingUnitInstance getProcessingUnitInstanceByUID(String processingUnitInstanceUid);    
 
     /**
      * Returns <code>true</code> if the GSC contains the provided processing unit instance.

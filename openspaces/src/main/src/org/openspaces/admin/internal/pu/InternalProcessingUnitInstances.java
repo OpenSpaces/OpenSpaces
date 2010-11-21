@@ -38,5 +38,5 @@ public interface InternalProcessingUnitInstances extends InternalProcessingUnitI
 
     void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
 
-    ProcessingUnitInstance getInstance(String processingUnitInstanceUid);
+    ProcessingUnitInstance getInstanceByUID(String processingUnitInstanceUid);
 }
