@@ -15,6 +15,7 @@ import org.apache.openjpa.kernel.exps.Value;
 import org.apache.openjpa.lib.rop.ResultObjectProvider;
 import org.apache.openjpa.meta.ClassMetaData;
 import org.apache.openjpa.meta.FieldMetaData;
+import org.openspaces.jpa.openjpa.query.AggregationFunction;
 import org.openspaces.jpa.openjpa.query.ExpressionNode;
 import org.openspaces.jpa.openjpa.query.LiteralValueNode;
 import org.openspaces.jpa.openjpa.query.QueryExpressionFactory;
@@ -69,9 +70,23 @@ public class SpaceStoreManagerQuery extends ExpressionStoreQuery {
             ClassMetaData[] types, boolean subClasses,  ExpressionFactory[] facts,
             QueryExpressions[] exps, Object[] params, Range range)
     {
+        // Execute aggregation functions using JDBC
+        if (exps[0].isAggregate()) {
+            return executeJdbcQuery(classMetaData, exps, params);
+        }        
         final ExpressionNode expression = (ExpressionNode) exps[0].filter;        
         final StringBuilder sql = new StringBuilder();
-        expression.appendSql(sql);                        
+        expression.appendSql(sql);
+        // Ordering
+        if (exps[0].ordering.length > 0) {
+            sql.append(" order by ");
+            for (int i = 0; i < exps[0].ordering.length;) {
+                sql.append(exps[0].ordering[i].getName());
+                sql.append(exps[0].ascending[i] ? " asc" : " desc");
+                if (++i != exps[0].ordering.length)
+                    sql.append(", ");                
+            }
+        }
         final SQLQuery<Object> sqlQuery = new SQLQuery<Object>(classMetaData.getDescribedType().getName(), sql.toString());
         // Set query parameters (if needed) - the parameters are ordered by index
         for (int i = 0; i < params.length; i++) {
@@ -89,6 +104,38 @@ public class SpaceStoreManagerQuery extends ExpressionStoreQuery {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }        
+    }
+
+    /**
+     * Execute OpenJPA's expression tree as a JDBC query against the space.
+     * Relevant for aggregation functions.
+     * 
+     * @param classMetaData The class meta data to select for.
+     * @param expressions The expression tree.
+     * @param params The query's set parameters.
+     * @return A provider for the aggregated result.
+     */
+    private ResultObjectProvider executeJdbcQuery(ClassMetaData classMetaData, QueryExpressions[] expressions, Object[] params) {
+        StringBuilder sql = new StringBuilder();
+        // Append SELECT clause
+        sql.append("SELECT ");
+        for (int i = 0; i < expressions[0].projections.length; i++) {
+            AggregationFunction af = (AggregationFunction) expressions[0].projections[i];
+            sql.append(af.getName());
+            sql.append("(");
+            sql.append(af.getPath().getName());
+            if (i + 1 == expressions[0].projections.length)
+                sql.append(") ");
+            else
+                sql.append("), ");
+        }
+        sql.append("FROM ");
+        sql.append(classMetaData.getDescribedType().getName());
+        sql.append(" ");
+        final ExpressionNode expression = (ExpressionNode) expressions[0].filter;        
+        expression.appendSql(sql);                        
+        
+        return null;
     }
 
     /**
@@ -111,7 +158,7 @@ public class SpaceStoreManagerQuery extends ExpressionStoreQuery {
     {
         final ExpressionNode expression = (ExpressionNode) exps[0].filter;        
         final StringBuilder sql = new StringBuilder();
-        expression.appendSql(sql);                        
+        expression.appendSql(sql);
         final SQLQuery<Object> sqlQuery = new SQLQuery<Object>(classMetaData.getDescribedType().getName(), sql.toString());
         // Set query parameters (if needed) - the parameters are ordered by index
         for (int i = 0; i < params.length; i++) {

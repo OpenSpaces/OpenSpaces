@@ -13,6 +13,7 @@ import org.apache.openjpa.kernel.exps.Path;
 import org.apache.openjpa.kernel.exps.Subquery;
 import org.apache.openjpa.kernel.exps.Value;
 import org.apache.openjpa.meta.ClassMetaData;
+import org.openspaces.jpa.openjpa.query.AggregationFunction.AggregationType;
 import org.openspaces.jpa.openjpa.query.BinaryExpression.ExpressionType;
 
 /**
@@ -483,7 +484,7 @@ public class QueryExpressionFactory implements ExpressionFactory {
      * Return the count of the given value for all matches.
      */
     public Value count(Value obj) {
-        throw new RuntimeException("Unsupported operation.");
+        return new AggregationFunction(obj, AggregationType.COUNT);
     }
 
     /**

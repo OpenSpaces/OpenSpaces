@@ -47,7 +47,7 @@ public class FieldPathNode implements Path, ExpressionNode {
     }
 
     public String getName() {
-        return null;
+        return toString();
     }
 
     public Path getPath() {

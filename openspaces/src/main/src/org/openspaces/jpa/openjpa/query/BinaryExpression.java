@@ -44,7 +44,7 @@ public class BinaryExpression implements Expression, ExpressionNode {
         case EQUAL:
             return " = ";
         case NOT_EQUAL:
-            return (_node2 instanceof NullValueNode)? " IS NOT " : " <> ";
+            return (_node2.getNodeType() == NodeType.NULL_VALUE)? " IS NOT " : " <> ";
         case GREATER_THAN:
             return " > ";
         case LESS_THAN:
