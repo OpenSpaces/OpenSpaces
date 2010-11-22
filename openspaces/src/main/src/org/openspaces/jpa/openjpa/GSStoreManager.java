@@ -9,6 +9,7 @@ import java.util.List;
 
 import net.jini.core.lease.Lease;
 import net.jini.core.transaction.Transaction;
+import net.jini.core.transaction.TransactionException;
 import net.jini.core.transaction.TransactionFactory;
 
 import org.apache.openjpa.abstractstore.AbstractStoreManager;
@@ -74,6 +75,8 @@ public class GSStoreManager extends AbstractStoreManager {
     @Override
     public void begin() {
         try {
+            if (_transaction != null)
+                throw new TransactionException("Attempted to start a new transaction when there's already an active transaction.");
             long timeout = (getConfiguration().getLockTimeout() == 0)?
                     Lease.FOREVER : getConfiguration().getLockTimeout();
             _transaction = (TransactionFactory.create(getConfiguration().getTransactionManager(),
@@ -89,6 +92,8 @@ public class GSStoreManager extends AbstractStoreManager {
             _transaction.commit(Long.MAX_VALUE);
         } catch (Exception e) {
            throw new RuntimeException(e.getMessage(), e);
+        } finally {
+            _transaction = null;
         }
     }
 
