@@ -413,10 +413,16 @@
             <report todir="${target.junit.summary.dir}"/>
         </junitreport>
     	
+    	<ant target="create.dummy.file.if.tests.failed"/> 
+    	
     	<!--fail if="junit.tests.failed" message="JUnit tests failed. exiting..."/-->
 
     </target>
-
+	
+	<target name="create.dummy.file.if.tests.failed" if="junit.tests.failed">
+		<touch file="${target.junit.summary.dir}/failed" />
+	</target>
+		
     <target name="clean_tests" depends="clean,tests"/>
 
 
