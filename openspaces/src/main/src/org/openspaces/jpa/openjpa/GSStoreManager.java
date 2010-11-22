@@ -98,7 +98,9 @@ public class GSStoreManager extends AbstractStoreManager {
             _transaction.abort();
         } catch (Exception e) {
            throw new RuntimeException(e.getMessage(), e);
-        }        
+        } finally {
+            _transaction = null;
+        }
     }    
     
     @Override
@@ -364,11 +366,9 @@ public class GSStoreManager extends AbstractStoreManager {
      */
     public Object loadObject(ClassMetaData classMetaData, IEntryPacket entry) {
         // Get object id
-        Object[] primaryKeys = new Object[classMetaData.getPrimaryKeyFields().length];
-        for (int i = 0; i < primaryKeys.length; i++) {
-            primaryKeys[i] = entry.getFieldValue(classMetaData.getPrimaryKeyFields()[i].getIndex());
-        }
-        Object objectId = ApplicationIds.fromPKValues(primaryKeys, classMetaData);
+        Object[] ids = new Object[1];
+        ids[0] = entry.getID();
+        Object objectId = ApplicationIds.fromPKValues(ids, classMetaData);
         return getContext().find(objectId, null, null, entry, 0);
     }
 
