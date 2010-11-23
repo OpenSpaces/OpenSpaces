@@ -42,15 +42,15 @@ public class POMGenerator {
         writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "gs-openspaces-pom.xml")))));
         printHeader(writer, version, POMGenerator.GS_GROUP, "gs-openspaces");
         printDependency(writer, POMGenerator.GS_GROUP, "gs-runtime");
-        printDependency(writer, "org.springframework", "spring-aop", "3.0.3.RELEASE");
-        printDependency(writer, "org.springframework", "spring-asm", "3.0.3.RELEASE");
-        printDependency(writer, "org.springframework", "spring-aspects", "3.0.3.RELEASE");
-        printDependency(writer, "org.springframework", "spring-beans", "3.0.3.RELEASE");
-        printDependency(writer, "org.springframework", "spring-context", "3.0.3.RELEASE");
-        printDependency(writer, "org.springframework", "spring-context-support", "3.0.3.RELEASE");
-        printDependency(writer, "org.springframework", "spring-core", "3.0.3.RELEASE");
-        printDependency(writer, "org.springframework", "spring-expression", "3.0.3.RELEASE");
-        printDependency(writer, "org.springframework", "spring-tx", "3.0.3.RELEASE");
+        printDependency(writer, "org.springframework", "spring-aop", "3.0.5.RELEASE");
+        printDependency(writer, "org.springframework", "spring-asm", "3.0.5.RELEASE");
+        printDependency(writer, "org.springframework", "spring-aspects", "3.0.5.RELEASE");
+        printDependency(writer, "org.springframework", "spring-beans", "3.0.5.RELEASE");
+        printDependency(writer, "org.springframework", "spring-context", "3.0.5.RELEASE");
+        printDependency(writer, "org.springframework", "spring-context-support", "3.0.5.RELEASE");
+        printDependency(writer, "org.springframework", "spring-core", "3.0.5.RELEASE");
+        printDependency(writer, "org.springframework", "spring-expression", "3.0.5.RELEASE");
+        printDependency(writer, "org.springframework", "spring-tx", "3.0.5.RELEASE");
         printDependency(writer, "commons-logging", "commons-logging", "1.1.1");
         // add javax.annotations (@PostConstruct) for JDK 1.5 (no need for 1.6 since it is there)
         if (!JdkVersion.isAtLeastJava16() && JdkVersion.isAtLeastJava15()) {
