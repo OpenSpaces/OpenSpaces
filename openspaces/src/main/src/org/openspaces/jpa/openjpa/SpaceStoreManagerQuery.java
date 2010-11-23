@@ -1,6 +1,7 @@
 package org.openspaces.jpa.openjpa;
 
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import net.jini.core.lease.Lease;
@@ -15,10 +16,13 @@ import org.apache.openjpa.kernel.exps.Value;
 import org.apache.openjpa.lib.rop.ResultObjectProvider;
 import org.apache.openjpa.meta.ClassMetaData;
 import org.apache.openjpa.meta.FieldMetaData;
-import org.openspaces.jpa.openjpa.query.AggregationFunction;
 import org.openspaces.jpa.openjpa.query.ExpressionNode;
 import org.openspaces.jpa.openjpa.query.LiteralValueNode;
+import org.openspaces.jpa.openjpa.query.ParameterNode;
 import org.openspaces.jpa.openjpa.query.QueryExpressionFactory;
+import org.openspaces.jpa.openjpa.query.ExpressionNode.NodeType;
+import org.openspaces.jpa.openjpa.query.executor.JpaQueryExecutor;
+import org.openspaces.jpa.openjpa.query.executor.JpaQueryExecutorFactory;
 
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.gigaspaces.internal.client.spaceproxy.metadata.ObjectType;
@@ -59,84 +63,23 @@ public class SpaceStoreManagerQuery extends ExpressionStoreQuery {
      * @param base the base type the query should match
      * @param types the independent candidate types
      * @param subclasses true if subclasses should be included in the results
-     * @param facts the expression factory used to build the query for
+     * @param factories the expression factory used to build the query for
      * each base type
      * @param parsed the parsed query values
-     * @param params parameter values, or empty array
+     * @param parameters parameter values, or empty array
      * @param range result range
      * @return a provider for matching objects
      */
-    @SuppressWarnings("deprecation")
     protected ResultObjectProvider executeQuery(Executor ex, ClassMetaData classMetaData,
-            ClassMetaData[] types, boolean subClasses,  ExpressionFactory[] facts,
-            QueryExpressions[] exps, Object[] params, Range range)
+            ClassMetaData[] types, boolean subClasses,  ExpressionFactory[] factories,
+            QueryExpressions[] expressions, Object[] parameters, Range range)
     {
-        // Execute aggregation functions using JDBC
-        if (exps[0].isAggregate()) {
-            return executeJdbcQuery(classMetaData, exps, params);
-        }        
-        final ExpressionNode expression = (ExpressionNode) exps[0].filter;        
-        final StringBuilder sql = new StringBuilder();
-        expression.appendSql(sql);
-        // Ordering
-        if (exps[0].ordering.length > 0) {
-            sql.append(" order by ");
-            for (int i = 0; i < exps[0].ordering.length;) {
-                sql.append(exps[0].ordering[i].getName());
-                sql.append(exps[0].ascending[i] ? " asc" : " desc");
-                if (++i != exps[0].ordering.length)
-                    sql.append(", ");                
-            }
-        }
-        final SQLQuery<Object> sqlQuery = new SQLQuery<Object>(classMetaData.getDescribedType().getName(), sql.toString());        
-        // Set query parameters (if needed) - the parameters are ordered by index
-        for (int i = 0; i < params.length; i++) {
-            sqlQuery.setParameter(i + 1, params[i]);
-        }
+        final JpaQueryExecutor executor = JpaQueryExecutorFactory.newExecutor(expressions[0], classMetaData, parameters); 
         try {
-            final ISpaceProxy proxy = (ISpaceProxy) _store.getConfiguration().getSpace();        
-            final Object[] result = proxy.readMultiple(sqlQuery, _store.getCurrentTransaction(), Integer.MAX_VALUE);            
-            final IEntryPacket[] entries = new IEntryPacket[result.length];
-            for (int i = 0; i < result.length; i++) {
-                entries[i] = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(result[i],
-                        ObjectType.POJO, proxy);
-            }
-            return new SpaceResultObjectProvider(classMetaData, entries, _store);
+            return executor.execute(_store);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }        
-    }
-
-    /**
-     * Execute OpenJPA's expression tree as a JDBC query against the space.
-     * Relevant for aggregation functions.
-     * 
-     * @param classMetaData The class meta data to select for.
-     * @param expressions The expression tree.
-     * @param params The query's set parameters.
-     * @return A provider for the aggregated result.
-     */
-    private ResultObjectProvider executeJdbcQuery(ClassMetaData classMetaData, QueryExpressions[] expressions, Object[] params) {
-        StringBuilder sql = new StringBuilder();
-        // Append SELECT clause
-        sql.append("SELECT ");
-        for (int i = 0; i < expressions[0].projections.length; i++) {
-            AggregationFunction af = (AggregationFunction) expressions[0].projections[i];
-            sql.append(af.getName());
-            sql.append("(");
-            sql.append(af.getPath().getName());
-            if (i + 1 == expressions[0].projections.length)
-                sql.append(") ");
-            else
-                sql.append("), ");
-        }
-        sql.append("FROM ");
-        sql.append(classMetaData.getDescribedType().getName());
-        sql.append(" ");
-        final ExpressionNode expression = (ExpressionNode) expressions[0].filter;        
-        expression.appendSql(sql);                        
-        
-        return null;
     }
 
     /**
@@ -189,7 +132,6 @@ public class SpaceStoreManagerQuery extends ExpressionStoreQuery {
      * @return a number indicating the number of instances updated,
      * or null to execute the update in memory.
      */
-    @SuppressWarnings("deprecation")
     protected Number executeUpdate(Executor ex, ClassMetaData classMetaData, ClassMetaData[] types, boolean subClasses,
             ExpressionFactory[] facts, QueryExpressions[] expressions, Object[] params)
     {
@@ -198,7 +140,23 @@ public class SpaceStoreManagerQuery extends ExpressionStoreQuery {
         expression.appendSql(sql);                        
         final SQLQuery<Object> sqlQuery = new SQLQuery<Object>(classMetaData.getDescribedType().getName(), sql.toString());
         // Set query parameters (if needed) - the parameters are ordered by index
-        for (int i = 0; i < params.length; i++) {
+        ArrayList<UpdateValue> updates = new ArrayList<UpdateValue>();
+        // Keeps the first parameter index related to the WHERE clause.
+        // The parameter before that index are related to the update set values.
+        int firstWhereParameterIndex = 0;
+        // Create a list of updated values
+        for (Map.Entry<Path, Value> entry : expressions[0].updates.entrySet()) {
+            FieldMetaData fmd = entry.getKey().last();
+            if (((ExpressionNode) entry.getValue()).getNodeType() == NodeType.PARAMETER) {
+                ParameterNode parameter = (ParameterNode) entry.getValue();
+                updates.add(new UpdateValue(fmd.getIndex(), params[parameter.getIndex()]));
+                firstWhereParameterIndex++;
+            } else {
+                LiteralValueNode literal = (LiteralValueNode) entry.getValue();
+                updates.add(new UpdateValue(fmd.getIndex(), literal.getValue()));
+            }                               
+        }
+        for (int i = firstWhereParameterIndex; i < params.length; i++) {
             sqlQuery.setParameter(i + 1, params[i]);
         }
         try {
@@ -210,9 +168,8 @@ public class SpaceStoreManagerQuery extends ExpressionStoreQuery {
                 entries[i] = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(result[i],
                         ObjectType.POJO, proxy);
                 // Update results with query update values
-                for (Map.Entry<Path, Value> entry : expressions[0].updates.entrySet()) {
-                    FieldMetaData fmd = entry.getKey().last();
-                    entries[i].setFieldValue(fmd.getDeclaredIndex(), ((LiteralValueNode) entry.getValue()).getValue());                    
+                for (UpdateValue updateValue : updates) {
+                    entries[i].setFieldValue(updateValue.getFieldIndex(), updateValue.getFieldValue());
                 }
             }
             Lease[] lease = proxy.writeMultiple(entries, _store.getCurrentTransaction(), Lease.FOREVER,
@@ -262,5 +219,35 @@ public class SpaceStoreManagerQuery extends ExpressionStoreQuery {
     }
     
     
+    
+    /**
+     * A structure to hold an update query's update value with its pojo field index.
+     * @author idan
+     * @since 8.0
+     */
+    private static class UpdateValue {
+        private int _fieldIndex;
+        private Object _fieldValue;
+        
+        public UpdateValue(int fieldIndex, Object fieldValue) {
+            _fieldIndex = fieldIndex;
+            _fieldValue = fieldValue;
+        }
+        
+        /**
+         * Gets the updated field index.
+         */
+        public int getFieldIndex() {
+            return _fieldIndex;
+        }
+        
+        /**
+         * Gets the updated field value.
+         */
+        public Object getFieldValue() {
+            return _fieldValue;
+        }
+        
+    }
     
 }

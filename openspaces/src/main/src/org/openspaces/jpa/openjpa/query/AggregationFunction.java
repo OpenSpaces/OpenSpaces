@@ -6,12 +6,18 @@ import org.apache.openjpa.kernel.exps.Value;
 import org.apache.openjpa.meta.ClassMetaData;
 
 /**
+ * An aggregation function representation.
+ * Supports the following aggregations:
+ *  Sum, Minimum, Maximum, Count & Average.
  * 
  * @author idan
  * @since 8.0
  *
  */
 public class AggregationFunction implements Value {
+    //
+	private static final long serialVersionUID = 1L;
+
     /**
      * Aggregation function type 
      */
@@ -29,6 +35,7 @@ public class AggregationFunction implements Value {
      * Return the expected type for this value, or <code>Object</code> if
      * the type is unknown.
      */
+    @SuppressWarnings("rawtypes")
     public Class getType() {
         return long.class;
     }
@@ -38,8 +45,8 @@ public class AggregationFunction implements Value {
      * filter. This method is only called on values who return
      * <code>Object</code> from {@link #getType}.
      */
-    public void setImplicitType(Class type) {
-        
+    @SuppressWarnings("rawtypes")
+    public void setImplicitType(Class type) {        
     }
 
     /**
@@ -80,6 +87,7 @@ public class AggregationFunction implements Value {
      * Accept a visit from a tree visitor.
      */
     public void acceptVisit(ExpressionVisitor visitor) {
+        visitor.enter(this);
     }
 
     /**

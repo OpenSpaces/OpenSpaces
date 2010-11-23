@@ -477,7 +477,7 @@ public class QueryExpressionFactory implements ExpressionFactory {
      * Return the average of the given value for all matches.
      */
     public Value avg(Value num) {
-        throw new RuntimeException("Unsupported operation.");
+        return new AggregationFunction(num, AggregationType.AVERAGE);
     }
 
     /**
@@ -491,21 +491,21 @@ public class QueryExpressionFactory implements ExpressionFactory {
      * Return the max of the given value for all matches.
      */
     public Value max(Value num) {
-        throw new RuntimeException("Unsupported operation.");
+        return new AggregationFunction(num, AggregationType.MAXIMUM);
     }
 
     /**
      * Return the max of the given value for all matches.
      */
     public Value min(Value num) {
-        throw new RuntimeException("Unsupported operation.");
+        return new AggregationFunction(num, AggregationType.MINIMUM);
     }
 
     /**
      * Return the max of the given value for all matches.
      */
     public Value sum(Value num) {
-        throw new RuntimeException("Unsupported operation.");
+        return new AggregationFunction(num, AggregationType.SUM);
     }
 
     /**
