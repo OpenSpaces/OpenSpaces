@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import net.jini.core.lease.Lease;
 import net.jini.core.transaction.Transaction;
@@ -296,42 +297,40 @@ public class GSStoreManager extends AbstractStoreManager {
      * Writes new persistent objects to the space.
      */
     private void handleNewObjects(Collection<OpenJPAStateManager> sms, ArrayList<Exception> exceptions, IJSpace space) {
+        final HashMap<Class<?>, ArrayList<Object>> objectsToWriteByType = new HashMap<Class<?>, ArrayList<Object>>();
+        final ArrayList<OpenJPAStateManager> stateManagersToRestore = new ArrayList<OpenJPAStateManager>();
+        Class<?> previousType = null;
+        ArrayList<Object> currentList = null;               
         for (OpenJPAStateManager sm : sms) {
             // If the current object is in a relation skip it
-            if (_classesRelationStatus.containsKey(sm.getMetaData().getDescribedType()))
+            if (_classesRelationStatus.containsKey(sm.getMetaData().getDescribedType())) {
+                // Remove the state manager from objects in relation for making their serialization not
+                // handled by OpenJPA which can cause a deadlock.
+                sm.getPersistenceCapable().pcReplaceStateManager(null);
+                stateManagersToRestore.add(sm);
                 continue;
-            try {
-                space.write(sm.getManagedInstance(), _transaction, Lease.FOREVER);
-            } catch (Exception e) {
-                exceptions.add(e);
+            }
+            if (!sm.getMetaData().getDescribedType().equals(previousType)) {
+                currentList = objectsToWriteByType.get(sm.getMetaData().getDescribedType());
+                if (currentList == null) {
+                    currentList = new ArrayList<Object>();
+                    objectsToWriteByType.put(sm.getMetaData().getDescribedType(), currentList);
+                }
+            }
+            currentList.add(sm.getManagedInstance());            
+        }
+        try {
+            for (Map.Entry<Class<?>, ArrayList<Object>> entry : objectsToWriteByType.entrySet()) {
+                space.writeMultiple(entry.getValue().toArray(), _transaction, Lease.FOREVER, UpdateModifiers.NO_RETURN_VALUE);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        } finally {
+            // Restore the removed state managers.
+            for (OpenJPAStateManager sm : stateManagersToRestore) {
+                sm.getPersistenceCapable().pcReplaceStateManager(sm);
             }
         }
-//
-//        Batching is currently commented out since there's a deadlock related to OpenJPA's entity serialization.
-//
-//        HashMap<Class<?>, ArrayList<Object>> objectsToWriteByType = new HashMap<Class<?>, ArrayList<Object>>();
-//        Class<?> previousType = null;
-//        ArrayList<Object> currentList = null;
-//        for (OpenJPAStateManager sm : sms) {
-//            // If the current object is in a relation skip it
-//            if (_classesRelationStatus.containsKey(sm.getMetaData().getDescribedType()))
-//                continue;
-//            if (!sm.getMetaData().getDescribedType().equals(previousType)) {
-//                currentList = objectsToWriteByType.get(sm.getMetaData().getDescribedType());
-//                if (currentList == null) {
-//                    currentList = new ArrayList<Object>();
-//                    objectsToWriteByType.put(sm.getMetaData().getDescribedType(), currentList);
-//                }
-//            }
-//            currentList.add(sm.getManagedInstance());            
-//        }
-//        try {
-//            for (Map.Entry<Class<?>, ArrayList<Object>> entry : objectsToWriteByType.entrySet()) {
-//                space.writeMultiple(entry.getValue().toArray(), _transaction, Lease.FOREVER, UpdateModifiers.NO_RETURN_VALUE);
-//            }
-//        } catch (Exception e) {
-//            throw new RuntimeException(e.getMessage(), e);
-//        }
     }
 
     private synchronized void initializeClassRelationStatus() {
@@ -382,5 +381,6 @@ public class GSStoreManager extends AbstractStoreManager {
      */
     public Transaction getCurrentTransaction() {
         return _transaction;
-    }
+    }    
+    
 }
