@@ -71,7 +71,6 @@
 	<classpathentry kind="lib" path="lib/external/junit/junit.jar"/>
 	<classpathentry kind="lib" path="lib/external/maven/maven-dependency-tree-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/external/retrotranslator/retrotranslator-runtime.jar"/>
-	<classpathentry kind="lib" path="tools/maven/apache-maven-2.0.9/lib/maven-2.0.9-uber.jar"/>
 	<classpathentry kind="lib" path="lib/external/backport/backport-util-concurrent.jar"/>
 	<classpathentry kind="lib" path="tools/groovy/embeddable/groovy-all-1.7.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/required/com.springsource.org.aopalliance-1.0.0.jar"/>
@@ -112,5 +111,16 @@
 	<classpathentry kind="lib" path="lib/optional/security/spring-security-core-3.0.2.RELEASE.jar"/>
 	<classpathentry kind="lib" path="deploy/templates/memcached/lib/netty-3.2.3.Final.jar"/>
 	<classpathentry kind="lib" path="lib/external/spymemcached/memcached-2.5.jar"/>
+	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0/lib/maven-artifact-3.0.jar"/>
+	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0/lib/maven-core-3.0.jar"/>
+	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0/lib/maven-plugin-api-3.0.jar"/>
+	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0/lib/maven-settings-3.0.jar"/>
+	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0/lib/maven-settings-builder-3.0.jar"/>
+	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0/lib/maven-aether-provider-3.0.jar"/>
+	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0/lib/maven-compat-3.0.jar"/>
+	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0/lib/maven-embedder-3.0.jar"/>
+	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0/lib/maven-model-3.0.jar"/>
+	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0/lib/maven-model-builder-3.0.jar"/>
+	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0/lib/maven-repository-metadata-3.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
