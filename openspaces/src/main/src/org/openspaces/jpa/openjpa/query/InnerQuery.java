@@ -6,6 +6,7 @@ import org.apache.openjpa.kernel.exps.QueryExpressions;
 import org.apache.openjpa.kernel.exps.Subquery;
 import org.apache.openjpa.kernel.exps.Value;
 import org.apache.openjpa.meta.ClassMetaData;
+import org.openspaces.jpa.openjpa.query.executor.JpaJdbcQueryExecutor;
 
 /**
  * Represents an inner query (subquery) in OpenJPA's expression tree.
@@ -157,35 +158,12 @@ public class InnerQuery implements Subquery, ExpressionNode {
 
     public void appendSql(StringBuilder sql) {
         sql.append("(");
-        appendSelectFromSql(sql);
-        ((ExpressionNode) _expressions.filter).appendSql(sql);
+        // In order to create the SQL string for the inner query we create
+        // a JDBC query executor which creates the needed SQL string.
+        JpaJdbcQueryExecutor executor = new JpaJdbcQueryExecutor(_expressions, _candidate, null);
+        sql.append(executor.getSqlBuffer());
         sql.append(")");
     }
-
-    /**
-     * Append SELECT FROM to SQL string builder.
-     */
-    protected void appendSelectFromSql(StringBuilder sql) {
-        sql.append("SELECT ");
-        if (_expressions.projections.length > 1)
-            throw new IllegalArgumentException("Multiple aggregation projection is not supported.");
-        for (int i = 0; i < _expressions.projections.length; i++) {
-            AggregationFunction aggregation = (AggregationFunction) _expressions.projections[i];
-            sql.append(aggregation.getName());
-            sql.append("(");
-            String path = aggregation.getPath().getName();
-            if (path.length() == 0)
-                path = "*";
-            sql.append(path);
-            if (i + 1 == _expressions.projections.length)
-                sql.append(") ");
-            else
-                sql.append("), ");
-        }
-        sql.append("FROM ");
-        sql.append(_candidate.getDescribedType().getName());
-        sql.append(" ");
-    }    
     
     public NodeType getNodeType() {
         return NodeType.INNER_QUERY;

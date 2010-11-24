@@ -14,7 +14,7 @@ import org.apache.openjpa.meta.ClassMetaData;
  * @since 8.0
  *
  */
-public class AggregationFunction implements Value {
+public class AggregationFunction implements Value, ExpressionNode {
     //
 	private static final long serialVersionUID = 1L;
 
@@ -137,6 +137,20 @@ public class AggregationFunction implements Value {
     
     public AggregationType getAggregationType() {
         return _aggregationType;
+    }
+
+    public void appendSql(StringBuilder sql) {
+        sql.append(getName());
+        sql.append("(");
+        String path = getPath().getName();
+        if (path.length() == 0)
+            path = "*";
+        sql.append(path);
+        sql.append(")");                
+    }
+
+    public NodeType getNodeType() {
+        return NodeType.AGGREGATION_FUNCTION;
     }
 
 }

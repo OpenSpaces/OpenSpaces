@@ -64,6 +64,13 @@ abstract class AbstractJpaQueryExecutor implements JpaQueryExecutor {
         }                
     }
     
+    /**
+     * Gets the executor's generated SQL buffer.
+     */
+    public StringBuilder getSqlBuffer() {
+        return _sql;
+    }
+
     
 
 }

@@ -23,7 +23,7 @@ public class JpaQueryExecutorFactory {
      * @return A JpaQueryExecutor implementation instance.
      */
     public static JpaQueryExecutor newExecutor(QueryExpressions expression, ClassMetaData cm, Object[] parameters) {
-        if (expression.isAggregate())
+        if (expression.projections.length > 0)
             return new JpaJdbcQueryExecutor(expression, cm, parameters);
         return new JpaSqlQueryExecutor(expression, cm, parameters);
     }

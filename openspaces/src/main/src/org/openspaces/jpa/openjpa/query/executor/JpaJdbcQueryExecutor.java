@@ -6,7 +6,8 @@ import org.apache.openjpa.kernel.exps.QueryExpressions;
 import org.apache.openjpa.lib.rop.ResultObjectProvider;
 import org.apache.openjpa.meta.ClassMetaData;
 import org.openspaces.jpa.openjpa.GSStoreManager;
-import org.openspaces.jpa.openjpa.query.AggregationFunction;
+import org.openspaces.jpa.openjpa.query.ExpressionNode;
+import org.openspaces.jpa.openjpa.query.ExpressionNode.NodeType;
 import org.openspaces.jpa.openjpa.query.SpaceProjectionResultObjectProvider;
 
 import com.j_spaces.jdbc.driver.GConnection;
@@ -19,7 +20,7 @@ import com.j_spaces.jdbc.driver.GResultSet;
  * @since 8.0
  * 
  */
-class JpaJdbcQueryExecutor extends AbstractJpaQueryExecutor {
+public class JpaJdbcQueryExecutor extends AbstractJpaQueryExecutor {
 
     public JpaJdbcQueryExecutor(QueryExpressions expression, ClassMetaData cm, Object[] parameters) {
         super(expression, cm, parameters);
@@ -45,26 +46,28 @@ class JpaJdbcQueryExecutor extends AbstractJpaQueryExecutor {
         appendWhereSql();
         appendOrderBySql();
     }
-
+    
+    @Override
+    protected void appendWhereSql() {
+        ExpressionNode node = (ExpressionNode) _expression.filter;
+        if (node.getNodeType() != NodeType.EMPTY_EXPRESSION) {
+            _sql.append("WHERE ");
+            super.appendWhereSql();
+        }
+    }    
+    
     /**
      * Append SELECT FROM to SQL string builder.
      */
     protected void appendSelectFromSql() {
         _sql.append("SELECT ");
-        if (_expression.projections.length > 1)
-            throw new IllegalArgumentException("Multiple aggregation projection is not supported.");
         for (int i = 0; i < _expression.projections.length; i++) {
-            AggregationFunction aggregation = (AggregationFunction) _expression.projections[i];
-            _sql.append(aggregation.getName());
-            _sql.append("(");
-            String path = aggregation.getPath().getName();
-            if (path.length() == 0)
-                path = "*";
-            _sql.append(path);
+            ExpressionNode node = (ExpressionNode) _expression.projections[i];
+            node.appendSql(_sql);
             if (i + 1 == _expression.projections.length)
-                _sql.append(") ");
+                _sql.append(" ");
             else
-                _sql.append("), ");
+                _sql.append(", ");
         }
         _sql.append("FROM ");
         _sql.append(_classMetaData.getDescribedType().getName());
