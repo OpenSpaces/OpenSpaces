@@ -15,6 +15,7 @@ import net.jini.core.transaction.TransactionFactory;
 
 import org.apache.openjpa.abstractstore.AbstractStoreManager;
 import org.apache.openjpa.conf.OpenJPAConfiguration;
+import org.apache.openjpa.enhance.PersistenceCapable;
 import org.apache.openjpa.kernel.FetchConfiguration;
 import org.apache.openjpa.kernel.OpenJPAStateManager;
 import org.apache.openjpa.kernel.PCState;
@@ -310,6 +311,19 @@ public class GSStoreManager extends AbstractStoreManager {
                 stateManagersToRestore.add(sm);
                 continue;
             }
+            // If the object has embedded relations we need to remove the state manager from them two
+            // since they are also serialized.
+            for (FieldMetaData fmd : sm.getMetaData().getFields()) {
+                if (fmd.isEmbeddedPC()) {
+                    Object value = sm.fetch(fmd.getDeclaredIndex());
+                    if (value != null) {
+                        PersistenceCapable pc = (PersistenceCapable) value;
+                        OpenJPAStateManager stateManager = (OpenJPAStateManager) pc.pcGetStateManager();
+                        pc.pcReplaceStateManager(null);
+                        stateManagersToRestore.add(stateManager);
+                    }
+                }
+            }
             if (!sm.getMetaData().getDescribedType().equals(previousType)) {
                 currentList = objectsToWriteByType.get(sm.getMetaData().getDescribedType());
                 if (currentList == null) {
@@ -321,7 +335,10 @@ public class GSStoreManager extends AbstractStoreManager {
         }
         try {
             for (Map.Entry<Class<?>, ArrayList<Object>> entry : objectsToWriteByType.entrySet()) {
-                space.writeMultiple(entry.getValue().toArray(), _transaction, Lease.FOREVER, UpdateModifiers.NO_RETURN_VALUE);
+                // TODO: USE NO_RETURN_VALUE modifier for better performance (currently it causes a NullPointerException
+                // when used with local cache.
+                //space.writeMultiple(entry.getValue().toArray(), _transaction, Lease.FOREVER, UpdateModifiers.NO_RETURN_VALUE);
+                space.writeMultiple(entry.getValue().toArray(), _transaction, Lease.FOREVER, UpdateModifiers.WRITE_ONLY);
             }
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
