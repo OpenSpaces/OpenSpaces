@@ -1,7 +1,6 @@
 package org.openspaces.jpa.openjpa.query.executor;
 
 import java.sql.PreparedStatement;
-import java.util.Properties;
 
 import org.apache.openjpa.kernel.exps.QueryExpressions;
 import org.apache.openjpa.lib.rop.ResultObjectProvider;
@@ -28,10 +27,9 @@ class JpaJdbcQueryExecutor extends AbstractJpaQueryExecutor {
 
     @Override
     public ResultObjectProvider execute(GSStoreManager store) throws Exception {
-        Class.forName("com.j_spaces.jdbc.driver.GDriver").newInstance();
-        Properties properties = new Properties();
-        properties.put("com.gs.embeddedQP.enabled", "true");
-        GConnection conn = GConnection.getInstance(store.getConfiguration().getSpace(), properties);
+        GConnection conn = store.getConfiguration().getJdbcConnection();
+        // TODO: attach the current transaction to the JDBC connection.
+        //conn.setTransaction(store.getCurrentTransaction());
         PreparedStatement pstmt = conn.prepareStatement(_sql.toString());
         for (int i = 0; i < _parameters.length; i++) {
             pstmt.setObject(i+1, _parameters[i]);

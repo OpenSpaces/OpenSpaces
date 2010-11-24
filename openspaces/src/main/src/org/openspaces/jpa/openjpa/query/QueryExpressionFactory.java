@@ -243,7 +243,7 @@ public class QueryExpressionFactory implements ExpressionFactory {
      * @param alias the alias given to the query candidate class
      */
     public Subquery newSubquery(ClassMetaData candidate, boolean subs, String alias) {
-        throw new RuntimeException("Unsupported operation.");
+        return new InnerQuery(candidate);
     }
 
     /**
@@ -261,7 +261,7 @@ public class QueryExpressionFactory implements ExpressionFactory {
      * given value.<br /> Example: <code>var.address.city</code>
      */
     public Path newPath(Value val) {
-        throw new RuntimeException("Unsupported operation.");
+        return new FieldPathNode();
     }
 
     /**
