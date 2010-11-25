@@ -168,7 +168,7 @@ public class GSStoreManager extends AbstractStoreManager {
                 final ITypeDesc typeDescriptor = proxy.getDirectProxy().getTypeManager().getTypeDesc(cm.getDescribedType().getName());                                
                 final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);
                 ITemplatePacket template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);
-                result = (IEntryPacket) proxy.read(template, _transaction, readModifier);                
+                result = (IEntryPacket) proxy.read(template, _transaction, 0, readModifier);                
                 if (result == null)
                     return false;            
             }
