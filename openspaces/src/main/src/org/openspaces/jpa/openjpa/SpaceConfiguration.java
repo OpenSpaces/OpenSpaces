@@ -12,6 +12,7 @@ import com.gigaspaces.client.transaction.ITransactionManagerProvider.Transaction
 import com.gigaspaces.client.transaction.TransactionManagerConfiguration;
 import com.gigaspaces.client.transaction.TransactionManagerProviderFactory;
 import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.client.ReadModifiers;
 import com.j_spaces.jdbc.driver.GConnection;
 
 /**
@@ -27,6 +28,7 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
     private IJSpace _space;
     private ITransactionManagerProvider _transactionManagerProvider;
     private GConnection _connection;
+    private int _readModifier;
     
     public SpaceConfiguration() {
         super();        
@@ -35,6 +37,8 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
         setOptimistic(false);
         setLockManager("none");
         setDynamicEnhancementAgent(false);
+        _readModifier = getReadLockLevel().equals("write") ? ReadModifiers.EXCLUSIVE_READ_LOCK
+                : ReadModifiers.REPEATABLE_READ;        
     }
 
     public void initialize() {
@@ -72,6 +76,9 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
         return _transactionManagerProvider.getTransactionManager();
     }
     
+    public int getReadModifier() {
+        return _readModifier;
+    }
     
     
 }

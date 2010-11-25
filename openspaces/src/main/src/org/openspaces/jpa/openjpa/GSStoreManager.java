@@ -151,12 +151,13 @@ public class GSStoreManager extends AbstractStoreManager {
             return super.loadAll(sms, state, load, fetch, edata);
         }
 
-    @SuppressWarnings("deprecation")
     @Override
     public boolean initialize(OpenJPAStateManager sm, PCState state,
             FetchConfiguration fetchConfiguration, Object edata) {
 
-        final ClassMetaData cm = sm.getMetaData();                                        
+        final ClassMetaData cm = sm.getMetaData();
+        int readModifier = (_transaction != null)? getConfiguration().getReadModifier()
+                : ReadModifiers.REPEATABLE_READ;
         try {
             IEntryPacket result = null;
             // If we already have the result and only need to initialize.. (relevant for JPQL)
@@ -167,7 +168,7 @@ public class GSStoreManager extends AbstractStoreManager {
                 final ITypeDesc typeDescriptor = proxy.getDirectProxy().getTypeManager().getTypeDesc(cm.getDescribedType().getName());                                
                 final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);
                 ITemplatePacket template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);
-                result = (IEntryPacket) proxy.read(template, _transaction, 0);                
+                result = (IEntryPacket) proxy.read(template, _transaction, readModifier);                
                 if (result == null)
                     return false;            
             }
