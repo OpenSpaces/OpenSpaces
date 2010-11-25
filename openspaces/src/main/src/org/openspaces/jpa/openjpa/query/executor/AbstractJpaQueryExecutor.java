@@ -39,7 +39,8 @@ abstract class AbstractJpaQueryExecutor implements JpaQueryExecutor {
     protected void build() {
         _sql = new StringBuilder();
         appendWhereSql();
-        appendOrderBySql();
+        appendGroupBySql();
+        appendOrderBySql();        
     }
     
     /**
@@ -54,7 +55,7 @@ abstract class AbstractJpaQueryExecutor implements JpaQueryExecutor {
      */
     protected void appendOrderBySql() {
         if (_expression.ordering.length > 0) {
-            _sql.append(" order by ");
+            _sql.append(" ORDER BY ");
             for (int i = 0; i < _expression.ordering.length;) {
                 _sql.append(_expression.ordering[i].getName());
                 _sql.append(_expression.ascending[i] ? " asc" : " desc");
@@ -63,6 +64,20 @@ abstract class AbstractJpaQueryExecutor implements JpaQueryExecutor {
             }
         }                
     }
+
+    /**
+     * Append GROUP BY to the SQL string builder.
+     */
+    protected void appendGroupBySql() {
+        if (_expression.grouping.length > 0) {
+            _sql.append(" GROUP BY ");
+            for (int i = 0; i < _expression.grouping.length;) {
+                _sql.append(_expression.grouping[i].getName());
+                if (++i != _expression.grouping.length)
+                    _sql.append(", ");                
+            }            
+        }
+    }    
     
     /**
      * Gets the executor's generated SQL buffer.

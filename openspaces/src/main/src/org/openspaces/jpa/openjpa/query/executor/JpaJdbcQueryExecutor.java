@@ -44,6 +44,7 @@ public class JpaJdbcQueryExecutor extends AbstractJpaQueryExecutor {
         _sql = new StringBuilder();
         appendSelectFromSql();
         appendWhereSql();
+        appendGroupBySql();
         appendOrderBySql();
     }
     
