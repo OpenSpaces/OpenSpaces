@@ -68,12 +68,6 @@
                     <target>1.5</target>
                 </configuration>
             </plugin>
-			<!-- bugfix for windows users http://forum.springsource.org/showthread.php?t=77886 -->
-            <plugin>                
-               <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-resources-plugin</artifactId>
-               <version>2.4.3</version>
-            </plugin>
         </plugins>
     </build>
 </project>
