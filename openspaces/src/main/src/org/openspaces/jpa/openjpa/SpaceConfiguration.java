@@ -37,8 +37,7 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
         setOptimistic(false);
         setLockManager("none");
         setDynamicEnhancementAgent(false);
-        _readModifier = getReadLockLevel().equals("write") ? ReadModifiers.EXCLUSIVE_READ_LOCK
-                : ReadModifiers.REPEATABLE_READ;        
+        _readModifier = ReadModifiers.REPEATABLE_READ;
     }
 
     public void initialize() {
@@ -52,6 +51,10 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+        
+        // Set read lock level (modifier)
+        _readModifier = getReadLockLevel().equals("write") ? ReadModifiers.EXCLUSIVE_READ_LOCK
+                : ReadModifiers.REPEATABLE_READ;        
     }
     
     public GConnection getJdbcConnection() throws SQLException {
