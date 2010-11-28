@@ -52,7 +52,6 @@ public class GSStoreManager extends AbstractStoreManager {
     private Transaction _transaction = null;
     private static final HashMap<Class<?>, Integer> _classesRelationStatus = new HashMap<Class<?>, Integer>();
     private static final HashSet<Class<?>> _processedClasses = new HashSet<Class<?>>();
-    private static boolean _initializedClassRelationStatus = false;
     
     @Override
     protected void open() {
@@ -234,8 +233,8 @@ public class GSStoreManager extends AbstractStoreManager {
                 
         ArrayList<Exception> exceptions = new ArrayList<Exception>();
 
-        if (!_initializedClassRelationStatus)
-            initializeClassRelationStatus();
+        if (shouldInitializeClassesRelationStatus())
+            initializeClassesRelationStatus();
         
         handleNewObjects(pNew, exceptions, space);
         handleUpdatedObjects(pDirty, exceptions, space);
@@ -336,9 +335,6 @@ public class GSStoreManager extends AbstractStoreManager {
         }
         try {
             for (Map.Entry<Class<?>, ArrayList<Object>> entry : objectsToWriteByType.entrySet()) {
-                // TODO: USE NO_RETURN_VALUE modifier for better performance (currently it causes a NullPointerException
-                // when used with local cache.
-                //space.writeMultiple(entry.getValue().toArray(), _transaction, Lease.FOREVER, UpdateModifiers.NO_RETURN_VALUE);
                 space.writeMultiple(entry.getValue().toArray(), _transaction, Lease.FOREVER, UpdateModifiers.WRITE_ONLY);
             }
         } catch (Exception e) {
@@ -351,8 +347,12 @@ public class GSStoreManager extends AbstractStoreManager {
         }
     }
 
-    private synchronized void initializeClassRelationStatus() {
-        if (_initializedClassRelationStatus)
+    /**
+     * Collects information on current OpenJPA listed class meta data list.
+     * On every call to flush() the method is called & checks if there are new classes to initialize.
+     */
+    private synchronized void initializeClassesRelationStatus() {
+        if (!shouldInitializeClassesRelationStatus())
             return;
         // Collect information regarding relationships.
         // Eventually classes which are in a relation should not be saved to the space
@@ -378,7 +378,6 @@ public class GSStoreManager extends AbstractStoreManager {
                 }
             }
         }
-        _initializedClassRelationStatus = true;
     }
 
 
@@ -400,5 +399,14 @@ public class GSStoreManager extends AbstractStoreManager {
     public Transaction getCurrentTransaction() {
         return _transaction;
     }    
+    
+    /**
+     * Gets whether classes relations status is not complete and should be synchronized.
+     * OpenJPA creates class meta data only after an entity is persisted for the first time.
+     */
+    private boolean shouldInitializeClassesRelationStatus() {
+        return getConfiguration().getMetaDataRepositoryInstance().getMetaDatas().length != _processedClasses.size();
+ 
+    }
     
 }
