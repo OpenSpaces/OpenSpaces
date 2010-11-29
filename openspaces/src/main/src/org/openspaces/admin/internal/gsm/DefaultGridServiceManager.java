@@ -109,12 +109,12 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     public ProcessingUnit deploy(ElasticSpaceDeployment deployment) throws ProcessingUnitAlreadyDeployedException {
-        return deploy(deployment.toProcessingUnitDeployment());
+        return deploy(deployment.toElasticProcessingUnitDeployment());
     }
 
     public ProcessingUnit deploy(ElasticSpaceDeployment deployment, long timeout, TimeUnit timeUnit)
             throws ProcessingUnitAlreadyDeployedException {
-        return deploy(deployment.toProcessingUnitDeployment(),timeout,timeUnit);
+        return deploy(deployment.toElasticProcessingUnitDeployment(),timeout,timeUnit);
     }
 
     public ProcessingUnit deploy(ElasticProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit)

@@ -1,15 +1,15 @@
 package org.openspaces.grid.esm;
 
+import java.util.Map;
 import java.util.logging.Logger;
 
-import org.openspaces.admin.internal.pu.elastic.ElasticScaleHandlerConfig;
 import org.openspaces.admin.machine.Machine;
 
 public class NullElasticScaleHandler implements ElasticScaleHandler {
 
     private final static Logger logger = Logger.getLogger("org.openspaces.grid.esm");
     
-    public void init(ElasticScaleHandlerConfig config) {
+    public void init(Map<String, String> properties) {
     }
 
     public boolean accept(Machine machine) {
@@ -23,4 +23,5 @@ public class NullElasticScaleHandler implements ElasticScaleHandler {
     public void scaleIn(Machine machine) {
         logger.info("Request to scale in - No need for this machine [" + ToStringHelper.machineToString(machine)+"]");
     }
+
 }

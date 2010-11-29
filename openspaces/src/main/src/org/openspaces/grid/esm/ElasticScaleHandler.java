@@ -1,6 +1,7 @@
 package org.openspaces.grid.esm;
 
-import org.openspaces.admin.internal.pu.elastic.ElasticScaleHandlerConfig;
+import java.util.Map;
+
 import org.openspaces.admin.machine.Machine;
 
 /**
@@ -20,8 +21,9 @@ public interface ElasticScaleHandler {
     /**
      * An initialization call, parameterized with the configuration used at deployment.
      * @param config The scale configuration.
+     * @throws ElasticScaleHandlerException 
      */
-    public void init(ElasticScaleHandlerConfig config);
+    public void init(Map<String,String> properties) throws ElasticScaleHandlerException;
     
     /**
      * A machine can be accepted/not-accepted (filtered) for whatever reason at any point in time.

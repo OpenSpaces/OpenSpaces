@@ -185,7 +185,7 @@ public class EsmExecutor {
         ElasticScaleHandlerConfig elasticScaleConfig = ElasticScaleHandlerConfig.valueOf(elasticScaleConfigStr);
         Class<? extends ElasticScaleHandler> clazz = ClassLoaderHelper.loadClass(elasticScaleConfig.getClassName()).asSubclass(ElasticScaleHandler.class);
         ElasticScaleHandler newInstance = clazz.newInstance();
-        newInstance.init(elasticScaleConfig);
+        newInstance.init(elasticScaleConfig.getProperties());
 
         elasticScaleMap.put(pu.getName(), newInstance);
         return newInstance;
