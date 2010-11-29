@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import org.apache.openjpa.kernel.exps.QueryExpressions;
 import org.apache.openjpa.lib.rop.ResultObjectProvider;
 import org.apache.openjpa.meta.ClassMetaData;
-import org.openspaces.jpa.openjpa.GSStoreManager;
+import org.openspaces.jpa.openjpa.StoreManager;
 import org.openspaces.jpa.openjpa.query.ExpressionNode;
 import org.openspaces.jpa.openjpa.query.ExpressionNode.NodeType;
 import org.openspaces.jpa.openjpa.query.SpaceProjectionResultObjectProvider;
@@ -27,7 +27,7 @@ public class JpaJdbcQueryExecutor extends AbstractJpaQueryExecutor {
     }
 
     @Override
-    public ResultObjectProvider execute(GSStoreManager store) throws Exception {
+    public ResultObjectProvider execute(StoreManager store) throws Exception {
         GConnection conn = store.getConfiguration().getJdbcConnection();
         // TODO: attach the current transaction to the JDBC connection.
         //conn.setTransaction(store.getCurrentTransaction());

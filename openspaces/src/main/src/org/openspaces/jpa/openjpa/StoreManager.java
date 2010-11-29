@@ -47,7 +47,8 @@ import com.j_spaces.core.client.UpdateModifiers;
  * @since 8.0
  *
  */
-public class GSStoreManager extends AbstractStoreManager {
+@SuppressWarnings("unchecked")
+public class StoreManager extends AbstractStoreManager {
     //
     private Transaction _transaction = null;
     private static final HashMap<Class<?>, Integer> _classesRelationStatus = new HashMap<Class<?>, Integer>();
@@ -62,7 +63,6 @@ public class GSStoreManager extends AbstractStoreManager {
     
     @Override
     protected Collection<String> getUnsupportedOptions() {
-        @SuppressWarnings("unchecked")
         Collection<String> unsupportedOptions = (Collection<String>) super.getUnsupportedOptions();
         unsupportedOptions.remove(OpenJPAConfiguration.OPTION_ID_DATASTORE);
         return unsupportedOptions;
@@ -144,7 +144,7 @@ public class GSStoreManager extends AbstractStoreManager {
         return false;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "rawtypes" })
     @Override
     public Collection loadAll(Collection sms, PCState state, int load, FetchConfiguration fetch, Object edata) {
             return super.loadAll(sms, state, load, fetch, edata);
@@ -224,7 +224,7 @@ public class GSStoreManager extends AbstractStoreManager {
      * Flushes changes to GigaSpaces.
      * Returns a list of exceptions that occurred.
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes" })
     @Override
     protected Collection flush(Collection pNew, Collection pNewUpdated, Collection pNewFlushedDeleted,
             Collection pDirty, Collection pDeleted) {
@@ -236,7 +236,7 @@ public class GSStoreManager extends AbstractStoreManager {
         if (shouldInitializeClassesRelationStatus())
             initializeClassesRelationStatus();
         
-        handleNewObjects(pNew, exceptions, space);
+        handleNewObjects(pNew, space);
         handleUpdatedObjects(pDirty, exceptions, space);
         handleDeletedObjects(pDeleted, exceptions, space);                     
         
@@ -297,7 +297,7 @@ public class GSStoreManager extends AbstractStoreManager {
     /**
      * Writes new persistent objects to the space.
      */
-    private void handleNewObjects(Collection<OpenJPAStateManager> sms, ArrayList<Exception> exceptions, IJSpace space) {
+    private void handleNewObjects(Collection<OpenJPAStateManager> sms, IJSpace space) {
         final HashMap<Class<?>, ArrayList<Object>> objectsToWriteByType = new HashMap<Class<?>, ArrayList<Object>>();
         final ArrayList<OpenJPAStateManager> stateManagersToRestore = new ArrayList<OpenJPAStateManager>();
         Class<?> previousType = null;
@@ -372,6 +372,8 @@ public class GSStoreManager extends AbstractStoreManager {
                             if (!_classesRelationStatus.containsKey(fmd.getDeclaredType())) {
                                 _classesRelationStatus.put(fmd.getElement().getDeclaredType(), FieldMetaData.ONE_TO_MANY);
                             }
+                        } else if (fmd.getAssociationType() == FieldMetaData.MANY_TO_MANY) {
+                            throw new RuntimeException("Many-to-many is not supported.");
                         }
                     }
                     _processedClasses.add(cm.getDescribedType());

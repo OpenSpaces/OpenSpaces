@@ -3,7 +3,7 @@ package org.openspaces.jpa.openjpa.query;
 import org.apache.commons.lang.exception.NestableRuntimeException;
 import org.apache.openjpa.lib.rop.ResultObjectProvider;
 import org.apache.openjpa.meta.ClassMetaData;
-import org.openspaces.jpa.openjpa.GSStoreManager;
+import org.openspaces.jpa.openjpa.StoreManager;
 
 import com.gigaspaces.internal.transport.IEntryPacket;
 
@@ -19,10 +19,10 @@ public class SpaceResultObjectProvider implements ResultObjectProvider {
     //
     private Object[] _result;
     private int _currentIndex;
-    private GSStoreManager _store;
+    private StoreManager _store;
     private ClassMetaData _classMetaData;
     
-    public SpaceResultObjectProvider(ClassMetaData classMetaData, Object[] result, GSStoreManager store) {
+    public SpaceResultObjectProvider(ClassMetaData classMetaData, Object[] result, StoreManager store) {
         _result = result;
         _currentIndex = -1;
         _store = store;

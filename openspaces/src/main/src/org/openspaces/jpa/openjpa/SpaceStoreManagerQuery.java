@@ -44,9 +44,9 @@ public class SpaceStoreManagerQuery extends ExpressionStoreQuery {
 
     private static final long serialVersionUID = 1L;
 
-    private GSStoreManager _store;
+    private StoreManager _store;
     
-    public SpaceStoreManagerQuery(ExpressionParser parser, GSStoreManager store) {
+    public SpaceStoreManagerQuery(ExpressionParser parser, StoreManager store) {
         super(parser);
         _store = store;
     }    

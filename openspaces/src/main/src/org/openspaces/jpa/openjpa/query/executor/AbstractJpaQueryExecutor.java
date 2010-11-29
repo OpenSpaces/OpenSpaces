@@ -3,7 +3,7 @@ package org.openspaces.jpa.openjpa.query.executor;
 import org.apache.openjpa.kernel.exps.QueryExpressions;
 import org.apache.openjpa.lib.rop.ResultObjectProvider;
 import org.apache.openjpa.meta.ClassMetaData;
-import org.openspaces.jpa.openjpa.GSStoreManager;
+import org.openspaces.jpa.openjpa.StoreManager;
 import org.openspaces.jpa.openjpa.query.ExpressionNode;
 
 /**
@@ -31,7 +31,7 @@ abstract class AbstractJpaQueryExecutor implements JpaQueryExecutor {
      * Execute query.
      * @throws Exception 
      */
-    public abstract ResultObjectProvider execute(GSStoreManager store) throws Exception;
+    public abstract ResultObjectProvider execute(StoreManager store) throws Exception;
     
     /**
      * Build query for execution.
