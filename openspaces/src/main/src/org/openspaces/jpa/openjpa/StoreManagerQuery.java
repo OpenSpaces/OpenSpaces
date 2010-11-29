@@ -40,13 +40,13 @@ import com.j_spaces.core.client.UpdateModifiers;
  * @since 8.0
  *
  */
-public class SpaceStoreManagerQuery extends ExpressionStoreQuery {
+public class StoreManagerQuery extends ExpressionStoreQuery {
 
     private static final long serialVersionUID = 1L;
 
     private StoreManager _store;
     
-    public SpaceStoreManagerQuery(ExpressionParser parser, StoreManager store) {
+    public StoreManagerQuery(ExpressionParser parser, StoreManager store) {
         super(parser);
         _store = store;
     }    

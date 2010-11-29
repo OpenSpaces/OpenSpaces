@@ -101,7 +101,7 @@ public class StoreManager extends AbstractStoreManager {
     @Override
     public void rollback() {
         try {
-            _transaction.abort();
+            _transaction.abort(Long.MAX_VALUE);
         } catch (Exception e) {
            throw new RuntimeException(e.getMessage(), e);
         } finally {
@@ -112,7 +112,7 @@ public class StoreManager extends AbstractStoreManager {
     @Override
     public StoreQuery newQuery(String language) {        
         ExpressionParser ep = QueryLanguages.parserForLanguage(language);
-        return new SpaceStoreManagerQuery(ep, this);
+        return new StoreManagerQuery(ep, this);
     }
 
     @Override
