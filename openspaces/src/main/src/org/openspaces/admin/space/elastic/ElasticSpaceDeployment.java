@@ -1,6 +1,6 @@
 package org.openspaces.admin.space.elastic;
 
-import java.util.Properties;
+import java.util.Map;
 
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticProcessingUnitDeployment;
@@ -188,7 +188,7 @@ public class ElasticSpaceDeployment {
      * @param classname The elastic scale handler class name
      * @param properties The elastic scale handler properties.
      */
-    public ElasticSpaceDeployment elasticScaleHandler(String classname, Properties properties) {
+    public ElasticSpaceDeployment elasticScaleHandler(String classname, Map<String, String> properties) {
         deployment.elasticScaleHandler(classname,properties);
         return this;
     }

@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.pu.elastic;
 
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -20,13 +21,13 @@ import java.util.Map.Entry;
 public class ElasticScaleHandlerConfig {
     
     private final String className;
-    private final Properties properties;
+    private final Map<String, String>  properties;
 
     public ElasticScaleHandlerConfig(String className) {
-        this(className,new Properties());
+        this(className,new HashMap<String, String>());
     }
 
-    public ElasticScaleHandlerConfig(String className,Properties properties) {
+    public ElasticScaleHandlerConfig(String className,Map<String, String> properties) {
         this.className = className;
         this.properties = properties;
     }
@@ -35,7 +36,7 @@ public class ElasticScaleHandlerConfig {
         if (key.contains(";") || value.contains(";"))
             throw new IllegalArgumentException("properties should not contain the ';' delimeter");
         
-        properties.setProperty(key, value);
+        properties.put(key, value);
         return this;
     }
     
@@ -44,21 +45,21 @@ public class ElasticScaleHandlerConfig {
     }
     
     public String getProperty(String key) {
-        return properties.getProperty(key);
+        return properties.get(key);
     }
     
-    Properties getProperties() {
+    public Map<String, String> getProperties() {
         return properties;
     }
     
     public String toString() {
         StringBuilder out = new StringBuilder();
         out.append("<class>").append(getClassName()).append("</class>");
-        Properties properties = getProperties();
+        Map<String, String> properties = getProperties();
         if (!properties.isEmpty()) {
             out.append("<props>");
-            Set<Entry<Object,Object>> entrySet = properties.entrySet();
-            for (Entry<Object,Object> entry : entrySet) {
+            Set<Entry<String, String>> entrySet = properties.entrySet();
+            for (Entry<String, String> entry : entrySet) {
                 out.append("<key>").append(entry.getKey()).append("</key>");
                 out.append("<val>").append(entry.getValue()).append("</val>");
             }
