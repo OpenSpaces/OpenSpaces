@@ -16,6 +16,7 @@ import org.apache.openjpa.kernel.exps.Value;
 import org.apache.openjpa.lib.rop.ResultObjectProvider;
 import org.apache.openjpa.meta.ClassMetaData;
 import org.apache.openjpa.meta.FieldMetaData;
+import org.openspaces.jpa.StoreManager;
 import org.openspaces.jpa.openjpa.query.ExpressionNode;
 import org.openspaces.jpa.openjpa.query.LiteralValueNode;
 import org.openspaces.jpa.openjpa.query.ParameterNode;

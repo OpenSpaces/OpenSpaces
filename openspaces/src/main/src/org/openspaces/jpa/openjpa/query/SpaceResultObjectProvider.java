@@ -3,7 +3,7 @@ package org.openspaces.jpa.openjpa.query;
 import org.apache.commons.lang.exception.NestableRuntimeException;
 import org.apache.openjpa.lib.rop.ResultObjectProvider;
 import org.apache.openjpa.meta.ClassMetaData;
-import org.openspaces.jpa.openjpa.StoreManager;
+import org.openspaces.jpa.StoreManager;
 
 import com.gigaspaces.internal.transport.IEntryPacket;
 

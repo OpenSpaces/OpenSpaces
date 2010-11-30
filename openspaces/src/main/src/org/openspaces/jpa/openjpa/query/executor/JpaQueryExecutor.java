@@ -1,7 +1,7 @@
 package org.openspaces.jpa.openjpa.query.executor;
 
 import org.apache.openjpa.lib.rop.ResultObjectProvider;
-import org.openspaces.jpa.openjpa.StoreManager;
+import org.openspaces.jpa.StoreManager;
 
 /**
  * An interface for JPA's translated expression tree executor.

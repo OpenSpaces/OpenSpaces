@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import org.apache.openjpa.kernel.exps.QueryExpressions;
 import org.apache.openjpa.lib.rop.ResultObjectProvider;
 import org.apache.openjpa.meta.ClassMetaData;
-import org.openspaces.jpa.openjpa.StoreManager;
+import org.openspaces.jpa.StoreManager;
 import org.openspaces.jpa.openjpa.query.ExpressionNode;
 import org.openspaces.jpa.openjpa.query.ExpressionNode.NodeType;
 import org.openspaces.jpa.openjpa.query.SpaceProjectionResultObjectProvider;

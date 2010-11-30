@@ -1,4 +1,4 @@
-package org.openspaces.jpa.openjpa;
+package org.openspaces.jpa;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -26,6 +26,8 @@ import org.apache.openjpa.lib.rop.ResultObjectProvider;
 import org.apache.openjpa.meta.ClassMetaData;
 import org.apache.openjpa.meta.FieldMetaData;
 import org.apache.openjpa.util.ApplicationIds;
+import org.openspaces.jpa.openjpa.SpaceConfiguration;
+import org.openspaces.jpa.openjpa.StoreManagerQuery;
 
 import com.gigaspaces.internal.client.QueryResultTypeInternal;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
@@ -64,7 +66,7 @@ public class StoreManager extends AbstractStoreManager {
     @Override
     protected Collection<String> getUnsupportedOptions() {
         Collection<String> unsupportedOptions = (Collection<String>) super.getUnsupportedOptions();
-        unsupportedOptions.remove(OpenJPAConfiguration.OPTION_ID_DATASTORE);
+        unsupportedOptions.remove(OpenJPAConfiguration.OPTION_ID_DATASTORE);        
         return unsupportedOptions;
     }
 
