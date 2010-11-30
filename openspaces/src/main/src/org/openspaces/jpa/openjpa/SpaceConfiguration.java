@@ -41,8 +41,10 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
     }
 
     public void initialize() {
-        // Set a space proxy using the provided connection url        
-        _space = new UrlSpaceConfigurer(getConnectionURL()).space();
+        // Set a space proxy using the provided connection url
+    	// if the space was injected - do nothing.
+        if (_space == null)
+            _space = new UrlSpaceConfigurer(getConnectionURL()).space();
         
         // Create a transaction manager
         TransactionManagerConfiguration configuration = new TransactionManagerConfiguration(TransactionManagerType.DISTRIBUTED);
@@ -83,5 +85,9 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
         return _readModifier;
     }
     
-    
+    @Override
+    public void setConnectionFactory(Object space) {
+        _space = (IJSpace) space;
+    }
+        
 }
