@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.GridComponent;
+import org.openspaces.admin.alerts.AlertManager;
 import org.openspaces.admin.dump.CompoundDumpResult;
 import org.openspaces.admin.dump.DumpGeneratedListener;
 import org.openspaces.admin.dump.DumpProvider;
@@ -23,6 +24,7 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.gsm.GridServiceManagers;
+import org.openspaces.admin.internal.alerts.DefaultAlertManager;
 import org.openspaces.admin.internal.discovery.DiscoveryService;
 import org.openspaces.admin.internal.esm.DefaultElasticServiceManagers;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
@@ -181,9 +183,12 @@ public class DefaultAdmin implements InternalAdmin {
     private boolean singleThreadedEventListeners = false;
 
     private long executorSingleThreadId;
+
+    private final AlertManager alertManager;
     
     public DefaultAdmin() {
         this.discoveryService = new DiscoveryService(this);
+        this.alertManager = new DefaultAlertManager(this);
     }
 
     public String[] getGroups() {
@@ -429,6 +434,10 @@ public class DefaultAdmin implements InternalAdmin {
 
     public Spaces getSpaces() {
         return this.spaces;
+    }
+    
+    public AlertManager getAlertManager() {
+        return alertManager;
     }
 
     public void addEventListener(AdminEventListener eventListener) {

@@ -4,8 +4,9 @@ import java.util.Map;
 
 public interface StrategyConfig {
 	
-	String getStartegyName();
+	String getStartegyBeanClassName();
 	
+	void applyRecommendedSettings();
 	void setProperties(Map<String,String> properties);
 	Map<String,String> getProperties();
 }

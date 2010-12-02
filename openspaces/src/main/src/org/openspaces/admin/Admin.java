@@ -17,6 +17,8 @@
 package org.openspaces.admin;
 
 import net.jini.core.discovery.LookupLocator;
+
+import org.openspaces.admin.alerts.AlertManager;
 import org.openspaces.admin.dump.DumpGeneratedListener;
 import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.dump.DumpResult;
@@ -203,6 +205,12 @@ public interface Admin extends StatisticsMonitor, DumpProvider {
      * Returns the spaces discovered.
      */
     Spaces getSpaces();
+
+    /**
+     * Returns the alert manager through which alert strategies are managed, alerts are fired and
+     * alert events are registered for.
+     */
+    AlertManager getAlertManager();
 
     /**
      * Smart addition of event listeners. Will automatically add to the correct place any interface
