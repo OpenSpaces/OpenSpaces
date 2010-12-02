@@ -8,19 +8,19 @@ public class MachineCpuUtilizationAlertStrategyConfigurer implements AlertStrate
 	}
 	
 	public MachineCpuUtilizationAlertStrategyConfigurer applyRecommendedSettings() {
-		lowThreshold(60);
-		highThreshold(70);
+		lowThresholdPerc(60);
+		highThresholdPerc(70);
 		movingAveragePeriod(5);
 		return this;
 	}
 	
-	public MachineCpuUtilizationAlertStrategyConfigurer highThreshold(int highThreshold) {
-		alertState.setHighThreshold(highThreshold);
+	public MachineCpuUtilizationAlertStrategyConfigurer highThresholdPerc(int highThreshold) {
+		alertState.setHighThresholdPerc(highThreshold);
 		return this;
 	}
 	
-	public MachineCpuUtilizationAlertStrategyConfigurer lowThreshold(int lowThreshold) {
-		alertState.setLowThreshold(lowThreshold);
+	public MachineCpuUtilizationAlertStrategyConfigurer lowThresholdPerc(int lowThreshold) {
+		alertState.setLowThresholdPerc(lowThreshold);
 		return this;
 	}
 	

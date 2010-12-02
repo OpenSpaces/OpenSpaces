@@ -53,18 +53,18 @@ public class MachineCpuUtilizationAlertStrategyBean implements AlertStrategyBean
     }
 
     private void validateProperties() {
-        if (strategyConfig.getHighThreshold() < strategyConfig.getLowThreshold()) {
-            throw new IllegalArgumentException("Low threshold [" + strategyConfig.getLowThreshold()
-                    + "] must be less than high threshold value [" + strategyConfig.getHighThreshold() + "]");
+        if (strategyConfig.getHighThresholdPerc() < strategyConfig.getLowThresholdPerc()) {
+            throw new IllegalArgumentException("Low threshold [" + strategyConfig.getLowThresholdPerc()
+                    + "] must be less than high threshold value [" + strategyConfig.getHighThresholdPerc() + "]");
         }
         
-        if (strategyConfig.getHighThreshold() < 0) {
-            throw new IllegalArgumentException("High threshold [" + strategyConfig.getHighThreshold()
+        if (strategyConfig.getHighThresholdPerc() < 0) {
+            throw new IllegalArgumentException("High threshold [" + strategyConfig.getHighThresholdPerc()
                     + "] must greater than zero");
         }
         
-        if (strategyConfig.getLowThreshold() < 0) {
-            throw new IllegalArgumentException("Low threshold [" + strategyConfig.getLowThreshold()
+        if (strategyConfig.getLowThresholdPerc() < 0) {
+            throw new IllegalArgumentException("Low threshold [" + strategyConfig.getLowThresholdPerc()
                     + "] must greater or equal to zero");
         }
         
@@ -76,8 +76,8 @@ public class MachineCpuUtilizationAlertStrategyBean implements AlertStrategyBean
 
     public void operatingSystemStatisticsChanged(OperatingSystemStatisticsChangedEvent event) {
 
-        int highThreshold = strategyConfig.getHighThreshold();
-        int lowThreshold = strategyConfig.getLowThreshold();
+        int highThreshold = strategyConfig.getHighThresholdPerc();
+        int lowThreshold = strategyConfig.getLowThresholdPerc();
         int movingAveragePeriod = strategyConfig.getMovingAveragePeriod();
         
         double cpuPerc = event.getStatistics().getCpuPerc() * 100;

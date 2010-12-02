@@ -62,6 +62,6 @@ public class Alert {
 	
 	@Override
 	public String toString() {
-		return alertId;
+	    return getAlertId()+" " + (isPositive()? "[+]":"[-]") + " " + getAlertDescription();
 	}
 }
