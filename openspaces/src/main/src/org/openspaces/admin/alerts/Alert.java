@@ -6,11 +6,11 @@ import java.util.Map;
 public class Alert {
 	
 	private String alertId;
-	private String alertType;
+	private String alertStrategyBeanClassName;
 	private String sourceComponentUid;
 	private String alertDescription;
 	private boolean isPositive;
-	private Map<String, Object> properties;
+	private Map<String, String> properties;
 	
 	public Alert() {
 	}
@@ -23,11 +23,11 @@ public class Alert {
 		this.alertId = alertId;
 	}
 	
-	public String getAlertType() {
-		return alertType;
+	public String getAlertStrategyBeanClassName() {
+		return alertStrategyBeanClassName;
 	}
-	public void setAlertType(String alertType) {
-		this.alertType = alertType;
+	public void setAlertStrategyBeanClassName(String alertStrategyBeanClassName) {
+		this.alertStrategyBeanClassName = alertStrategyBeanClassName;
 	}
 	public String getSourceComponentUid() {
 		return sourceComponentUid;
@@ -41,15 +41,21 @@ public class Alert {
 	public void setPositive(boolean isPositive) {
 		this.isPositive = isPositive;
 	}
-	public Map<String, Object> getProperties() {
+	public Map<String, String> getProperties() {
 		return properties;
 	}
-	public void setProperties(Map<String, Object> properties) {
+	public void setProperties(Map<String, String> properties) {
 		this.properties = properties;
 	}
-	public void setProperty(String key, Object value) {
+	public void addProperties(Map<String, String> properties) {
+	    if (this.properties == null) {
+	        this.properties = new HashMap<String, String>();
+	    }
+        this.properties.putAll(properties);
+    }
+	public void setProperty(String key, String value) {
 		if (this.properties == null) {
-			this.properties = new HashMap<String, Object>();
+			this.properties = new HashMap<String, String>();
 		}
 		this.properties.put(key, value);
 	}

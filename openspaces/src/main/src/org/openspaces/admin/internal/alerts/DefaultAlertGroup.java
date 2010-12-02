@@ -20,7 +20,7 @@ public class DefaultAlertGroup implements AlertGroup {
 	}
 	
 	public String getName() {
-		return alertsList.get(0).getAlertType();
+		return alertsList.get(0).getAlertStrategyBeanClassName();
 	}
 
 	public Iterator<Alert> iterator() {

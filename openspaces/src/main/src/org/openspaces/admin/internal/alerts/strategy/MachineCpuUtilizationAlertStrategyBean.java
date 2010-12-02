@@ -90,14 +90,11 @@ public class MachineCpuUtilizationAlertStrategyBean implements AlertStrategyBean
                 alert.setAlertDescription("CPU crossed above a " + highThreshold + "% threshold, for a period of "
                         + getPeriodOfTime(event) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuMovingAvg)
                         + "%");
-                alert.setAlertType(this.getClass().getName());
+                alert.setAlertStrategyBeanClassName(this.getClass().getName());
                 alert.setPositive(false);
                 alert.setSourceComponentUid(event.getOperatingSystem().getUid());
-                alert.setProperty("highThreshold", highThreshold);
-                alert.setProperty("lowThreshold", lowThreshold);
-                alert.setProperty("movingAveragePeriod", movingAveragePeriod);
-//                alert.setProperty("statisticsInterval", statisticsInterval);
-                alert.setProperty("utilization", cpuMovingAvg);
+                alert.setProperties(strategyConfig.getProperties());
+                alert.setProperty("utilization", String.valueOf(cpuMovingAvg));
                 alert.setProperty("hostname", event.getStatistics().getDetails().getHostName());
                 alert.setProperty("hostAddress", event.getStatistics().getDetails().getHostAddress());
 
@@ -112,14 +109,11 @@ public class MachineCpuUtilizationAlertStrategyBean implements AlertStrategyBean
                 alert.setAlertDescription("CPU crossed below a " + highThreshold + "% threshold, for a period of "
                         + getPeriodOfTime(event) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuMovingAvg)
                         + "%");
-                alert.setAlertType(this.getClass().getName());
+                alert.setAlertStrategyBeanClassName(this.getClass().getName());
                 alert.setPositive(true);
                 alert.setSourceComponentUid(event.getOperatingSystem().getUid());
-                alert.setProperty("highThreshold", highThreshold);
-                alert.setProperty("lowThreshold", lowThreshold);
-                alert.setProperty("movingAveragePeriod", movingAveragePeriod);
-//                alert.setProperty("statisticsInterval", statisticsInterval);
-                alert.setProperty("utilization", cpuMovingAvg);
+                alert.setProperties(strategyConfig.getProperties());
+                alert.setProperty("utilization", String.valueOf(cpuMovingAvg));
                 alert.setProperty("hostname", event.getStatistics().getDetails().getHostName());
                 alert.setProperty("hostAddress", event.getStatistics().getDetails().getHostAddress());
 
