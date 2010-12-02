@@ -90,7 +90,7 @@ public class MachineCpuUtilizationAlertStrategyBean implements AlertStrategyBean
                 alert.setAlertDescription("CPU crossed above a " + highThreshold + "% threshold, for a period of "
                         + getPeriodOfTime(event) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuMovingAvg)
                         + "%");
-                alert.setAlertStrategyBeanClassName(this.getClass().getName());
+                alert.setAlertType(this.getClass().getName());
                 alert.setPositive(false);
                 alert.setSourceComponentUid(event.getOperatingSystem().getUid());
                 alert.setProperties(strategyConfig.getProperties());
@@ -109,7 +109,7 @@ public class MachineCpuUtilizationAlertStrategyBean implements AlertStrategyBean
                 alert.setAlertDescription("CPU crossed below a " + highThreshold + "% threshold, for a period of "
                         + getPeriodOfTime(event) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuMovingAvg)
                         + "%");
-                alert.setAlertStrategyBeanClassName(this.getClass().getName());
+                alert.setAlertType(this.getClass().getName());
                 alert.setPositive(true);
                 alert.setSourceComponentUid(event.getOperatingSystem().getUid());
                 alert.setProperties(strategyConfig.getProperties());

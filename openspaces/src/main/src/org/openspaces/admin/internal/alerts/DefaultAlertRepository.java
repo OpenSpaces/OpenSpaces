@@ -23,10 +23,10 @@ public class DefaultAlertRepository implements InternalAlertRepository {
     public void addAlert(Alert alert) {
         alert.setAlertId(id.incrementAndGet() + "@" + Integer.toHexString(hashCode()));
 
-        AlertChain chain = alertsByType.get(alert.getAlertStrategyBeanClassName());
+        AlertChain chain = alertsByType.get(alert.getAlertType());
         if (chain == null) {
             AlertChain newChain = new AlertChain(historySize);
-            chain = alertsByType.putIfAbsent(alert.getAlertStrategyBeanClassName(), newChain);
+            chain = alertsByType.putIfAbsent(alert.getAlertType(), newChain);
             if (chain == null) {
                 chain = newChain;
             }
@@ -72,7 +72,7 @@ public class DefaultAlertRepository implements InternalAlertRepository {
     }
 
     public void removeAlert(Alert alert) {
-        alertsByType.remove(alert.getAlertStrategyBeanClassName());
+        alertsByType.remove(alert.getAlertType());
     }
 
     /*

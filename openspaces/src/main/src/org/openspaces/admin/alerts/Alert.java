@@ -6,7 +6,7 @@ import java.util.Map;
 public class Alert {
 	
 	private String alertId;
-	private String alertStrategyBeanClassName;
+	private String alertType;
 	private String sourceComponentUid;
 	private String alertDescription;
 	private boolean isPositive;
@@ -23,11 +23,11 @@ public class Alert {
 		this.alertId = alertId;
 	}
 	
-	public String getAlertStrategyBeanClassName() {
-		return alertStrategyBeanClassName;
+	public String getAlertType() {
+		return alertType;
 	}
-	public void setAlertStrategyBeanClassName(String alertStrategyBeanClassName) {
-		this.alertStrategyBeanClassName = alertStrategyBeanClassName;
+	public void setAlertType(String alertType) {
+		this.alertType = alertType;
 	}
 	public String getSourceComponentUid() {
 		return sourceComponentUid;
