@@ -57,7 +57,7 @@ public class MachineCpuUtilizationAlertStrategyConfig implements AlertStrategyCo
 	}
 	
 	public String getStartegyBeanClassName() {
-		return MachineCpuUtilizationAlertStrategyBean.class.getSimpleName();
+		return MachineCpuUtilizationAlertStrategyBean.class.getName();
 	}
 
 }

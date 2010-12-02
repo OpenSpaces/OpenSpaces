@@ -47,7 +47,7 @@ public class DefaultStrategyPropertiesManager<T extends StrategyBean> implements
             throw new StrategyNotFoundException("Failed to enable startegy [" + strategy + "] - doesn't exist.");
         }
 
-        if (!enabledStrategies.containsKey(strategy)) {
+        if (enabledStrategies.containsKey(strategy)) {
             return; // idempotent - already enabled just return
         }
 
@@ -112,7 +112,7 @@ public class DefaultStrategyPropertiesManager<T extends StrategyBean> implements
     private T newInstance(String strategyBeanClassName) throws StrategyNotFoundException {
         try {
             Class<T> clazz = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(
-                    strategyBeanClassName).asSubclass(ServiceBean.class);
+                    strategyBeanClassName);
             T newInstance = clazz.newInstance();
             return newInstance;
         } catch (Exception e) {

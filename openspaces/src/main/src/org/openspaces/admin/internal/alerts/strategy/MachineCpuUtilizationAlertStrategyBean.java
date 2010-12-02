@@ -24,9 +24,7 @@ public class MachineCpuUtilizationAlertStrategyBean implements AlertStrategyBean
     private boolean inBetweenThresholdState = false;
     private final static NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();
 
-    public MachineCpuUtilizationAlertStrategyBean(Admin admin) {
-        this.admin = admin;
-
+    public MachineCpuUtilizationAlertStrategyBean() {
         NUMBER_FORMAT.setMinimumFractionDigits(1);
         NUMBER_FORMAT.setMaximumFractionDigits(2);
     }
