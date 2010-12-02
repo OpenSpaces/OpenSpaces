@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import net.jini.core.transaction.server.TransactionManager;
 
 import org.apache.openjpa.conf.OpenJPAConfigurationImpl;
+import org.apache.openjpa.lib.conf.Value;
 import org.openspaces.core.space.UrlSpaceConfigurer;
 
 import com.gigaspaces.client.transaction.ITransactionManagerProvider;
@@ -43,8 +44,13 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
     public void initialize() {
         // Set a space proxy using the provided connection url
     	// if the space was injected - do nothing.
-        if (_space == null)
-            _space = new UrlSpaceConfigurer(getConnectionURL()).space();
+        if (_space == null) {
+            Value configurationValue = getValue("ConnectionFactory");
+            if (configurationValue != null && configurationValue.get() != null)
+                _space = (IJSpace) configurationValue.get();
+            else            
+                _space = new UrlSpaceConfigurer(getConnectionURL()).space();
+        }
         
         // Create a transaction manager
         TransactionManagerConfiguration configuration = new TransactionManagerConfiguration(TransactionManagerType.DISTRIBUTED);
