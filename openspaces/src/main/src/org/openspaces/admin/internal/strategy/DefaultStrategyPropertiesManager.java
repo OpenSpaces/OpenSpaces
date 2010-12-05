@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.jini.rio.core.jsb.ServiceBean;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.strategy.StrategyAlreadyExistsException;
 import org.openspaces.admin.strategy.StrategyNotFoundException;

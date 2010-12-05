@@ -7,7 +7,6 @@ import net.jini.core.lease.Lease;
 import com.gigaspaces.datasource.BulkItem;
 import com.gigaspaces.internal.client.spaceproxy.SpaceProxyImpl;
 import com.gigaspaces.internal.transport.EntryPacket;
-import com.j_spaces.core.OperationID;
 import com.j_spaces.core.client.UpdateModifiers;
 
 public class WanQueryExecutor implements Runnable {
