@@ -29,8 +29,7 @@ public class JpaJdbcQueryExecutor extends AbstractJpaQueryExecutor {
     @Override
     public ResultObjectProvider execute(StoreManager store) throws Exception {
         GConnection conn = store.getConfiguration().getJdbcConnection();
-        // TODO: attach the current transaction to the JDBC connection.
-        //conn.setTransaction(store.getCurrentTransaction());
+        conn.setTransaction(store.getCurrentTransaction());
         PreparedStatement pstmt = conn.prepareStatement(_sql.toString());
         for (int i = 0; i < _parameters.length; i++) {
             pstmt.setObject(i+1, _parameters[i]);
