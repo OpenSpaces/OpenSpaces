@@ -14,27 +14,29 @@
  * limitations under the License.
  */
 
-package org.openspaces.admin.strategy;
-
-import org.openspaces.admin.AdminException;
+package org.openspaces.admin.bean;
 
 /**
- * Base class for all Strategy exceptions.
+ * Exception indicating that a bean by this name can't be found (has not been added or has been
+ * removed).
+ * 
+ * @see BeanConfig#getBeanClassName()
+ * @see BeanManager#addBean(BeanConfig)
+ * @see BeanManager
  * 
  * @author Moran Avigdor
  * @author Itai Frenkel
  * @since 8.0
  */
-public class StrategyException extends AdminException {
+public class BeanNotFoundException extends BeanException {
 
 	private static final long serialVersionUID = 1L;
 
-	public StrategyException(String message) {
+	public BeanNotFoundException(String message) {
 		super(message);
 	}
 	
-	public StrategyException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
+	public BeanNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

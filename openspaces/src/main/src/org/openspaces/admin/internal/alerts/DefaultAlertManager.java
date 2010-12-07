@@ -4,29 +4,29 @@ import java.util.Map;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.alerts.Alert;
+import org.openspaces.admin.alerts.config.AlertBeanConfig;
 import org.openspaces.admin.alerts.events.AlertEventListener;
-import org.openspaces.admin.alerts.strategy.AlertStrategyConfig;
+import org.openspaces.admin.bean.BeanPropertiesManager;
+import org.openspaces.admin.internal.alerts.bean.AlertBean;
 import org.openspaces.admin.internal.alerts.events.DefaultAlertEventManager;
 import org.openspaces.admin.internal.alerts.events.InternalAlertEventManager;
-import org.openspaces.admin.internal.alerts.strategy.AlertStrategyBean;
-import org.openspaces.admin.internal.strategy.DefaultStrategyPropertiesManager;
-import org.openspaces.admin.strategy.StrategyAlreadyExistsException;
-import org.openspaces.admin.strategy.StrategyConfig;
-import org.openspaces.admin.strategy.StrategyNotFoundException;
-import org.openspaces.admin.strategy.StrategyPropertiesManager;
+import org.openspaces.admin.internal.bean.DefaultBeanPropertiesManager;
+import org.openspaces.admin.bean.BeanAlreadyExistsException;
+import org.openspaces.admin.bean.BeanConfig;
+import org.openspaces.admin.bean.BeanNotFoundException;
 
 public class DefaultAlertManager implements InternalAlertManager {
 
     private final Admin admin;
     private final InternalAlertEventManager alertEventManager;
     private final InternalAlertRepository alertRepository;
-    private final StrategyPropertiesManager strategies;
+    private final BeanPropertiesManager beanPropertiesManager;
 
     public DefaultAlertManager(Admin admin) {
         this.admin = admin;
         this.alertEventManager = new DefaultAlertEventManager(this);
         this.alertRepository = new DefaultAlertRepository();
-        this.strategies = new DefaultStrategyPropertiesManager<AlertStrategyBean>(admin);
+        this.beanPropertiesManager = new DefaultBeanPropertiesManager<AlertBean>(admin);
     }
 
     public AlertRepository getAlertRepository() {
@@ -35,7 +35,6 @@ public class DefaultAlertManager implements InternalAlertManager {
 
     public void add(AlertEventListener listener) {
         alertEventManager.add(listener);
-
     }
 
     public void add(AlertEventListener listener, boolean includeExisting) {
@@ -55,46 +54,46 @@ public class DefaultAlertManager implements InternalAlertManager {
         return admin;
     }
 
-    public StrategyPropertiesManager getStrategies() {
-        return strategies;
+    public BeanPropertiesManager getBeanPropertiesManager() {
+        return beanPropertiesManager;
     }
 
-    public void addStrategy(AlertStrategyConfig config) throws StrategyAlreadyExistsException {
-        strategies.addStrategy(config.getStartegyBeanClassName(), config.getProperties());
+    public void addBean(AlertBeanConfig config) throws BeanAlreadyExistsException {
+        beanPropertiesManager.addBean(config.getBeanClassName(), config.getProperties());
     }
 
-    public <T extends AlertStrategyConfig> void disableStrategy(Class<T> clazz) throws StrategyNotFoundException {
-        StrategyConfig configInstance = getConfigInstance(clazz);
-        strategies.disableStrategy(configInstance.getStartegyBeanClassName());
+    public <T extends AlertBeanConfig> void disableBean(Class<T> clazz) throws BeanNotFoundException {
+        BeanConfig configInstance = getConfigInstance(clazz);
+        beanPropertiesManager.disableBean(configInstance.getBeanClassName());
     }
 
-    public <T extends AlertStrategyConfig> void enableStrategy(Class<T> clazz) throws StrategyNotFoundException {
-        StrategyConfig configInstance = getConfigInstance(clazz);
-        strategies.enableStrategy(configInstance.getStartegyBeanClassName());
+    public <T extends AlertBeanConfig> void enableBean(Class<T> clazz) throws BeanNotFoundException {
+        BeanConfig configInstance = getConfigInstance(clazz);
+        beanPropertiesManager.enableBean(configInstance.getBeanClassName());
     }
 
-    public <T extends AlertStrategyConfig> T getStrategy(Class<T> clazz) throws StrategyNotFoundException {
+    public <T extends AlertBeanConfig> T getBean(Class<T> clazz) throws BeanNotFoundException {
         T configInstance = getConfigInstance(clazz);
-        Map<String, String> strategyProperties = strategies.getStrategy(configInstance.getStartegyBeanClassName());
-        configInstance.setProperties(strategyProperties);
+        Map<String, String> beanProperties = beanPropertiesManager.getBean(configInstance.getBeanClassName());
+        configInstance.setProperties(beanProperties);
         return configInstance;
     }
 
-    public <T extends AlertStrategyConfig> void removeStrategy(Class<T> clazz) throws StrategyNotFoundException {
-        StrategyConfig configInstance = getConfigInstance(clazz);
-        strategies.removeStrategy(configInstance.getStartegyBeanClassName());
+    public <T extends AlertBeanConfig> void removeBean(Class<T> clazz) throws BeanNotFoundException {
+        BeanConfig configInstance = getConfigInstance(clazz);
+        beanPropertiesManager.removeBean(configInstance.getBeanClassName());
     }
 
-    public void setStrategy(AlertStrategyConfig config) throws StrategyNotFoundException {
-        strategies.setStrategy(config.getStartegyBeanClassName(), config.getProperties());
+    public void setBean(AlertBeanConfig config) throws BeanNotFoundException {
+        beanPropertiesManager.setBean(config.getBeanClassName(), config.getProperties());
     }
 
-    private <T extends StrategyConfig> T getConfigInstance(Class<T> clazz) {
+    private <T extends BeanConfig> T getConfigInstance(Class<T> clazz) {
         try {
             T newInstance = clazz.newInstance();
             return newInstance;
         } catch (Exception e) {
-            throw new StrategyNotFoundException("Unable to extract strategy name from " + clazz, e);
+            throw new BeanNotFoundException("Unable to extract bean name from " + clazz, e);
         }
     }
 }

@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package org.openspaces.admin.strategy;
+package org.openspaces.admin.bean;
 
 /**
- * Exception indicating that a strategy by this name already has been added.
- * @see StrategyConfig#getStartegyBeanClassName()
- * @see StrategyManager#addStrategy(StrategyConfig)
+ * Exception indicating that a bean by this name already has been added.
+ * @see BeanConfig#getBeanClassName()
+ * @see BeanManager#addBean(BeanConfig)
  * 
  * @author Moran Avigdor
  * @author Itai Frenkel
  * @since 8.0
  */
-public class StrategyAlreadyExistsException extends StrategyException {
+public class BeanAlreadyExistsException extends BeanException {
 
 	private static final long serialVersionUID = 1L;
 
-	public StrategyAlreadyExistsException(String message) {
+	public BeanAlreadyExistsException(String message) {
 		super(message);
 	}
 
-	public StrategyAlreadyExistsException(String message, Throwable cause) {
+	public BeanAlreadyExistsException(String message, Throwable cause) {
 		super(message, cause);
 	}
 }

@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package org.openspaces.admin.strategy;
+package org.openspaces.admin.alerts.config;
+
+import org.openspaces.admin.bean.BeanConfigurer;
 
 /**
  * A weakly-typed configuration API based on the 'builder' patterns for a more convenient
- * code-fluent approach to configuring a {@link StrategyConfig}.
+ * code-fluent approach to configuring an {@link AlertBeanConfig}.
  * <p>
- * The fully configured {@link StrategyConfig} object is returned by the call to
+ * The fully configured {@link AlertBeanConfig} object is returned by the call to
  * {@link #getConfig()}.
  * <p>
  * By default, the configuration is empty - has no properties set. The
@@ -28,23 +30,7 @@ package org.openspaces.admin.strategy;
  * configuration properties.
  * 
  * @author Moran Avigdor
- * @author Itai Frenkel
  * @since 8.0
  */
-public interface StrategyConfigurer<T extends StrategyConfig> {
-    
-    /**
-     * Apply the recommended settings for all the configuration properties. Overrides any previously
-     * set property value.
-     * 
-     * @return this (builder pattern).
-     */
-    StrategyConfigurer<T> applyRecommendedSettings();
-    
-    /**
-     * Get the fully configured {@link StrategyConfig} object (after all properties have been set).
-     * 
-     * @return a fully configured <tt>StrategyConfig</tt>.
-     */
-	T getConfig();
+public interface AlertBeanConfigurer extends BeanConfigurer<AlertBeanConfig> {
 }

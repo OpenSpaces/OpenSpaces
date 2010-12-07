@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
-package org.openspaces.admin.alerts.events;
-
-import org.openspaces.admin.Admin;
-import org.openspaces.admin.alerts.Alert;
+package org.openspaces.admin.bean;
 
 /**
- * An event listener for all types of alerts. Register/Unregister for alert events, using the
- * {@link AlertEventManager} API accessible via {@link Admin#getAlertManager()}.
+ * A weakly-typed configuration API based on the 'builder' patterns for a more convenient
+ * code-fluent approach to configuring a {@link BeanConfig}.
  * <p>
- * Alerts may be then filtered by their type (see {@link Alert#getAlertType()}) or any other
- * criteria exposed by the getters in {@link Alert}.
+ * The fully configured {@link BeanConfig} object is returned by the call to {@link #getConfig()}.
+ * <p>
+ * By default, the configuration is empty - has no properties set. The recommended setting for the
+ * configuration properties should be derived from the javadoc.
  * 
  * @author Moran Avigdor
+ * @author Itai Frenkel
  * @since 8.0
  */
-public interface AlertEventListener {
+public interface BeanConfigurer<T extends BeanConfig> {
     
     /**
-     * @param alert An event of an alert issued by one of the admin Alert beans.
+     * Get the fully configured {@link BeanConfig} object (after all properties have been set).
+     * 
+     * @return a fully configured <tt>BeanConfig</tt>.
      */
-	public void onAlert(Alert alert);
+	T getConfig();
 }
