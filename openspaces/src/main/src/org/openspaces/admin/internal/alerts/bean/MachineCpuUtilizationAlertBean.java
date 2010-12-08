@@ -9,6 +9,8 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.alerts.Alert;
 import org.openspaces.admin.alerts.config.MachineCpuUtilizationAlertBeanConfig;
+import org.openspaces.admin.bean.BeanConfigurationException;
+import org.openspaces.admin.bean.BeanInitializationException;
 import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.os.events.OperatingSystemStatisticsChangedEvent;
 import org.openspaces.admin.os.events.OperatingSystemStatisticsChangedEventListener;
@@ -29,7 +31,7 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
         NUMBER_FORMAT.setMaximumFractionDigits(2);
     }
 
-    public void afterPropertiesSet() {
+    public void afterPropertiesSet() throws BeanConfigurationException, BeanInitializationException {
         admin.getOperatingSystems().getOperatingSystemStatisticsChanged().add(this);
         admin.getOperatingSystems().startStatisticsMonitor();
     }

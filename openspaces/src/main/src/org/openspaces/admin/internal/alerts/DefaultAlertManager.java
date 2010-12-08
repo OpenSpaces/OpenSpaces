@@ -12,6 +12,8 @@ import org.openspaces.admin.internal.alerts.events.DefaultAlertEventManager;
 import org.openspaces.admin.internal.alerts.events.InternalAlertEventManager;
 import org.openspaces.admin.bean.BeanAlreadyExistsException;
 import org.openspaces.admin.bean.BeanConfig;
+import org.openspaces.admin.bean.BeanConfigurationException;
+import org.openspaces.admin.bean.BeanInitializationException;
 import org.openspaces.admin.bean.BeanNotFoundException;
 import org.openspaces.core.bean.DefaultBeanServer;
 
@@ -67,7 +69,8 @@ public class DefaultAlertManager implements InternalAlertManager {
         beanPropertiesManager.disableBean(configInstance.getBeanClassName());
     }
 
-    public <T extends AlertBeanConfig> void enableBean(Class<T> clazz) throws BeanNotFoundException {
+    public <T extends AlertBeanConfig> void enableBean(Class<T> clazz) throws BeanNotFoundException,
+            BeanConfigurationException, BeanInitializationException {
         BeanConfig configInstance = getConfigInstance(clazz);
         beanPropertiesManager.enableBean(configInstance.getBeanClassName());
     }
