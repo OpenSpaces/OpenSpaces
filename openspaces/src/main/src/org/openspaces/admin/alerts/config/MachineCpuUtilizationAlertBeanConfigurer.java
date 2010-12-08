@@ -16,6 +16,8 @@
 
 package org.openspaces.admin.alerts.config;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * A strongly typed machine CPU utilization alert bean configurer.
  * 
@@ -51,16 +53,19 @@ public class MachineCpuUtilizationAlertBeanConfigurer implements AlertBeanConfig
 		config.setLowThresholdPerc(lowThreshold);
 		return this;
 	}
-	
-	/**
-	 * Set the period of time (in milliseconds) a CPU alert should be triggered if it's reading is
-     * above/below the threshold setting.
+
+    /**
+     * Set the period of time a CPU alert should be triggered if it's reading is above/below the
+     * threshold setting.
      * 
-	 * @param period period of time in milliseconds.
-	 * @return this.
-	 */
-	public MachineCpuUtilizationAlertBeanConfigurer measurementPeriod(long period) {
-		config.setMeasurementPeriod(period);
+     * @param period
+     *            period of time.
+     * @param timeUnit
+     *            the time unit of the specified period.
+     * @return this.
+     */
+	public MachineCpuUtilizationAlertBeanConfigurer measurementPeriod(long period, TimeUnit timeUnit) {
+		config.setMeasurementPeriod(period, timeUnit);
 		return this;
 	}
 	
