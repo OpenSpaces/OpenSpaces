@@ -10,7 +10,6 @@ import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.alerts.Alert;
 import org.openspaces.admin.alerts.config.MachineCpuUtilizationAlertBeanConfig;
 import org.openspaces.admin.bean.BeanConfigurationException;
-import org.openspaces.admin.bean.BeanInitializationException;
 import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.os.events.OperatingSystemStatisticsChangedEvent;
 import org.openspaces.admin.os.events.OperatingSystemStatisticsChangedEventListener;
@@ -31,12 +30,14 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
         NUMBER_FORMAT.setMaximumFractionDigits(2);
     }
 
-    public void afterPropertiesSet() throws BeanConfigurationException, BeanInitializationException {
+    public void afterPropertiesSet() throws Exception {
+        validateProperties();
+        
         admin.getOperatingSystems().getOperatingSystemStatisticsChanged().add(this);
         admin.getOperatingSystems().startStatisticsMonitor();
     }
 
-    public void destroy() {
+    public void destroy() throws Exception {
         admin.getOperatingSystems().getOperatingSystemStatisticsChanged().remove(this);
         admin.getOperatingSystems().stopStatisticsMonitor();
     }
@@ -51,29 +52,28 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
 
     public void setProperties(Map<String, String> properties) {
         config.setProperties(properties);
-        validateProperties();
     }
 
     private void validateProperties() {
         
         if (config.getHighThresholdPerc() < config.getLowThresholdPerc()) {
-            throw new IllegalArgumentException("Low threshold [" + config.getLowThresholdPerc()
+            throw new BeanConfigurationException("Low threshold [" + config.getLowThresholdPerc()
                     + "] must be less than high threshold value [" + config.getHighThresholdPerc() + "]");
         }
         
         if (config.getHighThresholdPerc() < 0) {
-            throw new IllegalArgumentException("High threshold [" + config.getHighThresholdPerc()
+            throw new BeanConfigurationException("High threshold [" + config.getHighThresholdPerc()
                     + "] must greater than zero");
         }
         
         if (config.getLowThresholdPerc() < 0) {
-            throw new IllegalArgumentException("Low threshold [" + config.getLowThresholdPerc()
+            throw new BeanConfigurationException("Low threshold [" + config.getLowThresholdPerc()
                     + "] must greater or equal to zero");
         }
         
       //TODO verify against the statistics interval from admin object
         if (config.getMeasurementPeriod() < 1) {
-            throw new IllegalArgumentException("Measurment period [" + config.getMeasurementPeriod()
+            throw new BeanConfigurationException("Measurment period [" + config.getMeasurementPeriod()
                     + "] must be greater than zero");
         }
     }
