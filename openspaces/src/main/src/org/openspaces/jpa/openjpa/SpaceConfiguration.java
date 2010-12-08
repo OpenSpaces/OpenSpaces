@@ -1,8 +1,5 @@
 package org.openspaces.jpa.openjpa;
 
-import java.sql.SQLException;
-import java.util.Properties;
-
 import net.jini.core.transaction.server.TransactionManager;
 
 import org.apache.openjpa.conf.OpenJPAConfigurationImpl;
@@ -15,8 +12,6 @@ import com.gigaspaces.client.transaction.TransactionManagerConfiguration;
 import com.gigaspaces.client.transaction.TransactionManagerProviderFactory;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.ReadModifiers;
-import com.j_spaces.jdbc.QueryProcessorFactory;
-import com.j_spaces.jdbc.driver.GConnection;
 
 /**
  * Holds OpenJPA's configuration properties & GigaSpaces resources.
@@ -30,7 +25,6 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
 
     private IJSpace _space;
     private ITransactionManagerProvider _transactionManagerProvider;
-    private GConnection _connection;
     private int _readModifier;
     
     public SpaceConfiguration() {
@@ -66,23 +60,7 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
         _readModifier = getReadLockLevel().equals("write") ? ReadModifiers.EXCLUSIVE_READ_LOCK
                 : ReadModifiers.REPEATABLE_READ;        
     }
-    
-    public GConnection getJdbcConnection() throws SQLException {
-        if (_connection == null) {
-            synchronized (this) {
-                if (_connection == null) {
-                    Properties connectionProperties = new Properties();
-                    connectionProperties.put(
-                            QueryProcessorFactory.COM_GIGASPACES_EMBEDDED_QP_ENABLED, "true");
-                    _connection = GConnection.getInstance(_space, connectionProperties);
-                    if (_connection.getAutoCommit())
-                        _connection.setAutoCommit(false);
-                }
-            }
-        }
-        return _connection;        
-    }
-    
+        
     public IJSpace getSpace() {
         return _space;
     }

@@ -163,19 +163,21 @@ public class StoreManagerQuery extends ExpressionStoreQuery {
         try {
             final ISpaceProxy proxy = (ISpaceProxy) _store.getConfiguration().getSpace();        
             final Object[] result = proxy.readMultiple(sqlQuery, _store.getCurrentTransaction(), Integer.MAX_VALUE,
-                    ReadModifiers.EXCLUSIVE_READ_LOCK);          
-            final IEntryPacket[] entries = new IEntryPacket[result.length];
-            for (int i = 0; i < result.length; i++) {
-                entries[i] = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(result[i],
-                        ObjectType.POJO, proxy);
-                // Update results with query update values
-                for (UpdateValue updateValue : updates) {
-                    entries[i].setFieldValue(updateValue.getFieldIndex(), updateValue.getFieldValue());
+                    ReadModifiers.EXCLUSIVE_READ_LOCK);
+            if (result.length > 0) {
+                final IEntryPacket[] entries = new IEntryPacket[result.length];
+                for (int i = 0; i < result.length; i++) {
+                    entries[i] = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(result[i],
+                            ObjectType.POJO, proxy);
+                    // Update results with query update values
+                    for (UpdateValue updateValue : updates) {
+                        entries[i].setFieldValue(updateValue.getFieldIndex(), updateValue.getFieldValue());
+                    }
                 }
+                proxy.writeMultiple(entries, _store.getCurrentTransaction(), Lease.FOREVER,
+                        UpdateModifiers.UPDATE_ONLY);
             }
-            Lease[] lease = proxy.writeMultiple(entries, _store.getCurrentTransaction(), Lease.FOREVER,
-                    UpdateModifiers.UPDATE_ONLY);            
-            return lease.length;
+            return result.length;
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }        

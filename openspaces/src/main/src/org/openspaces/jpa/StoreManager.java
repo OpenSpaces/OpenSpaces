@@ -1,5 +1,6 @@
 package org.openspaces.jpa;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
@@ -7,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import net.jini.core.lease.Lease;
 import net.jini.core.transaction.Transaction;
@@ -40,6 +42,8 @@ import com.gigaspaces.internal.transport.TransportPacketType;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.ReadModifiers;
 import com.j_spaces.core.client.UpdateModifiers;
+import com.j_spaces.jdbc.QueryProcessorFactory;
+import com.j_spaces.jdbc.driver.GConnection;
 
 /**
  * A GigaSpaces back-end implementation for OpenJPA.
@@ -55,6 +59,7 @@ public class StoreManager extends AbstractStoreManager {
     private Transaction _transaction = null;
     private static final HashMap<Class<?>, Integer> _classesRelationStatus = new HashMap<Class<?>, Integer>();
     private static final HashSet<Class<?>> _processedClasses = new HashSet<Class<?>>();
+    private GConnection _connection;
     
     @Override
     protected void open() {
@@ -94,9 +99,9 @@ public class StoreManager extends AbstractStoreManager {
         try {
             _transaction.commit(Long.MAX_VALUE);
         } catch (Exception e) {
-           throw new RuntimeException(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         } finally {
-            _transaction = null;
+            _transaction = null;            
         }
     }
 
@@ -412,5 +417,24 @@ public class StoreManager extends AbstractStoreManager {
         return getConfiguration().getMetaDataRepositoryInstance().getMetaDatas().length != _processedClasses.size();
  
     }
+
+    /**
+     * Gets a JDBC connection using the configuration's space instance.
+     * Each store manager has its own Connection for Multithreaded reasons. 
+     */
+    public GConnection getJdbcConnection() throws SQLException {
+        if (_connection == null) {
+            if (_connection == null) {
+                Properties connectionProperties = new Properties();
+                connectionProperties.put(
+                        QueryProcessorFactory.COM_GIGASPACES_EMBEDDED_QP_ENABLED, "true");
+                _connection = GConnection.getInstance(getConfiguration().getSpace(), connectionProperties);
+                if (_connection.getAutoCommit())
+                    _connection.setAutoCommit(false);
+            }
+        }
+        return _connection;        
+    }
+    
     
 }
