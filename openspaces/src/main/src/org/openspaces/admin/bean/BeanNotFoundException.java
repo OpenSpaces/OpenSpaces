@@ -21,8 +21,8 @@ package org.openspaces.admin.bean;
  * removed).
  * 
  * @see BeanConfig#getBeanClassName()
- * @see BeanManager#addBean(BeanConfig)
- * @see BeanManager
+ * @see BeanConfigManager#addBean(BeanConfig)
+ * @see BeanConfigManager
  * 
  * @author Moran Avigdor
  * @author Itai Frenkel

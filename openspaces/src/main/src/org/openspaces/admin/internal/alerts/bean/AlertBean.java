@@ -1,6 +1,6 @@
 package org.openspaces.admin.internal.alerts.bean;
 
-import org.openspaces.admin.internal.bean.Bean;
+import org.openspaces.core.bean.Bean;
 
 public interface AlertBean extends Bean {
 }

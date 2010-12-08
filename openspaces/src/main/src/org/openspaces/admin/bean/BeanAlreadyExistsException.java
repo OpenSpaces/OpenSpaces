@@ -19,7 +19,7 @@ package org.openspaces.admin.bean;
 /**
  * Exception indicating that a bean by this name already has been added.
  * @see BeanConfig#getBeanClassName()
- * @see BeanManager#addBean(BeanConfig)
+ * @see BeanConfigManager#addBean(BeanConfig)
  * 
  * @author Moran Avigdor
  * @author Itai Frenkel

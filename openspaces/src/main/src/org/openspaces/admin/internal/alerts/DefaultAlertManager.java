@@ -10,10 +10,10 @@ import org.openspaces.admin.bean.BeanPropertiesManager;
 import org.openspaces.admin.internal.alerts.bean.AlertBean;
 import org.openspaces.admin.internal.alerts.events.DefaultAlertEventManager;
 import org.openspaces.admin.internal.alerts.events.InternalAlertEventManager;
-import org.openspaces.admin.internal.bean.DefaultBeanPropertiesManager;
 import org.openspaces.admin.bean.BeanAlreadyExistsException;
 import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.bean.BeanNotFoundException;
+import org.openspaces.core.bean.DefaultBeanServer;
 
 public class DefaultAlertManager implements InternalAlertManager {
 
@@ -26,7 +26,7 @@ public class DefaultAlertManager implements InternalAlertManager {
         this.admin = admin;
         this.alertEventManager = new DefaultAlertEventManager(this);
         this.alertRepository = new DefaultAlertRepository();
-        this.beanPropertiesManager = new DefaultBeanPropertiesManager<AlertBean>(admin);
+        this.beanPropertiesManager = new DefaultBeanServer<AlertBean>(admin);
     }
 
     public AlertRepository getAlertRepository() {

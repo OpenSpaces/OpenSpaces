@@ -29,7 +29,7 @@ package org.openspaces.admin.bean;
  * @author Itai Frenkel
  * @since 8.0
  */
-public interface BeanManager<B extends BeanConfig> {
+public interface BeanConfigManager<B extends BeanConfig> {
 
     /**
      * Adds a bean by it's name {@link BeanConfig#getBeanClassName()} with the corresponding

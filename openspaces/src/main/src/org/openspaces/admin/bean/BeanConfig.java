@@ -18,7 +18,7 @@ package org.openspaces.admin.bean;
 
 import java.util.Map;
 
-import org.openspaces.admin.internal.bean.Bean;
+import org.openspaces.core.bean.Bean;
 
 /**
  * A weakly typed configuration API based on String key-value pairs to configure an admin

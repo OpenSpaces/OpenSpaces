@@ -21,7 +21,7 @@ import org.openspaces.admin.AdminException;
 /**
  * Base class for all admin Bean exceptions.
  * 
- * @see BeanManager
+ * @see BeanConfigManager
  * 
  * @author Moran Avigdor
  * @author Itai Frenkel

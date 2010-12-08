@@ -19,7 +19,7 @@ import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.alerts.config.AlertBeanConfig;
 import org.openspaces.admin.alerts.events.AlertEventListener;
 import org.openspaces.admin.alerts.events.AlertEventManager;
-import org.openspaces.admin.bean.BeanManager;
+import org.openspaces.admin.bean.BeanConfigManager;
 import org.openspaces.admin.bean.BeanPropertiesManager;
 
 /**
@@ -42,7 +42,7 @@ import org.openspaces.admin.bean.BeanPropertiesManager;
  * @author Moran Avigdor
  * @since 8.0
  */
-public interface AlertManager extends BeanManager<AlertBeanConfig>, AlertEventManager, AdminAware  {
+public interface AlertManager extends BeanConfigManager<AlertBeanConfig>, AlertEventManager, AdminAware  {
 	
     /**
      * @return the weakly typed configuration API. 
