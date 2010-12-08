@@ -109,7 +109,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     public ProcessingUnit deploy(MemcachedDeployment deployment, long timeout, TimeUnit timeUnit) {
         return deploy(deployment.toProcessingUnitDeployment(), timeout, timeUnit);
     }
-    
+
     public ProcessingUnit deploy(ElasticSpaceDeployment deployment) throws ProcessingUnitAlreadyDeployedException {
         return deploy(deployment.toProcessingUnitDeployment());
     }
@@ -155,7 +155,11 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             if (getGSMAdmin().hasDeployed(operationalString.getName())) {
                 throw new ProcessingUnitAlreadyDeployedException(operationalString.getName());
             }
-        } catch (Exception e) {
+        } 
+        catch (ProcessingUnitAlreadyDeployedException e) {
+            throw e;
+        }
+        catch (Exception e) {
             throw new AdminException("Failed to check if processing unit [" + operationalString.getName() + "] is deployed", e);
         }
 
