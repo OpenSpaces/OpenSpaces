@@ -66,12 +66,14 @@ public interface BeanConfigManager<B extends BeanConfig> {
      *            the class of the bean configuration
      * @throws BeanNotFoundException
      *             thrown if the bean was not added/found in the manager.
+     * @throws BeanException
+     *             if the request to enable a bean can't be fulfilled.
      * @throws BeanConfigurationException
      *             in the event of misconfiguration (such as failure to set an essential property).
      * @throws BeanInitializationException
      *             if initialization fails.
      */
-    <T extends B> void enableBean(Class<T> clazz) throws BeanNotFoundException, BeanConfigurationException, BeanInitializationException;
+    <T extends B> void enableBean(Class<T> clazz) throws BeanNotFoundException, BeanException;
 
     /**
      * Disables a previously enabled bean. The bean object is discarded, but it's configuration
