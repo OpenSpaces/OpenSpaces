@@ -12,9 +12,7 @@ import org.openspaces.admin.internal.alerts.events.DefaultAlertEventManager;
 import org.openspaces.admin.internal.alerts.events.InternalAlertEventManager;
 import org.openspaces.admin.bean.BeanAlreadyExistsException;
 import org.openspaces.admin.bean.BeanConfig;
-import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.bean.BeanException;
-import org.openspaces.admin.bean.BeanInitializationException;
 import org.openspaces.admin.bean.BeanNotFoundException;
 import org.openspaces.core.bean.DefaultBeanServer;
 
