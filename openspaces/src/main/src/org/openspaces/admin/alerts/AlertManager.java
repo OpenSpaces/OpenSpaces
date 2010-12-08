@@ -44,7 +44,14 @@ import org.openspaces.admin.bean.BeanPropertiesManager;
  */
 public interface AlertManager extends BeanManager<AlertBeanConfig>, AlertEventManager, AdminAware  {
 	
+    /**
+     * @return the weakly typed configuration API. 
+     */
 	BeanPropertiesManager getBeanPropertiesManager();
 	
+	/**
+	 * Trigger an alert event for registered alert event listeners.
+	 * @param alert an alert.
+	 */
 	void fireAlert(Alert alert);
 }
