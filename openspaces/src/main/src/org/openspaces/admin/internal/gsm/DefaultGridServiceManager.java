@@ -36,7 +36,9 @@ import org.openspaces.admin.pu.ProcessingUnitAlreadyDeployedException;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.elastic.ElasticProcessingUnitDeployment;
+import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
+import org.openspaces.admin.space.ElasticDataGridDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
 import org.openspaces.admin.space.elastic.ElasticSpaceDeployment;
 import org.openspaces.pu.container.servicegrid.deploy.Deploy;
@@ -107,7 +109,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     public ProcessingUnit deploy(MemcachedDeployment deployment, long timeout, TimeUnit timeUnit) {
         return deploy(deployment.toProcessingUnitDeployment(), timeout, timeUnit);
     }
-
+    
     public ProcessingUnit deploy(ElasticSpaceDeployment deployment) throws ProcessingUnitAlreadyDeployedException {
         return deploy(deployment.toProcessingUnitDeployment());
     }
@@ -385,5 +387,24 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             throw new AdminException( "Failed to check if processing unit [" + 
                     processingUnitName + "] deployed", e);
         }
+    }
+
+    public ProcessingUnit deploy(ElasticDataGridDeployment deployment) throws ProcessingUnitAlreadyDeployedException {
+        return deploy(deployment.toProcessingUnitDeployment());
+    }
+
+    public ProcessingUnit deploy(ElasticDataGridDeployment deployment, long timeout, TimeUnit timeUnit)
+            throws ProcessingUnitAlreadyDeployedException {
+        return deploy(deployment.toProcessingUnitDeployment(),timeout,timeUnit);
+    }
+
+    public ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment)
+            throws ProcessingUnitAlreadyDeployedException {
+        return deploy(deployment.toProcessingUnitDeployment());
+    }
+
+    public ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit)
+            throws ProcessingUnitAlreadyDeployedException {
+        return deploy(deployment.toProcessingUnitDeployment(),timeout,timeUnit);
     }
 }

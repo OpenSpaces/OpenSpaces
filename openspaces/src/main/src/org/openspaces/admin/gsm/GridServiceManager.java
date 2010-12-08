@@ -1,4 +1,5 @@
 /*
+
  * Copyright 2006-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +27,8 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitAlreadyDeployedException;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticProcessingUnitDeployment;
+import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
+import org.openspaces.admin.space.ElasticDataGridDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
 import org.openspaces.admin.space.elastic.ElasticSpaceDeployment;
 
@@ -115,7 +118,6 @@ public interface GridServiceManager extends AgentGridComponent, LogProviderGridC
      */
     ProcessingUnit deploy(ElasticProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
 
-
     /**
      * Deploys a memcached based on the space deployment information on the given grid
      * service manager (it will act as the primary GSM for the deployed processing unit).
@@ -139,4 +141,13 @@ public interface GridServiceManager extends AgentGridComponent, LogProviderGridC
     ProcessingUnit deploy(MemcachedDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
     
     boolean isDeployed( String processingUnitName );
+
+    ProcessingUnit deploy(ElasticDataGridDeployment deployment) throws ProcessingUnitAlreadyDeployedException;
+    
+    ProcessingUnit deploy(ElasticDataGridDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
+    
+    ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment) throws ProcessingUnitAlreadyDeployedException;
+    
+    ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
+
 }

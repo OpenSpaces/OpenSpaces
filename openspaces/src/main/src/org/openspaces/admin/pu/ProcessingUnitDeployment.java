@@ -32,12 +32,16 @@
 
 package org.openspaces.admin.pu;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
 import com.gigaspaces.grid.zone.ZoneHelper;
 import com.gigaspaces.security.directory.User;
 import com.gigaspaces.security.directory.UserDetails;
-
-import java.io.File;
-import java.util.*;
 
 /**
  * A deployment of processing unit.
@@ -334,5 +338,11 @@ public class ProcessingUnitDeployment {
         deployOptions.add(getProcessingUnit());
 
         return deployOptions.toArray(new String[deployOptions.size()]);
+    }
+
+    public ProcessingUnitDeployment setDynamicProperty(String key, String value) {
+        // TODO: support dynamic properties.
+        this.setContextProperty(key, value);
+        return this;
     }
 }
