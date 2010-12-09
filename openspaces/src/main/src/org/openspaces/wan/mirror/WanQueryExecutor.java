@@ -9,6 +9,12 @@ import com.gigaspaces.internal.client.spaceproxy.SpaceProxyImpl;
 import com.gigaspaces.internal.transport.EntryPacket;
 import com.j_spaces.core.client.UpdateModifiers;
 
+/***********
+ * Deprecated - I am leaving this code here in case some snippets might be useful.
+ * DELETE THIS FILE WHEN DEVELOPMENT IS FINISHED.
+ * @author barakme
+ *
+ */
 public class WanQueryExecutor implements Runnable {
 	private static final int QUERY_READ_TIMEOUT = 60000;
 	private static java.util.logging.Logger logger =
@@ -33,8 +39,8 @@ public class WanQueryExecutor implements Runnable {
 		this.localClusterSpace = localClusterSpace;
 		this.localClusterSpaceImpl = (SpaceProxyImpl)localClusterSpace.getSpace();
 		
-		this.template = new WanEntry(null, null, 
-				targetLocation.getReadIndex(), targetLocation.getSiteIndex());
+		/*this.template = new WanEntry(null, null, 
+				targetLocation.getReadIndex(), targetLocation.getSiteIndex());*/
 	}
 
 	
@@ -74,8 +80,8 @@ public class WanQueryExecutor implements Runnable {
 				}
 
 				// increment the read index
-				targetLocation.incReadIndex();
-				this.template.setWriteIndex(targetLocation.getReadIndex());
+				/*targetLocation.incReadIndex();
+				this.template.setWriteIndex(targetLocation.getReadIndex());*/
 			}
 
 		}
