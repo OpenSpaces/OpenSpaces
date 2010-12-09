@@ -23,8 +23,8 @@ public class ManualMemoryCapacityScaleBeanConfig
                    ScaleBeanConfig {
 
     private static final String STRATEGY_NAME = "scale-strategy.manual-memory";
-    private static final String CAPACITY_KEY = "sliding-window-milliseconds";
-    private static final String CAPACITY_DEFAULT = "2g";
+    private static final String MEMORY_CAPACITY_MEGABYTES_KEY = "sliding-window-milliseconds";
+    private static final int MEMORY_CAPACITY_MEGABYTES_DEFAULT = 2000;
     private StringProperties properties;
     
     /**
@@ -37,12 +37,12 @@ public class ManualMemoryCapacityScaleBeanConfig
     /**
      * Specifies the total memory capacity of the processing unit.
      */
-    public void setCapacity(String memory) {
-        properties.put(CAPACITY_KEY, memory);
+    public void setMemoryCapacityInMB(int memory) {
+        properties.putInteger(MEMORY_CAPACITY_MEGABYTES_KEY, memory);
     }
 
-    public String getCapacity() {
-        return properties.get(CAPACITY_KEY, CAPACITY_DEFAULT);
+    public int getMemoryCapacityInMB() {
+        return properties.getInteger(MEMORY_CAPACITY_MEGABYTES_KEY, MEMORY_CAPACITY_MEGABYTES_DEFAULT);
     }
     
     public void setMinNumberOfContainers(int minNumberOfContainers) {
@@ -92,11 +92,6 @@ public class ManualMemoryCapacityScaleBeanConfig
     public String getBeanClassName() {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    public void applyRecommendedSettings() {
-        // TODO Auto-generated method stub
-        
     }
     
 }

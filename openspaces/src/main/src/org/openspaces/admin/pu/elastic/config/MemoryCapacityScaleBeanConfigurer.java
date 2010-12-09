@@ -16,7 +16,9 @@ public class MemoryCapacityScaleBeanConfigurer
     private final MemoryCapacityScaleBeanConfig config;
     
     /**
-     * default constructor, creates an empty {@link MemoryCapacityScaleBeanConfig} object
+     * Provides fluent API for creating a new {@link MemoryCapacityScaleBeanConfig} object.
+     * For example {@code new MemoryCapacityScaleStrategyConfigurer().slidingTimeWindow(60,TimeUnit.SECONDS).scaleOutWhenAboveThreshold(70).getConfig()}
+     * The default constructor wraps an empty {@link MemoryCapacityScaleBeanConfig} object
      */
     public MemoryCapacityScaleBeanConfigurer() {
         this.config = new MemoryCapacityScaleBeanConfig();

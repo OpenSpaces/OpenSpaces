@@ -13,7 +13,9 @@ public class EagerScaleBeanConfigurer implements ScaleBeanConfigurer<EagerScaleB
     private final EagerScaleBeanConfig state;
 
     /**
-     * Create a fluent object that wraps a new {@link EagerScaleBeanConfig} object
+     * Provides fluent API for creating a new {@link EagerScaleBeanConfig} object.
+     * For example {@code new EagerScaleStrategyConfigurer().maxNumberOfContainers(10).getConfig()}
+     * The default constructor wraps an empty {@link EagerScaleBeanConfig} object
      */
     public EagerScaleBeanConfigurer() {
         this.state = new EagerScaleBeanConfig();

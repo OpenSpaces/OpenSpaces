@@ -13,7 +13,9 @@ public class ManualContainersScaleBeanConfigurer implements ScaleBeanConfigurer<
     private final ManualContainersScaleBeanConfig config;
 
     /**
-     * default constructor, creates an empty {@link ManualContainersScaleBeanConfig} object
+     * Provides fluent API for creating a new {@link ManualContainersScaleBeanConfig} object.
+     * For example {@code new ManualContainersScaleStrategyConfigurer().numberOfContainers(10).getConfig()}
+     * The default constructor wraps an empty {@link ManualContainersScaleBeanConfig} object
      */
     public ManualContainersScaleBeanConfigurer() {
         this.config = new ManualContainersScaleBeanConfig();

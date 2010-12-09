@@ -1,5 +1,7 @@
 package org.openspaces.admin.pu.elastic.config;
 
+import org.openspaces.core.util.MemoryUnit;
+
 /**
  * Provides fluent API for creating a new {@link ManualMemoryCapacityScaleBeanConfig} object.
  * 
@@ -13,14 +15,21 @@ public class ManualMemoryCapacityScaleBeanConfigurer implements ScaleBeanConfigu
 private final ManualMemoryCapacityScaleBeanConfig config;
     
     /**
-     * default constructor, creates an empty {@link ManualMemoryCapacityScaleBeanConfig} object
+     * Provides fluent API for creating a new {@link ManualMemoryCapacityScaleBeanConfig} object.
+     * For example {@code new ManualMemoryCapacityScaleStrategyConfigurer().capacity("1500m").getConfig()}
+     * The default constructor wraps an empty {@link ManualMemoryCapacityScaleBeanConfig} object
      */
     public ManualMemoryCapacityScaleBeanConfigurer() {
         this.config = new ManualMemoryCapacityScaleBeanConfig();
     }
     
-    public ManualMemoryCapacityScaleBeanConfigurer capacity(String memory) {
-        config.setCapacity(memory);
+    public ManualMemoryCapacityScaleBeanConfigurer memoryCapacity(String memory) {
+        config.setMemoryCapacityInMB((int)MemoryUnit.toMegaBytes(memory));
+        return this;
+    }
+    
+    public ManualMemoryCapacityScaleBeanConfigurer memoryCapacity(int memory, MemoryUnit unit) {
+        config.setMemoryCapacityInMB((int)unit.toMegaBytes(memory));
         return this;
     }
         
