@@ -20,6 +20,7 @@ import org.openspaces.grid.esm.ElasticScaleHandler;
  * @author moran
  * @author itaif
  */
+@Deprecated
 public class ElasticSpaceDeployment {
    
     private final ElasticProcessingUnitDeployment deployment;

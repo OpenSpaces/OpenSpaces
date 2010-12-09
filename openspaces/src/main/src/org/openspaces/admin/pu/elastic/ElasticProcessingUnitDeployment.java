@@ -11,6 +11,7 @@ import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.grid.esm.ElasticScaleHandler;
 import org.openspaces.grid.esm.MemorySettings;
 
+@Deprecated
 public class ElasticProcessingUnitDeployment {
 
     private final String processingUnit;
