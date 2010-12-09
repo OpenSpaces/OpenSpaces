@@ -219,6 +219,7 @@
 
         <javadoc sourcepath="${main.src.dir}" destdir="${target.javadoc.dir}" windowtitle="GigaSpaces XAP 8.0 API"
                  source="1.5" access="protected" author="true" version="true" use="true"
+                 useexternalfile="yes"
                  defaultexcludes="true"
                  header='&lt;a href=\"http://www.gigaspaces.com/docs/JavaDoc8.0/\" target=\"_top\"&gt;GigaSpaces XAP 8.0 API&lt;/a&gt;'
         		packagenames="org.openspaces.**.*"
