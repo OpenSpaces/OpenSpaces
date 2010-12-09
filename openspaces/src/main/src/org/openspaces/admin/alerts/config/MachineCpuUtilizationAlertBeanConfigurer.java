@@ -19,7 +19,11 @@ package org.openspaces.admin.alerts.config;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A strongly typed machine CPU utilization alert bean configurer.
+ * A strongly typed machine CPU utilization alert bean configurer. Allows a more code-fluent
+ * approach by use of method chaining. After all properties have been set, use the call to
+ * {@link #getConfig()} to create a fully initialized configuration object based.
+ * 
+ * @see MachineCpuUtilizationAlertBeanConfig
  * 
  * @author Moran Avigdor
  * @since 8.0

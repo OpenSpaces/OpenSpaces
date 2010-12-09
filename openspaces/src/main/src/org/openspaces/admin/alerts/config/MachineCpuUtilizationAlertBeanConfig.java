@@ -25,6 +25,8 @@ import org.openspaces.core.util.StringProperties;
 /**
  * A strongly typed machine CPU utilization alert bean configuration.
  * 
+ * @see MachineCpuUtilizationAlertBeanConfigurer
+ * 
  * @author Moran Avigdor
  * @since 8.0
  */
