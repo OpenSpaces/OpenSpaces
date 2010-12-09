@@ -62,11 +62,9 @@ public class MachineCpuUtilizationAlertBeanConfig implements AlertBeanConfig {
 	/**
 	 * Set the CPU high threshold percentage value.
 	 * @param highThreshold high threshold percentage.
-	 * @return this.
 	 */
-	public MachineCpuUtilizationAlertBeanConfig setHighThresholdPerc(int highThreshold) {
+	public void setHighThresholdPerc(int highThreshold) {
 	    properties.putInteger(HIGH_THRESHOLD_PERC_KEY, highThreshold);
-		return this;
 	}
 	
 	/**
@@ -79,11 +77,9 @@ public class MachineCpuUtilizationAlertBeanConfig implements AlertBeanConfig {
 	/**
 	 * Set the CPU low threshold percentage value.
 	 * @param lowThreshold low threshold percentage.
-	 * @return this.
 	 */
-	public MachineCpuUtilizationAlertBeanConfig setLowThresholdPerc(int lowThreshold) {
+	public void setLowThresholdPerc(int lowThreshold) {
 	    properties.putInteger(LOW_THRESHOLD_PERC_KEY, lowThreshold);
-		return this;
 	}
 
 	/**
@@ -101,12 +97,10 @@ public class MachineCpuUtilizationAlertBeanConfig implements AlertBeanConfig {
      *            period of time.
      * @param timeUnit
      *            the time unit of the specified period.
-     * @return this.
      */
-	public MachineCpuUtilizationAlertBeanConfig setMeasurementPeriod(long period, TimeUnit timeUnit) {
+	public void setMeasurementPeriod(long period, TimeUnit timeUnit) {
 	    long periodInMilliseconds = timeUnit.toMillis(period);
 	    properties.putLong(MEASUREMENT_PERIOD_MILLISECONDS_KEY, periodInMilliseconds);
-		return this;
 	}
 	
 	/**
