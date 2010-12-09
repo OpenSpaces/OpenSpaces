@@ -8,8 +8,6 @@ import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleBeanConfi
 import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleBeanConfigurer;
 import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfig;
 import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.topology.ElasticDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
 public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopology {
