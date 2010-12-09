@@ -9,6 +9,7 @@ import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.pu.events.*;
 import org.openspaces.admin.pu.DeploymentStatus;
+import org.openspaces.admin.pu.ElasticProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
@@ -556,5 +557,9 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     
     private void assertStateChangesPermitted() {
         admin.assertStateChangesPermitted();
+    }
+
+    public ElasticProcessingUnit asElasticProcessingUnit() {
+        return new DefaultElasticProcessingUnit(this);
     }
 }

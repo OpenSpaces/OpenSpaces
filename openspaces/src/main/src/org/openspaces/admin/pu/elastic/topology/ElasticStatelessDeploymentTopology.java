@@ -19,7 +19,7 @@ public interface ElasticStatelessDeploymentTopology extends ElasticDeploymentTop
      * @see EagerScaleBeanConfig
      * @see EagerScaleBeanConfigurer
      */
-    ElasticStatelessDeploymentTopology enableScaleStrategy(EagerScaleBeanConfigurer configurer);
+    ElasticStatelessDeploymentTopology scale(EagerScaleBeanConfigurer configurer);
 
     /**
      * Enables the specified scale strategy, and disables all other scale strategies. 
@@ -27,7 +27,7 @@ public interface ElasticStatelessDeploymentTopology extends ElasticDeploymentTop
      * @see ManualContainersScaleBeanConfig
      * @see ManualContainersScaleBeanConfigurer
      */
-    ElasticStatelessDeploymentTopology enableScaleStrategy(
+    ElasticStatelessDeploymentTopology scale(
             ManualContainersScaleBeanConfigurer configurer);
 
     /**
@@ -36,7 +36,7 @@ public interface ElasticStatelessDeploymentTopology extends ElasticDeploymentTop
      * @see ManualContainersScaleBeanConfig
      * @see ManualContainersScaleBeanConfigurer
      */
-    ElasticStatelessDeploymentTopology enableScaleStrategy(
+    ElasticStatelessDeploymentTopology scale(
             ManualContainersScaleBeanConfig strategy);
 
     /**
@@ -45,6 +45,6 @@ public interface ElasticStatelessDeploymentTopology extends ElasticDeploymentTop
      * @see EagerScaleBeanConfig
      * @see EagerScaleBeanConfigurer
      */
-    ElasticStatelessDeploymentTopology enableScaleStrategy(EagerScaleBeanConfig strategy);
+    ElasticStatelessDeploymentTopology scale(EagerScaleBeanConfig strategy);
 
 }

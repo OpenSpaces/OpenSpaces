@@ -10,7 +10,7 @@ import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfigure
 import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleBeanConfig;
 import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleBeanConfigurer;
 import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfig;
 import org.openspaces.admin.pu.elastic.isolation.DedicatedIsolation;
 import org.openspaces.admin.pu.elastic.isolation.PublicIsolation;
 import org.openspaces.admin.pu.elastic.isolation.SharedTenantIsolation;
@@ -56,43 +56,43 @@ public class ElasticMemcachedDeployment implements ElasticStatefulDeploymentTopo
         return this;
     }
     
-    public ElasticMemcachedDeployment enableScaleStrategy(EagerScaleBeanConfigurer strategy) {
-        deployment.enableScaleStrategy(strategy);
+    public ElasticMemcachedDeployment scale(EagerScaleBeanConfigurer strategy) {
+        deployment.scale(strategy);
         return this;
     }
 
-    public ElasticMemcachedDeployment enableScaleStrategy(ManualContainersScaleBeanConfigurer strategy) {
-        deployment.enableScaleStrategy(strategy);
+    public ElasticMemcachedDeployment scale(ManualContainersScaleBeanConfigurer strategy) {
+        deployment.scale(strategy);
         return this;
     }
 
-    public ElasticMemcachedDeployment enableScaleStrategy(ManualMemoryCapacityScaleBeanConfigurer strategy) {
-        deployment.enableScaleStrategy(strategy);
+    public ElasticMemcachedDeployment scale(ManualMemoryCapacityScaleBeanConfigurer strategy) {
+        deployment.scale(strategy);
         return this;
     }
 
-    public ElasticMemcachedDeployment enableScaleStrategy(MemoryCapacityScaleBeanConfigurer strategy) {
-        deployment.enableScaleStrategy(strategy);
+    public ElasticMemcachedDeployment scale(MemoryCapacityScaleBeanConfigurer strategy) {
+        deployment.scale(strategy);
         return this;
     }
     
-    public ElasticMemcachedDeployment enableScaleStrategy(EagerScaleBeanConfig strategy) {
-        deployment.enableScaleStrategy(strategy);
+    public ElasticMemcachedDeployment scale(EagerScaleBeanConfig strategy) {
+        deployment.scale(strategy);
         return this;
     }
 
-    public ElasticMemcachedDeployment enableScaleStrategy(ManualContainersScaleBeanConfig strategy) {
-        deployment.enableScaleStrategy(strategy);
+    public ElasticMemcachedDeployment scale(ManualContainersScaleBeanConfig strategy) {
+        deployment.scale(strategy);
         return this;
     }
 
-    public ElasticMemcachedDeployment enableScaleStrategy(ManualMemoryCapacityScaleBeanConfig strategy) {
-        deployment.enableScaleStrategy(strategy);
+    public ElasticMemcachedDeployment scale(ManualMemoryCapacityScaleBeanConfig strategy) {
+        deployment.scale(strategy);
         return this;
     }
     
-    public ElasticMemcachedDeployment enableScaleStrategy(MemoryCapacityScaleConfig strategy) {
-        deployment.enableScaleStrategy(strategy);
+    public ElasticMemcachedDeployment scale(MemoryCapacityScaleBeanConfig strategy) {
+        deployment.scale(strategy);
         return this;
     }
     

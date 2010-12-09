@@ -6,8 +6,9 @@ import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleBeanConfig;
 import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfig;
 import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfigurer;
+import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfig;
 import org.openspaces.admin.pu.elastic.topology.ElasticDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
@@ -58,7 +59,7 @@ public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopo
      * @see EagerScaleBeanConfig
      * @see EagerScaleBeanConfigurer
      */
-    ElasticStatefulDeploymentTopology enableScaleStrategy(EagerScaleBeanConfigurer strategy);
+    ElasticStatefulDeploymentTopology scale(EagerScaleBeanConfigurer strategy);
 
     /**
      * Enables the specified scale strategy, and disables all other scale strategies.
@@ -66,7 +67,7 @@ public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopo
      * @see ManualContainersScaleBeanConfig
      * @see ManualContainersScaleBeanConfigurer
      */
-    ElasticStatefulDeploymentTopology enableScaleStrategy(
+    ElasticStatefulDeploymentTopology scale(
             ManualContainersScaleBeanConfigurer strategy);
 
     /**
@@ -75,16 +76,16 @@ public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopo
      * @see ManualMemoryCapacityScaleBeanConfig
      * @see ManualMemoryCapacityScaleBeanConfigurer
      */
-    ElasticStatefulDeploymentTopology enableScaleStrategy(
+    ElasticStatefulDeploymentTopology scale(
             ManualMemoryCapacityScaleBeanConfigurer strategy);
 
     /**
      * Enables the specified scale strategy, and disables all other scale strategies.
      * Scale strategies can also be reconfigured after deployment.
-     * @see MemoryCapacityScaleConfig
+     * @see MemoryCapacityScaleBeanConfig
      * @see MemoryCapacityScaleBeanConfigurer
      */
-    ElasticStatefulDeploymentTopology enableScaleStrategy(
+    ElasticStatefulDeploymentTopology scale(
             MemoryCapacityScaleBeanConfigurer strategy);
 
     /**
@@ -93,7 +94,7 @@ public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopo
      * @see EagerScaleBeanConfig
      * @see EagerScaleBeanConfigurer
      */
-    ElasticStatefulDeploymentTopology enableScaleStrategy(EagerScaleBeanConfig strategy);
+    ElasticStatefulDeploymentTopology scale(EagerScaleBeanConfig strategy);
 
     /**
      * Enables the specified scale strategy, and disables all other scale strategies.
@@ -101,7 +102,7 @@ public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopo
      * @see ManualContainersScaleBeanConfig
      * @see ManualContainersScaleBeanConfigurer
      */
-    ElasticStatefulDeploymentTopology enableScaleStrategy(
+    ElasticStatefulDeploymentTopology scale(
             ManualContainersScaleBeanConfig strategy);
 
     /**
@@ -110,16 +111,16 @@ public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopo
      * @see ManualMemoryCapacityScaleBeanConfig
      * @see ManualMemoryCapacityScaleBeanConfigurer
      */
-    ElasticStatefulDeploymentTopology enableScaleStrategy(
+    ElasticStatefulDeploymentTopology scale(
             ManualMemoryCapacityScaleBeanConfig strategy);
 
     /**
      * Enables the specified scale strategy, and disables all other scale strategies.
      * Scale strategies can also be reconfigured after deployment.
-     * @see MemoryCapacityScaleConfig
+     * @see MemoryCapacityScaleBeanConfig
      * @see MemoryCapacityScaleBeanConfigurer
      */
-    ElasticStatefulDeploymentTopology enableScaleStrategy(
-            MemoryCapacityScaleConfig strategy);
+    ElasticStatefulDeploymentTopology scale(
+            MemoryCapacityScaleBeanConfig strategy);
 
 }

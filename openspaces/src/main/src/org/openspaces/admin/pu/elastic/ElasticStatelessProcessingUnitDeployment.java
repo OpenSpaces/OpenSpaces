@@ -40,19 +40,19 @@ public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticPro
         this(processingUnit.getAbsolutePath());
     }
 
-    public ElasticStatelessDeploymentTopology enableScaleStrategy(EagerScaleBeanConfigurer configurer) {
-        return enableScaleStrategy(configurer.getConfig());
+    public ElasticStatelessDeploymentTopology scale(EagerScaleBeanConfigurer configurer) {
+        return scale(configurer.getConfig());
     }
     
-    public ElasticStatelessDeploymentTopology enableScaleStrategy(ManualContainersScaleBeanConfigurer configurer) {
-        return enableScaleStrategy(configurer.getConfig());
+    public ElasticStatelessDeploymentTopology scale(ManualContainersScaleBeanConfigurer configurer) {
+        return scale(configurer.getConfig());
     }
     
-    public ElasticStatelessProcessingUnitDeployment enableScaleStrategy(ManualContainersScaleBeanConfig strategy) {
+    public ElasticStatelessProcessingUnitDeployment scale(ManualContainersScaleBeanConfig strategy) {
         return (ElasticStatelessProcessingUnitDeployment) super.enableScaleStrategy(strategy.getBeanClassName(), strategy.getProperties());
     }
 
-    public ElasticStatelessProcessingUnitDeployment enableScaleStrategy(EagerScaleBeanConfig strategy) {
+    public ElasticStatelessProcessingUnitDeployment scale(EagerScaleBeanConfig strategy) {
         return (ElasticStatelessProcessingUnitDeployment) super.enableScaleStrategy(strategy.getBeanClassName(), strategy.getProperties());
     }
     

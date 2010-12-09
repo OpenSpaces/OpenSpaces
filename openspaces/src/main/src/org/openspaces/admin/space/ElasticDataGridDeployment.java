@@ -11,7 +11,7 @@ import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfigure
 import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleBeanConfig;
 import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleBeanConfigurer;
 import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfig;
 import org.openspaces.admin.pu.elastic.isolation.DedicatedIsolation;
 import org.openspaces.admin.pu.elastic.isolation.PublicIsolation;
 import org.openspaces.admin.pu.elastic.isolation.SharedTenantIsolation;
@@ -56,43 +56,43 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
         return this;
     }
     
-    public ElasticDataGridDeployment enableScaleStrategy(EagerScaleBeanConfigurer strategy) {
-        deployment.enableScaleStrategy(strategy);
+    public ElasticDataGridDeployment scale(EagerScaleBeanConfigurer strategy) {
+        deployment.scale(strategy);
         return this;
     }
 
-    public ElasticDataGridDeployment enableScaleStrategy(ManualContainersScaleBeanConfigurer strategy) {
-        deployment.enableScaleStrategy(strategy);
+    public ElasticDataGridDeployment scale(ManualContainersScaleBeanConfigurer strategy) {
+        deployment.scale(strategy);
         return this;
     }
 
-    public ElasticDataGridDeployment enableScaleStrategy(ManualMemoryCapacityScaleBeanConfigurer strategy) {
-        deployment.enableScaleStrategy(strategy);
+    public ElasticDataGridDeployment scale(ManualMemoryCapacityScaleBeanConfigurer strategy) {
+        deployment.scale(strategy);
         return this;
     }
 
-    public ElasticDataGridDeployment enableScaleStrategy(MemoryCapacityScaleBeanConfigurer strategy) {
-        deployment.enableScaleStrategy(strategy);
+    public ElasticDataGridDeployment scale(MemoryCapacityScaleBeanConfigurer strategy) {
+        deployment.scale(strategy);
         return this;
     }
     
-    public ElasticDataGridDeployment enableScaleStrategy(EagerScaleBeanConfig strategy) {
-        deployment.enableScaleStrategy(strategy);
+    public ElasticDataGridDeployment scale(EagerScaleBeanConfig strategy) {
+        deployment.scale(strategy);
         return this;
     }
 
-    public ElasticDataGridDeployment enableScaleStrategy(ManualContainersScaleBeanConfig strategy) {
-        deployment.enableScaleStrategy(strategy);
+    public ElasticDataGridDeployment scale(ManualContainersScaleBeanConfig strategy) {
+        deployment.scale(strategy);
         return this;
     }
 
-    public ElasticDataGridDeployment enableScaleStrategy(ManualMemoryCapacityScaleBeanConfig strategy) {
-        deployment.enableScaleStrategy(strategy);
+    public ElasticDataGridDeployment scale(ManualMemoryCapacityScaleBeanConfig strategy) {
+        deployment.scale(strategy);
         return this;
     }
     
-    public ElasticDataGridDeployment enableScaleStrategy(MemoryCapacityScaleConfig strategy) {
-        deployment.enableScaleStrategy(strategy);
+    public ElasticDataGridDeployment scale(MemoryCapacityScaleBeanConfig strategy) {
+        deployment.scale(strategy);
         return this;
     }
     

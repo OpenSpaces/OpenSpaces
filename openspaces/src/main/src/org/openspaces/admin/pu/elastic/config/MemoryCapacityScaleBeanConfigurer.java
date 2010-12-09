@@ -3,7 +3,7 @@ package org.openspaces.admin.pu.elastic.config;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Provides fluent API for creating a new {@link MemoryCapacityScaleConfig} object.
+ * Provides fluent API for creating a new {@link MemoryCapacityScaleBeanConfig} object.
  * 
  * For example {@code new MemoryCapacityScaleStrategyConfigurer().slidingTimeWindow(60,TimeUnit.SECONDS).scaleOutWhenAboveThreshold(70).getConfig()}
  * 
@@ -11,19 +11,19 @@ import java.util.concurrent.TimeUnit;
  * 
  */
 public class MemoryCapacityScaleBeanConfigurer
-    implements ScaleBeanConfigurer<MemoryCapacityScaleConfig> {
+    implements ScaleBeanConfigurer<MemoryCapacityScaleBeanConfig> {
 
-    private final MemoryCapacityScaleConfig config;
+    private final MemoryCapacityScaleBeanConfig config;
     
     /**
-     * default constructor, creates an empty {@link MemoryCapacityScaleConfig} object
+     * default constructor, creates an empty {@link MemoryCapacityScaleBeanConfig} object
      */
     public MemoryCapacityScaleBeanConfigurer() {
-        this.config = new MemoryCapacityScaleConfig();
+        this.config = new MemoryCapacityScaleBeanConfig();
     }
     
     /**
-     * @see MemoryCapacityScaleConfig#setSlidingTimeWindowMilliseconds(int)
+     * @see MemoryCapacityScaleBeanConfig#setSlidingTimeWindowMilliseconds(int)
      */
     public MemoryCapacityScaleBeanConfigurer slidingTimeWindow(int duration, TimeUnit unit) {
         config.setSlidingTimeWindowMilliseconds(unit.toMillis(duration));
@@ -31,7 +31,7 @@ public class MemoryCapacityScaleBeanConfigurer
     }
 
     /**
-     * @see MemoryCapacityScaleConfig#setScaleInWhenAverageAbove(int)
+     * @see MemoryCapacityScaleBeanConfig#setScaleInWhenAverageAbove(int)
      */
     public MemoryCapacityScaleBeanConfigurer scaleInWhenAverageBelow(int usagePercentage) {
         validatePercentage(usagePercentage);
@@ -40,7 +40,7 @@ public class MemoryCapacityScaleBeanConfigurer
     }
 
     /**
-     * @see MemoryCapacityScaleConfig#setScaleOutWhenAverageAbove(int)
+     * @see MemoryCapacityScaleBeanConfig#setScaleOutWhenAverageAbove(int)
      */
     public MemoryCapacityScaleBeanConfigurer scaleOutWhenAverageAbove(int usagePercentage) {
         validatePercentage(usagePercentage);
@@ -83,7 +83,7 @@ public class MemoryCapacityScaleBeanConfigurer
     /**
      * @see ScaleBeanConfigurer#getConfig()
      */
-    public MemoryCapacityScaleConfig getConfig() {
+    public MemoryCapacityScaleBeanConfig getConfig() {
         return config;
     }
 

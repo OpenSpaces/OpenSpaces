@@ -41,19 +41,19 @@ public class ElasticWebProcessingUnitDeployment extends AbstractElasticProcessin
         this(processingUnit.getAbsolutePath());
     }
 
-    public ElasticWebProcessingUnitDeployment enableScaleStrategy(EagerScaleBeanConfigurer configurer) {
-        return enableScaleStrategy(configurer.getConfig());
+    public ElasticWebProcessingUnitDeployment scale(EagerScaleBeanConfigurer configurer) {
+        return scale(configurer.getConfig());
     }
     
-    public ElasticWebProcessingUnitDeployment enableScaleStrategy(ManualContainersScaleBeanConfigurer configurer) {
-        return enableScaleStrategy(configurer.getConfig());
+    public ElasticWebProcessingUnitDeployment scale(ManualContainersScaleBeanConfigurer configurer) {
+        return scale(configurer.getConfig());
     }
     
-    public ElasticWebProcessingUnitDeployment enableScaleStrategy(ManualContainersScaleBeanConfig strategy) {
+    public ElasticWebProcessingUnitDeployment scale(ManualContainersScaleBeanConfig strategy) {
         return (ElasticWebProcessingUnitDeployment) super.enableScaleStrategy(strategy.getBeanClassName(), strategy.getProperties());
     }
 
-    public ElasticWebProcessingUnitDeployment enableScaleStrategy(EagerScaleBeanConfig strategy) {
+    public ElasticWebProcessingUnitDeployment scale(EagerScaleBeanConfig strategy) {
         return (ElasticWebProcessingUnitDeployment) super.enableScaleStrategy(strategy.getBeanClassName(), strategy.getProperties());
     }
     

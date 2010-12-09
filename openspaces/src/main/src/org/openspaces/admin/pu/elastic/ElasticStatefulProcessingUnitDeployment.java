@@ -11,7 +11,7 @@ import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleBeanConfig;
 import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfig;
 import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfigurer;
 import org.openspaces.admin.pu.elastic.isolation.DedicatedIsolation;
 import org.openspaces.admin.pu.elastic.isolation.PublicIsolation;
@@ -108,35 +108,35 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return this;
     }
     
-    public ElasticStatefulProcessingUnitDeployment enableScaleStrategy(EagerScaleBeanConfigurer strategy) {
-        return enableScaleStrategy(strategy.getConfig());
+    public ElasticStatefulProcessingUnitDeployment scale(EagerScaleBeanConfigurer strategy) {
+        return scale(strategy.getConfig());
     }
 
-    public ElasticStatefulProcessingUnitDeployment enableScaleStrategy(ManualContainersScaleBeanConfigurer strategy) {
-        return enableScaleStrategy(strategy.getConfig());
+    public ElasticStatefulProcessingUnitDeployment scale(ManualContainersScaleBeanConfigurer strategy) {
+        return scale(strategy.getConfig());
     }
 
-    public ElasticStatefulProcessingUnitDeployment enableScaleStrategy(ManualMemoryCapacityScaleBeanConfigurer strategy) {
-        return enableScaleStrategy(strategy.getConfig());
+    public ElasticStatefulProcessingUnitDeployment scale(ManualMemoryCapacityScaleBeanConfigurer strategy) {
+        return scale(strategy.getConfig());
     }
 
-    public ElasticStatefulProcessingUnitDeployment enableScaleStrategy(MemoryCapacityScaleBeanConfigurer strategy) {
-        return enableScaleStrategy(strategy.getConfig());
+    public ElasticStatefulProcessingUnitDeployment scale(MemoryCapacityScaleBeanConfigurer strategy) {
+        return scale(strategy.getConfig());
     }
     
-    public ElasticStatefulProcessingUnitDeployment enableScaleStrategy(EagerScaleBeanConfig strategy) {
+    public ElasticStatefulProcessingUnitDeployment scale(EagerScaleBeanConfig strategy) {
         return (ElasticStatefulProcessingUnitDeployment) super.enableScaleStrategy(strategy.getBeanClassName(),strategy.getProperties());
     }
 
-    public ElasticStatefulProcessingUnitDeployment enableScaleStrategy(ManualContainersScaleBeanConfig strategy) {
+    public ElasticStatefulProcessingUnitDeployment scale(ManualContainersScaleBeanConfig strategy) {
         return (ElasticStatefulProcessingUnitDeployment) super.enableScaleStrategy(strategy.getBeanClassName(), strategy.getProperties());
     }
 
-    public ElasticStatefulProcessingUnitDeployment enableScaleStrategy(ManualMemoryCapacityScaleBeanConfig strategy) {
+    public ElasticStatefulProcessingUnitDeployment scale(ManualMemoryCapacityScaleBeanConfig strategy) {
         return (ElasticStatefulProcessingUnitDeployment) super.enableScaleStrategy(strategy.getBeanClassName(), strategy.getProperties());
     }
     
-    public ElasticStatefulProcessingUnitDeployment enableScaleStrategy(MemoryCapacityScaleConfig strategy) {
+    public ElasticStatefulProcessingUnitDeployment scale(MemoryCapacityScaleBeanConfig strategy) {
         return (ElasticStatefulProcessingUnitDeployment) super.enableScaleStrategy(strategy.getBeanClassName(), strategy.getProperties());
     }
     

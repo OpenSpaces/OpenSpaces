@@ -16,7 +16,7 @@ import org.openspaces.grid.gsm.elastic.MemoryCapacityScaleStrategyBean;
  * @see MemoryCapacityScaleBeanConfigurer
  * @author itaif
  */
-public class MemoryCapacityScaleConfig 
+public class MemoryCapacityScaleBeanConfig 
     implements  MinNumberOfContainersScaleConfig,  
                 MaxNumberOfContainersScaleConfig ,
                 MinNumberOfContainersPerMachineScaleConfig,
@@ -32,7 +32,7 @@ public class MemoryCapacityScaleConfig
     
     private StringProperties properties;
     
-    public MemoryCapacityScaleConfig() {
+    public MemoryCapacityScaleBeanConfig() {
         properties = new StringProperties();
     }
     

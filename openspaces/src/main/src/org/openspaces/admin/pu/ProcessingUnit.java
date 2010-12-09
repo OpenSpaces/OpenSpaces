@@ -290,4 +290,10 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * state.
      */
     ProcessingUnitInstanceStatisticsChangedEventManager getProcessingUnitInstanceStatisticsChanged();
+    
+    /**
+     * @return dynamic properties relevant for elastic processing units or null if not elastic
+     */
+    ElasticProcessingUnit asElasticProcessingUnit();
+    
 }
