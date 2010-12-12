@@ -1,7 +1,21 @@
 package org.openspaces.admin.internal.admin;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.jini.core.discovery.LookupLocator;
@@ -100,6 +114,7 @@ import org.openspaces.admin.vm.VirtualMachines;
 import org.openspaces.admin.zone.Zone;
 import org.openspaces.admin.zone.ZoneAware;
 import org.openspaces.admin.zone.Zones;
+import org.openspaces.core.space.SpaceServiceDetails;
 
 import com.gigaspaces.grid.gsa.AgentProcessesDetails;
 import com.gigaspaces.grid.gsa.GSA;
@@ -109,7 +124,6 @@ import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
 import com.gigaspaces.security.directory.UserDetails;
-import org.openspaces.core.space.SpaceServiceDetails;
 
 /**
  * @author kimchy
@@ -1239,4 +1253,15 @@ public class DefaultAdmin implements InternalAdmin {
         }
     }
 
+    public ScheduledFuture<?> scheduleWithFixedDelayNonBlockingStateChange(final Runnable command, long initialDelay,
+            long delay, TimeUnit unit) {
+        return this.getScheduler().scheduleWithFixedDelay(new Runnable() {
+
+            public void run() {
+                scheduleNonBlockingStateChange(command);
+            }}, 
+            
+            initialDelay, delay, unit);
+    }
+   
 }

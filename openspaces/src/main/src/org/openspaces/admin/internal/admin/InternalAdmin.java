@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.admin;
 
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -76,12 +77,28 @@ public interface InternalAdmin extends Admin {
      */
     void scheduleNonBlockingStateChange(Runnable runnable);
     
+    
+    /**
+     * Any internal admin objects state change based on polling must be scheduled using this method.
+     * In case there is a single event loop thread (non blocking event listeners), 
+     * the specified command is added to the event loop queue.
+     * Otherwise it is executed on the admin scheduler thread pool.
+     * @param runnable
+     */
+    
+    ScheduledFuture<?> scheduleWithFixedDelayNonBlockingStateChange(
+            Runnable command, 
+            long initialDelay,  
+            long delay, 
+            TimeUnit unit);
+        
     /**
      * A generic thread pool for network based operations such as creating a new grid service container.
      * @param runnable
      */
     void scheduleAdminOperation(Runnable runnable);
 
+    
     /**
      * Enables a single event loop threading model in which all
      * event listeners and admin state updates are done on the same thread.
@@ -91,4 +108,6 @@ public interface InternalAdmin extends Admin {
      * @return
      */
     void singleThreadedEventListeners();
+
+    
 }
