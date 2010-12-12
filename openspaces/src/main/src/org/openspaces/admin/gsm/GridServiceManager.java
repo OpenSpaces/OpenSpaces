@@ -150,4 +150,8 @@ public interface GridServiceManager extends AgentGridComponent, LogProviderGridC
     
     ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
 
+    /**
+     * @return true if this agent is in admin.getGridServiceManagers()
+     */
+    boolean isRunning();
 }

@@ -231,4 +231,8 @@ public class DefaultGridServiceContainer extends AbstractAgentGridComponent impl
     public int hashCode() {
         return serviceID.hashCode();
     }
+    
+    public boolean isRunning() {
+        return admin.getGridServiceContainers().getContainerByUID(this.getUid()) != null;
+    }
 }

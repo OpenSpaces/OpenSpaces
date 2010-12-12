@@ -99,4 +99,9 @@ public interface GridServiceContainer extends AgentGridComponent, Iterable<Proce
      * Removes a processing unit lifecycle listener to the container.
      */
     void removeProcessingUnitInstanceLifecycleEventListener(ProcessingUnitInstanceLifecycleEventListener eventListener);
+    
+    /**
+     * @return true if this container is in admin.getGridServiceContainers()
+     */
+    boolean isRunning();
 }

@@ -95,4 +95,12 @@ public class GridServiceContainerOptions {
         options.setEnvironmentVariables(environmentVariables);
         return options;
     }
+    
+    public boolean equals(Object other) {
+        return other instanceof GridServiceContainerOptions &&
+               ((GridServiceContainerOptions) other).useScript == this.useScript &&
+               ((GridServiceContainerOptions) other).overrideVmInputArguments == this.overrideVmInputArguments &&
+               ((GridServiceContainerOptions) other).vmInputArguments.equals(this.vmInputArguments) &&
+               ((GridServiceContainerOptions) other).environmentVariables.equals(this.environmentVariables);
+    }
 }

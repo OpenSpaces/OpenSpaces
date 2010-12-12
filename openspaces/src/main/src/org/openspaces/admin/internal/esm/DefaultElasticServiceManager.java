@@ -125,4 +125,8 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
     public int hashCode() {
         return serviceID.hashCode();
     }
+
+    public boolean isRunning() {
+        return this.admin.getElasticServiceManagers().getManagerByUID(getUid()) != null;
+    }
 }

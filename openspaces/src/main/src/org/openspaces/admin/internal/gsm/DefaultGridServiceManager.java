@@ -411,4 +411,8 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             throws ProcessingUnitAlreadyDeployedException {
         return deploy(deployment.toProcessingUnitDeployment(),timeout,timeUnit);
     }
+
+    public boolean isRunning() {
+        return admin.getGridServiceManagers().getManagerByUID(getUid()) != null;
+    }
 }

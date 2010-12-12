@@ -147,4 +147,9 @@ public interface GridServiceAgent extends GridComponent, LogProviderGridComponen
      * Shuts down the GSA.
      */
     void shutdown();
+    
+    /**
+     * @return true if this agent is in admin.getGridServiceAgents()
+     */
+    boolean isRunning();
 }
