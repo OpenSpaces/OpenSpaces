@@ -20,14 +20,14 @@ import org.openspaces.admin.alerts.config.AlertBeanConfig;
 import org.openspaces.admin.alerts.events.AlertEventListener;
 import org.openspaces.admin.alerts.events.AlertEventManager;
 import org.openspaces.admin.bean.BeanConfigManager;
-import org.openspaces.admin.bean.BeanPropertiesManager;
+import org.openspaces.admin.bean.BeanConfigPropertiesManager;
 
 /**
  * An alert manager is a manager for alerts issued by alert beans or alert providers.
  * <p>
  * The alert manager provides two options for configuration of alert beans: A strongly typed
  * configuration based on an implementation of {@link AlertBeanConfig}, or a weakly typed
- * configuration based on String key-value property pairs (see {@link BeanPropertiesManager}).
+ * configuration based on String key-value property pairs (see {@link BeanConfigPropertiesManager}).
  * <p>
  * To Register/Unregister for alert events (of all types), add/remove {@link AlertEventListener}s
  * exposed by the {@link AlertEventManager} API.
@@ -47,7 +47,7 @@ public interface AlertManager extends BeanConfigManager<AlertBeanConfig>, AlertE
     /**
      * @return the weakly typed configuration API. 
      */
-	BeanPropertiesManager getBeanPropertiesManager();
+	BeanConfigPropertiesManager getBeanConfigPropertiesManager();
 	
 	/**
 	 * Trigger an alert event for registered alert event listeners.

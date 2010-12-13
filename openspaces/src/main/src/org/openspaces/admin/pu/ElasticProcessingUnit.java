@@ -2,12 +2,12 @@ package org.openspaces.admin.pu;
 
 import java.util.Map;
 
-import org.openspaces.admin.bean.BeanPropertiesManager;
+import org.openspaces.admin.bean.BeanConfigPropertiesManager;
 import org.openspaces.admin.pu.elastic.config.ScaleBeanConfig;
 
 public interface ElasticProcessingUnit  {
 
-    BeanPropertiesManager getBeanPropertiesManager();
+    BeanConfigPropertiesManager getBeanPropertiesManager();
     void scale(ScaleBeanConfig scaleBeanConfiguration);
     Map<String,String> getEnvironmentVariables();
     void setEnvironmentVariables(Map<String,String> environmentVariables);

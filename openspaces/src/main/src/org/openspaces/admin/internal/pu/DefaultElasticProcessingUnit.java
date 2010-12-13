@@ -2,7 +2,7 @@ package org.openspaces.admin.internal.pu;
 
 import java.util.Map;
 
-import org.openspaces.admin.bean.BeanPropertiesManager;
+import org.openspaces.admin.bean.BeanConfigPropertiesManager;
 import org.openspaces.admin.pu.ElasticProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.ScaleBeanConfig;
@@ -16,7 +16,7 @@ public class DefaultElasticProcessingUnit implements ElasticProcessingUnit {
         this.pu = pu;
     }
 
-    public BeanPropertiesManager getBeanPropertiesManager() {
+    public BeanConfigPropertiesManager getBeanPropertiesManager() {
         //TODO: Auto-generated
         return null;
     }

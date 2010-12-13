@@ -17,26 +17,24 @@
 package org.openspaces.admin.bean;
 
 /**
- * Exception indicating that a bean by this name can't be found (has not been added or has been
- * removed).
+ * Exception indicating that a configuration for a bean by this name already has been added.
  * 
  * @see BeanConfig#getBeanClassName()
- * @see BeanConfigManager#addBean(BeanConfig)
- * @see BeanConfigManager
+ * @see BeanConfigManager#addConfig(BeanConfig)
  * 
  * @author Moran Avigdor
  * @author Itai Frenkel
  * @since 8.0
  */
-public class BeanNotFoundException extends BeanException {
+public class BeanConfigAlreadyExistsException extends BeanConfigException {
 
 	private static final long serialVersionUID = 1L;
 
-	public BeanNotFoundException(String message) {
+	public BeanConfigAlreadyExistsException(String message) {
 		super(message);
 	}
-	
-	public BeanNotFoundException(String message, Throwable cause) {
-        super(message, cause);
-    }
+
+	public BeanConfigAlreadyExistsException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

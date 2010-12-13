@@ -17,15 +17,15 @@
 package org.openspaces.admin.bean;
 
 /**
- * Exception indicating that an initialization of a bean fails.
+ * Exception indicating that an initialization of a bean failed.
  * 
- * @see BeanConfigManager#enableBean(Class)
+ * @see BeanConfigManager#enableConfig(Class)
  * 
  * @author Moran Avigdor
  * @author Itai Frenkel
  * @since 8.0
  */
-public class BeanInitializationException extends BeanException {
+public class BeanInitializationException extends BeanConfigException {
 
 	private static final long serialVersionUID = 1L;
 

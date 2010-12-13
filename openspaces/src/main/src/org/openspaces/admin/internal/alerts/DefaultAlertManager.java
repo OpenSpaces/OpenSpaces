@@ -6,14 +6,14 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.alerts.Alert;
 import org.openspaces.admin.alerts.config.AlertBeanConfig;
 import org.openspaces.admin.alerts.events.AlertEventListener;
-import org.openspaces.admin.bean.BeanPropertiesManager;
+import org.openspaces.admin.bean.BeanConfigPropertiesManager;
 import org.openspaces.admin.internal.alerts.bean.AlertBean;
 import org.openspaces.admin.internal.alerts.events.DefaultAlertEventManager;
 import org.openspaces.admin.internal.alerts.events.InternalAlertEventManager;
-import org.openspaces.admin.bean.BeanAlreadyExistsException;
+import org.openspaces.admin.bean.BeanConfigAlreadyExistsException;
 import org.openspaces.admin.bean.BeanConfig;
-import org.openspaces.admin.bean.BeanException;
-import org.openspaces.admin.bean.BeanNotFoundException;
+import org.openspaces.admin.bean.BeanConfigException;
+import org.openspaces.admin.bean.BeanConfigNotFoundException;
 import org.openspaces.core.bean.DefaultBeanServer;
 
 public class DefaultAlertManager implements InternalAlertManager {
@@ -21,13 +21,13 @@ public class DefaultAlertManager implements InternalAlertManager {
     private final Admin admin;
     private final InternalAlertEventManager alertEventManager;
     private final InternalAlertRepository alertRepository;
-    private final BeanPropertiesManager beanPropertiesManager;
+    private final BeanConfigPropertiesManager beanConfigPropertiesManager;
 
     public DefaultAlertManager(Admin admin) {
         this.admin = admin;
         this.alertEventManager = new DefaultAlertEventManager(this);
         this.alertRepository = new DefaultAlertRepository();
-        this.beanPropertiesManager = new DefaultBeanServer<AlertBean>(admin);
+        this.beanConfigPropertiesManager = new DefaultBeanServer<AlertBean>(admin);
     }
 
     public AlertRepository getAlertRepository() {
@@ -55,38 +55,38 @@ public class DefaultAlertManager implements InternalAlertManager {
         return admin;
     }
 
-    public BeanPropertiesManager getBeanPropertiesManager() {
-        return beanPropertiesManager;
+    public BeanConfigPropertiesManager getBeanConfigPropertiesManager() {
+        return beanConfigPropertiesManager;
     }
 
-    public void addBean(AlertBeanConfig config) throws BeanAlreadyExistsException {
-        beanPropertiesManager.addBean(config.getBeanClassName(), config.getProperties());
+    public void addConfig(AlertBeanConfig config) throws BeanConfigAlreadyExistsException {
+        beanConfigPropertiesManager.addConfig(config.getBeanClassName(), config.getProperties());
     }
 
-    public <T extends AlertBeanConfig> void disableBean(Class<T> clazz) throws BeanNotFoundException {
+    public <T extends AlertBeanConfig> void disableConfig(Class<T> clazz) throws BeanConfigNotFoundException {
         BeanConfig configInstance = getConfigInstance(clazz);
-        beanPropertiesManager.disableBean(configInstance.getBeanClassName());
+        beanConfigPropertiesManager.disableConfig(configInstance.getBeanClassName());
     }
 
-    public <T extends AlertBeanConfig> void enableBean(Class<T> clazz) throws BeanNotFoundException, BeanException {
+    public <T extends AlertBeanConfig> void enableConfig(Class<T> clazz) throws BeanConfigNotFoundException, BeanConfigException {
         BeanConfig configInstance = getConfigInstance(clazz);
-        beanPropertiesManager.enableBean(configInstance.getBeanClassName());
+        beanConfigPropertiesManager.enableConfig(configInstance.getBeanClassName());
     }
 
-    public <T extends AlertBeanConfig> T getBean(Class<T> clazz) throws BeanNotFoundException {
+    public <T extends AlertBeanConfig> T getConfig(Class<T> clazz) throws BeanConfigNotFoundException {
         T configInstance = getConfigInstance(clazz);
-        Map<String, String> beanProperties = beanPropertiesManager.getBean(configInstance.getBeanClassName());
+        Map<String, String> beanProperties = beanConfigPropertiesManager.getConfig(configInstance.getBeanClassName());
         configInstance.setProperties(beanProperties);
         return configInstance;
     }
 
-    public <T extends AlertBeanConfig> void removeBean(Class<T> clazz) throws BeanNotFoundException {
+    public <T extends AlertBeanConfig> void removeConfig(Class<T> clazz) throws BeanConfigNotFoundException {
         BeanConfig configInstance = getConfigInstance(clazz);
-        beanPropertiesManager.removeBean(configInstance.getBeanClassName());
+        beanConfigPropertiesManager.removeConfig(configInstance.getBeanClassName());
     }
 
-    public void setBean(AlertBeanConfig config) throws BeanNotFoundException {
-        beanPropertiesManager.setBean(config.getBeanClassName(), config.getProperties());
+    public void setConfig(AlertBeanConfig config) throws BeanConfigNotFoundException {
+        beanConfigPropertiesManager.setConfig(config.getBeanClassName(), config.getProperties());
     }
 
     private <T extends BeanConfig> T getConfigInstance(Class<T> clazz) {
@@ -94,7 +94,7 @@ public class DefaultAlertManager implements InternalAlertManager {
             T newInstance = clazz.newInstance();
             return newInstance;
         } catch (Exception e) {
-            throw new BeanNotFoundException("Unable to extract bean name from " + clazz, e);
+            throw new BeanConfigNotFoundException("Unable to extract bean name from " + clazz, e);
         }
     }
 }

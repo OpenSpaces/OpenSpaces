@@ -19,7 +19,7 @@ package org.openspaces.admin.bean;
 import org.openspaces.admin.AdminException;
 
 /**
- * Base class for all admin Bean exceptions.
+ * Base class for all admin Bean configuration exceptions.
  * 
  * @see BeanConfigManager
  * 
@@ -27,15 +27,15 @@ import org.openspaces.admin.AdminException;
  * @author Itai Frenkel
  * @since 8.0
  */
-public class BeanException extends AdminException {
+public class BeanConfigException extends AdminException {
 
 	private static final long serialVersionUID = 1L;
 
-	public BeanException(String message) {
+	public BeanConfigException(String message) {
 		super(message);
 	}
 	
-	public BeanException(String message, Throwable cause) {
+	public BeanConfigException(String message, Throwable cause) {
 		super(message, cause);
 	}
 

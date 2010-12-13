@@ -17,15 +17,16 @@
 package org.openspaces.admin.bean;
 
 /**
- * Exception indicating that a misconfiguration occurred when initializing a bean (such as failure to set an essential property).
+ * Exception indicating that a misconfiguration occurred when initializing a bean (such as failure
+ * to set an essential property).
  * 
- * @see BeanConfigManager#enableBean(Class)
+ * @see BeanConfigManager#enableConfig(Class)
  * 
  * @author Moran Avigdor
  * @author Itai Frenkel
  * @since 8.0
  */
-public class BeanConfigurationException extends BeanException {
+public class BeanConfigurationException extends BeanConfigException {
 
 	private static final long serialVersionUID = 1L;
 
