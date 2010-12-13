@@ -1,7 +1,6 @@
 package org.openspaces.grid.gsm.machines;
 
 import org.openspaces.admin.gsa.GridServiceAgent;
-import org.openspaces.admin.zone.Zone;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpoint;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
@@ -14,7 +13,7 @@ import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestr
  * @see MachineSlaPolicy
  */
 public interface MachinesSlaEnforcementEndpoint 
-    extends ServiceLevelAgreementEnforcementEndpoint<Zone,MachinesSlaPolicy> {
+    extends ServiceLevelAgreementEnforcementEndpoint<String,MachinesSlaPolicy> {
     
     /**
      * @return a list of agents for this zone that are not pending shutdown, without blocking the calling thread.

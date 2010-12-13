@@ -19,7 +19,6 @@ import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.os.OperatingSystemStatistics;
-import org.openspaces.admin.zone.Zone;
 import org.openspaces.grid.esm.ToStringHelper;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
@@ -34,7 +33,7 @@ import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestr
  * @author itaif
  *
  */
-public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcement<ContainersSlaPolicy,Zone,ContainersSlaEnforcementEndpoint> {
+public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcement<ContainersSlaPolicy,String,ContainersSlaEnforcementEndpoint> {
 
     private static final int START_CONTAINER_TIMEOUT_FAILURE_SECONDS = 60;
     private static final int START_CONTAINER_TIMEOUT_FAILURE_IGNORE_SECONDS = 600;
@@ -61,50 +60,50 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
      * @param zone - the container zone
      * @return a service that continuously maintains the specified number of containers with the specified zone.
      */
-    public ContainersSlaEnforcementEndpoint createEndpoint(final Zone zone)
+    public ContainersSlaEnforcementEndpoint createEndpoint(final String zone)
         throws ServiceLevelAgreementEnforcementEndpointAlreadyExistsException {
         
-        if (!isZoneDisposed(zone.getName())) {
-            throw new IllegalStateException("Cannot initialize a new ContainersAdminService for zone " + zone.getName() +" since it already exists." );
+        if (!isZoneDisposed(zone)) {
+            throw new IllegalStateException("Cannot initialize a new ContainersAdminService for zone " + zone +" since it already exists." );
         }
         
         ContainersSlaEnforcementEndpoint service = new ContainersSlaEnforcementEndpoint() {
 
             public GridServiceContainer[] getContainers() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
-                return ContainersSlaEnforcement.this.getContainers(zone.getName());
+                return ContainersSlaEnforcement.this.getContainers(zone);
             }
 
             public GridServiceContainer[] getContainersPendingShutdown() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
-                return ContainersSlaEnforcement.this.getContainersPendingProcessingUnitRelocation(zone.getName());
+                return ContainersSlaEnforcement.this.getContainersPendingProcessingUnitRelocation(zone);
             }
 
             public boolean enforceSla(ContainersSlaPolicy sla) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
-                return ContainersSlaEnforcement.this.enforceSla(zone.getName(),sla);
+                return ContainersSlaEnforcement.this.enforceSla(zone,sla);
             }
 
-            public Zone getId() {
+            public String getId() {
                 return zone;
             }
         };
         
         
         
-        services.put(zone.getName(),service);
-        containersMarkedForShutdownPerZone.put(zone.getName(), new ArrayList<GridServiceContainer>());
-        futureContainersPerZone.put(zone.getName(),new ArrayList<FutureGridServiceContainer>());
+        services.put(zone,service);
+        containersMarkedForShutdownPerZone.put(zone, new ArrayList<GridServiceContainer>());
+        futureContainersPerZone.put(zone,new ArrayList<FutureGridServiceContainer>());
         
         return service;
     }
 
-    public void destroyEndpoint(Zone zone) {
-        containersMarkedForShutdownPerZone.remove(zone.getName());
-        futureContainersPerZone.remove(zone.getName());
-        services.remove(zone.getName());
+    public void destroyEndpoint(String zone) {
+        containersMarkedForShutdownPerZone.remove(zone);
+        futureContainersPerZone.remove(zone);
+        services.remove(zone);
     }
 
     public void destroy() {
         for (String zone : services.keySet()) {
-            destroyEndpoint(admin.getZones().getByName(zone));
+            destroyEndpoint(zone);
         }
     }
     
