@@ -92,6 +92,8 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
         int lowThreshold = config.getLowThresholdPerc();
         
         double cpuAvg = calcAverageWithinPeriod(event);
+        if (cpuAvg == -1) return; //period hasn't passed
+        
         if (cpuAvg > highThreshold) {
                 inBetweenThresholdState = true;
                 Alert alert = new Alert();
@@ -133,6 +135,10 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
         long measurementPeriod = config.getMeasurementPeriod();
         //TODO get the statistics interval from admin object
         long period = measurementPeriod / statisticsInterval;
+        
+        //not enough samples within requested period
+        if (period > timeline.size()) return -1;
+        
         double average = 0.0;
         for (int i = 0; i < period && i < timeline.size(); i++) {
             double cpuPerc = timeline.get(i).getCpuPerc();
@@ -140,7 +146,7 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
         }
         average /= period;
         
-        return 100.0 * average;
+        return average;
     }
 
     private String getPeriodOfTime(OperatingSystemStatisticsChangedEvent event) {
