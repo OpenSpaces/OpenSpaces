@@ -16,11 +16,11 @@
 package org.openspaces.admin.bean;
 
 /**
- * A strongly typed bean manager using the strongly typed implementation of a {@link BeanConfig}. It
- * rides on top of the weakly typed bean properties manager (see {@link BeanConfigPropertiesManager}).
- * Underneath this wrapper, the bean name ({@link BeanConfig#getBeanClassName()}) and the
- * configuration properties ({@link BeanConfig#getProperties()}) are extracted and passed to the
- * bean properties manager.
+ * A strongly typed bean configuration manager using the strongly typed implementation of a
+ * {@link BeanConfig}. It rides on top of the weakly typed bean configuration properties manager
+ * (see {@link BeanConfigPropertiesManager}). Underneath this wrapper, the bean name (
+ * {@link BeanConfig#getBeanClassName()}) and the configuration properties (
+ * {@link BeanConfig#getProperties()}) are extracted and passed to the bean properties manager.
  * 
  * @param <B>
  *            the bean configuration implementation class
@@ -32,9 +32,9 @@ package org.openspaces.admin.bean;
 public interface BeanConfigManager<B extends BeanConfig> {
 
     /**
-     * Adds a bean by it's name {@link BeanConfig#getBeanClassName()} with the corresponding
-     * configuration properties. The configuration object is filled with String key-value pairs
-     * configuration properties used to configure this bean.
+     * Adds configuration properties of a bean. The bean is referenced by it's name - given by
+     * {@link BeanConfig#getBeanClassName()}. The configuration object is filled with String
+     * key-value configuration property pairs used to configure this bean.
      * 
      * @param config
      *            the bean configuration
@@ -56,7 +56,7 @@ public interface BeanConfigManager<B extends BeanConfig> {
     void setConfig(B config) throws BeanConfigNotFoundException;
 
     /**
-     * Enable a previously added bean configuration. Creates the bean bean corresponding to the bean
+     * Enable a previously added bean configuration. Creates the bean corresponding to the bean
      * name, configured with the properties previously set. If the bean was already enabled, the
      * request will be ignored.
      * 
