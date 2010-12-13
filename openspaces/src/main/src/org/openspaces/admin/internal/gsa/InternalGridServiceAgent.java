@@ -4,6 +4,7 @@ import com.gigaspaces.grid.gsa.AgentProcessesDetails;
 import com.gigaspaces.grid.gsa.GSA;
 import net.jini.core.lookup.ServiceID;
 import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.gsa.GridServiceContainerOptions;
 import org.openspaces.admin.internal.support.InternalAgentGridComponent;
 import org.openspaces.admin.internal.support.InternalGridComponent;
 
@@ -21,4 +22,6 @@ public interface InternalGridServiceAgent extends GridServiceAgent, InternalGrid
     void kill(InternalAgentGridComponent agentGridComponent);
 
     void restart(InternalAgentGridComponent agentGridComponent);
+
+    int internalStartGridService(GridServiceContainerOptions options);
 }
