@@ -102,6 +102,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     private ProcessingUnitInstanceStatistics lastStatistics;
 
     private Future scheduledStatisticsMonitor;
+    
+    private int scheduledStatisticsRefCount = 0;
 
     private final InternalProcessingUnitInstanceStatisticsChangedEventManager statisticsChangedEventManager;
 
@@ -532,6 +534,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public synchronized void startStatisticsMonitor() {
+        if (scheduledStatisticsRefCount++ > 0) return;
+        
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
         }
@@ -548,6 +552,8 @@ public class DefaultProcessingUnitInstance extends AbstractGridComponent impleme
     }
 
     public synchronized void stopStatisticsMonitor() {
+        if (scheduledStatisticsRefCount!=0 && --scheduledStatisticsRefCount > 0) return;
+        
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
             scheduledStatisticsMonitor = null;

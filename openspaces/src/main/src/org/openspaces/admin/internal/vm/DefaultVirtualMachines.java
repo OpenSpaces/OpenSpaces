@@ -58,6 +58,8 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
     private VirtualMachinesStatistics lastStatistics;
     
     private Future scheduledStatisticsMonitor;
+    
+    private int scheduledStatisticsRefCount = 0;
 
     public DefaultVirtualMachines(InternalAdmin admin) {
         this.admin = admin;
@@ -154,12 +156,18 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
     }
 
     public synchronized void stopStatisticsMonitor() {
+        stopScheduledStatisticsMonitor();
+        for (VirtualMachine virtualMachine : virtualMachinesByUID.values()) {
+            virtualMachine.stopStatisticsMonitor();
+        }
+    }
+
+    private void stopScheduledStatisticsMonitor() {
+        if (scheduledStatisticsRefCount!=0 && --scheduledStatisticsRefCount > 0) return;
+        
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
             scheduledStatisticsMonitor = null;
-        }
-        for (VirtualMachine virtualMachine : virtualMachinesByUID.values()) {
-            virtualMachine.stopStatisticsMonitor();
         }
     }
 
@@ -168,6 +176,8 @@ public class DefaultVirtualMachines implements InternalVirtualMachines {
     }
 
     private void rescheduleStatisticsMonitor() {
+        if (scheduledStatisticsRefCount++ > 0) return;
+        
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
         }

@@ -88,6 +88,8 @@ public class DefaultSpace implements InternalSpace {
     private SpaceStatistics lastBackupStatistics;
 
     private Future scheduledStatisticsMonitor;
+    
+    private int scheduledStatisticsRefCount = 0;
 
     public DefaultSpace(InternalSpaces spaces, String uid, String name) {
         this.spaces = spaces;
@@ -140,12 +142,18 @@ public class DefaultSpace implements InternalSpace {
     }
 
     public synchronized void stopStatisticsMonitor() {
+        stopScheduledStatisticsMonitor();
+        for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
+            spaceInstance.stopStatisticsMonitor();
+        }
+    }
+
+    private void stopScheduledStatisticsMonitor() {
+        if (scheduledStatisticsRefCount!=0 && --scheduledStatisticsRefCount > 0) return;
+        
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
             scheduledStatisticsMonitor = null;
-        }
-        for (SpaceInstance spaceInstance : spaceInstancesByUID.values()) {
-            spaceInstance.stopStatisticsMonitor();
         }
     }
 
@@ -154,6 +162,8 @@ public class DefaultSpace implements InternalSpace {
     }
 
     private void rescheduleStatisticsMonitor() {
+        if (scheduledStatisticsRefCount++ > 0) return;
+        
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
         }

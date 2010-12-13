@@ -44,6 +44,8 @@ public class DefaultTransport implements InternalTransport {
     private TransportStatistics lastStatistics;
 
     private Future scheduledStatisticsMonitor;
+    
+    private int scheduledStatisticsRefCount = 0;
 
     private final InternalTransportStatisticsChangedEventManager statisticsChangedEventManager;
 
@@ -140,6 +142,8 @@ public class DefaultTransport implements InternalTransport {
     }
 
     public synchronized void startStatisticsMonitor() {
+        if (scheduledStatisticsRefCount++ > 0) return;
+        
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
         }
@@ -155,6 +159,8 @@ public class DefaultTransport implements InternalTransport {
     }
 
     public synchronized void stopStatisticsMonitor() {
+        if (scheduledStatisticsRefCount!=0 && --scheduledStatisticsRefCount > 0) return;
+        
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
             scheduledStatisticsMonitor = null;

@@ -56,25 +56,33 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
 
     private void validateProperties() {
         
+        try {
+            config.getHighThresholdPerc();
+            config.getLowThresholdPerc();
+            config.getMeasurementPeriod();
+        } catch (IllegalArgumentException e) {
+            throw new BeanConfigurationException(e.getMessage());
+        }
+
         if (config.getHighThresholdPerc() < config.getLowThresholdPerc()) {
             throw new BeanConfigurationException("Low threshold [" + config.getLowThresholdPerc()
-                    + "] must be less than high threshold value [" + config.getHighThresholdPerc() + "]");
+                    + "%] must be less than high threshold value [" + config.getHighThresholdPerc() + "%]");
         }
-        
+
         if (config.getHighThresholdPerc() < 0) {
             throw new BeanConfigurationException("High threshold [" + config.getHighThresholdPerc()
-                    + "] must greater than zero");
+                    + "%] must greater than zero");
         }
-        
+
         if (config.getLowThresholdPerc() < 0) {
             throw new BeanConfigurationException("Low threshold [" + config.getLowThresholdPerc()
-                    + "] must greater or equal to zero");
+                    + "%] must greater or equal to zero");
         }
-        
-      //TODO verify against the statistics interval from admin object
-        if (config.getMeasurementPeriod() < 1) {
+
+        //TODO what if less than statistics interval?
+        if (config.getMeasurementPeriod() < statisticsInterval) {
             throw new BeanConfigurationException("Measurment period [" + config.getMeasurementPeriod()
-                    + "] must be greater than zero");
+                    + " ms] must be greater than ["+statisticsInterval+" ms]");
         }
     }
 
@@ -83,10 +91,8 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
         int highThreshold = config.getHighThresholdPerc();
         int lowThreshold = config.getLowThresholdPerc();
         
-        double cpuPerc = event.getStatistics().getCpuPerc() * 100;
         double cpuAvg = calcAverageWithinPeriod(event);
         if (cpuAvg > highThreshold) {
-            // System.out.println(cpuMovingAvg);
                 inBetweenThresholdState = true;
                 Alert alert = new Alert();
                 alert.setAlertDescription("CPU crossed above a " + highThreshold + "% threshold, for a period of "
@@ -102,7 +108,6 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
 
                 admin.getAlertManager().fireAlert(alert);
         } else if (cpuAvg < lowThreshold) {
-            // System.out.println(cpuMovingAvg);
             if (inBetweenThresholdState) {
                 inBetweenThresholdState = false;
                 Alert alert = new Alert();

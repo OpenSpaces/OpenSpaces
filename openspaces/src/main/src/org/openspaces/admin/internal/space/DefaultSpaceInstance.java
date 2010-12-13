@@ -92,6 +92,7 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     private Future scheduledStatisticsMonitor;
 
+    private int scheduledStatisticsRefCount = 0;
 
     public DefaultSpaceInstance(ServiceID serviceID, IJSpace directSpace, IInternalRemoteJSpaceAdmin spaceAdmin, InternalAdmin admin) {
         super(admin);
@@ -206,6 +207,8 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     }
 
     public synchronized void startStatisticsMonitor() {
+        if (scheduledStatisticsRefCount++ > 0) return;
+        
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
         }
@@ -222,6 +225,8 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
     }
 
     public synchronized void stopStatisticsMonitor() {
+        if (scheduledStatisticsRefCount!=0 && --scheduledStatisticsRefCount > 0) return;
+        
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
             scheduledStatisticsMonitor = null;

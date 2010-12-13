@@ -47,6 +47,8 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
     private OperatingSystemsStatistics lastStatistics;
 
     private Future scheduledStatisticsMonitor;
+    
+    private int scheduledStatisticsRefCount = 0;
 
     public DefaultOperatingSystems(InternalAdmin admin) {
         this.admin = admin;
@@ -121,12 +123,18 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
     }
 
     public synchronized void stopStatisticsMonitor() {
+        stopScheduledStatisticsMonitor();
+        for (OperatingSystem operatingSystem : operatingSystemsByUID.values()) {
+            operatingSystem.stopStatisticsMonitor();
+        }
+    }
+
+    private void stopScheduledStatisticsMonitor() {
+        if (scheduledStatisticsRefCount!=0 && --scheduledStatisticsRefCount > 0) return;
+        
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
             scheduledStatisticsMonitor = null;
-        }
-        for (OperatingSystem operatingSystem : operatingSystemsByUID.values()) {
-            operatingSystem.stopStatisticsMonitor();
         }
     }
 
@@ -135,6 +143,8 @@ public class DefaultOperatingSystems implements InternalOperatingSystems {
     }
 
     private void rescheduleStatisticsMonitor() {
+        if (scheduledStatisticsRefCount++ > 0) return;
+        
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
         }

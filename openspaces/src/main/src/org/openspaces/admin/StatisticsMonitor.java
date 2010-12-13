@@ -46,6 +46,7 @@ public interface StatisticsMonitor {
     /**
      * Sets the statistics interval, automatically updating the monitoring scheduled tasks if
      * monitoring is enabled.
+     * @since 8.0 Restarts monitoring, with new interval, if no other party is already monitoring for statistics.
      */
     void setStatisticsInterval(long interval, TimeUnit timeUnit);
 
@@ -57,11 +58,13 @@ public interface StatisticsMonitor {
     /**
      * Starts the statistics monitor, starting a scheduled monitor that polls for statistics. Monitoring
      * is required only when wanting to receive statistics change events.
+     * @since 8.0 Restarts monitoring if no other party is already monitoring for statistics. 
      */
     void startStatisticsMonitor();
 
     /**
      * Stops the statistics monitor.
+     * @since 8.0 Stops monitoring if no other party is monitoring for statistics. 
      */
     void stopStatisticsMonitor();
 

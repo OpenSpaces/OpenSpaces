@@ -51,6 +51,8 @@ public class DefaultTransports implements InternalTransports {
     private TransportsStatistics lastStatistics;
 
     private Future scheduledStatisticsMonitor;
+    
+    private int scheduledStatisticsRefCount = 0;
 
     public DefaultTransports(InternalAdmin admin) {
         this.admin = admin;
@@ -148,12 +150,18 @@ public class DefaultTransports implements InternalTransports {
     }
 
     public synchronized void stopStatisticsMonitor() {
+        stopScheduledStatisticsMonitor();
+        for (Transport transport : transportsByUID.values()) {
+            transport.stopStatisticsMonitor();
+        }
+    }
+
+    private void stopScheduledStatisticsMonitor() {
+        if (scheduledStatisticsRefCount!=0 && --scheduledStatisticsRefCount > 0) return;
+        
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
             scheduledStatisticsMonitor = null;
-        }
-        for (Transport transport : transportsByUID.values()) {
-            transport.stopStatisticsMonitor();
         }
     }
 
@@ -162,6 +170,8 @@ public class DefaultTransports implements InternalTransports {
     }
 
     private void rescheduleStatisticsMonitor() {
+        if (scheduledStatisticsRefCount++ > 0) return;
+        
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
         }

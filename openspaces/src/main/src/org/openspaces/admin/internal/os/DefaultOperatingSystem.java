@@ -45,6 +45,7 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
     private OperatingSystemStatistics lastStatistics;
 
     private Future scheduledStatisticsMonitor;
+    private int scheduledStatisticsRefCount = 0;;
 
     private volatile long timeDelta = Integer.MIN_VALUE;
 
@@ -157,6 +158,8 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
     }
 
     public synchronized void startStatisticsMonitor() {
+        if (scheduledStatisticsRefCount++ > 0) return;
+        
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
         }
@@ -172,6 +175,8 @@ public class DefaultOperatingSystem implements InternalOperatingSystem {
     }
 
     public synchronized void stopStatisticsMonitor() {
+        if (scheduledStatisticsRefCount!=0 && --scheduledStatisticsRefCount > 0) return;
+        
         if (scheduledStatisticsMonitor != null) {
             scheduledStatisticsMonitor.cancel(false);
             scheduledStatisticsMonitor = null;
