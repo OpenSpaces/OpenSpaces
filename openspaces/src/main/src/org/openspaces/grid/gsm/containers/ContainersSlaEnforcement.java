@@ -376,7 +376,7 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
                 logger.info("Ignoring failure to start container on machine " + ToStringHelper.machineToString(future.getGridServiceAgent().getMachine()) + " that occured " + passedSeconds + " seconds ago since grid service agent no longer exists.");
                 iterator.remove();
             }
-            else if ( passedSeconds > START_CONTAINER_TIMEOUT_FAILURE_IGNORE_SECONDS * 1000) {
+            else if ( passedSeconds > START_CONTAINER_TIMEOUT_FAILURE_IGNORE_SECONDS) {
                 logger.info("Ignoring failure to start container on machine " + ToStringHelper.machineToString(future.getGridServiceAgent().getMachine()) + " that occured " + passedSeconds + " seconds ago due to timeout.");
                 iterator.remove();
             }

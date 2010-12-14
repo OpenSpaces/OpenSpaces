@@ -7,19 +7,19 @@ public class MachinesSlaPolicy extends ServiceLevelAgreementPolicy {
     int memory;
     double cpu;
     
-    void setCpu(double cpu) {
+    public void setCpu(double cpu) {
         this.cpu = cpu;
     }
     
-    double getCpu() {
+    public double getCpu() {
         return this.cpu;
     }
     
-    void setMemoryCapacityInMB(int memory) {
+    public void setMemoryCapacityInMB(int memory) {
         this.memory = memory;
     }
     
-    int getMemoryCapacityInMB() {
+    public int getMemoryCapacityInMB() {
         return this.memory;
     }
     
