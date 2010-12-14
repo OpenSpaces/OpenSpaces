@@ -48,7 +48,7 @@ public interface NonBlockingElasticScaleHandler {
 	 * @throws InterruptedException 
 	 * @throws ElasticScaleHandlerException 
 	 */
-	void stopMachineAsync(GridServiceAgent agent, long duration, TimeUnit unit) throws ElasticScaleHandlerException, InterruptedException, TimeoutException;
+	void stopMachineAsync(GridServiceAgent agent, long duration, TimeUnit unit);
 
 	
 }

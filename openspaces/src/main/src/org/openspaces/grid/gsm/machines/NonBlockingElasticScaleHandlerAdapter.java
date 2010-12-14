@@ -35,7 +35,7 @@ public class NonBlockingElasticScaleHandlerAdapter implements NonBlockingElastic
 
 			});
 
-	NonBlockingElasticScaleHandlerAdapter(ElasticScaleHandler machinePool) {
+	public NonBlockingElasticScaleHandlerAdapter(ElasticScaleHandler machinePool) {
 		this.elasticScaleHandler = machinePool;
 	}
 
@@ -129,22 +129,22 @@ public class NonBlockingElasticScaleHandlerAdapter implements NonBlockingElastic
 	}
 
 	public void stopMachineAsync(final GridServiceAgent agent, final long duration,
-			final TimeUnit unit) throws ElasticScaleHandlerException,
-			InterruptedException, TimeoutException {
+			final TimeUnit unit) {
 
 		final String hostAddress = agent.getMachine().getHostAddress();
 		
 		service.submit(new Runnable() {
 			public void run() {
 				try {
-					NonBlockingElasticScaleHandlerAdapter.this.elasticScaleHandler.stopMachine(agent, duration, unit);
-					logger.info(hostAddress + " stopped succesfully.");
+					if (NonBlockingElasticScaleHandlerAdapter.this.elasticScaleHandler.stopMachine(agent, duration, unit)) {
+					    logger.info(hostAddress + " stopped succesfully.");
+					}
 				} catch (ElasticScaleHandlerException e) {
-					logger.warn("Error while stopping " + hostAddress);
+					logger.warn("Error while stopping " + hostAddress,e);
 				} catch (InterruptedException e) {
-					logger.info("Interrupted while stopping " + hostAddress);
+					logger.info("Interrupted while stopping " + hostAddress,e);
 				} catch (TimeoutException e) {
-					logger.info("Stopping " + hostAddress + " times out.");
+					logger.info("Stopping " + hostAddress + " times out.",e);
 				}
 			}
 		});

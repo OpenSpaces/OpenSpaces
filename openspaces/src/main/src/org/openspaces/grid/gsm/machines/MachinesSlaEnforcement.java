@@ -1,22 +1,26 @@
 package org.openspaces.grid.gsm.machines;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.openspaces.admin.Admin;
-import org.openspaces.core.bean.Bean;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
 
 public class MachinesSlaEnforcement 
-    implements  Bean ,NonBlockingElasticScaleHandlerAware , 
-                ServiceLevelAgreementEnforcement<MachinesSlaPolicy, String, MachinesSlaEnforcementEndpoint>{
+    implements  ServiceLevelAgreementEnforcement<MachinesSlaPolicy, String, MachinesSlaEnforcementEndpoint>{
 
-    private Map<String, MachinesSlaEnforcementEndpoint> endpointPerZone;
+    private final Map<String, MachinesSlaEnforcementEndpoint> endpointPerZone;
     
-    private Admin admin;
-    private Map<String, String> properties;
-    private NonBlockingElasticScaleHandler elasticScaleHandler;
-        
+    private final Admin admin;
+    private final NonBlockingElasticScaleHandler elasticScaleHandler;
+    
+    public MachinesSlaEnforcement(Admin admin, NonBlockingElasticScaleHandler elasticScaleHandler) {
+        endpointPerZone = new HashMap<String, MachinesSlaEnforcementEndpoint>();
+        this.admin = admin;
+        this.elasticScaleHandler = elasticScaleHandler;
+    }
+    
     public MachinesSlaEnforcementEndpoint createEndpoint(String zone) throws ServiceLevelAgreementEnforcementEndpointAlreadyExistsException {
         if (endpointPerZone.containsKey(zone)) {
             throw new ServiceLevelAgreementEnforcementEndpointAlreadyExistsException();
@@ -35,30 +39,9 @@ public class MachinesSlaEnforcement
         endpointPerZone.remove(id);
     }
 
-    public void afterPropertiesSet() throws Exception {
-
-    }
-
     public void destroy() throws Exception {
         for (String zone : endpointPerZone.keySet()) {
             destroyEndpoint(zone);
         }
     }
-
-    public Map<String, String> getProperties() {
-        return properties;
-    }
-
-    public void setAdmin(Admin admin) {
-        this.admin = admin;
-    }
-
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
-    }
-
-	public void setNonBlockingElasticScaleHandler(NonBlockingElasticScaleHandler elasticScaleHandler) {
-		this.elasticScaleHandler = elasticScaleHandler;
-	}
-
 }

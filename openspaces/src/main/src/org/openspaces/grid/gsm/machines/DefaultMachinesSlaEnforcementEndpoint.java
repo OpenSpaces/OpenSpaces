@@ -12,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
@@ -22,11 +23,13 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 
     private static final Log logger = LogFactory.getLog(DefaultMachinesSlaEnforcementEndpoint.class);
 
-	private static final int START_AGENT_TIMEOUT_FAILURE_SECONDS = 10*60;
+	private static final int START_AGENT_TIMEOUT_SECONDS = 10*60;
+
+    private static final long STOP_AGENT_TIMEOUT_SECONDS = 10*60;
     
     private final String zone;
     private final InternalAdmin admin;
-    private final NonBlockingElasticScaleHandler machinePool;
+    private final NonBlockingElasticScaleHandler elasticScaleHandler;
     
     private List<FutureGridServiceAgents> futureAgents;
     private List<GridServiceAgent> agentsPendingShutdown;
@@ -45,7 +48,7 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
         
         this.zone = zone;
         this.admin = (InternalAdmin) admin;
-        this.machinePool = machinePool;
+        this.elasticScaleHandler = machinePool;
         this.destroyed = false;
         
         this.futureAgents = new ArrayList<FutureGridServiceAgents>();
@@ -56,7 +59,7 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
     public GridServiceAgent[] getGridServiceAgents() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
         validateNotDestroyed();
        
-        List<GridServiceAgent> agents =  Arrays.asList(getAllGridServiceAgents());
+        List<GridServiceAgent> agents =  getAllGridServiceAgents();
         for (GridServiceAgent agent : agentsPendingShutdown) {
             agents.remove(agent);
         }
@@ -87,13 +90,11 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
         
         
         try {
-			run(sla);
+			return run(sla);
 		} catch (ConflictingOperationInProgressException e) {
 			logger.info("Cannot enforce Machines SLA since a conflicting operation is in progress. Try again later.", e);
             return false; // try again next time
 		}
-        
-        return isSlaReached(sla);
     }
 
 
@@ -108,12 +109,14 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
         destroyed = true;
     }
     
-	private void run(MachinesSlaPolicy sla)
+	private boolean run(MachinesSlaPolicy sla)
 			throws ConflictingOperationInProgressException {
 
 		cleanAgentsMarkedForShutdown();
 		cleanFutureAgents();
 
+		boolean slaReached = futureAgents.size() == 0 && agentsPendingShutdown.size() == 0;
+		
 		int targetMemory = sla.getMemoryCapacityInMB();
 		double targetCpu = sla.getCpu();
 
@@ -148,6 +151,7 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 					// don't mark this machine for shutdown otherwise surplus
 					// would become negative
 					iterator.remove();
+					logger.info("machine agent " + agent.getMachine().getHostAddress() + " is no longer marked for shutdown in order to maintain capacity.");
 				}
 			}
 
@@ -162,6 +166,8 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 					this.agentsPendingShutdown.add(agent);
 					surplusMemory -= machineMemory;
 					surplusCpu -= machineCpu;
+					slaReached = false;
+					logger.info("machine agent " + agent.getMachine().getHostAddress() + " is marked for shutdown in order to reduce capacity.");
 				}
 			}
 		}
@@ -170,7 +176,11 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 			// scale out
 
 			// unmark all machines pending shutdown
+			for (GridServiceAgent agent : agentsPendingShutdown) {
+			    logger.info("machine agent " + agent.getMachine().getHostAddress() + " is no longer marked for shutdown in order to maintain capacity.");
+			}
 			this.agentsPendingShutdown.clear();
+			    
 
 			int shortageMemory = targetMemory - existingMemory;
 			double shortageCpu = targetCpu - existingCpu;
@@ -198,38 +208,52 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 				shortageCpu = 0;
 			}
 
-			if (machinePool != null) {
-				
-				this.futureAgents.add(machinePool.startMachinesAsync(
-						zone,
-						new CapacityRequirements(
-								new MemoryCapacityRequirment(shortageMemory),
-								new CpuCapacityRequirement(shortageCpu)),
-						START_AGENT_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS));
+			if (shortageCpu >0 || shortageMemory > 0) {
+			    slaReached = false;
 			
+    			if (elasticScaleHandler != null) {
+    				
+    				this.futureAgents.add(elasticScaleHandler.startMachinesAsync(
+    						zone,
+    						new CapacityRequirements(
+    								new MemoryCapacityRequirment(shortageMemory),
+    								new CpuCapacityRequirement(shortageCpu)),
+    						START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
+    				logger.info("One or more new machine were scheduled to be started in order to increase capacity.");
+    			}
 			}
 		}
+		
+		return slaReached;
 	}
 
 	private void cleanAgentsMarkedForShutdown() {
     	
         final Iterator<GridServiceAgent> iterator = agentsPendingShutdown.iterator();
         while (iterator.hasNext()) {
+            
             final GridServiceAgent agent = iterator.next();
-            if (!agent.isRunning()) {
-                iterator.remove();
+            
+            int numberOfContainers = 0;
+            for (GridServiceContainer container : admin.getGridServiceContainers()) {
+                if (container.getGridServiceAgent() != null && container.getGridServiceAgent().equals(agent)) {
+                    numberOfContainers++;
+                }
             }
             
-            else if (agent.getProcessesDetails().getProcessDetails().length == 0) {
-            	// all containers have been closed, and no GSM/ESM/LUS on this agent
-        		admin.scheduleAdminOperation(new Runnable() {
-                    
-                    public void run() {
-                        agent.shutdown();
-                    }
-                });
+            int numberOfChildProcesses = agent.getProcessesDetails().getProcessDetails().length;
+            
+            if (!agent.isRunning() || numberOfContainers == 0) {
+                iterator.remove();
+            } 
+            
+            if (agent.isRunning() && numberOfChildProcesses == 0) {
+                 // nothing running on this agent (not even GSM/LUS). Get rid of it.
+                logger.info("Stopping agent machine " + agent.getMachine().getHostAddress());	
+                DefaultMachinesSlaEnforcementEndpoint.this.elasticScaleHandler.stopMachineAsync(agent, STOP_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             }
         }
+        
     }
 
     private void cleanFutureAgents() {
@@ -248,7 +272,7 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 	            	GridServiceAgent[] agents = future.get();
                     if (logger.isInfoEnabled()) {
 		            	for (GridServiceAgent agent : agents) {
-	                    	logger.info("Agent started succesfully on machine " + agent.getMachine().getHostAddress());
+	                    	logger.info("Agent started succesfully on a new machine " + agent.getMachine().getHostAddress());
 	                    }
                     }
                     
@@ -272,22 +296,16 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
             throw new ServiceLevelAgreementEnforcementEndpointDestroyedException();
         }
     }
-    
-    /**
-     * @return true if reached exact target number of machines with specified parameters.
-     */
-    private boolean isSlaReached(MachinesSlaPolicy sla) {
-    	
-    	int totalPhysicalMemorySizeInMB = 0;
-    	for (GridServiceAgent agent : this.getGridServiceAgents()) {
-    		totalPhysicalMemorySizeInMB += getMemoryInMB(agent);
-    	}
-    	
-    	return sla.getMemoryCapacityInMB() > totalPhysicalMemorySizeInMB;
-    }
-    
-    private GridServiceAgent[] getAllGridServiceAgents() {
-        return admin.getZones().getByName(zone).getGridServiceAgents().getAgents();
+        
+    private List<GridServiceAgent> getAllGridServiceAgents() {
+        List<GridServiceAgent> agents = new ArrayList<GridServiceAgent>();
+        for (GridServiceAgent agent : admin.getGridServiceAgents()) {
+            if (agent.getZones().containsKey(zone)) {
+                agents.add(agent);
+            }
+        }
+        return agents;
+        
     }
     
     private int getMemoryInMB(GridServiceAgent agent) {

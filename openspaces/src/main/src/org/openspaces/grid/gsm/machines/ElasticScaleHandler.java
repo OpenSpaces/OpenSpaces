@@ -41,10 +41,11 @@ public interface ElasticScaleHandler {
 	 * @param agent
 	 * @param duration
 	 * @param unit
+	 * @return true if grid service agent was shutdown or machine was ordered to start shutdown.
 	 * @throws TimeoutException 
 	 * @throws InterruptedException 
 	 * @throws ElasticScaleHandlerException 
 	 */
-	void stopMachine(GridServiceAgent agent, long duration, TimeUnit unit) throws ElasticScaleHandlerException, InterruptedException, TimeoutException;
+	boolean stopMachine(GridServiceAgent agent, long duration, TimeUnit unit) throws ElasticScaleHandlerException, InterruptedException, TimeoutException;
 	
 }
