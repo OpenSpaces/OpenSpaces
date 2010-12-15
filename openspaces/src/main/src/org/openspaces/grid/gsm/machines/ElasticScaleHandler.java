@@ -37,14 +37,23 @@ public interface ElasticScaleHandler {
 	
 
 	/**
-	 * Shuts down the grid service agent or the machine. 
+	 * Shuts down the grid service agent.
+	 * 
+	 * This method is blocking on the current thread, or raises a TimeOutException if the timeout expired.
+	 * 
+	 * The decision whether to terminate also the machine is implementation dependent.
+	 * In case the implementation also terminates the machine, the implementation should also keep an independent
+	 * scheduled cleanup task to search and terminate orphan machines that do not have a grid service agent running, 
+	 * and that have been running for enough time not to suspect that they have just been started.   
+	 * 
 	 * @param agent
 	 * @param duration
 	 * @param unit
-	 * @return true if grid service agent was shutdown or machine was ordered to start shutdown.
-	 * @throws TimeoutException 
+	 * @return true if grid service agent was shutdown (and depending on the implementation also the machine was terminated)
+	 *         false if no action was taken.
+	 * @throws TimeoutException - terminating the machine took too long
 	 * @throws InterruptedException 
-	 * @throws ElasticScaleHandlerException 
+	 * @throws ElasticScaleHandlerException - terminating the machine encountered a problem. 
 	 */
 	boolean stopMachine(GridServiceAgent agent, long duration, TimeUnit unit) throws ElasticScaleHandlerException, InterruptedException, TimeoutException;
 	

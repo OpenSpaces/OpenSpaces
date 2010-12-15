@@ -2,6 +2,7 @@ package org.openspaces.grid.gsm.machines;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -18,6 +19,8 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirment;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEndpoint {
 
@@ -66,6 +69,19 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
         return agents.toArray(new GridServiceAgent[]{});
     }
 
+    private List<GridServiceAgent> getGridServiceAgentsSortManagementComponentsLast() {
+        List<GridServiceAgent> agents = Arrays.asList(getGridServiceAgents());
+        Collections.sort(agents,new Comparator<GridServiceAgent>() {
+
+            public int compare(GridServiceAgent agent1, GridServiceAgent agent2) {
+                int numberOfManagementComponents1 = getNumberOfChildProcesses(agent1) - getNumberOfChildContainers(agent1);
+                int numberOfManagementComponents2 = getNumberOfChildProcesses(agent2) - getNumberOfChildContainers(agent2);
+                return numberOfManagementComponents1 - numberOfManagementComponents2;
+            }
+        });
+        return agents;
+    }
+    
     public GridServiceAgent[] getGridServiceAgentsPendingShutdown() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
         validateNotDestroyed();
         
@@ -156,7 +172,8 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 			}
 
 			// mark agents for shutdown if there are not enough of them
-			for (GridServiceAgent agent : getGridServiceAgents()) {
+			// give priority to agents that do not host a GSM/LUS since we want to evacuate those last.
+			for (GridServiceAgent agent : getGridServiceAgentsSortManagementComponentsLast()) {
 				int machineMemory = getMemoryInMB(agent);
 				double machineCpu = getCpu(agent);
 				if (surplusMemory >= machineMemory && surplusCpu >= machineCpu) {
@@ -227,33 +244,41 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 		return slaReached;
 	}
 
-	private void cleanAgentsMarkedForShutdown() {
+    private void cleanAgentsMarkedForShutdown() {
     	
         final Iterator<GridServiceAgent> iterator = agentsPendingShutdown.iterator();
         while (iterator.hasNext()) {
             
             final GridServiceAgent agent = iterator.next();
             
-            int numberOfContainers = 0;
-            for (GridServiceContainer container : admin.getGridServiceContainers()) {
-                if (container.getGridServiceAgent() != null && container.getGridServiceAgent().equals(agent)) {
-                    numberOfContainers++;
-                }
-            }
+            int numberOfChildProcesses = getNumberOfChildProcesses(agent);
             
-            int numberOfChildProcesses = agent.getProcessesDetails().getProcessDetails().length;
-            
-            if (!agent.isRunning() || numberOfContainers == 0) {
+            if (!agent.isRunning()) {
+                logger.info("Agent machine " + agent.getMachine().getHostAddress() + " is confirmed to be shutdown.");
                 iterator.remove();
             } 
-            
-            if (agent.isRunning() && numberOfChildProcesses == 0) {
+            else if (numberOfChildProcesses == 0) {
                  // nothing running on this agent (not even GSM/LUS). Get rid of it.
                 logger.info("Stopping agent machine " + agent.getMachine().getHostAddress());	
                 DefaultMachinesSlaEnforcementEndpoint.this.elasticScaleHandler.stopMachineAsync(agent, STOP_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             }
         }
         
+    }
+
+    private int getNumberOfChildProcesses(final GridServiceAgent agent) {
+        int numberOfChildProcesses = agent.getProcessesDetails().getProcessDetails().length;
+        return numberOfChildProcesses;
+    }
+
+    private int getNumberOfChildContainers(final GridServiceAgent agent) {
+        int numberOfContainers = 0;
+        for (final GridServiceContainer container : admin.getGridServiceContainers()) {
+            if (container.getGridServiceAgent() != null && container.getGridServiceAgent().equals(agent)) {
+                numberOfContainers++;
+            }
+        }
+        return numberOfContainers;
     }
 
     private void cleanFutureAgents() {
