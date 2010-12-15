@@ -16,170 +16,80 @@
 package org.openspaces.admin.alerts;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.openspaces.admin.Admin;
 
 /**
- * A plain java object representing an alert issued by an alert bean or an alert provider.
+ * An interface representing an alert issued by an alert bean or an alert provider.
  * <p>
- * An alert has a unique alert id ({@link #getAlertId()}) and is issued by one of the alert beans,
- * classified under a type ({@link #getAlertType()}). Each alert has descriptive information of the
- * alert ({@link #getAlertDescription()}), and has access to all the configuration properties and
- * any runtime properties the alert bean exposes (see {@link #getProperties()}).
  * <p>
- * The source component for which the alert was issued (see {@link #getSourceComponentUid()}) can be
+ * An alert has a unique alert id ({@link #getAlertUid()}) and is fired by one of the alert beans,
+ * and aggregated with other alerts of the same ({@link #getGroupUid()}).
+ * <p>
+ * An <b>unresolved</b> alert is an alert that indicates a problematic situation that needs
+ * attention. An alert bean can trigger more than one unresolved alert if the problem persists (with
+ * the same alert group UID). A <b>resolved</b> alert ({@link AlertSeverity#OK}) is an alert that
+ * indicates that the situation was resolved, or is no longer in need of attention.
+ * <p>
+ * Each alert has descriptive information of the alert ({@link #getDescription()}), data and time of
+ * the alert ({@link #getTimestamp()}), and configuration properties together with runtime
+ * properties the alert bean exposes (see {@link #getProperties()}). The alert bean that fired the alert
+ * is given by {@link #getBeanClassName()}.
+ * <p>
+ * The source component for which the alert was triggered (see {@link #getComponentUid()}) can be
  * correlated to one of the components using the {@link Admin#getGridComponentByUID(String)} if this
  * component has not yet been terminated.
- * <p>
- * A <B>negative</B> alert is an alert that indicates a problematic situation that needs attention.
- * An alert bean can trigger more than one negative alert if the problem persists (for the same
- * alert type). A <B>positive</B> alert is an alert that indicates that the situation was resolved,
- * or is no longer in need of attention.
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public class Alert implements Serializable {
-	
-    private static final long serialVersionUID = 1L;
-    private String alertId;
-	private String alertType;
-	private String sourceComponentUid;
-	private String alertDescription;
-	private boolean isPositive;
-	private Map<String, String> properties;
-	
-	/**
-	 * Empty construction of an alert instance.
-	 */
-	public Alert() {
-	}
-	
-	/**
-	 * @return A unique alert identification string.
-	 */
-	public String getAlertId() {
-		return alertId;
-	}
-	
-	/**
-	 * Set a unique alert identification string. Optional.
-	 * @param alertId the alert Id.
-	 */
-	public void setAlertId(String alertId) {
-		this.alertId = alertId;
-	}
-	
-	/**
-	 * @return an alert type (classification).
-	 */
-	public String getAlertType() {
-		return alertType;
-	}
-	
-	/**
-	 * The type of the alert which is a meaningful string.
-	 * @param alertType the alert type.
-	 */
-	public void setAlertType(String alertType) {
-		this.alertType = alertType;
-	}
-	
-	/**
-	 * @return the source component UID for which this alert was issued. Can be null.
-	 */
-	public String getSourceComponentUid() {
-		return sourceComponentUid;
-	}
-	
-	/**
-	 * A unique ID of the component that triggered the alert. In case of a grid wide alert,
-	 * the source component can be null.
-	 * 
-	 * @param sourceComponentUid the source component UID.
-	 */
-	public void setSourceComponentUid(String sourceComponentUid) {
-		this.sourceComponentUid = sourceComponentUid;
-	}
-	
-    /**
-     * @return <code>false</code> if the alert is in need of attention; <code>true</code> if no
-     *         longer in need of attention.
-     */
-	public boolean isPositive() {
-		return isPositive;
-	}
+public interface Alert extends Serializable {
 
     /**
-     * An indication if the alert is in need of attention (negative) or not (positive indication
-     * about previously detected negative condition).
-     * 
-     * @param isPositive <code>false</code> if in need of attention; <code>false</code> otherwise. 
+     * @return Alert Name - the name assigned to the alert.
      */
-	public void setPositive(boolean isPositive) {
-		this.isPositive = isPositive;
-	}
+    public String getName();
+
+    /**
+     * @return Description — a description of the alert.
+     */
+    public String getDescription();
+
+    /**
+     * @return Timestamp — the date and time the alert occurred.
+     */
+    public long getTimestamp();
+
+    /**
+     * @return Severity - the defined severity of the alert.
+     */
+    public AlertSeverity getSeverity();
+
+    /**
+     * @return Bean Class Name - the alert bean class name which generated the alert.
+     */
+    public String getBeanClassName();
+
+    /**
+     * @return Alert UID — the unique identification for this alert.
+     */
+    public String getAlertUid();
+
+    /**
+     * @return Group UID - the unique identification of the group this alert belongs to.
+     */
+    public String getGroupUid();
+
+    /**
+     * @return Component UID - the unique identifier of the component associated with the alert.
+     */
+    public String getComponentUid();
 
     /**
      * @return  A map of String key-value property pairs including configuration properties, and any runtime
      * properties exposed by the alert bean.
      */
-	public Map<String, String> getProperties() {
-		return properties;
-	}
+    public Map<String, String> getProperties();
 
-    /**
-     * Set of String key-value property pairs including configuration properties, and any runtime
-     * properties exposed by the alert bean. It is useful to put CPU, Memory and GC metrics into the
-     * map as a basic set of attributes for ease of troubleshooting. <b>Overrides any previously set
-     * properties.</b>
-     * 
-     * @param properties
-     *            the properties of an alert bean.
-     */
-	public void setProperties(Map<String, String> properties) {
-		this.properties = properties;
-	}
-
-    /**
-     * A convenience method for adding properties to an already existing set of properties.
-     */
-	public void putAllProperties(Map<String, String> properties) {
-	    if (this.properties == null) {
-	        this.properties = new HashMap<String, String>();
-	    }
-        this.properties.putAll(properties);
-    }
-	
-	/**
-	 * A convenience method for adding a single property to an already existing set of properties.
-	 */
-	public void putProperty(String key, String value) {
-		if (this.properties == null) {
-			this.properties = new HashMap<String, String>();
-		}
-		this.properties.put(key, value);
-	}
-	
-	/**
-	 * A more elaborated description of the alert. 
-	 * @param alertDescription an alert description.
-	 */
-	public void setAlertDescription(String alertDescription) {
-		this.alertDescription = alertDescription;
-	}
-	
-	/**
-	 * @return an alert description.
-	 */
-	public String getAlertDescription() {
-		return alertDescription;
-	}
-	
-	@Override
-	public String toString() {
-	    return getAlertId()+" " + (isPositive()? "[+]":"[-]") + " " + getAlertDescription();
-	}
 }

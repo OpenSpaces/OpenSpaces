@@ -4,12 +4,16 @@ import org.openspaces.admin.alerts.Alert;
 
 public interface AlertRepository extends Iterable<Alert> {
 	
-	Alert getAlertById(String id);
-	Alert[] getAlertsByType(String type);
-	AlertGroup[] getAlertsGroupedByType();
+    void addAlert(Alert alert);
+    
+    void removeAlert(Alert alert);
+    
+    void setAlertsHistorySize(int historySize);
+
+    /** get a specific alert by the unique alert identifier */
+	Alert getAlertByUid(String alertUid);
 	
-	void addAlert(Alert alert);
-	void removeAlert(Alert alert);
+	/** get all alerts belonging to this unique group identifier */
+	Alerts getAlertsByGroupUid(String groupUid);
 	
-	void setAlertsHistorySize(int historySize);
 }

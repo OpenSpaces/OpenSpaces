@@ -9,24 +9,25 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.openspaces.admin.alerts.Alert;
+import org.openspaces.admin.alerts.AlertSeverity;
 
 public class DefaultAlertRepository implements InternalAlertRepository {
 
     public volatile int historySize = 200;
-    private final AtomicInteger id = new AtomicInteger();
-    private final ConcurrentHashMap<String, AlertChain> alertsByType = new ConcurrentHashMap<String, AlertChain>();
+    private final AtomicInteger incrementalId = new AtomicInteger();
+    private final ConcurrentHashMap<String, AlertChain> alertsByGroupUid = new ConcurrentHashMap<String, AlertChain>();
 
     public void setAlertsHistorySize(int historySize) {
         this.historySize = historySize;
     }
 
     public void addAlert(Alert alert) {
-        alert.setAlertId(id.incrementAndGet() + "@" + Integer.toHexString(hashCode()));
+        ((DefaultAlert)alert).setAlertUid((incrementalId.incrementAndGet() + "@" + Integer.toHexString(hashCode())));
 
-        AlertChain chain = alertsByType.get(alert.getAlertType());
+        AlertChain chain = alertsByGroupUid.get(alert.getGroupUid());
         if (chain == null) {
             AlertChain newChain = new AlertChain(historySize);
-            chain = alertsByType.putIfAbsent(alert.getAlertType(), newChain);
+            chain = alertsByGroupUid.putIfAbsent(alert.getGroupUid(), newChain);
             if (chain == null) {
                 chain = newChain;
             }
@@ -34,45 +35,42 @@ public class DefaultAlertRepository implements InternalAlertRepository {
         chain.addAlert(alert);
     }
 
-    public Alert getAlertById(String id) {
-        for (AlertChain alertChain : alertsByType.values()) {
-            Alert alert = alertChain.getAlertById(id);
+    public Alert getAlertByUid(String uid) {
+        for (AlertChain alertChain : alertsByGroupUid.values()) {
+            Alert alert = alertChain.getAlertByUid(uid);
             if (alert != null) {
                 return alert;
             }
         }
         return null;
     }
-
-    public Alert[] getAlertsByType(String type) {
-        AlertChain chain = alertsByType.get(type);
-        if (chain == null) {
-            return new Alert[0];
-        } else {
-            return chain.toArray();
-        }
+    
+    public Alerts getAlertsByGroupUid(String groupUid) {
+        AlertChain alertChain = alertsByGroupUid.get(groupUid);
+        DefaultAlerts alerts = new DefaultAlerts(alertChain.toArray());
+        return alerts;
     }
 
-    public AlertGroup[] getAlertsGroupedByType() {
-        ArrayList<AlertGroup> groupedByType = new ArrayList<AlertGroup>();
-        for (AlertChain chain : alertsByType.values()) {
+    public Alerts[] getAlertsGroupedByType() {
+        ArrayList<Alerts> groupedByType = new ArrayList<Alerts>();
+        for (AlertChain chain : alertsByGroupUid.values()) {
             Alert[] alerts = chain.toArray();
-            DefaultAlertGroup alertGroup = new DefaultAlertGroup(alerts);
+            DefaultAlerts alertGroup = new DefaultAlerts(alerts);
             groupedByType.add(alertGroup);
         }
-        return groupedByType.toArray(new AlertGroup[groupedByType.size()]);
+        return groupedByType.toArray(new Alerts[groupedByType.size()]);
     }
 
     public Iterator<Alert> iterator() {
         List<Alert> alerts = new ArrayList<Alert>();
-        for (AlertChain chain : alertsByType.values()) {
+        for (AlertChain chain : alertsByGroupUid.values()) {
             alerts.addAll(chain.asList());
         }
         return alerts.iterator();
     }
 
     public void removeAlert(Alert alert) {
-        alertsByType.remove(alert.getAlertType());
+        alertsByGroupUid.remove(alert.getGroupUid());
     }
 
     /*
@@ -80,11 +78,11 @@ public class DefaultAlertRepository implements InternalAlertRepository {
      * fired, and a positive alert.
      */
     private static final class AlertChain {
-        private Alert negativeAlert;
-        private Alert positiveAlert;
-        private List<Alert> negativeChain;
+        private Alert unresolvedAlert;
+        private Alert resolvedAlert;
+        private List<Alert> unresolvedAlertsChain;
         private int historyIndex = 0;
-        private final Map<String, Alert> alertById = new HashMap<String, Alert>();
+        private final Map<String, Alert> alertByUid = new HashMap<String, Alert>();
         private final int alertsHistorySize;
 
         public AlertChain(int historySize) {
@@ -92,31 +90,31 @@ public class DefaultAlertRepository implements InternalAlertRepository {
         }
 
         private void initialize() {
-            positiveAlert = null;
-            negativeAlert = null;
-            alertById.clear();
-            if (negativeChain != null) {
-                negativeChain.clear();
+            resolvedAlert = null;
+            unresolvedAlert = null;
+            alertByUid.clear();
+            if (unresolvedAlertsChain != null) {
+                unresolvedAlertsChain.clear();
                 historyIndex = 0;
             }
         }
 
         public synchronized void addAlert(Alert alert) {
-            if (alert.isPositive()) {
-                positiveAlert = alert;
+            if (alert.getSeverity().equals(AlertSeverity.OK)) {
+                resolvedAlert = alert;
             } else {
-                if (positiveAlert != null) {
+                if (resolvedAlert != null) {
                     initialize();
                 }
 
-                if (negativeAlert == null) {
-                    negativeAlert = alert;
+                if (unresolvedAlert == null) {
+                    unresolvedAlert = alert;
                 } else {
-                    if (negativeChain == null) {
-                        negativeChain = new ArrayList<Alert>();
+                    if (unresolvedAlertsChain == null) {
+                        unresolvedAlertsChain = new ArrayList<Alert>();
                     }
-                    if (negativeChain.size() < alertsHistorySize) {
-                        negativeChain.add(alert);
+                    if (unresolvedAlertsChain.size() < alertsHistorySize) {
+                        unresolvedAlertsChain.add(alert);
                     } else {
                         /*
                          * Try to keep history uniformed in cases of overflow, by removing using a
@@ -126,23 +124,23 @@ public class DefaultAlertRepository implements InternalAlertRepository {
                          * 1, and adding new alert to the end ... - and if index reaches the end,
                          * will cycle again starting at index 0.
                          */
-                        Alert removed = negativeChain.remove(historyIndex);
-                        negativeChain.add(alert);
-                        historyIndex = (++historyIndex % negativeChain.size());
-                        alertById.remove(removed.getAlertId());
+                        Alert removed = unresolvedAlertsChain.remove(historyIndex);
+                        unresolvedAlertsChain.add(alert);
+                        historyIndex = (++historyIndex % unresolvedAlertsChain.size());
+                        alertByUid.remove(removed.getAlertUid());
                     }
                 }
             }
-            alertById.put(alert.getAlertId(), alert);
+            alertByUid.put(alert.getAlertUid(), alert);
         }
 
-        public Alert getAlertById(String id) {
-            return alertById.get(id);
+        public Alert getAlertByUid(String uid) {
+            return alertByUid.get(uid);
         }
 
         /**
-         * @return an array which it's first element is the first negative alert, followed by all
-         *         consecutive negative alerts, ending in a positive alert.
+         * @return an array which it's first element is the first unresolved alert, followed by all
+         *         consecutive unresolved alerts, ending in a resolved alert (if resolved).
          */
         public Alert[] toArray() {
             List<Alert> list = asList();
@@ -151,14 +149,14 @@ public class DefaultAlertRepository implements InternalAlertRepository {
 
         private List<Alert> asList() {
             List<Alert> list = new ArrayList<Alert>();
-            if (negativeAlert != null) {
-                list.add(negativeAlert);
+            if (unresolvedAlert != null) {
+                list.add(unresolvedAlert);
             }
-            if (negativeChain != null) {
-                list.addAll(negativeChain);
+            if (unresolvedAlertsChain != null) {
+                list.addAll(unresolvedAlertsChain);
             }
-            if (positiveAlert != null) {
-                list.add(positiveAlert);
+            if (resolvedAlert != null) {
+                list.add(resolvedAlert);
             }
             return list;
         }

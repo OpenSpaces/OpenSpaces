@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.alerts.bean;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -8,8 +9,11 @@ import org.jini.rio.resources.util.TimeUtil;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.alerts.Alert;
+import org.openspaces.admin.alerts.AlertFactory;
+import org.openspaces.admin.alerts.AlertSeverity;
 import org.openspaces.admin.alerts.config.MachineCpuUtilizationAlertBeanConfig;
 import org.openspaces.admin.bean.BeanConfigurationException;
+import org.openspaces.admin.internal.alerts.bean.util.AlertBeanUtils;
 import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.os.events.OperatingSystemStatisticsChangedEvent;
 import org.openspaces.admin.os.events.OperatingSystemStatisticsChangedEventListener;
@@ -17,6 +21,8 @@ import org.openspaces.admin.os.events.OperatingSystemStatisticsChangedEventListe
 public class MachineCpuUtilizationAlertBean implements AlertBean,
         OperatingSystemStatisticsChangedEventListener {
 
+    public final static String beanUID = "dc675afe-6a81-4400-957c-93392a70de4c";
+    
     private final MachineCpuUtilizationAlertBeanConfig config = new MachineCpuUtilizationAlertBeanConfig();
 
     private final long statisticsInterval = StatisticsMonitor.DEFAULT_MONITOR_INTERVAL;
@@ -96,57 +102,58 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
         
         if (cpuAvg > highThreshold) {
                 inBetweenThresholdState = true;
-                Alert alert = new Alert();
-                alert.setAlertDescription("CPU crossed above a " + highThreshold + "% threshold, for a period of "
-                        + getPeriodOfTime(event) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuAvg)
-                        + "%");
-                alert.setAlertType(this.getClass().getName());
-                alert.setPositive(false);
-                alert.setSourceComponentUid(event.getOperatingSystem().getUid());
-                alert.setProperties(config.getProperties());
-                alert.putProperty("utilization", String.valueOf(cpuAvg));
-                alert.putProperty("hostname", event.getStatistics().getDetails().getHostName());
-                alert.putProperty("hostAddress", event.getStatistics().getDetails().getHostAddress());
 
+                AlertFactory factory = new AlertFactory();
+                factory.name("Machine CPU Utilization");
+                factory.beanClassName(this.getClass().getName());
+                factory.groupUid(beanUID.concat("-").concat(event.getOperatingSystem().getUid()));
+                factory.description("CPU crossed above a " + highThreshold + "% threshold, for a period of "
+                        + getPeriodOfTime(event) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuAvg) + "%");
+                factory.severity(AlertSeverity.CRITICAL);
+                factory.componentUid(event.getOperatingSystem().getUid());
+                factory.properties(config.getProperties());
+                factory.putProperty("cpu-utilization", String.valueOf(cpuAvg));
+                factory.putProperty("hostname", event.getStatistics().getDetails().getHostName());
+                factory.putProperty("host-address", event.getStatistics().getDetails().getHostAddress());
+
+                Alert alert = factory.toAlert();
                 admin.getAlertManager().fireAlert(alert);
+                
         } else if (cpuAvg < lowThreshold) {
             if (inBetweenThresholdState) {
                 inBetweenThresholdState = false;
-                Alert alert = new Alert();
-                alert.setAlertDescription("CPU crossed below a " + highThreshold + "% threshold, for a period of "
-                        + getPeriodOfTime(event) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuAvg)
-                        + "%");
-                alert.setAlertType(this.getClass().getName());
-                alert.setPositive(true);
-                alert.setSourceComponentUid(event.getOperatingSystem().getUid());
-                alert.setProperties(config.getProperties());
-                alert.putProperty("utilization", String.valueOf(cpuAvg));
-                alert.putProperty("hostname", event.getStatistics().getDetails().getHostName());
-                alert.putProperty("hostAddress", event.getStatistics().getDetails().getHostAddress());
+                
+                AlertFactory factory = new AlertFactory();
+                factory.name("Machine CPU Utilization");
+                factory.beanClassName(this.getClass().getName());
+                factory.groupUid(beanUID.concat("-").concat(event.getOperatingSystem().getUid()));
+                factory.description("CPU crossed below a " + highThreshold + "% threshold, for a period of "
+                        + getPeriodOfTime(event) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuAvg) + "%");
+                factory.severity(AlertSeverity.OK);
+                factory.componentUid(event.getOperatingSystem().getUid());
+                factory.properties(config.getProperties());
+                factory.putProperty("cpu-utilization", String.valueOf(cpuAvg));
+                factory.putProperty("hostname", event.getStatistics().getDetails().getHostName());
+                factory.putProperty("host-address", event.getStatistics().getDetails().getHostAddress());
 
+                Alert alert = factory.toAlert();
                 admin.getAlertManager().fireAlert(alert);
             }
         }
     }
 
     private double calcAverageWithinPeriod(OperatingSystemStatisticsChangedEvent event) {
-        List<OperatingSystemStatistics> timeline = event.getStatistics().getTimeline();
 
-        long measurementPeriod = config.getMeasurementPeriod();
         //TODO get the statistics interval from admin object
-        long period = measurementPeriod / statisticsInterval;
+        long measurementPeriod = config.getMeasurementPeriod();
+        int period = (int) (measurementPeriod / statisticsInterval);
         
-        //not enough samples within requested period
-        if (period > timeline.size()) return -1;
-        
-        double average = 0.0;
-        for (int i = 0; i < period && i < timeline.size(); i++) {
-            double cpuPerc = timeline.get(i).getCpuPerc();
-            average += cpuPerc;
+        List<Double> timeline = new ArrayList<Double>(event.getStatistics().getTimeline().size());
+        for (OperatingSystemStatistics stats : event.getStatistics().getTimeline()) {
+            timeline.add(stats.getCpuPerc());
         }
-        average /= period;
         
-        return average;
+        return AlertBeanUtils.getAverage(period, timeline);
     }
 
     private String getPeriodOfTime(OperatingSystemStatisticsChangedEvent event) {
