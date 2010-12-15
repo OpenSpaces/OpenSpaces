@@ -47,6 +47,10 @@ public interface BeanConfigManager<B extends BeanConfig> {
      * Sets a previously added bean with new configuration properties. Overrides all previously set
      * properties. The configuration object is filled with String key-value pairs configuration
      * properties used to configure this bean.
+     * <p>
+     * If the bean is already enabled, the new configuration will 'restart' the bean with the newly
+     * set configuration (same as calling {@link #disableConfig(Class)}, followed by
+     * {@link #setConfig(BeanConfig)}, and {@link #enableConfig(Class)}).
      * 
      * @param config
      *            the bean configuration
