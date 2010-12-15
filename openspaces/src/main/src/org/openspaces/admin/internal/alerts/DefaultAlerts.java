@@ -36,4 +36,14 @@ public class DefaultAlerts implements Alerts {
     public String getGroupUid() {
         return alertsList.get(0).getGroupUid();
     }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getAlertSeverity()).append(" | ").append(getAlertName()).append(" | ").append(getGroupUid()).append('\n');
+        for (Alert alert : this) {
+            sb.append(alert).append('\n');
+        }
+        return sb.toString();
+    }
 }
