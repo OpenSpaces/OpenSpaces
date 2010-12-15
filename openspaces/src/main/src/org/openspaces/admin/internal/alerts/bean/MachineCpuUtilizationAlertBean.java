@@ -99,7 +99,7 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
         
         double cpuAvg = calcAverageWithinPeriod(event);
         if (cpuAvg == -1) return; //period hasn't passed
-        System.out.println(cpuAvg);
+
         if (cpuAvg > highThreshold) {
                 inBetweenThresholdState = true;
 
