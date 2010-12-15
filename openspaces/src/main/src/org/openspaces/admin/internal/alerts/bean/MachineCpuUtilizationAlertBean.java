@@ -99,7 +99,7 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
         
         double cpuAvg = calcAverageWithinPeriod(event);
         if (cpuAvg == -1) return; //period hasn't passed
-        
+        System.out.println(cpuAvg);
         if (cpuAvg > highThreshold) {
                 inBetweenThresholdState = true;
 
@@ -150,7 +150,7 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
         
         List<Double> timeline = new ArrayList<Double>(event.getStatistics().getTimeline().size());
         for (OperatingSystemStatistics stats : event.getStatistics().getTimeline()) {
-            timeline.add(stats.getCpuPerc());
+            timeline.add(stats.getCpuPerc()*100.0);
         }
         
         return AlertBeanUtils.getAverage(period, timeline);
