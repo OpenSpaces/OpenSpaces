@@ -24,8 +24,8 @@ package org.openspaces.admin.alerts.events;
 public interface AlertEventManager {
 
     /**
-     * Add the event listener. Note, the add callback will be called for currently issued alerts
-     * (positive and negative alerts).
+     * Add the event listener. Note, the add callback will be called for currently triggered alerts
+     * (both resolved and unresolved alerts).
      */
 	void add(AlertEventListener listener);
 

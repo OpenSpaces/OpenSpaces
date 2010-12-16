@@ -88,8 +88,8 @@ public class DefaultAlertRepository implements InternalAlertRepository {
     }
 
     /*
-     * Holds a negative alert, a history chain of negative alerts after the first negative alert was
-     * fired, and a positive alert.
+     * Holds unresolved alerts, a history chain of negative alerts after the first unresolved alert
+     * was fired, and a resolution alert.
      */
     private static final class AlertChain {
         private Alert unresolvedAlert;
