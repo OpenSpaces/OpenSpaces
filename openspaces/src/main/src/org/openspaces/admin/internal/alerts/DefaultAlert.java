@@ -18,7 +18,6 @@ package org.openspaces.admin.internal.alerts;
 import java.util.Date;
 import java.util.Map;
 
-import org.openspaces.admin.alerts.Alert;
 import org.openspaces.admin.alerts.AlertFactory;
 import org.openspaces.admin.alerts.AlertSeverity;
 
@@ -28,7 +27,7 @@ import org.openspaces.admin.alerts.AlertSeverity;
  * @author Moran Avigdor
  * @since 8.0
  */
-public class DefaultAlert implements Alert {
+public class DefaultAlert implements InternalAlert {
 	
     private static final long serialVersionUID = 1L;
     

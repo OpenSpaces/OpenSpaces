@@ -47,8 +47,10 @@ public class DefaultAlertManager implements InternalAlertManager {
     }
 
     public void fireAlert(Alert alert) {
-        alertRepository.addAlert(alert);
-        alertEventManager.onAlert(alert);
+        boolean added = alertRepository.addAlert(alert);
+        if (added) {
+            alertEventManager.onAlert(alert);
+        }
     }
 
     public Admin getAdmin() {

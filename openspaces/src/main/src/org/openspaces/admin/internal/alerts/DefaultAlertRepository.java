@@ -21,18 +21,21 @@ public class DefaultAlertRepository implements InternalAlertRepository {
         this.historySize = historySize;
     }
 
-    public void addAlert(Alert alert) {
-        ((DefaultAlert)alert).setAlertUid((incrementalId.incrementAndGet() + "@" + Integer.toHexString(hashCode())));
+    public boolean addAlert(Alert alert) {
 
         AlertChain chain = alertsByGroupUid.get(alert.getGroupUid());
         if (chain == null) {
+            if (AlertSeverity.OK.equals(alert.getSeverity())) return false;
+            
             AlertChain newChain = new AlertChain(historySize);
             chain = alertsByGroupUid.putIfAbsent(alert.getGroupUid(), newChain);
             if (chain == null) {
                 chain = newChain;
             }
         }
-        chain.addAlert(alert);
+        //assign an alert UID
+        ((InternalAlert)alert).setAlertUid((incrementalId.incrementAndGet() + "@" + Integer.toHexString(System.identityHashCode(alert))));
+        return chain.addAlert(alert);
     }
 
     public Alert getAlertByUid(String uid) {
@@ -45,20 +48,30 @@ public class DefaultAlertRepository implements InternalAlertRepository {
         return null;
     }
     
-    public Alerts getAlertsByGroupUid(String groupUid) {
+    public AlertHistory getAlertHistoryByGroupUid(String groupUid) {
         AlertChain alertChain = alertsByGroupUid.get(groupUid);
-        DefaultAlerts alerts = new DefaultAlerts(alertChain.toArray());
-        return alerts;
+        if (alertChain == null) {
+            return new DefaultAlertHistory(new Alert[0]);
+        } else {
+            DefaultAlertHistory alerts = new DefaultAlertHistory(alertChain.toArray());
+            return alerts;
+        }
     }
 
-    public Alerts[] getAlertsGroupedByType() {
-        ArrayList<Alerts> groupedByType = new ArrayList<Alerts>();
+    public AlertHistory[] getAlertHistory() {
+        ArrayList<AlertHistory> groupedByGroupUid = new ArrayList<AlertHistory>();
         for (AlertChain chain : alertsByGroupUid.values()) {
             Alert[] alerts = chain.toArray();
-            DefaultAlerts alertGroup = new DefaultAlerts(alerts);
-            groupedByType.add(alertGroup);
+            DefaultAlertHistory alertGroup = new DefaultAlertHistory(alerts);
+            groupedByGroupUid.add(alertGroup);
         }
-        return groupedByType.toArray(new Alerts[groupedByType.size()]);
+        return groupedByGroupUid.toArray(new AlertHistory[groupedByGroupUid.size()]);
+    }
+    
+    public boolean isAlertResolvedByGroupUid(String groupUid) {
+        AlertChain alertChain = alertsByGroupUid.get(groupUid);
+        if (alertChain == null) return true;
+        return (alertChain.isResolved());
     }
 
     public Iterator<Alert> iterator() {
@@ -68,9 +81,10 @@ public class DefaultAlertRepository implements InternalAlertRepository {
         }
         return alerts.iterator();
     }
-
-    public void removeAlert(Alert alert) {
-        alertsByGroupUid.remove(alert.getGroupUid());
+ 
+    public boolean removeAlertHistoryByGroupUid(String groupUid) {
+        AlertChain alertChain = alertsByGroupUid.remove(groupUid);
+        return alertChain != null;
     }
 
     /*
@@ -98,9 +112,15 @@ public class DefaultAlertRepository implements InternalAlertRepository {
                 historyIndex = 0;
             }
         }
+        
+        public synchronized boolean isResolved() {
+            return (resolvedAlert != null); 
+        }
 
-        public synchronized void addAlert(Alert alert) {
+        public synchronized boolean addAlert(Alert alert) {
             if (alert.getSeverity().equals(AlertSeverity.OK)) {
+                if (resolvedAlert != null)
+                    return false;
                 resolvedAlert = alert;
             } else {
                 if (resolvedAlert != null) {
@@ -132,6 +152,7 @@ public class DefaultAlertRepository implements InternalAlertRepository {
                 }
             }
             alertByUid.put(alert.getAlertUid(), alert);
+            return true;
         }
 
         public Alert getAlertByUid(String uid) {
