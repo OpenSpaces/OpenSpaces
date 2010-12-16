@@ -12,7 +12,7 @@ public interface ExpressionNode {
      * Represents the node type in the translated query expression tree.
      */
     public enum NodeType { BINARY_EXPRESSION, LOGICAL_EXPRESSION, NULL_VALUE, PARAMETER, VARIABLE,
-        FIELD_PATH, LITERAL_VALUE, EMPTY_EXPRESSION, INNER_QUERY, AGGREGATION_FUNCTION
+        FIELD_PATH, LITERAL_VALUE, EMPTY_EXPRESSION, INNER_QUERY, AGGREGATION_FUNCTION, CONTAINS_EXPRESSION
     }
 
     /**

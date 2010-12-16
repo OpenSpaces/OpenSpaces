@@ -98,8 +98,8 @@ public class QueryExpressionFactory implements ExpressionFactory {
     /**
      * Return an expression representing the given condition.
      */
-    public Expression contains(Value coll, Value arg) {
-        throw new RuntimeException("Unsupported operation.");
+    public Expression contains(Value fieldPath, Value value) {
+        return new ContainsExpression(fieldPath, value);
     }
 
     /**
