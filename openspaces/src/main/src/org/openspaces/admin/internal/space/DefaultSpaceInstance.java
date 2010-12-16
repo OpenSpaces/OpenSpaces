@@ -408,8 +408,8 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
         } else {
             for (int i = 0; i < newReplicationTargets.length; i++) {
                 ReplicationTarget newReplicationTarget = newReplicationTargets[i];
-                ReplicationTarget previousReplicationTarget = previousReplicationTargets[i];
-                if (newReplicationTarget.getReplicationStatus() != previousReplicationTarget.getReplicationStatus()) {
+                ReplicationTarget previousReplicationTarget = locatePreviousReplicationTarget(newReplicationTarget, previousReplicationTargets);
+                if (previousReplicationTarget == null || newReplicationTarget.getReplicationStatus() != previousReplicationTarget.getReplicationStatus()) {
                     events.add(new ReplicationStatusChangedEvent(this, newReplicationTarget, previousReplicationTarget.getReplicationStatus(), newReplicationTarget.getReplicationStatus()));
                 }
             }
@@ -419,6 +419,14 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
             ((InternalReplicationStatusChangedEventManager) getSpace().getReplicationStatusChanged()).replicationStatusChanged(event);
             ((InternalReplicationStatusChangedEventManager) getSpace().getSpaces().getReplicationStatusChanged()).replicationStatusChanged(event);
         }
+    }
+
+    private ReplicationTarget locatePreviousReplicationTarget(ReplicationTarget newReplicationTarget, ReplicationTarget[] previousReplicationTargets) {
+        for (ReplicationTarget prevReplicationTarget : previousReplicationTargets) {
+            if (prevReplicationTarget.getSpaceInstance().getServiceID().equals(newReplicationTarget.getSpaceInstance().getServiceID()))
+                return prevReplicationTarget;
+        }
+        return null;
     }
 
     public Space getSpace() {
