@@ -2,6 +2,7 @@ package org.openspaces.grid.gsm.machines;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -19,8 +20,6 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirment;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEndpoint {
 
