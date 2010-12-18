@@ -423,7 +423,11 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     private ReplicationTarget locatePreviousReplicationTarget(ReplicationTarget newReplicationTarget, ReplicationTarget[] previousReplicationTargets) {
         for (ReplicationTarget prevReplicationTarget : previousReplicationTargets) {
-            if (prevReplicationTarget.getSpaceInstance().getServiceID().equals(newReplicationTarget.getSpaceInstance().getServiceID()))
+            InternalSpaceInstance prevSpaceInstance = prevReplicationTarget.getSpaceInstance();
+            InternalSpaceInstance newSpaceInstance = newReplicationTarget.getSpaceInstance();
+            ServiceID prevSpaceId = prevSpaceInstance.getServiceID();
+            ServiceID newServiceId = newSpaceInstance.getServiceID();
+            if (prevSpaceId.equals(newServiceId))
                 return prevReplicationTarget;
         }
         return null;
