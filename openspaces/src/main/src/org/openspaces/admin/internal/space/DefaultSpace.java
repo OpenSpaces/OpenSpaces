@@ -542,7 +542,7 @@ public class DefaultSpace implements InternalSpace {
                                 replStatus = ReplicationStatus.DISABLED;
                                 break;
                         }
-                        replicationTargets[i] = new ReplicationTarget((InternalSpaceInstance) targetSpaceInstance, replStatus);
+                        replicationTargets[i] = new ReplicationTarget((InternalSpaceInstance) targetSpaceInstance, replStatus, (String)memberNames[i]);
                     }
                     spaceInstance.setReplicationTargets(replicationTargets);
                 }

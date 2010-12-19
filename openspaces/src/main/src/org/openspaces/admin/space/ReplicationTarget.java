@@ -45,10 +45,13 @@ public class ReplicationTarget {
     private final InternalSpaceInstance spaceInstance;
 
     private final ReplicationStatus replicationStatus;
+    
+    private final String memberName;
 
-    public ReplicationTarget(InternalSpaceInstance spaceInstance, ReplicationStatus replicationStatus) {
+    public ReplicationTarget(InternalSpaceInstance spaceInstance, ReplicationStatus replicationStatus, String memberName) {
         this.spaceInstance = spaceInstance;
         this.replicationStatus = replicationStatus;
+        this.memberName = memberName;
     }
 
     /**
@@ -64,5 +67,12 @@ public class ReplicationTarget {
      */
     public ReplicationStatus getReplicationStatus() {
         return replicationStatus;
+    }
+    
+    /**
+     * Returns the member name of this target.
+     */
+    public String getMemberName() {
+        return memberName;
     }
 }

@@ -318,23 +318,6 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
             spaceModeChangedEventManager.spaceModeChanged(event);
             ((InternalSpaceModeChangedEventManager) getSpace().getSpaceModeChanged()).spaceModeChanged(event);
             ((InternalSpaceModeChangedEventManager) getSpace().getSpaces().getSpaceModeChanged()).spaceModeChanged(event);
-            
-            /*
-             * GS-8231: Trigger replication status changed event when backup becomes primary after failover
-             */
-            if (!SpaceMode.NONE.equals(this.spaceMode)) {
-                List<ReplicationStatusChangedEvent> events = new ArrayList<ReplicationStatusChangedEvent>();
-                for (ReplicationTarget replicationTarget : replicationTargets) {
-                    events.add(new ReplicationStatusChangedEvent(this, replicationTarget, replicationTarget.getReplicationStatus(), ReplicationStatus.DISCONNECTED));
-                }
-
-                for (ReplicationStatusChangedEvent repEvent : events) {
-                    replicationStatusChangedEventManager.replicationStatusChanged(repEvent);
-                    ((InternalReplicationStatusChangedEventManager) getSpace().getReplicationStatusChanged()).replicationStatusChanged(repEvent);
-                    ((InternalReplicationStatusChangedEventManager) getSpace().getSpaces().getReplicationStatusChanged()).replicationStatusChanged(repEvent);
-                }
-            }
-            
         }
         this.spaceMode = spaceMode;
     }
@@ -409,8 +392,14 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
             for (int i = 0; i < newReplicationTargets.length; i++) {
                 ReplicationTarget newReplicationTarget = newReplicationTargets[i];
                 ReplicationTarget previousReplicationTarget = locatePreviousReplicationTarget(newReplicationTarget, previousReplicationTargets);
-                if (previousReplicationTarget == null || newReplicationTarget.getReplicationStatus() != previousReplicationTarget.getReplicationStatus()) {
-                    events.add(new ReplicationStatusChangedEvent(this, newReplicationTarget, previousReplicationTarget.getReplicationStatus(), newReplicationTarget.getReplicationStatus()));
+                if (previousReplicationTarget == null) {
+                    for (ReplicationTarget replicationTarget : newReplicationTargets) {
+                        events.add(new ReplicationStatusChangedEvent(this, replicationTarget, null, replicationTarget.getReplicationStatus()));
+                    }
+                } else {
+                    if (newReplicationTarget.getReplicationStatus() != previousReplicationTarget.getReplicationStatus()) {
+                        events.add(new ReplicationStatusChangedEvent(this, newReplicationTarget, previousReplicationTarget.getReplicationStatus(), newReplicationTarget.getReplicationStatus()));
+                    }
                 }
             }
         }
@@ -423,11 +412,9 @@ public class DefaultSpaceInstance extends AbstractGridComponent implements Inter
 
     private ReplicationTarget locatePreviousReplicationTarget(ReplicationTarget newReplicationTarget, ReplicationTarget[] previousReplicationTargets) {
         for (ReplicationTarget prevReplicationTarget : previousReplicationTargets) {
-            InternalSpaceInstance prevSpaceInstance = prevReplicationTarget.getSpaceInstance();
-            InternalSpaceInstance newSpaceInstance = newReplicationTarget.getSpaceInstance();
-            ServiceID prevSpaceId = prevSpaceInstance.getServiceID();
-            ServiceID newServiceId = newSpaceInstance.getServiceID();
-            if (prevSpaceId.equals(newServiceId))
+            String pevReplicationTargetMemberName = prevReplicationTarget.getMemberName();
+            String newReplicationTargetMemberName = newReplicationTarget.getMemberName();
+            if (newReplicationTargetMemberName.equals(pevReplicationTargetMemberName))
                 return prevReplicationTarget;
         }
         return null;
