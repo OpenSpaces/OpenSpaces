@@ -4,44 +4,43 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
 
 public class MachinesSlaEnforcement 
-    implements  ServiceLevelAgreementEnforcement<MachinesSlaPolicy, String, MachinesSlaEnforcementEndpoint>{
+    implements  ServiceLevelAgreementEnforcement<MachinesSlaPolicy, ProcessingUnit, MachinesSlaEnforcementEndpoint>{
 
-    private final Map<String, MachinesSlaEnforcementEndpoint> endpointPerZone;
+    private final Map<ProcessingUnit, MachinesSlaEnforcementEndpoint> endpoints;
     
     private final Admin admin;
-    private final NonBlockingElasticScaleHandler elasticScaleHandler;
     
-    public MachinesSlaEnforcement(Admin admin, NonBlockingElasticScaleHandler elasticScaleHandler) {
-        endpointPerZone = new HashMap<String, MachinesSlaEnforcementEndpoint>();
+    public MachinesSlaEnforcement(Admin admin) {
+
+        endpoints = new HashMap<ProcessingUnit, MachinesSlaEnforcementEndpoint>();
         this.admin = admin;
-        this.elasticScaleHandler = elasticScaleHandler;
     }
     
-    public MachinesSlaEnforcementEndpoint createEndpoint(String zone) throws ServiceLevelAgreementEnforcementEndpointAlreadyExistsException {
-        if (endpointPerZone.containsKey(zone)) {
+    public MachinesSlaEnforcementEndpoint createEndpoint(ProcessingUnit pu) throws ServiceLevelAgreementEnforcementEndpointAlreadyExistsException {
+        if (endpoints.containsKey(pu)) {
             throw new ServiceLevelAgreementEnforcementEndpointAlreadyExistsException();
         }
     
-    	MachinesSlaEnforcementEndpoint endpoint = new DefaultMachinesSlaEnforcementEndpoint(admin, zone, elasticScaleHandler);
-    	endpointPerZone.put(zone, endpoint);
+    	MachinesSlaEnforcementEndpoint endpoint = new DefaultMachinesSlaEnforcementEndpoint(admin, pu);
+    	endpoints.put(pu, endpoint);
     	return endpoint;
     }
 
-    public void destroyEndpoint(String id) {
+    public void destroyEndpoint(ProcessingUnit pu) {
 
-        DefaultMachinesSlaEnforcementEndpoint endpoint = (DefaultMachinesSlaEnforcementEndpoint) endpointPerZone.get(id);
+        DefaultMachinesSlaEnforcementEndpoint endpoint = 
+            (DefaultMachinesSlaEnforcementEndpoint) endpoints.remove(pu);
         endpoint.destroy();
-        
-        endpointPerZone.remove(id);
     }
 
     public void destroy() throws Exception {
-        for (String zone : endpointPerZone.keySet()) {
-            destroyEndpoint(zone);
+        for (ProcessingUnit pu : endpoints.keySet()) {
+            destroyEndpoint(pu);
         }
     }
 }

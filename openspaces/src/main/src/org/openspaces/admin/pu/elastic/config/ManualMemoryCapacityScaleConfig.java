@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.openspaces.admin.internal.pu.elastic.config.ScaleStrategyConfigUtils;
 import org.openspaces.core.util.StringProperties;
+import org.openspaces.grid.gsm.elastic.ManualMemoryCapacityScaleStrategyBean;
 
 /**
  * Defines a manual scaling strategy that consumes the specified memory capacity.
@@ -12,15 +13,15 @@ import org.openspaces.core.util.StringProperties;
  * When a backup partition is enabled (which usually is the case), the specified memory capacity is the total memory occupied by the
  * primary partition instances and the backup partition instances.
  *  
- * @see ManualMemoryCapacityScaleBeanConfigurer
+ * @see ManualMemoryCapacityScaleConfigurer
  * @author itaif
  */
-public class ManualMemoryCapacityScaleBeanConfig 
+public class ManualMemoryCapacityScaleConfig 
         implements MinNumberOfContainersScaleConfig,
                    MaxNumberOfContainersScaleConfig,
                    MinNumberOfContainersPerMachineScaleConfig,
                    MaxNumberOfContainersPerMachineScaleConfig,
-                   ScaleBeanConfig {
+                   ElasticScaleStrategyConfig {
 
     private static final String STRATEGY_NAME = "scale-strategy.manual-memory";
     private static final String MEMORY_CAPACITY_MEGABYTES_KEY = "sliding-window-milliseconds";
@@ -30,7 +31,7 @@ public class ManualMemoryCapacityScaleBeanConfig
     /**
      * Default constructor
      */
-    public ManualMemoryCapacityScaleBeanConfig() {
+    public ManualMemoryCapacityScaleConfig() {
         this.properties = new StringProperties();
     }
     
@@ -76,7 +77,15 @@ public class ManualMemoryCapacityScaleBeanConfig
     public int getMinNumberOfContainersPerMachine() {
         return ScaleStrategyConfigUtils.getMinNumberOfContainersPerMachine(properties);
     }
+
+    public void setPollingIntervalSeconds(int seconds) {
+        ScaleStrategyConfigUtils.setPollingIntervalSeconds(properties,seconds);
+    }
     
+    public int getPollingIntervalSeconds() {
+        return ScaleStrategyConfigUtils.getPollingIntervalSeconds(properties);
+    }
+
     public Map<String,String> getProperties() {
         return properties.getProperties();
     }
@@ -90,8 +99,6 @@ public class ManualMemoryCapacityScaleBeanConfig
     }
 
     public String getBeanClassName() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
+        return ManualMemoryCapacityScaleStrategyBean.class.getName();
+    }    
 }

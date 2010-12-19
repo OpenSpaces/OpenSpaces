@@ -14,7 +14,7 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirements;
  * @author itaif
  *
  */
-public interface NonBlockingElasticScaleHandler {
+public interface NonBlockingElasticMachineProvisioning {
 
 	/**
 	 * Starts a new machine with a new grid service agent with the specified zone.
@@ -32,7 +32,6 @@ public interface NonBlockingElasticScaleHandler {
 	 * @throws TimeoutException
 	 */
 	FutureGridServiceAgents startMachinesAsync(
-			String zone, 
 			CapacityRequirements capacityRequirements,
 			long duration, TimeUnit unit);
 	

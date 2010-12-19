@@ -1,26 +1,5 @@
 package org.openspaces.admin.internal.pu;
 
-import com.gigaspaces.grid.gsm.PUDetails;
-import org.openspaces.admin.Admin;
-import org.openspaces.admin.AdminException;
-import org.openspaces.admin.StatisticsMonitor;
-import org.openspaces.admin.gsm.GridServiceManager;
-import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
-import org.openspaces.admin.internal.pu.events.*;
-import org.openspaces.admin.pu.DeploymentStatus;
-import org.openspaces.admin.pu.ElasticProcessingUnit;
-import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.admin.pu.ProcessingUnitInstance;
-import org.openspaces.admin.pu.ProcessingUnitPartition;
-import org.openspaces.admin.pu.ProcessingUnits;
-import org.openspaces.admin.pu.events.*;
-import org.openspaces.admin.space.Space;
-import org.openspaces.core.properties.BeanLevelProperties;
-import org.openspaces.pu.sla.SLA;
-import org.openspaces.pu.sla.requirement.Requirement;
-import org.openspaces.pu.sla.requirement.ZoneRequirement;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -30,6 +9,57 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.openspaces.admin.Admin;
+import org.openspaces.admin.AdminException;
+import org.openspaces.admin.StatisticsMonitor;
+import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig;
+import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
+import org.openspaces.admin.internal.pu.events.DefaultBackupGridServiceManagerChangedEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultManagingGridServiceManagerChangedEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceRemovedEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceStatisticsChangedEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitSpaceCorrelatedEventManager;
+import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalBackupGridServiceManagerChangedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalManagingGridServiceManagerChangedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceRemovedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitInstanceStatisticsChangedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitSpaceCorrelatedEventManager;
+import org.openspaces.admin.internal.pu.events.InternalProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.pu.DeploymentStatus;
+import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.admin.pu.ProcessingUnitPartition;
+import org.openspaces.admin.pu.ProcessingUnits;
+import org.openspaces.admin.pu.elastic.config.ElasticScaleStrategyConfig;
+import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEvent;
+import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
+import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEvent;
+import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventListener;
+import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceLifecycleEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceRemovedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitInstanceStatisticsChangedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEvent;
+import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEventListener;
+import org.openspaces.admin.pu.events.ProcessingUnitSpaceCorrelatedEventManager;
+import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEvent;
+import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
+import org.openspaces.admin.space.Space;
+import org.openspaces.core.properties.BeanLevelProperties;
+import org.openspaces.pu.sla.SLA;
+import org.openspaces.pu.sla.requirement.Requirement;
+import org.openspaces.pu.sla.requirement.ZoneRequirement;
+
+import com.gigaspaces.grid.gsm.PUDetails;
 
 /**
  * @author kimchy
@@ -559,7 +589,25 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         admin.assertStateChangesPermitted();
     }
 
-    public ElasticProcessingUnit asElasticProcessingUnit() {
-        return new DefaultElasticProcessingUnit(this);
+    public void scale(ElasticScaleStrategyConfig strategyConfig) {
+
+        ProcessingUnitElasticConfig config = getElasticConfig();
+        config.setScaleStrategy(strategyConfig);
+        setElasticConfig(config);
+    }
+
+    public ProcessingUnitElasticConfig getElasticConfig() {
+        if (getManagingGridServiceManager() == null) {
+            throw new AdminException("Processing Unit " + getName() + " does not have an associated managing GSM");
+        }
+        return ((InternalGridServiceManager)getManagingGridServiceManager()).getProcessingUnitElasticConfig(this);
+    }
+
+    public void setElasticConfig(ProcessingUnitElasticConfig config) {
+        if (getManagingGridServiceManager() == null) {
+            throw new AdminException("Processing Unit " + getName() + " does not have an associated managing GSM");
+        }
+        ((InternalGridServiceManager)getManagingGridServiceManager()).setProcessingUnitElasticConfig(this,config);
+        
     }
 }

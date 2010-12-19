@@ -13,9 +13,11 @@ import java.util.concurrent.TimeoutException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.bean.BeanConfigurationClassCastException;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirment;
@@ -26,31 +28,29 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
     private static final Log logger = LogFactory.getLog(DefaultMachinesSlaEnforcementEndpoint.class);
 
 	private static final int START_AGENT_TIMEOUT_SECONDS = 10*60;
-
     private static final long STOP_AGENT_TIMEOUT_SECONDS = 10*60;
     
-    private final String zone;
+    private final ProcessingUnit pu;
     private final InternalAdmin admin;
-    private final NonBlockingElasticScaleHandler elasticScaleHandler;
-    
+        
+    private List<GridServiceAgent> agentsStarted;
     private List<FutureGridServiceAgents> futureAgents;
     private List<GridServiceAgent> agentsPendingShutdown;
     
     private boolean destroyed;
     
-    public DefaultMachinesSlaEnforcementEndpoint(Admin admin, String zone, NonBlockingElasticScaleHandler machinePool) {
-        
-    	if (zone == null) {
-        	throw new IllegalArgumentException("zone cannot be null.");
-        }
+    public DefaultMachinesSlaEnforcementEndpoint(Admin admin, ProcessingUnit pu) {
         
         if (admin == null) {
         	throw new IllegalArgumentException("admin cannot be null.");
         }
         
-        this.zone = zone;
+        if (pu == null) {
+            throw new IllegalArgumentException("pu cannot be null.");
+        }
+        
         this.admin = (InternalAdmin) admin;
-        this.elasticScaleHandler = machinePool;
+        this.pu = pu;
         this.destroyed = false;
         
         this.futureAgents = new ArrayList<FutureGridServiceAgents>();
@@ -61,11 +61,7 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
     public GridServiceAgent[] getGridServiceAgents() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
         validateNotDestroyed();
        
-        List<GridServiceAgent> agents =  getAllGridServiceAgents();
-        for (GridServiceAgent agent : agentsPendingShutdown) {
-            agents.remove(agent);
-        }
-        return agents.toArray(new GridServiceAgent[]{});
+        return agentsStarted.toArray(new GridServiceAgent[]{});
     }
 
     private List<GridServiceAgent> getGridServiceAgentsSortManagementComponentsLast() {
@@ -103,19 +99,37 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
             throw new IllegalArgumentException("Memory capacity cannot be negative");
         }
         
+        if (sla.getMachineProvisioning() == null) {
+            throw new IllegalArgumentException("MachineProvisioning cannot be null.");
+        }
+        
+        NonBlockingElasticMachineProvisioning machineProvisioning = null;
+        
+        if (sla.getMachineProvisioning() instanceof ElasticMachineProvisioning) {
+            machineProvisioning = new NonBlockingElasticMachineProvisioningAdapter((ElasticMachineProvisioning)machineProvisioning);
+        }
+        else if (sla.getMachineProvisioning() instanceof NonBlockingElasticMachineProvisioning) {
+            machineProvisioning = (NonBlockingElasticMachineProvisioning)sla.getMachineProvisioning();
+        }
+        else {
+            throw new BeanConfigurationClassCastException(
+                    "The bean class " + sla.getMachineProvisioning().getClass() + 
+                    " must either implement " + 
+                    ElasticMachineProvisioning.class.getName() + 
+                    " or " + 
+                    NonBlockingElasticMachineProvisioning.class.getName());
+        }
         
         try {
-			return run(sla);
+			return enforceSlaInternal(sla, machineProvisioning);
 		} catch (ConflictingOperationInProgressException e) {
 			logger.info("Cannot enforce Machines SLA since a conflicting operation is in progress. Try again later.", e);
             return false; // try again next time
 		}
     }
-
-
     
-    public String getId() {
-        return zone;
+    public ProcessingUnit getId() {
+        return pu;
     }
 
     
@@ -124,10 +138,10 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
         destroyed = true;
     }
     
-	private boolean run(MachinesSlaPolicy sla)
+	private boolean enforceSlaInternal(MachinesSlaPolicy sla, NonBlockingElasticMachineProvisioning machineProvisioning)
 			throws ConflictingOperationInProgressException {
 
-		cleanAgentsMarkedForShutdown();
+		cleanAgentsMarkedForShutdown(machineProvisioning);
 		cleanFutureAgents();
 
 		boolean slaReached = futureAgents.size() == 0 && agentsPendingShutdown.size() == 0;
@@ -137,10 +151,16 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 
 		int existingMemory = 0;
 		double existingCpu = 0;
-		for (GridServiceAgent agent : getAllGridServiceAgents()) {
+		
+		for (GridServiceAgent agent : agentsStarted) {
 			existingMemory += getMemoryInMB(agent);
 			existingCpu += getCpu(agent);
 		}
+		
+		for (GridServiceAgent agent : agentsPendingShutdown) {
+            existingMemory += getMemoryInMB(agent);
+            existingCpu += getCpu(agent);
+        }
 
 		if (existingMemory > targetMemory && existingCpu > targetCpu) {
 
@@ -227,23 +247,21 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 			if (shortageCpu >0 || shortageMemory > 0) {
 			    slaReached = false;
 			
-    			if (elasticScaleHandler != null) {
-    				
-    				this.futureAgents.add(elasticScaleHandler.startMachinesAsync(
-    						zone,
-    						new CapacityRequirements(
-    								new MemoryCapacityRequirment(shortageMemory),
-    								new CpuCapacityRequirement(shortageCpu)),
-    						START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
-    				logger.info("One or more new machine were scheduled to be started in order to increase capacity.");
-    			}
+				
+				this.futureAgents.add(
+			        machineProvisioning.startMachinesAsync(
+						new CapacityRequirements(
+								new MemoryCapacityRequirment(shortageMemory),
+								new CpuCapacityRequirement(shortageCpu)),
+						START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
+				logger.info("One or more new machine were scheduled to be started in order to increase capacity.");
 			}
 		}
 		
 		return slaReached;
 	}
 
-    private void cleanAgentsMarkedForShutdown() {
+    private void cleanAgentsMarkedForShutdown(NonBlockingElasticMachineProvisioning machineProvisioning) {
     	
         final Iterator<GridServiceAgent> iterator = agentsPendingShutdown.iterator();
         while (iterator.hasNext()) {
@@ -259,7 +277,7 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
             else if (numberOfChildProcesses == 0) {
                  // nothing running on this agent (not even GSM/LUS). Get rid of it.
                 logger.info("Stopping agent machine " + agent.getMachine().getHostAddress());	
-                DefaultMachinesSlaEnforcementEndpoint.this.elasticScaleHandler.stopMachineAsync(agent, STOP_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                machineProvisioning.stopMachineAsync(agent, STOP_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             }
         }
         
@@ -294,12 +312,12 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 	            try {
 	            
 	            	GridServiceAgent[] agents = future.get();
-                    if (logger.isInfoEnabled()) {
+                    agentsStarted.addAll(Arrays.asList(agents));
+	            	if (logger.isInfoEnabled()) {
 		            	for (GridServiceAgent agent : agents) {
 	                    	logger.info("Agent started succesfully on a new machine " + agent.getMachine().getHostAddress());
 	                    }
                     }
-                    
 	            } catch (ExecutionException e) {
 	                exception = e.getCause();
 	            } catch (TimeoutException e) {
@@ -319,17 +337,6 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
         if (destroyed) {
             throw new ServiceLevelAgreementEnforcementEndpointDestroyedException();
         }
-    }
-        
-    private List<GridServiceAgent> getAllGridServiceAgents() {
-        List<GridServiceAgent> agents = new ArrayList<GridServiceAgent>();
-        for (GridServiceAgent agent : admin.getGridServiceAgents()) {
-            if (agent.getZones().containsKey(zone)) {
-                agents.add(agent);
-            }
-        }
-        return agents;
-        
     }
     
     private int getMemoryInMB(GridServiceAgent agent) {

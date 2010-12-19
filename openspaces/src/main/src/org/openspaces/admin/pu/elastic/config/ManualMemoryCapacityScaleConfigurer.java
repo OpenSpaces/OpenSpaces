@@ -3,32 +3,32 @@ package org.openspaces.admin.pu.elastic.config;
 import org.openspaces.core.util.MemoryUnit;
 
 /**
- * Provides fluent API for creating a new {@link ManualMemoryCapacityScaleBeanConfig} object.
+ * Provides fluent API for creating a new {@link ManualMemoryCapacityScaleConfig} object.
  * 
  * For example {@code new ManualMemoryCapacityScaleStrategyConfigurer().capacity("1500m").getConfig()}
  * 
  * @author itaif
  * 
  */
-public class ManualMemoryCapacityScaleBeanConfigurer implements ScaleBeanConfigurer<ManualMemoryCapacityScaleBeanConfig>{
+public class ManualMemoryCapacityScaleConfigurer implements ScaleBeanConfigurer<ManualMemoryCapacityScaleConfig>{
 
-private final ManualMemoryCapacityScaleBeanConfig config;
+private final ManualMemoryCapacityScaleConfig config;
     
     /**
-     * Provides fluent API for creating a new {@link ManualMemoryCapacityScaleBeanConfig} object.
+     * Provides fluent API for creating a new {@link ManualMemoryCapacityScaleConfig} object.
      * For example {@code new ManualMemoryCapacityScaleStrategyConfigurer().capacity("1500m").getConfig()}
-     * The default constructor wraps an empty {@link ManualMemoryCapacityScaleBeanConfig} object
+     * The default constructor wraps an empty {@link ManualMemoryCapacityScaleConfig} object
      */
-    public ManualMemoryCapacityScaleBeanConfigurer() {
-        this.config = new ManualMemoryCapacityScaleBeanConfig();
+    public ManualMemoryCapacityScaleConfigurer() {
+        this.config = new ManualMemoryCapacityScaleConfig();
     }
     
-    public ManualMemoryCapacityScaleBeanConfigurer memoryCapacity(String memory) {
+    public ManualMemoryCapacityScaleConfigurer memoryCapacity(String memory) {
         config.setMemoryCapacityInMB((int)MemoryUnit.toMegaBytes(memory));
         return this;
     }
     
-    public ManualMemoryCapacityScaleBeanConfigurer memoryCapacity(int memory, MemoryUnit unit) {
+    public ManualMemoryCapacityScaleConfigurer memoryCapacity(int memory, MemoryUnit unit) {
         config.setMemoryCapacityInMB((int)unit.toMegaBytes(memory));
         return this;
     }
@@ -36,7 +36,7 @@ private final ManualMemoryCapacityScaleBeanConfig config;
     /**
      * @see MaxNumberOfContainersPerMachineScaleConfig#setMaxNumberOfContainersPerMachine(int)
      */
-    public ManualMemoryCapacityScaleBeanConfigurer maxNumberOfContainersPerMachine(int maxNumberOfContainersPerMachine) {
+    public ManualMemoryCapacityScaleConfigurer maxNumberOfContainersPerMachine(int maxNumberOfContainersPerMachine) {
         config.setMaxNumberOfContainersPerMachine(maxNumberOfContainersPerMachine);
         return this;
     }
@@ -44,7 +44,7 @@ private final ManualMemoryCapacityScaleBeanConfig config;
     /**
      * @see MinNumberOfContainersPerMachineScaleConfig#setMinNumberOfContainersPerMachine(int)
      */
-    public ManualMemoryCapacityScaleBeanConfigurer minNumberOfContainersPerMachine(int minNumberOfContainersPerMachine) {
+    public ManualMemoryCapacityScaleConfigurer minNumberOfContainersPerMachine(int minNumberOfContainersPerMachine) {
         config.setMinNumberOfContainersPerMachine(minNumberOfContainersPerMachine);
         return this;
     }
@@ -52,7 +52,7 @@ private final ManualMemoryCapacityScaleBeanConfig config;
     /**
      * @see MaxNumberOfContainersScaleConfig#setMaxNumberOfContainers(int)
      */
-    public ManualMemoryCapacityScaleBeanConfigurer maxNumberOfContainers(int maxNumberOfContainers) {
+    public ManualMemoryCapacityScaleConfigurer maxNumberOfContainers(int maxNumberOfContainers) {
         config.setMaxNumberOfContainers(maxNumberOfContainers);
         return this;
     }
@@ -60,7 +60,7 @@ private final ManualMemoryCapacityScaleBeanConfig config;
     /**
      * @see MinNumberOfContainersScaleConfig#setMinNumberOfContainers(int)
      */
-    public ManualMemoryCapacityScaleBeanConfigurer minNumberOfContainers(int minNumberOfContainers) {
+    public ManualMemoryCapacityScaleConfigurer minNumberOfContainers(int minNumberOfContainers) {
         config.setMinNumberOfContainers(minNumberOfContainers);
         return this;
     }
@@ -68,7 +68,7 @@ private final ManualMemoryCapacityScaleBeanConfig config;
     /**
      * @see ScaleBeanConfigurer#getConfig()
      */
-    public ManualMemoryCapacityScaleBeanConfig getConfig() {
+    public ManualMemoryCapacityScaleConfig getConfig() {
         return config;
     }
 }

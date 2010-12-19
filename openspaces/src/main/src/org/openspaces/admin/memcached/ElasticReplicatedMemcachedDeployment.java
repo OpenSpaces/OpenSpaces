@@ -1,11 +1,7 @@
 package org.openspaces.admin.memcached;
 
-import java.util.Map;
-
 import org.openspaces.admin.pu.elastic.ElasticReplicatedProcessingUnitDeployment;
-import org.openspaces.admin.pu.elastic.isolation.DedicatedIsolation;
-import org.openspaces.admin.pu.elastic.isolation.PublicIsolation;
-import org.openspaces.admin.pu.elastic.isolation.SharedTenantIsolation;
+import org.openspaces.admin.pu.elastic.config.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.topology.ElasticReplicatedDeploymentTopology;
 import org.openspaces.pu.container.servicegrid.deploy.MemcachedDeploy;
 
@@ -39,11 +35,27 @@ public class ElasticReplicatedMemcachedDeployment implements ElasticReplicatedDe
         return this;
     }
 
+/* NOT IMPLEMENTED YET    
     public ElasticReplicatedMemcachedDeployment zone(String zone) {
         deployment.zone(zone);
         return this;
     }
 
+    public ElasticReplicatedMemcachedDeployment isolation(DedicatedIsolation isolation) {
+        deployment.isolation(isolation);
+        return this;
+    }
+
+    public ElasticReplicatedMemcachedDeployment isolation(SharedTenantIsolation isolation) {
+        deployment.isolation(isolation);
+        return this;
+    }
+    
+    public ElasticReplicatedMemcachedDeployment isolation(PublicIsolation isolation) {
+        deployment.isolation(isolation);
+        return this;
+    }
+*/    
     public ElasticReplicatedMemcachedDeployment setContextProperty(String key, String value) {
         deployment.setContextProperty(key, value);
         return this;
@@ -63,34 +75,19 @@ public class ElasticReplicatedMemcachedDeployment implements ElasticReplicatedDe
         deployment.userDetails(userName, password);
         return this;
     }
-
-    public ElasticReplicatedMemcachedDeployment isolation(DedicatedIsolation isolation) {
-        deployment.isolation(isolation);
-        return this;
-    }
-
-    public ElasticReplicatedMemcachedDeployment isolation(SharedTenantIsolation isolation) {
-        deployment.isolation(isolation);
-        return this;
-    }
-    
-    public ElasticReplicatedMemcachedDeployment isolation(PublicIsolation isolation) {
-        deployment.isolation(isolation);
-        return this;
-    }
     
     public ElasticReplicatedMemcachedDeployment useScript() {
         deployment.useScript();
         return this;
     }
 
-    public ElasticReplicatedMemcachedDeployment overrideVmInputArguments() {
-        deployment.overrideVmInputArguments();
+    public ElasticReplicatedMemcachedDeployment overrideCommandLineArguments() {
+        deployment.overrideCommandLineArguments();
         return this;
     }
 
-    public ElasticReplicatedMemcachedDeployment vmInputArgument(String vmInputArgument) {
-        deployment.vmInputArgument(vmInputArgument);
+    public ElasticReplicatedMemcachedDeployment commandLineArgument(String vmInputArgument) {
+        deployment.commandLineArgument(vmInputArgument);
         return this;
     }
 
@@ -99,8 +96,8 @@ public class ElasticReplicatedMemcachedDeployment implements ElasticReplicatedDe
         return this;
     }
 
-    public ElasticReplicatedMemcachedDeployment machinePool(String beanClassName, Map<String, String> beanProperties) {
-        deployment.machinePool(beanClassName, beanProperties);
+    public ElasticReplicatedMemcachedDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+        deployment.machineProvisioning(config);
         return this;
     }
 

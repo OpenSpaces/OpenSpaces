@@ -16,6 +16,7 @@
 
 package org.openspaces.admin.bean;
 
+
 /**
  * Exception indicating that a configuration for a bean by this name can't be found (has not been
  * added or has been removed).
@@ -36,7 +37,8 @@ public class BeanConfigNotFoundException extends BeanConfigException {
 		super(message);
 	}
 	
-	public BeanConfigNotFoundException(String message, Throwable cause) {
-        super(message, cause);
+	public BeanConfigNotFoundException(String message, Throwable e) {
+        super(message, e);
     }
+	
 }

@@ -16,6 +16,8 @@
 
 package org.openspaces.admin.bean;
 
+import java.rmi.RemoteException;
+
 /**
  * Exception indicating that a configuration for a bean by this name already has been added.
  * 
@@ -37,4 +39,8 @@ public class BeanConfigAlreadyExistsException extends BeanConfigException {
 	public BeanConfigAlreadyExistsException(String message, Throwable cause) {
 		super(message, cause);
 	}
+
+    public BeanConfigAlreadyExistsException(RemoteException e) {
+        super(e);
+    }
 }

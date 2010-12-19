@@ -16,6 +16,8 @@
 
 package org.openspaces.admin.bean;
 
+import java.rmi.RemoteException;
+
 import org.openspaces.admin.AdminException;
 
 /**
@@ -38,5 +40,22 @@ public class BeanConfigException extends AdminException {
 	public BeanConfigException(String message, Throwable cause) {
 		super(message, cause);
 	}
+
+	/**
+	 * RemoteException sandwich model. 
+	 * Derive and copy any required properties from cause.getCause() as needed.
+	 * @param cause
+	 */
+    public BeanConfigException(RemoteException cause) {
+        super(getMessage(cause),cause);
+    }
+    
+    private static String getMessage(RemoteException remoteException) {
+        String message = "remote exception occured";
+        if (remoteException.getCause() != null) {
+            message = remoteException.getCause().getMessage();
+        }
+        return message;
+    }
 
 }

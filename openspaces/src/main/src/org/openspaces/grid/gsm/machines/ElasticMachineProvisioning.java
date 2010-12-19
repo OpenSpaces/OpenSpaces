@@ -12,7 +12,7 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirements;
  * @author itaif
  *
  */
-public interface ElasticScaleHandler {
+public interface ElasticMachineProvisioning {
 
 	/**
 	 * Starts a new machine with a new grid service agent with the specified zone.
@@ -30,7 +30,6 @@ public interface ElasticScaleHandler {
 	 * @throws TimeoutException
 	 */
 	GridServiceAgent[] startMachines(
-			String zone, 
 			CapacityRequirements capacityRequirements,
 			long duration, TimeUnit unit)
 	throws ElasticScaleHandlerException, InterruptedException , TimeoutException ;

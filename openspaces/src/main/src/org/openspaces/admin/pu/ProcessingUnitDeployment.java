@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig;
+
 import com.gigaspaces.grid.zone.ZoneHelper;
 import com.gigaspaces.security.directory.User;
 import com.gigaspaces.security.directory.UserDetails;
@@ -78,12 +80,15 @@ public class ProcessingUnitDeployment {
 
     private Boolean secured;
 
+    private final Map<String,String> elasticProperties;
+
     /**
      * Constructs a processing unit deployment based on the specified processing unit name (should
      * exists under the <code>[GS ROOT]/deploy</code> directory.
      */
     public ProcessingUnitDeployment(String processingUnit) {
         this.processingUnit = processingUnit;
+        this.elasticProperties = new HashMap<String,String>();
     }
 
     /**
@@ -91,7 +96,7 @@ public class ProcessingUnitDeployment {
      * to a processing unit jar/zip file or a directory).
      */
     public ProcessingUnitDeployment(File processingUnit) {
-        this.processingUnit = processingUnit.getAbsolutePath();
+        this(processingUnit.getAbsolutePath());
     }
 
     /**
@@ -340,9 +345,16 @@ public class ProcessingUnitDeployment {
         return deployOptions.toArray(new String[deployOptions.size()]);
     }
 
-    public ProcessingUnitDeployment setDynamicProperty(String key, String value) {
-        // TODO: support dynamic properties.
-        this.setContextProperty(key, value);
+    public ProcessingUnitDeployment setElasticProperty(String key, String value) {
+        this.elasticProperties.put(key,value);
         return this;
+    }
+    
+    public ProcessingUnitElasticConfig getElasticConfig() {
+        ProcessingUnitElasticConfig elasticConfig = null;
+        if (this.elasticProperties.size() > 0) {
+            elasticConfig = new ProcessingUnitElasticConfig(this.elasticProperties);
+        }
+        return elasticConfig;
     }
 }

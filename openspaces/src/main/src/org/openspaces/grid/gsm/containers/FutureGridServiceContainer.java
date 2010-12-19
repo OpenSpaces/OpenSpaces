@@ -4,15 +4,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import org.openspaces.admin.gsa.GridServiceAgent;
-import org.openspaces.admin.gsa.GridServiceContainerOptions;
 import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig.GridServiceContainerConfig;
 
 public interface FutureGridServiceContainer {
 
     /**
-     * @return the options used to start the container
+     * @return the configuration used to start the container
      */
-    GridServiceContainerOptions getGridServiceContainerOptions();
+    GridServiceContainerConfig getGridServiceContainerConfig();
     
     /**
      * @return the agent that starts the container

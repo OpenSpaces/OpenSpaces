@@ -1,13 +1,14 @@
 package org.openspaces.grid.gsm.containers;
 
-import org.openspaces.admin.gsa.GridServiceContainerOptions;
+import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig.GridServiceContainerConfig;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementPolicy;
 
 public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
 
     int containers;
     
-    GridServiceContainerOptions newContainerOptions;
+    GridServiceContainerConfig newContainerConfig;
 
     //private MachineIsolation machineIsolation;
 
@@ -16,6 +17,8 @@ public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
     private int reservedInMB;
 
     private int maxNumberOfContainersPerMachine;
+
+    private GridServiceAgent[] gridServiceAgents;
 
    
     public void setTargetNumberOfContainers(int containers) {
@@ -26,12 +29,12 @@ public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
         return this.containers;
     }
     
-    public void setNewContainerOptions(GridServiceContainerOptions options) {
-        this.newContainerOptions = options;
+    public void setNewContainerConfig(GridServiceContainerConfig config) {
+        this.newContainerConfig = config;
     }
     
-    public GridServiceContainerOptions getNewContainerOptions() {
-        return this.newContainerOptions;
+    public GridServiceContainerConfig getNewContainerConfig() {
+        return this.newContainerConfig;
     }
 
     public int getReservedPhysicalMemoryPerMachineInMB() {
@@ -50,34 +53,23 @@ public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
         this.maxNumberOfContainersPerMachine = maxNumberOfContainersPerMachine;
     }
     
- /*
-    public void setMachineIsolation(MachineIsolation machineIsolation) {
-        this.machineIsolation = machineIsolation;
-        
-    }
-    public MachineIsolation getMachineIsolation() {
-        return this.machineIsolation;
-    }
 
-    public void setMachineZone(String machineZone) {
-        this.machineZone = machineZone;
+    public GridServiceAgent[] getGridServiceAgents() {
+        return this.gridServiceAgents;
     }
     
-    public String getMachineZone() {
-        return this.machineZone;
+    public void setGridServiceAgents(GridServiceAgent[] gridServiceAgents) {
+        this.gridServiceAgents = gridServiceAgents;
     }
-*/
     
     public boolean equals(Object other) {
         return other instanceof ContainersSlaPolicy &&
                ((ContainersSlaPolicy)other).containers == this.containers &&
-               ((ContainersSlaPolicy)other).newContainerOptions.equals(this.newContainerOptions) &&
+               ((ContainersSlaPolicy)other).newContainerConfig.equals(this.newContainerConfig) &&
                //((ContainersAdminServiceLevelAgreement)other).machineZone.equals(this.machineZone) &&
                //((ContainersAdminServiceLevelAgreement)other).machineIsolation.equals(this.machineIsolation) &&
                ((ContainersSlaPolicy)other).reservedInMB == this.reservedInMB &&
                ((ContainersSlaPolicy)other).maxNumberOfContainersPerMachine == this.maxNumberOfContainersPerMachine;
     }
-
-    
 
 }

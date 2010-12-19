@@ -1,6 +1,7 @@
 package org.openspaces.grid.gsm.machines;
 
 import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpoint;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
@@ -13,15 +14,15 @@ import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestr
  * @see MachineSlaPolicy
  */
 public interface MachinesSlaEnforcementEndpoint 
-    extends ServiceLevelAgreementEnforcementEndpoint<String,MachinesSlaPolicy> {
+    extends ServiceLevelAgreementEnforcementEndpoint<ProcessingUnit,MachinesSlaPolicy> {
     
     /**
-     * @return a list of agents for this zone that are not pending shutdown, without blocking the calling thread.
+     * @return a list of agents for this pu that are not pending shutdown, without blocking the calling thread.
      */
     GridServiceAgent[] getGridServiceAgents() throws ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
     /**
-     * @return a list of agents for this zone that that need to be cleared of containers, without blocking the calling thread.
+     * @return a list of agents for this pu that that need to be cleared of containers, without blocking the calling thread.
      * Unless all containers are killed the sla would not be reached.
      */
     GridServiceAgent[] getGridServiceAgentsPendingShutdown() throws ServiceLevelAgreementEnforcementEndpointDestroyedException;

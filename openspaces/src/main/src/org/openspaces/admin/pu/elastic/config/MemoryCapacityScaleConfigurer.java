@@ -3,48 +3,48 @@ package org.openspaces.admin.pu.elastic.config;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Provides fluent API for creating a new {@link MemoryCapacityScaleBeanConfig} object.
+ * Provides fluent API for creating a new {@link MemoryCapacityScaleConfig} object.
  * 
  * For example {@code new MemoryCapacityScaleStrategyConfigurer().slidingTimeWindow(60,TimeUnit.SECONDS).scaleOutWhenAboveThreshold(70).getConfig()}
  * 
  * @author itaif
  * 
  */
-public class MemoryCapacityScaleBeanConfigurer
-    implements ScaleBeanConfigurer<MemoryCapacityScaleBeanConfig> {
+public class MemoryCapacityScaleConfigurer
+    implements ScaleBeanConfigurer<MemoryCapacityScaleConfig> {
 
-    private final MemoryCapacityScaleBeanConfig config;
+    private final MemoryCapacityScaleConfig config;
     
     /**
-     * Provides fluent API for creating a new {@link MemoryCapacityScaleBeanConfig} object.
+     * Provides fluent API for creating a new {@link MemoryCapacityScaleConfig} object.
      * For example {@code new MemoryCapacityScaleStrategyConfigurer().slidingTimeWindow(60,TimeUnit.SECONDS).scaleOutWhenAboveThreshold(70).getConfig()}
-     * The default constructor wraps an empty {@link MemoryCapacityScaleBeanConfig} object
+     * The default constructor wraps an empty {@link MemoryCapacityScaleConfig} object
      */
-    public MemoryCapacityScaleBeanConfigurer() {
-        this.config = new MemoryCapacityScaleBeanConfig();
+    public MemoryCapacityScaleConfigurer() {
+        this.config = new MemoryCapacityScaleConfig();
     }
     
     /**
-     * @see MemoryCapacityScaleBeanConfig#setSlidingTimeWindowMilliseconds(int)
+     * @see MemoryCapacityScaleConfig#setSlidingTimeWindowMilliseconds(int)
      */
-    public MemoryCapacityScaleBeanConfigurer slidingTimeWindow(int duration, TimeUnit unit) {
+    public MemoryCapacityScaleConfigurer slidingTimeWindow(int duration, TimeUnit unit) {
         config.setSlidingTimeWindowMilliseconds(unit.toMillis(duration));
         return this;
     }
 
     /**
-     * @see MemoryCapacityScaleBeanConfig#setScaleInWhenAverageAbove(int)
+     * @see MemoryCapacityScaleConfig#setScaleInWhenAverageAbove(int)
      */
-    public MemoryCapacityScaleBeanConfigurer scaleInWhenAverageBelow(int usagePercentage) {
+    public MemoryCapacityScaleConfigurer scaleInWhenAverageBelow(int usagePercentage) {
         validatePercentage(usagePercentage);
         config.setScaleInWhenAverageBelow(usagePercentage);
         return this;
     }
 
     /**
-     * @see MemoryCapacityScaleBeanConfig#setScaleOutWhenAverageAbove(int)
+     * @see MemoryCapacityScaleConfig#setScaleOutWhenAverageAbove(int)
      */
-    public MemoryCapacityScaleBeanConfigurer scaleOutWhenAverageAbove(int usagePercentage) {
+    public MemoryCapacityScaleConfigurer scaleOutWhenAverageAbove(int usagePercentage) {
         validatePercentage(usagePercentage);
         config.setScaleOutWhenAverageAbove(usagePercentage);
         return this;
@@ -53,7 +53,7 @@ public class MemoryCapacityScaleBeanConfigurer
     /**
      * @see MaxNumberOfContainersPerMachineScaleConfig#setMaxNumberOfContainersPerMachine(int)
      */
-    public MemoryCapacityScaleBeanConfigurer maxNumberOfContainersPerMachine(int maxNumberOfContainersPerMachine) {
+    public MemoryCapacityScaleConfigurer maxNumberOfContainersPerMachine(int maxNumberOfContainersPerMachine) {
         config.setMaxNumberOfContainersPerMachine(maxNumberOfContainersPerMachine);
         return this;
     }
@@ -61,7 +61,7 @@ public class MemoryCapacityScaleBeanConfigurer
     /**
      * @see MinNumberOfContainersPerMachineScaleConfig#setMinNumberOfContainersPerMachine(int)
      */
-    public MemoryCapacityScaleBeanConfigurer minNumberOfContainersPerMachine(int minNumberOfContainersPerMachine) {
+    public MemoryCapacityScaleConfigurer minNumberOfContainersPerMachine(int minNumberOfContainersPerMachine) {
         config.setMinNumberOfContainersPerMachine(minNumberOfContainersPerMachine);
         return this;
     }
@@ -69,7 +69,7 @@ public class MemoryCapacityScaleBeanConfigurer
     /**
      * @see MaxNumberOfContainersScaleConfig#setMaxNumberOfContainers(int)
      */
-    public MemoryCapacityScaleBeanConfigurer maxNumberOfContainers(int maxNumberOfContainers) {
+    public MemoryCapacityScaleConfigurer maxNumberOfContainers(int maxNumberOfContainers) {
         config.setMaxNumberOfContainersPerMachine(maxNumberOfContainers);
         return this;
     }
@@ -77,7 +77,7 @@ public class MemoryCapacityScaleBeanConfigurer
     /**
      * @see MinNumberOfContainersScaleConfig#setMinNumberOfContainers(int)
      */
-    public MemoryCapacityScaleBeanConfigurer minNumberOfContainers(int minNumberOfContainers) {
+    public MemoryCapacityScaleConfigurer minNumberOfContainers(int minNumberOfContainers) {
         config.setMinNumberOfContainers(minNumberOfContainers);
         return this;
     }
@@ -85,7 +85,7 @@ public class MemoryCapacityScaleBeanConfigurer
     /**
      * @see ScaleBeanConfigurer#getConfig()
      */
-    public MemoryCapacityScaleBeanConfig getConfig() {
+    public MemoryCapacityScaleConfig getConfig() {
         return config;
     }
 

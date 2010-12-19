@@ -26,6 +26,8 @@ import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.dump.InternalDumpResult;
+import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
+import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
@@ -35,12 +37,10 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitAlreadyDeployedException;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
-import org.openspaces.admin.pu.elastic.ElasticProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
 import org.openspaces.admin.space.ElasticDataGridDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
-import org.openspaces.admin.space.elastic.ElasticSpaceDeployment;
 import org.openspaces.pu.container.servicegrid.deploy.Deploy;
 
 import com.gigaspaces.grid.gsm.GSM;
@@ -110,25 +110,6 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         return deploy(deployment.toProcessingUnitDeployment(), timeout, timeUnit);
     }
 
-    public ProcessingUnit deploy(ElasticSpaceDeployment deployment) throws ProcessingUnitAlreadyDeployedException {
-        return deploy(deployment.toProcessingUnitDeployment());
-    }
-
-    public ProcessingUnit deploy(ElasticSpaceDeployment deployment, long timeout, TimeUnit timeUnit)
-            throws ProcessingUnitAlreadyDeployedException {
-        return deploy(deployment.toProcessingUnitDeployment(),timeout,timeUnit);
-    }
-
-    public ProcessingUnit deploy(ElasticProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit)
-            throws ProcessingUnitAlreadyDeployedException {
-        return deploy(deployment.toProcessingUnitDeployment(),timeout,timeUnit);
-    }
-
-    public ProcessingUnit deploy(ElasticProcessingUnitDeployment deployment)
-            throws ProcessingUnitAlreadyDeployedException {
-        return deploy(deployment.toProcessingUnitDeployment());
-    }
-    
     public ProcessingUnit deploy(ProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit) {
         Deploy deploy = new Deploy();
         Deploy.setDisableInfoLogging(true);
@@ -179,10 +160,11 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             }
         };
         getAdmin().getProcessingUnits().getProcessingUnitAdded().add(added);
+        ProcessingUnit pu = null;
         try {
             getGSMAdmin().deploy(operationalString);
             latch.await(timeout, timeUnit);
-            return ref.get();
+            pu = ref.get();
         } catch (SecurityException se) {
             throw new AdminException("No privileges to deploy a processing unit", se);
         } catch (Exception e) {
@@ -191,6 +173,14 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             Deploy.setDisableInfoLogging(false);
             getAdmin().getProcessingUnits().getProcessingUnitAdded().remove(added);
         }
+        
+        // set dynamic properties
+        ProcessingUnitElasticConfig elasticConfig = deployment.getElasticConfig();
+        if (elasticConfig != null) {
+            setProcessingUnitElasticConfig(pu, elasticConfig);
+        }
+        
+        return pu;
     }
 
     public void undeploy(String processingUnitName) {
@@ -394,25 +384,48 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
 
     public ProcessingUnit deploy(ElasticDataGridDeployment deployment) throws ProcessingUnitAlreadyDeployedException {
-        return deploy(deployment.toProcessingUnitDeployment());
+        return deploy(deployment.toElasticStatefulProcessingUnitDeployment());
     }
 
     public ProcessingUnit deploy(ElasticDataGridDeployment deployment, long timeout, TimeUnit timeUnit)
             throws ProcessingUnitAlreadyDeployedException {
-        return deploy(deployment.toProcessingUnitDeployment(),timeout,timeUnit);
+        return deploy(deployment.toElasticStatefulProcessingUnitDeployment(),timeout,timeUnit);
     }
 
     public ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment)
             throws ProcessingUnitAlreadyDeployedException {
-        return deploy(deployment.toProcessingUnitDeployment());
+        return deploy(deployment,admin.getDefaultTimeout(),admin.getDefaultTimeoutTimeUnit());
     }
 
     public ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit)
             throws ProcessingUnitAlreadyDeployedException {
+        
         return deploy(deployment.toProcessingUnitDeployment(),timeout,timeUnit);
     }
 
     public boolean isRunning() {
         return admin.getGridServiceManagers().getManagerByUID(getUid()) != null;
+    }
+    
+    public ProcessingUnitElasticConfig getProcessingUnitElasticConfig(ProcessingUnit pu) {
+        
+        //TODO: Read the data from the gsm server.
+        ProcessingUnitElasticConfig config = getElasticServiceManager().getProcessingUnitElasticConfig(pu);
+        
+        return config;
+    }
+    
+    public void setProcessingUnitElasticConfig(ProcessingUnit pu, ProcessingUnitElasticConfig config) {
+        
+        //TODO: Store the data in the gsm server.
+        getElasticServiceManager().setProcessingUnitElasticConfig(pu,config);
+    }
+
+    private InternalElasticServiceManager getElasticServiceManager() {
+        if (admin.getElasticServiceManagers().getSize() != 1) {
+            throw new AdminException("ElasticScaleHandler requires exactly one ESM server running.");
+        }
+        final InternalElasticServiceManager esm = (InternalElasticServiceManager) admin.getElasticServiceManagers().getManagers()[0];
+        return esm;
     }
 }

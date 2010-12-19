@@ -11,6 +11,7 @@ import org.openspaces.admin.dump.DumpResult;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.dump.InternalDumpResult;
 import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.esm.ESM;
 
 import com.gigaspaces.internal.jvm.JVMDetails;
@@ -25,6 +26,7 @@ import com.gigaspaces.lrmi.nio.info.NIOStatistics;
 
 /**
  * @author Moran Avigdor
+ * @author itaif
  */
 public class DefaultElasticServiceManager extends AbstractAgentGridComponent implements InternalElasticServiceManager {
 
@@ -128,5 +130,24 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
 
     public boolean isRunning() {
         return this.admin.getElasticServiceManagers().getManagerByUID(getUid()) != null;
+    }
+
+
+    public ProcessingUnitElasticConfig getProcessingUnitElasticConfig(ProcessingUnit pu) {
+        try {
+            return new ProcessingUnitElasticConfig(esm.getProcessingUnitElasticConfig(pu.getName()));
+        }
+        catch (RemoteException e) {
+            throw new AdminException("Failed to retrieve processing unit dynamic properties",e);
+        }
+    }
+
+    public void setProcessingUnitElasticConfig(ProcessingUnit pu, ProcessingUnitElasticConfig properties) {
+        try {
+            esm.setProcessingUnitElasticConfig(pu.getName(),properties.getProperties());
+        }
+        catch (RemoteException e) {
+            throw new AdminException("Failed to set processing unit dynamic properties",e);
+        }
     }
 }

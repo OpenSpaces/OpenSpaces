@@ -26,11 +26,9 @@ import org.openspaces.admin.memcached.MemcachedDeployment;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitAlreadyDeployedException;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
-import org.openspaces.admin.pu.elastic.ElasticProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.space.ElasticDataGridDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
-import org.openspaces.admin.space.elastic.ElasticSpaceDeployment;
 
 /**
  * A Grid Service Manager is a manager for {@link org.openspaces.admin.pu.ProcessingUnit} deployments
@@ -84,39 +82,6 @@ public interface GridServiceManager extends AgentGridComponent, LogProviderGridC
      * just an embedded space.
      */
     ProcessingUnit deploy(SpaceDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
-
-    /**
-     * Deploys a space based on the elastic space deployment information on the given grid
-     * service manager (it will act as the primary GSM for the deployed processing unit).
-     *
-     * <p>The deployment process will wait indefinitely and return the actual processing unit that can be used.
-     */
-    ProcessingUnit deploy(ElasticSpaceDeployment deployment) throws ProcessingUnitAlreadyDeployedException;
-
-    /**
-     * Deploys a processing unit based on the elastic space deployment information on the given grid
-     * service manager (it will act as the primary GSM for the deployed processing unit).
-     *
-     * <p>The deployment process will wait for the given timeout and return the actual processing unit that can be used.
-     */
-    ProcessingUnit deploy(ElasticSpaceDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
-
-
-    /**
-     * Deploys a processing unit based on the elastic space deployment information on the given grid
-     * service manager (it will act as the primary GSM for the deployed processing unit).
-     *
-     * <p>The deployment process will wait indefinitely and return the actual processing unit that can be used.
-     */
-    ProcessingUnit deploy(ElasticProcessingUnitDeployment deployment) throws ProcessingUnitAlreadyDeployedException;
-    
-    /**
-     * Deploys a space based on the elastic space deployment information on the given grid
-     * service manager (it will act as the primary GSM for the deployed processing unit).
-     *
-     * <p>The deployment process will wait for the given timeout and return the actual processing unit that can be used.
-     */
-    ProcessingUnit deploy(ElasticProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
 
     /**
      * Deploys a memcached based on the space deployment information on the given grid

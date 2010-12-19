@@ -33,24 +33,25 @@ public interface BeanConfigPropertiesManager {
      * Adds a bean by it's name with the corresponding configuration properties.
      * 
      * @param beanClassName
-     *            the bean name
-     * @param properties
+     *            the bean class name
+     * @param config
      *            the String key-value pairs configuration properties used to configure this
      *            bean.
      * @throws BeanConfigAlreadyExistsException
      *             thrown if bean has already been added to the manager.
      */
-	void addConfig(String beanClassName, Map<String,String> properties) throws BeanConfigAlreadyExistsException;
+	void addConfig(String beanClassName, Map<String,String> config) throws BeanConfigAlreadyExistsException;
 
     /**
-     * Sets a previously added bean with new configuration properties. Overrides all previously
-     * set properties.
+     * Sets or adds a bean with new configuration properties. 
+     * Overrides all previously set properties.
      * 
-     * @param beanClassName the bean name
-     * @param properties the String key-value pairs configuration properties used to configure this bean.
-     * @throws BeanConfigNotFoundException thrown if the bean was not added/found in the manager.
+     * @param beanClassName the bean class name
+     * @param config the String key-value pairs used to configure this bean.
+     * 
+     * @throws EnabledBeanConfigCannotBeChangedException - if the bean is enabled
      */
-	void setConfig(String beanClassName, Map<String,String> properties) throws BeanConfigNotFoundException;
+	void setConfig(String beanClassName, Map<String,String> config) throws EnabledBeanConfigCannotBeChangedException;
 
     /**
      * Enable a previously added bean's configuration. Creates the bean bean corresponding to the
@@ -58,17 +59,15 @@ public interface BeanConfigPropertiesManager {
      * the request will be ignored.
      * 
      * @param beanClassName
-     *            the bean name
+     *            the bean class name
      * @throws BeanConfigNotFoundException
      *             thrown if the bean was not added/found in the manager.
-     * @throws BeanConfigException
-     *             if the request to enable a bean can't be fulfilled.
      * @throws BeanConfigurationException
      *             in the event of misconfiguration (such as failure to set an essential property).
      * @throws BeanInitializationException
      *             if initialization fails.
      */
-	void enableConfig(String beanClassName) throws BeanConfigNotFoundException, BeanConfigException;
+	void enableBean(String beanClassName) throws BeanConfigNotFoundException, BeanConfigurationException, BeanInitializationException;
 
     /**
      * Disables a previously enabled bean's configuration. The bean object is discarded, but it's
@@ -76,52 +75,61 @@ public interface BeanConfigPropertiesManager {
      * already disabled, the request will be ignored.
      * 
      * @param beanClassName
-     *            the bean name
+     *            the bean class name
      * @throws BeanConfigNotFoundException
      *             thrown if the bean was not added/found in the manager.
      */
-	void disableConfig(String beanClassName) throws BeanConfigNotFoundException;
+	void disableBean(String beanClassName) throws BeanConfigNotFoundException;
+
+	/**
+	 * @return true if the bean is enabled, false if the bean is disabled
+	 * 
+	 * @param beanClassName
+     *            the bean class name
+	 * @throws BeanConfigNotFoundException
+     *             thrown if the bean was not added/found in the manager.
+	 */
+	boolean isBeanEnabled(String beanClassName) throws BeanConfigNotFoundException;
 
     /**
      * Removes a previously added bean together with its configuration properties. This bean
      * will need to be added again after it's removal.
      * 
      * @param beanClassName
-     *            the bean name
-     * @throws BeanConfigNotFoundException
-     *             thrown if the bean was not added/found in the manager.
+     *            the bean class name
+     * @return true if removed ,false otherwise
      */
-	void removeConfig(String beanClassName) throws BeanConfigNotFoundException;
+	boolean removeConfig(String beanClassName) throws EnabledBeanConfigCannotBeChangedException;
 	
 	/**
 	 * Get the configuration properties corresponding to the bean.
 	 * 
-	 * @param beanClassName the bean name
+	 * @param beanClassName the bean class name
 	 * @return the String key-value pairs configuration properties.
 	 * @throws BeanConfigNotFoundException thrown if the bean was not added/found in the manager.
 	 */
 	Map<String,String> getConfig(String beanClassName) throws BeanConfigNotFoundException;;
 
     /**
-     * Get all the bean's class names currently held by this manager.
+     * Lists the class name of all beans.
      * 
      * @return an array of bean class names held by this manager. If no beans were added, an array
      *         of zero length is returned.
      */
-	String[] getBeans();
+	String[] getBeansClassNames();
 
     /**
-     * Get all the class names of beans which are currently enabled.
+     * Lists the class name of enabled beans.
      * 
-     * @see #enableConfig(String)
+     * @see #enableBean(String)
      * @return an array of enabled beans. If no beans are enabled, an array of zero
      *         length is returned.
      */
-	String[] getEnabledBeans();
+	String[] getEnabledBeansClassNames();
 
 	/**
 	 * Disable all currently enabled bean configurations.
-	 * @see #disableConfig(String)
+	 * @see #disableBean(String)
 	 */
 	void disableAllBeans();
 }

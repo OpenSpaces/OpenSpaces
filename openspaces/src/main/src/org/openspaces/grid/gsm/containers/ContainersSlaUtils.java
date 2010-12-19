@@ -9,20 +9,19 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsa.GridServiceAgent;
-import org.openspaces.admin.gsa.GridServiceContainerOptions;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig.GridServiceContainerConfig;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.machine.Machine;
-import org.openspaces.core.util.MemoryUnit;
 
 public class ContainersSlaUtils {
 
     static FutureGridServiceContainer startGridServiceContainerAsync(
             final InternalAdmin admin,
             final InternalGridServiceAgent gsa,
-            final GridServiceContainerOptions options, 
+            final GridServiceContainerConfig config, 
             final long timeoutDuration, final TimeUnit timeoutUnit) {
 
         final AtomicReference<Object> ref = new AtomicReference<Object>(null);
@@ -32,7 +31,7 @@ public class ContainersSlaUtils {
         admin.scheduleAdminOperation(new Runnable() {
             public void run() {
                 try {
-                    ref.set(new Integer(gsa.internalStartGridService(options)));
+                    ref.set(new Integer(gsa.internalStartGridService(config)));
                     
                 } catch (Exception e) {
                     ref.set(e);
@@ -109,8 +108,8 @@ public class ContainersSlaUtils {
                 return gsa;
             }
 
-            public GridServiceContainerOptions getGridServiceContainerOptions() {
-                return options;
+            public GridServiceContainerConfig getGridServiceContainerConfig() {
+                return config;
             }
 
             public long getTimestamp() {
@@ -121,29 +120,6 @@ public class ContainersSlaUtils {
         
         return future;
     }
-    
-    /**
-     * @param options - grid service container options
-     * @return the maximum JVM heap size or 0 if not found.
-     */
-    static int getMaximumJavaHeapSizeInMB(GridServiceContainerOptions options) {
-        int maximumJavaHeapSizeMegabytes = 0;
-        String maxMemory = options.getOptions().getMaximumJavaHeapSize();
-        if (maxMemory != null) {
-            maximumJavaHeapSizeMegabytes = (int) MemoryUnit.toMegaBytes(maxMemory);
-        }
-        return maximumJavaHeapSizeMegabytes;
-     
-    }
-
-    /**
-     * @param options - grid service container options
-     * @return the grid service container zones
-     */
-    static String[] getZones(GridServiceContainerOptions options) {
-        return options.getOptions().getZones().split(",");
-    }
-    
     
     static List<GridServiceContainer> getContainersByZone(String zone, Admin admin) {
         List<GridServiceContainer> containers = new ArrayList<GridServiceContainer>();

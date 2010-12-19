@@ -16,16 +16,16 @@ import org.openspaces.grid.esm.ElasticScaleHandlerException;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 
 /**
- * An adapter that wraps an {@link ElasticScaleHandler} and exposes a {@link NonBlockingElasticScaleHandler}
+ * An adapter that wraps an {@link ElasticMachineProvisioning} and exposes a {@link NonBlockingElasticMachineProvisioning}
  *
  * @author itaif
  */
-public class NonBlockingElasticScaleHandlerAdapter implements NonBlockingElasticScaleHandler {
+public class NonBlockingElasticMachineProvisioningAdapter implements NonBlockingElasticMachineProvisioning {
 
-	private ElasticScaleHandler elasticScaleHandler;
+	private ElasticMachineProvisioning machineProvisioning;
 
 	private static final Log logger = LogFactory
-			.getLog(NonBlockingElasticScaleHandlerAdapter.class);
+			.getLog(NonBlockingElasticMachineProvisioningAdapter.class);
 
 	private ExecutorService service = Executors
 			.newCachedThreadPool(new ThreadFactory() {
@@ -35,12 +35,11 @@ public class NonBlockingElasticScaleHandlerAdapter implements NonBlockingElastic
 
 			});
 
-	public NonBlockingElasticScaleHandlerAdapter(ElasticScaleHandler machinePool) {
-		this.elasticScaleHandler = machinePool;
+	public NonBlockingElasticMachineProvisioningAdapter(ElasticMachineProvisioning machineProvisioning) {
+		this.machineProvisioning = machineProvisioning;
 	}
 
 	public FutureGridServiceAgents startMachinesAsync(
-			final String zone,
 			final CapacityRequirements capacityRequirements,
 			final long duration, final TimeUnit unit) {
 		
@@ -52,7 +51,7 @@ public class NonBlockingElasticScaleHandlerAdapter implements NonBlockingElastic
 		service.submit(new Runnable() {
 			public void run() {
 				try {
-					GridServiceAgent[] agents = elasticScaleHandler.startMachines(zone, capacityRequirements, duration, unit);
+					GridServiceAgent[] agents = machineProvisioning.startMachines(capacityRequirements, duration, unit);
 					ref.set(agents);
 				} catch (ElasticScaleHandlerException e) {
 					ref.set(new ExecutionException(e));
@@ -136,7 +135,7 @@ public class NonBlockingElasticScaleHandlerAdapter implements NonBlockingElastic
 		service.submit(new Runnable() {
 			public void run() {
 				try {
-					if (NonBlockingElasticScaleHandlerAdapter.this.elasticScaleHandler.stopMachine(agent, duration, unit)) {
+					if (NonBlockingElasticMachineProvisioningAdapter.this.machineProvisioning.stopMachine(agent, duration, unit)) {
 					    logger.info(hostAddress + " stopped succesfully.");
 					}
 				} catch (ElasticScaleHandlerException e) {

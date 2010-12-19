@@ -4,11 +4,9 @@ import java.io.File;
 import java.util.Map;
 
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.isolation.DedicatedIsolation;
-import org.openspaces.admin.pu.elastic.isolation.PublicIsolation;
-import org.openspaces.admin.pu.elastic.isolation.SharedTenantIsolation;
+import org.openspaces.admin.pu.elastic.config.ElasticMachineProvisioningConfig;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticReplicatedDeploymentTopology;
 
 import com.gigaspaces.security.directory.UserDetails;
@@ -39,22 +37,22 @@ public class ElasticReplicatedProcessingUnitDeployment extends AbstractElasticPr
         return this;
     }
    
-    public ElasticReplicatedDeploymentTopology enableScaleStrategy(ManualContainersScaleBeanConfigurer configurer) {
+    public ElasticReplicatedDeploymentTopology enableScaleStrategy(ManualContainersScaleConfigurer configurer) {
         return enableScaleStrategy(configurer.getConfig());
     }
     
-    public ElasticReplicatedProcessingUnitDeployment enableScaleStrategy(ManualContainersScaleBeanConfig strategy) {
-        return (ElasticReplicatedProcessingUnitDeployment) super.enableScaleStrategy(strategy.getBeanClassName(),strategy.getProperties());
+    public ElasticReplicatedProcessingUnitDeployment enableScaleStrategy(ManualContainersScaleConfig strategy) {
+        return (ElasticReplicatedProcessingUnitDeployment) super.scale(strategy);
     }
    
     public ElasticReplicatedProcessingUnitDeployment name(String name) {
         return (ElasticReplicatedProcessingUnitDeployment) super.name(name);
     }
-
+/* NOT IMPLEMENTED
     public ElasticReplicatedProcessingUnitDeployment zone(String zone) {
         return (ElasticReplicatedProcessingUnitDeployment) super.zone(zone);
     }
-
+*/
     public ElasticReplicatedProcessingUnitDeployment setContextProperty(String key, String value) {
         return (ElasticReplicatedProcessingUnitDeployment) super.setContextProperty(key, value);
     }
@@ -70,7 +68,7 @@ public class ElasticReplicatedProcessingUnitDeployment extends AbstractElasticPr
     public ElasticReplicatedProcessingUnitDeployment userDetails(String userName, String password) {
         return (ElasticReplicatedProcessingUnitDeployment) super.userDetails(userName, password);
     }
-
+/* NOT IMPLEMENTED
     public ElasticReplicatedProcessingUnitDeployment isolation(DedicatedIsolation isolation) {
         return (ElasticReplicatedProcessingUnitDeployment) super.isolation(isolation);
     }
@@ -82,24 +80,24 @@ public class ElasticReplicatedProcessingUnitDeployment extends AbstractElasticPr
     public ElasticReplicatedProcessingUnitDeployment isolation(PublicIsolation isolation) {
         return (ElasticReplicatedProcessingUnitDeployment) super.isolation(isolation);
     }
-    
+*/    
     public ElasticReplicatedProcessingUnitDeployment useScript() {
         return (ElasticReplicatedProcessingUnitDeployment) super.useScript();
     }
 
-    public ElasticReplicatedProcessingUnitDeployment overrideVmInputArguments() {
-        return (ElasticReplicatedProcessingUnitDeployment) super.overrideVmInputArguments();
+    public ElasticReplicatedProcessingUnitDeployment overrideCommandLineArguments() {
+        return (ElasticReplicatedProcessingUnitDeployment) super.overrideCommandLineArguments();
     }
 
-    public ElasticReplicatedProcessingUnitDeployment vmInputArgument(String vmInputArgument) {
-        return (ElasticReplicatedProcessingUnitDeployment) super.vmInputArgument(vmInputArgument);
+    public ElasticReplicatedProcessingUnitDeployment commandLineArgument(String vmInputArgument) {
+        return (ElasticReplicatedProcessingUnitDeployment) super.commandLineArgument(vmInputArgument);
     }
 
     public ElasticReplicatedProcessingUnitDeployment environmentVariable(String name, String value) {
         return (ElasticReplicatedProcessingUnitDeployment) super.environmentVariable(name, value);
     }
     
-    public ElasticReplicatedProcessingUnitDeployment machinePool(String beanClassName, Map<String, String> beanProperties) {
-        return (ElasticReplicatedProcessingUnitDeployment) super.machinePool(beanClassName, beanProperties);
+    public ElasticReplicatedProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+        return (ElasticReplicatedProcessingUnitDeployment) super.machineProvisioning(config);
     }
 }

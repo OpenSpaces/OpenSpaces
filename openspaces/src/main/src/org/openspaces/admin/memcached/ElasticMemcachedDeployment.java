@@ -1,19 +1,15 @@
 package org.openspaces.admin.memcached;
 
-import java.util.Map;
-
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
-import org.openspaces.admin.pu.elastic.config.EagerScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.EagerScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.isolation.DedicatedIsolation;
-import org.openspaces.admin.pu.elastic.isolation.PublicIsolation;
-import org.openspaces.admin.pu.elastic.isolation.SharedTenantIsolation;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.ElasticMachineProvisioningConfig;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatefulDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.pu.container.servicegrid.deploy.MemcachedDeploy;
@@ -56,42 +52,42 @@ public class ElasticMemcachedDeployment implements ElasticStatefulDeploymentTopo
         return this;
     }
     
-    public ElasticMemcachedDeployment scale(EagerScaleBeanConfigurer strategy) {
+    public ElasticMemcachedDeployment scale(EagerScaleConfigurer strategy) {
         deployment.scale(strategy);
         return this;
     }
 
-    public ElasticMemcachedDeployment scale(ManualContainersScaleBeanConfigurer strategy) {
+    public ElasticMemcachedDeployment scale(ManualContainersScaleConfigurer strategy) {
         deployment.scale(strategy);
         return this;
     }
 
-    public ElasticMemcachedDeployment scale(ManualMemoryCapacityScaleBeanConfigurer strategy) {
+    public ElasticMemcachedDeployment scale(ManualMemoryCapacityScaleConfigurer strategy) {
         deployment.scale(strategy);
         return this;
     }
 
-    public ElasticMemcachedDeployment scale(MemoryCapacityScaleBeanConfigurer strategy) {
+    public ElasticMemcachedDeployment scale(MemoryCapacityScaleConfigurer strategy) {
         deployment.scale(strategy);
         return this;
     }
     
-    public ElasticMemcachedDeployment scale(EagerScaleBeanConfig strategy) {
+    public ElasticMemcachedDeployment scale(EagerScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }
 
-    public ElasticMemcachedDeployment scale(ManualContainersScaleBeanConfig strategy) {
+    public ElasticMemcachedDeployment scale(ManualContainersScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }
 
-    public ElasticMemcachedDeployment scale(ManualMemoryCapacityScaleBeanConfig strategy) {
+    public ElasticMemcachedDeployment scale(ManualMemoryCapacityScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }
     
-    public ElasticMemcachedDeployment scale(MemoryCapacityScaleBeanConfig strategy) {
+    public ElasticMemcachedDeployment scale(MemoryCapacityScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }
@@ -100,12 +96,12 @@ public class ElasticMemcachedDeployment implements ElasticStatefulDeploymentTopo
         deployment.name(name);
         return this;
     }
-
+/* NOT IMPLEMENTED
     public ElasticMemcachedDeployment zone(String zone) {
         deployment.zone(zone);
         return this;
     }
-
+*/
     public ElasticMemcachedDeployment setContextProperty(String key, String value) {
         deployment.setContextProperty(key, value);
         return this;
@@ -125,7 +121,7 @@ public class ElasticMemcachedDeployment implements ElasticStatefulDeploymentTopo
         deployment.userDetails(userName, password);
         return this;
     }
-
+/* NOT IMPLEMENTED
     public ElasticMemcachedDeployment isolation(DedicatedIsolation isolation) {
         deployment.isolation(isolation);
         return this;
@@ -140,19 +136,19 @@ public class ElasticMemcachedDeployment implements ElasticStatefulDeploymentTopo
         deployment.isolation(isolation);
         return this;
     }
-    
+*/    
     public ElasticMemcachedDeployment useScript() {
         deployment.useScript();
         return this;
     }
 
-    public ElasticMemcachedDeployment overrideVmInputArguments() {
-        deployment.overrideVmInputArguments();
+    public ElasticMemcachedDeployment overrideCommandLineArguments() {
+        deployment.overrideCommandLineArguments();
         return this;
     }
 
-    public ElasticMemcachedDeployment vmInputArgument(String vmInputArgument) {
-        deployment.vmInputArgument(vmInputArgument);
+    public ElasticMemcachedDeployment commandLineArgument(String vmInputArgument) {
+        deployment.commandLineArgument(vmInputArgument);
         return this;
     }
 
@@ -166,9 +162,8 @@ public class ElasticMemcachedDeployment implements ElasticStatefulDeploymentTopo
         return this;
     }
 
-    public ElasticMemcachedDeployment machinePool(String beanClassName, Map<String, String> beanProperties) {
-        deployment.machinePool(beanClassName, beanProperties);
+    public ElasticMemcachedDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+        deployment.machineProvisioning(config);
         return this;
     }
-    
 }

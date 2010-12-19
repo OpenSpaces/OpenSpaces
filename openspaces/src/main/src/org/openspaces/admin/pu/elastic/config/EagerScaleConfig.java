@@ -12,21 +12,21 @@ import org.openspaces.core.util.StringProperties;
  * @see EagerScaleStrategyConfigurer
  * @author itaif
  */
-public class EagerScaleBeanConfig 
+public class EagerScaleConfig 
         implements MaxNumberOfContainersScaleConfig ,
                    MinNumberOfContainersPerMachineScaleConfig,
                    MaxNumberOfContainersPerMachineScaleConfig,
-                   ScaleBeanConfig {
+                   ElasticScaleStrategyConfig {
 
     private static final String STRATEGY_NAME = "scale-strategy.eager.";
  
     private StringProperties properties;
     
-    public EagerScaleBeanConfig() {
+    public EagerScaleConfig() {
         this.properties = new StringProperties();
     }
     
-    EagerScaleBeanConfig(StringProperties properties) {
+    EagerScaleConfig(StringProperties properties) {
         this.properties = properties;
     }
    
@@ -54,6 +54,14 @@ public class EagerScaleBeanConfig
         return ScaleStrategyConfigUtils.getMinNumberOfContainersPerMachine(properties);
     }
 
+    public int getPollingIntervalSeconds() {
+        return ScaleStrategyConfigUtils.getPollingIntervalSeconds(properties);
+    }
+    
+    public void setPollingIntervalSeconds(int pollingIntervalSeconds) {
+        ScaleStrategyConfigUtils.setPollingIntervalSeconds(properties, pollingIntervalSeconds);
+    }
+    
     public void setProperties(Map<String, String> properties) {
         this.properties = new StringProperties(properties);
     }

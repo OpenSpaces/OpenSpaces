@@ -1,30 +1,30 @@
 package org.openspaces.admin.pu.elastic.config;
 
 /**
- * Provides fluent API for creating a new {@link EagerScaleBeanConfig} object.
+ * Provides fluent API for creating a new {@link EagerScaleConfig} object.
  * 
  * For example {@code new EagerScaleStrategyConfigurer().maxNumberOfContainers(10).getConfig()}
  * 
  * @author itaif
  * 
  */
-public class EagerScaleBeanConfigurer implements ScaleBeanConfigurer<EagerScaleBeanConfig> {
+public class EagerScaleConfigurer implements ScaleBeanConfigurer<EagerScaleConfig> {
 
-    private final EagerScaleBeanConfig state;
+    private final EagerScaleConfig state;
 
     /**
-     * Provides fluent API for creating a new {@link EagerScaleBeanConfig} object.
+     * Provides fluent API for creating a new {@link EagerScaleConfig} object.
      * For example {@code new EagerScaleStrategyConfigurer().maxNumberOfContainers(10).getConfig()}
-     * The default constructor wraps an empty {@link EagerScaleBeanConfig} object
+     * The default constructor wraps an empty {@link EagerScaleConfig} object
      */
-    public EagerScaleBeanConfigurer() {
-        this.state = new EagerScaleBeanConfig();
+    public EagerScaleConfigurer() {
+        this.state = new EagerScaleConfig();
     }
 
     /**
      * @see MaxNumberOfContainersScaleConfig#setMaxNumberOfContainers(int)
      */
-    public EagerScaleBeanConfigurer maxNumberOfContainers(int numberOfContainers) {
+    public EagerScaleConfigurer maxNumberOfContainers(int numberOfContainers) {
         state.setMaxNumberOfContainers(numberOfContainers);
         return this;
     }
@@ -32,7 +32,7 @@ public class EagerScaleBeanConfigurer implements ScaleBeanConfigurer<EagerScaleB
     /**
      * @see MinNumberOfContainersPerMachineScaleConfig#setMinNumberOfContainersPerMachine(int)
      */
-    public EagerScaleBeanConfigurer minNumberOfContainersPerMachine(int minNumberOfContainersPerMachine) {
+    public EagerScaleConfigurer minNumberOfContainersPerMachine(int minNumberOfContainersPerMachine) {
         state.setMinNumberOfContainersPerMachine(minNumberOfContainersPerMachine);
         return this;
     }
@@ -40,7 +40,7 @@ public class EagerScaleBeanConfigurer implements ScaleBeanConfigurer<EagerScaleB
     /**
      * @see MaxNumberOfContainersPerMachineScaleConfig#setMaxNumberOfContainersPerMachine(int)
      */
-    public EagerScaleBeanConfigurer maxNumberOfContainersPerMachine(int maxNumberOfContainersPerMachine) {
+    public EagerScaleConfigurer maxNumberOfContainersPerMachine(int maxNumberOfContainersPerMachine) {
         state.setMaxNumberOfContainersPerMachine(maxNumberOfContainersPerMachine);
         return this;
     }
@@ -48,7 +48,7 @@ public class EagerScaleBeanConfigurer implements ScaleBeanConfigurer<EagerScaleB
     /**
      * @see ScaleBeanConfigurer#getConfig()
      */
-    public EagerScaleBeanConfig getConfig() {
+    public EagerScaleConfig getConfig() {
         return state;
     }
 }

@@ -13,15 +13,15 @@ import org.openspaces.grid.gsm.elastic.MemoryCapacityScaleStrategyBean;
  * When the average usage percentage is above the high threshold more containers are started.
  * When the average usage percentage is below the low threshold containers are killed.
  *
- * @see MemoryCapacityScaleBeanConfigurer
+ * @see MemoryCapacityScaleConfigurer
  * @author itaif
  */
-public class MemoryCapacityScaleBeanConfig 
+public class MemoryCapacityScaleConfig 
     implements  MinNumberOfContainersScaleConfig,  
                 MaxNumberOfContainersScaleConfig ,
                 MinNumberOfContainersPerMachineScaleConfig,
                 MaxNumberOfContainersPerMachineScaleConfig,
-                ScaleBeanConfig {
+                ElasticScaleStrategyConfig {
 
     private static final String SLIDING_WINDOW_MILLISECONDS_KEY = "sliding-window-milliseconds";
     private static final long SLIDING_WINDOW_MILLISECONDS_DEFAULT = 60000;
@@ -32,7 +32,7 @@ public class MemoryCapacityScaleBeanConfig
     
     private StringProperties properties;
     
-    public MemoryCapacityScaleBeanConfig() {
+    public MemoryCapacityScaleConfig() {
         properties = new StringProperties();
     }
     
@@ -101,6 +101,14 @@ public class MemoryCapacityScaleBeanConfig
         ScaleStrategyConfigUtils.setMinNumberOfContainersPerMachine(properties, minNumberOfContainersPerMachine);
     }
 
+    public int getPollingIntervalSeconds() {
+        return ScaleStrategyConfigUtils.getPollingIntervalSeconds(properties);
+    }
+    
+    public void setPollingIntervalSeconds(int pollingIntervalSeconds) {
+        ScaleStrategyConfigUtils.setPollingIntervalSeconds(properties, pollingIntervalSeconds);
+    }
+    
     public Map<String,String> getProperties() {
         return this.properties.getProperties();
     }

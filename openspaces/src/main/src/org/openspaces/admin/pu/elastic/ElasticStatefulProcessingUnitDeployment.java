@@ -5,17 +5,15 @@ import java.util.Map;
 
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
-import org.openspaces.admin.pu.elastic.config.EagerScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.EagerScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.isolation.DedicatedIsolation;
-import org.openspaces.admin.pu.elastic.isolation.PublicIsolation;
-import org.openspaces.admin.pu.elastic.isolation.SharedTenantIsolation;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.ElasticMachineProvisioningConfig;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatefulDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
@@ -108,46 +106,48 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return this;
     }
     
-    public ElasticStatefulProcessingUnitDeployment scale(EagerScaleBeanConfigurer strategy) {
+    public ElasticStatefulProcessingUnitDeployment scale(EagerScaleConfigurer strategy) {
         return scale(strategy.getConfig());
     }
 
-    public ElasticStatefulProcessingUnitDeployment scale(ManualContainersScaleBeanConfigurer strategy) {
+    public ElasticStatefulProcessingUnitDeployment scale(ManualContainersScaleConfigurer strategy) {
         return scale(strategy.getConfig());
     }
 
-    public ElasticStatefulProcessingUnitDeployment scale(ManualMemoryCapacityScaleBeanConfigurer strategy) {
+    public ElasticStatefulProcessingUnitDeployment scale(ManualMemoryCapacityScaleConfigurer strategy) {
         return scale(strategy.getConfig());
     }
 
-    public ElasticStatefulProcessingUnitDeployment scale(MemoryCapacityScaleBeanConfigurer strategy) {
+    public ElasticStatefulProcessingUnitDeployment scale(MemoryCapacityScaleConfigurer strategy) {
         return scale(strategy.getConfig());
     }
     
-    public ElasticStatefulProcessingUnitDeployment scale(EagerScaleBeanConfig strategy) {
-        return (ElasticStatefulProcessingUnitDeployment) super.enableScaleStrategy(strategy.getBeanClassName(),strategy.getProperties());
+    public ElasticStatefulProcessingUnitDeployment scale(EagerScaleConfig strategy) {
+        return (ElasticStatefulProcessingUnitDeployment) super.scale(strategy);
     }
 
-    public ElasticStatefulProcessingUnitDeployment scale(ManualContainersScaleBeanConfig strategy) {
-        return (ElasticStatefulProcessingUnitDeployment) super.enableScaleStrategy(strategy.getBeanClassName(), strategy.getProperties());
+    public ElasticStatefulProcessingUnitDeployment scale(ManualContainersScaleConfig strategy) {
+        return (ElasticStatefulProcessingUnitDeployment) super.scale(strategy);
     }
 
-    public ElasticStatefulProcessingUnitDeployment scale(ManualMemoryCapacityScaleBeanConfig strategy) {
-        return (ElasticStatefulProcessingUnitDeployment) super.enableScaleStrategy(strategy.getBeanClassName(), strategy.getProperties());
+    public ElasticStatefulProcessingUnitDeployment scale(ManualMemoryCapacityScaleConfig strategy) {
+        return (ElasticStatefulProcessingUnitDeployment) super.scale(strategy);
     }
     
-    public ElasticStatefulProcessingUnitDeployment scale(MemoryCapacityScaleBeanConfig strategy) {
-        return (ElasticStatefulProcessingUnitDeployment) super.enableScaleStrategy(strategy.getBeanClassName(), strategy.getProperties());
+    public ElasticStatefulProcessingUnitDeployment scale(MemoryCapacityScaleConfig strategy) {
+        return (ElasticStatefulProcessingUnitDeployment) super.scale(strategy);
     }
     
     public ElasticStatefulProcessingUnitDeployment name(String name) {
         return (ElasticStatefulProcessingUnitDeployment) super.name(name);
     }
 
+    /* Unimplemented 
     public ElasticStatefulProcessingUnitDeployment zone(String zone) {
         return (ElasticStatefulProcessingUnitDeployment) super.zone(zone);
     }
-
+    */
+    
     public ElasticStatefulProcessingUnitDeployment setContextProperty(String key, String value) {
         return (ElasticStatefulProcessingUnitDeployment) super.setContextProperty(key, value);
     }
@@ -163,7 +163,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     public ElasticStatefulProcessingUnitDeployment userDetails(String userName, String password) {
         return (ElasticStatefulProcessingUnitDeployment) super.userDetails(userName, password);
     }
-
+    /* Unimplemented
     public ElasticStatefulProcessingUnitDeployment isolation(DedicatedIsolation isolation) {
         return (ElasticStatefulProcessingUnitDeployment) super.isolation(isolation);
     }
@@ -176,25 +176,26 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     public ElasticStatefulProcessingUnitDeployment isolation(PublicIsolation isolation) {
         return (ElasticStatefulProcessingUnitDeployment) super.isolation(isolation);
     }
+    */
     
     public ElasticStatefulProcessingUnitDeployment useScript() {
         return (ElasticStatefulProcessingUnitDeployment) super.useScript();
     }
 
-    public ElasticStatefulProcessingUnitDeployment overrideVmInputArguments() {
-        return (ElasticStatefulProcessingUnitDeployment) super.overrideVmInputArguments();
+    public ElasticStatefulProcessingUnitDeployment overrideCommandLineArguments() {
+        return (ElasticStatefulProcessingUnitDeployment) super.overrideCommandLineArguments();
     }
 
-    public ElasticStatefulProcessingUnitDeployment vmInputArgument(String vmInputArgument) {
-        return (ElasticStatefulProcessingUnitDeployment) super.vmInputArgument(vmInputArgument);
+    public ElasticStatefulProcessingUnitDeployment commandLineArgument(String vmInputArgument) {
+        return (ElasticStatefulProcessingUnitDeployment) super.commandLineArgument(vmInputArgument);
     }
 
     public ElasticStatefulProcessingUnitDeployment environmentVariable(String name, String value) {
         return (ElasticStatefulProcessingUnitDeployment) super.environmentVariable(name, value);
     }
     
-    public ElasticStatefulProcessingUnitDeployment machinePool(String beanClassName, Map<String,String> beanProperties) {
-        return (ElasticStatefulProcessingUnitDeployment) super.machinePool(beanClassName, beanProperties);
+    public ElasticStatefulProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+        return (ElasticStatefulProcessingUnitDeployment) super.machineProvisioning(config);
     }
     
     public ProcessingUnitDeployment toProcessingUnitDeployment() {
@@ -208,13 +209,6 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         if (this.maxMemoryCapacityMegabytes >0 && this.minMemoryCapacityMegabytes == 0) {
             this.minMemoryCapacityMegabytes = this.maxMemoryCapacityMegabytes;
         }
-
-        //TODO: this is a hack for existing server side ESM implementation
-        //server side should not care about max/min capacity settings.
-        deployment
-        .setDynamicProperty(MAX_MEMORY_CAPACITY_MEGABYTES_DYNAMIC_PROPERTY, ""+this.maxMemoryCapacityMegabytes)
-        .setDynamicProperty(MIN_MEMORY_CAPACITY_MEGABYTES_DYNAMIC_PROPERTY, ""+this.minMemoryCapacityMegabytes);
-        
         
         int numberOfInstances = this.numberOfInstances;
         if (numberOfInstances == 0) {
@@ -230,14 +224,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     
     protected int calcNumberOfPartitionsFromMemoryRequirements() {
         
-        long maximumJavaHeapSizeMegabytes = 0;
-        for (String arg : super.getVmInputArguments()) {
-            String prefix = "-Xmx";
-            if (arg.startsWith(prefix)) {
-                maximumJavaHeapSizeMegabytes = MemoryUnit.toMegaBytes(arg.substring(prefix.length()));
-                break;
-            }
-        }
+        long maximumJavaHeapSizeMegabytes = super.getElasticConfig().getGridServiceContainerConfig().getMaximumJavaHeapSizeInMB();
                 
         if (maximumJavaHeapSizeMegabytes == 0) {
             throw new IllegalStateException("-Xmx vmInputArgument is not defined.");    
@@ -248,4 +235,5 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
                 
         return Math.max(1, numberOfPartitions);
     }
+
 }

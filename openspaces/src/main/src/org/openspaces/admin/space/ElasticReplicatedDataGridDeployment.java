@@ -1,11 +1,7 @@
 package org.openspaces.admin.space;
 
-import java.util.Map;
-
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
-import org.openspaces.admin.pu.elastic.isolation.DedicatedIsolation;
-import org.openspaces.admin.pu.elastic.isolation.PublicIsolation;
-import org.openspaces.admin.pu.elastic.isolation.SharedTenantIsolation;
+import org.openspaces.admin.pu.elastic.config.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.topology.ElasticReplicatedDeploymentTopology;
 
 import com.gigaspaces.security.directory.UserDetails;
@@ -35,12 +31,12 @@ public class ElasticReplicatedDataGridDeployment implements ElasticReplicatedDep
         deployment.name(name);
         return this;
     }
-
+/* NOT IMPLEMENTED
     public ElasticReplicatedDataGridDeployment zone(String zone) {
         deployment.zone(zone);
         return this;
     }
-
+*/
     public ElasticReplicatedDataGridDeployment setContextProperty(String key, String value) {
         deployment.setContextProperty(key, value);
         return this;
@@ -61,6 +57,7 @@ public class ElasticReplicatedDataGridDeployment implements ElasticReplicatedDep
         return this;
     }
 
+    /* NOT IMPLEMENTED
     public ElasticReplicatedDataGridDeployment isolation(DedicatedIsolation isolation) {
         deployment.isolation(isolation);
         return this;
@@ -75,19 +72,20 @@ public class ElasticReplicatedDataGridDeployment implements ElasticReplicatedDep
         deployment.isolation(isolation);
         return this;
     }
+    */
     
     public ElasticReplicatedDataGridDeployment useScript() {
         deployment.useScript();
         return this;
     }
 
-    public ElasticReplicatedDataGridDeployment overrideVmInputArguments() {
-        deployment.overrideVmInputArguments();
+    public ElasticReplicatedDataGridDeployment overrideCommandLineArguments() {
+        deployment.overrideCommandLineArguments();
         return this;
     }
 
-    public ElasticReplicatedDataGridDeployment vmInputArgument(String vmInputArgument) {
-        deployment.vmInputArgument(vmInputArgument);
+    public ElasticReplicatedDataGridDeployment commandLineArgument(String vmInputArgument) {
+        deployment.commandLineArgument(vmInputArgument);
         return this;
     }
 
@@ -96,8 +94,8 @@ public class ElasticReplicatedDataGridDeployment implements ElasticReplicatedDep
         return this;
     }
 
-    public ElasticReplicatedDataGridDeployment machinePool(String beanClassName, Map<String, String> beanProperties) {
-        deployment.machinePool(beanClassName, beanProperties);
+    public ElasticReplicatedDataGridDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+        deployment.machineProvisioning(config);
         return this;
     }
 

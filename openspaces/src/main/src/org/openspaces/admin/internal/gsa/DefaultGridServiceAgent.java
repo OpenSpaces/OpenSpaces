@@ -27,6 +27,7 @@ import org.openspaces.admin.gsm.events.GridServiceManagerAddedEventListener;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.dump.InternalDumpResult;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
+import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig.GridServiceContainerConfig;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
 import org.openspaces.admin.internal.lus.InternalLookupService;
@@ -280,6 +281,17 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
     }
 
     public int internalStartGridService(GridServiceContainerOptions options) {
+        try {
+            return gsa.startProcess(options.getOptions());
+        } catch (SecurityException se) {
+            throw new AdminException("No privileges to start a GSC", se);
+        } catch (IOException e) {
+            throw new AdminException("Failed to start GSC", e);
+        }
+    }
+    
+    public int internalStartGridService(GridServiceContainerConfig options) {
+       
         try {
             return gsa.startProcess(options.getOptions());
         } catch (SecurityException se) {

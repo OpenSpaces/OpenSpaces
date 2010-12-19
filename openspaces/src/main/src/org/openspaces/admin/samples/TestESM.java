@@ -5,8 +5,7 @@ import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.admin.pu.elastic.MemorySla;
-import org.openspaces.admin.space.elastic.ElasticSpaceDeployment;
+import org.openspaces.admin.space.ElasticDataGridDeployment;
 
 public class TestESM {
  
@@ -22,12 +21,10 @@ public class TestESM {
             System.out.println("found esm, deploying");
             
             ProcessingUnit pu = gsm.
-            deploy(new ElasticSpaceDeployment("mygrid")
-            .capacity("10m", "100m")
-            .maximumJavaHeapSize("1g")
-            .sla(new MemorySla("40%"))
-//            .elasticScaleConfig(new ElasticScaleConfig(PcLabOnDemandElasticScale.class.getName()).addProperty("machines", "pc-lab12,pc-lab13"))
-            
+            deploy(new ElasticDataGridDeployment("mygrid")
+            .minMemoryCapacity("1000m")
+            .maxMemoryCapacity("2000m")
+            .commandLineArgument("-Xmx250m")            
             );
             
             System.out.println("PU deployed: " + pu.getName() + " " + pu.getNumberOfInstances()+","+pu.getNumberOfBackups());

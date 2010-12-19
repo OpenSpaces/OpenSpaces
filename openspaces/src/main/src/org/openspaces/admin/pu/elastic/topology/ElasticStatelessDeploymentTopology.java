@@ -1,9 +1,9 @@
 package org.openspaces.admin.pu.elastic.topology;
 
-import org.openspaces.admin.pu.elastic.config.EagerScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.EagerScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfigurer;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticDeploymentTopology;
 
 /*
@@ -16,35 +16,35 @@ public interface ElasticStatelessDeploymentTopology extends ElasticDeploymentTop
     /**
      * Enables the specified scale strategy, and disables all other scale strategies.
      * Scale strategies can also be reconfigured after deployment.
-     * @see EagerScaleBeanConfig
-     * @see EagerScaleBeanConfigurer
+     * @see EagerScaleConfig
+     * @see EagerScaleConfigurer
      */
-    ElasticStatelessDeploymentTopology scale(EagerScaleBeanConfigurer configurer);
+    ElasticStatelessDeploymentTopology scale(EagerScaleConfigurer configurer);
 
     /**
      * Enables the specified scale strategy, and disables all other scale strategies. 
      * Scale strategies can also be reconfigured after deployment.
-     * @see ManualContainersScaleBeanConfig
-     * @see ManualContainersScaleBeanConfigurer
+     * @see ManualContainersScaleConfig
+     * @see ManualContainersScaleConfigurer
      */
     ElasticStatelessDeploymentTopology scale(
-            ManualContainersScaleBeanConfigurer configurer);
+            ManualContainersScaleConfigurer configurer);
 
     /**
      * Enables the specified scale strategy, and disables all other scale strategies. 
      * Scale strategies can also be reconfigured after deployment.
-     * @see ManualContainersScaleBeanConfig
-     * @see ManualContainersScaleBeanConfigurer
+     * @see ManualContainersScaleConfig
+     * @see ManualContainersScaleConfigurer
      */
     ElasticStatelessDeploymentTopology scale(
-            ManualContainersScaleBeanConfig strategy);
+            ManualContainersScaleConfig strategy);
 
     /**
      * Enables the specified scale strategy, and disables all other scale strategies.
      * Scale strategies can also be reconfigured after deployment.
-     * @see EagerScaleBeanConfig
-     * @see EagerScaleBeanConfigurer
+     * @see EagerScaleConfig
+     * @see EagerScaleConfigurer
      */
-    ElasticStatelessDeploymentTopology scale(EagerScaleBeanConfig strategy);
+    ElasticStatelessDeploymentTopology scale(EagerScaleConfig strategy);
 
 }

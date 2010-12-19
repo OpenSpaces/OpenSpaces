@@ -67,12 +67,12 @@ public class DefaultAlertManager implements InternalAlertManager {
 
     public <T extends AlertBeanConfig> void disableConfig(Class<T> clazz) throws BeanConfigNotFoundException {
         BeanConfig configInstance = getConfigInstance(clazz);
-        beanConfigPropertiesManager.disableConfig(configInstance.getBeanClassName());
+        beanConfigPropertiesManager.disableBean(configInstance.getBeanClassName());
     }
 
     public <T extends AlertBeanConfig> void enableConfig(Class<T> clazz) throws BeanConfigNotFoundException, BeanConfigException {
         BeanConfig configInstance = getConfigInstance(clazz);
-        beanConfigPropertiesManager.enableConfig(configInstance.getBeanClassName());
+        beanConfigPropertiesManager.enableBean(configInstance.getBeanClassName());
     }
 
     public <T extends AlertBeanConfig> T getConfig(Class<T> clazz) throws BeanConfigNotFoundException {

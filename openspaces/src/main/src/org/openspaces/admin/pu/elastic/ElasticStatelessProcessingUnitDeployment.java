@@ -4,13 +4,11 @@ import java.io.File;
 import java.util.Map;
 
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
-import org.openspaces.admin.pu.elastic.config.EagerScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.EagerScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.isolation.DedicatedIsolation;
-import org.openspaces.admin.pu.elastic.isolation.PublicIsolation;
-import org.openspaces.admin.pu.elastic.isolation.SharedTenantIsolation;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.ElasticMachineProvisioningConfig;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatelessDeploymentTopology;
 
 import com.gigaspaces.security.directory.UserDetails;
@@ -40,30 +38,30 @@ public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticPro
         this(processingUnit.getAbsolutePath());
     }
 
-    public ElasticStatelessDeploymentTopology scale(EagerScaleBeanConfigurer configurer) {
+    public ElasticStatelessDeploymentTopology scale(EagerScaleConfigurer configurer) {
         return scale(configurer.getConfig());
     }
     
-    public ElasticStatelessDeploymentTopology scale(ManualContainersScaleBeanConfigurer configurer) {
+    public ElasticStatelessDeploymentTopology scale(ManualContainersScaleConfigurer configurer) {
         return scale(configurer.getConfig());
     }
     
-    public ElasticStatelessProcessingUnitDeployment scale(ManualContainersScaleBeanConfig strategy) {
-        return (ElasticStatelessProcessingUnitDeployment) super.enableScaleStrategy(strategy.getBeanClassName(), strategy.getProperties());
+    public ElasticStatelessProcessingUnitDeployment scale(ManualContainersScaleConfig strategy) {
+        return (ElasticStatelessProcessingUnitDeployment) super.scale(strategy);
     }
 
-    public ElasticStatelessProcessingUnitDeployment scale(EagerScaleBeanConfig strategy) {
-        return (ElasticStatelessProcessingUnitDeployment) super.enableScaleStrategy(strategy.getBeanClassName(), strategy.getProperties());
+    public ElasticStatelessProcessingUnitDeployment scale(EagerScaleConfig strategy) {
+        return (ElasticStatelessProcessingUnitDeployment) super.scale(strategy);
     }
     
     public ElasticStatelessProcessingUnitDeployment name(String name) {
         return (ElasticStatelessProcessingUnitDeployment) super.name(name);
     }
-
+/* NOT IMPLEMENTED YET
     public ElasticStatelessProcessingUnitDeployment zone(String zone) {
         return (ElasticStatelessProcessingUnitDeployment) super.zone(zone);
     }
-
+*/
     public ElasticStatelessProcessingUnitDeployment setContextProperty(String key, String value) {
         return (ElasticStatelessProcessingUnitDeployment) super.setContextProperty(key, value);
     }
@@ -80,7 +78,7 @@ public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticPro
     public ElasticStatelessProcessingUnitDeployment userDetails(String userName, String password) {
         return (ElasticStatelessProcessingUnitDeployment) super.userDetails(userName, password);
     }
-
+/* NOT IMPLEMENTED
     public ElasticStatelessProcessingUnitDeployment isolation(DedicatedIsolation isolation) {
         return (ElasticStatelessProcessingUnitDeployment) super.isolation(isolation);
     }
@@ -92,25 +90,26 @@ public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticPro
     public ElasticStatelessProcessingUnitDeployment isolation(PublicIsolation isolation) {
         return (ElasticStatelessProcessingUnitDeployment) super.isolation(isolation);
     }
-    
+*/    
     public ElasticStatelessProcessingUnitDeployment useScript() {
         return (ElasticStatelessProcessingUnitDeployment) super.useScript();
     }
 
-    public ElasticStatelessProcessingUnitDeployment overrideVmInputArguments() {
-        return (ElasticStatelessProcessingUnitDeployment) super.overrideVmInputArguments();
+    public ElasticStatelessProcessingUnitDeployment overrideCommandLineArguments() {
+        return (ElasticStatelessProcessingUnitDeployment) super.overrideCommandLineArguments();
     }
 
-    public ElasticStatelessProcessingUnitDeployment vmInputArgument(String vmInputArgument) {
-        return (ElasticStatelessProcessingUnitDeployment) super.vmInputArgument(vmInputArgument);
+    public ElasticStatelessProcessingUnitDeployment commandLineArgument(String vmInputArgument) {
+        return (ElasticStatelessProcessingUnitDeployment) super.commandLineArgument(vmInputArgument);
     }
 
     public ElasticStatelessProcessingUnitDeployment environmentVariable(String name, String value) {
         return (ElasticStatelessProcessingUnitDeployment) super.environmentVariable(name, value);
     }
     
-    public ElasticStatelessProcessingUnitDeployment machinePool(String beanClassName, Map<String,String> beanProperties) {
-        return (ElasticStatelessProcessingUnitDeployment) super.machinePool(beanClassName, beanProperties);
+    public ElasticStatelessProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+        return (ElasticStatelessProcessingUnitDeployment) super.machineProvisioning(config);
     }
+
     
 }

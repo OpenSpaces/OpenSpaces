@@ -1,20 +1,15 @@
 package org.openspaces.admin.space;
 
-import java.util.Map;
-
-import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
-import org.openspaces.admin.pu.elastic.config.EagerScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.EagerScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.isolation.DedicatedIsolation;
-import org.openspaces.admin.pu.elastic.isolation.PublicIsolation;
-import org.openspaces.admin.pu.elastic.isolation.SharedTenantIsolation;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.ElasticMachineProvisioningConfig;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatefulDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
@@ -23,14 +18,12 @@ import com.gigaspaces.security.directory.UserDetails;
 public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopology {
 
     private final ElasticStatefulProcessingUnitDeployment deployment;
-    private final String spaceName;
 
     /**
      * Constructs a new Space deployment with the space name that will be created (it will also
      * be the processing unit name).
      */
     public ElasticDataGridDeployment(String spaceName) {
-        this.spaceName = spaceName;
         this.deployment = new ElasticStatefulProcessingUnitDeployment("/templates/datagrid");
         this.deployment.name(spaceName);
         this.deployment.setContextProperty("dataGridName", spaceName);
@@ -56,42 +49,42 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
         return this;
     }
     
-    public ElasticDataGridDeployment scale(EagerScaleBeanConfigurer strategy) {
+    public ElasticDataGridDeployment scale(EagerScaleConfigurer strategy) {
         deployment.scale(strategy);
         return this;
     }
 
-    public ElasticDataGridDeployment scale(ManualContainersScaleBeanConfigurer strategy) {
+    public ElasticDataGridDeployment scale(ManualContainersScaleConfigurer strategy) {
         deployment.scale(strategy);
         return this;
     }
 
-    public ElasticDataGridDeployment scale(ManualMemoryCapacityScaleBeanConfigurer strategy) {
+    public ElasticDataGridDeployment scale(ManualMemoryCapacityScaleConfigurer strategy) {
         deployment.scale(strategy);
         return this;
     }
 
-    public ElasticDataGridDeployment scale(MemoryCapacityScaleBeanConfigurer strategy) {
+    public ElasticDataGridDeployment scale(MemoryCapacityScaleConfigurer strategy) {
         deployment.scale(strategy);
         return this;
     }
     
-    public ElasticDataGridDeployment scale(EagerScaleBeanConfig strategy) {
+    public ElasticDataGridDeployment scale(EagerScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }
 
-    public ElasticDataGridDeployment scale(ManualContainersScaleBeanConfig strategy) {
+    public ElasticDataGridDeployment scale(ManualContainersScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }
 
-    public ElasticDataGridDeployment scale(ManualMemoryCapacityScaleBeanConfig strategy) {
+    public ElasticDataGridDeployment scale(ManualMemoryCapacityScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }
     
-    public ElasticDataGridDeployment scale(MemoryCapacityScaleBeanConfig strategy) {
+    public ElasticDataGridDeployment scale(MemoryCapacityScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }
@@ -101,11 +94,13 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
         return this;
     }
 
+    /*UNIMPLEMENTED
     public ElasticDataGridDeployment zone(String zone) {
         deployment.zone(zone);
         return this;
     }
-
+    */
+    
     public ElasticDataGridDeployment setContextProperty(String key, String value) {
         deployment.setContextProperty(key, value);
         return this;
@@ -126,6 +121,7 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
         return this;
     }
 
+    /*UNIMPLEMENTED
     public ElasticDataGridDeployment isolation(DedicatedIsolation isolation) {
         deployment.isolation(isolation);
         return this;
@@ -140,19 +136,20 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
         deployment.isolation(isolation);
         return this;
     }
+    */
     
     public ElasticDataGridDeployment useScript() {
         deployment.useScript();
         return this;
     }
 
-    public ElasticDataGridDeployment overrideVmInputArguments() {
-        deployment.overrideVmInputArguments();
+    public ElasticDataGridDeployment overrideCommandLineArguments() {
+        deployment.overrideCommandLineArguments();
         return this;
     }
 
-    public ElasticDataGridDeployment vmInputArgument(String vmInputArgument) {
-        deployment.vmInputArgument(vmInputArgument);
+    public ElasticDataGridDeployment commandLineArgument(String commandLineArgument) {
+        deployment.commandLineArgument(commandLineArgument);
         return this;
     }
 
@@ -166,12 +163,12 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
         return this;
     }
 
-    public ElasticDataGridDeployment machinePool(String beanClassName, Map<String, String> beanProperties) {
-        deployment.machinePool(beanClassName, beanProperties);
+    public ElasticDataGridDeployment machineProvisioning(ElasticMachineProvisioningConfig  config) {
+        deployment.machineProvisioning(config);
         return this;
     }
-
-    public ProcessingUnitDeployment toProcessingUnitDeployment() {
-       return deployment.toProcessingUnitDeployment();
+    
+    public ElasticStatefulProcessingUnitDeployment toElasticStatefulProcessingUnitDeployment() {
+       return deployment;
     }
 }

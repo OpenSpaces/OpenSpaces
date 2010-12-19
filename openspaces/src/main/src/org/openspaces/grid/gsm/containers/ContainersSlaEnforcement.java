@@ -40,8 +40,8 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
 
     private static final Log logger = LogFactory.getLog(ContainersSlaEnforcement.class);
     
-    private final Map<String,List<GridServiceContainer>> containersMarkedForShutdownPerZone;
-    private final Map<String,List<FutureGridServiceContainer>> futureContainersPerZone;
+    private final Map<String,List<GridServiceContainer>> containersMarkedForShutdownPerContainerZone;
+    private final Map<String,List<FutureGridServiceContainer>> futureContainersPerContainerZone;
     private final List<FutureGridServiceContainer> failedFutureContainers;
 
     private final InternalAdmin admin;
@@ -50,8 +50,8 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
     public ContainersSlaEnforcement(Admin admin) {
         this.admin = (InternalAdmin) admin;
         this.services = new HashMap<String,ContainersSlaEnforcementEndpoint>();
-        this.containersMarkedForShutdownPerZone = new HashMap<String, List<GridServiceContainer>>();
-        this.futureContainersPerZone = new HashMap<String, List<FutureGridServiceContainer>>();
+        this.containersMarkedForShutdownPerContainerZone = new HashMap<String, List<GridServiceContainer>>();
+        this.futureContainersPerContainerZone = new HashMap<String, List<FutureGridServiceContainer>>();
         this.failedFutureContainers = new ArrayList<FutureGridServiceContainer>();
     }
 
@@ -89,15 +89,15 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
         
         
         services.put(zone,service);
-        containersMarkedForShutdownPerZone.put(zone, new ArrayList<GridServiceContainer>());
-        futureContainersPerZone.put(zone,new ArrayList<FutureGridServiceContainer>());
+        containersMarkedForShutdownPerContainerZone.put(zone, new ArrayList<GridServiceContainer>());
+        futureContainersPerContainerZone.put(zone,new ArrayList<FutureGridServiceContainer>());
         
         return service;
     }
 
     public void destroyEndpoint(String zone) {
-        containersMarkedForShutdownPerZone.remove(zone);
-        futureContainersPerZone.remove(zone);
+        containersMarkedForShutdownPerContainerZone.remove(zone);
+        futureContainersPerContainerZone.remove(zone);
         services.remove(zone);
     }
 
@@ -111,7 +111,7 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
         validateNotDisposed(zone);   
         
         List<GridServiceContainer> containers = ContainersSlaUtils.getContainersByZone(zone,admin);
-        for (GridServiceContainer container : containersMarkedForShutdownPerZone.get(zone)) {
+        for (GridServiceContainer container : containersMarkedForShutdownPerContainerZone.get(zone)) {
             containers.remove(container);
         }
         return containers.toArray(new GridServiceContainer[]{});
@@ -124,7 +124,7 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
            throw new IllegalArgumentException("sla cannot be null");
         }
         
-        String[] zoneInContainerOptions = ContainersSlaUtils.getZones(sla.getNewContainerOptions());
+        String[] zoneInContainerOptions = sla.getNewContainerConfig().getZones();
         
         if (zoneInContainerOptions.length != 1 || !zoneInContainerOptions[0].equals(zone)) {
             throw new IllegalArgumentException("grid container options zone is " + zoneInContainerOptions + " instead of " + zone);
@@ -142,7 +142,7 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
 
     private GridServiceContainer[] getContainersPendingProcessingUnitRelocation(String zone) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
         validateNotDisposed(zone);
-        return containersMarkedForShutdownPerZone.get(zone).toArray(new GridServiceContainer[]{});
+        return containersMarkedForShutdownPerContainerZone.get(zone).toArray(new GridServiceContainer[]{});
     }
 
     
@@ -155,12 +155,12 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
         
         int targetContainers = sla.getTargetNumberOfContainers();
         int existingContainers = containers.size();
-        int futureContainers = this.futureContainersPerZone.get(zone).size();
+        int futureContainers = this.futureContainersPerContainerZone.get(zone).size();
         
         if (existingContainers > targetContainers) {
             // scale in
             int containersSurplus = existingContainers - targetContainers;
-            List<GridServiceContainer> containersMarkedForShutdown = this.containersMarkedForShutdownPerZone.get(zone); 
+            List<GridServiceContainer> containersMarkedForShutdown = this.containersMarkedForShutdownPerContainerZone.get(zone); 
             // remove containers mark for shutdown if there are too many of them 
             while (containersMarkedForShutdown.size() > containersSurplus) {
                 containersMarkedForShutdown.remove(0);
@@ -192,11 +192,11 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
                 try {
                     final GridServiceAgent gsa = findGridServiceAgentForNewContainer(zone, sla);
                                         
-                    this.futureContainersPerZone.get(zone).add(
+                    this.futureContainersPerContainerZone.get(zone).add(
                        ContainersSlaUtils.startGridServiceContainerAsync(
                                admin, 
                                (InternalGridServiceAgent)gsa,
-                               sla.getNewContainerOptions(),
+                               sla.getNewContainerConfig(),
                                START_CONTAINER_TIMEOUT_FAILURE_SECONDS,TimeUnit.SECONDS));
                 } catch (NeedMoreMachinesException e) {
                     missingCapacityInMB += e.getMissingCapacityInMB();
@@ -208,12 +208,12 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
     private GridServiceAgent findGridServiceAgentForNewContainer(String zone, ContainersSlaPolicy sla) throws NeedMoreMachinesException, ConflictingOperationInProgressException {
         
         //TODO: Take into account maximum number of containers per machine
-        int requiredFreeMemoryInMB = ContainersSlaUtils.getMaximumJavaHeapSizeInMB(sla.getNewContainerOptions());
+        long requiredFreeMemoryInMB = sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB();
         
         boolean conflictingOperationInProgress = false;
         GridServiceAgent recommendedGsa = null;
         
-        for (GridServiceAgent gsa : admin.getGridServiceAgents()) {
+        for (GridServiceAgent gsa : sla.getGridServiceAgents()) {
             Machine machine = gsa.getMachine();
             
             if (isFutureGridServiceContainerOnMachine(machine)) {
@@ -259,7 +259,7 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
      */
     private boolean isFutureGridServiceContainerOnMachine(Machine machine) {
         
-        for (List<FutureGridServiceContainer> futures : this.futureContainersPerZone.values()) {
+        for (List<FutureGridServiceContainer> futures : this.futureContainersPerContainerZone.values()) {
             for (FutureGridServiceContainer future : futures) {
                 if (future.getGridServiceAgent().getMachine().equals(machine)) {
                     return true;
@@ -278,8 +278,8 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
     private boolean isSlaReached(String zone, ContainersSlaPolicy sla) {
         return 
             sla.getTargetNumberOfContainers() == ContainersSlaUtils.getContainersByZone(zone,admin).size() &&
-            containersMarkedForShutdownPerZone.get(zone).size() == 0 &&
-            futureContainersPerZone.get(zone).size() == 0;
+            containersMarkedForShutdownPerContainerZone.get(zone).size() == 0 &&
+            futureContainersPerContainerZone.get(zone).size() == 0;
     }
 
     private void validateNotDisposed(String zone) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
@@ -297,13 +297,13 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
         }
         
         return  !services.containsKey(zone) ||
-                containersMarkedForShutdownPerZone.get(zone) == null || 
-                futureContainersPerZone.get(zone) == null;
+                containersMarkedForShutdownPerContainerZone.get(zone) == null || 
+                futureContainersPerContainerZone.get(zone) == null;
     }
     
     private void cleanContainersMarkedForShutdown(String zone) {
 
-        final List<GridServiceContainer> containersPendingRelocation = containersMarkedForShutdownPerZone.get(zone);
+        final List<GridServiceContainer> containersPendingRelocation = containersMarkedForShutdownPerContainerZone.get(zone);
         final Iterator<GridServiceContainer> iterator = containersPendingRelocation.iterator();
         while (iterator.hasNext()) {
             final GridServiceContainer container = iterator.next();
@@ -324,7 +324,7 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
     }
     
     private void cleanFutureContainers(String zone) {
-        List<FutureGridServiceContainer> list = futureContainersPerZone.get(zone);
+        List<FutureGridServiceContainer> list = futureContainersPerContainerZone.get(zone);
         final Iterator<FutureGridServiceContainer> iterator = list.iterator();
         while (iterator.hasNext()) {
             FutureGridServiceContainer future = iterator.next();
@@ -385,13 +385,13 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
 
     class ConflictingOperationInProgressException extends Exception {}
     class NeedMoreMachinesException extends Exception {
-        private final int missingCapacityInMB;
+        private final long missingCapacityInMB;
 
-        NeedMoreMachinesException(int missingCapacityInMB) {
+        NeedMoreMachinesException(long missingCapacityInMB) {
             this.missingCapacityInMB = missingCapacityInMB;
         }
 
-        public int getMissingCapacityInMB() {
+        public long getMissingCapacityInMB() {
             return missingCapacityInMB;
         }
         

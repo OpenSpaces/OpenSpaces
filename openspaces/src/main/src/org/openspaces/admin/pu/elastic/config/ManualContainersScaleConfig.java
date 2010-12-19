@@ -12,17 +12,17 @@ import org.openspaces.core.util.StringProperties;
  * @see ManualContainersScaleStrategyConfigurer
  * @author itaif
  */
-public class ManualContainersScaleBeanConfig 
+public class ManualContainersScaleConfig 
     implements MinNumberOfContainersPerMachineScaleConfig,
                MaxNumberOfContainersPerMachineScaleConfig,
-               ScaleBeanConfig {
+               ElasticScaleStrategyConfig {
 
     private static final String STRATEGY_NAME = "scale-strategy.manual-containers.";
     private static final String NUMBER_OF_CONTAINERS_KEY = "number-of-containers";
     private static final int NUMBER_OF_CONTAINERS_DEFAULT = 1;
     private StringProperties properties;
     
-    public ManualContainersScaleBeanConfig() {
+    public ManualContainersScaleConfig() {
         this.properties = new StringProperties();
     }
        
@@ -57,6 +57,14 @@ public class ManualContainersScaleBeanConfig
     public void setMaxNumberOfContainersPerMachine(int maxNumberOfContainersPerMachine) {
         ScaleStrategyConfigUtils.setMaxNumberOfContainersPerMachine(properties, maxNumberOfContainersPerMachine);
         
+    }
+ 
+    public int getPollingIntervalSeconds() {
+        return ScaleStrategyConfigUtils.getPollingIntervalSeconds(properties);
+    }
+    
+    public void setPollingIntervalSeconds(int pollingIntervalSeconds) {
+        ScaleStrategyConfigUtils.setPollingIntervalSeconds(properties, pollingIntervalSeconds);
     }
     
     public Map<String,String> getProperties() {

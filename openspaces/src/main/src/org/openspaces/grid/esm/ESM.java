@@ -1,7 +1,7 @@
 package org.openspaces.grid.esm;
 
-
-
+import java.rmi.RemoteException;
+import java.util.Map;
 
 /**
  * The Elastic Service Manager (ESM) provides the support to deploy, manage and
@@ -9,4 +9,7 @@ package org.openspaces.grid.esm;
  */
 public interface ESM extends com.gigaspaces.grid.esm.ESM {
 
+    Map<String, String> getProcessingUnitElasticConfig(String processingUnitName) throws RemoteException;
+
+    void setProcessingUnitElasticConfig(String processingUnitName, Map<String, String> properties) throws RemoteException;
 }

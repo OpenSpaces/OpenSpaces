@@ -2,6 +2,7 @@ package org.openspaces.grid.esm;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
+import java.util.Map;
 
 import net.jini.id.Uuid;
 
@@ -52,4 +53,14 @@ public class ESMProxy extends AbstractProxy implements ESM, Serializable {
     public SecurityContext login(UserDetails userDetails) throws SecurityException, RemoteException {
         return esmServer.login( userDetails );
     }
+
+    public Map<String, String> getProcessingUnitElasticConfig(String processingUnitName) throws RemoteException {
+        return esmServer.getProcessingUnitElasticConfig(processingUnitName);
+    }
+
+    public void setProcessingUnitElasticConfig(String processingUnitName, Map<String, String> properties)
+            throws RemoteException {
+        esmServer.setProcessingUnitElasticConfig(processingUnitName, properties);
+    }
+
 }

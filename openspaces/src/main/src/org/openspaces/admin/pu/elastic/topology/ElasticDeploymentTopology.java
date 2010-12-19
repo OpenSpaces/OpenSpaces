@@ -1,10 +1,6 @@
 package org.openspaces.admin.pu.elastic.topology;
 
-import java.util.Map;
-
-import org.openspaces.admin.pu.elastic.isolation.DedicatedIsolation;
-import org.openspaces.admin.pu.elastic.isolation.PublicIsolation;
-import org.openspaces.admin.pu.elastic.isolation.SharedTenantIsolation;
+import org.openspaces.admin.pu.elastic.config.ElasticMachineProvisioningConfig;
 
 import com.gigaspaces.security.directory.UserDetails;
 
@@ -26,7 +22,8 @@ public interface ElasticDeploymentTopology {
      *  can deploy on GSA[] without any zone
      *  but cannot deploy on GSA["x"]
      */
-    ElasticDeploymentTopology zone(String zone);
+    //UNIMPLEMENTED
+    //ElasticDeploymentTopology zone(String zone);
 
    /**
     * Sets a context deploy time property overriding any <code>${...}</code> defined within a processing
@@ -56,19 +53,22 @@ public interface ElasticDeploymentTopology {
      * Dedicated isolation ensures that only processing unit instances from the same processing units can share the same machine.
      * Dedicated is the default deployment isolation. 
      */
-    ElasticDeploymentTopology isolation(DedicatedIsolation isolation);
+    //UNIMPLEMENTED
+    //ElasticDeploymentTopology isolation(DedicatedIsolation isolation);
 
     /**
      * Sets the deployment isolation constraint to shared. 
      * Shared isolation ensures that only processing unit instances from the same tenant can share the same machine.
      */
-    ElasticDeploymentTopology isolation(SharedTenantIsolation isolation);
+    //UNIMPLEMENTED
+    //ElasticDeploymentTopology isolation(SharedTenantIsolation isolation);
 
     /**
      * Sets the deployment isolation constraint to public. 
      * Public isolation ensures that only processing unit instances with public isolation can share the same machine.
      */
-    ElasticDeploymentTopology isolation(PublicIsolation isolation);
+    //UNIMPLEMENTED
+    //ElasticDeploymentTopology isolation(PublicIsolation isolation);
 
     /**
      * Will cause the {@link org.openspaces.admin.gsc.GridServiceContainer} to be started using a script
@@ -77,16 +77,16 @@ public interface ElasticDeploymentTopology {
     ElasticDeploymentTopology useScript();
 
     /**
-     * Will cause JVM options added using {@link #vmInputArgument(String)} to override all the vm arguments
+     * Will cause JVM options added using {@link #commandLineArgument(String)} to override all the vm arguments
      * that the JVM will start by default with.
      */
-    ElasticDeploymentTopology overrideVmInputArguments();
+    ElasticDeploymentTopology overrideCommandLineArguments();
 
     /**
      * Will add a JVM level argument when the process is executed using pure JVM. For example, the memory
      * can be controlled using <code>-Xmx512m</code>.
      */
-    ElasticDeploymentTopology vmInputArgument(String vmInputArgument);
+    ElasticDeploymentTopology commandLineArgument(String vmInputArgument);
 
     /**
      * Sets an environment variable that will be passed to forked process.
@@ -94,9 +94,9 @@ public interface ElasticDeploymentTopology {
     ElasticDeploymentTopology environmentVariable(String name, String value);
     
     /**
-     * Defines a bean that provides new machines.
-     * For example, the implementation could represent a cloud provider or a predefined pool of machines.  
+     * Enables the server side bean that starts and stops machines automatically.
+     * For example, the bean could delegate the request to a cloud provider.  
      */
-    ElasticDeploymentTopology machinePool(String beanClassName, Map<String,String> beanProperties);
+    ElasticDeploymentTopology machineProvisioning(ElasticMachineProvisioningConfig  config);
 
 }

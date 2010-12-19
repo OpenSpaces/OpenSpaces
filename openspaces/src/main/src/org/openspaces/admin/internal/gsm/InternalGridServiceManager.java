@@ -5,6 +5,7 @@ import net.jini.core.lookup.ServiceID;
 import org.jini.rio.monitor.ProvisionMonitorAdmin;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig;
 import org.openspaces.admin.internal.support.InternalAgentGridComponent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
@@ -33,4 +34,8 @@ public interface InternalGridServiceManager extends GridServiceManager, Internal
     void relocate(ProcessingUnitInstance processingUnitInstance, GridServiceContainer gridServiceContainer);
     
     public String[] listDeployDir();
+    
+    ProcessingUnitElasticConfig getProcessingUnitElasticConfig(ProcessingUnit pu);
+
+    void setProcessingUnitElasticConfig(ProcessingUnit pu, ProcessingUnitElasticConfig config);
 }

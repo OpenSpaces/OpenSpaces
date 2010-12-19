@@ -32,9 +32,14 @@
 
 package org.openspaces.admin.pu;
 
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig;
+import org.openspaces.admin.pu.elastic.config.ElasticScaleStrategyConfig;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
@@ -46,13 +51,11 @@ import org.openspaces.admin.pu.events.ProcessingUnitStatusChangedEventManager;
 import org.openspaces.admin.space.Space;
 import org.openspaces.core.properties.BeanLevelProperties;
 
-import java.util.concurrent.TimeUnit;
-import java.util.Map;
-
 /**
  * A processing unit holds one or more {@link org.openspaces.admin.pu.ProcessingUnitInstance}s.
  *
  * @author kimchy
+ * @author itaif
  */
 public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminAware, StatisticsMonitor {
 
@@ -290,10 +293,30 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * state.
      */
     ProcessingUnitInstanceStatisticsChangedEventManager getProcessingUnitInstanceStatisticsChanged();
+            
+    /**
+     * Modifies the processing unit scalability strategy.
+     * 
+     * This method is only available if the processing unit deployment is elastic  
+     * 
+     * @param config
+     */
+    void scale(ElasticScaleStrategyConfig strategyConfig);
+        
+    /**
+     * Returns the elastic configuration of this processing unit
+     * 
+     * This method is only available if the processing unit deployment is elastic
+     */
+    ProcessingUnitElasticConfig getElasticConfig();
     
     /**
-     * @return dynamic properties relevant for elastic processing units or null if not elastic
+     * Modifies the elastic configuration of this processing unit
+     * 
+     * This method is only available if the processing unit deployment is elastic
+     * 
+     * @param config
      */
-    ElasticProcessingUnit asElasticProcessingUnit();
+    void setElasticConfig(ProcessingUnitElasticConfig config);
     
 }

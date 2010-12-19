@@ -2,17 +2,14 @@ package org.openspaces.admin.pu.elastic;
 
 import java.io.File;
 
-import org.openspaces.admin.pu.elastic.config.EagerScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.EagerScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfig;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleBeanConfigurer;
-import org.openspaces.admin.pu.elastic.isolation.DedicatedIsolation;
-import org.openspaces.admin.pu.elastic.isolation.PublicIsolation;
-import org.openspaces.admin.pu.elastic.isolation.SharedTenantIsolation;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfigurer;
 
 import com.gigaspaces.security.directory.UserDetails;
 
@@ -44,46 +41,60 @@ public class AdvancedElasticStatefulProcessingUnitDeployment extends ElasticStat
         return (AdvancedElasticStatefulProcessingUnitDeployment) super.maxInstancesPerMachine(maxInstancesPerMachine);
     }
    
-    public AdvancedElasticStatefulProcessingUnitDeployment scale(EagerScaleBeanConfigurer beanConfig) {
+    public AdvancedElasticStatefulProcessingUnitDeployment scale(EagerScaleConfigurer beanConfig) {
         return scale(beanConfig.getConfig());
     }
 
-    public AdvancedElasticStatefulProcessingUnitDeployment scale(ManualContainersScaleBeanConfigurer beanConfig) {
+    public AdvancedElasticStatefulProcessingUnitDeployment scale(ManualContainersScaleConfigurer beanConfig) {
         return scale(beanConfig.getConfig());
     }
 
-    public AdvancedElasticStatefulProcessingUnitDeployment scale(ManualMemoryCapacityScaleBeanConfigurer beanConfig) {
+    public AdvancedElasticStatefulProcessingUnitDeployment scale(ManualMemoryCapacityScaleConfigurer beanConfig) {
         return scale(beanConfig.getConfig());
     }
 
-    public AdvancedElasticStatefulProcessingUnitDeployment scale(MemoryCapacityScaleBeanConfigurer beanConfig) {
+    public AdvancedElasticStatefulProcessingUnitDeployment scale(MemoryCapacityScaleConfigurer beanConfig) {
         return scale(beanConfig.getConfig());
     }
     
-    public AdvancedElasticStatefulProcessingUnitDeployment scale(EagerScaleBeanConfig beanConfig) {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.enableScaleStrategy(beanConfig.getBeanClassName(),beanConfig.getProperties());
+    public AdvancedElasticStatefulProcessingUnitDeployment scale(EagerScaleConfig strategy) {
+        return (AdvancedElasticStatefulProcessingUnitDeployment) super.scale(strategy);
     }
 
-    public AdvancedElasticStatefulProcessingUnitDeployment scale(ManualContainersScaleBeanConfig beanConfig) {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.enableScaleStrategy(beanConfig.getBeanClassName(), beanConfig.getProperties());
+    public AdvancedElasticStatefulProcessingUnitDeployment scale(ManualContainersScaleConfig strategy) {
+        return (AdvancedElasticStatefulProcessingUnitDeployment) super.scale(strategy);
     }
 
-    public AdvancedElasticStatefulProcessingUnitDeployment scale(ManualMemoryCapacityScaleBeanConfig beanConfig) {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.enableScaleStrategy(beanConfig.getBeanClassName(), beanConfig.getProperties());
+    public AdvancedElasticStatefulProcessingUnitDeployment scale(ManualMemoryCapacityScaleConfig strategy) {
+        return (AdvancedElasticStatefulProcessingUnitDeployment) super.scale(strategy);
     }
     
-    public AdvancedElasticStatefulProcessingUnitDeployment scale(MemoryCapacityScaleBeanConfig beanConfig) {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.enableScaleStrategy(beanConfig.getBeanClassName(), beanConfig.getProperties());
+    public AdvancedElasticStatefulProcessingUnitDeployment scale(MemoryCapacityScaleConfig strategy) {
+        return (AdvancedElasticStatefulProcessingUnitDeployment) super.scale(strategy);
     }
     
     public AdvancedElasticStatefulProcessingUnitDeployment name(String name) {
         return (AdvancedElasticStatefulProcessingUnitDeployment) super.name(name);
     }
-
+/* NOT IMPLEMENTED YET
     public AdvancedElasticStatefulProcessingUnitDeployment zone(String zone) {
         return (AdvancedElasticStatefulProcessingUnitDeployment) super.zone(zone);
     }
+    
+    
+    public AdvancedElasticStatefulProcessingUnitDeployment isolation(DedicatedIsolation isolation) {
+        return (AdvancedElasticStatefulProcessingUnitDeployment) super.isolation(isolation);
+    }
 
+    public AdvancedElasticStatefulProcessingUnitDeployment isolation(SharedTenantIsolation isolation) {
+        return (AdvancedElasticStatefulProcessingUnitDeployment) super.isolation(isolation);
+    }
+    
+    public AdvancedElasticStatefulProcessingUnitDeployment isolation(PublicIsolation isolation) {
+        return (AdvancedElasticStatefulProcessingUnitDeployment) super.isolation(isolation);
+    }
+
+*/
     public AdvancedElasticStatefulProcessingUnitDeployment setContextProperty(String key, String value) {
         return (AdvancedElasticStatefulProcessingUnitDeployment) super.setContextProperty(key, value);
     }
@@ -99,29 +110,17 @@ public class AdvancedElasticStatefulProcessingUnitDeployment extends ElasticStat
     public AdvancedElasticStatefulProcessingUnitDeployment userDetails(String userName, String password) {
         return (AdvancedElasticStatefulProcessingUnitDeployment) super.userDetails(userName, password);
     }
-
-    public AdvancedElasticStatefulProcessingUnitDeployment isolation(DedicatedIsolation isolation) {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.isolation(isolation);
-    }
-
-    public AdvancedElasticStatefulProcessingUnitDeployment isolation(SharedTenantIsolation isolation) {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.isolation(isolation);
-    }
-    
-    public AdvancedElasticStatefulProcessingUnitDeployment isolation(PublicIsolation isolation) {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.isolation(isolation);
-    }
     
     public AdvancedElasticStatefulProcessingUnitDeployment useScript() {
         return (AdvancedElasticStatefulProcessingUnitDeployment) super.useScript();
     }
 
-    public AdvancedElasticStatefulProcessingUnitDeployment overrideVmInputArguments() {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.overrideVmInputArguments();
+    public AdvancedElasticStatefulProcessingUnitDeployment overrideCommandLineArguments() {
+        return (AdvancedElasticStatefulProcessingUnitDeployment) super.overrideCommandLineArguments();
     }
 
-    public AdvancedElasticStatefulProcessingUnitDeployment vmInputArgument(String vmInputArgument) {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.vmInputArgument(vmInputArgument);
+    public AdvancedElasticStatefulProcessingUnitDeployment commandLineArgument(String vmInputArgument) {
+        return (AdvancedElasticStatefulProcessingUnitDeployment) super.commandLineArgument(vmInputArgument);
     }
 
     public AdvancedElasticStatefulProcessingUnitDeployment environmentVariable(String name, String value) {
