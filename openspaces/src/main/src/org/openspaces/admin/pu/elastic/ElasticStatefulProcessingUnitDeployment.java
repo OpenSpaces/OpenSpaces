@@ -3,11 +3,11 @@ package org.openspaces.admin.pu.elastic;
 import java.io.File;
 import java.util.Map;
 
+import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleConfig;
@@ -194,7 +194,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return (ElasticStatefulProcessingUnitDeployment) super.environmentVariable(name, value);
     }
     
-    public ElasticStatefulProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+    public ElasticStatefulProcessingUnitDeployment machineProvisioning(BeanConfig config) {
         return (ElasticStatefulProcessingUnitDeployment) super.machineProvisioning(config);
     }
     

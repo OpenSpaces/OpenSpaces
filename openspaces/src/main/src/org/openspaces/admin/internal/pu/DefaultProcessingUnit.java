@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
+import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig;
@@ -36,7 +37,6 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.pu.ProcessingUnits;
-import org.openspaces.admin.pu.elastic.config.ElasticScaleStrategyConfig;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEvent;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEvent;
@@ -589,7 +589,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         admin.assertStateChangesPermitted();
     }
 
-    public void scale(ElasticScaleStrategyConfig strategyConfig) {
+    public void scale(BeanConfig strategyConfig) {
 
         ProcessingUnitElasticConfig config = getElasticConfig();
         config.setScaleStrategy(strategyConfig);

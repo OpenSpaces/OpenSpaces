@@ -1,9 +1,9 @@
 package org.openspaces.admin.space;
 
+import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleConfig;
@@ -163,7 +163,7 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
         return this;
     }
 
-    public ElasticDataGridDeployment machineProvisioning(ElasticMachineProvisioningConfig  config) {
+    public ElasticDataGridDeployment machineProvisioning(BeanConfig  config) {
         deployment.machineProvisioning(config);
         return this;
     }

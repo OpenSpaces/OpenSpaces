@@ -2,6 +2,7 @@ package org.openspaces.admin.pu.elastic.config;
 
 import java.util.Map;
 
+import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.internal.pu.elastic.config.ScaleStrategyConfigUtils;
 import org.openspaces.core.util.StringProperties;
 import org.openspaces.grid.gsm.elastic.MemoryCapacityScaleStrategyBean;
@@ -21,7 +22,7 @@ public class MemoryCapacityScaleConfig
                 MaxNumberOfContainersScaleConfig ,
                 MinNumberOfContainersPerMachineScaleConfig,
                 MaxNumberOfContainersPerMachineScaleConfig,
-                ElasticScaleStrategyConfig {
+                BeanConfig {
 
     private static final String SLIDING_WINDOW_MILLISECONDS_KEY = "sliding-window-milliseconds";
     private static final long SLIDING_WINDOW_MILLISECONDS_DEFAULT = 60000;

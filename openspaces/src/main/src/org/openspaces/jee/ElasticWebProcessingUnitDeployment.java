@@ -3,10 +3,10 @@ package org.openspaces.jee;
 import java.io.File;
 import java.util.Map;
 
+import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticWebDeploymentTopology;
@@ -110,7 +110,7 @@ public class ElasticWebProcessingUnitDeployment extends AbstractElasticProcessin
         return (ElasticWebProcessingUnitDeployment) super.environmentVariable(name, value);
     }
     
-    public ElasticWebProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+    public ElasticWebProcessingUnitDeployment machineProvisioning(BeanConfig config) {
         return (ElasticWebProcessingUnitDeployment) super.machineProvisioning(config);
     }
 }

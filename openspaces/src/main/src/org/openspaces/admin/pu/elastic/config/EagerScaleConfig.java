@@ -2,6 +2,7 @@ package org.openspaces.admin.pu.elastic.config;
 
 import java.util.Map;
 
+import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.internal.pu.elastic.config.ScaleStrategyConfigUtils;
 import org.openspaces.core.util.StringProperties;
 
@@ -16,7 +17,7 @@ public class EagerScaleConfig
         implements MaxNumberOfContainersScaleConfig ,
                    MinNumberOfContainersPerMachineScaleConfig,
                    MaxNumberOfContainersPerMachineScaleConfig,
-                   ElasticScaleStrategyConfig {
+                   BeanConfig {
 
     private static final String STRATEGY_NAME = "scale-strategy.eager.";
  

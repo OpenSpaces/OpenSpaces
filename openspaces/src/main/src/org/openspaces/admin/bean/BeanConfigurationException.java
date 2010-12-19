@@ -20,7 +20,7 @@ package org.openspaces.admin.bean;
  * Exception indicating that a misconfiguration occurred when initializing a bean (such as failure
  * to set an essential property).
  * 
- * @see BeanConfigManager#enableConfig(Class)
+ * @see BeanConfigManager#enableBean(Class)
  * 
  * @author Moran Avigdor
  * @author Itai Frenkel

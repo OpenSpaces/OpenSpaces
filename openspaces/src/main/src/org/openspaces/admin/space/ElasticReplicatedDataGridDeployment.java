@@ -1,7 +1,7 @@
 package org.openspaces.admin.space;
 
+import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
-import org.openspaces.admin.pu.elastic.config.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.topology.ElasticReplicatedDeploymentTopology;
 
 import com.gigaspaces.security.directory.UserDetails;
@@ -94,7 +94,7 @@ public class ElasticReplicatedDataGridDeployment implements ElasticReplicatedDep
         return this;
     }
 
-    public ElasticReplicatedDataGridDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+    public ElasticReplicatedDataGridDeployment machineProvisioning(BeanConfig config) {
         deployment.machineProvisioning(config);
         return this;
     }

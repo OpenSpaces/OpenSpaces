@@ -19,7 +19,7 @@ package org.openspaces.admin.bean;
 /**
  * Exception indicating that an initialization of a bean failed.
  * 
- * @see BeanConfigManager#enableConfig(Class)
+ * @see BeanConfigManager#enableBean(Class)
  * 
  * @author Moran Avigdor
  * @author Itai Frenkel

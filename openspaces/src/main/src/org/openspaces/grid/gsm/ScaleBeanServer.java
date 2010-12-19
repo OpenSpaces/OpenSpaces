@@ -6,10 +6,7 @@ import java.util.logging.Logger;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig;
 import org.openspaces.core.bean.Bean;
-import org.openspaces.grid.gsm.containers.ContainersSlaEnforcement;
 import org.openspaces.grid.gsm.elastic.ScaleStrategyBean;
-import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
-import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
 
 public class ScaleBeanServer {
 
@@ -17,11 +14,12 @@ public class ScaleBeanServer {
 
     private ProcessingUnitElasticConfig properties;
     
-    private RebalancingSlaEnforcement rebalancingSlaEnforcement;
-    private ContainersSlaEnforcement containersSlaEnforcement;
-    private MachinesSlaEnforcement machinesSlaEnforcement;
-    private ScaleStrategyBean scaleStrategyBean;
+    //private RebalancingSlaEnforcement rebalancingSlaEnforcement;
+    //private ContainersSlaEnforcement containersSlaEnforcement;
+    //private MachinesSlaEnforcement machinesSlaEnforcement;
+    //private ScaleStrategyBean scaleStrategyBean;
     private Bean elasticMachineAllocator;
+    private ScaleStrategyBean elasticScaleStrategy;
     
     private final Object lock = new Object();
 
@@ -33,25 +31,34 @@ public class ScaleBeanServer {
     }
     
     public void destroy() {
-        this.rebalancingSlaEnforcement.destroy();
-        this.containersSlaEnforcement.destroy();
+        //this.rebalancingSlaEnforcement.destroy();
+        //this.containersSlaEnforcement.destroy();
     }
 
     public Map<String, String> getProperties() {
         return properties.getProperties();
     }
-}
 
-/*
+
+
     public void setProperties(Map<String, String> rawproperties, boolean rollback) {
         
+        ProcessingUnitElasticConfig newProperties = new ProcessingUnitElasticConfig(rawproperties);
+        
         if (!rollback &&
-            this.properties.getProperties().equals(rawproperties)) {
+            properties.equals(newProperties)) {
             
             //ignore new properties, same as old ones
             return;
         }
         
+        //TODO: create strategy instance if needed 
+        //if (!properties.getScaleStrategy().getBeanClassName().equals(newProperties.getScaleStrategy().getBeanClassName() ||
+                
+        
+    }
+}
+/*
         try {
             initMachineSlaEnforcement(new ProcessingUnitDynamicProperties(rawproperties));
             this.properties = new ProcessingUnitDynamicProperties(rawproperties);

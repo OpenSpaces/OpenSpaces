@@ -1,6 +1,8 @@
 package org.openspaces.admin.pu.elastic.config;
 
-public interface ScaleBeanConfigurer<T extends ElasticScaleStrategyConfig> {
+import org.openspaces.admin.bean.BeanConfig;
+
+public interface ScaleBeanConfigurer<T extends BeanConfig> {
 
     T getConfig();
 }

@@ -1,6 +1,6 @@
 package org.openspaces.admin.pu.elastic.topology;
 
-import org.openspaces.admin.pu.elastic.config.ElasticMachineProvisioningConfig;
+import org.openspaces.admin.bean.BeanConfig;
 
 import com.gigaspaces.security.directory.UserDetails;
 
@@ -97,6 +97,6 @@ public interface ElasticDeploymentTopology {
      * Enables the server side bean that starts and stops machines automatically.
      * For example, the bean could delegate the request to a cloud provider.  
      */
-    ElasticDeploymentTopology machineProvisioning(ElasticMachineProvisioningConfig  config);
+    ElasticDeploymentTopology machineProvisioning(BeanConfig config);
 
 }

@@ -4,14 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.openspaces.admin.bean.BeanConfigAlreadyExistsException;
+import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.bean.BeanConfigNotFoundException;
 import org.openspaces.admin.bean.BeanConfigPropertiesManager;
 import org.openspaces.admin.bean.EnabledBeanConfigCannotBeChangedException;
-import org.openspaces.admin.pu.elastic.config.ElasticMachineProvisioningConfig;
-import org.openspaces.admin.pu.elastic.config.ElasticScaleStrategyConfig;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.core.util.StringProperties;
+import org.openspaces.grid.gsm.machines.ElasticMachineProvisioning;
 
 import com.gigaspaces.grid.gsa.GSProcessOptions;
 
@@ -200,17 +200,7 @@ public class ProcessingUnitElasticConfig {
             this.classnamesKey = classnamesKey;
         }
 
-        public void addConfig(String beanClassName, Map<String, String> beanProperties)
-                throws BeanConfigAlreadyExistsException {
-
-            if (containsBeanInternal(beanClassName)) {
-                throw new BeanConfigAlreadyExistsException("Failed to add bean [" + beanClassName + "] since it already exists.");
-            }
-
-            setConfig(beanClassName, beanProperties);
-        }
-
-        public void setConfig(String beanClassName, Map<String, String> properties) throws BeanConfigNotFoundException {
+        public void putConfig(String beanClassName, Map<String, String> properties) throws BeanConfigNotFoundException {
             
             if (isBeanEnabled(beanClassName)) {
                 throw new EnabledBeanConfigCannotBeChangedException("Cannot modify bean [" + beanClassName + "] configuration while it is enabled. Disable it first.");
@@ -309,17 +299,72 @@ public class ProcessingUnitElasticConfig {
         return true;
     }
 
-    public void setMachineProvisioning(ElasticMachineProvisioningConfig config) {
+    /**
+     * Sets the elastic machine provisioning 
+     * @param config - the machine provisioning bean configuration, or null to disable it.
+     * @see ElasticMachineProvisioning
+     */
+    public void setMachineProvisioning(BeanConfig config) {
         BeanConfigPropertiesManager propertiesManager = toElasticMachineAllocatorPropertiesManager();
         propertiesManager.disableAllBeans();
-        propertiesManager.setConfig(config.getBeanClassName(), config.getProperties());
-        propertiesManager.enableBean(config.getBeanClassName());
+        if (config != null) {
+            propertiesManager.putConfig(config.getBeanClassName(), config.getProperties());
+            propertiesManager.enableBean(config.getBeanClassName());
+        }
     }
 
-    public void setScaleStrategy(ElasticScaleStrategyConfig config) {
+    /**
+     * Sets the elastic scale strategy 
+     * @param config - the scale strategy bean configuration, or null to disable it.
+     * @see ProcessingUnit#scale(org.openspaces.admin.pu.ElasticScaleStrategyConfig)
+     */
+    public void setScaleStrategy(BeanConfig config) {
         BeanConfigPropertiesManager propertiesManager = toElasticScaleStrategyPropertiesManager();
         propertiesManager.disableAllBeans();
-        propertiesManager.setConfig(config.getBeanClassName(), config.getProperties());
-        propertiesManager.enableBean(config.getBeanClassName());
+        if (config != null) {
+            propertiesManager.putConfig(config.getBeanClassName(), config.getProperties());
+            propertiesManager.enableBean(config.getBeanClassName());
+        }
+    }
+    
+    /**
+     * @return the current scale strategy or null if no scale strategy
+     */
+    public BeanConfig getScaleStrategy() {
+        return getEnabledBeanConfig(toElasticScaleStrategyPropertiesManager());
+    }
+
+    /**
+     * @return the current machine provisioning or null if no machine provisioning.
+     */    
+    public BeanConfig getMachineProvisioning() {
+        return getEnabledBeanConfig(toElasticMachineAllocatorPropertiesManager());
+    }
+
+    private BeanConfig getEnabledBeanConfig(final BeanConfigPropertiesManager propertiesManager) {
+        BeanConfig config = null;
+        if (propertiesManager.getEnabledBeansClassNames().length > 0) {
+            final String beanClassName = propertiesManager.getEnabledBeansClassNames()[0];
+            config = new BeanConfig() {
+                 
+                public void setProperties(Map<String, String> properties) {
+                    propertiesManager.putConfig(beanClassName, properties);
+                }
+                
+                public Map<String, String> getProperties() {
+                    return propertiesManager.getConfig(beanClassName);
+                }
+                
+                public String getBeanClassName() {
+                    return beanClassName;
+                }
+            };
+        }
+        return config;
+    }
+    
+    public boolean equals(Object other) {
+        return other instanceof ProcessingUnitElasticConfig &&
+               ((ProcessingUnitElasticConfig)other).properties.equals(properties);
     }
 }

@@ -1,9 +1,9 @@
 package org.openspaces.admin.memcached;
 
+import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleConfig;
@@ -162,7 +162,7 @@ public class ElasticMemcachedDeployment implements ElasticStatefulDeploymentTopo
         return this;
     }
 
-    public ElasticMemcachedDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+    public ElasticMemcachedDeployment machineProvisioning(BeanConfig config) {
         deployment.machineProvisioning(config);
         return this;
     }

@@ -2,10 +2,9 @@ package org.openspaces.admin.internal.pu.elastic;
 
 import java.util.Map;
 
+import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
-import org.openspaces.admin.pu.elastic.config.ElasticMachineProvisioningConfig;
-import org.openspaces.admin.pu.elastic.config.ElasticScaleStrategyConfig;
 import org.openspaces.core.util.StringProperties;
 
 import com.gigaspaces.security.directory.User;
@@ -168,12 +167,12 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         return this;
     }
 */
-    protected AbstractElasticProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+    protected AbstractElasticProcessingUnitDeployment machineProvisioning(BeanConfig config) {
         elasticConfig.setMachineProvisioning(config);
         return this;
     }    
 
-    protected AbstractElasticProcessingUnitDeployment scale(ElasticScaleStrategyConfig config) {
+    protected AbstractElasticProcessingUnitDeployment scale(BeanConfig config) {
         elasticConfig.setScaleStrategy(config);
         return null;
     }

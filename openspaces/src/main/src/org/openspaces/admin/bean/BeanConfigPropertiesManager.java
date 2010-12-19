@@ -30,54 +30,48 @@ import java.util.Map;
 public interface BeanConfigPropertiesManager {
 
     /**
-     * Adds a bean by it's name with the corresponding configuration properties.
-     * 
-     * @param beanClassName
-     *            the bean class name
-     * @param config
-     *            the String key-value pairs configuration properties used to configure this
-     *            bean.
-     * @throws BeanConfigAlreadyExistsException
-     *             thrown if bean has already been added to the manager.
-     */
-	void addConfig(String beanClassName, Map<String,String> config) throws BeanConfigAlreadyExistsException;
-
-    /**
-     * Sets or adds a bean with new configuration properties. 
-     * Overrides all previously set properties.
+     * Defines a configuration for the specified bean. Overrides all previously set properties for that bean.
+     * <p>
+     * An exception is raised if the bean is enabled.
      * 
      * @param beanClassName the bean class name
-     * @param config the String key-value pairs used to configure this bean.
+     * @param properties the String key-value pairs used to configure this bean.
      * 
-     * @throws EnabledBeanConfigCannotBeChangedException - if the bean is enabled
+     * @throws EnabledBeanConfigCannotBeChangedException
+     *      The bean is enabled. Disable it first.
      */
-	void setConfig(String beanClassName, Map<String,String> config) throws EnabledBeanConfigCannotBeChangedException;
+	void putConfig(String beanClassName, Map<String,String> properties) throws EnabledBeanConfigCannotBeChangedException;
 
     /**
-     * Enable a previously added bean's configuration. Creates the bean bean corresponding to the
-     * bean name, configured with the properties previously set. If the bean was already enabled,
-     * the request will be ignored.
+     * Enables a previously added bean. 
+     * Creates the bean instance with the previously set properties.
+     * <p> 
+     * If the bean is already enabled, the request is silently ignored.
      * 
      * @param beanClassName
      *            the bean class name
+     *            
      * @throws BeanConfigNotFoundException
-     *             thrown if the bean was not added/found in the manager.
+     *             thrown if the bean configuration is not found.
      * @throws BeanConfigurationException
      *             in the event of misconfiguration (such as failure to set an essential property).
      * @throws BeanInitializationException
-     *             if initialization fails.
+     *             if bean initialization fails.
      */
 	void enableBean(String beanClassName) throws BeanConfigNotFoundException, BeanConfigurationException, BeanInitializationException;
 
     /**
-     * Disables a previously enabled bean's configuration. The bean object is discarded, but it's
-     * configuration remains in the manager, and it can be enabled at a later time. If the bean was
-     * already disabled, the request will be ignored.
+     * Disables a bean. 
+     * The bean object is discarded but it's configuration remains. 
+     * The bean can be enabled at a later time.
+     * <p> 
+     * If the bean is already disabled, the request is silently ignored.
      * 
      * @param beanClassName
      *            the bean class name
+     *            
      * @throws BeanConfigNotFoundException
-     *             thrown if the bean was not added/found in the manager.
+     *             bean configuration cannot be found.
      */
 	void disableBean(String beanClassName) throws BeanConfigNotFoundException;
 
@@ -86,49 +80,55 @@ public interface BeanConfigPropertiesManager {
 	 * 
 	 * @param beanClassName
      *            the bean class name
-	 * @throws BeanConfigNotFoundException
-     *             thrown if the bean was not added/found in the manager.
+     *            
 	 */
-	boolean isBeanEnabled(String beanClassName) throws BeanConfigNotFoundException;
+	boolean isBeanEnabled(String beanClassName);
 
     /**
-     * Removes a previously added bean together with its configuration properties. This bean
-     * will need to be added again after it's removal.
+     * Removes a bean configuration. 
+     * <p>
+     * An exception is raised if the bean is enabled.
      * 
      * @param beanClassName
      *            the bean class name
-     * @return true if removed ,false otherwise
+     * @return true if removed ,false if it did not exist in the first place.
+     * 
+     * @throws EnabledBeanConfigCannotBeChangedException 
+     *         The bean is enabled. Disable it first.
      */
 	boolean removeConfig(String beanClassName) throws EnabledBeanConfigCannotBeChangedException;
 	
 	/**
-	 * Get the configuration properties corresponding to the bean.
+	 * Get the bean configuration.
 	 * 
 	 * @param beanClassName the bean class name
+	 * 
 	 * @return the String key-value pairs configuration properties.
-	 * @throws BeanConfigNotFoundException thrown if the bean was not added/found in the manager.
+	 * 
+	 * @throws BeanConfigNotFoundException 
+	 *         Bean configuration cannot be found. Put the configuration first.
 	 */
 	Map<String,String> getConfig(String beanClassName) throws BeanConfigNotFoundException;;
 
     /**
-     * Lists the class name of all beans.
+     * Lists the class names of configured beans.
      * 
-     * @return an array of bean class names held by this manager. If no beans were added, an array
-     *         of zero length is returned.
+     * @return an array of bean class names that have been configured bean.
+     *         If no bean configuration exists, a zero length array is returned.
      */
 	String[] getBeansClassNames();
 
     /**
-     * Lists the class name of enabled beans.
+     * Lists the class names of enabled beans.
      * 
      * @see #enableBean(String)
-     * @return an array of enabled beans. If no beans are enabled, an array of zero
-     *         length is returned.
+     * @return an array of enabled beans. 
+     *         If no beans are enabled, a zero length array is returned.
      */
 	String[] getEnabledBeansClassNames();
 
 	/**
-	 * Disable all currently enabled bean configurations.
+	 * Disable all currently enabled beans.
 	 * @see #disableBean(String)
 	 */
 	void disableAllBeans();

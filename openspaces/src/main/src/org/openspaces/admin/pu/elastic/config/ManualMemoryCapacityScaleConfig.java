@@ -2,6 +2,7 @@ package org.openspaces.admin.pu.elastic.config;
 
 import java.util.Map;
 
+import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.internal.pu.elastic.config.ScaleStrategyConfigUtils;
 import org.openspaces.core.util.StringProperties;
 import org.openspaces.grid.gsm.elastic.ManualMemoryCapacityScaleStrategyBean;
@@ -21,7 +22,7 @@ public class ManualMemoryCapacityScaleConfig
                    MaxNumberOfContainersScaleConfig,
                    MinNumberOfContainersPerMachineScaleConfig,
                    MaxNumberOfContainersPerMachineScaleConfig,
-                   ElasticScaleStrategyConfig {
+                   BeanConfig {
 
     private static final String STRATEGY_NAME = "scale-strategy.manual-memory";
     private static final String MEMORY_CAPACITY_MEGABYTES_KEY = "sliding-window-milliseconds";

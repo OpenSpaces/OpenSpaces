@@ -1,7 +1,7 @@
 package org.openspaces.admin.memcached;
 
+import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.pu.elastic.ElasticReplicatedProcessingUnitDeployment;
-import org.openspaces.admin.pu.elastic.config.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.topology.ElasticReplicatedDeploymentTopology;
 import org.openspaces.pu.container.servicegrid.deploy.MemcachedDeploy;
 
@@ -96,7 +96,7 @@ public class ElasticReplicatedMemcachedDeployment implements ElasticReplicatedDe
         return this;
     }
 
-    public ElasticReplicatedMemcachedDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+    public ElasticReplicatedMemcachedDeployment machineProvisioning(BeanConfig config) {
         deployment.machineProvisioning(config);
         return this;
     }

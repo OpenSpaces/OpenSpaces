@@ -22,7 +22,7 @@ package org.openspaces.admin.bean;
  * added or has been removed).
  * 
  * @see BeanConfig#getBeanClassName()
- * @see BeanConfigManager#addConfig(BeanConfig)
+ * @see BeanConfigManager#putConfig2(BeanConfig)
  * @see BeanConfigManager
  * 
  * @author Moran Avigdor

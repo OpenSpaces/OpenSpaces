@@ -32,37 +32,22 @@ package org.openspaces.admin.bean;
 public interface BeanConfigManager<B extends BeanConfig> {
 
     /**
-     * Adds configuration properties of a bean. The bean is referenced by it's name - given by
-     * {@link BeanConfig#getBeanClassName()}. The configuration object is filled with String
-     * key-value configuration property pairs used to configure this bean.
-     * 
-     * @param config
-     *            the bean configuration
-     * @throws BeanConfigAlreadyExistsException
-     *             thrown if bean has already been added to the manager.
-     */
-    void addConfig(B config) throws BeanConfigAlreadyExistsException;
-
-    /**
-     * Sets a previously added bean with new configuration properties. Overrides all previously set
-     * properties. The configuration object is filled with String key-value pairs configuration
-     * properties used to configure this bean.
+     * Defines a configuration for the specified bean. Overrides all previously set properties for that bean.
+     * The configuration object internally holds String key-value pairs used to configure this bean.
      * <p>
-     * If the bean is already enabled, the new configuration will 'restart' the bean with the newly
-     * set configuration (same as calling {@link #disableConfig(Class)}, followed by
-     * {@link #setConfig(BeanConfig)}, and {@link #enableConfig(Class)}).
+     * An exception is raised if the bean is enabled.
      * 
      * @param config
      *            the bean configuration
-     * @throws BeanConfigNotFoundException
-     *             thrown if the bean was not added/found in the manager.
+     *            
+     * @throws EnabledBeanConfigCannotBeChangedException - if the bean is enabled
      */
-    void setConfig(B config) throws BeanConfigNotFoundException;
+    void putConfig(B config) throws BeanConfigNotFoundException;
 
     /**
-     * Enable a previously added bean configuration. Creates the bean corresponding to the bean
-     * name, configured with the properties previously set. If the bean was already enabled, the
-     * request will be ignored.
+     * Enable a previously added bean configuration. 
+     * Creates the bean instance with the previously set properties.
+     * If the bean is already enabled, the request is silently ignored.
      * 
      * @param <T>
      *            a bean configuration implementation (see {@link BeanConfig})
@@ -70,53 +55,71 @@ public interface BeanConfigManager<B extends BeanConfig> {
      *            the class of the bean configuration
      * @throws BeanConfigNotFoundException
      *             thrown if the bean was not added/found in the manager.
-     * @throws BeanConfigException
-     *             if the request to enable a bean can't be fulfilled.
      * @throws BeanConfigurationException
      *             in the event of misconfiguration (such as failure to set an essential property).
      * @throws BeanInitializationException
-     *             if initialization fails.
+     *             if bean initialization fails.
      */
-    <T extends B> void enableConfig(Class<T> clazz) throws BeanConfigNotFoundException, BeanConfigException;
+    <T extends B> void enableBean(Class<T> clazz) throws BeanConfigNotFoundException, BeanConfigurationException, BeanInitializationException;
 
     /**
-     * Disables a previously enabled bean configuration. The bean object is discarded, but it's
-     * configuration remains in the manager, and it can be enabled at a later time. If the bean was
-     * already disabled, the request will be ignored.
+     * Disables a bean. 
+     * The bean object is discarded but it's configuration remains. 
+     * The bean can be enabled at a later time.
+     * <p> 
+     * If the bean is already disabled, the request is silently ignored.
      * 
      * @param <T>
      *            a bean configuration implementation (see {@link BeanConfig})
      * @param clazz
      *            the class of the bean configuration
+     *            
      * @throws BeanConfigNotFoundException
-     *             thrown if the bean was not added/found in the manager.
+     *              bean configuration cannot be found.
      */
-    <T extends B> void disableConfig(Class<T> clazz) throws BeanConfigNotFoundException;
+    <T extends B> void disableBean(Class<T> clazz) throws BeanConfigNotFoundException;
 
     /**
-     * Removes a previously added bean together with its configuration properties. This bean will
-     * need to be added again after it's removal.
+     * @return true if the bean is enabled, false if the bean is disabled
      * 
      * @param <T>
      *            a bean configuration implementation (see {@link BeanConfig})
      * @param clazz
      *            the class of the bean configuration
-     * @throws BeanConfigNotFoundException
-     *             thrown if the bean was not added/found in the manager.
+     *            
      */
-    <T extends B> void removeConfig(Class<T> clazz) throws BeanConfigNotFoundException;
-
+    <T extends B> boolean isBeanEnabled(Class<T> clazz);
+    
     /**
-     * Get the configuration properties corresponding to the bean represented by this configuration
-     * class.
+     * Removes a bean configuration. 
+     * <p>
+     * An exception is raised if the bean is enabled.
      * 
      * @param <T>
      *            a bean configuration implementation (see {@link BeanConfig})
      * @param clazz
      *            the class of the bean configuration
+     *            
+     * @return true if removed ,false if it did not exist in the first place.
+     * 
+     * @throws EnabledBeanConfigCannotBeChangedException
+     *              The bean is enabled. Disable it first.
+     */
+    <T extends B> boolean removeConfig(Class<T> clazz) throws EnabledBeanConfigCannotBeChangedException;
+
+    /**
+     * Get the bean configuration represented by the specified configuration class.
+     * 
+     * @param <T>
+     *            a bean configuration implementation (see {@link BeanConfig})
+     * @param clazz
+     *            the class of the bean configuration
+     *            
      * @return The bean configuration implementation object set with the configuration properties.
+     * 
      * @throws BeanConfigNotFoundException
-     *             thrown if the bean was not added/found in the manager.
+     *             Bean configuration cannot be found. Put the configuration first.
      */
     <T extends B> T getConfig(Class<T> clazz) throws BeanConfigNotFoundException;
+    
 }

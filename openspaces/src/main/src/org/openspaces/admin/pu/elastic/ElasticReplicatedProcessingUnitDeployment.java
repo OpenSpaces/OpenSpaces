@@ -3,8 +3,8 @@ package org.openspaces.admin.pu.elastic;
 import java.io.File;
 import java.util.Map;
 
+import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
-import org.openspaces.admin.pu.elastic.config.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticReplicatedDeploymentTopology;
@@ -97,7 +97,7 @@ public class ElasticReplicatedProcessingUnitDeployment extends AbstractElasticPr
         return (ElasticReplicatedProcessingUnitDeployment) super.environmentVariable(name, value);
     }
     
-    public ElasticReplicatedProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+    public ElasticReplicatedProcessingUnitDeployment machineProvisioning(BeanConfig config) {
         return (ElasticReplicatedProcessingUnitDeployment) super.machineProvisioning(config);
     }
 }
