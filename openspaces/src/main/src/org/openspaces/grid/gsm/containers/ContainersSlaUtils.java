@@ -11,9 +11,9 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig.GridServiceContainerConfig;
 import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
+import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.machine.Machine;
 
 public class ContainersSlaUtils {

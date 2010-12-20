@@ -5,7 +5,7 @@ import java.util.Map;
 import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.internal.pu.elastic.config.ScaleStrategyConfigUtils;
 import org.openspaces.core.util.StringProperties;
-import org.openspaces.grid.gsm.elastic.ManualMemoryCapacityScaleStrategyBean;
+import org.openspaces.grid.gsm.strategy.ManualCapacityScaleStrategyBean;
 
 /**
  * Defines a manual scaling strategy that consumes the specified memory capacity.
@@ -17,7 +17,7 @@ import org.openspaces.grid.gsm.elastic.ManualMemoryCapacityScaleStrategyBean;
  * @see ManualMemoryCapacityScaleConfigurer
  * @author itaif
  */
-public class ManualMemoryCapacityScaleConfig 
+public class ManualCapacityScaleConfig 
         implements MinNumberOfContainersScaleConfig,
                    MaxNumberOfContainersScaleConfig,
                    MinNumberOfContainersPerMachineScaleConfig,
@@ -32,9 +32,14 @@ public class ManualMemoryCapacityScaleConfig
     /**
      * Default constructor
      */
-    public ManualMemoryCapacityScaleConfig() {
+    public ManualCapacityScaleConfig() {
         this.properties = new StringProperties();
     }
+    
+    public ManualCapacityScaleConfig(Map<String,String> properties) {
+        this.properties = new StringProperties(properties);
+    }
+
     
     /**
      * Specifies the total memory capacity of the processing unit.
@@ -100,6 +105,6 @@ public class ManualMemoryCapacityScaleConfig
     }
 
     public String getBeanClassName() {
-        return ManualMemoryCapacityScaleStrategyBean.class.getName();
+        return ManualCapacityScaleStrategyBean.class.getName();
     }    
 }

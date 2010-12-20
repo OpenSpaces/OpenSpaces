@@ -3,24 +3,24 @@ package org.openspaces.admin.pu.elastic.config;
 import org.openspaces.core.util.MemoryUnit;
 
 /**
- * Provides fluent API for creating a new {@link ManualMemoryCapacityScaleConfig} object.
+ * Provides fluent API for creating a new {@link ManualCapacityScaleConfig} object.
  * 
  * For example {@code new ManualMemoryCapacityScaleStrategyConfigurer().capacity("1500m").getConfig()}
  * 
  * @author itaif
  * 
  */
-public class ManualMemoryCapacityScaleConfigurer implements ScaleBeanConfigurer<ManualMemoryCapacityScaleConfig>{
+public class ManualMemoryCapacityScaleConfigurer implements ScaleBeanConfigurer<ManualCapacityScaleConfig>{
 
-private final ManualMemoryCapacityScaleConfig config;
+private final ManualCapacityScaleConfig config;
     
     /**
-     * Provides fluent API for creating a new {@link ManualMemoryCapacityScaleConfig} object.
+     * Provides fluent API for creating a new {@link ManualCapacityScaleConfig} object.
      * For example {@code new ManualMemoryCapacityScaleStrategyConfigurer().capacity("1500m").getConfig()}
-     * The default constructor wraps an empty {@link ManualMemoryCapacityScaleConfig} object
+     * The default constructor wraps an empty {@link ManualCapacityScaleConfig} object
      */
     public ManualMemoryCapacityScaleConfigurer() {
-        this.config = new ManualMemoryCapacityScaleConfig();
+        this.config = new ManualCapacityScaleConfig();
     }
     
     public ManualMemoryCapacityScaleConfigurer memoryCapacity(String memory) {
@@ -68,7 +68,7 @@ private final ManualMemoryCapacityScaleConfig config;
     /**
      * @see ScaleBeanConfigurer#getConfig()
      */
-    public ManualMemoryCapacityScaleConfig getConfig() {
+    public ManualCapacityScaleConfig getConfig() {
         return config;
     }
 }

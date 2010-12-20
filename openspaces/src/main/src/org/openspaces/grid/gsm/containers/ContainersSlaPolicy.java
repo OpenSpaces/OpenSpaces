@@ -1,7 +1,7 @@
 package org.openspaces.grid.gsm.containers;
 
 import org.openspaces.admin.gsa.GridServiceAgent;
-import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig.GridServiceContainerConfig;
+import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementPolicy;
 
 public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {

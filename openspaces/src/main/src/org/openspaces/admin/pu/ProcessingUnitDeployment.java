@@ -39,8 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig;
-
 import com.gigaspaces.grid.zone.ZoneHelper;
 import com.gigaspaces.security.directory.User;
 import com.gigaspaces.security.directory.UserDetails;
@@ -350,11 +348,7 @@ public class ProcessingUnitDeployment {
         return this;
     }
     
-    public ProcessingUnitElasticConfig getElasticConfig() {
-        ProcessingUnitElasticConfig elasticConfig = null;
-        if (this.elasticProperties.size() > 0) {
-            elasticConfig = new ProcessingUnitElasticConfig(this.elasticProperties);
-        }
-        return elasticConfig;
+    public Map<String,String> getElasticProperties() {
+        return this.elasticProperties;
     }
 }

@@ -54,13 +54,13 @@ public class ESMProxy extends AbstractProxy implements ESM, Serializable {
         return esmServer.login( userDetails );
     }
 
-    public Map<String, String> getProcessingUnitElasticConfig(String processingUnitName) throws RemoteException {
-        return esmServer.getProcessingUnitElasticConfig(processingUnitName);
+    public Map<String, String> getProcessingUnitElasticProperties(String processingUnitName) throws RemoteException {
+        return esmServer.getProcessingUnitElasticProperties(processingUnitName);
     }
 
-    public void setProcessingUnitElasticConfig(String processingUnitName, Map<String, String> properties)
+    public void setProcessingUnitElasticProperties(String processingUnitName, Map<String, String> properties)
             throws RemoteException {
-        esmServer.setProcessingUnitElasticConfig(processingUnitName, properties);
+        esmServer.setProcessingUnitElasticProperties(processingUnitName, properties);
     }
 
 }

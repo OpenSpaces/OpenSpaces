@@ -2,70 +2,102 @@ package org.openspaces.grid.gsm;
 
 import java.util.Map;
 
-import org.openspaces.admin.Admin;
-import org.openspaces.admin.bean.BeanConfigNotFoundException;
 import org.openspaces.admin.bean.BeanConfigurationException;
-import org.openspaces.admin.internal.pu.elastic.config.ScaleStrategyConfigUtils;
+import org.openspaces.admin.bean.BeanInitializationException;
+import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.admin.zone.Zone;
 import org.openspaces.core.bean.Bean;
-import org.openspaces.core.bean.BeanFactory;
+import org.openspaces.core.bean.BeanServer;
 import org.openspaces.core.bean.DefaultBeanFactory;
-import org.openspaces.core.util.StringProperties;
-import org.openspaces.grid.gsm.containers.ContainersSlaEnforcement;
+import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
-import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
-import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
+import org.openspaces.grid.gsm.machines.ElasticMachineProvisioning;
+import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
+import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
+import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioning;
+import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioningAdapter;
+import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAware;
 
-public class ScaleBeanFactory implements BeanFactory<Bean> {
+public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
 
-    DefaultBeanFactory<Bean> factory;
-    private final RebalancingSlaEnforcement rebalancingSlaEnforcement;
-    private final ContainersSlaEnforcement containersSlaEnforcement;
-    private final Admin admin;
+    private final RebalancingSlaEnforcementEndpoint rebalancingSlaEnforcementEndpoint;
+    private final ContainersSlaEnforcementEndpoint containersSlaEnforcementEndpoint;
+    private final MachinesSlaEnforcementEndpoint machinesSlaEnforcementEndpoint;
+    private final ProcessingUnit pu;
     
     ScaleBeanFactory(
-            Admin admin,
-            RebalancingSlaEnforcement rebalancingSlaEnforcement, 
-            ContainersSlaEnforcement containersSlaEnforcement,
-            MachinesSlaEnforcement machinesSlaEnforcement) {
-        this.rebalancingSlaEnforcement = rebalancingSlaEnforcement;
-        this.containersSlaEnforcement = containersSlaEnforcement;
-        this.factory = new DefaultBeanFactory<Bean>(admin);
-        this.admin = admin;
+            ProcessingUnit pu,
+            RebalancingSlaEnforcementEndpoint rebalancingSlaEnforcementEndpoint, 
+            ContainersSlaEnforcementEndpoint containersSlaEnforcementEndpoint,
+            MachinesSlaEnforcementEndpoint machinesSlaEnforcementEndpoint) {
+        
+        super(pu.getAdmin());
+        this.rebalancingSlaEnforcementEndpoint = rebalancingSlaEnforcementEndpoint;
+        this.containersSlaEnforcementEndpoint = containersSlaEnforcementEndpoint;
+        this.machinesSlaEnforcementEndpoint = machinesSlaEnforcementEndpoint;
+        this.pu = pu;
+        
     }
     
-    public Bean create(String className, Map<String,String> properties) throws BeanConfigurationException, BeanConfigNotFoundException {
+    @Override
+    protected Bean createInstance(String className, Map<String,String> properties, BeanServer<Bean> beanServer) throws BeanConfigurationException, BeanInitializationException{
 
-        String puName = ScaleStrategyConfigUtils.getProcessingUnitName(new StringProperties(properties));
-        ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(puName);
-        if (pu == null) {
-            throw new BeanConfigurationException("Cannot find processing unit by the name '" + puName + "'");
+        Bean instance = super.createInstance(className,properties, beanServer);
+        
+        if (instance instanceof MachinesSlaEnforcementEndpointAware) {
+            MachinesSlaEnforcementEndpointAware minstance = (MachinesSlaEnforcementEndpointAware)instance;
+            minstance.setMachinesSlaEnforcementEndpoint(machinesSlaEnforcementEndpoint);
         }
-            
-        Bean instance = factory.create(className,properties);
-        
-        if (pu.getRequiredZones().length != 1 || pu.getRequiredZones()[0].length() == 0) {
-            throw new BeanConfigurationException("Processing Unit " + pu.getName() + " must have a required container zone.");
-        }
-        
-        
-        
-        Zone zone = admin.getZones().getByName(pu.getRequiredZones()[0]);
         
         if (instance instanceof ContainersSlaEnforcementEndpointAware) {
             ContainersSlaEnforcementEndpointAware cinstance = (ContainersSlaEnforcementEndpointAware)instance;
-            cinstance.setContainersSlaEnforcementEndpoint(containersSlaEnforcement.createEndpoint(zone.getName()));
+            cinstance.setContainersSlaEnforcementEndpoint(containersSlaEnforcementEndpoint);
         }
         
         if (instance instanceof RebalancingSlaEnforcementEndpointAware) {
             RebalancingSlaEnforcementEndpointAware rinstance = (RebalancingSlaEnforcementEndpointAware)instance;
-            rinstance.setRebalancingSlaEnforcementEndpoint(rebalancingSlaEnforcement.createEndpoint(pu));
+            rinstance.setRebalancingSlaEnforcementEndpoint(rebalancingSlaEnforcementEndpoint);
         }
         
         if (instance instanceof ProcessingUnitAware) {
             ((ProcessingUnitAware)instance).setProcessingUnit(pu);
+        }
+        
+        if (instance instanceof ElasticMachineProvisioningAware) {
+            Bean[] injectedInstances = beanServer.getEnabledBeanAssignableTo(
+                    new Class[]{
+                            ElasticMachineProvisioning.class,
+                            NonBlockingElasticMachineProvisioning.class});
+           
+            
+            NonBlockingElasticMachineProvisioning machineProvisioning = null;
+           
+            for (Bean injectedInstance : injectedInstances) {
+                if (injectedInstance instanceof ElasticMachineProvisioning) {
+                    machineProvisioning = 
+                        new NonBlockingElasticMachineProvisioningAdapter((ElasticMachineProvisioning)injectedInstance);
+                    break;
+                }
+                else if (injectedInstance instanceof NonBlockingElasticMachineProvisioning){
+                    machineProvisioning = (NonBlockingElasticMachineProvisioning) injectedInstance;
+                    break;
+                }
+           }
+            
+           if (machineProvisioning != null) {
+               ((ElasticMachineProvisioningAware)instance).setElasticMachineProvisioning(machineProvisioning);
+           }
+        }
+        
+        if (instance instanceof GridServiceContainerConfigAware) {
+            Bean[] injectedInstances = beanServer.getEnabledBeanAssignableTo(
+                    new Class[]{ GridServiceContainerConfigBean.class });
+            for (Bean injectedInstance : injectedInstances) {
+                ((GridServiceContainerConfigAware)instance)
+                    .setGridServiceContainerConfig((GridServiceContainerConfig)injectedInstance);
+                break;
+            }
         }
         return instance;
     }

@@ -6,7 +6,7 @@ import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfigurer;
@@ -79,7 +79,7 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
         return this;
     }
 
-    public ElasticDataGridDeployment scale(ManualMemoryCapacityScaleConfig strategy) {
+    public ElasticDataGridDeployment scale(ManualCapacityScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }

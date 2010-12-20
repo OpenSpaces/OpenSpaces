@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,9 +17,14 @@ import org.jini.rio.jsb.ServiceBeanAdapter;
 import org.jini.rio.jsb.ServiceBeanActivation.LifeCycleManager;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.InternalAdminFactory;
+import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener;
 import org.openspaces.grid.gsm.ScaleBeanServer;
+import org.openspaces.grid.gsm.containers.ContainersSlaEnforcement;
+import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
+import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
 
 import com.gigaspaces.grid.gsa.AgentHelper;
 import com.gigaspaces.grid.zone.ZoneHelper;
@@ -45,14 +51,17 @@ import com.gigaspaces.security.service.SecurityContext;
 import com.gigaspaces.start.SystemBoot;
 import com.sun.jini.start.LifeCycle;
 
-public class ESMImpl<x> extends ServiceBeanAdapter implements ESM, ProcessingUnitRemovedEventListener
+public class ESMImpl<x> extends ServiceBeanAdapter implements ESM, ProcessingUnitRemovedEventListener, ProcessingUnitAddedEventListener
 		/*, RemoteSecuredService*//*, ServiceDiscoveryListener*/ {
 
 	private static final String CONFIG_COMPONENT = "org.openspaces.grid.esm";
 	private static final Logger logger = Logger.getLogger(CONFIG_COMPONENT);
-	private final Object lock = new Object();
 	private final Admin admin;
-	private final Map<String,ScaleBeanServer> scaleBeanServerPerProcessingUnit;
+	private final MachinesSlaEnforcement machinesSlaEnforcement;
+	private final ContainersSlaEnforcement containersSlaEnforcement;
+	private final RebalancingSlaEnforcement rebalancingSlaEnforcement;
+	private final Map<ProcessingUnit,ScaleBeanServer> scaleBeanServerPerProcessingUnit;
+	private final Map<String,Map<String,String>> elasticPropertiesPerProcessingUnit;
     private LifeCycle lifeCycle;
     private String[] configArgs;
 	
@@ -61,10 +70,16 @@ public class ESMImpl<x> extends ServiceBeanAdapter implements ESM, ProcessingUni
      */
     public ESMImpl() throws Exception {
         super();
-        scaleBeanServerPerProcessingUnit = new HashMap<String,ScaleBeanServer>();
+        
+        scaleBeanServerPerProcessingUnit = new HashMap<ProcessingUnit,ScaleBeanServer>();
+        elasticPropertiesPerProcessingUnit = new ConcurrentHashMap<String, Map<String,String>>();
         
         admin = new InternalAdminFactory().singleThreadedEventListeners().createAdmin();
         admin.getProcessingUnits().getProcessingUnitRemoved().add(this);
+        
+        machinesSlaEnforcement = new MachinesSlaEnforcement(admin);
+        containersSlaEnforcement = new ContainersSlaEnforcement(admin);
+        rebalancingSlaEnforcement = new RebalancingSlaEnforcement(admin);
     }
 
     /**
@@ -149,11 +164,12 @@ public class ESMImpl<x> extends ServiceBeanAdapter implements ESM, ProcessingUni
         logger.info("Stopping ESM ...");
         
         admin.getProcessingUnits().getProcessingUnitRemoved().remove(this);
-        
-        for (ScaleBeanServer beanServer : scaleBeanServerPerProcessingUnit.values()) {
-            beanServer.destroy();
+        synchronized (scaleBeanServerPerProcessingUnit) {
+            for (ScaleBeanServer beanServer : scaleBeanServerPerProcessingUnit.values()) {
+                beanServer.destroy();
+            }
+            this.scaleBeanServerPerProcessingUnit.clear();
         }
-        this.scaleBeanServerPerProcessingUnit.clear();
         
         if (lifeCycle != null) {
             lifeCycle.unregister(this);
@@ -254,40 +270,54 @@ public class ESMImpl<x> extends ServiceBeanAdapter implements ESM, ProcessingUni
         return null;
     }
 
-    public Map<String, String> getProcessingUnitElasticConfig(String processingUnitName) throws RemoteException {
-        synchronized (lock) {
-            ScaleBeanServer beanServer = getScaleBeanServer(processingUnitName);
-            Map<String,String> properties = new HashMap<String,String>();
-            if (beanServer != null) {
-                properties = beanServer.getProperties();
-            }
-            return properties;
-        }
+    public Map<String, String> getProcessingUnitElasticProperties(String processingUnitName) throws RemoteException {
+        // uses a concurrent hashmap. Consistency not guaranteed with #setPRocessingUnitElasticConfig
+        return elasticPropertiesPerProcessingUnit.get(processingUnitName);
     }
 
-    public void setProcessingUnitElasticConfig(String processingUnitName, Map<String, String> properties) throws RemoteException {
-        synchronized (lock) {
-            ScaleBeanServer beanServer = getScaleBeanServer(processingUnitName);
-            
-            if (beanServer == null) {
-                beanServer = new ScaleBeanServer(admin);
-                scaleBeanServerPerProcessingUnit.put(processingUnitName, beanServer);
-            }
-            
-            //TODO: Implement beanServer.setProperties(properties);
-        }
-    }
+    public void setProcessingUnitElasticProperties(final String puName, final Map<String, String> properties) throws RemoteException {
+        
+        ((InternalAdmin)admin).scheduleNonBlockingStateChange(
+                 new Runnable() {
 
-    ScaleBeanServer getScaleBeanServer(String processingUnitName) {
-        if (processingUnitName == null) {
-            throw new IllegalArgumentException("prcessingUnitName cannot be null.");
-        }
-        final ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.get(processingUnitName);
-        return beanServer;
+                    public void run() {
+                        ESMImpl.this.processingUnitElasticPropertiesChanged(puName,properties);
+                    }
+                 }
+        );
     }
     
     public void processingUnitRemoved(ProcessingUnit processingUnit) {
-        ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.remove(processingUnit.getName());
-        beanServer.destroy();
+        try {
+            ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.remove(processingUnit.getName());
+            beanServer.destroy();
+        }
+        catch(Exception e) {
+            logger.log(Level.SEVERE, "Failed to destroy ScaleBeanServer for pu " + processingUnit.getName(),e);
+        }
+    }
+
+    public void processingUnitAdded(ProcessingUnit pu) {
+        
+        Map<String,String> puConfig = this.elasticPropertiesPerProcessingUnit.get(pu.getName());
+        if (puConfig != null) {
+            refreshProcessingUnitElasticConfig(pu, puConfig);
+        }
+    }
+
+    private void refreshProcessingUnitElasticConfig(ProcessingUnit pu, Map<String,String> elasticConfig) {
+
+        ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.get(pu);
+        
+        if (beanServer == null) {
+            beanServer = new ScaleBeanServer(pu,rebalancingSlaEnforcement,containersSlaEnforcement,machinesSlaEnforcement);
+            scaleBeanServerPerProcessingUnit.put(pu, beanServer);
+        }
+        beanServer.setElasticProperties(elasticConfig);
+    }
+    
+    private void processingUnitElasticPropertiesChanged(String puName, Map<String,String> properties) {
+        // TODO Auto-generated method stub
+        
     }
 }

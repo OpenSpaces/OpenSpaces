@@ -39,7 +39,6 @@ import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.gsm.GridServiceManager;
-import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
@@ -308,7 +307,7 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * 
      * This method is only available if the processing unit deployment is elastic
      */
-    ProcessingUnitElasticConfig getElasticConfig();
+    Map<String,String> getElasticProperties();
     
     /**
      * Modifies the elastic configuration of this processing unit
@@ -317,6 +316,6 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * 
      * @param config
      */
-    void setElasticConfig(ProcessingUnitElasticConfig config);
+    void setElasticProperties(Map<String,String> config);
     
 }

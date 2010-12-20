@@ -1,13 +1,12 @@
 package org.openspaces.grid.gsm.machines;
 
-import org.openspaces.core.bean.Bean;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementPolicy;
 
 public class MachinesSlaPolicy extends ServiceLevelAgreementPolicy {
  
-    int memory;
+    long memoryInMB;
     double cpu;
-    private Bean machineProvisioning;
+    private NonBlockingElasticMachineProvisioning machineProvisioning;
     
     public void setCpu(double cpu) {
         this.cpu = cpu;
@@ -17,26 +16,26 @@ public class MachinesSlaPolicy extends ServiceLevelAgreementPolicy {
         return this.cpu;
     }
     
-    public void setMemoryCapacityInMB(int memory) {
-        this.memory = memory;
+    public void setMemoryCapacityInMB(long memory) {
+        this.memoryInMB = memory;
     }
     
-    public int getMemoryCapacityInMB() {
-        return this.memory;
+    public long getMemoryCapacityInMB() {
+        return this.memoryInMB;
     }
     
-    public Bean getMachineProvisioning() {
+    public NonBlockingElasticMachineProvisioning getMachineProvisioning() {
         return this.machineProvisioning;
     }
     
-    public void setMachineProvisioning(Bean machineProvisioning) {
+    public void setMachineProvisioning(NonBlockingElasticMachineProvisioning machineProvisioning) {
         this.machineProvisioning = machineProvisioning;
     }
     
     @Override
     public boolean equals(Object other) {
         return other instanceof MachinesSlaPolicy &&
-        ((MachinesSlaPolicy)other).memory == this.memory &&
+        ((MachinesSlaPolicy)other).memoryInMB == this.memoryInMB &&
         ((MachinesSlaPolicy)other).cpu == this.cpu;
     }
     

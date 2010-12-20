@@ -9,7 +9,7 @@ import java.util.Map;
  */
 public interface ESM extends com.gigaspaces.grid.esm.ESM {
 
-    Map<String, String> getProcessingUnitElasticConfig(String processingUnitName) throws RemoteException;
+    Map<String, String> getProcessingUnitElasticProperties(String processingUnitName) throws RemoteException;
 
-    void setProcessingUnitElasticConfig(String processingUnitName, Map<String, String> properties) throws RemoteException;
+    void setProcessingUnitElasticProperties(String processingUnitName, Map<String, String> properties) throws RemoteException;
 }

@@ -27,7 +27,6 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.dump.InternalDumpResult;
 import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
-import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
 import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
@@ -175,9 +174,9 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         }
         
         // set dynamic properties
-        ProcessingUnitElasticConfig elasticConfig = deployment.getElasticConfig();
-        if (elasticConfig != null) {
-            setProcessingUnitElasticConfig(pu, elasticConfig);
+        Map<String,String> elasticConfig = deployment.getElasticProperties();
+        if (elasticConfig.size() > 0) {
+            setProcessingUnitElasticProperties(pu, elasticConfig);
         }
         
         return pu;
@@ -407,18 +406,16 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         return admin.getGridServiceManagers().getManagerByUID(getUid()) != null;
     }
     
-    public ProcessingUnitElasticConfig getProcessingUnitElasticConfig(ProcessingUnit pu) {
+    public Map<String,String> getProcessingUnitElasticProperties(ProcessingUnit pu) {
         
         //TODO: Read the data from the gsm server.
-        ProcessingUnitElasticConfig config = getElasticServiceManager().getProcessingUnitElasticConfig(pu);
-        
-        return config;
+        return getElasticServiceManager().getProcessingUnitElasticProperties(pu);
     }
     
-    public void setProcessingUnitElasticConfig(ProcessingUnit pu, ProcessingUnitElasticConfig config) {
+    public void setProcessingUnitElasticProperties(ProcessingUnit pu, Map<String,String> properties) {
         
         //TODO: Store the data in the gsm server.
-        getElasticServiceManager().setProcessingUnitElasticConfig(pu,config);
+        getElasticServiceManager().setProcessingUnitElasticProperties(pu, properties);
     }
 
     private InternalElasticServiceManager getElasticServiceManager() {

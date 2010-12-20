@@ -13,7 +13,6 @@ import java.util.concurrent.TimeoutException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.Admin;
-import org.openspaces.admin.bean.BeanConfigurationClassCastException;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
@@ -103,25 +102,8 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
             throw new IllegalArgumentException("MachineProvisioning cannot be null.");
         }
         
-        NonBlockingElasticMachineProvisioning machineProvisioning = null;
-        
-        if (sla.getMachineProvisioning() instanceof ElasticMachineProvisioning) {
-            machineProvisioning = new NonBlockingElasticMachineProvisioningAdapter((ElasticMachineProvisioning)machineProvisioning);
-        }
-        else if (sla.getMachineProvisioning() instanceof NonBlockingElasticMachineProvisioning) {
-            machineProvisioning = (NonBlockingElasticMachineProvisioning)sla.getMachineProvisioning();
-        }
-        else {
-            throw new BeanConfigurationClassCastException(
-                    "The bean class " + sla.getMachineProvisioning().getClass() + 
-                    " must either implement " + 
-                    ElasticMachineProvisioning.class.getName() + 
-                    " or " + 
-                    NonBlockingElasticMachineProvisioning.class.getName());
-        }
-        
         try {
-			return enforceSlaInternal(sla, machineProvisioning);
+			return enforceSlaInternal(sla);
 		} catch (ConflictingOperationInProgressException e) {
 			logger.info("Cannot enforce Machines SLA since a conflicting operation is in progress. Try again later.", e);
             return false; // try again next time
@@ -138,15 +120,15 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
         destroyed = true;
     }
     
-	private boolean enforceSlaInternal(MachinesSlaPolicy sla, NonBlockingElasticMachineProvisioning machineProvisioning)
+	private boolean enforceSlaInternal(MachinesSlaPolicy sla)
 			throws ConflictingOperationInProgressException {
 
-		cleanAgentsMarkedForShutdown(machineProvisioning);
+		cleanAgentsMarkedForShutdown(sla.getMachineProvisioning());
 		cleanFutureAgents();
 
 		boolean slaReached = futureAgents.size() == 0 && agentsPendingShutdown.size() == 0;
 		
-		int targetMemory = sla.getMemoryCapacityInMB();
+		long targetMemory = sla.getMemoryCapacityInMB();
 		double targetCpu = sla.getCpu();
 
 		int existingMemory = 0;
@@ -165,7 +147,7 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 		if (existingMemory > targetMemory && existingCpu > targetCpu) {
 
 			// scale in
-			int surplusMemory = existingMemory - targetMemory;
+			long surplusMemory = existingMemory - targetMemory;
 			double surplusCpu = existingCpu - targetCpu;
 
 			// adjust existingMemory based on agents marked for shutdown
@@ -218,7 +200,7 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 			this.agentsPendingShutdown.clear();
 			    
 
-			int shortageMemory = targetMemory - existingMemory;
+			long shortageMemory = targetMemory - existingMemory;
 			double shortageCpu = targetCpu - existingCpu;
 
 			// take into account expected machines into shortage calculate
@@ -249,7 +231,7 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 			
 				
 				this.futureAgents.add(
-			        machineProvisioning.startMachinesAsync(
+			        sla.getMachineProvisioning().startMachinesAsync(
 						new CapacityRequirements(
 								new MemoryCapacityRequirment(shortageMemory),
 								new CpuCapacityRequirement(shortageCpu)),

@@ -5,12 +5,13 @@ import java.util.Map;
 
 import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
+import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfigurer;
@@ -130,7 +131,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return (ElasticStatefulProcessingUnitDeployment) super.scale(strategy);
     }
 
-    public ElasticStatefulProcessingUnitDeployment scale(ManualMemoryCapacityScaleConfig strategy) {
+    public ElasticStatefulProcessingUnitDeployment scale(ManualCapacityScaleConfig strategy) {
         return (ElasticStatefulProcessingUnitDeployment) super.scale(strategy);
     }
     
@@ -224,7 +225,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     
     protected int calcNumberOfPartitionsFromMemoryRequirements() {
         
-        long maximumJavaHeapSizeMegabytes = super.getElasticConfig().getGridServiceContainerConfig().getMaximumJavaHeapSizeInMB();
+        long maximumJavaHeapSizeMegabytes = new GridServiceContainerConfig(super.getElasticProperties()).getMaximumJavaHeapSizeInMB();
                 
         if (maximumJavaHeapSizeMegabytes == 0) {
             throw new IllegalStateException("-Xmx vmInputArgument is not defined.");    

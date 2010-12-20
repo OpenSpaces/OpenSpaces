@@ -133,18 +133,18 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
     }
 
 
-    public ProcessingUnitElasticConfig getProcessingUnitElasticConfig(ProcessingUnit pu) {
+    public Map<String,String> getProcessingUnitElasticProperties(ProcessingUnit pu) {
         try {
-            return new ProcessingUnitElasticConfig(esm.getProcessingUnitElasticConfig(pu.getName()));
+            return esm.getProcessingUnitElasticProperties(pu.getName());
         }
         catch (RemoteException e) {
             throw new AdminException("Failed to retrieve processing unit dynamic properties",e);
         }
     }
 
-    public void setProcessingUnitElasticConfig(ProcessingUnit pu, ProcessingUnitElasticConfig properties) {
+    public void setProcessingUnitElasticProperties(ProcessingUnit pu, Map<String,String> properties) {
         try {
-            esm.setProcessingUnitElasticConfig(pu.getName(),properties.getProperties());
+            esm.setProcessingUnitElasticProperties(pu.getName(),properties);
         }
         catch (RemoteException e) {
             throw new AdminException("Failed to set processing unit dynamic properties",e);

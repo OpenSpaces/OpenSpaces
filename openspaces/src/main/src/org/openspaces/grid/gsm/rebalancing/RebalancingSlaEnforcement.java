@@ -11,7 +11,8 @@ import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestr
  * @author itaif
  *
  */
-public class RebalancingSlaEnforcement implements ServiceLevelAgreementEnforcement<RebalancingSlaPolicy,ProcessingUnit,RebalancingSlaEnforcementEndpoint>{
+public class RebalancingSlaEnforcement 
+    implements ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, RebalancingSlaEnforcementEndpoint>{
 
     private boolean destroyed;
 

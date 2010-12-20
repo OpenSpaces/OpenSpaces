@@ -16,8 +16,8 @@ import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
+import org.openspaces.admin.internal.pu.elastic.ScaleStrategyBeanPropertiesManager;
 import org.openspaces.admin.internal.pu.events.DefaultBackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceAddedEventManager;
@@ -591,23 +591,28 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     public void scale(BeanConfig strategyConfig) {
 
-        ProcessingUnitElasticConfig config = getElasticConfig();
-        config.setScaleStrategy(strategyConfig);
-        setElasticConfig(config);
+        Map<String, String> elasticProperties = getElasticProperties();
+        ScaleStrategyBeanPropertiesManager propertiesManager = new ScaleStrategyBeanPropertiesManager(elasticProperties);
+        propertiesManager.disableAllBeans();
+        String beanClassName = strategyConfig.getBeanClassName();
+        Map<String, String> beanProperties = strategyConfig.getProperties();
+        propertiesManager.putConfig(beanClassName, beanProperties);
+        propertiesManager.enableBean(beanClassName);
+        setElasticProperties(elasticProperties);
     }
 
-    public ProcessingUnitElasticConfig getElasticConfig() {
+    public Map<String,String> getElasticProperties() {
         if (getManagingGridServiceManager() == null) {
             throw new AdminException("Processing Unit " + getName() + " does not have an associated managing GSM");
         }
-        return ((InternalGridServiceManager)getManagingGridServiceManager()).getProcessingUnitElasticConfig(this);
+        return ((InternalGridServiceManager)getManagingGridServiceManager()).getProcessingUnitElasticProperties(this);
     }
 
-    public void setElasticConfig(ProcessingUnitElasticConfig config) {
+    public void setElasticProperties(Map<String,String> properties) {
         if (getManagingGridServiceManager() == null) {
             throw new AdminException("Processing Unit " + getName() + " does not have an associated managing GSM");
         }
-        ((InternalGridServiceManager)getManagingGridServiceManager()).setProcessingUnitElasticConfig(this,config);
+        ((InternalGridServiceManager)getManagingGridServiceManager()).setProcessingUnitElasticProperties(this, properties);
         
     }
 }

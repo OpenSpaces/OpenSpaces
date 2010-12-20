@@ -6,7 +6,7 @@ import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfigurer;
@@ -82,7 +82,7 @@ public class ElasticMemcachedDeployment implements ElasticStatefulDeploymentTopo
         return this;
     }
 
-    public ElasticMemcachedDeployment scale(ManualMemoryCapacityScaleConfig strategy) {
+    public ElasticMemcachedDeployment scale(ManualCapacityScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }

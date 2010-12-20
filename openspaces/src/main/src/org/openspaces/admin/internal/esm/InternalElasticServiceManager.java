@@ -1,5 +1,7 @@
 package org.openspaces.admin.internal.esm;
 
+import java.util.Map;
+
 import net.jini.core.lookup.ServiceID;
 
 import org.openspaces.admin.esm.ElasticServiceManager;
@@ -14,7 +16,7 @@ public interface InternalElasticServiceManager extends ElasticServiceManager, In
 
     ServiceID getServiceID();
 
-    ProcessingUnitElasticConfig getProcessingUnitElasticConfig(ProcessingUnit pu);
+    Map<String,String> getProcessingUnitElasticProperties(ProcessingUnit pu);
 
-    void setProcessingUnitElasticConfig(ProcessingUnit pu, ProcessingUnitElasticConfig properties);
+    void setProcessingUnitElasticProperties(ProcessingUnit pu, Map<String,String> properties);
 }

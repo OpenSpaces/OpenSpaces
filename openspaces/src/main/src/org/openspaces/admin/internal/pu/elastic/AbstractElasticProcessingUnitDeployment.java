@@ -1,9 +1,11 @@
 package org.openspaces.admin.internal.pu.elastic;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.openspaces.admin.bean.BeanConfig;
-import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig;
+import org.openspaces.admin.bean.BeanConfigPropertiesManager;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.core.util.StringProperties;
 
@@ -19,22 +21,21 @@ public abstract class AbstractElasticProcessingUnitDeployment {
 //    private static final String RESERVED_CONTEXT_PROPERTY_PREFIX_DEFAULT ="__";
 //    public static final String RESERVED_CONTEXT_PROPERTY_PREFIX_PROPERTY="reserved-context-property-prefix";
 //    private static final String TENANT_ZONE_SEPERATOR_PROPERTY="tenant-zone-separator";
+
+//  private String agentZone;
+//  private ElasticProcessingUnitDeploymentIsolation isolation = new DedicatedIsolation();
     
     private final String processingUnit;
-
     private String name;
-    
-//    private String agentZone;
-        
-//    private ElasticProcessingUnitDeploymentIsolation isolation = new DedicatedIsolation();
-
     private final StringProperties contextProperties = new StringProperties();
-
     private UserDetails userDetails;
-    
     private Boolean secured;
+    private final Map<String,String> elasticProperties;
 
-    private ProcessingUnitElasticConfig elasticConfig;
+    private GridServiceContainerConfig containerConfig;
+    private MachineProvisioningBeanPropertiesManager machineProvisioningPropertiesManager;
+    private ScaleStrategyBeanPropertiesManager scaleStrategyPropertiesManager;
+    
     
 //    private String tenantZoneSeparator = TENANT_ZONE_SEPERATOR_DEFAULT;
 //    private String reservedContextPropertyPrefix = RESERVED_CONTEXT_PROPERTY_PREFIX_DEFAULT;
@@ -42,6 +43,10 @@ public abstract class AbstractElasticProcessingUnitDeployment {
 
     public AbstractElasticProcessingUnitDeployment(String processingUnit) {
         this.processingUnit = processingUnit;
+        elasticProperties = new HashMap<String,String>();
+        containerConfig = new GridServiceContainerConfig(elasticProperties);
+        machineProvisioningPropertiesManager = new MachineProvisioningBeanPropertiesManager(elasticProperties);
+        scaleStrategyPropertiesManager = new ScaleStrategyBeanPropertiesManager(elasticProperties);
     }
 
     /**
@@ -131,7 +136,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
      * and not a pure Java process.
      */
     protected AbstractElasticProcessingUnitDeployment useScript() {
-        elasticConfig.getGridServiceContainerConfig().setUseScript(true);
+        containerConfig.setUseScript(true);
         return this;
     }
 
@@ -140,7 +145,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
      * that the JVM will start by default with.
      */
     protected AbstractElasticProcessingUnitDeployment overrideCommandLineArguments() {
-        elasticConfig.getGridServiceContainerConfig().setOverrideCommandLineArguments(true);
+        containerConfig.setOverrideCommandLineArguments(true);
         return this;
     }
 
@@ -149,7 +154,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
      * can be controlled using <code>-Xmx512m</code>.
      */
     protected AbstractElasticProcessingUnitDeployment commandLineArgument(String argument) {
-        elasticConfig.getGridServiceContainerConfig().addCommandLineArgument(argument);
+        containerConfig.addCommandLineArgument(argument);
         return this;
     }
 
@@ -157,7 +162,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
      * Sets an environment variable that will be passed to forked process.
      */
     protected AbstractElasticProcessingUnitDeployment environmentVariable(String name, String value) {
-        elasticConfig.getGridServiceContainerConfig().setEnvironmentVariable(name, value);
+        containerConfig.setEnvironmentVariable(name, value);
         return this;
     }
     
@@ -168,12 +173,12 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     }
 */
     protected AbstractElasticProcessingUnitDeployment machineProvisioning(BeanConfig config) {
-        elasticConfig.setMachineProvisioning(config);
+        enableBean(machineProvisioningPropertiesManager, config);
         return this;
     }    
 
     protected AbstractElasticProcessingUnitDeployment scale(BeanConfig config) {
-        elasticConfig.setScaleStrategy(config);
+        enableBean(scaleStrategyPropertiesManager, config);
         return null;
     }
     
@@ -272,15 +277,25 @@ public abstract class AbstractElasticProcessingUnitDeployment {
             deployment.setContextProperty(key, value);
         }
 
-        Map<String,String> dynamicProperties = getElasticConfig().getProperties();
-         
-        for (String key : dynamicProperties.keySet()) {
-            deployment.setElasticProperty(key, dynamicProperties.get(key));
+        for (String key : elasticProperties.keySet()) {
+            deployment.setElasticProperty(key, elasticProperties.get(key));
         }
         return deployment;
     }
 
-    protected ProcessingUnitElasticConfig getElasticConfig() {
-        return this.elasticConfig;
+    protected Map<String,String> getElasticProperties() {
+        return this.elasticProperties;
     }
+    
+    /**
+     * Sets the elastic scale strategy 
+     * @param config - the scale strategy bean configuration, or null to disable it.
+     * @see ProcessingUnit#scale(org.openspaces.admin.pu.ElasticScaleStrategyConfig)
+     */
+    private void enableBean(BeanConfigPropertiesManager propertiesManager, BeanConfig config) {
+        propertiesManager.disableAllBeans();
+        propertiesManager.putConfig(config.getBeanClassName(), config.getProperties());
+        propertiesManager.enableBean(config.getBeanClassName());
+    }
+    
 }

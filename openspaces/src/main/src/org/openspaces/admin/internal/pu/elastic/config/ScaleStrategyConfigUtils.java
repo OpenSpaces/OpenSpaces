@@ -76,13 +76,4 @@ public class ScaleStrategyConfigUtils {
     public static void setPollingIntervalSeconds(StringProperties properties, int value) {
         properties.putInteger(POLLING_INTERVAL_SECONDS_KEY, value);
     }
-
-    public static void setProcessingUnitName(StringProperties properties, String processingUnitName) {
-        properties.put(PROCESSING_UNIT_NAME_KEY, processingUnitName);
-    }
-
-    public static String getProcessingUnitName(StringProperties properties) {
-        return properties.get(PROCESSING_UNIT_NAME_KEY, PROCESSING_UNIT_NAME_DEFAULT);
-    }
-
 }

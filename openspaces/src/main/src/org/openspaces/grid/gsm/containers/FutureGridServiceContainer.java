@@ -5,7 +5,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.internal.esm.ProcessingUnitElasticConfig.GridServiceContainerConfig;
+import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 
 public interface FutureGridServiceContainer {
 
@@ -20,7 +20,7 @@ public interface FutureGridServiceContainer {
     GridServiceAgent getGridServiceAgent();
     
     /**
-     * @return the grid service container object if started succesfully
+     * @return the grid service container object if started successfully
      * @throws ExecutionException - if async operation resulted in an exception
      * @throws TimeoutException - if async operation took too much time to complete
      * @throws IllegalStateException - if {@link #isDone()} is false
