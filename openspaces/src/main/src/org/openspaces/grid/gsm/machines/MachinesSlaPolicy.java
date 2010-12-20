@@ -7,6 +7,7 @@ public class MachinesSlaPolicy extends ServiceLevelAgreementPolicy {
     long memoryInMB;
     double cpu;
     private NonBlockingElasticMachineProvisioning machineProvisioning;
+    private int minimumNumberOfMachines;
     
     public void setCpu(double cpu) {
         this.cpu = cpu;
@@ -32,11 +33,21 @@ public class MachinesSlaPolicy extends ServiceLevelAgreementPolicy {
         this.machineProvisioning = machineProvisioning;
     }
     
+    
+    public int getMinimumNumberOfMachines() {
+        return minimumNumberOfMachines;
+    }
+    
+    public void setMinimumNumberOfMachines(int minimumNumberOfMachines) {
+        this.minimumNumberOfMachines = minimumNumberOfMachines;
+    }
+    
     @Override
     public boolean equals(Object other) {
         return other instanceof MachinesSlaPolicy &&
         ((MachinesSlaPolicy)other).memoryInMB == this.memoryInMB &&
-        ((MachinesSlaPolicy)other).cpu == this.cpu;
+        ((MachinesSlaPolicy)other).cpu == this.cpu &&
+        ((MachinesSlaPolicy)other).minimumNumberOfMachines == this.minimumNumberOfMachines;
     }
     
 

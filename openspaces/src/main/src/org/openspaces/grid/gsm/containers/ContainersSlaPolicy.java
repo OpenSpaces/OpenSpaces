@@ -20,6 +20,8 @@ public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
 
     private GridServiceAgent[] gridServiceAgents;
 
+    private int minimumNumberOfMachines;
+
    
     public void setTargetNumberOfContainers(int containers) {
         this.containers = containers;
@@ -62,6 +64,14 @@ public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
         this.gridServiceAgents = gridServiceAgents;
     }
     
+    public int getMinimumNumberOfMachines() {
+        return minimumNumberOfMachines;
+    }
+    
+    public void setMinimumNumberOfMachines(int minimumNumberOfMachines) {
+        this.minimumNumberOfMachines = minimumNumberOfMachines;
+    }
+    
     public boolean equals(Object other) {
         return other instanceof ContainersSlaPolicy &&
                ((ContainersSlaPolicy)other).containers == this.containers &&
@@ -69,7 +79,8 @@ public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
                //((ContainersAdminServiceLevelAgreement)other).machineZone.equals(this.machineZone) &&
                //((ContainersAdminServiceLevelAgreement)other).machineIsolation.equals(this.machineIsolation) &&
                ((ContainersSlaPolicy)other).reservedInMB == this.reservedInMB &&
-               ((ContainersSlaPolicy)other).maxNumberOfContainersPerMachine == this.maxNumberOfContainersPerMachine;
+               ((ContainersSlaPolicy)other).maxNumberOfContainersPerMachine == this.maxNumberOfContainersPerMachine &&
+               ((ContainersSlaPolicy)other).minimumNumberOfMachines == this.minimumNumberOfMachines;
     }
 
 }
