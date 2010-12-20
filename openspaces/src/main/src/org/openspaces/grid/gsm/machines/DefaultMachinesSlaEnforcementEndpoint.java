@@ -2,6 +2,7 @@ package org.openspaces.grid.gsm.machines;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -32,13 +33,13 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
     private final ProcessingUnit pu;
     private final InternalAdmin admin;
         
-    private List<GridServiceAgent> agentsStarted;
-    private List<FutureGridServiceAgents> futureAgents;
-    private List<GridServiceAgent> agentsPendingShutdown;
+    private final List<GridServiceAgent> agentsStarted;
+    private final List<FutureGridServiceAgents> futureAgents;
+    private final List<GridServiceAgent> agentsPendingShutdown;
     
     private boolean destroyed;
     
-    public DefaultMachinesSlaEnforcementEndpoint(Admin admin, ProcessingUnit pu) {
+    public DefaultMachinesSlaEnforcementEndpoint(Admin admin, ProcessingUnit pu, Collection<GridServiceAgent> agents) {
         
         if (admin == null) {
         	throw new IllegalArgumentException("admin cannot be null.");
@@ -52,6 +53,8 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
         this.pu = pu;
         this.destroyed = false;
         
+        this.agentsStarted = new ArrayList<GridServiceAgent>();
+        agentsStarted.addAll(agents);
         this.futureAgents = new ArrayList<FutureGridServiceAgents>();
         this.agentsPendingShutdown = new ArrayList<GridServiceAgent>();
         
@@ -182,6 +185,7 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 					// mark machine for shutdown unless it is a management
 					// machine
 					this.agentsPendingShutdown.add(agent);
+					this.agentsStarted.remove(agent);
 					surplusMemory -= machineMemory;
 					surplusCpu -= machineCpu;
 					slaReached = false;
