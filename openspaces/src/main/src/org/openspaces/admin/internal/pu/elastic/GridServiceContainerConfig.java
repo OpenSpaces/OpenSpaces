@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.pu.elastic;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -134,7 +135,8 @@ public class GridServiceContainerConfig {
     }
 
     public void addCommandLineArgument(String argument) {
-        List<String> arguments = Arrays.asList(this.getCommandLineArguments());
+        List<String> arguments = new ArrayList<String>();
+        arguments.addAll(Arrays.asList(this.getCommandLineArguments()));
         arguments.add(argument);
         this.setCommandLineArguments(arguments.toArray(new String[] {}));
     }

@@ -181,7 +181,7 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
             return false; // try again next time
         }
         
-       return isSlaReached(zone,sla);
+       return isSlaReached(pu,sla);
     }
 
     private GridServiceContainer[] getContainersPendingProcessingUnitRelocation(ProcessingUnit pu) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
@@ -320,11 +320,11 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
     /**
      * @return true if reached exact target number of containers with specified container zone.
      */
-    private boolean isSlaReached(String zone, ContainersSlaPolicy sla) {
+    private boolean isSlaReached(ProcessingUnit pu, ContainersSlaPolicy sla) {
         return 
-            sla.getTargetNumberOfContainers() == ContainersSlaUtils.getContainersByZone(zone,admin).size() &&
-            containersMarkedForShutdownPerProcessingUnit.get(zone).size() == 0 &&
-            futureContainersPerProcessingUnit.get(zone).size() == 0;
+            sla.getTargetNumberOfContainers() == ContainersSlaUtils.getContainersByZone(getContainerZone(pu),admin).size() &&
+            containersMarkedForShutdownPerProcessingUnit.get(pu).size() == 0 &&
+            futureContainersPerProcessingUnit.get(pu).size() == 0;
     }
 
     private void validateNotDisposed(ProcessingUnit pu) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
