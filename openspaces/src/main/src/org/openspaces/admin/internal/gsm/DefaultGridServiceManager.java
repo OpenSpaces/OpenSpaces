@@ -399,7 +399,8 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     public ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit)
             throws ProcessingUnitAlreadyDeployedException {
         
-        return deploy(deployment.toProcessingUnitDeployment(),timeout,timeUnit);
+        //return deploy(deployment.toProcessingUnitDeployment(),timeout,timeUnit);
+        throw new UnsupportedOperationException("Elastic Processing Unit Deployment is unsupported");
     }
 
     public boolean isRunning() {
