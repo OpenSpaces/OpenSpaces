@@ -30,29 +30,32 @@ import java.util.Map;
 public interface BeanConfigPropertiesManager {
 
     /**
-     * Defines a configuration for the specified bean. Overrides all previously set properties for that bean.
+     * Defines a configuration for the specified bean. Overrides all previously set properties for
+     * that bean.
      * <p>
      * An exception is raised if the bean is enabled.
      * 
-     * @param beanClassName the bean class name
-     * @param properties the String key-value pairs used to configure this bean.
+     * @param beanClassName
+     *            the bean class name
+     * @param properties
+     *            the String key-value pairs used to configure this bean.
      * 
      * @throws EnabledBeanConfigCannotBeChangedException
-     *      The bean is enabled. Disable it first.
+     *             The bean is enabled. Disable it first.
      */
 	void setBeanConfig(String beanClassName, Map<String,String> properties) throws EnabledBeanConfigCannotBeChangedException;
 
     /**
-     * Enables a previously added bean. 
-     * Creates the bean instance with the previously set properties.
-     * <p> 
-     * If the bean is already enabled, the request is silently ignored.
+     * Disables a bean. The bean object is discarded but it's configuration remains. The bean can be
+     * enabled at a later time.
+     * <p>
+     * If the bean is already disabled, the request is silently ignored.
      * 
      * @param beanClassName
      *            the bean class name
-     *            
+     * 
      * @throws BeanConfigNotFoundException
-     *             thrown if the bean configuration is not found.
+     *             bean configuration cannot be found.
      * @throws BeanConfigurationException
      *             in the event of misconfiguration (such as failure to set an essential property).
      * @throws BeanInitializationException
@@ -76,7 +79,7 @@ public interface BeanConfigPropertiesManager {
 	void disableBean(String beanClassName) throws BeanConfigNotFoundException;
 
 	/**
-	 * @return true if the bean is enabled, false if the bean is disabled
+	 * @return <code>true</code> if the bean is enabled, <code>false</code> if the bean is disabled.
 	 * 
 	 * @param beanClassName
      *            the bean class name
@@ -91,23 +94,26 @@ public interface BeanConfigPropertiesManager {
      * 
      * @param beanClassName
      *            the bean class name
-     * @return true if removed ,false if it did not exist in the first place.
+     * @return <code>true</code> if removed ,<code>false</code> if it did not exist in the first place.
      * 
      * @throws EnabledBeanConfigCannotBeChangedException 
      *         The bean is enabled. Disable it first.
+     * @throws BeanConfigNotFoundException
+     *             bean configuration cannot be found.
      */
-	boolean removeBeanConfig(String beanClassName) throws EnabledBeanConfigCannotBeChangedException;
-	
-	/**
-	 * Get the bean configuration.
-	 * 
-	 * @param beanClassName the bean class name
-	 * 
-	 * @return the String key-value pairs configuration properties.
-	 * 
-	 * @throws BeanConfigNotFoundException 
-	 *         Bean configuration cannot be found. Put the configuration first.
-	 */
+	boolean removeBeanConfig(String beanClassName) throws EnabledBeanConfigCannotBeChangedException, BeanConfigNotFoundException;
+
+    /**
+     * Get the bean configuration.
+     * 
+     * @param beanClassName
+     *            the bean class name
+     * 
+     * @return the String key-value pairs configuration properties.
+     * 
+     * @throws BeanConfigNotFoundException
+     *             bean configuration cannot be found. Put the configuration first.
+     */
 	Map<String,String> getBeanConfig(String beanClassName) throws BeanConfigNotFoundException;;
 
     /**
