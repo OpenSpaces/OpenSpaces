@@ -54,9 +54,9 @@ public class ScaleBeanServer {
                 new MachineProvisioningBeanPropertiesManager(elasticProperties);
         String enabledMachineProvisioningClassName = getEnabledBeanClassName(machineProvisioningPropertiesManager);
         if (enabledMachineProvisioningClassName != null) {
-            beanServer.putConfig(
+            beanServer.setBeanConfig(
                     enabledMachineProvisioningClassName, 
-                    machineProvisioningPropertiesManager.getConfig(enabledMachineProvisioningClassName));
+                    machineProvisioningPropertiesManager.getBeanConfig(enabledMachineProvisioningClassName));
             beanServer.enableBean(enabledMachineProvisioningClassName);
         }
         
@@ -64,9 +64,9 @@ public class ScaleBeanServer {
             new ScaleStrategyBeanPropertiesManager(elasticProperties);
         String enabledScaleStrategyClassName = getEnabledBeanClassName(scaleStrategyPropertiesManager);
         if (enabledScaleStrategyClassName != null) {
-            beanServer.putConfig(
+            beanServer.setBeanConfig(
                     enabledScaleStrategyClassName, 
-                    scaleStrategyPropertiesManager.getConfig(enabledScaleStrategyClassName));
+                    scaleStrategyPropertiesManager.getBeanConfig(enabledScaleStrategyClassName));
             beanServer.enableBean(enabledScaleStrategyClassName);
         }
     }
@@ -88,7 +88,7 @@ public class ScaleBeanServer {
 
     private void setGridServiceContainerConfig(Map<String, String> elasticProperties) {
         String beanClassName = GridServiceContainerConfigBean.class.getName();
-        beanServer.putConfig(beanClassName, elasticProperties);
+        beanServer.setBeanConfig(beanClassName, elasticProperties);
         beanServer.enableBean(beanClassName);
     }
 
@@ -103,7 +103,7 @@ public class ScaleBeanServer {
         }
         else {
 
-            Map<String, String> beanProperties = new HashMap<String,String>(scaleStrategyBeanPropertiesManager.getConfig(enabledBeanClassName));
+            Map<String, String> beanProperties = new HashMap<String,String>(scaleStrategyBeanPropertiesManager.getBeanConfig(enabledBeanClassName));
             beanServer.replaceBeanAssignableTo(
                     new Class[]{ElasticDeploymentTopology.class}, 
                     enabledBeanClassName,
@@ -134,7 +134,7 @@ public class ScaleBeanServer {
         // replace machine provisioning bean if possible    
         if (enabledBeanClassName != null && existingEnabledBeans.length != 0) {
                        
-            Map<String, String> beanProperties = propertiesManager.getConfig(enabledBeanClassName);
+            Map<String, String> beanProperties = propertiesManager.getBeanConfig(enabledBeanClassName);
             beanServer.replaceBeanAssignableTo(
                     new Class[]{ElasticMachineProvisioning.class,
                                 NonBlockingElasticMachineProvisioning.class}, 

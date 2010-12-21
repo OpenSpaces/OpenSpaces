@@ -40,7 +40,7 @@ public interface BeanConfigPropertiesManager {
      * @throws EnabledBeanConfigCannotBeChangedException
      *      The bean is enabled. Disable it first.
      */
-	void putConfig(String beanClassName, Map<String,String> properties) throws EnabledBeanConfigCannotBeChangedException;
+	void setBeanConfig(String beanClassName, Map<String,String> properties) throws EnabledBeanConfigCannotBeChangedException;
 
     /**
      * Enables a previously added bean. 
@@ -96,7 +96,7 @@ public interface BeanConfigPropertiesManager {
      * @throws EnabledBeanConfigCannotBeChangedException 
      *         The bean is enabled. Disable it first.
      */
-	boolean removeConfig(String beanClassName) throws EnabledBeanConfigCannotBeChangedException;
+	boolean removeBeanConfig(String beanClassName) throws EnabledBeanConfigCannotBeChangedException;
 	
 	/**
 	 * Get the bean configuration.
@@ -108,7 +108,7 @@ public interface BeanConfigPropertiesManager {
 	 * @throws BeanConfigNotFoundException 
 	 *         Bean configuration cannot be found. Put the configuration first.
 	 */
-	Map<String,String> getConfig(String beanClassName) throws BeanConfigNotFoundException;;
+	Map<String,String> getBeanConfig(String beanClassName) throws BeanConfigNotFoundException;;
 
     /**
      * Lists the class names of configured beans.

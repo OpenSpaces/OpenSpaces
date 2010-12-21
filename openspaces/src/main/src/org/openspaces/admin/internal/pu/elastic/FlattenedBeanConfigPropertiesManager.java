@@ -23,7 +23,7 @@ public class FlattenedBeanConfigPropertiesManager implements BeanConfigPropertie
         this.classnamesKey = classnamesKey;
     }
 
-    public void putConfig(String beanClassName, Map<String, String> properties) throws BeanConfigNotFoundException {
+    public void setBeanConfig(String beanClassName, Map<String, String> properties) throws BeanConfigNotFoundException {
         
         if (isBeanEnabled(beanClassName)) {
             throw new EnabledBeanConfigCannotBeChangedException("Cannot modify bean [" + beanClassName + "] configuration while it is enabled. Disable it first.");
@@ -55,7 +55,7 @@ public class FlattenedBeanConfigPropertiesManager implements BeanConfigPropertie
         }
     }
 
-    public boolean removeConfig(String beanClassName) {
+    public boolean removeBeanConfig(String beanClassName) {
         
         if (isBeanEnabled(beanClassName)) {
             throw new EnabledBeanConfigCannotBeChangedException("Cannot remove configuration of beanClassName " + beanClassName + " since it is enabled. disable it first.");
@@ -76,7 +76,7 @@ public class FlattenedBeanConfigPropertiesManager implements BeanConfigPropertie
         return properties.getArray(enabledClassnameKey, ",", new String[] {});
     }
 
-    public Map<String, String> getConfig(String beanClassName) throws BeanConfigNotFoundException {
+    public Map<String, String> getBeanConfig(String beanClassName) throws BeanConfigNotFoundException {
         
         if (!containsBeanInternal(beanClassName)) {
             throw new BeanConfigNotFoundException("Failed to get bean [" + beanClassName + "] since it does not exist.");

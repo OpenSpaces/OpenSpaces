@@ -596,7 +596,7 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         propertiesManager.disableAllBeans();
         String beanClassName = strategyConfig.getBeanClassName();
         Map<String, String> beanProperties = strategyConfig.getProperties();
-        propertiesManager.putConfig(beanClassName, beanProperties);
+        propertiesManager.setBeanConfig(beanClassName, beanProperties);
         propertiesManager.enableBean(beanClassName);
         setElasticProperties(elasticProperties);
     }

@@ -294,7 +294,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
      */
     private void enableBean(BeanConfigPropertiesManager propertiesManager, BeanConfig config) {
         propertiesManager.disableAllBeans();
-        propertiesManager.putConfig(config.getBeanClassName(), config.getProperties());
+        propertiesManager.setBeanConfig(config.getBeanClassName(), config.getProperties());
         propertiesManager.enableBean(config.getBeanClassName());
     }
     

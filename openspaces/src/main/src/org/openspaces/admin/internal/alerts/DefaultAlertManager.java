@@ -72,20 +72,20 @@ public class DefaultAlertManager implements InternalAlertManager {
         beanConfigPropertiesManager.enableBean(configInstance.getBeanClassName());
     }
 
-    public <T extends AlertBeanConfig> T getConfig(Class<T> clazz) throws BeanConfigNotFoundException {
+    public <T extends AlertBeanConfig> T getBeanConfig(Class<T> clazz) throws BeanConfigNotFoundException {
         T configInstance = getConfigInstance(clazz);
-        Map<String, String> beanProperties = beanConfigPropertiesManager.getConfig(configInstance.getBeanClassName());
+        Map<String, String> beanProperties = beanConfigPropertiesManager.getBeanConfig(configInstance.getBeanClassName());
         configInstance.setProperties(beanProperties);
         return configInstance;
     }
 
-    public <T extends AlertBeanConfig> boolean removeConfig(Class<T> clazz) throws EnabledBeanConfigCannotBeChangedException {
+    public <T extends AlertBeanConfig> boolean removeBeanConfig(Class<T> clazz) throws EnabledBeanConfigCannotBeChangedException {
         BeanConfig configInstance = getConfigInstance(clazz);
-        return beanConfigPropertiesManager.removeConfig(configInstance.getBeanClassName());
+        return beanConfigPropertiesManager.removeBeanConfig(configInstance.getBeanClassName());
     }
 
-    public void putConfig(AlertBeanConfig config) throws EnabledBeanConfigCannotBeChangedException {
-        beanConfigPropertiesManager.putConfig(config.getBeanClassName(), config.getProperties());
+    public void setBeanConfig(AlertBeanConfig config) throws EnabledBeanConfigCannotBeChangedException {
+        beanConfigPropertiesManager.setBeanConfig(config.getBeanClassName(), config.getProperties());
     }
 
     public <T extends AlertBeanConfig> boolean isBeanEnabled(Class<T> clazz) throws BeanConfigNotFoundException {

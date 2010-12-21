@@ -42,7 +42,7 @@ public interface BeanConfigManager<B extends BeanConfig> {
      *            
      * @throws EnabledBeanConfigCannotBeChangedException - if the bean is enabled
      */
-    void putConfig(B config) throws BeanConfigNotFoundException;
+    void setBeanConfig(B config) throws BeanConfigNotFoundException;
 
     /**
      * Enable a previously added bean configuration. 
@@ -105,7 +105,7 @@ public interface BeanConfigManager<B extends BeanConfig> {
      * @throws EnabledBeanConfigCannotBeChangedException
      *              The bean is enabled. Disable it first.
      */
-    <T extends B> boolean removeConfig(Class<T> clazz) throws EnabledBeanConfigCannotBeChangedException;
+    <T extends B> boolean removeBeanConfig(Class<T> clazz) throws EnabledBeanConfigCannotBeChangedException;
 
     /**
      * Get the bean configuration represented by the specified configuration class.
@@ -120,6 +120,6 @@ public interface BeanConfigManager<B extends BeanConfig> {
      * @throws BeanConfigNotFoundException
      *             Bean configuration cannot be found. Put the configuration first.
      */
-    <T extends B> T getConfig(Class<T> clazz) throws BeanConfigNotFoundException;
+    <T extends B> T getBeanConfig(Class<T> clazz) throws BeanConfigNotFoundException;
     
 }
