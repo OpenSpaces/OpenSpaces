@@ -29,7 +29,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     private String name;
     private final StringProperties contextProperties = new StringProperties();
     private UserDetails userDetails;
-    private Boolean secured;
+    private boolean secured;
     private final Map<String,String> elasticProperties;
 
     private GridServiceContainerConfig containerConfig;
@@ -72,7 +72,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         if (key == null) {
             throw new IllegalArgumentException("Key cannot be null");
         }
-        String currentValue = contextProperties.get(key);
+        String currentValue = contextProperties.get(key,null);
         if (currentValue != null && !currentValue.equals(value)) {
             throw new IllegalStateException("Context property " + key + " is already defined to " + currentValue + " and cannot be modified to " + value);
         }
@@ -81,9 +81,6 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     }
 
     protected AbstractElasticProcessingUnitDeployment secured(boolean secured) {
-        if (this.secured != null && this.secured != secured) {
-            throw new IllegalStateException("Secured is already defined to " + this.secured + " and cannot be modified to "+ secured);
-        }
         this.secured = secured;
         return this;
     }

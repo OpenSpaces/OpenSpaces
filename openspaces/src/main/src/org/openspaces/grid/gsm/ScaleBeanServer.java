@@ -2,6 +2,7 @@ package org.openspaces.grid.gsm;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.openspaces.admin.bean.BeanConfigException;
@@ -118,21 +119,21 @@ public class ScaleBeanServer {
         
         String enabledBeanClassName = getEnabledBeanClassName(propertiesManager);
 
-        Bean[] existingEnabledBeans = beanServer.getEnabledBeanAssignableTo(
+        List<Bean> existingEnabledBeans = beanServer.getEnabledBeanAssignableTo(
                 new Class[]{
                         ElasticMachineProvisioning.class,
                         NonBlockingElasticMachineProvisioning.class});
 
-        if (enabledBeanClassName == null && existingEnabledBeans.length != 0) {
-            throw new BeanConfigurationException("Cannot disable " + existingEnabledBeans[0].getClass() + " at runtime.");
+        if (enabledBeanClassName == null && !existingEnabledBeans.isEmpty()) {
+            throw new BeanConfigurationException("Cannot disable " + existingEnabledBeans.get(0).getClass() + " at runtime.");
         }
         
-        if (enabledBeanClassName != null && existingEnabledBeans.length == 0) {
+        if (enabledBeanClassName != null && existingEnabledBeans.isEmpty()) {
             throw new BeanConfigurationException("Cannot enable " + enabledBeanClassName + " at runtime.");
         }
         
         // replace machine provisioning bean if possible    
-        if (enabledBeanClassName != null && existingEnabledBeans.length != 0) {
+        if (enabledBeanClassName != null && !existingEnabledBeans.isEmpty()) {
                        
             Map<String, String> beanProperties = propertiesManager.getBeanConfig(enabledBeanClassName);
             beanServer.replaceBeanAssignableTo(

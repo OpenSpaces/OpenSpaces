@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.pu.elastic;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +48,7 @@ public class FlattenedBeanConfigPropertiesManager implements BeanConfigPropertie
             throw new BeanConfigNotFoundException("Failed to disable bean [" + beanClassName + "] since it does not exist.");
         }
         
-        List<String> enabled = Arrays.asList(getEnabledBeansClassNames());
+        List<String> enabled = new ArrayList<String>(Arrays.asList(getEnabledBeansClassNames()));
         
         if (enabled.contains(beanClassName)) {
             enabled.remove(beanClassName);
@@ -93,7 +94,7 @@ public class FlattenedBeanConfigPropertiesManager implements BeanConfigPropertie
     }
 
     private void addBeanInternal(String beanClassName) {
-        List<String> beanList = Arrays.asList(getBeansClassNames());
+        List<String> beanList = new ArrayList<String>(Arrays.asList(getBeansClassNames()));
         if (!beanList.contains(beanClassName)) {
             beanList.add(beanClassName);
             this.properties.putArray(
@@ -103,7 +104,7 @@ public class FlattenedBeanConfigPropertiesManager implements BeanConfigPropertie
 
     private boolean removeBeanInternal(String beanClassName) {
         boolean removed = false;
-        List<String> beanList = Arrays.asList(getBeansClassNames());
+        List<String> beanList = new ArrayList<String>(Arrays.asList(getBeansClassNames()));
         if (beanList.contains(beanClassName)) {
             beanList.remove(beanClassName);
             this.properties.putArray(

@@ -1,10 +1,10 @@
 package org.openspaces.grid.gsm;
 
+import java.util.List;
 import java.util.Map;
 
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.bean.BeanInitializationException;
-import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.core.bean.Bean;
 import org.openspaces.core.bean.BeanServer;
@@ -65,7 +65,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         }
         
         if (instance instanceof ElasticMachineProvisioningAware) {
-            Bean[] injectedInstances = beanServer.getEnabledBeanAssignableTo(
+            List<Bean> injectedInstances = beanServer.getEnabledBeanAssignableTo(
                     new Class[]{
                             ElasticMachineProvisioning.class,
                             NonBlockingElasticMachineProvisioning.class});
@@ -91,11 +91,11 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         }
         
         if (instance instanceof GridServiceContainerConfigAware) {
-            Bean[] injectedInstances = beanServer.getEnabledBeanAssignableTo(
+            List<Bean> injectedInstances = beanServer.getEnabledBeanAssignableTo(
                     new Class[]{ GridServiceContainerConfigBean.class });
             for (Bean injectedInstance : injectedInstances) {
                 ((GridServiceContainerConfigAware)instance)
-                    .setGridServiceContainerConfig((GridServiceContainerConfig)injectedInstance);
+                    .setGridServiceContainerConfig(((GridServiceContainerConfigBean)injectedInstance).getGridServiceContainerConfig());
                 break;
             }
         }

@@ -304,6 +304,9 @@ public class ESMImpl<x> extends ServiceBeanAdapter implements ESM, ProcessingUni
         if (puConfig != null) {
             refreshProcessingUnitElasticConfig(pu, puConfig);
         }
+        else {
+            logger.info("Processing Unit " + pu.getName() + " was detected, but elastic properties for that pu was not set yet.");
+        }
     }
 
     private void refreshProcessingUnitElasticConfig(ProcessingUnit pu, Map<String,String> elasticProperties) {
@@ -314,9 +317,11 @@ public class ESMImpl<x> extends ServiceBeanAdapter implements ESM, ProcessingUni
         if (beanServer == null) {
             beanServer = new ScaleBeanServer(pu,rebalancingSlaEnforcement,containersSlaEnforcement,machinesSlaEnforcement,elasticProperties);
             scaleBeanServerPerProcessingUnit.put(pu, beanServer);
+            logger.info("Elastic properties for pu " + pu.getName() + " are being enforced.");
         }
         else {
             beanServer.setElasticProperties(elasticProperties);
+            logger.info("Elastic properties for pu " + pu.getName() + " are being refreshed.");
         }
         }
         catch (BeanConfigException e) {
@@ -329,6 +334,9 @@ public class ESMImpl<x> extends ServiceBeanAdapter implements ESM, ProcessingUni
         ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(puName);
         if (pu != null) {
             refreshProcessingUnitElasticConfig(pu,elasticProperties);
+        }
+        else {
+            logger.info("Elastic properties for pu " + puName + " has been set, but the processing unit itself was not detected yet.");
         }
     }
 }

@@ -155,7 +155,15 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 		if (existingMemory > targetMemory && 
 		    existingCpu > targetCpu && 
 		    agentsStarted.size() + agentsPendingShutdown.size() > sla.getMinimumNumberOfMachines()) {
-
+		    
+		    logger.debug("Considering scale in: "+
+		            "target memory is "+ targetMemory +"MB, "+
+		            "existing memory is " + existingMemory +"MB, "+
+		            "target CPU is " + targetCpu + " " +
+		            "existing CPU is " + existingCpu + ", " +
+		            "minimum #machines is " + sla.getMinimumNumberOfMachines() + ", " +
+		            "existing #machines is " + agentsStarted.size() + agentsPendingShutdown.size());
+		    
 			// scale in
 			long surplusMemory = existingMemory - targetMemory;
 			double surplusCpu = existingCpu - targetCpu;
@@ -172,7 +180,8 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 				GridServiceAgent agent = iterator.next();
 				int machineMemory = getMemoryInMB(agent);
 				double machineCpu = getCpu(agent);
-				if (surplusMemory >= machineMemory && 
+				if (surplusMemory >= machineMemory &&
+				    surplusCpu >= machineCpu &&
 				    surplusMachines > 0) {
 					// this machine is already marked for shutdown, so surplus
 					// is adjusted to reflect that
@@ -180,8 +189,6 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 					surplusCpu -= machineCpu;
 					surplusMachines--;
 				} else {
-					// don't mark this machine for shutdown otherwise surplus
-					// would become negative
 					iterator.remove();
 					logger.info("machine agent " + agent.getMachine().getHostAddress() + " is no longer marked for shutdown in order to maintain capacity.");
 				}
@@ -210,6 +217,11 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 		else if (futureAgents.size() == 0 && 
 		        (agentsStarted.size() - agentsPendingShutdown.size() < sla.getMinimumNumberOfMachines())) {
 		    
+		    logger.info("Considering to start more machines to reach required minimum number of machines: " + 
+		                agentsStarted.size() + " machine agents started, " +
+		                agentsPendingShutdown.size() + " machine agents marked for shutdown, " +
+		                sla.getMinimumNumberOfMachines() + " is the required minimum number of machines."
+		    );
             int machineShortage = sla.getMinimumNumberOfMachines() + agentsPendingShutdown.size() 
                                   - agentsStarted.size();
             
@@ -226,12 +238,19 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
                             new CapacityRequirements(
                                     new NumberOfMachinesCapacityRequirement(machineShortage)),
                             START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
-                    logger.info(machineShortage+ " new machine were scheduled to be started in order to reach the minimum of " + sla.getMinimumNumberOfMachines() + " machines.");
+    		    slaReached = false;
+                logger.info(machineShortage+ " new machine(s) is scheduled to be started in order to reach the minimum of " + sla.getMinimumNumberOfMachines() + " machines.");
 		    }
 		}
 		
 		else if (agentsPendingShutdown.size() == 0 && 
                 (agentsStarted.size() + futureAgents.size() < sla.getMinimumNumberOfMachines())) {
+		    
+		    logger.info("Considering to start more machines to reach required minimum number of machines:" + 
+                    agentsStarted.size() + " machine agents started, " +
+                    futureAgents.size() + " machine agents are planned to be started, " +
+                    sla.getMinimumNumberOfMachines() + " is the required minimum number of machines."
+		    );
 		    
 		    // scale out to get to the minimum number of agents
 		    int machineShortage = sla.getMinimumNumberOfMachines() - (agentsStarted.size() + futureAgents.size()); 
@@ -240,12 +259,19 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
                         new CapacityRequirements(
                                 new NumberOfMachinesCapacityRequirement(machineShortage)),
                         START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
-                logger.info(machineShortage+ " new machine were scheduled to be started in order to reach the minimum of " + sla.getMinimumNumberOfMachines() + " machines.");
+            slaReached = false;
+            logger.info(machineShortage+ " new machine(s) is scheduled to be started in order to reach the minimum of " + sla.getMinimumNumberOfMachines() + " machines.");
 		}
 		
 		else if (existingMemory < targetMemory || existingCpu < targetCpu) {
 			// scale out
 
+		    logger.info("Considering to start more machines inorder to reach target capacity:" + 
+		            "target memory is "+ targetMemory +"MB, "+
+                    "existing memory is " + existingMemory +"MB, "+
+                    "target CPU is " + targetCpu + " " +
+                    "existing CPU is " + existingCpu);
+		    
 			// unmark all machines pending shutdown
 			for (GridServiceAgent agent : agentsPendingShutdown) {
 			    logger.info("machine agent " + agent.getMachine().getHostAddress() + " is no longer marked for shutdown in order to maintain capacity.");
@@ -289,10 +315,13 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 								new MemoryCapacityRequirment(shortageMemory),
 								new CpuCapacityRequirement(shortageCpu)),
 						START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
+				slaReached = false;
 				logger.info("One or more new machine were scheduled to be started in order to increase capacity.");
 			}
 		}
-		
+		else {
+		    logger.debug("No action required in order to enforce machines sla.");
+		}
 		return slaReached;
 	}
 

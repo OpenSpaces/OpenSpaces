@@ -59,6 +59,7 @@ public class ManualCapacityScaleStrategyBean
     @SuppressWarnings("unchecked")
     private Future scheduledTask;
     private int targetNumberOfContainers;
+    private int minimumNumberOfMachines;
     private NonBlockingElasticMachineProvisioning machineProvisioning;
 
     public Map<String, String> getProperties() {
@@ -108,12 +109,24 @@ public class ManualCapacityScaleStrategyBean
                     "cannot support " + (numberOfBackups==1?"one backup":numberOfBackups+" backups") + " per partition. "+
                     "Either don't use the minimum number of containers property or set it to " + (numberOfBackups+1));
         }
+        
+        // calculate minimum number of machines
+        minimumNumberOfMachines = calcMinNumberOfMachines(pu);
 
         this.targetNumberOfContainers = calcTargetNumberOfContainers();
         
         scheduledTask = 
         ((InternalAdmin)admin).scheduleWithFixedDelayNonBlockingStateChange(
         this, 0L, (long)slaConfig.getPollingIntervalSeconds(), TimeUnit.SECONDS);
+    }
+
+    private int calcMinNumberOfMachines(ProcessingUnit pu) {
+        int minNumberOfMachines = 1;
+        if (pu.getMaxInstancesPerMachine() != 0) {
+            minNumberOfMachines = (int)Math.ceil(
+                    (1 + pu.getNumberOfBackups())/1.0*pu.getMaxInstancesPerMachine());
+        }
+        return minNumberOfMachines;
     }
 
     public void destroy() {
@@ -219,6 +232,7 @@ public class ManualCapacityScaleStrategyBean
         sla.setCpu(0); // TODO: slaConfig.getCpu()
         long targetMemory = targetNumberOfContainers * containersConfig.getMaximumJavaHeapSizeInMB();
         sla.setMemoryCapacityInMB(targetMemory);
+        sla.setMinimumNumberOfMachines(minimumNumberOfMachines);
         boolean reachedSla = machinesService.enforceSla(sla);
         
         if (reachedSla) {
@@ -246,6 +260,7 @@ public class ManualCapacityScaleStrategyBean
         sla.setTargetNumberOfContainers(targetNumberOfContainers);
         sla.setNewContainerConfig(containersConfig);
         sla.setGridServiceAgents(machinesService.getGridServiceAgents());
+        sla.setMinimumNumberOfMachines(minimumNumberOfMachines);
         
         boolean reachedSla = containersService.enforceSla(sla);
         
