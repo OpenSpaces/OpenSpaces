@@ -4,7 +4,6 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.jini.rio.resources.util.TimeUtil;
 import org.openspaces.admin.Admin;
@@ -14,7 +13,6 @@ import org.openspaces.admin.alerts.AlertFactory;
 import org.openspaces.admin.alerts.AlertSeverity;
 import org.openspaces.admin.alerts.config.MachineCpuUtilizationAlertBeanConfig;
 import org.openspaces.admin.bean.BeanConfigurationException;
-import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.alerts.AlertHistory;
 import org.openspaces.admin.internal.alerts.AlertHistoryDetails;
 import org.openspaces.admin.internal.alerts.InternalAlertManager;
