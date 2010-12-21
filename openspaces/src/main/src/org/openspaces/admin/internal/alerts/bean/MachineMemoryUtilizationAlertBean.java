@@ -26,7 +26,11 @@ import org.openspaces.admin.os.events.OperatingSystemStatisticsChangedEventListe
 public class MachineMemoryUtilizationAlertBean implements AlertBean,
         OperatingSystemStatisticsChangedEventListener, MachineRemovedEventListener {
 
-    public final static String beanUID = "11ce5f71-135e-4d19-b59a-bbc0a919704c";
+    public static final String beanUID = "11ce5f71-135e-4d19-b59a-bbc0a919704c";
+    public static final String ALERT_NAME = "Machine Memory Utilization";
+    public static final String HOST_ADDRESS = "host-address";
+    public static final String HOST_NAME = "host-name";
+    public static final String MEMORY_UTILIZATION = "memory-utilization";
     
     private final MachineMemoryUtilizationAlertBeanConfig config = new MachineMemoryUtilizationAlertBeanConfig();
 
@@ -101,16 +105,16 @@ public class MachineMemoryUtilizationAlertBean implements AlertBean,
 
         final String groupUid = generateGroupUid(machine.getOperatingSystem().getUid());
         AlertFactory factory = new AlertFactory();
-        factory.name("Machine Memory Utilization");
+        factory.name(ALERT_NAME);
         factory.beanClassName(this.getClass().getName());
         factory.groupUid(groupUid);
         factory.description("Memory measurment is unavailable; machine has been removed");
         factory.severity(AlertSeverity.NA);
         factory.componentUid(machine.getOperatingSystem().getUid());
         factory.properties(config.getProperties());
-        factory.putProperty("memory-utilization", "n/a");
-        factory.putProperty("hostname", machine.getHostName());
-        factory.putProperty("host-address", machine.getHostAddress());
+        factory.putProperty(MEMORY_UTILIZATION, "n/a");
+        factory.putProperty(HOST_NAME, machine.getHostName());
+        factory.putProperty(HOST_ADDRESS, machine.getHostAddress());
 
         Alert alert = factory.toAlert();
         admin.getAlertManager().fireAlert(alert);
@@ -127,7 +131,7 @@ public class MachineMemoryUtilizationAlertBean implements AlertBean,
         if (memoryAvg > highThreshold) {
             final String groupUid = generateGroupUid(event.getOperatingSystem().getUid());
             AlertFactory factory = new AlertFactory();
-            factory.name("Machine Memory Utilization");
+            factory.name(ALERT_NAME);
             factory.beanClassName(this.getClass().getName());
             factory.groupUid(groupUid);
             factory.description("Memory crossed above a " + highThreshold + "% threshold, for a period of "
@@ -135,9 +139,9 @@ public class MachineMemoryUtilizationAlertBean implements AlertBean,
             factory.severity(AlertSeverity.CRITICAL);
             factory.componentUid(event.getOperatingSystem().getUid());
             factory.properties(config.getProperties());
-            factory.putProperty("memory-utilization", String.valueOf(memoryAvg));
-            factory.putProperty("hostname", event.getStatistics().getDetails().getHostName());
-            factory.putProperty("host-address", event.getStatistics().getDetails().getHostAddress());
+            factory.putProperty(MEMORY_UTILIZATION, String.valueOf(memoryAvg));
+            factory.putProperty(HOST_NAME, event.getStatistics().getDetails().getHostName());
+            factory.putProperty(HOST_ADDRESS, event.getStatistics().getDetails().getHostAddress());
 
             Alert alert = factory.toAlert();
             admin.getAlertManager().fireAlert(alert);
@@ -148,7 +152,7 @@ public class MachineMemoryUtilizationAlertBean implements AlertBean,
             AlertHistoryDetails alertHistoryDetails = alertHistory.getDetails();
             if (alertHistoryDetails != null && !alertHistoryDetails.isResolved()) {
                 AlertFactory factory = new AlertFactory();
-                factory.name("Machine Memory Utilization");
+                factory.name(ALERT_NAME);
                 factory.beanClassName(this.getClass().getName());
                 factory.groupUid(groupUid);
                 factory.description("Memory crossed below a " + highThreshold + "% threshold, for a period of "
@@ -156,9 +160,9 @@ public class MachineMemoryUtilizationAlertBean implements AlertBean,
                 factory.severity(AlertSeverity.OK);
                 factory.componentUid(event.getOperatingSystem().getUid());
                 factory.properties(config.getProperties());
-                factory.putProperty("memory-utilization", String.valueOf(memoryAvg));
-                factory.putProperty("hostname", event.getStatistics().getDetails().getHostName());
-                factory.putProperty("host-address", event.getStatistics().getDetails().getHostAddress());
+                factory.putProperty(MEMORY_UTILIZATION, String.valueOf(memoryAvg));
+                factory.putProperty(HOST_NAME, event.getStatistics().getDetails().getHostName());
+                factory.putProperty(HOST_ADDRESS, event.getStatistics().getDetails().getHostAddress());
 
                 Alert alert = factory.toAlert();
                 admin.getAlertManager().fireAlert(alert);

@@ -26,7 +26,11 @@ import org.openspaces.admin.os.events.OperatingSystemStatisticsChangedEventListe
 public class MachineCpuUtilizationAlertBean implements AlertBean,
         OperatingSystemStatisticsChangedEventListener, MachineRemovedEventListener {
 
-    public final static String beanUID = "dc675afe-6a81-4400-957c-93392a70de4c";
+    public static final String beanUID = "dc675afe-6a81-4400-957c-93392a70de4c";
+    public static final String ALERT_NAME = "Machine CPU Utilization";
+    public static final String HOST_ADDRESS = "host-address";
+    public static final String HOST_NAME = "host-name";
+    public static final String CPU_UTILIZATION = "cpu-utilization";
     
     private final MachineCpuUtilizationAlertBeanConfig config = new MachineCpuUtilizationAlertBeanConfig();
 
@@ -99,16 +103,16 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
     public void machineRemoved(final Machine machine) {
         final String groupUid = generateGroupUid(machine.getOperatingSystem().getUid());
         AlertFactory factory = new AlertFactory();
-        factory.name("Machine CPU Utilization");
+        factory.name(ALERT_NAME);
         factory.beanClassName(this.getClass().getName());
         factory.groupUid(groupUid);
         factory.description("CPU measurment is unavailable; machine has been removed");
         factory.severity(AlertSeverity.NA);
         factory.componentUid(machine.getOperatingSystem().getUid());
         factory.properties(config.getProperties());
-        factory.putProperty("cpu-utilization", "n/a");
-        factory.putProperty("hostname", machine.getHostName());
-        factory.putProperty("host-address", machine.getHostAddress());
+        factory.putProperty(CPU_UTILIZATION, "n/a");
+        factory.putProperty(HOST_NAME, machine.getHostName());
+        factory.putProperty(HOST_ADDRESS, machine.getHostAddress());
 
         Alert alert = factory.toAlert();
         admin.getAlertManager().fireAlert(alert);
@@ -125,7 +129,7 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
         if (cpuAvg > highThreshold) {
             final String groupUid = generateGroupUid(event.getOperatingSystem().getUid());
             AlertFactory factory = new AlertFactory();
-            factory.name("Machine CPU Utilization");
+            factory.name(ALERT_NAME);
             factory.beanClassName(this.getClass().getName());
             factory.groupUid(groupUid);
             factory.description("CPU crossed above a " + highThreshold + "% threshold, for a period of "
@@ -133,9 +137,9 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
             factory.severity(AlertSeverity.CRITICAL);
             factory.componentUid(event.getOperatingSystem().getUid());
             factory.properties(config.getProperties());
-            factory.putProperty("cpu-utilization", String.valueOf(cpuAvg));
-            factory.putProperty("hostname", event.getStatistics().getDetails().getHostName());
-            factory.putProperty("host-address", event.getStatistics().getDetails().getHostAddress());
+            factory.putProperty(CPU_UTILIZATION, String.valueOf(cpuAvg));
+            factory.putProperty(HOST_NAME, event.getStatistics().getDetails().getHostName());
+            factory.putProperty(HOST_ADDRESS, event.getStatistics().getDetails().getHostAddress());
 
             Alert alert = factory.toAlert();
             admin.getAlertManager().fireAlert(alert);
@@ -146,7 +150,7 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
             AlertHistoryDetails alertHistoryDetails = alertHistory.getDetails();
             if (alertHistoryDetails != null && !alertHistoryDetails.isResolved()) {
                 AlertFactory factory = new AlertFactory();
-                factory.name("Machine CPU Utilization");
+                factory.name(ALERT_NAME);
                 factory.beanClassName(this.getClass().getName());
                 factory.groupUid(groupUid);
                 factory.description("CPU crossed below a " + highThreshold + "% threshold, for a period of "
@@ -154,9 +158,9 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
                 factory.severity(AlertSeverity.OK);
                 factory.componentUid(event.getOperatingSystem().getUid());
                 factory.properties(config.getProperties());
-                factory.putProperty("cpu-utilization", String.valueOf(cpuAvg));
-                factory.putProperty("hostname", event.getStatistics().getDetails().getHostName());
-                factory.putProperty("host-address", event.getStatistics().getDetails().getHostAddress());
+                factory.putProperty(CPU_UTILIZATION, String.valueOf(cpuAvg));
+                factory.putProperty(HOST_NAME, event.getStatistics().getDetails().getHostName());
+                factory.putProperty(HOST_ADDRESS, event.getStatistics().getDetails().getHostAddress());
 
                 Alert alert = factory.toAlert();
                 admin.getAlertManager().fireAlert(alert);
