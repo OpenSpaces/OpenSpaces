@@ -3,9 +3,11 @@ package org.openspaces.grid.gsm.containers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -198,7 +200,7 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
         String zone = getContainerZone(pu);
         List<GridServiceContainer> containers = ContainersSlaUtils.getContainersByZone(zone,admin);
         
-        int targetContainers = sla.getTargetNumberOfContainers();
+        int targetContainers = Math.max(sla.getTargetNumberOfContainers(), sla.getMinimumNumberOfMachines());
         int existingContainers = containers.size();
         int futureContainers = this.futureContainersPerProcessingUnit.get(pu).size();
         
@@ -255,7 +257,8 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
         long requiredFreeMemoryInMB = sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB();
         
         boolean conflictingOperationInProgress = false;
-        GridServiceAgent recommendedGsa = null;
+        
+        List<GridServiceAgent> recommendedAgents = new ArrayList<GridServiceAgent>();
         
         for (GridServiceAgent gsa : sla.getGridServiceAgents()) {
             Machine machine = gsa.getMachine();
@@ -283,13 +286,28 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
                                 operatingSystemStatistics.getFreePhysicalMemorySizeInMB()));
             
             if (totalFreePhysicalMemorySizeInMB > requiredFreeMemoryInMB + sla.getReservedPhysicalMemoryPerMachineInMB()) {
-                recommendedGsa = gsa;
-                break;
+                recommendedAgents.add(gsa);
             }
         }
         
-        if (recommendedGsa != null) {
-            return recommendedGsa;
+        Set<Machine> machines =new HashSet<Machine>();
+        for (GridServiceContainer container : getContainers(pu)) {
+            machines.add(container.getMachine());
+        }
+        if (recommendedAgents.size() > 0) {
+            
+            if (machines.size() >= sla.getMinimumNumberOfMachines()) {
+                // minimum number of machines have been reached. just pick and recommended agent. 
+                return recommendedAgents.get(0);
+            }
+            
+            for (GridServiceAgent recommendedAgent : recommendedAgents) {
+                if (!machines.contains(recommendedAgent.getMachine())) {
+                 // this is a new machine and we need more machines to meet the minimum number of machines.
+                    return recommendedAgent;
+                }
+            }
+            
         }
         
         if (conflictingOperationInProgress) {

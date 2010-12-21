@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.openspaces.admin.bean.BeanConfigException;
+import org.openspaces.admin.bean.BeanConfigPropertiesManager;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.pu.elastic.MachineProvisioningBeanPropertiesManager;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyBeanPropertiesManager;
@@ -31,18 +32,43 @@ public class ScaleBeanServer {
             ProcessingUnit pu,
             RebalancingSlaEnforcement rebalancingSlaEnforcement, 
             ContainersSlaEnforcement containersSlaEnforcement,
-            MachinesSlaEnforcement machinesSlaEnforcement) {
+            MachinesSlaEnforcement machinesSlaEnforcement,
+            Map<String,String> elasticProperties) {
 
         this.pu = pu;
         this.rebalancingSlaEnforcement = rebalancingSlaEnforcement;
         this.containersSlaEnforcement = containersSlaEnforcement;
         this.machinesSlaEnforcement = machinesSlaEnforcement;
         this.beanServer = new DefaultBeanServer<Bean>(
+                
                 new ScaleBeanFactory(
                         pu, 
                         rebalancingSlaEnforcement.createEndpoint(pu), 
-                        containersSlaEnforcement.createEndpoint(pu), 
+                        containersSlaEnforcement.createEndpoint(pu),
                         machinesSlaEnforcement.createEndpoint(pu)));
+        
+        // order of beans is important due to implicit dependency inject order
+        setGridServiceContainerConfig(elasticProperties);
+        
+        MachineProvisioningBeanPropertiesManager machineProvisioningPropertiesManager = 
+                new MachineProvisioningBeanPropertiesManager(elasticProperties);
+        String enabledMachineProvisioningClassName = getEnabledBeanClassName(machineProvisioningPropertiesManager);
+        if (enabledMachineProvisioningClassName != null) {
+            beanServer.putConfig(
+                    enabledMachineProvisioningClassName, 
+                    machineProvisioningPropertiesManager.getConfig(enabledMachineProvisioningClassName));
+            beanServer.enableBean(enabledMachineProvisioningClassName);
+        }
+        
+        ScaleStrategyBeanPropertiesManager scaleStrategyPropertiesManager = 
+            new ScaleStrategyBeanPropertiesManager(elasticProperties);
+        String enabledScaleStrategyClassName = getEnabledBeanClassName(scaleStrategyPropertiesManager);
+        if (enabledScaleStrategyClassName != null) {
+            beanServer.putConfig(
+                    enabledScaleStrategyClassName, 
+                    scaleStrategyPropertiesManager.getConfig(enabledScaleStrategyClassName));
+            beanServer.enableBean(enabledScaleStrategyClassName);
+        }
     }
 
     public void destroy() {
@@ -56,10 +82,8 @@ public class ScaleBeanServer {
         // order of beans is important due to implicit dependency inject order
         // see ScaleBeanFactory
         setGridServiceContainerConfig(elasticProperties);
-        setElasticScaleStrategy(elasticProperties);
         setElasticMachineProvisioning(elasticProperties);
-        
-        
+        setElasticScaleStrategy(elasticProperties);
     }
 
     private void setGridServiceContainerConfig(Map<String, String> elasticProperties) {
@@ -69,22 +93,17 @@ public class ScaleBeanServer {
     }
 
     private void setElasticScaleStrategy(Map<String, String> elasticProperties) {
-        final ScaleStrategyBeanPropertiesManager propertiesManager = new ScaleStrategyBeanPropertiesManager(elasticProperties);
-        final String[] enabledBeansClassNames = propertiesManager.getEnabledBeansClassNames();
-        String enabledBeanClassName = null;
-        if (enabledBeansClassNames.length > 1) {
-            throw new BeanConfigurationException("At most one scale strategy can be enabled. Currently enabled " + Arrays.toString(enabledBeansClassNames));
-        }
-        else if (enabledBeansClassNames.length == 1) {
-            enabledBeanClassName = enabledBeansClassNames[0];
-        }
+        
+        ScaleStrategyBeanPropertiesManager scaleStrategyBeanPropertiesManager = new ScaleStrategyBeanPropertiesManager(elasticProperties);
+        String enabledBeanClassName = getEnabledBeanClassName(scaleStrategyBeanPropertiesManager);
         
         //replace scale strategy bean if necessary
         if (enabledBeanClassName == null) {
             beanServer.disableAllBeansAssignableTo(ElasticDeploymentTopology.class);
         }
         else {
-            Map<String, String> beanProperties = new HashMap<String,String>(propertiesManager.getConfig(enabledBeanClassName));
+
+            Map<String, String> beanProperties = new HashMap<String,String>(scaleStrategyBeanPropertiesManager.getConfig(enabledBeanClassName));
             beanServer.replaceBeanAssignableTo(
                     new Class[]{ElasticDeploymentTopology.class}, 
                     enabledBeanClassName,
@@ -93,22 +112,28 @@ public class ScaleBeanServer {
     }
     
     private void setElasticMachineProvisioning(Map<String, String> elasticProperties) {
-        final MachineProvisioningBeanPropertiesManager propertiesManager = new MachineProvisioningBeanPropertiesManager(elasticProperties);
-        final String[] enabledBeansClassNames = propertiesManager.getEnabledBeansClassNames();
-        String enabledBeanClassName = null;
-        if (enabledBeansClassNames.length > 1) {
-            throw new BeanConfigurationException("At most one machine provisioning can be enabled. Currently enabled " + Arrays.toString(enabledBeansClassNames));
-        }
-        else if (enabledBeansClassNames.length == 1) {
-            enabledBeanClassName = enabledBeansClassNames[0];
+        
+        final MachineProvisioningBeanPropertiesManager propertiesManager = 
+            new MachineProvisioningBeanPropertiesManager(elasticProperties);
+        
+        String enabledBeanClassName = getEnabledBeanClassName(propertiesManager);
+
+        Bean[] existingEnabledBeans = beanServer.getEnabledBeanAssignableTo(
+                new Class[]{
+                        ElasticMachineProvisioning.class,
+                        NonBlockingElasticMachineProvisioning.class});
+
+        if (enabledBeanClassName == null && existingEnabledBeans.length != 0) {
+            throw new BeanConfigurationException("Cannot disable " + existingEnabledBeans[0].getClass() + " at runtime.");
         }
         
-        // replace machine provisioning bean if necessary
-        if (enabledBeanClassName == null) {
-            beanServer.disableAllBeansAssignableTo(ElasticMachineProvisioning.class);
-            beanServer.disableAllBeansAssignableTo(NonBlockingElasticMachineProvisioning.class);
+        if (enabledBeanClassName != null && existingEnabledBeans.length == 0) {
+            throw new BeanConfigurationException("Cannot enable " + enabledBeanClassName + " at runtime.");
         }
-        else {
+        
+        // replace machine provisioning bean if possible    
+        if (enabledBeanClassName != null && existingEnabledBeans.length != 0) {
+                       
             Map<String, String> beanProperties = propertiesManager.getConfig(enabledBeanClassName);
             beanServer.replaceBeanAssignableTo(
                     new Class[]{ElasticMachineProvisioning.class,
@@ -117,4 +142,18 @@ public class ScaleBeanServer {
                     beanProperties);
         }
     }
+    
+    private String getEnabledBeanClassName(BeanConfigPropertiesManager propertiesManager) {
+        final String[] enabledBeansClassNames = propertiesManager.getEnabledBeansClassNames();
+        
+        if (enabledBeansClassNames.length > 1) {
+            throw new BeanConfigurationException("At most one of the following beans can be enabled: " + Arrays.toString(enabledBeansClassNames));
+        }
+        String enabledBeanClassName = null; 
+        if (enabledBeansClassNames.length == 1) {
+            enabledBeanClassName = enabledBeansClassNames[0];
+        }
+        return enabledBeanClassName;
+    }
+
 }

@@ -21,6 +21,7 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirment;
+import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
 public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEndpoint {
@@ -129,6 +130,10 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 		cleanAgentsMarkedForShutdown(sla.getMachineProvisioning());
 		cleanFutureAgents();
 
+		if (futureAgents.size() > 0 && agentsPendingShutdown.size() > 0) {
+		    throw new IllegalStateException("Cannot have both agents pending to be started and agents pending shutdown.");
+		}
+		
 		boolean slaReached = futureAgents.size() == 0 && agentsPendingShutdown.size() == 0;
 		
 		long targetMemory = sla.getMemoryCapacityInMB();
@@ -147,14 +152,19 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
             existingCpu += getCpu(agent);
         }
 
-		if (existingMemory > targetMemory && existingCpu > targetCpu) {
+		if (existingMemory > targetMemory && 
+		    existingCpu > targetCpu && 
+		    agentsStarted.size() + agentsPendingShutdown.size() > sla.getMinimumNumberOfMachines()) {
 
 			// scale in
 			long surplusMemory = existingMemory - targetMemory;
 			double surplusCpu = existingCpu - targetCpu;
-
-			// adjust existingMemory based on agents marked for shutdown
-			// remove mark if it would cause surplus to be below zero.
+			
+			int surplusMachines = agentsStarted.size() + agentsPendingShutdown.size() - sla.getMinimumNumberOfMachines();
+			
+			// adjust surplusMemory based on agents marked for shutdown
+			// remove mark if it would cause surplus to be below zero
+			// remove mark if it would reduce the number of machines below the sla minimum.
 			Iterator<GridServiceAgent> iterator = Arrays.asList(
 					getGridServiceAgentsPendingShutdown()).iterator();
 			while (iterator.hasNext()) {
@@ -162,11 +172,13 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 				GridServiceAgent agent = iterator.next();
 				int machineMemory = getMemoryInMB(agent);
 				double machineCpu = getCpu(agent);
-				if (surplusMemory >= machineMemory && surplusCpu >= machineCpu) {
+				if (surplusMemory >= machineMemory && 
+				    surplusMachines > 0) {
 					// this machine is already marked for shutdown, so surplus
 					// is adjusted to reflect that
 					surplusMemory -= machineMemory;
 					surplusCpu -= machineCpu;
+					surplusMachines--;
 				} else {
 					// don't mark this machine for shutdown otherwise surplus
 					// would become negative
@@ -175,12 +187,12 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 				}
 			}
 
-			// mark agents for shutdown if there are not enough of them
+			// mark agents for shutdown if there are not enough of them (scale in)
 			// give priority to agents that do not host a GSM/LUS since we want to evacuate those last.
 			for (GridServiceAgent agent : getGridServiceAgentsSortManagementComponentsLast()) {
 				int machineMemory = getMemoryInMB(agent);
 				double machineCpu = getCpu(agent);
-				if (surplusMemory >= machineMemory && surplusCpu >= machineCpu) {
+				if (surplusMemory >= machineMemory && surplusCpu >= machineCpu && surplusMachines > 0) {
 
 					// mark machine for shutdown unless it is a management
 					// machine
@@ -188,12 +200,49 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 					this.agentsStarted.remove(agent);
 					surplusMemory -= machineMemory;
 					surplusCpu -= machineCpu;
+					surplusMachines --;
 					slaReached = false;
 					logger.info("machine agent " + agent.getMachine().getHostAddress() + " is marked for shutdown in order to reduce capacity.");
 				}
 			}
 		}
 
+		else if (futureAgents.size() == 0 && 
+		        (agentsStarted.size() - agentsPendingShutdown.size() < sla.getMinimumNumberOfMachines())) {
+		    
+            int machineShortage = sla.getMinimumNumberOfMachines() + agentsPendingShutdown.size() 
+                                  - agentsStarted.size();
+            
+            for (int i =0 ; i < machineShortage && agentsPendingShutdown.size() > 0; i++) {
+                GridServiceAgent agent = agentsPendingShutdown.remove(0);
+                logger.info("machine agent " + agent.getMachine().getHostAddress() + " is no longer marked for shutdown in order to reach the minimum of " + sla.getMinimumNumberOfMachines() + " machines.");
+            }
+            
+            machineShortage = sla.getMinimumNumberOfMachines() + agentsPendingShutdown.size() 
+                                - agentsStarted.size();
+            if (machineShortage > 0) {
+    		    this.futureAgents.add(
+                        sla.getMachineProvisioning().startMachinesAsync(
+                            new CapacityRequirements(
+                                    new NumberOfMachinesCapacityRequirement(machineShortage)),
+                            START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
+                    logger.info(machineShortage+ " new machine were scheduled to be started in order to reach the minimum of " + sla.getMinimumNumberOfMachines() + " machines.");
+		    }
+		}
+		
+		else if (agentsPendingShutdown.size() == 0 && 
+                (agentsStarted.size() + futureAgents.size() < sla.getMinimumNumberOfMachines())) {
+		    
+		    // scale out to get to the minimum number of agents
+		    int machineShortage = sla.getMinimumNumberOfMachines() - (agentsStarted.size() + futureAgents.size()); 
+            this.futureAgents.add(
+                    sla.getMachineProvisioning().startMachinesAsync(
+                        new CapacityRequirements(
+                                new NumberOfMachinesCapacityRequirement(machineShortage)),
+                        START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
+                logger.info(machineShortage+ " new machine were scheduled to be started in order to reach the minimum of " + sla.getMinimumNumberOfMachines() + " machines.");
+		}
+		
 		else if (existingMemory < targetMemory || existingCpu < targetCpu) {
 			// scale out
 

@@ -13,9 +13,10 @@ import org.jini.rio.boot.BootUtil;
 import org.jini.rio.core.ClassBundle;
 import org.jini.rio.core.jsb.ServiceBeanContext;
 import org.jini.rio.jsb.ServiceBeanActivation;
-import org.jini.rio.jsb.ServiceBeanAdapter;
 import org.jini.rio.jsb.ServiceBeanActivation.LifeCycleManager;
+import org.jini.rio.jsb.ServiceBeanAdapter;
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.bean.BeanConfigException;
 import org.openspaces.admin.internal.InternalAdminFactory;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -305,19 +306,29 @@ public class ESMImpl<x> extends ServiceBeanAdapter implements ESM, ProcessingUni
         }
     }
 
-    private void refreshProcessingUnitElasticConfig(ProcessingUnit pu, Map<String,String> elasticConfig) {
+    private void refreshProcessingUnitElasticConfig(ProcessingUnit pu, Map<String,String> elasticProperties) {
 
+        try {
         ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.get(pu);
         
         if (beanServer == null) {
-            beanServer = new ScaleBeanServer(pu,rebalancingSlaEnforcement,containersSlaEnforcement,machinesSlaEnforcement);
+            beanServer = new ScaleBeanServer(pu,rebalancingSlaEnforcement,containersSlaEnforcement,machinesSlaEnforcement,elasticProperties);
             scaleBeanServerPerProcessingUnit.put(pu, beanServer);
         }
-        beanServer.setElasticProperties(elasticConfig);
+        else {
+            beanServer.setElasticProperties(elasticProperties);
+        }
+        }
+        catch (BeanConfigException e) {
+            logger.log(Level.SEVERE,"Error configuring elasitc scale bean.",e);
+        }
     }
     
-    private void processingUnitElasticPropertiesChanged(String puName, Map<String,String> properties) {
-        // TODO Auto-generated method stub
-        
+    private void processingUnitElasticPropertiesChanged(String puName, Map<String,String> elasticProperties) {
+        elasticPropertiesPerProcessingUnit.put(puName,elasticProperties);
+        ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(puName);
+        if (pu != null) {
+            refreshProcessingUnitElasticConfig(pu,elasticProperties);
+        }
     }
 }
