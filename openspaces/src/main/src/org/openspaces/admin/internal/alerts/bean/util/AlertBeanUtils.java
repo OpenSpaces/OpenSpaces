@@ -1,6 +1,9 @@
 package org.openspaces.admin.internal.alerts.bean.util;
 
 import java.util.List;
+import java.util.UUID;
+
+import org.openspaces.admin.internal.alerts.bean.AlertBean;
 
 public class AlertBeanUtils {
     
@@ -21,5 +24,16 @@ public class AlertBeanUtils {
         average /= period;
 
         return average;
+    }
+
+    /**
+     * Generate a unique bean UUID for a specific class by it's name.
+     * 
+     * @param clazz
+     *            the class of the alert bean to generate a UUID for.
+     * @return a UUID consisting of the name as hexadecimal digits concatenated with a random UUID.
+     */
+    public static String generateBeanUUID(Class<? extends AlertBean> clazz) {
+        return Integer.toHexString(clazz.getSimpleName().hashCode())+"-"+UUID.randomUUID();
     }
 }

@@ -26,7 +26,7 @@ import org.openspaces.admin.os.events.OperatingSystemStatisticsChangedEventListe
 public class MachineCpuUtilizationAlertBean implements AlertBean,
         OperatingSystemStatisticsChangedEventListener, MachineRemovedEventListener {
 
-    public static final String beanUID = "dc675afe-6a81-4400-957c-93392a70de4c";
+    public static final String beanUID = "d7f14ccb-774a468d-29dd-4c23-b7de-d0ae9aaec204";
     public static final String ALERT_NAME = "Machine CPU Utilization";
     public static final String HOST_ADDRESS = "host-address";
     public static final String HOST_NAME = "host-name";

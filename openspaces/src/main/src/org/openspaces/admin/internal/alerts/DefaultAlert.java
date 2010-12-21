@@ -148,6 +148,6 @@ public class DefaultAlert implements InternalAlert {
 
 	@Override
 	public String toString() {
-	    return getSeverity()+" | " + new Date(getTimestamp()) + " | " + getName() + " |" + getDescription() + " | " + getAlertUid()+" | " + getGroupUid() + " | " + getComponentUid();
+	    return getSeverity()+" | " + new Date(getTimestamp()) + " | " + getName() + " |" + getDescription() + " | " + getProperties();
 	}
 }
