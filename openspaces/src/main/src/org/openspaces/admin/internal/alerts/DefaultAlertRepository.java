@@ -13,29 +13,60 @@ import org.openspaces.admin.alerts.AlertSeverity;
 
 public class DefaultAlertRepository implements InternalAlertRepository {
 
-    public volatile int historySize = 200;
+    public volatile int groupHistorySize = 200;
+    private volatile int resolvedHistorySize = 100;
+    
     private final AtomicInteger incrementalId = new AtomicInteger();
     private final ConcurrentHashMap<String, AlertChain> alertsByGroupUid = new ConcurrentHashMap<String, AlertChain>();
 
-    public void setAlertsHistorySize(int historySize) {
-        this.historySize = historySize;
+    public void setGroupAlertHistorySize(int groupHistorySize) {
+        this.groupHistorySize = groupHistorySize;
+    }
+    
+    public void setResolvedAlertHistorySize(int resolvedHistorySize) {
+        this.resolvedHistorySize = resolvedHistorySize;
     }
 
     public boolean addAlert(Alert alert) {
 
         AlertChain chain = alertsByGroupUid.get(alert.getGroupUid());
         if (chain == null) {
-            if (AlertSeverity.OK.equals(alert.getSeverity())) return false;
+            if (AlertSeverity.OK.equals(alert.getSeverity())
+                    || AlertSeverity.NA.equals(alert.getSeverity())) return false;
             
-            AlertChain newChain = new AlertChain(historySize);
+            AlertChain newChain = new AlertChain(groupHistorySize);
             chain = alertsByGroupUid.putIfAbsent(alert.getGroupUid(), newChain);
             if (chain == null) {
                 chain = newChain;
             }
         }
+        ensureResolvedHistoryCapacity();
         //assign an alert UID
         ((InternalAlert)alert).setAlertUid((incrementalId.incrementAndGet() + "@" + Integer.toHexString(System.identityHashCode(alert))));
         return chain.addAlert(alert);
+    }
+
+    private void ensureResolvedHistoryCapacity() {
+        //fast exit check
+        if (alertsByGroupUid.size() < resolvedHistorySize) {
+            return;
+        }
+        
+        int countResolved = 0;
+        AlertChain olderTimestampAlertChain = null;
+        for (AlertChain chain : alertsByGroupUid.values()) {
+            if (chain.isResolved()) {
+                countResolved++;
+                //replace with older timestamp
+                if (olderTimestampAlertChain == null || olderTimestampAlertChain.resolvedAlert.getTimestamp() > chain.resolvedAlert.getTimestamp()) {
+                    olderTimestampAlertChain = chain;
+                }
+            }
+        }
+        
+        if (countResolved >= resolvedHistorySize && olderTimestampAlertChain != null) {
+            removeAlertHistoryByGroupUid(olderTimestampAlertChain.resolvedAlert.getGroupUid());
+        }
     }
 
     public Alert getAlertByUid(String uid) {
@@ -97,10 +128,10 @@ public class DefaultAlertRepository implements InternalAlertRepository {
         private List<Alert> unresolvedAlertsChain;
         private int historyIndex = 0;
         private final Map<String, Alert> alertByUid = new HashMap<String, Alert>();
-        private final int alertsHistorySize;
+        private final int groupHistorySize;
 
-        public AlertChain(int historySize) {
-            this.alertsHistorySize = historySize;
+        public AlertChain(int groupHistorySize) {
+            this.groupHistorySize = groupHistorySize;
         }
 
         private void initialize() {
@@ -118,7 +149,7 @@ public class DefaultAlertRepository implements InternalAlertRepository {
         }
 
         public synchronized boolean addAlert(Alert alert) {
-            if (alert.getSeverity().equals(AlertSeverity.OK)) {
+            if (AlertSeverity.OK.equals(alert.getSeverity()) || AlertSeverity.NA.equals(alert.getSeverity())) {
                 if (resolvedAlert != null)
                     return false;
                 resolvedAlert = alert;
@@ -133,7 +164,7 @@ public class DefaultAlertRepository implements InternalAlertRepository {
                     if (unresolvedAlertsChain == null) {
                         unresolvedAlertsChain = new ArrayList<Alert>();
                     }
-                    if (unresolvedAlertsChain.size() < alertsHistorySize) {
+                    if (unresolvedAlertsChain.size() < groupHistorySize) {
                         unresolvedAlertsChain.add(alert);
                     } else {
                         /*

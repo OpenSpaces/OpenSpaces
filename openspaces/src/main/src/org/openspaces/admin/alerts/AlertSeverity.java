@@ -22,14 +22,20 @@ package org.openspaces.admin.alerts;
  * <ul>
  * <li>CRITICAL (highest value)
  * <li>WARNING
- * <li>OK  (lowest value)
+ * <li>OK
+ * <li>NA (lowest value)
  * </ul>
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
 public enum AlertSeverity {
+    /** Alert indicating a critical state */
     CRITICAL, 
-    WARNING, 
-    OK;
+    /** Alert warning about a critical state */
+    WARNING,
+    /** Alert indicating a normal state */
+    OK,
+    /** Alert indicating that a state is not available; e.g. monitored component is unreachable */
+    NA;
 }

@@ -52,7 +52,7 @@ public class DefaultAlertHistory implements AlertHistory {
         }
 
         public boolean isResolved() {
-            return AlertSeverity.OK.equals(alertHistory.get(alertHistory.size() -1));
+            return AlertSeverity.OK.equals(alertHistory.get(alertHistory.size() -1).getSeverity());
         }
 
         public String getGroupUid() {

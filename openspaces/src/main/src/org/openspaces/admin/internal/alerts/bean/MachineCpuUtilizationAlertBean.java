@@ -100,16 +100,23 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
         }
     }
     
-
-    //when an operating system is removed, we want to clear the alert history from the repository (delayed by 1 minute).
+    //unreachable machine
     public void machineRemoved(final Machine machine) {
+        final String groupUid = generateGroupUid(machine.getOperatingSystem().getUid());
+        AlertFactory factory = new AlertFactory();
+        factory.name("Machine CPU Utilization");
+        factory.beanClassName(this.getClass().getName());
+        factory.groupUid(groupUid);
+        factory.description("CPU measurment is unavailable; machine has been removed");
+        factory.severity(AlertSeverity.NA);
+        factory.componentUid(machine.getOperatingSystem().getUid());
+        factory.properties(config.getProperties());
+        factory.putProperty("cpu-utilization", "n/a");
+        factory.putProperty("hostname", machine.getHostName());
+        factory.putProperty("host-address", machine.getHostAddress());
 
-        ((InternalAdmin)admin).getScheduler().schedule(new Runnable() {
-            public void run() {
-                final String groupUid = generateGroupUid(machine.getOperatingSystem().getUid());
-                ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().removeAlertHistoryByGroupUid(groupUid);
-            }
-        }, 60, TimeUnit.SECONDS);
+        Alert alert = factory.toAlert();
+        admin.getAlertManager().fireAlert(alert);
     }
 
     public void operatingSystemStatisticsChanged(OperatingSystemStatisticsChangedEvent event) {
