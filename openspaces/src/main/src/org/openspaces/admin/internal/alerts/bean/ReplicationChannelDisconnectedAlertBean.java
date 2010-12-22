@@ -63,7 +63,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
         final String groupUid = generateGroupUid(spaceInstance.getUid());
         AlertFactory factory = new AlertFactory();
         factory.name(ALERT_NAME);
-        factory.beanClassName(this.getClass().getName());
+        factory.beanConfigClass(config.getClass());
         factory.groupUid(groupUid);
         factory.description("Replication channel status is unavailable; " + spaceInstance + " has been removed.");
         factory.severity(AlertSeverity.NA);
@@ -94,7 +94,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                 final String groupUid = generateGroupUid(event.getSpaceInstance().getUid());
                 AlertFactory factory = new AlertFactory();
                 factory.name(ALERT_NAME);
-                factory.beanClassName(this.getClass().getName());
+                factory.beanConfigClass(config.getClass());
                 factory.groupUid(groupUid);
                 factory.description("A replication channel has been lost between " + getReplicationPath(source, target));
                 factory.severity(AlertSeverity.CRITICAL);
@@ -115,7 +115,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                 if (alertHistoryDetails != null && !alertHistoryDetails.isResolved()) {
                     AlertFactory factory = new AlertFactory();
                     factory.name(ALERT_NAME);
-                    factory.beanClassName(this.getClass().getName());
+                    factory.beanConfigClass(config.getClass());
                     factory.groupUid(groupUid);
                     factory.description("A replication channel has been restored between " + getReplicationPath(source, target));
                     factory.severity(AlertSeverity.OK);

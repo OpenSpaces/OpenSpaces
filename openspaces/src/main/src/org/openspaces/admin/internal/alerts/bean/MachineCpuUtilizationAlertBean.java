@@ -104,7 +104,7 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
         final String groupUid = generateGroupUid(machine.getOperatingSystem().getUid());
         AlertFactory factory = new AlertFactory();
         factory.name(ALERT_NAME);
-        factory.beanClassName(this.getClass().getName());
+        factory.beanConfigClass(config.getClass());
         factory.groupUid(groupUid);
         factory.description("CPU measurment is unavailable; machine has been removed");
         factory.severity(AlertSeverity.NA);
@@ -130,7 +130,7 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
             final String groupUid = generateGroupUid(event.getOperatingSystem().getUid());
             AlertFactory factory = new AlertFactory();
             factory.name(ALERT_NAME);
-            factory.beanClassName(this.getClass().getName());
+            factory.beanConfigClass(config.getClass());
             factory.groupUid(groupUid);
             factory.description("CPU crossed above a " + highThreshold + "% threshold, for a period of "
                     + getPeriodOfTime(event) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuAvg) + "%");
@@ -151,7 +151,7 @@ public class MachineCpuUtilizationAlertBean implements AlertBean,
             if (alertHistoryDetails != null && !alertHistoryDetails.isResolved()) {
                 AlertFactory factory = new AlertFactory();
                 factory.name(ALERT_NAME);
-                factory.beanClassName(this.getClass().getName());
+                factory.beanConfigClass(config.getClass());
                 factory.groupUid(groupUid);
                 factory.description("CPU crossed below a " + highThreshold + "% threshold, for a period of "
                         + getPeriodOfTime(event) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuAvg) + "%");

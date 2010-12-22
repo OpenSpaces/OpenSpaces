@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.openspaces.admin.AdminException;
+import org.openspaces.admin.alerts.config.AlertBeanConfig;
 import org.openspaces.admin.internal.alerts.DefaultAlert;
 
 /**
@@ -26,7 +27,7 @@ import org.openspaces.admin.internal.alerts.DefaultAlert;
  * <p>
  * <li> {@link #groupUid(String)} - <b>required</b> </li>
  * <li> {@link #severity(AlertSeverity)} - <b>required</b> </li>
- * <li> {@link #beanClassName(String)} - <b>required</b> </li>
+ * <li> {@link #beanConfigClass(String)} - <b>required</b> </li>
  * <li> {@link #timestamp(long)} - optional, is set upon construction</li>
  * <li> {@link #name(String)} - optional (<code>null</code> by default)</li>
  * <li> {@link #description(String)} - optional (<code>null</code> by default)</li>
@@ -45,7 +46,7 @@ public class AlertFactory {
      * <p>
      * <li> {@link #groupUid(String)} - <b>required</b> </li>
      * <li> {@link #severity(AlertSeverity)} - <b>required</b> </li>
-     * <li> {@link #beanClassName(String)} - <b>required</b> </li>
+     * <li> {@link #beanConfigClass(String)} - <b>required</b> </li>
      * <li> {@link #timestamp(long)} - optional, is set upon construction</li>
      * <li> {@link #name(String)} - optional (<code>null</code> by default)</li>
      * <li> {@link #description(String)} - optional (<code>null</code> by default)</li>
@@ -82,9 +83,9 @@ public class AlertFactory {
         return this;
     }
     
-    /** Bean Class Name - the alert bean class name which generated the alert. */
-    public AlertFactory beanClassName(String beanClassName) {
-        alert.setBeanClassName(beanClassName);
+    /** Bean Config Class - the alert bean configuration class (name) which is used to configure the alert. */
+    public AlertFactory beanConfigClass(Class<? extends AlertBeanConfig> beanConfigClass) {
+        alert.setBeanConfigClassName(beanConfigClass.getClass().getName());
         return this;
     }
 
@@ -155,8 +156,8 @@ public class AlertFactory {
         if (alert.getSeverity() == null) {
             throw new AdminException("Alert should be configured with a severity level");
         }
-        if (alert.getBeanClassName() == null) {
-            throw new AdminException("Alert should be configured with a bean class name which fires the alert");
+        if (alert.getBeanConfigClassName() == null) {
+            throw new AdminException("Alert should be configured with the bean config class name");
         }
         return alert;
     }

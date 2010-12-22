@@ -35,7 +35,7 @@ import org.openspaces.admin.Admin;
  * Each alert has descriptive information of the alert ({@link #getDescription()}), data and time of
  * the alert ({@link #getTimestamp()}), and configuration properties together with runtime
  * properties the alert bean exposes (see {@link #getProperties()}). The alert bean that fired the alert
- * is given by {@link #getBeanClassName()}.
+ * is given by {@link #getBeanConfigClassName()}.
  * <p>
  * The source component for which the alert was triggered (see {@link #getComponentUid()}) can be
  * correlated to one of the components using the {@link Admin#getGridComponentByUID(String)} if this
@@ -67,9 +67,9 @@ public interface Alert extends Serializable {
     public AlertSeverity getSeverity();
 
     /**
-     * @return Bean Class Name - the alert bean class name which generated the alert.
+     * @return Bean Configuration Class Name - the alert bean configuration class name which is used to configure the alert.
      */
-    public String getBeanClassName();
+    public String getBeanConfigClassName();
 
     /**
      * @return Alert UID - the unique identification for this alert.

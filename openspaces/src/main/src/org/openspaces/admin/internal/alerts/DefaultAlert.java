@@ -35,7 +35,7 @@ public class DefaultAlert implements InternalAlert {
     private String description;
     private long timestamp;
     private AlertSeverity severity;
-    private String beanClassName;
+    private String beanConfigClassName;
     private String alertUid;
     private String groupUid;
     private String componentUid;
@@ -92,14 +92,14 @@ public class DefaultAlert implements InternalAlert {
     }
 
 	/* (non-Javadoc)
-     * @see org.openspaces.admin.alerts.Alert#getBeanClassName()
+     * @see org.openspaces.admin.alerts.Alert#getBeanConfigClassName()
      */
-	public String getBeanClassName() {
-        return beanClassName;
+	public String getBeanConfigClassName() {
+        return beanConfigClassName;
     }
 	
-	public void setBeanClassName(String beanClassName) {
-        this.beanClassName = beanClassName;
+	public void setBeanConfigClassName(String beanConfigClassName) {
+        this.beanConfigClassName = beanConfigClassName;
     }
 	
 	/* (non-Javadoc)

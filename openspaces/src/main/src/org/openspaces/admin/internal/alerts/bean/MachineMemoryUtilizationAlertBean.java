@@ -106,7 +106,7 @@ public class MachineMemoryUtilizationAlertBean implements AlertBean,
         final String groupUid = generateGroupUid(machine.getOperatingSystem().getUid());
         AlertFactory factory = new AlertFactory();
         factory.name(ALERT_NAME);
-        factory.beanClassName(this.getClass().getName());
+        factory.beanConfigClass(config.getClass());
         factory.groupUid(groupUid);
         factory.description("Memory measurment is unavailable; machine has been removed");
         factory.severity(AlertSeverity.NA);
@@ -132,7 +132,7 @@ public class MachineMemoryUtilizationAlertBean implements AlertBean,
             final String groupUid = generateGroupUid(event.getOperatingSystem().getUid());
             AlertFactory factory = new AlertFactory();
             factory.name(ALERT_NAME);
-            factory.beanClassName(this.getClass().getName());
+            factory.beanConfigClass(config.getClass());
             factory.groupUid(groupUid);
             factory.description("Memory crossed above a " + highThreshold + "% threshold, for a period of "
                     + getPeriodOfTime(event) + ", with an average memory of " + NUMBER_FORMAT.format(memoryAvg) + "%");
@@ -153,7 +153,7 @@ public class MachineMemoryUtilizationAlertBean implements AlertBean,
             if (alertHistoryDetails != null && !alertHistoryDetails.isResolved()) {
                 AlertFactory factory = new AlertFactory();
                 factory.name(ALERT_NAME);
-                factory.beanClassName(this.getClass().getName());
+                factory.beanConfigClass(config.getClass());
                 factory.groupUid(groupUid);
                 factory.description("Memory crossed below a " + highThreshold + "% threshold, for a period of "
                         + getPeriodOfTime(event) + ", with an average memory of " + NUMBER_FORMAT.format(memoryAvg) + "%");
