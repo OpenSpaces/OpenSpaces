@@ -62,14 +62,14 @@ public class AlertFactory {
         return this;
     }
     
-    /** Description — a description of the alert. */
+    /** Description - a description of the alert. */
     public AlertFactory description(String description) {
         alert.setDescription(description);
         return this;
     }
 
     /**
-     * Timestamp — the date and time the alert occurred. Timestamp is already set by the factory
+     * Timestamp - the date and time the alert occurred. Timestamp is already set by the factory
      * upon construction. */
     public AlertFactory timestamp(long timestamp) {
         alert.setTimestamp(timestamp);

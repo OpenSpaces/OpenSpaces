@@ -52,12 +52,12 @@ public interface Alert extends Serializable {
     public String getName();
 
     /**
-     * @return Description — a description of the alert.
+     * @return Description - a description of the alert.
      */
     public String getDescription();
 
     /**
-     * @return Timestamp — the date and time the alert occurred.
+     * @return Timestamp - the date and time the alert occurred.
      */
     public long getTimestamp();
 
@@ -72,7 +72,7 @@ public interface Alert extends Serializable {
     public String getBeanClassName();
 
     /**
-     * @return Alert UID — the unique identification for this alert.
+     * @return Alert UID - the unique identification for this alert.
      */
     public String getAlertUid();
 
