@@ -266,4 +266,91 @@ public class DefaultAlertRepositoryTest extends TestCase {
         assertNotNull(alertHistoryByGroupUid7.getAlerts());
         assertEquals(5+2, alertHistoryByGroupUid7.getAlerts().length); //2 - is the first&last alert triggered, 5 - the rest of the history
     }
+    
+    /** history is ordered by timestamp of last alert */
+    public void test8() {
+        
+        /* 
+         * Create 3 groups of alerts with increasing timestamp.
+         * Create the following sequence:
+         * group 0: [1, 4, 7]
+         * group 1: [2, 5, 8]
+         * group 2: [3, 6, 9]
+         */
+        long timestamp = 1;
+        for (int j=0; j<3; ++j) {
+            for (int i=0; i<3; ++i) {
+                Alert alert = new AlertFactory()
+                .severity(AlertSeverity.WARNING)
+                .groupUid("group"+i)
+                .beanConfigClass(AlertBeanConfig.class)
+                .description("alert#"+timestamp)
+                .timestamp(timestamp++)
+                .toAlert();
+
+                assertTrue(repository.addAlert(alert));
+            }
+        }
+        
+        AlertHistory[] alertHistory = repository.getAlertHistory();
+        
+        /*
+         * Assert the following order:
+         * group 2: [3, 6, 9] (latest alert#9 in group)
+         * group 1: [2, 5, 8]
+         * group 0: [1, 4, 7] (earliest alert#7 in group)
+         */
+        long expectedTimestamp;
+        for (int j=0; j<3; ++j) {
+            expectedTimestamp = 3 - j;
+            for (int i=0; i<3; ++i) {
+                assertEquals(expectedTimestamp, alertHistory[j].getAlerts()[i].getTimestamp());
+                expectedTimestamp+=3;
+            }
+        }
+        
+        /* 
+         * resolve group 0
+         * assert the following order:
+         * group 0: [1, 4, 7, 10]
+         * group 2: [3, 6, 9]
+         * group 1: [2, 5, 8]
+         */
+        Alert alert = new AlertFactory()
+        .severity(AlertSeverity.OK)
+        .groupUid("group"+0)
+        .beanConfigClass(AlertBeanConfig.class)
+        .description("alert#"+timestamp)
+        .timestamp(timestamp++)
+        .toAlert();
+
+        assertTrue(repository.addAlert(alert));
+        alertHistory = repository.getAlertHistory();
+        assertEquals(10, alertHistory[0].getAlerts()[3].getTimestamp());
+        assertEquals(1, alertHistory[0].getAlerts()[0].getTimestamp());
+        assertEquals(3, alertHistory[1].getAlerts()[0].getTimestamp());
+        assertEquals(2, alertHistory[2].getAlerts()[0].getTimestamp());
+        
+        /* 
+         * resolve group 1
+         * assert the following order:
+         * group 1: [2, 5, 8, 11]
+         * group 0: [1, 4, 7, 10]
+         * group 2: [3, 6, 9]
+         */
+        alert = new AlertFactory()
+        .severity(AlertSeverity.OK)
+        .groupUid("group"+1)
+        .beanConfigClass(AlertBeanConfig.class)
+        .description("alert#"+timestamp)
+        .timestamp(timestamp++)
+        .toAlert();
+
+        assertTrue(repository.addAlert(alert));
+        alertHistory = repository.getAlertHistory();
+        assertEquals(11, alertHistory[0].getAlerts()[3].getTimestamp());
+        assertEquals(2, alertHistory[0].getAlerts()[0].getTimestamp());
+        assertEquals(1, alertHistory[1].getAlerts()[0].getTimestamp());
+        assertEquals(3, alertHistory[2].getAlerts()[0].getTimestamp());
+    }
 }

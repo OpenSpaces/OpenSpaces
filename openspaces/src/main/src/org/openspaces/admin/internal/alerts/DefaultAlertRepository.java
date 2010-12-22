@@ -1,10 +1,12 @@
 package org.openspaces.admin.internal.alerts;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -90,13 +92,24 @@ public class DefaultAlertRepository implements InternalAlertRepository {
     }
 
     public AlertHistory[] getAlertHistory() {
-        ArrayList<AlertHistory> groupedByGroupUid = new ArrayList<AlertHistory>();
+        TreeMap<Alert, AlertHistory> treeMap = new TreeMap<Alert, AlertHistory>(new Comparator<Alert>() {
+            public int compare(Alert a1, Alert a2) {
+                if (a1.getTimestamp() <= a2.getTimestamp()) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            }
+        });
+        
         for (AlertChain chain : alertsByGroupUid.values()) {
             Alert[] alerts = chain.toArray();
-            DefaultAlertHistory alertGroup = new DefaultAlertHistory(alerts);
-            groupedByGroupUid.add(alertGroup);
+            DefaultAlertHistory alertHistory = new DefaultAlertHistory(alerts);
+            treeMap.put(alerts[alerts.length-1], alertHistory);
         }
-        return groupedByGroupUid.toArray(new AlertHistory[groupedByGroupUid.size()]);
+
+        AlertHistory[] result = treeMap.values().toArray(new AlertHistory[treeMap.size()]);
+        return result;
     }
     
     public boolean isAlertResolvedByGroupUid(String groupUid) {
