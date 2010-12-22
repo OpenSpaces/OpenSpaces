@@ -6,13 +6,14 @@ import java.util.Map;
 import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
+import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualMemoryCapacityScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatefulDeploymentTopology;
@@ -48,6 +49,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
      */
     public ElasticStatefulProcessingUnitDeployment(String processingUnit) {
         super(processingUnit);
+        new ProcessingUnitSchemaConfig(super.getElasticProperties()).setPartitionedSync2BackupSchema();        
     }
     
     /**
@@ -55,7 +57,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
      * (points either to a processing unit jar/zip file or a directory).
      */
     public ElasticStatefulProcessingUnitDeployment(File processingUnit) {
-        super(processingUnit.getAbsolutePath());
+        this(processingUnit.getAbsolutePath());
     }
 
     public ElasticStatefulProcessingUnitDeployment maxMemoryCapacity(int maxMemoryCapacity, MemoryUnit unit) {
@@ -115,7 +117,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return scale(strategy.getConfig());
     }
 
-    public ElasticStatefulProcessingUnitDeployment scale(ManualMemoryCapacityScaleConfigurer strategy) {
+    public ElasticStatefulProcessingUnitDeployment scale(ManualCapacityScaleConfigurer strategy) {
         return scale(strategy.getConfig());
     }
 
@@ -231,8 +233,8 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
             throw new IllegalStateException("-Xmx vmInputArgument is not defined.");    
         }
                 
-        int numberOfPartitions = (int) Math.floor(((double)maxMemoryCapacityMegabytes)/maximumJavaHeapSizeMegabytes);
-        numberOfPartitions /= (numberOfBackups+1);
+        double totalNumberOfInstances = Math.ceil(((double)maxMemoryCapacityMegabytes)/maximumJavaHeapSizeMegabytes);
+        int numberOfPartitions = (int) Math.ceil(totalNumberOfInstances / (numberOfBackups+1));
                 
         return Math.max(1, numberOfPartitions);
     }

@@ -3,7 +3,7 @@ package org.openspaces.admin.pu.elastic.config;
 import java.util.Map;
 
 import org.openspaces.admin.bean.BeanConfig;
-import org.openspaces.admin.internal.pu.elastic.config.ScaleStrategyConfigUtils;
+import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
 import org.openspaces.core.util.StringProperties;
 import org.openspaces.grid.gsm.strategy.ManualCapacityScaleStrategyBean;
 
@@ -14,7 +14,7 @@ import org.openspaces.grid.gsm.strategy.ManualCapacityScaleStrategyBean;
  * When a backup partition is enabled (which usually is the case), the specified memory capacity is the total memory occupied by the
  * primary partition instances and the backup partition instances.
  *  
- * @see ManualMemoryCapacityScaleConfigurer
+ * @see ManualCapacityScaleConfigurer
  * @author itaif
  */
 public class ManualCapacityScaleConfig 
@@ -25,8 +25,8 @@ public class ManualCapacityScaleConfig
                    BeanConfig {
 
     private static final String STRATEGY_NAME = "scale-strategy.manual-memory";
-    private static final String MEMORY_CAPACITY_MEGABYTES_KEY = "sliding-window-milliseconds";
-    private static final int MEMORY_CAPACITY_MEGABYTES_DEFAULT = 2000;
+    private static final String MEMORY_CAPACITY_MEGABYTES_KEY = "memory-capacity-megabytes";
+    private static final int MEMORY_CAPACITY_MEGABYTES_DEFAULT = 0;
     private StringProperties properties;
     
     /**
@@ -106,5 +106,9 @@ public class ManualCapacityScaleConfig
 
     public String getBeanClassName() {
         return ManualCapacityScaleStrategyBean.class.getName();
-    }    
+    }
+    
+    public String toString() {
+        return this.properties.toString();
+    }
 }

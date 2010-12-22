@@ -299,6 +299,8 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * This method is only available if the processing unit deployment is elastic  
      * 
      * @param config
+     * 
+     * @since 8.0
      */
     void scale(BeanConfig strategyConfig);
         
@@ -306,6 +308,8 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * Returns the elastic configuration of this processing unit
      * 
      * This method is only available if the processing unit deployment is elastic
+     * 
+     * @since 8.0
      */
     Map<String,String> getElasticProperties();
     
@@ -315,6 +319,8 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * This method is only available if the processing unit deployment is elastic
      * 
      * @param config
+     * 
+     * @since 8.0
      */
     void setElasticProperties(Map<String,String> config);
     

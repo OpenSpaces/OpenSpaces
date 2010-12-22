@@ -9,6 +9,7 @@ import org.openspaces.admin.bean.BeanConfigException;
 import org.openspaces.admin.bean.BeanConfigPropertiesManager;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.pu.elastic.MachineProvisioningBeanPropertiesManager;
+import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyBeanPropertiesManager;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.topology.ElasticDeploymentTopology;
@@ -43,7 +44,8 @@ public class ScaleBeanServer {
         this.beanServer = new DefaultBeanServer<Bean>(
                 
                 new ScaleBeanFactory(
-                        pu, 
+                        pu,
+                        new ProcessingUnitSchemaConfig(elasticProperties),
                         rebalancingSlaEnforcement.createEndpoint(pu), 
                         containersSlaEnforcement.createEndpoint(pu),
                         machinesSlaEnforcement.createEndpoint(pu)));
@@ -88,9 +90,10 @@ public class ScaleBeanServer {
     }
 
     private void setGridServiceContainerConfig(Map<String, String> elasticProperties) {
-        String beanClassName = GridServiceContainerConfigBean.class.getName();
-        beanServer.setBeanConfig(beanClassName, elasticProperties);
-        beanServer.enableBean(beanClassName);
+        beanServer.replaceBeanAssignableTo(
+                new Class[]{GridServiceContainerConfigBean.class}, 
+                GridServiceContainerConfigBean.class.getName(),
+                elasticProperties); 
     }
 
     private void setElasticScaleStrategy(Map<String, String> elasticProperties) {

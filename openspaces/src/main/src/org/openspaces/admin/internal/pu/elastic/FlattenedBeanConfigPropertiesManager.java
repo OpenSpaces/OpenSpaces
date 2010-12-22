@@ -30,7 +30,7 @@ public class FlattenedBeanConfigPropertiesManager implements BeanConfigPropertie
             throw new EnabledBeanConfigCannotBeChangedException("Cannot modify bean [" + beanClassName + "] configuration while it is enabled. Disable it first.");
         }
         
-        this.properties.putMap(beanClassName + ".", properties);
+        this.properties.putMap(getKeyPrefix(beanClassName), properties);
         addBeanInternal(beanClassName);
     }
 
@@ -82,7 +82,11 @@ public class FlattenedBeanConfigPropertiesManager implements BeanConfigPropertie
         if (!containsBeanInternal(beanClassName)) {
             throw new BeanConfigNotFoundException("Failed to get bean [" + beanClassName + "] since it does not exist.");
         }
-        return properties.getMap(beanClassName, new HashMap<String, String>());
+        return properties.getMap(getKeyPrefix(beanClassName), new HashMap<String, String>());
+    }
+
+    private String getKeyPrefix(String beanClassName) {
+        return beanClassName + ".";
     }
 
     public String[] getBeansClassNames() {

@@ -1,4 +1,4 @@
-package org.openspaces.admin.internal.pu.elastic.config;
+package org.openspaces.admin.internal.pu.elastic;
 
 import org.openspaces.core.util.StringProperties;
 

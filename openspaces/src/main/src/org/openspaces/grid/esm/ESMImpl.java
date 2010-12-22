@@ -76,6 +76,7 @@ public class ESMImpl<x> extends ServiceBeanAdapter implements ESM, ProcessingUni
         elasticPropertiesPerProcessingUnit = new ConcurrentHashMap<String, Map<String,String>>();
         
         admin = new InternalAdminFactory().singleThreadedEventListeners().createAdmin();
+        admin.getProcessingUnits().getProcessingUnitAdded().add(this);
         admin.getProcessingUnits().getProcessingUnitRemoved().add(this);
         
         machinesSlaEnforcement = new MachinesSlaEnforcement(admin);
@@ -165,6 +166,7 @@ public class ESMImpl<x> extends ServiceBeanAdapter implements ESM, ProcessingUni
         logger.info("Stopping ESM ...");
         
         admin.getProcessingUnits().getProcessingUnitRemoved().remove(this);
+        admin.getProcessingUnits().getProcessingUnitAdded().remove(this);
         synchronized (scaleBeanServerPerProcessingUnit) {
             for (ScaleBeanServer beanServer : scaleBeanServerPerProcessingUnit.values()) {
                 beanServer.destroy();

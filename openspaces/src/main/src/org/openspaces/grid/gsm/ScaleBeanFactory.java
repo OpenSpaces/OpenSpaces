@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.bean.BeanInitializationException;
+import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.core.bean.Bean;
 import org.openspaces.core.bean.BeanServer;
@@ -25,14 +26,17 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
     private final ContainersSlaEnforcementEndpoint containersSlaEnforcementEndpoint;
     private final MachinesSlaEnforcementEndpoint machinesSlaEnforcementEndpoint;
     private final ProcessingUnit pu;
+    private final ProcessingUnitSchemaConfig schemaConfig;
     
     ScaleBeanFactory(
             ProcessingUnit pu,
+            ProcessingUnitSchemaConfig schemaConfig,
             RebalancingSlaEnforcementEndpoint rebalancingSlaEnforcementEndpoint, 
             ContainersSlaEnforcementEndpoint containersSlaEnforcementEndpoint,
             MachinesSlaEnforcementEndpoint machinesSlaEnforcementEndpoint) {
         
         super(pu.getAdmin());
+        this.schemaConfig = schemaConfig;
         this.rebalancingSlaEnforcementEndpoint = rebalancingSlaEnforcementEndpoint;
         this.containersSlaEnforcementEndpoint = containersSlaEnforcementEndpoint;
         this.machinesSlaEnforcementEndpoint = machinesSlaEnforcementEndpoint;
@@ -62,6 +66,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         
         if (instance instanceof ProcessingUnitAware) {
             ((ProcessingUnitAware)instance).setProcessingUnit(pu);
+            ((ProcessingUnitAware)instance).setProcessingUnitSchema(schemaConfig);
         }
         
         if (instance instanceof ElasticMachineProvisioningAware) {

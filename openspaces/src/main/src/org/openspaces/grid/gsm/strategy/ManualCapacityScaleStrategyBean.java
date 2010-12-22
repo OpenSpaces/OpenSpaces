@@ -1,7 +1,7 @@
 package org.openspaces.grid.gsm.strategy;
 
 import java.util.Map;
-import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -10,10 +10,12 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.alerts.AlertFactory;
 import org.openspaces.admin.alerts.AlertSeverity;
+import org.openspaces.admin.alerts.config.AlertBeanConfig;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
+import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.grid.gsm.ElasticMachineProvisioningAware;
@@ -54,13 +56,14 @@ public class ManualCapacityScaleStrategyBean
     private RebalancingSlaEnforcementEndpoint rebalancingService;
     private ProcessingUnit pu;
     private GridServiceContainerConfig containersConfig;
+    private ProcessingUnitSchemaConfig schemaConfig;
     
     // created by afterPropertiesSet()
-    @SuppressWarnings("unchecked")
-    private Future scheduledTask;
+    private ScheduledFuture<?> scheduledTask;
     private int targetNumberOfContainers;
     private int minimumNumberOfMachines;
     private NonBlockingElasticMachineProvisioning machineProvisioning;
+    
 
     public Map<String, String> getProperties() {
         return slaConfig.getProperties();
@@ -68,6 +71,10 @@ public class ManualCapacityScaleStrategyBean
 
     public void setProcessingUnit(ProcessingUnit pu) {
         this.pu = pu;
+    }
+
+    public void setProcessingUnitSchema(ProcessingUnitSchemaConfig schemaConfig) {
+        this.schemaConfig = schemaConfig;
     }
     
     public void setAdmin(Admin admin) {
@@ -95,9 +102,14 @@ public class ManualCapacityScaleStrategyBean
     }
      
     public void afterPropertiesSet() {
+        if (slaConfig == null) {
+            throw new IllegalStateException("slaConfig cannot be null.");
+        }
         
-        if (pu.getSpace() == null) {
-            throw new BeanConfigurationException("Processing Unit " + pu.getName() + " cannot scale by memory capacity, since it is not stateful and not a datagrid. Choose a different scale algorithm.");
+        logger.info("sla properties: "+slaConfig.toString());
+        
+        if (!schemaConfig.isPartitionedSync2BackupSchema()) {
+            throw new BeanConfigurationException("Processing Unit " + pu.getName() + " cannot scale by memory capacity, since it is not stateful and not a datagrid (it is " + schemaConfig.getSchema() +" . Choose a different scale algorithm.");
         }
         
         int numberOfBackups = pu.getNumberOfBackups();
@@ -121,11 +133,21 @@ public class ManualCapacityScaleStrategyBean
     }
 
     private int calcMinNumberOfMachines(ProcessingUnit pu) {
-        int minNumberOfMachines = 1;
-        if (pu.getMaxInstancesPerMachine() != 0) {
+        int minNumberOfMachines;
+        if (pu.getMaxInstancesPerMachine() == 0) {
+            minNumberOfMachines = 1;
+            logger.info("minNumberOfMachines=1 (since maxInstancesPerMachine is disabled)");
+        }
+        
+        else {
             minNumberOfMachines = (int)Math.ceil(
                     (1 + pu.getNumberOfBackups())/1.0*pu.getMaxInstancesPerMachine());
+            logger.info("minNumberOfMachines= " +
+                    "ceil((1+backupsPerPartition)/maxInstancesPerMachine)= "+
+                    "ceil("+(1+pu.getNumberOfBackups())+"/"+pu.getMaxInstancesPerMachine() + ")= " +
+                    minNumberOfMachines);
         }
+        
         return minNumberOfMachines;
     }
 
@@ -178,9 +200,35 @@ public class ManualCapacityScaleStrategyBean
         
         double totalNumberOfInstances = pu.getTotalNumberOfInstances();
         double instanceCapacityInMB = slaConfig.getMemoryCapacityInMB()/totalNumberOfInstances;
+        logger.info(
+                "instanceCapacityInMB= "+
+                "memoryCapacityInMB/(numberOfInstances*(1+numberOfBackups))= "+
+                slaConfig.getMemoryCapacityInMB()+"/"+totalNumberOfInstances+"= " +
+                instanceCapacityInMB);
+        
         double containerCapacityInMB = containersConfig.getMaximumJavaHeapSizeInMB();
+        
+        if (containerCapacityInMB < instanceCapacityInMB) {
+            throw new BeanConfigurationException(
+                    "Container capacity is " + containerCapacityInMB+"MB , "+
+                    "given " + totalNumberOfInstances + " instances, the total capacity =" 
+                    +containerCapacityInMB+"MB *"+totalNumberOfInstances + "= " + 
+                    containerCapacityInMB*totalNumberOfInstances+"MB. "+
+                    "Reduce total capacity from " + slaConfig.getMemoryCapacityInMB() +"MB to " + containerCapacityInMB*totalNumberOfInstances+"MB."); 
+        }
         double maxNumberOfInstancesPerContainer = Math.floor(containerCapacityInMB / instanceCapacityInMB); 
-        double targetNumberOfContainers = Math.ceil((totalNumberOfInstances)/ maxNumberOfInstancesPerContainer);
+        logger.info(
+                "maxNumberOfInstancesPerContainer= "+
+                "floor(containerCapacityInMB/instanceCapacityInMB)= "+
+                "floor("+containerCapacityInMB+"/"+instanceCapacityInMB+") =" +
+                maxNumberOfInstancesPerContainer);
+        
+        double targetNumberOfContainers = Math.ceil(totalNumberOfInstances/ maxNumberOfInstancesPerContainer);
+        logger.info(
+                "targetNumberOfContainers= "+
+                "ceil(totalNumberOfInstances/maxNumberOfInstancesPerContainer)= "+
+                "ceil("+totalNumberOfInstances+"/"+maxNumberOfInstancesPerContainer+") =" +
+                targetNumberOfContainers);
         
         int minNumberOfContainers = slaConfig.getMinNumberOfContainers();
         if (minNumberOfContainers != 0 && targetNumberOfContainers < minNumberOfContainers) {
@@ -239,6 +287,7 @@ public class ManualCapacityScaleStrategyBean
             fireAlert(
                 AlertSeverity.OK,
                 machinesAlertGroupUidPrefix,
+                "Machines Capacity SLA",
                 "Total machines memory for " + pu.getName() + " " + 
                 "has reached its target of " + targetMemory + "MB");
         }
@@ -246,6 +295,7 @@ public class ManualCapacityScaleStrategyBean
             fireAlert(
                 AlertSeverity.WARNING, 
                 containersAlertGroupUidPrefix,
+                "Machines Capacity SLA",
                 "Total machines memory for " + pu.getName() + " " + 
                 "is below the target "+ targetMemory + "MB");
         }
@@ -268,6 +318,7 @@ public class ManualCapacityScaleStrategyBean
             fireAlert(
                 AlertSeverity.OK,
                 containersAlertGroupUidPrefix,
+                "Containers Capacity SLA",
                 "Target number of containers for " + pu.getName() + " " + 
                 "has been reached: " + targetNumberOfContainers);
         }
@@ -275,6 +326,7 @@ public class ManualCapacityScaleStrategyBean
             fireAlert(
                 AlertSeverity.WARNING, 
                 containersAlertGroupUidPrefix,
+                "Containers Capacity SLA",
                 "Target number of containers for " + pu.getName() + " " + 
                 "is " + targetNumberOfContainers + ". " +
                 "Current number of containers is " + 
@@ -296,24 +348,28 @@ public class ManualCapacityScaleStrategyBean
             fireAlert(
                 AlertSeverity.OK,
                 rebalancingAlertGroupUidPrefix,
+                "Processing Unit Rebalancing SLA",
                 "Rebalancing of " + pu.getName() + " is complete.");
         }
         else {
             fireAlert(
                 AlertSeverity.WARNING, 
                 rebalancingAlertGroupUidPrefix,
+                "Processing Unit Rebalancing SLA",
                 "Rebalancing of " + pu.getName() + " is in progress.");
         }
         
         return slaEnforced;
     }
 
-    private void fireAlert(AlertSeverity severity,String alertGroupUidPrefix, String alertDescription) {
+    private void fireAlert(AlertSeverity severity,String alertGroupUidPrefix, String alertName, String alertDescription) {
         AlertFactory alertFactory = new AlertFactory();
+        alertFactory.name(alertName);
         alertFactory.description(alertDescription);
         alertFactory.severity(severity);        
         alertFactory.componentUid(pu.getName());
         alertFactory.groupUid(alertGroupUidPrefix + "-" + pu.getName());
+        alertFactory.beanConfigClass(AlertBeanConfig.class); //TODO: integration with alerts by type
         admin.getAlertManager().fireAlert(alertFactory.toAlert());
         logger.debug(alertDescription);
     }

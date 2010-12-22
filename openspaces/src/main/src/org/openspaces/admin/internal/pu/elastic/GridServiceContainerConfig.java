@@ -16,9 +16,9 @@ public class GridServiceContainerConfig {
 
     private static final String ENVIRONMENT_VARIABLES_KEY = "container.environmentVariables.";
     private static final HashMap<String, String> ENVIRONMENT_VARIABLES_DEFAULT = new HashMap<String, String>();
-    private static final String OVERRIDE_COMMAND_LINE_ARGUMENTS_KEY = "container.override-jvm-input-arguments";
+    private static final String OVERRIDE_COMMAND_LINE_ARGUMENTS_KEY = "container.override-commandline-arguments";
     private static final boolean OVERRIDE_COMMAND_LINE_ARGUMENTS_DEFAULT = false;
-    private static final String COMMAND_LINE_ARGUMENTS_KEY = "container.input-arguments.";
+    private static final String COMMAND_LINE_ARGUMENTS_KEY = "container.commandline-arguments";
     private static final String[] COMMAND_LINE_ARGUMENTS_DEFAULT = new String[] {};
     private static final String USE_SCRIPT_KEY = "container.use-script";
     private static final boolean USE_SCRIPT_DEFAULT = false;

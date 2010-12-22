@@ -10,7 +10,7 @@ import org.openspaces.core.util.MemoryUnit;
  * @author itaif
  * 
  */
-public class ManualMemoryCapacityScaleConfigurer implements ScaleBeanConfigurer<ManualCapacityScaleConfig>{
+public class ManualCapacityScaleConfigurer implements ScaleBeanConfigurer<ManualCapacityScaleConfig>{
 
 private final ManualCapacityScaleConfig config;
     
@@ -19,16 +19,16 @@ private final ManualCapacityScaleConfig config;
      * For example {@code new ManualMemoryCapacityScaleStrategyConfigurer().capacity("1500m").getConfig()}
      * The default constructor wraps an empty {@link ManualCapacityScaleConfig} object
      */
-    public ManualMemoryCapacityScaleConfigurer() {
+    public ManualCapacityScaleConfigurer() {
         this.config = new ManualCapacityScaleConfig();
     }
     
-    public ManualMemoryCapacityScaleConfigurer memoryCapacity(String memory) {
+    public ManualCapacityScaleConfigurer memoryCapacity(String memory) {
         config.setMemoryCapacityInMB((int)MemoryUnit.toMegaBytes(memory));
         return this;
     }
     
-    public ManualMemoryCapacityScaleConfigurer memoryCapacity(int memory, MemoryUnit unit) {
+    public ManualCapacityScaleConfigurer memoryCapacity(int memory, MemoryUnit unit) {
         config.setMemoryCapacityInMB((int)unit.toMegaBytes(memory));
         return this;
     }
@@ -36,7 +36,7 @@ private final ManualCapacityScaleConfig config;
     /**
      * @see MaxNumberOfContainersPerMachineScaleConfig#setMaxNumberOfContainersPerMachine(int)
      */
-    public ManualMemoryCapacityScaleConfigurer maxNumberOfContainersPerMachine(int maxNumberOfContainersPerMachine) {
+    public ManualCapacityScaleConfigurer maxNumberOfContainersPerMachine(int maxNumberOfContainersPerMachine) {
         config.setMaxNumberOfContainersPerMachine(maxNumberOfContainersPerMachine);
         return this;
     }
@@ -44,7 +44,7 @@ private final ManualCapacityScaleConfig config;
     /**
      * @see MinNumberOfContainersPerMachineScaleConfig#setMinNumberOfContainersPerMachine(int)
      */
-    public ManualMemoryCapacityScaleConfigurer minNumberOfContainersPerMachine(int minNumberOfContainersPerMachine) {
+    public ManualCapacityScaleConfigurer minNumberOfContainersPerMachine(int minNumberOfContainersPerMachine) {
         config.setMinNumberOfContainersPerMachine(minNumberOfContainersPerMachine);
         return this;
     }
@@ -52,7 +52,7 @@ private final ManualCapacityScaleConfig config;
     /**
      * @see MaxNumberOfContainersScaleConfig#setMaxNumberOfContainers(int)
      */
-    public ManualMemoryCapacityScaleConfigurer maxNumberOfContainers(int maxNumberOfContainers) {
+    public ManualCapacityScaleConfigurer maxNumberOfContainers(int maxNumberOfContainers) {
         config.setMaxNumberOfContainers(maxNumberOfContainers);
         return this;
     }
@@ -60,7 +60,7 @@ private final ManualCapacityScaleConfig config;
     /**
      * @see MinNumberOfContainersScaleConfig#setMinNumberOfContainers(int)
      */
-    public ManualMemoryCapacityScaleConfigurer minNumberOfContainers(int minNumberOfContainers) {
+    public ManualCapacityScaleConfigurer minNumberOfContainers(int minNumberOfContainers) {
         config.setMinNumberOfContainers(minNumberOfContainers);
         return this;
     }
