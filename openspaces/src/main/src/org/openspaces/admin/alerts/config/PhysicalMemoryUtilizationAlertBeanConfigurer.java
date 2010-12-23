@@ -23,19 +23,19 @@ import java.util.concurrent.TimeUnit;
  * approach by use of method chaining. After all properties have been set, use the call to
  * {@link #getConfig()} to create a fully initialized configuration object based.
  * 
- * @see MachineMemoryUtilizationAlertBeanConfig
+ * @see PhysicalMemoryUtilizationAlertBeanConfig
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public class MachineMemoryUtilizationAlertBeanConfigurer implements AlertBeanConfigurer {
+public class PhysicalMemoryUtilizationAlertBeanConfigurer implements AlertBeanConfigurer {
 
-	private final MachineMemoryUtilizationAlertBeanConfig config = new MachineMemoryUtilizationAlertBeanConfig();
+	private final PhysicalMemoryUtilizationAlertBeanConfig config = new PhysicalMemoryUtilizationAlertBeanConfig();
 	
 	/**
 	 * Constructs an empty machine physical memory utilization alert configuration.
 	 */
-	public MachineMemoryUtilizationAlertBeanConfigurer() {
+	public PhysicalMemoryUtilizationAlertBeanConfigurer() {
 	}
 	
 	/**
@@ -43,7 +43,7 @@ public class MachineMemoryUtilizationAlertBeanConfigurer implements AlertBeanCon
 	 * @param highThreshold high threshold percentage.
 	 * @return this.
 	 */
-	public MachineMemoryUtilizationAlertBeanConfigurer highThresholdPerc(int highThreshold) {
+	public PhysicalMemoryUtilizationAlertBeanConfigurer highThresholdPerc(int highThreshold) {
 		config.setHighThresholdPerc(highThreshold);
 		return this;
 	}
@@ -53,7 +53,7 @@ public class MachineMemoryUtilizationAlertBeanConfigurer implements AlertBeanCon
 	 * @param lowThreshold low threshold percentage.
 	 * @return this.
 	 */
-	public MachineMemoryUtilizationAlertBeanConfigurer lowThresholdPerc(int lowThreshold) {
+	public PhysicalMemoryUtilizationAlertBeanConfigurer lowThresholdPerc(int lowThreshold) {
 		config.setLowThresholdPerc(lowThreshold);
 		return this;
 	}
@@ -68,7 +68,7 @@ public class MachineMemoryUtilizationAlertBeanConfigurer implements AlertBeanCon
      *            the time unit of the specified period.
      * @return this.
      */
-	public MachineMemoryUtilizationAlertBeanConfigurer measurementPeriod(long period, TimeUnit timeUnit) {
+	public PhysicalMemoryUtilizationAlertBeanConfigurer measurementPeriod(long period, TimeUnit timeUnit) {
 		config.setMeasurementPeriod(period, timeUnit);
 		return this;
 	}
@@ -77,7 +77,7 @@ public class MachineMemoryUtilizationAlertBeanConfigurer implements AlertBeanCon
 	 * Get a fully configured physical memory utilization configuration (after all properties have been set).
 	 * @return a fully configured alert bean configuration.
 	 */
-	public MachineMemoryUtilizationAlertBeanConfig getConfig() {
+	public PhysicalMemoryUtilizationAlertBeanConfig getConfig() {
 		return config;
 	}
 }

@@ -23,19 +23,19 @@ import java.util.concurrent.TimeUnit;
  * approach by use of method chaining. After all properties have been set, use the call to
  * {@link #getConfig()} to create a fully initialized configuration object based.
  * 
- * @see MachineCpuUtilizationAlertBeanConfig
+ * @see CpuUtilizationAlertBeanConfig
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public class MachineCpuUtilizationAlertBeanConfigurer implements AlertBeanConfigurer {
+public class CpuUtilizationAlertBeanConfigurer implements AlertBeanConfigurer {
 
-	private final MachineCpuUtilizationAlertBeanConfig config = new MachineCpuUtilizationAlertBeanConfig();
+	private final CpuUtilizationAlertBeanConfig config = new CpuUtilizationAlertBeanConfig();
 	
 	/**
 	 * Constructs an empty machine CPU utilization alert configuration.
 	 */
-	public MachineCpuUtilizationAlertBeanConfigurer() {
+	public CpuUtilizationAlertBeanConfigurer() {
 	}
 	
 	/**
@@ -43,7 +43,7 @@ public class MachineCpuUtilizationAlertBeanConfigurer implements AlertBeanConfig
 	 * @param highThreshold high threshold percentage.
 	 * @return this.
 	 */
-	public MachineCpuUtilizationAlertBeanConfigurer highThresholdPerc(int highThreshold) {
+	public CpuUtilizationAlertBeanConfigurer highThresholdPerc(int highThreshold) {
 		config.setHighThresholdPerc(highThreshold);
 		return this;
 	}
@@ -53,7 +53,7 @@ public class MachineCpuUtilizationAlertBeanConfigurer implements AlertBeanConfig
 	 * @param lowThreshold low threshold percentage.
 	 * @return this.
 	 */
-	public MachineCpuUtilizationAlertBeanConfigurer lowThresholdPerc(int lowThreshold) {
+	public CpuUtilizationAlertBeanConfigurer lowThresholdPerc(int lowThreshold) {
 		config.setLowThresholdPerc(lowThreshold);
 		return this;
 	}
@@ -68,7 +68,7 @@ public class MachineCpuUtilizationAlertBeanConfigurer implements AlertBeanConfig
      *            the time unit of the specified period.
      * @return this.
      */
-	public MachineCpuUtilizationAlertBeanConfigurer measurementPeriod(long period, TimeUnit timeUnit) {
+	public CpuUtilizationAlertBeanConfigurer measurementPeriod(long period, TimeUnit timeUnit) {
 		config.setMeasurementPeriod(period, timeUnit);
 		return this;
 	}
@@ -77,7 +77,7 @@ public class MachineCpuUtilizationAlertBeanConfigurer implements AlertBeanConfig
 	 * Get a fully configured machine CPU utilization configuration (after all properties have been set).
 	 * @return a fully configured alert bean configuration.
 	 */
-	public MachineCpuUtilizationAlertBeanConfig getConfig() {
+	public CpuUtilizationAlertBeanConfig getConfig() {
 		return config;
 	}
 }

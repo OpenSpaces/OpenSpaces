@@ -19,36 +19,36 @@ package org.openspaces.admin.alerts.config;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.openspaces.admin.internal.alerts.bean.MachineCpuUtilizationAlertBean;
+import org.openspaces.admin.internal.alerts.bean.PhysicalMemoryUtilizationAlertBean;
 import org.openspaces.core.util.StringProperties;
 
 /**
- * A strongly typed machine CPU utilization alert bean configuration.
+ * A strongly typed physical memory utilization alert bean configuration.
  * 
- * @see MachineCpuUtilizationAlertBeanConfigurer
+ * @see PhysicalMemoryUtilizationAlertBeanConfigurer
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public class MachineCpuUtilizationAlertBeanConfig implements AlertBeanConfig {
+public class PhysicalMemoryUtilizationAlertBeanConfig implements AlertBeanConfig {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Period of time (in milliseconds) the CPU is above/below a certain threshold to trigger an
+     * Period of time (in milliseconds) the physical memory is above/below a certain threshold to trigger an
      * alert; Recommended setting is 60000 ms (1 minute)
      */
     public static final String MEASUREMENT_PERIOD_MILLISECONDS_KEY = "measurement-period-milliseconds";
 
     /**
-     * Low threshold for which to resolve a previously triggered CPU alert; Recommended setting is
-     * 50% CPU utilization. An alert will be triggered if CPU goes below this threshold for a
+     * Low threshold for which to resolve a previously triggered physical memory alert; Recommended setting is
+     * 50% physical memory utilization. An alert will be triggered if physical memory goes below this threshold for a
      * certain period of time.
      */
     public static final String LOW_THRESHOLD_PERC_KEY = "low-threshold-perc";
 
     /**
      * High threshold for which to trigger an alert which needs resolution; Recommended setting is
-     * above 80% CPU utilization. An alert will be triggered if CPU goes above this threshold for a
+     * above 80% physical memory utilization. An alert will be triggered if physical memory goes above this threshold for a
      * certain period of time.
      */
 	public static final String HIGH_THRESHOLD_PERC_KEY = "high-threshold-perc";
@@ -57,13 +57,13 @@ public class MachineCpuUtilizationAlertBeanConfig implements AlertBeanConfig {
 	private final StringProperties properties = new StringProperties();
 
 	/**
-	 * Constructs an empty machine CPU utilization alert configuration.
+	 * Constructs an empty physical memory utilization alert configuration.
 	 */
-	public MachineCpuUtilizationAlertBeanConfig() {
+	public PhysicalMemoryUtilizationAlertBeanConfig() {
 	}
 	
 	/**
-	 * Set the CPU high threshold percentage value.
+	 * Set the physical memory high threshold percentage value.
 	 * @param highThreshold high threshold percentage.
 	 */
 	public void setHighThresholdPerc(int highThreshold) {
@@ -71,14 +71,14 @@ public class MachineCpuUtilizationAlertBeanConfig implements AlertBeanConfig {
 	}
 	
 	/**
-	 * @return the CPU high threshold percentage.
+	 * @return the physical memory high threshold percentage.
 	 */
 	public int getHighThresholdPerc() {
 	    return Integer.valueOf(properties.get(HIGH_THRESHOLD_PERC_KEY)).intValue();
 	}
 	
 	/**
-	 * Set the CPU low threshold percentage value.
+	 * Set the physical memory low threshold percentage value.
 	 * @param lowThreshold low threshold percentage.
 	 */
 	public void setLowThresholdPerc(int lowThreshold) {
@@ -86,14 +86,14 @@ public class MachineCpuUtilizationAlertBeanConfig implements AlertBeanConfig {
 	}
 
 	/**
-	 * @return the CPU low threshold percentage.
+	 * @return the physical memory low threshold percentage.
 	 */
 	public int getLowThresholdPerc() {
 	    return Integer.valueOf(properties.get(LOW_THRESHOLD_PERC_KEY)).intValue();
 	}
 
     /**
-     * Set the period of time a CPU alert should be triggered if it's reading is
+     * Set the period of time a physical memory alert should be triggered if it's reading is
      * above/below the threshold setting.
      * 
      * @param period
@@ -132,6 +132,6 @@ public class MachineCpuUtilizationAlertBeanConfig implements AlertBeanConfig {
      * {@inheritDoc}
      */
 	public String getBeanClassName() {
-		return MachineCpuUtilizationAlertBean.class.getName();
+		return PhysicalMemoryUtilizationAlertBean.class.getName();
 	}
 }

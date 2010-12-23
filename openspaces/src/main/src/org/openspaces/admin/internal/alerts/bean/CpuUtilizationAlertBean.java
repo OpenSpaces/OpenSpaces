@@ -11,7 +11,7 @@ import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.alerts.Alert;
 import org.openspaces.admin.alerts.AlertFactory;
 import org.openspaces.admin.alerts.AlertSeverity;
-import org.openspaces.admin.alerts.config.MachineMemoryUtilizationAlertBeanConfig;
+import org.openspaces.admin.alerts.config.CpuUtilizationAlertBeanConfig;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.alerts.AlertHistory;
 import org.openspaces.admin.internal.alerts.AlertHistoryDetails;
@@ -23,21 +23,21 @@ import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.os.events.OperatingSystemStatisticsChangedEvent;
 import org.openspaces.admin.os.events.OperatingSystemStatisticsChangedEventListener;
 
-public class MachineMemoryUtilizationAlertBean implements AlertBean,
+public class CpuUtilizationAlertBean implements AlertBean,
         OperatingSystemStatisticsChangedEventListener, MachineRemovedEventListener {
 
-    public static final String beanUID = "726a2752-4cae5258-f281-49d3-96b6-1e68e42bbd2c";
-    public static final String ALERT_NAME = "Machine Memory Utilization";
+    public static final String beanUID = "d7f14ccb-774a468d-29dd-4c23-b7de-d0ae9aaec204";
+    public static final String ALERT_NAME = "CPU Utilization";
     public static final String HOST_ADDRESS = "host-address";
     public static final String HOST_NAME = "host-name";
-    public static final String MEMORY_UTILIZATION = "memory-utilization";
+    public static final String CPU_UTILIZATION = "cpu-utilization";
     
-    private final MachineMemoryUtilizationAlertBeanConfig config = new MachineMemoryUtilizationAlertBeanConfig();
+    private final CpuUtilizationAlertBeanConfig config = new CpuUtilizationAlertBeanConfig();
 
     private Admin admin;
     private final static NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();
 
-    public MachineMemoryUtilizationAlertBean() {
+    public CpuUtilizationAlertBean() {
         NUMBER_FORMAT.setMinimumFractionDigits(1);
         NUMBER_FORMAT.setMaximumFractionDigits(2);
     }
@@ -99,20 +99,18 @@ public class MachineMemoryUtilizationAlertBean implements AlertBean,
         }
     }
     
-
-        //unreachable machine
+    //unreachable machine
     public void machineRemoved(final Machine machine) {
-
         final String groupUid = generateGroupUid(machine.getOperatingSystem().getUid());
         AlertFactory factory = new AlertFactory();
         factory.name(ALERT_NAME);
         factory.beanConfigClass(config.getClass());
         factory.groupUid(groupUid);
-        factory.description("Memory measurment is unavailable; machine has been removed");
+        factory.description("CPU measurment is unavailable; machine has been removed");
         factory.severity(AlertSeverity.NA);
         factory.componentUid(machine.getOperatingSystem().getUid());
         factory.properties(config.getProperties());
-        factory.putProperty(MEMORY_UTILIZATION, "n/a");
+        factory.putProperty(CPU_UTILIZATION, "n/a");
         factory.putProperty(HOST_NAME, machine.getHostName());
         factory.putProperty(HOST_ADDRESS, machine.getHostAddress());
 
@@ -125,28 +123,28 @@ public class MachineMemoryUtilizationAlertBean implements AlertBean,
         int highThreshold = config.getHighThresholdPerc();
         int lowThreshold = config.getLowThresholdPerc();
         
-        double memoryAvg = calcAverageWithinPeriod(event);
-        if (memoryAvg < 0) return; //period hasn't passed
+        double cpuAvg = calcAverageWithinPeriod(event);
+        if (cpuAvg < 0) return; //period hasn't passed
 
-        if (memoryAvg > highThreshold) {
+        if (cpuAvg > highThreshold) {
             final String groupUid = generateGroupUid(event.getOperatingSystem().getUid());
             AlertFactory factory = new AlertFactory();
             factory.name(ALERT_NAME);
             factory.beanConfigClass(config.getClass());
             factory.groupUid(groupUid);
-            factory.description("Memory crossed above a " + highThreshold + "% threshold, for a period of "
-                    + getPeriodOfTime(event) + ", with an average memory of " + NUMBER_FORMAT.format(memoryAvg) + "%");
+            factory.description("CPU crossed above a " + highThreshold + "% threshold, for a period of "
+                    + getPeriodOfTime(event) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuAvg) + "%");
             factory.severity(AlertSeverity.CRITICAL);
             factory.componentUid(event.getOperatingSystem().getUid());
             factory.properties(config.getProperties());
-            factory.putProperty(MEMORY_UTILIZATION, String.valueOf(memoryAvg));
+            factory.putProperty(CPU_UTILIZATION, String.valueOf(cpuAvg));
             factory.putProperty(HOST_NAME, event.getStatistics().getDetails().getHostName());
             factory.putProperty(HOST_ADDRESS, event.getStatistics().getDetails().getHostAddress());
 
             Alert alert = factory.toAlert();
             admin.getAlertManager().fireAlert(alert);
                 
-        } else if (memoryAvg < lowThreshold) {
+        } else if (cpuAvg < lowThreshold) {
             final String groupUid = generateGroupUid(event.getOperatingSystem().getUid());
             AlertHistory alertHistory = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertHistoryByGroupUid(groupUid);
             AlertHistoryDetails alertHistoryDetails = alertHistory.getDetails();
@@ -155,12 +153,12 @@ public class MachineMemoryUtilizationAlertBean implements AlertBean,
                 factory.name(ALERT_NAME);
                 factory.beanConfigClass(config.getClass());
                 factory.groupUid(groupUid);
-                factory.description("Memory crossed below a " + highThreshold + "% threshold, for a period of "
-                        + getPeriodOfTime(event) + ", with an average memory of " + NUMBER_FORMAT.format(memoryAvg) + "%");
+                factory.description("CPU crossed below a " + highThreshold + "% threshold, for a period of "
+                        + getPeriodOfTime(event) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuAvg) + "%");
                 factory.severity(AlertSeverity.OK);
                 factory.componentUid(event.getOperatingSystem().getUid());
                 factory.properties(config.getProperties());
-                factory.putProperty(MEMORY_UTILIZATION, String.valueOf(memoryAvg));
+                factory.putProperty(CPU_UTILIZATION, String.valueOf(cpuAvg));
                 factory.putProperty(HOST_NAME, event.getStatistics().getDetails().getHostName());
                 factory.putProperty(HOST_ADDRESS, event.getStatistics().getDetails().getHostAddress());
 
@@ -180,7 +178,7 @@ public class MachineMemoryUtilizationAlertBean implements AlertBean,
         
         List<Double> timeline = new ArrayList<Double>(event.getStatistics().getTimeline().size());
         for (OperatingSystemStatistics stats : event.getStatistics().getTimeline()) {
-            timeline.add(stats.getPhysicalMemoryUsedPerc());
+            timeline.add(stats.getCpuPerc()*100.0);
         }
         
         return AlertBeanUtils.getAverage(period, timeline);
