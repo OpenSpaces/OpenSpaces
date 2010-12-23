@@ -12,7 +12,6 @@ import org.openspaces.admin.internal.pu.elastic.MachineProvisioningBeanPropertie
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyBeanPropertiesManager;
 import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.admin.pu.elastic.topology.ElasticDeploymentTopology;
 import org.openspaces.core.bean.Bean;
 import org.openspaces.core.bean.BeanServer;
 import org.openspaces.core.bean.DefaultBeanServer;
@@ -21,6 +20,7 @@ import org.openspaces.grid.gsm.machines.ElasticMachineProvisioning;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
 import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
+import org.openspaces.grid.gsm.strategy.ScaleStrategyBean;
 
 public class ScaleBeanServer {
 
@@ -103,13 +103,13 @@ public class ScaleBeanServer {
         
         //replace scale strategy bean if necessary
         if (enabledBeanClassName == null) {
-            beanServer.disableAllBeansAssignableTo(ElasticDeploymentTopology.class);
+            beanServer.disableAllBeansAssignableTo(ScaleStrategyBean.class);
         }
         else {
 
             Map<String, String> beanProperties = new HashMap<String,String>(scaleStrategyBeanPropertiesManager.getBeanConfig(enabledBeanClassName));
             beanServer.replaceBeanAssignableTo(
-                    new Class[]{ElasticDeploymentTopology.class}, 
+                    new Class[]{ScaleStrategyBean.class}, 
                     enabledBeanClassName,
                     beanProperties); 
         }
