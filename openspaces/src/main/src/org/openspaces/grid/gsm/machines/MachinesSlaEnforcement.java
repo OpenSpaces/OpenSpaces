@@ -37,18 +37,15 @@ public class MachinesSlaEnforcement implements
 
         String zone = pu.getRequiredZones()[0];
         Set<GridServiceAgent> agents = new HashSet<GridServiceAgent>();
-        for (GridServiceAgent agent : admin.getGridServiceAgents()) {
-            agents.add(agent);
-        }
-
+        
         for (GridServiceContainer container : admin.getGridServiceContainers()) {
-            if (!container.getZones().containsKey(zone) ||
-                container.getZones().size() != 1) {
-                
-                // some other pu's agent - remove
-                for (GridServiceAgent agent : container.getMachine().getGridServiceAgents()) {
-                    agents.remove(agent);
-                }
+            
+            // found a container associated with this pu. take it.
+            if (container.getZones().size() == 1 &&
+                container.getZones().containsKey(zone) &&
+                container.getMachine().getGridServiceAgents().getSize() == 1) {
+
+                agents.add(container.getMachine().getGridServiceAgent());
            }
         }
 
