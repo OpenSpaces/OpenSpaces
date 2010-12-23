@@ -25,7 +25,7 @@ import org.openspaces.core.util.StringProperties;
 /**
  * A strongly typed physical memory utilization alert bean configuration.
  * 
- * @see MachineCpuUtilizationAlertBeanConfigurer
+ * @see MachineMemoryUtilizationAlertBeanConfigurer
  * 
  * @author Moran Avigdor
  * @since 8.0

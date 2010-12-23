@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  * approach by use of method chaining. After all properties have been set, use the call to
  * {@link #getConfig()} to create a fully initialized configuration object based.
  * 
- * @see MachineCpuUtilizationAlertBeanConfig
+ * @see MachineMemoryUtilizationAlertBeanConfig
  * 
  * @author Moran Avigdor
  * @since 8.0
