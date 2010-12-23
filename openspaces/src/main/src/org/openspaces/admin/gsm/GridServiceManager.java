@@ -42,6 +42,18 @@ public interface GridServiceManager extends AgentGridComponent, LogProviderGridC
 
     /**
      * Undeploys the processing unit based on its name.
+     * 
+     * {@code
+     *  // wait for the lookup event of the processing unit by name.
+     *  ProcessingUnit pu = admin.getProcessingUnits().waitFor("mypuname");
+     *  
+     *  // wait for the lookup event of the grid service manager that manages the processing unit.
+     *  pu.waitForManaged();
+     *  
+     *  // undeploy the processing unit.
+     *  pu.undeploy();
+     * }
+     * 
      */
     void undeploy(String processingUnitName);
 
@@ -50,6 +62,8 @@ public interface GridServiceManager extends AgentGridComponent, LogProviderGridC
      * service manager (it will act as the primary GSM for the deployed processing unit).
      *
      * <p>The deployment process will wait indefinitely and return the actual processing unit that can be used.
+     * 
+     * @throws ProcessingUnitAlreadyDeployedException - processing unit with the same name has already been deployed.
      */
     ProcessingUnit deploy(ProcessingUnitDeployment deployment) throws ProcessingUnitAlreadyDeployedException;
 
@@ -58,6 +72,8 @@ public interface GridServiceManager extends AgentGridComponent, LogProviderGridC
      * service manager (it will act as the primary GSM for the deployed processing unit).
      *
      * <p>The deployment process will wait for the given timeout and return the actual processing unit that can be used.
+     * 
+     * @throws ProcessingUnitAlreadyDeployedException - processing unit with the same name has already been deployed.
      */
     ProcessingUnit deploy(ProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
 
