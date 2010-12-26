@@ -110,7 +110,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
         factory.beanConfigClass(config.getClass());
         factory.groupUid(groupUid);
         factory.description(getGridComponentShortName(virtualMachine)
-                + "Heap memory is unavailable; has been removed");
+                + "Heap memory is unavailable; JVM has been removed");
         factory.severity(AlertSeverity.NA);
         factory.componentUid(virtualMachine.getUid());
         factory.properties(config.getProperties());
@@ -140,7 +140,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
             factory.groupUid(groupUid);
             factory.description(getGridComponentShortName(event.getVirtualMachine())
                     + "Heap memory crossed above a " + highThreshold + "% threshold, for a period of "
-                    + getPeriodOfTime(event) + ", with an average memory of " + NUMBER_FORMAT.format(memoryAvg) + "%");
+                    + TimeUtil.format(config.getMeasurementPeriod()) + ", with an average memory of " + NUMBER_FORMAT.format(memoryAvg) + "%");
             factory.severity(AlertSeverity.WARNING);
             factory.componentUid(event.getVirtualMachine().getUid());
             factory.properties(config.getProperties());

@@ -133,7 +133,7 @@ public class CpuUtilizationAlertBean implements AlertBean,
             factory.beanConfigClass(config.getClass());
             factory.groupUid(groupUid);
             factory.description("CPU crossed above a " + highThreshold + "% threshold, for a period of "
-                    + getPeriodOfTime(event) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuAvg) + "%");
+                    + TimeUtil.format(config.getMeasurementPeriod()) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuAvg) + "%");
             factory.severity(AlertSeverity.WARNING);
             factory.componentUid(event.getOperatingSystem().getUid());
             factory.properties(config.getProperties());
@@ -154,7 +154,7 @@ public class CpuUtilizationAlertBean implements AlertBean,
                 factory.beanConfigClass(config.getClass());
                 factory.groupUid(groupUid);
                 factory.description("CPU crossed below a " + highThreshold + "% threshold, for a period of "
-                        + getPeriodOfTime(event) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuAvg) + "%");
+                        + TimeUtil.format(config.getMeasurementPeriod()) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuAvg) + "%");
                 factory.severity(AlertSeverity.OK);
                 factory.componentUid(event.getOperatingSystem().getUid());
                 factory.properties(config.getProperties());
@@ -182,9 +182,5 @@ public class CpuUtilizationAlertBean implements AlertBean,
         }
         
         return AlertBeanUtils.getAverage(period, timeline);
-    }
-
-    private String getPeriodOfTime(OperatingSystemStatisticsChangedEvent event) {
-        return TimeUtil.format(config.getMeasurementPeriod());
     }
 }
