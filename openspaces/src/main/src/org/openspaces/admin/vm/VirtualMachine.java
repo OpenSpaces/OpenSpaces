@@ -21,6 +21,7 @@ import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.machine.MachineAware;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
@@ -58,6 +59,13 @@ public interface VirtualMachine extends MachineAware, StatisticsMonitor {
      * Runs GC on the virtual machine.
      */
     void runGc();
+    
+    /**
+     * Returns the lookup services that are running on the machine.
+     * Returns <code>null</code> if no lookup service was started within it.
+     * @since 8.0
+     */
+    LookupService getLookupService();
 
     /**
      * Returns the grid service agent started within this virtual machine.

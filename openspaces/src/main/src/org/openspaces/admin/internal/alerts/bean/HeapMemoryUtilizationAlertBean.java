@@ -188,7 +188,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
             return "GSC ";
         } else if (virtualMachine.getGridServiceAgent() != null) {
             return "GSA ";
-        } else if (!virtualMachine.getMachine().getLookupServices().isEmpty()) {
+        } else if (virtualMachine.getLookupService() != null) {
             return "LUS ";
         } else return "";
     }
@@ -200,7 +200,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
             return "Grid Service Container";
         } else if (virtualMachine.getGridServiceAgent() != null) {
             return "Grid Service Agent";
-        } else if (!virtualMachine.getMachine().getLookupServices().isEmpty()) {
+        } else if (virtualMachine.getLookupService() != null) {
             return "Lookup Service";
         } else return "n/a";
     }

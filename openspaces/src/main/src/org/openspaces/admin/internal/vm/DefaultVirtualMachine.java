@@ -24,12 +24,16 @@ import org.openspaces.admin.internal.gsc.DefaultGridServiceContainers;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainers;
 import org.openspaces.admin.internal.gsm.DefaultGridServiceManagers;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManagers;
+import org.openspaces.admin.internal.lus.DefaultLookupServices;
+import org.openspaces.admin.internal.lus.InternalLookupServices;
 import org.openspaces.admin.internal.pu.DefaultProcessingUnitInstances;
 import org.openspaces.admin.internal.pu.InternalProcessingUnitInstances;
 import org.openspaces.admin.internal.space.DefaultSpaceInstances;
 import org.openspaces.admin.internal.space.InternalSpaceInstances;
 import org.openspaces.admin.internal.vm.events.DefaultVirtualMachineStatisticsChangedEventManager;
 import org.openspaces.admin.internal.vm.events.InternalVirtualMachineStatisticsChangedEventManager;
+import org.openspaces.admin.lus.LookupService;
+import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
@@ -64,6 +68,8 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
     private final Set<InternalVirtualMachineInfoProvider> virtualMachineInfoProviders = new ConcurrentHashSet<InternalVirtualMachineInfoProvider>();
 
     private volatile Machine machine;
+    
+    private final InternalLookupServices lookupServices;
    
     private final InternalGridServiceAgents gridServiceAgents;
 
@@ -96,6 +102,7 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
         this.admin = (InternalAdmin) virtualMachines.getAdmin();
         this.details = new DefaultVirtualMachineDetails(details);
         this.uid = details.getUid();
+        this.lookupServices = new DefaultLookupServices(admin);
         this.gridServiceAgents = new DefaultGridServiceAgents(admin);
         this.gridServiceManagers = new DefaultGridServiceManagers(admin);
         this.elasticServiceManagers = new DefaultElasticServiceManagers(admin);
@@ -138,6 +145,18 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
     public void setMachine(Machine machine) {
         assertStateChangesPermitted();
         this.machine = machine;
+    }
+    
+    public LookupService getLookupService() {
+        Iterator<LookupService> it = lookupServices.iterator();
+        if (it.hasNext()) {
+            return it.next();
+        }
+        return null;
+    }
+    
+    public LookupServices getLookupServices() {
+        return this.lookupServices;
     }
 
     public GridServiceAgents getGridServiceAgents() {

@@ -5,6 +5,7 @@ import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
 import org.openspaces.admin.internal.machine.InternalMachineAware;
+import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.vm.VirtualMachine;
@@ -28,6 +29,8 @@ public interface InternalVirtualMachine extends VirtualMachine, InternalMachineA
 
     void removeSpaceInstance(String uid);
 
+    LookupServices getLookupServices();
+    
     GridServiceAgents getGridServiceAgents();
 
     GridServiceManagers getGridServiceManagers();
