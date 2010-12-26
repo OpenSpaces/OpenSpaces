@@ -111,7 +111,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
         factory.groupUid(groupUid);
         factory.description(getGridComponentShortName(virtualMachine)
                 + "Heap memory is unavailable; has been removed");
-        factory.severity(AlertSeverity.CRITICAL);
+        factory.severity(AlertSeverity.NA);
         factory.componentUid(virtualMachine.getUid());
         factory.properties(config.getProperties());
         factory.putProperty(MEMORY_UTILIZATION, "n/a");
