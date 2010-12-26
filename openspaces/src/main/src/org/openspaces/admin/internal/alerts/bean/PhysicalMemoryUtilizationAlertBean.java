@@ -136,7 +136,7 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
             factory.groupUid(groupUid);
             factory.description("Memory crossed above a " + highThreshold + "% threshold, for a period of "
                     + getPeriodOfTime(event) + ", with an average memory of " + NUMBER_FORMAT.format(memoryAvg) + "%");
-            factory.severity(AlertSeverity.CRITICAL);
+            factory.severity(AlertSeverity.WARNING);
             factory.componentUid(event.getOperatingSystem().getUid());
             factory.properties(config.getProperties());
             factory.putProperty(MEMORY_UTILIZATION, String.valueOf(memoryAvg));

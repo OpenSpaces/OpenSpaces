@@ -134,7 +134,7 @@ public class CpuUtilizationAlertBean implements AlertBean,
             factory.groupUid(groupUid);
             factory.description("CPU crossed above a " + highThreshold + "% threshold, for a period of "
                     + getPeriodOfTime(event) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuAvg) + "%");
-            factory.severity(AlertSeverity.CRITICAL);
+            factory.severity(AlertSeverity.WARNING);
             factory.componentUid(event.getOperatingSystem().getUid());
             factory.properties(config.getProperties());
             factory.putProperty(CPU_UTILIZATION, String.valueOf(cpuAvg));
