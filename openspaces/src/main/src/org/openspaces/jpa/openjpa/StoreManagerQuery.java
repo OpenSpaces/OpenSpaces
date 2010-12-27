@@ -218,7 +218,7 @@ public class StoreManagerQuery extends ExpressionStoreQuery {
      * one filter only. The factory must be cachable.
      */
     protected ExpressionFactory getExpressionFactory(ClassMetaData type) {
-        return new QueryExpressionFactory();
+        return new QueryExpressionFactory(_store);
     }
     
     

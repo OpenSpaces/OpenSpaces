@@ -1,6 +1,8 @@
 package org.openspaces.jpa.openjpa.query;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.openjpa.kernel.exps.AggregateListener;
 import org.apache.openjpa.kernel.exps.Arguments;
@@ -13,6 +15,8 @@ import org.apache.openjpa.kernel.exps.Path;
 import org.apache.openjpa.kernel.exps.Subquery;
 import org.apache.openjpa.kernel.exps.Value;
 import org.apache.openjpa.meta.ClassMetaData;
+import org.apache.openjpa.meta.FieldMetaData;
+import org.openspaces.jpa.StoreManager;
 import org.openspaces.jpa.openjpa.query.AggregationFunction.AggregationType;
 import org.openspaces.jpa.openjpa.query.BinaryExpression.ExpressionType;
 
@@ -24,7 +28,17 @@ import org.openspaces.jpa.openjpa.query.BinaryExpression.ExpressionType;
  *
  */
 public class QueryExpressionFactory implements ExpressionFactory {
-
+	/**
+	 * Holds mapping between an alias name and actual field name.
+	 * Relevant for JOINS.
+	 */
+    private final Map<String, String> _joinBindings = new HashMap<String, String>();
+    private StoreManager _store;
+    
+    public QueryExpressionFactory(StoreManager store) {
+        this._store = store;
+    }
+    
     /**
      * Return a blank expression; this is used when the filter is empty.
      */
@@ -156,9 +170,11 @@ public class QueryExpressionFactory implements ExpressionFactory {
      * Bind the given variable to the given collection value.
      */
     public Expression bindVariable(Value var, Value coll) {
-        throw new RuntimeException("Unsupported operation.");
+        // Save the bound variable info for later use
+        _joinBindings.put(var.getName(), coll.getName());
+        return new BindVariableExpression();
     }
-
+    
     /**
      * Bind the given variable to the key set of the given map value.
      */
@@ -261,7 +277,16 @@ public class QueryExpressionFactory implements ExpressionFactory {
      * given value.<br /> Example: <code>var.address.city</code>
      */
     public Path newPath(Value val) {
-        return new FieldPathNode();
+        FieldPathNode fieldPathNode = new FieldPathNode();
+        String binding = _joinBindings.get(val.getName());
+        // If joined, set the joined property name and collection status
+        if (binding != null) {            
+            fieldPathNode.setJoinedFieldName(binding);
+            int classRelationStatus = _store.getClassRelationStatus(val.getMetaData().getDescribedType());
+            if (classRelationStatus == FieldMetaData.ONE_TO_MANY)
+                fieldPathNode.setCollection(true);            
+        }
+        return fieldPathNode;
     }
 
     /**
@@ -362,7 +387,7 @@ public class QueryExpressionFactory implements ExpressionFactory {
      */
     @SuppressWarnings("rawtypes")
     public Value newUnboundVariable(String name, Class type) {
-        throw new RuntimeException("Unsupported operation.");
+        return newBoundVariable(name, type);
     }
 
     /**

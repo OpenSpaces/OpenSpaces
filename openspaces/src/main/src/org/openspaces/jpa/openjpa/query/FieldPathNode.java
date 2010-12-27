@@ -28,10 +28,12 @@ public class FieldPathNode implements Path, ExpressionNode {
     private FieldMetaData _fieldMetaData;
     private List<String> _path;
     private String _schemaAlias;
+    private String _joinedFieldName = null;
+    private boolean _collection = false;
+    
     public FieldPathNode() {
         _path = new ArrayList<String>();
     }
-   
 
     public void acceptVisit(ExpressionVisitor visitor) {
         visitor.enter(this);
@@ -134,13 +136,35 @@ public class FieldPathNode implements Path, ExpressionNode {
         return path.toString();
     }
 
-
     public void appendSql(StringBuilder sql) {
-        sql.append(toString());
+        if (_joinedFieldName == null) {
+            sql.append(toString());
+        } else {
+            sql.append(_joinedFieldName);
+            if (_collection)
+                sql.append("[*]");
+            sql.append(".");
+            sql.append(toString());
+        }
     }
 
     public NodeType getNodeType() {
         return NodeType.FIELD_PATH;
+    }
+
+    /**
+     * In a JOIN statement - sets the JOINED property name. 
+     * @param collectionName
+     */
+    public void setJoinedFieldName(String collectionName) {
+        this._joinedFieldName = collectionName;
+    }
+
+    /**
+     * Sets whether the JOINED property is a collection or not.
+     */
+    public void setCollection(boolean collection) {
+        this._collection = collection;
     }
 
 }

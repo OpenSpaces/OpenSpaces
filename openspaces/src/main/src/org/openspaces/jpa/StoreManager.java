@@ -57,7 +57,7 @@ import com.j_spaces.jdbc.driver.GConnection;
 public class StoreManager extends AbstractStoreManager {
     //
     private Transaction _transaction = null;
-    private static final HashMap<Class<?>, Integer> _classesRelationStatus = new HashMap<Class<?>, Integer>();
+    private static final Map<Class<?>, Integer> _classesRelationStatus = new HashMap<Class<?>, Integer>();
     private static final HashSet<Class<?>> _processedClasses = new HashSet<Class<?>>();
     private GConnection _connection;
     
@@ -436,5 +436,12 @@ public class StoreManager extends AbstractStoreManager {
         return _connection;        
     }
     
+    /**
+     * Gets the class relation status (one-to-one etc..) for the provided type.
+     */
+    public synchronized int getClassRelationStatus(Class<?> type) {
+        Integer relationStatus = _classesRelationStatus.get(type);
+        return (relationStatus == null) ? FieldMetaData.MANAGE_NONE : relationStatus;
+    }
     
 }

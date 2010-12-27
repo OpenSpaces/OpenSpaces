@@ -29,8 +29,14 @@ public class LogicalExpression implements Expression, ExpressionNode {
         if (paren)
             sql.append("(");
         _expression1.appendSql(sql);
-        sql.append(this.toString());
-        _expression2.appendSql(sql);
+        // When OpenJPA's JPQL parser identifies a collection binding
+        // it adds a dummy expression wrapped by an AND expression which later translates
+        // to a "1 = 1" expression.
+        // We identify such a scenario and don't append the "AND 1 = 1" to the SQL buffer.
+        if (_expression2.getNodeType() != NodeType.VARIABLE_BINDING || _expressionType != ExpressionType.AND) {
+            sql.append(this.toString());
+            _expression2.appendSql(sql);
+        }
         if (paren)
             sql.append(")");
     }    
