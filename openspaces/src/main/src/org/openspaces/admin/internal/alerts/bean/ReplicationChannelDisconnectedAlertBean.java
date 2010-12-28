@@ -20,11 +20,11 @@ import com.gigaspaces.cluster.activeelection.SpaceMode;
 
 public class ReplicationChannelDisconnectedAlertBean implements AlertBean, ReplicationStatusChangedEventListener, SpaceInstanceRemovedEventListener {
 
-    private static final String REPLICATION_STATUS = "replication-status";
-    private static final String SOURCE_UID = "source-uid";
-    private static final String TARGET_UID = "target-uid";
     public static final String beanUID = "c54333ba-5d8ed065-4ac9-4f1e-a90e-236e36a1bc71";
     public static final String ALERT_NAME = "Replication Channel Disconnected";
+    public static final String REPLICATION_STATUS = "replication-status";
+    public static final String SOURCE_UID = "source-uid";
+    public static final String TARGET_UID = "target-uid";
     
     private final ReplicationChannelDisconnectedAlertBeanConfig config = new ReplicationChannelDisconnectedAlertBeanConfig();
 
@@ -91,14 +91,14 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
         
         switch (replicationStatus) {
             case DISCONNECTED: {
-                final String groupUid = generateGroupUid(event.getSpaceInstance().getUid());
+                final String groupUid = generateGroupUid(source.getUid());
                 AlertFactory factory = new AlertFactory();
                 factory.name(ALERT_NAME);
                 factory.beanConfigClass(config.getClass());
                 factory.groupUid(groupUid);
                 factory.description("A replication channel has been lost between " + getReplicationPath(source, target));
                 factory.severity(AlertSeverity.CRITICAL);
-                factory.componentUid(event.getSpaceInstance().getUid());
+                factory.componentUid(source.getUid());
                 factory.properties(config.getProperties());
                 factory.putProperty(REPLICATION_STATUS, replicationStatus.name());
                 factory.putProperty(SOURCE_UID, source.getUid());
@@ -109,7 +109,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                 break;
             }
             case ACTIVE: {
-                final String groupUid = generateGroupUid(event.getSpaceInstance().getUid());
+                final String groupUid = generateGroupUid(source.getUid());
                 AlertHistory alertHistory = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertHistoryByGroupUid(groupUid);
                 AlertHistoryDetails alertHistoryDetails = alertHistory.getDetails();
                 if (alertHistoryDetails != null && !alertHistoryDetails.isResolved()) {
@@ -119,9 +119,8 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                     factory.groupUid(groupUid);
                     factory.description("A replication channel has been restored between " + getReplicationPath(source, target));
                     factory.severity(AlertSeverity.OK);
-                    factory.componentUid(event.getSpaceInstance().getUid());
+                    factory.componentUid(source.getUid());
                     factory.properties(config.getProperties());
-                    factory.putProperty(REPLICATION_STATUS, replicationStatus.name());
                     factory.putProperty(REPLICATION_STATUS, replicationStatus.name());
                     factory.putProperty(SOURCE_UID, source.getUid());
                     factory.putProperty(TARGET_UID, (target == null ? "n/a" : target.getUid()));

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.openspaces.admin.internal.alerts.bean.AlertBean;
+import org.openspaces.admin.vm.VirtualMachine;
 
 public class AlertBeanUtils {
     
@@ -35,5 +36,43 @@ public class AlertBeanUtils {
      */
     public static String generateBeanUUID(Class<? extends AlertBean> clazz) {
         return Integer.toHexString(clazz.getSimpleName().hashCode())+"-"+UUID.randomUUID();
+    }
+    
+    /**
+     * Returns the short name of a grid component running inside a JVM.
+     * Inspects the JVM in the following order - GSM, GSC, GSA, LUS.
+     * 
+     * @param virtualMachine
+     * @return initials of the grid component. empty string if no component found.
+     */
+    public static String getGridComponentShortName(VirtualMachine virtualMachine) {
+        if (virtualMachine.getGridServiceManager() != null) {
+            return "GSM ";
+        } else if (virtualMachine.getGridServiceContainer() != null) {
+            return "GSC ";
+        } else if (virtualMachine.getGridServiceAgent() != null) {
+            return "GSA ";
+        } else if (virtualMachine.getLookupService() != null) {
+            return "LUS ";
+        } else return "";
+    }
+
+    /**
+     * Returns the full name of a grid component running inside a JVM.
+     * Inspects the JVM in the following order - GSM, GSC, GSA, LUS.
+     * 
+     * @param virtualMachine
+     * @return full name of a grid component. "n/a" if no component found.
+     */
+    public static String getGridComponentFullName(VirtualMachine virtualMachine) {
+        if (virtualMachine.getGridServiceManager() != null) {
+            return "Grid Service Manager";
+        } else if (virtualMachine.getGridServiceContainer() != null) {
+            return "Grid Service Container";
+        } else if (virtualMachine.getGridServiceAgent() != null) {
+            return "Grid Service Agent";
+        } else if (virtualMachine.getLookupService() != null) {
+            return "Lookup Service";
+        } else return "n/a";
     }
 }
