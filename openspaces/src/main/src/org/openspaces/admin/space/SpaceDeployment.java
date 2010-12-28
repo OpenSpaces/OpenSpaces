@@ -77,13 +77,13 @@ public class SpaceDeployment {
      * <p>Exactly the same like calling <code>clusterSchema("partitioned-sync2backup")</code>,
      * followed by <code>numberOfInstances(numberOfParitions)</code> and <code>numberOfBackups(numberOfBackups)</code>.
      *
-     * @param numberOfParitions The number of partitions
+     * @param numberOfPartitions The number of partitions
      * @param numberOfBackups   The number of backups
      * @return This space deployment
      */
-    public SpaceDeployment partitioned(int numberOfParitions, int numberOfBackups) {
+    public SpaceDeployment partitioned(int numberOfPartitions, int numberOfBackups) {
         clusterSchema("partitioned-sync2backup");
-        numberOfInstances(numberOfParitions);
+        numberOfInstances(numberOfPartitions);
         numberOfBackups(numberOfBackups);
         return this;
     }
