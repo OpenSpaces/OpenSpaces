@@ -10,6 +10,7 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.alerts.AlertFactory;
 import org.openspaces.admin.alerts.AlertSeverity;
+import org.openspaces.admin.alerts.AlertStatus;
 import org.openspaces.admin.alerts.config.AlertBeanConfig;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.gsc.GridServiceContainer;
@@ -128,8 +129,8 @@ public class ManualCapacityScaleStrategyBean
         this.targetNumberOfContainers = calcTargetNumberOfContainers();
         
         scheduledTask = 
-        ((InternalAdmin)admin).scheduleWithFixedDelayNonBlockingStateChange(
-        this, 0L, (long)slaConfig.getPollingIntervalSeconds(), TimeUnit.SECONDS);
+        (admin).scheduleWithFixedDelayNonBlockingStateChange(
+        this, 0L, slaConfig.getPollingIntervalSeconds(), TimeUnit.SECONDS);
     }
 
     private int calcMinNumberOfMachines(ProcessingUnit pu) {
@@ -285,7 +286,8 @@ public class ManualCapacityScaleStrategyBean
         
         if (reachedSla) {
             fireAlert(
-                AlertSeverity.OK,
+                AlertSeverity.WARNING,
+                AlertStatus.RESOLVED,
                 machinesAlertGroupUidPrefix,
                 "Machines Capacity SLA",
                 "Total machines memory for " + pu.getName() + " " + 
@@ -293,7 +295,8 @@ public class ManualCapacityScaleStrategyBean
         }
         else {
             fireAlert(
-                AlertSeverity.WARNING, 
+                AlertSeverity.WARNING,
+                AlertStatus.RAISED,
                 containersAlertGroupUidPrefix,
                 "Machines Capacity SLA",
                 "Total machines memory for " + pu.getName() + " " + 
@@ -316,7 +319,8 @@ public class ManualCapacityScaleStrategyBean
         
         if (reachedSla) {
             fireAlert(
-                AlertSeverity.OK,
+                AlertSeverity.WARNING,
+                AlertStatus.RESOLVED,
                 containersAlertGroupUidPrefix,
                 "Containers Capacity SLA",
                 "Target number of containers for " + pu.getName() + " " + 
@@ -324,7 +328,8 @@ public class ManualCapacityScaleStrategyBean
         }
         else {
             fireAlert(
-                AlertSeverity.WARNING, 
+                AlertSeverity.WARNING,
+                AlertStatus.RAISED,
                 containersAlertGroupUidPrefix,
                 "Containers Capacity SLA",
                 "Target number of containers for " + pu.getName() + " " + 
@@ -346,14 +351,16 @@ public class ManualCapacityScaleStrategyBean
         
         if (slaEnforced) {
             fireAlert(
-                AlertSeverity.OK,
+                AlertSeverity.WARNING,
+                AlertStatus.RESOLVED,
                 rebalancingAlertGroupUidPrefix,
                 "Processing Unit Rebalancing SLA",
                 "Rebalancing of " + pu.getName() + " is complete.");
         }
         else {
             fireAlert(
-                AlertSeverity.WARNING, 
+                AlertSeverity.WARNING,
+                AlertStatus.RAISED,
                 rebalancingAlertGroupUidPrefix,
                 "Processing Unit Rebalancing SLA",
                 "Rebalancing of " + pu.getName() + " is in progress.");
@@ -362,7 +369,7 @@ public class ManualCapacityScaleStrategyBean
         return slaEnforced;
     }
 
-    private void fireAlert(AlertSeverity severity,String alertGroupUidPrefix, String alertName, String alertDescription) {
+    private void fireAlert(AlertSeverity severity, AlertStatus status, String alertGroupUidPrefix, String alertName, String alertDescription) {
         AlertFactory alertFactory = new AlertFactory();
         alertFactory.name(alertName);
         alertFactory.description(alertDescription);

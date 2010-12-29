@@ -46,6 +46,7 @@ public class AlertFactory {
      * <p>
      * <li> {@link #groupUid(String)} - <b>required</b> </li>
      * <li> {@link #severity(AlertSeverity)} - <b>required</b> </li>
+     * <li> {@link #status(AlertStatus)} - <b>required</b> </li>
      * <li> {@link #beanConfigClass(String)} - <b>required</b> </li>
      * <li> {@link #timestamp(long)} - optional, is set upon construction</li>
      * <li> {@link #name(String)} - optional (<code>null</code> by default)</li>
@@ -83,6 +84,12 @@ public class AlertFactory {
         return this;
     }
     
+    /** Status - the status of this alert. */
+    public AlertFactory status(AlertStatus status) {
+        alert.setStatus(status);
+        return this;
+    }
+    
     /** Bean Config Class - the alert bean configuration class (name) which is used to configure the alert. */
     public AlertFactory beanConfigClass(Class<? extends AlertBeanConfig> beanConfigClass) {
         alert.setBeanConfigClassName(beanConfigClass.getClass().getName());
@@ -106,25 +113,29 @@ public class AlertFactory {
     }
 
     /**
+     * Copies all of the properties from the specified map to this map. Overrides any previously set
+     * properties.
+     * <p>
      * Set of String key-value property pairs including configuration properties, and any runtime
      * properties exposed by the alert bean. It is useful to put CPU, Memory and GC metrics into the
-     * map as a basic set of attributes for ease of troubleshooting. <b>Overrides any previously set
-     * properties.</b>
+     * map as a basic set of attributes for ease of troubleshooting.
      * 
      * @param properties
      *            the properties of an alert bean.
      */
     public AlertFactory properties(Map<String, String> properties) {
-        alert.setProperties(properties);
+        HashMap<String, String> newProperties = new HashMap<String, String>(properties);
+        alert.setProperties(newProperties);
         return this;
     }
 
     /**
      * A convenience method for adding properties to an already existing set of properties.
+     * Copies all of the properties from the specified map to this map.
      */
-    public AlertFactory putAllProperties(Map<String, String> properties) {
+    public AlertFactory putProperties(Map<String, String> properties) {
         if (alert.getProperties() == null) {
-            alert.setProperties(properties);
+            properties(properties);
         } else {
             alert.getProperties().putAll(properties);
         }
@@ -155,6 +166,9 @@ public class AlertFactory {
         }
         if (alert.getSeverity() == null) {
             throw new AdminException("Alert should be configured with a severity level");
+        }
+        if (alert.getStatus() == null) {
+            throw new AdminException("Alert should be configured with an status level");
         }
         if (alert.getBeanConfigClassName() == null) {
             throw new AdminException("Alert should be configured with the bean config class name");

@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.openspaces.admin.alerts.AlertFactory;
 import org.openspaces.admin.alerts.AlertSeverity;
+import org.openspaces.admin.alerts.AlertStatus;
 
 /**
  * A plain java object representing an alert issued by an alert bean or an alert provider.
@@ -35,6 +36,7 @@ public class DefaultAlert implements InternalAlert {
     private String description;
     private long timestamp;
     private AlertSeverity severity;
+    private AlertStatus status;
     private String beanConfigClassName;
     private String alertUid;
     private String groupUid;
@@ -89,6 +91,18 @@ public class DefaultAlert implements InternalAlert {
 	
 	public void setSeverity(AlertSeverity severity) {
         this.severity = severity;
+    }
+	
+	/*
+     * (non-Javadoc)
+     * @see org.openspaces.admin.alerts.Alert#getStatus()
+     */
+    public AlertStatus getStatus() {
+        return status;
+    }
+    
+    public void setStatus(AlertStatus status) {
+        this.status = status;
     }
 
 	/* (non-Javadoc)
@@ -148,6 +162,6 @@ public class DefaultAlert implements InternalAlert {
 
 	@Override
 	public String toString() {
-	    return getSeverity()+" | " + new Date(getTimestamp()) + " | " + getName() + " |" + getDescription() + " | " + getProperties();
+	    return new Date(getTimestamp()) + " | " + getStatus() + " | " + getSeverity()+" | " + getName() + " |" + getDescription() + " | " + getProperties();
 	}
 }

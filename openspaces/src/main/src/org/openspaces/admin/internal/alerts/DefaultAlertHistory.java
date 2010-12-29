@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.openspaces.admin.alerts.Alert;
-import org.openspaces.admin.alerts.AlertSeverity;
+import org.openspaces.admin.alerts.AlertStatus;
 
 public class DefaultAlertHistory implements AlertHistory {
 
@@ -50,9 +50,9 @@ public class DefaultAlertHistory implements AlertHistory {
         public String getName() {
             return alertHistory.get(0).getName();
         }
-
-        public boolean isResolved() {
-            return AlertSeverity.OK.equals(alertHistory.get(alertHistory.size() -1).getSeverity());
+        
+        public AlertStatus getLastAlertStatus() {
+            return alertHistory.get(alertHistory.size() -1).getStatus();
         }
 
         public String getGroupUid() {

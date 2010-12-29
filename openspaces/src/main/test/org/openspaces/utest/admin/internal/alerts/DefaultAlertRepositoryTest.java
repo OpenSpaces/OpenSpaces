@@ -3,6 +3,7 @@ package org.openspaces.utest.admin.internal.alerts;
 import org.openspaces.admin.alerts.Alert;
 import org.openspaces.admin.alerts.AlertFactory;
 import org.openspaces.admin.alerts.AlertSeverity;
+import org.openspaces.admin.alerts.AlertStatus;
 import org.openspaces.admin.alerts.config.AlertBeanConfig;
 import org.openspaces.admin.internal.alerts.AlertHistory;
 import org.openspaces.admin.internal.alerts.DefaultAlertRepository;
@@ -19,10 +20,11 @@ public class DefaultAlertRepositoryTest extends TestCase {
 
     final DefaultAlertRepository repository = new DefaultAlertRepository();
 
-    /** adding an {@link AlertSeverity#OK} alert with a non-existing group UID should not open an entry in the repository */
+    /** adding an {@link AlertStatus#RESOLVED} alert with a non-existing group UID should not open an entry in the repository */
     public void test1() {
         Alert alert = new AlertFactory()
-        .severity(AlertSeverity.OK)
+        .severity(AlertSeverity.WARNING)
+        .status(AlertStatus.RESOLVED)
         .groupUid("group1")
         .beanConfigClass(AlertBeanConfig.class)
         .toAlert();
@@ -36,10 +38,11 @@ public class DefaultAlertRepositoryTest extends TestCase {
         assertEquals(0, alertHistoryByGroupUid.getAlerts().length);
     }
     
-    /** adding an {@link AlertSeverity#NA} alert with a non-existing group UID should not open an entry in the repository */
+    /** adding an {@link AlertStatus#NA} alert with a non-existing group UID should not open an entry in the repository */
     public void test2() {
         Alert alert = new AlertFactory()
-        .severity(AlertSeverity.NA)
+        .severity(AlertSeverity.WARNING)
+        .status(AlertStatus.NA)
         .groupUid("group2")
         .beanConfigClass(AlertBeanConfig.class)
         .toAlert();
@@ -54,14 +57,15 @@ public class DefaultAlertRepositoryTest extends TestCase {
     }
     
     /** 
-     * adding an {@link AlertSeverity#WARNING} alert should open an entry in the repository.
-     * adding an {@link AlertSeverity#OK} alert should resolve the alert group. 
+     * adding an {@link AlertStatus#RAISED} alert should open an entry in the repository.
+     * adding an {@link AlertStatus#RESOLVED} alert should resolve the alert group. 
      */
     public void test3() {
         
         for (int i=0; i<3; ++i) {
             Alert alert = new AlertFactory()
             .severity(AlertSeverity.WARNING)
+            .status(AlertStatus.RAISED)
             .groupUid("group3")
             .beanConfigClass(AlertBeanConfig.class)
             .description("alert#"+i)
@@ -72,13 +76,14 @@ public class DefaultAlertRepositoryTest extends TestCase {
             AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid(alert.getGroupUid());
             assertNotNull(alertHistoryByGroupUid);
             assertNotNull(alertHistoryByGroupUid.getDetails());
-            assertFalse(alertHistoryByGroupUid.getDetails().isResolved());
+            assertFalse(alertHistoryByGroupUid.getDetails().getLastAlertStatus().isResolved());
             assertNotNull(alertHistoryByGroupUid.getAlerts());
             assertEquals(i+1, alertHistoryByGroupUid.getAlerts().length);
         }
 
         Alert alert = new AlertFactory()
-        .severity(AlertSeverity.OK)
+        .severity(AlertSeverity.WARNING)
+        .status(AlertStatus.RESOLVED)
         .groupUid("group3")
         .beanConfigClass(AlertBeanConfig.class)
         .description("alert#4")
@@ -89,20 +94,21 @@ public class DefaultAlertRepositoryTest extends TestCase {
         AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid(alert.getGroupUid());
         assertNotNull(alertHistoryByGroupUid);
         assertNotNull(alertHistoryByGroupUid.getDetails());
-        assertTrue(alertHistoryByGroupUid.getDetails().isResolved());
+        assertTrue(alertHistoryByGroupUid.getDetails().getLastAlertStatus().isResolved());
         assertNotNull(alertHistoryByGroupUid.getAlerts());
         assertEquals(4, alertHistoryByGroupUid.getAlerts().length);
     }
     
     /** 
-     * adding an {@link AlertSeverity#WARNING} alert should open an entry in the repository.
-     * adding an {@link AlertSeverity#NA} alert should 'close' the alert group.
+     * adding an {@link AlertStatus#RAISED} alert should open an entry in the repository.
+     * adding an {@link AlertStatus#NA} alert should 'close' the alert group.
      */
     public void test4() {
         
         for (int i=0; i<3; ++i) {
             Alert alert = new AlertFactory()
             .severity(AlertSeverity.WARNING)
+            .status(AlertStatus.RAISED)
             .groupUid("group4")
             .beanConfigClass(AlertBeanConfig.class)
             .description("alert#"+i)
@@ -113,13 +119,14 @@ public class DefaultAlertRepositoryTest extends TestCase {
             AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid(alert.getGroupUid());
             assertNotNull(alertHistoryByGroupUid);
             assertNotNull(alertHistoryByGroupUid.getDetails());
-            assertFalse(alertHistoryByGroupUid.getDetails().isResolved());
+            assertFalse(alertHistoryByGroupUid.getDetails().getLastAlertStatus().isResolved());
             assertNotNull(alertHistoryByGroupUid.getAlerts());
             assertEquals(i+1, alertHistoryByGroupUid.getAlerts().length);
         }
 
         Alert alert = new AlertFactory()
-        .severity(AlertSeverity.NA)
+        .severity(AlertSeverity.WARNING)
+        .status(AlertStatus.NA)
         .groupUid("group4")
         .beanConfigClass(AlertBeanConfig.class)
         .description("alert#4")
@@ -130,21 +137,22 @@ public class DefaultAlertRepositoryTest extends TestCase {
         AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid(alert.getGroupUid());
         assertNotNull(alertHistoryByGroupUid);
         assertNotNull(alertHistoryByGroupUid.getDetails());
-        assertFalse(alertHistoryByGroupUid.getDetails().isResolved());
+        assertFalse(alertHistoryByGroupUid.getDetails().getLastAlertStatus().isResolved());
         assertNotNull(alertHistoryByGroupUid.getAlerts());
         assertEquals(4, alertHistoryByGroupUid.getAlerts().length);
     }
     
     /** 
-     * adding an {@link AlertSeverity#WARNING} alert should open an entry in the repository.
-     * adding an {@link AlertSeverity#OK} alert should resolve the alert group.
-     * adding another {@link AlertSeverity#OK} alert should not affect the resolved alert group.
+     * adding an {@link AlertStatus#RAISED} alert should open an entry in the repository.
+     * adding an {@link AlertStatus#RESOLVED} alert should resolve the alert group.
+     * adding another {@link AlertStatus#RESOLVED} alert should not affect the resolved alert group.
      */
     public void test5() {
         
         for (int i=0; i<3; ++i) {
             Alert alert = new AlertFactory()
             .severity(AlertSeverity.WARNING)
+            .status(AlertStatus.RAISED)
             .groupUid("group5")
             .beanConfigClass(AlertBeanConfig.class)
             .description("alert#"+i)
@@ -155,7 +163,8 @@ public class DefaultAlertRepositoryTest extends TestCase {
 
         for (int i=0; i<3; ++i) {
             Alert alert = new AlertFactory()
-            .severity(AlertSeverity.OK)
+            .severity(AlertSeverity.WARNING)
+            .status(AlertStatus.RESOLVED)
             .groupUid("group5")
             .beanConfigClass(AlertBeanConfig.class)
             .description("alert#4")
@@ -167,7 +176,7 @@ public class DefaultAlertRepositoryTest extends TestCase {
                 AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid(alert.getGroupUid());
                 assertNotNull(alertHistoryByGroupUid);
                 assertNotNull(alertHistoryByGroupUid.getDetails());
-                assertTrue(alertHistoryByGroupUid.getDetails().isResolved());
+                assertTrue(alertHistoryByGroupUid.getDetails().getLastAlertStatus().isResolved());
                 assertNotNull(alertHistoryByGroupUid.getAlerts());
                 assertEquals(4, alertHistoryByGroupUid.getAlerts().length);
             }
@@ -177,7 +186,7 @@ public class DefaultAlertRepositoryTest extends TestCase {
                 AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid(alert.getGroupUid());
                 assertNotNull(alertHistoryByGroupUid);
                 assertNotNull(alertHistoryByGroupUid.getDetails());
-                assertTrue(alertHistoryByGroupUid.getDetails().isResolved());
+                assertTrue(alertHistoryByGroupUid.getDetails().getLastAlertStatus().isResolved());
                 assertNotNull(alertHistoryByGroupUid.getAlerts());
                 assertEquals(4, alertHistoryByGroupUid.getAlerts().length);
             }
@@ -192,6 +201,7 @@ public class DefaultAlertRepositoryTest extends TestCase {
         for (int i=0; i<10; ++i) {
             Alert alert = new AlertFactory()
             .severity(AlertSeverity.WARNING)
+            .status(AlertStatus.RAISED)
             .groupUid("group"+i)
             .beanConfigClass(AlertBeanConfig.class)
             .description("alert#"+i)
@@ -204,7 +214,8 @@ public class DefaultAlertRepositoryTest extends TestCase {
         
         for (int i=0; i<10; ++i) {
             Alert alert = new AlertFactory()
-            .severity(AlertSeverity.OK)
+            .severity(AlertSeverity.WARNING)
+            .status(AlertStatus.RESOLVED)
             .groupUid("group"+i)
             .beanConfigClass(AlertBeanConfig.class)
             .description("alert#"+i)
@@ -222,7 +233,7 @@ public class DefaultAlertRepositoryTest extends TestCase {
             AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid("group"+i);
             assertNotNull(alertHistoryByGroupUid);
             assertNotNull(alertHistoryByGroupUid.getDetails());
-            assertTrue(alertHistoryByGroupUid.getDetails().isResolved());
+            assertTrue(alertHistoryByGroupUid.getDetails().getLastAlertStatus().isResolved());
             assertNotNull(alertHistoryByGroupUid.getAlerts());
             assertEquals(2, alertHistoryByGroupUid.getAlerts().length);
         }
@@ -235,6 +246,7 @@ public class DefaultAlertRepositoryTest extends TestCase {
         for (int i=0; i<10; ++i) {
             Alert alert = new AlertFactory()
             .severity(AlertSeverity.WARNING)
+            .status(AlertStatus.RAISED)
             .groupUid("group7")
             .beanConfigClass(AlertBeanConfig.class)
             .description("alert#"+i)
@@ -246,13 +258,14 @@ public class DefaultAlertRepositoryTest extends TestCase {
         AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid("group7");
         assertNotNull(alertHistoryByGroupUid);
         assertNotNull(alertHistoryByGroupUid.getDetails());
-        assertFalse(alertHistoryByGroupUid.getDetails().isResolved());
+        assertFalse(alertHistoryByGroupUid.getDetails().getLastAlertStatus().isResolved());
         assertNotNull(alertHistoryByGroupUid.getAlerts());
         assertEquals(5+1, alertHistoryByGroupUid.getAlerts().length); //1 - is the first alert triggered, 5 - the rest of the history
         
         
         Alert alert = new AlertFactory()
-        .severity(AlertSeverity.OK)
+        .severity(AlertSeverity.WARNING)
+        .status(AlertStatus.RESOLVED)
         .groupUid("group7")
         .beanConfigClass(AlertBeanConfig.class)
         .description("alert#11")
@@ -262,7 +275,7 @@ public class DefaultAlertRepositoryTest extends TestCase {
         AlertHistory alertHistoryByGroupUid7 = repository.getAlertHistoryByGroupUid("group7");
         assertNotNull(alertHistoryByGroupUid7);
         assertNotNull(alertHistoryByGroupUid7.getDetails());
-        assertTrue(alertHistoryByGroupUid7.getDetails().isResolved());
+        assertTrue(alertHistoryByGroupUid7.getDetails().getLastAlertStatus().isResolved());
         assertNotNull(alertHistoryByGroupUid7.getAlerts());
         assertEquals(5+2, alertHistoryByGroupUid7.getAlerts().length); //2 - is the first&last alert triggered, 5 - the rest of the history
     }
@@ -282,6 +295,7 @@ public class DefaultAlertRepositoryTest extends TestCase {
             for (int i=0; i<3; ++i) {
                 Alert alert = new AlertFactory()
                 .severity(AlertSeverity.WARNING)
+                .status(AlertStatus.RAISED)
                 .groupUid("group"+i)
                 .beanConfigClass(AlertBeanConfig.class)
                 .description("alert#"+timestamp)
@@ -317,7 +331,8 @@ public class DefaultAlertRepositoryTest extends TestCase {
          * group 1: [2, 5, 8]
          */
         Alert alert = new AlertFactory()
-        .severity(AlertSeverity.OK)
+        .severity(AlertSeverity.WARNING)
+        .status(AlertStatus.RESOLVED)
         .groupUid("group"+0)
         .beanConfigClass(AlertBeanConfig.class)
         .description("alert#"+timestamp)
@@ -339,7 +354,8 @@ public class DefaultAlertRepositoryTest extends TestCase {
          * group 2: [3, 6, 9]
          */
         alert = new AlertFactory()
-        .severity(AlertSeverity.OK)
+        .severity(AlertSeverity.WARNING)
+        .status(AlertStatus.RESOLVED)
         .groupUid("group"+1)
         .beanConfigClass(AlertBeanConfig.class)
         .description("alert#"+timestamp)

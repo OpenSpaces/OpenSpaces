@@ -11,6 +11,7 @@ import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.alerts.Alert;
 import org.openspaces.admin.alerts.AlertFactory;
 import org.openspaces.admin.alerts.AlertSeverity;
+import org.openspaces.admin.alerts.AlertStatus;
 import org.openspaces.admin.alerts.config.PhysicalMemoryUtilizationAlertBeanConfig;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.alerts.AlertHistory;
@@ -111,7 +112,8 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
         factory.groupUid(groupUid);
         factory.description(getGridComponentShortName(virtualMachine)
                 + "Heap memory is unavailable; JVM has been removed");
-        factory.severity(AlertSeverity.NA);
+        factory.severity(AlertSeverity.WARNING);
+        factory.status(AlertStatus.NA);
         factory.componentUid(virtualMachine.getUid());
         factory.properties(config.getProperties());
         factory.putProperty(MEMORY_UTILIZATION, "n/a");
@@ -142,6 +144,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
                     + "Heap memory crossed above a " + highThreshold + "% threshold, for a period of "
                     + TimeUtil.format(config.getMeasurementPeriod()) + ", with an average memory of " + NUMBER_FORMAT.format(memoryAvg) + "%");
             factory.severity(AlertSeverity.WARNING);
+            factory.status(AlertStatus.RAISED);
             factory.componentUid(event.getVirtualMachine().getUid());
             factory.properties(config.getProperties());
             factory.putProperty(MEMORY_UTILIZATION, String.valueOf(memoryAvg));
@@ -157,7 +160,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
             final String groupUid = generateGroupUid(event.getVirtualMachine().getUid());
             AlertHistory alertHistory = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertHistoryByGroupUid(groupUid);
             AlertHistoryDetails alertHistoryDetails = alertHistory.getDetails();
-            if (alertHistoryDetails != null && !alertHistoryDetails.isResolved()) {
+            if (alertHistoryDetails != null && !alertHistoryDetails.getLastAlertStatus().isResolved()) {
                 AlertFactory factory = new AlertFactory();
                 factory.name(ALERT_NAME);
                 factory.beanConfigClass(config.getClass());
@@ -166,7 +169,8 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
                         + "Heap memory crossed below a " + highThreshold + "% threshold, for a period of "
                         + getPeriodOfTime(event) + ", with an average memory of " + NUMBER_FORMAT.format(memoryAvg)
                         + "%");
-                factory.severity(AlertSeverity.OK);
+                factory.severity(AlertSeverity.WARNING);
+                factory.status(AlertStatus.RESOLVED);
                 factory.componentUid(event.getVirtualMachine().getUid());
                 factory.properties(config.getProperties());
                 factory.putProperty(MEMORY_UTILIZATION, String.valueOf(memoryAvg));

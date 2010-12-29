@@ -6,6 +6,7 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.alerts.Alert;
 import org.openspaces.admin.alerts.AlertFactory;
 import org.openspaces.admin.alerts.AlertSeverity;
+import org.openspaces.admin.alerts.AlertStatus;
 import org.openspaces.admin.alerts.config.ReplicationChannelDisconnectedAlertBeanConfig;
 import org.openspaces.admin.internal.alerts.AlertHistory;
 import org.openspaces.admin.internal.alerts.AlertHistoryDetails;
@@ -66,7 +67,8 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
         factory.beanConfigClass(config.getClass());
         factory.groupUid(groupUid);
         factory.description("Replication channel status is unavailable; " + spaceInstance + " has been removed.");
-        factory.severity(AlertSeverity.NA);
+        factory.severity(AlertSeverity.SEVERE);
+        factory.status(AlertStatus.NA);
         factory.componentUid(spaceInstance.getUid());
         factory.properties(config.getProperties());
         factory.putProperty(REPLICATION_STATUS, "n/a");
@@ -97,7 +99,8 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                 factory.beanConfigClass(config.getClass());
                 factory.groupUid(groupUid);
                 factory.description("A replication channel has been lost between " + getReplicationPath(source, target));
-                factory.severity(AlertSeverity.CRITICAL);
+                factory.severity(AlertSeverity.SEVERE);
+                factory.status(AlertStatus.RAISED);
                 factory.componentUid(source.getUid());
                 factory.properties(config.getProperties());
                 factory.putProperty(REPLICATION_STATUS, replicationStatus.name());
@@ -112,13 +115,14 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                 final String groupUid = generateGroupUid(source.getUid());
                 AlertHistory alertHistory = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertHistoryByGroupUid(groupUid);
                 AlertHistoryDetails alertHistoryDetails = alertHistory.getDetails();
-                if (alertHistoryDetails != null && !alertHistoryDetails.isResolved()) {
+                if (alertHistoryDetails != null && !alertHistoryDetails.getLastAlertStatus().isResolved()) {
                     AlertFactory factory = new AlertFactory();
                     factory.name(ALERT_NAME);
                     factory.beanConfigClass(config.getClass());
                     factory.groupUid(groupUid);
                     factory.description("A replication channel has been restored between " + getReplicationPath(source, target));
-                    factory.severity(AlertSeverity.OK);
+                    factory.severity(AlertSeverity.SEVERE);
+                    factory.status(AlertStatus.RESOLVED);
                     factory.componentUid(source.getUid());
                     factory.properties(config.getProperties());
                     factory.putProperty(REPLICATION_STATUS, replicationStatus.name());

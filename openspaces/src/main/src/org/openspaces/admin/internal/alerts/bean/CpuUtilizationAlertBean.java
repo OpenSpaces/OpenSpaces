@@ -11,6 +11,7 @@ import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.alerts.Alert;
 import org.openspaces.admin.alerts.AlertFactory;
 import org.openspaces.admin.alerts.AlertSeverity;
+import org.openspaces.admin.alerts.AlertStatus;
 import org.openspaces.admin.alerts.config.CpuUtilizationAlertBeanConfig;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.alerts.AlertHistory;
@@ -107,7 +108,8 @@ public class CpuUtilizationAlertBean implements AlertBean,
         factory.beanConfigClass(config.getClass());
         factory.groupUid(groupUid);
         factory.description("CPU measurment is unavailable; machine has been removed");
-        factory.severity(AlertSeverity.NA);
+        factory.severity(AlertSeverity.WARNING);
+        factory.status(AlertStatus.NA);
         factory.componentUid(machine.getOperatingSystem().getUid());
         factory.properties(config.getProperties());
         factory.putProperty(CPU_UTILIZATION, "n/a");
@@ -135,6 +137,7 @@ public class CpuUtilizationAlertBean implements AlertBean,
             factory.description("CPU crossed above a " + highThreshold + "% threshold, for a period of "
                     + TimeUtil.format(config.getMeasurementPeriod()) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuAvg) + "%");
             factory.severity(AlertSeverity.WARNING);
+            factory.status(AlertStatus.RAISED);
             factory.componentUid(event.getOperatingSystem().getUid());
             factory.properties(config.getProperties());
             factory.putProperty(CPU_UTILIZATION, String.valueOf(cpuAvg));
@@ -148,14 +151,15 @@ public class CpuUtilizationAlertBean implements AlertBean,
             final String groupUid = generateGroupUid(event.getOperatingSystem().getUid());
             AlertHistory alertHistory = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertHistoryByGroupUid(groupUid);
             AlertHistoryDetails alertHistoryDetails = alertHistory.getDetails();
-            if (alertHistoryDetails != null && !alertHistoryDetails.isResolved()) {
+            if (alertHistoryDetails != null && !alertHistoryDetails.getLastAlertStatus().isResolved()) {
                 AlertFactory factory = new AlertFactory();
                 factory.name(ALERT_NAME);
                 factory.beanConfigClass(config.getClass());
                 factory.groupUid(groupUid);
                 factory.description("CPU crossed below a " + highThreshold + "% threshold, for a period of "
                         + TimeUtil.format(config.getMeasurementPeriod()) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuAvg) + "%");
-                factory.severity(AlertSeverity.OK);
+                factory.severity(AlertSeverity.WARNING);
+                factory.status(AlertStatus.RESOLVED);
                 factory.componentUid(event.getOperatingSystem().getUid());
                 factory.properties(config.getProperties());
                 factory.putProperty(CPU_UTILIZATION, String.valueOf(cpuAvg));

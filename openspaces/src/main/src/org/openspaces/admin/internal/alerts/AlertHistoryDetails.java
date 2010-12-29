@@ -1,6 +1,6 @@
 package org.openspaces.admin.internal.alerts;
 
-import org.openspaces.admin.alerts.AlertSeverity;
+import org.openspaces.admin.alerts.AlertStatus;
 
 /**
  * History details of all the alerts aggregated by the same group UID (Alert{@link #getGroupUid()}.
@@ -23,7 +23,7 @@ public interface AlertHistoryDetails {
     String  getGroupUid();
 
     /**
-     * @return <code>true</code> if this alert was resolved (with a severity of {@link AlertSeverity#OK}).
+     * @return The status of the last alert in this alert history aggregation.
      */
-    boolean isResolved();
+    AlertStatus getLastAlertStatus();
 }

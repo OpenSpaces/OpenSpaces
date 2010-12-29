@@ -6,6 +6,7 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.alerts.Alert;
 import org.openspaces.admin.alerts.AlertFactory;
 import org.openspaces.admin.alerts.AlertSeverity;
+import org.openspaces.admin.alerts.AlertStatus;
 import org.openspaces.admin.alerts.config.ReplicationRedoLogSizeAlertBeanConfig;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.alerts.AlertHistory;
@@ -92,7 +93,8 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
         factory.beanConfigClass(config.getClass());
         factory.groupUid(groupUid);
         factory.description("Replication redo log is unvailable; " + getSpaceName(spaceInstance) + " has been removed.");
-        factory.severity(AlertSeverity.NA);
+        factory.severity(AlertSeverity.WARNING);
+        factory.status(AlertStatus.NA);
         factory.componentUid(spaceInstance.getUid());
         factory.properties(config.getProperties());
         factory.putProperty(SOURCE_UID, spaceInstance.getUid());
@@ -124,6 +126,7 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
             factory.groupUid(groupUid);
             factory.description("Replication redo-log size crossed above a " + highThreshold + " threshold, with a size of " + redoLogSize + " for " + getSpaceName(source));
             factory.severity(AlertSeverity.WARNING);
+            factory.status(AlertStatus.RAISED);
             factory.componentUid(source.getUid());
             factory.properties(config.getProperties());
             factory.putProperty(SOURCE_UID, source.getUid());
@@ -137,13 +140,14 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
             final String groupUid = generateGroupUid(source.getUid());
             AlertHistory alertHistory = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertHistoryByGroupUid(groupUid);
             AlertHistoryDetails alertHistoryDetails = alertHistory.getDetails();
-            if (alertHistoryDetails != null && !alertHistoryDetails.isResolved()) {
+            if (alertHistoryDetails != null && !alertHistoryDetails.getLastAlertStatus().isResolved()) {
                 AlertFactory factory = new AlertFactory();
                 factory.name(ALERT_NAME);
                 factory.beanConfigClass(config.getClass());
                 factory.groupUid(groupUid);
                 factory.description("Replication redo-log size crossed below a " + lowThreshold + " threshold, with a size of " + redoLogSize + " for " + getSpaceName(source));
-                factory.severity(AlertSeverity.OK);
+                factory.severity(AlertSeverity.WARNING);
+                factory.status(AlertStatus.RESOLVED);
                 factory.componentUid(event.getSpaceInstance().getUid());
                 factory.properties(config.getProperties());
                 factory.putProperty(SOURCE_UID, source.getUid());

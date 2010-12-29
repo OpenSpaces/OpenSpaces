@@ -11,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.openspaces.admin.alerts.Alert;
-import org.openspaces.admin.alerts.AlertSeverity;
 
 public class DefaultAlertRepository implements InternalAlertRepository {
 
@@ -33,8 +32,9 @@ public class DefaultAlertRepository implements InternalAlertRepository {
 
         AlertChain chain = alertsByGroupUid.get(alert.getGroupUid());
         if (chain == null) {
-            if (AlertSeverity.OK.equals(alert.getSeverity())
-                    || AlertSeverity.NA.equals(alert.getSeverity())) return false;
+            if (alert.getStatus().isResolved() || alert.getStatus().isNotAvailable()) {
+                return false;
+            }
             
             AlertChain newChain = new AlertChain(groupHistorySize);
             chain = alertsByGroupUid.putIfAbsent(alert.getGroupUid(), newChain);
@@ -162,7 +162,7 @@ public class DefaultAlertRepository implements InternalAlertRepository {
         }
 
         public synchronized boolean addAlert(Alert alert) {
-            if (AlertSeverity.OK.equals(alert.getSeverity()) || AlertSeverity.NA.equals(alert.getSeverity())) {
+            if (alert.getStatus().isResolved() || alert.getStatus().isNotAvailable()) {
                 if (resolvedAlert != null)
                     return false;
                 resolvedAlert = alert;

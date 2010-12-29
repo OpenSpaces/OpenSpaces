@@ -29,13 +29,12 @@ import org.openspaces.admin.Admin;
  * <p>
  * An <b>unresolved</b> alert is an alert that indicates a problematic situation that needs
  * attention. An alert bean can trigger more than one unresolved alert if the problem persists (with
- * the same alert group UID). A <b>resolved</b> alert ({@link AlertSeverity#OK}) is an alert that
+ * the same alert group UID). A <b>resolved</b> alert ({@link AlertStatus#RESOLVED}) is an alert that
  * indicates that the situation was resolved, or is no longer in need of attention.
  * <p>
  * Each alert has descriptive information of the alert ({@link #getDescription()}), data and time of
  * the alert ({@link #getTimestamp()}), and configuration properties together with runtime
- * properties the alert bean exposes (see {@link #getProperties()}). The alert bean that fired the alert
- * is given by {@link #getBeanConfigClassName()}.
+ * properties the alert bean exposes (see {@link #getProperties()}).
  * <p>
  * The source component for which the alert was triggered (see {@link #getComponentUid()}) can be
  * correlated to one of the components using the {@link Admin#getGridComponentByUID(String)} if this
@@ -65,6 +64,11 @@ public interface Alert extends Serializable {
      * @return Severity - the defined severity of the alert.
      */
     public AlertSeverity getSeverity();
+    
+    /**
+     * @return Status - the status of the alert.
+     */
+    public AlertStatus getStatus();
 
     /**
      * @return Bean Configuration Class Name - the alert bean configuration class name which is used to configure the alert.
