@@ -33,7 +33,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
     public static final String HOST_NAME = "host-name";
     public static final String PROCESS_ID = "process-id";
     public static final String COMPONENT_NAME = "component-name";
-    public static final String MEMORY_UTILIZATION = "memory-utilization";
+    public static final String HEAP_UTILIZATION = "heap-utilization";
     
     private final PhysicalMemoryUtilizationAlertBeanConfig config = new PhysicalMemoryUtilizationAlertBeanConfig();
 
@@ -116,7 +116,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
         factory.status(AlertStatus.NA);
         factory.componentUid(virtualMachine.getUid());
         factory.properties(config.getProperties());
-        factory.putProperty(MEMORY_UTILIZATION, "n/a");
+        factory.putProperty(HEAP_UTILIZATION, "n/a");
         factory.putProperty(HOST_NAME, virtualMachine.getMachine().getHostName());
         factory.putProperty(HOST_ADDRESS, virtualMachine.getMachine().getHostAddress());
         factory.putProperty(PROCESS_ID, String.valueOf(virtualMachine.getDetails().getPid()));
@@ -147,7 +147,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
             factory.status(AlertStatus.RAISED);
             factory.componentUid(event.getVirtualMachine().getUid());
             factory.properties(config.getProperties());
-            factory.putProperty(MEMORY_UTILIZATION, String.valueOf(memoryAvg));
+            factory.putProperty(HEAP_UTILIZATION, String.valueOf(memoryAvg));
             factory.putProperty(HOST_NAME, event.getVirtualMachine().getMachine().getHostName());
             factory.putProperty(HOST_ADDRESS, event.getVirtualMachine().getMachine().getHostAddress());
             factory.putProperty(PROCESS_ID, String.valueOf(event.getVirtualMachine().getDetails().getPid()));
@@ -173,7 +173,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
                 factory.status(AlertStatus.RESOLVED);
                 factory.componentUid(event.getVirtualMachine().getUid());
                 factory.properties(config.getProperties());
-                factory.putProperty(MEMORY_UTILIZATION, String.valueOf(memoryAvg));
+                factory.putProperty(HEAP_UTILIZATION, String.valueOf(memoryAvg));
                 factory.putProperty(HOST_NAME, event.getVirtualMachine().getMachine().getHostName());
                 factory.putProperty(HOST_ADDRESS, event.getVirtualMachine().getMachine().getHostAddress());
                 factory.putProperty(PROCESS_ID, String.valueOf(event.getVirtualMachine().getDetails().getPid()));
