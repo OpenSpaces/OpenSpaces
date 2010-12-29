@@ -18,7 +18,7 @@ package org.openspaces.admin;
 
 import net.jini.core.discovery.LookupLocator;
 
-import org.openspaces.admin.alerts.AlertManager;
+import org.openspaces.admin.alert.AlertManager;
 import org.openspaces.admin.dump.DumpGeneratedListener;
 import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.dump.DumpResult;

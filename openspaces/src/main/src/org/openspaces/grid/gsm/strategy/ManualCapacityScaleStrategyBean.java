@@ -8,10 +8,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
-import org.openspaces.admin.alerts.AlertFactory;
-import org.openspaces.admin.alerts.AlertSeverity;
-import org.openspaces.admin.alerts.AlertStatus;
-import org.openspaces.admin.alerts.config.AlertBeanConfig;
+import org.openspaces.admin.alert.AlertFactory;
+import org.openspaces.admin.alert.AlertSeverity;
+import org.openspaces.admin.alert.AlertStatus;
+import org.openspaces.admin.alert.config.AlertBeanConfig;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
@@ -376,7 +376,6 @@ public class ManualCapacityScaleStrategyBean
         alertFactory.severity(severity);        
         alertFactory.componentUid(pu.getName());
         alertFactory.groupUid(alertGroupUidPrefix + "-" + pu.getName());
-        alertFactory.beanConfigClass(AlertBeanConfig.class); //TODO: integration with alerts by type
         admin.getAlertManager().fireAlert(alertFactory.toAlert());
         logger.debug(alertDescription);
     }

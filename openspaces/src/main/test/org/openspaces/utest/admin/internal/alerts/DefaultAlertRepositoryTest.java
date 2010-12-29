@@ -1,12 +1,12 @@
 package org.openspaces.utest.admin.internal.alerts;
 
-import org.openspaces.admin.alerts.Alert;
-import org.openspaces.admin.alerts.AlertFactory;
-import org.openspaces.admin.alerts.AlertSeverity;
-import org.openspaces.admin.alerts.AlertStatus;
-import org.openspaces.admin.alerts.config.AlertBeanConfig;
-import org.openspaces.admin.internal.alerts.AlertHistory;
-import org.openspaces.admin.internal.alerts.DefaultAlertRepository;
+import org.openspaces.admin.alert.Alert;
+import org.openspaces.admin.alert.AlertFactory;
+import org.openspaces.admin.alert.AlertSeverity;
+import org.openspaces.admin.alert.AlertStatus;
+import org.openspaces.admin.alert.config.AlertBeanConfig;
+import org.openspaces.admin.internal.alert.AlertHistory;
+import org.openspaces.admin.internal.alert.DefaultAlertRepository;
 
 import junit.framework.TestCase;
 
@@ -26,7 +26,6 @@ public class DefaultAlertRepositoryTest extends TestCase {
         .severity(AlertSeverity.WARNING)
         .status(AlertStatus.RESOLVED)
         .groupUid("group1")
-        .beanConfigClass(AlertBeanConfig.class)
         .toAlert();
 
         assertFalse(repository.addAlert(alert));
@@ -44,7 +43,6 @@ public class DefaultAlertRepositoryTest extends TestCase {
         .severity(AlertSeverity.WARNING)
         .status(AlertStatus.NA)
         .groupUid("group2")
-        .beanConfigClass(AlertBeanConfig.class)
         .toAlert();
 
         assertFalse(repository.addAlert(alert));
@@ -67,7 +65,6 @@ public class DefaultAlertRepositoryTest extends TestCase {
             .severity(AlertSeverity.WARNING)
             .status(AlertStatus.RAISED)
             .groupUid("group3")
-            .beanConfigClass(AlertBeanConfig.class)
             .description("alert#"+i)
             .toAlert();
 
@@ -85,7 +82,6 @@ public class DefaultAlertRepositoryTest extends TestCase {
         .severity(AlertSeverity.WARNING)
         .status(AlertStatus.RESOLVED)
         .groupUid("group3")
-        .beanConfigClass(AlertBeanConfig.class)
         .description("alert#4")
         .toAlert();
 
@@ -110,7 +106,6 @@ public class DefaultAlertRepositoryTest extends TestCase {
             .severity(AlertSeverity.WARNING)
             .status(AlertStatus.RAISED)
             .groupUid("group4")
-            .beanConfigClass(AlertBeanConfig.class)
             .description("alert#"+i)
             .toAlert();
 
@@ -128,7 +123,6 @@ public class DefaultAlertRepositoryTest extends TestCase {
         .severity(AlertSeverity.WARNING)
         .status(AlertStatus.NA)
         .groupUid("group4")
-        .beanConfigClass(AlertBeanConfig.class)
         .description("alert#4")
         .toAlert();
 
@@ -154,7 +148,6 @@ public class DefaultAlertRepositoryTest extends TestCase {
             .severity(AlertSeverity.WARNING)
             .status(AlertStatus.RAISED)
             .groupUid("group5")
-            .beanConfigClass(AlertBeanConfig.class)
             .description("alert#"+i)
             .toAlert();
 
@@ -166,7 +159,6 @@ public class DefaultAlertRepositoryTest extends TestCase {
             .severity(AlertSeverity.WARNING)
             .status(AlertStatus.RESOLVED)
             .groupUid("group5")
-            .beanConfigClass(AlertBeanConfig.class)
             .description("alert#4")
             .toAlert();
 
@@ -203,7 +195,6 @@ public class DefaultAlertRepositoryTest extends TestCase {
             .severity(AlertSeverity.WARNING)
             .status(AlertStatus.RAISED)
             .groupUid("group"+i)
-            .beanConfigClass(AlertBeanConfig.class)
             .description("alert#"+i)
             .toAlert();
 
@@ -217,7 +208,6 @@ public class DefaultAlertRepositoryTest extends TestCase {
             .severity(AlertSeverity.WARNING)
             .status(AlertStatus.RESOLVED)
             .groupUid("group"+i)
-            .beanConfigClass(AlertBeanConfig.class)
             .description("alert#"+i)
             .timestamp(i) //timestamp of last resolved should be kept in repository if exceeds history size
             .toAlert();
@@ -248,7 +238,6 @@ public class DefaultAlertRepositoryTest extends TestCase {
             .severity(AlertSeverity.WARNING)
             .status(AlertStatus.RAISED)
             .groupUid("group7")
-            .beanConfigClass(AlertBeanConfig.class)
             .description("alert#"+i)
             .toAlert();
 
@@ -267,7 +256,6 @@ public class DefaultAlertRepositoryTest extends TestCase {
         .severity(AlertSeverity.WARNING)
         .status(AlertStatus.RESOLVED)
         .groupUid("group7")
-        .beanConfigClass(AlertBeanConfig.class)
         .description("alert#11")
         .toAlert();
 
@@ -297,7 +285,6 @@ public class DefaultAlertRepositoryTest extends TestCase {
                 .severity(AlertSeverity.WARNING)
                 .status(AlertStatus.RAISED)
                 .groupUid("group"+i)
-                .beanConfigClass(AlertBeanConfig.class)
                 .description("alert#"+timestamp)
                 .timestamp(timestamp++)
                 .toAlert();
@@ -334,7 +321,6 @@ public class DefaultAlertRepositoryTest extends TestCase {
         .severity(AlertSeverity.WARNING)
         .status(AlertStatus.RESOLVED)
         .groupUid("group"+0)
-        .beanConfigClass(AlertBeanConfig.class)
         .description("alert#"+timestamp)
         .timestamp(timestamp++)
         .toAlert();
@@ -357,7 +343,6 @@ public class DefaultAlertRepositoryTest extends TestCase {
         .severity(AlertSeverity.WARNING)
         .status(AlertStatus.RESOLVED)
         .groupUid("group"+1)
-        .beanConfigClass(AlertBeanConfig.class)
         .description("alert#"+timestamp)
         .timestamp(timestamp++)
         .toAlert();

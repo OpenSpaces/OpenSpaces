@@ -10,7 +10,7 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminEventListener;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.GridComponent;
-import org.openspaces.admin.alerts.AlertManager;
+import org.openspaces.admin.alert.AlertManager;
 import org.openspaces.admin.dump.DumpGeneratedListener;
 import org.openspaces.admin.dump.DumpProvider;
 import org.openspaces.admin.dump.DumpResult;
