@@ -35,21 +35,19 @@ public class HeapMemoryUtilizationAlertBeanConfig implements AlertBeanConfig {
 
     /**
      * Period of time (in milliseconds) the JVM heap memory is above/below a certain threshold to
-     * trigger an alert; Recommended setting is 60000 ms (1 minute)
+     * trigger an alert.
      */
     public static final String MEASUREMENT_PERIOD_MILLISECONDS_KEY = "measurement-period-milliseconds";
 
     /**
-     * Low threshold for which to resolve a previously triggered high heap memory alert; Recommended
-     * setting is 50% heap memory utilization. An alert will be triggered if heap memory goes below
-     * this threshold for a certain period of time.
+     * Low threshold for which to resolve a previously triggered high heap memory alert. An alert
+     * will be triggered if heap memory goes below this threshold for a certain period of time.
      */
     public static final String LOW_THRESHOLD_PERC_KEY = "low-threshold-perc";
 
     /**
-     * High threshold for which to trigger an alert which needs resolution; Recommended setting is
-     * above 80% heap memory utilization. An alert will be triggered if heap memory goes above this
-     * threshold for a certain period of time.
+     * High threshold for which to trigger an alert which needs resolution. An alert will be
+     * triggered if heap memory goes above this threshold for a certain period of time.
      */
 	public static final String HIGH_THRESHOLD_PERC_KEY = "high-threshold-perc";
 	

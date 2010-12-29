@@ -34,22 +34,20 @@ public class PhysicalMemoryUtilizationAlertBeanConfig implements AlertBeanConfig
     private static final long serialVersionUID = 1L;
 
     /**
-     * Period of time (in milliseconds) the physical memory is above/below a certain threshold to trigger an
-     * alert; Recommended setting is 60000 ms (1 minute)
+     * Period of time (in milliseconds) the physical memory is above/below a certain threshold to
+     * trigger an alert.
      */
     public static final String MEASUREMENT_PERIOD_MILLISECONDS_KEY = "measurement-period-milliseconds";
 
     /**
-     * Low threshold for which to resolve a previously triggered physical memory alert; Recommended setting is
-     * 50% physical memory utilization. An alert will be triggered if physical memory goes below this threshold for a
-     * certain period of time.
+     * Low threshold for which to resolve a previously triggered physical memory alert. An alert
+     * will be triggered if physical memory goes below this threshold for a certain period of time.
      */
     public static final String LOW_THRESHOLD_PERC_KEY = "low-threshold-perc";
 
     /**
-     * High threshold for which to trigger an alert which needs resolution; Recommended setting is
-     * above 80% physical memory utilization. An alert will be triggered if physical memory goes above this threshold for a
-     * certain period of time.
+     * High threshold for which to trigger an alert which needs resolution. An alert will be
+     * triggered if physical memory goes above this threshold for a certain period of time.
      */
 	public static final String HIGH_THRESHOLD_PERC_KEY = "high-threshold-perc";
 	

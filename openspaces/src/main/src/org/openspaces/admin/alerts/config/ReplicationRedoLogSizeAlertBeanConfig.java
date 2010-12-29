@@ -36,14 +36,13 @@ public class ReplicationRedoLogSizeAlertBeanConfig implements AlertBeanConfig {
 
     /**
      * High threshold for redo-log size. Raises an alert if redo-log size (of both swapped packets
-     * and memory residing packets) goes above this high threshold. Recommended setting is 100000.
+     * and memory residing packets) goes above this high threshold.
      */
     public static final String HIGH_THRESHOLD_REDO_LOG_SIZE_KEY = "high-threshold-redo-log-size";
 
     /**
-     * Low threshold for redo-log size. Resolves a previously high threshold triggered alert.
-     * Recommended setting is zero. A 'resolved' alert will be triggered if redo-log size goes below
-     * this low threshold.
+     * Low threshold for redo-log size. Resolves a previously high threshold triggered alert. A
+     * 'resolved' alert will be triggered if redo-log size goes below this low threshold.
      */
     public static final String LOW_THRESHOLD_REDO_LOG_SIZE_KEY = "low-threshold-redo-log-size";
     
