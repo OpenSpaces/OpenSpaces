@@ -179,6 +179,12 @@ public class AlertFactory {
         if (alert.getStatus() == null) {
             throw new AdminException("Alert should be configured with an status level");
         }
+        if (alert.getConfig() == null) {
+            alert.setConfig(new HashMap<String, String>(0));
+        }
+        if (alert.getProperties() == null) {
+            alert.setProperties(new HashMap<String, String>(0));
+        }
         return alert;
     }
     

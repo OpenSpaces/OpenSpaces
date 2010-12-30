@@ -20,17 +20,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.openspaces.admin.internal.alert.bean.GarbageCollectionPauseAlertBean;
+import org.openspaces.admin.internal.alert.bean.GarbageCollectionAlertBean;
 
 /**
  * A strongly typed long garbage collection pause alert bean configuration.
  * 
- * @see GarbageCollectionPauseAlertBeanConfigurer
+ * @see GarbageCollectionAlertBeanConfigurer
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public class GarbageCollectionPauseAlertBeanConfig implements AlertBeanConfig {
+public class GarbageCollectionAlertBeanConfig implements AlertBeanConfig {
     private static final long serialVersionUID = 1L;
         
     /**
@@ -51,7 +51,7 @@ public class GarbageCollectionPauseAlertBeanConfig implements AlertBeanConfig {
 	/**
 	 * Constructs an empty garbage collection pause alert configuration.
 	 */
-	public GarbageCollectionPauseAlertBeanConfig() {
+	public GarbageCollectionAlertBeanConfig() {
 	}
 	
     /**
@@ -117,6 +117,6 @@ public class GarbageCollectionPauseAlertBeanConfig implements AlertBeanConfig {
      * {@inheritDoc}
      */
 	public String getBeanClassName() {
-		return GarbageCollectionPauseAlertBean.class.getName();
+		return GarbageCollectionAlertBean.class.getName();
 	}
 }

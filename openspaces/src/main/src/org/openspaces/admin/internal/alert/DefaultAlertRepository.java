@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.openspaces.admin.alert.Alert;
+import org.openspaces.admin.alert.alerts.AbstractAlert;
 
 public class DefaultAlertRepository implements InternalAlertRepository {
 
@@ -43,9 +44,27 @@ public class DefaultAlertRepository implements InternalAlertRepository {
             }
         }
         ensureResolvedHistoryCapacity();
-        //assign an alert UID
-        ((InternalAlert)alert).setAlertUid((incrementalId.incrementAndGet() + "@" + Integer.toHexString(System.identityHashCode(alert))));
+        setAlertUid(alert);
+
         return chain.addAlert(alert);
+    }
+
+    private void setAlertUid(Alert alert) {
+        InternalAlert internalAlert = null;
+        
+        if (alert instanceof AbstractAlert) {
+            alert = ((AbstractAlert)alert).getAlert();
+        }
+        
+        if (alert instanceof InternalAlert) {
+            internalAlert = (InternalAlert)alert;
+        }
+        
+        if (internalAlert == null) {
+            throw new IllegalStateException("Can't set alert Uid, Alert must implement InternalAlert interface.");
+        }
+        
+        internalAlert.setAlertUid((incrementalId.incrementAndGet() + "@" + Integer.toHexString(System.identityHashCode(alert))));
     }
 
     private void ensureResolvedHistoryCapacity() {

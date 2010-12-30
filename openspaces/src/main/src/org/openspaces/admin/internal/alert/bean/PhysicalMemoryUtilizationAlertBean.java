@@ -12,6 +12,7 @@ import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
+import org.openspaces.admin.alert.alerts.PhysicalMemoryUtilizationAlert;
 import org.openspaces.admin.alert.config.PhysicalMemoryUtilizationAlertBeanConfig;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.alert.AlertHistory;
@@ -29,9 +30,6 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
 
     public static final String beanUID = "726a2752-4cae5258-f281-49d3-96b6-1e68e42bbd2c";
     public static final String ALERT_NAME = "Physical Memory Utilization";
-    public static final String HOST_ADDRESS = "host-address";
-    public static final String HOST_NAME = "host-name";
-    public static final String MEMORY_UTILIZATION = "memory-utilization";
     
     private final PhysicalMemoryUtilizationAlertBeanConfig config = new PhysicalMemoryUtilizationAlertBeanConfig();
 
@@ -117,12 +115,9 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
         factory.status(AlertStatus.NA);
         factory.componentUid(machine.getOperatingSystem().getUid());
         factory.config(config.getProperties());
-        factory.putProperty(MEMORY_UTILIZATION, "n/a");
-        factory.putProperty(HOST_NAME, machine.getHostName());
-        factory.putProperty(HOST_ADDRESS, machine.getHostAddress());
 
         Alert alert = factory.toAlert();
-        admin.getAlertManager().fireAlert(alert);
+        admin.getAlertManager().fireAlert( new PhysicalMemoryUtilizationAlert(alert));
     }
 
     public void operatingSystemStatisticsChanged(OperatingSystemStatisticsChangedEvent event) {
@@ -144,12 +139,14 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
             factory.status(AlertStatus.RAISED);
             factory.componentUid(event.getOperatingSystem().getUid());
             factory.config(config.getProperties());
-            factory.putProperty(MEMORY_UTILIZATION, String.valueOf(memoryAvg));
-            factory.putProperty(HOST_NAME, event.getStatistics().getDetails().getHostName());
-            factory.putProperty(HOST_ADDRESS, event.getStatistics().getDetails().getHostAddress());
+            
+            factory.putProperty(PhysicalMemoryUtilizationAlert.HOST_ADDRESS, event.getStatistics().getDetails().getHostAddress());
+            factory.putProperty(PhysicalMemoryUtilizationAlert.HOST_NAME, event.getStatistics().getDetails().getHostName());
+            factory.putProperty(PhysicalMemoryUtilizationAlert.CPU_UTILIZATION, String.valueOf(event.getStatistics().getCpuPerc()*100.0));
+            factory.putProperty(PhysicalMemoryUtilizationAlert.MEMORY_UTILIZATION, String.valueOf(memoryAvg));
 
             Alert alert = factory.toAlert();
-            admin.getAlertManager().fireAlert(alert);
+            admin.getAlertManager().fireAlert( new PhysicalMemoryUtilizationAlert(alert));
                 
         } else if (memoryAvg < lowThreshold) {
             final String groupUid = generateGroupUid(event.getOperatingSystem().getUid());
@@ -165,12 +162,14 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
                 factory.status(AlertStatus.RESOLVED);
                 factory.componentUid(event.getOperatingSystem().getUid());
                 factory.config(config.getProperties());
-                factory.putProperty(MEMORY_UTILIZATION, String.valueOf(memoryAvg));
-                factory.putProperty(HOST_NAME, event.getStatistics().getDetails().getHostName());
-                factory.putProperty(HOST_ADDRESS, event.getStatistics().getDetails().getHostAddress());
+                
+                factory.putProperty(PhysicalMemoryUtilizationAlert.HOST_ADDRESS, event.getStatistics().getDetails().getHostAddress());
+                factory.putProperty(PhysicalMemoryUtilizationAlert.HOST_NAME, event.getStatistics().getDetails().getHostName());
+                factory.putProperty(PhysicalMemoryUtilizationAlert.CPU_UTILIZATION, String.valueOf(event.getStatistics().getCpuPerc()*100.0));
+                factory.putProperty(PhysicalMemoryUtilizationAlert.MEMORY_UTILIZATION, String.valueOf(memoryAvg));
 
                 Alert alert = factory.toAlert();
-                admin.getAlertManager().fireAlert(alert);
+                admin.getAlertManager().fireAlert( new PhysicalMemoryUtilizationAlert(alert));
             }
         }
     }

@@ -14,6 +14,11 @@ public class AbstractAlert implements Alert {
     public AbstractAlert(Alert alert) {
         this.alert = alert;
     }
+    
+    /** The alert set upon construction */
+    public Alert getAlert() {
+        return alert;
+    }
 
     public String getAlertUid() {
         return alert.getAlertUid();
@@ -55,4 +60,8 @@ public class AbstractAlert implements Alert {
         return alert.getTimestamp();
     }
 
+    @Override
+    public String toString() {
+        return alert.toString();
+    }
 }

@@ -23,19 +23,19 @@ import java.util.concurrent.TimeUnit;
  * approach by use of method chaining. After all properties have been set, use the call to
  * {@link #getConfig()} to create a fully initialized configuration object based.
  * 
- * @see GarbageCollectionPauseAlertBeanConfig
+ * @see GarbageCollectionAlertBeanConfig
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public class GarbageCollectionPauseAlertBeanConfigurer implements AlertBeanConfigurer {
+public class GarbageCollectionAlertBeanConfigurer implements AlertBeanConfigurer {
 
-    private final GarbageCollectionPauseAlertBeanConfig config = new GarbageCollectionPauseAlertBeanConfig();
+    private final GarbageCollectionAlertBeanConfig config = new GarbageCollectionAlertBeanConfig();
 
     /**
      * Constructs an empty garbage collection pause alert configuration.
      */
-    public GarbageCollectionPauseAlertBeanConfigurer() {
+    public GarbageCollectionAlertBeanConfigurer() {
     }
 
     /**
@@ -47,7 +47,7 @@ public class GarbageCollectionPauseAlertBeanConfigurer implements AlertBeanConfi
      *            the time unit of the specified period.
      * @return this.
      */
-    public GarbageCollectionPauseAlertBeanConfigurer raiseAlertForGcDurationOf(long period, TimeUnit timeUnit) {
+    public GarbageCollectionAlertBeanConfigurer raiseAlertForGcDurationOf(long period, TimeUnit timeUnit) {
         config.setLongGcPausePeriod(period, timeUnit);
         return this;
     }
@@ -61,7 +61,7 @@ public class GarbageCollectionPauseAlertBeanConfigurer implements AlertBeanConfi
      *            the time unit of the specified period.
      * @return this.
      */
-    public GarbageCollectionPauseAlertBeanConfigurer resolveAlertForGcDurationOf(long period, TimeUnit timeUnit) {
+    public GarbageCollectionAlertBeanConfigurer resolveAlertForGcDurationOf(long period, TimeUnit timeUnit) {
         config.setShortGcPausePeriod(period, timeUnit);
         return this;
     }
@@ -72,7 +72,7 @@ public class GarbageCollectionPauseAlertBeanConfigurer implements AlertBeanConfi
      * 
      * @return a fully configured alert bean configuration.
      */
-    public GarbageCollectionPauseAlertBeanConfig getConfig() {
+    public GarbageCollectionAlertBeanConfig getConfig() {
         return config;
     }
 }

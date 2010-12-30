@@ -113,9 +113,6 @@ public class CpuUtilizationAlertBean implements AlertBean,
         factory.status(AlertStatus.NA);
         factory.componentUid(machine.getOperatingSystem().getUid());
         factory.config(config.getProperties());
-        factory.putProperty(CpuUtilizationAlert.CPU_UTILIZATION, "n/a");
-        factory.putProperty(CpuUtilizationAlert.HOST_NAME, machine.getHostName());
-        factory.putProperty(CpuUtilizationAlert.HOST_ADDRESS, machine.getHostAddress());
 
         Alert alert = factory.toAlert();
         admin.getAlertManager().fireAlert( new CpuUtilizationAlert(alert));
@@ -140,7 +137,7 @@ public class CpuUtilizationAlertBean implements AlertBean,
             factory.status(AlertStatus.RAISED);
             factory.componentUid(event.getOperatingSystem().getUid());
             factory.config(config.getProperties());
-            factory.putProperty(CpuUtilizationAlert.CPU_UTILIZATION, String.valueOf(cpuAvg));
+            factory.putProperty(CpuUtilizationAlert.CPU_UTILIZATION, String.valueOf(event.getStatistics().getCpuPerc() * 100.0));
             factory.putProperty(CpuUtilizationAlert.HOST_NAME, event.getStatistics().getDetails().getHostName());
             factory.putProperty(CpuUtilizationAlert.HOST_ADDRESS, event.getStatistics().getDetails().getHostAddress());
 
@@ -161,7 +158,7 @@ public class CpuUtilizationAlertBean implements AlertBean,
                 factory.status(AlertStatus.RESOLVED);
                 factory.componentUid(event.getOperatingSystem().getUid());
                 factory.config(config.getProperties());
-                factory.putProperty(CpuUtilizationAlert.CPU_UTILIZATION, String.valueOf(cpuAvg));
+                factory.putProperty(CpuUtilizationAlert.CPU_UTILIZATION, String.valueOf(event.getStatistics().getCpuPerc() * 100.0));
                 factory.putProperty(CpuUtilizationAlert.HOST_NAME, event.getStatistics().getDetails().getHostName());
                 factory.putProperty(CpuUtilizationAlert.HOST_ADDRESS, event.getStatistics().getDetails().getHostAddress());
 

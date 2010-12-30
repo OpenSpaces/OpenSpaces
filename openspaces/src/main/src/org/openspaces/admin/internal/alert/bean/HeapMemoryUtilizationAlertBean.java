@@ -12,6 +12,7 @@ import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
+import org.openspaces.admin.alert.alerts.HeapMemoryUtilizationAlert;
 import org.openspaces.admin.alert.config.PhysicalMemoryUtilizationAlertBeanConfig;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.alert.AlertHistory;
@@ -29,11 +30,6 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
 
     public static final String beanUID = "694248f7-8a41119b-ddf9-4998-b3a0-885021e366af";
     public static final String ALERT_NAME = "Heap Memory Utilization";
-    public static final String HOST_ADDRESS = "host-address";
-    public static final String HOST_NAME = "host-name";
-    public static final String PROCESS_ID = "process-id";
-    public static final String COMPONENT_NAME = "component-name";
-    public static final String HEAP_UTILIZATION = "heap-utilization";
     
     private final PhysicalMemoryUtilizationAlertBeanConfig config = new PhysicalMemoryUtilizationAlertBeanConfig();
 
@@ -113,20 +109,15 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
         AlertFactory factory = new AlertFactory();
         factory.name(ALERT_NAME);
         factory.groupUid(groupUid);
-        factory.description(getGridComponentShortName(virtualMachine)
+        factory.description(AlertBeanUtils.getGridComponentShortName(virtualMachine)
                 + "Heap memory is unavailable; JVM has been removed");
         factory.severity(AlertSeverity.WARNING);
         factory.status(AlertStatus.NA);
         factory.componentUid(virtualMachine.getUid());
         factory.config(config.getProperties());
-        factory.putProperty(HEAP_UTILIZATION, "n/a");
-        factory.putProperty(HOST_NAME, virtualMachine.getMachine().getHostName());
-        factory.putProperty(HOST_ADDRESS, virtualMachine.getMachine().getHostAddress());
-        factory.putProperty(PROCESS_ID, String.valueOf(virtualMachine.getDetails().getPid()));
-        factory.putProperty(COMPONENT_NAME, getGridComponentFullName(virtualMachine));
 
         Alert alert = factory.toAlert();
-        admin.getAlertManager().fireAlert(alert);
+        admin.getAlertManager().fireAlert( new HeapMemoryUtilizationAlert(alert));
     }
 
     public void virtualMachineStatisticsChanged(VirtualMachineStatisticsChangedEvent event) {
@@ -142,21 +133,23 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
             AlertFactory factory = new AlertFactory();
             factory.name(ALERT_NAME);
             factory.groupUid(groupUid);
-            factory.description(getGridComponentShortName(event.getVirtualMachine())
+            factory.description(AlertBeanUtils.getGridComponentShortName(event.getVirtualMachine())
                     + "Heap memory crossed above a " + highThreshold + "% threshold, for a period of "
                     + TimeUtil.format(config.getMeasurementPeriod()) + ", with an average memory of " + NUMBER_FORMAT.format(memoryAvg) + "%");
             factory.severity(AlertSeverity.WARNING);
             factory.status(AlertStatus.RAISED);
             factory.componentUid(event.getVirtualMachine().getUid());
             factory.config(config.getProperties());
-            factory.putProperty(HEAP_UTILIZATION, String.valueOf(memoryAvg));
-            factory.putProperty(HOST_NAME, event.getVirtualMachine().getMachine().getHostName());
-            factory.putProperty(HOST_ADDRESS, event.getVirtualMachine().getMachine().getHostAddress());
-            factory.putProperty(PROCESS_ID, String.valueOf(event.getVirtualMachine().getDetails().getPid()));
-            factory.putProperty(COMPONENT_NAME, getGridComponentFullName(event.getVirtualMachine()));
+            
+            factory.putProperty(HeapMemoryUtilizationAlert.HOST_ADDRESS, event.getVirtualMachine().getMachine().getHostAddress());
+            factory.putProperty(HeapMemoryUtilizationAlert.HOST_NAME, event.getVirtualMachine().getMachine().getHostName());
+            factory.putProperty(HeapMemoryUtilizationAlert.CPU_UTILIZATION, String.valueOf(event.getStatistics().getCpuPerc()*100.0));
+            factory.putProperty(HeapMemoryUtilizationAlert.PROCESS_ID, String.valueOf(event.getVirtualMachine().getDetails().getPid()));
+            factory.putProperty(HeapMemoryUtilizationAlert.COMPONENT_NAME, AlertBeanUtils.getGridComponentFullName(event.getVirtualMachine()));
+            factory.putProperty(HeapMemoryUtilizationAlert.HEAP_UTILIZATION, String.valueOf(event.getStatistics().getMemoryHeapUsedPerc()));
 
             Alert alert = factory.toAlert();
-            admin.getAlertManager().fireAlert(alert);
+            admin.getAlertManager().fireAlert( new HeapMemoryUtilizationAlert(alert));
                 
         } else if (memoryAvg < lowThreshold) {
             final String groupUid = generateGroupUid(event.getVirtualMachine().getUid());
@@ -166,7 +159,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
                 AlertFactory factory = new AlertFactory();
                 factory.name(ALERT_NAME);
                 factory.groupUid(groupUid);
-                factory.description(getGridComponentShortName(event.getVirtualMachine())
+                factory.description(AlertBeanUtils.getGridComponentShortName(event.getVirtualMachine())
                         + "Heap memory crossed below a " + highThreshold + "% threshold, for a period of "
                         + getPeriodOfTime(event) + ", with an average memory of " + NUMBER_FORMAT.format(memoryAvg)
                         + "%");
@@ -174,40 +167,18 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
                 factory.status(AlertStatus.RESOLVED);
                 factory.componentUid(event.getVirtualMachine().getUid());
                 factory.config(config.getProperties());
-                factory.putProperty(HEAP_UTILIZATION, String.valueOf(memoryAvg));
-                factory.putProperty(HOST_NAME, event.getVirtualMachine().getMachine().getHostName());
-                factory.putProperty(HOST_ADDRESS, event.getVirtualMachine().getMachine().getHostAddress());
-                factory.putProperty(PROCESS_ID, String.valueOf(event.getVirtualMachine().getDetails().getPid()));
-                factory.putProperty(COMPONENT_NAME, getGridComponentFullName(event.getVirtualMachine()));
+                
+                factory.putProperty(HeapMemoryUtilizationAlert.HOST_ADDRESS, event.getVirtualMachine().getMachine().getHostAddress());
+                factory.putProperty(HeapMemoryUtilizationAlert.HOST_NAME, event.getVirtualMachine().getMachine().getHostName());
+                factory.putProperty(HeapMemoryUtilizationAlert.CPU_UTILIZATION, String.valueOf(event.getStatistics().getCpuPerc()*100.0));
+                factory.putProperty(HeapMemoryUtilizationAlert.PROCESS_ID, String.valueOf(event.getVirtualMachine().getDetails().getPid()));
+                factory.putProperty(HeapMemoryUtilizationAlert.COMPONENT_NAME, AlertBeanUtils.getGridComponentFullName(event.getVirtualMachine()));
+                factory.putProperty(HeapMemoryUtilizationAlert.HEAP_UTILIZATION, String.valueOf(event.getStatistics().getMemoryHeapUsedPerc()));
 
                 Alert alert = factory.toAlert();
-                admin.getAlertManager().fireAlert(alert);
+                admin.getAlertManager().fireAlert( new HeapMemoryUtilizationAlert(alert));
             }
         }
-    }
-    
-    private String getGridComponentShortName(VirtualMachine virtualMachine) {
-        if (virtualMachine.getGridServiceManager() != null) {
-            return "GSM ";
-        } else if (virtualMachine.getGridServiceContainer() != null) {
-            return "GSC ";
-        } else if (virtualMachine.getGridServiceAgent() != null) {
-            return "GSA ";
-        } else if (virtualMachine.getLookupService() != null) {
-            return "LUS ";
-        } else return "";
-    }
-
-    private String getGridComponentFullName(VirtualMachine virtualMachine) {
-        if (virtualMachine.getGridServiceManager() != null) {
-            return "Grid Service Manager";
-        } else if (virtualMachine.getGridServiceContainer() != null) {
-            return "Grid Service Container";
-        } else if (virtualMachine.getGridServiceAgent() != null) {
-            return "Grid Service Agent";
-        } else if (virtualMachine.getLookupService() != null) {
-            return "Lookup Service";
-        } else return "n/a";
     }
 
     private String generateGroupUid(String uid) {

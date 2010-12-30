@@ -7,11 +7,14 @@ import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
+import org.openspaces.admin.alert.alerts.ReplicationRedoLogSizeAlert;
 import org.openspaces.admin.alert.config.ReplicationRedoLogSizeAlertBeanConfig;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.alert.AlertHistory;
 import org.openspaces.admin.internal.alert.AlertHistoryDetails;
 import org.openspaces.admin.internal.alert.InternalAlertManager;
+import org.openspaces.admin.space.ReplicationStatus;
+import org.openspaces.admin.space.ReplicationTarget;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.events.SpaceInstanceRemovedEventListener;
 import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEvent;
@@ -19,16 +22,11 @@ import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEventList
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.j_spaces.core.filters.ReplicationStatistics;
-import com.j_spaces.core.filters.ReplicationStatistics.OutgoingReplication;
 
 public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstanceRemovedEventListener, SpaceInstanceStatisticsChangedEventListener {
 
     public static final String beanUID = "3f4bff98-52de6d72-b2b8-434b-aa18-d57c7554262a";
     public static final String ALERT_NAME = "Replication Redo log";
-    public static final String SOURCE_UID = "source-uid";
-    public static final String REDO_LOG_SIZE = "redo-log-size";
-    public static final String REDO_LOG_MEMORY_SIZE = "redo-log-memory-size";
-    public static final String REDO_LOG_SWAP_SIZE = "redo-log-swap-size";
     
     private final ReplicationRedoLogSizeAlertBeanConfig config = new ReplicationRedoLogSizeAlertBeanConfig();
 
@@ -98,14 +96,9 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
         factory.status(AlertStatus.NA);
         factory.componentUid(spaceInstance.getUid());
         factory.config(config.getProperties());
-        factory.putProperty(SOURCE_UID, spaceInstance.getUid());
-        OutgoingReplication outgoingReplication = spaceInstance.getStatistics().getReplicationStatistics().getOutgoingReplication();
-        factory.putProperty(REDO_LOG_SIZE, String.valueOf(outgoingReplication.getRedoLogSize()));
-        factory.putProperty(REDO_LOG_MEMORY_SIZE, String.valueOf(outgoingReplication.getRedoLogMemoryPacketCount()));
-        factory.putProperty(REDO_LOG_SWAP_SIZE, String.valueOf(outgoingReplication.getRedoLogExternalStoragePacketCount()));
 
         Alert alert = factory.toAlert();
-        admin.getAlertManager().fireAlert(alert);
+        admin.getAlertManager().fireAlert( new ReplicationRedoLogSizeAlert(alert));
     }
     
     
@@ -129,13 +122,22 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
             factory.status(AlertStatus.RAISED);
             factory.componentUid(source.getUid());
             factory.config(config.getProperties());
-            factory.putProperty(SOURCE_UID, source.getUid());
-            factory.putProperty(REDO_LOG_SIZE, String.valueOf(redoLogSize));
-            factory.putProperty(REDO_LOG_MEMORY_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogMemoryPacketCount()));
-            factory.putProperty(REDO_LOG_SWAP_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogExternalStoragePacketCount()));
+            
+            factory.putProperty(ReplicationRedoLogSizeAlert.HOST_ADDRESS, source.getMachine().getHostAddress());
+            factory.putProperty(ReplicationRedoLogSizeAlert.HOST_NAME, source.getMachine().getHostName());
+            factory.putProperty(ReplicationRedoLogSizeAlert.CPU_UTILIZATION, String.valueOf(source.getOperatingSystem().getStatistics().getCpuPerc()*100.0));
+            factory.putProperty(ReplicationRedoLogSizeAlert.HEAP_UTILIZATION, String.valueOf(source.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc()));
+            
+            factory.putProperty(ReplicationRedoLogSizeAlert.REPLICATION_STATUS, getReplicationStatus(source));
+            factory.putProperty(ReplicationRedoLogSizeAlert.SOURCE_UID, source.getUid());
+            
+            factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_SIZE, String.valueOf(redoLogSize));
+            factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_MEMORY_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogMemoryPacketCount()));
+            factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_SWAP_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogExternalStoragePacketCount()));
 
             Alert alert = factory.toAlert();
-            admin.getAlertManager().fireAlert(alert);
+            admin.getAlertManager().fireAlert( new ReplicationRedoLogSizeAlert(alert));
+            
         } else if (redoLogSize <= lowThreshold) {
             final String groupUid = generateGroupUid(source.getUid());
             AlertHistory alertHistory = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertHistoryByGroupUid(groupUid);
@@ -149,17 +151,34 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
                 factory.status(AlertStatus.RESOLVED);
                 factory.componentUid(event.getSpaceInstance().getUid());
                 factory.config(config.getProperties());
-                factory.putProperty(SOURCE_UID, source.getUid());
-                factory.putProperty(REDO_LOG_SIZE, String.valueOf(redoLogSize));
-                factory.putProperty(REDO_LOG_MEMORY_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogMemoryPacketCount()));
-                factory.putProperty(REDO_LOG_SWAP_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogExternalStoragePacketCount()));                
                 
+                factory.putProperty(ReplicationRedoLogSizeAlert.HOST_ADDRESS, source.getMachine().getHostAddress());
+                factory.putProperty(ReplicationRedoLogSizeAlert.HOST_NAME, source.getMachine().getHostName());
+                factory.putProperty(ReplicationRedoLogSizeAlert.CPU_UTILIZATION, String.valueOf(source.getOperatingSystem().getStatistics().getCpuPerc()*100.0));
+                factory.putProperty(ReplicationRedoLogSizeAlert.HEAP_UTILIZATION, String.valueOf(source.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc()));
+                
+                factory.putProperty(ReplicationRedoLogSizeAlert.REPLICATION_STATUS, getReplicationStatus(source));
+                factory.putProperty(ReplicationRedoLogSizeAlert.SOURCE_UID, source.getUid());
+                
+                factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_SIZE, String.valueOf(redoLogSize));
+                factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_MEMORY_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogMemoryPacketCount()));
+                factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_SWAP_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogExternalStoragePacketCount()));
+
                 Alert alert = factory.toAlert();
-                admin.getAlertManager().fireAlert(alert);
+                admin.getAlertManager().fireAlert(new ReplicationRedoLogSizeAlert(alert));
             }
         }
     }
     
+    private String getReplicationStatus(SpaceInstance source) {
+        for (ReplicationTarget target : source.getReplicationTargets()) {
+            if (!ReplicationStatus.ACTIVE.equals(target.getReplicationStatus())) {
+                return target.getReplicationStatus().name();
+            }
+        }
+        return ReplicationStatus.ACTIVE.name();
+    }
+
     private String getSpaceName(SpaceInstance source) {
         StringBuilder sb = new StringBuilder();
         SpaceMode sourceSpaceMode = source.getMode();
