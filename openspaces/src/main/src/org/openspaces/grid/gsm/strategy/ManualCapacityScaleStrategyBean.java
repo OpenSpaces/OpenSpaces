@@ -11,7 +11,6 @@ import org.openspaces.admin.AdminException;
 import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
-import org.openspaces.admin.alert.config.AlertBeanConfig;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;

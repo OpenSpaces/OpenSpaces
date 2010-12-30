@@ -4,7 +4,6 @@ import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
-import org.openspaces.admin.alert.config.AlertBeanConfig;
 import org.openspaces.admin.internal.alert.AlertHistory;
 import org.openspaces.admin.internal.alert.DefaultAlertRepository;
 
