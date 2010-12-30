@@ -143,7 +143,7 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
             factory.putProperty(PhysicalMemoryUtilizationAlert.HOST_ADDRESS, event.getStatistics().getDetails().getHostAddress());
             factory.putProperty(PhysicalMemoryUtilizationAlert.HOST_NAME, event.getStatistics().getDetails().getHostName());
             factory.putProperty(PhysicalMemoryUtilizationAlert.CPU_UTILIZATION, String.valueOf(event.getStatistics().getCpuPerc()*100.0));
-            factory.putProperty(PhysicalMemoryUtilizationAlert.MEMORY_UTILIZATION, String.valueOf(memoryAvg));
+            factory.putProperty(PhysicalMemoryUtilizationAlert.MEMORY_UTILIZATION, String.valueOf(event.getStatistics().getPhysicalMemoryUsedPerc()));
 
             Alert alert = factory.toAlert();
             admin.getAlertManager().fireAlert( new PhysicalMemoryUtilizationAlert(alert));
@@ -166,7 +166,7 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
                 factory.putProperty(PhysicalMemoryUtilizationAlert.HOST_ADDRESS, event.getStatistics().getDetails().getHostAddress());
                 factory.putProperty(PhysicalMemoryUtilizationAlert.HOST_NAME, event.getStatistics().getDetails().getHostName());
                 factory.putProperty(PhysicalMemoryUtilizationAlert.CPU_UTILIZATION, String.valueOf(event.getStatistics().getCpuPerc()*100.0));
-                factory.putProperty(PhysicalMemoryUtilizationAlert.MEMORY_UTILIZATION, String.valueOf(memoryAvg));
+                factory.putProperty(PhysicalMemoryUtilizationAlert.MEMORY_UTILIZATION, String.valueOf(event.getStatistics().getPhysicalMemoryUsedPerc()));
 
                 Alert alert = factory.toAlert();
                 admin.getAlertManager().fireAlert( new PhysicalMemoryUtilizationAlert(alert));
