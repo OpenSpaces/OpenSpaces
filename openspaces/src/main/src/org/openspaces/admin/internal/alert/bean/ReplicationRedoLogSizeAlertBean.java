@@ -95,7 +95,7 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
         factory.severity(AlertSeverity.WARNING);
         factory.status(AlertStatus.NA);
         factory.componentUid(spaceInstance.getUid());
-        factory.properties(config.getProperties());
+        factory.config(config.getProperties());
         factory.putProperty(SOURCE_UID, spaceInstance.getUid());
         OutgoingReplication outgoingReplication = spaceInstance.getStatistics().getReplicationStatistics().getOutgoingReplication();
         factory.putProperty(REDO_LOG_SIZE, String.valueOf(outgoingReplication.getRedoLogSize()));
@@ -126,7 +126,7 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
             factory.severity(AlertSeverity.WARNING);
             factory.status(AlertStatus.RAISED);
             factory.componentUid(source.getUid());
-            factory.properties(config.getProperties());
+            factory.config(config.getProperties());
             factory.putProperty(SOURCE_UID, source.getUid());
             factory.putProperty(REDO_LOG_SIZE, String.valueOf(redoLogSize));
             factory.putProperty(REDO_LOG_MEMORY_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogMemoryPacketCount()));
@@ -146,7 +146,7 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
                 factory.severity(AlertSeverity.WARNING);
                 factory.status(AlertStatus.RESOLVED);
                 factory.componentUid(event.getSpaceInstance().getUid());
-                factory.properties(config.getProperties());
+                factory.config(config.getProperties());
                 factory.putProperty(SOURCE_UID, source.getUid());
                 factory.putProperty(REDO_LOG_SIZE, String.valueOf(redoLogSize));
                 factory.putProperty(REDO_LOG_MEMORY_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogMemoryPacketCount()));

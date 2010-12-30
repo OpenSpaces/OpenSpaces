@@ -69,7 +69,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
         factory.severity(AlertSeverity.SEVERE);
         factory.status(AlertStatus.NA);
         factory.componentUid(spaceInstance.getUid());
-        factory.properties(config.getProperties());
+        factory.config(config.getProperties());
         factory.putProperty(REPLICATION_STATUS, "n/a");
         factory.putProperty(SOURCE_UID, spaceInstance.getUid());
         try {
@@ -100,7 +100,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                 factory.severity(AlertSeverity.SEVERE);
                 factory.status(AlertStatus.RAISED);
                 factory.componentUid(source.getUid());
-                factory.properties(config.getProperties());
+                factory.config(config.getProperties());
                 factory.putProperty(REPLICATION_STATUS, replicationStatus.name());
                 factory.putProperty(SOURCE_UID, source.getUid());
                 factory.putProperty(TARGET_UID, (target == null ? "n/a" : target.getUid()));
@@ -121,7 +121,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                     factory.severity(AlertSeverity.SEVERE);
                     factory.status(AlertStatus.RESOLVED);
                     factory.componentUid(source.getUid());
-                    factory.properties(config.getProperties());
+                    factory.config(config.getProperties());
                     factory.putProperty(REPLICATION_STATUS, replicationStatus.name());
                     factory.putProperty(SOURCE_UID, source.getUid());
                     factory.putProperty(TARGET_UID, (target == null ? "n/a" : target.getUid()));

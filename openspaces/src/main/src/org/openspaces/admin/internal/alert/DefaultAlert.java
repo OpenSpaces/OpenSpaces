@@ -37,10 +37,10 @@ public class DefaultAlert implements InternalAlert {
     private long timestamp;
     private AlertSeverity severity;
     private AlertStatus status;
-    private String beanConfigClassName;
     private String alertUid;
     private String groupUid;
     private String componentUid;
+    private Map<String, String> config;
 	private Map<String, String> properties;
 
 	/**
@@ -104,17 +104,6 @@ public class DefaultAlert implements InternalAlert {
     public void setStatus(AlertStatus status) {
         this.status = status;
     }
-
-	/* (non-Javadoc)
-     * @see org.openspaces.admin.alert.Alert#getBeanConfigClassName()
-     */
-	public String getBeanConfigClassName() {
-        return beanConfigClassName;
-    }
-	
-	public void setBeanConfigClassName(String beanConfigClassName) {
-        this.beanConfigClassName = beanConfigClassName;
-    }
 	
 	/* (non-Javadoc)
      * @see org.openspaces.admin.alert.Alert#getAlertUid()
@@ -148,6 +137,17 @@ public class DefaultAlert implements InternalAlert {
 	public void setComponentUid(String componentUid) {
         this.componentUid = componentUid;
     }
+	
+	/*
+	 * @see org.openspaces.admin.alert.Alert#getConfig()
+	 */
+	public Map<String, String> getConfig() {
+	    return config;
+	}
+	
+	public void setConfig(Map<String,String> properties) {
+	    this.config = properties;
+	}
 
     /* (non-Javadoc)
      * @see org.openspaces.admin.alert.Alert#getProperties()

@@ -84,10 +84,15 @@ public interface Alert extends Serializable {
      * @return Component UID - the unique identifier of the component associated with the alert.
      */
     public String getComponentUid();
+    
+    /**
+     * @return A map of String key-value property pairs of the configuration properties used to configure the alert bean.
+     */
+    public Map<String, String> getConfig();
 
     /**
-     * @return  A map of String key-value property pairs including configuration properties, and any runtime
-     * properties exposed by the alert bean.
+     * @return A map of String key-value property pairs of any runtime properties exposed by the
+     *         alert bean.
      */
     public Map<String, String> getProperties();
 

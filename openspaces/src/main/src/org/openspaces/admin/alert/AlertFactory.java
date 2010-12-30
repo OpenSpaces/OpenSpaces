@@ -42,6 +42,7 @@ public class AlertFactory {
      * <li> {@link #description(String)} - optional (<code>null</code> by default)</li>
      * <li> {@link #componentUid(String)} - optional (<code>null</code> by default)</li>
      * <li> {@link #properties(Map)} - optional (<code>null</code> by default)</li>
+     * <li> {@link #config(Map)} - optional (<code>null</code> by default) </li>
      */
     public AlertFactory() {
         alert.setTimestamp(System.currentTimeMillis());
@@ -96,12 +97,29 @@ public class AlertFactory {
     }
 
     /**
-     * Copies all of the properties from the specified map to this map. Overrides any previously set
-     * properties.
+     * Set the configuration properties used to configure the alert bean.
      * <p>
-     * Set of String key-value property pairs including configuration properties, and any runtime
-     * properties exposed by the alert bean. It is useful to put CPU, Memory and GC metrics into the
-     * map as a basic set of attributes for ease of troubleshooting.
+     * Copies all of the configuration properties from the specified map.
+     * Overrides any previously set configuration properties.
+     * 
+     * @param properties
+     *            the configuration properties of the alert bean.
+     */
+    public AlertFactory config(Map<String, String> properties) {
+        HashMap<String, String> configProperties = new HashMap<String, String>(properties);
+        alert.setConfig(configProperties);
+        return this;
+    }
+
+    /**
+     * Set any runtime properties which can be correlated with the appearance of this alert. It is
+     * useful to put CPU, Memory and GC metrics into the map as a basic set of attributes for ease
+     * of troubleshooting.
+     * <p>
+     * Copies all of the properties from the specified map. Overrides any previously set properties.
+     * 
+     * @see #putProperties(Map)
+     * @see #putProperty(String, String)
      * 
      * @param properties
      *            the properties of an alert bean.
@@ -113,8 +131,12 @@ public class AlertFactory {
     }
 
     /**
-     * A convenience method for adding properties to an already existing set of properties.
-     * Copies all of the properties from the specified map to this map.
+     * Set any runtime properties which can be correlated with the appearance of this alert.
+     * <p>
+     * A convenience method for adding properties to an already existing set of properties. Copies
+     * all of the properties from the specified map to this map.
+     * 
+     * @see #properties(Map)
      */
     public AlertFactory putProperties(Map<String, String> properties) {
         if (alert.getProperties() == null) {
@@ -124,9 +146,13 @@ public class AlertFactory {
         }
         return this;
     }
-    
+
     /**
+     * Set any runtime property which can be correlated with the appearance of this alert.
+     * <p>
      * A convenience method for adding a single property to an already existing set of properties.
+     * 
+     * @see #properties(Map)
      */
     public AlertFactory putProperty(String key, String value) {
         if (alert.getProperties() == null) {

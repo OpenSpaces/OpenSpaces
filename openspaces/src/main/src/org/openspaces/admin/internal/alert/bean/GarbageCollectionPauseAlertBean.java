@@ -102,7 +102,7 @@ public class GarbageCollectionPauseAlertBean implements AlertBean, VirtualMachin
         factory.severity(AlertSeverity.WARNING);
         factory.status(AlertStatus.NA);
         factory.componentUid(virtualMachine.getUid());
-        factory.properties(config.getProperties());
+        factory.config(config.getProperties());
         factory.putProperty(GC_PAUSE_TIME_MILLISECONDS, "n/a");
         factory.putProperty(HOST_NAME, virtualMachine.getMachine().getHostName());
         factory.putProperty(HOST_ADDRESS, virtualMachine.getMachine().getHostAddress());
@@ -140,7 +140,7 @@ public class GarbageCollectionPauseAlertBean implements AlertBean, VirtualMachin
             factory.severity(AlertSeverity.WARNING);
             factory.status(AlertStatus.RAISED);
             factory.componentUid(event.getVirtualMachine().getUid());
-            factory.properties(config.getProperties());
+            factory.config(config.getProperties());
             factory.putProperty(GC_PAUSE_TIME_MILLISECONDS, String.valueOf(diffGcCollectionTime));
             factory.putProperty(CPU_UTILIZATION, String.valueOf(event.getStatistics().getCpuPerc()*100.0));
             factory.putProperty(HEAP_UTILIZATION, String.valueOf(event.getStatistics().getMemoryHeapUsedPerc()));
@@ -165,7 +165,7 @@ public class GarbageCollectionPauseAlertBean implements AlertBean, VirtualMachin
                 factory.severity(AlertSeverity.WARNING);
                 factory.status(AlertStatus.RESOLVED);
                 factory.componentUid(event.getVirtualMachine().getUid());
-                factory.properties(config.getProperties());
+                factory.config(config.getProperties());
                 factory.putProperty(GC_PAUSE_TIME_MILLISECONDS, String.valueOf(diffGcCollectionTime));
                 factory.putProperty(CPU_UTILIZATION, String.valueOf(event.getStatistics().getCpuPerc()*100.0));
                 factory.putProperty(HEAP_UTILIZATION, String.valueOf(event.getStatistics().getMemoryHeapUsedPerc()));
