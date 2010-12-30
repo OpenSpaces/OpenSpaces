@@ -16,11 +16,11 @@
 
 package org.openspaces.admin.alert.config;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.openspaces.admin.internal.alert.bean.CpuUtilizationAlertBean;
-import org.openspaces.core.util.StringProperties;
 
 /**
  * A strongly typed machine CPU utilization alert bean configuration.
@@ -52,7 +52,7 @@ public class CpuUtilizationAlertBeanConfig implements AlertBeanConfig {
 	public static final String HIGH_THRESHOLD_PERC_KEY = "high-threshold-perc";
 	
 	
-	private final StringProperties properties = new StringProperties();
+	private final Map<String,String> properties = new HashMap<String, String>();
 
 	/**
 	 * Constructs an empty machine CPU utilization alert configuration.
@@ -65,14 +65,16 @@ public class CpuUtilizationAlertBeanConfig implements AlertBeanConfig {
 	 * @param highThreshold high threshold percentage.
 	 */
 	public void setHighThresholdPerc(int highThreshold) {
-	    properties.putInteger(HIGH_THRESHOLD_PERC_KEY, highThreshold);
+	    properties.put(HIGH_THRESHOLD_PERC_KEY, String.valueOf(highThreshold));
 	}
 	
 	/**
 	 * @return the CPU high threshold percentage.
 	 */
-	public int getHighThresholdPerc() {
-	    return Integer.valueOf(properties.get(HIGH_THRESHOLD_PERC_KEY)).intValue();
+	public Integer getHighThresholdPerc() {
+	    String value = properties.get(HIGH_THRESHOLD_PERC_KEY);
+	    if (value == null) return null;
+	    return Integer.valueOf(value);
 	}
 	
 	/**
@@ -80,14 +82,16 @@ public class CpuUtilizationAlertBeanConfig implements AlertBeanConfig {
 	 * @param lowThreshold low threshold percentage.
 	 */
 	public void setLowThresholdPerc(int lowThreshold) {
-	    properties.putInteger(LOW_THRESHOLD_PERC_KEY, lowThreshold);
+	    properties.put(LOW_THRESHOLD_PERC_KEY, String.valueOf(lowThreshold));
 	}
 
 	/**
 	 * @return the CPU low threshold percentage.
 	 */
-	public int getLowThresholdPerc() {
-	    return Integer.valueOf(properties.get(LOW_THRESHOLD_PERC_KEY)).intValue();
+	public Integer getLowThresholdPerc() {
+	    String value = properties.get(LOW_THRESHOLD_PERC_KEY);
+        if (value == null) return null;
+        return Integer.valueOf(value);
 	}
 
     /**
@@ -101,14 +105,16 @@ public class CpuUtilizationAlertBeanConfig implements AlertBeanConfig {
      */
 	public void setMeasurementPeriod(long period, TimeUnit timeUnit) {
 	    long periodInMilliseconds = timeUnit.toMillis(period);
-	    properties.putLong(MEASUREMENT_PERIOD_MILLISECONDS_KEY, periodInMilliseconds);
+	    properties.put(MEASUREMENT_PERIOD_MILLISECONDS_KEY, String.valueOf(periodInMilliseconds));
 	}
 	
 	/**
 	 * @return the measurement period in milliseconds.
 	 */
-	public long getMeasurementPeriod() {
-	    return Long.valueOf(properties.get(MEASUREMENT_PERIOD_MILLISECONDS_KEY)).longValue();
+	public Long getMeasurementPeriod() {
+	    String value = properties.get(MEASUREMENT_PERIOD_MILLISECONDS_KEY);
+        if (value == null) return null;
+        return Long.valueOf(value);
 	}
 	
 	/**
@@ -123,7 +129,7 @@ public class CpuUtilizationAlertBeanConfig implements AlertBeanConfig {
      * {@inheritDoc}
      */
 	public Map<String, String> getProperties() {
-		return properties.getProperties();
+		return properties;
 	}
 
 	/**

@@ -16,10 +16,10 @@
 
 package org.openspaces.admin.alert.config;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.openspaces.admin.internal.alert.bean.ReplicationRedoLogSizeAlertBean;
-import org.openspaces.core.util.StringProperties;
 
 /**
  * A strongly typed alert bean configuration triggered when a replication redo log size crosses a
@@ -47,7 +47,7 @@ public class ReplicationRedoLogSizeAlertBeanConfig implements AlertBeanConfig {
     public static final String LOW_THRESHOLD_REDO_LOG_SIZE_KEY = "low-threshold-redo-log-size";
     
     
-	private final StringProperties properties = new StringProperties();
+	private final Map<String, String> properties = new HashMap<String, String>();
 
 	/**
 	 * Constructs an empty configuration.
@@ -60,14 +60,16 @@ public class ReplicationRedoLogSizeAlertBeanConfig implements AlertBeanConfig {
      * @param highThreshold high threshold redo-log size.
      */
     public void setHighThresholdRedoLogSize(int highThreshold) {
-        properties.putInteger(HIGH_THRESHOLD_REDO_LOG_SIZE_KEY, highThreshold);
+        properties.put(HIGH_THRESHOLD_REDO_LOG_SIZE_KEY, String.valueOf(highThreshold));
     }
     
     /**
      * @return the high threshold redo-log size
      */
     public Integer getHighThresholdRedoLogSize() {
-        return Integer.valueOf(properties.get(HIGH_THRESHOLD_REDO_LOG_SIZE_KEY)).intValue();
+        String value = properties.get(HIGH_THRESHOLD_REDO_LOG_SIZE_KEY);
+        if (value == null) return null;
+        return Integer.valueOf(value);
     }
     
     /**
@@ -75,14 +77,16 @@ public class ReplicationRedoLogSizeAlertBeanConfig implements AlertBeanConfig {
      * @param lowThreshold low threshold redo-log size.
      */
     public void setLowThresholdRedoLogSize(int lowThreshold) {
-        properties.putInteger(LOW_THRESHOLD_REDO_LOG_SIZE_KEY, lowThreshold);
+        properties.put(LOW_THRESHOLD_REDO_LOG_SIZE_KEY, String.valueOf(lowThreshold));
     }
     
     /**
      * @return the low threshold redo-log size
      */
     public Integer getLowThresholdRedoLogSize() {
-        return Integer.valueOf(properties.get(LOW_THRESHOLD_REDO_LOG_SIZE_KEY)).intValue();
+        String value = properties.get(LOW_THRESHOLD_REDO_LOG_SIZE_KEY);
+        if (value == null) return null;
+        return Integer.valueOf(value);
     }
 	
 	
@@ -98,7 +102,7 @@ public class ReplicationRedoLogSizeAlertBeanConfig implements AlertBeanConfig {
      * {@inheritDoc}
      */
 	public Map<String, String> getProperties() {
-		return properties.getProperties();
+		return properties;
 	}
 
 	/**

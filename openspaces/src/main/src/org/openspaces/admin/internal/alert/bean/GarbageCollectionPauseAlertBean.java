@@ -74,6 +74,14 @@ public class GarbageCollectionPauseAlertBean implements AlertBean, VirtualMachin
 
     private void validateProperties() {
         
+        if (config.getLongGcPausePeriod() == null) {
+            throw new BeanConfigurationException("Long GC pause pertiod property is null");
+        }
+        
+        if (config.getShortGcPausePeriod() == null) {
+            throw new BeanConfigurationException("Short GC pause pertiod property is null");
+        }
+        
         if (config.getLongGcPausePeriod() < config.getShortGcPausePeriod()) {
             throw new BeanConfigurationException("Long GC period [" + config.getLongGcPausePeriod()
                     + " ms] must be greater than the short GC period [" + config.getShortGcPausePeriod() + " ms]");

@@ -16,10 +16,10 @@
 
 package org.openspaces.admin.alert.config;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.openspaces.admin.internal.alert.bean.ReplicationChannelDisconnectedAlertBean;
-import org.openspaces.core.util.StringProperties;
 
 /**
  * A strongly typed replication channel disconnection alert bean configuration.
@@ -32,7 +32,7 @@ import org.openspaces.core.util.StringProperties;
 public class ReplicationChannelDisconnectedAlertBeanConfig implements AlertBeanConfig {
     private static final long serialVersionUID = 1L;
 
-	private final StringProperties properties = new StringProperties();
+	private final Map<String, String> properties = new HashMap<String, String>();
 
 	/**
 	 * Constructs an empty replication channel disconnection configuration.
@@ -52,7 +52,7 @@ public class ReplicationChannelDisconnectedAlertBeanConfig implements AlertBeanC
      * {@inheritDoc}
      */
 	public Map<String, String> getProperties() {
-		return properties.getProperties();
+		return properties;
 	}
 
 	/**

@@ -63,11 +63,13 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
     }
 
     private void validateProperties() {
-        try {
-            config.getHighThresholdRedoLogSize();
-            config.getLowThresholdRedoLogSize();
-        } catch (IllegalArgumentException e) {
-            throw new BeanConfigurationException(e.getMessage());
+        
+        if (config.getHighThresholdRedoLogSize() == null) {
+            throw new BeanConfigurationException("High threshold property is null");
+        }
+        
+        if (config.getLowThresholdRedoLogSize() == null) {
+            throw new BeanConfigurationException("Low threshold property is null");
         }
 
         if (config.getHighThresholdRedoLogSize() < config.getLowThresholdRedoLogSize()) {

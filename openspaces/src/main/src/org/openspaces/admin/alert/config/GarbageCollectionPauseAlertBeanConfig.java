@@ -16,11 +16,11 @@
 
 package org.openspaces.admin.alert.config;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.openspaces.admin.internal.alert.bean.GarbageCollectionPauseAlertBean;
-import org.openspaces.core.util.StringProperties;
 
 /**
  * A strongly typed long garbage collection pause alert bean configuration.
@@ -46,7 +46,7 @@ public class GarbageCollectionPauseAlertBeanConfig implements AlertBeanConfig {
     public static final String SHORT_GC_PAUSE_PERIOD_MILLISECONDS_KEY = "short-gc-pause-period-milliseconds";
     
     
-	private final StringProperties properties = new StringProperties();
+	private final Map<String, String> properties = new HashMap<String, String>();
 
 	/**
 	 * Constructs an empty garbage collection pause alert configuration.
@@ -64,14 +64,16 @@ public class GarbageCollectionPauseAlertBeanConfig implements AlertBeanConfig {
      */
 	public void setLongGcPausePeriod(long period, TimeUnit timeUnit) {
 	    long periodInMilliseconds = timeUnit.toMillis(period);
-        properties.putLong(LONG_GC_PAUSE_PERIOD_MILLISECONDS_KEY, periodInMilliseconds);
+        properties.put(LONG_GC_PAUSE_PERIOD_MILLISECONDS_KEY, String.valueOf(periodInMilliseconds));
 	}
 	
 	/**
 	 * @return the long GC pause period in milliseconds.
 	 */
-	public long getLongGcPausePeriod() {
-	    return Long.valueOf(properties.get(LONG_GC_PAUSE_PERIOD_MILLISECONDS_KEY)).longValue();
+	public Long getLongGcPausePeriod() {
+	    String value = properties.get(LONG_GC_PAUSE_PERIOD_MILLISECONDS_KEY);
+	    if (value == null) return null;
+	    return Long.valueOf(value);
 	}
 	
     /**
@@ -84,14 +86,16 @@ public class GarbageCollectionPauseAlertBeanConfig implements AlertBeanConfig {
      */
     public void setShortGcPausePeriod(long period, TimeUnit timeUnit) {
         long periodInMilliseconds = timeUnit.toMillis(period);
-        properties.putLong(SHORT_GC_PAUSE_PERIOD_MILLISECONDS_KEY, periodInMilliseconds);
+        properties.put(SHORT_GC_PAUSE_PERIOD_MILLISECONDS_KEY, String.valueOf(periodInMilliseconds));
     }
     
     /**
      * @return the low GC pause period in milliseconds.
      */
-    public long getShortGcPausePeriod() {
-        return Long.valueOf(properties.get(SHORT_GC_PAUSE_PERIOD_MILLISECONDS_KEY)).longValue();
+    public Long getShortGcPausePeriod() {
+        String value = properties.get(SHORT_GC_PAUSE_PERIOD_MILLISECONDS_KEY);
+        if (value == null) return null;
+        return Long.valueOf(value);
     }
 	
 	/**
@@ -106,7 +110,7 @@ public class GarbageCollectionPauseAlertBeanConfig implements AlertBeanConfig {
      * {@inheritDoc}
      */
 	public Map<String, String> getProperties() {
-		return properties.getProperties();
+		return properties;
 	}
 
 	/**

@@ -69,12 +69,16 @@ public class CpuUtilizationAlertBean implements AlertBean,
 
     private void validateProperties() {
         
-        try {
-            config.getHighThresholdPerc();
-            config.getLowThresholdPerc();
-            config.getMeasurementPeriod();
-        } catch (IllegalArgumentException e) {
-            throw new BeanConfigurationException(e.getMessage());
+        if (config.getHighThresholdPerc() == null) {
+            throw new BeanConfigurationException("High threshold property is null");
+        }
+        
+        if (config.getLowThresholdPerc() == null) {
+            throw new BeanConfigurationException("Low threshold property is null");
+        }
+        
+        if (config.getMeasurementPeriod() == null) {
+            throw new BeanConfigurationException("Measurement period property is null");
         }
 
         if (config.getHighThresholdPerc() < config.getLowThresholdPerc()) {
