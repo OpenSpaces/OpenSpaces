@@ -6,6 +6,14 @@ import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 
+/**
+ * An abstraction over a fired alert, exposing the {@link Alert} API. Subclass to introduce a new
+ * type of alert, with strongly typed getter methods over runtime properties specified by
+ * {@link Alert#getProperties()}.
+ * 
+ * @author Moran Avigdor
+ * @since 8.0
+ */
 public class AbstractAlert implements Alert {
 
     private static final long serialVersionUID = 1L;
