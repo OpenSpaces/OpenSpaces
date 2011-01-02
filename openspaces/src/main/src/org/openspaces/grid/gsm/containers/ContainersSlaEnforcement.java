@@ -159,7 +159,7 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
         for (GridServiceContainer container : containersMarkedForShutdownPerProcessingUnit.get(pu)) {
             containers.remove(container);
         }
-        return containers.toArray(new GridServiceContainer[]{});
+        return containers.toArray(new GridServiceContainer[containers.size()]);
     }
 
     
@@ -188,7 +188,8 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
 
     private GridServiceContainer[] getContainersPendingProcessingUnitRelocation(ProcessingUnit pu) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
         validateNotDisposed(pu);
-        return containersMarkedForShutdownPerProcessingUnit.get(pu).toArray(new GridServiceContainer[]{});
+        List<GridServiceContainer> containers = containersMarkedForShutdownPerProcessingUnit.get(pu);
+        return containers.toArray(new GridServiceContainer[containers.size()]);
     }
 
     
@@ -445,8 +446,9 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
         }
     }
 
-    class ConflictingOperationInProgressException extends Exception {}
-    class NeedMoreMachinesException extends Exception {
+    private static class ConflictingOperationInProgressException extends Exception {}
+    
+    private static class NeedMoreMachinesException extends Exception {
         private final long missingCapacityInMB;
 
         NeedMoreMachinesException(long missingCapacityInMB) {
