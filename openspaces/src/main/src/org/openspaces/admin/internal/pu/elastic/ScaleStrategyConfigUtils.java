@@ -16,6 +16,8 @@ public class ScaleStrategyConfigUtils {
     private static final String PROCESSING_UNIT_NAME_DEFAULT = "";
     private static final int POLLING_INTERVAL_SECONDS_DEFAULT = 15;
     private static final String POLLING_INTERVAL_SECONDS_KEY = "polling-interval-seconds";
+    private static final String MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_KEY = "max-number-of-concurrent-relocations-per-machine";
+    private static final int MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_DEFAULT = 1;
     
     public static void setMaxNumberOfContainersPerMachine(
             StringProperties properties,
@@ -75,5 +77,13 @@ public class ScaleStrategyConfigUtils {
 
     public static void setPollingIntervalSeconds(StringProperties properties, int value) {
         properties.putInteger(POLLING_INTERVAL_SECONDS_KEY, value);
+    }
+
+    public static int getMaximumNumberOfConcurrentRelocationsPerMachine(StringProperties properties) {
+        return properties.getInteger(MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_KEY, MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_DEFAULT);
+    }
+    
+    public static void setMaximumNumberOfConcurrentRelocationsPerMachine(StringProperties properties, int maxNumberOfConcurrentRelocationsPerMachine) {
+        properties.putInteger(MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_KEY,maxNumberOfConcurrentRelocationsPerMachine);        
     }
 }

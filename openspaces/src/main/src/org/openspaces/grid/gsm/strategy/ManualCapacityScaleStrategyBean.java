@@ -345,6 +345,7 @@ public class ManualCapacityScaleStrategyBean
     {
         RebalancingSlaPolicy sla = new RebalancingSlaPolicy();
         sla.setContainers(containers);
+        sla.setMaximumNumberOfConcurrentRelocationsPerMachine(slaConfig.getMaximumNumberOfConcurrentRelocationsPerMachine());
         
         boolean slaEnforced = rebalancingService.enforceSla(sla);
         

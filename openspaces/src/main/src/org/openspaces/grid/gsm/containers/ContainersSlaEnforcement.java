@@ -40,7 +40,7 @@ import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestr
 public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcement<ContainersSlaPolicy,ProcessingUnit,ContainersSlaEnforcementEndpoint> {
 
     private static final int START_CONTAINER_TIMEOUT_FAILURE_SECONDS = 60;
-    private static final int START_CONTAINER_TIMEOUT_FAILURE_IGNORE_SECONDS = 600;
+    private static final int START_CONTAINER_TIMEOUT_FAILURE_FORGET_SECONDS = 600;
 
     private static final Log logger = LogFactory.getLog(ContainersSlaEnforcement.class);
     
@@ -172,8 +172,9 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
         String[] zoneInContainerOptions = sla.getNewContainerConfig().getZones();
         
         String zone = getContainerZone(pu);
-        if (zoneInContainerOptions.length != 1 || !zoneInContainerOptions[0].equals(zone)) {
-            throw new IllegalArgumentException("grid container options zone is " + zoneInContainerOptions + " instead of " + zone);
+        if (zoneInContainerOptions.length != 1 || 
+            !zoneInContainerOptions[0].equals(zone)) {
+            throw new IllegalArgumentException("sla zone is " + Arrays.toString(zoneInContainerOptions) + " and instead it should be " + zone);
         }
        
        try {
@@ -401,7 +402,7 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
                 try {
                     
                     if (future.getGridServiceAgent().isRunning()) {
-                        GridServiceContainer container = future.getGridServiceContainer();
+                        GridServiceContainer container = future.get();
                         logger.info("Container started succesfully " + ToStringHelper.gscToString(container));
                     }
                     
@@ -434,13 +435,13 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
         final Iterator<FutureGridServiceContainer> iterator = list.iterator();
         while (iterator.hasNext()) {
             FutureGridServiceContainer future = iterator.next();
-            int passedSeconds = (int) ((System.currentTimeMillis() - future.getTimestamp()) / 1000);
-            if (!future.getGridServiceAgent().isRunning()) {
-                logger.info("Ignoring failure to start container on machine " + ToStringHelper.machineToString(future.getGridServiceAgent().getMachine()) + " that occured " + passedSeconds + " seconds ago since grid service agent no longer exists.");
+            int passedSeconds = (int) ((System.currentTimeMillis() - future.getTimestamp().getTime()) / 1000);
+            if (!future.getGridServiceAgent().isDiscovered()) {
+                logger.info("Forgetting failure to start container on machine " + ToStringHelper.machineToString(future.getGridServiceAgent().getMachine()) + " that occured " + passedSeconds + " seconds ago since grid service agent no longer exists.");
                 iterator.remove();
             }
-            else if ( passedSeconds > START_CONTAINER_TIMEOUT_FAILURE_IGNORE_SECONDS) {
-                logger.info("Ignoring failure to start container on machine " + ToStringHelper.machineToString(future.getGridServiceAgent().getMachine()) + " that occured " + passedSeconds + " seconds ago due to timeout.");
+            else if ( passedSeconds > START_CONTAINER_TIMEOUT_FAILURE_FORGET_SECONDS) {
+                logger.info("Forgetting failure to start container on machine " + ToStringHelper.machineToString(future.getGridServiceAgent().getMachine()) + " that occured " + passedSeconds + " seconds ago due to timeout.");
                 iterator.remove();
             }
         }

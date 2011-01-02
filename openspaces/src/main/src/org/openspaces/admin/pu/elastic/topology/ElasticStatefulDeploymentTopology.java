@@ -6,8 +6,8 @@ import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.CapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.CapacityScaleConfigurer;
 import org.openspaces.core.util.MemoryUnit;
 
 public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopology {
@@ -80,11 +80,11 @@ public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopo
     /**
      * Enables the specified scale strategy, and disables all other scale strategies.
      * Scale strategies can also be reconfigured after deployment.
-     * @see MemoryCapacityScaleConfig
-     * @see MemoryCapacityScaleConfigurer
+     * @see CapacityScaleConfig
+     * @see CapacityScaleConfigurer
      */
     ElasticStatefulDeploymentTopology scale(
-            MemoryCapacityScaleConfigurer strategy);
+            CapacityScaleConfigurer strategy);
 
     /**
      * Enables the specified scale strategy, and disables all other scale strategies.
@@ -115,9 +115,9 @@ public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopo
     /**
      * Enables the specified scale strategy, and disables all other scale strategies.
      * Scale strategies can also be reconfigured after deployment.
-     * @see MemoryCapacityScaleConfig
-     * @see MemoryCapacityScaleConfigurer
+     * @see CapacityScaleConfig
+     * @see CapacityScaleConfigurer
      */
     ElasticStatefulDeploymentTopology scale(
-            MemoryCapacityScaleConfig strategy);
+            CapacityScaleConfig strategy);
 }

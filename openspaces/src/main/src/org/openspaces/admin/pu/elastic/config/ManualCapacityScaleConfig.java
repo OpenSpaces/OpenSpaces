@@ -92,6 +92,14 @@ public class ManualCapacityScaleConfig
         return ScaleStrategyConfigUtils.getPollingIntervalSeconds(properties);
     }
 
+    public int getMaximumNumberOfConcurrentRelocationsPerMachine() {
+        return ScaleStrategyConfigUtils.getMaximumNumberOfConcurrentRelocationsPerMachine(properties);
+    }
+    
+    public void setMaximumNumberOfConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
+        ScaleStrategyConfigUtils.setMaximumNumberOfConcurrentRelocationsPerMachine(properties, maxNumberOfConcurrentRelocationsPerMachine);
+    }
+    
     public Map<String,String> getProperties() {
         return properties.getProperties();
     }
@@ -107,8 +115,10 @@ public class ManualCapacityScaleConfig
     public String getBeanClassName() {
         return ManualCapacityScaleStrategyBean.class.getName();
     }
-    
+   
     public String toString() {
         return this.properties.toString();
     }
+
+    
 }

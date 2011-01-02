@@ -14,8 +14,8 @@ import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.CapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.CapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatefulDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
@@ -121,7 +121,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return scale(strategy.getConfig());
     }
 
-    public ElasticStatefulProcessingUnitDeployment scale(MemoryCapacityScaleConfigurer strategy) {
+    public ElasticStatefulProcessingUnitDeployment scale(CapacityScaleConfigurer strategy) {
         return scale(strategy.getConfig());
     }
     
@@ -137,7 +137,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return (ElasticStatefulProcessingUnitDeployment) super.scale(strategy);
     }
     
-    public ElasticStatefulProcessingUnitDeployment scale(MemoryCapacityScaleConfig strategy) {
+    public ElasticStatefulProcessingUnitDeployment scale(CapacityScaleConfig strategy) {
         return (ElasticStatefulProcessingUnitDeployment) super.scale(strategy);
     }
     

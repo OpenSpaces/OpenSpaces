@@ -8,8 +8,8 @@ import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.config.MemoryCapacityScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.CapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.CapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatefulDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
@@ -64,7 +64,7 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
         return this;
     }
 
-    public ElasticDataGridDeployment scale(MemoryCapacityScaleConfigurer strategy) {
+    public ElasticDataGridDeployment scale(CapacityScaleConfigurer strategy) {
         deployment.scale(strategy);
         return this;
     }
@@ -84,7 +84,7 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
         return this;
     }
     
-    public ElasticDataGridDeployment scale(MemoryCapacityScaleConfig strategy) {
+    public ElasticDataGridDeployment scale(CapacityScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }

@@ -1,6 +1,7 @@
 package org.openspaces.grid.gsm.containers;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -41,29 +42,43 @@ public class ContainersSlaUtils {
         
         FutureGridServiceContainer future = new FutureGridServiceContainer() {
 
-            public GridServiceContainer getGridServiceContainer() throws ExecutionException, IllegalStateException,
+            public boolean isTimedOut() {
+                return System.currentTimeMillis() > endTimestamp;
+            }
+
+
+            public ExecutionException getException() {
+                Object result = ref.get();
+                if (result instanceof Exception) {
+                    return new ExecutionException((Exception)result);
+                }
+                return null;
+            }
+            
+            public GridServiceContainer get() throws ExecutionException, IllegalStateException,
                     TimeoutException {
                 
-                if (System.currentTimeMillis() > endTimestamp) {
+                if (isTimedOut()) {
                     throw new TimeoutException("Starting a new container on machine "+ gsa.getMachine().getHostAddress() + " took more than " + timeoutUnit.toSeconds(timeoutDuration) + " seconds to complete.");
                 }
                 
+                ExecutionException exception = getException();
+                if (exception != null) {
+                    throw exception;
+                }
+               
                 Object result = ref.get();
+                GridServiceContainer container = null;
+                if (result != null) {
+                    container = getGridServiceContainerInternal((Integer)result);
+                }
                 
-                if (result == null) {
+                if (container == null) {
                     throw new IllegalStateException("Async operation is not done yet.");
                 }
                 
-                if (result instanceof Exception) {
-                    throw new ExecutionException((Exception)result);
-                }
+                return container;            
                 
-                GridServiceContainer container = getGridServiceContainerInternal((Integer)result);
-                if (container != null) {
-                    return container;
-                }
-                                
-                throw new IllegalStateException("Async operation is not done yet.");
             }
 
             public boolean isDone() {
@@ -112,10 +127,9 @@ public class ContainersSlaUtils {
                 return config;
             }
 
-            public long getTimestamp() {
-                return startTimestamp;
+            public Date getTimestamp() {
+                return new Date(startTimestamp);
             }
-            
         };
         
         return future;

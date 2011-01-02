@@ -5,7 +5,7 @@ import java.util.Map;
 import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
 import org.openspaces.core.util.StringProperties;
-import org.openspaces.grid.gsm.elastic.MemoryCapacityScaleStrategyBean;
+import org.openspaces.grid.gsm.strategy.CapacityScaleStrategyBean;
 
 /**
  * Defines an automatic scaling strategy that monitors each container's memory usage percentage.
@@ -14,10 +14,10 @@ import org.openspaces.grid.gsm.elastic.MemoryCapacityScaleStrategyBean;
  * When the average usage percentage is above the high threshold more containers are started.
  * When the average usage percentage is below the low threshold containers are killed.
  *
- * @see MemoryCapacityScaleConfigurer
+ * @see CapacityScaleConfigurer
  * @author itaif
  */
-public class MemoryCapacityScaleConfig 
+public class CapacityScaleConfig 
     implements  MinNumberOfContainersScaleConfig,  
                 MaxNumberOfContainersScaleConfig ,
                 MinNumberOfContainersPerMachineScaleConfig,
@@ -33,7 +33,7 @@ public class MemoryCapacityScaleConfig
     
     private StringProperties properties;
     
-    public MemoryCapacityScaleConfig() {
+    public CapacityScaleConfig() {
         properties = new StringProperties();
     }
     
@@ -119,7 +119,7 @@ public class MemoryCapacityScaleConfig
     }
 
     public String getBeanClassName() {
-        return MemoryCapacityScaleStrategyBean.class.getName();
+        return CapacityScaleStrategyBean.class.getName();
     }
 
     public void applyRecommendedSettings() {

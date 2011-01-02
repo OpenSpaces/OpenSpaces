@@ -17,6 +17,7 @@ import org.jini.rio.jsb.ServiceBeanActivation.LifeCycleManager;
 import org.jini.rio.jsb.ServiceBeanAdapter;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.bean.BeanConfigException;
+import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.InternalAdminFactory;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -81,7 +82,7 @@ public class ESMImpl<x> extends ServiceBeanAdapter implements ESM, ProcessingUni
         
         machinesSlaEnforcement = new MachinesSlaEnforcement(admin);
         containersSlaEnforcement = new ContainersSlaEnforcement(admin);
-        rebalancingSlaEnforcement = new RebalancingSlaEnforcement(admin);
+        rebalancingSlaEnforcement = new RebalancingSlaEnforcement();
     }
 
     /**
@@ -314,17 +315,22 @@ public class ESMImpl<x> extends ServiceBeanAdapter implements ESM, ProcessingUni
     private void refreshProcessingUnitElasticConfig(ProcessingUnit pu, Map<String,String> elasticProperties) {
 
         try {
-        ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.get(pu);
         
-        if (beanServer == null) {
-            beanServer = new ScaleBeanServer(pu,rebalancingSlaEnforcement,containersSlaEnforcement,machinesSlaEnforcement,elasticProperties);
-            scaleBeanServerPerProcessingUnit.put(pu, beanServer);
-            logger.info("Elastic properties for pu " + pu.getName() + " are being enforced.");
-        }
-        else {
-            beanServer.setElasticProperties(elasticProperties);
-            logger.info("Elastic properties for pu " + pu.getName() + " are being refreshed.");
-        }
+            if (pu.getRequiredZones().length != 1) {
+                throw new BeanConfigurationException("Processing Unit must have exactly one container zone defined.");
+            }
+            
+            ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.get(pu);
+        
+            if (beanServer == null) {
+                beanServer = new ScaleBeanServer(pu,rebalancingSlaEnforcement,containersSlaEnforcement,machinesSlaEnforcement,elasticProperties);
+                scaleBeanServerPerProcessingUnit.put(pu, beanServer);
+                logger.info("Elastic properties for pu " + pu.getName() + " are being enforced.");
+            }
+            else {
+                beanServer.setElasticProperties(elasticProperties);
+                logger.info("Elastic properties for pu " + pu.getName() + " are being refreshed.");
+            }
         }
         catch (BeanConfigException e) {
             logger.log(Level.SEVERE,"Error configuring elasitc scale bean.",e);
