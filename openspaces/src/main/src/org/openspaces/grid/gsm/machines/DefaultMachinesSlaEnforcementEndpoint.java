@@ -64,7 +64,7 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
     public GridServiceAgent[] getGridServiceAgents() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
         validateNotDestroyed();
        
-        return agentsStarted.toArray(new GridServiceAgent[]{});
+        return agentsStarted.toArray(new GridServiceAgent[agentsStarted.size()]);
     }
 
     private List<GridServiceAgent> getGridServiceAgentsSortManagementComponentsLast() {
@@ -83,7 +83,7 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
     public GridServiceAgent[] getGridServiceAgentsPendingShutdown() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
         validateNotDestroyed();
         
-        return agentsPendingShutdown.toArray(new GridServiceAgent[] {});
+        return agentsPendingShutdown.toArray(new GridServiceAgent[agentsPendingShutdown.size()]);
         
     }
 
@@ -415,5 +415,5 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 	}
 
     @SuppressWarnings("serial")
-	class ConflictingOperationInProgressException extends Exception  {}
+	private static class ConflictingOperationInProgressException extends Exception  {}
 }
