@@ -7,9 +7,9 @@ import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
+import org.openspaces.admin.alert.alerts.ReplicationRedoLogOverflowToDiskAlert;
 import org.openspaces.admin.alert.alerts.ReplicationRedoLogSizeAlert;
 import org.openspaces.admin.alert.config.ReplicationRedoLogSizeAlertBeanConfig;
-import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.alert.AlertHistory;
 import org.openspaces.admin.internal.alert.AlertHistoryDetails;
 import org.openspaces.admin.internal.alert.InternalAlertManager;
@@ -22,17 +22,18 @@ import org.openspaces.admin.space.events.SpaceInstanceStatisticsChangedEventList
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 import com.j_spaces.core.filters.ReplicationStatistics;
+import com.j_spaces.core.filters.ReplicationStatistics.OutgoingReplication;
 
-public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstanceRemovedEventListener, SpaceInstanceStatisticsChangedEventListener {
+public class ReplicationRedoLogOverflowToDiskAlertBean implements AlertBean, SpaceInstanceRemovedEventListener, SpaceInstanceStatisticsChangedEventListener {
 
-    public static final String beanUID = "3f4bff98-52de6d72-b2b8-434b-aa18-d57c7554262a";
-    public static final String ALERT_NAME = "Replication Redo log";
+    public static final String beanUID = "3519ba78-08e6de85-87dc-4c10-8d08-ef03fe7b5d76";
+    public static final String ALERT_NAME = "Replication Redo log Overflow";
     
     private final ReplicationRedoLogSizeAlertBeanConfig config = new ReplicationRedoLogSizeAlertBeanConfig();
 
     private Admin admin;
 
-    public ReplicationRedoLogSizeAlertBean() {
+    public ReplicationRedoLogOverflowToDiskAlertBean() {
     }
 
     public void afterPropertiesSet() throws Exception {
@@ -61,29 +62,6 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
     }
 
     private void validateProperties() {
-        
-        if (config.getHighThresholdRedoLogSize() == null) {
-            throw new BeanConfigurationException("High threshold property is null");
-        }
-        
-        if (config.getLowThresholdRedoLogSize() == null) {
-            throw new BeanConfigurationException("Low threshold property is null");
-        }
-
-        if (config.getHighThresholdRedoLogSize() < config.getLowThresholdRedoLogSize()) {
-            throw new BeanConfigurationException("Low threshold [" + config.getLowThresholdRedoLogSize()
-                    + "] must be less than high threshold value [" + config.getHighThresholdRedoLogSize() + "]");
-        }
-
-        if (config.getHighThresholdRedoLogSize() < 0) {
-            throw new BeanConfigurationException("High threshold [" + config.getHighThresholdRedoLogSize()
-                    + "] must greater than zero");
-        }
-
-        if (config.getLowThresholdRedoLogSize() < 0) {
-            throw new BeanConfigurationException("Low threshold [" + config.getLowThresholdRedoLogSize()
-                    + "] must greater or equal to zero");
-        }
     }
     
     public void spaceInstanceRemoved(SpaceInstance spaceInstance) {
@@ -98,27 +76,27 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
         factory.config(config.getProperties());
 
         Alert alert = factory.toAlert();
-        admin.getAlertManager().fireAlert( new ReplicationRedoLogSizeAlert(alert));
+        admin.getAlertManager().fireAlert( new ReplicationRedoLogOverflowToDiskAlert(alert));
     }
     
     
     public void spaceInstanceStatisticsChanged(SpaceInstanceStatisticsChangedEvent event) {
         
-        int highThreshold = config.getHighThresholdRedoLogSize();
-        int lowThreshold = config.getLowThresholdRedoLogSize();
-        
         final SpaceInstance source = event.getSpaceInstance();
         final ReplicationStatistics replicationStatistics = event.getStatistics().getReplicationStatistics();
         if (replicationStatistics == null) return;
         
-        long redoLogSize = replicationStatistics.getOutgoingReplication().getRedoLogSize();
+        OutgoingReplication outgoingReplication = replicationStatistics.getOutgoingReplication();
+        long redoLogSize = outgoingReplication.getRedoLogSize();
+        long redoLogSizeInDisk = outgoingReplication.getRedoLogExternalStoragePacketCount();
+        long redoLogSizeInMemory = outgoingReplication.getRedoLogMemoryPacketCount();
         
-        if (redoLogSize > highThreshold) {
+        if (redoLogSizeInDisk > 0) {
             final String groupUid = generateGroupUid(source.getUid());
             AlertFactory factory = new AlertFactory();
             factory.name(ALERT_NAME);
             factory.groupUid(groupUid);
-            factory.description("Replication redo-log size crossed above a " + highThreshold + " threshold, with a size of " + redoLogSize + " for " + getSpaceName(source));
+            factory.description("Replication redo-log has overflown to disk, for " + getSpaceName(source));
             factory.severity(AlertSeverity.WARNING);
             factory.status(AlertStatus.RAISED);
             factory.componentUid(source.getUid());
@@ -133,13 +111,13 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
             factory.putProperty(ReplicationRedoLogSizeAlert.SOURCE_UID, source.getUid());
             
             factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_SIZE, String.valueOf(redoLogSize));
-            factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_MEMORY_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogMemoryPacketCount()));
-            factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_SWAP_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogExternalStoragePacketCount()));
+            factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_MEMORY_SIZE, String.valueOf(redoLogSizeInMemory));
+            factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_SWAP_SIZE, String.valueOf(redoLogSizeInDisk));
 
             Alert alert = factory.toAlert();
-            admin.getAlertManager().fireAlert( new ReplicationRedoLogSizeAlert(alert));
+            admin.getAlertManager().fireAlert( new ReplicationRedoLogOverflowToDiskAlert(alert));
             
-        } else if (redoLogSize <= lowThreshold) {
+        } else if (redoLogSizeInDisk == 0 && redoLogSize >= 0){
             final String groupUid = generateGroupUid(source.getUid());
             AlertHistory alertHistory = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertHistoryByGroupUid(groupUid);
             AlertHistoryDetails alertHistoryDetails = alertHistory.getDetails();
@@ -147,7 +125,7 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
                 AlertFactory factory = new AlertFactory();
                 factory.name(ALERT_NAME);
                 factory.groupUid(groupUid);
-                factory.description("Replication redo-log size crossed below a " + lowThreshold + " threshold, with a size of " + redoLogSize + " for " + getSpaceName(source));
+                factory.description("Replication redo-log no longer uses the disk, for " + getSpaceName(source));
                 factory.severity(AlertSeverity.WARNING);
                 factory.status(AlertStatus.RESOLVED);
                 factory.componentUid(event.getSpaceInstance().getUid());
@@ -162,11 +140,11 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
                 factory.putProperty(ReplicationRedoLogSizeAlert.SOURCE_UID, source.getUid());
                 
                 factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_SIZE, String.valueOf(redoLogSize));
-                factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_MEMORY_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogMemoryPacketCount()));
-                factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_SWAP_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogExternalStoragePacketCount()));
+                factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_MEMORY_SIZE, String.valueOf(redoLogSizeInMemory));
+                factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_SWAP_SIZE, String.valueOf(redoLogSizeInDisk));
 
                 Alert alert = factory.toAlert();
-                admin.getAlertManager().fireAlert(new ReplicationRedoLogSizeAlert(alert));
+                admin.getAlertManager().fireAlert(new ReplicationRedoLogOverflowToDiskAlert(alert));
             }
         }
     }
