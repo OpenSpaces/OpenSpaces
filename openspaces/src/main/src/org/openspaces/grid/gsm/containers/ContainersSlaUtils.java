@@ -31,7 +31,7 @@ public class ContainersSlaUtils {
         admin.scheduleAdminOperation(new Runnable() {
             public void run() {
                 try {
-                    ref.set(new Integer(gsa.internalStartGridService(config)));
+                    ref.set(gsa.internalStartGridService(config));
                     
                 } catch (Exception e) {
                     ref.set(e);

@@ -15,6 +15,8 @@ import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.grid.esm.ElasticScaleHandlerException;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 
+import com.j_spaces.kernel.GSThread;
+
 /**
  * An adapter that wraps an {@link ElasticMachineProvisioning} and exposes a {@link NonBlockingElasticMachineProvisioning}
  *
@@ -30,7 +32,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
 	private ExecutorService service = Executors
 			.newCachedThreadPool(new ThreadFactory() {
 				public Thread newThread(Runnable r) {
-					return new Thread(r, this.getClass().getName());
+					return new GSThread(r, this.getClass().getName());
 				}
 
 			});

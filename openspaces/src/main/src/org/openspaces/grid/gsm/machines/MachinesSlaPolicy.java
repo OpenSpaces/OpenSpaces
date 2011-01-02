@@ -4,8 +4,8 @@ import org.openspaces.grid.gsm.sla.ServiceLevelAgreementPolicy;
 
 public class MachinesSlaPolicy extends ServiceLevelAgreementPolicy {
  
-    long memoryInMB;
-    double cpu;
+    private long memoryInMB;
+    private double cpu;
     private NonBlockingElasticMachineProvisioning machineProvisioning;
     private int minimumNumberOfMachines;
     
