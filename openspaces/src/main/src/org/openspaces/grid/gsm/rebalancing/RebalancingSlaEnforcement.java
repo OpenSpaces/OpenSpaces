@@ -128,26 +128,32 @@ public class RebalancingSlaEnforcement implements
                 cleanFutureRelocation(pu);
 
                 GridServiceContainer[] containers = sla.getContainers();
-
-                // stage 1 : relocate backups so number of instances per container is balanced
-                boolean relocateOnlyBackups = true;
-                rebalanceNumberOfInstancesPerContainer(pu, containers, sla, relocateOnlyBackups);
-                                
-                if ( !RebalancingUtils.isProcessingUnitIntact(pu) ||
-                     !futureRelocationPerProcessingUnit.get(pu).isEmpty()) {
-                    return;
+                if (pu.getNumberOfBackups() > 0) {
+                    // stage 1 : relocate backups so number of instances per container is balanced
+                    boolean relocateOnlyBackups = true;
+                    rebalanceNumberOfInstancesPerContainer(pu, containers, sla, relocateOnlyBackups);
+                                    
+                    if ( !RebalancingUtils.isProcessingUnitIntact(pu) ||
+                         !futureRelocationPerProcessingUnit.get(pu).isEmpty()) {
+                        return;
+                    }
+                    
+                    // if not all of pu instances are in the approved containers... 
+                    // then skip directly to stage 3
+                    if (RebalancingUtils.isProcessingUnitIntact(pu, containers)) {
+                        
+                        //stage 2: restart primaries so number of primaries per machine is balanced
+                        rebalanceNumberOfPrimaryInstancesPerMachine(pu, containers, sla);
+                        
+                        if ( !RebalancingUtils.isProcessingUnitIntact(pu) ||
+                             !futureRelocationPerProcessingUnit.get(pu).isEmpty()) {
+                           return;
+                        }
+                    }
                 }
-                  
-                //stage 2: restart primaries so number of primaries per machine is balanced
-                rebalanceNumberOfPrimaryInstancesPerMachine(pu,containers);
                 
-                if ( !RebalancingUtils.isProcessingUnitIntact(pu) ||
-                     !futureRelocationPerProcessingUnit.get(pu).isEmpty()) {
-                   return;
-                }
-         
                 // stage 3: relocate backups or primaries so number of instances per container is balanced
-                relocateOnlyBackups = false; 
+                boolean relocateOnlyBackups = false; 
                 rebalanceNumberOfInstancesPerContainer(pu, containers, sla, relocateOnlyBackups);
 
             }
@@ -330,6 +336,18 @@ public class RebalancingSlaEnforcement implements
                                 continue;
                             }
                             
+                            for (Machine sourceReplicationMachine : 
+                                RebalancingUtils.getMachinesHostingContainers(
+                                        RebalancingUtils.getReplicationSourceContainers(candidateInstance))) {
+                                if (isConflictingOperationInProgress(sourceReplicationMachine, maximumNumberOfRelocationsPerMachine)) {
+                                    logger.debug("Cannot relocate " + ToStringHelper.puInstanceToString(candidateInstance)
+                                            + " " + "since replication source is on machine " + ToStringHelper.machineToString(sourceReplicationMachine) + " " +
+                                            "which is busy with another relocation");
+                                    conflict = true;
+                                    continue;
+                                }
+                            }
+                            
                             if (pu.getMaxInstancesPerVM() > 0) {
                                 int numberOfOtherInstancesFromPartitionInTargetContainer = 
                                     RebalancingUtils.getOtherInstancesFromSamePartitionInContainer(
@@ -370,7 +388,7 @@ public class RebalancingSlaEnforcement implements
                                     + "from " + ToStringHelper.gscToString(source) + " " + "to "
                                     + ToStringHelper.gscToString(target));
                             return 
-                                RebalancingUtils.relocateProcessingUnitAsync(
+                                RebalancingUtils.relocateProcessingUnitInstanceAsync(
                                         target,
                                         candidateInstance, 
                                         RELOCATION_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
@@ -389,13 +407,15 @@ public class RebalancingSlaEnforcement implements
 
             private void rebalanceNumberOfPrimaryInstancesPerMachine(
                     ProcessingUnit pu,
-                    GridServiceContainer[] containers) {
+                    GridServiceContainer[] containers,
+                    RebalancingSlaPolicy sla) throws ConflictingOperationInProgressException {
                 
                 while (true) {
                     final FutureProcessingUnitInstance newInstance =
                         rebalanceNumberOfPrimaryInstancesPerMachineStep(
                                 pu, 
-                                containers);
+                                containers,
+                                sla.getMaximumNumberOfConcurrentRelocationsPerMachine());
                     
                     if (newInstance == null) {
                         break;
@@ -405,10 +425,132 @@ public class RebalancingSlaEnforcement implements
                 }
             }
 
-            private FutureProcessingUnitInstance rebalanceNumberOfPrimaryInstancesPerMachineStep(ProcessingUnit pu,
-                    GridServiceContainer[] containers) {
-                // TODO Auto-generated method stub
-                return null;
+            private FutureProcessingUnitInstance rebalanceNumberOfPrimaryInstancesPerMachineStep(
+                    ProcessingUnit pu,
+                    GridServiceContainer[] containers,
+                    int maximumNumberOfRelocationsPerMachine) throws ConflictingOperationInProgressException {
+                
+             // sort all machines (including those not in the specified machines 
+             // by (numberOfPrimaryInstancesPerMachine - minNumberOfPrimaryInstances)
+             final List<Machine> sortedMachines = 
+                RebalancingUtils.sortAllMachinesByNumberOfPrimaryInstancesAboveMinimum(
+                        pu, 
+                        containers);
+
+                
+             boolean conflict = false;
+             // a restart is performed on a a primary instance on the source machine 
+             // that has too many primary instances and the target machine has the matching 
+             // backup instance and has too little primary instances.
+             for (int targetIndex = 0; 
+                  targetIndex < sortedMachines.size() ; 
+                  targetIndex++) {
+
+                 Machine target = sortedMachines.get(targetIndex);
+
+                 int primaryInstancesInTarget = RebalancingUtils.getNumberOfPrimaryInstancesOnMachine(target, pu);
+                 if (primaryInstancesInTarget >= 
+                         RebalancingUtils.getPlannedMaximumNumberOfPrimaryInstancesForMachine(target, containers, pu)) {
+                     // target cannot host any more primary instances
+                     // since the array is sorted there is no point in continuing the search
+                     break;
+                 }
+
+                 for (int sourceIndex = sortedMachines.size() - 1; 
+                      sourceIndex > targetIndex ; 
+                      sourceIndex--) {
+
+                     Machine source = sortedMachines.get(sourceIndex);
+
+                     if (isConflictingOperationInProgress(source, maximumNumberOfRelocationsPerMachine)) {
+                         conflict = true;
+                         logger.debug("Cannot restart a primary instance from machine " + ToStringHelper.machineToString(source)
+                                 + " since a conflicting relocation is already in progress.");
+                         continue;
+                     }
+
+                     int primaryInstancesInSource = source.getProcessingUnitInstances(pu.getName()).length;
+                     if (primaryInstancesInSource <= 
+                             RebalancingUtils.getPlannedMinimumNumberOfPrimaryInstancesForMachine(source, containers, pu)) {
+                         // source cannot give up any primary instances
+                         // since the array is sorted there is no point in continuing the search
+                         break;
+                     }
+
+                     if (primaryInstancesInTarget >= RebalancingUtils.getPlannedMinimumNumberOfPrimaryInstancesForMachine(target, containers, pu) &&
+                         primaryInstancesInSource <= RebalancingUtils.getPlannedMaximumNumberOfPrimaryInstancesForMachine(source, containers, pu)) {
+                         // both source and target are balanced.
+                         // since array is sorted there is no point in continuing the search
+                         // as this condition will hold true.
+                         break;
+                     }
+                     
+                     // we have a target and a source container. now let's decide which primary pu instance to restart
+                     for (ProcessingUnitInstance candidateInstance : source.getProcessingUnitInstances(pu.getName())) {
+
+                         
+                         if (candidateInstance.getSpaceInstance() == null) {
+                             logger.debug("Cannot relocate " + ToStringHelper.puInstanceToString(candidateInstance)
+                                     + " since embedded space is not detected");
+                             continue;
+                         }
+
+                         if (candidateInstance.getSpaceInstance().getMode() != SpaceMode.PRIMARY) {
+                             logger.debug("Cannot restart instance "
+                                     + ToStringHelper.puInstanceToString(candidateInstance)
+                                     + " since it is not primary.");
+                             continue;
+                         }
+
+                         if (!RebalancingUtils.isProcessingUnitPartitionIntact(candidateInstance.getPartition())) {
+                             logger.debug("Cannot restart " + ToStringHelper.puInstanceToString(candidateInstance)
+                                     + " since instances from the same partition are missing");
+                             conflict = true;
+                             continue;
+                         }
+                         
+                         if (isConflictingOperationInProgress(candidateInstance)) {
+                             logger.debug("Cannot relocate " + ToStringHelper.puInstanceToString(candidateInstance)
+                                     + " " + "since another instance from the same partition is being relocated");
+                             conflict = true;
+                             continue;
+                         }
+                         
+                         Machine[] sourceReplicationMachines = 
+                             RebalancingUtils.getMachinesHostingContainers(
+                                     RebalancingUtils.getReplicationSourceContainers(candidateInstance));
+                         
+                         if (!sourceReplicationMachines[0].equals(target)) {
+                             logger.debug("Cannot restart " + ToStringHelper.puInstanceToString(candidateInstance) +
+                                     "since replication source is on " + ToStringHelper.machineToString(sourceReplicationMachines[0]) + " " +
+                                     "and not on the target machine " + ToStringHelper.machineToString(target));
+                         }
+                         
+                        for (Machine sourceReplicationMachine : sourceReplicationMachines) {
+                             if (isConflictingOperationInProgress(sourceReplicationMachine, maximumNumberOfRelocationsPerMachine)) {
+                                 logger.debug("Cannot restart " + ToStringHelper.puInstanceToString(candidateInstance)
+                                         + " " + "since replication source is on machine " + ToStringHelper.machineToString(sourceReplicationMachine) + " " +
+                                         "which is busy with another relocation");
+                                 conflict = true;
+                                 continue;
+                             }
+                         }
+
+                        logger.info("Restarting " + ToStringHelper.puInstanceToString(candidateInstance) + " "
+                                + "and an instance on machine " + ToStringHelper.machineToString(target) + " should be elected to primary");
+                        return 
+                            RebalancingUtils.restartProcessingUnitInstanceAsync(
+                                    candidateInstance, 
+                                    RELOCATION_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
+                     }
+                 }
+              }
+             
+             if (conflict) {
+                 throw new ConflictingOperationInProgressException();
+             }
+             
+             return null;
             }
             
             
@@ -482,9 +624,8 @@ public class RebalancingSlaEnforcement implements
             maximumNumberOfConcurrentRelocationsPerMachine = Integer.MAX_VALUE;
         }
 
-        Machine machine = container.getMachine();
         int concurrentRelocationsInContainer = 0;
-        int concurrentRelocationsInMachine = 0;
+        
 
         for (FutureProcessingUnitInstance future : getAllFutureProcessingUnitInstances()) {
 
@@ -498,6 +639,30 @@ public class RebalancingSlaEnforcement implements
 
                 concurrentRelocationsInContainer++;
             }
+        }
+
+        return concurrentRelocationsInContainer > 0 ||
+        
+               isConflictingOperationInProgress(
+                       container.getMachine(), 
+                       maximumNumberOfConcurrentRelocationsPerMachine);
+    }
+
+    private boolean isConflictingOperationInProgress(
+            Machine machine,
+            int maximumNumberOfConcurrentRelocationsPerMachine) {
+
+        if (maximumNumberOfConcurrentRelocationsPerMachine <= 0) {
+            //maximumNumberOfConcurrentRelocationsPerMachine is disabled
+            maximumNumberOfConcurrentRelocationsPerMachine = Integer.MAX_VALUE;
+        }
+
+        int concurrentRelocationsInMachine = 0;
+
+        for (FutureProcessingUnitInstance future : getAllFutureProcessingUnitInstances()) {
+
+            GridServiceContainer targetContainer = future.getTargetContainer();
+            List<GridServiceContainer> replicationSourceContainers = Arrays.asList(future.getReplicaitonSourceContainers());
 
             Machine targetMachine = targetContainer.getMachine();
             Set<Machine> replicaitonSourceMachines = new HashSet<Machine>();
@@ -506,14 +671,13 @@ public class RebalancingSlaEnforcement implements
             }
 
             if (targetMachine.equals(machine) ||    // target machine is busy with replication 
-                replicaitonSourceMachines.contains(machine)) { // source machine is busy with replication
+                replicaitonSourceMachines.contains(machine)) { // replication source machine is busy with replication
 
                 concurrentRelocationsInMachine++;
             }
         }
 
-        return concurrentRelocationsInContainer > 0
-                || concurrentRelocationsInMachine > maximumNumberOfConcurrentRelocationsPerMachine;
+        return concurrentRelocationsInMachine > maximumNumberOfConcurrentRelocationsPerMachine;
     }
 
     public void destroyEndpoint(ProcessingUnit id) {

@@ -29,7 +29,7 @@ import com.gigaspaces.cluster.activeelection.SpaceMode;
 
 public class RebalancingUtils {
 
-   static FutureProcessingUnitInstance relocateProcessingUnitAsync(
+   static FutureProcessingUnitInstance relocateProcessingUnitInstanceAsync(
            final GridServiceContainer targetContainer,
            final ProcessingUnitInstance puInstance, 
            final long duration, final TimeUnit timeUnit) {
@@ -244,17 +244,14 @@ public class RebalancingUtils {
         return future;
     }
 
-    
-   private static GridServiceContainer[] getReplicationSourceContainers(ProcessingUnitInstance puInstance) {
-       return getReplicationSourceContainers(puInstance,puInstance.getAdmin().getGridServiceContainers().getContainers());
-   }
-
    /**
     * @param instance
     * @return list of containers that are used by the relocated processing unit instance to synchronize all data.
     */
-    private static GridServiceContainer[] getReplicationSourceContainers(ProcessingUnitInstance instance, GridServiceContainer[] containers) {
+    public static GridServiceContainer[] getReplicationSourceContainers(ProcessingUnitInstance instance) {
         Set<GridServiceContainer> repContainers = new HashSet<GridServiceContainer>();
+        
+        GridServiceContainer[] containers = instance.getAdmin().getGridServiceContainers().getContainers();
         
         int numberOfBackups = instance.getProcessingUnit().getNumberOfBackups();
         if (numberOfBackups == 0) {
@@ -567,4 +564,100 @@ public class RebalancingUtils {
         });
         return sortedContainers;
     }
+
+
+    public static List<Machine> sortAllMachinesByNumberOfPrimaryInstancesAboveMinimum(
+            final ProcessingUnit pu,
+            final GridServiceContainer[] approvedContainers) {
+        
+        final List<Machine> sortedMachines = 
+                new ArrayList<Machine>(Arrays.asList(
+                        RebalancingUtils.getMachinesHostingContainers(approvedContainers)));
+        
+        Collections.sort(sortedMachines,
+                new Comparator<Machine>() {
+
+                public int compare(final Machine m1, final Machine m2) {
+                    return getNormalizedNumberOfPrimaryInstances(m1)
+                            - getNormalizedNumberOfPrimaryInstances(m2);
+                }
+                
+                private int getNormalizedNumberOfPrimaryInstances(final Machine machine) {
+                    return getNumberOfPrimaryInstancesOnMachine(machine, pu) -
+                           getPlannedMinimumNumberOfPrimaryInstancesForMachine(machine, approvedContainers, pu);
+                }
+
+            });
+            return sortedMachines;
+        }
+
+
+    public static int getNumberOfPrimaryInstancesOnMachine(Machine machine, ProcessingUnit pu) {
+        int numberOfPrimaryInstances = 0;
+        for (GridServiceContainer container : machine.getGridServiceContainers()) {
+            for (ProcessingUnitInstance instance : container.getProcessingUnitInstances(pu.getName())) {
+                if (instance.getSpaceInstance() != null && 
+                    instance.getSpaceInstance().getMode() == SpaceMode.PRIMARY) {
+                    numberOfPrimaryInstances++;
+                }
+            }
+        }
+        return numberOfPrimaryInstances;
+    }
+    
+    public static int getPlannedMinimumNumberOfPrimaryInstancesForMachine(
+            Machine machine,
+            GridServiceContainer[] approvedContainers, ProcessingUnit pu) {
+        
+        return (int) Math.floor( 
+                getPlannedAverageNumberOfPrimaryInstancesForMachine(
+                        machine,
+                        approvedContainers,
+                        pu));
+    }
+
+    public static int getPlannedMaximumNumberOfPrimaryInstancesForMachine(
+            Machine machine,
+            GridServiceContainer[] approvedContainers, ProcessingUnit pu) {
+        
+        return (int) Math.ceil( 
+                getPlannedAverageNumberOfPrimaryInstancesForMachine(
+                        machine,
+                        approvedContainers,
+                        pu));
+    }
+    
+    private static double getPlannedAverageNumberOfPrimaryInstancesForMachine(
+            Machine machine,
+            GridServiceContainer[] approvedContainers, 
+            ProcessingUnit pu) {
+        
+        List<GridServiceContainer> approvedContainersAsList=
+            Arrays.asList(approvedContainers);
+        
+        
+            
+        int numberOfApprovedContainersOnMachine=0;
+        for (GridServiceContainer container : machine.getGridServiceContainers()) {
+            if (approvedContainersAsList.contains(container)) {
+                numberOfApprovedContainersOnMachine++;
+            }
+        }
+        
+        return pu.getNumberOfInstances() *
+                1.0*numberOfApprovedContainersOnMachine/approvedContainers.length;
+    }
+
+    public static FutureProcessingUnitInstance restartProcessingUnitInstanceAsync(
+            ProcessingUnitInstance candidateInstance, int relocationTimeoutFailureSeconds, TimeUnit seconds) {
+        
+        return relocateProcessingUnitInstanceAsync(
+                candidateInstance.getGridServiceContainer(), 
+                candidateInstance,
+                relocationTimeoutFailureSeconds, seconds);
+    }
+
+
+    
+
 }
