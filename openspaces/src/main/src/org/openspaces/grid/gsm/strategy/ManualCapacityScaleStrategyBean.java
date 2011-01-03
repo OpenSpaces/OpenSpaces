@@ -373,7 +373,8 @@ public class ManualCapacityScaleStrategyBean
         AlertFactory alertFactory = new AlertFactory();
         alertFactory.name(alertName);
         alertFactory.description(alertDescription);
-        alertFactory.severity(severity);        
+        alertFactory.severity(severity);    
+        alertFactory.status(status);
         alertFactory.componentUid(pu.getName());
         alertFactory.groupUid(alertGroupUidPrefix + "-" + pu.getName());
         admin.getAlertManager().fireAlert(alertFactory.toAlert());
