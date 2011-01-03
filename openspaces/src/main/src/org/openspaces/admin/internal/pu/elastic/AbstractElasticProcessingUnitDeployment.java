@@ -176,7 +176,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
 
     protected AbstractElasticProcessingUnitDeployment scale(BeanConfig config) {
         enableBean(scaleStrategyPropertiesManager, config);
-        return null;
+        return this;
     }
     
     private String getDefaultZone() {
