@@ -81,7 +81,7 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
             throw new IllegalStateException("Cannot initialize a new ContainersSlaEnforcementEndpoint for pu " + pu.getName() +" since an endpoint for a pu with the same (containers) zone already exists: " + otherPu2.getName() );
         }
         
-        ContainersSlaEnforcementEndpoint service = new ContainersSlaEnforcementEndpoint() {
+        ContainersSlaEnforcementEndpoint endpoint = new ContainersSlaEnforcementEndpoint() {
 
             public GridServiceContainer[] getContainers() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
                 return ContainersSlaEnforcement.this.getContainers(pu);
@@ -102,11 +102,11 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
         
         
         
-        endpoints.put(pu,service);
+        endpoints.put(pu,endpoint);
         containersMarkedForShutdownPerProcessingUnit.put(pu, new ArrayList<GridServiceContainer>());
         futureContainersPerProcessingUnit.put(pu,new ArrayList<FutureGridServiceContainer>());
         
-        return service;
+        return endpoint;
     }
 
     private ProcessingUnit getEndpointsWithSameContainersZoneAs(ProcessingUnit pu) {

@@ -46,18 +46,21 @@ public class RebalancingSlaEnforcement implements
 
     private final Map<ProcessingUnit, List<FutureProcessingUnitInstance>> futureRelocationPerProcessingUnit;
     private final List<FutureProcessingUnitInstance> failedRelocations;
-
-    private boolean destroyed;
+    
+    private final HashMap<ProcessingUnit, RebalancingSlaEnforcementEndpoint> endpoints;
 
     public RebalancingSlaEnforcement() {
         futureRelocationPerProcessingUnit = new HashMap<ProcessingUnit, List<FutureProcessingUnitInstance>>();
         failedRelocations = new ArrayList<FutureProcessingUnitInstance>();
+        this.endpoints = new HashMap<ProcessingUnit, RebalancingSlaEnforcementEndpoint>();
     }
 
     public void destroy() {
-        destroyed = true;
+        for (ProcessingUnit pu : endpoints.keySet()) {
+            destroyEndpoint(pu);
+        }
     }
-
+    
     public RebalancingSlaEnforcementEndpoint createEndpoint(final ProcessingUnit pu)
             throws ServiceLevelAgreementEnforcementEndpointAlreadyExistsException {
 
@@ -65,7 +68,23 @@ public class RebalancingSlaEnforcement implements
             throw new IllegalStateException("Processing Unit must have exactly one container zone defined.");
         }
 
-        return new RebalancingSlaEnforcementEndpoint() {
+        if (!isProcessingUnitDisposed(pu)) {
+            throw new IllegalStateException("Cannot initialize a new ContainersSlaEnforcementEndpoint for pu " + pu.getName() +" since an endpoint for the pu already exists.");
+        }
+        
+        ProcessingUnit otherPu1 = getEndpointsWithSameNameAs(pu);
+        if (otherPu1 != null) {
+            throw new IllegalStateException("Cannot initialize a new ContainersSlaEnforcementEndpoint for pu " + pu.getName() +" since an endpoint for a pu with the same name already exists.");
+        }
+        
+        ProcessingUnit otherPu2 = getEndpointsWithSameContainersZoneAs(pu);
+        if (otherPu2 != null) {
+            throw new IllegalStateException("Cannot initialize a new ContainersSlaEnforcementEndpoint for pu " + pu.getName() +" since an endpoint for a pu with the same (containers) zone already exists: " + otherPu2.getName() );
+        }
+        
+        
+        RebalancingSlaEnforcementEndpoint
+            endpoint = new RebalancingSlaEnforcementEndpoint() {
 
             public ProcessingUnit getId() {
                 return pu;
@@ -78,10 +97,8 @@ public class RebalancingSlaEnforcement implements
                     throw new IllegalArgumentException("sla cannot be null");
                 }
 
-                if (destroyed) {
-                    throw new ServiceLevelAgreementEnforcementEndpointDestroyedException();
-                }
-
+                validateNotDisposed(pu);
+                
                 String zone = pu.getRequiredZones()[0];
 
                 for (GridServiceContainer container : sla.getContainers()) {
@@ -186,8 +203,7 @@ public class RebalancingSlaEnforcement implements
                 List<FutureProcessingUnitInstance> list = futureRelocationPerProcessingUnit.get(pu);
 
                 if (list == null) {
-                    list = new ArrayList<FutureProcessingUnitInstance>();
-                    futureRelocationPerProcessingUnit.put(pu, list);
+                    throw new IllegalStateException("endpoint for pu " + pu.getName() + " has already been destroyed.");
                 }
 
                 final Iterator<FutureProcessingUnitInstance> iterator = list.iterator();
@@ -462,7 +478,8 @@ public class RebalancingSlaEnforcement implements
 
                      Machine source = sortedMachines.get(sourceIndex);
 
-                     if (isConflictingOperationInProgress(source, maximumNumberOfRelocationsPerMachine)) {
+                     if (isConflictingOperationInProgress(source, 1)) {
+                         // number of primaries on machine might be skewed.
                          conflict = true;
                          logger.debug("Cannot restart a primary instance from machine " + ToStringHelper.machineToString(source)
                                  + " since a conflicting relocation is already in progress.");
@@ -537,7 +554,7 @@ public class RebalancingSlaEnforcement implements
                          }
 
                         logger.info("Restarting " + ToStringHelper.puInstanceToString(candidateInstance) + " "
-                                + "and an instance on machine " + ToStringHelper.machineToString(target) + " should be elected to primary");
+                                + "instance on machine " + ToStringHelper.machineToString(source) + " so that machine " + ToStringHelper.machineToString(target) + " would have more primary instances.");
                         return 
                             RebalancingUtils.restartProcessingUnitInstanceAsync(
                                     candidateInstance, 
@@ -552,10 +569,11 @@ public class RebalancingSlaEnforcement implements
              
              return null;
             }
-            
-            
-
         };
+        
+        endpoints.put(pu,endpoint);
+        futureRelocationPerProcessingUnit.put(pu, new ArrayList<FutureProcessingUnitInstance>());
+        return endpoint;
     }
 
     /**
@@ -677,14 +695,63 @@ public class RebalancingSlaEnforcement implements
             }
         }
 
-        return concurrentRelocationsInMachine > maximumNumberOfConcurrentRelocationsPerMachine;
+        return concurrentRelocationsInMachine >= maximumNumberOfConcurrentRelocationsPerMachine;
     }
 
-    public void destroyEndpoint(ProcessingUnit id) {
-        destroyed = true;
+    public void destroyEndpoint(ProcessingUnit pu) {
+        futureRelocationPerProcessingUnit.remove(pu);
+        endpoints.remove(pu);
     }
 
     @SuppressWarnings("serial")
     class ConflictingOperationInProgressException extends Exception {
+    }
+    
+    private void validateNotDisposed(ProcessingUnit pu) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+        
+        if (isProcessingUnitDisposed(pu)) {
+            
+            throw new ServiceLevelAgreementEnforcementEndpointDestroyedException();
+        }
+    }
+    
+    private boolean isProcessingUnitDisposed(ProcessingUnit pu) {
+        
+        if (pu == null) {
+            throw new IllegalArgumentException("pu cannot be null");
+        }
+        return  !endpoints.containsKey(pu) ||
+                futureRelocationPerProcessingUnit.get(pu) == null;
+    }
+    
+    private ProcessingUnit getEndpointsWithSameContainersZoneAs(ProcessingUnit pu) {
+        for (ProcessingUnit endpointPu : this.endpoints.keySet()) {
+            if (getContainerZone(endpointPu).equals(getContainerZone(pu))) {
+                return endpointPu;
+            }
+        }
+        return null;
+    }
+    
+    private ProcessingUnit getEndpointsWithSameNameAs(ProcessingUnit pu) {
+        for (ProcessingUnit endpointPu : this.endpoints.keySet()) {
+            if (endpointPu.getName().equals(pu.getName())) {
+                return endpointPu;
+            }
+        }
+        return null;
+    }
+    
+    private String getContainerZone(ProcessingUnit pu) {
+        String[] zones = pu.getRequiredZones();
+        if (zones.length == 0) {
+            throw new IllegalArgumentException("Elastic Processing Unit must have exactly one (container) zone. " + pu.getName() + " has been deployed with no zones defined.");
+        }
+        
+        if (zones.length > 1) {
+            throw new IllegalArgumentException("Elastic Processing Unit must have exactly one (container) zone. " + pu.getName() + " has been deployed with " + zones.length + " zones : "  + Arrays.toString(zones));
+        }
+        
+        return zones[0];
     }
 }
