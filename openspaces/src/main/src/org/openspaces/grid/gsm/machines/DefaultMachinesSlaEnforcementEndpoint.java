@@ -3,8 +3,6 @@ package org.openspaces.grid.gsm.machines;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -13,10 +11,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsa.GridServiceAgent;
-import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
@@ -24,6 +19,14 @@ import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirment;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
+/**
+ * Logic that decides werther to start a new machine machine or stop an existing machine
+ * based on the specified SLA policy.
+ * 
+ * @author itaif
+ * @see MachinesSlaEnforcement - creates this endpoint
+ * @see MachinesSlaPolicy - defines the sla policy for this endpoint
+ */
 public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEndpoint {
 
     private static final Log logger = LogFactory.getLog(DefaultMachinesSlaEnforcementEndpoint.class);
@@ -32,25 +35,21 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
     private static final long STOP_AGENT_TIMEOUT_SECONDS = 10*60;
     
     private final ProcessingUnit pu;
-    private final InternalAdmin admin;
-        
+
+    // state that tracks managed grid service agents, agents to be started and agents marked for shutdown.
     private final List<GridServiceAgent> agentsStarted;
     private final List<FutureGridServiceAgents> futureAgents;
     private final List<GridServiceAgent> agentsPendingShutdown;
     
+    // flag indicating that destroyed() was called
     private boolean destroyed;
     
-    public DefaultMachinesSlaEnforcementEndpoint(Admin admin, ProcessingUnit pu, Collection<GridServiceAgent> agents) {
-        
-        if (admin == null) {
-        	throw new IllegalArgumentException("admin cannot be null.");
-        }
+    public DefaultMachinesSlaEnforcementEndpoint(ProcessingUnit pu, Collection<GridServiceAgent> agents) {
         
         if (pu == null) {
             throw new IllegalArgumentException("pu cannot be null.");
         }
         
-        this.admin = (InternalAdmin) admin;
         this.pu = pu;
         this.destroyed = false;
         
@@ -67,19 +66,7 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
         return agentsStarted.toArray(new GridServiceAgent[agentsStarted.size()]);
     }
 
-    private List<GridServiceAgent> getGridServiceAgentsSortManagementComponentsLast() {
-        List<GridServiceAgent> agents = Arrays.asList(getGridServiceAgents());
-        Collections.sort(agents,new Comparator<GridServiceAgent>() {
-
-            public int compare(GridServiceAgent agent1, GridServiceAgent agent2) {
-                int numberOfManagementComponents1 = getNumberOfChildProcesses(agent1) - getNumberOfChildContainers(agent1);
-                int numberOfManagementComponents2 = getNumberOfChildProcesses(agent2) - getNumberOfChildContainers(agent2);
-                return numberOfManagementComponents1 - numberOfManagementComponents2;
-            }
-        });
-        return agents;
-    }
-    
+        
     public GridServiceAgent[] getGridServiceAgentsPendingShutdown() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
         validateNotDestroyed();
         
@@ -196,7 +183,7 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 
 			// mark agents for shutdown if there are not enough of them (scale in)
 			// give priority to agents that do not host a GSM/LUS since we want to evacuate those last.
-			for (GridServiceAgent agent : getGridServiceAgentsSortManagementComponentsLast()) {
+			for (GridServiceAgent agent : MachinesSlaUtils.sortGridServiceAgentsByManagementComponentsLast(getGridServiceAgents())) {
 				int machineMemory = getMemoryInMB(agent);
 				double machineCpu = getCpu(agent);
 				if (surplusMemory >= machineMemory && surplusCpu >= machineCpu && surplusMachines > 0) {
@@ -344,7 +331,7 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
             
             final GridServiceAgent agent = iterator.next();
             
-            int numberOfChildProcesses = getNumberOfChildProcesses(agent);
+            int numberOfChildProcesses = MachinesSlaUtils.getNumberOfChildProcesses(agent);
             
             if (!agent.isRunning()) {
                 logger.info("Agent machine " + agent.getMachine().getHostAddress() + " is confirmed to be shutdown.");
@@ -357,21 +344,6 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
             }
         }
         
-    }
-
-    private int getNumberOfChildProcesses(final GridServiceAgent agent) {
-        int numberOfChildProcesses = agent.getProcessesDetails().getProcessDetails().length;
-        return numberOfChildProcesses;
-    }
-
-    private int getNumberOfChildContainers(final GridServiceAgent agent) {
-        int numberOfContainers = 0;
-        for (final GridServiceContainer container : admin.getGridServiceContainers()) {
-            if (container.getGridServiceAgent() != null && container.getGridServiceAgent().equals(agent)) {
-                numberOfContainers++;
-            }
-        }
-        return numberOfContainers;
     }
 
     private void cleanFutureAgents() {

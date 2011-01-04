@@ -75,7 +75,7 @@ public class MachinesSlaEnforcement implements
         // that does not implement start/stop, but rather just implements getallmachines
         //
         MachinesSlaEnforcementEndpoint endpoint = 
-            new DefaultMachinesSlaEnforcementEndpoint(admin, pu, agents);
+            new DefaultMachinesSlaEnforcementEndpoint(pu, agents);
         endpoints.put(pu, endpoint);
         return endpoint;
     }
