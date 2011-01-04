@@ -294,7 +294,9 @@ public class ESMImpl<x> extends ServiceBeanAdapter implements ESM, ProcessingUni
     public void processingUnitRemoved(ProcessingUnit processingUnit) {
         try {
             ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.remove(processingUnit.getName());
-            beanServer.destroy();
+            if (beanServer != null) {
+                beanServer.destroy();
+            }
         }
         catch(Exception e) {
             logger.log(Level.SEVERE, "Failed to destroy ScaleBeanServer for pu " + processingUnit.getName(),e);
