@@ -152,7 +152,7 @@ public class CpuUtilizationAlertBean implements AlertBean,
                 AlertFactory factory = new AlertFactory();
                 factory.name(ALERT_NAME);
                 factory.groupUid(groupUid);
-                factory.description("CPU crossed below a " + highThreshold + "% threshold, for a period of "
+                factory.description("CPU crossed below a " + lowThreshold + "% threshold, for a period of "
                         + TimeUtil.format(config.getMeasurementPeriod()) + ", with an average CPU of " + NUMBER_FORMAT.format(cpuAvg) + "%");
                 factory.severity(AlertSeverity.WARNING);
                 factory.status(AlertStatus.RESOLVED);

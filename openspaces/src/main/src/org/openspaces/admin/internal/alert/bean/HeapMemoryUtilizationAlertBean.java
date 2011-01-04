@@ -160,7 +160,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
                 factory.name(ALERT_NAME);
                 factory.groupUid(groupUid);
                 factory.description(AlertBeanUtils.getGridComponentShortName(event.getVirtualMachine())
-                        + "Heap memory crossed below a " + highThreshold + "% threshold, for a period of "
+                        + "Heap memory crossed below a " + lowThreshold + "% threshold, for a period of "
                         + getPeriodOfTime(event) + ", with an average memory of " + NUMBER_FORMAT.format(memoryAvg)
                         + "%");
                 factory.severity(AlertSeverity.WARNING);

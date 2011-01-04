@@ -156,7 +156,7 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
                 AlertFactory factory = new AlertFactory();
                 factory.name(ALERT_NAME);
                 factory.groupUid(groupUid);
-                factory.description("Memory crossed below a " + highThreshold + "% threshold, for a period of "
+                factory.description("Memory crossed below a " + lowThreshold + "% threshold, for a period of "
                         + getPeriodOfTime(event) + ", with an average memory of " + NUMBER_FORMAT.format(memoryAvg) + "%");
                 factory.severity(AlertSeverity.WARNING);
                 factory.status(AlertStatus.RESOLVED);
