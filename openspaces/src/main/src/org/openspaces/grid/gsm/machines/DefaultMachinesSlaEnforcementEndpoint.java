@@ -130,11 +130,11 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 		cleanAgentsMarkedForShutdown(sla.getMachineProvisioning());
 		cleanFutureAgents();
 
-		if (futureAgents.size() > 0 && agentsPendingShutdown.size() > 0) {
+		if (!futureAgents.isEmpty() && !agentsPendingShutdown.isEmpty()) {
 		    throw new IllegalStateException("Cannot have both agents pending to be started and agents pending shutdown.");
 		}
 		
-		boolean slaReached = futureAgents.size() == 0 && agentsPendingShutdown.size() == 0;
+		boolean slaReached = futureAgents.isEmpty() && agentsPendingShutdown.isEmpty();
 		
 		long targetMemory = sla.getMemoryCapacityInMB();
 		double targetCpu = sla.getCpu();
@@ -214,7 +214,7 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 			}
 		}
 
-		else if (futureAgents.size() == 0 && 
+		else if (futureAgents.isEmpty() && 
 		        (agentsStarted.size() - agentsPendingShutdown.size() < sla.getMinimumNumberOfMachines())) {
 		    
 		    logger.info("Considering to start more machines to reach required minimum number of machines: " + 
@@ -243,24 +243,36 @@ public class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforce
 		    }
 		}
 		
-		else if (agentsPendingShutdown.size() == 0 && 
-                (agentsStarted.size() + futureAgents.size() < sla.getMinimumNumberOfMachines())) {
+		else if (agentsPendingShutdown.isEmpty() && 
+                (agentsStarted.size()  < sla.getMinimumNumberOfMachines())) {
 		    
-		    logger.info("Considering to start more machines to reach required minimum number of machines:" + 
-                    agentsStarted.size() + " machine agents started, " +
-                    futureAgents.size() + " machine agents are planned to be started, " +
-                    sla.getMinimumNumberOfMachines() + " is the required minimum number of machines."
-		    );
+		    int machineShortage = sla.getMinimumNumberOfMachines() - agentsStarted.size();
 		    
-		    // scale out to get to the minimum number of agents
-		    int machineShortage = sla.getMinimumNumberOfMachines() - (agentsStarted.size() + futureAgents.size()); 
-            this.futureAgents.add(
-                    sla.getMachineProvisioning().startMachinesAsync(
-                        new CapacityRequirements(
-                                new NumberOfMachinesCapacityRequirement(machineShortage)),
-                        START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
-            slaReached = false;
-            logger.info(machineShortage+ " new machine(s) is scheduled to be started in order to reach the minimum of " + sla.getMinimumNumberOfMachines() + " machines.");
+		 // take into account expected machines into shortage calculate
+            for (FutureGridServiceAgents future : this.futureAgents) {
+                
+                int expectedNumberOfMachines = future.getCapacityRequirements().getRequirement(NumberOfMachinesCapacityRequirement.class).getNumberOfMahines();
+                if (expectedNumberOfMachines == 0) {
+                    throw new ConflictingOperationInProgressException();
+                }
+                machineShortage -= expectedNumberOfMachines;
+            }
+
+            if (machineShortage > 0) {
+		    
+                // scale out to get to the minimum number of agents
+    		     
+                this.futureAgents.add(
+                        sla.getMachineProvisioning().startMachinesAsync(
+                            new CapacityRequirements(
+                                    new NumberOfMachinesCapacityRequirement(machineShortage)),
+                            START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
+                slaReached = false;
+                logger.info(machineShortage + " " + 
+                        "new machine(s) is scheduled to be started in order to "+
+                        "reach the minimum of " + sla.getMinimumNumberOfMachines() + " " +
+                        "machines.");
+		    }
 		}
 		
 		else if (existingMemory < targetMemory || existingCpu < targetCpu) {
