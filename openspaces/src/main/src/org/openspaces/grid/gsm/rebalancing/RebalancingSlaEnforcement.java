@@ -20,7 +20,6 @@ import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.grid.esm.ToStringHelper;
-import org.openspaces.grid.gsm.machines.DefaultMachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
@@ -39,7 +38,7 @@ import com.gigaspaces.cluster.activeelection.SpaceMode;
 public class RebalancingSlaEnforcement implements
         ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, RebalancingSlaEnforcementEndpoint> {
 
-    private static final Log logger = LogFactory.getLog(DefaultMachinesSlaEnforcementEndpoint.class);
+    private static final Log logger = LogFactory.getLog(RebalancingSlaEnforcement.class);
 
     private static final int RELOCATION_TIMEOUT_FAILURE_SECONDS = 3600; // one hour
     private static final int RELOCATION_TIMEOUT_FAILURE_FORGET_SECONDS = 3600; // one hour
