@@ -67,7 +67,7 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
     public ContainersSlaEnforcementEndpoint createEndpoint(final ProcessingUnit pu)
         throws ServiceLevelAgreementEnforcementEndpointAlreadyExistsException {
         
-        if (!isProcessingUnitDisposed(pu)) {
+        if (!isEndpointDestroyed(pu)) {
             throw new IllegalStateException("Cannot initialize a new ContainersSlaEnforcementEndpoint for pu " + pu.getName() +" since an endpoint for the pu already exists.");
         }
         
@@ -153,7 +153,7 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
     }
     
     private GridServiceContainer[] getContainers(ProcessingUnit pu) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
-        validateNotDisposed(pu);   
+        validateEndpointNotDestroyed(pu);   
         
         List<GridServiceContainer> containers = ContainersSlaUtils.getContainersByZone(getContainerZone(pu),admin);
         for (GridServiceContainer container : containersMarkedForShutdownPerProcessingUnit.get(pu)) {
@@ -164,7 +164,7 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
 
     
     private boolean enforceSla(ProcessingUnit pu, ContainersSlaPolicy sla) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
-        validateNotDisposed(pu);
+        validateEndpointNotDestroyed(pu);
         if (sla == null) {
            throw new IllegalArgumentException("sla cannot be null");
         }
@@ -188,7 +188,7 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
     }
 
     private GridServiceContainer[] getContainersPendingProcessingUnitRelocation(ProcessingUnit pu) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
-        validateNotDisposed(pu);
+        validateEndpointNotDestroyed(pu);
         List<GridServiceContainer> containers = containersMarkedForShutdownPerProcessingUnit.get(pu);
         return containers.toArray(new GridServiceContainer[containers.size()]);
     }
@@ -347,15 +347,15 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
             futureContainersPerProcessingUnit.get(pu).size() == 0;
     }
 
-    private void validateNotDisposed(ProcessingUnit pu) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+    private void validateEndpointNotDestroyed(ProcessingUnit pu) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
  
-        if (isProcessingUnitDisposed(pu)) {
+        if (isEndpointDestroyed(pu)) {
             
             throw new ServiceLevelAgreementEnforcementEndpointDestroyedException();
         }
     }
     
-    private boolean isProcessingUnitDisposed(ProcessingUnit pu) {
+    private boolean isEndpointDestroyed(ProcessingUnit pu) {
         
         if (pu == null) {
             throw new IllegalArgumentException("pu cannot be null");

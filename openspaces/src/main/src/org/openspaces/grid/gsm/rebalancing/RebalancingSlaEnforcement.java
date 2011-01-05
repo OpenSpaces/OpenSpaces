@@ -67,7 +67,7 @@ public class RebalancingSlaEnforcement implements
             throw new IllegalStateException("Processing Unit must have exactly one container zone defined.");
         }
 
-        if (!isProcessingUnitDisposed(pu)) {
+        if (!isEndpointDestroyed(pu)) {
             throw new IllegalStateException("Cannot initialize a new ContainersSlaEnforcementEndpoint for pu " + pu.getName() +" since an endpoint for the pu already exists.");
         }
         
@@ -96,7 +96,7 @@ public class RebalancingSlaEnforcement implements
                     throw new IllegalArgumentException("sla cannot be null");
                 }
 
-                validateNotDisposed(pu);
+                validateEndpointNotDestroyed(pu);
                 
                 String zone = pu.getRequiredZones()[0];
 
@@ -706,15 +706,15 @@ public class RebalancingSlaEnforcement implements
     class ConflictingOperationInProgressException extends Exception {
     }
     
-    private void validateNotDisposed(ProcessingUnit pu) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+    private void validateEndpointNotDestroyed(ProcessingUnit pu) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
         
-        if (isProcessingUnitDisposed(pu)) {
+        if (isEndpointDestroyed(pu)) {
             
             throw new ServiceLevelAgreementEnforcementEndpointDestroyedException();
         }
     }
     
-    private boolean isProcessingUnitDisposed(ProcessingUnit pu) {
+    private boolean isEndpointDestroyed(ProcessingUnit pu) {
         
         if (pu == null) {
             throw new IllegalArgumentException("pu cannot be null");
