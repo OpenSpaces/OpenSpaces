@@ -34,6 +34,14 @@ private final ManualCapacityScaleConfig config;
     }
    
     /**
+     * @see ManualCapacityScaleConfig#setCpuCapacity(double) 
+     */
+    public ManualCapacityScaleConfigurer cpuCapacity(double cpuCores) {
+        config.setCpuCapacity(cpuCores);
+        return this;
+    }
+   
+    /**
      * @see MaxNumberOfContainersScaleConfig#setMaxNumberOfContainers(int)
      */
     public ManualCapacityScaleConfigurer maxNumberOfContainers(int maxNumberOfContainers) {

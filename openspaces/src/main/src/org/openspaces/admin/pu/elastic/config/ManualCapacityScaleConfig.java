@@ -25,6 +25,8 @@ public class ManualCapacityScaleConfig
     private static final String STRATEGY_NAME = "scale-strategy.manual-memory";
     private static final String MEMORY_CAPACITY_MEGABYTES_KEY = "memory-capacity-megabytes";
     private static final int MEMORY_CAPACITY_MEGABYTES_DEFAULT = 0;
+    private static final String CPU_CAPACITY_CORES_KEY = "cpu-capacity-cores";
+    private static final double CPU_CAPACITY_CORES_DEFAULT = 0.0;
     private StringProperties properties;
     
     /**
@@ -48,7 +50,18 @@ public class ManualCapacityScaleConfig
     public int getMemoryCapacityInMB() {
         return properties.getInteger(MEMORY_CAPACITY_MEGABYTES_KEY, MEMORY_CAPACITY_MEGABYTES_DEFAULT);
     }
-    
+
+    /**
+     * Specifies the total CPU cores for the processing unit.
+     */
+    public void setCpuCapacity(double cpuCores) {
+        properties.putDouble(CPU_CAPACITY_CORES_KEY, cpuCores);
+    }
+
+    public double getCpuCapacity() {
+        return properties.getDouble(CPU_CAPACITY_CORES_KEY, CPU_CAPACITY_CORES_DEFAULT);
+    }
+
     public void setMinNumberOfContainers(int minNumberOfContainers) {
         ScaleStrategyConfigUtils.setMinNumberOfContainers(properties, minNumberOfContainers);
     }
