@@ -20,8 +20,6 @@ import org.openspaces.grid.gsm.strategy.ManualCapacityScaleStrategyBean;
 public class ManualCapacityScaleConfig 
         implements MinNumberOfContainersScaleConfig,
                    MaxNumberOfContainersScaleConfig,
-                   MinNumberOfContainersPerMachineScaleConfig,
-                   MaxNumberOfContainersPerMachineScaleConfig,
                    BeanConfig {
 
     private static final String STRATEGY_NAME = "scale-strategy.manual-memory";
@@ -40,7 +38,6 @@ public class ManualCapacityScaleConfig
         this.properties = new StringProperties(properties);
     }
 
-    
     /**
      * Specifies the total memory capacity of the processing unit.
      */
@@ -60,28 +57,12 @@ public class ManualCapacityScaleConfig
         ScaleStrategyConfigUtils.setMaxNumberOfContainers(properties, maxNumberOfContainers);
     }
 
-    public void setMinNumberOfContainersPerMachine(int minNumberOfContainersPerMachine) {
-        ScaleStrategyConfigUtils.setMinNumberOfContainersPerMachine(properties, minNumberOfContainersPerMachine);
-    }
-    
-    public void setMaxNumberOfContainersPerMachine(int maxNumberOfContainersPerMachine) {
-        ScaleStrategyConfigUtils.setMaxNumberOfContainersPerMachine(properties, maxNumberOfContainersPerMachine);
-    }
-
     public int getMinNumberOfContainers() {
         return ScaleStrategyConfigUtils.getMinNumberOfContainers(properties);
     }
 
     public int getMaxNumberOfContainers() {
         return ScaleStrategyConfigUtils.getMaxNumberOfContainers(properties);
-    }
-
-    public int getMaxNumberOfContainersPerMachine() {
-        return ScaleStrategyConfigUtils.getMaxNumberOfContainersPerMachine(properties);
-    }
-
-    public int getMinNumberOfContainersPerMachine() {
-        return ScaleStrategyConfigUtils.getMinNumberOfContainersPerMachine(properties);
     }
 
     public void setPollingIntervalSeconds(int seconds) {
@@ -118,7 +99,5 @@ public class ManualCapacityScaleConfig
    
     public String toString() {
         return this.properties.toString();
-    }
-
-    
+    }  
 }
