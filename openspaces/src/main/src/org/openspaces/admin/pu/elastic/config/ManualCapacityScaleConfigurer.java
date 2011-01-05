@@ -32,23 +32,7 @@ private final ManualCapacityScaleConfig config;
         config.setMemoryCapacityInMB((int)unit.toMegaBytes(memory));
         return this;
     }
-        
-    /**
-     * @see MaxNumberOfContainersPerMachineScaleConfig#setMaxNumberOfContainersPerMachine(int)
-     */
-    public ManualCapacityScaleConfigurer maxNumberOfContainersPerMachine(int maxNumberOfContainersPerMachine) {
-        config.setMaxNumberOfContainersPerMachine(maxNumberOfContainersPerMachine);
-        return this;
-    }
-
-    /**
-     * @see MinNumberOfContainersPerMachineScaleConfig#setMinNumberOfContainersPerMachine(int)
-     */
-    public ManualCapacityScaleConfigurer minNumberOfContainersPerMachine(int minNumberOfContainersPerMachine) {
-        config.setMinNumberOfContainersPerMachine(minNumberOfContainersPerMachine);
-        return this;
-    }
-
+   
     /**
      * @see MaxNumberOfContainersScaleConfig#setMaxNumberOfContainers(int)
      */
