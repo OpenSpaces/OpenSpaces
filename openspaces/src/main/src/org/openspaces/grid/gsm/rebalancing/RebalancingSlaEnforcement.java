@@ -470,6 +470,14 @@ public class RebalancingSlaEnforcement implements
                      // since the array is sorted there is no point in continuing the search
                      break;
                  }
+                 
+                 if (isConflictingOperationInProgress(target, 1)) {
+                     // number of primaries on machine might be skewed.
+                     conflict = true;
+                     logger.debug("Cannot restart a primary instance whos backup is on machine " + ToStringHelper.machineToString(target)
+                             + " since a conflicting relocation is already in progress.");
+                     continue;
+                 }
 
                  for (int sourceIndex = sortedMachines.size() - 1; 
                       sourceIndex > targetIndex ; 
