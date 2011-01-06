@@ -171,7 +171,7 @@ public class StoreManager extends AbstractStoreManager {
                 result = (IEntryPacket) edata;
             } else {
                 final ISpaceProxy proxy = (ISpaceProxy) getConfiguration().getSpace();
-                final ITypeDesc typeDescriptor = proxy.getDirectProxy().getTypeManager().getTypeDesc(cm.getDescribedType().getName());                                
+                final ITypeDesc typeDescriptor = proxy.getDirectProxy().getTypeManager().getTypeDescByName(cm.getDescribedType().getName());                                
                 final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);
                 ITemplatePacket template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);
                 result = (IEntryPacket) proxy.read(template, _transaction, 0, readModifier);                
@@ -203,7 +203,7 @@ public class StoreManager extends AbstractStoreManager {
         ClassMetaData cm = (ClassMetaData)sm.getMetaData();
         Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);        
         final IJSpace space = getConfiguration().getSpace();
-        final ITypeDesc typeDescriptor = ((ISpaceProxy) space).getDirectProxy().getTypeManager().getTypeDesc(cm.getDescribedType().getName());
+        final ITypeDesc typeDescriptor = ((ISpaceProxy) space).getDirectProxy().getTypeManager().getTypeDescByName(cm.getDescribedType().getName());
         final ITemplatePacket template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);                      
         try {        
             // Read object from space                
@@ -262,7 +262,7 @@ public class StoreManager extends AbstractStoreManager {
                 // Remove object from space
                 final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);
                 final ISpaceProxy proxy = (ISpaceProxy) space;                              
-                final ITypeDesc typeDescriptor = proxy.getDirectProxy().getTypeManager().getTypeDesc(sm.getMetaData().getDescribedType().getName());
+                final ITypeDesc typeDescriptor = proxy.getDirectProxy().getTypeManager().getTypeDescByName(sm.getMetaData().getDescribedType().getName());
                 final Object routing = sm.fetch(typeDescriptor.getRoutingPropertyId());                             
                 final ITemplatePacket template = TemplatePacketFactory.createIdPacket(ids[0], routing, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);                     
                 int result = proxy.clear(template, _transaction, 0);
