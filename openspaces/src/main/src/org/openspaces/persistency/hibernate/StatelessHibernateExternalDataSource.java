@@ -39,7 +39,6 @@ import com.gigaspaces.datasource.BulkDataPersister;
 import com.gigaspaces.datasource.BulkItem;
 import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.DataSourceException;
-import com.gigaspaces.datasource.PartialUpdateBulkItem;
 import com.gigaspaces.datasource.SQLDataProvider;
 import com.j_spaces.core.client.SQLQuery;
 
@@ -215,20 +214,19 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
     
   
     private void executePartialUpdate(StatelessSession session, BulkItem bulkItem) {
-        PartialUpdateBulkItem updateBulkItem = (PartialUpdateBulkItem)bulkItem;
         if (logger.isTraceEnabled()) {
-            logger.trace("Partial Update Entry [" + updateBulkItem.toString() + "]");
+            logger.trace("Partial Update Entry [" + bulkItem.toString() + "]");
         }
 
-        String hql = getPartialUpdateHQL(updateBulkItem);
+        String hql = getPartialUpdateHQL(bulkItem);
 
         Query query = session.createQuery(hql);
 
-        for (Map.Entry<String, Object> updateEntry : updateBulkItem.getUpdatedValues().entrySet()) {
+        for (Map.Entry<String, Object> updateEntry : bulkItem.getItemValues().entrySet()) {
 
             query.setParameter(updateEntry.getKey(), updateEntry.getValue());
         }
-        query.setParameter("id_" +updateBulkItem.getIdPropertyName() ,updateBulkItem.getIdPropertyValue());
+        query.setParameter("id_" +bulkItem.getIdPropertyName() ,bulkItem.getIdPropertyValue());
         query.executeUpdate();
     }
 
@@ -302,9 +300,8 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
                 criteria.setProjection(Projections.rowCount());
                 return ((Number) criteria.uniqueResult()).intValue() > 0;
             case BulkItem.PARTIAL_UPDATE:
-                PartialUpdateBulkItem partialUpdateBulkItem = (PartialUpdateBulkItem)bulkItem;
-                criteria = session.createCriteria(partialUpdateBulkItem.getTypeName());
-                criteria.add(Restrictions.idEq(partialUpdateBulkItem.getIdPropertyValue()));
+                criteria = session.createCriteria(bulkItem.getTypeName());
+                criteria.add(Restrictions.idEq(bulkItem.getIdPropertyValue()));
                 criteria.setProjection(Projections.rowCount());
                 return ((Number) criteria.uniqueResult()).intValue() > 0;
            default:

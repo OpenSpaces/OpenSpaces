@@ -16,12 +16,12 @@
 
 package org.openspaces.persistency.hibernate;
 
-import com.gigaspaces.datasource.BulkItem;
-import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.datasource.DataSourceException;
-import com.gigaspaces.datasource.ManagedDataSource;
-import com.gigaspaces.datasource.PartialUpdateBulkItem;
-import com.gigaspaces.datasource.hibernate.SessionFactoryBuilder;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,12 +33,11 @@ import org.openspaces.persistency.hibernate.iterator.HibernateProxyRemoverIterat
 import org.openspaces.persistency.patterns.ManagedDataSourceEntriesProvider;
 import org.openspaces.persistency.support.ConcurrentMultiDataIterator;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import com.gigaspaces.datasource.BulkItem;
+import com.gigaspaces.datasource.DataIterator;
+import com.gigaspaces.datasource.DataSourceException;
+import com.gigaspaces.datasource.ManagedDataSource;
+import com.gigaspaces.datasource.hibernate.SessionFactoryBuilder;
 
 /**
  * A base class for Hibernate based external data source implementations.
@@ -318,36 +317,20 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
     }
 
     protected boolean isManaged(BulkItem bulkItem) {
-        switch (bulkItem.getOperation()) {
-            case BulkItem.WRITE:
-            case BulkItem.UPDATE:
-            case BulkItem.REMOVE:
-                Object entry = bulkItem.getItem();
-                if (!isManagedEntry(entry.getClass().getName())) {
-                    if (logger.isTraceEnabled()) {
-                        logger.trace("Entry [" + entry + "] is not managed, filtering it out");
-                    }
-                    return false;
-                }
-                break;
-            case BulkItem.PARTIAL_UPDATE:
-                String  typeName = ((PartialUpdateBulkItem)bulkItem).getTypeName();
-                if (!isManagedEntry(typeName)) {
-                    if (logger.isTraceEnabled()) {
-                        logger.trace("Entry [" + typeName + ":" + ((PartialUpdateBulkItem)bulkItem).getIdPropertyValue()+ "] is not managed, filtering it out");
-                    }
-                    return false;
-                }
-                break;
-                default:
-                    throw new IllegalArgumentException("Unknown BulkItem operation [" + bulkItem.getOperation() +"]");
+
+        String  typeName = bulkItem.getTypeName();
+        if (!isManagedEntry(typeName)) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("Entry [" + typeName + ":" + bulkItem.getIdPropertyValue()+ "] is not managed, filtering it out");
+            }
+            return false;
         }
-    
+
         return true;
     }
 
-    protected String getPartialUpdateHQL(PartialUpdateBulkItem updateBulkItem) {
-        Map<String, Object> updatedValues = updateBulkItem.getUpdatedValues();
+    protected String getPartialUpdateHQL(BulkItem updateBulkItem) {
+        Map<String, Object> updatedValues = updateBulkItem.getItemValues();
     
         StringBuilder updateQueryBuilder = new StringBuilder();
         updateQueryBuilder.append("update " + updateBulkItem.getTypeName() + " set ");

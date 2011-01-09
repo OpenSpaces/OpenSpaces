@@ -1,5 +1,7 @@
 package org.openspaces.itest.persistency.support;
 
+import java.util.Map;
+
 import com.gigaspaces.datasource.BulkItem;
 
 /**
@@ -22,5 +24,21 @@ public class MockBulkItem implements BulkItem {
 
     public short getOperation() {
         return operation;
+    }
+
+    public String getTypeName() {
+        return null;
+    }
+
+    public String getIdPropertyName() {
+        return null;
+    }
+
+    public Object getIdPropertyValue() {
+        return null;
+    }
+
+    public Map<String, Object> getItemValues() {
+        return null;
     }
 }
