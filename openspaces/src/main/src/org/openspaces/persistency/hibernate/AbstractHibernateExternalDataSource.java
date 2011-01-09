@@ -321,7 +321,7 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
         String  typeName = bulkItem.getTypeName();
         if (!isManagedEntry(typeName)) {
             if (logger.isTraceEnabled()) {
-                logger.trace("Entry [" + typeName + ":" + bulkItem.getIdPropertyValue()+ "] is not managed, filtering it out");
+                logger.trace("Entry [" + typeName + ":" + bulkItem+ "] is not managed, filtering it out");
             }
             return false;
         }
