@@ -14,21 +14,30 @@ public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
 
     //private String machineZone;
 
-    private int reservedInMB;
-
-    private int maxNumberOfContainersPerMachine;
+    private int reservedMemoryPerMachineInMB;
 
     private GridServiceAgent[] gridServiceAgents;
+  
+    private long memoryInMB;
+    
+    private double cpu;
 
     private int minimumNumberOfMachines;
-
-   
-    public void setTargetNumberOfContainers(int containers) {
-        this.containers = containers;
+    
+    public void setCpuCapacity(double cpu) {
+        this.cpu = cpu;
     }
     
-    public int getTargetNumberOfContainers() {
-        return this.containers;
+    public double getCpuCapacity() {
+        return this.cpu;
+    }
+    
+    public void setMemoryCapacityInMB(long memory) {
+        this.memoryInMB = memory;
+    }
+    
+    public long getMemoryCapacityInMB() {
+        return this.memoryInMB;
     }
     
     public void setNewContainerConfig(GridServiceContainerConfig config) {
@@ -39,23 +48,14 @@ public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
         return this.newContainerConfig;
     }
 
-    public int getReservedPhysicalMemoryPerMachineInMB() {
-        return reservedInMB;
+    public int getReservedMemoryCapacityPerMachineInMB() {
+        return reservedMemoryPerMachineInMB;
     }
     
-    public void setReservedPhysicalMemoryPerMachineInMB(int reservedInMB) {
-        this.reservedInMB =reservedInMB ; 
+    public void setReservedMemoryCapacityPerMachineInMB(int reservedInMB) {
+        this.reservedMemoryPerMachineInMB =reservedInMB ; 
     }
     
-    public int getMaximumNumberOfContainersPerMachine() {
-        return maxNumberOfContainersPerMachine;
-    }
-    
-    public void setMaximumNumberOfContainersPerMachine(int maxNumberOfContainersPerMachine) {
-        this.maxNumberOfContainersPerMachine = maxNumberOfContainersPerMachine;
-    }
-    
-
     public GridServiceAgent[] getGridServiceAgents() {
         return this.gridServiceAgents;
     }
@@ -78,9 +78,10 @@ public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
                ((ContainersSlaPolicy)other).newContainerConfig.equals(this.newContainerConfig) &&
                //((ContainersAdminServiceLevelAgreement)other).machineZone.equals(this.machineZone) &&
                //((ContainersAdminServiceLevelAgreement)other).machineIsolation.equals(this.machineIsolation) &&
-               ((ContainersSlaPolicy)other).reservedInMB == this.reservedInMB &&
-               ((ContainersSlaPolicy)other).maxNumberOfContainersPerMachine == this.maxNumberOfContainersPerMachine &&
-               ((ContainersSlaPolicy)other).minimumNumberOfMachines == this.minimumNumberOfMachines;
+               ((ContainersSlaPolicy)other).reservedMemoryPerMachineInMB == this.reservedMemoryPerMachineInMB &&
+               ((ContainersSlaPolicy)other).minimumNumberOfMachines == this.minimumNumberOfMachines &&
+               ((ContainersSlaPolicy)other).memoryInMB == this.memoryInMB &&
+               ((ContainersSlaPolicy)other).cpu == this.cpu;
     }
 
 }

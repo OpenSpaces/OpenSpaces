@@ -16,7 +16,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.DeploymentStatus;
@@ -380,46 +379,32 @@ public class RebalancingUtils {
             return false;
         }
         
+        double averagePrimariesPerCpuCore = 
+            getAverageNumberOfPrimaryInstancesPerCpuCore(pu,machines);
         
-        boolean result = true;
-        
-        int numberOfPrimaryInstances = pu.getNumberOfInstances();
-        int numberOfContainers = getContainersOnMachines(pu,machines).length;
-        
-        double expectedAverageNumberOfPrimariesPerContainer = 1.0 * numberOfPrimaryInstances / numberOfContainers;
+        boolean foundMachineWithSurplusPrimaries = false;
+        boolean foundMachineWithDeficitPrimaries = false;
         
         for (Machine machine : machines) {
-            GridServiceContainers gridServiceContainers = machine.getGridServiceContainers();
-            int numberOfContainersOnMachine = gridServiceContainers.getSize();
-
-            double expectedAverageNumberOfServicesPerMachine = 
-                expectedAverageNumberOfPrimariesPerContainer * numberOfContainersOnMachine;
             
-            int numberOfInstancesPerMachineUpperBound = (int) Math.ceil(expectedAverageNumberOfServicesPerMachine);
-            int numberOfInstancesPerMachineLowerBound = (int) Math.floor(expectedAverageNumberOfServicesPerMachine);
-            
-            int puNumberOfInstances = 0;
-            
-            for (GridServiceContainer container : gridServiceContainers) {
-                for (ProcessingUnitInstance puInstance : container.getProcessingUnitInstances()) {
-                    if (puInstance.getProcessingUnit().equals(pu) &&
-                        puInstance.getSpaceInstance().getMode() == SpaceMode.PRIMARY) {
-                       puNumberOfInstances += 1; 
-                    }
-                }
+            if (RebalancingUtils.getAverageNumberOfPrimaryInstancesMinusOnePerCpuCore(pu,machine) 
+                    >= averagePrimariesPerCpuCore) {
+                foundMachineWithSurplusPrimaries = true;
             }
-            
-            if (puNumberOfInstances < numberOfInstancesPerMachineLowerBound || 
-                puNumberOfInstances > numberOfInstancesPerMachineUpperBound) {
-                result = false;
-                break;
-            }
-            
+            else if (RebalancingUtils.getAverageNumberOfPrimaryInstancesPlusOnePerCpuCore(pu,machine) 
+                    <= averagePrimariesPerCpuCore) {
+                foundMachineWithDeficitPrimaries = true;
+            }            
         }
-        return result;
+        return 
+        // everything is balanced
+        (!foundMachineWithSurplusPrimaries && !foundMachineWithDeficitPrimaries) ||
+        
+        //not exactly balanced, but there is nothing we can do about it
+        (!foundMachineWithSurplusPrimaries &&  foundMachineWithDeficitPrimaries) ||
+        ( foundMachineWithSurplusPrimaries && !foundMachineWithDeficitPrimaries);
     }
 
-    
     private static boolean isProcessingUnitIntact(ProcessingUnit pu, Machine[] machines) {
         return isProcessingUnitIntact(pu, getContainersOnMachines(pu,machines));
     }
@@ -565,34 +550,38 @@ public class RebalancingUtils {
         return sortedContainers;
     }
 
-
-    public static List<Machine> sortAllMachinesByNumberOfPrimaryInstancesAboveMinimum(
+    public static List<Machine> sortMachinesByNumberOfPrimaryInstancesPerCpuCore(
             final ProcessingUnit pu,
-            final GridServiceContainer[] approvedContainers) {
+            final Machine[] machines) {
         
         final List<Machine> sortedMachines = 
-                new ArrayList<Machine>(Arrays.asList(
-                        RebalancingUtils.getMachinesHostingContainers(approvedContainers)));
+                new ArrayList<Machine>(Arrays.asList(machines));
         
         Collections.sort(sortedMachines,
                 new Comparator<Machine>() {
 
                 public int compare(final Machine m1, final Machine m2) {
-                    return getNormalizedNumberOfPrimaryInstances(m1)
-                            - getNormalizedNumberOfPrimaryInstances(m2);
+                    double delta = getNumberOfPrimaryInstancesPerCpuCore(pu,m1) - getNumberOfPrimaryInstancesPerCpuCore(pu,m2);
+                    if (delta < 0) {
+                        return -1;
+                    }
+                    else if (delta > 0) { 
+                        return 1;
+                    }
+                    else {
+                        return 0;
+                    }
                 }
-                
-                private int getNormalizedNumberOfPrimaryInstances(final Machine machine) {
-                    return getNumberOfPrimaryInstancesOnMachine(machine, pu) -
-                           getPlannedMinimumNumberOfPrimaryInstancesForMachine(machine, approvedContainers, pu);
-                }
-
             });
             return sortedMachines;
         }
 
+    public static double getNumberOfPrimaryInstancesPerCpuCore(ProcessingUnit pu, Machine machine) {
+        return getNumberOfPrimaryInstancesOnMachine(pu, machine) *1.0 / getNumberOfCpuCores(machine);
+    }
 
-    public static int getNumberOfPrimaryInstancesOnMachine(Machine machine, ProcessingUnit pu) {
+
+    public static int getNumberOfPrimaryInstancesOnMachine(ProcessingUnit pu, Machine machine) {
         int numberOfPrimaryInstances = 0;
         for (GridServiceContainer container : machine.getGridServiceContainers()) {
             for (ProcessingUnitInstance instance : container.getProcessingUnitInstances(pu.getName())) {
@@ -603,50 +592,7 @@ public class RebalancingUtils {
             }
         }
         return numberOfPrimaryInstances;
-    }
-    
-    public static int getPlannedMinimumNumberOfPrimaryInstancesForMachine(
-            Machine machine,
-            GridServiceContainer[] approvedContainers, ProcessingUnit pu) {
-        
-        return (int) Math.floor( 
-                getPlannedAverageNumberOfPrimaryInstancesForMachine(
-                        machine,
-                        approvedContainers,
-                        pu));
-    }
-
-    public static int getPlannedMaximumNumberOfPrimaryInstancesForMachine(
-            Machine machine,
-            GridServiceContainer[] approvedContainers, ProcessingUnit pu) {
-        
-        return (int) Math.ceil( 
-                getPlannedAverageNumberOfPrimaryInstancesForMachine(
-                        machine,
-                        approvedContainers,
-                        pu));
-    }
-    
-    private static double getPlannedAverageNumberOfPrimaryInstancesForMachine(
-            Machine machine,
-            GridServiceContainer[] approvedContainers, 
-            ProcessingUnit pu) {
-        
-        List<GridServiceContainer> approvedContainersAsList=
-            Arrays.asList(approvedContainers);
-        
-        
-            
-        int numberOfApprovedContainersOnMachine=0;
-        for (GridServiceContainer container : machine.getGridServiceContainers()) {
-            if (approvedContainersAsList.contains(container)) {
-                numberOfApprovedContainersOnMachine++;
-            }
-        }
-        
-        return pu.getNumberOfInstances() *
-                1.0*numberOfApprovedContainersOnMachine/approvedContainers.length;
-    }
+    }    
 
     public static FutureProcessingUnitInstance restartProcessingUnitInstanceAsync(
             ProcessingUnitInstance candidateInstance, int relocationTimeoutFailureSeconds, TimeUnit seconds) {
@@ -659,5 +605,54 @@ public class RebalancingUtils {
 
 
     
+    private static double getAverageNumberOfPrimaryInstancesPerCpuCore(ProcessingUnit pu, Machine[] machines) {
+        
+        if (machines.length == 0) {
+            throw new IllegalArgumentException("list of machines cannot be empty.");
+        }
+        int numberOfCpuCores = 0;
+        for (Machine machine : machines) {
+            numberOfCpuCores += getNumberOfCpuCores(machine);
+        }
+        return 1.0 * pu.getNumberOfInstances() / numberOfCpuCores;
+    }
+    
+    public static double getAverageNumberOfPrimaryInstancesPerCpuCore(
+            ProcessingUnit pu,
+            GridServiceContainer[] approvedContainers) {
+                
+        Machine[] machines = getMachinesHostingContainers(approvedContainers);
+        return getAverageNumberOfPrimaryInstancesPerCpuCore(pu, machines);
+    }
 
+    public static int getNumberOfCpuCores(Machine machine) {
+        int numberOfCpuCores = machine.getOperatingSystem().getDetails().getAvailableProcessors();
+        if (numberOfCpuCores <= 0) {
+            throw new IllegalStateException("number of cpu cores on machine " + ToStringHelper.machineToString(machine) + " must be a positive number.");
+        }
+        return numberOfCpuCores;
+    }
+    
+    public static double getAverageNumberOfPrimaryInstancesMinusOnePerCpuCore(ProcessingUnit pu, Machine machine) {
+        
+        int numberOfPrimaryInstances = RebalancingUtils.getNumberOfPrimaryInstancesOnMachine(pu, machine);
+        int numberOfCpuCores = RebalancingUtils.getNumberOfCpuCores(machine);
+        
+        double averagePrimariesPerCoreAfterActiveElection = 
+            (numberOfPrimaryInstances-1) * 1.0 /  numberOfCpuCores;
+        
+        return averagePrimariesPerCoreAfterActiveElection;
+    }
+    
+    public static double getAverageNumberOfPrimaryInstancesPlusOnePerCpuCore(ProcessingUnit pu, Machine machine) {
+        
+        int numberOfPrimaryInstances = RebalancingUtils.getNumberOfPrimaryInstancesOnMachine(pu, machine);
+        int numberOfCpuCores = RebalancingUtils.getNumberOfCpuCores(machine);
+        
+        double averagePrimariesPerCoreAfterActiveElection = 
+            (numberOfPrimaryInstances+1) * 1.0 /  numberOfCpuCores;
+        
+        return averagePrimariesPerCoreAfterActiveElection;
+    }
+    
 }

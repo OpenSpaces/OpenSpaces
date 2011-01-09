@@ -28,6 +28,12 @@ import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
+/**
+ * Enforces the MachinesSlaPolicy of all processing units by starting an enforcement endpoint for each PU.
+ * The state is shared by all endpoints to detect conflicting operations.  
+ * @author itaif
+ *
+ */
 public class MachinesSlaEnforcement implements
         ServiceLevelAgreementEnforcement<MachinesSlaPolicy, ProcessingUnit, MachinesSlaEnforcementEndpoint> {
 
@@ -61,11 +67,15 @@ public class MachinesSlaEnforcement implements
             throw new ServiceLevelAgreementEnforcementEndpointAlreadyExistsException();
         }
 
+        // check pu zone matches container zones.
         if (pu.getRequiredZones().length != 1) {
             throw new IllegalStateException("PU has to have exactly 1 zone defined");
         }
 
         String zone = pu.getRequiredZones()[0];
+        
+        // Recover the endpoint state.
+        // List all machines that have containers that match the specified pu (zone)
         Set<GridServiceAgent> agents = new HashSet<GridServiceAgent>();
         
         for (GridServiceContainer container : admin.getGridServiceContainers()) {
@@ -129,7 +139,11 @@ public class MachinesSlaEnforcement implements
             agentsPendingShutdownPerProcessingUnit.get(pu) == null;
     }
     
-    private Set<GridServiceAgent> getAllUsedGridServiceAgents() {
+    /**
+     * Lists all grid service agents from all processing units including those that are pending shutdown.
+     * This method is unique since it reads state from all endpoints.
+     */
+    private Set<GridServiceAgent> getAllUsedAgents() {
         
         Set<GridServiceAgent> agents = new HashSet<GridServiceAgent>();
         
@@ -148,8 +162,8 @@ public class MachinesSlaEnforcement implements
     }
     
     /**
-     * Logic that decides werther to start a new machine machine or stop an existing machine
-     * based on the specified SLA policy.
+     * Logic that decides whether to start a new machine machine or stop an existing machine
+     * in order to enforce the specified SLA policy.
      * 
      * @author itaif
      * @see MachinesSlaEnforcement - creates this endpoint
@@ -200,7 +214,12 @@ public class MachinesSlaEnforcement implements
             }
             
             if (sla.getMachineProvisioning() == null) {
-                sla.setMachineProvisioning(getDefaultMachineProvisioningForProcessingUnit(pu));
+                NonBlockingElasticMachineProvisioning defaultMachineProvisioning = getDefaultMachineProvisioningForProcessingUnit(pu);
+                sla.setMachineProvisioning(defaultMachineProvisioning);
+            }
+            
+            if (sla.getContainerMemoryCapacityInMB() <= 0) {
+                throw new IllegalArgumentException("Container memory capacity must be defined.");
             }
             
             try {
@@ -235,13 +254,13 @@ public class MachinesSlaEnforcement implements
             double existingCpu = 0;
             
             for (GridServiceAgent agent : getAgentsStarted()) {
-                existingMemory += MachinesSlaUtils.getMemoryInMB(agent);
-                existingCpu += MachinesSlaUtils.getCpu(agent);
+                existingMemory += MachinesSlaUtils.getMemoryInMB(agent.getMachine(), sla);
+                existingCpu += MachinesSlaUtils.getCpu(agent.getMachine());
             }
             
             for (GridServiceAgent agent : getAgentsPendingShutdown()) {
-                existingMemory += MachinesSlaUtils.getMemoryInMB(agent);
-                existingCpu += MachinesSlaUtils.getCpu(agent);
+                existingMemory += MachinesSlaUtils.getMemoryInMB(agent.getMachine(), sla);
+                existingCpu += MachinesSlaUtils.getCpu(agent.getMachine());
             }
 
             if (existingMemory > targetMemory && 
@@ -270,8 +289,8 @@ public class MachinesSlaEnforcement implements
                 while (iterator.hasNext()) {
 
                     GridServiceAgent agent = iterator.next();
-                    int machineMemory = MachinesSlaUtils.getMemoryInMB(agent);
-                    double machineCpu = MachinesSlaUtils.getCpu(agent);
+                    long machineMemory = MachinesSlaUtils.getMemoryInMB(agent.getMachine(), sla);
+                    double machineCpu = MachinesSlaUtils.getCpu(agent.getMachine());
                     if (surplusMemory >= machineMemory &&
                         surplusCpu >= machineCpu &&
                         surplusMachines > 0) {
@@ -289,8 +308,8 @@ public class MachinesSlaEnforcement implements
                 // mark agents for shutdown if there are not enough of them (scale in)
                 // give priority to agents that do not host a GSM/LUS since we want to evacuate those last.
                 for (GridServiceAgent agent : getGridServiceAgents()) {
-                    int machineMemory = MachinesSlaUtils.getMemoryInMB(agent);
-                    double machineCpu = MachinesSlaUtils.getCpu(agent);
+                    long machineMemory = MachinesSlaUtils.getMemoryInMB(agent.getMachine(), sla);
+                    double machineCpu = MachinesSlaUtils.getCpu(agent.getMachine());
                     if (surplusMemory >= machineMemory && surplusCpu >= machineCpu && surplusMachines > 0) {
 
                         // mark machine for shutdown unless it is a management
@@ -429,6 +448,10 @@ public class MachinesSlaEnforcement implements
             return slaReached;
         }
 
+        /**
+         * Kill agents marked for shutdown that no longer manage containers. 
+         * @param machineProvisioning
+         */
         private void cleanAgentsMarkedForShutdown(NonBlockingElasticMachineProvisioning machineProvisioning) {
             
             for (GridServiceAgent agent : 
@@ -454,6 +477,9 @@ public class MachinesSlaEnforcement implements
             }
         }
 
+        /**
+         * Move future agents that completed startup, from the futureAgents list to the agentsStarted list. 
+         */
         private void cleanFutureAgents() {
             final Iterator<FutureGridServiceAgents> iterator = getFutureAgents().iterator();
             while (iterator.hasNext()) {
@@ -461,34 +487,43 @@ public class MachinesSlaEnforcement implements
                 
                 if (future.isDone()) {
                 
+                    // remove future from futureAgents list since it is done.
                     iterator.remove();
                     
                     Throwable exception = null;
                     try {
                     
-                        Set<GridServiceAgent> newAgents = 
-                            new HashSet<GridServiceAgent>(
-                                    Arrays.asList(
+                        // create a set of new agents
+                        // throws an exception if anything went wrong.
+                        Set<GridServiceAgent> newAgents = new HashSet<GridServiceAgent>(Arrays.asList(
                                             future.get()));
                         
-                        Set<GridServiceAgent> usedAgents = getAllUsedGridServiceAgents();
-                        usedAgents.retainAll(newAgents);
-                        if (!usedAgents.isEmpty()) {
+                        // create a set of agents that are both in the new and already started agents.
+                        Set<GridServiceAgent> duplicateAgents = getAllUsedAgents();
+                        duplicateAgents.retainAll(newAgents);
+                        
+                        // the duplicate list should be empty.
+                        if (!duplicateAgents.isEmpty()) {
                             
-                            // remove all agents that are already in use
-                            newAgents.remove(usedAgents);
-                            List<String> usedMachines = new ArrayList<String>();
-                            for (GridServiceAgent usedAgent : usedAgents) {
-                                usedMachines.add(usedAgent.getMachine().getHostAddress());
+                            // remove all new agents that are duplicate
+                            newAgents.remove(duplicateAgents);
+                            
+                            if (logger.isWarnEnabled()) {
+                                List<String> usedMachines = new ArrayList<String>();
+                                for (GridServiceAgent usedAgent : duplicateAgents) {
+                                    usedMachines.add(usedAgent.getMachine().getHostAddress());
+                                }
+                                
+                                logger.warn(
+                                        "Machine provisioning for " + pu.getName() + " "+
+                                        "has provided the following machines, which are already in use: "+
+                                        Arrays.toString(usedMachines.toArray(new String[usedMachines.size()])) +
+                                        "This violating machines have been ignored, "+
+                                        "but it should not have happened in the first place.");
                             }
-                            
-                            logger.warn(
-                                    "Machine provisioning for " + pu.getName() + " "+
-                                    "has provided the following machines, which are already in use: "+
-                                    Arrays.toString(usedMachines.toArray(new String[usedMachines.size()])) +
-                                    "This violating machines have been ignored, but it should not have happened in the first place."); 
                         }
                         
+                        //update started agents list with the list of new agents
                         getAgentsStarted().addAll(newAgents);
                         if (logger.isInfoEnabled()) {
                             for (GridServiceAgent agent : newAgents) {
@@ -503,7 +538,9 @@ public class MachinesSlaEnforcement implements
                     
                     if (exception != null) {
                         final String errorMessage = "Failed to start agent on new machine";
-                        logger.warn(errorMessage , exception);
+                        if (logger.isWarnEnabled()) {
+                            logger.warn(errorMessage , exception);
+                        }
                     }
                 }
             }
@@ -529,11 +566,10 @@ public class MachinesSlaEnforcement implements
 
     /**
      * This is the default machine provisioning implementation which is tightly coupled
-     * with the state hold by the various endpoints.
+     * with the state hold by the various endpoints. It reads and modifies the shared state used by all endpoints.
      * 
-     * It provides a PollingFuture which lazily allocates the required capacity when
-     * polled for the first time.
-     * 
+     * It basically looks for agents that are not used by any endpoint and returns it wrapped as a FutureMachine.
+     *  
      * @return
      */
     private NonBlockingElasticMachineProvisioning getDefaultMachineProvisioningForProcessingUnit(ProcessingUnit pu) {
@@ -547,6 +583,10 @@ public class MachinesSlaEnforcement implements
             this.pu = pu;
         }
         
+        /**
+         * @return a future that when called looks for an empty grid service agent that is not used by any PU.
+         * relies on the fact that get() can only be called from a single thread and not from multiple concurrent threads.
+         */
         public FutureGridServiceAgents startMachinesAsync(
                 final CapacityRequirements capacityRequirements, 
                 final long duration, final TimeUnit unit) {
@@ -605,20 +645,21 @@ public class MachinesSlaEnforcement implements
                         return; // idempotent, already allocated
                     }
                     
-                    Set<GridServiceAgent> agents = new HashSet<GridServiceAgent>();
+                    Set<GridServiceAgent> newAgents = new HashSet<GridServiceAgent>();
+                    Set<GridServiceAgent> agentsUsedByPus = getAllUsedAgents();
                     
-                    Set<GridServiceAgent> usedAgents = getAllUsedGridServiceAgents();
-                    while (!MachinesSlaUtils.isCapacityRequirementsMet(agents,capacityRequirements)) {
+                    // add one machine at a time until the sla is met or until there are no more machines left. 
+                    while (!MachinesSlaUtils.isCapacityRequirementsMet(newAgents, capacityRequirements)) {
                         
-                        GridServiceAgent agent = tryAllocateFreeGridServiceAgent(usedAgents);
+                        GridServiceAgent agent = findFreeAgent(agentsUsedByPus);
                         if (agent == null) {
                             break;
                         }
-                        agents.add(agent);
-                        usedAgents.add(agent);
+                        newAgents.add(agent);
+                        agentsUsedByPus.add(agent); // so we wont allocate this machine again. 
                     }
                     
-                    if (exception == null && agents.isEmpty()) {
+                    if (exception == null && newAgents.isEmpty()) {
                         
                         exception = new ExecutionException(
                                 new AdminException(
@@ -627,7 +668,7 @@ public class MachinesSlaEnforcement implements
                                         "on a new machine."));
                     }
                     
-                    allocatedAgents = agents.toArray(new GridServiceAgent[agents.size()]);
+                    allocatedAgents = newAgents.toArray(new GridServiceAgent[newAgents.size()]);
                 }
 
                 public Date getTimestamp() {
@@ -640,16 +681,9 @@ public class MachinesSlaEnforcement implements
             };
         }
 
-        protected GridServiceAgent tryAllocateFreeGridServiceAgent(Set<GridServiceAgent> usedAgents) {
-            for (GridServiceAgent agent : admin.getGridServiceAgents()) {
-                if (!usedAgents.contains(agent) &&
-                    !MachinesSlaUtils.isManagementRunningOnGridServiceAgent(agent)) {
-                    return agent;
-                }
-            }
-            return null;
-        }
-
+        /**
+         * remove the specified agent from the started agents list.
+         */
         public void stopMachineAsync(GridServiceAgent agent, long duration, TimeUnit unit) {
             // special case where we do not actually kill the agent.
             logger.info(
@@ -661,6 +695,22 @@ public class MachinesSlaEnforcement implements
         
         private List<GridServiceAgent> getAgentsPendingShutdown() {
             return agentsPendingShutdownPerProcessingUnit.get(pu);
+        }
+        
+
+        /**
+         * finds a grid service agent that is not in the specified list and not used by GSM/LUS
+         * @param usedAgents
+         * @return agent if found, or null if no free machines exist.
+         */
+        private GridServiceAgent findFreeAgent(Set<GridServiceAgent> usedAgents) {
+            for (GridServiceAgent agent : admin.getGridServiceAgents()) {
+                if (!usedAgents.contains(agent) &&
+                    !MachinesSlaUtils.isManagementRunningOnGridServiceAgent(agent)) {
+                    return agent;
+                }
+            }
+            return null;
         }
     }
 

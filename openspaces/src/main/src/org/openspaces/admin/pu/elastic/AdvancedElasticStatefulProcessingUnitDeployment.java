@@ -29,16 +29,16 @@ public class AdvancedElasticStatefulProcessingUnitDeployment extends ElasticStat
         super(processingUnit);
     }
     
-    public AdvancedElasticStatefulProcessingUnitDeployment numberOfBackups(int numberOfBackups) {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.numberOfBackups(numberOfBackups);
+    public AdvancedElasticStatefulProcessingUnitDeployment numberOfBackupsPerPartition(int numberOfBackupsPerPartition) {
+        return (AdvancedElasticStatefulProcessingUnitDeployment) super.numberOfBackupsPerPartition(numberOfBackupsPerPartition);
     }
     
-    public AdvancedElasticStatefulProcessingUnitDeployment numberOfInstances(int numberOfInstances) {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.numberOfInstances(numberOfInstances);
+    public AdvancedElasticStatefulProcessingUnitDeployment numberOfPartitions(int numberOfPartitions) {
+        return (AdvancedElasticStatefulProcessingUnitDeployment) super.numberOfPartitions(numberOfPartitions);
     }
 
-    public AdvancedElasticStatefulProcessingUnitDeployment maxInstancesPerMachine(int maxInstancesPerMachine) {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.maxInstancesPerMachine(maxInstancesPerMachine);
+    public AdvancedElasticStatefulProcessingUnitDeployment maxParitionInstancesPerMachine(int maxInstancesPerMachine) {
+        return (AdvancedElasticStatefulProcessingUnitDeployment) super.maxParitionInstancesPerMachine(maxInstancesPerMachine);
     }
    
     public AdvancedElasticStatefulProcessingUnitDeployment scale(EagerScaleConfigurer beanConfig) {

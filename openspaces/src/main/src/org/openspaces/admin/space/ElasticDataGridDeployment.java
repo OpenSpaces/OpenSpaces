@@ -49,6 +49,11 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
         return this;
     }
     
+    public ElasticDataGridDeployment maxNumberOfCpuCores(int maxNumberOfCpuCores) {
+        deployment.maxNumberOfCpuCores(maxNumberOfCpuCores);
+        return this;
+    }
+    
     public ElasticDataGridDeployment scale(EagerScaleConfigurer strategy) {
         deployment.scale(strategy);
         return this;
@@ -171,4 +176,5 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
     public ElasticStatefulProcessingUnitDeployment toElasticStatefulProcessingUnitDeployment() {
        return deployment;
     }
+
 }

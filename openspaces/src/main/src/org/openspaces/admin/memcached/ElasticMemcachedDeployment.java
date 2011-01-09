@@ -51,6 +51,11 @@ public class ElasticMemcachedDeployment implements ElasticStatefulDeploymentTopo
         deployment.minMemoryCapacity(minMemoryCapacity);
         return this;
     }
+
+    public ElasticStatefulDeploymentTopology maxNumberOfCpuCores(int maxNumberOfCpuCores) {
+        deployment.maxNumberOfCpuCores(maxNumberOfCpuCores);
+        return this;
+    }
     
     public ElasticMemcachedDeployment scale(EagerScaleConfigurer strategy) {
         deployment.scale(strategy);
@@ -166,4 +171,5 @@ public class ElasticMemcachedDeployment implements ElasticStatefulDeploymentTopo
         deployment.machineProvisioning(config);
         return this;
     }
+
 }

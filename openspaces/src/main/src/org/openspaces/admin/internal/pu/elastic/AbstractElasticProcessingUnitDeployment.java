@@ -7,6 +7,7 @@ import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.bean.BeanConfigPropertiesManager;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.core.util.StringProperties;
 
 import com.gigaspaces.security.directory.User;
@@ -289,10 +290,21 @@ public abstract class AbstractElasticProcessingUnitDeployment {
      * @param config - the scale strategy bean configuration, or null to disable it.
      * @see ProcessingUnit#scale(org.openspaces.admin.pu.ElasticScaleStrategyConfig)
      */
-    private void enableBean(BeanConfigPropertiesManager propertiesManager, BeanConfig config) {
+    private static void enableBean(BeanConfigPropertiesManager propertiesManager, BeanConfig config) {
         propertiesManager.disableAllBeans();
         propertiesManager.setBeanConfig(config.getBeanClassName(), config.getProperties());
         propertiesManager.enableBean(config.getBeanClassName());
+    }
+    
+    protected ElasticMachineProvisioningConfig getMachineProvisioningConfig() {
+        ElasticMachineProvisioningConfig beanConfig = null;
+        String[] enabledBeans = this.machineProvisioningPropertiesManager.getEnabledBeansClassNames();
+        if (enabledBeans.length > 0) {
+            beanConfig = 
+                (ElasticMachineProvisioningConfig)
+                    this.machineProvisioningPropertiesManager.getBeanConfig(enabledBeans[0]);
+        }
+        return beanConfig;
     }
     
 }

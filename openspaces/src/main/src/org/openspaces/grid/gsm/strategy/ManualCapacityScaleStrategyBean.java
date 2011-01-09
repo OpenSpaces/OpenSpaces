@@ -60,7 +60,8 @@ public class ManualCapacityScaleStrategyBean
     
     // created by afterPropertiesSet()
     private ScheduledFuture<?> scheduledTask;
-    private int targetNumberOfContainers;
+
+    private long memoryInMB;
     private int minimumNumberOfMachines;
     private NonBlockingElasticMachineProvisioning machineProvisioning;
     
@@ -125,7 +126,12 @@ public class ManualCapacityScaleStrategyBean
         // calculate minimum number of machines
         minimumNumberOfMachines = calcMinNumberOfMachines(pu);
 
-        this.targetNumberOfContainers = calcTargetNumberOfContainers();
+        int targetNumberOfContainers = 
+            slaConfig.getMemoryCapacityInMB() > 0?
+                    calcTargetNumberOfContainers() :
+                    minimumNumberOfMachines;
+        
+        memoryInMB = targetNumberOfContainers * containersConfig.getMaximumJavaHeapSizeInMB();
         
         scheduledTask = 
         (admin).scheduleWithFixedDelayNonBlockingStateChange(
@@ -194,10 +200,6 @@ public class ManualCapacityScaleStrategyBean
 
     private int calcTargetNumberOfContainers() {
         
-        if (slaConfig.getMemoryCapacityInMB() <= 0) {
-            throw new BeanConfigurationException("The specified memory capacity " + slaConfig.getMemoryCapacityInMB() + "m cannot be negative or zero.");
-        }
-        
         double totalNumberOfInstances = pu.getTotalNumberOfInstances();
         double instanceCapacityInMB = slaConfig.getMemoryCapacityInMB()/totalNumberOfInstances;
         logger.info(
@@ -223,7 +225,9 @@ public class ManualCapacityScaleStrategyBean
                 "floor("+containerCapacityInMB+"/"+instanceCapacityInMB+") =" +
                 maxNumberOfInstancesPerContainer);
         
-        double targetNumberOfContainers = Math.ceil(totalNumberOfInstances/ maxNumberOfInstancesPerContainer);
+        int targetNumberOfContainers = (int) 
+                Math.ceil(totalNumberOfInstances/ maxNumberOfInstancesPerContainer);
+                
         logger.info(
                 "targetNumberOfContainers= "+
                 "ceil(totalNumberOfInstances/maxNumberOfInstancesPerContainer)= "+
@@ -270,17 +274,24 @@ public class ManualCapacityScaleStrategyBean
                     "decrease the memory capacity to " + recommendedMemoryCapacityInMB +"m");
         }
         
-        return (int) targetNumberOfContainers;
+        
+        if (targetNumberOfContainers == 0) {
+            throw new IllegalStateException("targetNumberOfContainers cannot be zero");
+        }
+        return targetNumberOfContainers;
     }
 
 
     private boolean enforceMachinesSla() {
         final MachinesSlaPolicy sla = new MachinesSlaPolicy();
         sla.setMachineProvisioning(machineProvisioning);
-        sla.setCpu(0); // TODO: slaConfig.getCpu()
-        long targetMemory = targetNumberOfContainers * containersConfig.getMaximumJavaHeapSizeInMB();
-        sla.setMemoryCapacityInMB(targetMemory);
+        sla.setCpuCapacity(slaConfig.getNumberOfCpuCores());
+        
+        sla.setMemoryCapacityInMB(memoryInMB);
         sla.setMinimumNumberOfMachines(minimumNumberOfMachines);
+        sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
+        sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
+        
         boolean reachedSla = machinesService.enforceSla(sla);
         
         if (reachedSla) {
@@ -290,7 +301,7 @@ public class ManualCapacityScaleStrategyBean
                 machinesAlertGroupUidPrefix,
                 "Machines Capacity SLA",
                 "Total machines memory for " + pu.getName() + " " + 
-                "has reached its target of " + targetMemory + "MB");
+                "has reached its target of " + memoryInMB + "MB");
         }
         else {
             fireAlert(
@@ -299,7 +310,7 @@ public class ManualCapacityScaleStrategyBean
                 containersAlertGroupUidPrefix,
                 "Machines Capacity SLA",
                 "Total machines memory for " + pu.getName() + " " + 
-                "is below the target "+ targetMemory + "MB");
+                "is below the target "+ memoryInMB + "MB");
         }
         
         return reachedSla;
@@ -309,11 +320,12 @@ public class ManualCapacityScaleStrategyBean
     private boolean enforceContainersSla() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
         
         final ContainersSlaPolicy sla = new ContainersSlaPolicy();
-        sla.setTargetNumberOfContainers(targetNumberOfContainers);
         sla.setNewContainerConfig(containersConfig);
         sla.setGridServiceAgents(machinesService.getGridServiceAgents());
         sla.setMinimumNumberOfMachines(minimumNumberOfMachines);
-        
+        sla.setCpuCapacity(slaConfig.getNumberOfCpuCores());
+        sla.setMemoryCapacityInMB(memoryInMB);
+        sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
         boolean reachedSla = containersService.enforceSla(sla);
         
         if (reachedSla) {
@@ -322,8 +334,10 @@ public class ManualCapacityScaleStrategyBean
                 AlertStatus.RESOLVED,
                 containersAlertGroupUidPrefix,
                 "Containers Capacity SLA",
-                "Target number of containers for " + pu.getName() + " " + 
-                "has been reached: " + targetNumberOfContainers);
+                "Contains capacity for " + pu.getName() + " " + 
+                "has been reached: " +
+                memoryInMB +" MB memory" +
+                (slaConfig.getNumberOfCpuCores()>0 ? " and " + slaConfig.getNumberOfCpuCores() +" cpu cores " : "" ));
         }
         else {
             fireAlert(
@@ -331,10 +345,10 @@ public class ManualCapacityScaleStrategyBean
                 AlertStatus.RAISED,
                 containersAlertGroupUidPrefix,
                 "Containers Capacity SLA",
-                "Target number of containers for " + pu.getName() + " " + 
-                "is " + targetNumberOfContainers + ". " +
-                "Current number of containers is " + 
-                containersService.getContainers().length);
+                "Contains capacity for " + pu.getName() + " " + 
+                "has not reached its sla. The sla is " + 
+                memoryInMB +" MB memory" +
+                (slaConfig.getNumberOfCpuCores()>0 ? " and " + slaConfig.getNumberOfCpuCores() +" cpu cores " : ""));
         }
         
         return reachedSla;

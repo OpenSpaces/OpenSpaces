@@ -54,11 +54,11 @@ public class ManualCapacityScaleConfig
     /**
      * Specifies the total CPU cores for the processing unit.
      */
-    public void setCpuCapacity(double cpuCores) {
+    public void setNumberOfCpuCores(double cpuCores) {
         properties.putDouble(CPU_CAPACITY_CORES_KEY, cpuCores);
     }
 
-    public double getCpuCapacity() {
+    public double getNumberOfCpuCores() {
         return properties.getDouble(CPU_CAPACITY_CORES_KEY, CPU_CAPACITY_CORES_DEFAULT);
     }
 
@@ -94,6 +94,14 @@ public class ManualCapacityScaleConfig
         ScaleStrategyConfigUtils.setMaximumNumberOfConcurrentRelocationsPerMachine(properties, maxNumberOfConcurrentRelocationsPerMachine);
     }
     
+    public int getReservedMemoryCapacityPerMachineInMB() {
+        return ScaleStrategyConfigUtils.getReservedMemoryCapacityPerMachineInMB(properties); 
+    }
+    
+    public void setReservedMemoryCapacityPerMachineInMB(int reservedInMB) {
+        ScaleStrategyConfigUtils.setReservedMemoryCapacityPerMachineInMB(properties, reservedInMB); 
+    }
+    
     public Map<String,String> getProperties() {
         return properties.getProperties();
     }
@@ -112,5 +120,5 @@ public class ManualCapacityScaleConfig
    
     public String toString() {
         return this.properties.toString();
-    }  
+    } 
 }

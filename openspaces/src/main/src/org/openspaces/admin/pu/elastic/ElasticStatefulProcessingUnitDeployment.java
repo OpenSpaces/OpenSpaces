@@ -39,9 +39,10 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     Map<String,String> scaleStrategy;
     private long maxMemoryCapacityMegabytes;
     private long minMemoryCapacityMegabytes;
-    private int numberOfBackups = 1;
-    private int numberOfInstances;
-    private int maxInstancesPerMachine = 1;
+    private int numberOfBackupInstancesPerPartition = 1;
+    private int numberOfPartitions;
+    private int maxPartitionInstancesPerMachine = 1;
+    private double maxNumberOfCpuCores = 1;
     
     /**
      * Constructs a stateful processing unit deployment based on the specified processing unit name (should
@@ -81,31 +82,36 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     }
     
     public ElasticStatefulProcessingUnitDeployment highlyAvailable(boolean highlyAvailable) {
-        numberOfBackups(highlyAvailable ? 1 : 0);
+        numberOfBackupsPerPartition(highlyAvailable ? 1 : 0);
         return this;
     }
     
     /**
      * Overrides the number of backup instances per partition.
      */
-    protected ElasticStatefulProcessingUnitDeployment numberOfBackups(int numberOfBackups) {
-        this.numberOfBackups = numberOfBackups;
+    protected ElasticStatefulProcessingUnitDeployment numberOfBackupsPerPartition(int numberOfBackupsPerPartition) {
+        this.numberOfBackupInstancesPerPartition = numberOfBackupsPerPartition;
         return this;
     }
     
     /**
      * Overrides the number of partition.
      */
-    protected ElasticStatefulProcessingUnitDeployment numberOfInstances(int numberOfInstances) {
-        this.numberOfInstances = numberOfInstances;
+    protected ElasticStatefulProcessingUnitDeployment numberOfPartitions(int numberOfPartitions) {
+        this.numberOfPartitions = numberOfPartitions;
         return this;
     }
 
     /**
      * Overrides the number of instances from the same partition per machine.
      */
-    protected ElasticStatefulProcessingUnitDeployment maxInstancesPerMachine(int maxInstancesPerMachine) {
-        this.maxInstancesPerMachine  = maxInstancesPerMachine;
+    protected ElasticStatefulProcessingUnitDeployment maxParitionInstancesPerMachine(int maxPartitionInstancesPerMachine) {
+        this.maxPartitionInstancesPerMachine  = maxPartitionInstancesPerMachine;
+        return this;
+    }
+    
+    public ElasticStatefulProcessingUnitDeployment maxNumberOfCpuCores(int maxNumberOfCpuCores) {
+        this.maxNumberOfCpuCores = maxNumberOfCpuCores;
         return this;
     }
     
@@ -213,14 +219,14 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
             this.minMemoryCapacityMegabytes = this.maxMemoryCapacityMegabytes;
         }
         
-        int numberOfInstances = this.numberOfInstances;
+        int numberOfInstances = this.numberOfPartitions;
         if (numberOfInstances == 0) {
-            numberOfInstances = calcNumberOfPartitionsFromMemoryRequirements();
+            numberOfInstances = Math.max(calcNumberOfPartitionsFromMemoryRequirements(),calcNumberOfPartitionsFromCpuRequirements());
         }
         
         deployment
-        .maxInstancesPerMachine(this.maxInstancesPerMachine)
-        .partitioned(numberOfInstances, this.numberOfBackups);
+        .maxInstancesPerMachine(this.maxPartitionInstancesPerMachine)
+        .partitioned(numberOfInstances, this.numberOfBackupInstancesPerPartition);
       
         return deployment;
     }
@@ -230,13 +236,18 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         long maximumJavaHeapSizeMegabytes = new GridServiceContainerConfig(super.getElasticProperties()).getMaximumJavaHeapSizeInMB();
                 
         if (maximumJavaHeapSizeMegabytes == 0) {
-            throw new IllegalStateException("-Xmx vmInputArgument is not defined.");    
+            throw new IllegalStateException("-Xmx CommandLineArgument is undefined.");    
         }
                 
         double totalNumberOfInstances = Math.ceil(((double)maxMemoryCapacityMegabytes)/maximumJavaHeapSizeMegabytes);
-        int numberOfPartitions = (int) Math.ceil(totalNumberOfInstances / (numberOfBackups+1));
+        int numberOfPartitions = (int) Math.ceil(totalNumberOfInstances / (numberOfBackupInstancesPerPartition+1));
                 
         return Math.max(1, numberOfPartitions);
     }
 
+    protected int calcNumberOfPartitionsFromCpuRequirements() {
+        int coresPerMachine = super.getMachineProvisioningConfig().getMinimumNumberOfCpuCoresPerMachine();
+        int maximumNumberOfActiveInstances =(int) Math.ceil(this.maxNumberOfCpuCores / coresPerMachine); 
+        return maximumNumberOfActiveInstances; 
+    }
 }

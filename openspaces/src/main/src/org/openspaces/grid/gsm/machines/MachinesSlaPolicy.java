@@ -8,8 +8,10 @@ public class MachinesSlaPolicy extends ServiceLevelAgreementPolicy {
     private double cpu;
     private NonBlockingElasticMachineProvisioning machineProvisioning;
     private int minimumNumberOfMachines;
+    private long reservedMemoryCapacityPerMachineInMB;
+    private long containerMemoryCapacityInMB;
     
-    public void setCpu(double cpu) {
+    public void setCpuCapacity(double cpu) {
         this.cpu = cpu;
     }
     
@@ -42,13 +44,29 @@ public class MachinesSlaPolicy extends ServiceLevelAgreementPolicy {
         this.minimumNumberOfMachines = minimumNumberOfMachines;
     }
     
+    public long getReservedMemoryCapacityPerMachineInMB() {
+        return reservedMemoryCapacityPerMachineInMB;
+    }
+    
+    public void setReservedMemoryCapacityPerMachineInMB(int reservedInMB) {
+        this.reservedMemoryCapacityPerMachineInMB =reservedInMB ; 
+    }
+
+    public void setContainerMemoryCapacityInMB(long containerMemoryCapacityInMB) {
+        this.containerMemoryCapacityInMB = containerMemoryCapacityInMB;       
+    }
+    
+    public long getContainerMemoryCapacityInMB() {
+        return this.containerMemoryCapacityInMB;
+    }
+    
     @Override
     public boolean equals(Object other) {
         return other instanceof MachinesSlaPolicy &&
         ((MachinesSlaPolicy)other).memoryInMB == this.memoryInMB &&
         ((MachinesSlaPolicy)other).cpu == this.cpu &&
+        ((MachinesSlaPolicy)other).reservedMemoryCapacityPerMachineInMB == this.reservedMemoryCapacityPerMachineInMB &&
+        ((MachinesSlaPolicy)other).containerMemoryCapacityInMB == this.containerMemoryCapacityInMB &&
         ((MachinesSlaPolicy)other).minimumNumberOfMachines == this.minimumNumberOfMachines;
     }
-    
-
 }

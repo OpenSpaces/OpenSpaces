@@ -21,7 +21,13 @@ import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
 import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
 import org.openspaces.grid.gsm.strategy.ScaleStrategyBean;
-
+/**
+ * Creates the Scalability Strategy bean servers, based on the specified elasticProperties.
+ * When the elasticProperties are modified the bean is restarted with the new properties.
+ * 
+ * @author itaif
+ *
+ */
 public class ScaleBeanServer {
 
     private final BeanServer<Bean> beanServer;

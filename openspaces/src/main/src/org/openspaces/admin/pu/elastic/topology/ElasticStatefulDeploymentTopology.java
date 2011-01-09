@@ -1,13 +1,13 @@
 package org.openspaces.admin.pu.elastic.topology;
 
-import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
-import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.CapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.CapacityScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.core.util.MemoryUnit;
 
 public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopology {
@@ -44,6 +44,11 @@ public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopo
      */
     ElasticStatefulDeploymentTopology minMemoryCapacity(String minMemoryCapacity);
 
+    /**
+     * Specifies an estimate for the maximum total number of cpu cores used by this processing unit.
+     */
+    ElasticStatefulDeploymentTopology maxNumberOfCpuCores(int maxNumberOfCpuCores);
+        
     /**
      * Specifies if the space should duplicate each information on two different machines.
      * If set to false then partition data is lost each time fail-over or scaling occurs.

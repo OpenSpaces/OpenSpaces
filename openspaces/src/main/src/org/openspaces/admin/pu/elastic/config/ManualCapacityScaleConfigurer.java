@@ -34,10 +34,10 @@ private final ManualCapacityScaleConfig config;
     }
    
     /**
-     * @see ManualCapacityScaleConfig#setCpuCapacity(double) 
+     * @see ManualCapacityScaleConfig#setNumberOfCpuCores(double) 
      */
-    public ManualCapacityScaleConfigurer cpuCapacity(double cpuCores) {
-        config.setCpuCapacity(cpuCores);
+    public ManualCapacityScaleConfigurer numberOfCpuCores(double cpuCores) {
+        config.setNumberOfCpuCores(cpuCores);
         return this;
     }
    
@@ -54,6 +54,11 @@ private final ManualCapacityScaleConfig config;
      */
     public ManualCapacityScaleConfigurer minNumberOfContainers(int minNumberOfContainers) {
         config.setMinNumberOfContainers(minNumberOfContainers);
+        return this;
+    }
+
+    public ManualCapacityScaleConfigurer reservedMemoryCapacityPerMachine(int memory, MemoryUnit unit) {
+        config.setReservedMemoryCapacityPerMachineInMB((int) unit.toMegaBytes(memory));
         return this;
     }
     

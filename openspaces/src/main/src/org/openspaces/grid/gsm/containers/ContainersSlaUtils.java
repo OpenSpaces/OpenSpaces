@@ -1,8 +1,15 @@
 package org.openspaces.grid.gsm.containers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -16,6 +23,9 @@ import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.machine.Machine;
+import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.core.util.MemoryUnit;
+import org.openspaces.grid.esm.ToStringHelper;
 
 public class ContainersSlaUtils {
 
@@ -157,6 +167,187 @@ public class ContainersSlaUtils {
     
     private static boolean isContainerMatchesZone(GridServiceContainer container, String zone) {
         return container.getZones().containsKey(zone);
+    }
+    
+    public static int getMachineShortage(
+            ContainersSlaPolicy sla,
+            Iterable<GridServiceContainer> containers) {
+               
+        return getFutureMachineShortage(sla, containers, new ArrayList<FutureGridServiceContainer>());
+    }
+
+    public static double getCpuCapacityShortage(
+            ContainersSlaPolicy sla,
+            Iterable<GridServiceContainer> containers) {
+        
+        return getFutureCpuCapacityShortage(sla,containers, new ArrayList<FutureGridServiceContainer>());
+    }
+
+    public static long getMemoryCapacityShortageInMB(
+            ContainersSlaPolicy sla,
+            Iterable<GridServiceContainer> containers) {
+        
+        return getFutureMemoryCapacityShortageInMB(sla, containers, new ArrayList<FutureGridServiceContainer>());
+    }
+   
+    
+    private static double getCpu(Machine machine) {
+        return machine.getOperatingSystem().getDetails().getAvailableProcessors();
+    }
+    
+    private static String getCommandLineArgumentRemovePrefix(GridServiceContainer container, String prefix) {
+        String[] commandLineArguments = container.getVirtualMachine().getDetails().getInputArguments();
+        String requiredArg = null;
+        for (final String arg : commandLineArguments) {
+            if (arg.startsWith(prefix)) {
+                requiredArg = arg;
+            }
+        }
+        
+        if (requiredArg != null) {
+            return requiredArg.substring(prefix.length());
+        }
+        return null;
+    }
+    
+    private static long getMemoryInMB(GridServiceContainer container) {
+        
+        String prefix = "-Xmx";
+        String xmxArgument = getCommandLineArgumentRemovePrefix(container,prefix);
+        if (xmxArgument == null) {
+            throw new IllegalStateException("Container " + ToStringHelper.gscToString(container) + " does not have an -Xmx commandline argument.");
+        }
+        return MemoryUnit.MEGABYTES.convert(xmxArgument);
+    }
+    
+    public static long getFutureMemoryCapacityShortageInMB(
+            ContainersSlaPolicy sla, 
+            Iterable<GridServiceContainer> containers,
+            Iterable<FutureGridServiceContainer> futureContainers) {
+        
+        long memoryShortageInMB = sla.getMemoryCapacityInMB();
+        
+        for (GridServiceContainer container : containers) {
+            memoryShortageInMB -= getMemoryInMB(container);
+        }
+        
+        for (FutureGridServiceContainer future : futureContainers) {
+            memoryShortageInMB -= future.getGridServiceContainerConfig().getMaximumJavaHeapSizeInMB();
+        }
+        return memoryShortageInMB;
+    }
+
+    public static double getFutureCpuCapacityShortage(
+            ContainersSlaPolicy sla, 
+            Iterable<GridServiceContainer> containers,
+            Iterable<FutureGridServiceContainer> futureContainers) {
+
+        double cpuShortage = sla.getCpuCapacity();
+        
+        for (Machine machine : getFutureMachinesHostingContainers(containers, futureContainers)) {
+            cpuShortage -= getCpu(machine);
+        }
+        
+        return cpuShortage;
+    }
+
+    private static Set<Machine> getFutureMachinesHostingContainers(Iterable<GridServiceContainer> containers,
+            Iterable<FutureGridServiceContainer> futureContainers) {
+        final Set<Machine> machines = new HashSet<Machine>();
+        for (final GridServiceContainer container : containers) {
+            machines.add(container.getMachine());
+        }
+        for (final FutureGridServiceContainer futureContainer : futureContainers) {
+            final GridServiceAgent agent = futureContainer.getGridServiceAgent();
+            if (agent.isDiscovered()) {
+                machines.add(agent.getMachine());
+            }
+        }
+        return machines;
+    }
+
+    public static int getFutureMachineShortage(
+            ContainersSlaPolicy sla, 
+            Iterable<GridServiceContainer> containers,
+            Iterable<FutureGridServiceContainer> futureContainers) {
+        return sla.getMinimumNumberOfMachines() - getFutureMachinesHostingContainers(containers, futureContainers).size();
+    }
+
+    /**
+     * Sorts the specified agents by the number of containers (from the specified containers) on each agent.
+     * @param agents
+     * @param containers
+     * @return the sorted agents list
+     */
+    public static List<GridServiceAgent> sortAgentsByNumberOfContainers(
+            GridServiceAgent[] agents, 
+            List<GridServiceContainer> containers) {
+
+        final Map<GridServiceAgent,Integer> numberOfContainersPerAgent = new HashMap<GridServiceAgent,Integer>();
+        for (GridServiceAgent agent: agents) {
+            numberOfContainersPerAgent.put(agent, 0);
+        }
+        for (GridServiceContainer container : containers) {
+            GridServiceAgent agent = container.getGridServiceAgent();
+            int count = numberOfContainersPerAgent.get(agent);
+            numberOfContainersPerAgent.put(agent, count+1);
+        }
+        
+        List<GridServiceAgent> sortedAgents = new ArrayList<GridServiceAgent>(Arrays.asList(agents));
+        Collections.sort(sortedAgents,new Comparator<GridServiceAgent>() {
+
+            public int compare(GridServiceAgent agent1, GridServiceAgent agent2) {
+                return numberOfContainersPerAgent.get(agent1) - numberOfContainersPerAgent.get(agent2);
+            }
+        });
+        
+        return sortedAgents;
+    }
+    
+    public static String getContainerZone(ProcessingUnit pu) {
+        String[] zones = pu.getRequiredZones();
+        if (zones.length == 0) {
+            throw new IllegalArgumentException("Elastic Processing Unit must have exactly one (container) zone. "
+                    + pu.getName() + " has been deployed with no zones defined.");
+        }
+
+        if (zones.length > 1) {
+            throw new IllegalArgumentException("Elastic Processing Unit must have exactly one (container) zone. "
+                    + pu.getName() + " has been deployed with " + zones.length + " zones : " + Arrays.toString(zones));
+        }
+
+        return zones[0];
+    }
+
+    public static ProcessingUnit findProcessingUnitWithSameZone(Set<ProcessingUnit> processingUnits, ProcessingUnit pu) {
+        for (final ProcessingUnit endpointPu : processingUnits) {
+            if (ContainersSlaUtils.getContainerZone(endpointPu).equals(ContainersSlaUtils.getContainerZone(pu))) {
+                return endpointPu;
+            }
+        }
+        return null;
+    }
+
+    public static ProcessingUnit findProcessingUnitWithSameName(Set<ProcessingUnit> processingUnits, ProcessingUnit pu) {
+        for (final ProcessingUnit endpointPu : processingUnits) {
+            if (endpointPu.getName().equals(pu.getName())) {
+                return endpointPu;
+            }
+        }
+        return null;
+    }
+
+    public static boolean isCapacityMet(ContainersSlaPolicy sla, Iterable<GridServiceContainer> containers) {
+        return ContainersSlaUtils.getMemoryCapacityShortageInMB(sla, containers) <= 0
+                && ContainersSlaUtils.getCpuCapacityShortage(sla, containers) <= 0
+                && ContainersSlaUtils.getMachineShortage(sla, containers) <= 0;
+    }
+
+    public static boolean isFutureCapacityMet(ContainersSlaPolicy sla, Iterable<GridServiceContainer> containers,
+            Iterable<FutureGridServiceContainer> futureContainers) {
+        return ContainersSlaUtils.getFutureMemoryCapacityShortageInMB(sla, containers, futureContainers) <= 0
+                && ContainersSlaUtils.getFutureCpuCapacityShortage(sla, containers, futureContainers) <= 0
+                && ContainersSlaUtils.getFutureMachineShortage(sla, containers, futureContainers) <= 0;
     }
 
 }

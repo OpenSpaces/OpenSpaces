@@ -3,11 +3,9 @@ package org.openspaces.grid.gsm.containers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -37,19 +35,21 @@ import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestr
  * @author itaif
  *
  */
-public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcement<ContainersSlaPolicy,ProcessingUnit,ContainersSlaEnforcementEndpoint> {
+public class ContainersSlaEnforcement implements
+        ServiceLevelAgreementEnforcement<ContainersSlaPolicy, ProcessingUnit, ContainersSlaEnforcementEndpoint> {
 
-    private static final int START_CONTAINER_TIMEOUT_FAILURE_SECONDS = 60;
+    private static final int START_CONTAINER_TIMEOUT_FAILURE_SECONDS = 600;
     private static final int START_CONTAINER_TIMEOUT_FAILURE_FORGET_SECONDS = 600;
 
     private static final Log logger = LogFactory.getLog(ContainersSlaEnforcement.class);
-    
+
+    // State shared by all endpoints.
     private final Map<ProcessingUnit, List<GridServiceContainer>> containersMarkedForShutdownPerProcessingUnit;
     private final Map<ProcessingUnit, List<FutureGridServiceContainer>> futureContainersPerProcessingUnit;
     private final List<FutureGridServiceContainer> failedFutureContainers;
 
     private final InternalAdmin admin;
-    private final Map<ProcessingUnit,ContainersSlaEnforcementEndpoint> endpoints;
+    private final Map<ProcessingUnit, ContainersSlaEnforcementEndpoint> endpoints;
 
     public ContainersSlaEnforcement(Admin admin) {
         this.admin = (InternalAdmin) admin;
@@ -61,83 +61,36 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
 
     /**
      * 
-     * @param zone - the container zone
-     * @return a service that continuously maintains the specified number of containers with the specified zone.
+     * @return a service that continuously maintains the specified number of containers for the
+     *         specified pu.
      */
     public ContainersSlaEnforcementEndpoint createEndpoint(final ProcessingUnit pu)
-        throws ServiceLevelAgreementEnforcementEndpointAlreadyExistsException {
-        
+            throws ServiceLevelAgreementEnforcementEndpointAlreadyExistsException {
+
         if (!isEndpointDestroyed(pu)) {
-            throw new IllegalStateException("Cannot initialize a new ContainersSlaEnforcementEndpoint for pu " + pu.getName() +" since an endpoint for the pu already exists.");
+            throw new IllegalStateException("Cannot initialize a new ContainersSlaEnforcementEndpoint for pu "
+                    + pu.getName() + " since an endpoint for the pu already exists.");
         }
-        
-        ProcessingUnit otherPu1 = getEndpointsWithSameNameAs(pu);
+
+        ProcessingUnit otherPu1 = ContainersSlaUtils.findProcessingUnitWithSameName(endpoints.keySet(), pu);
         if (otherPu1 != null) {
-            throw new IllegalStateException("Cannot initialize a new ContainersSlaEnforcementEndpoint for pu " + pu.getName() +" since an endpoint for a pu with the same name already exists.");
+            throw new IllegalStateException("Cannot initialize a new ContainersSlaEnforcementEndpoint for pu "
+                    + pu.getName() + " since an endpoint for a pu with the same name already exists.");
         }
-        
-        ProcessingUnit otherPu2 = getEndpointsWithSameContainersZoneAs(pu);
+
+        ProcessingUnit otherPu2 = ContainersSlaUtils.findProcessingUnitWithSameZone(endpoints.keySet(), pu);
         if (otherPu2 != null) {
-            throw new IllegalStateException("Cannot initialize a new ContainersSlaEnforcementEndpoint for pu " + pu.getName() +" since an endpoint for a pu with the same (containers) zone already exists: " + otherPu2.getName() );
+            throw new IllegalStateException("Cannot initialize a new ContainersSlaEnforcementEndpoint for pu "
+                    + pu.getName() + " since an endpoint for a pu with the same (containers) zone already exists: "
+                    + otherPu2.getName());
         }
-        
-        ContainersSlaEnforcementEndpoint endpoint = new ContainersSlaEnforcementEndpoint() {
 
-            public GridServiceContainer[] getContainers() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
-                return ContainersSlaEnforcement.this.getContainers(pu);
-            }
-
-            public GridServiceContainer[] getContainersPendingShutdown() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
-                return ContainersSlaEnforcement.this.getContainersPendingProcessingUnitRelocation(pu);
-            }
-
-            public boolean enforceSla(ContainersSlaPolicy sla) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
-                return ContainersSlaEnforcement.this.enforceSla(pu, sla);
-            }
-
-            public ProcessingUnit getId() {
-                return pu;
-            }
-        };
-        
-        
-        
-        endpoints.put(pu,endpoint);
+        ContainersSlaEnforcementEndpoint endpoint = new DefaultContainersSlaEnforcementEndpoint(pu);
+        endpoints.put(pu, endpoint);
         containersMarkedForShutdownPerProcessingUnit.put(pu, new ArrayList<GridServiceContainer>());
-        futureContainersPerProcessingUnit.put(pu,new ArrayList<FutureGridServiceContainer>());
-        
+        futureContainersPerProcessingUnit.put(pu, new ArrayList<FutureGridServiceContainer>());
+
         return endpoint;
-    }
-
-    private ProcessingUnit getEndpointsWithSameContainersZoneAs(ProcessingUnit pu) {
-        for (ProcessingUnit endpointPu : this.endpoints.keySet()) {
-            if (getContainerZone(endpointPu).equals(getContainerZone(pu))) {
-                return endpointPu;
-            }
-        }
-        return null;
-    }
-    
-    private ProcessingUnit getEndpointsWithSameNameAs(ProcessingUnit pu) {
-        for (ProcessingUnit endpointPu : this.endpoints.keySet()) {
-            if (endpointPu.getName().equals(pu.getName())) {
-                return endpointPu;
-            }
-        }
-        return null;
-    }
-
-    private String getContainerZone(ProcessingUnit pu) {
-        String[] zones = pu.getRequiredZones();
-        if (zones.length == 0) {
-            throw new IllegalArgumentException("Elastic Processing Unit must have exactly one (container) zone. " + pu.getName() + " has been deployed with no zones defined.");
-        }
-        
-        if (zones.length > 1) {
-            throw new IllegalArgumentException("Elastic Processing Unit must have exactly one (container) zone. " + pu.getName() + " has been deployed with " + zones.length + " zones : "  + Arrays.toString(zones));
-        }
-        
-        return zones[0];
     }
 
     public void destroyEndpoint(ProcessingUnit pu) {
@@ -151,179 +104,311 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
             destroyEndpoint(pu);
         }
     }
-    
-    private GridServiceContainer[] getContainers(ProcessingUnit pu) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
-        validateEndpointNotDestroyed(pu);   
-        
-        List<GridServiceContainer> containers = ContainersSlaUtils.getContainersByZone(getContainerZone(pu),admin);
-        for (GridServiceContainer container : containersMarkedForShutdownPerProcessingUnit.get(pu)) {
-            containers.remove(container);
-        }
-        return containers.toArray(new GridServiceContainer[containers.size()]);
-    }
 
-    
-    private boolean enforceSla(ProcessingUnit pu, ContainersSlaPolicy sla) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
-        validateEndpointNotDestroyed(pu);
-        if (sla == null) {
-           throw new IllegalArgumentException("sla cannot be null");
-        }
-        
-        String[] zoneInContainerOptions = sla.getNewContainerConfig().getZones();
-        
-        String zone = getContainerZone(pu);
-        if (zoneInContainerOptions.length != 1 || 
-            !zoneInContainerOptions[0].equals(zone)) {
-            throw new IllegalArgumentException("sla zone is " + Arrays.toString(zoneInContainerOptions) + " and instead it should be " + zone);
-        }
-       
-       try {
-            enforceSlaInternal(pu, sla);
-        } catch (ConflictingOperationInProgressException e) {
-            logger.info("Cannot enforce Containers SLA since a conflicting operation is in progress. Try again later.",e);
-            return false; // try again next time
-        }
-        
-       return isSlaReached(pu,sla);
-    }
+    class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcementEndpoint {
 
-    private GridServiceContainer[] getContainersPendingProcessingUnitRelocation(ProcessingUnit pu) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
-        validateEndpointNotDestroyed(pu);
-        List<GridServiceContainer> containers = containersMarkedForShutdownPerProcessingUnit.get(pu);
-        return containers.toArray(new GridServiceContainer[containers.size()]);
-    }
+        private ProcessingUnit pu;
 
-    
-    private void enforceSlaInternal(ProcessingUnit pu, final ContainersSlaPolicy sla) throws ConflictingOperationInProgressException {
-        
-        cleanContainersMarkedForShutdown(pu);
-        cleanFutureContainers(pu);
-        
-        String zone = getContainerZone(pu);
-        List<GridServiceContainer> containers = ContainersSlaUtils.getContainersByZone(zone,admin);
-        
-        int targetContainers = Math.max(sla.getTargetNumberOfContainers(), sla.getMinimumNumberOfMachines());
-        int existingContainers = containers.size();
-        int futureContainers = this.futureContainersPerProcessingUnit.get(pu).size();
-        
-        if (existingContainers > targetContainers) {
-            // scale in
-            int containersSurplus = existingContainers - targetContainers;
-            List<GridServiceContainer> containersMarkedForShutdown = this.containersMarkedForShutdownPerProcessingUnit.get(pu); 
-            // remove containers mark for shutdown if there are too many of them 
-            while (containersMarkedForShutdown.size() > containersSurplus) {
-                containersMarkedForShutdown.remove(0);
+        public DefaultContainersSlaEnforcementEndpoint(ProcessingUnit pu) {
+            this.pu = pu;
+        }
+
+        public GridServiceContainer[] getContainers() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+            validateEndpointNotDestroyed(pu);
+
+            List<GridServiceContainer> approvedContainers = ContainersSlaUtils.getContainersByZone(
+                    ContainersSlaUtils.getContainerZone(pu), admin);
+            approvedContainers.removeAll(containersMarkedForShutdownPerProcessingUnit.get(pu));
+
+            return approvedContainers.toArray(new GridServiceContainer[approvedContainers.size()]);
+        }
+
+        public GridServiceContainer[] getContainersPendingShutdown()
+                throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+            ContainersSlaEnforcement.this.validateEndpointNotDestroyed(pu);
+            List<GridServiceContainer> containers = ContainersSlaEnforcement.this.containersMarkedForShutdownPerProcessingUnit.get(pu);
+            return containers.toArray(new GridServiceContainer[containers.size()]);
+        }
+
+        public boolean enforceSla(ContainersSlaPolicy sla)
+                throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+            ContainersSlaEnforcement.this.validateEndpointNotDestroyed(pu);
+            if (sla == null) {
+                throw new IllegalArgumentException("sla cannot be null");
+            }
+
+            String[] zoneInContainerOptions = sla.getNewContainerConfig().getZones();
+
+            String zone = ContainersSlaUtils.getContainerZone(pu);
+            if (zoneInContainerOptions.length != 1 || !zoneInContainerOptions[0].equals(zone)) {
+                throw new IllegalArgumentException("sla zone is " + Arrays.toString(zoneInContainerOptions)
+                        + " and instead it should be " + zone);
+            }
+
+            if (sla.getGridServiceAgents().length < sla.getMinimumNumberOfMachines()) {
+                throw new IllegalArgumentException ("Number of grid service agents must be at least minimum number of machines.");
             }
             
-            // add containers mark for shutdown if there are too few of them
-            for (int i = 0 ; 
-                 containersMarkedForShutdown.size()< containersSurplus && i < existingContainers ; 
-                 i++) {
-                
-                GridServiceContainer container = containers.get(i);
-                if (!containersMarkedForShutdown.contains(container)) {
+            try {
+                enforceSlaInternal(sla);
+            } catch (ConflictingOperationInProgressException e) {
+                ContainersSlaEnforcement.logger.info(
+                        "Cannot enforce Containers SLA since a conflicting operation is in progress. Try again later.",
+                        e);
+                return false; // try again next time
+            } catch (NeedMoreMachinesException e) {
+                ContainersSlaEnforcement.logger.warn(
+                        "Cannot enforce Containers SLA since there are not enough machines available. Need more "
+                                + e.getMissingCapacityInMB() + "MB RAM", e);
+            }
+
+            return isSlaReached(sla);
+        }
+
+        /**
+         * @return true if reached exact target number of containers with specified container zone.
+         */
+        private boolean isSlaReached(ContainersSlaPolicy sla) {
+
+            Iterable<GridServiceContainer> containers = Arrays.asList(getContainers());
+
+            return ContainersSlaUtils.isCapacityMet(sla, containers)
+                    && containersMarkedForShutdownPerProcessingUnit.get(pu).size() == 0
+                    && futureContainersPerProcessingUnit.get(pu).size() == 0;
+        }
+
+        public ProcessingUnit getId() {
+            return pu;
+        }
+
+        private void enforceSlaInternal(final ContainersSlaPolicy sla) throws ConflictingOperationInProgressException,
+                NeedMoreMachinesException {
+
+            cleanContainersMarkedForShutdown();
+            cleanFutureContainers();
+
+            List<GridServiceContainer> containersMarkedForShutdown = containersMarkedForShutdownPerProcessingUnit.get(pu);
+            List<FutureGridServiceContainer> futureContainers = futureContainersPerProcessingUnit.get(pu);
+
+            // mark for shutdown all containers that are not managed by an approved agent
+            String zone = ContainersSlaUtils.getContainerZone(pu);
+            List<GridServiceAgent> approvedAgents = Arrays.asList(sla.getGridServiceAgents());
+            for (GridServiceContainer container : ContainersSlaUtils.getContainersByZone(zone, admin)) {
+                if (!approvedAgents.contains(container.getGridServiceAgent())) {
                     containersMarkedForShutdown.add(container);
                 }
             }
             
-            // assert we marked just enough containers for shutdown
-            if (containersMarkedForShutdown.size() != containersSurplus) {
-                throw new IllegalStateException("Could not find enough containers to shutdown in order to reach target of " + targetContainers + " containers.");
-            }
-        }
-        
-        else if (existingContainers < targetContainers) {
-         // scale out
-            int requiredContainers = targetContainers - (existingContainers + futureContainers);
-            int missingCapacityInMB = 0;
-            for (int i = 0 ; i < requiredContainers ; i++) {
-                
-                try {
-                    final GridServiceAgent gsa = findGridServiceAgentForNewContainer(pu, sla);
-                                        
-                    this.futureContainersPerProcessingUnit.get(pu).add(
-                       ContainersSlaUtils.startGridServiceContainerAsync(
-                               admin, 
-                               (InternalGridServiceAgent)gsa,
-                               sla.getNewContainerConfig(),
-                               START_CONTAINER_TIMEOUT_FAILURE_SECONDS,TimeUnit.SECONDS));
-                } catch (NeedMoreMachinesException e) {
-                    missingCapacityInMB += e.getMissingCapacityInMB();
+            // add or remove containers to the approved containers to meet SLA.
+            List<GridServiceContainer> approvedContainers = new ArrayList<GridServiceContainer>(
+                    Arrays.asList(getContainers()));
+
+            if (ContainersSlaUtils.isCapacityMet(sla, approvedContainers)) {
+                // try to scale in, only if we are not in the process of starting new grid service
+                // containers.
+                if (futureContainers.size() == 0) {
+                    // try to scale in (mark container for shutdown) until SLA is met
+                    while (true) {
+                        GridServiceContainer containerToRemove = findContainerForRemoval(sla, approvedContainers);
+                        if (containerToRemove == null) {
+                            break;
+                        }
+                        containersMarkedForShutdown.add(containerToRemove);
+                        approvedContainers.remove(containerToRemove);
+                    }
+                }
+            } else {
+                // try to scale out until SLA is met
+                while (!ContainersSlaUtils.isFutureCapacityMet(sla, approvedContainers, futureContainers)) {
+
+                    // bring back a container that is marked for shutdown to the approved containers
+                    // list
+                    GridServiceContainer unmarkContainer = null;
+
+                    for (GridServiceContainer containerMarkedForShutdown : containersMarkedForShutdown) {
+                        // unmark only containers that are managed by an approved agent
+                        if (approvedAgents.contains(containerMarkedForShutdown.getGridServiceAgent())) {
+                            unmarkContainer = containerMarkedForShutdown;
+                            break;
+                        }
+                    }
+                    if (unmarkContainer != null) {
+                        containersMarkedForShutdownPerProcessingUnit.remove(unmarkContainer);
+                        approvedContainers.add(unmarkContainer);
+                        continue;
+                    }
+
+                    // deploy a new container on an approved machine that has the least number of
+                    // containers.
+                    final GridServiceAgent gsa = findAgentForNewContainer(pu, sla);
+                    futureContainers.add(ContainersSlaUtils.startGridServiceContainerAsync(admin,
+                            (InternalGridServiceAgent) gsa, sla.getNewContainerConfig(),
+                            START_CONTAINER_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS));
+
                 }
             }
         }
+
+        private GridServiceContainer findContainerForRemoval(ContainersSlaPolicy sla,
+                List<GridServiceContainer> containers) {
+
+            for (GridServiceContainer container : containers) {
+
+                List<GridServiceContainer> containersAfterScaleIn = new ArrayList<GridServiceContainer>(containers);
+
+                containersAfterScaleIn.remove(container);
+
+                if (ContainersSlaUtils.isCapacityMet(sla, containersAfterScaleIn)) {
+                    return container;
+                }
+            }
+
+            return null;
+        }
+
+        private GridServiceAgent findAgentForNewContainer(ProcessingUnit pu, ContainersSlaPolicy sla)
+                throws NeedMoreMachinesException, ConflictingOperationInProgressException {
+
+            List<GridServiceAgent> recommendedAgents = findAgentsForNewContainerSortByNumberOfContainersInZone(pu, sla);
+
+            // Pick the most recommended agent.
+            return recommendedAgents.get(0);
+
+        }
+        
+        /**
+         * removes containers from the futureContainers list if the future is done (container started).
+         */
+        private void cleanFutureContainers() {
+            List<FutureGridServiceContainer> list = futureContainersPerProcessingUnit.get(pu);
+            final Iterator<FutureGridServiceContainer> iterator = list.iterator();
+            while (iterator.hasNext()) {
+                FutureGridServiceContainer future = iterator.next();
+
+                if (future.isDone()) {
+
+                    iterator.remove();
+
+                    Exception exception = null;
+
+                    try {
+
+                        GridServiceContainer container = future.get();
+                        if (container.isDiscovered()) {
+                            logger.info("Container started succesfully " + ToStringHelper.gscToString(container));
+                        }
+
+                    } catch (ExecutionException e) {
+                        if (e.getCause() instanceof AdminException) {
+                            exception = (AdminException) e.getCause();
+                        } else {
+                            throw new IllegalStateException("Unexpected runtime exception", e);
+                        }
+                    } catch (TimeoutException e) {
+                        exception = e;
+                    }
+
+                    if (exception != null) {
+                        final String errorMessage = "Failed to start container on machine "
+                                + ToStringHelper.machineToString(future.getGridServiceAgent().getMachine());
+                        logger.warn(errorMessage, exception);
+                        failedFutureContainers.add(future);
+                    }
+                }
+            }
+
+            cleanFailedFutureContainers();
+
+        }
+
+        /**
+         * kills and removes containers that are marked for shutdown and have no pu instances deployed on them.
+         */
+        private void cleanContainersMarkedForShutdown() {
+
+            final List<GridServiceContainer> containersPendingRelocation = containersMarkedForShutdownPerProcessingUnit.get(pu);
+            final Iterator<GridServiceContainer> iterator = containersPendingRelocation.iterator();
+            while (iterator.hasNext()) {
+                final GridServiceContainer container = iterator.next();
+
+                if (!container.isDiscovered()) {
+                    //container kill completed
+                    iterator.remove();
+                }
+
+                else if (container.getProcessingUnitInstances().length == 0) {
+                    //kill container
+                    ((InternalAdmin)pu.getAdmin()).scheduleAdminOperation(new Runnable() {
+
+                        public void run() {
+                            container.kill();
+                        }
+                    });
+                }
+                else {
+                    // cannot kill container since it still has pu instances on it.
+                }
+            }
+        }
+
     }
 
-    private GridServiceAgent findGridServiceAgentForNewContainer(ProcessingUnit pu, ContainersSlaPolicy sla) throws NeedMoreMachinesException, ConflictingOperationInProgressException {
-        
-        long requiredFreeMemoryInMB = sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB();
-        
-        boolean conflictingOperationInProgress = false;
-        
+    /**
+     * finds all Grid Service Agents that have enough free space for a new grid service container.
+     * The resultint agents are sorted by the number of containers (with the same zone) per machine.
+     * @param pu
+     * @param sla
+     * @return
+     * @throws ConflictingOperationInProgressException
+     * @throws NeedMoreMachinesException
+     */
+    private List<GridServiceAgent> findAgentsForNewContainerSortByNumberOfContainersInZone(ProcessingUnit pu,
+            ContainersSlaPolicy sla) throws ConflictingOperationInProgressException, NeedMoreMachinesException {
+
         List<GridServiceAgent> recommendedAgents = new ArrayList<GridServiceAgent>();
-        
-        for (GridServiceAgent gsa : sla.getGridServiceAgents()) {
-            Machine machine = gsa.getMachine();
-            
+
+        boolean conflictingOperationInProgress = false;
+        long requiredFreeMemoryInMB = sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB();
+        final List<GridServiceContainer> containersByZone = ContainersSlaUtils.getContainersByZone(
+                ContainersSlaUtils.getContainerZone(pu), admin);
+        final List<GridServiceAgent> agentsSortedByNumberOfContainers = ContainersSlaUtils.sortAgentsByNumberOfContainers(
+                sla.getGridServiceAgents(), containersByZone);
+        for (final GridServiceAgent gsa : agentsSortedByNumberOfContainers) {
+
+            final Machine machine = gsa.getMachine();
             if (isFutureGridServiceContainerOnMachine(machine)) {
                 // try another machine, we check the flag if all else fails.
                 conflictingOperationInProgress = true;
                 continue;
             }
-            
-            if (sla.getMaximumNumberOfContainersPerMachine() != 0 &&
-                ContainersSlaUtils.getContainersByZoneOnMachine(getContainerZone(pu),machine).size() >= 
-                    sla.getMaximumNumberOfContainersPerMachine()) {
-                // hit maximum number of containers per machine sla limit
-                continue;
-            }
-            
+
             final OperatingSystemStatistics operatingSystemStatistics = machine.getOperatingSystem().getStatistics();
-            
+
             // get total free system memory + cached (getActualFreePhysicalMemorySizeInMB returns -1
             // when not using Sigar)
-            int totalFreePhysicalMemorySizeInMB = (int) Math.floor(
-                    (operatingSystemStatistics.getActualFreePhysicalMemorySizeInBytes() > -1 ? 
-                            operatingSystemStatistics.getActualFreePhysicalMemorySizeInMB() : 
-                                operatingSystemStatistics.getFreePhysicalMemorySizeInMB()));
-            
-            if (totalFreePhysicalMemorySizeInMB > requiredFreeMemoryInMB + sla.getReservedPhysicalMemoryPerMachineInMB()) {
+            final int totalFreePhysicalMemorySizeInMB = (int) Math.floor((operatingSystemStatistics.getActualFreePhysicalMemorySizeInBytes() > -1 ? operatingSystemStatistics.getActualFreePhysicalMemorySizeInMB() : operatingSystemStatistics.getFreePhysicalMemorySizeInMB()));
+
+            if (totalFreePhysicalMemorySizeInMB > requiredFreeMemoryInMB
+                    + sla.getReservedMemoryCapacityPerMachineInMB()) {
                 recommendedAgents.add(gsa);
             }
         }
-        
-        Set<Machine> machines =new HashSet<Machine>();
-        for (GridServiceContainer container : getContainers(pu)) {
-            machines.add(container.getMachine());
-        }
-        if (recommendedAgents.size() > 0) {
-            
-            if (machines.size() >= sla.getMinimumNumberOfMachines()) {
-                // minimum number of machines have been reached. just pick and recommended agent. 
-                return recommendedAgents.get(0);
+
+        if (recommendedAgents.size() == 0) {
+            if (conflictingOperationInProgress) {
+                throw new ConflictingOperationInProgressException();
             }
-            
-            for (GridServiceAgent recommendedAgent : recommendedAgents) {
-                if (!machines.contains(recommendedAgent.getMachine())) {
-                 // this is a new machine and we need more machines to meet the minimum number of machines.
-                    return recommendedAgent;
-                }
-            }
-            
+            throw new NeedMoreMachinesException(requiredFreeMemoryInMB);
         }
-        
-        if (conflictingOperationInProgress) {
-            throw new ConflictingOperationInProgressException();
-        }
-        
-        throw new NeedMoreMachinesException(requiredFreeMemoryInMB);
+
+        return recommendedAgents;
     }
 
     /**
      * @return true if there is pending grid service container allocation on the machine.
      */
     private boolean isFutureGridServiceContainerOnMachine(Machine machine) {
-        
+
         for (List<FutureGridServiceContainer> futures : this.futureContainersPerProcessingUnit.values()) {
             for (FutureGridServiceContainer future : futures) {
                 if (future.getGridServiceAgent().getMachine().equals(machine)) {
@@ -331,104 +416,28 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
                 }
             }
         }
-        
+
         return false;
     }
-    
 
-    
-    /**
-     * @return true if reached exact target number of containers with specified container zone.
-     */
-    private boolean isSlaReached(ProcessingUnit pu, ContainersSlaPolicy sla) {
-        return 
-            sla.getTargetNumberOfContainers() == ContainersSlaUtils.getContainersByZone(getContainerZone(pu),admin).size() &&
-            containersMarkedForShutdownPerProcessingUnit.get(pu).size() == 0 &&
-            futureContainersPerProcessingUnit.get(pu).size() == 0;
-    }
+    private void validateEndpointNotDestroyed(ProcessingUnit pu)
+            throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
 
-    private void validateEndpointNotDestroyed(ProcessingUnit pu) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
- 
         if (isEndpointDestroyed(pu)) {
-            
+
             throw new ServiceLevelAgreementEnforcementEndpointDestroyedException();
         }
     }
-    
+
     private boolean isEndpointDestroyed(ProcessingUnit pu) {
-        
+
         if (pu == null) {
             throw new IllegalArgumentException("pu cannot be null");
         }
-        return  !endpoints.containsKey(pu) ||
-                containersMarkedForShutdownPerProcessingUnit.get(pu) == null || 
-                futureContainersPerProcessingUnit.get(pu) == null;
+        return !endpoints.containsKey(pu) || containersMarkedForShutdownPerProcessingUnit.get(pu) == null
+                || futureContainersPerProcessingUnit.get(pu) == null;
     }
-    
-    private void cleanContainersMarkedForShutdown(ProcessingUnit pu) {
 
-        final List<GridServiceContainer> containersPendingRelocation = containersMarkedForShutdownPerProcessingUnit.get(pu);
-        final Iterator<GridServiceContainer> iterator = containersPendingRelocation.iterator();
-        while (iterator.hasNext()) {
-            final GridServiceContainer container = iterator.next();
-            
-            if (!container.isRunning()) {
-                iterator.remove();
-            }
-            
-            else if (container.getProcessingUnitInstances().length == 0) {
-                admin.scheduleAdminOperation(new Runnable() {
-                    
-                    public void run() {
-                        container.kill();
-                    }
-                });
-            }
-        }
-    }
-    
-    private void cleanFutureContainers(ProcessingUnit pu) {
-        List<FutureGridServiceContainer> list = futureContainersPerProcessingUnit.get(pu);
-        final Iterator<FutureGridServiceContainer> iterator = list.iterator();
-        while (iterator.hasNext()) {
-            FutureGridServiceContainer future = iterator.next();
-            
-            if (future.isDone()) {
-            
-                iterator.remove();
-                
-                Exception exception = null;
-                
-                try {
-                    
-                    if (future.getGridServiceAgent().isRunning()) {
-                        GridServiceContainer container = future.get();
-                        logger.info("Container started succesfully " + ToStringHelper.gscToString(container));
-                    }
-                    
-                } catch (ExecutionException e) {
-                    if (e.getCause() instanceof AdminException) {
-                        exception = (AdminException) e.getCause();
-                    }
-                    else {
-                        throw new IllegalStateException("Unexpected runtime exception",e);
-                    }
-                } catch (TimeoutException e) {
-                    exception = e;
-                }
-                
-                if (exception != null) {
-                    final String errorMessage = "Failed to start container on machine " + ToStringHelper.machineToString(future.getGridServiceAgent().getMachine());
-                    logger.warn(errorMessage , exception);
-                    this.failedFutureContainers.add(future);
-                }
-            }
-        }
-        
-        cleanFailedFutureContainers();
-
-    }
-        
     private void cleanFailedFutureContainers() {
 
         List<FutureGridServiceContainer> list = failedFutureContainers;
@@ -437,19 +446,26 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
             FutureGridServiceContainer future = iterator.next();
             int passedSeconds = (int) ((System.currentTimeMillis() - future.getTimestamp().getTime()) / 1000);
             if (!future.getGridServiceAgent().isDiscovered()) {
-                logger.info("Forgetting failure to start container on machine " + ToStringHelper.machineToString(future.getGridServiceAgent().getMachine()) + " that occured " + passedSeconds + " seconds ago since grid service agent no longer exists.");
+                logger.info("Forgetting failure to start container on machine "
+                        + ToStringHelper.machineToString(future.getGridServiceAgent().getMachine()) + " that occured "
+                        + passedSeconds + " seconds ago since grid service agent no longer exists.");
                 iterator.remove();
-            }
-            else if ( passedSeconds > START_CONTAINER_TIMEOUT_FAILURE_FORGET_SECONDS) {
-                logger.info("Forgetting failure to start container on machine " + ToStringHelper.machineToString(future.getGridServiceAgent().getMachine()) + " that occured " + passedSeconds + " seconds ago due to timeout.");
+            } else if (passedSeconds > START_CONTAINER_TIMEOUT_FAILURE_FORGET_SECONDS) {
+                logger.info("Forgetting failure to start container on machine "
+                        + ToStringHelper.machineToString(future.getGridServiceAgent().getMachine()) + " that occured "
+                        + passedSeconds + " seconds ago due to timeout.");
                 iterator.remove();
             }
         }
     }
 
-    private static class ConflictingOperationInProgressException extends Exception {}
-    
+    @SuppressWarnings("serial")
+    private static class ConflictingOperationInProgressException extends Exception {
+    }
+
+    @SuppressWarnings("serial")
     private static class NeedMoreMachinesException extends Exception {
+
         private final long missingCapacityInMB;
 
         NeedMoreMachinesException(long missingCapacityInMB) {
@@ -459,6 +475,7 @@ public class ContainersSlaEnforcement implements ServiceLevelAgreementEnforcemen
         public long getMissingCapacityInMB() {
             return missingCapacityInMB;
         }
-        
+
     }
+
 }

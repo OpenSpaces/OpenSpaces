@@ -1,13 +1,17 @@
 package org.openspaces.grid.gsm.machines;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.machine.Machine;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirment;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
 
-class MachinesSlaUtils {
+public class MachinesSlaUtils {
 
     public static int getNumberOfChildProcesses(final GridServiceAgent agent) {
         int numberOfChildProcesses = agent.getProcessesDetails().getProcessDetails().length;
@@ -28,33 +32,54 @@ class MachinesSlaUtils {
         return numberOfContainers;
     }
 
+    
+
+    public static long getMemoryInMB(Machine machine, MachinesSlaPolicy sla) {
+        
+        long total = (long) 
+            machine.getOperatingSystem().getDetails()
+            .getTotalPhysicalMemorySizeInMB(); // 3000
+        
+        long actual = total-sla.getReservedMemoryCapacityPerMachineInMB(); // 2900
+        return actual - (actual % sla.getContainerMemoryCapacityInMB()); // 2900 - (2900 % 500) = 2900 - 400 = 2500
+    }
+    
+    public static double getCpu(Machine machine) {
+        return machine.getOperatingSystem().getDetails().getAvailableProcessors();
+    }
+
     public static boolean isCapacityRequirementsMet(
-            Iterable<GridServiceAgent> agents,
+            Set<GridServiceAgent> agents,
+            CapacityRequirements capacityRequirements) {
+        
+        Set<Machine> machines = new HashSet<Machine>();
+        for (GridServiceAgent agent : agents) {
+            machines.add(agent.getMachine());
+        }
+        return isCapacityRequirementsMet(machines, capacityRequirements);
+    }
+    
+    private static boolean isCapacityRequirementsMet(
+            Iterable<Machine> machines,
             CapacityRequirements capacityRequirements) {
         
         int machineShortage = capacityRequirements.getRequirement(NumberOfMachinesCapacityRequirement.class).getNumberOfMahines();
         long memoryShortageInMB = capacityRequirements.getRequirement(MemoryCapacityRequirment.class).getMemoryInMB();
         double cpuShortage = capacityRequirements.getRequirement(CpuCapacityRequirement.class).getCpu();
         
-        for (GridServiceAgent agent : agents) {
+        for (Machine machine: machines) {
             machineShortage -= 1;
-            memoryShortageInMB -= getMemoryInMB(agent);
-            cpuShortage -= getCpu(agent);
+            memoryShortageInMB -= getMemoryInMB(machine);
+            cpuShortage -= getCpu(machine);
         }
         
         return machineShortage<=0 && memoryShortageInMB<=0 && cpuShortage<=0;
     }
 
-    public static int getMemoryInMB(GridServiceAgent agent) {
+    private static int getMemoryInMB(Machine machine) {
         return (int) 
-            agent.getMachine().getOperatingSystem()
+            machine.getOperatingSystem()
             .getDetails()
             .getTotalPhysicalMemorySizeInMB();
     }
-
-    public static double getCpu(GridServiceAgent agent) {
-        return agent.getMachine().getOperatingSystem().getDetails().getAvailableProcessors();
-    }
-
-
 }
