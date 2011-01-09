@@ -18,10 +18,12 @@ package org.openspaces.persistency.hibernate;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.EntityMode;
 import org.hibernate.HibernateException;
 import org.hibernate.ObjectNotFoundException;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.openspaces.persistency.hibernate.iterator.DefaultChunkListDataIterator;
@@ -34,6 +36,7 @@ import com.gigaspaces.datasource.BulkDataPersister;
 import com.gigaspaces.datasource.BulkItem;
 import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.DataSourceException;
+import com.gigaspaces.datasource.PartialUpdateBulkItem;
 import com.gigaspaces.datasource.SQLDataProvider;
 import com.j_spaces.core.client.SQLQuery;
 
@@ -80,82 +83,23 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
         Object latest = null;
         try {
             for (BulkItem bulkItem : bulkItems) {
-                Object entry = bulkItem.getItem();
-                if (!isManagedEntry(entry.getClass().getName())) {
-                    if (logger.isTraceEnabled()) {
-                        logger.trace("Entry [" + entry + "] is not managed, filtering it out");
-                    }
+                
+                if(!isManaged(bulkItem))
                     continue;
-                }
-                latest = entry;
+                
+                latest = bulkItem;
                 switch (bulkItem.getOperation()) {
                     case BulkItem.REMOVE:
-                        if (logger.isTraceEnabled()) {
-                            logger.trace("Deleting Entry [" + entry + "]");
-                        }
-                        
-                        
-                        if (deleteById) {
-                            Serializable id = getIdentifier(entry);
-                            if (id == null)
-                                throw new DataSourceException(
-                                        "Object id is null. Make sure object space id and hibernate id are the same property.");
-    
-                            // ignore non existing objects - avoid unnecessary failures                            
-                            try
-                            {
-                                Object toDelete = session.load(entry.getClass(), id);
-                            
-                                 if(toDelete != null)
-                                    session.delete(toDelete);
-                            }catch(ObjectNotFoundException e)
-                            {  
-                               // ignore non existing objects - avoid unnecessary failures
-                                if (logger.isTraceEnabled()) {
-                                    logger.trace("Delete Entry failed [" + entry + "]",e);
-                                }
-                            }
-    
-                        } else {
-                            if (useMerge) {
-                                session.delete(session.merge(entry));
-                            } else {
-                                try {
-                                    session.delete(entry);
-                                } catch (HibernateException e) {
-                                    session.delete(session.merge(entry));
-                                }
-                            }
-                        }
-
+                        executeRemove(session, bulkItem);
                         break;
                     case BulkItem.WRITE:
-                        if (logger.isTraceEnabled()) {
-                            logger.trace("Write Entry [" + entry + "]");
-                        }
-                        if (useMerge) {
-                            session.merge(entry);
-                        } else {
-                            try {
-                                session.saveOrUpdate(entry);
-                            } catch (HibernateException e) {
-                                session.merge(entry);
-                            }
-                        }
+                        executeWrite(session, bulkItem);
                         break;
                     case BulkItem.UPDATE:
-                        if (logger.isTraceEnabled()) {
-                            logger.trace("Update Entry [" + entry + "]");
-                        }
-                        if (useMerge) {
-                            session.merge(entry);
-                        } else {
-                            try {
-                                session.saveOrUpdate(entry);
-                            } catch (HibernateException e) {
-                                session.merge(entry);
-                            }
-                        }
+                        executeUpdate(session, bulkItem);
+                        break;
+                    case BulkItem.PARTIAL_UPDATE:
+                        executePartialUpdate(session, bulkItem);
                         break;
                     default:
                         break;
@@ -168,6 +112,101 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
         } finally {
             closeSession(session);
         }
+    }
+
+    private void executePartialUpdate(Session session, BulkItem bulkItem) {
+        PartialUpdateBulkItem updateBulkItem = (PartialUpdateBulkItem)bulkItem;
+        if (logger.isTraceEnabled()) {
+            logger.trace("Partial Update Entry [" + updateBulkItem.toString() + "]");
+        }
+
+        String hql = getPartialUpdateHQL(updateBulkItem);
+        Query query = session.createQuery(hql);
+
+        for (Map.Entry<String, Object> updateEntry : updateBulkItem.getUpdatedValues().entrySet()) {
+            query.setParameter(updateEntry.getKey(), updateEntry.getValue());
+        }
+        query.setParameter("id_" +updateBulkItem.getIdPropertyName() ,updateBulkItem.getIdPropertyValue());
+        query.executeUpdate();
+    }
+
+    private void executeWrite(Session session, BulkItem bulkItem) {
+        Object entry = bulkItem.getItem();
+        
+        if (logger.isTraceEnabled()) {
+            logger.trace("Write Entry [" + entry + "]");
+        }
+        if (useMerge) {
+            session.merge(entry);
+        } else {
+            try {
+                session.saveOrUpdate(entry);
+            } catch (HibernateException e) {
+                session.merge(entry);
+            }
+        }
+       
+    }
+
+    private void executeUpdate(Session session, BulkItem bulkItem) {
+        Object entry = bulkItem.getItem();
+        
+        if (logger.isTraceEnabled()) {
+            logger.trace("Update Entry [" + entry + "]");
+        }
+        if (useMerge) {
+            session.merge(entry);
+        } else {
+            try {
+                session.saveOrUpdate(entry);
+            } catch (HibernateException e) {
+                session.merge(entry);
+            }
+        }
+     
+    }
+
+    private void executeRemove(Session session, BulkItem bulkItem) throws DataSourceException {
+        Object entry = bulkItem.getItem();
+        
+        if (logger.isTraceEnabled()) {
+            logger.trace("Deleting Entry [" + entry + "]");
+        }
+        
+        
+        if (deleteById) {
+            Serializable id = getIdentifier(entry);
+            if (id == null)
+                throw new DataSourceException(
+                        "Object id is null. Make sure object space id and hibernate id are the same property.");
+   
+            // ignore non existing objects - avoid unnecessary failures                            
+            try
+            {
+                Object toDelete = session.load(entry.getClass(), id);
+            
+                 if(toDelete != null)
+                    session.delete(toDelete);
+            }catch(ObjectNotFoundException e)
+            {  
+               // ignore non existing objects - avoid unnecessary failures
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Delete Entry failed [" + entry + "]",e);
+                }
+            }
+   
+        } else {
+            if (useMerge) {
+                session.delete(session.merge(entry));
+            } else {
+                try {
+                    session.delete(entry);
+                } catch (HibernateException e) {
+                    session.delete(session.merge(entry));
+                }
+            }
+        }
+      
     }
 
     /**

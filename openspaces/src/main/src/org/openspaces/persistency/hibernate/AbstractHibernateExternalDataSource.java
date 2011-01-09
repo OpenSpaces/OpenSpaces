@@ -16,9 +16,11 @@
 
 package org.openspaces.persistency.hibernate;
 
+import com.gigaspaces.datasource.BulkItem;
 import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.DataSourceException;
 import com.gigaspaces.datasource.ManagedDataSource;
+import com.gigaspaces.datasource.PartialUpdateBulkItem;
 import com.gigaspaces.datasource.hibernate.SessionFactoryBuilder;
 
 import org.apache.commons.logging.Log;
@@ -313,6 +315,57 @@ public abstract class AbstractHibernateExternalDataSource implements ManagedData
      */
     protected DataIterator createInitialLoadIterator(DataIterator[] iterators) {
         return new HibernateProxyRemoverIterator(new ConcurrentMultiDataIterator(iterators, initialLoadThreadPoolSize));
+    }
+
+    protected boolean isManaged(BulkItem bulkItem) {
+        switch (bulkItem.getOperation()) {
+            case BulkItem.WRITE:
+            case BulkItem.UPDATE:
+            case BulkItem.REMOVE:
+                Object entry = bulkItem.getItem();
+                if (!isManagedEntry(entry.getClass().getName())) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Entry [" + entry + "] is not managed, filtering it out");
+                    }
+                    return false;
+                }
+                break;
+            case BulkItem.PARTIAL_UPDATE:
+                String  typeName = ((PartialUpdateBulkItem)bulkItem).getTypeName();
+                if (!isManagedEntry(typeName)) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Entry [" + typeName + ":" + ((PartialUpdateBulkItem)bulkItem).getIdPropertyValue()+ "] is not managed, filtering it out");
+                    }
+                    return false;
+                }
+                break;
+                default:
+                    throw new IllegalArgumentException("Unknown BulkItem operation [" + bulkItem.getOperation() +"]");
+        }
+    
+        return true;
+    }
+
+    protected String getPartialUpdateHQL(PartialUpdateBulkItem updateBulkItem) {
+        Map<String, Object> updatedValues = updateBulkItem.getUpdatedValues();
+    
+        StringBuilder updateQueryBuilder = new StringBuilder();
+        updateQueryBuilder.append("update " + updateBulkItem.getTypeName() + " set ");
+    
+        int i  = 0;
+        for (Map.Entry<String, Object> updateEntry : updatedValues.entrySet()) {
+            updateQueryBuilder.append(updateEntry.getKey() + "=:" + updateEntry.getKey());
+            if(i < updatedValues.size()-1)
+                updateQueryBuilder.append(",");
+            i++;
+        }
+    
+        updateQueryBuilder.append( " where " + updateBulkItem.getIdPropertyName() + "=:id_" + updateBulkItem.getIdPropertyName());
+        String hql = updateQueryBuilder.toString();
+        if (logger.isTraceEnabled()) {
+            logger.trace("Partial Update HQL [" + hql + "]");
+        }
+        return hql;
     }
 
 }

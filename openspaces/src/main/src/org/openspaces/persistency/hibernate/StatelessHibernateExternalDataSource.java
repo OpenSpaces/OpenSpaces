@@ -16,16 +16,14 @@
 
 package org.openspaces.persistency.hibernate;
 
-import com.gigaspaces.datasource.BulkDataPersister;
-import com.gigaspaces.datasource.BulkItem;
-import com.gigaspaces.datasource.DataIterator;
-import com.gigaspaces.datasource.DataSourceException;
-import com.gigaspaces.datasource.SQLDataProvider;
-import com.j_spaces.core.client.SQLQuery;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.EntityMode;
+import org.hibernate.Query;
 import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Projections;
@@ -37,7 +35,13 @@ import org.openspaces.persistency.hibernate.iterator.StatelessChunkScrollableDat
 import org.openspaces.persistency.hibernate.iterator.StatelessListQueryDataIterator;
 import org.openspaces.persistency.hibernate.iterator.StatelessScrollableDataIterator;
 
-import java.util.List;
+import com.gigaspaces.datasource.BulkDataPersister;
+import com.gigaspaces.datasource.BulkItem;
+import com.gigaspaces.datasource.DataIterator;
+import com.gigaspaces.datasource.DataSourceException;
+import com.gigaspaces.datasource.PartialUpdateBulkItem;
+import com.gigaspaces.datasource.SQLDataProvider;
+import com.j_spaces.core.client.SQLQuery;
 
 /**
  * An external data source implementation based on Hiberante {@link org.hibernate.StatelessSession}.
@@ -63,31 +67,21 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
         Exception batchModeException = null;
         try {
             for (BulkItem bulkItem : bulkItems) {
-                Object entry = bulkItem.getItem();
-                if (!isManagedEntry(entry.getClass().getName())) {
-                    if (logger.isTraceEnabled()) {
-                        logger.trace("[Optimistic] Entry [" + entry + "] is not managed, filtering it out");
-                    }
+                if(!isManaged(bulkItem))
                     continue;
-                }
+                
                 switch (bulkItem.getOperation()) {
                     case BulkItem.REMOVE:
-                        if (logger.isTraceEnabled()) {
-                            logger.trace("[Optimistic REMOVE] Deleting Entry [" + entry + "]");
-                        }
-                        session.delete(entry);
+                        executeRemove(session, bulkItem);
                         break;
                     case BulkItem.WRITE:
-                        if (logger.isTraceEnabled()) {
-                            logger.trace("[Optimistic WRITE] Write Entry [" + entry + "]");
-                        }
-                        session.insert(entry);
+                        executeWrite(session, bulkItem);
                         break;
                     case BulkItem.UPDATE:
-                        if (logger.isTraceEnabled()) {
-                            logger.trace("[Optimistic UPDATE] Update Entry [" + entry + "]");
-                        }
-                        session.update(entry);
+                        executeUpdate(session, bulkItem);
+                        break;
+                    case BulkItem.PARTIAL_UPDATE:
+                        executePartialUpdate(session, bulkItem);
                         break;
                     default:
                         break;
@@ -114,49 +108,22 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
         tr = session.beginTransaction();
         try {
             for (BulkItem bulkItem : bulkItems) {
-                Object entry = bulkItem.getItem();
-                if (!isManagedEntry(entry.getClass().getName())) {
-                    if (logger.isTraceEnabled()) {
-                        logger.trace("[Exists] Entry [" + entry + "] is not managed, filtering it out");
-                    }
+                if (!isManaged(bulkItem)) 
                     continue;
-                }
-                latest = entry;
+                
+                latest = bulkItem;
                 switch (bulkItem.getOperation()) {
                     case BulkItem.REMOVE:
-                        if (exists(entry, session)) {
-                            if (logger.isTraceEnabled()) {
-                                logger.trace("[Exists REMOVE] Deleting Entry [" + entry + "]");
-                            }
-                            session.delete(entry);
-                        }
+                        executeRemoveIfExists(session, bulkItem);
                         break;
                     case BulkItem.WRITE:
-                        if (exists(entry, session)) {
-                            if (logger.isTraceEnabled()) {
-                                logger.trace("[Exists WRITE] Update Entry [" + entry + "]");
-                            }
-                            session.update(entry);
-                        } else {
-                            if (logger.isTraceEnabled()) {
-                                logger.trace("[Exists WRITE] Insert Entry [" + entry + "]");
-                            }
-                            session.insert(entry);
-                        }
+                        executeWriteIfExists(session, bulkItem);
                         break;
                     case BulkItem.UPDATE:
-                        if (exists(entry, session)) {
-                            if (logger.isTraceEnabled()) {
-                                logger.trace("[Exists UPDATE] Update Entry [" + entry + "]");
-                            }
-                            session.update(entry);
-                        } else {
-                            if (logger.isTraceEnabled()) {
-                                logger.trace("[Exists UPDATE] Insert Entry [" + entry + "]");
-                            }
-                            session.insert(entry);
-                        }
+                        executeUpdateIfExists(session, bulkItem);
                         break;
+                    case BulkItem.PARTIAL_UPDATE:
+                        executePartialUpdateIfExists(session, bulkItem);
                     default:
                         break;
                 }
@@ -168,6 +135,101 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
         } finally {
             closeSession(session);
         }
+    }
+
+    private void executePartialUpdateIfExists(StatelessSession session, BulkItem bulkItem) {
+        if(exists(bulkItem, session))
+            executePartialUpdate(session, bulkItem);
+    }
+
+    private void executeWriteIfExists(StatelessSession session, BulkItem bulkItem) {
+        Object entry = bulkItem.getItem();
+        if (exists(bulkItem, session)) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("[Exists WRITE] Update Entry [" + entry + "]");
+            }
+            session.update(entry);
+        } else {
+            if (logger.isTraceEnabled()) {
+                logger.trace("[Exists WRITE] Insert Entry [" + entry + "]");
+            }
+            session.insert(entry);
+        }
+    }
+
+
+    private void executeUpdateIfExists(StatelessSession session, BulkItem bulkItem) {
+        Object entry = bulkItem.getItem();
+        if (exists(bulkItem, session)) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("[Exists UPDATE] Update Entry [" + entry + "]");
+            }
+            session.update(entry);
+        } else {
+            if (logger.isTraceEnabled()) {
+                logger.trace("[Exists UPDATE] Insert Entry [" + entry + "]");
+            }
+            session.insert(entry);
+        }
+    }
+
+
+    private void executeRemoveIfExists(StatelessSession session, BulkItem bulkItem) {
+        Object entry = bulkItem.getItem();
+        if (exists(bulkItem, session)) {
+            if (logger.isTraceEnabled()) {
+                logger.trace("[Exists REMOVE] Deleting Entry [" + entry + "]");
+            }
+            session.delete(entry);
+        }
+    }
+
+
+    private void executeUpdate(StatelessSession session, BulkItem bulkItem) {
+        Object entry = bulkItem.getItem();
+
+        if (logger.isTraceEnabled()) {
+            logger.trace("[Optimistic UPDATE] Update Entry [" + entry + "]");
+        }
+        session.update(entry);
+    }
+
+
+    private void executeWrite(StatelessSession session, BulkItem bulkItem) {
+        Object entry = bulkItem.getItem();
+
+        if (logger.isTraceEnabled()) {
+            logger.trace("[Optimistic WRITE] Write Entry [" + entry + "]");
+        }
+        session.insert(entry);
+    }
+
+
+    private void executeRemove(StatelessSession session, BulkItem bulkItem) {
+        Object entry = bulkItem.getItem();
+        if (logger.isTraceEnabled()) {
+            logger.trace("[Optimistic REMOVE] Deleting Entry [" + entry + "]");
+        }
+        session.delete(entry);
+    }
+    
+  
+    private void executePartialUpdate(StatelessSession session, BulkItem bulkItem) {
+        PartialUpdateBulkItem updateBulkItem = (PartialUpdateBulkItem)bulkItem;
+        if (logger.isTraceEnabled()) {
+            logger.trace("Partial Update Entry [" + updateBulkItem.toString() + "]");
+        }
+
+        String hql = getPartialUpdateHQL(updateBulkItem);
+
+        Query query = session.createQuery(hql);
+
+        for (Map.Entry<String, Object> updateEntry : updateBulkItem.getUpdatedValues().entrySet()) {
+
+            query.setParameter(updateEntry.getKey(), updateEntry.getValue());
+        }
+        query.setParameter("id_" +updateBulkItem.getIdPropertyName() ,updateBulkItem.getIdPropertyValue());
+        query.executeUpdate();
     }
 
     /**
@@ -226,12 +288,28 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
         return createInitialLoadIterator(iterators);
     }
 
-    protected boolean exists(Object entry, StatelessSession session) {
-        Criteria criteria = session.createCriteria(entry.getClass().getName());
-        ClassMetadata classMetaData = getSessionFactory().getClassMetadata(entry.getClass());
-        criteria.add(Restrictions.idEq(classMetaData.getIdentifier(entry, EntityMode.POJO)));
-        criteria.setProjection(Projections.rowCount());
-        return ((Number) criteria.uniqueResult()).intValue() > 0;
+    protected boolean exists(BulkItem bulkItem, StatelessSession session) {
+        
+        Criteria criteria = null;
+        switch (bulkItem.getOperation()) {
+            case BulkItem.REMOVE:
+            case BulkItem.WRITE:
+            case BulkItem.UPDATE:
+                Object entry = bulkItem.getItem();
+                criteria = session.createCriteria(entry.getClass().getName());
+                ClassMetadata classMetaData = getSessionFactory().getClassMetadata(entry.getClass());
+                criteria.add(Restrictions.idEq(classMetaData.getIdentifier(entry, EntityMode.POJO)));
+                criteria.setProjection(Projections.rowCount());
+                return ((Number) criteria.uniqueResult()).intValue() > 0;
+            case BulkItem.PARTIAL_UPDATE:
+                PartialUpdateBulkItem partialUpdateBulkItem = (PartialUpdateBulkItem)bulkItem;
+                criteria = session.createCriteria(partialUpdateBulkItem.getTypeName());
+                criteria.add(Restrictions.idEq(partialUpdateBulkItem.getIdPropertyValue()));
+                criteria.setProjection(Projections.rowCount());
+                return ((Number) criteria.uniqueResult()).intValue() > 0;
+           default:
+                return false;
+        }
     }
 
     private void rollbackTx(Transaction tr) {
