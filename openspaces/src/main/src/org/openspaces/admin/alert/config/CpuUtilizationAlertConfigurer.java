@@ -19,9 +19,14 @@ package org.openspaces.admin.alert.config;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A strongly typed machine CPU utilization alert bean configurer. Allows a more code-fluent
- * approach by use of method chaining. After all properties have been set, use the call to
- * {@link #getConfig()} to create a fully initialized configuration object based.
+ * A CPU utilization alert configurer. Specifies the thresholds for triggering an alert. There are
+ * two thresholds, high and low and a measurement period indicating a window for the CPU reading.
+ * The CPU alert is raised if any discovered machine is above the specified CPU threshold for a
+ * period of time. The CPU alert is resolved if its CPU goes below the specified CPU threshold for a
+ * period of time.
+ * <p>
+ * Use the call to {@link #getConfig()} to create a fully initialized
+ * {@link CpuUtilizationAlertConfiguration} configuration.
  * 
  * @see CpuUtilizationAlertConfiguration
  * 
@@ -37,23 +42,31 @@ public class CpuUtilizationAlertConfigurer implements AlertConfigurer {
 	 */
 	public CpuUtilizationAlertConfigurer() {
 	}
-	
-	/**
-	 * Set the CPU high threshold percentage value.
-	 * @param highThreshold high threshold percentage.
-	 * @return this.
-	 */
-	public CpuUtilizationAlertConfigurer highThresholdPerc(int highThreshold) {
+
+    /**
+     * Raise an alert if the CPU reading is above the specified threshold for a period of time. The
+     * period of time is configured using {@link #measurementPeriod(long, TimeUnit)}.
+     * 
+     * @see CpuUtilizationAlertConfiguration#setHighThresholdPerc(int)
+     * @param highThreshold
+     *            high threshold percentage.
+     * @return this.
+     */
+	public CpuUtilizationAlertConfigurer raiseAlertIfCpuAboveThreshold(int highThreshold) {
 		config.setHighThresholdPerc(highThreshold);
 		return this;
 	}
 	
-	/**
-	 * Set the CPU low threshold percentage value.
-	 * @param lowThreshold low threshold percentage.
-	 * @return this.
-	 */
-	public CpuUtilizationAlertConfigurer lowThresholdPerc(int lowThreshold) {
+    /**
+     * Resolve the previously raised alert if CPU is below the specified threshold for a period of
+     * time. The period of time is configured using {@link #measurementPeriod(long, TimeUnit)}.
+     * 
+     * @see CpuUtilizationAlertConfiguration#setLowThresholdPerc(int)
+     * @param lowThreshold
+     *            low threshold percentage.
+     * @return this.
+     */
+	public CpuUtilizationAlertConfigurer resolveAlertIfCpuBelowThreshold(int lowThreshold) {
 		config.setLowThresholdPerc(lowThreshold);
 		return this;
 	}

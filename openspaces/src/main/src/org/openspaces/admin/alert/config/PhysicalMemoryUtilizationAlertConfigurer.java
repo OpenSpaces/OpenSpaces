@@ -19,9 +19,15 @@ package org.openspaces.admin.alert.config;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A strongly typed physical memory utilization alert bean configurer. Allows a more code-fluent
- * approach by use of method chaining. After all properties have been set, use the call to
- * {@link #getConfig()} to create a fully initialized configuration object based.
+ * A physical memory utilization alert configurer. Specifies the thresholds for triggering an alert.
+ * There are two thresholds, high and low and a measurement period indicating a window for the
+ * memory reading. The memory utilization alert is raised if any discovered machine is above the
+ * specified physical memory threshold for a period of time. The memory utilization alert is
+ * resolved if its physical memory reading goes below the specified memory threshold for a period of
+ * time.
+ * <p>
+ * Use the call to {@link #getConfig()} to create a fully initialized
+ * {@link PhysicalMemoryUtilizationAlertConfiguration} configuration.
  * 
  * @see PhysicalMemoryUtilizationAlertConfiguration
  * 
@@ -37,23 +43,34 @@ public class PhysicalMemoryUtilizationAlertConfigurer implements AlertConfigurer
 	 */
 	public PhysicalMemoryUtilizationAlertConfigurer() {
 	}
-	
-	/**
-	 * Set the physical memory high threshold percentage value.
-	 * @param highThreshold high threshold percentage.
-	 * @return this.
-	 */
-	public PhysicalMemoryUtilizationAlertConfigurer highThresholdPerc(int highThreshold) {
+
+    /**
+     * Raise an alert if physical memory is above the specified threshold for a period of time. The
+     * period of time is configured using {@link #measurementPeriod(long, TimeUnit)}.
+     * 
+     * @see PhysicalMemoryUtilizationAlertConfiguration#setHighThresholdPerc(int)
+     * 
+     * @param highThreshold
+     *            high threshold percentage.
+     * @return this.
+     */
+	public PhysicalMemoryUtilizationAlertConfigurer raiseAlertIfMemoryAboveThreshold(int highThreshold) {
 		config.setHighThresholdPerc(highThreshold);
 		return this;
 	}
-	
-	/**
-	 * Set the physical memory low threshold percentage value.
-	 * @param lowThreshold low threshold percentage.
-	 * @return this.
-	 */
-	public PhysicalMemoryUtilizationAlertConfigurer lowThresholdPerc(int lowThreshold) {
+
+    /**
+     * Resolve the previously raised alert if physical memory goes below the specified threshold for
+     * a period of time. The period of time is configured using
+     * {@link #measurementPeriod(long, TimeUnit)}.
+     * 
+     * @see PhysicalMemoryUtilizationAlertConfiguration#setLowThresholdPerc(int)
+     * 
+     * @param lowThreshold
+     *            low threshold percentage.
+     * @return this.
+     */
+	public PhysicalMemoryUtilizationAlertConfigurer resolveAlertIfMemoryBelowThreshold(int lowThreshold) {
 		config.setLowThresholdPerc(lowThreshold);
 		return this;
 	}

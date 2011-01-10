@@ -23,7 +23,10 @@ import java.util.concurrent.TimeUnit;
 import org.openspaces.admin.internal.alert.bean.GarbageCollectionAlertBean;
 
 /**
- * A strongly typed long garbage collection pause alert bean configuration.
+ * A Garbage Collection pause alert configuration. Specifies the thresholds for triggering an alert. There are
+ * two thresholds, long period and short period indicating how long a gc took. The garbage collection alert
+ * is raised if the gc took longer than the specified 'long' period. The garbage collection alert is resolved
+ * if gc took less than the specified 'short' period.
  * 
  * @see GarbageCollectionAlertConfigurer
  * 

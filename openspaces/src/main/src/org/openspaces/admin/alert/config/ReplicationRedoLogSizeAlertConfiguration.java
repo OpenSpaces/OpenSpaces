@@ -22,9 +22,10 @@ import java.util.Map;
 import org.openspaces.admin.internal.alert.bean.ReplicationRedoLogSizeAlertBean;
 
 /**
- * A strongly typed alert bean configuration triggered when a replication redo log size crosses a
- * certain threshold. The redo-log size takes both the swapped packets and the memory residing
- * packets into consideration.
+ * A replication redo log size alert configurer. Specifies the thresholds for triggering an alert.
+ * There are two thresholds, high and low. The redo log size alert is raised if the number of
+ * packets in the redo log is above the specified high threshold. The redo log size alert is
+ * resolved if the number of packets in the redo log goes below the specified low threshold.
  * 
  * @see ReplicationRedoLogSizeAlertConfigurer
  * 
@@ -58,7 +59,8 @@ public class ReplicationRedoLogSizeAlertConfiguration implements AlertConfigurat
 	}
 	
 	/**
-     * Set the high threshold redo-log size value.
+     * Set the high threshold redo-log size value - the number of packets in the redo log.
+     * 
      * @param highThreshold high threshold redo-log size.
      */
     public void setHighThresholdRedoLogSize(int highThreshold) {
@@ -66,7 +68,7 @@ public class ReplicationRedoLogSizeAlertConfiguration implements AlertConfigurat
     }
     
     /**
-     * @return the high threshold redo-log size
+     * @return the high threshold redo-log size - the number of packets in the redo log.
      */
     public Integer getHighThresholdRedoLogSize() {
         String value = properties.get(HIGH_THRESHOLD_REDO_LOG_SIZE_KEY);

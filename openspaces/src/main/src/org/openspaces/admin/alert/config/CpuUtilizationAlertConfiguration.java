@@ -23,7 +23,11 @@ import java.util.concurrent.TimeUnit;
 import org.openspaces.admin.internal.alert.bean.CpuUtilizationAlertBean;
 
 /**
- * A strongly typed machine CPU utilization alert bean configuration.
+ * A CPU utilization alert configuration. Specifies the thresholds for triggering an alert. There are
+ * two thresholds, high and low and a measurement period indicating a window for the CPU reading.
+ * The CPU alert is raised if any discovered machine is above the specified CPU threshold for a
+ * period of time. The CPU alert is resolved if its CPU goes below the specified CPU threshold for a
+ * period of time.
  * 
  * @see CpuUtilizationAlertConfigurer
  * 

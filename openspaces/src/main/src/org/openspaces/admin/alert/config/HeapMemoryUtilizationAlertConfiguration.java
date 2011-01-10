@@ -23,7 +23,11 @@ import java.util.concurrent.TimeUnit;
 import org.openspaces.admin.internal.alert.bean.HeapMemoryUtilizationAlertBean;
 
 /**
- * A strongly typed high heap memory utilization alert bean configuration.
+ * A heap utilization alert configuration. Specifies the thresholds for triggering an alert. There are
+ * two thresholds, high and low and a measurement period indicating a window for the heap reading.
+ * The heap utilization alert is raised if any discovered JVM is above the specified heap threshold
+ * for a period of time. The heap utilization alert is resolved if its heap goes below the specified
+ * heap threshold for a period of time.
  * 
  * @see HeapMemoryUtilizationAlertConfigurer
  * 

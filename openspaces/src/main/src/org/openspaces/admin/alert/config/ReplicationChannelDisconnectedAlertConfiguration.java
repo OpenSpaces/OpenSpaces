@@ -22,7 +22,9 @@ import java.util.Map;
 import org.openspaces.admin.internal.alert.bean.ReplicationChannelDisconnectedAlertBean;
 
 /**
- * A strongly typed replication channel disconnection alert bean configuration.
+ * A replication channel disconnection alert configuration. The alert is raised if a replication
+ * channel connection between a source (primary) and it's target (backup/mirror) has been
+ * disconnected. The alert is resolved once the connection is re-established.
  * 
  * @see ReplicationChannelDisconnectedAlertConfigurer
  * 

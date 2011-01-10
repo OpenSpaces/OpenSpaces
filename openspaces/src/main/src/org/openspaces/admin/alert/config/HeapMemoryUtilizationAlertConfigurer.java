@@ -19,9 +19,14 @@ package org.openspaces.admin.alert.config;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A strongly typed high heap memory utilization alert bean configurer. Allows a more code-fluent
- * approach by use of method chaining. After all properties have been set, use the call to
- * {@link #getConfig()} to create a fully initialized configuration object based.
+ * A heap utilization alert configurer. Specifies the thresholds for triggering an alert. There are
+ * two thresholds, high and low and a measurement period indicating a window for the heap reading.
+ * The heap utilization alert is raised if any discovered JVM is above the specified heap threshold
+ * for a period of time. The heap utilization alert is resolved if its heap goes below the specified
+ * heap threshold for a period of time.
+ * <p>
+ * Use the call to {@link #getConfig()} to create a fully initialized
+ * {@link HeapMemoryUtilizationAlertConfiguration} configuration.
  * 
  * @see HeapMemoryUtilizationAlertConfiguration
  * 
@@ -39,25 +44,32 @@ public class HeapMemoryUtilizationAlertConfigurer implements AlertConfigurer {
     }
 
     /**
-     * Set the heap memory high threshold percentage value.
+     * Raise an alert if heap utilization if above the specified threshold for a period of time. The
+     * period of time is configured using {@link #measurementPeriod(long, TimeUnit)}.
+     * 
+     * @see HeapMemoryUtilizationAlertConfiguration#setHighThresholdPerc(int)
      * 
      * @param highThreshold
      *            high threshold percentage.
      * @return this.
      */
-    public HeapMemoryUtilizationAlertConfigurer highThresholdPerc(int highThreshold) {
+    public HeapMemoryUtilizationAlertConfigurer raiseAlertIfHeapAboveThreshold(int highThreshold) {
         config.setHighThresholdPerc(highThreshold);
         return this;
     }
 
     /**
-     * Set the heap memory low threshold percentage value.
+     * Resolve the previously raised alert if heap utilization goes below the specified threshold
+     * for a period of time. The period of time is configured using
+     * {@link #measurementPeriod(long, TimeUnit)}.
+     * 
+     * @see HeapMemoryUtilizationAlertConfiguration#setLowThresholdPerc(int)
      * 
      * @param lowThreshold
      *            low threshold percentage.
      * @return this.
      */
-    public HeapMemoryUtilizationAlertConfigurer lowThresholdPerc(int lowThreshold) {
+    public HeapMemoryUtilizationAlertConfigurer resolveAlertIfHeapBelowThreshold(int lowThreshold) {
         config.setLowThresholdPerc(lowThreshold);
         return this;
     }

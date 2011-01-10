@@ -17,9 +17,12 @@
 package org.openspaces.admin.alert.config;
 
 /**
- * A strongly typed replication channel disconnection alert bean configurer. Allows a more code-fluent
- * approach by use of method chaining. After all properties have been set, use the call to
- * {@link #getConfig()} to create a fully initialized configuration object based.
+ * A replication channel disconnection alert configurer. The alert is raised if a replication
+ * channel connection between a source (primary) and it's target (backup/mirror) has been
+ * disconnected. The alert is resolved once the connection is re-established.
+ * <p>
+ * Use the call to {@link #getConfig()} to create a fully initialized
+ * {@link ReplicationChannelDisconnectedAlertConfiguration} configuration.
  * 
  * @see ReplicationChannelDisconnectedAlertConfiguration
  * 

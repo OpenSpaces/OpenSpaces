@@ -22,8 +22,16 @@ import java.util.Map;
 import org.openspaces.admin.internal.alert.bean.ReplicationRedoLogOverflowToDiskAlertBean;
 
 /**
- * A strongly typed alert bean configuration triggered when a replication redo log has exceeded the
- * redo-log memory capacity, and has been swapped to disk.
+ * A replication redo log overflow to disk alert configurer. The alert is raised if a redo log has
+ * exceeded the defined memory capacity and excess packets are being written to disk. The alert is
+ * resolved once the disk is no longer in use.
+ * <p>
+ * When target space is unavailable, replication packets are stored in the redo log (a.k.a backlog).
+ * If the capacity of the memory redo log exceeds, the disk is used. Once the target reconnects, the
+ * backlog is transmitted. When the disk is no longer in use, a resolution alert is triggered. On
+ * the other hand, if the disk redo log capacity exceeds, then the redo log is cleared and target
+ * will sync upon recovery. When the redo log is cleared the disk is no longer in use and an alert
+ * will be triggered as well.
  * 
  * @see ReplicationRedoLogOverflowToDiskAlertConfigurer
  * 

@@ -23,7 +23,12 @@ import java.util.concurrent.TimeUnit;
 import org.openspaces.admin.internal.alert.bean.PhysicalMemoryUtilizationAlertBean;
 
 /**
- * A strongly typed physical memory utilization alert bean configuration.
+ * A physical memory utilization alert configuration. Specifies the thresholds for triggering an alert.
+ * There are two thresholds, high and low and a measurement period indicating a window for the
+ * memory reading. The memory utilization alert is raised if any discovered machine is above the
+ * specified physical memory threshold for a period of time. The memory utilization alert is
+ * resolved if its physical memory reading goes below the specified memory threshold for a period of
+ * time.
  * 
  * @see PhysicalMemoryUtilizationAlertConfigurer
  * 

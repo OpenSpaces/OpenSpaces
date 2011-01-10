@@ -19,9 +19,13 @@ package org.openspaces.admin.alert.config;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A strongly typed long garbage collection pause alert bean configurer. Allows a more code-fluent
- * approach by use of method chaining. After all properties have been set, use the call to
- * {@link #getConfig()} to create a fully initialized configuration object based.
+ * A Garbage Collection pause alert configurer. Specifies the thresholds for triggering an alert. There are
+ * two thresholds, long period and short period indicating how long a gc took. The garbage collection alert
+ * is raised if the gc took longer than the specified 'long' period. The garbage collection alert is resolved
+ * if gc took less than the specified 'short' period.
+ * <p>
+ * Use the call to {@link #getConfig()} to create a fully initialized
+ * {@link GarbageCollectionAlertConfiguration} configuration.
  * 
  * @see GarbageCollectionAlertConfiguration
  * 
@@ -39,7 +43,8 @@ public class GarbageCollectionAlertConfigurer implements AlertConfigurer {
     }
 
     /**
-     * Set the period of time a long GC pause alert should be raised for.
+     * Raise an alert if gc took longer than the specified period of time.
+     * @see GarbageCollectionAlertConfiguration#setLongGcPausePeriod(long, TimeUnit)
      * 
      * @param period
      *            period of time spent on GC.
@@ -53,7 +58,8 @@ public class GarbageCollectionAlertConfigurer implements AlertConfigurer {
     }
     
     /**
-     * Set the period of time a GC pause alert should be resolved for.
+     * Resolve a previously raised alert if gc took less than the specified period of time.
+     * @see GarbageCollectionAlertConfiguration#setShortGcPausePeriod(long, TimeUnit)
      * 
      * @param period
      *            period of time spent on GC.

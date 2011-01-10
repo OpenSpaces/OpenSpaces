@@ -17,11 +17,13 @@
 package org.openspaces.admin.alert.config;
 
 /**
- * A strongly typed alert bean configurer triggered when a replication redo log size crosses a
- * certain threshold.
+ * A replication redo log size alert configurer. Specifies the thresholds for triggering an alert.
+ * There are two thresholds, high and low. The redo log size alert is raised if the number of
+ * packets in the redo log is above the specified high threshold. The redo log size alert is
+ * resolved if the number of packets in the redo log goes below the specified low threshold.
  * <p>
- * Allows a more code-fluent approach by use of method chaining. After all properties have been set,
- * use the call to {@link #getConfig()} to create a fully initialized configuration object based.
+ * Use the call to {@link #getConfig()} to create a fully initialized
+ * {@link ReplicationRedoLogSizeAlertConfiguration} configuration.
  * 
  * @see ReplicationRedoLogSizeAlertConfiguration
  * 
@@ -38,22 +40,26 @@ public class ReplicationRedoLogSizeAlertConfigurer implements AlertConfigurer {
 	public ReplicationRedoLogSizeAlertConfigurer() {
 	}
 	
-	   /**
-     * Set the high threshold redo-log size value.
+	/**
+	 * Raise an alert if the number of packets in the redo log is above the specified threshold.
+	 * @see ReplicationRedoLogSizeAlertConfiguration#setHighThresholdRedoLogSize(int)
+	 * 
      * @param highThreshold high threshold redo-log size.
      * @return this.
      */
-    public ReplicationRedoLogSizeAlertConfigurer highThresholdRedoLogSize(int highThreshold) {
+    public ReplicationRedoLogSizeAlertConfigurer raiseAlertIfNumberOfPacketsAboveThreshold(int highThreshold) {
         config.setHighThresholdRedoLogSize(highThreshold);
         return this;
     }
     
     /**
-     * Set the low threshold redo-log size value.
+     * Resolve a previously raised alert if the number of packets in the redo log goes below the specified threshold.
+     * @see ReplicationRedoLogSizeAlertConfiguration#setLowThresholdRedoLogSize(int)
+     * 
      * @param lowThreshold low threshold size.
      * @return this.
      */
-    public ReplicationRedoLogSizeAlertConfigurer lowThresholdRedoLogSize(int lowThreshold) {
+    public ReplicationRedoLogSizeAlertConfigurer resolveAlertIfNumberOfPacketsBelowThreshold(int lowThreshold) {
         config.setLowThresholdRedoLogSize(lowThreshold);
         return this;
     }
