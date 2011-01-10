@@ -47,7 +47,7 @@ public class ReplicationRedoLogSizeAlertConfigurer implements AlertConfigurer {
      * @param highThreshold high threshold redo-log size.
      * @return this.
      */
-    public ReplicationRedoLogSizeAlertConfigurer raiseAlertIfNumberOfPacketsAboveThreshold(int highThreshold) {
+    public ReplicationRedoLogSizeAlertConfigurer raiseAlertIfRedoLogSizeAbove(int highThreshold) {
         config.setHighThresholdRedoLogSize(highThreshold);
         return this;
     }
@@ -59,7 +59,7 @@ public class ReplicationRedoLogSizeAlertConfigurer implements AlertConfigurer {
      * @param lowThreshold low threshold size.
      * @return this.
      */
-    public ReplicationRedoLogSizeAlertConfigurer resolveAlertIfNumberOfPacketsBelowThreshold(int lowThreshold) {
+    public ReplicationRedoLogSizeAlertConfigurer resolveAlertIfRedoLogSizeBelow(int lowThreshold) {
         config.setLowThresholdRedoLogSize(lowThreshold);
         return this;
     }

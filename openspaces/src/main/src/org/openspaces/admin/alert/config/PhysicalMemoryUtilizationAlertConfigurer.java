@@ -54,7 +54,7 @@ public class PhysicalMemoryUtilizationAlertConfigurer implements AlertConfigurer
      *            high threshold percentage.
      * @return this.
      */
-	public PhysicalMemoryUtilizationAlertConfigurer raiseAlertIfMemoryAboveThreshold(int highThreshold) {
+	public PhysicalMemoryUtilizationAlertConfigurer raiseAlertIfMemoryAbove(int highThreshold) {
 		config.setHighThresholdPerc(highThreshold);
 		return this;
 	}
@@ -70,7 +70,7 @@ public class PhysicalMemoryUtilizationAlertConfigurer implements AlertConfigurer
      *            low threshold percentage.
      * @return this.
      */
-	public PhysicalMemoryUtilizationAlertConfigurer resolveAlertIfMemoryBelowThreshold(int lowThreshold) {
+	public PhysicalMemoryUtilizationAlertConfigurer resolveAlertIfMemoryBelow(int lowThreshold) {
 		config.setLowThresholdPerc(lowThreshold);
 		return this;
 	}

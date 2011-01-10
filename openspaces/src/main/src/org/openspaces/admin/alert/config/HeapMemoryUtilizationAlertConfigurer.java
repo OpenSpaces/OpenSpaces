@@ -53,7 +53,7 @@ public class HeapMemoryUtilizationAlertConfigurer implements AlertConfigurer {
      *            high threshold percentage.
      * @return this.
      */
-    public HeapMemoryUtilizationAlertConfigurer raiseAlertIfHeapAboveThreshold(int highThreshold) {
+    public HeapMemoryUtilizationAlertConfigurer raiseAlertIfHeapAbove(int highThreshold) {
         config.setHighThresholdPerc(highThreshold);
         return this;
     }
@@ -69,7 +69,7 @@ public class HeapMemoryUtilizationAlertConfigurer implements AlertConfigurer {
      *            low threshold percentage.
      * @return this.
      */
-    public HeapMemoryUtilizationAlertConfigurer resolveAlertIfHeapBelowThreshold(int lowThreshold) {
+    public HeapMemoryUtilizationAlertConfigurer resolveAlertIfHeapBelow(int lowThreshold) {
         config.setLowThresholdPerc(lowThreshold);
         return this;
     }

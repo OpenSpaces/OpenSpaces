@@ -52,7 +52,7 @@ public class CpuUtilizationAlertConfigurer implements AlertConfigurer {
      *            high threshold percentage.
      * @return this.
      */
-	public CpuUtilizationAlertConfigurer raiseAlertIfCpuAboveThreshold(int highThreshold) {
+	public CpuUtilizationAlertConfigurer raiseAlertIfCpuAbove(int highThreshold) {
 		config.setHighThresholdPerc(highThreshold);
 		return this;
 	}
@@ -66,7 +66,7 @@ public class CpuUtilizationAlertConfigurer implements AlertConfigurer {
      *            low threshold percentage.
      * @return this.
      */
-	public CpuUtilizationAlertConfigurer resolveAlertIfCpuBelowThreshold(int lowThreshold) {
+	public CpuUtilizationAlertConfigurer resolveAlertIfCpuBelow(int lowThreshold) {
 		config.setLowThresholdPerc(lowThreshold);
 		return this;
 	}
