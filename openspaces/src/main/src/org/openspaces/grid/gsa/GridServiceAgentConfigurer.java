@@ -1,6 +1,7 @@
 package org.openspaces.grid.gsa;
 
 import com.gigaspaces.start.SystemBoot;
+import com.j_spaces.kernel.GSThread;
 
 /**
  * Provides a configurer to start a GS-Agent.
@@ -60,7 +61,8 @@ public class GridServiceAgentConfigurer {
     }
     
     public void create() {
-        new Thread(new Runnable() {
+        GSThread starter = new GSThread("GSAgentStarter"){ 
+            @Override
             public void run() {
                 SystemBoot.main(new String[]{"com.gigaspaces.start.services=\"GSA\"",
                         "gsa.gsc", String.valueOf(gsc),
@@ -73,6 +75,8 @@ public class GridServiceAgentConfigurer {
                         "gsa.global.lus", String.valueOf(globalLus),
                         });
             }
-        },"GSAgentStarter").start();
+        };
+        starter.setDaemon(true);
+        starter.start();
     }
 }
