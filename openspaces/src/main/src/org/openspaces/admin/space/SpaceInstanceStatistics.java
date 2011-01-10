@@ -117,11 +117,13 @@ public interface SpaceInstanceStatistics {
     
     /**
      * Gets the current number of pending tasks in the space processor queue.
+     * @since 8.0
      */
     int getProcessorQueueSize();
     
     /**
      * Gets the current number of pending notifications that needs to be sent to different clients.
+     * @since 8.0
      */
     int getNotifierQueueSize();
 
