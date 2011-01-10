@@ -1,5 +1,6 @@
 package org.openspaces.admin.space;
 
+import org.openspaces.admin.pu.elastic.AdvancedElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.CapacityScaleConfig;
@@ -17,14 +18,14 @@ import com.gigaspaces.security.directory.UserDetails;
 
 public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopology {
 
-    private final ElasticStatefulProcessingUnitDeployment deployment;
+    private final AdvancedElasticStatefulProcessingUnitDeployment deployment;
 
     /**
      * Constructs a new Space deployment with the space name that will be created (it will also
      * be the processing unit name).
      */
     public ElasticDataGridDeployment(String spaceName) {
-        this.deployment = new ElasticStatefulProcessingUnitDeployment("/templates/datagrid");
+        this.deployment = new AdvancedElasticStatefulProcessingUnitDeployment("/templates/datagrid");
         this.deployment.name(spaceName);
         this.deployment.setContextProperty("dataGridName", spaceName);
     }
@@ -170,6 +171,27 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
 
     public ElasticDataGridDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
         deployment.machineProvisioning(config);
+        return this;
+    }
+
+    protected ElasticDataGridDeployment numberOfBackupsPerPartition(int numberOfBackupsPerPartition) {
+        deployment.numberOfBackupsPerPartition(numberOfBackupsPerPartition);
+        return this;
+    }
+
+    protected ElasticDataGridDeployment numberOfPartitions(int numberOfPartitions) {
+        deployment.numberOfPartitions(numberOfPartitions);
+        return this;
+    }
+
+    protected ElasticDataGridDeployment maxProcessingUnitInstancesFromSamePartitionPerMachine(
+            int maxProcessingUnitInstancesFromSamePartitionPerMachine) {
+        deployment.maxProcessingUnitInstancesFromSamePartitionPerMachine(maxProcessingUnitInstancesFromSamePartitionPerMachine);
+        return this;
+    }
+
+    protected ElasticDataGridDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
+        deployment.minNumberOfCpuCoresPerMachine(minNumberOfCpuCoresPerMachine);
         return this;
     }
     

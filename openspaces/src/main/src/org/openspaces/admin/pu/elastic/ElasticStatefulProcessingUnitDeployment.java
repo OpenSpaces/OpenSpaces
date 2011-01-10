@@ -43,7 +43,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     private long maxMemoryCapacityInMB;
     private int numberOfBackupInstancesPerPartition = 1;
     private int numberOfPartitions;
-    private int maxPartitionInstancesPerMachine = 1;
+    private int maxProcessingUnitInstancesFromSamePartitionPerMachine = 1;
     private double maxNumberOfCpuCores = 1;
     private double minNumberOfCpuCoresPerMachine;
     
@@ -79,27 +79,18 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return this;
     }
     
-    /**
-     * Overrides the number of backup instances per partition.
-     */
     protected ElasticStatefulProcessingUnitDeployment numberOfBackupsPerPartition(int numberOfBackupsPerPartition) {
         this.numberOfBackupInstancesPerPartition = numberOfBackupsPerPartition;
         return this;
     }
     
-    /**
-     * Overrides the number of partition.
-     */
     protected ElasticStatefulProcessingUnitDeployment numberOfPartitions(int numberOfPartitions) {
         this.numberOfPartitions = numberOfPartitions;
         return this;
     }
 
-    /**
-     * Overrides the number of instances from the same partition per machine.
-     */
-    protected ElasticStatefulProcessingUnitDeployment maxParitionInstancesPerMachine(int maxPartitionInstancesPerMachine) {
-        this.maxPartitionInstancesPerMachine  = maxPartitionInstancesPerMachine;
+    protected ElasticStatefulProcessingUnitDeployment maxProcessingUnitInstancesFromSamePartitionPerMachine(int maxProcessingUnitInstancesFromSamePartitionPerMachine) {
+        this.maxProcessingUnitInstancesFromSamePartitionPerMachine  = maxProcessingUnitInstancesFromSamePartitionPerMachine;
         return this;
     }
     
@@ -113,9 +104,6 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
      * This figure is used to calculate the maximum number of partitions (maxNumberOfCpuCores/minNumberOfCpuCoresPerMachine) 
      */
     protected ElasticStatefulProcessingUnitDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
-        if (minNumberOfCpuCoresPerMachine > 0) {
-            throw new IllegalStateException("minNumberOfCpuCoresPerMachine has already been set");
-        }
         this.minNumberOfCpuCoresPerMachine = minNumberOfCpuCoresPerMachine;
         return this;
     }
@@ -219,7 +207,13 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     }
     
     public ElasticStatefulProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
-        minNumberOfCpuCoresPerMachine = config.getMinimumNumberOfCpuCoresPerMachine();
+        if (minNumberOfCpuCoresPerMachine <= 0) {
+            // if not overrided, try to figure out from machine provisioning
+            minNumberOfCpuCoresPerMachine = config.getMinimumNumberOfCpuCoresPerMachine();
+            if (minNumberOfCpuCoresPerMachine <= 0) {
+                throw new AdminException("Elastic Machine Provisioning configuration must supply the expected minimum number of CPU cores per machine.");
+            }
+        }
         return (ElasticStatefulProcessingUnitDeployment) super.machineProvisioning(config);
     }
     
@@ -237,7 +231,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         }
         
         deployment
-        .maxInstancesPerMachine(this.maxPartitionInstancesPerMachine)
+        .maxInstancesPerMachine(this.maxProcessingUnitInstancesFromSamePartitionPerMachine)
         .partitioned(numberOfInstances, this.numberOfBackupInstancesPerPartition);
       
         return deployment;

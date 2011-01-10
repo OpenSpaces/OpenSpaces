@@ -2,14 +2,16 @@ package org.openspaces.admin.pu.elastic;
 
 import java.io.File;
 
-import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
-import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.CapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.CapacityScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
+import org.openspaces.admin.pu.elastic.topology.AdvancedStatefulDeploymentTopology;
+import org.openspaces.core.util.MemoryUnit;
 
 import com.gigaspaces.security.directory.UserDetails;
 
@@ -19,7 +21,7 @@ import com.gigaspaces.security.directory.UserDetails;
  * @author itaif
  *
  */
-public class AdvancedElasticStatefulProcessingUnitDeployment extends ElasticStatefulProcessingUnitDeployment {
+public class AdvancedElasticStatefulProcessingUnitDeployment extends ElasticStatefulProcessingUnitDeployment implements AdvancedStatefulDeploymentTopology {
 
     public AdvancedElasticStatefulProcessingUnitDeployment(File processingUnit) {
         super(processingUnit);
@@ -37,10 +39,34 @@ public class AdvancedElasticStatefulProcessingUnitDeployment extends ElasticStat
         return (AdvancedElasticStatefulProcessingUnitDeployment) super.numberOfPartitions(numberOfPartitions);
     }
 
-    public AdvancedElasticStatefulProcessingUnitDeployment maxParitionInstancesPerMachine(int maxInstancesPerMachine) {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.maxParitionInstancesPerMachine(maxInstancesPerMachine);
+    public AdvancedElasticStatefulProcessingUnitDeployment maxProcessingUnitInstancesFromSamePartitionPerMachine(int maxProcessingUnitInstancesFromSamePartitionPerMachine) {
+        return (AdvancedElasticStatefulProcessingUnitDeployment) super.maxProcessingUnitInstancesFromSamePartitionPerMachine(maxProcessingUnitInstancesFromSamePartitionPerMachine);
     }
-   
+
+    public AdvancedElasticStatefulProcessingUnitDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
+        return (AdvancedElasticStatefulProcessingUnitDeployment) super.minNumberOfCpuCoresPerMachine(minNumberOfCpuCoresPerMachine);
+    }
+    
+    public AdvancedElasticStatefulProcessingUnitDeployment maxMemoryCapacity(int maxMemoryCapacity, MemoryUnit unit) {
+        super.maxMemoryCapacity(maxMemoryCapacity,unit);
+        return this;
+    }
+
+    public AdvancedElasticStatefulProcessingUnitDeployment maxMemoryCapacity(String maxMemoryCapacity) {
+        super.maxMemoryCapacity(maxMemoryCapacity);
+        return this;
+    }
+    
+    public AdvancedElasticStatefulProcessingUnitDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
+        super.memoryCapacityPerContainer(memoryCapacityPerContainer,unit);
+        return this;
+    }
+
+    public AdvancedElasticStatefulProcessingUnitDeployment memoryCapacityPerContainer(String memoryCapacityPerContainer) {
+        super.memoryCapacityPerContainer(memoryCapacityPerContainer);
+        return this;
+    }
+    
     public AdvancedElasticStatefulProcessingUnitDeployment scale(EagerScaleConfigurer beanConfig) {
         return scale(beanConfig.getConfig());
     }
@@ -126,8 +152,5 @@ public class AdvancedElasticStatefulProcessingUnitDeployment extends ElasticStat
     public AdvancedElasticStatefulProcessingUnitDeployment environmentVariable(String name, String value) {
         return (AdvancedElasticStatefulProcessingUnitDeployment) super.environmentVariable(name, value);
     }
-    
-    public AdvancedElasticStatefulProcessingUnitDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.minNumberOfCpuCoresPerMachine(minNumberOfCpuCoresPerMachine);
-    }
+
 }
