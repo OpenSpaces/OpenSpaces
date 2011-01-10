@@ -7,7 +7,6 @@ import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.bean.BeanConfigPropertiesManager;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
-import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.core.util.StringProperties;
 
@@ -306,17 +305,6 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         propertiesManager.disableAllBeans();
         propertiesManager.setBeanConfig(config.getBeanClassName(), config.getProperties());
         propertiesManager.enableBean(config.getBeanClassName());
-    }
-    
-    protected ElasticMachineProvisioningConfig getMachineProvisioningConfig() {
-        ElasticMachineProvisioningConfig beanConfig = null;
-        String[] enabledBeans = this.machineProvisioningPropertiesManager.getEnabledBeansClassNames();
-        if (enabledBeans.length > 0) {
-            beanConfig = 
-                (ElasticMachineProvisioningConfig)
-                    this.machineProvisioningPropertiesManager.getBeanConfig(enabledBeans[0]);
-        }
-        return beanConfig;
     }
     
 }

@@ -127,4 +127,7 @@ public class AdvancedElasticStatefulProcessingUnitDeployment extends ElasticStat
         return (AdvancedElasticStatefulProcessingUnitDeployment) super.environmentVariable(name, value);
     }
     
+    public AdvancedElasticStatefulProcessingUnitDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
+        return (AdvancedElasticStatefulProcessingUnitDeployment) super.minNumberOfCpuCoresPerMachine(minNumberOfCpuCoresPerMachine);
+    }
 }

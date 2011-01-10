@@ -1,6 +1,6 @@
 package org.openspaces.admin.memcached;
 
-import org.openspaces.admin.bean.BeanConfig;
+import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.CapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.CapacityScaleConfigurer;
@@ -167,7 +167,7 @@ public class ElasticMemcachedDeployment implements ElasticStatefulDeploymentTopo
         return this;
     }
 
-    public ElasticMemcachedDeployment machineProvisioning(BeanConfig config) {
+    public ElasticMemcachedDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
         deployment.machineProvisioning(config);
         return this;
     }

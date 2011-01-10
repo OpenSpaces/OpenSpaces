@@ -3,10 +3,13 @@ package org.openspaces.admin.pu.elastic;
 import java.io.File;
 import java.util.Map;
 
-import org.openspaces.admin.bean.BeanConfig;
+import org.openspaces.admin.Admin;
+import org.openspaces.admin.AdminException;
+import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
+import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.CapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.CapacityScaleConfigurer;
@@ -42,6 +45,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     private int numberOfPartitions;
     private int maxPartitionInstancesPerMachine = 1;
     private double maxNumberOfCpuCores = 1;
+    private double minNumberOfCpuCoresPerMachine;
     
     /**
      * Constructs a stateful processing unit deployment based on the specified processing unit name (should
@@ -104,6 +108,18 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return this;
     }
 
+    /**
+     * Overrides the minimum number of cpu cores per machines.
+     * This figure is used to calculate the maximum number of partitions (maxNumberOfCpuCores/minNumberOfCpuCoresPerMachine) 
+     */
+    protected ElasticStatefulProcessingUnitDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
+        if (minNumberOfCpuCoresPerMachine > 0) {
+            throw new IllegalStateException("minNumberOfCpuCoresPerMachine has already been set");
+        }
+        this.minNumberOfCpuCoresPerMachine = minNumberOfCpuCoresPerMachine;
+        return this;
+    }
+    
     public ElasticStatefulProcessingUnitDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
         super.memoryCapacityPerContainer(memoryCapacityPerContainer,unit);
         return this;
@@ -202,11 +218,12 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return (ElasticStatefulProcessingUnitDeployment) super.environmentVariable(name, value);
     }
     
-    public ElasticStatefulProcessingUnitDeployment machineProvisioning(BeanConfig config) {
+    public ElasticStatefulProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+        minNumberOfCpuCoresPerMachine = config.getMinimumNumberOfCpuCoresPerMachine();
         return (ElasticStatefulProcessingUnitDeployment) super.machineProvisioning(config);
     }
     
-    public ProcessingUnitDeployment toProcessingUnitDeployment() {
+    public ProcessingUnitDeployment toProcessingUnitDeployment(Admin admin) {
 
         ProcessingUnitDeployment deployment = super.toProcessingUnitDeployment();
         
@@ -216,7 +233,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
 
         int numberOfInstances = this.numberOfPartitions;
         if (numberOfInstances == 0) {
-            numberOfInstances = Math.max(calcNumberOfPartitionsFromMemoryRequirements(),calcNumberOfPartitionsFromCpuRequirements());
+            numberOfInstances = Math.max(calcNumberOfPartitionsFromMemoryRequirements(),calcNumberOfPartitionsFromCpuRequirements(admin));
         }
         
         deployment
@@ -240,10 +257,38 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return Math.max(1, numberOfPartitions);
     }
 
-    protected int calcNumberOfPartitionsFromCpuRequirements() {
-        int coresPerMachine = super.getMachineProvisioningConfig().getMinimumNumberOfCpuCoresPerMachine();
-        int maximumNumberOfActiveInstances =(int) Math.ceil(this.maxNumberOfCpuCores / coresPerMachine); 
-        return maximumNumberOfActiveInstances; 
+    protected int calcNumberOfPartitionsFromCpuRequirements(Admin admin) {
+        
+        if (minNumberOfCpuCoresPerMachine <= 0) {
+            minNumberOfCpuCoresPerMachine = findMinimumNumberOfCpuCoresPerMachine(admin);
+        }
+
+        int maximumNumberOfPrimaryInstances =(int) Math.ceil(this.maxNumberOfCpuCores / minNumberOfCpuCoresPerMachine); 
+        return maximumNumberOfPrimaryInstances; 
     }
 
+    private double findMinimumNumberOfCpuCoresPerMachine(Admin admin) {
+        // No machineProvisioning is defined means that the server will use whatever machine it could find.
+        // so we just go over all machines and calculate the minimum number of cpu cores per machine.
+        final GridServiceAgent[] agents = admin.getGridServiceAgents().getAgents();
+        if (agents.length == 0) {
+            throw new AdminException("Cannot determine minimum number of cpu cores per machine. Please use new AdvancedElasticStatefulProcessingUnit().minNumberOfCpuCoresPerMachine() to specify this figure.");
+        }
+        double minCoresPerMachine = getNumberOfCpuCores(agents[0].getMachine());
+        for (final GridServiceAgent agent : agents) {
+            final double cores = getNumberOfCpuCores(agent.getMachine());
+            if (cores <= 0) {
+                throw new AdminException("Cannot determine number of cpu cores on machine " + agent.getMachine().getHostAddress());
+            }
+            if (minCoresPerMachine < cores) {
+                minCoresPerMachine = cores; 
+            }
+        }
+        return minCoresPerMachine;
+    }
+
+    private double getNumberOfCpuCores(Machine machine) {
+        return machine.getOperatingSystem().getDetails().getAvailableProcessors();
+    }
+    
 }
