@@ -39,13 +39,13 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
         return this;
     }
     
-    public ElasticDataGridDeployment minMemoryCapacity(int minMemoryCapacity, MemoryUnit unit) {
-        deployment.minMemoryCapacity(minMemoryCapacity,unit);
+    public ElasticDataGridDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
+        deployment.memoryCapacityPerContainer(memoryCapacityPerContainer,unit);
         return this;
     }
 
-    public ElasticDataGridDeployment minMemoryCapacity(String minMemoryCapacity) {
-        deployment.minMemoryCapacity(minMemoryCapacity);
+    public ElasticDataGridDeployment memoryCapacityPerContainer(String memoryCapacityPerContainer) {
+        deployment.memoryCapacityPerContainer(memoryCapacityPerContainer);
         return this;
     }
     
@@ -143,8 +143,8 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
     }
     */
     
-    public ElasticDataGridDeployment useScript() {
-        deployment.useScript();
+    public ElasticDataGridDeployment useScriptToStartContainer() {
+        deployment.useScriptToStartContainer();
         return this;
     }
 

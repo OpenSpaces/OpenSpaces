@@ -8,6 +8,7 @@ import org.openspaces.admin.bean.BeanConfigPropertiesManager;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
+import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.core.util.StringProperties;
 
 import com.gigaspaces.security.directory.User;
@@ -133,7 +134,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
      * Will cause the {@link org.openspaces.admin.gsc.GridServiceContainer} to be started using a script
      * and not a pure Java process.
      */
-    protected AbstractElasticProcessingUnitDeployment useScript() {
+    protected AbstractElasticProcessingUnitDeployment useScriptToStartContainer() {
         containerConfig.setUseScript(true);
         return this;
     }
@@ -147,6 +148,17 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         return this;
     }
 
+    protected AbstractElasticProcessingUnitDeployment memoryCapacityPerContainer(String memoryCapacityPerContainer) {
+        commandLineArgument("-Xmx"+memoryCapacityPerContainer);
+        commandLineArgument("-Xms"+memoryCapacityPerContainer);
+        return this;
+    }
+    
+    protected AbstractElasticProcessingUnitDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
+        memoryCapacityPerContainer(unit.toMegaBytes(memoryCapacityPerContainer)+MemoryUnit.MEGABYTES.getPostfix());
+        return this;
+    }
+    
     /**
      * Will add a JVM level argument when the process is executed using pure JVM. For example, the memory
      * can be controlled using <code>-Xmx512m</code>.

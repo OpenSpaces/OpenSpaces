@@ -3,6 +3,7 @@ package org.openspaces.admin.memcached;
 import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.pu.elastic.ElasticReplicatedProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.topology.ElasticReplicatedDeploymentTopology;
+import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.pu.container.servicegrid.deploy.MemcachedDeploy;
 
 import com.gigaspaces.security.directory.UserDetails;
@@ -76,8 +77,8 @@ public class ElasticReplicatedMemcachedDeployment implements ElasticReplicatedDe
         return this;
     }
     
-    public ElasticReplicatedMemcachedDeployment useScript() {
-        deployment.useScript();
+    public ElasticReplicatedMemcachedDeployment useScriptToStartContainer() {
+        deployment.useScriptToStartContainer();
         return this;
     }
 
@@ -98,6 +99,18 @@ public class ElasticReplicatedMemcachedDeployment implements ElasticReplicatedDe
 
     public ElasticReplicatedMemcachedDeployment machineProvisioning(BeanConfig config) {
         deployment.machineProvisioning(config);
+        return this;
+    }
+
+
+    public ElasticReplicatedMemcachedDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
+        deployment.memoryCapacityPerContainer(memoryCapacityPerContainer, unit);
+        return this;
+    }
+
+
+    public ElasticReplicatedMemcachedDeployment memoryCapacityPerContainer(String memoryCapacityPerContainer) {
+        deployment.memoryCapacityPerContainer(memoryCapacityPerContainer);
         return this;
     }
 

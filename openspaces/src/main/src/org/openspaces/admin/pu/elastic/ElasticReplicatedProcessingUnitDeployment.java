@@ -8,6 +8,7 @@ import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDep
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticReplicatedDeploymentTopology;
+import org.openspaces.core.util.MemoryUnit;
 
 import com.gigaspaces.security.directory.UserDetails;
 
@@ -81,8 +82,8 @@ public class ElasticReplicatedProcessingUnitDeployment extends AbstractElasticPr
         return (ElasticReplicatedProcessingUnitDeployment) super.isolation(isolation);
     }
 */    
-    public ElasticReplicatedProcessingUnitDeployment useScript() {
-        return (ElasticReplicatedProcessingUnitDeployment) super.useScript();
+    public ElasticReplicatedProcessingUnitDeployment useScriptToStartContainer() {
+        return (ElasticReplicatedProcessingUnitDeployment) super.useScriptToStartContainer();
     }
 
     public ElasticReplicatedProcessingUnitDeployment overrideCommandLineArguments() {
@@ -100,4 +101,15 @@ public class ElasticReplicatedProcessingUnitDeployment extends AbstractElasticPr
     public ElasticReplicatedProcessingUnitDeployment machineProvisioning(BeanConfig config) {
         return (ElasticReplicatedProcessingUnitDeployment) super.machineProvisioning(config);
     }
+    
+    public ElasticReplicatedProcessingUnitDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
+        super.memoryCapacityPerContainer(memoryCapacityPerContainer,unit);
+        return this;
+    }
+
+    public ElasticReplicatedProcessingUnitDeployment memoryCapacityPerContainer(String memoryCapacityPerContainer) {
+        super.memoryCapacityPerContainer(memoryCapacityPerContainer);
+        return this;
+    }
+
 }

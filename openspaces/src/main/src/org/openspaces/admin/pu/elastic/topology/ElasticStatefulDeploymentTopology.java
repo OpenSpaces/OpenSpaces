@@ -15,7 +15,7 @@ public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopo
     /**
      * Specifies an estimate of the maximum memory capacity for this processing unit.
      * The actual maximum memory capacity will be at least the specified maximum.
-     * Requires the vmInputArgument("-Xmx...") property.
+     * Requires the memoryCapacityPerContainer() property.
      * The memory capacity value is the sum of both the primary and backup instances memory capacity.
      */
     ElasticStatefulDeploymentTopology maxMemoryCapacity(int maxMemoryCapacity, MemoryUnit unit);
@@ -23,26 +23,10 @@ public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopo
     /**
      * Specifies an estimate of the minimum memory capacity for this processing unit.
      * The actual maximum memory capacity will be at least the specified maximum.
-     * Requires the vmInputArgument("-Xmx...") property.
+     * Requires the memoryCapacityPerContainer() property.
      * The memory capacity value is the sum of both the primary and backup instances memory capacity.
      */
     ElasticStatefulDeploymentTopology maxMemoryCapacity(String maxMemoryCapacity);
-
-    /**
-     * Specifies an estimate of the minimum memory capacity for this processing unit.
-     * The actual minimum memory capacity will be at least the specified minimum.
-     * Requires the vmInputArgument("-Xmx...") property.
-     * The memory capacity value is the sum of both the primary and backup instances memory capacity.
-     */
-    ElasticStatefulDeploymentTopology minMemoryCapacity(int minMemoryCapacity, MemoryUnit unit);
-
-    /**
-     * Specifies an estimate of the minimum memory capacity for this processing unit.
-     * The actual minimum memory capacity will be at least the specified minimum.
-     * Requires the vmInputArgument("-Xmx...") property.
-     * The memory capacity value is the sum of both the primary and backup instances memory capacity.
-     */
-    ElasticStatefulDeploymentTopology minMemoryCapacity(String minMemoryCapacity);
 
     /**
      * Specifies an estimate for the maximum total number of cpu cores used by this processing unit.

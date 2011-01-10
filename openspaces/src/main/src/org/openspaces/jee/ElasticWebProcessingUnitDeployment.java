@@ -10,6 +10,7 @@ import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticWebDeploymentTopology;
+import org.openspaces.core.util.MemoryUnit;
 
 import com.gigaspaces.security.directory.UserDetails;
 
@@ -94,8 +95,8 @@ public class ElasticWebProcessingUnitDeployment extends AbstractElasticProcessin
         return (ElasticWebProcessingUnitDeployment) super.userDetails(userName, password);
     }
     
-    public ElasticWebProcessingUnitDeployment useScript() {
-        return (ElasticWebProcessingUnitDeployment) super.useScript();
+    public ElasticWebProcessingUnitDeployment useScriptToStartContainer() {
+        return (ElasticWebProcessingUnitDeployment) super.useScriptToStartContainer();
     }
 
     public ElasticWebProcessingUnitDeployment overrideCommandLineArguments() {
@@ -113,4 +114,15 @@ public class ElasticWebProcessingUnitDeployment extends AbstractElasticProcessin
     public ElasticWebProcessingUnitDeployment machineProvisioning(BeanConfig config) {
         return (ElasticWebProcessingUnitDeployment) super.machineProvisioning(config);
     }
+    
+    public ElasticWebProcessingUnitDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
+        super.memoryCapacityPerContainer(memoryCapacityPerContainer,unit);
+        return this;
+    }
+
+    public ElasticWebProcessingUnitDeployment memoryCapacityPerContainer(String memoryCapacityPerContainer) {
+        super.memoryCapacityPerContainer(memoryCapacityPerContainer);
+        return this;
+    }
+
 }

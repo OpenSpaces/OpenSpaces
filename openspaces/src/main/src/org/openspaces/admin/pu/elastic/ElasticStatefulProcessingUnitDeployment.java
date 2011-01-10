@@ -8,14 +8,14 @@ import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDep
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.elastic.config.CapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.CapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.CapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.config.CapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatefulDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
@@ -37,8 +37,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     public static final String MIN_MEMORY_CAPACITY_MEGABYTES_DYNAMIC_PROPERTY = "min-memory-capacity-megabytes";
     
     Map<String,String> scaleStrategy;
-    private long maxMemoryCapacityMegabytes;
-    private long minMemoryCapacityMegabytes;
+    private long maxMemoryCapacityInMB;
     private int numberOfBackupInstancesPerPartition = 1;
     private int numberOfPartitions;
     private int maxPartitionInstancesPerMachine = 1;
@@ -62,25 +61,15 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     }
 
     public ElasticStatefulProcessingUnitDeployment maxMemoryCapacity(int maxMemoryCapacity, MemoryUnit unit) {
-        this.maxMemoryCapacityMegabytes = unit.toMegaBytes(maxMemoryCapacity);
+        this.maxMemoryCapacityInMB = unit.toMegaBytes(maxMemoryCapacity);
         return this;
     }
 
     public ElasticStatefulProcessingUnitDeployment maxMemoryCapacity(String maxMemoryCapacity) {
-        this.maxMemoryCapacityMegabytes = MemoryUnit.toMegaBytes(maxMemoryCapacity);
-        return this;
-    }
-    
-    public ElasticStatefulProcessingUnitDeployment minMemoryCapacity(int minMemoryCapacity, MemoryUnit unit) {
-        this.minMemoryCapacityMegabytes = unit.toMegaBytes(minMemoryCapacity);
+        this.maxMemoryCapacityInMB = MemoryUnit.toMegaBytes(maxMemoryCapacity);
         return this;
     }
 
-    public ElasticStatefulProcessingUnitDeployment minMemoryCapacity(String minMemoryCapacity) {
-        this.minMemoryCapacityMegabytes = MemoryUnit.toMegaBytes(minMemoryCapacity);
-        return this;
-    }
-    
     public ElasticStatefulProcessingUnitDeployment highlyAvailable(boolean highlyAvailable) {
         numberOfBackupsPerPartition(highlyAvailable ? 1 : 0);
         return this;
@@ -114,7 +103,17 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         this.maxNumberOfCpuCores = maxNumberOfCpuCores;
         return this;
     }
-    
+
+    public ElasticStatefulProcessingUnitDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
+        super.memoryCapacityPerContainer(memoryCapacityPerContainer,unit);
+        return this;
+    }
+
+    public ElasticStatefulProcessingUnitDeployment memoryCapacityPerContainer(String memoryCapacityPerContainer) {
+        super.memoryCapacityPerContainer(memoryCapacityPerContainer);
+        return this;
+    }
+
     public ElasticStatefulProcessingUnitDeployment scale(EagerScaleConfigurer strategy) {
         return scale(strategy.getConfig());
     }
@@ -187,8 +186,8 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     }
     */
     
-    public ElasticStatefulProcessingUnitDeployment useScript() {
-        return (ElasticStatefulProcessingUnitDeployment) super.useScript();
+    public ElasticStatefulProcessingUnitDeployment useScriptToStartContainer() {
+        return (ElasticStatefulProcessingUnitDeployment) super.useScriptToStartContainer();
     }
 
     public ElasticStatefulProcessingUnitDeployment overrideCommandLineArguments() {
@@ -211,14 +210,10 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
 
         ProcessingUnitDeployment deployment = super.toProcessingUnitDeployment();
         
-        if (this.maxMemoryCapacityMegabytes == 0) {
+        if (this.maxMemoryCapacityInMB == 0) {
             throw new IllegalStateException("maxMemoryCapacity is too low.");
         }
 
-        if (this.maxMemoryCapacityMegabytes >0 && this.minMemoryCapacityMegabytes == 0) {
-            this.minMemoryCapacityMegabytes = this.maxMemoryCapacityMegabytes;
-        }
-        
         int numberOfInstances = this.numberOfPartitions;
         if (numberOfInstances == 0) {
             numberOfInstances = Math.max(calcNumberOfPartitionsFromMemoryRequirements(),calcNumberOfPartitionsFromCpuRequirements());
@@ -239,7 +234,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
             throw new IllegalStateException("-Xmx CommandLineArgument is undefined.");    
         }
                 
-        double totalNumberOfInstances = Math.ceil(((double)maxMemoryCapacityMegabytes)/maximumJavaHeapSizeMegabytes);
+        double totalNumberOfInstances = Math.ceil(((double)maxMemoryCapacityInMB)/maximumJavaHeapSizeMegabytes);
         int numberOfPartitions = (int) Math.ceil(totalNumberOfInstances / (numberOfBackupInstancesPerPartition+1));
                 
         return Math.max(1, numberOfPartitions);
@@ -250,4 +245,5 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         int maximumNumberOfActiveInstances =(int) Math.ceil(this.maxNumberOfCpuCores / coresPerMachine); 
         return maximumNumberOfActiveInstances; 
     }
+
 }

@@ -22,7 +22,6 @@ public class TestESM {
             
             ProcessingUnit pu = gsm.
             deploy(new ElasticDataGridDeployment("mygrid")
-            .minMemoryCapacity("1000m")
             .maxMemoryCapacity("2000m")
             .commandLineArgument("-Xmx250m")            
             );

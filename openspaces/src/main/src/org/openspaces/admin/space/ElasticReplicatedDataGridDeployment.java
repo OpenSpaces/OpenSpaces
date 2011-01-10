@@ -2,7 +2,9 @@ package org.openspaces.admin.space;
 
 import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
+import org.openspaces.admin.pu.elastic.topology.ElasticDeploymentTopology;
 import org.openspaces.admin.pu.elastic.topology.ElasticReplicatedDeploymentTopology;
+import org.openspaces.core.util.MemoryUnit;
 
 import com.gigaspaces.security.directory.UserDetails;
 
@@ -74,8 +76,8 @@ public class ElasticReplicatedDataGridDeployment implements ElasticReplicatedDep
     }
     */
     
-    public ElasticReplicatedDataGridDeployment useScript() {
-        deployment.useScript();
+    public ElasticReplicatedDataGridDeployment useScriptToStartContainer() {
+        deployment.useScriptToStartContainer();
         return this;
     }
 
@@ -99,4 +101,15 @@ public class ElasticReplicatedDataGridDeployment implements ElasticReplicatedDep
         return this;
     }
 
+    public ElasticDeploymentTopology memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
+        deployment.memoryCapacityPerContainer(memoryCapacityPerContainer, unit);
+        return this;
+    }
+
+    public ElasticDeploymentTopology memoryCapacityPerContainer(String memoryCapacityPerContainer) {
+        deployment.memoryCapacityPerContainer(memoryCapacityPerContainer);
+        return this;
+    }
+
+    
 }

@@ -1,6 +1,7 @@
 package org.openspaces.admin.pu.elastic.topology;
 
 import org.openspaces.admin.bean.BeanConfig;
+import org.openspaces.core.util.MemoryUnit;
 
 import com.gigaspaces.security.directory.UserDetails;
 
@@ -74,7 +75,7 @@ public interface ElasticDeploymentTopology {
      * Will cause the {@link org.openspaces.admin.gsc.GridServiceContainer} to be started using a script
      * and not a pure Java process.
      */
-    ElasticDeploymentTopology useScript();
+    ElasticDeploymentTopology useScriptToStartContainer();
 
     /**
      * Will cause JVM options added using {@link #commandLineArgument(String)} to override all the vm arguments
@@ -98,5 +99,22 @@ public interface ElasticDeploymentTopology {
      * For example, the bean could delegate the request to a cloud provider.  
      */
     ElasticDeploymentTopology machineProvisioning(BeanConfig config);
+    
+    /**
+     * Specifies the the heap size per container (operating system process)
+     * For example: 
+     * memoryCapacityPerContainer(256,MemoryUnit.MEGABYTES) is equivalent to
+     * commandLineArgument("-Xmx256m").commandLineArgument("-Xms256m")
+     */
+    ElasticDeploymentTopology memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit);
+    
+    /**
+     * Specifies the the heap size per container (operating system process)
+     * For example: 
+     * memoryCapacityPerContainer("256m") is equivalent to
+     * commandLineArgument("-Xmx256m").commandLineArgument("-Xms256m")
+     */
+    ElasticDeploymentTopology memoryCapacityPerContainer(String memoryCapacityPerContainer);
+
 
 }

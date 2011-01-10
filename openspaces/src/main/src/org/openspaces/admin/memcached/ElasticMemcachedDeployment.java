@@ -2,14 +2,14 @@ package org.openspaces.admin.memcached;
 
 import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
-import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
-import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.CapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.CapacityScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfigurer;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatefulDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.pu.container.servicegrid.deploy.MemcachedDeploy;
@@ -42,18 +42,18 @@ public class ElasticMemcachedDeployment implements ElasticStatefulDeploymentTopo
         return this;
     }
     
-    public ElasticMemcachedDeployment minMemoryCapacity(int minMemoryCapacity, MemoryUnit unit) {
-        deployment.minMemoryCapacity(minMemoryCapacity,unit);
-        return this;
-    }
-
-    public ElasticMemcachedDeployment minMemoryCapacity(String minMemoryCapacity) {
-        deployment.minMemoryCapacity(minMemoryCapacity);
-        return this;
-    }
-
-    public ElasticStatefulDeploymentTopology maxNumberOfCpuCores(int maxNumberOfCpuCores) {
+    public ElasticMemcachedDeployment maxNumberOfCpuCores(int maxNumberOfCpuCores) {
         deployment.maxNumberOfCpuCores(maxNumberOfCpuCores);
+        return this;
+    }
+    
+    public ElasticMemcachedDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
+        deployment.memoryCapacityPerContainer(memoryCapacityPerContainer,unit);
+        return this;
+    }
+
+    public ElasticMemcachedDeployment memoryCapacityPerContainer(String memoryCapacityPerContainer) {
+        deployment.memoryCapacityPerContainer(memoryCapacityPerContainer);
         return this;
     }
     
@@ -142,8 +142,8 @@ public class ElasticMemcachedDeployment implements ElasticStatefulDeploymentTopo
         return this;
     }
 */    
-    public ElasticMemcachedDeployment useScript() {
-        deployment.useScript();
+    public ElasticMemcachedDeployment useScriptToStartContainer() {
+        deployment.useScriptToStartContainer();
         return this;
     }
 

@@ -111,8 +111,8 @@ public class AdvancedElasticStatefulProcessingUnitDeployment extends ElasticStat
         return (AdvancedElasticStatefulProcessingUnitDeployment) super.userDetails(userName, password);
     }
     
-    public AdvancedElasticStatefulProcessingUnitDeployment useScript() {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.useScript();
+    public AdvancedElasticStatefulProcessingUnitDeployment useScriptToStartContainer() {
+        return (AdvancedElasticStatefulProcessingUnitDeployment) super.useScriptToStartContainer();
     }
 
     public AdvancedElasticStatefulProcessingUnitDeployment overrideCommandLineArguments() {
