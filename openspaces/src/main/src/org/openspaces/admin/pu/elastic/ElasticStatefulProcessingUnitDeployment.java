@@ -93,6 +93,11 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         this.maxProcessingUnitInstancesFromSamePartitionPerMachine  = maxProcessingUnitInstancesFromSamePartitionPerMachine;
         return this;
     }
+
+    protected ElasticStatefulProcessingUnitDeployment allowDeploymentOnManagementMachine() {
+        super.allowDeploymentOnManagementMachine();
+        return this;
+    }
     
     public ElasticStatefulProcessingUnitDeployment maxNumberOfCpuCores(int maxNumberOfCpuCores) {
         this.maxNumberOfCpuCores = maxNumberOfCpuCores;

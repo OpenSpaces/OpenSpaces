@@ -97,8 +97,8 @@ public class ScaleBeanServer {
 
     private void setGridServiceContainerConfig(Map<String, String> elasticProperties) {
         beanServer.replaceBeanAssignableTo(
-                new Class[]{GridServiceContainerConfigBean.class}, 
-                GridServiceContainerConfigBean.class.getName(),
+                new Class[]{ElasticConfigBean.class}, 
+                ElasticConfigBean.class.getName(),
                 elasticProperties); 
     }
 

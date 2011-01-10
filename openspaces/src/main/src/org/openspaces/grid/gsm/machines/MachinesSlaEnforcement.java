@@ -214,7 +214,7 @@ public class MachinesSlaEnforcement implements
             }
             
             if (sla.getMachineProvisioning() == null) {
-                NonBlockingElasticMachineProvisioning defaultMachineProvisioning = getDefaultMachineProvisioningForProcessingUnit(pu);
+                NonBlockingElasticMachineProvisioning defaultMachineProvisioning = getDefaultMachineProvisioningForProcessingUnit(pu,sla.getAllowDeploymentOnManagementMachine());
                 sla.setMachineProvisioning(defaultMachineProvisioning);
             }
             
@@ -238,6 +238,12 @@ public class MachinesSlaEnforcement implements
         private boolean enforceSlaInternal(MachinesSlaPolicy sla)
                 throws ConflictingOperationInProgressException {
 
+            if (sla.getAllowDeploymentOnManagementMachine()) {
+                for (GridServiceAgent agent : getAllManagementMachines()) {
+                    this.getAgentsStarted().add(agent);
+                }
+            }
+            
             cleanAgentsMarkedForShutdown(sla.getMachineProvisioning());
             cleanFutureAgents();
 
@@ -307,13 +313,12 @@ public class MachinesSlaEnforcement implements
 
                 // mark agents for shutdown if there are not enough of them (scale in)
                 // give priority to agents that do not host a GSM/LUS since we want to evacuate those last.
-                for (GridServiceAgent agent : getGridServiceAgents()) {
+                for (GridServiceAgent agent : MachinesSlaUtils.sortManagementLast(getGridServiceAgents())) {
                     long machineMemory = MachinesSlaUtils.getMemoryInMB(agent.getMachine(), sla);
                     double machineCpu = MachinesSlaUtils.getCpu(agent.getMachine());
                     if (surplusMemory >= machineMemory && surplusCpu >= machineCpu && surplusMachines > 0) {
 
-                        // mark machine for shutdown unless it is a management
-                        // machine
+                        // mark machine for shutdown
                         this.getAgentsPendingShutdown().add(agent);
                         this.getAgentsStarted().remove(agent);
                         surplusMemory -= machineMemory;
@@ -448,6 +453,18 @@ public class MachinesSlaEnforcement implements
             return slaReached;
         }
 
+        private Set<GridServiceAgent> getAllManagementMachines() {
+            final Set<GridServiceAgent> agents = new HashSet<GridServiceAgent>();
+            for (final GridServiceAgent agent : admin.getGridServiceAgents()) {
+                if (MachinesSlaUtils.isManagementRunningOnGridServiceAgent(agent)) {
+                    agents.add(agent);
+                }
+            }
+            
+            agents.removeAll(getAllUsedAgents());
+            return agents;
+        }
+
         /**
          * Kill agents marked for shutdown that no longer manage containers. 
          * @param machineProvisioning
@@ -463,7 +480,10 @@ public class MachinesSlaEnforcement implements
                     logger.info("Agent machine " + agent.getMachine().getHostAddress() + " is confirmed to be shutdown.");
                     getAgentsPendingShutdown().remove(agent);
                 } 
-                
+                else if (MachinesSlaUtils.isManagementRunningOnGridServiceAgent(agent)) {
+                    logger.info("Agent machine " + agent.getMachine().getHostAddress() + " is not needed for pu " + pu.getName());
+                    getAgentsPendingShutdown().remove(agent);
+                }
                 else if (numberOfChildProcesses == 0) {
                    // nothing running on this agent (not even GSM/LUS). Get rid of it.
                    logger.info(
@@ -572,15 +592,17 @@ public class MachinesSlaEnforcement implements
      *  
      * @return
      */
-    private NonBlockingElasticMachineProvisioning getDefaultMachineProvisioningForProcessingUnit(ProcessingUnit pu) {
-        return new DefaultMachineProvisioning(pu);
+    private NonBlockingElasticMachineProvisioning getDefaultMachineProvisioningForProcessingUnit(ProcessingUnit pu, boolean allowDeploymentOnManagementMachine) {
+        return new DefaultMachineProvisioning(pu, allowDeploymentOnManagementMachine);
     }
     
     class DefaultMachineProvisioning implements NonBlockingElasticMachineProvisioning {
 
         private final ProcessingUnit pu;
-        DefaultMachineProvisioning(ProcessingUnit pu) {
+        private final boolean allowDeploymentOnManagementMachine;
+        DefaultMachineProvisioning(ProcessingUnit pu, boolean allowDeploymentOnManagementMachine) {
             this.pu = pu;
+            this.allowDeploymentOnManagementMachine = allowDeploymentOnManagementMachine;
         }
         
         /**
@@ -701,12 +723,14 @@ public class MachinesSlaEnforcement implements
         /**
          * finds a grid service agent that is not in the specified list and not used by GSM/LUS
          * @param usedAgents
+         * @param allowDeploymentOnManagementMachine 
          * @return agent if found, or null if no free machines exist.
          */
         private GridServiceAgent findFreeAgent(Set<GridServiceAgent> usedAgents) {
-            for (GridServiceAgent agent : admin.getGridServiceAgents()) {
+            for (GridServiceAgent agent : MachinesSlaUtils.sortManagementLast(admin.getGridServiceAgents().getAgents())) {
                 if (!usedAgents.contains(agent) &&
-                    !MachinesSlaUtils.isManagementRunningOnGridServiceAgent(agent)) {
+                    (allowDeploymentOnManagementMachine || 
+                     !MachinesSlaUtils.isManagementRunningOnGridServiceAgent(agent))) {
                     return agent;
                 }
             }

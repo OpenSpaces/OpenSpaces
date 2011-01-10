@@ -95,15 +95,28 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
            }
         }
         
-        if (instance instanceof GridServiceContainerConfigAware) {
-            List<Bean> injectedInstances = beanServer.getEnabledBeanAssignableTo(
-                    new Class[]{ GridServiceContainerConfigBean.class });
-            for (Bean injectedInstance : injectedInstances) {
+        ElasticConfigBean elasticConfigBean = findElasticConfigBean(beanServer);
+        if (elasticConfigBean != null) {
+            if (instance instanceof GridServiceContainerConfigAware) {
                 ((GridServiceContainerConfigAware)instance)
-                    .setGridServiceContainerConfig(((GridServiceContainerConfigBean)injectedInstance).getGridServiceContainerConfig());
-                break;
+                    .setGridServiceContainerConfig((elasticConfigBean.getGridServiceContainerConfig()));
+            }
+            
+            if (instance instanceof AdvancedElasticPropertiesConfigAware) {
+                ((AdvancedElasticPropertiesConfigAware)instance)
+                    .setAdvancedElasticPropertiesConfig((elasticConfigBean.getAdvancedElasticPropertiesConfig()));
             }
         }
         return instance;
+    }
+    
+    ElasticConfigBean findElasticConfigBean(BeanServer<Bean> beanServer) {
+        
+        List<Bean> injectedInstances = beanServer.getEnabledBeanAssignableTo(
+                new Class[]{ ElasticConfigBean.class });
+        if (!injectedInstances.isEmpty()) {
+            return (ElasticConfigBean) injectedInstances.get(0);
+        }
+        return null;
     }
 }

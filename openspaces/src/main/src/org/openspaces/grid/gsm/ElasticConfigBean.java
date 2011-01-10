@@ -3,15 +3,20 @@ package org.openspaces.grid.gsm;
 import java.util.Map;
 
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.internal.pu.elastic.AdvancedElasticPropertiesConfig;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.core.bean.Bean;
 
-public class GridServiceContainerConfigBean implements Bean {
+public class ElasticConfigBean implements Bean {
 
     Map<String,String> properties;
     
     GridServiceContainerConfig getGridServiceContainerConfig() {
         return new GridServiceContainerConfig(properties);
+    }
+    
+    AdvancedElasticPropertiesConfig getAdvancedElasticPropertiesConfig() {
+        return new AdvancedElasticPropertiesConfig(properties);
     }
 
     public void afterPropertiesSet() throws Exception {

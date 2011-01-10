@@ -1,5 +1,6 @@
 package org.openspaces.admin.space;
 
+import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.CapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.CapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
@@ -27,8 +28,9 @@ public class AdvancedElasticDataGridDeployment extends ElasticDataGridDeployment
         return (AdvancedElasticDataGridDeployment) super.numberOfPartitions(numberOfPartitions);
     }
 
-    public AdvancedElasticDataGridDeployment maxProcessingUnitInstancesFromSamePartitionPerMachine(int maxInstancesPerMachine) {
-        return (AdvancedElasticDataGridDeployment) super.maxProcessingUnitInstancesFromSamePartitionPerMachine(maxInstancesPerMachine);
+    public AdvancedElasticDataGridDeployment allowDeploymentOnSingleMachine() {
+        super.allowDeploymentOnSingleMachine();
+        return this;
     }
 
     public AdvancedElasticDataGridDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
@@ -52,6 +54,11 @@ public class AdvancedElasticDataGridDeployment extends ElasticDataGridDeployment
 
     public AdvancedElasticDataGridDeployment memoryCapacityPerContainer(String memoryCapacityPerContainer) {
         super.memoryCapacityPerContainer(memoryCapacityPerContainer);
+        return this;
+    }
+    
+    public AdvancedElasticDataGridDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+        super.machineProvisioning(config);
         return this;
     }
     
@@ -140,6 +147,5 @@ public class AdvancedElasticDataGridDeployment extends ElasticDataGridDeployment
     public AdvancedElasticDataGridDeployment environmentVariable(String name, String value) {
         return (AdvancedElasticDataGridDeployment) super.environmentVariable(name, value);
     }
-
 
 }

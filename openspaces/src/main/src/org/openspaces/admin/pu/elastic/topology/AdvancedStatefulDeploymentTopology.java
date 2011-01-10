@@ -15,10 +15,10 @@ public interface AdvancedStatefulDeploymentTopology extends ElasticStatefulDeplo
     public AdvancedStatefulDeploymentTopology numberOfPartitions(int numberOfPartitions);
 
     /**
-     * Overrides the maximum number of processing unit instances from the same partition allowed on the same machine.
-     * The value 0 disables the limitation, which allows deploying a processing unit on a single machine.
+     * Allows deploying the processing unit on a single machine, by lifting the limitation
+     * for primary and backup processing unit instances from the same partition to be deployed on different machines. 
      */
-    public AdvancedStatefulDeploymentTopology maxProcessingUnitInstancesFromSamePartitionPerMachine(int maxProcessingUnitInstancesFromSamePartitionPerMachine);
+    public AdvancedStatefulDeploymentTopology allowDeploymentOnSingleMachine();
 
     /**
      * Overrides the minimum number of CPU cores per machine assumption.

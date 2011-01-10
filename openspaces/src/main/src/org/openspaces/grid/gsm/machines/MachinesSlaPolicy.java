@@ -10,6 +10,7 @@ public class MachinesSlaPolicy extends ServiceLevelAgreementPolicy {
     private int minimumNumberOfMachines;
     private long reservedMemoryCapacityPerMachineInMB;
     private long containerMemoryCapacityInMB;
+    private boolean allowDeploymentOnManagementMachine;
     
     public void setCpuCapacity(double cpu) {
         this.cpu = cpu;
@@ -59,6 +60,15 @@ public class MachinesSlaPolicy extends ServiceLevelAgreementPolicy {
     public long getContainerMemoryCapacityInMB() {
         return this.containerMemoryCapacityInMB;
     }
+
+
+    public boolean getAllowDeploymentOnManagementMachine() {
+        return this.allowDeploymentOnManagementMachine;
+    }
+    
+    public void setAllowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
+        this.allowDeploymentOnManagementMachine = allowDeploymentOnManagementMachine;
+    }
     
     @Override
     public boolean equals(Object other) {
@@ -67,6 +77,8 @@ public class MachinesSlaPolicy extends ServiceLevelAgreementPolicy {
         ((MachinesSlaPolicy)other).cpu == this.cpu &&
         ((MachinesSlaPolicy)other).reservedMemoryCapacityPerMachineInMB == this.reservedMemoryCapacityPerMachineInMB &&
         ((MachinesSlaPolicy)other).containerMemoryCapacityInMB == this.containerMemoryCapacityInMB &&
-        ((MachinesSlaPolicy)other).minimumNumberOfMachines == this.minimumNumberOfMachines;
+        ((MachinesSlaPolicy)other).minimumNumberOfMachines == this.minimumNumberOfMachines &&
+        ((MachinesSlaPolicy)other).allowDeploymentOnManagementMachine == this.allowDeploymentOnManagementMachine;
     }
+
 }

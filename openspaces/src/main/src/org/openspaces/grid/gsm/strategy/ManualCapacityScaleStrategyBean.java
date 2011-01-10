@@ -14,10 +14,12 @@ import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.pu.elastic.AdvancedElasticPropertiesConfig;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
+import org.openspaces.grid.gsm.AdvancedElasticPropertiesConfigAware;
 import org.openspaces.grid.gsm.ElasticMachineProvisioningAware;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
 import org.openspaces.grid.gsm.ProcessingUnitAware;
@@ -41,6 +43,7 @@ public class ManualCapacityScaleStrategyBean
                ProcessingUnitAware,
                ElasticMachineProvisioningAware,
                GridServiceContainerConfigAware,
+               AdvancedElasticPropertiesConfigAware,
                Runnable {
 
     private static final Log logger = LogFactory.getLog(ManualCapacityScaleStrategyBean.class);
@@ -57,6 +60,7 @@ public class ManualCapacityScaleStrategyBean
     private ProcessingUnit pu;
     private GridServiceContainerConfig containersConfig;
     private ProcessingUnitSchemaConfig schemaConfig;
+    private AdvancedElasticPropertiesConfig advancedElasticPropertiesConfig;
     
     // created by afterPropertiesSet()
     private ScheduledFuture<?> scheduledTask;
@@ -102,6 +106,10 @@ public class ManualCapacityScaleStrategyBean
          this.containersConfig = containersConfig;
     }
      
+    public void setAdvancedElasticPropertiesConfig(AdvancedElasticPropertiesConfig advancedElasticPropertiesConfig) {
+        this.advancedElasticPropertiesConfig = advancedElasticPropertiesConfig;
+    }
+    
     public void afterPropertiesSet() {
         if (slaConfig == null) {
             throw new IllegalStateException("slaConfig cannot be null.");
@@ -286,7 +294,7 @@ public class ManualCapacityScaleStrategyBean
         final MachinesSlaPolicy sla = new MachinesSlaPolicy();
         sla.setMachineProvisioning(machineProvisioning);
         sla.setCpuCapacity(slaConfig.getNumberOfCpuCores());
-        
+        sla.setAllowDeploymentOnManagementMachine(advancedElasticPropertiesConfig.getAllowDeploymentOnManagementMachine());
         sla.setMemoryCapacityInMB(memoryInMB);
         sla.setMinimumNumberOfMachines(minimumNumberOfMachines);
         sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());

@@ -1,6 +1,11 @@
 package org.openspaces.grid.gsm.machines;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.openspaces.admin.gsa.GridServiceAgent;
@@ -81,5 +86,21 @@ public class MachinesSlaUtils {
             machine.getOperatingSystem()
             .getDetails()
             .getTotalPhysicalMemorySizeInMB();
+    }
+
+    public static GridServiceAgent[] sortManagementLast(GridServiceAgent[] agents) {
+        List<GridServiceAgent> sortedAgents = new ArrayList<GridServiceAgent>(Arrays.asList(agents));
+        Collections.sort(sortedAgents,new Comparator<GridServiceAgent>() {
+
+            public int compare(GridServiceAgent agent1, GridServiceAgent agent2) {
+                boolean management1 = isManagementRunningOnGridServiceAgent(agent1);
+                boolean management2 = isManagementRunningOnGridServiceAgent(agent2);
+                if (management1 && !management2) return 1; // agent2 is smaller since no management
+                if (management2 && !management1) return -1;// agent1 is smaller since no management
+                return 0;
+            }
+        });
+        
+        return sortedAgents.toArray(new GridServiceAgent[sortedAgents.size()]);
     }
 }

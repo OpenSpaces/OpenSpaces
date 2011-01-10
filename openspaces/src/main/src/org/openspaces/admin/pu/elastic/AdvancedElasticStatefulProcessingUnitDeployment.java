@@ -39,8 +39,10 @@ public class AdvancedElasticStatefulProcessingUnitDeployment extends ElasticStat
         return (AdvancedElasticStatefulProcessingUnitDeployment) super.numberOfPartitions(numberOfPartitions);
     }
 
-    public AdvancedElasticStatefulProcessingUnitDeployment maxProcessingUnitInstancesFromSamePartitionPerMachine(int maxProcessingUnitInstancesFromSamePartitionPerMachine) {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.maxProcessingUnitInstancesFromSamePartitionPerMachine(maxProcessingUnitInstancesFromSamePartitionPerMachine);
+    public AdvancedElasticStatefulProcessingUnitDeployment allowDeploymentOnSingleMachine() {
+        super.maxProcessingUnitInstancesFromSamePartitionPerMachine(0);
+        super.allowDeploymentOnManagementMachine();
+        return this;
     }
 
     public AdvancedElasticStatefulProcessingUnitDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
@@ -57,6 +59,10 @@ public class AdvancedElasticStatefulProcessingUnitDeployment extends ElasticStat
         return this;
     }
     
+    public AdvancedElasticStatefulProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+        super.machineProvisioning(config);
+        return this;
+    }
     public AdvancedElasticStatefulProcessingUnitDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
         super.memoryCapacityPerContainer(memoryCapacityPerContainer,unit);
         return this;

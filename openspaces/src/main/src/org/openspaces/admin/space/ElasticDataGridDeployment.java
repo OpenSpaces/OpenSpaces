@@ -184,14 +184,13 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
         return this;
     }
 
-    protected ElasticDataGridDeployment maxProcessingUnitInstancesFromSamePartitionPerMachine(
-            int maxProcessingUnitInstancesFromSamePartitionPerMachine) {
-        deployment.maxProcessingUnitInstancesFromSamePartitionPerMachine(maxProcessingUnitInstancesFromSamePartitionPerMachine);
+    protected ElasticDataGridDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
+        deployment.minNumberOfCpuCoresPerMachine(minNumberOfCpuCoresPerMachine);
         return this;
     }
 
-    protected ElasticDataGridDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
-        deployment.minNumberOfCpuCoresPerMachine(minNumberOfCpuCoresPerMachine);
+    protected ElasticDataGridDeployment allowDeploymentOnSingleMachine() {
+        deployment.allowDeploymentOnSingleMachine();
         return this;
     }
     
