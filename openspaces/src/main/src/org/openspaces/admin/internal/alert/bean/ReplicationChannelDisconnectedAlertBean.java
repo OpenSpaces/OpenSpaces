@@ -96,14 +96,20 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                 factory.componentUid(source.getUid());
                 factory.config(config.getProperties());
                 
-                factory.putProperty(ReplicationChannelDisconnectedAlert.HOST_ADDRESS, source.getMachine().getHostAddress());
-                factory.putProperty(ReplicationChannelDisconnectedAlert.HOST_NAME, source.getMachine().getHostName());
-                factory.putProperty(ReplicationChannelDisconnectedAlert.CPU_UTILIZATION, String.valueOf(source.getOperatingSystem().getStatistics().getCpuPerc()*100.0));
-                factory.putProperty(ReplicationChannelDisconnectedAlert.HEAP_UTILIZATION, String.valueOf(source.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc()));
+                factory.putProperty(ReplicationChannelDisconnectedAlert.SOURCE_HOST_ADDRESS, source.getMachine().getHostAddress());
+                factory.putProperty(ReplicationChannelDisconnectedAlert.SOURCE_HOST_NAME, source.getMachine().getHostName());
+                factory.putProperty(ReplicationChannelDisconnectedAlert.SOURCE_CPU_UTILIZATION, String.valueOf(source.getOperatingSystem().getStatistics().getCpuPerc()*100.0));
+                factory.putProperty(ReplicationChannelDisconnectedAlert.SOURCE_HEAP_UTILIZATION, String.valueOf(source.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc()));
                 
                 factory.putProperty(ReplicationChannelDisconnectedAlert.REPLICATION_STATUS, replicationStatus.name());
                 factory.putProperty(ReplicationChannelDisconnectedAlert.SOURCE_UID, source.getUid());
-                factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_UID, (target == null ? null : target.getUid()));
+                if (target != null) {
+                    factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_UID, target.getUid());
+                    factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_HOST_ADDRESS, target.getMachine().getHostAddress());
+                    factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_HOST_NAME, target.getMachine().getHostName());
+                    factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_CPU_UTILIZATION, String.valueOf(target.getOperatingSystem().getStatistics().getCpuPerc()*100.0));
+                    factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_HEAP_UTILIZATION, String.valueOf(target.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc()));
+                }
 
                 Alert alert = factory.toAlert();
                 admin.getAlertManager().fireAlert( new ReplicationChannelDisconnectedAlert(alert));
@@ -123,14 +129,20 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                     factory.componentUid(source.getUid());
                     factory.config(config.getProperties());
                     
-                    factory.putProperty(ReplicationChannelDisconnectedAlert.HOST_ADDRESS, source.getMachine().getHostAddress());
-                    factory.putProperty(ReplicationChannelDisconnectedAlert.HOST_NAME, source.getMachine().getHostName());
-                    factory.putProperty(ReplicationChannelDisconnectedAlert.CPU_UTILIZATION, String.valueOf(source.getOperatingSystem().getStatistics().getCpuPerc()*100.0));
-                    factory.putProperty(ReplicationChannelDisconnectedAlert.HEAP_UTILIZATION, String.valueOf(source.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc()));
+                    factory.putProperty(ReplicationChannelDisconnectedAlert.SOURCE_HOST_ADDRESS, source.getMachine().getHostAddress());
+                    factory.putProperty(ReplicationChannelDisconnectedAlert.SOURCE_HOST_NAME, source.getMachine().getHostName());
+                    factory.putProperty(ReplicationChannelDisconnectedAlert.SOURCE_CPU_UTILIZATION, String.valueOf(source.getOperatingSystem().getStatistics().getCpuPerc()*100.0));
+                    factory.putProperty(ReplicationChannelDisconnectedAlert.SOURCE_HEAP_UTILIZATION, String.valueOf(source.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc()));
                     
                     factory.putProperty(ReplicationChannelDisconnectedAlert.REPLICATION_STATUS, replicationStatus.name());
                     factory.putProperty(ReplicationChannelDisconnectedAlert.SOURCE_UID, source.getUid());
-                    factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_UID, (target == null ? null : target.getUid()));
+                    if (target != null) {
+                        factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_UID, target.getUid());
+                        factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_HOST_ADDRESS, target.getMachine().getHostAddress());
+                        factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_HOST_NAME, target.getMachine().getHostName());
+                        factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_CPU_UTILIZATION, String.valueOf(target.getOperatingSystem().getStatistics().getCpuPerc()*100.0));
+                        factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_HEAP_UTILIZATION, String.valueOf(target.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc()));
+                    }
                     
                     Alert alert = factory.toAlert();
                     admin.getAlertManager().fireAlert( new ReplicationChannelDisconnectedAlert(alert));

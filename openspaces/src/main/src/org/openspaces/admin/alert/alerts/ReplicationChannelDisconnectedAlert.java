@@ -8,9 +8,9 @@ import org.openspaces.admin.space.ReplicationStatus;
 import org.openspaces.admin.space.SpaceInstance;
 
 /**
- * A replication channel disconnection alert, fired upon a disconnected channel between a primary
- * Space and it's backup Space. The alert is raised when the channel has disconnected. The alert is
- * resolved when the channel is reconnected.
+ * A replication channel disconnection alert, fired upon a disconnected channel between a source
+ * (primary Space) and it's target (backup Space or Mirror). The alert is raised when the channel
+ * has disconnected. The alert is resolved when the channel is reconnected.
  * <p>
  * These thresholds can be configured by using the
  * {@link ReplicationChannelDisconnectedAlertConfigurer}.
@@ -25,10 +25,15 @@ public class ReplicationChannelDisconnectedAlert extends AbstractAlert {
 
     private static final long serialVersionUID = 1L;
     
-    public static final String HOST_ADDRESS = "host-address";
-    public static final String HOST_NAME = "host-name";
-    public static final String CPU_UTILIZATION = "cpu-utilization";
-    public static final String HEAP_UTILIZATION = "heap-utilization";
+    public static final String SOURCE_HOST_ADDRESS = "source-host-address";
+    public static final String SOURCE_HOST_NAME = "source-host-name";
+    public static final String SOURCE_CPU_UTILIZATION = "source-cpu-utilization";
+    public static final String SOURCE_HEAP_UTILIZATION = "source-heap-utilization";
+    
+    public static final String TARGET_HOST_ADDRESS = "target-host-address";
+    public static final String TARGET_HOST_NAME = "target-host-name";
+    public static final String TARGET_CPU_UTILIZATION = "target-cpu-utilization";
+    public static final String TARGET_HEAP_UTILIZATION = "target-heap-utilization";
     
     public static final String REPLICATION_STATUS = "replication-status";
     public static final String SOURCE_UID = "source-uid";
@@ -39,27 +44,27 @@ public class ReplicationChannelDisconnectedAlert extends AbstractAlert {
     }
     
     /**
-     * The host address of the machine that this alert corresponds to.
+     * The host address of the source machine that this alert corresponds to.
      * @return the host address; may be <code>null</code>.
      */
-    public String getHostAddress() {
-        return getProperties().get(HOST_ADDRESS);
+    public String getSourceHostAddress() {
+        return getProperties().get(SOURCE_HOST_ADDRESS);
     }
     
     /**
-     * The host name of the machine that this alert corresponds to.
+     * The host name of the source machine that this alert corresponds to.
      * @return the host name; may be <code>null</code>.
      */
-    public String getHostName() {
-        return getProperties().get(HOST_NAME);
+    public String getSourceHostName() {
+        return getProperties().get(SOURCE_HOST_NAME);
     }
     
     /**
      * The CPU utilization reading when this alert was fired.
      * @return the CPU utilization; may be <code>null</code>.
      */
-    public Double getCpuUtilization() {
-        String value = getProperties().get(CPU_UTILIZATION);
+    public Double getSourceCpuUtilization() {
+        String value = getProperties().get(SOURCE_CPU_UTILIZATION);
         if (value == null) return null;
         return Double.valueOf(value);
     }
@@ -68,8 +73,44 @@ public class ReplicationChannelDisconnectedAlert extends AbstractAlert {
      * The heap memory utilization reading when this alert was fired.
      * @return the heap utilization; may be <code>null</code>.
      */
-    public Double getHeapUtilization() {
-        String value = getProperties().get(HEAP_UTILIZATION);
+    public Double getSourceHeapUtilization() {
+        String value = getProperties().get(SOURCE_HEAP_UTILIZATION);
+        if (value == null) return null;
+        return Double.valueOf(value);
+    }
+    
+    /**
+     * The host address of the target machine that this alert corresponds to.
+     * @return the host address; may be <code>null</code>.
+     */
+    public String getTargetHostAddress() {
+        return getProperties().get(TARGET_HOST_ADDRESS);
+    }
+    
+    /**
+     * The host name of the target machine that this alert corresponds to.
+     * @return the host name; may be <code>null</code>.
+     */
+    public String getTargetHostName() {
+        return getProperties().get(TARGET_HOST_NAME);
+    }
+    
+    /**
+     * The CPU utilization reading when this alert was fired.
+     * @return the CPU utilization; may be <code>null</code>.
+     */
+    public Double getTargetCpuUtilization() {
+        String value = getProperties().get(TARGET_CPU_UTILIZATION);
+        if (value == null) return null;
+        return Double.valueOf(value);
+    }
+    
+    /**
+     * The heap memory utilization reading when this alert was fired.
+     * @return the heap utilization; may be <code>null</code>.
+     */
+    public Double getTargetHeapUtilization() {
+        String value = getProperties().get(TARGET_HEAP_UTILIZATION);
         if (value == null) return null;
         return Double.valueOf(value);
     }
