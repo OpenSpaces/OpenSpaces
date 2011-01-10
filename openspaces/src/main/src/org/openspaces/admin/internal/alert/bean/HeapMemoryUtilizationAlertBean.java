@@ -147,6 +147,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
             factory.putProperty(HeapMemoryUtilizationAlert.PROCESS_ID, String.valueOf(event.getVirtualMachine().getDetails().getPid()));
             factory.putProperty(HeapMemoryUtilizationAlert.COMPONENT_NAME, AlertBeanUtils.getGridComponentFullName(event.getVirtualMachine()));
             factory.putProperty(HeapMemoryUtilizationAlert.HEAP_UTILIZATION, String.valueOf(event.getStatistics().getMemoryHeapUsedPerc()));
+            factory.putProperty(HeapMemoryUtilizationAlert.MAX_HEAP_IN_BYTES, String.valueOf(event.getVirtualMachine().getDetails().getMemoryHeapMaxInBytes()));
 
             Alert alert = factory.toAlert();
             admin.getAlertManager().fireAlert( new HeapMemoryUtilizationAlert(alert));
@@ -174,6 +175,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
                 factory.putProperty(HeapMemoryUtilizationAlert.PROCESS_ID, String.valueOf(event.getVirtualMachine().getDetails().getPid()));
                 factory.putProperty(HeapMemoryUtilizationAlert.COMPONENT_NAME, AlertBeanUtils.getGridComponentFullName(event.getVirtualMachine()));
                 factory.putProperty(HeapMemoryUtilizationAlert.HEAP_UTILIZATION, String.valueOf(event.getStatistics().getMemoryHeapUsedPerc()));
+                factory.putProperty(HeapMemoryUtilizationAlert.MAX_HEAP_IN_BYTES, String.valueOf(event.getVirtualMachine().getDetails().getMemoryHeapMaxInBytes()));
 
                 Alert alert = factory.toAlert();
                 admin.getAlertManager().fireAlert( new HeapMemoryUtilizationAlert(alert));

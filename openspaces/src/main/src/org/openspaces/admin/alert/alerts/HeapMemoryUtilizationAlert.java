@@ -29,6 +29,7 @@ public class HeapMemoryUtilizationAlert extends AbstractAlert {
     public static final String PROCESS_ID = "process-id";
     public static final String COMPONENT_NAME = "component-name";
     public static final String HEAP_UTILIZATION = "heap-utilization";
+    public static final String MAX_HEAP_IN_BYTES = "max-heap-in-bytes";
     
     public HeapMemoryUtilizationAlert(Alert alert) {
         super(alert);
@@ -86,5 +87,17 @@ public class HeapMemoryUtilizationAlert extends AbstractAlert {
         String value = getProperties().get(HEAP_UTILIZATION);
         if (value == null) return null;
         return Double.valueOf(value);
+    }
+    
+    /**
+     * The maximum amount of memory in bytes that can be used for memory management. This method
+     * returns -1 if the maximum memory size (-Xmx) is undefined.
+     * 
+     * @return the Heap utilization; may be <code>null</code>.
+     */
+    public Long getMaxHeapInBytes() {
+        String value = getProperties().get(MAX_HEAP_IN_BYTES);
+        if (value == null) return null;
+        return Long.valueOf(value);
     }
 }
