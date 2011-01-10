@@ -2,6 +2,11 @@ package org.openspaces.grid.gsa;
 
 import com.gigaspaces.start.SystemBoot;
 
+/**
+ * Provides a configurer to start a GS-Agent.
+ * @since 8.0
+ * @author Uri
+ */
 public class GridServiceAgentConfigurer {
     
     private int gsc = 0;
