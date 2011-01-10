@@ -113,7 +113,16 @@ public interface SpaceInstanceStatistics {
 
     ReplicationStatistics getReplicationStatistics();
     
-
     MirrorStatistics getMirrorStatistics();
+    
+    /**
+     * Gets the current number of pending tasks in the space processor queue.
+     */
+    int getProcessorQueueSize();
+    
+    /**
+     * Gets the current number of pending notifications that needs to be sent to different clients.
+     */
+    int getNotifierQueueSize();
 
 }

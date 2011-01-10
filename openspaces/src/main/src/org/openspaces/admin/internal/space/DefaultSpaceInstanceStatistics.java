@@ -186,4 +186,12 @@ public class DefaultSpaceInstanceStatistics implements SpaceInstanceStatistics {
     public MirrorStatistics getMirrorStatistics() {
         return statisticsHolder.getMirrorStatistics();
     }
+    
+    public int getProcessorQueueSize() {
+        return statisticsHolder.getProcessorQueueSize();
+    }
+    
+    public int getNotifierQueueSize() {
+        return statisticsHolder.getNotifierQueueSize();
+    }
 }
