@@ -8,7 +8,7 @@ import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.alert.alerts.ReplicationChannelDisconnectedAlert;
-import org.openspaces.admin.alert.config.ReplicationChannelDisconnectedAlertBeanConfig;
+import org.openspaces.admin.alert.config.ReplicationChannelDisconnectedAlertConfiguration;
 import org.openspaces.admin.internal.alert.AlertHistory;
 import org.openspaces.admin.internal.alert.AlertHistoryDetails;
 import org.openspaces.admin.internal.alert.InternalAlertManager;
@@ -25,7 +25,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
     public static final String beanUID = "c54333ba-5d8ed065-4ac9-4f1e-a90e-236e36a1bc71";
     public static final String ALERT_NAME = "Replication Channel Disconnected";
     
-    private final ReplicationChannelDisconnectedAlertBeanConfig config = new ReplicationChannelDisconnectedAlertBeanConfig();
+    private final ReplicationChannelDisconnectedAlertConfiguration config = new ReplicationChannelDisconnectedAlertConfiguration();
 
     private Admin admin;
 

@@ -25,20 +25,22 @@ import org.openspaces.admin.internal.alert.bean.ReplicationRedoLogOverflowToDisk
  * A strongly typed alert bean configuration triggered when a replication redo log has exceeded the
  * redo-log memory capacity, and has been swapped to disk.
  * 
- * @see ReplicationRedoLogOverflowToDiskAlertBeanConfigurer
+ * @see ReplicationRedoLogOverflowToDiskAlertConfigurer
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public class ReplicationRedoLogOverflowToDiskAlertBeanConfig implements AlertBeanConfig {
+public class ReplicationRedoLogOverflowToDiskAlertConfiguration implements AlertConfiguration {
     private static final long serialVersionUID = 1L;
 
 	private final Map<String, String> properties = new HashMap<String, String>();
 
+    private boolean enabled;
+
 	/**
 	 * Constructs an empty configuration.
 	 */
-	public ReplicationRedoLogOverflowToDiskAlertBeanConfig() {
+	public ReplicationRedoLogOverflowToDiskAlertConfiguration() {
 	}
 	
 	/**
@@ -62,4 +64,18 @@ public class ReplicationRedoLogOverflowToDiskAlertBeanConfig implements AlertBea
 	public String getBeanClassName() {
 		return ReplicationRedoLogOverflowToDiskAlertBean.class.getName();
 	}
+	   
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }

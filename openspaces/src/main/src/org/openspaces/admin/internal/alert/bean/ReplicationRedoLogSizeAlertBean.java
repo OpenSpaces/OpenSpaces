@@ -8,7 +8,7 @@ import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.alert.alerts.ReplicationRedoLogSizeAlert;
-import org.openspaces.admin.alert.config.ReplicationRedoLogSizeAlertBeanConfig;
+import org.openspaces.admin.alert.config.ReplicationRedoLogSizeAlertConfiguration;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.alert.AlertHistory;
 import org.openspaces.admin.internal.alert.AlertHistoryDetails;
@@ -28,7 +28,7 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
     public static final String beanUID = "3f4bff98-52de6d72-b2b8-434b-aa18-d57c7554262a";
     public static final String ALERT_NAME = "Replication Redo log";
     
-    private final ReplicationRedoLogSizeAlertBeanConfig config = new ReplicationRedoLogSizeAlertBeanConfig();
+    private final ReplicationRedoLogSizeAlertConfiguration config = new ReplicationRedoLogSizeAlertConfiguration();
 
     private Admin admin;
 

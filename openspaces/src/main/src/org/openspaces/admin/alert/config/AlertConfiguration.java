@@ -23,7 +23,7 @@ import org.openspaces.admin.bean.BeanConfig;
  * <tt>AlertBean</tt>. Implementors of this interface can provide more strongly typed API to enforce
  * type-safety and argument verifications.
  * <p>
- * The <tt>AlertBeanConfig</tt> is a client side configuration. The String key-value pairs returned
+ * The <tt>AlertConfiguration</tt> is a client side configuration. The String key-value pairs returned
  * by the {@link #getProperties()} method, are sent to the server to be injected into the admin
  * <tt>AlertBean</tt> matching the {@link #getBeanClassName() bean class-name}.
  * <p>
@@ -31,10 +31,23 @@ import org.openspaces.admin.bean.BeanConfig;
  * {@link #applyRecommendedSettings()} can be used to set the recommended setting for all
  * configuration properties.
  * 
- * @see AlertBeanConfigurer
+ * @see AlertConfigurer
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public interface AlertBeanConfig extends BeanConfig {
+public interface AlertConfiguration extends BeanConfig {
+    
+    /**
+     * @return <code>true</code> if this alert is enabled; <code>false</code> if this alert is
+     *         currently disabled.
+     */
+    boolean isEnabled();
+    
+    /**
+     * @param enabled
+     *            <code>true</code> if this alert should be enabled; <code>false</code> if this
+     *            alert should be disabled.
+     */
+    void setEnabled(boolean enabled);
 }

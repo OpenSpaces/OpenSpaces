@@ -24,20 +24,22 @@ import org.openspaces.admin.internal.alert.bean.ReplicationChannelDisconnectedAl
 /**
  * A strongly typed replication channel disconnection alert bean configuration.
  * 
- * @see ReplicationChannelDisconnectedAlertBeanConfigurer
+ * @see ReplicationChannelDisconnectedAlertConfigurer
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public class ReplicationChannelDisconnectedAlertBeanConfig implements AlertBeanConfig {
+public class ReplicationChannelDisconnectedAlertConfiguration implements AlertConfiguration {
     private static final long serialVersionUID = 1L;
 
 	private final Map<String, String> properties = new HashMap<String, String>();
 
+    private boolean enabled;
+
 	/**
 	 * Constructs an empty replication channel disconnection configuration.
 	 */
-	public ReplicationChannelDisconnectedAlertBeanConfig() {
+	public ReplicationChannelDisconnectedAlertConfiguration() {
 	}
 	
 	/**
@@ -61,4 +63,18 @@ public class ReplicationChannelDisconnectedAlertBeanConfig implements AlertBeanC
 	public String getBeanClassName() {
 		return ReplicationChannelDisconnectedAlertBean.class.getName();
 	}
+	   
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }

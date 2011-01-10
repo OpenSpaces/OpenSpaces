@@ -2,7 +2,7 @@ package org.openspaces.admin.alert.alerts;
 
 
 import org.openspaces.admin.alert.Alert;
-import org.openspaces.admin.alert.config.ReplicationRedoLogSizeAlertBeanConfigurer;
+import org.openspaces.admin.alert.config.ReplicationRedoLogSizeAlertConfigurer;
 import org.openspaces.admin.alert.events.AlertEventListener;
 import org.openspaces.admin.space.ReplicationStatus;
 import org.openspaces.admin.space.SpaceInstance;
@@ -13,7 +13,7 @@ import org.openspaces.admin.space.SpaceInstance;
  * red-log size crosses a specified 'high' threshold. The alert is resolved when the redo-log size
  * goes below a specified 'low' threshold.
  * <p>
- * These thresholds can be configured by using the {@link ReplicationRedoLogSizeAlertBeanConfigurer}.
+ * These thresholds can be configured by using the {@link ReplicationRedoLogSizeAlertConfigurer}.
  * <p>
  * This alert will be received on the call to {@link AlertEventListener#onAlert(Alert)} for
  * registered listeners.

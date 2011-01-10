@@ -25,12 +25,12 @@ import org.openspaces.admin.internal.alert.bean.CpuUtilizationAlertBean;
 /**
  * A strongly typed machine CPU utilization alert bean configuration.
  * 
- * @see CpuUtilizationAlertBeanConfigurer
+ * @see CpuUtilizationAlertConfigurer
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public class CpuUtilizationAlertBeanConfig implements AlertBeanConfig {
+public class CpuUtilizationAlertConfiguration implements AlertConfiguration {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -54,10 +54,12 @@ public class CpuUtilizationAlertBeanConfig implements AlertBeanConfig {
 	
 	private final Map<String,String> properties = new HashMap<String, String>();
 
+    private boolean enabled;
+
 	/**
 	 * Constructs an empty machine CPU utilization alert configuration.
 	 */
-	public CpuUtilizationAlertBeanConfig() {
+	public CpuUtilizationAlertConfiguration() {
 	}
 	
 	/**
@@ -138,4 +140,18 @@ public class CpuUtilizationAlertBeanConfig implements AlertBeanConfig {
 	public String getBeanClassName() {
 		return CpuUtilizationAlertBean.class.getName();
 	}
+
+	/**
+     * {@inheritDoc}
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }

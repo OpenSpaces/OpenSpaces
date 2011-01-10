@@ -2,7 +2,7 @@ package org.openspaces.admin.alert.alerts;
 
 
 import org.openspaces.admin.alert.Alert;
-import org.openspaces.admin.alert.config.HeapMemoryUtilizationAlertBeanConfigurer;
+import org.openspaces.admin.alert.config.HeapMemoryUtilizationAlertConfigurer;
 import org.openspaces.admin.alert.events.AlertEventListener;
 
 /**
@@ -10,7 +10,7 @@ import org.openspaces.admin.alert.events.AlertEventListener;
  * raised when heap memory crosses a 'high' threshold for a specified period of time. The alert is
  * resolved when heap-memory crosses a 'low' threshold for a specified period of time.
  * <p>
- * These thresholds can be configured by using the {@link HeapMemoryUtilizationAlertBeanConfigurer}.
+ * These thresholds can be configured by using the {@link HeapMemoryUtilizationAlertConfigurer}.
  * <p>
  * This alert will be received on the call to {@link AlertEventListener#onAlert(Alert)} for
  * registered listeners.

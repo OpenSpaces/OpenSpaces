@@ -21,26 +21,26 @@ package org.openspaces.admin.alert.config;
  * approach by use of method chaining. After all properties have been set, use the call to
  * {@link #getConfig()} to create a fully initialized configuration object based.
  * 
- * @see ReplicationChannelDisconnectedAlertBeanConfig
+ * @see ReplicationChannelDisconnectedAlertConfiguration
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public class ReplicationChannelDisconnectedAlertBeanConfigurer implements AlertBeanConfigurer {
+public class ReplicationChannelDisconnectedAlertConfigurer implements AlertConfigurer {
 
-	private final ReplicationChannelDisconnectedAlertBeanConfig config = new ReplicationChannelDisconnectedAlertBeanConfig();
+	private final ReplicationChannelDisconnectedAlertConfiguration config = new ReplicationChannelDisconnectedAlertConfiguration();
 	
 	/**
 	 * Constructs an empty replication channel disconnection alert configuration.
 	 */
-	public ReplicationChannelDisconnectedAlertBeanConfigurer() {
+	public ReplicationChannelDisconnectedAlertConfigurer() {
 	}
 
 	/**
 	 * Get a fully configured replication channel disconnection configuration (after all properties have been set).
 	 * @return a fully configured alert bean configuration.
 	 */
-	public ReplicationChannelDisconnectedAlertBeanConfig getConfig() {
+	public ReplicationChannelDisconnectedAlertConfiguration getConfig() {
 		return config;
 	}
 }

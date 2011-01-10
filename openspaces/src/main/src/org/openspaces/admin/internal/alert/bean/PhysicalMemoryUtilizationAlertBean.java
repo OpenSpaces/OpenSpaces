@@ -13,7 +13,7 @@ import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.alert.alerts.PhysicalMemoryUtilizationAlert;
-import org.openspaces.admin.alert.config.PhysicalMemoryUtilizationAlertBeanConfig;
+import org.openspaces.admin.alert.config.PhysicalMemoryUtilizationAlertConfiguration;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.alert.AlertHistory;
 import org.openspaces.admin.internal.alert.AlertHistoryDetails;
@@ -31,7 +31,7 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
     public static final String beanUID = "726a2752-4cae5258-f281-49d3-96b6-1e68e42bbd2c";
     public static final String ALERT_NAME = "Physical Memory Utilization";
     
-    private final PhysicalMemoryUtilizationAlertBeanConfig config = new PhysicalMemoryUtilizationAlertBeanConfig();
+    private final PhysicalMemoryUtilizationAlertConfiguration config = new PhysicalMemoryUtilizationAlertConfiguration();
 
     private Admin admin;
     private final static NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();

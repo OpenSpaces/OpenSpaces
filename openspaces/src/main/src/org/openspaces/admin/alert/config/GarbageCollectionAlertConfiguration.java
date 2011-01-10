@@ -25,12 +25,12 @@ import org.openspaces.admin.internal.alert.bean.GarbageCollectionAlertBean;
 /**
  * A strongly typed long garbage collection pause alert bean configuration.
  * 
- * @see GarbageCollectionAlertBeanConfigurer
+ * @see GarbageCollectionAlertConfigurer
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public class GarbageCollectionAlertBeanConfig implements AlertBeanConfig {
+public class GarbageCollectionAlertConfiguration implements AlertConfiguration {
     private static final long serialVersionUID = 1L;
         
     /**
@@ -48,10 +48,12 @@ public class GarbageCollectionAlertBeanConfig implements AlertBeanConfig {
     
 	private final Map<String, String> properties = new HashMap<String, String>();
 
+    private boolean enabled;
+
 	/**
 	 * Constructs an empty garbage collection pause alert configuration.
 	 */
-	public GarbageCollectionAlertBeanConfig() {
+	public GarbageCollectionAlertConfiguration() {
 	}
 	
     /**
@@ -119,4 +121,18 @@ public class GarbageCollectionAlertBeanConfig implements AlertBeanConfig {
 	public String getBeanClassName() {
 		return GarbageCollectionAlertBean.class.getName();
 	}
+
+	/**
+     * {@inheritDoc}
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }

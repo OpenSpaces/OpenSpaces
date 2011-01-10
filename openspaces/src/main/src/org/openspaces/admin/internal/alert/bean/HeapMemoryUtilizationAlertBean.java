@@ -13,7 +13,7 @@ import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.alert.alerts.HeapMemoryUtilizationAlert;
-import org.openspaces.admin.alert.config.PhysicalMemoryUtilizationAlertBeanConfig;
+import org.openspaces.admin.alert.config.PhysicalMemoryUtilizationAlertConfiguration;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.alert.AlertHistory;
 import org.openspaces.admin.internal.alert.AlertHistoryDetails;
@@ -31,7 +31,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
     public static final String beanUID = "694248f7-8a41119b-ddf9-4998-b3a0-885021e366af";
     public static final String ALERT_NAME = "Heap Memory Utilization";
     
-    private final PhysicalMemoryUtilizationAlertBeanConfig config = new PhysicalMemoryUtilizationAlertBeanConfig();
+    private final PhysicalMemoryUtilizationAlertConfiguration config = new PhysicalMemoryUtilizationAlertConfiguration();
 
     private Admin admin;
     private final static NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();

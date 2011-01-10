@@ -2,7 +2,7 @@ package org.openspaces.admin.alert.alerts;
 
 
 import org.openspaces.admin.alert.Alert;
-import org.openspaces.admin.alert.config.ReplicationRedoLogOverflowToDiskAlertBeanConfigurer;
+import org.openspaces.admin.alert.config.ReplicationRedoLogOverflowToDiskAlertConfigurer;
 import org.openspaces.admin.alert.events.AlertEventListener;
 import org.openspaces.admin.space.ReplicationStatus;
 import org.openspaces.admin.space.SpaceInstance;
@@ -12,7 +12,7 @@ import org.openspaces.admin.space.SpaceInstance;
  * redo-log memory capacity and overflows to disk. The alert is raised when the redo-log overflows.
  * The alert is resolved when the redo-log no longer uses the disk.
  * <p>
- * These thresholds can be configured by using the {@link ReplicationRedoLogOverflowToDiskAlertBeanConfigurer}.
+ * These thresholds can be configured by using the {@link ReplicationRedoLogOverflowToDiskAlertConfigurer}.
  * <p>
  * This alert will be received on the call to {@link AlertEventListener#onAlert(Alert)} for
  * registered listeners.

@@ -23,19 +23,19 @@ import java.util.concurrent.TimeUnit;
  * approach by use of method chaining. After all properties have been set, use the call to
  * {@link #getConfig()} to create a fully initialized configuration object based.
  * 
- * @see GarbageCollectionAlertBeanConfig
+ * @see GarbageCollectionAlertConfiguration
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public class GarbageCollectionAlertBeanConfigurer implements AlertBeanConfigurer {
+public class GarbageCollectionAlertConfigurer implements AlertConfigurer {
 
-    private final GarbageCollectionAlertBeanConfig config = new GarbageCollectionAlertBeanConfig();
+    private final GarbageCollectionAlertConfiguration config = new GarbageCollectionAlertConfiguration();
 
     /**
      * Constructs an empty garbage collection pause alert configuration.
      */
-    public GarbageCollectionAlertBeanConfigurer() {
+    public GarbageCollectionAlertConfigurer() {
     }
 
     /**
@@ -47,7 +47,7 @@ public class GarbageCollectionAlertBeanConfigurer implements AlertBeanConfigurer
      *            the time unit of the specified period.
      * @return this.
      */
-    public GarbageCollectionAlertBeanConfigurer raiseAlertForGcDurationOf(long period, TimeUnit timeUnit) {
+    public GarbageCollectionAlertConfigurer raiseAlertForGcDurationOf(long period, TimeUnit timeUnit) {
         config.setLongGcPausePeriod(period, timeUnit);
         return this;
     }
@@ -61,7 +61,7 @@ public class GarbageCollectionAlertBeanConfigurer implements AlertBeanConfigurer
      *            the time unit of the specified period.
      * @return this.
      */
-    public GarbageCollectionAlertBeanConfigurer resolveAlertForGcDurationOf(long period, TimeUnit timeUnit) {
+    public GarbageCollectionAlertConfigurer resolveAlertForGcDurationOf(long period, TimeUnit timeUnit) {
         config.setShortGcPausePeriod(period, timeUnit);
         return this;
     }
@@ -72,7 +72,7 @@ public class GarbageCollectionAlertBeanConfigurer implements AlertBeanConfigurer
      * 
      * @return a fully configured alert bean configuration.
      */
-    public GarbageCollectionAlertBeanConfig getConfig() {
+    public GarbageCollectionAlertConfiguration getConfig() {
         return config;
     }
 }

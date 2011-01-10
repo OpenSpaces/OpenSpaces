@@ -2,7 +2,7 @@ package org.openspaces.admin.alert.alerts;
 
 
 import org.openspaces.admin.alert.Alert;
-import org.openspaces.admin.alert.config.CpuUtilizationAlertBeanConfigurer;
+import org.openspaces.admin.alert.config.CpuUtilizationAlertConfigurer;
 import org.openspaces.admin.alert.events.AlertEventListener;
 
 /**
@@ -10,7 +10,7 @@ import org.openspaces.admin.alert.events.AlertEventListener;
  * a 'high' threshold for a specified period of time. The alert is resolved when CPU crosses a 'low'
  * threshold for a specified period of time.
  * <p>
- * These thresholds can be configured by using the {@link CpuUtilizationAlertBeanConfigurer}.
+ * These thresholds can be configured by using the {@link CpuUtilizationAlertConfigurer}.
  * <p>
  * This alert will be received on the call to {@link AlertEventListener#onAlert(Alert)} for
  * registered listeners.

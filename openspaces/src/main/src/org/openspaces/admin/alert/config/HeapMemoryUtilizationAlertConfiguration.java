@@ -25,12 +25,12 @@ import org.openspaces.admin.internal.alert.bean.HeapMemoryUtilizationAlertBean;
 /**
  * A strongly typed high heap memory utilization alert bean configuration.
  * 
- * @see HeapMemoryUtilizationAlertBeanConfigurer
+ * @see HeapMemoryUtilizationAlertConfigurer
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public class HeapMemoryUtilizationAlertBeanConfig implements AlertBeanConfig {
+public class HeapMemoryUtilizationAlertConfiguration implements AlertConfiguration {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -54,10 +54,12 @@ public class HeapMemoryUtilizationAlertBeanConfig implements AlertBeanConfig {
 	
 	private final Map<String, String> properties = new HashMap<String, String>();
 
+    private boolean enabled;
+
 	/**
 	 * Constructs an empty heap memory utilization alert configuration.
 	 */
-	public HeapMemoryUtilizationAlertBeanConfig() {
+	public HeapMemoryUtilizationAlertConfiguration() {
 	}
 	
 	/**
@@ -138,4 +140,18 @@ public class HeapMemoryUtilizationAlertBeanConfig implements AlertBeanConfig {
 	public String getBeanClassName() {
 		return HeapMemoryUtilizationAlertBean.class.getName();
 	}
+	
+	/**
+     * {@inheritDoc}
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }

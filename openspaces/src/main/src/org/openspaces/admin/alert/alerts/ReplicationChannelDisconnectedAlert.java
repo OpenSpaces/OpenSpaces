@@ -2,7 +2,7 @@ package org.openspaces.admin.alert.alerts;
 
 
 import org.openspaces.admin.alert.Alert;
-import org.openspaces.admin.alert.config.ReplicationChannelDisconnectedAlertBeanConfigurer;
+import org.openspaces.admin.alert.config.ReplicationChannelDisconnectedAlertConfigurer;
 import org.openspaces.admin.alert.events.AlertEventListener;
 import org.openspaces.admin.space.ReplicationStatus;
 import org.openspaces.admin.space.SpaceInstance;
@@ -13,7 +13,7 @@ import org.openspaces.admin.space.SpaceInstance;
  * resolved when the channel is reconnected.
  * <p>
  * These thresholds can be configured by using the
- * {@link ReplicationChannelDisconnectedAlertBeanConfigurer}.
+ * {@link ReplicationChannelDisconnectedAlertConfigurer}.
  * <p>
  * This alert will be received on the call to {@link AlertEventListener#onAlert(Alert)} for
  * registered listeners.

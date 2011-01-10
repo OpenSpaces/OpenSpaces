@@ -25,12 +25,12 @@ import org.openspaces.admin.internal.alert.bean.PhysicalMemoryUtilizationAlertBe
 /**
  * A strongly typed physical memory utilization alert bean configuration.
  * 
- * @see PhysicalMemoryUtilizationAlertBeanConfigurer
+ * @see PhysicalMemoryUtilizationAlertConfigurer
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public class PhysicalMemoryUtilizationAlertBeanConfig implements AlertBeanConfig {
+public class PhysicalMemoryUtilizationAlertConfiguration implements AlertConfiguration {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -54,10 +54,12 @@ public class PhysicalMemoryUtilizationAlertBeanConfig implements AlertBeanConfig
 	
 	private final Map<String, String> properties = new HashMap<String, String>();
 
+    private boolean enabled;
+
 	/**
 	 * Constructs an empty physical memory utilization alert configuration.
 	 */
-	public PhysicalMemoryUtilizationAlertBeanConfig() {
+	public PhysicalMemoryUtilizationAlertConfiguration() {
 	}
 	
 	/**
@@ -138,4 +140,18 @@ public class PhysicalMemoryUtilizationAlertBeanConfig implements AlertBeanConfig
 	public String getBeanClassName() {
 		return PhysicalMemoryUtilizationAlertBean.class.getName();
 	}
+	   
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }

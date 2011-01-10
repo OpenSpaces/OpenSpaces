@@ -13,7 +13,7 @@ import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.alert.alerts.CpuUtilizationAlert;
-import org.openspaces.admin.alert.config.CpuUtilizationAlertBeanConfig;
+import org.openspaces.admin.alert.config.CpuUtilizationAlertConfiguration;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.alert.AlertHistory;
 import org.openspaces.admin.internal.alert.AlertHistoryDetails;
@@ -31,7 +31,7 @@ public class CpuUtilizationAlertBean implements AlertBean,
     public static final String beanUID = "d7f14ccb-774a468d-29dd-4c23-b7de-d0ae9aaec204";
     public static final String ALERT_NAME = "CPU Utilization";
     
-    private final CpuUtilizationAlertBeanConfig config = new CpuUtilizationAlertBeanConfig();
+    private final CpuUtilizationAlertConfiguration config = new CpuUtilizationAlertConfiguration();
 
     private Admin admin;
     private final static NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();

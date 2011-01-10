@@ -23,19 +23,19 @@ import java.util.concurrent.TimeUnit;
  * approach by use of method chaining. After all properties have been set, use the call to
  * {@link #getConfig()} to create a fully initialized configuration object based.
  * 
- * @see HeapMemoryUtilizationAlertBeanConfig
+ * @see HeapMemoryUtilizationAlertConfiguration
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public class HeapMemoryUtilizationAlertBeanConfigurer implements AlertBeanConfigurer {
+public class HeapMemoryUtilizationAlertConfigurer implements AlertConfigurer {
 
-    private final HeapMemoryUtilizationAlertBeanConfig config = new HeapMemoryUtilizationAlertBeanConfig();
+    private final HeapMemoryUtilizationAlertConfiguration config = new HeapMemoryUtilizationAlertConfiguration();
 
     /**
      * Constructs an empty heap memory utilization alert configuration.
      */
-    public HeapMemoryUtilizationAlertBeanConfigurer() {
+    public HeapMemoryUtilizationAlertConfigurer() {
     }
 
     /**
@@ -45,7 +45,7 @@ public class HeapMemoryUtilizationAlertBeanConfigurer implements AlertBeanConfig
      *            high threshold percentage.
      * @return this.
      */
-    public HeapMemoryUtilizationAlertBeanConfigurer highThresholdPerc(int highThreshold) {
+    public HeapMemoryUtilizationAlertConfigurer highThresholdPerc(int highThreshold) {
         config.setHighThresholdPerc(highThreshold);
         return this;
     }
@@ -57,7 +57,7 @@ public class HeapMemoryUtilizationAlertBeanConfigurer implements AlertBeanConfig
      *            low threshold percentage.
      * @return this.
      */
-    public HeapMemoryUtilizationAlertBeanConfigurer lowThresholdPerc(int lowThreshold) {
+    public HeapMemoryUtilizationAlertConfigurer lowThresholdPerc(int lowThreshold) {
         config.setLowThresholdPerc(lowThreshold);
         return this;
     }
@@ -72,7 +72,7 @@ public class HeapMemoryUtilizationAlertBeanConfigurer implements AlertBeanConfig
      *            the time unit of the specified period.
      * @return this.
      */
-    public HeapMemoryUtilizationAlertBeanConfigurer measurementPeriod(long period, TimeUnit timeUnit) {
+    public HeapMemoryUtilizationAlertConfigurer measurementPeriod(long period, TimeUnit timeUnit) {
         config.setMeasurementPeriod(period, timeUnit);
         return this;
     }
@@ -83,7 +83,7 @@ public class HeapMemoryUtilizationAlertBeanConfigurer implements AlertBeanConfig
      * 
      * @return a fully configured alert bean configuration.
      */
-    public HeapMemoryUtilizationAlertBeanConfig getConfig() {
+    public HeapMemoryUtilizationAlertConfiguration getConfig() {
         return config;
     }
 }

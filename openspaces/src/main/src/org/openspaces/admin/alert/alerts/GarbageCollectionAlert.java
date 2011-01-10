@@ -2,7 +2,7 @@ package org.openspaces.admin.alert.alerts;
 
 
 import org.openspaces.admin.alert.Alert;
-import org.openspaces.admin.alert.config.GarbageCollectionAlertBeanConfigurer;
+import org.openspaces.admin.alert.config.GarbageCollectionAlertConfigurer;
 import org.openspaces.admin.alert.events.AlertEventListener;
 
 /**
@@ -10,7 +10,7 @@ import org.openspaces.admin.alert.events.AlertEventListener;
  * the JVM spends more than a specified period of time on Garbage Collection. The alert is resolved
  * when the JVM spends less then the specified time on Garbage Collection.
  * <p>
- * These thresholds can be configured by using the {@link GarbageCollectionAlertBeanConfigurer}.
+ * These thresholds can be configured by using the {@link GarbageCollectionAlertConfigurer}.
  * <p>
  * This alert will be received on the call to {@link AlertEventListener#onAlert(Alert)} for
  * registered listeners.

@@ -11,7 +11,7 @@ import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.alert.alerts.GarbageCollectionAlert;
-import org.openspaces.admin.alert.config.GarbageCollectionAlertBeanConfig;
+import org.openspaces.admin.alert.config.GarbageCollectionAlertConfiguration;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.alert.AlertHistory;
 import org.openspaces.admin.internal.alert.AlertHistoryDetails;
@@ -28,7 +28,7 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
     public static final String beanUID = "94e663d9-0e2877c3-beb0-473f-a5bb-8fe965cd8751";
     public static final String ALERT_NAME = "Garbage Collection";
     
-    private final GarbageCollectionAlertBeanConfig config = new GarbageCollectionAlertBeanConfig();
+    private final GarbageCollectionAlertConfiguration config = new GarbageCollectionAlertConfiguration();
 
     private Admin admin;
     private final static NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();

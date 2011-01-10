@@ -9,7 +9,7 @@ import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.alert.alerts.ReplicationRedoLogOverflowToDiskAlert;
 import org.openspaces.admin.alert.alerts.ReplicationRedoLogSizeAlert;
-import org.openspaces.admin.alert.config.ReplicationRedoLogSizeAlertBeanConfig;
+import org.openspaces.admin.alert.config.ReplicationRedoLogSizeAlertConfiguration;
 import org.openspaces.admin.internal.alert.AlertHistory;
 import org.openspaces.admin.internal.alert.AlertHistoryDetails;
 import org.openspaces.admin.internal.alert.InternalAlertManager;
@@ -29,7 +29,7 @@ public class ReplicationRedoLogOverflowToDiskAlertBean implements AlertBean, Spa
     public static final String beanUID = "3519ba78-08e6de85-87dc-4c10-8d08-ef03fe7b5d76";
     public static final String ALERT_NAME = "Replication Redo log Overflow";
     
-    private final ReplicationRedoLogSizeAlertBeanConfig config = new ReplicationRedoLogSizeAlertBeanConfig();
+    private final ReplicationRedoLogSizeAlertConfiguration config = new ReplicationRedoLogSizeAlertConfiguration();
 
     private Admin admin;
 

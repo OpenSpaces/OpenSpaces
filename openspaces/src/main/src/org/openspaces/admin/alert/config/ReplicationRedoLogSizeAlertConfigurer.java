@@ -17,32 +17,52 @@
 package org.openspaces.admin.alert.config;
 
 /**
- * A strongly typed alert bean configurer triggered when a replication redo log has exceeded the
- * redo-log memory capacity, and has been swapped to disk.
+ * A strongly typed alert bean configurer triggered when a replication redo log size crosses a
+ * certain threshold.
  * <p>
  * Allows a more code-fluent approach by use of method chaining. After all properties have been set,
  * use the call to {@link #getConfig()} to create a fully initialized configuration object based.
  * 
- * @see ReplicationRedoLogOverflowToDiskAlertBeanConfig
+ * @see ReplicationRedoLogSizeAlertConfiguration
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public class ReplicationRedoLogOverflowToDiskAlertBeanConfigurer implements AlertBeanConfigurer {
+public class ReplicationRedoLogSizeAlertConfigurer implements AlertConfigurer {
 
-	private final ReplicationRedoLogOverflowToDiskAlertBeanConfig config = new ReplicationRedoLogOverflowToDiskAlertBeanConfig();
+	private final ReplicationRedoLogSizeAlertConfiguration config = new ReplicationRedoLogSizeAlertConfiguration();
 	
 	/**
 	 * Constructs an empty alert configuration.
 	 */
-	public ReplicationRedoLogOverflowToDiskAlertBeanConfigurer() {
+	public ReplicationRedoLogSizeAlertConfigurer() {
 	}
+	
+	   /**
+     * Set the high threshold redo-log size value.
+     * @param highThreshold high threshold redo-log size.
+     * @return this.
+     */
+    public ReplicationRedoLogSizeAlertConfigurer highThresholdRedoLogSize(int highThreshold) {
+        config.setHighThresholdRedoLogSize(highThreshold);
+        return this;
+    }
+    
+    /**
+     * Set the low threshold redo-log size value.
+     * @param lowThreshold low threshold size.
+     * @return this.
+     */
+    public ReplicationRedoLogSizeAlertConfigurer lowThresholdRedoLogSize(int lowThreshold) {
+        config.setLowThresholdRedoLogSize(lowThreshold);
+        return this;
+    }
 
 	/**
 	 * Get a fully configured configuration (after all properties have been set).
 	 * @return a fully configured alert bean configuration.
 	 */
-	public ReplicationRedoLogOverflowToDiskAlertBeanConfig getConfig() {
+	public ReplicationRedoLogSizeAlertConfiguration getConfig() {
 		return config;
 	}
 }

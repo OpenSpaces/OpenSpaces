@@ -19,47 +19,47 @@ package org.openspaces.admin.alert.config;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A strongly typed machine CPU utilization alert bean configurer. Allows a more code-fluent
+ * A strongly typed physical memory utilization alert bean configurer. Allows a more code-fluent
  * approach by use of method chaining. After all properties have been set, use the call to
  * {@link #getConfig()} to create a fully initialized configuration object based.
  * 
- * @see CpuUtilizationAlertBeanConfig
+ * @see PhysicalMemoryUtilizationAlertConfiguration
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public class CpuUtilizationAlertBeanConfigurer implements AlertBeanConfigurer {
+public class PhysicalMemoryUtilizationAlertConfigurer implements AlertConfigurer {
 
-	private final CpuUtilizationAlertBeanConfig config = new CpuUtilizationAlertBeanConfig();
+	private final PhysicalMemoryUtilizationAlertConfiguration config = new PhysicalMemoryUtilizationAlertConfiguration();
 	
 	/**
-	 * Constructs an empty machine CPU utilization alert configuration.
+	 * Constructs an empty machine physical memory utilization alert configuration.
 	 */
-	public CpuUtilizationAlertBeanConfigurer() {
+	public PhysicalMemoryUtilizationAlertConfigurer() {
 	}
 	
 	/**
-	 * Set the CPU high threshold percentage value.
+	 * Set the physical memory high threshold percentage value.
 	 * @param highThreshold high threshold percentage.
 	 * @return this.
 	 */
-	public CpuUtilizationAlertBeanConfigurer highThresholdPerc(int highThreshold) {
+	public PhysicalMemoryUtilizationAlertConfigurer highThresholdPerc(int highThreshold) {
 		config.setHighThresholdPerc(highThreshold);
 		return this;
 	}
 	
 	/**
-	 * Set the CPU low threshold percentage value.
+	 * Set the physical memory low threshold percentage value.
 	 * @param lowThreshold low threshold percentage.
 	 * @return this.
 	 */
-	public CpuUtilizationAlertBeanConfigurer lowThresholdPerc(int lowThreshold) {
+	public PhysicalMemoryUtilizationAlertConfigurer lowThresholdPerc(int lowThreshold) {
 		config.setLowThresholdPerc(lowThreshold);
 		return this;
 	}
 
     /**
-     * Set the period of time a CPU alert should be triggered if it's reading is above/below the
+     * Set the period of time a physical memory alert should be triggered if it's reading is above/below the
      * threshold setting.
      * 
      * @param period
@@ -68,16 +68,16 @@ public class CpuUtilizationAlertBeanConfigurer implements AlertBeanConfigurer {
      *            the time unit of the specified period.
      * @return this.
      */
-	public CpuUtilizationAlertBeanConfigurer measurementPeriod(long period, TimeUnit timeUnit) {
+	public PhysicalMemoryUtilizationAlertConfigurer measurementPeriod(long period, TimeUnit timeUnit) {
 		config.setMeasurementPeriod(period, timeUnit);
 		return this;
 	}
 	
 	/**
-	 * Get a fully configured machine CPU utilization configuration (after all properties have been set).
+	 * Get a fully configured physical memory utilization configuration (after all properties have been set).
 	 * @return a fully configured alert bean configuration.
 	 */
-	public CpuUtilizationAlertBeanConfig getConfig() {
+	public PhysicalMemoryUtilizationAlertConfiguration getConfig() {
 		return config;
 	}
 }

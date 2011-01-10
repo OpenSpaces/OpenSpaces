@@ -20,9 +20,9 @@ import org.openspaces.admin.bean.BeanConfigurer;
 
 /**
  * A weakly-typed configuration API based on the 'builder' patterns for a more convenient
- * code-fluent approach to configuring an {@link AlertBeanConfig}.
+ * code-fluent approach to configuring an {@link AlertConfiguration}.
  * <p>
- * The fully configured {@link AlertBeanConfig} object is returned by the call to
+ * The fully configured {@link AlertConfiguration} object is returned by the call to
  * {@link #getConfig()}.
  * <p>
  * By default, the configuration is empty - has no properties set. The
@@ -32,5 +32,5 @@ import org.openspaces.admin.bean.BeanConfigurer;
  * @author Moran Avigdor
  * @since 8.0
  */
-public interface AlertBeanConfigurer extends BeanConfigurer<AlertBeanConfig> {
+public interface AlertConfigurer extends BeanConfigurer<AlertConfiguration> {
 }

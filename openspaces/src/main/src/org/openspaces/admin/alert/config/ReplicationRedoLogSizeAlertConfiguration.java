@@ -26,12 +26,12 @@ import org.openspaces.admin.internal.alert.bean.ReplicationRedoLogSizeAlertBean;
  * certain threshold. The redo-log size takes both the swapped packets and the memory residing
  * packets into consideration.
  * 
- * @see ReplicationRedoLogSizeAlertBeanConfigurer
+ * @see ReplicationRedoLogSizeAlertConfigurer
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public class ReplicationRedoLogSizeAlertBeanConfig implements AlertBeanConfig {
+public class ReplicationRedoLogSizeAlertConfiguration implements AlertConfiguration {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -49,10 +49,12 @@ public class ReplicationRedoLogSizeAlertBeanConfig implements AlertBeanConfig {
     
 	private final Map<String, String> properties = new HashMap<String, String>();
 
+    private boolean enabled;
+
 	/**
 	 * Constructs an empty configuration.
 	 */
-	public ReplicationRedoLogSizeAlertBeanConfig() {
+	public ReplicationRedoLogSizeAlertConfiguration() {
 	}
 	
 	/**
@@ -111,4 +113,19 @@ public class ReplicationRedoLogSizeAlertBeanConfig implements AlertBeanConfig {
 	public String getBeanClassName() {
 		return ReplicationRedoLogSizeAlertBean.class.getName();
 	}
+	
+	   
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }
