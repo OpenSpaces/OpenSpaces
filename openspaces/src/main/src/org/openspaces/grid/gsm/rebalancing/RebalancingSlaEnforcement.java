@@ -614,8 +614,8 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                     pu, 
                     machines);
 
-            double averagePrimariesPerCpuCore = 
-                RebalancingUtils.getAverageNumberOfPrimaryInstancesPerCpuCore(pu,containers);
+            double optimalCpuCoresPerPrimary = 
+                RebalancingUtils.getAverageCpuCoresPerPrimary(pu,containers);
             boolean conflict = false;
             // the source machine is the machine where the primary is restarted (high primaries per core)
             // the target machine is the machine where a new primary is elected (low primaries per core)
@@ -624,31 +624,23 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
 
                 Machine target = sortedMachines.get(targetIndex);
 
-                if (RebalancingUtils.getAverageNumberOfPrimaryInstancesPlusOnePerCpuCore(pu,target) 
-                        > averagePrimariesPerCpuCore) {
-                    // target cannot host any more primary instances
-                    // since the array is sorted there is no point in continuing for the next target
-                    break;
-                }
-
-                if (isConflictingOperationInProgress(target, 1)) {
-                    // number of primaries on machine might be skewed.
-                    conflict = true;
-                    logger.debug("Cannot restart a primary instance whos backup is on machine "
-                            + ToStringHelper.machineToString(target)
-                            + " since a conflicting relocation is already in progress.");
-                    continue;
-                }
-
                 for (int sourceIndex = sortedMachines.size() - 1; sourceIndex > targetIndex; sourceIndex--) {
 
                     Machine source = sortedMachines.get(sourceIndex);
 
-                    if (RebalancingUtils.getAverageNumberOfPrimaryInstancesMinusOnePerCpuCore(pu,source) 
-                            < averagePrimariesPerCpuCore) {
+                    if (!RebalancingUtils.isRestartRecommended(pu, source, target, optimalCpuCoresPerPrimary)) {
                         // source cannot give up any primary instances
                         // since the array is sorted there is no point in continuing the search
                         break;
+                    }
+                    
+                    if (isConflictingOperationInProgress(target, 1)) {
+                        // number of primaries on machine might be skewed.
+                        conflict = true;
+                        logger.debug("Cannot restart a primary instance whos backup is on machine "
+                                + ToStringHelper.machineToString(target)
+                                + " since a conflicting relocation is already in progress.");
+                        continue;
                     }
 
                     if (isConflictingOperationInProgress(source, 1)) {
@@ -748,26 +740,25 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                         
                         ProcessingUnitInstance candidateInstance = pu.getPartition(lastResortPartitionRestart).getPrimary();
                         Machine source = candidateInstance.getMachine();
-                        if (RebalancingUtils.getAverageNumberOfPrimaryInstancesMinusOnePerCpuCore(pu,source) 
-                                < averagePrimariesPerCpuCore) {
-                            // machine cannot give up any primary instances
-                            continue;
+                        if (RebalancingUtils.getNumberOfCpuCores(source) <=
+                                RebalancingUtils.getNumberOfPrimaryInstancesOnMachine(pu, source) * optimalCpuCoresPerPrimary) {
+                            
+                            // number of cores is below optimal, or put it another way there are too many primaries on the machine                        
+                            if (logger.isInfoEnabled()) {
+                                String sourceToString = ToStringHelper.machineToString(source);
+                                int numberOfPrimaryInstancesOnSource = RebalancingUtils.getNumberOfPrimaryInstancesOnMachine(pu, source);
+                                int numberOfCpuCoresOnSource = RebalancingUtils.getNumberOfCpuCores(source);
+                                logger.info(
+                                    "Restarting " + ToStringHelper.puInstanceToString(candidateInstance) + " "
+                                    + "instance on machine " + sourceToString + " so that machine "
+                                    + sourceToString + " would have more less instances per cpu core. "
+                                    + sourceToString +" has " + numberOfPrimaryInstancesOnSource + " primary instances "+
+                                    "running on " + numberOfCpuCoresOnSource + " cpu cores. ");
+                            }
+                            
+                            return RebalancingUtils.restartProcessingUnitInstanceAsync(candidateInstance,
+                                    RELOCATION_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
                         }
-                                                    
-                        if (logger.isInfoEnabled()) {
-                            String sourceToString = ToStringHelper.machineToString(source);
-                            int numberOfPrimaryInstancesOnSource = RebalancingUtils.getNumberOfPrimaryInstancesOnMachine(pu, source);
-                            int numberOfCpuCoresOnSource = RebalancingUtils.getNumberOfCpuCores(source);
-                            logger.info(
-                                "Restarting " + ToStringHelper.puInstanceToString(candidateInstance) + " "
-                                + "instance on machine " + sourceToString + " so that machine "
-                                + sourceToString + " would have more less instances per cpu core. "
-                                + sourceToString +" has " + numberOfPrimaryInstancesOnSource + " primary instances "+
-                                "running on " + numberOfCpuCoresOnSource + " cpu cores. ");
-                        }
-                        
-                        return RebalancingUtils.restartProcessingUnitInstanceAsync(candidateInstance,
-                                RELOCATION_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
                     }
                     // we haven't found any partition to restart, probably the instance that requires restart
                     // has a partition lower than doomsDayPartitionRestart.
