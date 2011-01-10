@@ -36,8 +36,17 @@ import com.gigaspaces.cluster.activeelection.SpaceMode;
  * 
  */
 public class RebalancingSlaEnforcement implements
-        ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, RebalancingSlaEnforcementEndpoint> {
+ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, RebalancingSlaEnforcementEndpoint> {
 
+    private final List<FutureProcessingUnitInstance> doneFutureRelocations;
+    private boolean tracingEnabled = false;
+    public void enableTracing() {
+        tracingEnabled = true;
+    }
+    public List<FutureProcessingUnitInstance> getTrace() {
+        return doneFutureRelocations;
+    }
+    
     private static final Log logger = LogFactory.getLog(RebalancingSlaEnforcement.class);
 
     private static final int RELOCATION_TIMEOUT_FAILURE_SECONDS = 3600; // one hour
@@ -52,6 +61,8 @@ public class RebalancingSlaEnforcement implements
         futureRelocationPerProcessingUnit = new HashMap<ProcessingUnit, List<FutureProcessingUnitInstance>>();
         failedRelocations = new ArrayList<FutureProcessingUnitInstance>();
         this.endpoints = new HashMap<ProcessingUnit, RebalancingSlaEnforcementEndpoint>();
+        
+        doneFutureRelocations = new ArrayList<FutureProcessingUnitInstance>();
     }
 
     public void destroy() {
@@ -787,8 +798,12 @@ public class RebalancingSlaEnforcement implements
 
                 if (future.isDone()) {
 
+                    if (tracingEnabled) {
+                        doneFutureRelocations.add(future);
+                    }
+                    
                     iterator.remove();
-
+                    
                     Exception exception = null;
 
                     try {
@@ -817,4 +832,5 @@ public class RebalancingSlaEnforcement implements
 
         }
     }
+    
 }
