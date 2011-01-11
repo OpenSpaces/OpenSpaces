@@ -78,12 +78,7 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
             throw new BeanConfigurationException("Long GC period [" + config.getLongGcPausePeriod()
                     + " ms] must be greater than the short GC period [" + config.getShortGcPausePeriod() + " ms]");
         }
-        
-        if (config.getLongGcPausePeriod() < StatisticsMonitor.DEFAULT_MONITOR_INTERVAL) {
-            throw new BeanConfigurationException("Measurment period [" + config.getLongGcPausePeriod()
-                    + " ms] must be greater than ["+StatisticsMonitor.DEFAULT_MONITOR_INTERVAL+" ms]");
-        }
-        
+              
         if (config.getShortGcPausePeriod() < 0) {
             throw new BeanConfigurationException("Measurment period [" + config.getShortGcPausePeriod()
                     + " ms] must be greater than zero");
