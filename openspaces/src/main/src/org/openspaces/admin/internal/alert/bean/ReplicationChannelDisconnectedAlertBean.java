@@ -75,11 +75,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
     
     
     public void replicationStatusChanged(ReplicationStatusChangedEvent event) {
-        
-        if (event.getPreviousStatus() == null) {
-            return; //wait for full statistics. Avoid alert upon first deployment.
-        }
-        
+
         final ReplicationStatus replicationStatus = event.getNewStatus();
         final SpaceInstance source = event.getSpaceInstance();
         final SpaceInstance target = event.getReplicationTarget().getSpaceInstance();
