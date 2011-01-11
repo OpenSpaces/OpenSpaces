@@ -38,6 +38,7 @@ import com.gigaspaces.cluster.activeelection.SpaceMode;
 public class RebalancingSlaEnforcement implements
 ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, RebalancingSlaEnforcementEndpoint> {
 
+    // tracing used for component testing expected result validation
     private final List<FutureProcessingUnitInstance> doneFutureRelocations;
     private boolean tracingEnabled = false;
     public void enableTracing() {
@@ -285,7 +286,11 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
     class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcementEndpoint {
 
         private final ProcessingUnit pu;
-        private int lastResortPartitionRestart = 0; // when all primary rebalancing hueristics fail, we use this state to restart primaries by partition number
+        
+        // restart a primary as a last resort continuation state
+        // when primary rebalancing algorithm fails, we use this state to restart primaries by partition number (hueristics)
+        private int lastResortPartitionRestart = 0;
+        private int lastResortPartitionRelocate = 0;
 
         DefaultRebalancingSlaEnforcementEndpoint(ProcessingUnit pu) {
             this.pu = pu;
@@ -363,7 +368,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                 // then skip directly to stage 3
                 if (RebalancingUtils.isProcessingUnitIntact(pu, containers)) {
 
-                    // stage 2: restart primaries so number of primaries per machine is balanced
+                    // stage 2: restart primaries so number of cpu cores per primary is balanced
                     rebalanceNumberOfPrimaryInstancesPerMachine(containers, sla);
 
                     if (!RebalancingUtils.isProcessingUnitIntact(pu)
@@ -567,10 +572,108 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                 }// for source container
             }// for target container
 
+            if (// we tried to relocate primaries
+                !onlyBackups &&
+                
+                 // backup instances exist and they are the reason we are here due to max instances per machine limitation
+                pu.getNumberOfBackups() > 0 &&
+                
+                // no future operations that may conflict
+                futureRelocationPerProcessingUnit.get(pu).size() == 0 &&
+                
+                // all instances are deployed
+                RebalancingUtils.isProcessingUnitIntact(pu) &&
+                
+                // we're not done rebalancing yet!
+                !RebalancingUtils.isEvenlyDistributedAcrossContainers(pu, containers)) {
+                
+                logger.debug("Optimal rebalancing hueristics failed balancing instances per container in this deployment. "+
+                "Performing non-optimal relocation heuristics.");
+
+                // algorithm failed. we need to use heuristics.
+                // The reason the algorithm failed is that the machine that has an empty spot also has instances from partition that prevent a relocation into that machine.
+                // For example, the excess machine wants to relocate Primary1 but the empty GSC is on a machine that has Backup1.
+                // The workaround is to relocate any backup from another machine to the empty GSC, and so the "emptiness" would move to that other machine.
+                // we look for backups by their partition number to avoid an endless loop.
+
+                for (; lastResortPartitionRelocate < pu.getNumberOfInstances() - 1; lastResortPartitionRelocate++) {
+
+                    // find backup to relocate
+                    ProcessingUnitInstance candidateInstance = pu.getPartition(lastResortPartitionRelocate).getBackup();
+                    
+                    GridServiceContainer source = candidateInstance.getGridServiceContainer();
+                    
+                    for (int targetIndex = 0; targetIndex < sortedContainers.size(); targetIndex++) {
+
+                        GridServiceContainer target = sortedContainers.get(targetIndex);
+                        
+                        if (target.getMachine().equals(source.getMachine())) {
+                            // there's no point in relocating a backup into the same machine
+                            // since we want another machine to have an "empty" container. 
+                            continue;
+                        }
+
+                        int instancesInTarget = target.getProcessingUnitInstances(pu.getName()).length;
+                        if (instancesInTarget >= RebalancingUtils.getPlannedMaximumNumberOfInstancesForContainer(
+                                target, containers, pu)) {
+                            // target cannot host any more instances
+                            continue;
+                        }
+
+                        // check limit of pu instances from same partition per container
+                        if (pu.getMaxInstancesPerVM() > 0) {
+                            int numberOfOtherInstancesFromPartitionInTargetContainer = RebalancingUtils.getOtherInstancesFromSamePartitionInContainer(
+                                    target, candidateInstance)
+                                .size();
+
+                            if (numberOfOtherInstancesFromPartitionInTargetContainer >= pu.getMaxInstancesPerVM()) {
+                                logger.debug("Cannot relocate " + ToStringHelper.puInstanceToString(candidateInstance)
+                                        + " " + "to container " + ToStringHelper.gscToString(target) + " "
+                                        + "since container already hosts "
+                                        + numberOfOtherInstancesFromPartitionInTargetContainer + " "
+                                        + "instance(s) from the same partition.");
+                                continue;
+                            }
+                        }
+
+                        // check limit of pu instances from same partition per machine
+                        if (pu.getMaxInstancesPerMachine() > 0) {
+                            int numberOfOtherInstancesFromPartitionInTargetMachine = RebalancingUtils.getOtherInstancesFromSamePartitionInMachine(
+                                    target.getMachine(), candidateInstance)
+                                .size();
+
+                            if (numberOfOtherInstancesFromPartitionInTargetMachine >= pu.getMaxInstancesPerMachine()) {
+                                logger.debug("Cannot relocate " + ToStringHelper.puInstanceToString(candidateInstance)
+                                        + " " + "to container " + ToStringHelper.gscToString(target) + " "
+                                        + "since machine already contains "
+                                        + numberOfOtherInstancesFromPartitionInTargetMachine + " "
+                                        + "instance(s) from the same partition.");
+                                continue;
+                            }
+                        }
+
+                        logger.info("Relocating " + ToStringHelper.puInstanceToString(candidateInstance) + " "
+                                + "from " + ToStringHelper.gscToString(source)
+                                + " " + "to " + ToStringHelper.gscToString(target));
+                        return RebalancingUtils.relocateProcessingUnitInstanceAsync(target, candidateInstance,
+                                RELOCATION_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
+
+                    }
+                }
+
+                // we haven't found any partition to relocate, probably the instance that requires
+                // relocation has a partition lower than lastResortPartitionRelocate.
+
+                if (lastResortPartitionRelocate >= pu.getNumberOfInstances() - 1) {
+                    lastResortPartitionRelocate = 0; // better luck next time. continuation programming
+                }
+            }
+            
             if (conflict) {
                 throw new ConflictingOperationInProgressException();
             }
 
+            
             return null;
         }
 
@@ -735,11 +838,23 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                     // In order to make the algorithm deterministic and avoid loops we restart primaries by
                     // their natural order (by partition number)
                     //
-                    // doomsDayPartitionRestart is the next partition we should restart. 
+                    // lastResortPartitionRestart is the next partition we should restart. 
                     for (;lastResortPartitionRestart < pu.getNumberOfInstances()-1 ; lastResortPartitionRestart++) {
                         
                         ProcessingUnitInstance candidateInstance = pu.getPartition(lastResortPartitionRestart).getPrimary();
                         Machine source = candidateInstance.getMachine();
+                        
+                        Machine[] sourceReplicationMachines = RebalancingUtils.getMachinesHostingContainers(RebalancingUtils.getReplicationSourceContainers(candidateInstance));
+                        if (sourceReplicationMachines.length > 1) {
+                            throw new IllegalArgumentException("pu " + pu.getName() + " must have exactly one backup instance per partition in order for the primary restart algorithm to work.");
+                        }
+                        
+                        if (sourceReplicationMachines[0].equals(source)) {
+                            logger.debug("Cannot restart " + ToStringHelper.puInstanceToString(candidateInstance)
+                                    + "since replication source is on same machine as primary, so restarting will have not change number of primaries on machine.");
+                            continue;
+                        }
+                    
                         if (RebalancingUtils.getNumberOfCpuCores(source) <=
                                 RebalancingUtils.getNumberOfPrimaryInstancesOnMachine(pu, source) * optimalCpuCoresPerPrimary) {
                             
@@ -761,12 +876,12 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                         }
                     }
                     // we haven't found any partition to restart, probably the instance that requires restart
-                    // has a partition lower than doomsDayPartitionRestart.
-                    // don't worry, doomsDayPartitionRestart is set to zero in the next line, so if we get here again
-                    // the heuristics will work.
+                    // has a partition lower than lastResortPartitionRestart.
+                    
+                    if (lastResortPartitionRestart >= pu.getNumberOfInstances()-1) {
+                        lastResortPartitionRestart = 0; //better luck next time. continuation programming
+                    }
             }                    
-
-            lastResortPartitionRestart = 0;
 
             if (conflict) {
                 throw new ConflictingOperationInProgressException();

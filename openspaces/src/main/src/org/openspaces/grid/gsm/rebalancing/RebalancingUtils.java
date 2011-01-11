@@ -406,18 +406,20 @@ public class RebalancingUtils {
             
         
         final int numberOfPrimaryInstancesOnTarget = getNumberOfPrimaryInstancesOnMachine(pu, target);
+        int cpuCoresOnSource = getNumberOfCpuCores(source);
+        int cpuCoresOnTarget = getNumberOfCpuCores(target);
         final double missingCpuCoresBeforeRestart = 
-            Math.min(0, 
-                 numberOfPrimaryInstancesOnSource * optimalCpuCoresPerPrimaryInstance - getNumberOfCpuCores(source)) +
-            Math.min(0, 
-                 numberOfPrimaryInstancesOnTarget * optimalCpuCoresPerPrimaryInstance - getNumberOfCpuCores(target));
+            Math.max(0, 
+                 numberOfPrimaryInstancesOnSource * optimalCpuCoresPerPrimaryInstance - cpuCoresOnSource) +
+            Math.max(0, 
+                 numberOfPrimaryInstancesOnTarget * optimalCpuCoresPerPrimaryInstance - cpuCoresOnTarget);
         
         
         final double missingCpuCoresAfterRestart = 
-            Math.min(0, 
-                 (numberOfPrimaryInstancesOnSource-1) * optimalCpuCoresPerPrimaryInstance - getNumberOfCpuCores(source)) +
-            Math.min(0, 
-                 (numberOfPrimaryInstancesOnTarget+1) * optimalCpuCoresPerPrimaryInstance - getNumberOfCpuCores(target));
+            Math.max(0, 
+                 (numberOfPrimaryInstancesOnSource-1) * optimalCpuCoresPerPrimaryInstance - cpuCoresOnSource) +
+            Math.max(0, 
+                 (numberOfPrimaryInstancesOnTarget+1) * optimalCpuCoresPerPrimaryInstance - cpuCoresOnTarget);
         
             isRestartRecommended = missingCpuCoresAfterRestart < missingCpuCoresBeforeRestart;
         }
