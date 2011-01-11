@@ -377,9 +377,10 @@ public class ContainersSlaEnforcement implements
 
             final Machine machine = gsa.getMachine();
             if (isFutureGridServiceContainerOnMachine(machine)) {
-                // try another machine, we check the flag if all else fails.
-                conflictingOperationInProgress = true;
-                continue;
+                // the reason we don't keep looking is that this machine might still have the least
+                // number of containers, even though a container is being started on it.
+                // so we'll just have to wait until the container is ready.
+                throw new ConflictingOperationInProgressException();
             }
 
             final OperatingSystemStatistics operatingSystemStatistics = machine.getOperatingSystem().getStatistics();
