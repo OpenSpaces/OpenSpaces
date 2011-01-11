@@ -137,20 +137,23 @@ public class ManualCapacityScaleStrategyBean
         int targetNumberOfContainers = 
             slaConfig.getMemoryCapacityInMB() > 0?
                     calcTargetNumberOfContainers() :
-                    minimumNumberOfMachines;
+                    Math.max(minimumNumberOfMachines,
+                             pu.getNumberOfBackups()+1);
         
         memoryInMB = targetNumberOfContainers * containersConfig.getMaximumJavaHeapSizeInMB();
         
         scheduledTask = 
         (admin).scheduleWithFixedDelayNonBlockingStateChange(
-        this, 0L, slaConfig.getPollingIntervalSeconds(), TimeUnit.SECONDS);
+                this, 
+       0L, slaConfig.getPollingIntervalSeconds(), TimeUnit.SECONDS);
+       logger.debug(pu.getName() + " is being monitored for SLA violations every " + slaConfig.getPollingIntervalSeconds() + " seconds");
     }
 
     private int calcMinNumberOfMachines(ProcessingUnit pu) {
         int minNumberOfMachines;
         if (pu.getMaxInstancesPerMachine() == 0) {
             minNumberOfMachines = 1;
-            logger.info("minNumberOfMachines=1 (since maxInstancesPerMachine is disabled)");
+            logger.info("minNumberOfMachines=1 (since max instances from same partition per machine is not defined)");
         }
         
         else {
@@ -178,19 +181,49 @@ public class ManualCapacityScaleStrategyBean
     }
 
     public void run() {
+        
+        logger.debug("Enforcing sla for processing unit " + pu.getName());
+        //TODO: Move this check to EsmImpl, this component should not be aware it is running in an ESM
+        //TODO: Raise an alert
+        int numberOfEsms = admin.getElasticServiceManagers().getSize();
+        if (numberOfEsms != 1) {
+            logger.error("Number of ESMs must be 1. Currently " + numberOfEsms + " running.");
+            return;
+        }
+        
         try {
             
             boolean machinesSlaEnforced = enforceMachinesSla();
-            
+            if (logger.isDebugEnabled()) {
+                if (!machinesSlaEnforced) {
+                    logger.debug("Machines SLA has not been reached");
+                }
+                else if (machinesService.getGridServiceAgentsPendingShutdown().length > 0) {
+                    logger.debug("Machines SLA cannot be reached until containers are removed before scale in");
+                }
+            }
             if (machinesSlaEnforced || 
                 machinesService.getGridServiceAgentsPendingShutdown().length >0) {
 
                 boolean containersSlaEnforced = enforceContainersSla();
-
+                if (logger.isDebugEnabled()) {
+                    if (!containersSlaEnforced) {
+                        logger.debug("Containers SLA has not been reached");
+                    }
+                    else if (machinesService.getGridServiceAgentsPendingShutdown().length > 0) {
+                        logger.debug("Containers SLA cannot be reached until processingunit is relocated before scale in");
+                    }
+                }
+                
                 if (containersSlaEnforced || 
                     containersService.getContainersPendingShutdown().length > 0) {
 
-                    enforceRebalancingSla(containersService.getContainers());
+                    boolean rebalancingSlaEnforced = enforceRebalancingSla(containersService.getContainers());
+                    if (logger.isDebugEnabled()) {
+                        if (!rebalancingSlaEnforced) {
+                            logger.debug("Rebalancing SLA has not been reached");
+                        }
+                    }
                 }
             }
         }

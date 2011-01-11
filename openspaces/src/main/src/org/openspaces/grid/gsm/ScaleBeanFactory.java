@@ -3,6 +3,8 @@ package org.openspaces.grid.gsm;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.bean.BeanInitializationException;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
@@ -22,6 +24,8 @@ import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAwar
 
 public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
 
+    private static final Log logger = LogFactory.getLog(ScaleBeanFactory.class);
+    
     private final RebalancingSlaEnforcementEndpoint rebalancingSlaEnforcementEndpoint;
     private final ContainersSlaEnforcementEndpoint containersSlaEnforcementEndpoint;
     private final MachinesSlaEnforcementEndpoint machinesSlaEnforcementEndpoint;
@@ -47,6 +51,8 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
     @Override
     protected Bean createInstance(String className, Map<String,String> properties, BeanServer<Bean> beanServer) throws BeanConfigurationException, BeanInitializationException{
 
+        logger.debug("Creating instance of class " + className + " with properties " + properties);
+        
         Bean instance = super.createInstance(className,properties, beanServer);
         
         if (instance instanceof MachinesSlaEnforcementEndpointAware) {

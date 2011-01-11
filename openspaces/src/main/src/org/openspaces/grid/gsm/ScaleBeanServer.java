@@ -20,6 +20,7 @@ import org.openspaces.grid.gsm.machines.ElasticMachineProvisioning;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
 import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
+import org.openspaces.grid.gsm.strategy.ManualCapacityScaleStrategyBean;
 import org.openspaces.grid.gsm.strategy.ScaleStrategyBean;
 /**
  * Creates the Scalability Strategy bean servers, based on the specified elasticProperties.
@@ -30,6 +31,8 @@ import org.openspaces.grid.gsm.strategy.ScaleStrategyBean;
  */
 public class ScaleBeanServer {
 
+    private static final HashMap<String, String> DEFAULT_SCALE_STRATEGY_BEAN_PROPERTIES = new HashMap<String,String>();
+    private static final String DEFAULT_SCALE_STRATEGY_BEAN_CLASSNAME = ManualCapacityScaleStrategyBean.class.getName();
     private final BeanServer<Bean> beanServer;
     private final ProcessingUnit pu ;
     private final RebalancingSlaEnforcement rebalancingSlaEnforcement;
@@ -69,15 +72,20 @@ public class ScaleBeanServer {
             beanServer.enableBean(enabledMachineProvisioningClassName);
         }
         
+
+        String scaleStrategyClassName = DEFAULT_SCALE_STRATEGY_BEAN_CLASSNAME;
+        Map<String,String> scaleStrategyProperties = DEFAULT_SCALE_STRATEGY_BEAN_PROPERTIES;
         ScaleStrategyBeanPropertiesManager scaleStrategyPropertiesManager = 
             new ScaleStrategyBeanPropertiesManager(elasticProperties);
         String enabledScaleStrategyClassName = getEnabledBeanClassName(scaleStrategyPropertiesManager);
+        
         if (enabledScaleStrategyClassName != null) {
-            beanServer.setBeanConfig(
-                    enabledScaleStrategyClassName, 
-                    scaleStrategyPropertiesManager.getBeanConfig(enabledScaleStrategyClassName));
-            beanServer.enableBean(enabledScaleStrategyClassName);
+            scaleStrategyClassName = enabledScaleStrategyClassName;
+            scaleStrategyProperties = scaleStrategyPropertiesManager.getBeanConfig(scaleStrategyClassName);
         }
+        
+        beanServer.setBeanConfig(scaleStrategyClassName, scaleStrategyProperties);
+        beanServer.enableBean(scaleStrategyClassName);
     }
 
     public void destroy() {
