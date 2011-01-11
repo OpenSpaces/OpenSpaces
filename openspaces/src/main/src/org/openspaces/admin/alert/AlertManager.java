@@ -17,6 +17,8 @@ package org.openspaces.admin.alert;
 
 import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.alert.config.AlertConfiguration;
+import org.openspaces.admin.alert.config.parser.AlertConfigurationParser;
+import org.openspaces.admin.alert.config.parser.XmlAlertConfigurationParser;
 import org.openspaces.admin.alert.events.AlertEventListener;
 import org.openspaces.admin.alert.events.AlertEventManager;
 
@@ -24,19 +26,26 @@ import org.openspaces.admin.alert.events.AlertEventManager;
  * The <tt>AlertManager</tt> is a manager for configuring of alerts, firing of alerts, and
  * registering for alert events.
  * <p>
- * The alert manager provides two options for configuration of alert beans - as bulk or one by one.
- * The {@link AlertConfiguration} is the main interface of an alert configuration. A configuration
- * based on String key-value property pairs.
+ * The alert manager provides two options for configuration of alert configurations - as bulk or one
+ * by one. The {@link AlertConfiguration} is the main interface of an alert configuration - a
+ * configuration based on String key-value property pairs.
+ * <p>
+ * To configure with a bulk of alert configurations, the {@link #configure(AlertConfiguration[])}
+ * method can be used. These configurations can be extracted from a resource using an
+ * {@link AlertConfigurationParser}. The parser {@link AlertConfigurationParser#parse()} returns an
+ * array of {@link AlertConfiguration}. The {@link XmlAlertConfigurationParser} can be used to parse
+ * the <tt>alerts.xml</tt> configuration file located under <tt>config/alerts</tt>.
  * <p>
  * To Register/Unregister for alert events (of all types), use the {@link AlertEventManager} to
  * add/remove {@link AlertEventListener}s.
  * <p>
- * The {@link #fireAlert(Alert)} method call allows <tt>alert triggers</tt> to 'fire' an alert and trigger an
- * event to be sent to all registered alert event listeners.
+ * The {@link #fireAlert(Alert)} method call allows <tt>alert triggers</tt> to 'fire' an alert and
+ * trigger an event to be sent to all registered alert event listeners.
  * <p>
  * An alert provider is a remote service implementing an {@link AlertProvider} interface. A
- * dedicated <tt>alert trigger</tt> needs to be configured to periodically perform remote calls to poll issued
- * alerts (see {@link AlertProvider#getAlerts()}), and 'fire' them to local alert event listeners.
+ * dedicated <tt>alert trigger</tt> needs to be configured to periodically perform remote calls to
+ * poll issued alerts (see {@link AlertProvider#getAlerts()}), and 'fire' them to local alert event
+ * listeners.
  * 
  * @author Moran Avigdor
  * @since 8.0
@@ -46,6 +55,9 @@ public interface AlertManager extends AdminAware {
     /**
      * Define an alert configuration for a 'bulk' of configurations. Overrides all previously set
      * properties for any of the alerts.
+     * <p>
+     * See the {@link XmlAlertConfigurationParser} which can be used to parse the default
+     * <tt>alerts.xml</tt> configuration file located under <tt>config/alerts</tt>.
      * <p>
      * If {@link AlertConfiguration#isEnabled()} returns <code>true</code> it is equivalent to
      * calling {@link #setConfig(AlertConfiguration)} followed by {@link #enableAlert(Class)}. If it
@@ -58,6 +70,7 @@ public interface AlertManager extends AdminAware {
      *            the alert configurations.
      * @throws AlertConfigurationException
      *             if the alert is already enabled (need to disable it first).
+     * @see AlertConfigurationParser
      */
     void configure(AlertConfiguration[] configurations) throws AlertConfigurationException;
 
