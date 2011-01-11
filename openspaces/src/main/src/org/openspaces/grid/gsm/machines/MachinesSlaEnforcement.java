@@ -244,8 +244,10 @@ public class MachinesSlaEnforcement implements
                 }
             }
             
+            cleanFailedMachines();
             cleanAgentsMarkedForShutdown(sla.getMachineProvisioning());
             cleanFutureAgents();
+            
 
             if (!getFutureAgents().isEmpty() && !getAgentsPendingShutdown().isEmpty()) {
                 throw new IllegalStateException("Cannot have both agents pending to be started and agents pending shutdown.");
@@ -448,7 +450,15 @@ public class MachinesSlaEnforcement implements
                 }
             }
             else {
-                logger.debug("No action required in order to enforce machines sla.");
+                logger.debug("No action required in order to enforce machines sla. "+
+                        "existingMemory="+existingMemory + " " +
+                        "targetMemory="+targetMemory + " " + 
+                        "existingCpu="+existingCpu + " " +
+                        "targetCpu=" + targetCpu + " " +
+                        "getAgentsStarted().size()=" + getAgentsStarted().size() + " " +
+                        "getAgentsPendingShutdown().size()="+getAgentsPendingShutdown().size() + " " +
+                        "getFutureAgents().size()="+getFutureAgents().size() + " " +
+                        "minimumNumberOfMachines="+sla.getMinimumNumberOfMachines());        
             }
             return slaReached;
         }
@@ -497,6 +507,16 @@ public class MachinesSlaEnforcement implements
             }
         }
 
+        private void cleanFailedMachines() {
+            Iterator<GridServiceAgent> iterator = agentsStartedPerProcessingUnit.get(pu).iterator();
+            while(iterator.hasNext()) {
+                GridServiceAgent agent = iterator.next();
+                if (!agent.isDiscovered()) {
+                    iterator.remove();
+                }
+            }
+        }
+        
         /**
          * Move future agents that completed startup, from the futureAgents list to the agentsStarted list. 
          */
