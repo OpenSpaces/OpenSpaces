@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.jini.rio.resources.util.TimeUtil;
 import org.openspaces.admin.Admin;
-import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
