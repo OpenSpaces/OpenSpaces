@@ -22,7 +22,7 @@ import java.util.Map;
 import org.openspaces.admin.internal.alert.bean.ReplicationRedoLogSizeAlertBean;
 
 /**
- * A replication redo log size alert configurer. Specifies the thresholds for triggering an alert.
+ * A replication redo log size alert configuration. Specifies the thresholds for triggering an alert.
  * There are two thresholds, high and low. The redo log size alert is raised if the number of
  * packets in the redo log is above the specified high threshold. The redo log size alert is
  * resolved if the number of packets in the redo log goes below the specified low threshold.

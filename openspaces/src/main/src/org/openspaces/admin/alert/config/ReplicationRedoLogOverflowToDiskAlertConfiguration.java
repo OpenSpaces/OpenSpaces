@@ -22,7 +22,7 @@ import java.util.Map;
 import org.openspaces.admin.internal.alert.bean.ReplicationRedoLogOverflowToDiskAlertBean;
 
 /**
- * A replication redo log overflow to disk alert configurer. The alert is raised if a redo log has
+ * A replication redo log overflow to disk alert configuration. The alert is raised if a redo log has
  * exceeded the defined memory capacity and excess packets are being written to disk. The alert is
  * resolved once the disk is no longer in use.
  * <p>
