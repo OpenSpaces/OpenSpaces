@@ -112,17 +112,22 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
         
         long prevGcCollectionTime = event.getStatistics().getPrevious().getGcCollectionTime();
         long diffGcCollectionTime = gcCollectionTime - prevGcCollectionTime;
+        long diffGcCollectionCount = event.getStatistics().getGcCollectionCount() - event.getStatistics().getPrevious().getGcCollectionCount();
 
-        if (diffGcCollectionTime == 0) 
+        if (diffGcCollectionTime == 0 || diffGcCollectionCount == 0) 
             return; //same value, no change
+              
+        // divide total accumulated gc time by the number of accumulated collection count to get the
+        // average gc reading for our measurement intervals
+        long gcPauseTime = diffGcCollectionTime / diffGcCollectionCount;
         
-        if (diffGcCollectionTime > longGcPausePeriod) {
+        if (gcPauseTime > longGcPausePeriod) {
             final String groupUid = generateGroupUid(event.getVirtualMachine().getUid());
             AlertFactory factory = new AlertFactory();
             factory.name(ALERT_NAME);
             factory.groupUid(groupUid);
             factory.description(AlertBeanUtils.getGridComponentShortName(event.getVirtualMachine())
-                    + "JVM garbage cycle collection time took " + TimeUtil.format(diffGcCollectionTime));
+                    + "JVM garbage cycle collection time took " + TimeUtil.format(gcPauseTime));
             factory.severity(AlertSeverity.WARNING);
             factory.status(AlertStatus.RAISED);
             factory.componentUid(event.getVirtualMachine().getUid());
@@ -133,7 +138,7 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
             factory.putProperty(GarbageCollectionAlert.CPU_UTILIZATION, String.valueOf(event.getStatistics().getCpuPerc()*100.0));
             factory.putProperty(GarbageCollectionAlert.PROCESS_ID, String.valueOf(event.getVirtualMachine().getDetails().getPid()));
             factory.putProperty(GarbageCollectionAlert.COMPONENT_NAME, AlertBeanUtils.getGridComponentFullName(event.getVirtualMachine()));
-            factory.putProperty(GarbageCollectionAlert.GC_DURATION_MILLISECONDS, String.valueOf(diffGcCollectionTime));
+            factory.putProperty(GarbageCollectionAlert.GC_DURATION_MILLISECONDS, String.valueOf(gcPauseTime));
             factory.putProperty(GarbageCollectionAlert.HEAP_UTILIZATION, String.valueOf(event.getStatistics().getMemoryHeapUsedPerc()));
             factory.putProperty(GarbageCollectionAlert.NON_HEAP_UTILIZATION, String.valueOf(event.getStatistics().getMemoryNonHeapUsedPerc()));
 
@@ -141,7 +146,7 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
             Alert alert = factory.toAlert();
             admin.getAlertManager().fireAlert( new GarbageCollectionAlert(alert));
             
-        } else if (diffGcCollectionTime < shortGcPausePeriod) {
+        } else if (gcPauseTime < shortGcPausePeriod) {
             final String groupUid = generateGroupUid(event.getVirtualMachine().getUid());
             AlertHistory alertHistory = ((InternalAlertManager)admin.getAlertManager()).getAlertRepository().getAlertHistoryByGroupUid(groupUid);
             AlertHistoryDetails alertHistoryDetails = alertHistory.getDetails();
@@ -150,7 +155,7 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
                 factory.name(ALERT_NAME);
                 factory.groupUid(groupUid);
                 factory.description(AlertBeanUtils.getGridComponentShortName(event.getVirtualMachine())
-                        + "JVM garbage cycle collection time took " + TimeUtil.format(diffGcCollectionTime));
+                        + "JVM garbage cycle collection time took " + TimeUtil.format(gcPauseTime));
                 factory.severity(AlertSeverity.WARNING);
                 factory.status(AlertStatus.RESOLVED);
                 factory.componentUid(event.getVirtualMachine().getUid());
@@ -161,7 +166,7 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
                 factory.putProperty(GarbageCollectionAlert.CPU_UTILIZATION, String.valueOf(event.getStatistics().getCpuPerc()*100.0));
                 factory.putProperty(GarbageCollectionAlert.PROCESS_ID, String.valueOf(event.getVirtualMachine().getDetails().getPid()));
                 factory.putProperty(GarbageCollectionAlert.COMPONENT_NAME, AlertBeanUtils.getGridComponentFullName(event.getVirtualMachine()));
-                factory.putProperty(GarbageCollectionAlert.GC_DURATION_MILLISECONDS, String.valueOf(diffGcCollectionTime));
+                factory.putProperty(GarbageCollectionAlert.GC_DURATION_MILLISECONDS, String.valueOf(gcPauseTime));
                 factory.putProperty(GarbageCollectionAlert.HEAP_UTILIZATION, String.valueOf(event.getStatistics().getMemoryHeapUsedPerc()));
                 factory.putProperty(GarbageCollectionAlert.NON_HEAP_UTILIZATION, String.valueOf(event.getStatistics().getMemoryNonHeapUsedPerc()));
 
