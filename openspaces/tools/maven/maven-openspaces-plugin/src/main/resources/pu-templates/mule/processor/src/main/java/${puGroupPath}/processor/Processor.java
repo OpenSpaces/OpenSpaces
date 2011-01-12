@@ -2,9 +2,6 @@ package ${puGroupId}.processor;
 
 import ${puGroupId}.common.Data;
 
-import org.mule.api.MuleEventContext;
-import org.mule.api.lifecycle.Callable;
-
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.context.GigaSpaceContext;
 
