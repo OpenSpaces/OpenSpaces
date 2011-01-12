@@ -331,7 +331,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
 
             } catch (ConflictingOperationInProgressException e) {
                 logger.debug(
-                        "Cannot enforce Containers SLA since a conflicting operation is in progress. Try again later.",
+                        "Cannot enforce Rebalancing SLA since a conflicting operation is in progress. Try again later.",
                         e);
                 return false;
             }
