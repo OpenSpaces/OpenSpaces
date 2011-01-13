@@ -32,9 +32,4 @@ public interface LookupService extends AgentGridComponent, LogProviderGridCompon
     String[] getLookupGroups();
 
     LookupLocator getLookupLocator();
-    
-    /**
-     * @return true if the lus is in admin.getLookupServices()
-     */
-    boolean isRunning();
 }

@@ -402,10 +402,6 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         return deploy(deployment.toProcessingUnitDeployment(admin),timeout,timeUnit);
     }
 
-    public boolean isRunning() {
-        return admin.getGridServiceManagers().getManagerByUID(getUid()) != null;
-    }
-    
     public Map<String,String> getProcessingUnitElasticProperties(ProcessingUnit pu) {
         
         //TODO: Read the data from the gsm server.

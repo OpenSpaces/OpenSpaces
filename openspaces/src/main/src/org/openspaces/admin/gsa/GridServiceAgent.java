@@ -148,10 +148,4 @@ public interface GridServiceAgent extends GridComponent, LogProviderGridComponen
      * @since 7.1.2
      */
     void shutdown();
-    
-    /**
-     * @return true if this agent is in admin.getGridServiceAgents()
-     * @since 8.0
-     */
-    boolean isRunning();
 }

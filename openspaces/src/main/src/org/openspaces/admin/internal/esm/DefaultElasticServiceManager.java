@@ -128,11 +128,6 @@ public class DefaultElasticServiceManager extends AbstractAgentGridComponent imp
         return serviceID.hashCode();
     }
 
-    public boolean isRunning() {
-        return this.admin.getElasticServiceManagers().getManagerByUID(getUid()) != null;
-    }
-
-
     public Map<String,String> getProcessingUnitElasticProperties(ProcessingUnit pu) {
         try {
             return esm.getProcessingUnitElasticProperties(pu.getName());

@@ -148,7 +148,4 @@ public class DefaultLookupService extends AbstractAgentGridComponent implements 
         return serviceID.hashCode();
     }
 
-    public boolean isRunning() {
-        return admin.getLookupServices().getLookupServiceByUID(getUid()) != null;
-    }
 }

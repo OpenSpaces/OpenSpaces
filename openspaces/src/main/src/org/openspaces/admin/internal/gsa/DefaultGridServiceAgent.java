@@ -454,7 +454,4 @@ public class DefaultGridServiceAgent extends AbstractGridComponent implements In
         gsa.runGc();
     }
 
-    public boolean isRunning() {
-        return admin.getGridServiceAgents().getAgentByUID(getUid()) != null;
-    }
 }
