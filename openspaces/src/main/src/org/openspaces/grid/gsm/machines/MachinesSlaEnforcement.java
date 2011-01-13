@@ -19,6 +19,7 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
@@ -702,12 +703,18 @@ public class MachinesSlaEnforcement implements
                     }
                     
                     if (exception == null && newAgents.isEmpty()) {
-                        
+                        StringBuilder usedMachines = new StringBuilder();
+                        for (GridServiceAgent agent : agentsUsedByPus) {
+                            Machine machine = agent.getMachine();
+                            usedMachines.append(machine.getHostAddress()+" has "+ MachinesSlaUtils.getCpu(machine)+ " cpu cores " + MachinesSlaUtils.getPhysicalMemoryInMB(machine)+"MB running " + machine.getGridServiceContainers().getSize() +" containers. ");
+                        }
                         exception = new ExecutionException(
                                 new AdminException(
                                         "Out of Machines. "+
                                         "Please start another grid service agent "+
-                                        "on a new machine."));
+                                        "on a new machine." +
+                                        " Used machines: " + usedMachines
+                                ));
                     }
                     
                     allocatedAgents = newAgents.toArray(new GridServiceAgent[newAgents.size()]);

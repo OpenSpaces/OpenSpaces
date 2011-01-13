@@ -41,12 +41,17 @@ public class MachinesSlaUtils {
 
     public static long getMemoryInMB(Machine machine, MachinesSlaPolicy sla) {
         
-        long total = (long) 
-            machine.getOperatingSystem().getDetails()
-            .getTotalPhysicalMemorySizeInMB(); // 3000
+        final long total = getPhysicalMemoryInMB(machine);
         
         long actual = total-sla.getReservedMemoryCapacityPerMachineInMB(); // 2900
         return actual - (actual % sla.getContainerMemoryCapacityInMB()); // 2900 - (2900 % 500) = 2900 - 400 = 2500
+    }
+
+    public static long getPhysicalMemoryInMB(Machine machine) {
+        final long total = (long) 
+            machine.getOperatingSystem().getDetails()
+            .getTotalPhysicalMemorySizeInMB(); // 3000
+        return total;
     }
     
     public static double getCpu(Machine machine) {
