@@ -282,7 +282,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     
                 
         Map<String,String> context = contextProperties.getProperties();
-        for (String key : context.keySet()) {
+        for (Map.Entry<String,String> entry : context.entrySet()) {
         
             // Protect against overriding reserved context properties
             // Advanced users can override the separator with the {@link AbstractElasticProcessingUnitDeployment#setReservedContextPropertyPrefix()} protected method.
@@ -290,8 +290,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
 //                throw new IllegalStateException("Context property must not start with the reserved '"+reservedContextPropertyPrefix+ "' prefix.");
 //            }
             
-            String value = context.get(key);
-            deployment.setContextProperty(key, value);
+            deployment.setContextProperty(entry.getKey(), entry.getValue());
         }
 
         for (String key : elasticProperties.keySet()) {
