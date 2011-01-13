@@ -27,7 +27,7 @@ public class MockBulkItem implements BulkItem {
     }
 
     public String getTypeName() {
-        return null;
+        return item.getClass().getName();
     }
 
     public String getIdPropertyName() {
