@@ -38,8 +38,8 @@ import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestr
 public class ContainersSlaEnforcement implements
         ServiceLevelAgreementEnforcement<ContainersSlaPolicy, ProcessingUnit, ContainersSlaEnforcementEndpoint> {
 
-    private static final int START_CONTAINER_TIMEOUT_FAILURE_SECONDS = 600;
-    private static final int START_CONTAINER_TIMEOUT_FAILURE_FORGET_SECONDS = 600;
+    private static final int START_CONTAINER_TIMEOUT_FAILURE_SECONDS = 60;
+    private static final int START_CONTAINER_TIMEOUT_FAILURE_FORGET_SECONDS = 60;
 
     private static final Log logger = LogFactory.getLog(ContainersSlaEnforcement.class);
 
