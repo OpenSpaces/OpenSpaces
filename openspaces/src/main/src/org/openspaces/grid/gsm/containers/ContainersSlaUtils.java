@@ -289,8 +289,10 @@ public class ContainersSlaUtils {
         }
         for (GridServiceContainer container : containers) {
             GridServiceAgent agent = container.getGridServiceAgent();
-            int count = numberOfContainersPerAgent.get(agent);
-            numberOfContainersPerAgent.put(agent, count+1);
+            if (numberOfContainersPerAgent.containsKey(agent)) {
+                int count = numberOfContainersPerAgent.get(agent);
+                numberOfContainersPerAgent.put(agent, count+1);
+            }
         }
         
         List<GridServiceAgent> sortedAgents = new ArrayList<GridServiceAgent>(Arrays.asList(agents));
