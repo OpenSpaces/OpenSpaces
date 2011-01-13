@@ -809,7 +809,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                             logger.info(
                                 "Restarting " + ToStringHelper.puInstanceToString(candidateInstance) + " "
                                 + "instance on machine " + sourceToString + " so that machine "
-                                + sourceToString + " would have more less instances per cpu core, and "
+                                + sourceToString + " would have less instances per cpu core, and "
                                 + targetToString + " would have more primary instances per cpu core. "
                                 + sourceToString +" has " + numberOfPrimaryInstancesOnSource + " primary instances "+
                                 "running on " + numberOfCpuCoresOnSource + " cpu cores. "
@@ -866,7 +866,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                                 logger.info(
                                     "Restarting " + ToStringHelper.puInstanceToString(candidateInstance) + " "
                                     + "instance on machine " + sourceToString + " so that machine "
-                                    + sourceToString + " would have more less instances per cpu core. "
+                                    + sourceToString + " would have less instances per cpu core. "
                                     + sourceToString +" has " + numberOfPrimaryInstancesOnSource + " primary instances "+
                                     "running on " + numberOfCpuCoresOnSource + " cpu cores. ");
                             }
