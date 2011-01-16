@@ -21,7 +21,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.MultiException;
 
 /**
- * A plain wrapper around jetty. Simply deleagate the lifecycle calls directory to jetty.
+ * A plain wrapper around jetty. Simply delegate the lifecycle calls directory to jetty.
  *
  * @author kimchy
  */
