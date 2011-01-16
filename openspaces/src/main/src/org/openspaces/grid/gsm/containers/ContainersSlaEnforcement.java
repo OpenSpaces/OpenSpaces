@@ -241,6 +241,7 @@ public class ContainersSlaEnforcement implements
                     // deploy a new container on an approved machine that has the least number of
                     // containers.
                     final GridServiceAgent gsa = findAgentForNewContainer(pu, sla);
+                    logger.info("Starting a new Grid Service Container on " + ToStringHelper.machineToString(gsa.getMachine()));
                     futureContainers.add(ContainersSlaUtils.startGridServiceContainerAsync(admin,
                             (InternalGridServiceAgent) gsa, sla.getNewContainerConfig(),
                             START_CONTAINER_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS));

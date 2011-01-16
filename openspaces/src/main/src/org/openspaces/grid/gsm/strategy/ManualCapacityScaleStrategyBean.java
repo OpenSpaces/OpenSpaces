@@ -192,7 +192,7 @@ public class ManualCapacityScaleStrategyBean
         }
         
         try {
-            
+            logger.debug("Enforcing machines SLA.");
             boolean machinesSlaEnforced = enforceMachinesSla();
             if (logger.isDebugEnabled()) {
                 if (!machinesSlaEnforced) {
@@ -205,6 +205,7 @@ public class ManualCapacityScaleStrategyBean
             if (machinesSlaEnforced || 
                 machinesService.getGridServiceAgentsPendingShutdown().length >0) {
 
+                logger.debug("Enforcing containers SLA.");
                 boolean containersSlaEnforced = enforceContainersSla();
                 if (logger.isDebugEnabled()) {
                     if (!containersSlaEnforced) {
@@ -217,7 +218,8 @@ public class ManualCapacityScaleStrategyBean
                 
                 if (containersSlaEnforced || 
                     containersService.getContainersPendingShutdown().length > 0) {
-
+                    
+                    logger.debug("Enforcing rebalancing SLA.");
                     boolean rebalancingSlaEnforced = enforceRebalancingSla(containersService.getContainers());
                     if (logger.isDebugEnabled()) {
                         if (!rebalancingSlaEnforced) {
