@@ -8,9 +8,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.openspaces.admin.GridComponent;
+import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.machine.Machine;
+import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirment;
@@ -43,14 +48,42 @@ public class MachinesSlaUtils {
         
         final long total = getPhysicalMemoryInMB(machine);
         
-        long actual = total-sla.getReservedMemoryCapacityPerMachineInMB(); // 2900
-        return actual - (actual % sla.getContainerMemoryCapacityInMB()); // 2900 - (2900 % 500) = 2900 - 400 = 2500
+        long reservedMemoryCapacityPerMachineInMB = sla.getReservedMemoryCapacityPerMachineInMB();
+        
+        long reservedMemoryCapacityByManagersInMB = getUsedMemoryCapacityByManagersInMB(machine);
+        
+        long actual = total-reservedMemoryCapacityPerMachineInMB-reservedMemoryCapacityByManagersInMB;
+        
+        return actual - (actual % sla.getContainerMemoryCapacityInMB()); 
+    }
+
+    private static long getUsedMemoryCapacityByManagersInMB(Machine machine) {
+        long reservedMemoryCapacityByManagersInMB = 0;
+        for (final GridServiceManager gsm : machine.getGridServiceManagers()) {
+            reservedMemoryCapacityByManagersInMB += getJvmHeapMemoryInMB(gsm);
+        }
+        
+        for (final ElasticServiceManager esm : machine.getElasticServiceManagers()) {
+            reservedMemoryCapacityByManagersInMB += getJvmHeapMemoryInMB(esm);
+        }
+        
+        for (final LookupService lus : machine.getLookupServices()) {
+            reservedMemoryCapacityByManagersInMB += getJvmHeapMemoryInMB(lus);
+        }
+        return reservedMemoryCapacityByManagersInMB;
+    }
+    
+    private static long getJvmHeapMemoryInMB(GridComponent gridComponent) {
+        long memoryHeapInitInBytes = gridComponent.getVirtualMachine().getDetails().getMemoryHeapInitInBytes();
+        long memoryHeapMaxInBytes = gridComponent.getVirtualMachine().getDetails().getMemoryHeapMaxInBytes();
+        return MemoryUnit.MEGABYTES.convert(Math.max(memoryHeapInitInBytes, memoryHeapMaxInBytes), MemoryUnit.BYTES);
+        
     }
 
     public static long getPhysicalMemoryInMB(Machine machine) {
         final long total = (long) 
             machine.getOperatingSystem().getDetails()
-            .getTotalPhysicalMemorySizeInMB(); // 3000
+            .getTotalPhysicalMemorySizeInMB();
         return total;
     }
     
