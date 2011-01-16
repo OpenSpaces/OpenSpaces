@@ -309,7 +309,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         MarshalledObject beanLevelPropertiesMarshObj =
                 (MarshalledObject) getServiceBeanContext().getInitParameter("beanLevelProperties");
-        BeanLevelProperties beanLevelProperties = null;
+        BeanLevelProperties beanLevelProperties;
         if (beanLevelPropertiesMarshObj != null) {
             beanLevelProperties = (BeanLevelProperties) beanLevelPropertiesMarshObj.get();
             logger.info(logMessage("BeanLevelProperties " + beanLevelProperties));
@@ -418,7 +418,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 logger.info("Downloaded [" + nf.format(size / factor) + suffix + "] to [" + deployPath + "]");
             }
 
-            // go over listed files that needs to be resovled with properties
+            // go over listed files that needs to be resolved with properties
             for (Map.Entry entry : beanLevelProperties.getContextProperties().entrySet()) {
                 String key = (String) entry.getKey();
                 if (key.startsWith("com.gs.resolvePlaceholder")) {
@@ -630,12 +630,12 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
         if (container instanceof ApplicationContextProcessingUnitContainer) {
             ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) ((ApplicationContextProcessingUnitContainer) container).getApplicationContext();
-            final Map monitorsMap = applicationContext.getBeansOfType(ServiceMonitorsProvider.class);
+            final Map<String, ServiceMonitorsProvider> monitorsMap = applicationContext.getBeansOfType(ServiceMonitorsProvider.class);
             serviceMonitors.add(new Callable() {
                 public Object call() throws Exception {
                     ArrayList<ServiceMonitors> retMonitors = new ArrayList<ServiceMonitors>();
-                    for (Iterator it = monitorsMap.values().iterator(); it.hasNext();) {
-                        ServiceMonitors[] monitors = ((ServiceMonitorsProvider) it.next()).getServicesMonitors();
+                    for (ServiceMonitorsProvider serviceMonitorsProvider : monitorsMap.values()) {
+                        ServiceMonitors[] monitors = serviceMonitorsProvider.getServicesMonitors();
                         if (monitors != null) {
                             for (ServiceMonitors mon : monitors) {
                                 retMonitors.add(mon);
