@@ -194,8 +194,8 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     }
 
 
-    protected AbstractElasticProcessingUnitDeployment allowDeploymentOnManagementMachine() {
-        advancedElasticPropertiesConfig.setAllowDeploymentOnManagementMachine(true);
+    protected AbstractElasticProcessingUnitDeployment allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
+        advancedElasticPropertiesConfig.setAllowDeploymentOnManagementMachine(allowDeploymentOnManagementMachine);
         return this;
     }
     

@@ -21,20 +21,28 @@ public class AdvancedElasticDataGridDeployment extends ElasticDataGridDeployment
     }
     
     public AdvancedElasticDataGridDeployment numberOfBackupsPerPartition(int numberOfBackupsPerPartition) {
-        return (AdvancedElasticDataGridDeployment) super.numberOfBackupsPerPartition(numberOfBackupsPerPartition);
+        super.numberOfBackupsPerPartition(numberOfBackupsPerPartition);
+        return this;
     }
     
     public AdvancedElasticDataGridDeployment numberOfPartitions(int numberOfPartitions) {
-        return (AdvancedElasticDataGridDeployment) super.numberOfPartitions(numberOfPartitions);
-    }
-
-    public AdvancedElasticDataGridDeployment allowDeploymentOnSingleMachine() {
-        super.allowDeploymentOnSingleMachine();
+        super.numberOfPartitions(numberOfPartitions);
         return this;
     }
 
+    public AdvancedElasticDataGridDeployment allowDeploymentOnSingleMachine(boolean allowDeploymentOnSingleMachine) {
+        super.allowDeploymentOnSingleMachine(allowDeploymentOnSingleMachine);
+        return this;
+    }
+
+    public AdvancedStatefulDeploymentTopology allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
+        super.allowDeploymentOnSingleMachine(allowDeploymentOnManagementMachine);
+        return this;
+    }
+    
     public AdvancedElasticDataGridDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
-        return (AdvancedElasticDataGridDeployment) super.minNumberOfCpuCoresPerMachine(minNumberOfCpuCoresPerMachine);
+        super.minNumberOfCpuCoresPerMachine(minNumberOfCpuCoresPerMachine);
+        return this;
     }
     
     public AdvancedElasticDataGridDeployment maxMemoryCapacity(int maxMemoryCapacity, MemoryUnit unit) {
@@ -63,89 +71,87 @@ public class AdvancedElasticDataGridDeployment extends ElasticDataGridDeployment
     }
     
     public AdvancedElasticDataGridDeployment scale(EagerScaleConfigurer beanConfig) {
-        return scale(beanConfig.getConfig());
+        scale(beanConfig.getConfig());
+        return this;
     }
 
     public AdvancedElasticDataGridDeployment scale(ManualContainersScaleConfigurer beanConfig) {
-        return scale(beanConfig.getConfig());
+        scale(beanConfig.getConfig());
+        return this;
     }
 
     public AdvancedElasticDataGridDeployment scale(ManualCapacityScaleConfigurer beanConfig) {
-        return scale(beanConfig.getConfig());
+        scale(beanConfig.getConfig());
+        return this;
     }
 
     public AdvancedElasticDataGridDeployment scale(CapacityScaleConfigurer beanConfig) {
-        return scale(beanConfig.getConfig());
+        scale(beanConfig.getConfig());
+        return this;
     }
     
     public AdvancedElasticDataGridDeployment scale(EagerScaleConfig strategy) {
-        return (AdvancedElasticDataGridDeployment) super.scale(strategy);
+        super.scale(strategy);
+        return this;
     }
 
     public AdvancedElasticDataGridDeployment scale(ManualContainersScaleConfig strategy) {
-        return (AdvancedElasticDataGridDeployment) super.scale(strategy);
+        super.scale(strategy);
+        return this;
     }
 
     public AdvancedElasticDataGridDeployment scale(ManualCapacityScaleConfig strategy) {
-        return (AdvancedElasticDataGridDeployment) super.scale(strategy);
+        super.scale(strategy);
+        return this;
     }
     
     public AdvancedElasticDataGridDeployment scale(CapacityScaleConfig strategy) {
-        return (AdvancedElasticDataGridDeployment) super.scale(strategy);
+        super.scale(strategy);
+        return this;
     }
     
     public AdvancedElasticDataGridDeployment name(String name) {
-        return (AdvancedElasticDataGridDeployment) super.name(name);
-    }
-/* NOT IMPLEMENTED YET
-    public AdvancedElasticDataGridDeployment zone(String zone) {
-        return (AdvancedElasticDataGridDeployment) super.zone(zone);
-    }
-    
-    
-    public AdvancedElasticDataGridDeployment isolation(DedicatedIsolation isolation) {
-        return (AdvancedElasticDataGridDeployment) super.isolation(isolation);
+        super.name(name);
+        return this;
     }
 
-    public AdvancedElasticDataGridDeployment isolation(SharedTenantIsolation isolation) {
-        return (AdvancedElasticDataGridDeployment) super.isolation(isolation);
-    }
-    
-    public AdvancedElasticDataGridDeployment isolation(PublicIsolation isolation) {
-        return (AdvancedElasticDataGridDeployment) super.isolation(isolation);
-    }
-
-*/
     public AdvancedElasticDataGridDeployment setContextProperty(String key, String value) {
-        return (AdvancedElasticDataGridDeployment) super.setContextProperty(key, value);
+        super.setContextProperty(key, value);
+        return this;
     }
 
     public AdvancedElasticDataGridDeployment secured(boolean secured) {
-        return (AdvancedElasticDataGridDeployment) super.secured(secured);
+        super.secured(secured);
+        return this;
     }
 
     public AdvancedElasticDataGridDeployment userDetails(UserDetails userDetails) {
-        return (AdvancedElasticDataGridDeployment) super.userDetails(userDetails);
+        super.userDetails(userDetails);
+        return this;
     }
 
     public AdvancedElasticDataGridDeployment userDetails(String userName, String password) {
-        return (AdvancedElasticDataGridDeployment) super.userDetails(userName, password);
+        super.userDetails(userName, password);
+        return this;
     }
     
     public AdvancedElasticDataGridDeployment useScriptToStartContainer() {
-        return (AdvancedElasticDataGridDeployment) super.useScriptToStartContainer();
+        super.useScriptToStartContainer();
+        return this;
     }
 
     public AdvancedElasticDataGridDeployment overrideCommandLineArguments() {
-        return (AdvancedElasticDataGridDeployment) super.overrideCommandLineArguments();
+        super.overrideCommandLineArguments();
+        return this;
     }
 
     public AdvancedElasticDataGridDeployment commandLineArgument(String vmInputArgument) {
-        return (AdvancedElasticDataGridDeployment) super.commandLineArgument(vmInputArgument);
+        super.commandLineArgument(vmInputArgument);
+        return this;
     }
 
     public AdvancedElasticDataGridDeployment environmentVariable(String name, String value) {
-        return (AdvancedElasticDataGridDeployment) super.environmentVariable(name, value);
+        super.environmentVariable(name, value);
+        return this;
     }
-
 }

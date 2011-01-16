@@ -39,12 +39,21 @@ public class AdvancedElasticStatefulProcessingUnitDeployment extends ElasticStat
         return (AdvancedElasticStatefulProcessingUnitDeployment) super.numberOfPartitions(numberOfPartitions);
     }
 
-    public AdvancedElasticStatefulProcessingUnitDeployment allowDeploymentOnSingleMachine() {
-        super.maxProcessingUnitInstancesFromSamePartitionPerMachine(0);
-        super.allowDeploymentOnManagementMachine();
+    public AdvancedElasticStatefulProcessingUnitDeployment allowDeploymentOnSingleMachine(boolean allowDeploymentOnSingleMachine) {
+        if (allowDeploymentOnSingleMachine) {
+            super.maxProcessingUnitInstancesFromSamePartitionPerMachine(0);
+        }
+        else {
+            super.maxProcessingUnitInstancesFromSamePartitionPerMachine(1);
+        }
         return this;
     }
 
+    public AdvancedElasticStatefulProcessingUnitDeployment allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
+        super.allowDeploymentOnManagementMachine(allowDeploymentOnManagementMachine);
+        return this;
+    }
+    
     public AdvancedElasticStatefulProcessingUnitDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
         return (AdvancedElasticStatefulProcessingUnitDeployment) super.minNumberOfCpuCoresPerMachine(minNumberOfCpuCoresPerMachine);
     }

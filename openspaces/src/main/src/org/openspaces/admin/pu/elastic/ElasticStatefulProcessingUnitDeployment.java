@@ -94,8 +94,8 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return this;
     }
 
-    protected ElasticStatefulProcessingUnitDeployment allowDeploymentOnManagementMachine() {
-        super.allowDeploymentOnManagementMachine();
+    protected ElasticStatefulProcessingUnitDeployment allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
+        super.allowDeploymentOnManagementMachine(allowDeploymentOnManagementMachine);
         return this;
     }
     

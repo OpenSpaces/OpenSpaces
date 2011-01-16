@@ -2,6 +2,7 @@ package org.openspaces.admin.pu.elastic.topology;
 
 
 
+
 public interface AdvancedStatefulDeploymentTopology extends ElasticStatefulDeploymentTopology {
 
     /**
@@ -15,11 +16,18 @@ public interface AdvancedStatefulDeploymentTopology extends ElasticStatefulDeplo
     public AdvancedStatefulDeploymentTopology numberOfPartitions(int numberOfPartitions);
 
     /**
-     * Allows deploying the processing unit on a single machine, by lifting the limitation
-     * for primary and backup processing unit instances from the same partition to be deployed on different machines. 
+     * If specified, allows deployment of the processing unit on a single machine, by lifting the limitation
+     * for primary and backup processing unit instances from the same partition to be deployed on different machines.
+     * Default value is false (by default primary instances and backup instances need separate machines).
      */
-    public AdvancedStatefulDeploymentTopology allowDeploymentOnSingleMachine();
+    public AdvancedStatefulDeploymentTopology allowDeploymentOnSingleMachine(boolean allowDeploymentOnSingleMachine);
 
+    /**
+     * If specified, allows deployment of the processing unit on the same machine as the Grid Service Managers and Lookup Services.
+     * Default value is true (by default processing unit can deploy on same machine as Grid Service Manager)
+     */
+    public AdvancedStatefulDeploymentTopology allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine);
+    
     /**
      * Overrides the minimum number of CPU cores per machine assumption.
      */

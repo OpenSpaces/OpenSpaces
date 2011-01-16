@@ -189,8 +189,8 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
         return this;
     }
 
-    protected ElasticDataGridDeployment allowDeploymentOnSingleMachine() {
-        deployment.allowDeploymentOnSingleMachine();
+    protected ElasticDataGridDeployment allowDeploymentOnSingleMachine(boolean allowDeploymentOnSingleMachine) {
+        deployment.allowDeploymentOnSingleMachine(allowDeploymentOnSingleMachine);
         return this;
     }
     

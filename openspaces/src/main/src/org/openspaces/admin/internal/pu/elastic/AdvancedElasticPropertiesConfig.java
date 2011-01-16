@@ -7,7 +7,7 @@ import org.openspaces.core.util.StringProperties;
 public class AdvancedElasticPropertiesConfig {
 
     private static final String ALLOW_DEPLOYMENT_ON_MANAGEMENT_MACHINE_KEY = "container.allow-deployment-on-management-machine";
-    private static final boolean ALLOW_DEPLOYMENT_ON_MANAGEMENT_MACHINE_DEFAULT = false;
+    private static final boolean ALLOW_DEPLOYMENT_ON_MANAGEMENT_MACHINE_DEFAULT = true;
 
     StringProperties properties;
     
