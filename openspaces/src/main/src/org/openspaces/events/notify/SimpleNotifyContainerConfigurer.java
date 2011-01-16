@@ -50,7 +50,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  */
 public class SimpleNotifyContainerConfigurer {
 
-    private SimpleNotifyEventListenerContainer notifyEventListenerContainer;
+    final private SimpleNotifyEventListenerContainer notifyEventListenerContainer;
 
     private boolean initialized = false;
 
