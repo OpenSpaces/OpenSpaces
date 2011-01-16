@@ -98,7 +98,7 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
         factory.config(config.getProperties());
 
         Alert alert = factory.toAlert();
-        admin.getAlertManager().fireAlert( new ReplicationRedoLogSizeAlert(alert));
+        admin.getAlertManager().triggerAlert( new ReplicationRedoLogSizeAlert(alert));
     }
     
     
@@ -137,7 +137,7 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
             factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_SWAP_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogExternalStoragePacketCount()));
 
             Alert alert = factory.toAlert();
-            admin.getAlertManager().fireAlert( new ReplicationRedoLogSizeAlert(alert));
+            admin.getAlertManager().triggerAlert( new ReplicationRedoLogSizeAlert(alert));
             
         } else if (redoLogSize <= lowThreshold) {
             final String groupUid = generateGroupUid(source.getUid());
@@ -166,7 +166,7 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
                 factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_SWAP_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogExternalStoragePacketCount()));
 
                 Alert alert = factory.toAlert();
-                admin.getAlertManager().fireAlert(new ReplicationRedoLogSizeAlert(alert));
+                admin.getAlertManager().triggerAlert(new ReplicationRedoLogSizeAlert(alert));
             }
         }
     }

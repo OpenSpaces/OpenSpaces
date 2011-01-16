@@ -3,7 +3,7 @@ package org.openspaces.admin.alert.alerts;
 
 import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.config.PhysicalMemoryUtilizationAlertConfigurer;
-import org.openspaces.admin.alert.events.AlertEventListener;
+import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
 
 /**
  * A physical memory utilization alert, fired upon triggered machine physical memory thresholds. The
@@ -12,7 +12,7 @@ import org.openspaces.admin.alert.events.AlertEventListener;
  * <p>
  * These thresholds can be configured by using the {@link PhysicalMemoryUtilizationAlertConfigurer}.
  * <p>
- * This alert will be received on the call to {@link AlertEventListener#onAlert(Alert)} for
+ * This alert will be received on the call to {@link AlertTriggeredEventListener#alertTriggered(Alert)} for
  * registered listeners.
  * 
  * @author Moran Avigdor

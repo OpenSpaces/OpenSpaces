@@ -117,7 +117,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
         factory.config(config.getProperties());
 
         Alert alert = factory.toAlert();
-        admin.getAlertManager().fireAlert( new HeapMemoryUtilizationAlert(alert));
+        admin.getAlertManager().triggerAlert( new HeapMemoryUtilizationAlert(alert));
     }
 
     public void virtualMachineStatisticsChanged(VirtualMachineStatisticsChangedEvent event) {
@@ -150,7 +150,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
             factory.putProperty(HeapMemoryUtilizationAlert.MAX_HEAP_IN_BYTES, String.valueOf(event.getVirtualMachine().getDetails().getMemoryHeapMaxInBytes()));
 
             Alert alert = factory.toAlert();
-            admin.getAlertManager().fireAlert( new HeapMemoryUtilizationAlert(alert));
+            admin.getAlertManager().triggerAlert( new HeapMemoryUtilizationAlert(alert));
                 
         } else if (memoryAvg < lowThreshold) {
             final String groupUid = generateGroupUid(event.getVirtualMachine().getUid());
@@ -178,7 +178,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
                 factory.putProperty(HeapMemoryUtilizationAlert.MAX_HEAP_IN_BYTES, String.valueOf(event.getVirtualMachine().getDetails().getMemoryHeapMaxInBytes()));
 
                 Alert alert = factory.toAlert();
-                admin.getAlertManager().fireAlert( new HeapMemoryUtilizationAlert(alert));
+                admin.getAlertManager().triggerAlert( new HeapMemoryUtilizationAlert(alert));
             }
         }
     }

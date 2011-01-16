@@ -99,7 +99,7 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
         factory.config(config.getProperties());
 
         Alert alert = factory.toAlert();
-        admin.getAlertManager().fireAlert( new GarbageCollectionAlert(alert));
+        admin.getAlertManager().triggerAlert( new GarbageCollectionAlert(alert));
     }
 
     public void virtualMachineStatisticsChanged(VirtualMachineStatisticsChangedEvent event) {
@@ -144,7 +144,7 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
 
 
             Alert alert = factory.toAlert();
-            admin.getAlertManager().fireAlert( new GarbageCollectionAlert(alert));
+            admin.getAlertManager().triggerAlert( new GarbageCollectionAlert(alert));
             
         } else if (gcPauseTime < shortGcPausePeriod) {
             final String groupUid = generateGroupUid(event.getVirtualMachine().getUid());
@@ -171,7 +171,7 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
                 factory.putProperty(GarbageCollectionAlert.NON_HEAP_UTILIZATION, String.valueOf(event.getStatistics().getMemoryNonHeapUsedPerc()));
 
                 Alert alert = factory.toAlert();
-                admin.getAlertManager().fireAlert( new GarbageCollectionAlert(alert));
+                admin.getAlertManager().triggerAlert( new GarbageCollectionAlert(alert));
             }
         }
     }

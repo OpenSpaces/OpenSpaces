@@ -117,7 +117,7 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
         factory.config(config.getProperties());
 
         Alert alert = factory.toAlert();
-        admin.getAlertManager().fireAlert( new PhysicalMemoryUtilizationAlert(alert));
+        admin.getAlertManager().triggerAlert( new PhysicalMemoryUtilizationAlert(alert));
     }
 
     public void operatingSystemStatisticsChanged(OperatingSystemStatisticsChangedEvent event) {
@@ -146,7 +146,7 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
             factory.putProperty(PhysicalMemoryUtilizationAlert.MEMORY_UTILIZATION, String.valueOf(event.getStatistics().getPhysicalMemoryUsedPerc()));
 
             Alert alert = factory.toAlert();
-            admin.getAlertManager().fireAlert( new PhysicalMemoryUtilizationAlert(alert));
+            admin.getAlertManager().triggerAlert( new PhysicalMemoryUtilizationAlert(alert));
                 
         } else if (memoryAvg < lowThreshold) {
             final String groupUid = generateGroupUid(event.getOperatingSystem().getUid());
@@ -169,7 +169,7 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
                 factory.putProperty(PhysicalMemoryUtilizationAlert.MEMORY_UTILIZATION, String.valueOf(event.getStatistics().getPhysicalMemoryUsedPerc()));
 
                 Alert alert = factory.toAlert();
-                admin.getAlertManager().fireAlert( new PhysicalMemoryUtilizationAlert(alert));
+                admin.getAlertManager().triggerAlert( new PhysicalMemoryUtilizationAlert(alert));
             }
         }
     }

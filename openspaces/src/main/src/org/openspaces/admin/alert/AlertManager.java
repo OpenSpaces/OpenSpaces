@@ -19,8 +19,8 @@ import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.alert.config.AlertConfiguration;
 import org.openspaces.admin.alert.config.parser.AlertConfigurationParser;
 import org.openspaces.admin.alert.config.parser.XmlAlertConfigurationParser;
-import org.openspaces.admin.alert.events.AlertEventListener;
-import org.openspaces.admin.alert.events.AlertEventManager;
+import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
+import org.openspaces.admin.alert.events.AlertTriggeredEventManager;
 
 /**
  * The <tt>AlertManager</tt> is a manager for configuring of alerts, firing of alerts, and
@@ -36,10 +36,10 @@ import org.openspaces.admin.alert.events.AlertEventManager;
  * array of {@link AlertConfiguration}. The {@link XmlAlertConfigurationParser} can be used to parse
  * the <tt>alerts.xml</tt> configuration file located under <tt>config/alerts</tt>.
  * <p>
- * To Register/Unregister for alert events (of all types), use the {@link AlertEventManager} to
- * add/remove {@link AlertEventListener}s.
+ * To Register/Unregister for alert events (of all types), use the {@link AlertTriggeredEventManager} to
+ * add/remove {@link AlertTriggeredEventListener}s.
  * <p>
- * The {@link #fireAlert(Alert)} method call allows <tt>alert triggers</tt> to 'fire' an alert and
+ * The {@link #triggerAlert(Alert)} method call allows <tt>alert triggers</tt> to 'fire' an alert and
  * trigger an event to be sent to all registered alert event listeners.
  * <p>
  * An alert provider is a remote service implementing an {@link AlertProvider} interface. A
@@ -169,10 +169,10 @@ public interface AlertManager extends AdminAware {
 	 * Trigger an alert event for registered alert event listeners.
 	 * @param alert an alert.
 	 */
-	void fireAlert(Alert alert);
+	void triggerAlert(Alert alert);
 	
 	/**
 	 * @return the alert event manager to register/unregister for alert events.
 	 */
-	AlertEventManager getAlertEventManager();
+	AlertTriggeredEventManager getAlertTriggered();
 }

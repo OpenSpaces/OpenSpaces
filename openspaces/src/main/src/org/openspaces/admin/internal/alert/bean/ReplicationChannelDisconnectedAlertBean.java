@@ -70,7 +70,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
         factory.config(config.getProperties());
 
         Alert alert = factory.toAlert();
-        admin.getAlertManager().fireAlert( new ReplicationChannelDisconnectedAlert(alert));
+        admin.getAlertManager().triggerAlert( new ReplicationChannelDisconnectedAlert(alert));
     }
     
     
@@ -108,7 +108,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                 }
 
                 Alert alert = factory.toAlert();
-                admin.getAlertManager().fireAlert( new ReplicationChannelDisconnectedAlert(alert));
+                admin.getAlertManager().triggerAlert( new ReplicationChannelDisconnectedAlert(alert));
                 break;
             }
             case ACTIVE: {
@@ -141,7 +141,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                     }
                     
                     Alert alert = factory.toAlert();
-                    admin.getAlertManager().fireAlert( new ReplicationChannelDisconnectedAlert(alert));
+                    admin.getAlertManager().triggerAlert( new ReplicationChannelDisconnectedAlert(alert));
                 }
                 break;
             }

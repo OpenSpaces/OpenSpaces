@@ -76,7 +76,7 @@ public class ReplicationRedoLogOverflowToDiskAlertBean implements AlertBean, Spa
         factory.config(config.getProperties());
 
         Alert alert = factory.toAlert();
-        admin.getAlertManager().fireAlert( new ReplicationRedoLogOverflowToDiskAlert(alert));
+        admin.getAlertManager().triggerAlert( new ReplicationRedoLogOverflowToDiskAlert(alert));
     }
     
     
@@ -115,7 +115,7 @@ public class ReplicationRedoLogOverflowToDiskAlertBean implements AlertBean, Spa
             factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_SWAP_SIZE, String.valueOf(redoLogSizeInDisk));
 
             Alert alert = factory.toAlert();
-            admin.getAlertManager().fireAlert( new ReplicationRedoLogOverflowToDiskAlert(alert));
+            admin.getAlertManager().triggerAlert( new ReplicationRedoLogOverflowToDiskAlert(alert));
             
         } else if (redoLogSizeInDisk == 0 && redoLogSize >= 0){
             final String groupUid = generateGroupUid(source.getUid());
@@ -144,7 +144,7 @@ public class ReplicationRedoLogOverflowToDiskAlertBean implements AlertBean, Spa
                 factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_SWAP_SIZE, String.valueOf(redoLogSizeInDisk));
 
                 Alert alert = factory.toAlert();
-                admin.getAlertManager().fireAlert(new ReplicationRedoLogOverflowToDiskAlert(alert));
+                admin.getAlertManager().triggerAlert(new ReplicationRedoLogOverflowToDiskAlert(alert));
             }
         }
     }

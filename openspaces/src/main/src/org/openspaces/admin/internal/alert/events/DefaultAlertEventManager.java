@@ -4,32 +4,32 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.openspaces.admin.alert.Alert;
-import org.openspaces.admin.alert.events.AlertEventListener;
+import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.alert.InternalAlertManager;
 
-public class DefaultAlertEventManager implements InternalAlertEventManager {
+public class DefaultAlertEventManager implements InternalAlertTriggeredEventManager {
 
     private final InternalAlertManager alerts;
     private final InternalAdmin admin;
 
-    private final List<AlertEventListener> listeners = new CopyOnWriteArrayList<AlertEventListener>();
+    private final List<AlertTriggeredEventListener> listeners = new CopyOnWriteArrayList<AlertTriggeredEventListener>();
 
     public DefaultAlertEventManager(InternalAlertManager alerts) {
         this.alerts = alerts;
         this.admin = (InternalAdmin) alerts.getAdmin();
     }
 
-    public void add(AlertEventListener eventListener) {
+    public void add(AlertTriggeredEventListener eventListener) {
         add(eventListener, true);
     }
 
-    public void add(final AlertEventListener eventListener, boolean includeExisting) {
+    public void add(final AlertTriggeredEventListener eventListener, boolean includeExisting) {
         if (includeExisting) {
             admin.raiseEvent(eventListener, new Runnable() {
                 public void run() {
                     for (Alert alert : alerts.getAlertRepository()) {
-                        eventListener.onAlert(alert);
+                        eventListener.alertTriggered(alert);
                     }
                 }
             });
@@ -37,15 +37,15 @@ public class DefaultAlertEventManager implements InternalAlertEventManager {
         listeners.add(eventListener);
     }
 
-    public void remove(AlertEventListener eventListener) {
+    public void remove(AlertTriggeredEventListener eventListener) {
         listeners.remove(eventListener);
     }
 
-    public void onAlert(final Alert alert) {
-        for (final AlertEventListener listener : listeners) {
+    public void alertTriggered(final Alert alert) {
+        for (final AlertTriggeredEventListener listener : listeners) {
             admin.pushEvent(listener, new Runnable() {
                 public void run() {
-                    listener.onAlert(alert);
+                    listener.alertTriggered(alert);
                 }
             });
         }

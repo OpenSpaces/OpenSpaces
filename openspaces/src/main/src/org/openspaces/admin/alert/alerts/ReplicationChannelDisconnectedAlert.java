@@ -3,7 +3,7 @@ package org.openspaces.admin.alert.alerts;
 
 import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.config.ReplicationChannelDisconnectedAlertConfigurer;
-import org.openspaces.admin.alert.events.AlertEventListener;
+import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
 import org.openspaces.admin.space.ReplicationStatus;
 import org.openspaces.admin.space.SpaceInstance;
 
@@ -15,7 +15,7 @@ import org.openspaces.admin.space.SpaceInstance;
  * These thresholds can be configured by using the
  * {@link ReplicationChannelDisconnectedAlertConfigurer}.
  * <p>
- * This alert will be received on the call to {@link AlertEventListener#onAlert(Alert)} for
+ * This alert will be received on the call to {@link AlertTriggeredEventListener#alertTriggered(Alert)} for
  * registered listeners.
  * 
  * @author Moran Avigdor

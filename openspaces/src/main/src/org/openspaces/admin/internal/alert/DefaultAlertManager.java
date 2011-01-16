@@ -6,19 +6,19 @@ import org.openspaces.admin.Admin;
 import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.AlertConfigurationException;
 import org.openspaces.admin.alert.config.AlertConfiguration;
-import org.openspaces.admin.alert.events.AlertEventManager;
+import org.openspaces.admin.alert.events.AlertTriggeredEventManager;
 import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.bean.BeanConfigNotFoundException;
 import org.openspaces.admin.bean.BeanConfigPropertiesManager;
 import org.openspaces.admin.internal.alert.bean.AlertBean;
 import org.openspaces.admin.internal.alert.events.DefaultAlertEventManager;
-import org.openspaces.admin.internal.alert.events.InternalAlertEventManager;
+import org.openspaces.admin.internal.alert.events.InternalAlertTriggeredEventManager;
 import org.openspaces.core.bean.DefaultBeanServer;
 
 public class DefaultAlertManager implements InternalAlertManager {
 
     private final Admin admin;
-    private final InternalAlertEventManager alertEventManager;
+    private final InternalAlertTriggeredEventManager alertEventManager;
     private final InternalAlertRepository alertRepository;
     private final BeanConfigPropertiesManager beanConfigPropertiesManager;
 
@@ -33,14 +33,14 @@ public class DefaultAlertManager implements InternalAlertManager {
         return alertRepository;
     }
     
-    public AlertEventManager getAlertEventManager() {
+    public AlertTriggeredEventManager getAlertTriggered() {
         return alertEventManager;
     }
 
-    public void fireAlert(Alert alert) {
+    public void triggerAlert(Alert alert) {
         boolean added = alertRepository.addAlert(alert);
         if (added) {
-            alertEventManager.onAlert(alert);
+            alertEventManager.alertTriggered(alert);
         }
     }
 

@@ -115,7 +115,7 @@ public class CpuUtilizationAlertBean implements AlertBean,
         factory.config(config.getProperties());
 
         Alert alert = factory.toAlert();
-        admin.getAlertManager().fireAlert( new CpuUtilizationAlert(alert));
+        admin.getAlertManager().triggerAlert( new CpuUtilizationAlert(alert));
     }
 
     public void operatingSystemStatisticsChanged(OperatingSystemStatisticsChangedEvent event) {
@@ -142,7 +142,7 @@ public class CpuUtilizationAlertBean implements AlertBean,
             factory.putProperty(CpuUtilizationAlert.HOST_ADDRESS, event.getStatistics().getDetails().getHostAddress());
 
             Alert alert = factory.toAlert();
-            admin.getAlertManager().fireAlert( new CpuUtilizationAlert(alert));
+            admin.getAlertManager().triggerAlert( new CpuUtilizationAlert(alert));
                 
         } else if (cpuAvg < lowThreshold) {
             final String groupUid = generateGroupUid(event.getOperatingSystem().getUid());
@@ -163,7 +163,7 @@ public class CpuUtilizationAlertBean implements AlertBean,
                 factory.putProperty(CpuUtilizationAlert.HOST_ADDRESS, event.getStatistics().getDetails().getHostAddress());
 
                 Alert alert = factory.toAlert();
-                admin.getAlertManager().fireAlert( new CpuUtilizationAlert(alert));
+                admin.getAlertManager().triggerAlert( new CpuUtilizationAlert(alert));
             }
         }
     }

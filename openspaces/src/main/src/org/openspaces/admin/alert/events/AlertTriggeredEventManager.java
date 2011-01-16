@@ -13,26 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openspaces.admin.alert.events;
 
-import org.openspaces.admin.Admin;
-import org.openspaces.admin.alert.Alert;
-
 /**
- * An event listener for all types of alerts. Register/Unregister for alert events, using the
- * {@link AlertEventManager} API accessible via {@link Admin#getAlertManager()}.
- * <p>
- * Alerts may be then filtered by their type (see {@link Alert#getAlertType()}) or any other
- * criteria exposed by the getters in {@link Alert}.
+ * An event manager allowing to remove and add {@link AlertTriggeredEventListener}s.
  * 
  * @author Moran Avigdor
  * @since 8.0
  */
-public interface AlertEventListener {
-    
+public interface AlertTriggeredEventManager {
+
     /**
-     * @param alert An event of an alert issued by one of the admin Alert beans.
+     * Add the event listener. Note, the add callback will be called for currently triggered alerts
+     * (both resolved and unresolved alerts).
      */
-	public void onAlert(Alert alert);
+	void add(AlertTriggeredEventListener listener);
+
+    /**
+     * Add the event listener. Allows to control if the event will be called for existing issued
+     * alerts as well or only for future alert events.
+     */
+	void add(AlertTriggeredEventListener listener, boolean includeExisting);
+	
+	/**
+	 * Removes the event listener.
+	 */
+	void remove(AlertTriggeredEventListener listener);
 }

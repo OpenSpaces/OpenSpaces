@@ -338,7 +338,7 @@ public class ManualCapacityScaleStrategyBean
         boolean reachedSla = machinesService.enforceSla(sla);
         
         if (reachedSla) {
-            fireAlert(
+            triggerAlert(
                 AlertSeverity.WARNING,
                 AlertStatus.RESOLVED,
                 machinesAlertGroupUidPrefix,
@@ -347,7 +347,7 @@ public class ManualCapacityScaleStrategyBean
                 "has reached its target of " + memoryInMB + "MB");
         }
         else {
-            fireAlert(
+            triggerAlert(
                 AlertSeverity.WARNING,
                 AlertStatus.RAISED,
                 containersAlertGroupUidPrefix,
@@ -372,7 +372,7 @@ public class ManualCapacityScaleStrategyBean
         boolean reachedSla = containersService.enforceSla(sla);
         
         if (reachedSla) {
-            fireAlert(
+            triggerAlert(
                 AlertSeverity.WARNING,
                 AlertStatus.RESOLVED,
                 containersAlertGroupUidPrefix,
@@ -383,7 +383,7 @@ public class ManualCapacityScaleStrategyBean
                 (slaConfig.getNumberOfCpuCores()>0 ? " and " + slaConfig.getNumberOfCpuCores() +" cpu cores " : "" ));
         }
         else {
-            fireAlert(
+            triggerAlert(
                 AlertSeverity.WARNING,
                 AlertStatus.RAISED,
                 containersAlertGroupUidPrefix,
@@ -407,7 +407,7 @@ public class ManualCapacityScaleStrategyBean
         boolean slaEnforced = rebalancingService.enforceSla(sla);
         
         if (slaEnforced) {
-            fireAlert(
+            triggerAlert(
                 AlertSeverity.WARNING,
                 AlertStatus.RESOLVED,
                 rebalancingAlertGroupUidPrefix,
@@ -415,7 +415,7 @@ public class ManualCapacityScaleStrategyBean
                 "Rebalancing of " + pu.getName() + " is complete.");
         }
         else {
-            fireAlert(
+            triggerAlert(
                 AlertSeverity.WARNING,
                 AlertStatus.RAISED,
                 rebalancingAlertGroupUidPrefix,
@@ -426,7 +426,7 @@ public class ManualCapacityScaleStrategyBean
         return slaEnforced;
     }
 
-    private void fireAlert(AlertSeverity severity, AlertStatus status, String alertGroupUidPrefix, String alertName, String alertDescription) {
+    private void triggerAlert(AlertSeverity severity, AlertStatus status, String alertGroupUidPrefix, String alertName, String alertDescription) {
         AlertFactory alertFactory = new AlertFactory();
         alertFactory.name(alertName);
         alertFactory.description(alertDescription);
@@ -434,7 +434,7 @@ public class ManualCapacityScaleStrategyBean
         alertFactory.status(status);
         alertFactory.componentUid(pu.getName());
         alertFactory.groupUid(alertGroupUidPrefix + "-" + pu.getName());
-        admin.getAlertManager().fireAlert(alertFactory.toAlert());
+        admin.getAlertManager().triggerAlert(alertFactory.toAlert());
         logger.debug(alertDescription);
     }
 }

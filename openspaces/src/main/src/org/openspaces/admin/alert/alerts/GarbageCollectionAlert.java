@@ -3,7 +3,7 @@ package org.openspaces.admin.alert.alerts;
 
 import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.config.GarbageCollectionAlertConfigurer;
-import org.openspaces.admin.alert.events.AlertEventListener;
+import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
 
 /**
  * A Garbage Collection duration alert, fired upon triggered GC thresholds. The alert is raised when
@@ -12,7 +12,7 @@ import org.openspaces.admin.alert.events.AlertEventListener;
  * <p>
  * These thresholds can be configured by using the {@link GarbageCollectionAlertConfigurer}.
  * <p>
- * This alert will be received on the call to {@link AlertEventListener#onAlert(Alert)} for
+ * This alert will be received on the call to {@link AlertTriggeredEventListener#alertTriggered(Alert)} for
  * registered listeners.
  * 
  * @author Moran Avigdor
