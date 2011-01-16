@@ -2,7 +2,7 @@ package org.openspaces.grid.esm;
 
 import java.util.List;
 
-import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
@@ -50,7 +50,7 @@ public class ToStringHelper {
         return machine.getHostName() + "/" + machine.getHostAddress();
     }
     
-    public static String gscToString(GridServiceContainer container) {
+    public static String gscToString(GridComponent container) {
         return "pid["+container.getVirtualMachine().getDetails().getPid()+"] host["+machineToString(container.getMachine())+"]";
     }
     

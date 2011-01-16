@@ -21,6 +21,7 @@ import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.grid.esm.ToStringHelper;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
@@ -374,6 +375,7 @@ public class ContainersSlaEnforcement implements
                 ContainersSlaUtils.getContainerZone(pu), admin);
         final List<GridServiceAgent> agentsSortedByNumberOfContainers = ContainersSlaUtils.sortAgentsByNumberOfContainers(
                 sla.getGridServiceAgents(), containersByZone);
+        logger.debug("Considering " + agentsSortedByNumberOfContainers.size() + " agents to start a container on.");
         for (final GridServiceAgent gsa : agentsSortedByNumberOfContainers) {
 
             final Machine machine = gsa.getMachine();
@@ -386,13 +388,24 @@ public class ContainersSlaEnforcement implements
 
             final OperatingSystemStatistics operatingSystemStatistics = machine.getOperatingSystem().getStatistics();
 
-            // get total free system memory + cached (getActualFreePhysicalMemorySizeInMB returns -1
-            // when not using Sigar)
-            final int totalFreePhysicalMemorySizeInMB = (int) Math.floor((operatingSystemStatistics.getActualFreePhysicalMemorySizeInBytes() > -1 ? operatingSystemStatistics.getActualFreePhysicalMemorySizeInMB() : operatingSystemStatistics.getFreePhysicalMemorySizeInMB()));
+            // get total free system memory + cached (without sigar returns -1)
+            long freeBytes = operatingSystemStatistics.getActualFreePhysicalMemorySizeInBytes(); 
+            if (freeBytes <= 0) {
+                // fallback - no sigar. Provides a pessimistic number since does not take into account OS cache that can be allocated.
+                freeBytes = operatingSystemStatistics.getFreePhysicalMemorySizeInBytes();
+                if (freeBytes <= 0) {
+                    // machine is probably going down. Blow everything up.
+                    throw new ConflictingOperationInProgressException(); 
+                }
+            }
+            
+            final long freeInMB = MemoryUnit.MEGABYTES.convert(freeBytes,MemoryUnit.BYTES);
 
-            if (totalFreePhysicalMemorySizeInMB > requiredFreeMemoryInMB
-                    + sla.getReservedMemoryCapacityPerMachineInMB()) {
+            if (freeInMB > requiredFreeMemoryInMB + sla.getReservedMemoryCapacityPerMachineInMB()) {
                 recommendedAgents.add(gsa);
+            }
+            else {
+                logger.debug(ToStringHelper.machineToString(gsa.getMachine()) + " does not have enough free memory. It has only " + freeInMB + "MB free and required is " + requiredFreeMemoryInMB + "MB plus reserved is " + sla.getReservedMemoryCapacityPerMachineInMB()+"MB");
             }
         }
 

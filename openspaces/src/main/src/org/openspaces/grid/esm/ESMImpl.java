@@ -20,6 +20,8 @@ import org.openspaces.admin.bean.BeanConfigException;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.InternalAdminFactory;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.machine.Machine;
+import org.openspaces.admin.machine.events.MachineLifecycleEventListener;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
 import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener;
@@ -53,7 +55,7 @@ import com.gigaspaces.security.service.SecurityContext;
 import com.gigaspaces.start.SystemBoot;
 import com.sun.jini.start.LifeCycle;
 
-public class ESMImpl<x> extends ServiceBeanAdapter implements ESM, ProcessingUnitRemovedEventListener, ProcessingUnitAddedEventListener
+public class ESMImpl<x> extends ServiceBeanAdapter implements ESM, ProcessingUnitRemovedEventListener, ProcessingUnitAddedEventListener,MachineLifecycleEventListener
 		/*, RemoteSecuredService*//*, ServiceDiscoveryListener*/ {
 
 	private static final String CONFIG_COMPONENT = "org.openspaces.grid.esm";
@@ -348,5 +350,13 @@ public class ESMImpl<x> extends ServiceBeanAdapter implements ESM, ProcessingUni
         else {
             logger.info("Elastic properties for pu " + puName + " has been set, but the processing unit itself was not detected yet.");
         }
+    }
+
+    public void machineAdded(Machine machine) {
+        machine.getOperatingSystem().startStatisticsMonitor();
+    }
+
+    public void machineRemoved(Machine machine) {
+        machine.getOperatingSystem().stopStatisticsMonitor();
     }
 }
