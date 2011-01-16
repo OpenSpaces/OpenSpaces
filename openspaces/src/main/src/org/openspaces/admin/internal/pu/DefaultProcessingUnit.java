@@ -2,6 +2,7 @@ package org.openspaces.admin.internal.pu;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -605,7 +606,11 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         if (getManagingGridServiceManager() == null) {
             throw new AdminException("Processing Unit " + getName() + " does not have an associated managing GSM");
         }
-        return ((InternalGridServiceManager)getManagingGridServiceManager()).getProcessingUnitElasticProperties(this);
+        Map<String, String> elasticProperties = ((InternalGridServiceManager)getManagingGridServiceManager()).getProcessingUnitElasticProperties(this);
+        if (elasticProperties == null) {
+            elasticProperties = new HashMap<String,String>();
+        }
+        return elasticProperties;
     }
 
     public void setElasticProperties(Map<String,String> properties) {
