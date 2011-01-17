@@ -105,7 +105,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         }
         started = true;
         try {
-            sdm = SharedDiscoveryManagement.getServiceDiscoveryManager(getGroups(), getLocators(), this);
+            sdm = SharedDiscoveryManagement.getServiceDiscoveryManager(getGroups(), getLocators(), null);
         } catch (Exception e) {
             throw new AdminException("Failed to start discovery service, Service Discovery Manager failed to start", e);
         }
