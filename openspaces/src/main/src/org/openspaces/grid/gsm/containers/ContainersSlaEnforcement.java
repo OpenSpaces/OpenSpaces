@@ -195,15 +195,14 @@ public class ContainersSlaEnforcement implements
             String zone = ContainersSlaUtils.getContainerZone(pu);
             List<GridServiceAgent> approvedAgents = Arrays.asList(sla.getGridServiceAgents());
             for (GridServiceContainer container : ContainersSlaUtils.getContainersByZone(zone, admin)) {
-                if (!approvedAgents.contains(container.getGridServiceAgent())) {
+                if (!approvedAgents.contains(container.getGridServiceAgent()) && !containersMarkedForShutdown.contains(container)) {
                     containersMarkedForShutdown.add(container);
                 }
             }
-            
-            // add or remove containers to the approved containers to meet SLA.
-            List<GridServiceContainer> approvedContainers = new ArrayList<GridServiceContainer>(
-                    Arrays.asList(getContainers()));
 
+            // add or remove containers to the approved containers to meet SLA.
+            
+            List<GridServiceContainer> approvedContainers = ContainersSlaUtils.sortContainersInterleaved(getContainers());
             if (ContainersSlaUtils.isCapacityMet(sla, approvedContainers)) {
                 // try to scale in, only if we are not in the process of starting new grid service
                 // containers.
@@ -251,6 +250,7 @@ public class ContainersSlaEnforcement implements
             }
         }
 
+        
         private GridServiceContainer findContainerForRemoval(ContainersSlaPolicy sla,
                 List<GridServiceContainer> containers) {
 
@@ -262,6 +262,15 @@ public class ContainersSlaEnforcement implements
 
                 if (ContainersSlaUtils.isCapacityMet(sla, containersAfterScaleIn)) {
                     return container;
+                }
+                else {
+                    if (logger.isDebugEnabled()) {
+                    logger.debug(
+                            "Cannot remove container " + ToStringHelper.gscToString(container) + " since " +
+                            (ContainersSlaUtils.getMemoryCapacityShortageInMB(sla, containers) <= 0 ? " it would violate memory SLA." :
+                             ContainersSlaUtils.getCpuCapacityShortage(sla, containers) <= 0 ? " it would violate CPU sla." :
+                             ContainersSlaUtils.getMachineShortage(sla, containers) <= 0 ? " it would violate minimum number of machines." : "unknown"));
+                    }
                 }
             }
 

@@ -352,4 +352,67 @@ public class ContainersSlaUtils {
                 && ContainersSlaUtils.getFutureMachineShortage(sla, containers, futureContainers) <= 0;
     }
 
+    /**
+     * Sort containers so that containers started last on their machine would be sorted first.
+     * For example:
+     * Input:  Machine1{ GSC1[t=1], GSC2[t=8]} , Machine2 {GSC3[t=1], GSC4[t=4], GSC5[t=5], GSC6[t=6]}
+     * Output: [ GSC6, GSC5 , GSC4 , GSC2 , GSC3, GSC1 ]
+     * @param approvedContainers
+     * @return
+     */
+    public static List<GridServiceContainer> sortContainersInterleaved(GridServiceContainer[] approvedContainers) {
+
+        // for each machine create a list of containers
+        // the list is sorted such that containers started first are placed first.
+        final Map<Machine, List<GridServiceContainer>> containersSortedByTimestampPerMachine = new HashMap<Machine, List<GridServiceContainer>>();
+        
+        for (final GridServiceContainer container : approvedContainers) {
+            final Machine machine = container.getMachine();
+            if (!containersSortedByTimestampPerMachine.containsKey(machine)) {
+                
+                final List<GridServiceContainer> containers = new ArrayList<GridServiceContainer>(
+                        Arrays.asList(machine.getGridServiceContainers().getContainers()));
+                Collections.sort(containers, new Comparator<GridServiceContainer>() {
+
+                    public int compare(final GridServiceContainer container1, final GridServiceContainer container2) {
+                        long startTime1 = container1.getVirtualMachine().getDetails().getStartTime();
+                        long startTime2 = container2.getVirtualMachine().getDetails().getStartTime();
+                        // Ascending order
+                        if (startTime1 > startTime2){
+                            return 1;
+                        }
+                        else if (startTime1 < startTime2) {
+                            return -1;
+                        }
+                        else {
+                            return 0;
+                        }
+                    }
+                });
+                containersSortedByTimestampPerMachine.put(machine, containers);
+            }
+        }
+
+        // interleave containers. Those started last on the machine will be be first on the list.
+        // 4th started container on machine 2, will be placed before 2nd started container on machine 1.
+        List<GridServiceContainer> sortedApprovedContainers = 
+            new ArrayList<GridServiceContainer>(Arrays.asList(approvedContainers));
+        Collections.sort(sortedApprovedContainers, new Comparator<GridServiceContainer>() {
+
+            public int compare(final GridServiceContainer container1, final GridServiceContainer container2) {
+                
+                final int startedOnMachine1 = 
+                    containersSortedByTimestampPerMachine.get(container1.getMachine()).indexOf(container1);
+                
+                final int startedOnMachine2 = 
+                    containersSortedByTimestampPerMachine.get(container2.getMachine()).indexOf(container2);
+                
+                //Descending order
+                return startedOnMachine2 - startedOnMachine1; 
+            }
+        });
+
+        return sortedApprovedContainers;
+    }
+
 }
