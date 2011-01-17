@@ -376,12 +376,12 @@ public class DefaultAdmin implements InternalAdmin {
         if (closed) {
             return;
         }
-        closed = true;
         discoveryService.stop();
         scheduledExecutorService.shutdownNow();
         for (ExecutorService executorService : eventsExecutorServices) {
             executorService.shutdownNow();
-        }       
+        }
+        closed = true;
     }
 
     public LookupServices getLookupServices() {
@@ -480,10 +480,16 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void raiseEvent(Object listener, Runnable notifier) {
+        if (closed) {
+            throw new IllegalStateException("Cannot raiseEvent since admin already closed");
+        }
         eventsExecutorServices[Math.abs(listener.hashCode() % eventsExecutorServices.length)].submit(new LoggerRunnable(notifier));
     }
 
     public void scheduleNonBlockingStateChange(Runnable command) {
+        if (closed) {
+            throw new IllegalStateException("Cannot change state since admin already closed");
+        }
         if (singleThreadedEventListeners) {
             raiseEvent(this,command);
         }
