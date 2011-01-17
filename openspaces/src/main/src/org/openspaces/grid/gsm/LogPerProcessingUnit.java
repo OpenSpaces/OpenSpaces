@@ -42,7 +42,7 @@ public class LogPerProcessingUnit implements Log {
     }
 
     public void info(Object message, Throwable t) {
-        logger.info(message,t);
+        logger.info(prefix+message,t);
     }
 
     public void trace(Object message) {
