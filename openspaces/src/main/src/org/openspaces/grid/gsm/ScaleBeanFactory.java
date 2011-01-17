@@ -51,7 +51,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
     @Override
     protected Bean createInstance(String className, Map<String,String> properties, BeanServer<Bean> beanServer) throws BeanConfigurationException, BeanInitializationException{
 
-        logger.debug("Creating instance of class " + className + " with properties " + properties);
+        logger.debug("Creating instance of class " + className /* properties may contain passwords or other PII, do not log !!+ " with properties " + properties*/);
         
         Bean instance = super.createInstance(className,properties, beanServer);
         
