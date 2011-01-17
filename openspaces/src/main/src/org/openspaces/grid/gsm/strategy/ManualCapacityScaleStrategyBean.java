@@ -1,5 +1,8 @@
 package org.openspaces.grid.gsm.strategy;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -12,6 +15,7 @@ import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.bean.BeanConfigurationException;
+import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.elastic.AdvancedElasticPropertiesConfig;
@@ -19,6 +23,7 @@ import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
+import org.openspaces.grid.esm.ToStringHelper;
 import org.openspaces.grid.gsm.AdvancedElasticPropertiesConfigAware;
 import org.openspaces.grid.gsm.ElasticMachineProvisioningAware;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
@@ -195,11 +200,15 @@ public class ManualCapacityScaleStrategyBean
             logger.debug("Enforcing machines SLA.");
             boolean machinesSlaEnforced = enforceMachinesSla();
             if (logger.isDebugEnabled()) {
-                if (!machinesSlaEnforced) {
-                    logger.debug("Machines SLA has not been reached");
+            
+                if (machinesService.getGridServiceAgentsPendingShutdown().length > 0) {
+                    logger.debug(
+                            "Machines SLA cannot be reached until containers are removed before scale in. "+
+                            "Approved Machines:" + toString(machinesService.getGridServiceAgents()) +" " +
+                            "Machines to remove:" + toString(machinesService.getGridServiceAgentsPendingShutdown()));
                 }
-                else if (machinesService.getGridServiceAgentsPendingShutdown().length > 0) {
-                    logger.debug("Machines SLA cannot be reached until containers are removed before scale in");
+                else if (!machinesSlaEnforced) {
+                    logger.debug("Machines SLA has not been reached");
                 }
             }
             if (machinesSlaEnforced || 
@@ -208,11 +217,14 @@ public class ManualCapacityScaleStrategyBean
                 logger.debug("Enforcing containers SLA.");
                 boolean containersSlaEnforced = enforceContainersSla();
                 if (logger.isDebugEnabled()) {
-                    if (!containersSlaEnforced) {
-                        logger.debug("Containers SLA has not been reached");
+                    if (machinesService.getGridServiceAgentsPendingShutdown().length > 0) {
+                        logger.debug(
+                                "Containers SLA cannot be reached until processingunit is relocated before scale in. "+
+                                "Approved Containers: " + toString(containersService.getContainers())+ " " +
+                                "Contaniers to remove:" + toString(containersService.getContainersPendingShutdown()));
                     }
-                    else if (machinesService.getGridServiceAgentsPendingShutdown().length > 0) {
-                        logger.debug("Containers SLA cannot be reached until processingunit is relocated before scale in");
+                    else if (!containersSlaEnforced) {
+                        logger.debug("Containers SLA has not been reached");
                     }
                 }
                 
@@ -239,6 +251,22 @@ public class ManualCapacityScaleStrategyBean
             logger.error("Unhandled Exception",e);
         }
         
+    }
+
+    private static String toString(GridServiceContainer[] containers) {
+        final List<String> containersToString = new ArrayList<String>();
+        for (final GridServiceContainer container : containers) {
+            containersToString.add(ToStringHelper.gscToString(container));
+        }
+        return Arrays.toString(containersToString.toArray(new String[containersToString.size()]));
+    }
+
+    private static String toString(GridServiceAgent[] approvedAgents) {
+        final List<String> approvedHostAddresses = new ArrayList<String>();
+        for (final GridServiceAgent approvedAgent : approvedAgents) {
+            approvedHostAddresses.add(ToStringHelper.machineToString(approvedAgent.getMachine()));
+        }
+        return Arrays.toString(approvedHostAddresses.toArray(new String[approvedHostAddresses.size()]));
     }
 
     private int calcTargetNumberOfContainers() {

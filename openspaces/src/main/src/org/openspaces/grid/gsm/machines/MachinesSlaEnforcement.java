@@ -239,15 +239,17 @@ public class MachinesSlaEnforcement implements
         private boolean enforceSlaInternal(MachinesSlaPolicy sla)
                 throws ConflictingOperationInProgressException {
 
+            cleanFutureAgents();
+            
             if (sla.getAllowDeploymentOnManagementMachine()) {
-                for (GridServiceAgent agent : getAllManagementMachines()) {
-                    this.getAgentsStarted().add(agent);
+                for (GridServiceAgent agent : getAllUnusedManagementMachines()) {
+                        getAgentsStarted().add(agent);
                 }
             }
             
             cleanFailedMachines();
             cleanAgentsMarkedForShutdown(sla.getMachineProvisioning());
-            cleanFutureAgents();
+            
             
 
             if (!getFutureAgents().isEmpty() && !getAgentsPendingShutdown().isEmpty()) {
@@ -282,7 +284,8 @@ public class MachinesSlaEnforcement implements
                         "target CPU is " + targetCpu + " " +
                         "existing CPU is " + existingCpu + ", " +
                         "minimum #machines is " + sla.getMinimumNumberOfMachines() + ", " +
-                        "existing #machines is " + getAgentsStarted().size() + getAgentsPendingShutdown().size());
+                        "existing #machines started " + getAgentsStarted().size() + ", " + 
+                        "existing #machines pending shutdown " + getAgentsPendingShutdown().size());
                 
                 // scale in
                 long surplusMemory = existingMemory - targetMemory;
@@ -323,7 +326,7 @@ public class MachinesSlaEnforcement implements
 
                         // mark machine for shutdown
                         this.getAgentsPendingShutdown().add(agent);
-                        this.getAgentsStarted().remove(agent);
+                        getAgentsStarted().remove(agent);
                         surplusMemory -= machineMemory;
                         surplusCpu -= machineCpu;
                         surplusMachines --;
@@ -464,10 +467,10 @@ public class MachinesSlaEnforcement implements
             return slaReached;
         }
 
-        private Set<GridServiceAgent> getAllManagementMachines() {
+        private Set<GridServiceAgent> getAllUnusedManagementMachines() {
             final Set<GridServiceAgent> agents = new HashSet<GridServiceAgent>();
             for (final GridServiceAgent agent : admin.getGridServiceAgents()) {
-                if (MachinesSlaUtils.isManagementRunningOnGridServiceAgent(agent)) {
+                if (MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine())) {
                     agents.add(agent);
                 }
             }
@@ -491,8 +494,8 @@ public class MachinesSlaEnforcement implements
                     logger.info("Agent machine " + agent.getMachine().getHostAddress() + " is confirmed to be shutdown.");
                     getAgentsPendingShutdown().remove(agent);
                 } 
-                else if (MachinesSlaUtils.isManagementRunningOnGridServiceAgent(agent)) {
-                    logger.info("Agent machine " + agent.getMachine().getHostAddress() + " is not needed for pu " + pu.getName());
+                else if (MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine())) {
+                    logger.info("Agent machine " + agent.getMachine().getHostAddress() + " is running management processes but is not needed for pu " + pu.getName());
                     getAgentsPendingShutdown().remove(agent);
                 }
                 else if (numberOfChildProcesses == 0) {
@@ -757,7 +760,7 @@ public class MachinesSlaEnforcement implements
             for (GridServiceAgent agent : MachinesSlaUtils.sortManagementLast(admin.getGridServiceAgents().getAgents())) {
                 if (!usedAgents.contains(agent) &&
                     (allowDeploymentOnManagementMachine || 
-                     !MachinesSlaUtils.isManagementRunningOnGridServiceAgent(agent))) {
+                     !MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine()))) {
                     return agent;
                 }
             }

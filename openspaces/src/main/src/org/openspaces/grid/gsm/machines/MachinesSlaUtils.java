@@ -11,7 +11,6 @@ import java.util.Set;
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.gsa.GridServiceAgent;
-import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.lus.LookupService;
 import org.openspaces.admin.machine.Machine;
@@ -28,22 +27,14 @@ public class MachinesSlaUtils {
         return numberOfChildProcesses;
     }
 
-    public static boolean isManagementRunningOnGridServiceAgent(GridServiceAgent agent) {
-        return getNumberOfChildProcesses(agent) - getNumberOfChildContainers(agent) > 0;
+    public static boolean isManagementRunningOnMachine(Machine machine) {
+        return 
+            machine.getGridServiceManagers().getSize() > 0 ||
+            machine.getLookupServices().getSize() > 0 ||
+            machine.getElasticServiceManagers().getSize() > 0;
+        
     }
     
-    private static int getNumberOfChildContainers(final GridServiceAgent agent) {
-        int numberOfContainers = 0;
-        for (final GridServiceContainer container : agent.getAdmin().getGridServiceContainers()) {
-            if (container.getGridServiceAgent() != null && container.getGridServiceAgent().equals(agent)) {
-                numberOfContainers++;
-            }
-        }
-        return numberOfContainers;
-    }
-
-    
-
     public static long getMemoryInMB(Machine machine, MachinesSlaPolicy sla) {
         
         final long total = getPhysicalMemoryInMB(machine);
@@ -131,8 +122,8 @@ public class MachinesSlaUtils {
         Collections.sort(sortedAgents,new Comparator<GridServiceAgent>() {
 
             public int compare(GridServiceAgent agent1, GridServiceAgent agent2) {
-                boolean management1 = isManagementRunningOnGridServiceAgent(agent1);
-                boolean management2 = isManagementRunningOnGridServiceAgent(agent2);
+                boolean management1 = isManagementRunningOnMachine(agent1.getMachine());
+                boolean management2 = isManagementRunningOnMachine(agent2.getMachine());
                 if (management1 && !management2) return 1; // agent2 is smaller since no management
                 if (management2 && !management1) return -1;// agent1 is smaller since no management
                 return 0;
