@@ -1,5 +1,6 @@
 package org.openspaces.jpa;
 
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -9,6 +10,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 import net.jini.core.lease.Lease;
 import net.jini.core.transaction.Transaction;
@@ -31,6 +36,7 @@ import org.apache.openjpa.util.ApplicationIds;
 import org.openspaces.jpa.openjpa.SpaceConfiguration;
 import org.openspaces.jpa.openjpa.StoreManagerQuery;
 
+import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.internal.client.QueryResultTypeInternal;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.gigaspaces.internal.client.spaceproxy.metadata.ObjectType;
@@ -173,7 +179,11 @@ public class StoreManager extends AbstractStoreManager {
                 final ISpaceProxy proxy = (ISpaceProxy) getConfiguration().getSpace();
                 final ITypeDesc typeDescriptor = proxy.getDirectProxy().getTypeManager().getTypeDescByName(cm.getDescribedType().getName());                                
                 final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);
-                ITemplatePacket template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);
+                ITemplatePacket template;
+                if (typeDescriptor.isAutoGenerateId())
+                    template = TemplatePacketFactory.createUidPacket((String) ids[0], null, 0, TransportPacketType.ENTRY_PACKET);
+                else
+                    template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);
                 result = (IEntryPacket) proxy.read(template, _transaction, 0, readModifier);                
                 if (result == null)
                     return false;            
@@ -264,7 +274,12 @@ public class StoreManager extends AbstractStoreManager {
                 final ISpaceProxy proxy = (ISpaceProxy) space;                              
                 final ITypeDesc typeDescriptor = proxy.getDirectProxy().getTypeManager().getTypeDescByName(sm.getMetaData().getDescribedType().getName());
                 final Object routing = sm.fetch(typeDescriptor.getRoutingPropertyId());                             
-                final ITemplatePacket template = TemplatePacketFactory.createIdPacket(ids[0], routing, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);                     
+                ITemplatePacket template;
+                if (typeDescriptor.isAutoGenerateId())
+                    template = TemplatePacketFactory.createUidPacket((String) ids[0], routing, 0, TransportPacketType.ENTRY_PACKET);
+                else
+                    template = TemplatePacketFactory.createIdPacket(ids[0], routing, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);
+                
                 int result = proxy.clear(template, _transaction, 0);
                 if (result != 1)
                     throw new Exception("Unable to clear object from space.");
@@ -367,28 +382,56 @@ public class StoreManager extends AbstractStoreManager {
         // of their owning instance.
         ClassMetaData[] cms = getConfiguration().getMetaDataRepositoryInstance().getMetaDatas();
         for (ClassMetaData cm : cms) {
+            // Process class
             if (!_processedClasses.contains(cm.getDescribedType())) {
-                // Process class
-                if (!_processedClasses.contains(cm.getDescribedType())) {
-                    for (FieldMetaData fmd : cm.getFields()) {
-                        if (fmd.getAssociationType() == FieldMetaData.ONE_TO_ONE) {
-                            if (!_classesRelationStatus.containsKey(fmd.getDeclaredType())) {
-                                _classesRelationStatus.put(fmd.getDeclaredType(), FieldMetaData.ONE_TO_ONE);
-                            }
-                        } else if (fmd.getAssociationType() == FieldMetaData.ONE_TO_MANY) {
-                            if (!_classesRelationStatus.containsKey(fmd.getDeclaredType())) {
-                                _classesRelationStatus.put(fmd.getElement().getDeclaredType(), FieldMetaData.ONE_TO_MANY);
-                            }
-                        } else if (fmd.getAssociationType() == FieldMetaData.MANY_TO_MANY) {
-                            throw new RuntimeException("Many-to-many is not supported.");
+                for (FieldMetaData fmd : cm.getFields()) {
+                    if (fmd.getAssociationType() == FieldMetaData.ONE_TO_ONE) {
+                        if (!_classesRelationStatus.containsKey(fmd.getDeclaredType())) {
+                            _classesRelationStatus.put(fmd.getDeclaredType(), FieldMetaData.ONE_TO_ONE);
                         }
+                    } else if (fmd.getAssociationType() == FieldMetaData.ONE_TO_MANY) {
+                        if (!_classesRelationStatus.containsKey(fmd.getDeclaredType())) {
+                            _classesRelationStatus.put(fmd.getElement().getDeclaredType(), FieldMetaData.ONE_TO_MANY);
+                        }
+                    } else if (fmd.getAssociationType() == FieldMetaData.MANY_TO_MANY) {
+                        throw new IllegalArgumentException("Many-to-many is not supported.");
                     }
-                    _processedClasses.add(cm.getDescribedType());
                 }
+                validateClassAnnotations(cm.getDescribedType());
+                _processedClasses.add(cm.getDescribedType());
             }
         }
     }
 
+    /**
+     * Validates the provided class' annotations.
+     * Currently the only validation performed is for @Id & @SpaceId annotations
+     * that must be declared on the same getter.  
+     */
+    private void validateClassAnnotations(Class<?> type) {
+        // Validation is only relevant for Entities
+        if (type.getAnnotation(Entity.class) == null)
+            return;
+        
+        for (Method getter : type.getMethods()) {
+            
+            if (!getter.getName().startsWith("get"))
+                continue;
+            
+            SpaceId spaceId = getter.getAnnotation(SpaceId.class);
+            Id id = getter.getAnnotation(Id.class);
+            if (spaceId != null || id != null) {                
+                if (id == null || spaceId == null)
+                    throw new IllegalArgumentException("SpaceId and Id annotations must both be declared on the same property in JPA entities in type: " + type.getName());
+                if (spaceId.autoGenerate()) {
+                    GeneratedValue generatedValue = getter.getAnnotation(GeneratedValue.class);
+                    if (generatedValue == null)
+                        throw new IllegalArgumentException("SpaceId with autoGenerate=true annotated property should also have a JPA GeneratedValue annotation.");
+                }
+                break;
+            }
+        }        
+    }
 
     /**
      * Initializes an ExternalEntry result as a state managed Pojo.
@@ -440,6 +483,9 @@ public class StoreManager extends AbstractStoreManager {
      * Gets the class relation status (one-to-one etc..) for the provided type.
      */
     public synchronized int getClassRelationStatus(Class<?> type) {
+        // In case relations status was not initialized already..
+        initializeClassesRelationStatus();
+        // Get relation status..
         Integer relationStatus = _classesRelationStatus.get(type);
         return (relationStatus == null) ? FieldMetaData.MANAGE_NONE : relationStatus;
     }
