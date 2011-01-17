@@ -451,9 +451,10 @@ public class SpaceRemotingServiceExporter implements SpaceDataEventListener<Spac
                 service = applicationContext.getBean(lookupName);
             } catch (NoSuchBeanDefinitionException e) {
                 // do nothing, write back a proper exception
+                throw new RemoteLookupFailureException("Failed to find service for lookup [" + lookupName + "]", e);
             }
             if (service == null) {
-                throw new RemoteLookupFailureException("Failed to find service for lookup [" + task.getLookupName() + "]");
+                throw new RemoteLookupFailureException("Failed to find service for lookup [" + lookupName + "]");
             }
         }
 
