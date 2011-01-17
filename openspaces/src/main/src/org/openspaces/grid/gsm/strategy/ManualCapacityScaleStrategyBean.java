@@ -27,6 +27,7 @@ import org.openspaces.grid.esm.ToStringHelper;
 import org.openspaces.grid.gsm.AdvancedElasticPropertiesConfigAware;
 import org.openspaces.grid.gsm.ElasticMachineProvisioningAware;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
+import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.ProcessingUnitAware;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
@@ -51,7 +52,6 @@ public class ManualCapacityScaleStrategyBean
                AdvancedElasticPropertiesConfigAware,
                Runnable {
 
-    private static final Log logger = LogFactory.getLog(ManualCapacityScaleStrategyBean.class);
     private static final String rebalancingAlertGroupUidPrefix = "4499C1ED-1584-4387-90CF-34C5EC236644";
     private static final String containersAlertGroupUidPrefix = "47A94111-5665-4214-9F7A-2962D998DD12";
     private static final String machinesAlertGroupUidPrefix = "3BA87E89-449A-4abc-A632-4732246A9EE4";
@@ -68,8 +68,9 @@ public class ManualCapacityScaleStrategyBean
     private AdvancedElasticPropertiesConfig advancedElasticPropertiesConfig;
     
     // created by afterPropertiesSet()
+    private Log logger;
     private ScheduledFuture<?> scheduledTask;
-
+    
     private long memoryInMB;
     private int minimumNumberOfMachines;
     private NonBlockingElasticMachineProvisioning machineProvisioning;
@@ -119,6 +120,11 @@ public class ManualCapacityScaleStrategyBean
         if (slaConfig == null) {
             throw new IllegalStateException("slaConfig cannot be null.");
         }
+        
+        if (pu == null) {
+            throw new IllegalStateException("pu cannot be null.");
+        }
+        logger = new LogPerProcessingUnit(LogFactory.getLog(ManualCapacityScaleStrategyBean.class),pu);
         
         logger.info("sla properties: "+slaConfig.toString());
         

@@ -21,6 +21,7 @@ import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirment;
@@ -173,6 +174,7 @@ public class MachinesSlaEnforcement implements
     class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEndpoint {
 
         private final ProcessingUnit pu;
+        private final Log logger;
         
         public DefaultMachinesSlaEnforcementEndpoint(ProcessingUnit pu) {
             
@@ -181,6 +183,7 @@ public class MachinesSlaEnforcement implements
             }
             
             this.pu = pu;           
+            this.logger = new LogPerProcessingUnit(MachinesSlaEnforcement.logger,pu);
         }
         
         public GridServiceAgent[] getGridServiceAgents() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
@@ -624,9 +627,11 @@ public class MachinesSlaEnforcement implements
 
         private final ProcessingUnit pu;
         private final boolean allowDeploymentOnManagementMachine;
+        private final Log logger;
         DefaultMachineProvisioning(ProcessingUnit pu, boolean allowDeploymentOnManagementMachine) {
             this.pu = pu;
             this.allowDeploymentOnManagementMachine = allowDeploymentOnManagementMachine;
+            this.logger = new LogPerProcessingUnit(MachinesSlaEnforcement.logger,pu);
         }
         
         /**

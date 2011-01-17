@@ -24,6 +24,7 @@ import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.grid.esm.ToStringHelper;
+import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
@@ -40,10 +41,10 @@ import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestr
 public class ContainersSlaEnforcement implements
         ServiceLevelAgreementEnforcement<ContainersSlaPolicy, ProcessingUnit, ContainersSlaEnforcementEndpoint> {
 
+    private static final Log logger = LogFactory.getLog(ContainersSlaEnforcement.class);
+    
     private static final int START_CONTAINER_TIMEOUT_FAILURE_SECONDS = 60;
     private static final int START_CONTAINER_TIMEOUT_FAILURE_FORGET_SECONDS = 60;
-
-    private static final Log logger = LogFactory.getLog(ContainersSlaEnforcement.class);
 
     // State shared by all endpoints.
     private final Map<ProcessingUnit, List<GridServiceContainer>> containersMarkedForShutdownPerProcessingUnit;
@@ -108,11 +109,12 @@ public class ContainersSlaEnforcement implements
     }
 
     class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcementEndpoint {
-
-        private ProcessingUnit pu;
-
+        
+        private final ProcessingUnit pu;
+        private final Log logger;
         public DefaultContainersSlaEnforcementEndpoint(ProcessingUnit pu) {
             this.pu = pu;
+            this.logger = new LogPerProcessingUnit(ContainersSlaEnforcement.logger,pu);
         }
 
         public GridServiceContainer[] getContainers() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
@@ -154,18 +156,18 @@ public class ContainersSlaEnforcement implements
             try {
                 enforceSlaInternal(sla);
             } catch (ConflictingOperationInProgressException e) {
-                ContainersSlaEnforcement.logger.info(
+                logger.info(
                         "Cannot enforce Containers SLA since a conflicting operation is in progress. Try again later.",
                         e);
                 return false; // try again next time
             } catch (NeedMoreMemoryException e) {
-                ContainersSlaEnforcement.logger.warn(e.getMessage());
+                logger.warn(e.getMessage());
                 return false; // try again next time
             } catch (NeedMoreMachinesException e) {
-                ContainersSlaEnforcement.logger.warn(e.getMessage());
+                logger.warn(e.getMessage());
                 return false; // try again next time
             } catch (NeedMoreCpuException e) {
-                ContainersSlaEnforcement.logger.warn(e.getMessage());
+                logger.warn(e.getMessage());
                 return false; // try again next time
             }
 
@@ -336,7 +338,70 @@ public class ContainersSlaEnforcement implements
 
             // Pick the most recommended agent.
             return recommendedAgents.get(0);
+        }
+        
+        /**
+         * finds all Grid Service Agents that have enough free space for a new grid service container.
+         * The resultint agents are sorted by the number of containers (with the same zone) per machine.
+         * @param pu
+         * @param sla
+         * @return
+         * @throws ConflictingOperationInProgressException
+         * @throws NeedMoreMemoryException 
+         */
+        private List<GridServiceAgent> findAgentsForNewContainerSortByNumberOfContainersInZone(ProcessingUnit pu,
+                ContainersSlaPolicy sla) throws ConflictingOperationInProgressException, NeedMoreMachinesException, NeedMoreMemoryException {
 
+            List<GridServiceAgent> recommendedAgents = new ArrayList<GridServiceAgent>();
+
+            boolean conflictingOperationInProgress = false;
+            long requiredFreeMemoryInMB = sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB();
+            final List<GridServiceContainer> containersByZone = ContainersSlaUtils.getContainersByZone(
+                    ContainersSlaUtils.getContainerZone(pu), admin);
+            final List<GridServiceAgent> agentsSortedByNumberOfContainers = ContainersSlaUtils.sortAgentsByNumberOfContainers(
+                    sla.getGridServiceAgents(), containersByZone);
+            logger.debug("Considering " + agentsSortedByNumberOfContainers.size() + " agents to start a container on.");
+            for (final GridServiceAgent gsa : agentsSortedByNumberOfContainers) {
+
+                final Machine machine = gsa.getMachine();
+                if (isFutureGridServiceContainerOnMachine(machine)) {
+                    // the reason we don't keep looking is that this machine might still have the least
+                    // number of containers, even though a container is being started on it.
+                    // so we'll just have to wait until the container is ready.
+                    throw new ConflictingOperationInProgressException();
+                }
+
+                final OperatingSystemStatistics operatingSystemStatistics = machine.getOperatingSystem().getStatistics();
+
+                // get total free system memory + cached (without sigar returns -1)
+                long freeBytes = operatingSystemStatistics.getActualFreePhysicalMemorySizeInBytes(); 
+                if (freeBytes <= 0) {
+                    // fallback - no sigar. Provides a pessimistic number since does not take into account OS cache that can be allocated.
+                    freeBytes = operatingSystemStatistics.getFreePhysicalMemorySizeInBytes();
+                    if (freeBytes <= 0) {
+                        // machine is probably going down. Blow everything up.
+                        throw new ConflictingOperationInProgressException(); 
+                    }
+                }
+                
+                final long freeInMB = MemoryUnit.MEGABYTES.convert(freeBytes,MemoryUnit.BYTES);
+
+                if (freeInMB > requiredFreeMemoryInMB + sla.getReservedMemoryCapacityPerMachineInMB()) {
+                    recommendedAgents.add(gsa);
+                }
+                else {
+                    logger.debug(ToStringHelper.machineToString(gsa.getMachine()) + " does not have enough free memory. It has only " + freeInMB + "MB free and required is " + requiredFreeMemoryInMB + "MB plus reserved is " + sla.getReservedMemoryCapacityPerMachineInMB()+"MB");
+                }
+            }
+
+            if (recommendedAgents.size() == 0) {
+                if (conflictingOperationInProgress) {
+                    throw new ConflictingOperationInProgressException();
+                }
+                throw new NeedMoreMemoryException(requiredFreeMemoryInMB);
+            }
+
+            return recommendedAgents;
         }
         
         /**
@@ -416,69 +481,6 @@ public class ContainersSlaEnforcement implements
 
     }
 
-    /**
-     * finds all Grid Service Agents that have enough free space for a new grid service container.
-     * The resultint agents are sorted by the number of containers (with the same zone) per machine.
-     * @param pu
-     * @param sla
-     * @return
-     * @throws ConflictingOperationInProgressException
-     * @throws NeedMoreMemoryException 
-     */
-    private List<GridServiceAgent> findAgentsForNewContainerSortByNumberOfContainersInZone(ProcessingUnit pu,
-            ContainersSlaPolicy sla) throws ConflictingOperationInProgressException, NeedMoreMachinesException, NeedMoreMemoryException {
-
-        List<GridServiceAgent> recommendedAgents = new ArrayList<GridServiceAgent>();
-
-        boolean conflictingOperationInProgress = false;
-        long requiredFreeMemoryInMB = sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB();
-        final List<GridServiceContainer> containersByZone = ContainersSlaUtils.getContainersByZone(
-                ContainersSlaUtils.getContainerZone(pu), admin);
-        final List<GridServiceAgent> agentsSortedByNumberOfContainers = ContainersSlaUtils.sortAgentsByNumberOfContainers(
-                sla.getGridServiceAgents(), containersByZone);
-        logger.debug("Considering " + agentsSortedByNumberOfContainers.size() + " agents to start a container on.");
-        for (final GridServiceAgent gsa : agentsSortedByNumberOfContainers) {
-
-            final Machine machine = gsa.getMachine();
-            if (isFutureGridServiceContainerOnMachine(machine)) {
-                // the reason we don't keep looking is that this machine might still have the least
-                // number of containers, even though a container is being started on it.
-                // so we'll just have to wait until the container is ready.
-                throw new ConflictingOperationInProgressException();
-            }
-
-            final OperatingSystemStatistics operatingSystemStatistics = machine.getOperatingSystem().getStatistics();
-
-            // get total free system memory + cached (without sigar returns -1)
-            long freeBytes = operatingSystemStatistics.getActualFreePhysicalMemorySizeInBytes(); 
-            if (freeBytes <= 0) {
-                // fallback - no sigar. Provides a pessimistic number since does not take into account OS cache that can be allocated.
-                freeBytes = operatingSystemStatistics.getFreePhysicalMemorySizeInBytes();
-                if (freeBytes <= 0) {
-                    // machine is probably going down. Blow everything up.
-                    throw new ConflictingOperationInProgressException(); 
-                }
-            }
-            
-            final long freeInMB = MemoryUnit.MEGABYTES.convert(freeBytes,MemoryUnit.BYTES);
-
-            if (freeInMB > requiredFreeMemoryInMB + sla.getReservedMemoryCapacityPerMachineInMB()) {
-                recommendedAgents.add(gsa);
-            }
-            else {
-                logger.debug(ToStringHelper.machineToString(gsa.getMachine()) + " does not have enough free memory. It has only " + freeInMB + "MB free and required is " + requiredFreeMemoryInMB + "MB plus reserved is " + sla.getReservedMemoryCapacityPerMachineInMB()+"MB");
-            }
-        }
-
-        if (recommendedAgents.size() == 0) {
-            if (conflictingOperationInProgress) {
-                throw new ConflictingOperationInProgressException();
-            }
-            throw new NeedMoreMemoryException(requiredFreeMemoryInMB);
-        }
-
-        return recommendedAgents;
-    }
 
     /**
      * @return true if there is pending grid service container allocation on the machine.

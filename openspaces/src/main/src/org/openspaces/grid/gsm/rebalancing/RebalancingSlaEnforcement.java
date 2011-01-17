@@ -20,6 +20,7 @@ import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.grid.esm.ToStringHelper;
+import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
@@ -102,37 +103,6 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
         endpoints.put(pu, endpoint);
         futureRelocationPerProcessingUnit.put(pu, new ArrayList<FutureProcessingUnitInstance>());
         return endpoint;
-    }
-
-    /**
-     * This method removes failed relocations from the list allowing a retry attempt to take place.
-     * Some failures are removed immediately, while others stay in the list for
-     * RELOCATION_TIMEOUT_FAILURE_IGNORE_SECONDS.
-     */
-    private void cleanFailedFutureRelocations() {
-
-        List<FutureProcessingUnitInstance> list = failedRelocations;
-        final Iterator<FutureProcessingUnitInstance> iterator = list.iterator();
-        while (iterator.hasNext()) {
-            FutureProcessingUnitInstance future = iterator.next();
-            int passedSeconds = (int) ((System.currentTimeMillis() - future.getTimestamp().getTime()) / 1000);
-
-            if (future.getException() != null
-                    && future.getException().getCause() instanceof WrongContainerRelocationException
-                    && future.getTargetContainer().isDiscovered()
-                    && passedSeconds < RELOCATION_TIMEOUT_FAILURE_FORGET_SECONDS) {
-
-                // do not remove future from list since the target container did not have enough
-                // memory
-                // meaning something is very wrong with our assumptions on the target container.
-                // We leave this future in the list so it will cause conflicting exceptions.
-                // Once RELOCATION_TIMEOUT_FAILURE_FORGET_SECONDS passes it is removed from the
-                // list.
-            } else {
-                logger.info("Forgetting relocation error " + future.getFailureMessage());
-                iterator.remove();
-            }
-        }
     }
 
     private boolean isConflictingOperationInProgress(ProcessingUnitInstance candidateInstance) {
@@ -292,8 +262,11 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
         private int lastResortPartitionRestart = 0;
         private int lastResortPartitionRelocate = 0;
 
+        private final Log logger;
+
         DefaultRebalancingSlaEnforcementEndpoint(ProcessingUnit pu) {
             this.pu = pu;
+            this.logger = new LogPerProcessingUnit(RebalancingSlaEnforcement.logger,pu);
         }
 
         public ProcessingUnit getId() {
@@ -935,7 +908,37 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
             }
 
             cleanFailedFutureRelocations();
+        }
+        
+        /**
+         * This method removes failed relocations from the list allowing a retry attempt to take place.
+         * Some failures are removed immediately, while others stay in the list for
+         * RELOCATION_TIMEOUT_FAILURE_IGNORE_SECONDS.
+         */
+        private void cleanFailedFutureRelocations() {
 
+            List<FutureProcessingUnitInstance> list = failedRelocations;
+            final Iterator<FutureProcessingUnitInstance> iterator = list.iterator();
+            while (iterator.hasNext()) {
+                FutureProcessingUnitInstance future = iterator.next();
+                int passedSeconds = (int) ((System.currentTimeMillis() - future.getTimestamp().getTime()) / 1000);
+
+                if (future.getException() != null
+                        && future.getException().getCause() instanceof WrongContainerRelocationException
+                        && future.getTargetContainer().isDiscovered()
+                        && passedSeconds < RELOCATION_TIMEOUT_FAILURE_FORGET_SECONDS) {
+
+                    // do not remove future from list since the target container did not have enough
+                    // memory
+                    // meaning something is very wrong with our assumptions on the target container.
+                    // We leave this future in the list so it will cause conflicting exceptions.
+                    // Once RELOCATION_TIMEOUT_FAILURE_FORGET_SECONDS passes it is removed from the
+                    // list.
+                } else {
+                    logger.info("Forgetting relocation error " + future.getFailureMessage());
+                    iterator.remove();
+                }
+            }
         }
     }
     
