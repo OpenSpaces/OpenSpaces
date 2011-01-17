@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -157,10 +158,15 @@ public class ContainersSlaEnforcement implements
                         "Cannot enforce Containers SLA since a conflicting operation is in progress. Try again later.",
                         e);
                 return false; // try again next time
+            } catch (NeedMoreMemoryException e) {
+                ContainersSlaEnforcement.logger.warn(e.getMessage());
+                return false; // try again next time
             } catch (NeedMoreMachinesException e) {
-                ContainersSlaEnforcement.logger.warn(
-                        "Cannot enforce Containers SLA since there are not enough machines available. Need more "
-                                + e.getMissingCapacityInMB() + "MB RAM", e);
+                ContainersSlaEnforcement.logger.warn(e.getMessage());
+                return false; // try again next time
+            } catch (NeedMoreCpuException e) {
+                ContainersSlaEnforcement.logger.warn(e.getMessage());
+                return false; // try again next time
             }
 
             return isSlaReached(sla);
@@ -183,7 +189,7 @@ public class ContainersSlaEnforcement implements
         }
 
         private void enforceSlaInternal(final ContainersSlaPolicy sla) throws ConflictingOperationInProgressException,
-                NeedMoreMachinesException {
+                NeedMoreMachinesException, NeedMoreCpuException, NeedMoreMemoryException {
 
             cleanContainersMarkedForShutdown();
             cleanFutureContainers();
@@ -213,44 +219,90 @@ public class ContainersSlaEnforcement implements
                         if (containerToRemove == null) {
                             break;
                         }
+                        logger.info("Marking container " + ToStringHelper.gscToString(containerToRemove) +" for shutdown.");
                         containersMarkedForShutdown.add(containerToRemove);
                         approvedContainers.remove(containerToRemove);
                     }
                 }
             } else {
                 // try to scale out until SLA is met
-                while (!ContainersSlaUtils.isFutureCapacityMet(sla, approvedContainers, futureContainers)) {
+                while (true) {
+                long memoryShortageInMB = ContainersSlaUtils.getFutureMemoryCapacityShortageInMB(sla, approvedContainers, futureContainers);
+                double cpuCoresShortage = ContainersSlaUtils.getFutureNumberOfCpuCoresShortage(sla, approvedContainers, futureContainers);
+                int machineShortage = ContainersSlaUtils.getFutureMachineShortage(sla, approvedContainers, futureContainers);
+                
+                if (logger.isDebugEnabled()) {
+                    StringBuilder isMetExplanation = new StringBuilder();
+                    if (memoryShortageInMB > 0) {
+                        isMetExplanation.append("Containers SLA requires more " + memoryShortageInMB + "MB memory");
+                    }
+                    if (cpuCoresShortage > 0) {
+                        isMetExplanation.append("Containers SLA requires more " + cpuCoresShortage + " CPU cores ");
+                    }
+                    if (machineShortage > 0) {
+                        isMetExplanation.append("Containers SLA requires more " + machineShortage + " minimum machines");
+                    }
+                    if (isMetExplanation.length() > 0) {
+                        logger.debug(isMetExplanation);
+                    }
+                }
+                boolean isFutureCapacityMet = memoryShortageInMB <= 0 && cpuCoresShortage <= 0 && machineShortage <= 0;
+                if (isFutureCapacityMet) {
+                    break;
+                }
 
+                Set<Machine> futureMachinesHostingContainers = ContainersSlaUtils.getFutureMachinesHostingContainers(approvedContainers,futureContainers);
                     // bring back a container that is marked for shutdown to the approved containers
                     // list
                     GridServiceContainer unmarkContainer = null;
 
                     for (GridServiceContainer containerMarkedForShutdown : containersMarkedForShutdown) {
+                        if (
+                        // more memory is needed, meaning more containers are needed
+                        (memoryShortageInMB > 0 || 
+                        // or this container is on a machine with zero containers (would add cpu and machines)        
+                        !futureMachinesHostingContainers.contains(containerMarkedForShutdown.getMachine())) &&
+                        
                         // unmark only containers that are managed by an approved agent
-                        if (approvedAgents.contains(containerMarkedForShutdown.getGridServiceAgent())) {
+                        approvedAgents.contains(containerMarkedForShutdown.getGridServiceAgent())) {
+                            
                             unmarkContainer = containerMarkedForShutdown;
                             break;
                         }
                     }
                     if (unmarkContainer != null) {
+                        logger.info("Unmarking container " + ToStringHelper.gscToString(unmarkContainer) + " so it won't be shutdown.");
                         containersMarkedForShutdownPerProcessingUnit.remove(unmarkContainer);
                         approvedContainers.add(unmarkContainer);
                         continue;
                     }
 
-                    // deploy a new container on an approved machine that has the least number of
-                    // containers.
+                    // deploy a new container on an approved machine that 
+                    // has the least number of containers.
                     final GridServiceAgent gsa = findAgentForNewContainer(pu, sla);
+                    if (
+                        // more memory is needed
+                        memoryShortageInMB > 0 ||
+                        
+                        // more cpu cores (or a new machine) is needed 
+                        // and this is an unused machine        
+                        !futureMachinesHostingContainers.contains(gsa.getMachine())) {
+                            
                     logger.info("Starting a new Grid Service Container on " + ToStringHelper.machineToString(gsa.getMachine()));
                     futureContainers.add(ContainersSlaUtils.startGridServiceContainerAsync(admin,
                             (InternalGridServiceAgent) gsa, sla.getNewContainerConfig(),
                             START_CONTAINER_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS));
-
+                    }
+                    else if (cpuCoresShortage > 0) {
+                                throw new NeedMoreCpuException(cpuCoresShortage);
+                    }
+                    else if (machineShortage > 0) {
+                                throw new NeedMoreMachinesException(machineShortage);                       
+                    }
                 }
             }
         }
 
-        
         private GridServiceContainer findContainerForRemoval(ContainersSlaPolicy sla,
                 List<GridServiceContainer> containers) {
 
@@ -268,7 +320,7 @@ public class ContainersSlaEnforcement implements
                     logger.debug(
                             "Cannot remove container " + ToStringHelper.gscToString(container) + " since " +
                             (ContainersSlaUtils.getMemoryCapacityShortageInMB(sla, containers) <= 0 ? " it would violate memory SLA." :
-                             ContainersSlaUtils.getCpuCapacityShortage(sla, containers) <= 0 ? " it would violate CPU sla." :
+                             ContainersSlaUtils.getNumberOfCpuCoresShortage(sla, containers) <= 0 ? " it would violate CPU sla." :
                              ContainersSlaUtils.getMachineShortage(sla, containers) <= 0 ? " it would violate minimum number of machines." : "unknown"));
                     }
                 }
@@ -278,7 +330,7 @@ public class ContainersSlaEnforcement implements
         }
 
         private GridServiceAgent findAgentForNewContainer(ProcessingUnit pu, ContainersSlaPolicy sla)
-                throws NeedMoreMachinesException, ConflictingOperationInProgressException {
+                throws ConflictingOperationInProgressException, NeedMoreMachinesException, NeedMoreMemoryException {
 
             List<GridServiceAgent> recommendedAgents = findAgentsForNewContainerSortByNumberOfContainersInZone(pu, sla);
 
@@ -371,10 +423,10 @@ public class ContainersSlaEnforcement implements
      * @param sla
      * @return
      * @throws ConflictingOperationInProgressException
-     * @throws NeedMoreMachinesException
+     * @throws NeedMoreMemoryException 
      */
     private List<GridServiceAgent> findAgentsForNewContainerSortByNumberOfContainersInZone(ProcessingUnit pu,
-            ContainersSlaPolicy sla) throws ConflictingOperationInProgressException, NeedMoreMachinesException {
+            ContainersSlaPolicy sla) throws ConflictingOperationInProgressException, NeedMoreMachinesException, NeedMoreMemoryException {
 
         List<GridServiceAgent> recommendedAgents = new ArrayList<GridServiceAgent>();
 
@@ -422,7 +474,7 @@ public class ContainersSlaEnforcement implements
             if (conflictingOperationInProgress) {
                 throw new ConflictingOperationInProgressException();
             }
-            throw new NeedMoreMachinesException(requiredFreeMemoryInMB);
+            throw new NeedMoreMemoryException(requiredFreeMemoryInMB);
         }
 
         return recommendedAgents;
@@ -488,18 +540,29 @@ public class ContainersSlaEnforcement implements
     }
 
     @SuppressWarnings("serial")
-    private static class NeedMoreMachinesException extends Exception {
-
-        private final long missingCapacityInMB;
-
-        NeedMoreMachinesException(long missingCapacityInMB) {
-            this.missingCapacityInMB = missingCapacityInMB;
+    private static class NeedMoreMemoryException extends Exception {
+        NeedMoreMemoryException(long missingCapacityInMB) {
+            super("Cannot enforce Containers SLA since there are not enough machines available. "+
+                  "Need more machines with " + missingCapacityInMB + "MB memory");
+        
         }
-
-        public long getMissingCapacityInMB() {
-            return missingCapacityInMB;
-        }
-
     }
+
+    @SuppressWarnings("serial")
+    private static class NeedMoreCpuException extends Exception {
+        NeedMoreCpuException(double cpuCoresShortage) {
+            super("Cannot enforce Containers SLA since there are not enough machines available. "+
+                  "Need more machines with " + cpuCoresShortage + "CPU cores");
+        }
+    }
+    
+    @SuppressWarnings("serial")
+    private static class NeedMoreMachinesException extends Exception {
+        NeedMoreMachinesException(int machineShortage) {
+            super("Cannot enforce Containers SLA since there are not enough machines available. "+
+                  "Need " + machineShortage + " more machines");
+        }
+    }
+
 
 }

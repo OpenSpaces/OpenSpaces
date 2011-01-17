@@ -176,11 +176,11 @@ public class ContainersSlaUtils {
         return getFutureMachineShortage(sla, containers, new ArrayList<FutureGridServiceContainer>());
     }
 
-    public static double getCpuCapacityShortage(
+    public static double getNumberOfCpuCoresShortage(
             ContainersSlaPolicy sla,
             Iterable<GridServiceContainer> containers) {
         
-        return getFutureCpuCapacityShortage(sla,containers, new ArrayList<FutureGridServiceContainer>());
+        return getFutureNumberOfCpuCoresShortage(sla,containers, new ArrayList<FutureGridServiceContainer>());
     }
 
     public static long getMemoryCapacityShortageInMB(
@@ -225,33 +225,37 @@ public class ContainersSlaUtils {
             Iterable<GridServiceContainer> containers,
             Iterable<FutureGridServiceContainer> futureContainers) {
         
-        long memoryShortageInMB = sla.getMemoryCapacityInMB();
+        long memorySla = sla.getMemoryCapacityInMB();
         
+        long allocatedContainersCapacityInMB = 0;
         for (GridServiceContainer container : containers) {
-            memoryShortageInMB -= getMemoryInMB(container);
+            allocatedContainersCapacityInMB += getMemoryInMB(container);
         }
         
         for (FutureGridServiceContainer future : futureContainers) {
-            memoryShortageInMB -= future.getGridServiceContainerConfig().getMaximumJavaHeapSizeInMB();
+            allocatedContainersCapacityInMB += future.getGridServiceContainerConfig().getMaximumJavaHeapSizeInMB();
         }
-        return memoryShortageInMB;
+        long shortage = memorySla - allocatedContainersCapacityInMB;
+        return shortage;
     }
 
-    public static double getFutureCpuCapacityShortage(
+    public static double getFutureNumberOfCpuCoresShortage(
             ContainersSlaPolicy sla, 
             Iterable<GridServiceContainer> containers,
             Iterable<FutureGridServiceContainer> futureContainers) {
 
-        double cpuShortage = sla.getCpuCapacity();
+        double cpuSla = sla.getNumberOfCpuCores();
         
+        double futureContainersCpuCores = 0;
         for (Machine machine : getFutureMachinesHostingContainers(containers, futureContainers)) {
-            cpuShortage -= getCpu(machine);
+            futureContainersCpuCores += getCpu(machine);
         }
         
-        return cpuShortage;
+        double shortage = cpuSla - futureContainersCpuCores;
+        return shortage;
     }
 
-    private static Set<Machine> getFutureMachinesHostingContainers(Iterable<GridServiceContainer> containers,
+    static Set<Machine> getFutureMachinesHostingContainers(Iterable<GridServiceContainer> containers,
             Iterable<FutureGridServiceContainer> futureContainers) {
         final Set<Machine> machines = new HashSet<Machine>();
         for (final GridServiceContainer container : containers) {
@@ -270,7 +274,9 @@ public class ContainersSlaUtils {
             ContainersSlaPolicy sla, 
             Iterable<GridServiceContainer> containers,
             Iterable<FutureGridServiceContainer> futureContainers) {
-        return sla.getMinimumNumberOfMachines() - getFutureMachinesHostingContainers(containers, futureContainers).size();
+        int minimumNumberOfMachinesSla = sla.getMinimumNumberOfMachines();
+        int futureMachinesWithContainers = getFutureMachinesHostingContainers(containers, futureContainers).size();
+        return minimumNumberOfMachinesSla - futureMachinesWithContainers;
     }
 
     /**
@@ -341,16 +347,10 @@ public class ContainersSlaUtils {
 
     public static boolean isCapacityMet(ContainersSlaPolicy sla, Iterable<GridServiceContainer> containers) {
         return ContainersSlaUtils.getMemoryCapacityShortageInMB(sla, containers) <= 0
-                && ContainersSlaUtils.getCpuCapacityShortage(sla, containers) <= 0
+                && ContainersSlaUtils.getNumberOfCpuCoresShortage(sla, containers) <= 0
                 && ContainersSlaUtils.getMachineShortage(sla, containers) <= 0;
     }
 
-    public static boolean isFutureCapacityMet(ContainersSlaPolicy sla, Iterable<GridServiceContainer> containers,
-            Iterable<FutureGridServiceContainer> futureContainers) {
-        return ContainersSlaUtils.getFutureMemoryCapacityShortageInMB(sla, containers, futureContainers) <= 0
-                && ContainersSlaUtils.getFutureCpuCapacityShortage(sla, containers, futureContainers) <= 0
-                && ContainersSlaUtils.getFutureMachineShortage(sla, containers, futureContainers) <= 0;
-    }
 
     /**
      * Sort containers so that containers started last on their machine would be sorted first.

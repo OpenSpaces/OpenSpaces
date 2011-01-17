@@ -28,7 +28,7 @@ public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
         this.cpu = cpu;
     }
     
-    public double getCpuCapacity() {
+    public double getNumberOfCpuCores() {
         return this.cpu;
     }
     
