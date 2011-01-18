@@ -14,7 +14,7 @@ import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestr
  * @see MachineSlaPolicy
  */
 public interface MachinesSlaEnforcementEndpoint 
-    extends ServiceLevelAgreementEnforcementEndpoint<ProcessingUnit,MachinesSlaPolicy> {
+    extends ServiceLevelAgreementEnforcementEndpoint<ProcessingUnit,CapacityMachinesSlaPolicy> {
     
     /**
      * @return a list of agents for this pu that are not pending shutdown, without blocking the calling thread.

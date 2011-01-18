@@ -37,7 +37,7 @@ import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestr
  *
  */
 public class MachinesSlaEnforcement implements
-        ServiceLevelAgreementEnforcement<MachinesSlaPolicy, ProcessingUnit, MachinesSlaEnforcementEndpoint> {
+        ServiceLevelAgreementEnforcement<CapacityMachinesSlaPolicy, ProcessingUnit, MachinesSlaEnforcementEndpoint> {
 
     private static final Log logger = LogFactory.getLog(MachinesSlaEnforcementEndpoint.class);
     private static final int START_AGENT_TIMEOUT_SECONDS = 10*60;
@@ -171,7 +171,7 @@ public class MachinesSlaEnforcement implements
      * @see MachinesSlaEnforcement - creates this endpoint
      * @see MachinesSlaPolicy - defines the sla policy for this endpoint
      */
-    class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEndpoint {
+    class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEndpoint, EagerMachinesSlaEnforcementEndpoint {
 
         private final ProcessingUnit pu;
         private final Log logger;
@@ -202,7 +202,7 @@ public class MachinesSlaEnforcement implements
             
         }
 
-        public boolean enforceSla(MachinesSlaPolicy sla) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+        public boolean enforceSla(CapacityMachinesSlaPolicy sla) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
             validateEndpointNotDestroyed(pu);
             
             if (sla == null) {
@@ -218,7 +218,7 @@ public class MachinesSlaEnforcement implements
             }
             
             if (sla.getMachineProvisioning() == null) {
-                NonBlockingElasticMachineProvisioning defaultMachineProvisioning = getDefaultMachineProvisioningForProcessingUnit(pu,sla.getAllowDeploymentOnManagementMachine());
+                NonBlockingElasticMachineProvisioning defaultMachineProvisioning = getDefaultMachineProvisioningForProcessingUnit(pu,sla);
                 sla.setMachineProvisioning(defaultMachineProvisioning);
             }
             
@@ -234,12 +234,112 @@ public class MachinesSlaEnforcement implements
             }
         }
         
+        public boolean enforceSla(EagerMachinesSlaPolicy sla)
+                throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+            
+            if (sla == null) {
+                throw new IllegalArgumentException("SLA cannot be null");
+            }
+            if (sla.getContainerMemoryCapacityInMB() <= 0) {
+                throw new IllegalArgumentException("Container memory capacity must be defined.");
+            }
+            DefaultMachineProvisioning defaultMachineProvisioning = getDefaultMachineProvisioningForProcessingUnit(pu,sla);
+            return enforceSlaInternal(sla, defaultMachineProvisioning);
+        }
+
+        private boolean enforceSlaInternal(EagerMachinesSlaPolicy sla, DefaultMachineProvisioning defaultMachineProvisioning) {
+
+            cleanFutureAgents();
+            cleanFailedMachines();
+            cleanAgentsMarkedForShutdown(defaultMachineProvisioning);
+
+            if (!getFutureAgents().isEmpty() && !getAgentsPendingShutdown().isEmpty()) {
+                throw new IllegalStateException("Cannot have both agents pending to be started and agents pending shutdown.");
+            }
+            
+            boolean slaReached = getFutureAgents().isEmpty() && getAgentsPendingShutdown().isEmpty();
+            // Eager more: we ask for all available machines.
+            int maxNumberOfMachines = Math.max(sla.getMinimumNumberOfMachines(), pu.getTotalNumberOfInstances());
+
+            if (getAgentsStarted().size() + getAgentsPendingShutdown().size() > maxNumberOfMachines) {
+                    
+                logger.debug("Considering scale in: "+
+                        "max #machines is " + maxNumberOfMachines + ", " +
+                        "existing #machines started " + getAgentsStarted().size() + ", " + 
+                        "existing #machines pending shutdown " + getAgentsPendingShutdown().size());
+                
+                // scale in
+                int surplusMachines = getAgentsStarted().size() + getAgentsPendingShutdown().size() - maxNumberOfMachines;
+                
+                // adjust surplusMemory based on agents marked for shutdown
+                // remove mark if it would cause surplus to be below zero
+                // remove mark if it would reduce the number of machines below the sla minimum.
+                Iterator<GridServiceAgent> iterator = Arrays.asList(
+                        getGridServiceAgentsPendingShutdown()).iterator();
+                while (iterator.hasNext()) {
+
+                    GridServiceAgent agent = iterator.next();
+                    if (surplusMachines > 0) {
+                        // this machine is already marked for shutdown, so surplus
+                        // is adjusted to reflect that
+                        surplusMachines--;
+                    } else {
+                        iterator.remove();
+                        logger.info("machine agent " + agent.getMachine().getHostAddress() + " is no longer marked for shutdown in order to maintain capacity.");
+                    }
+                }
+
+                // mark agents for shutdown if there are not enough of them (scale in)
+                // give priority to agents that do not host a GSM/LUS since we want to evacuate those last.
+                for (GridServiceAgent agent : MachinesSlaUtils.sortManagementLast(getGridServiceAgents())) {
+                    if (surplusMachines > 0) {
+                        // mark machine for shutdown
+                        this.getAgentsPendingShutdown().add(agent);
+                        getAgentsStarted().remove(agent);
+                        surplusMachines --;
+                        slaReached = false;
+                        logger.info("machine agent " + agent.getMachine().getHostAddress() + " is marked for shutdown in order to reduce capacity.");
+                    }
+                }
+            }
+            else if (getFutureAgents().size() ==0 && 
+                     getAgentsPendingShutdown().size() == 0 &&
+                     getAgentsStarted().size() < maxNumberOfMachines){
+                
+                int freeAgents = defaultMachineProvisioning.countFreeAgents();
+                if (freeAgents > 0) {
+                    int machineShortage = Math.min(freeAgents, maxNumberOfMachines-getAgentsStarted().size());
+                    this.getFutureAgents().add(
+                            defaultMachineProvisioning.startMachinesAsync(
+                                new CapacityRequirements(
+                                        new NumberOfMachinesCapacityRequirement(machineShortage)),
+                                START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
+                    slaReached = false;
+                    logger.info(machineShortage+ " new machine(s) is scheduled to be started.");
+                }
+            }
+            
+            if (getGridServiceAgents().length < sla.getMinimumNumberOfMachines()) {
+                slaReached = false;
+            }
+            
+            return slaReached;
+        }
+        
+        public long getMemoryCapacityInMB(EagerMachinesSlaPolicy sla) {
+            long memoryInMB = 0;
+            for (GridServiceAgent agent : getGridServiceAgents()) {
+                memoryInMB += MachinesSlaUtils.getMemoryInMB(agent.getMachine(), sla);
+            }
+            return memoryInMB;
+        }
+
         public ProcessingUnit getId() {
             return pu;
         }
 
                 
-        private boolean enforceSlaInternal(MachinesSlaPolicy sla)
+        private boolean enforceSlaInternal(CapacityMachinesSlaPolicy sla)
                 throws ConflictingOperationInProgressException {
 
             cleanFutureAgents();
@@ -253,8 +353,6 @@ public class MachinesSlaEnforcement implements
             cleanFailedMachines();
             cleanAgentsMarkedForShutdown(sla.getMachineProvisioning());
             
-            
-
             if (!getFutureAgents().isEmpty() && !getAgentsPendingShutdown().isEmpty()) {
                 throw new IllegalStateException("Cannot have both agents pending to be started and agents pending shutdown.");
             }
@@ -481,7 +579,7 @@ public class MachinesSlaEnforcement implements
             agents.removeAll(getAllUsedAgents());
             return agents;
         }
-
+        
         /**
          * Kill agents marked for shutdown that no longer manage containers. 
          * @param machineProvisioning
@@ -619,21 +717,40 @@ public class MachinesSlaEnforcement implements
      *  
      * @return
      */
-    private NonBlockingElasticMachineProvisioning getDefaultMachineProvisioningForProcessingUnit(ProcessingUnit pu, boolean allowDeploymentOnManagementMachine) {
-        return new DefaultMachineProvisioning(pu, allowDeploymentOnManagementMachine);
+    private DefaultMachineProvisioning getDefaultMachineProvisioningForProcessingUnit(ProcessingUnit pu, AbstractMachinesSlaPolicy sla) {
+        return new DefaultMachineProvisioning(pu, sla);
     }
     
     class DefaultMachineProvisioning implements NonBlockingElasticMachineProvisioning {
 
         private final ProcessingUnit pu;
-        private final boolean allowDeploymentOnManagementMachine;
+        private final AbstractMachinesSlaPolicy sla;
         private final Log logger;
-        DefaultMachineProvisioning(ProcessingUnit pu, boolean allowDeploymentOnManagementMachine) {
+        DefaultMachineProvisioning(ProcessingUnit pu, AbstractMachinesSlaPolicy sla) {
             this.pu = pu;
-            this.allowDeploymentOnManagementMachine = allowDeploymentOnManagementMachine;
+            this.sla = sla;
             this.logger = new LogPerProcessingUnit(MachinesSlaEnforcement.logger,pu);
         }
         
+        /**
+         * finds a grid service agent that is not in the specified list and not used by GSM/LUS
+         * @param usedAgents
+         * @param allowDeploymentOnManagementMachine 
+         * @return agent if found, or null if no free machines exist.
+         */
+        public int countFreeAgents() {
+            int count = 0;
+            Set<GridServiceAgent> usedAgents = getAllUsedAgents();
+            for (GridServiceAgent agent : admin.getGridServiceAgents().getAgents()) {
+                if (!usedAgents.contains(agent) &&
+                    (sla.getAllowDeploymentOnManagementMachine() || 
+                     !MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine()))) {
+                    count++;
+                }
+            }
+            return count;
+        }
+
         /**
          * @return a future that when called looks for an empty grid service agent that is not used by any PU.
          * relies on the fact that get() can only be called from a single thread and not from multiple concurrent threads.
@@ -700,7 +817,7 @@ public class MachinesSlaEnforcement implements
                     Set<GridServiceAgent> agentsUsedByPus = getAllUsedAgents();
                     
                     // add one machine at a time until the sla is met or until there are no more machines left. 
-                    while (!MachinesSlaUtils.isCapacityRequirementsMet(newAgents, capacityRequirements)) {
+                    while (!MachinesSlaUtils.isCapacityRequirementsMet(newAgents, capacityRequirements, sla)) {
                         
                         GridServiceAgent agent = findFreeAgent(agentsUsedByPus);
                         if (agent == null) {
@@ -764,7 +881,7 @@ public class MachinesSlaEnforcement implements
         private GridServiceAgent findFreeAgent(Set<GridServiceAgent> usedAgents) {
             for (GridServiceAgent agent : MachinesSlaUtils.sortManagementLast(admin.getGridServiceAgents().getAgents())) {
                 if (!usedAgents.contains(agent) &&
-                    (allowDeploymentOnManagementMachine || 
+                    (sla.getAllowDeploymentOnManagementMachine() || 
                      !MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine()))) {
                     return agent;
                 }

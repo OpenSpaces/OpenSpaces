@@ -14,6 +14,8 @@ import org.openspaces.core.bean.BeanServer;
 import org.openspaces.core.bean.DefaultBeanFactory;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
+import org.openspaces.grid.gsm.machines.EagerMachinesSlaEnforcementEndpoint;
+import org.openspaces.grid.gsm.machines.EagerMachinesSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.machines.ElasticMachineProvisioning;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
@@ -21,6 +23,7 @@ import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioningAdapter;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAware;
+import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpoint;
 
 public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
 
@@ -28,7 +31,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
     
     private final RebalancingSlaEnforcementEndpoint rebalancingSlaEnforcementEndpoint;
     private final ContainersSlaEnforcementEndpoint containersSlaEnforcementEndpoint;
-    private final MachinesSlaEnforcementEndpoint machinesSlaEnforcementEndpoint;
+    private final ServiceLevelAgreementEnforcementEndpoint machinesSlaEnforcementEndpoint;
     private final ProcessingUnit pu;
     private final ProcessingUnitSchemaConfig schemaConfig;
     
@@ -37,7 +40,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
             ProcessingUnitSchemaConfig schemaConfig,
             RebalancingSlaEnforcementEndpoint rebalancingSlaEnforcementEndpoint, 
             ContainersSlaEnforcementEndpoint containersSlaEnforcementEndpoint,
-            MachinesSlaEnforcementEndpoint machinesSlaEnforcementEndpoint) {
+            ServiceLevelAgreementEnforcementEndpoint machinesSlaEnforcementEndpoint) {
         
         super(pu.getAdmin());
         this.schemaConfig = schemaConfig;
@@ -57,7 +60,11 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         
         if (instance instanceof MachinesSlaEnforcementEndpointAware) {
             MachinesSlaEnforcementEndpointAware minstance = (MachinesSlaEnforcementEndpointAware)instance;
-            minstance.setMachinesSlaEnforcementEndpoint(machinesSlaEnforcementEndpoint);
+            minstance.setMachinesSlaEnforcementEndpoint((MachinesSlaEnforcementEndpoint)machinesSlaEnforcementEndpoint);
+        }
+        if (instance instanceof EagerMachinesSlaEnforcementEndpointAware) {
+            EagerMachinesSlaEnforcementEndpointAware minstance = (EagerMachinesSlaEnforcementEndpointAware)instance;
+            minstance.setEagerMachinesSlaEnforcementEndpoint((EagerMachinesSlaEnforcementEndpoint)machinesSlaEnforcementEndpoint);
         }
         
         if (instance instanceof ContainersSlaEnforcementEndpointAware) {

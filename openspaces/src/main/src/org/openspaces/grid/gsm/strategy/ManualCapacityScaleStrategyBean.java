@@ -34,7 +34,7 @@ import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.containers.ContainersSlaPolicy;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
-import org.openspaces.grid.gsm.machines.MachinesSlaPolicy;
+import org.openspaces.grid.gsm.machines.CapacityMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAware;
@@ -59,9 +59,9 @@ public class ManualCapacityScaleStrategyBean
     // injected 
     private InternalAdmin admin;
     private ManualCapacityScaleConfig slaConfig;
-    private MachinesSlaEnforcementEndpoint machinesService;
-    private ContainersSlaEnforcementEndpoint containersService;
-    private RebalancingSlaEnforcementEndpoint rebalancingService;
+    private MachinesSlaEnforcementEndpoint machinesEndpoint;
+    private ContainersSlaEnforcementEndpoint containersEndpoint;
+    private RebalancingSlaEnforcementEndpoint rebalancingEndpoint;
     private ProcessingUnit pu;
     private GridServiceContainerConfig containersConfig;
     private ProcessingUnitSchemaConfig schemaConfig;
@@ -93,15 +93,15 @@ public class ManualCapacityScaleStrategyBean
     }
 
     public void setMachinesSlaEnforcementEndpoint(MachinesSlaEnforcementEndpoint machinesService) {
-        this.machinesService = machinesService;
+        this.machinesEndpoint = machinesService;
     }
 
     public void setContainersSlaEnforcementEndpoint(ContainersSlaEnforcementEndpoint containersService) {
-        this.containersService = containersService;
+        this.containersEndpoint = containersService;
     }
     
     public void setRebalancingSlaEnforcementEndpoint(RebalancingSlaEnforcementEndpoint relocationService) {
-        this.rebalancingService = relocationService;
+        this.rebalancingEndpoint = relocationService;
     }
 
     public void setElasticMachineProvisioning(NonBlockingElasticMachineProvisioning elasticMachineProvisioning) {
@@ -207,27 +207,27 @@ public class ManualCapacityScaleStrategyBean
             boolean machinesSlaEnforced = enforceMachinesSla();
             if (logger.isDebugEnabled()) {
             
-                if (machinesService.getGridServiceAgentsPendingShutdown().length > 0) {
+                if (machinesEndpoint.getGridServiceAgentsPendingShutdown().length > 0) {
                     logger.debug(
                             "Machines SLA cannot be reached until containers are removed before scale in. "+
-                            "Approved Machines:" + toString(machinesService.getGridServiceAgents()) +" " +
-                            "Machines to remove:" + toString(machinesService.getGridServiceAgentsPendingShutdown()));
+                            "Approved Machines:" + toString(machinesEndpoint.getGridServiceAgents()) +" " +
+                            "Machines to remove:" + toString(machinesEndpoint.getGridServiceAgentsPendingShutdown()));
                 }
                 else if (!machinesSlaEnforced) {
                     logger.debug("Machines SLA has not been reached");
                 }
             }
             if (machinesSlaEnforced || 
-                machinesService.getGridServiceAgentsPendingShutdown().length >0) {
+                machinesEndpoint.getGridServiceAgentsPendingShutdown().length >0) {
 
                 logger.debug("Enforcing containers SLA.");
                 boolean containersSlaEnforced = enforceContainersSla();
                 if (logger.isDebugEnabled()) {
-                    if (machinesService.getGridServiceAgentsPendingShutdown().length > 0) {
+                    if (machinesEndpoint.getGridServiceAgentsPendingShutdown().length > 0) {
                         logger.debug(
                                 "Containers SLA cannot be reached until processingunit is relocated before scale in. "+
-                                "Approved Containers: " + toString(containersService.getContainers())+ " " +
-                                "Contaniers to remove:" + toString(containersService.getContainersPendingShutdown()));
+                                "Approved Containers: " + toString(containersEndpoint.getContainers())+ " " +
+                                "Contaniers to remove:" + toString(containersEndpoint.getContainersPendingShutdown()));
                     }
                     else if (!containersSlaEnforced) {
                         logger.debug("Containers SLA has not been reached");
@@ -235,10 +235,10 @@ public class ManualCapacityScaleStrategyBean
                 }
                 
                 if (containersSlaEnforced || 
-                    containersService.getContainersPendingShutdown().length > 0) {
+                    containersEndpoint.getContainersPendingShutdown().length > 0) {
                     
                     logger.debug("Enforcing rebalancing SLA.");
-                    boolean rebalancingSlaEnforced = enforceRebalancingSla(containersService.getContainers());
+                    boolean rebalancingSlaEnforced = enforceRebalancingSla(containersEndpoint.getContainers());
                     if (logger.isDebugEnabled()) {
                         if (!rebalancingSlaEnforced) {
                             logger.debug("Rebalancing SLA has not been reached");
@@ -360,7 +360,7 @@ public class ManualCapacityScaleStrategyBean
 
 
     private boolean enforceMachinesSla() {
-        final MachinesSlaPolicy sla = new MachinesSlaPolicy();
+        final CapacityMachinesSlaPolicy sla = new CapacityMachinesSlaPolicy();
         sla.setMachineProvisioning(machineProvisioning);
         sla.setCpuCapacity(slaConfig.getNumberOfCpuCores());
         sla.setAllowDeploymentOnManagementMachine(advancedElasticPropertiesConfig.getAllowDeploymentOnManagementMachine());
@@ -369,7 +369,7 @@ public class ManualCapacityScaleStrategyBean
         sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
         
-        boolean reachedSla = machinesService.enforceSla(sla);
+        boolean reachedSla = machinesEndpoint.enforceSla(sla);
         
         if (reachedSla) {
             triggerAlert(
@@ -398,12 +398,12 @@ public class ManualCapacityScaleStrategyBean
         
         final ContainersSlaPolicy sla = new ContainersSlaPolicy();
         sla.setNewContainerConfig(containersConfig);
-        sla.setGridServiceAgents(machinesService.getGridServiceAgents());
+        sla.setGridServiceAgents(machinesEndpoint.getGridServiceAgents());
         sla.setMinimumNumberOfMachines(minimumNumberOfMachines);
         sla.setCpuCapacity(slaConfig.getNumberOfCpuCores());
         sla.setMemoryCapacityInMB(memoryInMB);
         sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
-        boolean reachedSla = containersService.enforceSla(sla);
+        boolean reachedSla = containersEndpoint.enforceSla(sla);
         
         if (reachedSla) {
             triggerAlert(
@@ -438,7 +438,7 @@ public class ManualCapacityScaleStrategyBean
         sla.setContainers(containers);
         sla.setMaximumNumberOfConcurrentRelocationsPerMachine(slaConfig.getMaximumNumberOfConcurrentRelocationsPerMachine());
         
-        boolean slaEnforced = rebalancingService.enforceSla(sla);
+        boolean slaEnforced = rebalancingEndpoint.enforceSla(sla);
         
         if (slaEnforced) {
             triggerAlert(

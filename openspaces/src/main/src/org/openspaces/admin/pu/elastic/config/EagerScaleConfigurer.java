@@ -1,5 +1,7 @@
 package org.openspaces.admin.pu.elastic.config;
 
+import org.openspaces.core.util.MemoryUnit;
+
 /**
  * Provides fluent API for creating a new {@link EagerScaleConfig} object.
  * 
@@ -10,7 +12,7 @@ package org.openspaces.admin.pu.elastic.config;
  */
 public class EagerScaleConfigurer implements ScaleBeanConfigurer<EagerScaleConfig> {
 
-    private final EagerScaleConfig state;
+    private final EagerScaleConfig config;
 
     /**
      * Provides fluent API for creating a new {@link EagerScaleConfig} object.
@@ -18,30 +20,11 @@ public class EagerScaleConfigurer implements ScaleBeanConfigurer<EagerScaleConfi
      * The default constructor wraps an empty {@link EagerScaleConfig} object
      */
     public EagerScaleConfigurer() {
-        this.state = new EagerScaleConfig();
+        this.config = new EagerScaleConfig();
     }
 
-    /**
-     * @see MaxNumberOfContainersScaleConfig#setMaxNumberOfContainers(int)
-     */
-    public EagerScaleConfigurer maxNumberOfContainers(int numberOfContainers) {
-        state.setMaxNumberOfContainers(numberOfContainers);
-        return this;
-    }
-
-    /**
-     * @see MinNumberOfContainersPerMachineScaleConfig#setMinNumberOfContainersPerMachine(int)
-     */
-    public EagerScaleConfigurer minNumberOfContainersPerMachine(int minNumberOfContainersPerMachine) {
-        state.setMinNumberOfContainersPerMachine(minNumberOfContainersPerMachine);
-        return this;
-    }
-
-    /**
-     * @see MaxNumberOfContainersPerMachineScaleConfig#setMaxNumberOfContainersPerMachine(int)
-     */
-    public EagerScaleConfigurer maxNumberOfContainersPerMachine(int maxNumberOfContainersPerMachine) {
-        state.setMaxNumberOfContainersPerMachine(maxNumberOfContainersPerMachine);
+    public EagerScaleConfigurer reservedMemoryCapacityPerMachine(int memory, MemoryUnit unit) {
+        config.setReservedMemoryCapacityPerMachineInMB((int) unit.toMegaBytes(memory));
         return this;
     }
     
@@ -49,6 +32,6 @@ public class EagerScaleConfigurer implements ScaleBeanConfigurer<EagerScaleConfi
      * @see ScaleBeanConfigurer#getConfig()
      */
     public EagerScaleConfig getConfig() {
-        return state;
+        return config;
     }
 }

@@ -30,7 +30,7 @@ public class MachinesSlaUtils {
         
     }
     
-    public static long getMemoryInMB(Machine machine, MachinesSlaPolicy sla) {
+    public static long getMemoryInMB(Machine machine, AbstractMachinesSlaPolicy sla) {
         
         final long total = getPhysicalMemoryInMB(machine);
         long reservedMemoryCapacityPerMachineInMB = sla.getReservedMemoryCapacityPerMachineInMB();
@@ -55,18 +55,20 @@ public class MachinesSlaUtils {
 
     public static boolean isCapacityRequirementsMet(
             Set<GridServiceAgent> agents,
-            CapacityRequirements capacityRequirements) {
+            CapacityRequirements capacityRequirements,
+            AbstractMachinesSlaPolicy sla) {
         
         Set<Machine> machines = new HashSet<Machine>();
         for (GridServiceAgent agent : agents) {
             machines.add(agent.getMachine());
         }
-        return isCapacityRequirementsMet(machines, capacityRequirements);
+        return isCapacityRequirementsMet(machines, capacityRequirements,sla);
     }
     
     private static boolean isCapacityRequirementsMet(
             Iterable<Machine> machines,
-            CapacityRequirements capacityRequirements) {
+            CapacityRequirements capacityRequirements,
+            AbstractMachinesSlaPolicy sla) {
         
         int machineShortage = capacityRequirements.getRequirement(NumberOfMachinesCapacityRequirement.class).getNumberOfMahines();
         long memoryShortageInMB = capacityRequirements.getRequirement(MemoryCapacityRequirment.class).getMemoryInMB();
@@ -74,20 +76,17 @@ public class MachinesSlaUtils {
         
         for (Machine machine: machines) {
             machineShortage -= 1;
-            memoryShortageInMB -= getMemoryInMB(machine);
+            memoryShortageInMB -= getMemoryInMB(machine, sla);
             cpuShortage -= getCpu(machine);
         }
         
         return machineShortage<=0 && memoryShortageInMB<=0 && cpuShortage<=0;
     }
 
-    private static int getMemoryInMB(Machine machine) {
-        return (int) 
-            machine.getOperatingSystem()
-            .getDetails()
-            .getTotalPhysicalMemorySizeInMB();
-    }
-
+    public static long getMemoryInMB(Machine machine, EagerMachinesSlaPolicy sla) {
+        return getMemoryInMB(machine,sla);
+   }
+    
     public static GridServiceAgent[] sortManagementLast(GridServiceAgent[] agents) {
         List<GridServiceAgent> sortedAgents = new ArrayList<GridServiceAgent>(Arrays.asList(agents));
         Collections.sort(sortedAgents,new Comparator<GridServiceAgent>() {
@@ -103,4 +102,5 @@ public class MachinesSlaUtils {
         
         return sortedAgents.toArray(new GridServiceAgent[sortedAgents.size()]);
     }
+
 }
