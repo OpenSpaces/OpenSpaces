@@ -73,7 +73,6 @@ public class StoreManager extends AbstractStoreManager {
         getConfiguration().initialize();
     }
     
-    
     @Override
     protected Collection<String> getUnsupportedOptions() {
         Collection<String> unsupportedOptions = (Collection<String>) super.getUnsupportedOptions();
@@ -328,13 +327,16 @@ public class StoreManager extends AbstractStoreManager {
             // If the current object is in a relation skip it
             if (_classesRelationStatus.containsKey(sm.getMetaData().getDescribedType())) {
                 // Remove the state manager from objects in relation for making their serialization not
-                // handled by OpenJPA which can cause a deadlock.
+                // handled by OpenJPA which can cause a deadlock when writing to space.
+                // The deadlock is caused because when serializing a monitored instance, OpenJPA takes over
+                // and attempts to access an already locked layer in OpenJPA's hierarchy which causes
+                // a deadlock.
                 sm.getPersistenceCapable().pcReplaceStateManager(null);
                 stateManagersToRestore.add(sm);
                 continue;
             }
-            // If the object has embedded relations we need to remove the state manager from them two
-            // since they are also serialized.
+            // If the object has embedded relations we need to remove the state manager from them too
+            // since they are also serialized when written to space.
             for (FieldMetaData fmd : sm.getMetaData().getFields()) {
                 if (fmd.isEmbeddedPC()) {
                     Object value = sm.fetch(fmd.getDeclaredIndex());
@@ -352,6 +354,7 @@ public class StoreManager extends AbstractStoreManager {
                     currentList = new ArrayList<Object>();
                     objectsToWriteByType.put(sm.getMetaData().getDescribedType(), currentList);
                 }
+                previousType = sm.getMetaData().getDescribedType();
             }
             currentList.add(sm.getManagedInstance());            
         }
@@ -378,7 +381,7 @@ public class StoreManager extends AbstractStoreManager {
             return;
         // Collect information regarding relationships.
         // Eventually classes which are in a relation should not be saved to the space
-        // since we only support owned relationship and these instances will saved as nested instances
+        // since we only support owned relationships and these instances will be saved as nested instances
         // of their owning instance.
         ClassMetaData[] cms = getConfiguration().getMetaDataRepositoryInstance().getMetaDatas();
         for (ClassMetaData cm : cms) {
