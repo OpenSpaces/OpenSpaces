@@ -3,6 +3,7 @@ package org.openspaces.grid.gsm.containers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,8 @@ import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
+import com.gigaspaces.grid.gsa.AgentProcessDetails;
+
 /**
  * Starts and shutdowns grid service container based on the requested {@link ContainersSlaPolicy}
  * Use {@link ContainersSlaEnforcement#createContainersAdminService() to enforce an SLA for a specific container zone.
@@ -44,7 +47,7 @@ public class ContainersSlaEnforcement implements
     private static final Log logger = LogFactory.getLog(ContainersSlaEnforcement.class);
     
     private static final int START_CONTAINER_TIMEOUT_FAILURE_SECONDS = 60;
-    private static final int START_CONTAINER_TIMEOUT_FAILURE_FORGET_SECONDS = 60;
+    private static final int START_CONTAINER_TIMEOUT_FAILURE_FORGET_SECONDS = 120;
 
     // State shared by all endpoints.
     private final Map<ProcessingUnit, List<GridServiceContainer>> containersMarkedForShutdownPerProcessingUnit;
@@ -523,16 +526,47 @@ public class ContainersSlaEnforcement implements
         while (iterator.hasNext()) {
             FutureGridServiceContainer future = iterator.next();
             int passedSeconds = (int) ((System.currentTimeMillis() - future.getTimestamp().getTime()) / 1000);
-            if (!future.getGridServiceAgent().isDiscovered()) {
+            GridServiceAgent agent = future.getGridServiceAgent();
+            if (!agent.isDiscovered()) {
                 logger.info("Forgetting failure to start container on machine "
-                        + ToStringHelper.machineToString(future.getGridServiceAgent().getMachine()) + " that occured "
+                        + ToStringHelper.machineToString(agent.getMachine()) + " that occured "
                         + passedSeconds + " seconds ago since grid service agent no longer exists.");
                 iterator.remove();
-            } else if (passedSeconds > START_CONTAINER_TIMEOUT_FAILURE_FORGET_SECONDS) {
-                logger.info("Forgetting failure to start container on machine "
-                        + ToStringHelper.machineToString(future.getGridServiceAgent().getMachine()) + " that occured "
-                        + passedSeconds + " seconds ago due to timeout.");
-                iterator.remove();
+            } 
+            else {
+                terminateOrphanContainersOfAgent(agent);
+                if (passedSeconds > START_CONTAINER_TIMEOUT_FAILURE_FORGET_SECONDS) {
+                    logger.info("Forgetting failure to start container on machine "
+                            + ToStringHelper.machineToString(agent.getMachine()) + " that occured "
+                            + passedSeconds + " seconds ago due to timeout.");
+                    iterator.remove();
+                }
+            }
+        }
+    }
+
+    private void terminateOrphanContainersOfAgent(GridServiceAgent agent) {
+        final Set<Integer> agentIds = new HashSet<Integer>();
+        // add all agent's containers process ids.
+        for (final AgentProcessDetails processDetails : agent.getProcessesDetails()) {
+            if (processDetails.getServiceType().toLowerCase().equals("gsc")) {
+                agentIds.add(processDetails.getAgentId());
+            }
+        }
+        // remove all agent's containers process ids that registered with lus.
+        for (final GridServiceContainer container : admin.getGridServiceContainers()) {
+            if (container.getGridServiceAgent().equals(agent)) {
+                agentIds.remove(container.getAgentId());
+            }
+        }
+        
+        for (final int agentId : agentIds) {
+            try {
+                agent.killByAgentId(agentId);
+                logger.warn("Terminated orphan container that did not register with lookup service on machine " + ToStringHelper.machineToString(agent.getMachine())+ " agentId=" + agentId);
+            }
+            catch (final AdminException e) {
+                logger.warn("Error terminating orphan container that did not register with lookup service on machine " + ToStringHelper.machineToString(agent.getMachine()) + " agentId=" + agentId, e);
             }
         }
     }
