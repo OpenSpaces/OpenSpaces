@@ -10,6 +10,13 @@ import org.openspaces.admin.AdminFactory;
 import com.j_spaces.core.client.SpaceURL;
 import com.j_spaces.core.client.SpaceURLParser;
 
+
+/*****************
+ * Utils class for the wan mirror package.
+ * 
+ * @author barakme
+ *
+ */
 public class WanUtils {
 
     private WanUtils() {

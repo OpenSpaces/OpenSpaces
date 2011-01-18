@@ -93,8 +93,6 @@ public class WanDataSource implements DisposableBean, BulkDataPersister, DataPro
     private static final String DEFAULT_WAN_SPACE_URL_TEMPLATE =
             "/./wanSpace?cluster_schema=sync_replicated";
 
-    
-
     // ///////////////////////
     // Injected properties //
     // ///////////////////////
@@ -184,17 +182,22 @@ public class WanDataSource implements DisposableBean, BulkDataPersister, DataPro
      * }
      */
 
-    // TODO: Is this required?
+    // This is the lookupgroup that the embedded space signs up to
     private String wanLookupGroup = "WAN_CLUSTER";
 
     // A debug feature - injectable locators string that will be added to the wan
     // space locators.
     private String wanAdditionalLocators;
 
+    // the embedded LUS
     private GigaRegistrar reggieImpl;
 
     // Used to shut down the embedded space
     private UrlSpaceConfigurer wanSpaceConfigurer;
+
+    // ///////////////////////
+    // Initializers
+    // //////////////////////
 
     /*******
      * Returns a set of the possible IPs and host names that this host may be named. Used when
@@ -223,188 +226,8 @@ public class WanDataSource implements DisposableBean, BulkDataPersister, DataPro
         return localAddresses;
     }
 
-    private WanEntry createWANEntry(final List<BulkItem> bulkItems, final TxnData txnData) {
-
-        final EntryPacket[] packets = new EntryPacket[bulkItems.size()];
-        final short[] operationTypes = new short[bulkItems.size()];
-        int i = 0;
-
-        int partitionId = 0;
-        boolean first = true;
-        for (final BulkItem bulkItem : bulkItems) {
-            // logger.info(bulkItem.toString());
-
-            final Object item = bulkItem.getItem();
-            final EntryPacket packet = (EntryPacket) item;
-
-            if (first) {
-                first = false;
-
-                final Object routingField = packet.getRoutingFieldValue();
-                if (routingField != null) {
-                    partitionId = (routingField.hashCode() % this.numberOfPartitions);
-                }
-            }
-            packets[i] = packet;
-            operationTypes[i] = bulkItem.getOperation();
-            ++i;
-        }
-
-        final long nextWriteIndex = this.writeIndicesPerPartition.get(partitionId) + 1;
-        final WanEntry entry =
-                new WanEntry(this.mySiteId, partitionId, nextWriteIndex,
-                        packets, operationTypes, txnData);
-        return entry;
-    }
-
-    /***********
-     * The main entry point for the WAN Gateway. This is the method that sends changes from the
-     * local cluster to the remote ones.
-     */
-    public void executeBulk(final List<BulkItem> bulkItems)
-            throws DataSourceException {
-
-        if (bulkItems.size() == 0) {
-            logger.warning("Recieved a bulk update with no items");
-            return;
-        }
-
-        if (isResonantBulk(bulkItems)) {
-            if (logger.isLoggable(Level.FINE)) {
-                logger.finer("Detected a resonant bulk update - ignoring");
-            }
-            return;
-        }
-
-        // Distributed transaction support has been canceled
-        // It looks like there is no way to implement this without
-        // risking deadlocks, operation reordering or data loss
-        // So txnData is always null, and every bulk will run as an
-        // Independent transaction
-        // final TxnData txnData = createTxnData();
-
-        final TxnData txnData = null;
-
-        final WanEntry entry = createWANEntry(bulkItems, txnData);
-
-        logger.fine("********** EXECUTE BULK ON MIRROR ********");
-        wanGigaSpace.write(entry);
-
-        // Note: if the thread dies before this method, there
-        // could be a problem
-        this.writeIndicesPerPartition.incrementAndGet(
-            entry.getPartitionIndex());
-
-    }
-
-    public long getCleanupTaskInterval() {
-        return cleanupTaskInterval;
-    }
-
-    public CollisionHandler getCollisionHandler() {
-        return collisionHandler;
-    }
-
-    public String getLocalClusterSpaceUrl() {
-        return localClusterSpaceUrl;
-    }
-
-    public String getLocalLUSLookupGroups() {
-        return localLUSLookupGroups;
-    }
-
-    // ///////////////////////
-    // Initializers
-    // //////////////////////
-
     private WanLocation getLocationByIndex(final int index) {
         return this.allLocations.get(index - 1);
-    }
-
-    public List<LocationConfiguration> getLocations() {
-        return locationsConfiguration;
-    }
-
-    public String getMyNICAddress() {
-        return myNICAddress;
-    }
-
-    public int getMySiteId() {
-        return mySiteId;
-    }
-
-    public int getNumberOfPartitions() {
-        return numberOfPartitions;
-    }
-
-    public String getPuName() {
-        return puName;
-    }
-
-    /********
-     * Service monitors implementation.
-     * 
-     */
-    public ServiceMonitors[] getServicesMonitors() {
-        final PlainServiceMonitors psm = new PlainServiceMonitors("WAN_MIRROR");
-
-        final IJSpace ijSpace = this.wanGigaSpace.getSpace();
-
-        final Map<String, Object> map = psm.getMonitors();
-        map.put("Site Name", getLocationByIndex(this.mySiteId).getName());
-        map.put("Total Processed Bulks", this.totalProcessedBulks.longValue());
-        map.put("Collision Detection", (collisionHandler == null ? "Off" : "On"));
-
-        try {
-            final ReplicationStatistics stats = ((StatisticsAdmin) ijSpace.getAdmin()).getHolder()
-                .getReplicationStatistics();
-            final OutgoingReplication outgoingReplication = stats.getOutgoingReplication();
-            map.put("Redo Log Size", outgoingReplication.getRedoLogSize());
-            map.put("Redo Log External Storage Packet Count",
-                    outgoingReplication.getRedoLogExternalStoragePacketCount());
-            map.put("Redo Log External Storate Space Used", outgoingReplication.getRedoLogExternalStorageSpaceUsed());
-            map.put("Redo Log Memory Packet Count",
-                    outgoingReplication.getRedoLogMemoryPacketCount());
-
-            final List<OutgoingChannel> channels = stats.getOutgoingReplication().getChannels();
-            for (final OutgoingChannel channel : channels) {
-                final HashMap<String, Object> channelMap =
-                        new HashMap<String, Object>();
-
-                final String targetName = getTargetNameForChannel(channel);
-                channelMap.put("Name", targetName);
-                channelMap.put("State", channel.getState().toString());
-                channelMap.put("Sent Bytes", channel.getSentBytes());
-                channelMap.put("Received Bytes", channel.getReceivedBytes());
-                channelMap.put("Sent Bytes per Second", channel.getSendBytesPerSecond());
-                channelMap.put("Received Bytes per Second", channel.getReceiveBytesPerSecond());
-                channelMap.put("Inconsistent", channel.getInconsistencyReason() != null);
-
-                map.put("Channel " + targetName, channelMap);
-
-            }
-        } catch (final RemoteException e) {
-            e.printStackTrace();
-        }
-
-        return new ServiceMonitors[] { psm };
-
-    }
-
-    private String getTargetNameForChannel(final OutgoingChannel channel) {
-        // TODO - map this to site location name
-        return channel.getTargetMemberName();
-        // for(WanLocation loc : this.allLocations) {
-        // if(channel.getTargetMemberName())
-        // }
-    }
-
-    public String getWanAdditionalLocators() {
-        return wanAdditionalLocators;
-    }
-
-    public String getWanLookupGroup() {
-        return wanLookupGroup;
     }
 
     private String getWanSpaceUrl() {
@@ -426,6 +249,7 @@ public class WanDataSource implements DisposableBean, BulkDataPersister, DataPro
         final WanSiteInfo info = result.getResult();
         if (info == null) {
             logger.severe("Got a null when reading WanSiteInfo from wan space. Number of partition for target site cannot be determined!");
+            return;
         }
 
         final int numOfPartitions = info.getNumberOfPartitions();
@@ -439,13 +263,6 @@ public class WanDataSource implements DisposableBean, BulkDataPersister, DataPro
         location.setNumberOfPartitions(numOfPartitions);
         startQueriesForLocation(location);
 
-    }
-
-    // ///////////////////////////
-    // Managed Data Source API //
-    // ///////////////////////////
-    public void init(final Properties arg0) throws DataSourceException {
-        // ignore
     }
 
     private void initClusterJoin() {
@@ -527,21 +344,12 @@ public class WanDataSource implements DisposableBean, BulkDataPersister, DataPro
 
     }
 
-    public DataIterator initialLoad() throws DataSourceException {
-        // ignore
-        return null;
-    }
-
     private void initIndices() {
         initPerPartitionWriteIndices();
 
         initReadIndices();
 
     }
-
-    // /////////////
-    // Accessors //
-    // /////////////
 
     private void initLocalAddress() {
         if (this.myNICAddress == null) {
@@ -593,7 +401,7 @@ public class WanDataSource implements DisposableBean, BulkDataPersister, DataPro
                     throw new IllegalStateException("Could not connect to space at URL: "
                             + localClusterSpaceUrl + " after " + LOCAL_SPACE_LOOKUP_RETRIES + " retries. Giving up.");
                 }
-                
+
                 logger.log(Level.WARNING, "Could not find space at URL: "
                         + localClusterSpaceUrl + ". Waiting for " + LOCAL_SPACE_LOOKUP_INTERVAL_SECONDS
                         + " seconds before trying again.");
@@ -812,20 +620,16 @@ public class WanDataSource implements DisposableBean, BulkDataPersister, DataPro
 
         final String url = getWanSpaceUrl();
 
-        logger.info("Starting embedded replicatad space with URL: " + url);
-        logger.info("Starting embedded replicatad space with Locators: " + locators);
-        logger.info("Starting embedded replicatad space with Groups: " + this.wanLookupGroup);
-        logger.info("Starting embedded replicatad space with LUS port: "
-                + getLocationByIndex(this.mySiteId).getDiscoveryPort());
+        if (logger.isLoggable(Level.FINE)) {
+            logger.fine("Starting embedded replicatad space with URL: " + url);
+            logger.fine("Starting embedded replicatad space with Locators: " + locators);
+            logger.fine("Starting embedded replicatad space with Groups: " + this.wanLookupGroup);
+            logger.fine("Starting embedded replicatad space with LUS port: "
+                    + getLocationByIndex(this.mySiteId).getDiscoveryPort());
+        }
 
         this.wanSpaceConfigurer =
-                new UrlSpaceConfigurer(url).lookupLocators(locators)
-        // .addProperty(com.j_spaces.kernel.SystemProperties.START_EMBEDDED_LOOKUP,
-        // Boolean.TRUE.toString())
-        // .addProperty(
-        // com.j_spaces.core.Constants.Container.CONTAINER_EMBEDDED_HTTPD_EXPLICIT_BINDING_PORT_PROP,
-        // "" + getLocationByIndex(this.mySiteId).getPort())
-        ;
+                new UrlSpaceConfigurer(url).lookupLocators(locators);
 
         if ((this.wanLookupGroup != null) && (this.wanLookupGroup.length() > 0)) {
             wanSpaceConfigurer.lookupGroups(this.wanLookupGroup);
@@ -845,37 +649,8 @@ public class WanDataSource implements DisposableBean, BulkDataPersister, DataPro
 
     }
 
-    private boolean isResonantBulk(final List<BulkItem> bulkItems) {
-        final BulkItem firstItem = bulkItems.get(0);
-        final EntryPacket packet = (EntryPacket) firstItem.getItem();
-        OperationID opid = packet.getOperationID();
-
-        // TODO: Remove this
-        if (opid == null) {
-            logger.severe("OPERATION ID IS NULL IN BULK!!!");
-            opid = new OperationID(1, 1);
-        }
-        // Resonance - ignore this update
-        // If they are equal, this cluster update originated from my
-        // Space proxy, so this update must have originally come
-        // from another site - no need to send it back out.
-        // If we do, we would have
-        // an endless loop of messages going back and forth.
-        return (opid.getClientID() == this.localClusterProxyClientId);
-    }
-
     public boolean isWaitForUpdatesEnabled() {
         return isWaitForUpdatesEnabled;
-    }
-
-    public DataIterator iterator(final Object arg0) throws DataSourceException {
-        // ignore
-        return null;
-    }
-
-    public Object read(final Object arg0) throws DataSourceException {
-        // ignore
-        return null;
     }
 
     private void readWanSiteInfos() {
@@ -934,8 +709,283 @@ public class WanDataSource implements DisposableBean, BulkDataPersister, DataPro
         }
     }
 
+    private void startQueriesForLocation(final WanLocation location) {
+
+        if (!location.isMe()) {
+
+            // need the impl to create new operation IDs in the listener
+            // when sending entries to the local space
+            final SpaceProxyImpl impl = (SpaceProxyImpl) localClusterSpace.getSpace();
+
+            // these are used to handle distributed transactions across multiple partitions
+            // and listeners
+
+            final int numOfPartitions = location.getNumberOfPartitions();
+            for (int i = 0; i < numOfPartitions; ++i) {
+                // get the current index - next value is the next index
+                final long index = location.getReadIndexForPartition(i) + 1;
+                // create a template that will be used with this partition
+                final WanEntry template = new WanEntry(location.getSiteIndex(), i, index, null, null, null);
+                // Create the listener for this partition's query
+                final UpdateListener listener = new UpdateListener(template,
+                        this.wanGigaSpace, this.localClusterSpace, impl, location, this.mySiteId,
+                        this.localClusterTransactionTemplate, this.totalProcessedBulks,
+                        this.collisionHandler);
+
+                // Add new listener to list so it can be shut down in the future
+                wanListeners.add(listener);
+
+                // send the first query. When the listener returns, it will fire the next query
+                logger.info("Waiting for update from site: " + location.getSiteIndex() + ", partition: " + i
+                        + " index: " + index);
+                this.wanGigaSpace.asyncRead(template, Long.MAX_VALUE, listener);
+
+            }
+
+        }
+    }
+
+    // //////////////////////////
+    // PU Shutdown
+    // //////////////////////////
+    /*************
+     * Shuts down this PU, including the embedded LUS, the update listeners and the embedded space.
+     * 
+     */
+    public void destroy() throws Exception {
+        // shut down the LUS
+        if (this.reggieImpl != null) {
+            logger.fine("Shutting down embedded reggie");
+            this.reggieImpl.destroy();
+        }
+
+        // Stop all the queries
+        if (this.wanListeners != null) {
+
+            logger.fine("Disabling per partition update listeners");
+            for (UpdateListener updateListener : wanListeners) {
+                // this will prevent any future blocking reads to the space
+                updateListener.setEnabled(false);
+            }
+        }
+
+        // Shut down the embedded space.
+        if (this.wanSpaceConfigurer != null) {
+            this.wanSpaceConfigurer.destroy();
+        }
+
+    }
+
+    // /////////////////////////
+    // Mirror bulk handling
+    // /////////////////////////
+
+    /***********
+     * The main entry point for the WAN Gateway. This is the method that sends changes from the
+     * local cluster to the remote ones.
+     */
+    public void executeBulk(final List<BulkItem> bulkItems)
+            throws DataSourceException {
+
+        if (bulkItems.size() == 0) {
+            logger.warning("Recieved a bulk update with no items");
+            return;
+        }
+
+        if (isResonantBulk(bulkItems)) {
+            if (logger.isLoggable(Level.FINE)) {
+                logger.finer("Detected a resonant bulk update - ignoring");
+            }
+            return;
+        }
+
+        // Distributed transaction support has been canceled
+        // It looks like there is no way to implement this without
+        // risking deadlocks, operation reordering or data loss
+        // So txnData is always null, and every bulk will run as an
+        // Independent transaction
+        // final TxnData txnData = createTxnData();
+
+        final TxnData txnData = null;
+
+        final WanEntry entry = createWANEntry(bulkItems, txnData);
+
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.finest("********** EXECUTE BULK ON MIRROR ********");
+        }
+        wanGigaSpace.write(entry);
+
+        // Note: if the thread dies before this method, there
+        // could be a problem
+        this.writeIndicesPerPartition.incrementAndGet(
+            entry.getPartitionIndex());
+
+    }
+
+    private WanEntry createWANEntry(final List<BulkItem> bulkItems, final TxnData txnData) {
+
+        final EntryPacket[] packets = new EntryPacket[bulkItems.size()];
+        final short[] operationTypes = new short[bulkItems.size()];
+        int i = 0;
+
+        int partitionId = 0;
+        boolean first = true;
+        for (final BulkItem bulkItem : bulkItems) {
+            // logger.info(bulkItem.toString());
+
+            final Object item = bulkItem.getItem();
+            final EntryPacket packet = (EntryPacket) item;
+
+            if (first) {
+                first = false;
+
+                final Object routingField = packet.getRoutingFieldValue();
+                if (routingField != null) {
+                    partitionId = (routingField.hashCode() % this.numberOfPartitions);
+                }
+            }
+            packets[i] = packet;
+            operationTypes[i] = bulkItem.getOperation();
+            ++i;
+        }
+
+        final long nextWriteIndex = this.writeIndicesPerPartition.get(partitionId) + 1;
+        final WanEntry entry =
+                new WanEntry(this.mySiteId, partitionId, nextWriteIndex,
+                        packets, operationTypes, txnData);
+        return entry;
+    }
+
+    private boolean isResonantBulk(final List<BulkItem> bulkItems) {
+        final BulkItem firstItem = bulkItems.get(0);
+        final EntryPacket packet = (EntryPacket) firstItem.getItem();
+        OperationID opid = packet.getOperationID();
+
+        // TODO: Remove this
+        if (opid == null) {
+            logger.severe("OPERATION ID IS NULL IN BULK!!!");
+            opid = new OperationID(1, 1);
+        }
+        // Resonance - ignore this update
+        // If they are equal, this cluster update originated from my
+        // Space proxy, so this update must have originally come
+        // from another site - no need to send it back out.
+        // If we do, we would have
+        // an endless loop of messages going back and forth.
+        return (opid.getClientID() == this.localClusterProxyClientId);
+    }
+
+    // /////////////////////////////
+    // / Service Monitors
+    // /////////////////////////////
+    /********
+     * Service monitors implementation.
+     * 
+     */
+    public ServiceMonitors[] getServicesMonitors() {
+        final PlainServiceMonitors psm = new PlainServiceMonitors("WAN_MIRROR");
+
+        final IJSpace ijSpace = this.wanGigaSpace.getSpace();
+
+        final Map<String, Object> map = psm.getMonitors();
+        map.put("Site Name", getLocationByIndex(this.mySiteId).getName());
+        map.put("Total Processed Bulks", this.totalProcessedBulks.longValue());
+        map.put("Collision Detection", (collisionHandler == null ? "Off" : "On"));
+
+        try {
+            final ReplicationStatistics stats = ((StatisticsAdmin) ijSpace.getAdmin()).getHolder()
+                .getReplicationStatistics();
+            final OutgoingReplication outgoingReplication = stats.getOutgoingReplication();
+            map.put("Redo Log Size", outgoingReplication.getRedoLogSize());
+            map.put("Redo Log External Storage Packet Count",
+                    outgoingReplication.getRedoLogExternalStoragePacketCount());
+            map.put("Redo Log External Storate Space Used", outgoingReplication.getRedoLogExternalStorageSpaceUsed());
+            map.put("Redo Log Memory Packet Count",
+                    outgoingReplication.getRedoLogMemoryPacketCount());
+
+            final List<OutgoingChannel> channels = stats.getOutgoingReplication().getChannels();
+            for (final OutgoingChannel channel : channels) {
+                final HashMap<String, Object> channelMap =
+                        new HashMap<String, Object>();
+
+                final String targetName = getTargetNameForChannel(channel);
+                channelMap.put("Name", targetName);
+                channelMap.put("State", channel.getState().toString());
+                channelMap.put("Sent Bytes", channel.getSentBytes());
+                channelMap.put("Received Bytes", channel.getReceivedBytes());
+                channelMap.put("Sent Bytes per Second", channel.getSendBytesPerSecond());
+                channelMap.put("Received Bytes per Second", channel.getReceiveBytesPerSecond());
+                channelMap.put("Inconsistent", channel.getInconsistencyReason() != null);
+
+                map.put("Channel " + targetName, channelMap);
+
+            }
+        } catch (final RemoteException e) {
+            e.printStackTrace();
+        }
+
+        return new ServiceMonitors[] { psm };
+
+    }
+
+    private String getTargetNameForChannel(final OutgoingChannel channel) {
+        // TODO - map this to site location name
+        return channel.getTargetMemberName();
+        // for(WanLocation loc : this.allLocations) {
+        // if(channel.getTargetMemberName())
+        // }
+    }
+
+    // /////////////
+    // Accessors //
+    // /////////////
+
+    public long getCleanupTaskInterval() {
+        return cleanupTaskInterval;
+    }
+
+    public CollisionHandler getCollisionHandler() {
+        return collisionHandler;
+    }
+
+    public String getLocalClusterSpaceUrl() {
+        return localClusterSpaceUrl;
+    }
+
+    public String getLocalLUSLookupGroups() {
+        return localLUSLookupGroups;
+    }
+
     public void setCleanupTaskInterval(final long cleanupTaskInterval) {
         this.cleanupTaskInterval = cleanupTaskInterval;
+    }
+
+    public List<LocationConfiguration> getLocations() {
+        return locationsConfiguration;
+    }
+
+    public String getMyNICAddress() {
+        return myNICAddress;
+    }
+
+    public int getMySiteId() {
+        return mySiteId;
+    }
+
+    public int getNumberOfPartitions() {
+        return numberOfPartitions;
+    }
+
+    public String getPuName() {
+        return puName;
+    }
+
+    public String getWanAdditionalLocators() {
+        return wanAdditionalLocators;
+    }
+
+    public String getWanLookupGroup() {
+        return wanLookupGroup;
     }
 
     /*********
@@ -1000,68 +1050,30 @@ public class WanDataSource implements DisposableBean, BulkDataPersister, DataPro
         this.wanSpaceUrl = wanSpaceUrl;
     }
 
+    // ///////////////////////////
+    // Managed Data Source API //
+    // ///////////////////////////
+    public void init(final Properties arg0) throws DataSourceException {
+        // ignore
+    }
+
+    public DataIterator initialLoad() throws DataSourceException {
+        // ignore
+        return null;
+    }
+
+    public Object read(final Object arg0) throws DataSourceException {
+        // ignore
+        return null;
+    }
+
     public void shutdown() throws DataSourceException {
         // ignore
     }
 
-    private void startQueriesForLocation(final WanLocation location) {
-
-        if (!location.isMe()) {
-
-            // need the impl to create new operation IDs in the listener
-            // when sending entries to the local space
-            final SpaceProxyImpl impl = (SpaceProxyImpl) localClusterSpace.getSpace();
-
-            // these are used to handle distributed transactions across multiple partitions
-            // and listeners
-
-            final int numOfPartitions = location.getNumberOfPartitions();
-            for (int i = 0; i < numOfPartitions; ++i) {
-                // get the current index - next value is the next index
-                final long index = location.getReadIndexForPartition(i) + 1;
-                // create a template that will be used with this partition
-                final WanEntry template = new WanEntry(location.getSiteIndex(), i, index, null, null, null);
-                // Create the listener for this partition's query
-                final UpdateListener listener = new UpdateListener(template,
-                        this.wanGigaSpace, this.localClusterSpace, impl, location, this.mySiteId,
-                        this.localClusterTransactionTemplate, this.totalProcessedBulks,
-                        this.collisionHandler);
-
-                // Add new listener to list so it can be shut down in the future
-                wanListeners.add(listener);
-
-                // send the first query. When the listener returns, it will fire the next query
-                logger.info("Waiting for update from site: " + location.getSiteIndex() + ", partition: " + i
-                        + " index: " + index);
-                this.wanGigaSpace.asyncRead(template, Long.MAX_VALUE, listener);
-
-            }
-
-        }
-    }
-
-    public void destroy() throws Exception {
-        // shut down the LUS
-        if (this.reggieImpl != null) {
-            logger.fine("Shutting down embedded reggie");
-            this.reggieImpl.destroy();
-        }
-
-        // Stop all the queries
-        if (this.wanListeners != null) {
-
-            logger.fine("Disabling per partition update listeners");
-            for (UpdateListener updateListener : wanListeners) {
-                // this will prevent any future blocking reads to the space
-                updateListener.setEnabled(false);
-            }
-        }
-
-        // Shut down the embedded space.
-        if (this.wanSpaceConfigurer != null) {
-            this.wanSpaceConfigurer.destroy();
-        }
-
+    public DataIterator iterator(final Object arg0) throws DataSourceException {
+        // ignore
+        return null;
     }
 
 }

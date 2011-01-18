@@ -219,10 +219,12 @@ public class GSCForkHandler {
             logger.info("Waiting for new GSC to start up");
             notifyObject.wait(30000);
         } catch (final InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+           // ignore
         }
 
+        // This is not a redundant null check
+        // The gscResult field may be changed by another thread which
+        // is synchronized on the same object as this method
         if (this.gscResult == null) {
             throw new IllegalStateException(
                     "New GSC was not discovered in time! Can't start new WAN mirror on required GSC");
