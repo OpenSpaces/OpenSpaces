@@ -1,5 +1,6 @@
 package org.openspaces.admin.internal.admin;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -130,6 +131,8 @@ import com.gigaspaces.security.directory.UserDetails;
  */
 public class DefaultAdmin implements InternalAdmin {
 
+    private final Date debuggingTimestamp;
+    
     private static final Log logger = LogFactory.getLog(DefaultAdmin.class);
     
     private static final int DEFAULT_EVENT_LISTENER_THREADS = 10;
@@ -203,6 +206,8 @@ public class DefaultAdmin implements InternalAdmin {
     public DefaultAdmin() {
         this.discoveryService = new DiscoveryService(this);
         this.alertManager = new DefaultAlertManager(this);
+        this.debuggingTimestamp = new Date();
+        logger.info("Creating admin debuggingTimestamp='"+debuggingTimestamp+"'");
     }
 
     public String[] getGroups() {
@@ -382,6 +387,7 @@ public class DefaultAdmin implements InternalAdmin {
             executorService.shutdownNow();
         }
         closed = true;
+        logger.info("Closing admin debuggingTimestamp='"+debuggingTimestamp+"'");
     }
 
     public LookupServices getLookupServices() {
@@ -488,7 +494,12 @@ public class DefaultAdmin implements InternalAdmin {
 
     public void scheduleNonBlockingStateChange(Runnable command) {
         if (closed) {
-            throw new IllegalStateException("Cannot change state since admin already closed");
+            try {
+                throw new IllegalStateException("Cannot change state since admin already closed. debuggingTimestamp='"+debuggingTimestamp+"'");
+            }
+            catch (IllegalStateException e) {
+                logger.error(e.getMessage(),e);
+            }
         }
         if (singleThreadedEventListeners) {
             raiseEvent(this,command);
