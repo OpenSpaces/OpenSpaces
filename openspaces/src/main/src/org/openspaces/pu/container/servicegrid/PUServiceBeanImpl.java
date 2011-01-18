@@ -1086,10 +1086,18 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
 
     private long downloadAndExtractPU(String puName, String puPath, String codeserver, File path, File tempPath) {
         URL url = null;
-        try {
-            url = new URL(context.getServiceBeanManager().getOperationalStringManager().getDeployURL() + "/" + puPath);
-        } catch (Exception e) {
-            throw new CannotCreateContainerException("Failed to construct URL to download processing unit", e);
+        //use 3 retries to acquire URL connection
+        //it seems that after network disconnection, GSC which gets instantiation request has a stale connection to GSM
+        for (int i=3; i>0; --i) {
+            try {
+                url = new URL(context.getServiceBeanManager().getOperationalStringManager().getDeployURL() + "/" + puPath);
+                break;
+            } catch (Exception e) {
+                if (i==0) {
+                    //throw exception on last retry attempt
+                    throw new CannotCreateContainerException("Failed to construct URL to download processing unit", e);
+                }
+            }
         }
 
         if (logger.isInfoEnabled()) {
