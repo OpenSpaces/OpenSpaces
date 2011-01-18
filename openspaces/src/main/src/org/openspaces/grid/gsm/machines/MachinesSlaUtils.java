@@ -82,10 +82,6 @@ public class MachinesSlaUtils {
         
         return machineShortage<=0 && memoryShortageInMB<=0 && cpuShortage<=0;
     }
-
-    public static long getMemoryInMB(Machine machine, EagerMachinesSlaPolicy sla) {
-        return getMemoryInMB(machine,sla);
-   }
     
     public static GridServiceAgent[] sortManagementLast(GridServiceAgent[] agents) {
         List<GridServiceAgent> sortedAgents = new ArrayList<GridServiceAgent>(Arrays.asList(agents));
