@@ -16,6 +16,14 @@ public interface InternalElasticServiceManager extends ElasticServiceManager, In
 
     ServiceID getServiceID();
 
+    /**
+     * Returns the elastic configuration of this processing unit
+     * 
+     * This method is only available if the processing unit deployment is elastic.
+     * This method might be removed in future versions, since it may expose PII (such as passwords).
+     * 
+     * @since 8.0
+     */
     Map<String,String> getProcessingUnitElasticProperties(ProcessingUnit pu);
 
     void setProcessingUnitElasticProperties(ProcessingUnit pu, Map<String,String> properties);

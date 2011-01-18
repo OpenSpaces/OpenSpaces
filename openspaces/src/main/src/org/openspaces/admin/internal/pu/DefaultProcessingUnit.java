@@ -602,7 +602,15 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         setElasticProperties(elasticProperties);
     }
 
-    public Map<String,String> getElasticProperties() {
+    /**
+     * Returns the elastic configuration of this processing unit
+     * 
+     * This method is only available if the processing unit deployment is elastic.
+     * This method might be removed in future versions, since it may expose PII (such as passwords).
+     * 
+     * @since 8.0
+     */
+    private Map<String,String> getElasticProperties() {
         if (getManagingGridServiceManager() == null) {
             throw new AdminException("Processing Unit " + getName() + " does not have an associated managing GSM");
         }
