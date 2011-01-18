@@ -499,6 +499,7 @@ public class DefaultAdmin implements InternalAdmin {
             }
             catch (IllegalStateException e) {
                 logger.error(e.getMessage(),e);
+                return;
             }
         }
         if (singleThreadedEventListeners) {
