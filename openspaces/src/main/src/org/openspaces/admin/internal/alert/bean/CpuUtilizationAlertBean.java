@@ -178,7 +178,9 @@ public class CpuUtilizationAlertBean implements AlertBean,
         
         List<Double> timeline = new ArrayList<Double>(event.getStatistics().getTimeline().size());
         for (OperatingSystemStatistics stats : event.getStatistics().getTimeline()) {
-            timeline.add(stats.getCpuPerc()*100.0);
+            if (!stats.isNA()) {
+                timeline.add(stats.getCpuPerc()*100.0);
+            }
         }
         
         return AlertBeanUtils.getAverage(period, timeline);

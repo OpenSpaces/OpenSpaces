@@ -193,7 +193,9 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
         
         List<Double> timeline = new ArrayList<Double>(event.getStatistics().getTimeline().size());
         for (VirtualMachineStatistics stats : event.getStatistics().getTimeline()) {
-            timeline.add(stats.getMemoryHeapUsedPerc());
+            if (!stats.isNA()) {
+                timeline.add(stats.getMemoryHeapUsedPerc());
+            }
         }
         
         return AlertBeanUtils.getAverage(period, timeline);

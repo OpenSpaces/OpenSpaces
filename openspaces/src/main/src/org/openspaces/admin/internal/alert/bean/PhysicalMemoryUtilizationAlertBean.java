@@ -184,7 +184,9 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
         
         List<Double> timeline = new ArrayList<Double>(event.getStatistics().getTimeline().size());
         for (OperatingSystemStatistics stats : event.getStatistics().getTimeline()) {
-            timeline.add(stats.getPhysicalMemoryUsedPerc());
+            if (!stats.isNA()) {
+                timeline.add(stats.getPhysicalMemoryUsedPerc());
+            }
         }
         
         return AlertBeanUtils.getAverage(period, timeline);
