@@ -1,6 +1,9 @@
 package org.openspaces.wan.mirror;
 
+import com.gigaspaces.annotation.pojo.SpaceIndex;
+import com.gigaspaces.annotation.pojo.SpaceProperty;
 import com.gigaspaces.internal.transport.EntryPacket;
+import com.gigaspaces.metadata.index.SpaceIndexType;
 
 /********************************
  * A Wan Entry contains the details of a single bulk that arrived at a mirror in one site.
@@ -12,60 +15,103 @@ import com.gigaspaces.internal.transport.EntryPacket;
  */
 public class WanEntry {
 
-	private EntryPacket[] entryPackets;
-	public WanEntry(int siteIndex, int partitionIndex, long writeIndex,
-	        EntryPacket[] entryPackets, short[] operationTypes) {
-		
-	    this.partitionIndex = partitionIndex;
-		this.entryPackets = entryPackets;
-		this.operationTypes = operationTypes;
-		this.writeIndex = writeIndex;
-		this.siteIndex = siteIndex;
-		
-	}
+    public static class TxnData {
+        private long txnId;
+        private int participantId;
+        private int pacticipantCount;
+        
+        public TxnData(long txnId, int participantId, int pacticipantCount) {
+            super();
+            this.txnId = txnId;
+            this.participantId = participantId;
+            this.pacticipantCount = pacticipantCount;
+        }
+        
+        
+        public TxnData() {
+            super();
+        }
 
-	
-	private short[] operationTypes;
-	private long writeIndex;
-	private int siteIndex;
-	private int partitionIndex;
+        @SpaceIndex(type=SpaceIndexType.BASIC)
+        public long getTxnId() {
+            return txnId;
+        }
+        
+        public void setTxnId(long txnId) {
+            this.txnId = txnId;
+        }
+        
+        @SpaceProperty(nullValue = "0")
+        public int getParticipantId() {
+            return participantId;
+        }
+        public void setParticipantId(int participantId) {
+            this.participantId = participantId;
+        }
+        
+        @SpaceProperty(nullValue = "0")
+        public int getPacticipantCount() {
+            return pacticipantCount;
+        }
+        public void setPacticipantCount(int pacticipantCount) {
+            this.pacticipantCount = pacticipantCount;
+        }
+        
+    }
+    
+    private EntryPacket[] entryPackets;
+    private short[] operationTypes;
+    private long writeIndex;
+    private int siteIndex;
+    private int partitionIndex;
+    
+    private TxnData txnData;
+    
+    public WanEntry(int siteIndex, int partitionIndex, long writeIndex,
+            EntryPacket[] entryPackets, short[] operationTypes, TxnData txnData) {
+        
+        this.partitionIndex = partitionIndex;
+        this.entryPackets = entryPackets;
+        this.operationTypes = operationTypes;
+        this.writeIndex = writeIndex;
+        this.siteIndex = siteIndex;
+        this.txnData = txnData;
+        
+    }
+            
+    public WanEntry() {
+        
+    }
 
-	
-	
-		
-	public WanEntry() {
-		
-	}
+    public long getWriteIndex() {
+        return writeIndex;
+    }
+    public void setWriteIndex(long writeIndex) {
+        this.writeIndex = writeIndex;
+    }
+    public int getSiteIndex() {
+        return siteIndex;
+    }
+    public void setSiteIndex(int siteIndex) {
+        this.siteIndex = siteIndex;
+    }
 
-	public long getWriteIndex() {
-		return writeIndex;
-	}
-	public void setWriteIndex(long writeIndex) {
-		this.writeIndex = writeIndex;
-	}
-	public int getSiteIndex() {
-		return siteIndex;
-	}
-	public void setSiteIndex(int siteIndex) {
-		this.siteIndex = siteIndex;
-	}
+    
+    public EntryPacket[] getEntryPackets() {
+        return entryPackets;
+    }
 
-	
-	public EntryPacket[] getEntryPackets() {
-		return entryPackets;
-	}
+    public void setEntryPackets(EntryPacket[] entryPackets) {
+        this.entryPackets = entryPackets;
+    }
 
-	public void setEntryPackets(EntryPacket[] entryPackets) {
-		this.entryPackets = entryPackets;
-	}
+    public short[] getOperationTypes() {
+        return operationTypes;
+    }
 
-	public short[] getOperationTypes() {
-		return operationTypes;
-	}
-
-	public void setOperationTypes(short[] operationTypes) {
-		this.operationTypes = operationTypes;
-	}
+    public void setOperationTypes(short[] operationTypes) {
+        this.operationTypes = operationTypes;
+    }
 
     public int getPartitionIndex() {
         return partitionIndex;
@@ -81,8 +127,16 @@ public class WanEntry {
                 + "]";
     }
 
+    public TxnData getTxnData() {
+        return txnData;
+    }
+
+    public void setTxnData(TxnData txnData) {
+        this.txnData = txnData;
+    }
+
 
     
-	
-	
+    
+    
 }

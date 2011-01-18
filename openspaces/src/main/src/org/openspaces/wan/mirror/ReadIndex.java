@@ -3,6 +3,7 @@ package org.openspaces.wan.mirror;
 import com.gigaspaces.annotation.pojo.SpaceClass;
 import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.annotation.pojo.SpaceProperty;
+import com.gigaspaces.internal.metadata.annotations.SpaceSystemClass;
 
 /**************************
  * A ReadIndex is the index of the multi-cluster mirror in the list of operations
@@ -12,6 +13,7 @@ import com.gigaspaces.annotation.pojo.SpaceProperty;
  *
  */
 @SpaceClass
+@SpaceSystemClass
 public class ReadIndex {
 
     private int ownerSiteId;

@@ -13,11 +13,11 @@ import com.gigaspaces.annotation.pojo.SpaceProperty;
 @SpaceClass
 public class WriteIndex {
 
-	private int siteId;
-	private long index = 0;
-	private int partitionId = 0;
-	
-	public WriteIndex(int siteId, int partitionId, long index) {
+    private int siteId;
+    private long index = 0;
+    private int partitionId = 0;
+    
+    public WriteIndex(int siteId, int partitionId, long index) {
         super();
         this.siteId = siteId;
         this.partitionId = partitionId;
@@ -25,24 +25,24 @@ public class WriteIndex {
     }
 
     public WriteIndex() {
-		
-	}
-	
-	@SpaceId
-	public int getSiteId() {
-		return siteId;
-	}
-	public void setSiteId(int siteId) {
-		this.siteId = siteId;
-	}
-	
-	@SpaceProperty(nullValue="0")
-	public long getIndex() {
-		return index;
-	}
-	public void setIndex(long index) {
-		this.index = index;
-	}
+        
+    }
+    
+    @SpaceId
+    public int getSiteId() {
+        return siteId;
+    }
+    public void setSiteId(int siteId) {
+        this.siteId = siteId;
+    }
+    
+    @SpaceProperty(nullValue="0")
+    public long getIndex() {
+        return index;
+    }
+    public void setIndex(long index) {
+        this.index = index;
+    }
 
     public int getPartitionId() {
         return partitionId;
@@ -51,5 +51,5 @@ public class WriteIndex {
     public void setPartitionId(int partitionId) {
         this.partitionId = partitionId;
     }
-	
+    
 }

@@ -2,27 +2,41 @@ package org.openspaces.wan.mirror;
 
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.URL;
 import java.net.UnknownHostException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.jini.admin.JoinAdmin;
 import net.jini.space.JavaSpace;
 
 import org.openspaces.admin.Admin;
-import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.space.Space;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceConfigurer;
+import org.openspaces.core.cluster.ClusterInfo;
+import org.openspaces.core.cluster.ClusterInfoAware;
 import org.openspaces.core.space.UrlSpaceConfigurer;
 import org.openspaces.core.transaction.manager.DistributedJiniTxManagerConfigurer;
 import org.openspaces.core.transaction.manager.LocalJiniTxManagerConfigurer;
+import org.openspaces.pu.service.PlainServiceMonitors;
+import org.openspaces.pu.service.ServiceMonitors;
+import org.openspaces.pu.service.ServiceMonitorsProvider;
+import org.openspaces.wan.mirror.WanEntry.TxnData;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -33,46 +47,64 @@ import com.gigaspaces.datasource.BulkItem;
 import com.gigaspaces.datasource.DataIterator;
 import com.gigaspaces.datasource.DataProvider;
 import com.gigaspaces.datasource.DataSourceException;
+import com.gigaspaces.internal.backport.java.util.Arrays;
 import com.gigaspaces.internal.client.spaceproxy.SpaceProxyImpl;
 import com.gigaspaces.internal.transport.EntryPacket;
+import com.gigaspaces.lrmi.ProtocolAdapter;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.OperationID;
+import com.j_spaces.core.admin.StatisticsAdmin;
 import com.j_spaces.core.client.SQLQuery;
 import com.j_spaces.core.client.SpaceURL;
+import com.j_spaces.core.filters.ReplicationStatistics;
+import com.j_spaces.core.filters.ReplicationStatistics.OutgoingChannel;
+import com.j_spaces.core.filters.ReplicationStatistics.OutgoingReplication;
+import com.j_spaces.kernel.ResourceLoader;
+import com.sun.jini.reggie.GigaRegistrar;
 
 /****************************************
- * A BulkDataPersister implementation used to synchronize data across different 
- * GigaSpaces clusters. 
- * Each bulk that arrives at this data source will be written to an embedded space.
- * This space is part of a replication group along with the embedded spaces in other
- * mirrors. The mirrors in the other sites will pick up the updates and write them
- * to their local clusters.
+ * A BulkDataPersister implementation used to synchronize data across different GigaSpaces clusters.
+ * Each bulk that arrives at this data source will be written to an embedded space. This space is
+ * part of a replication group along with the embedded spaces in other mirrors. The mirrors in the
+ * other sites will pick up the updates and write them to their local clusters.
  * 
  * 
  * @author barakme
- *
+ * 
  */
-@SuppressWarnings( { "unchecked", "deprecation" })
-public class WanDataSource implements BulkDataPersister, DataProvider {
+@SuppressWarnings({ "deprecation" })
+public class WanDataSource implements DisposableBean, BulkDataPersister, DataProvider,
+        ClusterInfoAware, ServiceMonitorsProvider {
+
+    private static final int ADMIN_LOOKUP_TIMEOUT_SECONDS = 10;
 
     // logger
-    private static final Logger logger = Logger.getLogger(WanDataSource.class.getName());
+    static final Logger logger = Logger.getLogger(WanDataSource.class.getName());
+
+    private static final String LOCAL_LUS_GROUP_DEFAULT = "WAN_LOCAL";
 
     // Space access timeouts
-    private static final int LOCAL_SPACE_LOOKUP_INTERVAL_SECONDS = 15;
     public static final int WAN_SPACE_ACCESS_TIMEOUT = 5000;
+    private static final int LOCAL_SPACE_LOOKUP_INTERVAL_SECONDS = 15;
+    private static final int LOCAL_SPACE_LOOKUP_RETRIES = 4;
     public static final int LOCAL_SPACE_ACCESS_TIMEOUT = 5000;
 
     // String template for the URL of the wan cluster
-    private static final String WAN_SPACE_URL_TEMPLATE =
-            "/./wanSpace?cluster_schema=sync_replicated&total_members=<TOTAL>&id=<INDEX>";
+    private static final String DEFAULT_WAN_SPACE_URL_TEMPLATE =
+            "/./wanSpace?cluster_schema=sync_replicated";
+
+    
+
     // ///////////////////////
     // Injected properties //
     // ///////////////////////
 
     // Locations of embedded LUS per each site, in format host:port[;name]
     // should be set from static config file during startup
-    private List<String> locationsConfiguration = null;
+    private List<LocationConfiguration> locationsConfiguration = null;
+
+    // URL of the wan space
+    private String wanSpaceUrl = DEFAULT_WAN_SPACE_URL_TEMPLATE;
 
     // URL for lookup of the local cluster (that this mirror belongs to)
     private String localClusterSpaceUrl;
@@ -82,11 +114,11 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
     private int mySiteId = -1;
 
     // Interval between executions of the cleanup tasks
+    // NOTE: Not used! TODO: Finish this.
     private long cleanupTaskInterval = 30000;
 
     // Number of partitions in the local cluster. If 0, information is loaded
     // via the admin API, using the injected local cluster URL.
-    // TODO: Check if initialized in property file, otherwise load via Admin API
     private int numberOfPartitions = 0;
 
     // The wan-wide clustered space
@@ -98,8 +130,8 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
     private PlatformTransactionManager wanTransactionManager = null;
 
     // Transaction manager for the local cluster operations
-    // TODO: Chance local cluster txn manager to embedded mahalo
     private PlatformTransactionManager localClusterTransactionManager;
+
     private TransactionTemplate localClusterTransactionTemplate;
 
     // parsed location objects, based on the injected locations list
@@ -113,6 +145,56 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
 
     // flag indicating whether updates from remote sites should be processed
     private boolean isWaitForUpdatesEnabled = true;
+
+    // The IP address for the machine running the mirror. May be set by NIC_ADDR
+    // environment variable, or defaults to InetAddress.getLocalHost().getHostAddress()
+    private String myNICAddress;
+
+    // The lookup group used by the local LUS
+    private String localLUSLookupGroups = LOCAL_LUS_GROUP_DEFAULT;
+
+    // The name of this PU
+    private String puName;
+
+    // The LRMI port that this mirror should be bound to
+    private int gscPort;
+    // The unicast discovery port used by the embedded LUS
+    private int discoveryPort;
+
+    // Statistics counter
+    private final AtomicLong totalProcessedBulks = new AtomicLong();
+
+    // Handler for optimistic locking collisions across clusters
+    @Autowired
+    private CollisionHandler collisionHandler;
+
+    // list of listeners, used in shutdown.
+    private List<UpdateListener> wanListeners = new LinkedList<UpdateListener>();
+
+    /*
+     * private void initCleanUpTaskExecutor() {
+     * 
+     * cleanupTaskExecutor = Executors.newScheduledThreadPool(1); final Runnable cleanUpTask = new
+     * LogCleanupRunnable(wanGigaSpace, wanTransactionTemplate, locationsConfiguration.size(),
+     * deleteLogQuery);
+     * 
+     * cleanupTaskExecutor.scheduleWithFixedDelay(cleanUpTask, 10, cleanupTaskInterval,
+     * TimeUnit.MILLISECONDS);
+     * 
+     * }
+     */
+
+    // TODO: Is this required?
+    private String wanLookupGroup = "WAN_CLUSTER";
+
+    // A debug feature - injectable locators string that will be added to the wan
+    // space locators.
+    private String wanAdditionalLocators;
+
+    private GigaRegistrar reggieImpl;
+
+    // Used to shut down the embedded space
+    private UrlSpaceConfigurer wanSpaceConfigurer;
 
     /*******
      * Returns a set of the possible IPs and host names that this host may be named. Used when
@@ -141,7 +223,7 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
         return localAddresses;
     }
 
-    private WanEntry createWANEntry(final List<BulkItem> bulkItems) {
+    private WanEntry createWANEntry(final List<BulkItem> bulkItems, final TxnData txnData) {
 
         final EntryPacket[] packets = new EntryPacket[bulkItems.size()];
         final short[] operationTypes = new short[bulkItems.size()];
@@ -171,10 +253,14 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
         final long nextWriteIndex = this.writeIndicesPerPartition.get(partitionId) + 1;
         final WanEntry entry =
                 new WanEntry(this.mySiteId, partitionId, nextWriteIndex,
-                packets, operationTypes);
+                        packets, operationTypes, txnData);
         return entry;
     }
 
+    /***********
+     * The main entry point for the WAN Gateway. This is the method that sends changes from the
+     * local cluster to the remote ones.
+     */
     public void executeBulk(final List<BulkItem> bulkItems)
             throws DataSourceException {
 
@@ -190,11 +276,22 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
             return;
         }
 
-        final WanEntry entry = createWANEntry(bulkItems);
+        // Distributed transaction support has been canceled
+        // It looks like there is no way to implement this without
+        // risking deadlocks, operation reordering or data loss
+        // So txnData is always null, and every bulk will run as an
+        // Independent transaction
+        // final TxnData txnData = createTxnData();
+
+        final TxnData txnData = null;
+
+        final WanEntry entry = createWANEntry(bulkItems, txnData);
 
         logger.fine("********** EXECUTE BULK ON MIRROR ********");
         wanGigaSpace.write(entry);
 
+        // Note: if the thread dies before this method, there
+        // could be a problem
         this.writeIndicesPerPartition.incrementAndGet(
             entry.getPartitionIndex());
 
@@ -204,29 +301,32 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
         return cleanupTaskInterval;
     }
 
+    public CollisionHandler getCollisionHandler() {
+        return collisionHandler;
+    }
+
     public String getLocalClusterSpaceUrl() {
         return localClusterSpaceUrl;
     }
+
+    public String getLocalLUSLookupGroups() {
+        return localLUSLookupGroups;
+    }
+
+    // ///////////////////////
+    // Initializers
+    // //////////////////////
 
     private WanLocation getLocationByIndex(final int index) {
         return this.allLocations.get(index - 1);
     }
 
-    /*
-     * private void initCleanUpTaskExecutor() {
-     * 
-     * cleanupTaskExecutor = Executors.newScheduledThreadPool(1); final Runnable cleanUpTask = new
-     * LogCleanupRunnable(wanGigaSpace, wanTransactionTemplate, locationsConfiguration.size(),
-     * deleteLogQuery);
-     * 
-     * cleanupTaskExecutor.scheduleWithFixedDelay(cleanUpTask, 10, cleanupTaskInterval,
-     * TimeUnit.MILLISECONDS);
-     * 
-     * }
-     */
-
-    public List<String> getLocations() {
+    public List<LocationConfiguration> getLocations() {
         return locationsConfiguration;
+    }
+
+    public String getMyNICAddress() {
+        return myNICAddress;
     }
 
     public int getMySiteId() {
@@ -237,27 +337,82 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
         return numberOfPartitions;
     }
 
-    private String getURLString(final Object[] params) {
-        final StringBuilder builder = new StringBuilder();
-        boolean first = true;
-        for (final Object param : params) {
+    public String getPuName() {
+        return puName;
+    }
 
-            if (first) {
-                builder.append(param.toString());
-                first = false;
-            } else {
-                builder.append(",");
-                builder.append(param.toString());
+    /********
+     * Service monitors implementation.
+     * 
+     */
+    public ServiceMonitors[] getServicesMonitors() {
+        final PlainServiceMonitors psm = new PlainServiceMonitors("WAN_MIRROR");
+
+        final IJSpace ijSpace = this.wanGigaSpace.getSpace();
+
+        final Map<String, Object> map = psm.getMonitors();
+        map.put("Site Name", getLocationByIndex(this.mySiteId).getName());
+        map.put("Total Processed Bulks", this.totalProcessedBulks.longValue());
+        map.put("Collision Detection", (collisionHandler == null ? "Off" : "On"));
+
+        try {
+            final ReplicationStatistics stats = ((StatisticsAdmin) ijSpace.getAdmin()).getHolder()
+                .getReplicationStatistics();
+            final OutgoingReplication outgoingReplication = stats.getOutgoingReplication();
+            map.put("Redo Log Size", outgoingReplication.getRedoLogSize());
+            map.put("Redo Log External Storage Packet Count",
+                    outgoingReplication.getRedoLogExternalStoragePacketCount());
+            map.put("Redo Log External Storate Space Used", outgoingReplication.getRedoLogExternalStorageSpaceUsed());
+            map.put("Redo Log Memory Packet Count",
+                    outgoingReplication.getRedoLogMemoryPacketCount());
+
+            final List<OutgoingChannel> channels = stats.getOutgoingReplication().getChannels();
+            for (final OutgoingChannel channel : channels) {
+                final HashMap<String, Object> channelMap =
+                        new HashMap<String, Object>();
+
+                final String targetName = getTargetNameForChannel(channel);
+                channelMap.put("Name", targetName);
+                channelMap.put("State", channel.getState().toString());
+                channelMap.put("Sent Bytes", channel.getSentBytes());
+                channelMap.put("Received Bytes", channel.getReceivedBytes());
+                channelMap.put("Sent Bytes per Second", channel.getSendBytesPerSecond());
+                channelMap.put("Received Bytes per Second", channel.getReceiveBytesPerSecond());
+                channelMap.put("Inconsistent", channel.getInconsistencyReason() != null);
+
+                map.put("Channel " + targetName, channelMap);
+
             }
+        } catch (final RemoteException e) {
+            e.printStackTrace();
         }
 
-        final String res = builder.toString();
-        return res;
+        return new ServiceMonitors[] { psm };
+
+    }
+
+    private String getTargetNameForChannel(final OutgoingChannel channel) {
+        // TODO - map this to site location name
+        return channel.getTargetMemberName();
+        // for(WanLocation loc : this.allLocations) {
+        // if(channel.getTargetMemberName())
+        // }
+    }
+
+    public String getWanAdditionalLocators() {
+        return wanAdditionalLocators;
+    }
+
+    public String getWanLookupGroup() {
+        return wanLookupGroup;
     }
 
     private String getWanSpaceUrl() {
-        final String res = WAN_SPACE_URL_TEMPLATE.replace("<TOTAL>", "" + this.allLocations.size())
-            .replace("<INDEX>", "" + this.mySiteId);
+
+        final String res = this.wanSpaceUrl
+                + "&total_members=" + this.allLocations.size()
+                + "&id=" + this.mySiteId;
+
         return res;
 
     }
@@ -279,12 +434,10 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
         if (logger.isLoggable(Level.INFO)) {
             logger.info("Setting number of partitions in site: " + targetSite + " to: " + numOfPartitions);
         }
-        
-        final WanLocation location =this.getLocationByIndex(targetSite); 
+
+        final WanLocation location = this.getLocationByIndex(targetSite);
         location.setNumberOfPartitions(numOfPartitions);
         startQueriesForLocation(location);
-        
-        
 
     }
 
@@ -305,23 +458,72 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
 
     }
 
+    private void initEmbeddedLUS() {
+
+        try {
+            final URL reggieConfig = ResourceLoader.getServicesConfigUrl();
+            // final Class reggieClass = Thread.currentThread()
+            // .getContextClassLoader()
+            // .loadClass(SystemConfig.getReggieClassName());
+            // final Constructor constructor = reggieClass.getDeclaredConstructor(String[].class,
+            // LifeCycle.class);
+            // constructor.setAccessible(true);
+
+            final String config = reggieConfig.toExternalForm();
+            this.reggieImpl = new GigaRegistrar(new String[] { config }, null);
+
+            // final Object reggieImpl = constructor.newInstance(new String[] {
+            // reggieConfig.toExternalForm() }, null);
+            final JoinAdmin joiner = reggieImpl;
+
+            joiner.setLookupGroups(new String[] { "WAN_CLUSTER" });
+            final Object reggieProxy = ((com.sun.jini.start.ServiceProxyAccessor) reggieImpl).getServiceProxy();
+            new com.sun.jini.start.NonActivatableServiceDescriptor.Created(reggieImpl, reggieProxy);
+        } catch (final Exception e) {
+            throw new IllegalStateException("Could not start embedded LUS: " + e.getMessage(), e);
+        }
+
+    }
+
+    /*******
+     * Initialization of the WAN mirror starts here.
+     */
     public void initialize() throws Exception {
+
+        logger.info("Initializing WanDataSource with site ID: " + this.mySiteId + ", Local Cluster URL: "
+                + this.localClusterSpaceUrl);
+
+        initLocalAddress();
 
         initLocations();
 
-        initLocalClusterSpaceProxy();
+        new WanLicenseVerifier().verifyLicense();
 
-        initNumberOfPartitions();
+        // check if mirror is running on the required GSC.
+        final boolean isCorrectGSC = initWanLUS();
+        if (isCorrectGSC) {
 
-        initWanSpace();
+            initLocalClusterSpaceProxy();
 
-        initClusterJoin();
+            initNumberOfPartitions();
 
-        initIndices();
+            initWanSpace();
 
-        initReadQueries();
+            initClusterJoin();
 
-        logger.info("******** WAN MIRROR GATEWAY WAS INITIALIZED CORRECTLY ********");
+            initIndices();
+
+            initReadQueries();
+
+            logger.info("******** WAN MIRROR GATEWAY WAS INITIALIZED CORRECTLY ********");
+        } else {
+            logger.info("******** FORKING NEW CONTAINER FOR MIRROR GATEWAY ********");
+            final Admin admin = WanUtils.getAdminForLocalCluster(this.localClusterSpaceUrl);
+            admin.getProcessingUnits()
+                .getProcessingUnitInstanceAdded()
+                .add(new PostInitPUIListener(admin, this.gscPort, this.discoveryPort, this.myNICAddress, this.puName));
+
+        }
 
     }
 
@@ -337,13 +539,40 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
 
     }
 
+    // /////////////
+    // Accessors //
+    // /////////////
+
+    private void initLocalAddress() {
+        if (this.myNICAddress == null) {
+            this.myNICAddress = System.getenv().get("NIC_ADDR");
+        }
+
+        if (this.myNICAddress == null) {
+            try {
+                this.myNICAddress = InetAddress.getLocalHost().getHostAddress();
+            } catch (final UnknownHostException e) {
+                throw new IllegalStateException("Unable to configure local host address", e);
+            }
+        }
+
+        logger.info("Setting local Address to: " + this.myNICAddress);
+
+    }
+
     private void initLocalClusterSpaceProxy() {
+        if (this.localClusterSpace != null) {
+            return; // just in case this is called twice
+        }
         if (this.localClusterSpaceUrl == null) {
             throw new IllegalArgumentException("The 'localClusterSpaceUrl' property must " +
                     "be set with the URL of the local space");
         }
 
+        logger.info("Connecting to local space cluster at: " + this.localClusterSpaceUrl);
+
         IJSpace space = null;
+        int retryCount = 0;
         boolean gotSpace = false;
         while (!gotSpace) {
             try {
@@ -351,8 +580,20 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
                         new UrlSpaceConfigurer(this.localClusterSpaceUrl);
 
                 space = spaceConfigurer.space();
+
+                if (space.isOptimisticLockingEnabled() && (this.collisionHandler == null)) {
+                    logger.warning("Optimistic Locking is enabled for local cluster, but no collision handler has been assigned. Using DefaultCollisionHandler");
+                    this.collisionHandler = new DefaultCollisionHandler();
+                }
+
                 gotSpace = true;
             } catch (final Exception e) {
+                ++retryCount;
+                if (retryCount > LOCAL_SPACE_LOOKUP_RETRIES) {
+                    throw new IllegalStateException("Could not connect to space at URL: "
+                            + localClusterSpaceUrl + " after " + LOCAL_SPACE_LOOKUP_RETRIES + " retries. Giving up.");
+                }
+                
                 logger.log(Level.WARNING, "Could not find space at URL: "
                         + localClusterSpaceUrl + ". Waiting for " + LOCAL_SPACE_LOOKUP_INTERVAL_SECONDS
                         + " seconds before trying again.");
@@ -384,12 +625,12 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
 
     private void initLocations() throws Exception {
 
-        if (locationsConfiguration == null) {
-            throw new Exception("Locations configuration is missing in Wan Mirror configuration");
+        if (locationsConfiguration.size() == 0) {
+            throw new IllegalArgumentException("Locations configuration is missing in Wan Mirror configuration");
         }
 
-        if (locationsConfiguration.size() < 2) {
-            throw new Exception("Wan Mirror Locations requires at least two locations");
+        if (locationsConfiguration.size() == 1) {
+            throw new IllegalArgumentException("Wan Mirror Locations requires at least two locations");
         }
 
         final Set<String> localAddresses = createLocalAddresses();
@@ -401,14 +642,14 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
         int index = 1;
 
         if (isSiteIdConfigured) {
-            for (final String location : locationsConfiguration) {
+            for (final LocationConfiguration location : locationsConfiguration) {
                 final WanLocation wanLocation = new WanLocation(index, location, null);
                 wanLocation.setMe(index == this.mySiteId);
                 this.allLocations.add(wanLocation);
                 ++index;
             }
         } else {
-            for (final String location : locationsConfiguration) {
+            for (final LocationConfiguration location : locationsConfiguration) {
                 final WanLocation wanLocation = new WanLocation(index, location, localAddresses);
                 this.allLocations.add(wanLocation);
                 ++index;
@@ -418,12 +659,13 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
         if (this.mySiteId == -1) {
             throw new IllegalArgumentException(
                     "Could not find my location in the locations list, " +
-                    "and local site ID not available in properties");
+                            "and local site ID not available in properties");
         }
+
+        logger.info("Loaded locations configuration: " + Arrays.toString(this.allLocations.toArray()));
     }
 
     private void initNumberOfPartitions() {
-
         if (this.numberOfPartitions > 0) {
             // this is really a debugging feature, useful when using the
             // IntegratedProcessingUnitContainer
@@ -434,23 +676,11 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
         final IJSpace space = this.localClusterSpace.getSpace();
         final SpaceURL url = space.getFinderURL();
 
-        final AdminFactory factory = new AdminFactory();
-        if (url.getLookupLocators().length > 0) {
-            factory.addLocators(getURLString(url.getLookupLocators()));
-        }
-        if (url.getLookupGroups().length > 0) {
-            factory.addGroups(getURLString(url.getLookupGroups()));
-        }
-
-        // .addLocator("192.168.10.49");//
-
         final String spaceName = url.getSpaceName();
-        final Admin admin = factory.createAdmin();
 
-        // GridServiceContainer[] gscs = admin.getGridServiceContainers().getContainers();
-        // Space[] spaces = admin.getSpaces().getSpaces();
-        // LookupService[] luses = admin.getLookupServices().getLookupServices();
-        final Space tempSpace = admin.getSpaces().waitFor(spaceName, 10, TimeUnit.SECONDS);
+        final Admin admin = WanUtils.getAdminForLocalCluster(this.localClusterSpaceUrl);
+        final Space tempSpace = admin.getSpaces().waitFor(spaceName,
+                ADMIN_LOOKUP_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
         if (tempSpace == null) {
             throw new IllegalStateException("Failed to find space " + spaceName
@@ -458,6 +688,9 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
                     + url + " is accurate");
         }
         this.numberOfPartitions = tempSpace.getNumberOfInstances();
+
+        admin.close();
+        logger.info("Number of partitions in the local space cluster has been detected as: " + this.numberOfPartitions);
 
     }
 
@@ -483,10 +716,6 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
 
     }
 
-    // /////////////
-    // Accessors //
-    // /////////////
-
     private void initReadIndices() {
         final ReadIndex template = new ReadIndex(this.mySiteId);
 
@@ -499,41 +728,65 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
         }
     }
 
-    private void initReadQueries() {        
+    private void initReadQueries() {
 
         for (final WanLocation location : this.allLocations) {
             startQueriesForLocation(location);
         }
-
     }
 
-    private void startQueriesForLocation(final WanLocation location) {
-        // need the impl to create new operation IDs in the listener
-        // when sending entries to the local space
-        SpaceProxyImpl impl = (SpaceProxyImpl) localClusterSpace.getSpace();
-        if (!location.isMe()) {
-            final int numOfPartitions = location.getNumberOfPartitions();
-            for (int i = 0; i < numOfPartitions; ++i) {
-                // get the current index - next value is the next index
-                final long index = location.getReadIndexForPartition(i) + 1;
-                // create a template that will be used with this partition
-                final WanEntry template = new WanEntry(location.getSiteIndex(), i, index, null, null);
-                // Create the listener for this partition's query
-                final AsyncFutureListener<WanEntry> listener = new UpdateListener(template,
-                        this.wanGigaSpace, this.localClusterSpace, impl, location, this.mySiteId,
-                        this.localClusterTransactionTemplate);
-                // send the first query. When the listener returns, it will fire the next query
-                logger.info("Waiting for update from site: " + location.getSiteIndex() + ", partition: " + i + " index: " + index);
-                this.wanGigaSpace.asyncRead(template, Long.MAX_VALUE, listener);
+    private boolean initWanLUS() {
 
+        final WanLocation loc = getLocationByIndex(this.mySiteId);
+
+        gscPort = loc.getReplicationPort();
+        discoveryPort = loc.getDiscoveryPort();
+
+        int lrmiPort = 0;
+        final ProtocolAdapter<?> prot = com.gigaspaces.lrmi.LRMIRuntime.getRuntime().getProtocolRegistry().get("NIO");
+        if (prot != null) {
+            lrmiPort = prot.getPort();
+        }
+        logger.info("LRMI port: " + lrmiPort + ", target GSC port: " + gscPort);
+
+        if (lrmiPort == 0) {
+            // LRMI layer not initialized yet - probably means that we are running in the
+            // IntegratedProcessingUnitContainer
+            // So nothing to do here
+            logger.info("Could not find the NIO protocol adapter. " +
+                    "This is normal if running in an IntegratedProcessingUnitContainer");
+        } else {
+            if (gscPort != lrmiPort) {
+                logger.info("This GSC is not running on the required port. Creating new GSC!");
+                // Must create new GSC and move this PU there.
+                if (!WanUtils.checkPortAvailable(gscPort)) {
+                    throw new IllegalArgumentException("The required Replication port for the new GSC(" + gscPort
+                            + ") is not available!");
+                }
+                return false;
             }
+        }
+
+        final int currentDiscoPort = Integer.parseInt(
+                System.getProperty("com.sun.jini.reggie.initialUnicastDiscoveryPort"));
+
+        logger.info("Discovery port: " + currentDiscoPort + ", target Discovery port: " + discoveryPort);
+        if (currentDiscoPort != this.discoveryPort) {
+            logger.info("This GSC is not running with the required Unicast Discovery port. Creating new GSC!");
+            if (!WanUtils.checkPortAvailable(this.discoveryPort)) {
+                throw new IllegalArgumentException("The required discovery port for the new GSC(" + discoveryPort
+                        + ") is not available!");
+            }
+            return false;
 
         }
+        return true;
+
     }
-    
-    
 
     private void initWanSpace() {
+        initEmbeddedLUS();
+
         final StringBuilder builder = new StringBuilder();
         for (final WanLocation location : this.allLocations) {
             builder.append(location.toLocatorString() + ",");
@@ -544,27 +797,41 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
             locators = locators.substring(0, locators.length() - 1);
         }
 
-        // TODO: Make this a debug feature, off by default
-        locators += ",localhost:4164";
+        // This is a debug feature, useful for enabling wan space discovery
+        // via an additional LUS and available via a UI
+        if (this.wanAdditionalLocators != null) {
+            this.wanAdditionalLocators = this.wanAdditionalLocators.trim();
+            if (this.wanAdditionalLocators.length() > 0) {
+
+                if (!locators.endsWith(",")) {
+                    locators += ",";
+                }
+                locators += this.wanAdditionalLocators;
+            }
+        }
 
         final String url = getWanSpaceUrl();
-        final UrlSpaceConfigurer spaceConfigurer =
-                new UrlSpaceConfigurer(url).lookupLocators(locators).lookupGroups("WAN")
-            .addProperty(com.j_spaces.kernel.SystemProperties.START_EMBEDDED_LOOKUP,
-                Boolean.TRUE.toString())
-            .addProperty(com.j_spaces.core.Constants.Container.CONTAINER_EMBEDDED_HTTPD_EXPLICIT_BINDING_PORT_PROP,
-                "" + getLocationByIndex(this.mySiteId).getPort());
 
-        // This does not work because the constant was already initialized when
-        // the mirror
-        // started up
+        logger.info("Starting embedded replicatad space with URL: " + url);
+        logger.info("Starting embedded replicatad space with Locators: " + locators);
+        logger.info("Starting embedded replicatad space with Groups: " + this.wanLookupGroup);
+        logger.info("Starting embedded replicatad space with LUS port: "
+                + getLocationByIndex(this.mySiteId).getDiscoveryPort());
 
-        /*
-         * .addProperty(net.jini.discovery.Constants.MULTICAST_ENABLED_PROPERTY,
-         * Boolean.FALSE.toString());
-         */
+        this.wanSpaceConfigurer =
+                new UrlSpaceConfigurer(url).lookupLocators(locators)
+        // .addProperty(com.j_spaces.kernel.SystemProperties.START_EMBEDDED_LOOKUP,
+        // Boolean.TRUE.toString())
+        // .addProperty(
+        // com.j_spaces.core.Constants.Container.CONTAINER_EMBEDDED_HTTPD_EXPLICIT_BINDING_PORT_PROP,
+        // "" + getLocationByIndex(this.mySiteId).getPort())
+        ;
 
-        final IJSpace space = spaceConfigurer.space();
+        if ((this.wanLookupGroup != null) && (this.wanLookupGroup.length() > 0)) {
+            wanSpaceConfigurer.lookupGroups(this.wanLookupGroup);
+        }
+
+        final IJSpace space = wanSpaceConfigurer.space();
 
         try {
             wanTransactionManager = new LocalJiniTxManagerConfigurer(space).transactionManager();
@@ -575,15 +842,7 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
         }
 
         wanGigaSpace = new GigaSpaceConfigurer(space).transactionManager(wanTransactionManager).gigaSpace();
-    }
 
-    public boolean isEmbeddedLusRunning() {
-        final String sysProp = System.getProperty(com.j_spaces.kernel.SystemProperties.START_EMBEDDED_LOOKUP);
-        if ((sysProp != null) && sysProp.equals("true")) {
-            return true;
-        }
-
-        return false;
     }
 
     private boolean isResonantBulk(final List<BulkItem> bulkItems) {
@@ -648,8 +907,9 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
             final WanLocation myLocation = this.getLocationByIndex(this.mySiteId);
             this.wanGigaSpace.write(
                 new WanSiteInfo(
-                    this.mySiteId, this.numberOfPartitions,
-                    myLocation.getName(), myLocation.getHost(), myLocation.getPort()));
+                        this.mySiteId, this.numberOfPartitions,
+                        myLocation.getName(), myLocation.getHost(),
+                        myLocation.getDiscoveryPort(), myLocation.getReplicationPort()));
         }
     }
 
@@ -663,12 +923,12 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
                     this.wanGigaSpace.asyncRead(siteInfoTemplate, Long.MAX_VALUE,
                             new AsyncFutureListener<WanSiteInfo>() {
 
-                        public void onResult(final AsyncResult<WanSiteInfo> result) {
-                            handleSiteInfoQueryResult(result);
+                                public void onResult(final AsyncResult<WanSiteInfo> result) {
+                                    handleSiteInfoQueryResult(result);
 
-                        }
+                                }
 
-                    });
+                            });
                 }
             }
         }
@@ -678,12 +938,38 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
         this.cleanupTaskInterval = cleanupTaskInterval;
     }
 
+    /*********
+     * ClusterInfoAware implementation, used to get the PU name. If running in the Integrated PU
+     * container, the received name is null, so you should set the puName property explictly in the
+     * properties file.
+     * 
+     */
+    public void setClusterInfo(final ClusterInfo clusterInfo) {
+        logger.info("Wan Mirror Cluster Info: name= " + clusterInfo.getName());
+        if (this.puName == null) {
+            this.puName = clusterInfo.getName();
+        }
+
+    }
+
+    public void setCollisionHandler(final CollisionHandler collisionHandler) {
+        this.collisionHandler = collisionHandler;
+    }
+
     public void setLocalClusterSpaceUrl(final String localClusterSpaceUrl) {
         this.localClusterSpaceUrl = localClusterSpaceUrl;
     }
 
-    public void setLocations(final List<String> locations) {
+    public void setLocalLUSLookupGroups(final String localLUSLookupGroups) {
+        this.localLUSLookupGroups = localLUSLookupGroups;
+    }
+
+    public void setLocations(final List<LocationConfiguration> locations) {
         this.locationsConfiguration = locations;
+    }
+
+    public void setMyNICAddress(final String myNICAddress) {
+        this.myNICAddress = myNICAddress;
     }
 
     public void setMySiteId(final int mySiteId) {
@@ -694,12 +980,88 @@ public class WanDataSource implements BulkDataPersister, DataProvider {
         this.numberOfPartitions = numberOfPartitions;
     }
 
+    public void setPuName(final String puName) {
+        this.puName = puName;
+    }
+
     public void setWaitForUdatesEnabled(final boolean isWaitForUpdatesEnabled) {
         this.isWaitForUpdatesEnabled = isWaitForUpdatesEnabled;
     }
 
+    public void setWanAdditionalLocators(final String wanAdditionalLocators) {
+        this.wanAdditionalLocators = wanAdditionalLocators;
+    }
+
+    public void setWanLookupGroup(final String wanLookupGroup) {
+        this.wanLookupGroup = wanLookupGroup;
+    }
+
+    public void setWanSpaceUrl(final String wanSpaceUrl) {
+        this.wanSpaceUrl = wanSpaceUrl;
+    }
+
     public void shutdown() throws DataSourceException {
         // ignore
+    }
+
+    private void startQueriesForLocation(final WanLocation location) {
+
+        if (!location.isMe()) {
+
+            // need the impl to create new operation IDs in the listener
+            // when sending entries to the local space
+            final SpaceProxyImpl impl = (SpaceProxyImpl) localClusterSpace.getSpace();
+
+            // these are used to handle distributed transactions across multiple partitions
+            // and listeners
+
+            final int numOfPartitions = location.getNumberOfPartitions();
+            for (int i = 0; i < numOfPartitions; ++i) {
+                // get the current index - next value is the next index
+                final long index = location.getReadIndexForPartition(i) + 1;
+                // create a template that will be used with this partition
+                final WanEntry template = new WanEntry(location.getSiteIndex(), i, index, null, null, null);
+                // Create the listener for this partition's query
+                final UpdateListener listener = new UpdateListener(template,
+                        this.wanGigaSpace, this.localClusterSpace, impl, location, this.mySiteId,
+                        this.localClusterTransactionTemplate, this.totalProcessedBulks,
+                        this.collisionHandler);
+
+                // Add new listener to list so it can be shut down in the future
+                wanListeners.add(listener);
+
+                // send the first query. When the listener returns, it will fire the next query
+                logger.info("Waiting for update from site: " + location.getSiteIndex() + ", partition: " + i
+                        + " index: " + index);
+                this.wanGigaSpace.asyncRead(template, Long.MAX_VALUE, listener);
+
+            }
+
+        }
+    }
+
+    public void destroy() throws Exception {
+        // shut down the LUS
+        if (this.reggieImpl != null) {
+            logger.fine("Shutting down embedded reggie");
+            this.reggieImpl.destroy();
+        }
+
+        // Stop all the queries
+        if (this.wanListeners != null) {
+
+            logger.fine("Disabling per partition update listeners");
+            for (UpdateListener updateListener : wanListeners) {
+                // this will prevent any future blocking reads to the space
+                updateListener.setEnabled(false);
+            }
+        }
+
+        // Shut down the embedded space.
+        if (this.wanSpaceConfigurer != null) {
+            this.wanSpaceConfigurer.destroy();
+        }
+
     }
 
 }

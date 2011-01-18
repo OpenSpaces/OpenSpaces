@@ -16,7 +16,8 @@ public class WanSiteInfo {
     private int numberOfPartitions;
     private String name;
     private String host;
-    private int port;
+    private int discoveryPort;
+    private int replicationPort;
     
     
     
@@ -25,16 +26,18 @@ public class WanSiteInfo {
     }
 
     public WanSiteInfo(int siteId) {
-        this(siteId, 0, null, null, 0);
+        this(siteId, 0, null, null, 0, 0);
     }
     
-    public WanSiteInfo(int siteId, int numberOfPartitions, String name, String host, int port) {
+    public WanSiteInfo(int siteId, int numberOfPartitions, String name, String host,
+            int discoveryPort, int replicationPort) {
         
         this.siteId = siteId;
         this.numberOfPartitions = numberOfPartitions;
         this.name = name;
         this.host = host;
-        this.port = port;
+        this.discoveryPort = discoveryPort;
+        this.replicationPort = replicationPort;
     }
     
     @SpaceId
@@ -66,14 +69,25 @@ public class WanSiteInfo {
     public void setHost(String host) {
         this.host = host;
     }
-    
+
     @SpaceProperty(nullValue = "0")
-    public int getPort() {
-        return port;
+    public int getDiscoveryPort() {
+        return discoveryPort;
+    }
+
+    public void setDiscoveryPort(int discoveryPort) {
+        this.discoveryPort = discoveryPort;
+    }
+
+    @SpaceProperty(nullValue = "0")
+    public int getReplicationPort() {
+        return replicationPort;
+    }
+
+    public void setReplicationPort(int replicationPort) {
+        this.replicationPort = replicationPort;
     }
     
-    public void setPort(int port) {
-        this.port = port;
-    }
+   
     
 }
