@@ -86,7 +86,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                 AlertFactory factory = new AlertFactory();
                 factory.name(ALERT_NAME);
                 factory.groupUid(groupUid);
-                factory.description("A replication channel has been lost between " + getReplicationPath(source, target));
+                factory.description("A replication channel has been lost between " + getReplicationPath(event));
                 factory.severity(AlertSeverity.SEVERE);
                 factory.status(AlertStatus.RAISED);
                 factory.componentUid(source.getUid());
@@ -119,7 +119,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                     AlertFactory factory = new AlertFactory();
                     factory.name(ALERT_NAME);
                     factory.groupUid(groupUid);
-                    factory.description("A replication channel has been restored between " + getReplicationPath(source, target));
+                    factory.description("A replication channel has been restored between " + getReplicationPath(event));
                     factory.severity(AlertSeverity.SEVERE);
                     factory.status(AlertStatus.RESOLVED);
                     factory.componentUid(source.getUid());
@@ -147,21 +147,43 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
             }
         }
     }
-    
-    private String getReplicationPath(SpaceInstance source, SpaceInstance target) {
+
+    /**
+     * Try and extract the replication path
+     * Primary -> Backup
+     * Primary -> Mirror
+     * Backup -- soon to be elected as Primary -> new Backup
+     * 
+     * In each case, where an instance has failed, the SpaceInstance may be null.
+     * Thus if a backup failed, or a mirror failed or a primary has failed, we need to
+     * sometimes guess what the target was. In case of a mirror, we assume that the mirror
+     * may be called by any name (not just mirror-service; since 8.0), so check against the
+     * cluster name (e.g. ending with ":foo").
+     */
+    private String getReplicationPath(ReplicationStatusChangedEvent event) {
+
+        final SpaceInstance source = event.getSpaceInstance();
+        final SpaceInstance target = event.getReplicationTarget().getSpaceInstance();
         StringBuilder sb = new StringBuilder();
         SpaceMode sourceSpaceMode = source.getMode();
         sb.append(sourceSpaceMode.toString().toLowerCase()).append(" Space ");
         sb.append(source.getSpace().getName() + "." + source.getInstanceId() + " ["+(source.getBackupId()+1)+"]");
-        if (sourceSpaceMode.equals(SpaceMode.PRIMARY)) {
-            sb.append(" to backup Space ");
-        } else { 
-            sb.append(" to unavailable primary Space ");
-        }
+        sb.append(" and ");
         if (target != null) {
-            sb.append(target.getSpace().getName() + "." + target.getInstanceId() + " ["+(target.getBackupId()+1)+"]");
+            String memberName = event.getReplicationTarget().getMemberName();
+            if (memberName.endsWith(":"+source.getSpace().getName())) {
+                if (!target.getMode().equals(SpaceMode.NONE)) {
+                    sb.append(target.getMode().toString().toLowerCase());
+                }
+            }
+            sb.append("Space ").append(target.getSpace().getName() + "." + target.getInstanceId() + " ["+(target.getBackupId()+1)+"]");
         } else {
-            sb.append(source.getSpace().getName() + "." + source.getInstanceId() + " ["+((source.getBackupId()!=0)?"1":"2")+"]");
+            String memberName = event.getReplicationTarget().getMemberName();
+            if (memberName.endsWith(":"+source.getSpace().getName())) {
+                sb.append("Space ").append(source.getSpace().getName() + "." + source.getInstanceId() + " ["+((source.getBackupId()!=0)?"1":"2")+"]");
+            } else {
+                sb.append("Space ").append(memberName);
+            }
         }
         return sb.toString();
     }

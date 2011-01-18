@@ -529,7 +529,25 @@ public class DefaultSpace implements InternalSpace {
                         if (memberNames[i] == null) {
                             continue;
                         }
+                        
                         SpaceInstance targetSpaceInstance = spaceInstancesByMemberName.get(memberNames[i]);
+                        /*
+                         * If mirror-service is one of the replication target names, find its SpaceInstance.
+                         */
+                        if (targetSpaceInstance == null) {
+                            //we don't know the name of the mirror-service space (since 8.0 it can be any name that is different from the cluster name)
+                            if (!((String)memberNames[i]).endsWith(":"+name)) {
+                                String mirrorServiceName = ((String)memberNames[i]).split(":")[1];
+                                Space mirrorServiceSpace = spaceInstance.getAdmin().getSpaces().getSpaceByName(mirrorServiceName);
+                                if (mirrorServiceSpace != null) {
+                                    SpaceInstance mirrorInstance = mirrorServiceSpace.getInstances()[0];
+                                    if (mirrorInstance != null && mirrorInstance.getSpaceUrl().getSchema().equals("mirror")) {
+                                        //note: don't cache it in spaceInstanceByMemberName map since we don't get a removal event on this instance
+                                        targetSpaceInstance = mirrorInstance;
+                                    }
+                                }
+                            }
+                        }
                         ReplicationStatus replStatus = null;
                         switch (replicationStatus[i]) {
                             case IRemoteJSpaceAdmin.REPLICATION_STATUS_ACTIVE:
