@@ -2,20 +2,17 @@ package org.openspaces.admin.alert.alerts;
 
 
 import org.openspaces.admin.alert.Alert;
-import org.openspaces.admin.alert.config.ReplicationRedoLogSizeAlertConfigurer;
 import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
 import org.openspaces.admin.space.ReplicationStatus;
 
 /**
- * A replication redo-log size alert, fired upon redo-log increase, indicating that packets are not
- * being sent from a source Space to it's target Space (backup or mirror). The alert is raised when
- * red-log size crosses a specified 'high' threshold. The alert is resolved when the redo-log size
- * goes below a specified 'low' threshold.
+ * A Mirror persistency failure alert, triggered upon a failed replication from primary Space to
+ * Mirror Space, due to an error (e.g. a DB error). The alert is raised when the replication channel
+ * has encountered an exception reported by the Mirror target. The alert is resolved when the Mirror
+ * manages to persist to the DB for first time after the alert has been triggered.
  * <p>
- * These thresholds can be configured by using the {@link ReplicationRedoLogSizeAlertConfigurer}.
- * <p>
- * This alert will be received on the call to {@link AlertTriggeredEventListener#alertTriggered(Alert)} for
- * registered listeners.
+ * This alert will be received on the call to
+ * {@link AlertTriggeredEventListener#alertTriggered(Alert)} for registered listeners.
  * 
  * @author Moran Avigdor
  * @since 8.0
