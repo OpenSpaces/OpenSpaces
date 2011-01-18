@@ -117,25 +117,7 @@ public class AdvancedElasticStatefulProcessingUnitDeployment extends ElasticStat
     public AdvancedElasticStatefulProcessingUnitDeployment name(String name) {
         return (AdvancedElasticStatefulProcessingUnitDeployment) super.name(name);
     }
-/* NOT IMPLEMENTED YET
-    public AdvancedElasticStatefulProcessingUnitDeployment zone(String zone) {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.zone(zone);
-    }
-    
-    
-    public AdvancedElasticStatefulProcessingUnitDeployment isolation(DedicatedIsolation isolation) {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.isolation(isolation);
-    }
 
-    public AdvancedElasticStatefulProcessingUnitDeployment isolation(SharedTenantIsolation isolation) {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.isolation(isolation);
-    }
-    
-    public AdvancedElasticStatefulProcessingUnitDeployment isolation(PublicIsolation isolation) {
-        return (AdvancedElasticStatefulProcessingUnitDeployment) super.isolation(isolation);
-    }
-
-*/
     public AdvancedElasticStatefulProcessingUnitDeployment setContextProperty(String key, String value) {
         return (AdvancedElasticStatefulProcessingUnitDeployment) super.setContextProperty(key, value);
     }

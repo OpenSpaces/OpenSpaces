@@ -35,8 +35,8 @@ public class AdvancedElasticDataGridDeployment extends ElasticDataGridDeployment
         return this;
     }
 
-    public AdvancedStatefulDeploymentTopology allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
-        super.allowDeploymentOnSingleMachine(allowDeploymentOnManagementMachine);
+    public AdvancedElasticDataGridDeployment allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
+        super.allowDeploymentOnManagementMachine(allowDeploymentOnManagementMachine);
         return this;
     }
     

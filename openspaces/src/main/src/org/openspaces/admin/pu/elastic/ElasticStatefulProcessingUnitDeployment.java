@@ -158,13 +158,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     public ElasticStatefulProcessingUnitDeployment name(String name) {
         return (ElasticStatefulProcessingUnitDeployment) super.name(name);
     }
-
-    /* Unimplemented 
-    public ElasticStatefulProcessingUnitDeployment zone(String zone) {
-        return (ElasticStatefulProcessingUnitDeployment) super.zone(zone);
-    }
-    */
-    
+   
     public ElasticStatefulProcessingUnitDeployment setContextProperty(String key, String value) {
         return (ElasticStatefulProcessingUnitDeployment) super.setContextProperty(key, value);
     }
@@ -180,20 +174,6 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     public ElasticStatefulProcessingUnitDeployment userDetails(String userName, String password) {
         return (ElasticStatefulProcessingUnitDeployment) super.userDetails(userName, password);
     }
-    /* Unimplemented
-    public ElasticStatefulProcessingUnitDeployment isolation(DedicatedIsolation isolation) {
-        return (ElasticStatefulProcessingUnitDeployment) super.isolation(isolation);
-    }
-
-    
-    public ElasticStatefulProcessingUnitDeployment isolation(SharedTenantIsolation isolation) {
-        return (ElasticStatefulProcessingUnitDeployment) super.isolation(isolation);
-    }
-    
-    public ElasticStatefulProcessingUnitDeployment isolation(PublicIsolation isolation) {
-        return (ElasticStatefulProcessingUnitDeployment) super.isolation(isolation);
-    }
-    */
     
     public ElasticStatefulProcessingUnitDeployment useScriptToStartContainer() {
         return (ElasticStatefulProcessingUnitDeployment) super.useScriptToStartContainer();
