@@ -212,8 +212,19 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
             numberOfInstances = Math.max(calcNumberOfPartitionsFromMemoryRequirements(),calcNumberOfPartitionsFromCpuRequirements(admin));
         }
         
+        if (numberOfBackupInstancesPerPartition == 0) {
+            // allow instances from DIFFERENT partitions to deploy on same Container
+            deployment.maxInstancesPerMachine(0);   
+            deployment.maxInstancesPerVM(0);
+        }
+        else {
+            // disallow instances from SAME partition to deploy on same Container
+            deployment.maxInstancesPerVM(1);
+            // allow or disallow instances from SAME partition to deploy on same Container
+            deployment.maxInstancesPerMachine(this.maxProcessingUnitInstancesFromSamePartitionPerMachine);
+        }
+        
         deployment
-        .maxInstancesPerMachine(this.maxProcessingUnitInstancesFromSamePartitionPerMachine)
         .partitioned(numberOfInstances, this.numberOfBackupInstancesPerPartition);
       
         return deployment;

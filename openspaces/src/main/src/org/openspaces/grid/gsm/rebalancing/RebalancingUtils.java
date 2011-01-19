@@ -277,9 +277,23 @@ public class RebalancingUtils {
         if (pu.getStatus() != DeploymentStatus.INTACT) {
             intact = false;
         }
-        
-        for (int partitionId = 0 ; intact && partitionId < pu.getNumberOfInstances() ; partitionId ++) {
-            intact = isProcessingUnitPartitionIntact(pu.getPartition(partitionId),containers);
+        else {
+            if (pu.getNumberOfBackups() > 0) {
+                for (int partitionId = 0 ; intact && partitionId < pu.getNumberOfInstances() ; partitionId ++) {
+                    if (!isProcessingUnitPartitionIntact(pu.getPartition(partitionId),containers)) {
+                        intact = false;
+                        break;
+                    }
+                }
+            }
+            else {
+                for (int instanceId = 1 ; instanceId <= pu.getNumberOfInstances(); instanceId++) {
+                    if (findProcessingUnitInstance(pu, instanceId, 0, containers) == null) {
+                        intact = false;
+                        break;
+                    }
+                }
+            }
         }
         
         return intact;
@@ -292,10 +306,15 @@ public class RebalancingUtils {
     private static ProcessingUnitInstance findProcessingUnitInstance(ProcessingUnitPartition partition, int backupId, GridServiceContainer[] containers) {
         
         ProcessingUnit pu = partition.getProcessingUnit();
+        int instanceId = partition.getPartitionId() + 1;
         
-        for (GridServiceContainer container : containers) {
-            for (ProcessingUnitInstance instance : container.getProcessingUnitInstances(pu.getName())) {
-                if (instance.getInstanceId() == partition.getPartitionId() + 1 &&
+        return findProcessingUnitInstance(pu, instanceId, backupId, containers);
+    }
+
+    private static ProcessingUnitInstance findProcessingUnitInstance(ProcessingUnit pu, int instanceId, int backupId, GridServiceContainer[] containers) {
+        for (final GridServiceContainer container : containers) {
+            for (final ProcessingUnitInstance instance : container.getProcessingUnitInstances(pu.getName())) {
+                if (instance.getInstanceId() == instanceId &&
                     instance.getBackupId() == backupId){
                     return instance;                    
                 }

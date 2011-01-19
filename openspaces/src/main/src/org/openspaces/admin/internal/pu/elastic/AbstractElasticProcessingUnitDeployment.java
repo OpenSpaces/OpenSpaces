@@ -170,8 +170,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     protected ProcessingUnitDeployment toProcessingUnitDeployment() {
         
         ProcessingUnitDeployment deployment = 
-            new ProcessingUnitDeployment(this.processingUnit)
-            .maxInstancesPerVM(1);
+            new ProcessingUnitDeployment(this.processingUnit);
         
         if (this.name != null) {
             deployment.name(name);
