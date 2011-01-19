@@ -14,18 +14,7 @@ import com.gigaspaces.security.directory.User;
 import com.gigaspaces.security.directory.UserDetails;
 
 public abstract class AbstractElasticProcessingUnitDeployment {
-    
-//    private static final String RESERVED_ISOLATION_CONTEXT_PROPERTY = "isolation";
-//    public static final String RESERVED_ZONE_CONTEXT_PROPERTY = "zone";
-//    public static final String RESERVED_TENANT_CONTEXT_PROPERTY = "tenant";
-//    private static final String TENANT_ZONE_SEPERATOR_DEFAULT = "__";
-//    private static final String RESERVED_CONTEXT_PROPERTY_PREFIX_DEFAULT ="__";
-//    public static final String RESERVED_CONTEXT_PROPERTY_PREFIX_PROPERTY="reserved-context-property-prefix";
-//    private static final String TENANT_ZONE_SEPERATOR_PROPERTY="tenant-zone-separator";
 
-//  private String agentZone;
-//  private ElasticProcessingUnitDeploymentIsolation isolation = new DedicatedIsolation();
-    
     private final String processingUnit;
     private String name;
     private final StringProperties contextProperties = new StringProperties();
@@ -39,10 +28,6 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     private AdvancedElasticPropertiesConfig advancedElasticPropertiesConfig;
     
     
-//    private String tenantZoneSeparator = TENANT_ZONE_SEPERATOR_DEFAULT;
-//    private String reservedContextPropertyPrefix = RESERVED_CONTEXT_PROPERTY_PREFIX_DEFAULT;
-        
-
     public AbstractElasticProcessingUnitDeployment(String processingUnit) {
         this.processingUnit = processingUnit;
         elasticProperties = new HashMap<String,String>();
@@ -51,22 +36,6 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         scaleStrategyPropertiesManager = new ScaleStrategyBeanPropertiesManager(elasticProperties);
         advancedElasticPropertiesConfig = new AdvancedElasticPropertiesConfig(elasticProperties);
     }
-
-    /**
-     * Reserved context properties start with the {@link AbstractElasticProcessingUnitDeployment#RESERVED_CONTEXT_PROPERTY_PREFIX_DEFAULT} prefix.
-     * This method is a hook for overriding the default reserved context property prefix.
-     */
-//    protected void setReservedContextPropertyPrefix(String prefix) {
-//        this.reservedContextPropertyPrefix = prefix;
-//    }
-    
-    /**
-     * Tenant and Zone strings are concatenated with {@link AbstractElasticProcessingUnitDeployment#TENANT_ZONE_SEPERATOR_DEFAULT} to form a unique per tenant zone string.
-     * This method is a hook for overriding the default concatenation separator string.
-     */
-//    protected void setTenantZoneSeperator(String separator) {
-//        this.tenantZoneSeparator = separator;
-//    }
         
     protected AbstractElasticProcessingUnitDeployment setContextProperty(String key, String value) {
         if (value == null) {
@@ -87,20 +56,6 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         this.secured = secured;
         return this;
     }
-
-
-/* NOT IMPLEMENTED
-    protected AbstractElasticProcessingUnitDeployment zone(String zone) {
-        if (zone == null) {
-            throw new IllegalArgumentException("Zone cannot be null");
-        }
-        if (this.agentZone != null && !this.agentZone.equals(zone)) {
-            throw new IllegalStateException("Zone is already defined to " + this.agentZone + " and cannot be modified to " + zone);
-        }
-        this.agentZone = zone;
-        return this;
-    }
-*/
 
     protected AbstractElasticProcessingUnitDeployment name(String name) {
         if (name == null) {
@@ -177,12 +132,6 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         return this;
     }
     
-/* NOT IMPLEMENTED
-    protected AbstractElasticProcessingUnitDeployment isolation(ElasticProcessingUnitDeploymentIsolation isolation) {
-        this.isolation = isolation;
-        return this;
-    }
-*/
     protected AbstractElasticProcessingUnitDeployment machineProvisioning(BeanConfig config) {
         enableBean(machineProvisioningPropertiesManager, config);
         return this;
@@ -245,51 +194,14 @@ public abstract class AbstractElasticProcessingUnitDeployment {
             deployment.userDetails(userDetails);
         }
 
-// NOT IMPLEMENTED        
-//        deployment.setContextProperty(RESERVED_CONTEXT_PROPERTY_PREFIX_PROPERTY, reservedContextPropertyPrefix);
-//        deployment.setContextProperty(TENANT_ZONE_SEPERATOR_PROPERTY, tenantZoneSeparator);      
-//        deployment.setContextProperty(reservedContextPropertyPrefix + RESERVED_ISOLATION_CONTEXT_PROPERTY, this.isolation.getIsolationType());
-
-//        String tenant = null;
-//        if (this.isolation instanceof SharedTenantIsolation) {
-//            tenant = ((SharedTenantIsolation)isolation).getTenant();
-//        }
-        
         String containerZone = getDefaultZone();
             
-//        deployment.setContextProperty(this.reservedContextPropertyPrefix + RESERVED_ZONE_CONTEXT_PROPERTY, containerZone);
-        
-//        if (this.isolation instanceof SharedTenantIsolation) {
-//            
-//            deployment.setContextProperty(this.reservedContextPropertyPrefix + RESERVED_TENANT_CONTEXT_PROPERTY, tenant);
-//        
-//            // Protect against spill over of tenant and zone strings by rejecting strings that contain the separator
-//            // Advanced users can override the separator with the {@link AbstractElasticProcessingUnitDeployment#setTenantZoneSeperator(String)} protected method.
-//        
-//            if (agentZone.contains(tenantZoneSeparator)) {
-//                throw new IllegalStateException("Zone must not container the seperator '"+tenantZoneSeparator + "' string");
-//            }
-//        
-//            if (tenant.contains(tenantZoneSeparator)) {
-//                throw new IllegalStateException("Tenant must not container the seperator '"+tenantZoneSeparator + "' string");
-//            }
-//        
-//            containerZone += TENANT_ZONE_SEPERATOR_DEFAULT + tenant;
-//        }
-//        
         deployment.addZone(containerZone);
         commandLineArgument("-Dcom.gs.zones=" + containerZone);
     
                 
         Map<String,String> context = contextProperties.getProperties();
         for (Map.Entry<String,String> entry : context.entrySet()) {
-        
-            // Protect against overriding reserved context properties
-            // Advanced users can override the separator with the {@link AbstractElasticProcessingUnitDeployment#setReservedContextPropertyPrefix()} protected method.
-//            if (key.startsWith(reservedContextPropertyPrefix)) {
-//                throw new IllegalStateException("Context property must not start with the reserved '"+reservedContextPropertyPrefix+ "' prefix.");
-//            }
-            
             deployment.setContextProperty(entry.getKey(), entry.getValue());
         }
 
