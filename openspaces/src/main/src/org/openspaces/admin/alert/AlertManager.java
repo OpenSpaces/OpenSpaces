@@ -41,11 +41,6 @@ import org.openspaces.admin.alert.events.AlertTriggeredEventManager;
  * <p>
  * The {@link #triggerAlert(Alert)} method call allows <tt>alert triggers</tt> to 'fire' an alert and
  * trigger an event to be sent to all registered alert event listeners.
- * <p>
- * An alert provider is a remote service implementing an {@link AlertProvider} interface. A
- * dedicated <tt>alert trigger</tt> needs to be configured to periodically perform remote calls to
- * poll issued alerts (see {@link AlertProvider#getAlerts()}), and 'fire' them to local alert event
- * listeners.
  * 
  * @author Moran Avigdor
  * @since 8.0
