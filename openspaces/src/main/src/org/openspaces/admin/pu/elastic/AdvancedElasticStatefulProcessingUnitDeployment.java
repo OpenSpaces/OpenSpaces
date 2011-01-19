@@ -67,6 +67,11 @@ public class AdvancedElasticStatefulProcessingUnitDeployment extends ElasticStat
         return this;
     }
     
+    public AdvancedElasticStatefulProcessingUnitDeployment maxNumberOfCpuCores(int maxNumberOfCpuCores) {
+        super.maxNumberOfCpuCores(maxNumberOfCpuCores);
+        return this;
+    }
+
     public AdvancedElasticStatefulProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
         super.machineProvisioning(config);
         return this;

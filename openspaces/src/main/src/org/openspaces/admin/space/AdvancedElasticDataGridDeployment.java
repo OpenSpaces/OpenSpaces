@@ -57,6 +57,11 @@ public class AdvancedElasticDataGridDeployment extends ElasticDataGridDeployment
         return this;
     }
     
+    public ElasticDataGridDeployment maxNumberOfCpuCores(int maxNumberOfCpuCores) {
+        super.maxNumberOfCpuCores(maxNumberOfCpuCores);
+        return this;
+    }
+    
     public AdvancedElasticDataGridDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
         super.memoryCapacityPerContainer(memoryCapacityPerContainer,unit);
         return this;
