@@ -55,7 +55,7 @@ import com.gigaspaces.security.service.SecurityContext;
 import com.gigaspaces.start.SystemBoot;
 import com.sun.jini.start.LifeCycle;
 
-public class ESMImpl<x> extends ServiceBeanAdapter implements ESM, ProcessingUnitRemovedEventListener, ProcessingUnitAddedEventListener,MachineLifecycleEventListener
+public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRemovedEventListener, ProcessingUnitAddedEventListener,MachineLifecycleEventListener
 		/*, RemoteSecuredService*//*, ServiceDiscoveryListener*/ {
 
 	private static final String CONFIG_COMPONENT = "org.openspaces.grid.esm";
