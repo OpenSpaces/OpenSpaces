@@ -1,5 +1,8 @@
 package org.openspaces.admin.alert.alerts;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.Map;
 
 import org.openspaces.admin.alert.Alert;
@@ -17,7 +20,7 @@ import org.openspaces.admin.alert.AlertStatus;
 public class AbstractAlert implements Alert {
 
     private static final long serialVersionUID = 1L;
-    protected final Alert alert;
+    private Alert alert;
 
     public AbstractAlert(Alert alert) {
         this.alert = alert;
@@ -71,5 +74,13 @@ public class AbstractAlert implements Alert {
     @Override
     public String toString() {
         return alert.toString();
+    }
+
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        alert = (Alert)in.readObject();
+    }
+
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeObject(alert);
     }
 }

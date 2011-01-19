@@ -153,6 +153,73 @@ public class AlertStatus implements java.io.Serializable {
     }
     
     /**
+     * Returns an AlertStatus by it's value (see {@link #getValue()}).
+     * @param value representing this status
+     * @return a severity.
+     * @throws IllegalArgumentException if an unknown status was requested.
+     */
+    public static AlertStatus parse(String name) {
+        if (name == ESCALATED.name) {
+            return ESCALATED;
+        } else if (name == RAISED.name) {
+            return RAISED;
+        } else if (name == SUPPRESSED.name) {
+            return SUPPRESSED;
+        } else if (name == RESOLVED.name) {
+            return RESOLVED;
+        } else if (name == NA.name) {
+            return NA;
+        }else {
+            throw new IllegalArgumentException("Could not match an AlertStatus with a name of " + name);
+        }
+    }
+    
+    /**
+     * Returns an AlertStatus by it's value (see {@link #getValue()}).
+     * @param value representing this status
+     * @return a severity.
+     * @throws IllegalArgumentException if an unknown status was requested.
+     */
+    public static AlertStatus parse(int value) {
+        if (value == ESCALATED.value) {
+            return ESCALATED;
+        } else if (value == RAISED.value) {
+            return RAISED;
+        } else if (value == SUPPRESSED.value) {
+            return SUPPRESSED;
+        } else if (value == RESOLVED.value) {
+            return RESOLVED;
+        } else if (value == NA.value) {
+            return NA;
+        }else {
+            throw new IllegalArgumentException("Could not match an AlertStatus with a value of " + value);
+        }
+    }
+    
+    /**
+     * Compare two objects for value equality.
+     * @return true if and only if the two objects have the same alert status value.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        try {
+            AlertStatus s = (AlertStatus) obj;
+            return (s.value == this.value);
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+    
+    /**
+     * Generate a hashcode.
+     * @return a hashcode based on the alert status value
+     */
+    @Override
+    public int hashCode() {
+        return this.value;
+    }
+    
+    /**
      * @return the non-localized name of the alert status, for example "RESOLVED".
      */
     @Override

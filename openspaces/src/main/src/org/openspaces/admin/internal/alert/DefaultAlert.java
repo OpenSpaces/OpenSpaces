@@ -15,7 +15,11 @@
  */
 package org.openspaces.admin.internal.alert;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.openspaces.admin.alert.AlertFactory;
@@ -164,4 +168,32 @@ public class DefaultAlert implements InternalAlert {
 	public String toString() {
 	    return new Date(getTimestamp()) + " | " + getStatus() + " | " + getSeverity()+" | " + getName() + " |" + getDescription() + " | " + getProperties();
 	}
+	
+    @SuppressWarnings("unchecked")
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        alertUid = in.readUTF();
+        componentUid = in.readUTF();
+        groupUid = in.readUTF();
+        description = in.readUTF();
+        name = in.readUTF();
+        timestamp = in.readLong();
+        severity = (AlertSeverity)in.readObject();
+        status = (AlertStatus)in.readObject();
+        config = (HashMap<String, String>)in.readObject();
+        properties = (HashMap<String, String>)in.readObject();
+    }
+
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeUTF(alertUid);
+        out.writeUTF(componentUid);
+        out.writeUTF(groupUid);
+        out.writeUTF(description);
+        out.writeUTF(name);
+        out.writeLong(timestamp);
+        out.writeObject(severity);
+        out.writeObject(status);
+        out.writeObject(config);
+        out.writeObject(properties);
+    }
+
 }

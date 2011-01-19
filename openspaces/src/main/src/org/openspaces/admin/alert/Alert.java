@@ -15,7 +15,7 @@
  */
 package org.openspaces.admin.alert;
 
-import java.io.Serializable;
+import java.io.Externalizable;
 import java.util.Map;
 
 import org.openspaces.admin.Admin;
@@ -43,7 +43,7 @@ import org.openspaces.admin.Admin;
  * @author Moran Avigdor
  * @since 8.0
  */
-public interface Alert extends Serializable {
+public interface Alert extends Externalizable {
 
     /**
      * @return Alert Name - the name assigned to the alert.
@@ -95,5 +95,4 @@ public interface Alert extends Serializable {
      *         alert bean.
      */
     public Map<String, String> getProperties();
-
 }

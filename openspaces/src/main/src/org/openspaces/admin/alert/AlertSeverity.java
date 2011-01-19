@@ -132,6 +132,65 @@ public class AlertSeverity implements java.io.Serializable {
     }
     
     /**
+     * Returns an AlertSeverity by it's name (see {@link #getName()}).
+     * @param name representing this severity.
+     * @return a severity.
+     * @throws IllegalArgumentException if an unknown severity was requested.
+     */
+    public static AlertSeverity parse(String name) {
+        if (name == SEVERE.name) {
+            return SEVERE;
+        } else if (name == WARNING.name) {
+            return WARNING;
+        } else if (name == INFO.name) {
+            return INFO;
+        } else {
+            throw new IllegalArgumentException("Could not match an AlertSeverity with a name of " + name);
+        }
+    }
+    
+    /**
+     * Returns an AlertSeverity by it's value (see {@link #getValue()}).
+     * @param value representing this severity.
+     * @return a severity.
+     * @throws IllegalArgumentException if an unknown severity was requested.
+     */
+    public static AlertSeverity parse(int value) {
+        if (value == SEVERE.value) {
+            return SEVERE;
+        } else if (value == WARNING.value) {
+            return WARNING;
+        } else if (value == INFO.value) {
+            return INFO;
+        } else {
+            throw new IllegalArgumentException("Could not match an AlertSeverity with a value of " + value);
+        }
+    }
+    
+    /**
+     * Compare two objects for value equality.
+     * @return true if and only if the two objects have the same alert severity value.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        try {
+            AlertSeverity s = (AlertSeverity) obj;
+            return (s.value == this.value);
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+    
+    /**
+     * Generate a hashcode.
+     * @return a hashcode based on the alert severity value
+     */
+    @Override
+    public int hashCode() {
+        return this.value;
+    }
+    
+    /**
      * @return the non-localized name of the alert severity, for example "SEVERE".
      */
     @Override
