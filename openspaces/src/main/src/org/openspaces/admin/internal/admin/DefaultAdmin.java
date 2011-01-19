@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
@@ -473,14 +474,26 @@ public class DefaultAdmin implements InternalAdmin {
     public synchronized void flushEvents() {
         for (int i = 0; i < eventsExecutorServices.length; i++) {
             for (Runnable notifier : eventsQueue[i]) {
-                eventsExecutorServices[i].submit(notifier);
+                raiseEventIfNotTerminated(eventsExecutorServices[i],notifier);
             }
             eventsQueue[i].clear();
         }
     }
 
     public synchronized void raiseEvent(Object listener, Runnable notifier) {
-        eventsExecutorServices[Math.abs(listener.hashCode() % eventsExecutorServices.length)].submit(new LoggerRunnable(notifier));
+        ExecutorService executorService = eventsExecutorServices[Math.abs(listener.hashCode() % eventsExecutorServices.length)];
+        raiseEventIfNotTerminated(executorService, new LoggerRunnable(notifier));
+    }
+
+    private void raiseEventIfNotTerminated(ExecutorService executorService, Runnable notifier) {
+        if (!executorService.isTerminated() && !closed) {
+            try {
+                executorService.submit(notifier);
+            }
+            catch(RejectedExecutionException e) {
+                // terminated
+            }
+        }
     }
 
     public void scheduleNonBlockingStateChange(Runnable command) {
