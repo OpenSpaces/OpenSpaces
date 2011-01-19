@@ -114,11 +114,6 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
                 ((GridServiceContainerConfigAware)instance)
                     .setGridServiceContainerConfig((elasticConfigBean.getGridServiceContainerConfig()));
             }
-            
-            if (instance instanceof AdvancedElasticPropertiesConfigAware) {
-                ((AdvancedElasticPropertiesConfigAware)instance)
-                    .setAdvancedElasticPropertiesConfig((elasticConfigBean.getAdvancedElasticPropertiesConfig()));
-            }
         }
         return instance;
     }

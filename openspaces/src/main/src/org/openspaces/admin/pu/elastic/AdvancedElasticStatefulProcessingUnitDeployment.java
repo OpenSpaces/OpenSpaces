@@ -15,12 +15,16 @@ import org.openspaces.core.util.MemoryUnit;
 
 import com.gigaspaces.security.directory.UserDetails;
 
-/**
- * Exposes internal advanced properties that are not public in super class {@link ElasticStatefulProcessingUnitDeployment}
- * 
- * @author itaif
- *
- */
+/*
+* This Advanced version of {@link ElasticStatefulProcessingUnitDeployment} allows 
+* implementation related tweaking that might change in the future.
+* 
+* @see ElasticStatefulProcessingUnitDeployment
+* 
+* @author itaif
+* @since 8.0
+* 
+*/
 public class AdvancedElasticStatefulProcessingUnitDeployment extends ElasticStatefulProcessingUnitDeployment implements AdvancedStatefulDeploymentTopology {
 
     public AdvancedElasticStatefulProcessingUnitDeployment(File processingUnit) {
@@ -49,11 +53,6 @@ public class AdvancedElasticStatefulProcessingUnitDeployment extends ElasticStat
         return this;
     }
 
-    public AdvancedElasticStatefulProcessingUnitDeployment allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
-        super.allowDeploymentOnManagementMachine(allowDeploymentOnManagementMachine);
-        return this;
-    }
-    
     public AdvancedElasticStatefulProcessingUnitDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
         return (AdvancedElasticStatefulProcessingUnitDeployment) super.minNumberOfCpuCoresPerMachine(minNumberOfCpuCoresPerMachine);
     }

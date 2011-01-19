@@ -25,8 +25,6 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     private GridServiceContainerConfig containerConfig;
     private MachineProvisioningBeanPropertiesManager machineProvisioningPropertiesManager;
     private ScaleStrategyBeanPropertiesManager scaleStrategyPropertiesManager;
-    private AdvancedElasticPropertiesConfig advancedElasticPropertiesConfig;
-    
     
     public AbstractElasticProcessingUnitDeployment(String processingUnit) {
         this.processingUnit = processingUnit;
@@ -34,7 +32,6 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         containerConfig = new GridServiceContainerConfig(elasticProperties);
         machineProvisioningPropertiesManager = new MachineProvisioningBeanPropertiesManager(elasticProperties);
         scaleStrategyPropertiesManager = new ScaleStrategyBeanPropertiesManager(elasticProperties);
-        advancedElasticPropertiesConfig = new AdvancedElasticPropertiesConfig(elasticProperties);
     }
         
     protected AbstractElasticProcessingUnitDeployment setContextProperty(String key, String value) {
@@ -139,12 +136,6 @@ public abstract class AbstractElasticProcessingUnitDeployment {
 
     protected AbstractElasticProcessingUnitDeployment scale(BeanConfig config) {
         enableBean(scaleStrategyPropertiesManager, config);
-        return this;
-    }
-
-
-    protected AbstractElasticProcessingUnitDeployment allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
-        advancedElasticPropertiesConfig.setAllowDeploymentOnManagementMachine(allowDeploymentOnManagementMachine);
         return this;
     }
     

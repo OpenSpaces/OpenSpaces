@@ -8,7 +8,7 @@ package org.openspaces.admin.pu.elastic.config;
  * @author itaif
  * 
  */
-public class ManualContainersScaleConfigurer implements ScaleBeanConfigurer<ManualContainersScaleConfig>{
+public class ManualContainersScaleConfigurer implements ScaleStrategyBeanConfigurer<ManualContainersScaleConfig>{
 
     private final ManualContainersScaleConfig config;
 
@@ -46,7 +46,7 @@ public class ManualContainersScaleConfigurer implements ScaleBeanConfigurer<Manu
     }
 
     /**
-     * @see ScaleBeanConfigurer#getConfig()
+     * @see ScaleStrategyBeanConfigurer#getConfig()
      */
     public ManualContainersScaleConfig getConfig() {
         return config;

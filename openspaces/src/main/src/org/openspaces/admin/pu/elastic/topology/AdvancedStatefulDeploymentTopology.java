@@ -23,12 +23,6 @@ public interface AdvancedStatefulDeploymentTopology extends ElasticStatefulDeplo
     public AdvancedStatefulDeploymentTopology allowDeploymentOnSingleMachine(boolean allowDeploymentOnSingleMachine);
 
     /**
-     * If specified, allows deployment of the processing unit on the same machine as the Grid Service Managers and Lookup Services.
-     * Default value is true (by default processing unit can deploy on same machine as Grid Service Manager)
-     */
-    public AdvancedStatefulDeploymentTopology allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine);
-    
-    /**
      * Overrides the minimum number of CPU cores per machine assumption.
      */
     public AdvancedStatefulDeploymentTopology minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine);

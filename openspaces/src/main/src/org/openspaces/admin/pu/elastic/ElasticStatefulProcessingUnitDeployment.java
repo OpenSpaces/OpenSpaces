@@ -32,6 +32,8 @@ import com.gigaspaces.security.directory.UserDetails;
  * The disadvantage compared to a stateless processing unit is that the ratio between 
  * the minimum and maximum number of containers is limited.
  * 
+ * @see AdvancedElasticStatefulProcessingUnitDeployment
+ * 
  * @author itaif
  */
 public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProcessingUnitDeployment implements ElasticStatefulDeploymentTopology {
@@ -91,11 +93,6 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
 
     protected ElasticStatefulProcessingUnitDeployment maxProcessingUnitInstancesFromSamePartitionPerMachine(int maxProcessingUnitInstancesFromSamePartitionPerMachine) {
         this.maxProcessingUnitInstancesFromSamePartitionPerMachine  = maxProcessingUnitInstancesFromSamePartitionPerMachine;
-        return this;
-    }
-
-    protected ElasticStatefulProcessingUnitDeployment allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
-        super.allowDeploymentOnManagementMachine(allowDeploymentOnManagementMachine);
         return this;
     }
     

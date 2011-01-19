@@ -15,12 +15,10 @@ import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.pu.elastic.AdvancedElasticPropertiesConfig;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
-import org.openspaces.grid.gsm.AdvancedElasticPropertiesConfigAware;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.ProcessingUnitAware;
@@ -44,7 +42,6 @@ public class EagerScaleStrategyBean
                EagerMachinesSlaEnforcementEndpointAware,
                ProcessingUnitAware,
                GridServiceContainerConfigAware,
-               AdvancedElasticPropertiesConfigAware,
                Runnable {
 
     private static final String rebalancingAlertGroupUidPrefix = "4499C1ED-1584-4387-90CF-34C5EC236644";
@@ -60,7 +57,6 @@ public class EagerScaleStrategyBean
     private ProcessingUnit pu;
     private GridServiceContainerConfig containersConfig;
     private ProcessingUnitSchemaConfig schemaConfig;
-    private AdvancedElasticPropertiesConfig advancedElasticPropertiesConfig;
 
     // created by afterPropertiesSet()
     private Log logger;
@@ -98,11 +94,7 @@ public class EagerScaleStrategyBean
     public void setGridServiceContainerConfig(GridServiceContainerConfig containersConfig) {
          this.containersConfig = containersConfig;
     }
-     
-    public void setAdvancedElasticPropertiesConfig(AdvancedElasticPropertiesConfig advancedElasticPropertiesConfig) {
-        this.advancedElasticPropertiesConfig = advancedElasticPropertiesConfig;
-    }
-    
+         
     public void afterPropertiesSet() {
         if (slaConfig == null) {
             throw new IllegalStateException("slaConfig cannot be null.");
@@ -280,7 +272,7 @@ public class EagerScaleStrategyBean
     {
         RebalancingSlaPolicy sla = new RebalancingSlaPolicy();
         sla.setContainers(containers);
-        sla.setMaximumNumberOfConcurrentRelocationsPerMachine(slaConfig.getMaximumNumberOfConcurrentRelocationsPerMachine());
+        sla.setMaximumNumberOfConcurrentRelocationsPerMachine(slaConfig.getMaxConcurrentRelocationsPerMachine());
         
         boolean slaEnforced = rebalancingEndpoing.enforceSla(sla);
         
@@ -346,7 +338,7 @@ public class EagerScaleStrategyBean
 
     private EagerMachinesSlaPolicy getEagerMachinesSlaPolicy() {
         final EagerMachinesSlaPolicy machinesSla = new EagerMachinesSlaPolicy();
-        machinesSla.setAllowDeploymentOnManagementMachine(advancedElasticPropertiesConfig.getAllowDeploymentOnManagementMachine());
+        machinesSla.setAllowDeploymentOnManagementMachine(slaConfig.getAllowDeploymentOnManagementMachine());
         machinesSla.setMinimumNumberOfMachines(minimumNumberOfMachines);
         machinesSla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
         machinesSla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());

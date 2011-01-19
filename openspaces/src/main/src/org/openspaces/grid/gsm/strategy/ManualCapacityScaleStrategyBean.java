@@ -18,13 +18,11 @@ import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.pu.elastic.AdvancedElasticPropertiesConfig;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.grid.esm.ToStringHelper;
-import org.openspaces.grid.gsm.AdvancedElasticPropertiesConfigAware;
 import org.openspaces.grid.gsm.ElasticMachineProvisioningAware;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
@@ -32,9 +30,9 @@ import org.openspaces.grid.gsm.ProcessingUnitAware;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.containers.ContainersSlaPolicy;
+import org.openspaces.grid.gsm.machines.CapacityMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
-import org.openspaces.grid.gsm.machines.CapacityMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAware;
@@ -49,7 +47,6 @@ public class ManualCapacityScaleStrategyBean
                ProcessingUnitAware,
                ElasticMachineProvisioningAware,
                GridServiceContainerConfigAware,
-               AdvancedElasticPropertiesConfigAware,
                Runnable {
 
     private static final String rebalancingAlertGroupUidPrefix = "4499C1ED-1584-4387-90CF-34C5EC236644";
@@ -65,7 +62,6 @@ public class ManualCapacityScaleStrategyBean
     private ProcessingUnit pu;
     private GridServiceContainerConfig containersConfig;
     private ProcessingUnitSchemaConfig schemaConfig;
-    private AdvancedElasticPropertiesConfig advancedElasticPropertiesConfig;
     
     // created by afterPropertiesSet()
     private Log logger;
@@ -111,11 +107,7 @@ public class ManualCapacityScaleStrategyBean
     public void setGridServiceContainerConfig(GridServiceContainerConfig containersConfig) {
          this.containersConfig = containersConfig;
     }
-     
-    public void setAdvancedElasticPropertiesConfig(AdvancedElasticPropertiesConfig advancedElasticPropertiesConfig) {
-        this.advancedElasticPropertiesConfig = advancedElasticPropertiesConfig;
-    }
-    
+         
     public void afterPropertiesSet() {
         if (slaConfig == null) {
             throw new IllegalStateException("slaConfig cannot be null.");
@@ -134,14 +126,6 @@ public class ManualCapacityScaleStrategyBean
         
         int numberOfBackups = pu.getNumberOfBackups();
        
-        if (slaConfig.getMinNumberOfContainers() != 0 &&
-            slaConfig.getMinNumberOfContainers() <  1 + numberOfBackups) {
-            throw new BeanConfigurationException(
-                    "Minimum number of containers " + slaConfig.getMinNumberOfContainers() + " " + 
-                    "cannot support " + (numberOfBackups==1?"one backup":numberOfBackups+" backups") + " per partition. "+
-                    "Either don't use the minimum number of containers property or set it to " + (numberOfBackups+1));
-        }
-        
         // calculate minimum number of machines
         minimumNumberOfMachines = calcMinNumberOfMachines(pu);
 
@@ -310,18 +294,6 @@ public class ManualCapacityScaleStrategyBean
                 "ceil(totalNumberOfInstances/maxNumberOfInstancesPerContainer)= "+
                 "ceil("+totalNumberOfInstances+"/"+maxNumberOfInstancesPerContainer+") =" +
                 targetNumberOfContainers);
-        
-        int minNumberOfContainers = slaConfig.getMinNumberOfContainers();
-        if (minNumberOfContainers != 0 && targetNumberOfContainers < minNumberOfContainers) {
-                
-            // raise exception if min number of containers conflicts with the specified memory capacity.
-            int recommendedMemoryCapacityInMB = (int)(minNumberOfContainers * containerCapacityInMB);
-            throw new BeanConfigurationException(
-                    targetNumberOfContainers + " containers are needed in order to scale to " + slaConfig.getMemoryCapacityInMB() + "m . "+
-                    "The minimum number of containers is set to " + minNumberOfContainers + ". "+
-                    "Either decrease the minimum number of containers to " + targetNumberOfContainers +" or " +
-                    "increase the memory capacity to " + recommendedMemoryCapacityInMB +"m");
-        }
                 
         int numberOfBackups = pu.getNumberOfBackups();
         if (targetNumberOfContainers < numberOfBackups +1) {
@@ -332,25 +304,6 @@ public class ManualCapacityScaleStrategyBean
                     "which cannot support " + (numberOfBackups==1?"one backup":numberOfBackups+" backups") + " per partition. "+
                     "Increase the memory capacity to " + recommendedMemoryCapacityInMB +"m");
         }
-        
-        int maxNumberOfContainers = slaConfig.getMaxNumberOfContainers();
-        if (maxNumberOfContainers != 0 && targetNumberOfContainers > maxNumberOfContainers) {
-            
-            // raise exception if max number of containers conflicts with the specified memory capacity.
-            double recommendedMaxNumberOfInstancesPerContainer = Math.ceil(totalNumberOfInstances/maxNumberOfContainers);
-            double recommendedInstanceCapacityInMB = containerCapacityInMB / recommendedMaxNumberOfInstancesPerContainer;
-            int recommendedMemoryCapacityInMB = (int)Math.floor(recommendedInstanceCapacityInMB * totalNumberOfInstances);
-            if (recommendedMemoryCapacityInMB >= slaConfig.getMemoryCapacityInMB()) {
-                throw new IllegalStateException("recommended capacity is bigger than specified capacity. recommendedMemoryCapacityInMB (="+recommendedInstanceCapacityInMB+") >= " + slaConfig.getMemoryCapacityInMB());
-            }
-                
-            throw new BeanConfigurationException(
-                    targetNumberOfContainers + " containers are needed in order to scale to " + slaConfig.getMemoryCapacityInMB() + "m . "+
-                    "The maximum number of containers is set to " + maxNumberOfContainers + ". "+
-                    "Either increase the maximum number of containers to " + targetNumberOfContainers +" or " +
-                    "decrease the memory capacity to " + recommendedMemoryCapacityInMB +"m");
-        }
-        
         
         if (targetNumberOfContainers == 0) {
             throw new IllegalStateException("targetNumberOfContainers cannot be zero");
@@ -363,7 +316,7 @@ public class ManualCapacityScaleStrategyBean
         final CapacityMachinesSlaPolicy sla = new CapacityMachinesSlaPolicy();
         sla.setMachineProvisioning(machineProvisioning);
         sla.setCpuCapacity(slaConfig.getNumberOfCpuCores());
-        sla.setAllowDeploymentOnManagementMachine(advancedElasticPropertiesConfig.getAllowDeploymentOnManagementMachine());
+        sla.setAllowDeploymentOnManagementMachine(slaConfig.getAllowDeploymentOnManagementMachine());
         sla.setMemoryCapacityInMB(memoryInMB);
         sla.setMinimumNumberOfMachines(minimumNumberOfMachines);
         sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
@@ -436,7 +389,7 @@ public class ManualCapacityScaleStrategyBean
     {
         RebalancingSlaPolicy sla = new RebalancingSlaPolicy();
         sla.setContainers(containers);
-        sla.setMaximumNumberOfConcurrentRelocationsPerMachine(slaConfig.getMaximumNumberOfConcurrentRelocationsPerMachine());
+        sla.setMaximumNumberOfConcurrentRelocationsPerMachine(slaConfig.getMaxConcurrentRelocationsPerMachine());
         
         boolean slaEnforced = rebalancingEndpoint.enforceSla(sla);
         

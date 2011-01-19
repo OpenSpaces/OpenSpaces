@@ -2,15 +2,21 @@ package org.openspaces.admin.pu.elastic.config;
 
 import org.openspaces.core.util.MemoryUnit;
 
+
 /**
  * Provides fluent API for creating a new {@link EagerScaleConfig} object.
  * 
  * For example {@code new EagerScaleStrategyConfigurer().maxNumberOfContainers(10).getConfig()}
  * 
+ * @see AdvancedEagerScaleConfigurer
+ * @see EagerScaleConfig
+ * 
+ * @since 8.0
+ * 
  * @author itaif
  * 
  */
-public class EagerScaleConfigurer implements ScaleBeanConfigurer<EagerScaleConfig> {
+public class EagerScaleConfigurer implements ScaleStrategyBeanConfigurer<EagerScaleConfig> {
 
     private final EagerScaleConfig config;
 
@@ -22,14 +28,34 @@ public class EagerScaleConfigurer implements ScaleBeanConfigurer<EagerScaleConfi
     public EagerScaleConfigurer() {
         this.config = new EagerScaleConfig();
     }
-
-    public EagerScaleConfigurer reservedMemoryCapacityPerMachine(int memory, MemoryUnit unit) {
+    
+    /**
+     * @see ScaleStrategyConfig#setReservedMemoryCapacityPerMachineInMB(int)
+     */
+    protected EagerScaleConfigurer reservedMemoryCapacityPerMachine(long memory, MemoryUnit unit) {
         config.setReservedMemoryCapacityPerMachineInMB((int) unit.toMegaBytes(memory));
         return this;
     }
     
     /**
-     * @see ScaleBeanConfigurer#getConfig()
+     * @see ScaleStrategyConfig#setAllowDeploymentOnManagementMachine(boolean)
+     */
+    protected EagerScaleConfigurer allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
+        config.setAllowDeploymentOnManagementMachine(allowDeploymentOnManagementMachine);
+        return this;
+    }
+    
+    /**
+     * @return 
+     * @see ScaleStrategyConfig#setMaxConcurrentRelocationsPerMachine(int)
+     */
+    protected EagerScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
+        config.setMaxConcurrentRelocationsPerMachine(maxNumberOfConcurrentRelocationsPerMachine);
+        return this;
+     }
+    
+    /**
+     * @see ScaleStrategyBeanConfigurer#getConfig()
      */
     public EagerScaleConfig getConfig() {
         return config;

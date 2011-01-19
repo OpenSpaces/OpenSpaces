@@ -16,6 +16,21 @@ import org.openspaces.core.util.MemoryUnit;
 
 import com.gigaspaces.security.directory.UserDetails;
 
+/**
+ * Defines an elastic deployment of a partitioned data grid (space).
+ * 
+ * The advantage of partitioned topology is that the data can spread across different containers,
+ * and is not limited by the size of each container.
+ * 
+ * The disadvantage compared to replicated topology is that there is only 1 read/write endpoint
+ * for each data object (no concurrent reads from different containers for the same data).
+ * 
+ * @see AdvancedElasticDataGridDeployment
+ * 
+ * @author itaif
+ * @since 8.0
+ */
+
 public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopology {
 
     private final AdvancedElasticStatefulProcessingUnitDeployment deployment;
@@ -193,11 +208,7 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
         deployment.allowDeploymentOnSingleMachine(allowDeploymentOnSingleMachine);
         return this;
     }
-
-    protected ElasticDataGridDeployment allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
-        deployment.allowDeploymentOnManagementMachine(allowDeploymentOnManagementMachine);
-        return this;
-    }
+   
     public ElasticStatefulProcessingUnitDeployment toElasticStatefulProcessingUnitDeployment() {
        return deployment;
     }

@@ -10,7 +10,7 @@ import org.openspaces.core.util.MemoryUnit;
  * @author itaif
  * 
  */
-public class ManualCapacityScaleConfigurer implements ScaleBeanConfigurer<ManualCapacityScaleConfig>{
+public class ManualCapacityScaleConfigurer implements ScaleStrategyBeanConfigurer<ManualCapacityScaleConfig>{
 
 private final ManualCapacityScaleConfig config;
     
@@ -23,13 +23,19 @@ private final ManualCapacityScaleConfig config;
         this.config = new ManualCapacityScaleConfig();
     }
     
+    /**
+     * @see ManualCapacityScaleConfig#setMemoryCapacityInMB(int)
+     */
     public ManualCapacityScaleConfigurer memoryCapacity(String memory) {
-        config.setMemoryCapacityInMB((int)MemoryUnit.toMegaBytes(memory));
+        config.setMemoryCapacityInMB(MemoryUnit.toMegaBytes(memory));
         return this;
     }
-    
+
+    /**
+     * @see ManualCapacityScaleConfig#setMemoryCapacityInMB(int)
+     */
     public ManualCapacityScaleConfigurer memoryCapacity(int memory, MemoryUnit unit) {
-        config.setMemoryCapacityInMB((int)unit.toMegaBytes(memory));
+        config.setMemoryCapacityInMB(unit.toMegaBytes(memory));
         return this;
     }
    
@@ -42,30 +48,36 @@ private final ManualCapacityScaleConfig config;
     }
    
     /**
-     * @see MaxNumberOfContainersScaleConfig#setMaxNumberOfContainers(int)
+     * @see ScaleStrategyConfig#setReservedMemoryCapacityPerMachineInMB(int)
      */
-    public ManualCapacityScaleConfigurer maxNumberOfContainers(int maxNumberOfContainers) {
-        config.setMaxNumberOfContainers(maxNumberOfContainers);
-        return this;
-    }
-
-    /**
-     * @see MinNumberOfContainersScaleConfig#setMinNumberOfContainers(int)
-     */
-    public ManualCapacityScaleConfigurer minNumberOfContainers(int minNumberOfContainers) {
-        config.setMinNumberOfContainers(minNumberOfContainers);
-        return this;
-    }
-
-    public ManualCapacityScaleConfigurer reservedMemoryCapacityPerMachine(int memory, MemoryUnit unit) {
+    protected ManualCapacityScaleConfigurer reservedMemoryCapacityPerMachine(long memory, MemoryUnit unit) {
         config.setReservedMemoryCapacityPerMachineInMB((int) unit.toMegaBytes(memory));
         return this;
     }
     
     /**
-     * @see ScaleBeanConfigurer#getConfig()
+     * @see ScaleStrategyConfig#setAllowDeploymentOnManagementMachine(boolean)
+     */
+    protected ManualCapacityScaleConfigurer allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
+        config.setAllowDeploymentOnManagementMachine(allowDeploymentOnManagementMachine);
+        return this;
+    }
+    
+    /**
+     * @return 
+     * @see ScaleStrategyConfig#setMaxConcurrentRelocationsPerMachine(int)
+     */
+    protected ManualCapacityScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
+        config.setMaxConcurrentRelocationsPerMachine(maxNumberOfConcurrentRelocationsPerMachine);
+        return this;
+     }
+    
+    /**
+     * @see ScaleStrategyBeanConfigurer#getConfig()
      */
     public ManualCapacityScaleConfig getConfig() {
         return config;
     }
+
+    
 }

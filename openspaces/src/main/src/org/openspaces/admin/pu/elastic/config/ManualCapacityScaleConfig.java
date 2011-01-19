@@ -2,7 +2,6 @@ package org.openspaces.admin.pu.elastic.config;
 
 import java.util.Map;
 
-import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
 import org.openspaces.core.util.StringProperties;
 import org.openspaces.grid.gsm.strategy.ManualCapacityScaleStrategyBean;
@@ -18,9 +17,7 @@ import org.openspaces.grid.gsm.strategy.ManualCapacityScaleStrategyBean;
  * @author itaif
  */
 public class ManualCapacityScaleConfig 
-        implements MinNumberOfContainersScaleConfig,
-                   MaxNumberOfContainersScaleConfig,
-                   BeanConfig {
+        implements ScaleStrategyConfig {
 
     private static final String STRATEGY_NAME = "scale-strategy.manual-memory";
     private static final String MEMORY_CAPACITY_MEGABYTES_KEY = "memory-capacity-megabytes";
@@ -43,12 +40,12 @@ public class ManualCapacityScaleConfig
     /**
      * Specifies the total memory capacity of the processing unit.
      */
-    public void setMemoryCapacityInMB(int memory) {
-        properties.putInteger(MEMORY_CAPACITY_MEGABYTES_KEY, memory);
+    public void setMemoryCapacityInMB(long memory) {
+        properties.putLong(MEMORY_CAPACITY_MEGABYTES_KEY, memory);
     }
 
-    public int getMemoryCapacityInMB() {
-        return properties.getInteger(MEMORY_CAPACITY_MEGABYTES_KEY, MEMORY_CAPACITY_MEGABYTES_DEFAULT);
+    public long getMemoryCapacityInMB() {
+        return properties.getLong(MEMORY_CAPACITY_MEGABYTES_KEY, MEMORY_CAPACITY_MEGABYTES_DEFAULT);
     }
 
     /**
@@ -62,22 +59,6 @@ public class ManualCapacityScaleConfig
         return properties.getDouble(CPU_CAPACITY_CORES_KEY, CPU_CAPACITY_CORES_DEFAULT);
     }
 
-    public void setMinNumberOfContainers(int minNumberOfContainers) {
-        ScaleStrategyConfigUtils.setMinNumberOfContainers(properties, minNumberOfContainers);
-    }
-    
-    public void setMaxNumberOfContainers(int maxNumberOfContainers) {
-        ScaleStrategyConfigUtils.setMaxNumberOfContainers(properties, maxNumberOfContainers);
-    }
-
-    public int getMinNumberOfContainers() {
-        return ScaleStrategyConfigUtils.getMinNumberOfContainers(properties);
-    }
-
-    public int getMaxNumberOfContainers() {
-        return ScaleStrategyConfigUtils.getMaxNumberOfContainers(properties);
-    }
-
     public void setPollingIntervalSeconds(int seconds) {
         ScaleStrategyConfigUtils.setPollingIntervalSeconds(properties,seconds);
     }
@@ -86,12 +67,12 @@ public class ManualCapacityScaleConfig
         return ScaleStrategyConfigUtils.getPollingIntervalSeconds(properties);
     }
 
-    public int getMaximumNumberOfConcurrentRelocationsPerMachine() {
-        return ScaleStrategyConfigUtils.getMaximumNumberOfConcurrentRelocationsPerMachine(properties);
+    public int getMaxConcurrentRelocationsPerMachine() {
+        return ScaleStrategyConfigUtils.getMaxConcurrentRelocationsPerMachine(properties);
     }
     
-    public void setMaximumNumberOfConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
-        ScaleStrategyConfigUtils.setMaximumNumberOfConcurrentRelocationsPerMachine(properties, maxNumberOfConcurrentRelocationsPerMachine);
+    public void setMaxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
+        ScaleStrategyConfigUtils.setMaxConcurrentRelocationsPerMachine(properties, maxNumberOfConcurrentRelocationsPerMachine);
     }
     
     public int getReservedMemoryCapacityPerMachineInMB() {
@@ -100,6 +81,14 @@ public class ManualCapacityScaleConfig
     
     public void setReservedMemoryCapacityPerMachineInMB(int reservedInMB) {
         ScaleStrategyConfigUtils.setReservedMemoryCapacityPerMachineInMB(properties, reservedInMB); 
+    }
+    
+    public boolean getAllowDeploymentOnManagementMachine() {
+        return ScaleStrategyConfigUtils.getAllowDeploymentOnManagementMachine(properties);
+    }
+
+    public void setAllowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
+        ScaleStrategyConfigUtils.setAllowDeploymentOnManagementMachine(properties, allowDeploymentOnManagementMachine);
     }
     
     public Map<String,String> getProperties() {

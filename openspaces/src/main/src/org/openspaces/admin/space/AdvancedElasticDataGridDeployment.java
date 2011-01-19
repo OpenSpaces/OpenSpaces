@@ -13,7 +13,14 @@ import org.openspaces.admin.pu.elastic.topology.AdvancedStatefulDeploymentTopolo
 import org.openspaces.core.util.MemoryUnit;
 
 import com.gigaspaces.security.directory.UserDetails;
-
+/*
+* This Advanced version of {@link ElasticDataGridDeployment} allows 
+* implementation related tweaking that might change in the future.
+* 
+* @see ElasticDataGridDeployment
+* @author itaif
+* @since 8.0
+*/
 public class AdvancedElasticDataGridDeployment extends ElasticDataGridDeployment implements AdvancedStatefulDeploymentTopology {
 
     public AdvancedElasticDataGridDeployment(String spaceName) {
@@ -34,12 +41,7 @@ public class AdvancedElasticDataGridDeployment extends ElasticDataGridDeployment
         super.allowDeploymentOnSingleMachine(allowDeploymentOnSingleMachine);
         return this;
     }
-
-    public AdvancedElasticDataGridDeployment allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
-        super.allowDeploymentOnManagementMachine(allowDeploymentOnManagementMachine);
-        return this;
-    }
-    
+ 
     public AdvancedElasticDataGridDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
         super.minNumberOfCpuCoresPerMachine(minNumberOfCpuCoresPerMachine);
         return this;

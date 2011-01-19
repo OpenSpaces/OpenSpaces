@@ -17,7 +17,9 @@ public class ScaleStrategyConfigUtils {
     private static final String MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_KEY = "max-number-of-concurrent-relocations-per-machine";
     private static final int MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_DEFAULT = 1;
     private static final String RESERVED_MEMORY_CAPACITY_PER_MACHINE_MEGABYTES_KEY = "reserved-memory-capacity-per-machine-megabytes";
-    private static final int RESERVED_MEMORY_CAPACITY_PER_MACHINE_MEGABYTES_DEFAULT = 1024; // reserved for GSA/LUS/GSM/ESM
+    private static final int RESERVED_MEMORY_CAPACITY_PER_MACHINE_MEGABYTES_DEFAULT = 1024; // reserved for GSA/LUS/GSM/ESM and 3rd party daemons
+    private static final String ALLOW_DEPLOYMENT_ON_MANAGEMENT_MACHINE_KEY = "allow-deployment-on-management-machine";
+    private static final boolean ALLOW_DEPLOYMENT_ON_MANAGEMENT_MACHINE_DEFAULT = true;
     
     public static void setMaxNumberOfContainersPerMachine(
             StringProperties properties,
@@ -79,11 +81,11 @@ public class ScaleStrategyConfigUtils {
         properties.putInteger(POLLING_INTERVAL_SECONDS_KEY, value);
     }
 
-    public static int getMaximumNumberOfConcurrentRelocationsPerMachine(StringProperties properties) {
+    public static int getMaxConcurrentRelocationsPerMachine(StringProperties properties) {
         return properties.getInteger(MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_KEY, MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_DEFAULT);
     }
     
-    public static void setMaximumNumberOfConcurrentRelocationsPerMachine(StringProperties properties, int maxNumberOfConcurrentRelocationsPerMachine) {
+    public static void setMaxConcurrentRelocationsPerMachine(StringProperties properties, int maxNumberOfConcurrentRelocationsPerMachine) {
         properties.putInteger(MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_KEY,maxNumberOfConcurrentRelocationsPerMachine);        
     }
 
@@ -93,5 +95,13 @@ public class ScaleStrategyConfigUtils {
 
     public static void setReservedMemoryCapacityPerMachineInMB(StringProperties properties, int reservedInMB) {
         properties.putInteger(RESERVED_MEMORY_CAPACITY_PER_MACHINE_MEGABYTES_KEY, reservedInMB);
+    }
+
+    public static boolean getAllowDeploymentOnManagementMachine(StringProperties properties) {
+        return properties.getBoolean(ALLOW_DEPLOYMENT_ON_MANAGEMENT_MACHINE_KEY, ALLOW_DEPLOYMENT_ON_MANAGEMENT_MACHINE_DEFAULT);
+    }
+
+    public static void setAllowDeploymentOnManagementMachine(StringProperties properties, boolean allowDeploymentOnManagementMachine) {
+        properties.putBoolean(ALLOW_DEPLOYMENT_ON_MANAGEMENT_MACHINE_KEY, allowDeploymentOnManagementMachine);
     }
 }

@@ -3,7 +3,6 @@ package org.openspaces.admin.pu.elastic.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyConfigUtils;
 import org.openspaces.core.util.StringProperties;
 import org.openspaces.grid.gsm.strategy.EagerScaleStrategyBean;
@@ -16,7 +15,7 @@ import org.openspaces.grid.gsm.strategy.EagerScaleStrategyBean;
  * @author itaif
  */
 public class EagerScaleConfig 
-        implements BeanConfig {
+        implements ScaleStrategyConfig {
 
     private static final String STRATEGY_NAME = "scale-strategy.eager.";
  
@@ -46,12 +45,20 @@ public class EagerScaleConfig
         ScaleStrategyConfigUtils.setReservedMemoryCapacityPerMachineInMB(properties, reservedInMB); 
     }
     
-    public int getMaximumNumberOfConcurrentRelocationsPerMachine() {
-        return ScaleStrategyConfigUtils.getMaximumNumberOfConcurrentRelocationsPerMachine(properties);
+    public int getMaxConcurrentRelocationsPerMachine() {
+        return ScaleStrategyConfigUtils.getMaxConcurrentRelocationsPerMachine(properties);
     }
     
-    public void setMaximumNumberOfConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
-        ScaleStrategyConfigUtils.setMaximumNumberOfConcurrentRelocationsPerMachine(properties, maxNumberOfConcurrentRelocationsPerMachine);
+    public void setMaxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
+        ScaleStrategyConfigUtils.setMaxConcurrentRelocationsPerMachine(properties, maxNumberOfConcurrentRelocationsPerMachine);
+    }
+    
+    public boolean getAllowDeploymentOnManagementMachine() {
+        return ScaleStrategyConfigUtils.getAllowDeploymentOnManagementMachine(properties);
+    }
+
+    public void setAllowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
+        ScaleStrategyConfigUtils.setAllowDeploymentOnManagementMachine(properties, allowDeploymentOnManagementMachine);
     }
     
     public void setProperties(Map<String, String> properties) {
@@ -69,8 +76,6 @@ public class EagerScaleConfig
     public String getBeanClassName() {
         return EagerScaleStrategyBean.class.getName();
     }
-
-
 }
 
 

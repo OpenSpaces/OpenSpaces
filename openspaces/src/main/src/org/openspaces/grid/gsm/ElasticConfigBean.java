@@ -3,7 +3,6 @@ package org.openspaces.grid.gsm;
 import java.util.Map;
 
 import org.openspaces.admin.Admin;
-import org.openspaces.admin.internal.pu.elastic.AdvancedElasticPropertiesConfig;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.core.bean.Bean;
 
@@ -15,10 +14,6 @@ public class ElasticConfigBean implements Bean {
         return new GridServiceContainerConfig(properties);
     }
     
-    AdvancedElasticPropertiesConfig getAdvancedElasticPropertiesConfig() {
-        return new AdvancedElasticPropertiesConfig(properties);
-    }
-
     public void afterPropertiesSet() throws Exception {
         // TODO Auto-generated method stub
         
