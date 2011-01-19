@@ -12,10 +12,11 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -134,6 +135,7 @@ public class DefaultAdmin implements InternalAdmin {
     private static final Log logger = LogFactory.getLog(DefaultAdmin.class);
     
     private static final int DEFAULT_EVENT_LISTENER_THREADS = 10;
+    private static final DiscardPolicy DEFAULT_EVENT_LISTENER_REJECTED_POLICY = new ThreadPoolExecutor.DiscardPolicy();
     
     private static final int DEFAULT_STATE_CHANGE_THREADS = 10;
 
@@ -293,6 +295,8 @@ public class DefaultAdmin implements InternalAdmin {
                     return thread;
                 }});
             
+            ((ThreadPoolExecutor)eventsExecutorServices[0]).setRejectedExecutionHandler(DEFAULT_EVENT_LISTENER_REJECTED_POLICY);
+            
         }
         else {
         
@@ -305,6 +309,7 @@ public class DefaultAdmin implements InternalAdmin {
                     public Thread newThread(Runnable r) {
                         return new Thread(r,"GS-ADMIN-event-executor-thread");
                     }});
+                ((ThreadPoolExecutor)eventsExecutorServices[i]).setRejectedExecutionHandler(DEFAULT_EVENT_LISTENER_REJECTED_POLICY);
                 eventsQueue[i] = new LinkedList<Runnable>();
             }
         }
@@ -474,26 +479,14 @@ public class DefaultAdmin implements InternalAdmin {
     public synchronized void flushEvents() {
         for (int i = 0; i < eventsExecutorServices.length; i++) {
             for (Runnable notifier : eventsQueue[i]) {
-                raiseEventIfNotTerminated(eventsExecutorServices[i],notifier);
+                eventsExecutorServices[i].submit(notifier);
             }
             eventsQueue[i].clear();
         }
     }
 
     public synchronized void raiseEvent(Object listener, Runnable notifier) {
-        ExecutorService executorService = eventsExecutorServices[Math.abs(listener.hashCode() % eventsExecutorServices.length)];
-        raiseEventIfNotTerminated(executorService, new LoggerRunnable(notifier));
-    }
-
-    private void raiseEventIfNotTerminated(ExecutorService executorService, Runnable notifier) {
-        if (!executorService.isTerminated() && !closed) {
-            try {
-                executorService.submit(notifier);
-            }
-            catch(RejectedExecutionException e) {
-                // terminated
-            }
-        }
+        eventsExecutorServices[Math.abs(listener.hashCode() % eventsExecutorServices.length)].submit(new LoggerRunnable(notifier));
     }
 
     public void scheduleNonBlockingStateChange(Runnable command) {
