@@ -17,7 +17,7 @@ public class ScaleStrategyConfigUtils {
     private static final String MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_KEY = "max-number-of-concurrent-relocations-per-machine";
     private static final int MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_DEFAULT = 1;
     private static final String RESERVED_MEMORY_CAPACITY_PER_MACHINE_MEGABYTES_KEY = "reserved-memory-capacity-per-machine-megabytes";
-    private static final int RESERVED_MEMORY_CAPACITY_PER_MACHINE_MEGABYTES_DEFAULT = 256; // reserved for GSA/LUS/GSM/ESM
+    private static final int RESERVED_MEMORY_CAPACITY_PER_MACHINE_MEGABYTES_DEFAULT = 1024; // reserved for GSA/LUS/GSM/ESM
     
     public static void setMaxNumberOfContainersPerMachine(
             StringProperties properties,
