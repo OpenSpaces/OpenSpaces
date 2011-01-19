@@ -1,11 +1,14 @@
 package org.openspaces.admin.internal.discovery;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
 import net.jini.core.discovery.LookupLocator;
+import net.jini.core.entry.Entry;
 import net.jini.core.lookup.ServiceID;
+import net.jini.core.lookup.ServiceItem;
 import net.jini.core.lookup.ServiceRegistrar;
 import net.jini.core.lookup.ServiceTemplate;
 import net.jini.discovery.DiscoveryEvent;
@@ -50,8 +53,11 @@ import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.gigaspaces.internal.jvm.JVMDetails;
 import com.gigaspaces.internal.os.OSDetails;
 import com.gigaspaces.lrmi.nio.info.NIODetails;
+import com.gigaspaces.management.entry.JMXConnection;
 import com.j_spaces.core.IJSpace;
+import com.j_spaces.core.IJSpaceContainer;
 import com.j_spaces.core.admin.IInternalRemoteJSpaceAdmin;
+import com.j_spaces.core.admin.IJSpaceContainerAdmin;
 import com.j_spaces.core.jini.SharedDiscoveryManagement;
 import com.j_spaces.kernel.PlatformVersion;
 
@@ -111,7 +117,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
         }
 
         try {
-            ServiceTemplate template = new ServiceTemplate(null, new Class[]{Service.class}, null);
+            ServiceTemplate template = new ServiceTemplate(null, new Class[] { Service.class }, null);
             serviceCache = sdm.createLookupCache(template, null, this);
         } catch (Exception e) {
             sdm.terminate();
@@ -120,7 +126,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
         if (discoverUnmanagedSpaces) {
             try {
-                ServiceTemplate template = new ServiceTemplate(null, new Class[]{IJSpace.class}, null);
+                ServiceTemplate template = new ServiceTemplate(null, new Class[] { IJSpace.class }, null);
                 spaceCache = sdm.createLookupCache(template, null, this);
             } catch (Exception e) {
                 serviceCache.terminate();
@@ -145,8 +151,9 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     public void discovered(final DiscoveryEvent disEvent) {
         for (final ServiceRegistrar registrar : disEvent.getRegistrars()) {
             try {
-                final InternalLookupService lookupService = new DefaultLookupService(registrar, registrar.getServiceID(), admin,
-                        ((AgentIdAware) registrar.getRegistrar()).getAgentId(), ((AgentIdAware) registrar.getRegistrar()).getGSAServiceID());
+                final InternalLookupService lookupService = new DefaultLookupService(registrar,
+                        registrar.getServiceID(), admin, ((AgentIdAware) registrar.getRegistrar()).getAgentId(),
+                        ((AgentIdAware) registrar.getRegistrar()).getGSAServiceID());
                 // get the details here, on the thread pool
                 final NIODetails nioDetails = lookupService.getNIODetails();
                 final OSDetails osDetails = lookupService.getOSDetails();
@@ -154,15 +161,15 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 final String[] zones = ((GridZoneProvider) registrar.getRegistrar()).getZones();
                 admin.scheduleNonBlockingStateChange(new Runnable() {
                     public void run() {
-                        admin.addLookupService(lookupService, nioDetails, osDetails, jvmDetails, zones);
+                        admin.addLookupService(lookupService, nioDetails, osDetails, jvmDetails, null, zones);
                     }
                 });
-                
+
             } catch (Exception e) {
                 logger.warn("Failed to add lookup service with id [" + registrar.getServiceID() + "]", e);
             }
         }
-        
+
     }
 
     public void discarded(final DiscoveryEvent e) {
@@ -176,8 +183,9 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
     }
 
     public void serviceAdded(final ServiceDiscoveryEvent event) {
-        Object service = event.getPostEventServiceItem().service;
-        ServiceID serviceID = event.getPostEventServiceItem().serviceID;
+        final ServiceItem serviceItem = event.getPostEventServiceItem();
+        Object service = serviceItem.service;
+        ServiceID serviceID = serviceItem.serviceID;
         if (service instanceof GSM) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Service Added [GSM] with uid [" + serviceID + "]");
@@ -187,8 +195,8 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 if (gsm.isServiceSecured()) {
                     gsm.login(admin.getUserDetails());
                 }
-                final InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, gsm, admin,
-                        gsm.getAgentId(), gsm.getGSAServiceID());
+                final InternalGridServiceManager gridServiceManager = new DefaultGridServiceManager(serviceID, gsm,
+                        admin, gsm.getAgentId(), gsm.getGSAServiceID());
                 // get the details here, on the thread pool
                 final NIODetails nioDetails = gridServiceManager.getNIODetails();
                 final OSDetails osDetails = gridServiceManager.getOSDetails();
@@ -196,10 +204,11 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 final String[] zones = gsm.getZones();
                 admin.scheduleNonBlockingStateChange(new Runnable() {
                     public void run() {
-                        admin.addGridServiceManager(gridServiceManager, nioDetails, osDetails, jvmDetails, zones);
+                        String jmxUrl = getJMXConnection( serviceItem.attributeSets );
+                        admin.addGridServiceManager(gridServiceManager, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
                     }
                 });
-                
+
             } catch (Exception e) {
                 logger.warn("Failed to add [GSM] with uid [" + serviceID + "]", e);
             }
@@ -209,11 +218,11 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             }
             try {
                 ESM esm = (ESM) service;
-//                if (esm.isServiceSecured()) {
-//                    esm.login(admin.getUserDetails());
-//                }
-                final InternalElasticServiceManager elasticServiceManager = new DefaultElasticServiceManager(serviceID, esm, admin,
-                        esm.getAgentId(), esm.getGSAServiceID());
+                // if (esm.isServiceSecured()) {
+                // esm.login(admin.getUserDetails());
+                // }
+                final InternalElasticServiceManager elasticServiceManager = new DefaultElasticServiceManager(serviceID,
+                        esm, admin, esm.getAgentId(), esm.getGSAServiceID());
                 // get the details here, on the thread pool
                 final NIODetails nioDetails = elasticServiceManager.getNIODetails();
                 final OSDetails osDetails = elasticServiceManager.getOSDetails();
@@ -221,7 +230,9 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 final String[] zones = esm.getZones();
                 admin.scheduleNonBlockingStateChange(new Runnable() {
                     public void run() {
-                        admin.addElasticServiceManager(elasticServiceManager, nioDetails, osDetails, jvmDetails, zones);
+                        String jmxUrl = getJMXConnection( serviceItem.attributeSets );
+                        admin.addElasticServiceManager(elasticServiceManager, nioDetails, 
+                                                    osDetails, jvmDetails, jmxUrl, zones);
                     }
                 });
             } catch (Exception e) {
@@ -237,7 +248,8 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                     gsa.login(admin.getUserDetails());
                 }
                 AgentProcessesDetails processesDetails = gsa.getDetails();
-                final InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, gsa, admin, processesDetails);
+                final InternalGridServiceAgent gridServiceAgent = new DefaultGridServiceAgent(serviceID, gsa, admin,
+                        processesDetails);
                 // get the details here, on the thread pool
                 final NIODetails nioDetails = gridServiceAgent.getNIODetails();
                 final OSDetails osDetails = gridServiceAgent.getOSDetails();
@@ -245,7 +257,8 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 final String[] zones = gsa.getZones();
                 admin.scheduleNonBlockingStateChange(new Runnable() {
                     public void run() {
-                        admin.addGridServiceAgent(gridServiceAgent, nioDetails, osDetails, jvmDetails, zones);
+                        String jmxUrl = getJMXConnection( serviceItem.attributeSets );
+                        admin.addGridServiceAgent(gridServiceAgent, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
                     }
                 });
             } catch (Exception e) {
@@ -260,8 +273,8 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 if (gsc.isServiceSecured()) {
                     gsc.login(admin.getUserDetails());
                 }
-                final InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(serviceID, gsc,
-                        admin, gsc.getAgentId(), gsc.getGSAServiceID());
+                final InternalGridServiceContainer gridServiceContainer = new DefaultGridServiceContainer(serviceID,
+                        gsc, admin, gsc.getAgentId(), gsc.getGSAServiceID());
                 // get the details here, on the thread pool
                 final NIODetails nioDetails = gridServiceContainer.getNIODetails();
                 final OSDetails osDetails = gridServiceContainer.getOSDetails();
@@ -269,9 +282,11 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                 final String[] zones = gsc.getZones();
                 admin.scheduleNonBlockingStateChange(new Runnable() {
                     public void run() {
-                        admin.addGridServiceContainer(gridServiceContainer, nioDetails, osDetails, jvmDetails, zones);
+                        String jmxUrl = getJMXConnection( serviceItem.attributeSets );
+                        admin.addGridServiceContainer(gridServiceContainer, nioDetails, 
+                                osDetails, jvmDetails, jmxUrl, zones);
                     }
-                });                
+                });
             } catch (Exception e) {
                 logger.warn("Failed to add GSC with uid [" + serviceID + "]", e);
             }
@@ -282,21 +297,25 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
             try {
                 final PUServiceBean puServiceBean = (PUServiceBean) service;
                 PUDetails puDetails = puServiceBean.getPUDetails();
-                final InternalProcessingUnitInstance processingUnitInstance = new DefaultProcessingUnitInstance(serviceID, puDetails, puServiceBean, admin);
+                final InternalProcessingUnitInstance processingUnitInstance = new DefaultProcessingUnitInstance(
+                        serviceID, puDetails, puServiceBean, admin);
                 final NIODetails nioDetails = processingUnitInstance.getNIODetails();
                 final OSDetails osDetails = processingUnitInstance.getOSDetails();
                 final JVMDetails jvmDetails = processingUnitInstance.getJVMDetails();
                 final String[] zones = puServiceBean.getZones();
                 admin.scheduleNonBlockingStateChange(new Runnable() {
                     public void run() {
-                        admin.addProcessingUnitInstance(processingUnitInstance, nioDetails, osDetails, jvmDetails, zones);
+                        String jmxUrl = getJMXConnection( serviceItem.attributeSets );
+                        admin.addProcessingUnitInstance(processingUnitInstance, nioDetails, osDetails, jvmDetails, jmxUrl,
+                                zones);
                         if (!discoverUnmanagedSpaces) {
                             for (SpaceServiceDetails serviceDetails : processingUnitInstance.getEmbeddedSpacesDetails()) {
-                                InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(puServiceBean, serviceDetails, admin);
-                                admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, zones);
+                                InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(puServiceBean,
+                                        serviceDetails, admin);
+                                admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, jmxUrl, zones);
                             }
                         }
-        
+
                     }
                 });
             } catch (Exception e) {
@@ -319,56 +338,90 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
 
                 IInternalRemoteJSpaceAdmin spaceAdmin = (IInternalRemoteJSpaceAdmin) direcyIjspace.getAdmin();
 
-                InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(serviceID, direcyIjspace, spaceAdmin, admin);
+                InternalSpaceInstance spaceInstance = new DefaultSpaceInstance(serviceID, direcyIjspace, spaceAdmin,
+                        admin);
                 NIODetails nioDetails = spaceInstance.getNIODetails();
                 OSDetails osDetails = spaceInstance.getOSDetails();
                 JVMDetails jvmDetails = spaceInstance.getJVMDetails();
-                admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, spaceAdmin.getZones());
+                
+                IJSpaceContainer container = direcyIjspace.getContainer();
+                IJSpaceContainerAdmin containerAdmin = ( IJSpaceContainerAdmin )container;
+                String jmxServiceURL = null;
+                try{
+                    String jndiUrl = containerAdmin.getConfig().jndiUrl;
+                    jmxServiceURL = "service:jmx:rmi:///jndi/rmi://" + jndiUrl + "/jmxrmi";
+                }
+                catch( RemoteException re ){
+                    logger.warn( "Failed to fetch jndi url from space container", re);   
+                }
+                
+                
+                admin.addSpaceInstance(spaceInstance, nioDetails, osDetails, jvmDetails, jmxServiceURL, spaceAdmin.getZones());
             } catch (Exception e) {
                 logger.warn("Failed to add [Space Instance] with uid [" + serviceID + "]", e);
             }
         }
     }
+    
+    /**
+     * Get the String value found in the JMXConnection entry, or null if the attribute
+     * set does not include a JMXConnection
+     */
+    public static String getJMXConnection( Entry[] attrs ) 
+    {
+        String jmxConn = null;
+        for( int x = 0; x < attrs.length; x++ ) 
+        {
+            if( attrs[ x ] instanceof JMXConnection ) 
+            {
+                jmxConn = ( ( JMXConnection )attrs[ x ] ).jmxServiceURL;
+                break;
+            }
+        }
+        
+        return jmxConn;
+    }  
 
     public void serviceRemoved(final ServiceDiscoveryEvent event) {
         admin.scheduleNonBlockingStateChange(new Runnable() {
             public void run() {
-        Object service = event.getPreEventServiceItem().service;
-        ServiceID serviceID = event.getPreEventServiceItem().serviceID;
-        if (service instanceof GSM) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Service Removed [GSM] with uid [" + serviceID + "]");
+                Object service = event.getPreEventServiceItem().service;
+                ServiceID serviceID = event.getPreEventServiceItem().serviceID;
+                if (service instanceof GSM) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Service Removed [GSM] with uid [" + serviceID + "]");
+                    }
+                    admin.removeGridServiceManager(serviceID.toString());
+                } else if (service instanceof ESM) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Service Removed [ESM] with uid [" + serviceID + "]");
+                    }
+                    admin.removeElasticServiceManager(serviceID.toString());
+                } else if (service instanceof GSA) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Service Removed [GSA] with uid [" + serviceID + "]");
+                    }
+                    admin.removeGridServiceAgent(serviceID.toString());
+                } else if (service instanceof GSC) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Service Removed [GSC] with uid [" + serviceID + "]");
+                    }
+                    admin.removeGridServiceContainer(serviceID.toString());
+                } else if (service instanceof PUServiceBean) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Service Removed [Processing Unit Instance] with uid [" + serviceID + "]");
+                    }
+                    admin.removeProcessingUnitInstance(serviceID.toString(), !discoverUnmanagedSpaces);
+                } else if (service instanceof IJSpace) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Service Removed [Space Instance] with uid [" + serviceID + "]");
+                    }
+                    admin.removeSpaceInstance(serviceID.toString());
+                }
             }
-            admin.removeGridServiceManager(serviceID.toString());
-        } else if (service instanceof ESM) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Service Removed [ESM] with uid [" + serviceID + "]");
-            }
-            admin.removeElasticServiceManager(serviceID.toString());
-        } else if (service instanceof GSA) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Service Removed [GSA] with uid [" + serviceID + "]");
-            }
-            admin.removeGridServiceAgent(serviceID.toString());
-        } else if (service instanceof GSC) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Service Removed [GSC] with uid [" + serviceID + "]");
-            }
-            admin.removeGridServiceContainer(serviceID.toString());
-        } else if (service instanceof PUServiceBean) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Service Removed [Processing Unit Instance] with uid [" + serviceID + "]");
-            }
-            admin.removeProcessingUnitInstance(serviceID.toString(), !discoverUnmanagedSpaces);
-        } else if (service instanceof IJSpace) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Service Removed [Space Instance] with uid [" + serviceID + "]");
-            }
-            admin.removeSpaceInstance(serviceID.toString());
-        }
-         }});
+        });
     }
-   
+
     public void serviceChanged(ServiceDiscoveryEvent event) {
         // TODO do we really care about this?
     }
@@ -388,7 +441,7 @@ public class DiscoveryService implements DiscoveryListener, ServiceDiscoveryList
                     groups[i] = tokenizer.nextToken();
                 }
             } else {
-                groups = new String[]{"gigaspaces-" + PlatformVersion.getVersionNumber()};
+                groups = new String[] { "gigaspaces-" + PlatformVersion.getVersionNumber() };
             }
         } else {
             groups = this.groups.toArray(new String[this.groups.size()]);

@@ -97,10 +97,10 @@ public class DefaultVirtualMachine implements InternalVirtualMachine {
 
     private final InternalVirtualMachineStatisticsChangedEventManager statisticsChangedEventManager;
 
-    public DefaultVirtualMachine(InternalVirtualMachines virtualMachines, JVMDetails details) {
+    public DefaultVirtualMachine(InternalVirtualMachines virtualMachines, JVMDetails details, String jmxUrl) {
         this.virtualMachines = virtualMachines;
         this.admin = (InternalAdmin) virtualMachines.getAdmin();
-        this.details = new DefaultVirtualMachineDetails(details);
+        this.details = new DefaultVirtualMachineDetails(details,jmxUrl);
         this.uid = details.getUid();
         this.lookupServices = new DefaultLookupServices(admin);
         this.gridServiceAgents = new DefaultGridServiceAgents(admin);

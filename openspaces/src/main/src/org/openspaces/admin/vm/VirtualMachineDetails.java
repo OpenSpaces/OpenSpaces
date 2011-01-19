@@ -45,6 +45,14 @@ public interface VirtualMachineDetails {
      * Returns <code>true</code> if the details of the virtual machine is not available.
      */
     boolean isNA();
+    
+    /**
+     * The address of a JMX API connector server
+     * This value is taken from JMXAttribute lookup attribute, in the case of LookupService null returned
+     * @return url to JMX API connector server, can be null in the case of Lookup Service
+     * @since 8.0
+     */
+    public String getJmxUrl();    
 
     /**
      * Returns the uid of the virtual machine.

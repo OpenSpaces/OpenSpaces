@@ -309,7 +309,6 @@ public class DefaultAdmin implements InternalAdmin {
                     public Thread newThread(Runnable r) {
                         return new Thread(r,"GS-ADMIN-event-executor-thread");
                     }});
-                ((ThreadPoolExecutor)eventsExecutorServices[i]).setRejectedExecutionHandler(DEFAULT_EVENT_LISTENER_REJECTED_POLICY);
                 eventsQueue[i] = new LinkedList<Runnable>();
             }
         }
@@ -387,7 +386,7 @@ public class DefaultAdmin implements InternalAdmin {
         scheduledExecutorService.shutdownNow();
         for (ExecutorService executorService : eventsExecutorServices) {
             executorService.shutdownNow();
-        }       
+        }
     }
 
     public LookupServices getLookupServices() {
@@ -497,7 +496,8 @@ public class DefaultAdmin implements InternalAdmin {
             command.run();
         }
     }
-    
+
+   
     public void scheduleAdminOperation(Runnable command) {
         longRunningExecutorService.submit(command);
     }
@@ -511,9 +511,9 @@ public class DefaultAdmin implements InternalAdmin {
         }
     }
     
-    public synchronized void addGridServiceAgent(InternalGridServiceAgent gridServiceAgent, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
+    public synchronized void addGridServiceAgent(InternalGridServiceAgent gridServiceAgent, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceAgent, osDetails);
-        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceAgent, jvmDetails);
+        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceAgent, jvmDetails, jmxUrl);
         InternalTransport transport = processTransportOnServiceAddition(gridServiceAgent, nioDetails, virtualMachine);
 
         InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
@@ -572,9 +572,9 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void addLookupService(InternalLookupService lookupService,
-            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
+            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(lookupService, osDetails);
-        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(lookupService, jvmDetails);
+        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(lookupService, jvmDetails, jmxUrl );
         InternalTransport transport = processTransportOnServiceAddition(lookupService, nioDetails, virtualMachine);
 
         InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
@@ -616,9 +616,9 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void addGridServiceManager(InternalGridServiceManager gridServiceManager,
-            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
+            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceManager, osDetails);
-        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceManager, jvmDetails);
+        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceManager, jvmDetails, jmxUrl);
         InternalTransport transport = processTransportOnServiceAddition(gridServiceManager, nioDetails, virtualMachine);
 
         InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
@@ -662,9 +662,9 @@ public class DefaultAdmin implements InternalAdmin {
     }
     
     public synchronized void addElasticServiceManager(InternalElasticServiceManager elasticServiceManager,
-            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
+            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(elasticServiceManager, osDetails);
-        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(elasticServiceManager, jvmDetails);
+        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(elasticServiceManager, jvmDetails, jmxUrl );
         InternalTransport transport = processTransportOnServiceAddition(elasticServiceManager, nioDetails, virtualMachine);
 
         InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
@@ -708,9 +708,9 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer,
-            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
+            NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(gridServiceContainer, osDetails);
-        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceContainer, jvmDetails);
+        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(gridServiceContainer, jvmDetails, jmxUrl);
         InternalTransport transport = processTransportOnServiceAddition(gridServiceContainer, nioDetails, virtualMachine);
 
         InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
@@ -754,9 +754,9 @@ public class DefaultAdmin implements InternalAdmin {
         flushEvents();
     }
 
-    public synchronized void addProcessingUnitInstance(InternalProcessingUnitInstance processingUnitInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
+    public synchronized void addProcessingUnitInstance(InternalProcessingUnitInstance processingUnitInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(processingUnitInstance, osDetails);
-        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(processingUnitInstance, jvmDetails);
+        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(processingUnitInstance, jvmDetails, jmxUrl);
         InternalTransport transport = processTransportOnServiceAddition(processingUnitInstance, nioDetails, virtualMachine);
 
         InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
@@ -806,9 +806,9 @@ public class DefaultAdmin implements InternalAdmin {
         flushEvents();
     }
 
-    public synchronized void addSpaceInstance(InternalSpaceInstance spaceInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String[] zones) {
+    public synchronized void addSpaceInstance(InternalSpaceInstance spaceInstance, NIODetails nioDetails, OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
         OperatingSystem operatingSystem = processOperatingSystemOnServiceAddition(spaceInstance, osDetails);
-        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(spaceInstance, jvmDetails);
+        VirtualMachine virtualMachine = processVirtualMachineOnServiceAddition(spaceInstance, jvmDetails, jmxUrl);
         InternalTransport transport = processTransportOnServiceAddition(spaceInstance, nioDetails, virtualMachine);
 
         InternalMachine machine = processMachineOnServiceAddition(transport.getDetails(),
@@ -964,10 +964,10 @@ public class DefaultAdmin implements InternalAdmin {
         }
     }
 
-    private InternalVirtualMachine processVirtualMachineOnServiceAddition(InternalVirtualMachineInfoProvider vmProvider, JVMDetails jvmDetails) {
+    private InternalVirtualMachine processVirtualMachineOnServiceAddition(InternalVirtualMachineInfoProvider vmProvider, JVMDetails jvmDetails, String jmxUrl) {
         InternalVirtualMachine virtualMachine = (InternalVirtualMachine) virtualMachines.getVirtualMachineByUID(jvmDetails.getUid());
         if (virtualMachine == null) {
-            virtualMachine = new DefaultVirtualMachine(virtualMachines, jvmDetails);
+            virtualMachine = new DefaultVirtualMachine(virtualMachines, jvmDetails,jmxUrl);
             virtualMachines.addVirtualMachine(virtualMachine);
         }
         virtualMachine.addVirtualMachineInfoProvider(vmProvider);

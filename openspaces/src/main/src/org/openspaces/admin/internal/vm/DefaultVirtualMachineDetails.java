@@ -1,6 +1,7 @@
 package org.openspaces.admin.internal.vm;
 
 import com.gigaspaces.internal.jvm.JVMDetails;
+import com.gigaspaces.start.SystemBoot;
 
 import org.openspaces.admin.support.StatisticsUtils;
 import org.openspaces.admin.vm.VirtualMachineDetails;
@@ -13,13 +14,22 @@ import java.util.Map;
 public class DefaultVirtualMachineDetails implements VirtualMachineDetails {
 
     private final JVMDetails details;
+    private final String jmxUrl;
 
     public DefaultVirtualMachineDetails() {
         this.details = new JVMDetails();
+        jmxUrl = "";
     }
 
-    public DefaultVirtualMachineDetails(JVMDetails details) {
+    public DefaultVirtualMachineDetails(JVMDetails details,String jmxUrl) {
         this.details = details;
+        this.jmxUrl = jmxUrl;
+        
+        System.out.println( ">>>DefaultVirtualMachineDetails, jmxServiceURL=" + SystemBoot.getJMXServiceURL() );
+    }
+    
+    public String getJmxUrl(){
+        return jmxUrl;
     }
 
     public boolean isNA() {
