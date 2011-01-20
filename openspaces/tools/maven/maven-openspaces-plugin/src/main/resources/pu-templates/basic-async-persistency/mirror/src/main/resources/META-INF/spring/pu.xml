@@ -61,14 +61,14 @@
 
     <!--
         An external data source that will be responsible for persisting changes done on the cluster that
-        connects to this mirror using Hiberante.
+        connects to this mirror using Hibernate.
     -->
     <bean id="hibernateDataSource" class="org.openspaces.persistency.hibernate.DefaultHibernateExternalDataSource">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
 
     <!--
-        The mirror space. Uses the Hiberante exteranl data source. Persists changes done on the Space that
+        The mirror space. Uses the Hibernate external data source. Persists changes done on the Space that
         connects to this mirror space into the database using Hibernate.
     -->    
     <os-core:mirror id="mirror" url="/./mirror-service" external-data-source="hibernateDataSource">
