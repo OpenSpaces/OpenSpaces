@@ -70,8 +70,7 @@
     <!--
         The mirror space. Uses the Hiberante exteranl data source. Persists changes done on the Space that
         connects to this mirror space into the database using Hibernate.
-    -->
-    
+    -->    
     <os-core:mirror id="mirror" url="/./mirror-service" external-data-source="hibernateDataSource">
 		<os-core:source-space name="space" partitions="2" backups="1"/>      
 	</os-core:mirror>
