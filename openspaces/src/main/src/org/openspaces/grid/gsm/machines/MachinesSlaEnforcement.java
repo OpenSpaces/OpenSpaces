@@ -263,7 +263,7 @@ public class MachinesSlaEnforcement implements
 
             if (getAgentsStarted().size() + getAgentsPendingShutdown().size() > maxNumberOfMachines) {
                     
-                logger.debug("Considering scale in: "+
+                logger.info("Considering scale in: "+
                         "max #machines is " + maxNumberOfMachines + ", " +
                         "existing #machines started " + getAgentsStarted().size() + ", " + 
                         "existing #machines pending shutdown " + getAgentsPendingShutdown().size());
@@ -271,34 +271,36 @@ public class MachinesSlaEnforcement implements
                 // scale in
                 int surplusMachines = getAgentsStarted().size() + getAgentsPendingShutdown().size() - maxNumberOfMachines;
                 
-                // adjust surplusMemory based on agents marked for shutdown
-                // remove mark if it would cause surplus to be below zero
-                // remove mark if it would reduce the number of machines below the sla minimum.
-                Iterator<GridServiceAgent> iterator = Arrays.asList(
-                        getGridServiceAgentsPendingShutdown()).iterator();
-                while (iterator.hasNext()) {
+                // adjust surplusMachines based on agents marked for shutdown
+                for (GridServiceAgent agent : getGridServiceAgentsPendingShutdown()) {
 
-                    GridServiceAgent agent = iterator.next();
                     if (surplusMachines > 0) {
                         // this machine is already marked for shutdown, so surplus
                         // is adjusted to reflect that
                         surplusMachines--;
                     } else {
-                        iterator.remove();
-                        logger.info("machine agent " + agent.getMachine().getHostAddress() + " is no longer marked for shutdown in order to maintain capacity.");
+                        // cancel scale in
+                        getAgentsPendingShutdown().remove(agent);
+                        getAgentsStarted().add(agent);
+                        logger.info(
+                                "machine agent " + agent.getMachine().getHostAddress() + " " +
+                                "is no longer marked for shutdown in order to maintain capacity. "+
+                                "Approved machine agents are: " + MachinesSlaUtils.machinesToString(getAgentsStarted()));
                     }
                 }
 
                 // mark agents for shutdown if there are not enough of them (scale in)
                 // give priority to agents that do not host a GSM/LUS since we want to evacuate those last.
-                for (GridServiceAgent agent : MachinesSlaUtils.sortManagementLast(getGridServiceAgents())) {
+                for (GridServiceAgent agent : MachinesSlaUtils.sortManagementLast(getAgentsStarted())) {
                     if (surplusMachines > 0) {
                         // mark machine for shutdown
-                        this.getAgentsPendingShutdown().add(agent);
+                        getAgentsPendingShutdown().add(agent);
                         getAgentsStarted().remove(agent);
                         surplusMachines --;
                         slaReached = false;
-                        logger.info("machine agent " + agent.getMachine().getHostAddress() + " is marked for shutdown in order to reduce capacity.");
+                        logger.info(
+                                "Machine agent " + agent.getMachine().getHostAddress() + " is marked for shutdown in order to reduce capacity. "+
+                                "Approved machine agents are: " + MachinesSlaUtils.machinesToString(getAgentsStarted()));
                     }
                 }
             }
@@ -315,7 +317,9 @@ public class MachinesSlaEnforcement implements
                                         new NumberOfMachinesCapacityRequirement(machineShortage)),
                                 START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
                     slaReached = false;
-                    logger.info(machineShortage+ " new machine(s) is scheduled to be started.");
+                    logger.info(
+                            machineShortage+ " new machine(s) is scheduled to be started "+
+                            "in order to reach a total of " + maxNumberOfMachines + " machines.");
                 }
             }
             
@@ -397,11 +401,8 @@ public class MachinesSlaEnforcement implements
                 // adjust surplusMemory based on agents marked for shutdown
                 // remove mark if it would cause surplus to be below zero
                 // remove mark if it would reduce the number of machines below the sla minimum.
-                Iterator<GridServiceAgent> iterator = Arrays.asList(
-                        getGridServiceAgentsPendingShutdown()).iterator();
-                while (iterator.hasNext()) {
+                for (GridServiceAgent agent : getGridServiceAgentsPendingShutdown()) {
 
-                    GridServiceAgent agent = iterator.next();
                     long machineMemory = MachinesSlaUtils.getMemoryInMB(agent.getMachine(), sla);
                     double machineCpu = MachinesSlaUtils.getCpu(agent.getMachine());
                     if (surplusMemory >= machineMemory &&
@@ -413,26 +414,33 @@ public class MachinesSlaEnforcement implements
                         surplusCpu -= machineCpu;
                         surplusMachines--;
                     } else {
-                        iterator.remove();
-                        logger.info("machine agent " + agent.getMachine().getHostAddress() + " is no longer marked for shutdown in order to maintain capacity.");
+                        // cancel scale in
+                        getAgentsPendingShutdown().remove(agent);
+                        getAgentsStarted().add(agent);
+                        logger.info(
+                                "machine agent " + agent.getMachine().getHostAddress() + " " +
+                                "is no longer marked for shutdown in order to maintain capacity. "+
+                                "Approved machine agents are: " + MachinesSlaUtils.machinesToString(getAgentsStarted()));
                     }
                 }
 
                 // mark agents for shutdown if there are not enough of them (scale in)
                 // give priority to agents that do not host a GSM/LUS since we want to evacuate those last.
-                for (GridServiceAgent agent : MachinesSlaUtils.sortManagementLast(getGridServiceAgents())) {
+                for (GridServiceAgent agent : MachinesSlaUtils.sortManagementLast(getAgentsStarted())) {
                     long machineMemory = MachinesSlaUtils.getMemoryInMB(agent.getMachine(), sla);
                     double machineCpu = MachinesSlaUtils.getCpu(agent.getMachine());
                     if (surplusMemory >= machineMemory && surplusCpu >= machineCpu && surplusMachines > 0) {
 
-                        // mark machine for shutdown
-                        this.getAgentsPendingShutdown().add(agent);
+                        // scale in machine
+                        getAgentsPendingShutdown().add(agent);
                         getAgentsStarted().remove(agent);
                         surplusMemory -= machineMemory;
                         surplusCpu -= machineCpu;
                         surplusMachines --;
                         slaReached = false;
-                        logger.info("machine agent " + agent.getMachine().getHostAddress() + " is marked for shutdown in order to reduce capacity.");
+                        logger.info(
+                                "Machine agent " + agent.getMachine().getHostAddress() + " is marked for shutdown in order to reduce capacity. "+
+                                "Approved machine agents are: " + MachinesSlaUtils.machinesToString(getAgentsStarted()));
                     }
                 }
             }
@@ -613,11 +621,9 @@ public class MachinesSlaEnforcement implements
         }
 
         private void cleanFailedMachines() {
-            Iterator<GridServiceAgent> iterator = agentsStartedPerProcessingUnit.get(pu).iterator();
-            while(iterator.hasNext()) {
-                GridServiceAgent agent = iterator.next();
+            for(GridServiceAgent agent : getGridServiceAgents()) {
                 if (!agent.isDiscovered()) {
-                    iterator.remove();
+                    getAgentsStarted().remove(agent);
                 }
             }
         }
@@ -879,7 +885,8 @@ public class MachinesSlaEnforcement implements
          * @return agent if found, or null if no free machines exist.
          */
         private GridServiceAgent findFreeAgent(Set<GridServiceAgent> usedAgents) {
-            for (GridServiceAgent agent : MachinesSlaUtils.sortManagementLast(admin.getGridServiceAgents().getAgents())) {
+            List<GridServiceAgent> agents = Arrays.asList(admin.getGridServiceAgents().getAgents());
+            for (GridServiceAgent agent : MachinesSlaUtils.sortManagementLast(agents)) {
                 if (!usedAgents.contains(agent) &&
                     (sla.getAllowDeploymentOnManagementMachine() || 
                      !MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine()))) {

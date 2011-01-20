@@ -84,8 +84,8 @@ public class MachinesSlaUtils {
         return machineShortage<=0 && memoryShortageInMB<=0 && cpuShortage<=0;
     }
     
-    public static GridServiceAgent[] sortManagementLast(GridServiceAgent[] agents) {
-        List<GridServiceAgent> sortedAgents = new ArrayList<GridServiceAgent>(Arrays.asList(agents));
+    public static List<GridServiceAgent> sortManagementLast(List<GridServiceAgent> agents) {
+        List<GridServiceAgent> sortedAgents = new ArrayList<GridServiceAgent>(agents);
         Collections.sort(sortedAgents,new Comparator<GridServiceAgent>() {
 
             public int compare(GridServiceAgent agent1, GridServiceAgent agent2) {
@@ -97,7 +97,7 @@ public class MachinesSlaUtils {
             }
         });
         
-        return sortedAgents.toArray(new GridServiceAgent[sortedAgents.size()]);
+        return sortedAgents;
     }
 
     public static String machineToString(Machine machine) {
@@ -106,5 +106,13 @@ public class MachinesSlaUtils {
     
     public static String gscToString(GridComponent container) {
         return "pid["+container.getVirtualMachine().getDetails().getPid()+"] host["+machineToString(container.getMachine())+"]";
+    }
+
+    public static String machinesToString(List<GridServiceAgent> agents) {
+        String[] machinesToString = new String[agents.size()];
+        for (int i = 0 ; i < machinesToString.length ; i++) {
+            machinesToString[i] = machineToString(agents.get(i).getMachine());
+        }
+        return Arrays.toString(machinesToString);
     }
 }
