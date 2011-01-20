@@ -76,6 +76,10 @@ public class EagerScaleConfig
     public String getBeanClassName() {
         return EagerScaleStrategyBean.class.getName();
     }
+    
+    public String toString() {
+        return this.properties.toString();
+    }
 }
 
 
