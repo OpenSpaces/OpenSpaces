@@ -137,6 +137,12 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             }
         } 
         catch (ProcessingUnitAlreadyDeployedException e) {
+            // re-set dynamic properties (ESM)
+            Map<String,String> elasticConfig = deployment.getElasticProperties();
+            ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(operationalString.getName());
+            if (pu != null && elasticConfig.size() > 0) {
+                setProcessingUnitElasticProperties(pu, elasticConfig);
+            }
             throw e;
         }
         catch (Exception e) {
