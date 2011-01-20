@@ -16,6 +16,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
@@ -25,7 +26,6 @@ import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.core.util.MemoryUnit;
-import org.openspaces.grid.esm.ToStringHelper;
 
 public class ContainersSlaUtils {
 
@@ -215,7 +215,7 @@ public class ContainersSlaUtils {
         String prefix = "-Xmx";
         String xmxArgument = getCommandLineArgumentRemovePrefix(container,prefix);
         if (xmxArgument == null) {
-            throw new IllegalStateException("Container " + ToStringHelper.gscToString(container) + " does not have an -Xmx commandline argument.");
+            throw new IllegalStateException("Container " + gscToString(container) + " does not have an -Xmx commandline argument.");
         }
         return MemoryUnit.MEGABYTES.convert(xmxArgument);
     }
@@ -413,6 +413,14 @@ public class ContainersSlaUtils {
         });
 
         return sortedApprovedContainers;
+    }
+    
+    public static String machineToString(Machine machine) {
+        return machine.getHostName() + "/" + machine.getHostAddress();
+    }
+    
+    public static String gscToString(GridComponent container) {
+        return "pid["+container.getVirtualMachine().getDetails().getPid()+"] host["+machineToString(container.getMachine())+"]";
     }
 
 }

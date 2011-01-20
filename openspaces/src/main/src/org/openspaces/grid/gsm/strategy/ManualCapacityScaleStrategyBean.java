@@ -22,7 +22,6 @@ import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
-import org.openspaces.grid.esm.ToStringHelper;
 import org.openspaces.grid.gsm.ElasticMachineProvisioningAware;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
@@ -33,6 +32,7 @@ import org.openspaces.grid.gsm.containers.ContainersSlaPolicy;
 import org.openspaces.grid.gsm.machines.CapacityMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
+import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
 import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAware;
@@ -246,7 +246,7 @@ public class ManualCapacityScaleStrategyBean
     private static String toString(GridServiceContainer[] containers) {
         final List<String> containersToString = new ArrayList<String>();
         for (final GridServiceContainer container : containers) {
-            containersToString.add(ToStringHelper.gscToString(container));
+            containersToString.add(MachinesSlaUtils.gscToString(container));
         }
         return Arrays.toString(containersToString.toArray(new String[containersToString.size()]));
     }
@@ -254,7 +254,7 @@ public class ManualCapacityScaleStrategyBean
     private static String toString(GridServiceAgent[] approvedAgents) {
         final List<String> approvedHostAddresses = new ArrayList<String>();
         for (final GridServiceAgent approvedAgent : approvedAgents) {
-            approvedHostAddresses.add(ToStringHelper.machineToString(approvedAgent.getMachine()));
+            approvedHostAddresses.add(MachinesSlaUtils.machineToString(approvedAgent.getMachine()));
         }
         return Arrays.toString(approvedHostAddresses.toArray(new String[approvedHostAddresses.size()]));
     }

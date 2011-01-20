@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
@@ -99,4 +100,11 @@ public class MachinesSlaUtils {
         return sortedAgents.toArray(new GridServiceAgent[sortedAgents.size()]);
     }
 
+    public static String machineToString(Machine machine) {
+        return machine.getHostName() + "/" + machine.getHostAddress();
+    }
+    
+    public static String gscToString(GridComponent container) {
+        return "pid["+container.getVirtualMachine().getDetails().getPid()+"] host["+machineToString(container.getMachine())+"]";
+    }
 }

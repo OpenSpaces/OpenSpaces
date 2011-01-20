@@ -15,6 +15,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.machine.Machine;
@@ -22,7 +23,7 @@ import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
-import org.openspaces.grid.esm.ToStringHelper;
+import org.openspaces.admin.space.SpaceInstance;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 
@@ -141,7 +142,7 @@ public class RebalancingUtils {
                 else if (!targetContainer.isDiscovered()) {
                     executionException = new ExecutionException(new RelocationException(
                                     "Relocation of processing unit instance to container " + 
-                                    ToStringHelper.gscToString(targetContainer) + " "+
+                                    gscToString(targetContainer) + " "+
                                     "failed since container no longer exists."));
                 } 
                 else if (!isAtLeastOneInstanceValid(puInstancesFromSamePartition)) {
@@ -149,7 +150,7 @@ public class RebalancingUtils {
                             "Relocation of processing unit instance failed. "+
                             "The following pu instance that were supposed to hold a copy of the data no longer exist :";
                         for (ProcessingUnitInstance instanceFromSamePartition : puInstancesFromSamePartition) {
-                            errorMessage += " " + ToStringHelper.puInstanceToString(instanceFromSamePartition);
+                            errorMessage += " " + puInstanceToString(instanceFromSamePartition);
                         }
                         executionException = new ExecutionException(new RelocationException(errorMessage));
                 } 
@@ -167,7 +168,7 @@ public class RebalancingUtils {
                         else  { 
                             executionException = new ExecutionException(new WrongContainerRelocationException(
                                         "Relocation of processing unit instance to container " +
-                                        ToStringHelper.gscToString(targetContainer) + " "+
+                                        gscToString(targetContainer) + " "+
                                         "failed since the instance was eventually deployed on a different container " + 
                                         puInstance.getGridServiceContainer())); 
                         }
@@ -206,8 +207,8 @@ public class RebalancingUtils {
             public String getFailureMessage() {
                if (isTimedOut()) {
                 return "relocation timeout of processing unit from " + 
-                        ToStringHelper.gscToString(sourceContainer) + " to " + 
-                        ToStringHelper.gscToString(targetContainer);
+                        gscToString(sourceContainer) + " to " + 
+                        gscToString(targetContainer);
                }
                
                if (executionException != null && executionException.getCause() != null) {
@@ -259,7 +260,7 @@ public class RebalancingUtils {
         
         ProcessingUnitPartition partition = instance.getPartition();
         if (!isProcessingUnitPartitionIntact(partition, containers)) {
-            throw new IllegalStateException("Cannot relocate pu instance " + ToStringHelper.puInstanceToString(instance) +" since partition is not intact." );
+            throw new IllegalStateException("Cannot relocate pu instance " + puInstanceToString(instance) +" since partition is not intact." );
         }
         
         for (int backupId = 0 ; backupId <= numberOfBackups ; backupId++) {
@@ -703,9 +704,28 @@ public class RebalancingUtils {
     public static int getNumberOfCpuCores(Machine machine) {
         int numberOfCpuCores = machine.getOperatingSystem().getDetails().getAvailableProcessors();
         if (numberOfCpuCores <= 0) {
-            throw new IllegalStateException("number of cpu cores on machine " + ToStringHelper.machineToString(machine) + " must be a positive number.");
+            throw new IllegalStateException("number of cpu cores on machine " + machineToString(machine) + " must be a positive number.");
         }
         return numberOfCpuCores;
+    }
+    
+    public static String puInstanceToString(ProcessingUnitInstance instance) {
+        StringBuilder builder = new StringBuilder(16);
+        builder.append("[").append(instance.getInstanceId()).append(",").append(instance.getBackupId() + 1);
+        SpaceInstance spaceInstance = instance.getSpaceInstance();
+        if (spaceInstance != null) {
+            builder.append(",").append(spaceInstance.getMode());
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+    
+    public static String machineToString(Machine machine) {
+        return machine.getHostName() + "/" + machine.getHostAddress();
+    }
+    
+    public static String gscToString(GridComponent container) {
+        return "pid["+container.getVirtualMachine().getDetails().getPid()+"] host["+machineToString(container.getMachine())+"]";
     }
     
 }

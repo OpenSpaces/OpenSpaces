@@ -4,7 +4,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.openspaces.admin.gsa.GridServiceAgent;
-import org.openspaces.grid.esm.ElasticScaleHandlerException;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 
 /**
@@ -25,14 +24,14 @@ public interface ElasticMachineProvisioning {
 	 * @param duration - the maximum duration after which a TimeoutException is raised.
 	 * @return the grid service agent
 	 * 
-	 * @throws ElasticScaleHandlerException
+	 * @throws ElasticMachineProvisioningException
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
 	GridServiceAgent[] startMachines(
 			CapacityRequirements capacityRequirements,
 			long duration, TimeUnit unit)
-	throws ElasticScaleHandlerException, InterruptedException , TimeoutException ;
+	throws ElasticMachineProvisioningException, InterruptedException , TimeoutException ;
 	
 
 	/**
@@ -52,8 +51,8 @@ public interface ElasticMachineProvisioning {
 	 *         false if no action was taken.
 	 * @throws TimeoutException - terminating the machine took too long
 	 * @throws InterruptedException 
-	 * @throws ElasticScaleHandlerException - terminating the machine encountered a problem. 
+	 * @throws ElasticMachineProvisioningException - terminating the machine encountered a problem. 
 	 */
-	boolean stopMachine(GridServiceAgent agent, long duration, TimeUnit unit) throws ElasticScaleHandlerException, InterruptedException, TimeoutException;
+	boolean stopMachine(GridServiceAgent agent, long duration, TimeUnit unit) throws ElasticMachineProvisioningException, InterruptedException, TimeoutException;
 	
 }

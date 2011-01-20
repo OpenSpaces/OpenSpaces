@@ -19,7 +19,6 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
-import org.openspaces.grid.esm.ToStringHelper;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
@@ -288,12 +287,12 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                 Set<String> zones = container.getZones().keySet();
 
                 if (zones.size() != 1) {
-                    throw new IllegalArgumentException("Container " + ToStringHelper.gscToString(container)
+                    throw new IllegalArgumentException("Container " + RebalancingUtils.gscToString(container)
                             + " must have exactly one zone.");
                 }
 
                 if (!zones.contains(zone)) {
-                    throw new IllegalArgumentException("Container " + ToStringHelper.gscToString(container)
+                    throw new IllegalArgumentException("Container " + RebalancingUtils.gscToString(container)
                             + " must have the zone " + zone);
                 }
             }
@@ -418,7 +417,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
 
                 if (isConflictingOperationInProgress(target, maximumNumberOfRelocationsPerMachine)) {
                     conflict = true;
-                    logger.debug("Cannot relocate instances to " + ToStringHelper.gscToString(target)
+                    logger.debug("Cannot relocate instances to " + RebalancingUtils.gscToString(target)
                             + " since a conflicting relocation is already in progress.");
                     continue;
                 }
@@ -437,7 +436,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
 
                     if (isConflictingOperationInProgress(source, maximumNumberOfRelocationsPerMachine)) {
                         conflict = true;
-                        logger.debug("Cannot relocate instances from " + ToStringHelper.gscToString(source)
+                        logger.debug("Cannot relocate instances from " + RebalancingUtils.gscToString(source)
                                 + " since a conflicting relocation is already in progress.");
                         continue;
                     }
@@ -464,27 +463,27 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                     for (ProcessingUnitInstance candidateInstance : source.getProcessingUnitInstances(pu.getName())) {
 
                         if (candidateInstance.getSpaceInstance() == null) {
-                            logger.debug("Cannot relocate " + ToStringHelper.puInstanceToString(candidateInstance)
+                            logger.debug("Cannot relocate " + RebalancingUtils.puInstanceToString(candidateInstance)
                                     + " since embedded space is not detected");
                             continue;
                         }
 
                         if (onlyBackups && candidateInstance.getSpaceInstance().getMode() != SpaceMode.BACKUP) {
                             logger.debug("Prefer not to relocate "
-                                    + ToStringHelper.puInstanceToString(candidateInstance)
+                                    + RebalancingUtils.puInstanceToString(candidateInstance)
                                     + " since it is not a backup, and backups are preffered for relocation");
                             continue;
                         }
 
                         if (!RebalancingUtils.isProcessingUnitPartitionIntact(candidateInstance.getPartition())) {
-                            logger.debug("Cannot relocate " + ToStringHelper.puInstanceToString(candidateInstance)
+                            logger.debug("Cannot relocate " + RebalancingUtils.puInstanceToString(candidateInstance)
                                     + " since instances from the same partition are missing");
                             conflict = true;
                             continue;
                         }
 
                         if (isConflictingOperationInProgress(candidateInstance)) {
-                            logger.debug("Cannot relocate " + ToStringHelper.puInstanceToString(candidateInstance)
+                            logger.debug("Cannot relocate " + RebalancingUtils.puInstanceToString(candidateInstance)
                                     + " " + "since another instance from the same partition is being relocated");
                             conflict = true;
                             continue;
@@ -493,9 +492,9 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                         for (Machine sourceReplicationMachine : RebalancingUtils.getMachinesHostingContainers(RebalancingUtils.getReplicationSourceContainers(candidateInstance))) {
                             if (isConflictingOperationInProgress(sourceReplicationMachine,
                                     maximumNumberOfRelocationsPerMachine)) {
-                                logger.debug("Cannot relocate " + ToStringHelper.puInstanceToString(candidateInstance)
+                                logger.debug("Cannot relocate " + RebalancingUtils.puInstanceToString(candidateInstance)
                                         + " " + "since replication source is on machine "
-                                        + ToStringHelper.machineToString(sourceReplicationMachine) + " "
+                                        + RebalancingUtils.machineToString(sourceReplicationMachine) + " "
                                         + "which is busy with another relocation");
                                 conflict = true;
                                 continue;
@@ -509,8 +508,8 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                                 .size();
 
                             if (numberOfOtherInstancesFromPartitionInTargetContainer >= pu.getMaxInstancesPerVM()) {
-                                logger.debug("Cannot relocate " + ToStringHelper.puInstanceToString(candidateInstance)
-                                        + " " + "to container " + ToStringHelper.gscToString(target) + " "
+                                logger.debug("Cannot relocate " + RebalancingUtils.puInstanceToString(candidateInstance)
+                                        + " " + "to container " + RebalancingUtils.gscToString(target) + " "
                                         + "since container already hosts "
                                         + numberOfOtherInstancesFromPartitionInTargetContainer + " "
                                         + "instance(s) from the same partition.");
@@ -526,8 +525,8 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                                 .size();
 
                             if (numberOfOtherInstancesFromPartitionInTargetMachine >= pu.getMaxInstancesPerMachine()) {
-                                logger.debug("Cannot relocate " + ToStringHelper.puInstanceToString(candidateInstance)
-                                        + " " + "to container " + ToStringHelper.gscToString(target) + " "
+                                logger.debug("Cannot relocate " + RebalancingUtils.puInstanceToString(candidateInstance)
+                                        + " " + "to container " + RebalancingUtils.gscToString(target) + " "
                                         + "since machine already contains "
                                         + numberOfOtherInstancesFromPartitionInTargetMachine + " "
                                         + "instance(s) from the same partition.");
@@ -535,9 +534,9 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                             }
                         }
 
-                        logger.info("Relocating " + ToStringHelper.puInstanceToString(candidateInstance) + " "
-                                + "from " + ToStringHelper.gscToString(source) + " " + "to "
-                                + ToStringHelper.gscToString(target));
+                        logger.info("Relocating " + RebalancingUtils.puInstanceToString(candidateInstance) + " "
+                                + "from " + RebalancingUtils.gscToString(source) + " " + "to "
+                                + RebalancingUtils.gscToString(target));
                         return RebalancingUtils.relocateProcessingUnitInstanceAsync(target, candidateInstance,
                                 RELOCATION_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
 
@@ -600,8 +599,8 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                                 .size();
 
                             if (numberOfOtherInstancesFromPartitionInTargetContainer >= pu.getMaxInstancesPerVM()) {
-                                logger.debug("Cannot relocate " + ToStringHelper.puInstanceToString(candidateInstance)
-                                        + " " + "to container " + ToStringHelper.gscToString(target) + " "
+                                logger.debug("Cannot relocate " + RebalancingUtils.puInstanceToString(candidateInstance)
+                                        + " " + "to container " + RebalancingUtils.gscToString(target) + " "
                                         + "since container already hosts "
                                         + numberOfOtherInstancesFromPartitionInTargetContainer + " "
                                         + "instance(s) from the same partition.");
@@ -616,8 +615,8 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                                 .size();
 
                             if (numberOfOtherInstancesFromPartitionInTargetMachine >= pu.getMaxInstancesPerMachine()) {
-                                logger.debug("Cannot relocate " + ToStringHelper.puInstanceToString(candidateInstance)
-                                        + " " + "to container " + ToStringHelper.gscToString(target) + " "
+                                logger.debug("Cannot relocate " + RebalancingUtils.puInstanceToString(candidateInstance)
+                                        + " " + "to container " + RebalancingUtils.gscToString(target) + " "
                                         + "since machine already contains "
                                         + numberOfOtherInstancesFromPartitionInTargetMachine + " "
                                         + "instance(s) from the same partition.");
@@ -625,9 +624,9 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                             }
                         }
 
-                        logger.info("Relocating " + ToStringHelper.puInstanceToString(candidateInstance) + " "
-                                + "from " + ToStringHelper.gscToString(source)
-                                + " " + "to " + ToStringHelper.gscToString(target));
+                        logger.info("Relocating " + RebalancingUtils.puInstanceToString(candidateInstance) + " "
+                                + "from " + RebalancingUtils.gscToString(source)
+                                + " " + "to " + RebalancingUtils.gscToString(target));
                         return RebalancingUtils.relocateProcessingUnitInstanceAsync(target, candidateInstance,
                                 RELOCATION_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
 
@@ -714,7 +713,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                         // number of primaries on machine might be skewed.
                         conflict = true;
                         logger.debug("Cannot restart a primary instance whos backup is on machine "
-                                + ToStringHelper.machineToString(target)
+                                + RebalancingUtils.machineToString(target)
                                 + " since a conflicting relocation is already in progress.");
                         continue;
                     }
@@ -723,7 +722,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                         // number of primaries on machine might be skewed.
                         conflict = true;
                         logger.debug("Cannot restart a primary instance from machine "
-                                + ToStringHelper.machineToString(source)
+                                + RebalancingUtils.machineToString(source)
                                 + " since a conflicting relocation is already in progress.");
                         continue;
                     }
@@ -733,27 +732,27 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                     for (ProcessingUnitInstance candidateInstance : source.getProcessingUnitInstances(pu.getName())) {
 
                         if (candidateInstance.getSpaceInstance() == null) {
-                            logger.debug("Cannot relocate " + ToStringHelper.puInstanceToString(candidateInstance)
+                            logger.debug("Cannot relocate " + RebalancingUtils.puInstanceToString(candidateInstance)
                                     + " since embedded space is not detected");
                             continue;
                         }
 
                         if (candidateInstance.getSpaceInstance().getMode() != SpaceMode.PRIMARY) {
                             logger.debug("Cannot restart instance "
-                                    + ToStringHelper.puInstanceToString(candidateInstance)
+                                    + RebalancingUtils.puInstanceToString(candidateInstance)
                                     + " since it is not primary.");
                             continue;
                         }
 
                         if (!RebalancingUtils.isProcessingUnitPartitionIntact(candidateInstance.getPartition())) {
-                            logger.debug("Cannot restart " + ToStringHelper.puInstanceToString(candidateInstance)
+                            logger.debug("Cannot restart " + RebalancingUtils.puInstanceToString(candidateInstance)
                                     + " since instances from the same partition are missing");
                             conflict = true;
                             continue;
                         }
 
                         if (isConflictingOperationInProgress(candidateInstance)) {
-                            logger.debug("Cannot relocate " + ToStringHelper.puInstanceToString(candidateInstance)
+                            logger.debug("Cannot relocate " + RebalancingUtils.puInstanceToString(candidateInstance)
                                     + " " + "since another instance from the same partition is being relocated");
                             conflict = true;
                             continue;
@@ -765,22 +764,22 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                         }
                         
                         if (!sourceReplicationMachines[0].equals(target)) {
-                            logger.debug("Cannot restart " + ToStringHelper.puInstanceToString(candidateInstance)
+                            logger.debug("Cannot restart " + RebalancingUtils.puInstanceToString(candidateInstance)
                                     + "since replication source is on "
-                                    + ToStringHelper.machineToString(sourceReplicationMachines[0]) + " "
-                                    + "and not on the target machine " + ToStringHelper.machineToString(target));
+                                    + RebalancingUtils.machineToString(sourceReplicationMachines[0]) + " "
+                                    + "and not on the target machine " + RebalancingUtils.machineToString(target));
                             continue;
                         }
                     
                         if (logger.isInfoEnabled()) {
-                            String sourceToString = ToStringHelper.machineToString(source);
-                            String targetToString = ToStringHelper.machineToString(target);
+                            String sourceToString = RebalancingUtils.machineToString(source);
+                            String targetToString = RebalancingUtils.machineToString(target);
                             int numberOfPrimaryInstancesOnTarget = RebalancingUtils.getNumberOfPrimaryInstancesOnMachine(pu, target);
                             int numberOfCpuCoresOnTarget = RebalancingUtils.getNumberOfCpuCores(target);
                             int numberOfPrimaryInstancesOnSource = RebalancingUtils.getNumberOfPrimaryInstancesOnMachine(pu, source);
                             int numberOfCpuCoresOnSource = RebalancingUtils.getNumberOfCpuCores(source);
                             logger.info(
-                                "Restarting " + ToStringHelper.puInstanceToString(candidateInstance) + " "
+                                "Restarting " + RebalancingUtils.puInstanceToString(candidateInstance) + " "
                                 + "instance on machine " + sourceToString + " so that machine "
                                 + sourceToString + " would have less instances per cpu core, and "
                                 + targetToString + " would have more primary instances per cpu core. "
@@ -823,7 +822,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                         }
                         
                         if (sourceReplicationMachines[0].equals(source)) {
-                            logger.debug("Cannot restart " + ToStringHelper.puInstanceToString(candidateInstance)
+                            logger.debug("Cannot restart " + RebalancingUtils.puInstanceToString(candidateInstance)
                                     + "since replication source is on same machine as primary, so restarting will have not change number of primaries on machine.");
                             continue;
                         }
@@ -833,11 +832,11 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                             
                             // number of cores is below optimal, or put it another way there are too many primaries on the machine                        
                             if (logger.isInfoEnabled()) {
-                                String sourceToString = ToStringHelper.machineToString(source);
+                                String sourceToString = RebalancingUtils.machineToString(source);
                                 int numberOfPrimaryInstancesOnSource = RebalancingUtils.getNumberOfPrimaryInstancesOnMachine(pu, source);
                                 int numberOfCpuCoresOnSource = RebalancingUtils.getNumberOfCpuCores(source);
                                 logger.info(
-                                    "Restarting " + ToStringHelper.puInstanceToString(candidateInstance) + " "
+                                    "Restarting " + RebalancingUtils.puInstanceToString(candidateInstance) + " "
                                     + "instance on machine " + sourceToString + " so that machine "
                                     + sourceToString + " would have less instances per cpu core. "
                                     + sourceToString +" has " + numberOfPrimaryInstancesOnSource + " primary instances "+
@@ -888,7 +887,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                     try {
                         ProcessingUnitInstance puInstance = future.get();
                         logger.info("Processing unit relocation completed successfully "
-                                + ToStringHelper.puInstanceToString(puInstance));
+                                + RebalancingUtils.puInstanceToString(puInstance));
 
                     } catch (ExecutionException e) {
                         if (e.getCause() instanceof AdminException) {

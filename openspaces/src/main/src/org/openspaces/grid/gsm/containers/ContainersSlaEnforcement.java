@@ -24,7 +24,6 @@ import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.core.util.MemoryUnit;
-import org.openspaces.grid.esm.ToStringHelper;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
@@ -224,7 +223,7 @@ public class ContainersSlaEnforcement implements
                         if (containerToRemove == null) {
                             break;
                         }
-                        logger.info("Marking container " + ToStringHelper.gscToString(containerToRemove) +" for shutdown.");
+                        logger.info("Marking container " + ContainersSlaUtils.gscToString(containerToRemove) +" for shutdown.");
                         containersMarkedForShutdown.add(containerToRemove);
                         approvedContainers.remove(containerToRemove);
                     }
@@ -276,7 +275,7 @@ public class ContainersSlaEnforcement implements
                         }
                     }
                     if (unmarkContainer != null) {
-                        logger.info("Unmarking container " + ToStringHelper.gscToString(unmarkContainer) + " so it won't be shutdown.");
+                        logger.info("Unmarking container " + ContainersSlaUtils.gscToString(unmarkContainer) + " so it won't be shutdown.");
                         containersMarkedForShutdownPerProcessingUnit.remove(unmarkContainer);
                         approvedContainers.add(unmarkContainer);
                         continue;
@@ -293,7 +292,7 @@ public class ContainersSlaEnforcement implements
                         // and this is an unused machine        
                         !futureMachinesHostingContainers.contains(gsa.getMachine())) {
                             
-                    logger.info("Starting a new Grid Service Container on " + ToStringHelper.machineToString(gsa.getMachine()));
+                    logger.info("Starting a new Grid Service Container on " + ContainersSlaUtils.machineToString(gsa.getMachine()));
                     futureContainers.add(ContainersSlaUtils.startGridServiceContainerAsync(admin,
                             (InternalGridServiceAgent) gsa, sla.getNewContainerConfig(),
                             START_CONTAINER_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS));
@@ -323,7 +322,7 @@ public class ContainersSlaEnforcement implements
                 else {
                     if (logger.isDebugEnabled()) {
                     logger.debug(
-                            "Cannot remove container " + ToStringHelper.gscToString(container) + " since " +
+                            "Cannot remove container " + ContainersSlaUtils.gscToString(container) + " since " +
                             (ContainersSlaUtils.getMemoryCapacityShortageInMB(sla, containers) <= 0 ? " it would violate memory SLA." :
                              ContainersSlaUtils.getNumberOfCpuCoresShortage(sla, containers) <= 0 ? " it would violate CPU sla." :
                              ContainersSlaUtils.getMachineShortage(sla, containers) <= 0 ? " it would violate minimum number of machines." : "unknown"));
@@ -393,7 +392,7 @@ public class ContainersSlaEnforcement implements
                     recommendedAgents.add(gsa);
                 }
                 else {
-                    logger.debug(ToStringHelper.machineToString(gsa.getMachine()) + " does not have enough free memory. It has only " + freeInMB + "MB free and required is " + requiredFreeMemoryInMB + "MB plus reserved is " + sla.getReservedMemoryCapacityPerMachineInMB()+"MB");
+                    logger.debug(ContainersSlaUtils.machineToString(gsa.getMachine()) + " does not have enough free memory. It has only " + freeInMB + "MB free and required is " + requiredFreeMemoryInMB + "MB plus reserved is " + sla.getReservedMemoryCapacityPerMachineInMB()+"MB");
                 }
             }
 
@@ -426,7 +425,7 @@ public class ContainersSlaEnforcement implements
 
                         GridServiceContainer container = future.get();
                         if (container.isDiscovered()) {
-                            logger.info("Container started succesfully " + ToStringHelper.gscToString(container));
+                            logger.info("Container started succesfully " + ContainersSlaUtils.gscToString(container));
                         }
 
                     } catch (ExecutionException e) {
@@ -441,7 +440,7 @@ public class ContainersSlaEnforcement implements
 
                     if (exception != null) {
                         final String errorMessage = "Failed to start container on machine "
-                                + ToStringHelper.machineToString(future.getGridServiceAgent().getMachine());
+                                + ContainersSlaUtils.machineToString(future.getGridServiceAgent().getMachine());
                         logger.warn(errorMessage, exception);
                         failedFutureContainers.add(future);
                     }
@@ -529,7 +528,7 @@ public class ContainersSlaEnforcement implements
             GridServiceAgent agent = future.getGridServiceAgent();
             if (!agent.isDiscovered()) {
                 logger.info("Forgetting failure to start container on machine "
-                        + ToStringHelper.machineToString(agent.getMachine()) + " that occured "
+                        + ContainersSlaUtils.machineToString(agent.getMachine()) + " that occured "
                         + passedSeconds + " seconds ago since grid service agent no longer exists.");
                 iterator.remove();
             } 
@@ -537,7 +536,7 @@ public class ContainersSlaEnforcement implements
                 terminateOrphanContainersOfAgent(agent);
                 if (passedSeconds > START_CONTAINER_TIMEOUT_FAILURE_FORGET_SECONDS) {
                     logger.info("Forgetting failure to start container on machine "
-                            + ToStringHelper.machineToString(agent.getMachine()) + " that occured "
+                            + ContainersSlaUtils.machineToString(agent.getMachine()) + " that occured "
                             + passedSeconds + " seconds ago due to timeout.");
                     iterator.remove();
                 }
@@ -563,10 +562,10 @@ public class ContainersSlaEnforcement implements
         for (final int agentId : agentIds) {
             try {
                 agent.killByAgentId(agentId);
-                logger.warn("Terminated orphan container that did not register with lookup service on machine " + ToStringHelper.machineToString(agent.getMachine())+ " agentId=" + agentId);
+                logger.warn("Terminated orphan container that did not register with lookup service on machine " + ContainersSlaUtils.machineToString(agent.getMachine())+ " agentId=" + agentId);
             }
             catch (final AdminException e) {
-                logger.warn("Error terminating orphan container that did not register with lookup service on machine " + ToStringHelper.machineToString(agent.getMachine()) + " agentId=" + agentId, e);
+                logger.warn("Error terminating orphan container that did not register with lookup service on machine " + ContainersSlaUtils.machineToString(agent.getMachine()) + " agentId=" + agentId, e);
             }
         }
     }

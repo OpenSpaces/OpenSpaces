@@ -12,7 +12,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.gsa.GridServiceAgent;
-import org.openspaces.grid.esm.ElasticScaleHandlerException;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 
 import com.j_spaces.kernel.GSThread;
@@ -55,7 +54,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
 				try {
 					GridServiceAgent[] agents = machineProvisioning.startMachines(capacityRequirements, duration, unit);
 					ref.set(agents);
-				} catch (ElasticScaleHandlerException e) {
+				} catch (ElasticMachineProvisioningException e) {
 					ref.set(new ExecutionException(e));
 				} catch (InterruptedException e) {
 					ref.set(new ExecutionException(e));
@@ -140,7 +139,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
 					if (NonBlockingElasticMachineProvisioningAdapter.this.machineProvisioning.stopMachine(agent, duration, unit)) {
 					    logger.info(hostAddress + " stopped succesfully.");
 					}
-				} catch (ElasticScaleHandlerException e) {
+				} catch (ElasticMachineProvisioningException e) {
 					logger.warn("Error while stopping " + hostAddress,e);
 				} catch (InterruptedException e) {
 					logger.info("Interrupted while stopping " + hostAddress,e);
