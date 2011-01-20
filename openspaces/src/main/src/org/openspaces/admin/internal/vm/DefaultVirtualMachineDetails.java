@@ -1,12 +1,11 @@
 package org.openspaces.admin.internal.vm;
 
-import com.gigaspaces.internal.jvm.JVMDetails;
-import com.gigaspaces.start.SystemBoot;
+import java.util.Map;
 
 import org.openspaces.admin.support.StatisticsUtils;
 import org.openspaces.admin.vm.VirtualMachineDetails;
 
-import java.util.Map;
+import com.gigaspaces.internal.jvm.JVMDetails;
 
 /**
  * @author kimchy
@@ -24,8 +23,6 @@ public class DefaultVirtualMachineDetails implements VirtualMachineDetails {
     public DefaultVirtualMachineDetails(JVMDetails details,String jmxUrl) {
         this.details = details;
         this.jmxUrl = jmxUrl;
-        
-        System.out.println( ">>>DefaultVirtualMachineDetails, jmxServiceURL=" + SystemBoot.getJMXServiceURL() );
     }
     
     public String getJmxUrl(){
