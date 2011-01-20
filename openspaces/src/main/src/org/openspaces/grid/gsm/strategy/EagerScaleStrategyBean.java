@@ -53,7 +53,7 @@ public class EagerScaleStrategyBean
     private EagerScaleConfig slaConfig;
     private EagerMachinesSlaEnforcementEndpoint machinesEndpoint;
     private ContainersSlaEnforcementEndpoint containersEndpoint;
-    private RebalancingSlaEnforcementEndpoint rebalancingEndpoing;
+    private RebalancingSlaEnforcementEndpoint rebalancingEndpoint;
     private ProcessingUnit pu;
     private GridServiceContainerConfig containersConfig;
     private ProcessingUnitSchemaConfig schemaConfig;
@@ -88,7 +88,7 @@ public class EagerScaleStrategyBean
     }
     
     public void setRebalancingSlaEnforcementEndpoint(RebalancingSlaEnforcementEndpoint relocationService) {
-        this.rebalancingEndpoing = relocationService;
+        this.rebalancingEndpoint = relocationService;
     }
 
     public void setGridServiceContainerConfig(GridServiceContainerConfig containersConfig) {
@@ -274,7 +274,7 @@ public class EagerScaleStrategyBean
         sla.setContainers(containers);
         sla.setMaximumNumberOfConcurrentRelocationsPerMachine(slaConfig.getMaxConcurrentRelocationsPerMachine());
         
-        boolean slaEnforced = rebalancingEndpoing.enforceSla(sla);
+        boolean slaEnforced = rebalancingEndpoint.enforceSla(sla);
         
         if (slaEnforced) {
             triggerAlert(

@@ -102,7 +102,7 @@ public class ManualCapacityScaleStrategyBean
 
     public void setElasticMachineProvisioning(NonBlockingElasticMachineProvisioning elasticMachineProvisioning) {
         this.machineProvisioning = elasticMachineProvisioning;
-     }
+    }
 
     public void setGridServiceContainerConfig(GridServiceContainerConfig containersConfig) {
          this.containersConfig = containersConfig;
