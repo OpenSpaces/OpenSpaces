@@ -145,7 +145,7 @@ public class RebalancingUtils {
                                     gscToString(targetContainer) + " "+
                                     "failed since container no longer exists."));
                 } 
-                else if (!isAtLeastOneInstanceValid(puInstancesFromSamePartition)) {
+                else if (pu.getNumberOfBackups() > 0 && !isAtLeastOneInstanceValid(puInstancesFromSamePartition)) {
                         String errorMessage = 
                             "Relocation of processing unit instance failed. "+
                             "The following pu instance that were supposed to hold a copy of the data no longer exist :";
