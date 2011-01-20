@@ -16,12 +16,16 @@ import org.openspaces.core.bean.Bean;
 import org.openspaces.core.bean.BeanServer;
 import org.openspaces.core.bean.DefaultBeanServer;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcement;
+import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.ElasticMachineProvisioning;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
+import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
+import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.strategy.ManualCapacityScaleStrategyBean;
 import org.openspaces.grid.gsm.strategy.ScaleStrategyBean;
+import org.openspaces.grid.gsm.strategy.UndeployScaleStrategyBean;
 /**
  * Creates the Scalability Strategy bean servers, based on the specified elasticProperties.
  * When the elasticProperties are modified the bean is restarted with the new properties.
@@ -33,12 +37,13 @@ public class ScaleBeanServer {
 
     private static final HashMap<String, String> DEFAULT_SCALE_STRATEGY_BEAN_PROPERTIES = new HashMap<String,String>();
     private static final String DEFAULT_SCALE_STRATEGY_BEAN_CLASSNAME = ManualCapacityScaleStrategyBean.class.getName();
+    
     private final BeanServer<Bean> beanServer;
     private final ProcessingUnit pu ;
     private final RebalancingSlaEnforcement rebalancingSlaEnforcement;
     private final MachinesSlaEnforcement machinesSlaEnforcement;
     private final ContainersSlaEnforcement containersSlaEnforcement;
-
+    
     public ScaleBeanServer(
             ProcessingUnit pu,
             RebalancingSlaEnforcement rebalancingSlaEnforcement, 
@@ -50,14 +55,35 @@ public class ScaleBeanServer {
         this.rebalancingSlaEnforcement = rebalancingSlaEnforcement;
         this.containersSlaEnforcement = containersSlaEnforcement;
         this.machinesSlaEnforcement = machinesSlaEnforcement;
+        
+        ContainersSlaEnforcementEndpoint containersSlaEnforcementEndpoint = null;
+        MachinesSlaEnforcementEndpoint machinesSlaEnforcementEndpoint = null;
+        RebalancingSlaEnforcementEndpoint rebalancingSlaEnforcementEndpoint = null;
+        try {
+            containersSlaEnforcementEndpoint = containersSlaEnforcement.createEndpoint(pu);
+            machinesSlaEnforcementEndpoint = machinesSlaEnforcement.createEndpoint(pu);
+            rebalancingSlaEnforcementEndpoint = rebalancingSlaEnforcement.createEndpoint(pu);
+        }
+        finally {
+            if (containersSlaEnforcementEndpoint == null ||
+                machinesSlaEnforcementEndpoint == null ||
+                rebalancingSlaEnforcementEndpoint == null) {
+                
+                // make sure there are no leftovers in case of an exception
+                this.rebalancingSlaEnforcement.destroyEndpoint(pu);
+                this.containersSlaEnforcement.destroyEndpoint(pu);
+                this.machinesSlaEnforcement.destroyEndpoint(pu);
+            }
+        }
+        
         this.beanServer = new DefaultBeanServer<Bean>(
                 
                 new ScaleBeanFactory(
                         pu,
                         new ProcessingUnitSchemaConfig(elasticProperties),
-                        rebalancingSlaEnforcement.createEndpoint(pu), 
-                        containersSlaEnforcement.createEndpoint(pu),
-                        machinesSlaEnforcement.createEndpoint(pu)));
+                        rebalancingSlaEnforcementEndpoint, 
+                        containersSlaEnforcementEndpoint,
+                        machinesSlaEnforcementEndpoint));
         
         // order of beans is important due to implicit dependency inject order
         setGridServiceContainerConfig(elasticProperties);
@@ -88,6 +114,29 @@ public class ScaleBeanServer {
         beanServer.enableBean(scaleStrategyClassName);
     }
 
+    /**
+     * Changes scale strategy to undeployed processing unit strategy (remove Containers/Machines)
+     */
+    public void undeploy() {
+        
+        List<String> enabledBeanClassNames;
+        try {
+            enabledBeanClassNames = beanServer.getEnabledBeansClassNamesAssignableTo(new Class[]{ScaleStrategyBean.class});
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException(e.getMessage(),e);
+        }
+        
+        if (enabledBeanClassNames.size() > 0) {
+        // we need the previously enabled strategy properties in case it had machine provisioning configured.
+        Map<String,String> properties = beanServer.getBeanConfig(enabledBeanClassNames.get(0));
+        // enable the undeploy strategy
+        beanServer.replaceBeanAssignableTo(
+                new Class[]{ScaleStrategyBean.class}, 
+                UndeployScaleStrategyBean.class.getName(),
+                properties);
+        }
+    }
+    
     public void destroy() {
         this.beanServer.destroy();
         this.rebalancingSlaEnforcement.destroyEndpoint(pu);

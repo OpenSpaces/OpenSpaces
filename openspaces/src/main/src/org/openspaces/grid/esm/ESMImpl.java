@@ -293,20 +293,16 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         );
     }
     
-    public void processingUnitRemoved(ProcessingUnit processingUnit) {
-        try {
-            ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.remove(processingUnit.getName());
-            if (beanServer != null) {
-                beanServer.destroy();
-            }
-        }
-        catch(Exception e) {
-            logger.log(Level.SEVERE, "Failed to destroy ScaleBeanServer for pu " + processingUnit.getName(),e);
+    public void processingUnitRemoved(final ProcessingUnit pu) {
+
+        final ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.get(pu);
+        if (beanServer != null) {
+            logger.info("Processing Unit " + pu.getName() + " was removed. Cleaning up machines."); 
+            beanServer.undeploy();
         }
     }
 
     public void processingUnitAdded(ProcessingUnit pu) {
-        
         Map<String,String> puConfig = this.elasticPropertiesPerProcessingUnit.get(pu.getName());
         if (puConfig != null) {
             refreshProcessingUnitElasticConfig(pu, puConfig);
