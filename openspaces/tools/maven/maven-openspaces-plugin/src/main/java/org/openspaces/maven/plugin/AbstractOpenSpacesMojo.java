@@ -21,7 +21,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
 /**
- * An abtract mojo to be inherited by all OpenSpaces mojos.
+ * An abstract mojo to be inherited by all OpenSpaces mojos.
  */
 public abstract class AbstractOpenSpacesMojo extends AbstractMojo {
 
@@ -31,7 +31,7 @@ public abstract class AbstractOpenSpacesMojo extends AbstractMojo {
     }
 
     /**
-     * Exectutes the mojo.
+     * Executes the mojo.
      * @throws MojoExecutionException
      * @throws MojoFailureException
      */
