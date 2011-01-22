@@ -408,17 +408,18 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         return deploy(deployment.toProcessingUnitDeployment(admin),timeout,timeUnit);
     }
 
-    public Map<String,String> getProcessingUnitElasticProperties(ProcessingUnit pu) {
-        
-        //TODO: Read the data from the gsm server.
-        return getElasticServiceManager().getProcessingUnitElasticProperties(pu);
-    }
-    
     public void setProcessingUnitElasticProperties(ProcessingUnit pu, Map<String,String> properties) {
         
         //TODO: Store the data in the gsm server.
         getElasticServiceManager().setProcessingUnitElasticProperties(pu, properties);
     }
+    
+    public void setScaleStrategy(ProcessingUnit pu, String strategyClassName, Map<String,String> strategyProperties) {
+        
+        //TODO: Store the data in the gsm server.
+        getElasticServiceManager().setScaleStrategy(pu, strategyClassName, strategyProperties);
+    }
+
 
     private InternalElasticServiceManager getElasticServiceManager() {
         if (admin.getElasticServiceManagers().getSize() != 1) {

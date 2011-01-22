@@ -206,7 +206,7 @@ public class RebalancingUtils {
            
             public String getFailureMessage() {
                if (isTimedOut()) {
-                return "relocation timeout of processing unit from " + 
+                return "relocation timeout of processing unit instance " + instanceId + " from " + 
                         gscToString(sourceContainer) + " to " + 
                         gscToString(targetContainer);
                }
@@ -726,6 +726,28 @@ public class RebalancingUtils {
     
     public static String gscToString(GridComponent container) {
         return "pid["+container.getVirtualMachine().getDetails().getPid()+"] host["+machineToString(container.getMachine())+"]";
+    }
+
+    public static String gscsToString(List<GridServiceContainer> containers) {
+        String[] containersToString = new String[containers.size()];
+        for (int i = 0 ; i < containersToString.length ; i++) {
+            containersToString[i] = gscToString(containers.get(i));
+        }
+        return Arrays.toString(containersToString);
+    }
+
+    public static String processingUnitDeploymentToString(ProcessingUnit pu) {
+        StringBuilder deployment = new StringBuilder();
+        for (final GridServiceContainer container : pu.getAdmin().getGridServiceContainers()) {
+            deployment.append(gscToString(container));
+            deployment.append(" { ");
+            for (final ProcessingUnitInstance instance : container.getProcessingUnitInstances(pu.getName())) {
+                deployment.append(puInstanceToString(instance));
+                deployment.append(" ");
+            }
+            deployment.append(" } ");
+        }
+        return deployment.toString();
     }
     
 }

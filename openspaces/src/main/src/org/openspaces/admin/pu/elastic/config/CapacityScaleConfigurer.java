@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
  * 
  */
 public class CapacityScaleConfigurer
-    implements ScaleStrategyBeanConfigurer<CapacityScaleConfig> {
+    implements ScaleStrategyConfigurer<CapacityScaleConfig> {
 
     private final CapacityScaleConfig config;
     
@@ -83,7 +83,7 @@ public class CapacityScaleConfigurer
     }
 
     /**
-     * @see ScaleStrategyBeanConfigurer#getConfig()
+     * @see ScaleStrategyConfigurer#getConfig()
      */
     public CapacityScaleConfig getConfig() {
         return config;

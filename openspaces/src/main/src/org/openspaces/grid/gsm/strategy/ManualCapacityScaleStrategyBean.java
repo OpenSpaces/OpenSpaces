@@ -26,6 +26,7 @@ import org.openspaces.grid.gsm.ElasticMachineProvisioningAware;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.ProcessingUnitAware;
+import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.containers.ContainersSlaPolicy;
@@ -116,24 +117,24 @@ public class ManualCapacityScaleStrategyBean
         if (pu == null) {
             throw new IllegalStateException("pu cannot be null.");
         }
-        logger = new LogPerProcessingUnit(LogFactory.getLog(ManualCapacityScaleStrategyBean.class),pu);
+        logger = new LogPerProcessingUnit(
+                    new SingleThreadedPollingLog(
+                            LogFactory.getLog(ManualCapacityScaleStrategyBean.class)),
+                    pu);
         
         logger.info("sla properties: "+slaConfig.toString());
         
         if (!schemaConfig.isPartitionedSync2BackupSchema()) {
             throw new BeanConfigurationException("Processing Unit " + pu.getName() + " cannot scale by memory capacity, since it is not stateful and not a datagrid (it is " + schemaConfig.getSchema() +" . Choose a different scale algorithm.");
         }
-        
-        int numberOfBackups = pu.getNumberOfBackups();
-       
+
         // calculate minimum number of machines
         minimumNumberOfMachines = calcMinNumberOfMachines(pu);
 
         int targetNumberOfContainers = 
             slaConfig.getMemoryCapacityInMB() > 0?
                     calcTargetNumberOfContainers() :
-                    Math.max(minimumNumberOfMachines,
-                             pu.getNumberOfBackups()+1);
+                    calcDefaultTargetNumberOfContainers();
         
         memoryInMB = targetNumberOfContainers * containersConfig.getMaximumJavaHeapSizeInMB();
         
@@ -142,6 +143,19 @@ public class ManualCapacityScaleStrategyBean
                 this, 
        0L, slaConfig.getPollingIntervalSeconds(), TimeUnit.SECONDS);
        logger.debug(pu.getName() + " is being monitored for SLA violations every " + slaConfig.getPollingIntervalSeconds() + " seconds");
+    }
+
+    private int calcDefaultTargetNumberOfContainers() {
+        
+        int targetNumberOfContainers = Math.max(minimumNumberOfMachines,
+                 pu.getNumberOfBackups()+1);
+        logger.info(
+                "targetNumberOfContainers= "+
+                "max(minimumNumberOfMachines, numberOfBackupsPerParition+1)= "+
+                "max("+ minimumNumberOfMachines +","+1+ "+"+pu.getNumberOfBackups()+")= "+
+                targetNumberOfContainers);
+        
+        return targetNumberOfContainers;
     }
 
     private int calcMinNumberOfMachines(ProcessingUnit pu) {
@@ -273,7 +287,7 @@ public class ManualCapacityScaleStrategyBean
         
         if (containerCapacityInMB < instanceCapacityInMB) {
             throw new BeanConfigurationException(
-                    "Container capacity is " + containerCapacityInMB+"MB , "+
+                    "Container capacity (-Xmx) is " + containerCapacityInMB+"MB , "+
                     "given " + totalNumberOfInstances + " instances, the total capacity =" 
                     +containerCapacityInMB+"MB *"+totalNumberOfInstances + "= " + 
                     containerCapacityInMB*totalNumberOfInstances+"MB. "+

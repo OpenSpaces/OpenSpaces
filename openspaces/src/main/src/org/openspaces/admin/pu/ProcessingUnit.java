@@ -37,8 +37,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.openspaces.admin.AdminAware;
 import org.openspaces.admin.StatisticsMonitor;
-import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.gsm.GridServiceManager;
+import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ProcessingUnitInstanceAddedEventManager;
@@ -302,7 +302,7 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * 
      * @since 8.0
      */
-    void scale(BeanConfig strategyConfig);
+    void scale(ScaleStrategyConfig strategyConfig);
            
     /**
      * Modifies the elastic configuration of this processing unit

@@ -20,6 +20,7 @@ import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
+import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
@@ -265,7 +266,11 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
 
         DefaultRebalancingSlaEnforcementEndpoint(ProcessingUnit pu) {
             this.pu = pu;
-            this.logger = new LogPerProcessingUnit(RebalancingSlaEnforcement.logger,pu);
+            this.logger = 
+                new LogPerProcessingUnit(
+                        new SingleThreadedPollingLog(
+                                RebalancingSlaEnforcement.logger),
+                        pu);
         }
 
         public ProcessingUnit getId() {
@@ -299,6 +304,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
 
             try {
                 enforceSlaInternal(sla);
+                logger.debug("Number of relocations in progress is " + futureRelocationPerProcessingUnit.get(pu).size());
                 return isBalanced(sla);
 
             } catch (ConflictingOperationInProgressException e) {
@@ -331,11 +337,20 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                 boolean relocateOnlyBackups = true;
                 rebalanceNumberOfInstancesPerContainer(containers, sla, relocateOnlyBackups);
 
-                if (!RebalancingUtils.isProcessingUnitIntact(pu)
-                        || !futureRelocationPerProcessingUnit.get(pu).isEmpty()) {
+                if (!futureRelocationPerProcessingUnit.get(pu).isEmpty()) {
+                    logger.debug("Rebalancing of backup instances is in progress after Stage 1. Try again later.");
                     return;
                 }
 
+                if (!RebalancingUtils.isProcessingUnitIntact(pu)) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Processing Unit deployment is not intact after Stage 1. Try again later. " +
+                                     RebalancingUtils.processingUnitDeploymentToString(pu) + 
+                                     "Status = " + pu.getStatus());
+                    }
+                    return;
+                }
+                
                 // if not all of pu instances are in the approved containers...
                 // then skip directly to stage 3
                 if (RebalancingUtils.isProcessingUnitIntact(pu, containers)) {
@@ -343,10 +358,20 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                     // stage 2: restart primaries so number of cpu cores per primary is balanced
                     rebalanceNumberOfPrimaryInstancesPerMachine(containers, sla);
 
-                    if (!RebalancingUtils.isProcessingUnitIntact(pu)
-                            || !futureRelocationPerProcessingUnit.get(pu).isEmpty()) {
+                    if (!futureRelocationPerProcessingUnit.get(pu).isEmpty()) {
+                        logger.debug("Restarting of primary instances is in progress after Stage 2. Try again later.");
                         return;
                     }
+                    
+                    if (!RebalancingUtils.isProcessingUnitIntact(pu)) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Processing Unit deployment is not intact after Stage 2. Try again later. "+ 
+                                         RebalancingUtils.processingUnitDeploymentToString(pu) + 
+                                         "Status = " + pu.getStatus());
+                        }
+                        return;
+                    }
+                
                 }
             }
 
@@ -408,6 +433,8 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
             final List<GridServiceContainer> sortedContainers = RebalancingUtils.sortAllContainersByNumberOfInstancesAboveMinimum(
                     pu, containers);
 
+            logger.debug("Containers sorted by number of instances above minimum: " + RebalancingUtils.gscsToString(sortedContainers));
+            
             boolean conflict = false;
             // relocation is done from a source container with too many instances
             // to a target container with too little instances
@@ -560,7 +587,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                 !RebalancingUtils.isEvenlyDistributedAcrossContainers(pu, containers)) {
                 
                 logger.debug("Optimal rebalancing hueristics failed balancing instances per container in this deployment. "+
-                "Performing non-optimal relocation heuristics.");
+                "Performing non-optimal relocation heuristics. Starting with partition " + lastResortPartitionRelocate);
 
                 // algorithm failed. we need to use heuristics.
                 // The reason the algorithm failed is that the machine that has an empty spot also has instances from partition that prevent a relocation into that machine.
@@ -801,7 +828,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                 !RebalancingUtils.isEvenlyDistributedAcrossMachines(pu, machines)) {
                     
                     logger.debug("Optimal primary rebalancing hueristics failed balancing primaries in this deployment. "+
-                                 "Performing non-optimal restart heuristics.");
+                                 "Performing non-optimal restart heuristics. Starting with partition " + lastResortPartitionRestart);
                     
                     //
                     // We cannot balance primaries per cpu core with one restart.
@@ -900,7 +927,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                     }
 
                     if (exception != null) {
-                        logger.warn(future.getFailureMessage(), exception);
+                        logger.info(future.getFailureMessage(), exception);
                         failedRelocations.add(future);
                     }
                 }

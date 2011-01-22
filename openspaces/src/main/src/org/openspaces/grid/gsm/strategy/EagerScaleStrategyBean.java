@@ -22,6 +22,7 @@ import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.ProcessingUnitAware;
+import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.containers.ContainersSlaPolicy;
@@ -100,7 +101,10 @@ public class EagerScaleStrategyBean
             throw new IllegalStateException("slaConfig cannot be null.");
         }
         
-        logger = new LogPerProcessingUnit(LogFactory.getLog(EagerScaleStrategyBean.class),pu);
+        logger = new LogPerProcessingUnit(
+                    new SingleThreadedPollingLog(
+                            LogFactory.getLog(EagerScaleStrategyBean.class)),
+                    pu);
         logger.info("sla properties: "+slaConfig.toString());
         
         if (!schemaConfig.isPartitionedSync2BackupSchema()) {

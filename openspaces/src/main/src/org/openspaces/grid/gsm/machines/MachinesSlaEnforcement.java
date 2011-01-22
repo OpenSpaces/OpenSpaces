@@ -22,6 +22,7 @@ import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
+import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirment;
@@ -183,7 +184,11 @@ public class MachinesSlaEnforcement implements
             }
             
             this.pu = pu;           
-            this.logger = new LogPerProcessingUnit(MachinesSlaEnforcement.logger,pu);
+            this.logger = 
+                new LogPerProcessingUnit(
+                    new SingleThreadedPollingLog( 
+                            MachinesSlaEnforcement.logger),
+                    pu);
         }
         
         public GridServiceAgent[] getGridServiceAgents() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
@@ -319,7 +324,8 @@ public class MachinesSlaEnforcement implements
                     slaReached = false;
                     logger.info(
                             machineShortage+ " new machine(s) is scheduled to be started "+
-                            "in order to reach a total of " + maxNumberOfMachines + " machines.");
+                            "in order to reach a total of " + maxNumberOfMachines + " machines." +
+                            "Approved machine agents are: " + MachinesSlaUtils.machinesToString(getAgentsStarted()));
                 }
             }
             
@@ -470,7 +476,10 @@ public class MachinesSlaEnforcement implements
                                         new NumberOfMachinesCapacityRequirement(machineShortage)),
                                 START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
                     slaReached = false;
-                    logger.info(machineShortage+ " new machine(s) is scheduled to be started in order to reach the minimum of " + sla.getMinimumNumberOfMachines() + " machines.");
+                    logger.info(
+                            machineShortage+ " new machine(s) is scheduled to be started in order to reach the minimum of " + 
+                            sla.getMinimumNumberOfMachines() + " machines. " +
+                            "Approved machine agents are: " + MachinesSlaUtils.machinesToString(getAgentsStarted()));
                 }
             }
             
@@ -559,7 +568,12 @@ public class MachinesSlaEnforcement implements
                                     new CpuCapacityRequirement(shortageCpu)),
                             START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
                     slaReached = false;
-                    logger.info("One or more new machine were scheduled to be started in order to increase capacity.");
+                    logger.info(
+                            "One or more new machine(s) is started in order to "+
+                            "increase memory by " +shortageMemory + "MB "+
+                            "and increase number of cpu cores by " + shortageCpu + ". " +
+                            "Approved machine agents are: " + MachinesSlaUtils.machinesToString(getAgentsStarted()) +
+                            "Pending machine(s) start requests " + getFutureAgents().size());
                 }
             }
             else {

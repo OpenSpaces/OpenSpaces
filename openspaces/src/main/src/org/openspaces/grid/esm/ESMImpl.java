@@ -20,6 +20,7 @@ import org.openspaces.admin.bean.BeanConfigException;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.InternalAdminFactory;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.pu.elastic.ScaleStrategyBeanPropertiesManager;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.machine.events.MachineLifecycleEventListener;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -281,6 +282,22 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         return elasticPropertiesPerProcessingUnit.get(processingUnitName);
     }
 
+    public void setScaleStrategy(final String puName, final String strategyClassName, final Map<String,String> strategyProperties) {
+        ((InternalAdmin)admin).scheduleNonBlockingStateChange(
+                new Runnable() {
+
+                   public void run() {
+                       Map<String, String> properties = elasticPropertiesPerProcessingUnit.get(puName);
+                       ScaleStrategyBeanPropertiesManager propertiesManager = new ScaleStrategyBeanPropertiesManager(properties);
+                       propertiesManager.disableAllBeans();
+                       propertiesManager.setBeanConfig(strategyClassName, strategyProperties);
+                       propertiesManager.enableBean(strategyClassName);
+                       ESMImpl.this.processingUnitElasticPropertiesChanged(puName,properties);
+                   }
+                }
+       );
+    }
+    
     public void setProcessingUnitElasticProperties(final String puName, final Map<String, String> properties) throws RemoteException {
         
         ((InternalAdmin)admin).scheduleNonBlockingStateChange(
@@ -299,10 +316,17 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         if (beanServer != null) {
             logger.info("Processing Unit " + pu.getName() + " was removed. Cleaning up machines."); 
             beanServer.undeploy();
+            elasticPropertiesPerProcessingUnit.remove(pu);
         }
     }
 
     public void processingUnitAdded(ProcessingUnit pu) {
+        
+        ScaleBeanServer undeployedBeanServer = scaleBeanServerPerProcessingUnit.remove(pu);
+        if (undeployedBeanServer != null) {
+            undeployedBeanServer.destroy();
+        }
+        
         Map<String,String> puConfig = this.elasticPropertiesPerProcessingUnit.get(pu.getName());
         if (puConfig != null) {
             refreshProcessingUnitElasticConfig(pu, puConfig);
@@ -321,7 +345,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
             }
             
             ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.get(pu);
-        
+
             if (beanServer == null) {
                 beanServer = new ScaleBeanServer(pu,rebalancingSlaEnforcement,containersSlaEnforcement,machinesSlaEnforcement,elasticProperties);
                 scaleBeanServerPerProcessingUnit.put(pu, beanServer);

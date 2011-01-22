@@ -10,7 +10,7 @@ import org.openspaces.core.util.MemoryUnit;
  * @author itaif
  * 
  */
-public class ManualCapacityScaleConfigurer implements ScaleStrategyBeanConfigurer<ManualCapacityScaleConfig>{
+public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<ManualCapacityScaleConfig>{
 
 private final ManualCapacityScaleConfig config;
     
@@ -73,7 +73,7 @@ private final ManualCapacityScaleConfig config;
      }
     
     /**
-     * @see ScaleStrategyBeanConfigurer#getConfig()
+     * @see ScaleStrategyConfigurer#getConfig()
      */
     public ManualCapacityScaleConfig getConfig() {
         return config;

@@ -2,7 +2,6 @@ package org.openspaces.admin.internal.pu;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,11 +13,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.StatisticsMonitor;
-import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
-import org.openspaces.admin.internal.pu.elastic.ScaleStrategyBeanPropertiesManager;
 import org.openspaces.admin.internal.pu.events.DefaultBackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultManagingGridServiceManagerChangedEventManager;
 import org.openspaces.admin.internal.pu.events.DefaultProcessingUnitInstanceAddedEventManager;
@@ -38,6 +35,8 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.pu.ProcessingUnits;
+import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
+import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfigurer;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEvent;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEvent;
@@ -590,37 +589,21 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         admin.assertStateChangesPermitted();
     }
 
-    public void scale(BeanConfig strategyConfig) {
-
-        Map<String, String> elasticProperties = getElasticProperties();
-        ScaleStrategyBeanPropertiesManager propertiesManager = new ScaleStrategyBeanPropertiesManager(elasticProperties);
-        propertiesManager.disableAllBeans();
-        String beanClassName = strategyConfig.getBeanClassName();
-        Map<String, String> beanProperties = strategyConfig.getProperties();
-        propertiesManager.setBeanConfig(beanClassName, beanProperties);
-        propertiesManager.enableBean(beanClassName);
-        setElasticProperties(elasticProperties);
-    }
-
-    /**
-     * Returns the elastic configuration of this processing unit
-     * 
-     * This method is only available if the processing unit deployment is elastic.
-     * This method might be removed in future versions, since it may expose PII (such as passwords).
-     * 
-     * @since 8.0
-     */
-    private Map<String,String> getElasticProperties() {
+    public void scale(ScaleStrategyConfig strategyConfig) {
+  
         if (getManagingGridServiceManager() == null) {
             throw new AdminException("Processing Unit " + getName() + " does not have an associated managing GSM");
         }
-        Map<String, String> elasticProperties = ((InternalGridServiceManager)getManagingGridServiceManager()).getProcessingUnitElasticProperties(this);
-        if (elasticProperties == null) {
-            elasticProperties = new HashMap<String,String>();
-        }
-        return elasticProperties;
+        ((InternalGridServiceManager)getManagingGridServiceManager()).setScaleStrategy(
+                this, 
+                strategyConfig.getBeanClassName(), 
+                strategyConfig.getProperties());
     }
 
+    public <T extends ScaleStrategyConfig> void scale(ScaleStrategyConfigurer<T> strategyConfigurer) {
+        scale(strategyConfigurer.getConfig());
+    }
+    
     public void setElasticProperties(Map<String,String> properties) {
         if (getManagingGridServiceManager() == null) {
             throw new AdminException("Processing Unit " + getName() + " does not have an associated managing GSM");
@@ -628,4 +611,5 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         ((InternalGridServiceManager)getManagingGridServiceManager()).setProcessingUnitElasticProperties(this, properties);
         
     }
+    
 }

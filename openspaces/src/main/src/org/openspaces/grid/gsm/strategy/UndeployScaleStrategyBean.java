@@ -22,6 +22,7 @@ import org.openspaces.grid.gsm.ElasticMachineProvisioningAware;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.ProcessingUnitAware;
+import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.containers.ContainersSlaPolicy;
@@ -95,7 +96,10 @@ public class UndeployScaleStrategyBean
             throw new IllegalStateException("slaConfig cannot be null.");
         }
         
-        logger = new LogPerProcessingUnit(LogFactory.getLog(EagerScaleStrategyBean.class),pu);
+        logger = new LogPerProcessingUnit(
+                    new SingleThreadedPollingLog(
+                            LogFactory.getLog(EagerScaleStrategyBean.class)),
+                    pu);
         logger.info("sla properties: "+slaConfig.toString());
         
         if (!schemaConfig.isPartitionedSync2BackupSchema()) {
@@ -245,24 +249,4 @@ public class UndeployScaleStrategyBean
         admin.getAlertManager().triggerAlert(alertFactory.toAlert());
         logger.debug(alertDescription);
     }
-    
-    private int calcMinNumberOfMachines(ProcessingUnit pu) {
-        int minNumberOfMachines;
-        if (pu.getMaxInstancesPerMachine() == 0) {
-            minNumberOfMachines = 1;
-            logger.info("minNumberOfMachines=1 (since max instances from same partition per machine is not defined)");
-        }
-        
-        else {
-            minNumberOfMachines = (int)Math.ceil(
-                    (1 + pu.getNumberOfBackups())/1.0*pu.getMaxInstancesPerMachine());
-            logger.info("minNumberOfMachines= " +
-                    "ceil((1+backupsPerPartition)/maxInstancesPerMachine)= "+
-                    "ceil("+(1+pu.getNumberOfBackups())+"/"+pu.getMaxInstancesPerMachine() + ")= " +
-                    minNumberOfMachines);
-        }
-        
-        return minNumberOfMachines;
-    }
-
 }

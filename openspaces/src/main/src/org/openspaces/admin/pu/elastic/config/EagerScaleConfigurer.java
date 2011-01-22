@@ -16,7 +16,7 @@ import org.openspaces.core.util.MemoryUnit;
  * @author itaif
  * 
  */
-public class EagerScaleConfigurer implements ScaleStrategyBeanConfigurer<EagerScaleConfig> {
+public class EagerScaleConfigurer implements ScaleStrategyConfigurer<EagerScaleConfig> {
 
     private final EagerScaleConfig config;
 
@@ -55,7 +55,7 @@ public class EagerScaleConfigurer implements ScaleStrategyBeanConfigurer<EagerSc
      }
     
     /**
-     * @see ScaleStrategyBeanConfigurer#getConfig()
+     * @see ScaleStrategyConfigurer#getConfig()
      */
     public EagerScaleConfig getConfig() {
         return config;

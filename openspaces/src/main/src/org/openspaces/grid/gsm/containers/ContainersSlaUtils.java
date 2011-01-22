@@ -423,4 +423,11 @@ public class ContainersSlaUtils {
         return "pid["+container.getVirtualMachine().getDetails().getPid()+"] host["+machineToString(container.getMachine())+"]";
     }
 
+    public static String gscsToString(GridServiceContainer[] containers) {
+        String[] containersToString = new String[containers.length];
+        for (int i = 0 ; i < containersToString.length ; i++) {
+            containersToString[i] = gscToString(containers[i]);
+        }
+        return Arrays.toString(containersToString);
+    }
 }

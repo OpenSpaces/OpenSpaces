@@ -25,6 +25,7 @@ import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
+import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
@@ -116,7 +117,11 @@ public class ContainersSlaEnforcement implements
         private final Log logger;
         public DefaultContainersSlaEnforcementEndpoint(ProcessingUnit pu) {
             this.pu = pu;
-            this.logger = new LogPerProcessingUnit(ContainersSlaEnforcement.logger,pu);
+            this.logger = 
+                new LogPerProcessingUnit(
+                    new SingleThreadedPollingLog(
+                            ContainersSlaEnforcement.logger),
+                    pu);
         }
 
         public GridServiceContainer[] getContainers() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
@@ -291,8 +296,13 @@ public class ContainersSlaEnforcement implements
                         // more cpu cores (or a new machine) is needed 
                         // and this is an unused machine        
                         !futureMachinesHostingContainers.contains(gsa.getMachine())) {
-                            
-                    logger.info("Starting a new Grid Service Container on " + ContainersSlaUtils.machineToString(gsa.getMachine()));
+                    
+                    if (logger.isInfoEnabled()) {
+                    logger.info("Starting a new Grid Service Container on " + 
+                            ContainersSlaUtils.machineToString(gsa.getMachine()) + " "+
+                            "which is currently running " +  ContainersSlaUtils.gscsToString(gsa.getMachine().getGridServiceContainers().getContainers()));
+                    }
+                    
                     futureContainers.add(ContainersSlaUtils.startGridServiceContainerAsync(admin,
                             (InternalGridServiceAgent) gsa, sla.getNewContainerConfig(),
                             START_CONTAINER_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS));

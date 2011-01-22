@@ -9,15 +9,7 @@ import java.util.Map;
  */
 public interface ESM extends com.gigaspaces.grid.esm.ESM {
 
-    /**
-     * Returns the elastic configuration of this processing unit
-     * 
-     * This method is only available if the processing unit deployment is elastic.
-     * This method might be removed in future versions, since it may expose PII (such as passwords).
-     * 
-     * @since 8.0
-     */
-    Map<String, String> getProcessingUnitElasticProperties(String processingUnitName) throws RemoteException;
-
     void setProcessingUnitElasticProperties(String processingUnitName, Map<String, String> properties) throws RemoteException;
+
+    void setScaleStrategy(String puName, String strategyClassName, Map<String,String> strategyProperties) throws RemoteException;
 }
