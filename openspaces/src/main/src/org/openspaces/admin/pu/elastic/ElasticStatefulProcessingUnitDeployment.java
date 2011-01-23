@@ -42,7 +42,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     private int numberOfBackupInstancesPerPartition = 1;
     private int numberOfPartitions;
     private int maxProcessingUnitInstancesFromSamePartitionPerMachine = 1;
-    private double maxNumberOfCpuCores = 1;
+    private double maxNumberOfCpuCores;
     private double minNumberOfCpuCoresPerMachine;
     
     /**
@@ -235,11 +235,16 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
 
     protected int calcNumberOfPartitionsFromCpuRequirements(Admin admin) {
         
-        if (minNumberOfCpuCoresPerMachine <= 0) {
-            minNumberOfCpuCoresPerMachine = findMinimumNumberOfCpuCoresPerMachine(admin);
-        }
+        int maximumNumberOfPrimaryInstances = 1;
+        
+        if (maxNumberOfCpuCores > 0) {
+            
+            if (minNumberOfCpuCoresPerMachine <= 0) {
+                minNumberOfCpuCoresPerMachine = findMinimumNumberOfCpuCoresPerMachine(admin);
+            }
 
-        int maximumNumberOfPrimaryInstances =(int) Math.ceil(this.maxNumberOfCpuCores / minNumberOfCpuCoresPerMachine); 
+            maximumNumberOfPrimaryInstances =(int) Math.ceil(this.maxNumberOfCpuCores / minNumberOfCpuCoresPerMachine);
+        }
         return maximumNumberOfPrimaryInstances; 
     }
 
