@@ -19,15 +19,11 @@ package org.openspaces.admin.alert.config;
 import org.openspaces.admin.bean.BeanConfigurer;
 
 /**
- * A weakly-typed configuration API based on the 'builder' patterns for a more convenient
- * code-fluent approach to configuring an {@link AlertConfiguration}.
+ * An interface for implementations carrying out the 'builder/chaining' pattern on top of an
+ * {@link AlertConfiguration}.
  * <p>
  * The fully configured {@link AlertConfiguration} object is returned by the call to
  * {@link #getConfig()}.
- * <p>
- * By default, the configuration is empty - has no properties set. The
- * {@link #applyRecommendedSettings()} can be used to set the recommended setting for all
- * configuration properties.
  * 
  * @author Moran Avigdor
  * @since 8.0

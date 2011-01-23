@@ -16,20 +16,24 @@
 
 package org.openspaces.admin.alert.config;
 
+import org.openspaces.admin.alert.AlertManager;
+import org.openspaces.admin.alert.config.parser.AlertConfigurationParser;
+import org.openspaces.admin.alert.config.parser.XmlAlertConfigurationParser;
 import org.openspaces.admin.bean.BeanConfig;
 
 /**
- * A weakly typed configuration API based on String key-value pairs to configure an admin
- * <tt>AlertBean</tt>. Implementors of this interface can provide more strongly typed API to enforce
- * type-safety and argument verifications.
+ * A configuration of an alert trigger. The configuration consists of a weakly typed configuration
+ * API based on String key-value pairs to configure an alert trigger. An enabled configuration means
+ * that alerts may be triggered based on this configuration. A disabled configuration means that
+ * alerts will not be triggered until enabled.
  * <p>
- * The <tt>AlertConfiguration</tt> is a client side configuration. The String key-value pairs returned
- * by the {@link #getProperties()} method, are sent to the server to be injected into the admin
- * <tt>AlertBean</tt> matching the {@link #getBeanClassName() bean class-name}.
+ * Implementors of this interface can provide more strongly typed API to enforce type-safety and
+ * argument verifications.
  * <p>
- * By default, the configuration is empty - has no properties set. The
- * {@link #applyRecommendedSettings()} can be used to set the recommended setting for all
- * configuration properties.
+ * An {@link AlertConfiguration} may be parsed by an {@link AlertConfigurationParser}. For example,
+ * using the {@link XmlAlertConfigurationParser} which it's {@link AlertConfigurationParser#parse()}
+ * method returns an array of configurations to be passed to
+ * {@link AlertManager#configure(AlertConfiguration[])}.
  * 
  * @see AlertConfigurer
  * 
