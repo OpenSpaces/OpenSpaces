@@ -21,8 +21,6 @@ package org.openspaces.admin.bean;
  * Exception indicating that a configuration for a bean by this name can't be found (has not been
  * added or has been removed).
  * 
- * @see BeanConfig#getBeanClassName()
- * @see BeanConfigManager#putConfig2(BeanConfig)
  * @see BeanConfigManager
  * 
  * @author Moran Avigdor
