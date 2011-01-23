@@ -35,7 +35,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * SimpleNotifyEventListenerContainer notifyEventListenerContainer = new SimpleNotifyContainerConfigurer(gigaSpace)
  *              .template(new TestMessage())
  *              .eventListenerAnnotation(new Object() {
- *                  @SpaceDataEvent public void gotMeselfAnEvent() {
+ *                  <code>@SpaceDataEvent</code> public void gotMeselfAnEvent() {
  *                      // do something
  *                  }
  *              }).notifyContainer();
