@@ -298,7 +298,7 @@ public interface ProcessingUnit extends Iterable<ProcessingUnitInstance>, AdminA
      * 
      * This method is only available if the processing unit deployment is elastic  
      * 
-     * @param config
+     * @param strategyConfig
      * 
      * @since 8.0
      */
