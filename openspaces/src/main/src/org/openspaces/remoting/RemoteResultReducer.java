@@ -18,7 +18,7 @@ package org.openspaces.remoting;
 
 /**
  * A remoting result reducer (ala Map Reduce) used when working with
- * {@link org.openspaces.remoting.SyncSpaceRemotingProxyFactoryBean} in
+ * {@link org.openspaces.remoting.ExecutorSpaceRemotingProxyFactoryBean} in
  * broadcast mode in order to reduce the broadcast results into a "client
  * side" result value.
  *
