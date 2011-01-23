@@ -114,12 +114,20 @@ public class AdminFactory {
     /**
      * Creates the admin and begins its listening for events from the lookup service.
      */
-    public Admin createAdmin() {
+    public Admin create() {
         if (useGsLogging) {
             GSLogConfigLoader.getLoader();
         }
         admin.begin();
         return admin;
+    }
+    
+    /**
+     * Creates the admin and begins its listening for events from the lookup service.
+     * @deprecated use {@link #create()} instead
+     */
+    public Admin createAdmin() {
+        return create();
     }
 
     protected Admin getAdmin() {
