@@ -118,7 +118,6 @@ public class ScaleBeanServer {
      * Changes scale strategy to undeployed processing unit strategy (remove Containers/Machines)
      */
     public void undeploy() {
-        
         List<String> enabledBeanClassNames;
         try {
             enabledBeanClassNames = beanServer.getEnabledBeansClassNamesAssignableTo(new Class[]{ScaleStrategyBean.class});

@@ -28,7 +28,7 @@ package org.openspaces.admin.alert.config;
  * will sync upon recovery. When the redo log is cleared the disk is no longer in use and an alert
  * will be triggered as well.
  * <p>
- * Use the call to {@link #getConfig()} to create a fully initialized
+ * Use the call to {@link #create()} to create a fully initialized
  * {@link ReplicationRedoLogOverflowToDiskAlertConfiguration} configuration.
  * 
  * @see ReplicationRedoLogOverflowToDiskAlertConfiguration
@@ -50,7 +50,7 @@ public class ReplicationRedoLogOverflowToDiskAlertConfigurer implements AlertCon
 	 * Get a fully configured configuration (after all properties have been set).
 	 * @return a fully configured alert bean configuration.
 	 */
-	public ReplicationRedoLogOverflowToDiskAlertConfiguration getConfig() {
+	public ReplicationRedoLogOverflowToDiskAlertConfiguration create() {
 		return config;
 	}
 }

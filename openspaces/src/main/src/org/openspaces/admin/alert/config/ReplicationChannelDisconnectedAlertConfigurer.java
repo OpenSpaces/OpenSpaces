@@ -21,7 +21,7 @@ package org.openspaces.admin.alert.config;
  * channel connection between a source (primary) and it's target (backup/mirror) has been
  * disconnected. The alert is resolved once the connection is re-established.
  * <p>
- * Use the call to {@link #getConfig()} to create a fully initialized
+ * Use the call to {@link #create()} to create a fully initialized
  * {@link ReplicationChannelDisconnectedAlertConfiguration} configuration.
  * 
  * @see ReplicationChannelDisconnectedAlertConfiguration
@@ -43,7 +43,7 @@ public class ReplicationChannelDisconnectedAlertConfigurer implements AlertConfi
 	 * Get a fully configured replication channel disconnection configuration (after all properties have been set).
 	 * @return a fully configured alert bean configuration.
 	 */
-	public ReplicationChannelDisconnectedAlertConfiguration getConfig() {
+	public ReplicationChannelDisconnectedAlertConfiguration create() {
 		return config;
 	}
 }

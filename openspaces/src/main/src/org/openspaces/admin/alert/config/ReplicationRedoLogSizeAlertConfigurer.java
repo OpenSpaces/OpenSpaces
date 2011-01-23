@@ -22,7 +22,7 @@ package org.openspaces.admin.alert.config;
  * packets in the redo log is above the specified high threshold. The redo log size alert is
  * resolved if the number of packets in the redo log goes below the specified low threshold.
  * <p>
- * Use the call to {@link #getConfig()} to create a fully initialized
+ * Use the call to {@link #create()} to create a fully initialized
  * {@link ReplicationRedoLogSizeAlertConfiguration} configuration.
  * 
  * @see ReplicationRedoLogSizeAlertConfiguration
@@ -68,7 +68,7 @@ public class ReplicationRedoLogSizeAlertConfigurer implements AlertConfigurer {
 	 * Get a fully configured configuration (after all properties have been set).
 	 * @return a fully configured alert bean configuration.
 	 */
-	public ReplicationRedoLogSizeAlertConfiguration getConfig() {
+	public ReplicationRedoLogSizeAlertConfiguration create() {
 		return config;
 	}
 }

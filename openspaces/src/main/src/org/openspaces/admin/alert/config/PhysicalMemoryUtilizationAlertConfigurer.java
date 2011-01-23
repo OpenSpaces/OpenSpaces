@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  * resolved if its physical memory reading goes below the specified memory threshold for a period of
  * time.
  * <p>
- * Use the call to {@link #getConfig()} to create a fully initialized
+ * Use the call to {@link #create()} to create a fully initialized
  * {@link PhysicalMemoryUtilizationAlertConfiguration} configuration.
  * 
  * @see PhysicalMemoryUtilizationAlertConfiguration
@@ -94,7 +94,7 @@ public class PhysicalMemoryUtilizationAlertConfigurer implements AlertConfigurer
 	 * Get a fully configured physical memory utilization configuration (after all properties have been set).
 	 * @return a fully configured alert bean configuration.
 	 */
-	public PhysicalMemoryUtilizationAlertConfiguration getConfig() {
+	public PhysicalMemoryUtilizationAlertConfiguration create() {
 		return config;
 	}
 }

@@ -20,7 +20,7 @@ package org.openspaces.admin.bean;
  * A weakly-typed configuration API based on the 'builder' patterns for a more convenient
  * code-fluent approach to configuring a {@link BeanConfig}.
  * <p>
- * The fully configured {@link BeanConfig} object is returned by the call to {@link #getConfig()}.
+ * The fully configured {@link BeanConfig} object is returned by the call to {@link #create()}.
  * <p>
  * By default, the configuration is empty - has no properties set. The recommended setting for the
  * configuration properties should be derived from the javadoc.
@@ -36,5 +36,5 @@ public interface BeanConfigurer<T extends BeanConfig> {
      * 
      * @return a fully configured <tt>BeanConfig</tt>.
      */
-	T getConfig();
+	T create();
 }

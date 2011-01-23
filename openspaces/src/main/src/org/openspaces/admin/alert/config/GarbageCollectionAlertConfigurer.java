@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * is raised if the gc took longer than the specified 'long' period. The garbage collection alert is resolved
  * if gc took less than the specified 'short' period.
  * <p>
- * Use the call to {@link #getConfig()} to create a fully initialized
+ * Use the call to {@link #create()} to create a fully initialized
  * {@link GarbageCollectionAlertConfiguration} configuration.
  * 
  * @see GarbageCollectionAlertConfiguration
@@ -78,7 +78,7 @@ public class GarbageCollectionAlertConfigurer implements AlertConfigurer {
      * 
      * @return a fully configured alert bean configuration.
      */
-    public GarbageCollectionAlertConfiguration getConfig() {
+    public GarbageCollectionAlertConfiguration create() {
         return config;
     }
 }

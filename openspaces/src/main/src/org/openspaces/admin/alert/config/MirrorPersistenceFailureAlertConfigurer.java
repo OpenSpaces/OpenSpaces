@@ -21,7 +21,7 @@ package org.openspaces.admin.alert.config;
  * persist to the DB. The alert is resolved when the Mirror manages to persist to the DB for the
  * first time after the alert has been triggered.
  * <p>
- * Use the call to {@link #getConfig()} to create a fully initialized
+ * Use the call to {@link #create()} to create a fully initialized
  * {@link MirrorPersistenceFailureAlertConfiguration} configuration.
  * 
  * @see MirrorPersistenceFailureAlertConfiguration
@@ -43,7 +43,7 @@ public class MirrorPersistenceFailureAlertConfigurer implements AlertConfigurer 
 	 * Get a fully configured replication channel disconnection configuration (after all properties have been set).
 	 * @return a fully configured alert bean configuration.
 	 */
-	public MirrorPersistenceFailureAlertConfiguration getConfig() {
+	public MirrorPersistenceFailureAlertConfiguration create() {
 		return config;
 	}
 }

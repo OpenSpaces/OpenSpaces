@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  * for a period of time. The heap utilization alert is resolved if its heap goes below the specified
  * heap threshold for a period of time.
  * <p>
- * Use the call to {@link #getConfig()} to create a fully initialized
+ * Use the call to {@link #create()} to create a fully initialized
  * {@link HeapMemoryUtilizationAlertConfiguration} configuration.
  * 
  * @see HeapMemoryUtilizationAlertConfiguration
@@ -95,7 +95,7 @@ public class HeapMemoryUtilizationAlertConfigurer implements AlertConfigurer {
      * 
      * @return a fully configured alert bean configuration.
      */
-    public HeapMemoryUtilizationAlertConfiguration getConfig() {
+    public HeapMemoryUtilizationAlertConfiguration create() {
         return config;
     }
 }

@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  * period of time. The CPU alert is resolved if its CPU goes below the specified CPU threshold for a
  * period of time.
  * <p>
- * Use the call to {@link #getConfig()} to create a fully initialized
+ * Use the call to {@link #create()} to create a fully initialized
  * {@link CpuUtilizationAlertConfiguration} configuration.
  * 
  * @see CpuUtilizationAlertConfiguration
@@ -90,7 +90,7 @@ public class CpuUtilizationAlertConfigurer implements AlertConfigurer {
 	 * Get a fully configured machine CPU utilization configuration (after all properties have been set).
 	 * @return a fully configured alert bean configuration.
 	 */
-	public CpuUtilizationAlertConfiguration getConfig() {
+	public CpuUtilizationAlertConfiguration create() {
 		return config;
 	}
 }

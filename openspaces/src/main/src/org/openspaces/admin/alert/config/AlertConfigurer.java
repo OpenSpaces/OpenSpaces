@@ -23,7 +23,7 @@ import org.openspaces.admin.bean.BeanConfigurer;
  * {@link AlertConfiguration}.
  * <p>
  * The fully configured {@link AlertConfiguration} object is returned by the call to
- * {@link #getConfig()}.
+ * {@link #create()}.
  * 
  * @author Moran Avigdor
  * @since 8.0
