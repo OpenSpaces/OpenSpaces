@@ -34,7 +34,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * SimpleAsyncPollingEventListenerContainer pollingEventListenerContainer = new SimpleAsyncPollingContainerConfigurer(gigaSpace)
  *              .template(new TestMessage())
  *              .eventListenerAnnotation(new Object() {
- *                  @SpaceDataEvent public void gotMeselfAnEvent() {
+ *                  <code>@SpaceDataEvent</code> public void gotMeselfAnEvent() {
  *                      // do something
  *                  }
  *              }).asyncPollingContainer();
@@ -50,7 +50,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  */
 public class SimpleAsyncPollingContainerConfigurer {
 
-    private SimpleAsyncPollingEventListenerContainer pollingEventListenerContainer;
+    private final SimpleAsyncPollingEventListenerContainer pollingEventListenerContainer;
 
     private boolean initialized = false;
 
