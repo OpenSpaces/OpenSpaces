@@ -358,7 +358,7 @@ public class ContainersSlaUtils {
      * Input:  Machine1{ GSC1[t=1], GSC2[t=8]} , Machine2 {GSC3[t=1], GSC4[t=4], GSC5[t=5], GSC6[t=6]}
      * Output: [ GSC6, GSC5 , GSC4 , GSC2 , GSC3, GSC1 ]
      * @param approvedContainers
-     * @return
+     * @return the sorted containers
      */
     public static List<GridServiceContainer> sortContainersInterleaved(GridServiceContainer[] approvedContainers) {
 

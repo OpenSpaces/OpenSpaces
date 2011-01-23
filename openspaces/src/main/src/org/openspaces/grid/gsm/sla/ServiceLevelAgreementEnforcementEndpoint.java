@@ -50,8 +50,8 @@ public interface ServiceLevelAgreementEnforcementEndpoint<ID,POLICY extends Serv
      *       finally {
      *           scheduledTask.cancel(false);
      *       }
+     *    }
      * }
-     * 
      * 
      */   
      boolean enforceSla(POLICY sla) throws ServiceLevelAgreementEnforcementEndpointDestroyedException;

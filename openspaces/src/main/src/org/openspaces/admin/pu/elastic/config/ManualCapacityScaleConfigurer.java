@@ -25,7 +25,7 @@ private final ManualCapacityScaleConfig config;
     }
     
     /**
-     * @see ManualCapacityScaleConfig#setMemoryCapacityInMB(int)
+     * @see ManualCapacityScaleConfig#setMemoryCapacityInMB(long)
      */
     public ManualCapacityScaleConfigurer memoryCapacity(String memory) {
         config.setMemoryCapacityInMB(MemoryUnit.toMegaBytes(memory));
@@ -33,7 +33,7 @@ private final ManualCapacityScaleConfig config;
     }
 
     /**
-     * @see ManualCapacityScaleConfig#setMemoryCapacityInMB(int)
+     * @see ManualCapacityScaleConfig#setMemoryCapacityInMB(long)
      */
     public ManualCapacityScaleConfigurer memoryCapacity(int memory, MemoryUnit unit) {
         config.setMemoryCapacityInMB(unit.toMegaBytes(memory));

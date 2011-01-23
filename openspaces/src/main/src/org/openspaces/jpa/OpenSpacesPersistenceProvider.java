@@ -33,7 +33,7 @@ public class OpenSpacesPersistenceProvider implements PersistenceProvider {
      * Creates an {@link EntityManagerFactory} instance and injects the provided space instance to it. 
      * @param persistenceUnitName The persistence unit name.
      * @param space The space instance to inject.
-     * @param m Properties map.
+     * @param properties Properties map.
      * @return {@link EntityManagerFactory} instance.
      */
     @SuppressWarnings("rawtypes")
