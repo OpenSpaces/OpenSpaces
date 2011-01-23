@@ -181,6 +181,9 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
             for (Monitor monitor : sla.getMonitors()) {
                 String watchName = monitor.getName();
                 Watch watch = new GaugeWatch(watchName, context.getConfiguration());
+                if (watch.getWatchDataSource() == null) {
+                    throw new JSBInstantiationException("Failed to add SLA monitor [" + watchName + "] for processing unit [" + getServiceBeanContext().getServiceElement().getName() + "]");
+                }
                 watch.getWatchDataSource().setSize(monitor.getHistorySize());
                 context.getWatchRegistry().register(watch);
                 watchTasks.add(new WatchTask(monitor, watch));
