@@ -19,9 +19,9 @@ public interface ElasticMachineProvisioning {
 	 * 
 	 * This method is blocking on the current thread, or raises a TimeOutException if the timeout expired.
 	 * 
-	 * @param zone - the grid service agent's zone.
-	 * @param requirements - the capacity requirements that indicate how many machines to start.
+	 * @param capacityRequirements - the capacity requirements that indicate how many machines to start.
 	 * @param duration - the maximum duration after which a TimeoutException is raised.
+	 * @param unit - the time unit for the duration
 	 * @return the grid service agent
 	 * 
 	 * @throws ElasticMachineProvisioningException
