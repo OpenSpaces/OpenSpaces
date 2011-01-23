@@ -11,14 +11,9 @@ import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
-import org.openspaces.admin.pu.elastic.config.CapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.config.CapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
-import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
+import org.openspaces.admin.pu.elastic.topology.AdvancedStatefulDeploymentTopology;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatefulDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
@@ -32,11 +27,12 @@ import com.gigaspaces.security.directory.UserDetails;
  * The disadvantage compared to a stateless processing unit is that the ratio between 
  * the minimum and maximum number of containers is limited.
  * 
- * @see AdvancedElasticStatefulProcessingUnitDeployment
+ * @see ElasticStatefulProcessingUnitDeployment
  * 
  * @author itaif
  */
-public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProcessingUnitDeployment implements ElasticStatefulDeploymentTopology {
+public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProcessingUnitDeployment 
+    implements ElasticStatefulDeploymentTopology , AdvancedStatefulDeploymentTopology {
 
     public static final String MAX_MEMORY_CAPACITY_MEGABYTES_DYNAMIC_PROPERTY = "max-memory-capacity-megabytes";
     public static final String MIN_MEMORY_CAPACITY_MEGABYTES_DYNAMIC_PROPERTY = "min-memory-capacity-megabytes";
@@ -81,12 +77,12 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return this;
     }
     
-    protected ElasticStatefulProcessingUnitDeployment numberOfBackupsPerPartition(int numberOfBackupsPerPartition) {
+    public ElasticStatefulProcessingUnitDeployment numberOfBackupsPerPartition(int numberOfBackupsPerPartition) {
         this.numberOfBackupInstancesPerPartition = numberOfBackupsPerPartition;
         return this;
     }
     
-    protected ElasticStatefulProcessingUnitDeployment numberOfPartitions(int numberOfPartitions) {
+    public ElasticStatefulProcessingUnitDeployment numberOfPartitions(int numberOfPartitions) {
         this.numberOfPartitions = numberOfPartitions;
         return this;
     }
@@ -101,11 +97,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return this;
     }
 
-    /**
-     * Overrides the minimum number of cpu cores per machines.
-     * This figure is used to calculate the maximum number of partitions (maxNumberOfCpuCores/minNumberOfCpuCoresPerMachine) 
-     */
-    protected ElasticStatefulProcessingUnitDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
+    public ElasticStatefulProcessingUnitDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
         this.minNumberOfCpuCoresPerMachine = minNumberOfCpuCoresPerMachine;
         return this;
     }
@@ -120,35 +112,17 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return this;
     }
 
-    public ElasticStatefulProcessingUnitDeployment scale(EagerScaleConfigurer strategy) {
-        return scale(strategy.getConfig());
-    }
 
-    public ElasticStatefulProcessingUnitDeployment scale(ManualContainersScaleConfigurer strategy) {
-        return scale(strategy.getConfig());
-    }
-
-    public ElasticStatefulProcessingUnitDeployment scale(ManualCapacityScaleConfigurer strategy) {
-        return scale(strategy.getConfig());
-    }
-
-    public ElasticStatefulProcessingUnitDeployment scale(CapacityScaleConfigurer strategy) {
-        return scale(strategy.getConfig());
+    public ElasticStatefulProcessingUnitDeployment singleMachineDeployment() {
+        this.maxProcessingUnitInstancesFromSamePartitionPerMachine(0);
+        return this;
     }
     
     public ElasticStatefulProcessingUnitDeployment scale(EagerScaleConfig strategy) {
         return (ElasticStatefulProcessingUnitDeployment) super.scale(strategy);
     }
 
-    public ElasticStatefulProcessingUnitDeployment scale(ManualContainersScaleConfig strategy) {
-        return (ElasticStatefulProcessingUnitDeployment) super.scale(strategy);
-    }
-
     public ElasticStatefulProcessingUnitDeployment scale(ManualCapacityScaleConfig strategy) {
-        return (ElasticStatefulProcessingUnitDeployment) super.scale(strategy);
-    }
-    
-    public ElasticStatefulProcessingUnitDeployment scale(CapacityScaleConfig strategy) {
         return (ElasticStatefulProcessingUnitDeployment) super.scale(strategy);
     }
     
@@ -203,8 +177,16 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
 
         ProcessingUnitDeployment deployment = super.toProcessingUnitDeployment();
         
-        if (this.maxMemoryCapacityInMB == 0) {
-            throw new IllegalStateException("maxMemoryCapacity is too low.");
+        if (this.maxMemoryCapacityInMB == 0 && this.numberOfPartitions == 0) {
+            throw new IllegalStateException("maxMemoryCapacity must be defined.");
+        }
+        
+        if (this.maxMemoryCapacityInMB != 0 && this.numberOfPartitions != 0) {
+            throw new IllegalStateException("numberOfPartitions conflicts with maxMemoryCapacity. Please specify only one of these properties.");
+        }
+        
+        if (this.maxNumberOfCpuCores != 0 && this.numberOfPartitions != 0) {
+            throw new IllegalStateException("numberOfPartitions conflicts with maxNumberOfCpuCores. Please specify only one of these properties.");
         }
 
         int numberOfInstances = this.numberOfPartitions;
@@ -276,6 +258,5 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
 
     private double getNumberOfCpuCores(Machine machine) {
         return machine.getOperatingSystem().getDetails().getAvailableProcessors();
-    }
-    
+    }    
 }

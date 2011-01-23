@@ -13,22 +13,6 @@ import org.openspaces.admin.pu.elastic.topology.ElasticDeploymentTopology;
 */
 public interface ElasticStatelessDeploymentTopology extends ElasticDeploymentTopology {
 
-    /**
-     * Enables the specified scale strategy, and disables all other scale strategies.
-     * Scale strategies can also be reconfigured after deployment.
-     * @see EagerScaleConfig
-     * @see EagerScaleConfigurer
-     */
-    ElasticStatelessDeploymentTopology scale(EagerScaleConfigurer configurer);
-
-    /**
-     * Enables the specified scale strategy, and disables all other scale strategies. 
-     * Scale strategies can also be reconfigured after deployment.
-     * @see ManualContainersScaleConfig
-     * @see ManualContainersScaleConfigurer
-     */
-    ElasticStatelessDeploymentTopology scale(
-            ManualContainersScaleConfigurer configurer);
 
     /**
      * Enables the specified scale strategy, and disables all other scale strategies. 

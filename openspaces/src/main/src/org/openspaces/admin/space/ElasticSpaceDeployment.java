@@ -1,16 +1,10 @@
 package org.openspaces.admin.space;
 
-import org.openspaces.admin.pu.elastic.AdvancedElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
-import org.openspaces.admin.pu.elastic.config.CapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.config.CapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
-import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
+import org.openspaces.admin.pu.elastic.topology.AdvancedStatefulDeploymentTopology;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatefulDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
@@ -25,22 +19,23 @@ import com.gigaspaces.security.directory.UserDetails;
  * The disadvantage compared to replicated topology is that there is only 1 read/write endpoint
  * for each data object (no concurrent reads from different containers for the same data).
  * 
- * @see AdvancedElasticSpaceDeployment
+ * @see ElasticSpaceDeployment
  * 
  * @author itaif
  * @since 8.0
  */
 
-public class ElasticSpaceDeployment implements ElasticStatefulDeploymentTopology {
+public class ElasticSpaceDeployment 
+    implements ElasticStatefulDeploymentTopology , AdvancedStatefulDeploymentTopology{
 
-    private final AdvancedElasticStatefulProcessingUnitDeployment deployment;
+    private final ElasticStatefulProcessingUnitDeployment deployment;
 
     /**
      * Constructs a new Space deployment with the space name that will be created (it will also
      * be the processing unit name).
      */
     public ElasticSpaceDeployment(String spaceName) {
-        this.deployment = new AdvancedElasticStatefulProcessingUnitDeployment("/templates/datagrid");
+        this.deployment = new ElasticStatefulProcessingUnitDeployment("/templates/datagrid");
         this.deployment.name(spaceName);
         this.deployment.setContextProperty("dataGridName", spaceName);
     }
@@ -69,33 +64,8 @@ public class ElasticSpaceDeployment implements ElasticStatefulDeploymentTopology
         deployment.maxNumberOfCpuCores(maxNumberOfCpuCores);
         return this;
     }
-    
-    public ElasticSpaceDeployment scale(EagerScaleConfigurer strategy) {
-        deployment.scale(strategy);
-        return this;
-    }
-
-    public ElasticSpaceDeployment scale(ManualContainersScaleConfigurer strategy) {
-        deployment.scale(strategy);
-        return this;
-    }
-
-    public ElasticSpaceDeployment scale(ManualCapacityScaleConfigurer strategy) {
-        deployment.scale(strategy);
-        return this;
-    }
-
-    public ElasticSpaceDeployment scale(CapacityScaleConfigurer strategy) {
-        deployment.scale(strategy);
-        return this;
-    }
-    
+       
     public ElasticSpaceDeployment scale(EagerScaleConfig strategy) {
-        deployment.scale(strategy);
-        return this;
-    }
-
-    public ElasticSpaceDeployment scale(ManualContainersScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }
@@ -105,23 +75,11 @@ public class ElasticSpaceDeployment implements ElasticStatefulDeploymentTopology
         return this;
     }
     
-    public ElasticSpaceDeployment scale(CapacityScaleConfig strategy) {
-        deployment.scale(strategy);
-        return this;
-    }
-    
     public ElasticSpaceDeployment name(String name) {
         deployment.name(name);
         return this;
     }
 
-    /*UNIMPLEMENTED
-    public ElasticSpaceDeployment zone(String zone) {
-        deployment.zone(zone);
-        return this;
-    }
-    */
-    
     public ElasticSpaceDeployment setContextProperty(String key, String value) {
         deployment.setContextProperty(key, value);
         return this;
@@ -189,22 +147,22 @@ public class ElasticSpaceDeployment implements ElasticStatefulDeploymentTopology
         return this;
     }
 
-    protected ElasticSpaceDeployment numberOfBackupsPerPartition(int numberOfBackupsPerPartition) {
+    public ElasticSpaceDeployment numberOfBackupsPerPartition(int numberOfBackupsPerPartition) {
         deployment.numberOfBackupsPerPartition(numberOfBackupsPerPartition);
         return this;
     }
 
-    protected ElasticSpaceDeployment numberOfPartitions(int numberOfPartitions) {
+    public ElasticSpaceDeployment numberOfPartitions(int numberOfPartitions) {
         deployment.numberOfPartitions(numberOfPartitions);
         return this;
     }
 
-    protected ElasticSpaceDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
+    public ElasticSpaceDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
         deployment.minNumberOfCpuCoresPerMachine(minNumberOfCpuCoresPerMachine);
         return this;
     }
 
-    protected ElasticSpaceDeployment singleMachineDeployment() {
+    public ElasticSpaceDeployment singleMachineDeployment() {
         deployment.singleMachineDeployment();
         return this;
     }

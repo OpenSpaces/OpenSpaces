@@ -6,9 +6,9 @@ import org.openspaces.core.util.MemoryUnit;
 /**
  * Provides fluent API for creating a new {@link EagerScaleConfig} object.
  * 
- * For example {@code new EagerScaleStrategyConfigurer().maxNumberOfContainers(10).getConfig()}
+ * For example {@code new EagerScaleStrategyConfigurer().maxNumberOfContainers(10).create()}
  * 
- * @see AdvancedEagerScaleConfigurer
+ * @see EagerScaleConfigurer
  * @see EagerScaleConfig
  * 
  * @since 8.0
@@ -21,7 +21,7 @@ public class EagerScaleConfigurer implements ScaleStrategyConfigurer<EagerScaleC
 
     /**
      * Provides fluent API for creating a new {@link EagerScaleConfig} object.
-     * For example {@code new EagerScaleStrategyConfigurer().maxNumberOfContainers(10).getConfig()}
+     * For example {@code new EagerScaleStrategyConfigurer().maxNumberOfContainers(10).create()}
      * The default constructor wraps an empty {@link EagerScaleConfig} object
      */
     public EagerScaleConfigurer() {
@@ -31,7 +31,7 @@ public class EagerScaleConfigurer implements ScaleStrategyConfigurer<EagerScaleC
     /**
      * @see ScaleStrategyConfig#setReservedMemoryCapacityPerMachineInMB(int)
      */
-    protected EagerScaleConfigurer reservedMemoryCapacityPerMachine(long memory, MemoryUnit unit) {
+    public EagerScaleConfigurer reservedMemoryCapacityPerMachine(long memory, MemoryUnit unit) {
         config.setReservedMemoryCapacityPerMachineInMB((int) unit.toMegaBytes(memory));
         return this;
     }
@@ -39,7 +39,7 @@ public class EagerScaleConfigurer implements ScaleStrategyConfigurer<EagerScaleC
     /**
      * @see ScaleStrategyConfig#setDedicatedManagementMachines(boolean)
      */
-    protected EagerScaleConfigurer dedicatedManagementMachines() {
+    public EagerScaleConfigurer dedicatedManagementMachines() {
         config.setDedicatedManagementMachines(true);
         return this;
     }
@@ -48,15 +48,15 @@ public class EagerScaleConfigurer implements ScaleStrategyConfigurer<EagerScaleC
      * @return 
      * @see ScaleStrategyConfig#setMaxConcurrentRelocationsPerMachine(int)
      */
-    protected EagerScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
+    public EagerScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         config.setMaxConcurrentRelocationsPerMachine(maxNumberOfConcurrentRelocationsPerMachine);
         return this;
      }
     
     /**
-     * @see ScaleStrategyConfigurer#getConfig()
+     * @see ScaleStrategyConfigurer#create()
      */
-    public EagerScaleConfig getConfig() {
+    public EagerScaleConfig create() {
         return config;
     }
 }

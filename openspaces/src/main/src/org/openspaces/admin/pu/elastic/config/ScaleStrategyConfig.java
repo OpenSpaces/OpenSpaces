@@ -22,7 +22,9 @@ public interface ScaleStrategyConfig extends BeanConfig {
      * 
      * For example, by default, a 16GB server  
      * can run 3 containers 5GB each, since it approximately leaves 1024MB memory free.
-     *  
+     * 
+     * This is an advanced property setting.
+     * 
      * @param reservedInMB - amount of reserved memory in MB
      */
     void setReservedMemoryCapacityPerMachineInMB(int reservedInMB);
@@ -34,6 +36,8 @@ public interface ScaleStrategyConfig extends BeanConfig {
      * from being started on the same machine as the {@link org.openspaces.admin.gsm.GridServiceManager} , {@link org.openspaces.admin.lus.LookupService}
      * 
      * Default value is false
+     * 
+     * This is an advanced property setting.
      * 
      * @param dedicatedManagementMachines - set to false for a dedicated management machine
      */
@@ -51,6 +55,8 @@ public interface ScaleStrategyConfig extends BeanConfig {
      * completes faster, by using more machine cpu and network resources.
      * 
      * Default value is 1.
+     * 
+     * This is an advanced property setting.
      * 
      * @param maxNumberOfConcurrentRelocationsPerMachine
      */

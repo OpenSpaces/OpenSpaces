@@ -2,14 +2,8 @@ package org.openspaces.admin.memcached;
 
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
-import org.openspaces.admin.pu.elastic.config.CapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.config.CapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
-import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatefulDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.pu.container.servicegrid.deploy.MemcachedDeploy;
@@ -56,33 +50,8 @@ public class ElasticMemcachedDeployment implements ElasticStatefulDeploymentTopo
         deployment.memoryCapacityPerContainer(memoryCapacityPerContainer);
         return this;
     }
-    
-    public ElasticMemcachedDeployment scale(EagerScaleConfigurer strategy) {
-        deployment.scale(strategy);
-        return this;
-    }
-
-    public ElasticMemcachedDeployment scale(ManualContainersScaleConfigurer strategy) {
-        deployment.scale(strategy);
-        return this;
-    }
-
-    public ElasticMemcachedDeployment scale(ManualCapacityScaleConfigurer strategy) {
-        deployment.scale(strategy);
-        return this;
-    }
-
-    public ElasticMemcachedDeployment scale(CapacityScaleConfigurer strategy) {
-        deployment.scale(strategy);
-        return this;
-    }
-    
+        
     public ElasticMemcachedDeployment scale(EagerScaleConfig strategy) {
-        deployment.scale(strategy);
-        return this;
-    }
-
-    public ElasticMemcachedDeployment scale(ManualContainersScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }
@@ -92,21 +61,11 @@ public class ElasticMemcachedDeployment implements ElasticStatefulDeploymentTopo
         return this;
     }
     
-    public ElasticMemcachedDeployment scale(CapacityScaleConfig strategy) {
-        deployment.scale(strategy);
-        return this;
-    }
-    
     public ElasticMemcachedDeployment name(String name) {
         deployment.name(name);
         return this;
     }
-/* NOT IMPLEMENTED
-    public ElasticMemcachedDeployment zone(String zone) {
-        deployment.zone(zone);
-        return this;
-    }
-*/
+
     public ElasticMemcachedDeployment setContextProperty(String key, String value) {
         deployment.setContextProperty(key, value);
         return this;

@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticReplicatedDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
@@ -36,10 +35,6 @@ public class ElasticReplicatedProcessingUnitDeployment extends AbstractElasticPr
         this.numberOfContainers = numberOfContainers;
         return this;
     }
-   
-    public ElasticReplicatedDeploymentTopology enableScaleStrategy(ManualContainersScaleConfigurer configurer) {
-        return enableScaleStrategy(configurer.getConfig());
-    }
     
     public ElasticReplicatedProcessingUnitDeployment enableScaleStrategy(ManualContainersScaleConfig strategy) {
         return (ElasticReplicatedProcessingUnitDeployment) super.scale(strategy);
@@ -48,11 +43,7 @@ public class ElasticReplicatedProcessingUnitDeployment extends AbstractElasticPr
     public ElasticReplicatedProcessingUnitDeployment name(String name) {
         return (ElasticReplicatedProcessingUnitDeployment) super.name(name);
     }
-/* NOT IMPLEMENTED
-    public ElasticReplicatedProcessingUnitDeployment zone(String zone) {
-        return (ElasticReplicatedProcessingUnitDeployment) super.zone(zone);
-    }
-*/
+
     public ElasticReplicatedProcessingUnitDeployment setContextProperty(String key, String value) {
         return (ElasticReplicatedProcessingUnitDeployment) super.setContextProperty(key, value);
     }

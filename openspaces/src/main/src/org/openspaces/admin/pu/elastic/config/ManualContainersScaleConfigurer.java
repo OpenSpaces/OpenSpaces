@@ -3,7 +3,7 @@ package org.openspaces.admin.pu.elastic.config;
 /**
  * Provides fluent API for creating a new {@link ManualContainersScaleConfig} object.
  * 
- * For example {@code new ManualContainersScaleStrategyConfigurer().numberOfContainers(10).getConfig()}
+ * For example {@code new ManualContainersScaleStrategyConfigurer().numberOfContainers(10).create()}
  * 
  * @author itaif
  * 
@@ -14,7 +14,7 @@ public class ManualContainersScaleConfigurer implements ScaleStrategyConfigurer<
 
     /**
      * Provides fluent API for creating a new {@link ManualContainersScaleConfig} object.
-     * For example {@code new ManualContainersScaleStrategyConfigurer().numberOfContainers(10).getConfig()}
+     * For example {@code new ManualContainersScaleStrategyConfigurer().numberOfContainers(10).create()}
      * The default constructor wraps an empty {@link ManualContainersScaleConfig} object
      */
     public ManualContainersScaleConfigurer() {
@@ -46,9 +46,9 @@ public class ManualContainersScaleConfigurer implements ScaleStrategyConfigurer<
     }
 
     /**
-     * @see ScaleStrategyConfigurer#getConfig()
+     * @see ScaleStrategyConfigurer#create()
      */
-    public ManualContainersScaleConfig getConfig() {
+    public ManualContainersScaleConfig create() {
         return config;
     }
 }

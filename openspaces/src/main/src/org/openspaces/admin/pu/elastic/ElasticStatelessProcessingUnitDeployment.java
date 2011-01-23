@@ -5,9 +5,7 @@ import java.util.Map;
 
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
-import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatelessDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
@@ -38,14 +36,6 @@ public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticPro
         this(processingUnit.getAbsolutePath());
     }
 
-    public ElasticStatelessDeploymentTopology scale(EagerScaleConfigurer configurer) {
-        return scale(configurer.getConfig());
-    }
-    
-    public ElasticStatelessDeploymentTopology scale(ManualContainersScaleConfigurer configurer) {
-        return scale(configurer.getConfig());
-    }
-    
     public ElasticStatelessProcessingUnitDeployment scale(ManualContainersScaleConfig strategy) {
         return (ElasticStatelessProcessingUnitDeployment) super.scale(strategy);
     }

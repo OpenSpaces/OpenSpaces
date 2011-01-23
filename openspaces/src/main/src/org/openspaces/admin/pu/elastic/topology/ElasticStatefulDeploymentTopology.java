@@ -1,13 +1,9 @@
 package org.openspaces.admin.pu.elastic.topology;
 
-import org.openspaces.admin.pu.elastic.config.CapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.config.CapacityScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfigurer;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.core.util.MemoryUnit;
 
 public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopology {
@@ -46,51 +42,7 @@ public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopo
      * @see EagerScaleConfig
      * @see EagerScaleConfigurer
      */
-    ElasticStatefulDeploymentTopology scale(EagerScaleConfigurer strategy);
-
-    /**
-     * Enables the specified scale strategy, and disables all other scale strategies.
-     * Scale strategies can also be reconfigured after deployment.
-     * @see ManualContainersScaleConfig
-     * @see ManualContainersScaleConfigurer
-     */
-    ElasticStatefulDeploymentTopology scale(
-            ManualContainersScaleConfigurer strategy);
-
-    /**
-     * Enables the specified scale strategy, and disables all other scale strategies.
-     * Scale strategies can also be reconfigured after deployment.
-     * @see ManualCapacityScaleConfig
-     * @see ManualCapacityScaleConfigurer
-     */
-    ElasticStatefulDeploymentTopology scale(
-            ManualCapacityScaleConfigurer strategy);
-
-    /**
-     * Enables the specified scale strategy, and disables all other scale strategies.
-     * Scale strategies can also be reconfigured after deployment.
-     * @see CapacityScaleConfig
-     * @see CapacityScaleConfigurer
-     */
-    ElasticStatefulDeploymentTopology scale(
-            CapacityScaleConfigurer strategy);
-
-    /**
-     * Enables the specified scale strategy, and disables all other scale strategies.
-     * Scale strategies can also be reconfigured after deployment.
-     * @see EagerScaleConfig
-     * @see EagerScaleConfigurer
-     */
     ElasticStatefulDeploymentTopology scale(EagerScaleConfig strategy);
-
-    /**
-     * Enables the specified scale strategy, and disables all other scale strategies.
-     * Scale strategies can also be reconfigured after deployment.
-     * @see ManualContainersScaleConfig
-     * @see ManualContainersScaleConfigurer
-     */
-    ElasticStatefulDeploymentTopology scale(
-            ManualContainersScaleConfig strategy);
 
     /**
      * Enables the specified scale strategy, and disables all other scale strategies.
@@ -100,13 +52,4 @@ public interface ElasticStatefulDeploymentTopology extends ElasticDeploymentTopo
      */
     ElasticStatefulDeploymentTopology scale(
             ManualCapacityScaleConfig strategy);
-
-    /**
-     * Enables the specified scale strategy, and disables all other scale strategies.
-     * Scale strategies can also be reconfigured after deployment.
-     * @see CapacityScaleConfig
-     * @see CapacityScaleConfigurer
-     */
-    ElasticStatefulDeploymentTopology scale(
-            CapacityScaleConfig strategy);
 }

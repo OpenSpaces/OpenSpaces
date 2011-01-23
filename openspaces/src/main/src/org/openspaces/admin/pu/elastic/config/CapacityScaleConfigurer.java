@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Provides fluent API for creating a new {@link CapacityScaleConfig} object.
  * 
- * For example {@code new MemoryCapacityScaleStrategyConfigurer().slidingTimeWindow(60,TimeUnit.SECONDS).scaleOutWhenAboveThreshold(70).getConfig()}
+ * For example {@code new MemoryCapacityScaleStrategyConfigurer().slidingTimeWindow(60,TimeUnit.SECONDS).scaleOutWhenAboveThreshold(70).create()}
  * 
  * @author itaif
  * 
@@ -17,7 +17,7 @@ public class CapacityScaleConfigurer
     
     /**
      * Provides fluent API for creating a new {@link CapacityScaleConfig} object.
-     * For example {@code new MemoryCapacityScaleStrategyConfigurer().slidingTimeWindow(60,TimeUnit.SECONDS).scaleOutWhenAboveThreshold(70).getConfig()}
+     * For example {@code new MemoryCapacityScaleStrategyConfigurer().slidingTimeWindow(60,TimeUnit.SECONDS).scaleOutWhenAboveThreshold(70).create()}
      * The default constructor wraps an empty {@link CapacityScaleConfig} object
      */
     public CapacityScaleConfigurer() {
@@ -83,9 +83,9 @@ public class CapacityScaleConfigurer
     }
 
     /**
-     * @see ScaleStrategyConfigurer#getConfig()
+     * @see ScaleStrategyConfigurer#create()
      */
-    public CapacityScaleConfig getConfig() {
+    public CapacityScaleConfig create() {
         return config;
     }
 

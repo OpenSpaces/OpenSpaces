@@ -36,7 +36,6 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.ProcessingUnitPartition;
 import org.openspaces.admin.pu.ProcessingUnits;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
-import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfigurer;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEvent;
 import org.openspaces.admin.pu.events.BackupGridServiceManagerChangedEventManager;
 import org.openspaces.admin.pu.events.ManagingGridServiceManagerChangedEvent;
@@ -598,10 +597,6 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
                 this, 
                 strategyConfig.getBeanClassName(), 
                 strategyConfig.getProperties());
-    }
-
-    public <T extends ScaleStrategyConfig> void scale(ScaleStrategyConfigurer<T> strategyConfigurer) {
-        scale(strategyConfigurer.getConfig());
     }
     
     public void setElasticProperties(Map<String,String> properties) {

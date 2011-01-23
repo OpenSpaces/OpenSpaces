@@ -6,9 +6,7 @@ import java.util.Map;
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
-import org.openspaces.admin.pu.elastic.config.EagerScaleConfigurer;
 import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfig;
-import org.openspaces.admin.pu.elastic.config.ManualContainersScaleConfigurer;
 import org.openspaces.admin.pu.elastic.topology.ElasticWebDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
@@ -39,14 +37,6 @@ public class ElasticWebProcessingUnitDeployment extends AbstractElasticProcessin
     public ElasticWebProcessingUnitDeployment(File processingUnit) {
         this(processingUnit.getAbsolutePath());
     }
-
-    public ElasticWebProcessingUnitDeployment scale(EagerScaleConfigurer configurer) {
-        return scale(configurer.getConfig());
-    }
-    
-    public ElasticWebProcessingUnitDeployment scale(ManualContainersScaleConfigurer configurer) {
-        return scale(configurer.getConfig());
-    }
     
     public ElasticWebProcessingUnitDeployment scale(ManualContainersScaleConfig strategy) {
         return (ElasticWebProcessingUnitDeployment) super.scale(strategy);
@@ -59,25 +49,7 @@ public class ElasticWebProcessingUnitDeployment extends AbstractElasticProcessin
     public ElasticWebProcessingUnitDeployment name(String name) {
         return (ElasticWebProcessingUnitDeployment) super.name(name);
     }
-/* NOT IMPLEMENTED YET
-    public ElasticWebProcessingUnitDeployment zone(String zone) {
-        return (ElasticWebProcessingUnitDeployment) super.zone(zone);
-    }
 
-
-    public ElasticWebProcessingUnitDeployment isolation(DedicatedIsolation isolation) {
-        return (ElasticWebProcessingUnitDeployment) super.isolation(isolation);
-    }
-
-    public ElasticWebProcessingUnitDeployment isolation(SharedTenantIsolation isolation) {
-        return (ElasticWebProcessingUnitDeployment) super.isolation(isolation);
-    }
-    
-    public ElasticWebProcessingUnitDeployment isolation(PublicIsolation isolation) {
-        return (ElasticWebProcessingUnitDeployment) super.isolation(isolation);
-    }
-
-*/
     public ElasticWebProcessingUnitDeployment setContextProperty(String key, String value) {
         return (ElasticWebProcessingUnitDeployment) super.setContextProperty(key, value);
     }

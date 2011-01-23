@@ -5,7 +5,7 @@ import org.openspaces.core.util.MemoryUnit;
 /**
  * Provides fluent API for creating a new {@link ManualCapacityScaleConfig} object.
  * 
- * For example {@code new ManualMemoryCapacityScaleStrategyConfigurer().capacity("1500m").getConfig()}
+ * For example {@code new ManualMemoryCapacityScaleStrategyConfigurer().memoryCapacity("1500m").create()}
  * 
  * @author itaif
  * @since 8.0
@@ -17,7 +17,7 @@ private final ManualCapacityScaleConfig config;
     
     /**
      * Provides fluent API for creating a new {@link ManualCapacityScaleConfig} object.
-     * For example {@code new ManualMemoryCapacityScaleStrategyConfigurer().capacity("1500m").getConfig()}
+     * For example {@code new ManualMemoryCapacityScaleStrategyConfigurer().memoryCapacity("1500m").create()}
      * The default constructor wraps an empty {@link ManualCapacityScaleConfig} object
      */
     public ManualCapacityScaleConfigurer() {
@@ -51,7 +51,7 @@ private final ManualCapacityScaleConfig config;
     /**
      * @see ScaleStrategyConfig#setReservedMemoryCapacityPerMachineInMB(int)
      */
-    protected ManualCapacityScaleConfigurer reservedMemoryCapacityPerMachine(long memory, MemoryUnit unit) {
+    public ManualCapacityScaleConfigurer reservedMemoryCapacityPerMachine(long memory, MemoryUnit unit) {
         config.setReservedMemoryCapacityPerMachineInMB((int) unit.toMegaBytes(memory));
         return this;
     }
@@ -59,7 +59,7 @@ private final ManualCapacityScaleConfig config;
     /**
      * @see ScaleStrategyConfig#setDedicatedManagementMachines(boolean)
      */
-    protected ManualCapacityScaleConfigurer dedicatedManagementMachines() {
+    public ManualCapacityScaleConfigurer dedicatedManagementMachines() {
         config.setDedicatedManagementMachines(true);
         return this;
     }
@@ -68,17 +68,15 @@ private final ManualCapacityScaleConfig config;
      * @return 
      * @see ScaleStrategyConfig#setMaxConcurrentRelocationsPerMachine(int)
      */
-    protected ManualCapacityScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
+    public ManualCapacityScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         config.setMaxConcurrentRelocationsPerMachine(maxNumberOfConcurrentRelocationsPerMachine);
         return this;
      }
     
     /**
-     * @see ScaleStrategyConfigurer#getConfig()
+     * @see ScaleStrategyConfigurer#create()
      */
-    public ManualCapacityScaleConfig getConfig() {
+    public ManualCapacityScaleConfig create() {
         return config;
     }
-
-    
 }

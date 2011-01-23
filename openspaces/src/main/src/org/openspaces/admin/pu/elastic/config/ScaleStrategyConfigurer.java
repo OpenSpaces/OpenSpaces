@@ -4,5 +4,5 @@ import org.openspaces.admin.bean.BeanConfig;
 
 public interface ScaleStrategyConfigurer<T extends BeanConfig> {
 
-    T getConfig();
+    T create();
 }
