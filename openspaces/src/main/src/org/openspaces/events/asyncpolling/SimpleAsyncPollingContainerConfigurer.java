@@ -22,7 +22,6 @@ import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.events.adapter.AnnotationEventListenerAdapter;
 import org.openspaces.events.adapter.MethodEventListenerAdapter;
 import org.openspaces.events.asyncpolling.receive.AsyncOperationHandler;
-import org.openspaces.events.notify.SimpleNotifyEventListenerContainer;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
