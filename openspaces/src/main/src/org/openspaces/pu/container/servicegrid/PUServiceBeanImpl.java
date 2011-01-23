@@ -1093,7 +1093,7 @@ public class PUServiceBeanImpl extends ServiceBeanAdapter implements PUServiceBe
                 url = new URL(context.getServiceBeanManager().getOperationalStringManager().getDeployURL() + "/" + puPath);
                 break;
             } catch (Exception e) {
-                if (i==0) {
+                if (i==1) {
                     //throw exception on last retry attempt
                     throw new CannotCreateContainerException("Failed to construct URL to download processing unit", e);
                 }
