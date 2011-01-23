@@ -1,8 +1,7 @@
 package org.openspaces.admin.pu.elastic.config;
 
-import org.openspaces.admin.bean.BeanConfig;
+import org.openspaces.admin.bean.BeanConfigurer;
 
-public interface ScaleStrategyConfigurer<T extends BeanConfig> {
+public interface ScaleStrategyConfigurer<T extends ScaleStrategyConfig> extends BeanConfigurer<T> {
 
-    T create();
 }
