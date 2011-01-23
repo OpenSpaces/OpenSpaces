@@ -13,19 +13,6 @@ public interface ElasticDeploymentTopology {
      */
     ElasticDeploymentTopology name(String name);
 
-    /**
-     * Defines a deployment restriction where the processing unit is allowed to be deployed on.
-     * The processing unit can only deploy on machines which have a grid service agent with
-     * the specified zone or without any specified zones. 
-     * For example, a processing unit with zone("z") 
-     *  can deploy on GSA["z"] 
-     *  can deploy on GSA["x,y,z"] 
-     *  can deploy on GSA[] without any zone
-     *  but cannot deploy on GSA["x"]
-     */
-    //UNIMPLEMENTED
-    //ElasticDeploymentTopology zone(String zone);
-
    /**
     * Defines a context deploy time property overriding any <code>${...}</code> defined within a processing
     * unit configuration.
@@ -48,28 +35,6 @@ public interface ElasticDeploymentTopology {
      * processing unit.
      */ 
     ElasticDeploymentTopology userDetails(String userName, String password);
-
-    /**
-     * Sets the deployment isolation constraint to dedicated. 
-     * Dedicated isolation ensures that only processing unit instances from the same processing units can share the same machine.
-     * Dedicated is the default deployment isolation. 
-     */
-    //UNIMPLEMENTED
-    //ElasticDeploymentTopology isolation(DedicatedIsolation isolation);
-
-    /**
-     * Sets the deployment isolation constraint to shared. 
-     * Shared isolation ensures that only processing unit instances from the same tenant can share the same machine.
-     */
-    //UNIMPLEMENTED
-    //ElasticDeploymentTopology isolation(SharedTenantIsolation isolation);
-
-    /**
-     * Sets the deployment isolation constraint to public. 
-     * Public isolation ensures that only processing unit instances with public isolation can share the same machine.
-     */
-    //UNIMPLEMENTED
-    //ElasticDeploymentTopology isolation(PublicIsolation isolation);
 
     /**
      * Will cause the {@link org.openspaces.admin.gsc.GridServiceContainer} to be started using a script
