@@ -254,12 +254,23 @@ public class SimplePollingContainerConfigurer {
         return this;
     }
 
-    public SimplePollingEventListenerContainer pollingContainer() {
+    /**
+     * Creates a new {@link SimplePollingEventListenerContainer} instance.
+     */
+    public SimplePollingEventListenerContainer create() {
         if (!initialized) {
             pollingEventListenerContainer.setRegisterSpaceModeListener(true);
             pollingEventListenerContainer.afterPropertiesSet();
             initialized = true;
         }
         return pollingEventListenerContainer;
+    }
+    
+    /**
+     * Creates a new {@link SimplePollingEventListenerContainer} instance.
+     * @see #create()
+     */
+    public SimplePollingEventListenerContainer pollingContainer() {
+        return create();
     }
 }
