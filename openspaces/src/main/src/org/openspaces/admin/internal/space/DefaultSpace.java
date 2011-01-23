@@ -7,6 +7,7 @@ import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.admin.IRemoteJSpaceAdmin;
 import com.j_spaces.core.admin.RuntimeHolder;
 import com.j_spaces.core.exception.SpaceUnavailableException;
+import com.j_spaces.core.exception.internal.InterruptedSpaceException;
 import com.j_spaces.kernel.JSpaceUtilities;
 import com.j_spaces.kernel.SizeConcurrentHashMap;
 import org.apache.commons.logging.Log;
@@ -17,6 +18,8 @@ import org.openspaces.admin.StatisticsMonitor;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.space.events.*;
 import org.openspaces.admin.internal.support.NetworkExceptionHelper;
+import org.openspaces.admin.pu.DeploymentStatus;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.space.*;
 import org.openspaces.admin.space.events.*;
 import org.openspaces.core.GigaSpace;
@@ -569,6 +572,14 @@ public class DefaultSpace implements InternalSpace {
                 // space is going shutdown or abort process
             } catch (InactiveSpaceException e) {
                 // ignore this (maybe we should add it as a state to a Space instance?)
+            } catch (InterruptedSpaceException e) {
+                ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(name);
+                if (pu == null ||
+                    pu.getStatus() == DeploymentStatus.UNDEPLOYED) {
+                    logger.debug("Failed to get runtime information", e);
+                } else {
+                    logger.warn("Failed to get runtime information", e);
+                }
             } catch (Exception e) {
                 if (NetworkExceptionHelper.isConnectOrCloseException(e)) {
                     logger.debug("Failed to get runtime information", e);
