@@ -19,20 +19,19 @@ package org.openspaces.remoting;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * A remoting aspect allows to wrap the remote invocaiton with specific "user" logic, for example,
+ * A remoting aspect allows to wrap the remote invocation with specific "user" logic, for example,
  * to add retry in case of a failure, security, or something similar.
  *
  * @author kimchy
- * @see EventDrivenSpaceRemotingProxyFactoryBean
+ * @see org.openspaces.remoting.EventDrivenSpaceRemotingProxyFactoryBean
  * @see org.openspaces.remoting.ExecutorSpaceRemotingProxyFactoryBean
- * @see SyncSpaceRemotingProxyFactoryBean
  */
 public interface RemoteInvocationAspect<T> {
 
     /**
      * The aspect is called instead of the actual remote invocation. The methodInvocation can
      * be used to access any method related information. The remoting invoker passed can be used
-     * to actually invoke the remote invocaiton.
+     * to actually invoke the remote invocation.
      */
     T invoke(MethodInvocation methodInvocation, RemotingInvoker remotingInvoker) throws Throwable;
 }
