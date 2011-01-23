@@ -35,14 +35,16 @@ public interface Transport extends VirtualMachineAware, StatisticsMonitor {
     /**
      * Returns the host address of the transport.
      *
-     * @see java.net.InetAddress#getLocalHost()#getHostAddress()
+     * @see java.net.InetAddress#getLocalHost()
+     * @see java.net.InetAddress#getHostAddress()
      */
     String getHostAddress();
 
     /**
      * Returns the host address of the transport.
      *
-     * @see java.net.InetAddress#getLocalHost()#getHostName()
+     * @see java.net.InetAddress#getLocalHost()
+     * @see java.net.InetAddress#getHostName()
      */
     String getHostName();
 
