@@ -7,7 +7,7 @@ import org.openspaces.admin.alert.config.AlertConfiguration;
  * A configuration parser for setting a bulk of alert configurations using the call to
  * {@link AlertManager#configure(AlertConfiguration[])}.
  * <p>
- * @see {@link XmlAlertConfigurationParser} which reads from an xml file the alert configurations.
+ * @see XmlAlertConfigurationParser which reads from an xml file the alert configurations.
  * 
  * @author Moran Avigdor
  * @since 8.0
