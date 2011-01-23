@@ -11,7 +11,7 @@ import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestr
  *  
  * @author itaif
  *
- * @see MachineSlaPolicy
+ * @see CapacityMachinesSlaPolicy
  */
 public interface MachinesSlaEnforcementEndpoint 
     extends ServiceLevelAgreementEnforcementEndpoint<ProcessingUnit,CapacityMachinesSlaPolicy> {
