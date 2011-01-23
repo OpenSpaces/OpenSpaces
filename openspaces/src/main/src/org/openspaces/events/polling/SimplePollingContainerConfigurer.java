@@ -36,7 +36,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * SimplePollingEventListenerContainer pollingEventListenerContainer = new SimplePollingContainerConfigurer(gigaSpace)
  *              .template(new TestMessage())
  *              .eventListenerAnnotation(new Object() {
- *                  @SpaceDataEvent public void gotMeselfAnEvent() {
+ *                  <code>@SpaceDataEvent</code> public void gotMeselfAnEvent() {
  *                      // do something
  *                  }
  *              }).notifyContainer();
@@ -51,7 +51,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  */
 public class SimplePollingContainerConfigurer {
 
-    private SimplePollingEventListenerContainer pollingEventListenerContainer;
+    private final SimplePollingEventListenerContainer pollingEventListenerContainer;
 
     private boolean initialized = false;
 
