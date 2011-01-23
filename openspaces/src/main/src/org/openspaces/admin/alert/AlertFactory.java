@@ -167,7 +167,9 @@ public class AlertFactory {
     
     /**
      * @return the constructed alert
-     * @throws AdminException if required configurations were not set properly ({@link #groupUid(String), #severity(AlertSeverity), #beanClassName(String))
+     * @throws AdminException
+     *             if required configurations were not set properly ({@link #groupUid(String)},
+     *             {@link #severity(AlertSeverity)}, {@link #status(AlertStatus)})
      */
     public Alert toAlert() {
         if (alert.getGroupUid() == null) {
