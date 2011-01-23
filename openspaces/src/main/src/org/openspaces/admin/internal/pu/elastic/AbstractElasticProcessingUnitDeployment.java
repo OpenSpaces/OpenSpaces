@@ -18,6 +18,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     private final String processingUnit;
     private String name;
     private final StringProperties contextProperties = new StringProperties();
+    private final StringProperties defaultContextProperties = new StringProperties();
     private UserDetails userDetails;
     private boolean secured;
     private final Map<String,String> elasticProperties;
@@ -34,16 +35,19 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         scaleStrategyPropertiesManager = new ScaleStrategyBeanPropertiesManager(elasticProperties);
     }
         
+    protected void addContextPropertyDefault(String key, String defaultValue) {
+        if (key == null) {
+            throw new IllegalArgumentException("Key cannot be null");
+        }
+        defaultContextProperties.put(key,defaultValue);
+    }
+    
     protected AbstractElasticProcessingUnitDeployment addContextProperty(String key, String value) {
         if (value == null) {
             throw new IllegalArgumentException("Value cannot be null");
         }
         if (key == null) {
             throw new IllegalArgumentException("Key cannot be null");
-        }
-        String currentValue = contextProperties.get(key,null);
-        if (currentValue != null && !currentValue.equals(value)) {
-            throw new IllegalStateException("Context property " + key + " is already defined to " + currentValue + " and cannot be modified to " + value);
         }
         contextProperties.put(key, value);
         return this;
@@ -189,8 +193,10 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         deployment.addZone(containerZone);
         commandLineArgument("-Dcom.gs.zones=" + containerZone);
     
-                
-        Map<String,String> context = contextProperties.getProperties();
+        // context properties defined by the user overrides the 
+        // default context properties defined by the derived class.
+        Map<String,String> context = defaultContextProperties.getProperties();
+        context.putAll(contextProperties.getProperties());
         for (Map.Entry<String,String> entry : context.entrySet()) {
             deployment.setContextProperty(entry.getKey(), entry.getValue());
         }
@@ -214,6 +220,5 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         propertiesManager.disableAllBeans();
         propertiesManager.setBeanConfig(config.getBeanClassName(), config.getProperties());
         propertiesManager.enableBean(config.getBeanClassName());
-    }
-    
+    }   
 }
