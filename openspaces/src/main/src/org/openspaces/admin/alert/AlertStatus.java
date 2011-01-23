@@ -153,8 +153,8 @@ public class AlertStatus implements java.io.Serializable {
     }
     
     /**
-     * Returns an AlertStatus by it's value (see {@link #getValue()}).
-     * @param value representing this status
+     * Returns an AlertStatus by it's value (see {@link #getName()}).
+     * @param name representing this status
      * @return a severity.
      * @throws IllegalArgumentException if an unknown status was requested.
      */
