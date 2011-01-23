@@ -37,7 +37,7 @@ public class ElasticSpaceDeployment
     public ElasticSpaceDeployment(String spaceName) {
         this.deployment = new ElasticStatefulProcessingUnitDeployment("/templates/datagrid");
         this.deployment.name(spaceName);
-        this.deployment.setContextProperty("dataGridName", spaceName);
+        this.deployment.addContextProperty("dataGridName", spaceName);
     }
 
     public ElasticSpaceDeployment maxMemoryCapacity(int maxMemoryCapacity, MemoryUnit unit) {
@@ -80,8 +80,8 @@ public class ElasticSpaceDeployment
         return this;
     }
 
-    public ElasticSpaceDeployment setContextProperty(String key, String value) {
-        deployment.setContextProperty(key, value);
+    public ElasticSpaceDeployment addContextProperty(String key, String value) {
+        deployment.addContextProperty(key, value);
         return this;
     }
 

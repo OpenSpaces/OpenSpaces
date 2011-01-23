@@ -34,7 +34,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         scaleStrategyPropertiesManager = new ScaleStrategyBeanPropertiesManager(elasticProperties);
     }
         
-    protected AbstractElasticProcessingUnitDeployment setContextProperty(String key, String value) {
+    protected AbstractElasticProcessingUnitDeployment addContextProperty(String key, String value) {
         if (value == null) {
             throw new IllegalArgumentException("Value cannot be null");
         }

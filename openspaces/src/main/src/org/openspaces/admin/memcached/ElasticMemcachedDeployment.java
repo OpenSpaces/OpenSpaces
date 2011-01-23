@@ -23,7 +23,7 @@ public class ElasticMemcachedDeployment implements ElasticStatefulDeploymentTopo
         this.spaceUrl = spaceUrl;
         this.deployment = new ElasticStatefulProcessingUnitDeployment("/templates/memcached");
         this.deployment.name(MemcachedDeploy.extractName(spaceUrl) + "-memcached");
-        this.deployment.setContextProperty("url", spaceUrl);
+        this.deployment.addContextProperty("url", spaceUrl);
     }
 
     public ElasticMemcachedDeployment maxMemoryCapacity(int maxMemoryCapacity, MemoryUnit unit) {
@@ -66,8 +66,8 @@ public class ElasticMemcachedDeployment implements ElasticStatefulDeploymentTopo
         return this;
     }
 
-    public ElasticMemcachedDeployment setContextProperty(String key, String value) {
-        deployment.setContextProperty(key, value);
+    public ElasticMemcachedDeployment addContextProperty(String key, String value) {
+        deployment.addContextProperty(key, value);
         return this;
     }
 

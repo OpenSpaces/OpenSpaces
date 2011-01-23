@@ -27,10 +27,10 @@ public interface ElasticDeploymentTopology {
     //ElasticDeploymentTopology zone(String zone);
 
    /**
-    * Sets a context deploy time property overriding any <code>${...}</code> defined within a processing
+    * Defines a context deploy time property overriding any <code>${...}</code> defined within a processing
     * unit configuration.
     */
-    ElasticDeploymentTopology setContextProperty(String key, String value);
+    ElasticDeploymentTopology addContextProperty(String key, String value);
 
     /**
      * Will deploy a secured processing unit. Note, by setting user details the processing unit will be secured automatically.

@@ -130,8 +130,8 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return (ElasticStatefulProcessingUnitDeployment) super.name(name);
     }
    
-    public ElasticStatefulProcessingUnitDeployment setContextProperty(String key, String value) {
-        return (ElasticStatefulProcessingUnitDeployment) super.setContextProperty(key, value);
+    public ElasticStatefulProcessingUnitDeployment addContextProperty(String key, String value) {
+        return (ElasticStatefulProcessingUnitDeployment) super.addContextProperty(key, value);
     }
 
     public ElasticStatefulProcessingUnitDeployment secured(boolean secured) {
