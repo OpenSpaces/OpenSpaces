@@ -27,17 +27,17 @@ public interface ScaleStrategyConfig extends BeanConfig {
      */
     void setReservedMemoryCapacityPerMachineInMB(int reservedInMB);
     
-    boolean getAllowDeploymentOnManagementMachine();
+    boolean getDedicatedManagementMachines();
     
     /**
-     * If specified allows the {@link org.openspaces.admin.gsc.GridServiceContainer} 
-     * to be started on the same machine as the {@link org.openspaces.admin.gsm.GridServiceManager} , {@link org.openspaces.admin.lus.LookupService}
+     * If specified restricts the {@link org.openspaces.admin.gsc.GridServiceContainer} 
+     * from being started on the same machine as the {@link org.openspaces.admin.gsm.GridServiceManager} , {@link org.openspaces.admin.lus.LookupService}
      * 
-     * Default value is true
+     * Default value is false
      * 
-     * @param allowDeploymentOnManagementMachine - set to false for a dedicated management machine
+     * @param dedicatedManagementMachines - set to false for a dedicated management machine
      */
-    void setAllowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine);
+    void setDedicatedManagementMachines(boolean dedicatedManagementMachines);
     
     int getMaxConcurrentRelocationsPerMachine();
     

@@ -25,13 +25,13 @@ import com.gigaspaces.security.directory.UserDetails;
  * The disadvantage compared to replicated topology is that there is only 1 read/write endpoint
  * for each data object (no concurrent reads from different containers for the same data).
  * 
- * @see AdvancedElasticDataGridDeployment
+ * @see AdvancedElasticSpaceDeployment
  * 
  * @author itaif
  * @since 8.0
  */
 
-public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopology {
+public class ElasticSpaceDeployment implements ElasticStatefulDeploymentTopology {
 
     private final AdvancedElasticStatefulProcessingUnitDeployment deployment;
 
@@ -39,173 +39,173 @@ public class ElasticDataGridDeployment implements ElasticStatefulDeploymentTopol
      * Constructs a new Space deployment with the space name that will be created (it will also
      * be the processing unit name).
      */
-    public ElasticDataGridDeployment(String spaceName) {
+    public ElasticSpaceDeployment(String spaceName) {
         this.deployment = new AdvancedElasticStatefulProcessingUnitDeployment("/templates/datagrid");
         this.deployment.name(spaceName);
         this.deployment.setContextProperty("dataGridName", spaceName);
     }
 
-    public ElasticDataGridDeployment maxMemoryCapacity(int maxMemoryCapacity, MemoryUnit unit) {
+    public ElasticSpaceDeployment maxMemoryCapacity(int maxMemoryCapacity, MemoryUnit unit) {
         deployment.maxMemoryCapacity(maxMemoryCapacity,unit);
         return this;
     }
 
-    public ElasticDataGridDeployment maxMemoryCapacity(String maxMemoryCapacity) {
+    public ElasticSpaceDeployment maxMemoryCapacity(String maxMemoryCapacity) {
         deployment.maxMemoryCapacity(maxMemoryCapacity);
         return this;
     }
     
-    public ElasticDataGridDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
+    public ElasticSpaceDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
         deployment.memoryCapacityPerContainer(memoryCapacityPerContainer,unit);
         return this;
     }
 
-    public ElasticDataGridDeployment memoryCapacityPerContainer(String memoryCapacityPerContainer) {
+    public ElasticSpaceDeployment memoryCapacityPerContainer(String memoryCapacityPerContainer) {
         deployment.memoryCapacityPerContainer(memoryCapacityPerContainer);
         return this;
     }
     
-    public ElasticDataGridDeployment maxNumberOfCpuCores(int maxNumberOfCpuCores) {
+    public ElasticSpaceDeployment maxNumberOfCpuCores(int maxNumberOfCpuCores) {
         deployment.maxNumberOfCpuCores(maxNumberOfCpuCores);
         return this;
     }
     
-    public ElasticDataGridDeployment scale(EagerScaleConfigurer strategy) {
+    public ElasticSpaceDeployment scale(EagerScaleConfigurer strategy) {
         deployment.scale(strategy);
         return this;
     }
 
-    public ElasticDataGridDeployment scale(ManualContainersScaleConfigurer strategy) {
+    public ElasticSpaceDeployment scale(ManualContainersScaleConfigurer strategy) {
         deployment.scale(strategy);
         return this;
     }
 
-    public ElasticDataGridDeployment scale(ManualCapacityScaleConfigurer strategy) {
+    public ElasticSpaceDeployment scale(ManualCapacityScaleConfigurer strategy) {
         deployment.scale(strategy);
         return this;
     }
 
-    public ElasticDataGridDeployment scale(CapacityScaleConfigurer strategy) {
+    public ElasticSpaceDeployment scale(CapacityScaleConfigurer strategy) {
         deployment.scale(strategy);
         return this;
     }
     
-    public ElasticDataGridDeployment scale(EagerScaleConfig strategy) {
+    public ElasticSpaceDeployment scale(EagerScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }
 
-    public ElasticDataGridDeployment scale(ManualContainersScaleConfig strategy) {
+    public ElasticSpaceDeployment scale(ManualContainersScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }
 
-    public ElasticDataGridDeployment scale(ManualCapacityScaleConfig strategy) {
+    public ElasticSpaceDeployment scale(ManualCapacityScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }
     
-    public ElasticDataGridDeployment scale(CapacityScaleConfig strategy) {
+    public ElasticSpaceDeployment scale(CapacityScaleConfig strategy) {
         deployment.scale(strategy);
         return this;
     }
     
-    public ElasticDataGridDeployment name(String name) {
+    public ElasticSpaceDeployment name(String name) {
         deployment.name(name);
         return this;
     }
 
     /*UNIMPLEMENTED
-    public ElasticDataGridDeployment zone(String zone) {
+    public ElasticSpaceDeployment zone(String zone) {
         deployment.zone(zone);
         return this;
     }
     */
     
-    public ElasticDataGridDeployment setContextProperty(String key, String value) {
+    public ElasticSpaceDeployment setContextProperty(String key, String value) {
         deployment.setContextProperty(key, value);
         return this;
     }
 
-    public ElasticDataGridDeployment secured(boolean secured) {
+    public ElasticSpaceDeployment secured(boolean secured) {
         deployment.secured(secured);
         return this;
     }
 
-    public ElasticDataGridDeployment userDetails(UserDetails userDetails) {
+    public ElasticSpaceDeployment userDetails(UserDetails userDetails) {
         deployment.userDetails(userDetails);
         return this;
     }
 
-    public ElasticDataGridDeployment userDetails(String userName, String password) {
+    public ElasticSpaceDeployment userDetails(String userName, String password) {
         deployment.userDetails(userName, password);
         return this;
     }
 
     /*UNIMPLEMENTED
-    public ElasticDataGridDeployment isolation(DedicatedIsolation isolation) {
+    public ElasticSpaceDeployment isolation(DedicatedIsolation isolation) {
         deployment.isolation(isolation);
         return this;
     }
 
-    public ElasticDataGridDeployment isolation(SharedTenantIsolation isolation) {
+    public ElasticSpaceDeployment isolation(SharedTenantIsolation isolation) {
         deployment.isolation(isolation);
         return this;
     }
     
-    public ElasticDataGridDeployment isolation(PublicIsolation isolation) {
+    public ElasticSpaceDeployment isolation(PublicIsolation isolation) {
         deployment.isolation(isolation);
         return this;
     }
     */
     
-    public ElasticDataGridDeployment useScriptToStartContainer() {
+    public ElasticSpaceDeployment useScriptToStartContainer() {
         deployment.useScriptToStartContainer();
         return this;
     }
 
-    public ElasticDataGridDeployment overrideCommandLineArguments() {
+    public ElasticSpaceDeployment overrideCommandLineArguments() {
         deployment.overrideCommandLineArguments();
         return this;
     }
 
-    public ElasticDataGridDeployment commandLineArgument(String commandLineArgument) {
+    public ElasticSpaceDeployment commandLineArgument(String commandLineArgument) {
         deployment.commandLineArgument(commandLineArgument);
         return this;
     }
 
-    public ElasticDataGridDeployment environmentVariable(String name, String value) {
+    public ElasticSpaceDeployment environmentVariable(String name, String value) {
         deployment.environmentVariable(name, value);
         return this;
     }
 
-    public ElasticDataGridDeployment highlyAvailable(boolean highlyAvailable) {
+    public ElasticSpaceDeployment highlyAvailable(boolean highlyAvailable) {
         deployment.highlyAvailable(highlyAvailable);
         return this;
     }
 
-    public ElasticDataGridDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+    public ElasticSpaceDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
         deployment.machineProvisioning(config);
         return this;
     }
 
-    protected ElasticDataGridDeployment numberOfBackupsPerPartition(int numberOfBackupsPerPartition) {
+    protected ElasticSpaceDeployment numberOfBackupsPerPartition(int numberOfBackupsPerPartition) {
         deployment.numberOfBackupsPerPartition(numberOfBackupsPerPartition);
         return this;
     }
 
-    protected ElasticDataGridDeployment numberOfPartitions(int numberOfPartitions) {
+    protected ElasticSpaceDeployment numberOfPartitions(int numberOfPartitions) {
         deployment.numberOfPartitions(numberOfPartitions);
         return this;
     }
 
-    protected ElasticDataGridDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
+    protected ElasticSpaceDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
         deployment.minNumberOfCpuCoresPerMachine(minNumberOfCpuCoresPerMachine);
         return this;
     }
 
-    protected ElasticDataGridDeployment allowDeploymentOnSingleMachine(boolean allowDeploymentOnSingleMachine) {
-        deployment.allowDeploymentOnSingleMachine(allowDeploymentOnSingleMachine);
+    protected ElasticSpaceDeployment singleMachineDeployment() {
+        deployment.singleMachineDeployment();
         return this;
     }
    

@@ -24,10 +24,10 @@ public class AdvancedEagerScaleConfigurer extends EagerScaleConfigurer {
     }
     
     /**
-     * @see ScaleStrategyConfig#setAllowDeploymentOnManagementMachine(boolean)
+     * @see ScaleStrategyConfig#setDedicatedManagementMachines(boolean)
      */
-    public AdvancedEagerScaleConfigurer allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
-        super.allowDeploymentOnManagementMachine(allowDeploymentOnManagementMachine);
+    public AdvancedEagerScaleConfigurer dedicatedManagementMachines() {
+        super.dedicatedManagementMachines();
         return this;
     }
     

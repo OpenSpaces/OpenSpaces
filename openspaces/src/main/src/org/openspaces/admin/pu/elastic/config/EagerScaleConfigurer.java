@@ -12,7 +12,6 @@ import org.openspaces.core.util.MemoryUnit;
  * @see EagerScaleConfig
  * 
  * @since 8.0
- * 
  * @author itaif
  * 
  */
@@ -38,10 +37,10 @@ public class EagerScaleConfigurer implements ScaleStrategyConfigurer<EagerScaleC
     }
     
     /**
-     * @see ScaleStrategyConfig#setAllowDeploymentOnManagementMachine(boolean)
+     * @see ScaleStrategyConfig#setDedicatedManagementMachines(boolean)
      */
-    protected EagerScaleConfigurer allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
-        config.setAllowDeploymentOnManagementMachine(allowDeploymentOnManagementMachine);
+    protected EagerScaleConfigurer dedicatedManagementMachines() {
+        config.setDedicatedManagementMachines(true);
         return this;
     }
     

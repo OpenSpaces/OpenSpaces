@@ -45,10 +45,10 @@ public class AdvancedManualCapacityScaleConfigurer extends ManualCapacityScaleCo
     }
     
     /**
-     * @see ScaleStrategyConfig#setAllowDeploymentOnManagementMachine(boolean)
+     * @see ScaleStrategyConfig#setDedicatedManagementMachines(boolean)
      */
-    public AdvancedManualCapacityScaleConfigurer allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
-        super.allowDeploymentOnManagementMachine(allowDeploymentOnManagementMachine);
+    public AdvancedManualCapacityScaleConfigurer dedicatedManagementMachines() {
+        super.dedicatedManagementMachines();
         return this;
     }
     

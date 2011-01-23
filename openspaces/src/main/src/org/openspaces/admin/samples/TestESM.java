@@ -5,7 +5,7 @@ import org.openspaces.admin.AdminFactory;
 import org.openspaces.admin.esm.ElasticServiceManager;
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.admin.space.ElasticDataGridDeployment;
+import org.openspaces.admin.space.ElasticSpaceDeployment;
 
 public class TestESM {
  
@@ -21,7 +21,7 @@ public class TestESM {
             System.out.println("found esm, deploying");
             
             ProcessingUnit pu = gsm.
-            deploy(new ElasticDataGridDeployment("mygrid")
+            deploy(new ElasticSpaceDeployment("mygrid")
             .maxMemoryCapacity("2000m")
             .commandLineArgument("-Xmx250m")            
             );

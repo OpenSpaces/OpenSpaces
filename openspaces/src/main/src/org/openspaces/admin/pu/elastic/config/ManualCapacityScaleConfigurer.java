@@ -8,7 +8,8 @@ import org.openspaces.core.util.MemoryUnit;
  * For example {@code new ManualMemoryCapacityScaleStrategyConfigurer().capacity("1500m").getConfig()}
  * 
  * @author itaif
- * 
+ * @since 8.0
+ * @see ManualCapacityScaleConfig
  */
 public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<ManualCapacityScaleConfig>{
 
@@ -56,10 +57,10 @@ private final ManualCapacityScaleConfig config;
     }
     
     /**
-     * @see ScaleStrategyConfig#setAllowDeploymentOnManagementMachine(boolean)
+     * @see ScaleStrategyConfig#setDedicatedManagementMachines(boolean)
      */
-    protected ManualCapacityScaleConfigurer allowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
-        config.setAllowDeploymentOnManagementMachine(allowDeploymentOnManagementMachine);
+    protected ManualCapacityScaleConfigurer dedicatedManagementMachines() {
+        config.setDedicatedManagementMachines(true);
         return this;
     }
     

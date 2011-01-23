@@ -38,7 +38,7 @@ import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
-import org.openspaces.admin.space.ElasticDataGridDeployment;
+import org.openspaces.admin.space.ElasticSpaceDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
 import org.openspaces.pu.container.servicegrid.deploy.Deploy;
 
@@ -388,11 +388,11 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         }
     }
 
-    public ProcessingUnit deploy(ElasticDataGridDeployment deployment) throws ProcessingUnitAlreadyDeployedException {
+    public ProcessingUnit deploy(ElasticSpaceDeployment deployment) throws ProcessingUnitAlreadyDeployedException {
         return deploy(deployment.toElasticStatefulProcessingUnitDeployment());
     }
 
-    public ProcessingUnit deploy(ElasticDataGridDeployment deployment, long timeout, TimeUnit timeUnit)
+    public ProcessingUnit deploy(ElasticSpaceDeployment deployment, long timeout, TimeUnit timeUnit)
             throws ProcessingUnitAlreadyDeployedException {
         return deploy(deployment.toElasticStatefulProcessingUnitDeployment(),timeout,timeUnit);
     }

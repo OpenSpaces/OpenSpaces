@@ -177,7 +177,7 @@ public class UndeployScaleStrategyBean
         sla.setCpuCapacity(0);
         sla.setMemoryCapacityInMB(0);
         sla.setMinimumNumberOfMachines(0);
-        sla.setAllowDeploymentOnManagementMachine(slaConfig.getAllowDeploymentOnManagementMachine());
+        sla.setAllowDeploymentOnManagementMachine(!slaConfig.getDedicatedManagementMachines());
         sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
         

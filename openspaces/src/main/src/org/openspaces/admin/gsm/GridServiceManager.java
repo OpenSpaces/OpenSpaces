@@ -27,7 +27,7 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitAlreadyDeployedException;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
-import org.openspaces.admin.space.ElasticDataGridDeployment;
+import org.openspaces.admin.space.ElasticSpaceDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
 
 /**
@@ -123,9 +123,9 @@ public interface GridServiceManager extends AgentGridComponent, LogProviderGridC
     
     boolean isDeployed( String processingUnitName );
 
-    ProcessingUnit deploy(ElasticDataGridDeployment deployment) throws ProcessingUnitAlreadyDeployedException;
+    ProcessingUnit deploy(ElasticSpaceDeployment deployment) throws ProcessingUnitAlreadyDeployedException;
     
-    ProcessingUnit deploy(ElasticDataGridDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
+    ProcessingUnit deploy(ElasticSpaceDeployment deployment, long timeout, TimeUnit timeUnit) throws ProcessingUnitAlreadyDeployedException;
     
     ProcessingUnit deploy(ElasticStatefulProcessingUnitDeployment deployment) throws ProcessingUnitAlreadyDeployedException;
     

@@ -330,7 +330,7 @@ public class ManualCapacityScaleStrategyBean
         final CapacityMachinesSlaPolicy sla = new CapacityMachinesSlaPolicy();
         sla.setMachineProvisioning(machineProvisioning);
         sla.setCpuCapacity(slaConfig.getNumberOfCpuCores());
-        sla.setAllowDeploymentOnManagementMachine(slaConfig.getAllowDeploymentOnManagementMachine());
+        sla.setAllowDeploymentOnManagementMachine(!slaConfig.getDedicatedManagementMachines());
         sla.setMemoryCapacityInMB(memoryInMB);
         sla.setMinimumNumberOfMachines(minimumNumberOfMachines);
         sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());

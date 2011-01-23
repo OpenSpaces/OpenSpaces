@@ -342,7 +342,7 @@ public class EagerScaleStrategyBean
 
     private EagerMachinesSlaPolicy getEagerMachinesSlaPolicy() {
         final EagerMachinesSlaPolicy machinesSla = new EagerMachinesSlaPolicy();
-        machinesSla.setAllowDeploymentOnManagementMachine(slaConfig.getAllowDeploymentOnManagementMachine());
+        machinesSla.setAllowDeploymentOnManagementMachine(!slaConfig.getDedicatedManagementMachines());
         machinesSla.setMinimumNumberOfMachines(minimumNumberOfMachines);
         machinesSla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
         machinesSla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());

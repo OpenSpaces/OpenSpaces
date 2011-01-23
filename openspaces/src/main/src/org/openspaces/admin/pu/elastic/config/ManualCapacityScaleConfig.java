@@ -14,6 +14,7 @@ import org.openspaces.grid.gsm.strategy.ManualCapacityScaleStrategyBean;
  * primary partition instances and the backup partition instances.
  *  
  * @see ManualCapacityScaleConfigurer
+ * @since 8.0
  * @author itaif
  */
 public class ManualCapacityScaleConfig 
@@ -83,12 +84,12 @@ public class ManualCapacityScaleConfig
         ScaleStrategyConfigUtils.setReservedMemoryCapacityPerMachineInMB(properties, reservedInMB); 
     }
     
-    public boolean getAllowDeploymentOnManagementMachine() {
-        return ScaleStrategyConfigUtils.getAllowDeploymentOnManagementMachine(properties);
+    public boolean getDedicatedManagementMachines() {
+        return ScaleStrategyConfigUtils.getDedicatedManagementMachines(properties);
     }
 
-    public void setAllowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
-        ScaleStrategyConfigUtils.setAllowDeploymentOnManagementMachine(properties, allowDeploymentOnManagementMachine);
+    public void setDedicatedManagementMachines(boolean dedicatedManagementMachines) {
+        ScaleStrategyConfigUtils.setDedicatedManagementMachines(properties, dedicatedManagementMachines);
     }
     
     public Map<String,String> getProperties() {
