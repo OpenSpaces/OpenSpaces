@@ -22,6 +22,7 @@ import org.openspaces.events.SpaceDataEventListener;
 import org.openspaces.events.adapter.AnnotationEventListenerAdapter;
 import org.openspaces.events.adapter.MethodEventListenerAdapter;
 import org.openspaces.events.asyncpolling.receive.AsyncOperationHandler;
+import org.openspaces.events.notify.SimpleNotifyEventListenerContainer;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
@@ -194,12 +195,23 @@ public class SimpleAsyncPollingContainerConfigurer {
         return this;
     }
 
-    public SimpleAsyncPollingEventListenerContainer pollingContainer() {
+    /**
+     * Creates a new {@link SimpleAsyncPollingEventListenerContainer} instance.
+     */
+    public SimpleAsyncPollingEventListenerContainer create() {
         if (!initialized) {
             pollingEventListenerContainer.setRegisterSpaceModeListener(true);
             pollingEventListenerContainer.afterPropertiesSet();
             initialized = true;
         }
         return pollingEventListenerContainer;
+    }
+    
+    /**
+     * Creates a new {@link SimpleAsyncPollingEventListenerContainer} instance.
+     * @see #create()
+     */
+    public SimpleAsyncPollingEventListenerContainer pollingContainer() {
+        return create();
     }
 }
