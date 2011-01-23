@@ -124,7 +124,7 @@ public class AdminFactory {
     
     /**
      * Creates the admin and begins its listening for events from the lookup service.
-     * @see {@link #create()}
+     * @see #create()
      */
     public Admin createAdmin() {
         return create();
