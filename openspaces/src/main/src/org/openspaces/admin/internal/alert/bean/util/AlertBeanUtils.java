@@ -46,7 +46,9 @@ public class AlertBeanUtils {
      * @return initials of the grid component. empty string if no component found.
      */
     public static String getGridComponentShortName(VirtualMachine virtualMachine) {
-        if (virtualMachine.getGridServiceManager() != null) {
+        if (virtualMachine.getElasticServiceManager() != null) {
+            return "ESM ";
+        } else if (virtualMachine.getGridServiceManager() != null) {
             return "GSM ";
         } else if (virtualMachine.getGridServiceContainer() != null) {
             return "GSC ";
@@ -65,7 +67,9 @@ public class AlertBeanUtils {
      * @return full name of a grid component. "n/a" if no component found.
      */
     public static String getGridComponentFullName(VirtualMachine virtualMachine) {
-        if (virtualMachine.getGridServiceManager() != null) {
+        if (virtualMachine.getElasticServiceManager() != null) {
+            return "Elastic Service Manager ";
+        } else if (virtualMachine.getGridServiceManager() != null) {
             return "Grid Service Manager";
         } else if (virtualMachine.getGridServiceContainer() != null) {
             return "Grid Service Container";
