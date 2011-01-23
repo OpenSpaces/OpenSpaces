@@ -357,8 +357,10 @@ public class SimpleNotifyContainerConfigurer {
         return this;
     }
 
-
-    public SimpleNotifyEventListenerContainer notifyContainer() {
+    /**
+     * Creates a new {@link SimpleNotifyEventListenerContainer} instance.
+     */
+    public SimpleNotifyEventListenerContainer create() {
         if (!initialized) {
             // NO need, we always register a notify listener on embedded space, even if it is backup
 //            notifyEventListenerContainer.setRegisterSpaceModeListener(true);
@@ -366,5 +368,13 @@ public class SimpleNotifyContainerConfigurer {
             initialized = true;
         }
         return notifyEventListenerContainer;
+    }
+
+    /**
+     * Creates a new {@link SimpleNotifyEventListenerContainer} instance.
+     * @see #create()
+     */
+    public SimpleNotifyEventListenerContainer notifyContainer() {
+        return create();
     }
 }
