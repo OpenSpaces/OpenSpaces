@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -335,7 +336,7 @@ public class StoreManager extends AbstractStoreManager {
                 stateManagersToRestore.add(sm);
                 continue;
             }
-            // If the object has embedded relations we need to remove the state manager from them too
+            // If the object has embedded relations we need to remove the state manager from these instances
             // since they are also serialized when written to space.
             for (FieldMetaData fmd : sm.getMetaData().getFields()) {
                 if (fmd.isEmbeddedPC()) {
@@ -356,8 +357,14 @@ public class StoreManager extends AbstractStoreManager {
                 }
                 previousType = sm.getMetaData().getDescribedType();
             }
+            // Each persisted class should have its state manager removed
+            // before being written to space since gigaspaces reflection conflicts with
+            // OpenJPA's class monitoring.
+            sm.getPersistenceCapable().pcReplaceStateManager(null);
+            stateManagersToRestore.add(sm);
             currentList.add(sm.getManagedInstance());            
         }
+        // Write objects to space in batches by type
         try {
             for (Map.Entry<Class<?>, ArrayList<Object>> entry : objectsToWriteByType.entrySet()) {
                 space.writeMultiple(entry.getValue().toArray(), _transaction, Lease.FOREVER, UpdateModifiers.WRITE_ONLY);
@@ -422,9 +429,9 @@ public class StoreManager extends AbstractStoreManager {
                 continue;
             
             SpaceId spaceId = getter.getAnnotation(SpaceId.class);
-            Id id = getter.getAnnotation(Id.class);
-            if (spaceId != null || id != null) {                
-                if (id == null || spaceId == null)
+            boolean hasJpaId = getter.getAnnotation(Id.class) != null || getter.getAnnotation(EmbeddedId.class) != null; 
+            if (spaceId != null || hasJpaId) {                
+                if (!hasJpaId || spaceId == null)
                     throw new IllegalArgumentException("SpaceId and Id annotations must both be declared on the same property in JPA entities in type: " + type.getName());
                 if (spaceId.autoGenerate()) {
                     GeneratedValue generatedValue = getter.getAnnotation(GeneratedValue.class);
