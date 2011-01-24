@@ -1,6 +1,7 @@
 package org.openspaces.jpa;
 
 import java.lang.reflect.Method;
+import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -16,6 +17,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import net.jini.core.entry.UnusableEntryException;
 import net.jini.core.lease.Lease;
 import net.jini.core.transaction.Transaction;
 import net.jini.core.transaction.TransactionException;
@@ -83,6 +85,22 @@ public class StoreManager extends AbstractStoreManager {
 
     @Override
     public boolean syncVersion(OpenJPAStateManager sm, Object edata) {
+        try {
+            // Read object from space
+            IEntryPacket result = readObjectFromSpace(sm);
+            if (result == null)
+                return false;
+            // Populate fields
+            FieldMetaData[] fms = sm.getMetaData().getFields();
+            for (int i = 0; i < fms.length; i++) {
+                // Skip primary keys and non-persistent keys
+                if (fms[i].isPrimaryKey())
+                    continue;                
+                sm.store(i, result.getFieldValue(i));
+            }            
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
         return true;
     }
 
@@ -168,23 +186,13 @@ public class StoreManager extends AbstractStoreManager {
             FetchConfiguration fetchConfiguration, Object edata) {
 
         final ClassMetaData cm = sm.getMetaData();
-        int readModifier = (_transaction != null)? getConfiguration().getReadModifier()
-                : ReadModifiers.REPEATABLE_READ;
         try {
             IEntryPacket result = null;
             // If we already have the result and only need to initialize.. (relevant for JPQL)
             if (edata != null) {
                 result = (IEntryPacket) edata;
             } else {
-                final ISpaceProxy proxy = (ISpaceProxy) getConfiguration().getSpace();
-                final ITypeDesc typeDescriptor = proxy.getDirectProxy().getTypeManager().getTypeDescByName(cm.getDescribedType().getName());                                
-                final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);
-                ITemplatePacket template;
-                if (typeDescriptor.isAutoGenerateId())
-                    template = TemplatePacketFactory.createUidPacket((String) ids[0], null, 0, TransportPacketType.ENTRY_PACKET);
-                else
-                    template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);
-                result = (IEntryPacket) proxy.read(template, _transaction, 0, readModifier);                
+                result = readObjectFromSpace(sm);                
                 if (result == null)
                     return false;            
             }
@@ -206,6 +214,30 @@ public class StoreManager extends AbstractStoreManager {
     }
 
     /**
+     * Reads an IEntryPacket implementation from space according to the provided StateManager.
+     * @param sm The state manager.
+     * @return The IEntryPacket implementation for the provided StateManager.
+     */
+    private IEntryPacket readObjectFromSpace(OpenJPAStateManager sm)
+            throws UnusableEntryException, TransactionException, InterruptedException, RemoteException {
+        IEntryPacket result;
+        final ISpaceProxy proxy = (ISpaceProxy) getConfiguration().getSpace();
+        final ITypeDesc typeDescriptor = proxy.getDirectProxy().getTypeManager().getTypeDescByName(
+                sm.getMetaData().getDescribedType().getName());                                
+        final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), sm.getMetaData());
+        final int readModifier = (_transaction != null)? getConfiguration().getReadModifier()
+                : ReadModifiers.REPEATABLE_READ;
+
+        ITemplatePacket template;
+        if (typeDescriptor.isAutoGenerateId())
+            template = TemplatePacketFactory.createUidPacket((String) ids[0], null, 0, TransportPacketType.ENTRY_PACKET);
+        else
+            template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);
+        result = (IEntryPacket) proxy.read(template, _transaction, 0, readModifier);
+        return result;
+    }
+
+    /**
      * This method loads specific fields from the data store for updating them.
      */
     @Override
@@ -214,14 +246,18 @@ public class StoreManager extends AbstractStoreManager {
         Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);        
         final IJSpace space = getConfiguration().getSpace();
         final ITypeDesc typeDescriptor = ((ISpaceProxy) space).getDirectProxy().getTypeManager().getTypeDescByName(cm.getDescribedType().getName());
-        final ITemplatePacket template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);                      
+        ITemplatePacket template;
+        if (typeDescriptor.isAutoGenerateId())
+            template = TemplatePacketFactory.createUidPacket((String) ids[0], null, 0, TransportPacketType.ENTRY_PACKET);
+        else
+            template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);
         try {        
             // Read object from space                
             IEntryPacket result = (IEntryPacket) space.read(template, _transaction, 0); 
             if (result == null)
                 return false;
             // Process result - store only the relevant fields in the state manager
-            for (int i = 0; i < cm.getDeclaredFields().length; i++) {
+            for (int i = 0; i < cm.getFields().length; i++) {
                 if (fields.get(i))                
                     sm.store(i, result.getFieldValue(i));                
             }                                    
