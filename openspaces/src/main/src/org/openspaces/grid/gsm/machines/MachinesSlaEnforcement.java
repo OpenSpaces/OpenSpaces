@@ -294,7 +294,7 @@ public class MachinesSlaEnforcement implements
                     }
                 }
 
-                // mark agents for shutdown if there are not enough of them (scale in)
+                // mark agents for shutdown if there are enough of them (scale in)
                 // give priority to agents that do not host a GSM/LUS since we want to evacuate those last.
                 for (GridServiceAgent agent : MachinesSlaUtils.sortManagementLast(getAgentsStarted())) {
                     if (surplusMachines > 0) {
@@ -353,13 +353,6 @@ public class MachinesSlaEnforcement implements
                 throws ConflictingOperationInProgressException {
 
             cleanFutureAgents();
-            
-            if (sla.getAllowDeploymentOnManagementMachine()) {
-                for (GridServiceAgent agent : getAllUnusedManagementMachines()) {
-                        getAgentsStarted().add(agent);
-                }
-            }
-            
             cleanFailedMachines();
             cleanAgentsMarkedForShutdown(sla.getMachineProvisioning());
             
@@ -469,17 +462,11 @@ public class MachinesSlaEnforcement implements
                 
                 machineShortage = sla.getMinimumNumberOfMachines() + getAgentsPendingShutdown().size() 
                                     - getAgentsStarted().size();
+                
                 if (machineShortage > 0) {
-                    this.getFutureAgents().add(
-                            sla.getMachineProvisioning().startMachinesAsync(
-                                new CapacityRequirements(
-                                        new NumberOfMachinesCapacityRequirement(machineShortage)),
-                                START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
+                    
+                    startMachines(sla, machineShortage);
                     slaReached = false;
-                    logger.info(
-                            machineShortage+ " new machine(s) is scheduled to be started in order to reach the minimum of " + 
-                            sla.getMinimumNumberOfMachines() + " machines. " +
-                            "Approved machine agents are: " + MachinesSlaUtils.machinesToString(getAgentsStarted()));
                 }
             }
             
@@ -488,7 +475,7 @@ public class MachinesSlaEnforcement implements
                 
                 int machineShortage = sla.getMinimumNumberOfMachines() - getAgentsStarted().size();
                 
-             // take into account expected machines into shortage calculate
+                // take into account expected machines into shortage calculate
                 for (FutureGridServiceAgents future : this.getFutureAgents()) {
                     
                     int expectedNumberOfMachines = future.getCapacityRequirements().getRequirement(NumberOfMachinesCapacityRequirement.class).getNumberOfMahines();
@@ -500,18 +487,8 @@ public class MachinesSlaEnforcement implements
 
                 if (machineShortage > 0) {
                 
-                    // scale out to get to the minimum number of agents
-                     
-                    this.getFutureAgents().add(
-                            sla.getMachineProvisioning().startMachinesAsync(
-                                new CapacityRequirements(
-                                        new NumberOfMachinesCapacityRequirement(machineShortage)),
-                                START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
+                    startMachines(sla, machineShortage);
                     slaReached = false;
-                    logger.info(machineShortage + " " + 
-                            "new machine(s) is scheduled to be started in order to "+
-                            "reach the minimum of " + sla.getMinimumNumberOfMachines() + " " +
-                            "machines.");
                 }
             }
             
@@ -559,21 +536,30 @@ public class MachinesSlaEnforcement implements
 
                 if (shortageCpu >0 || shortageMemory > 0) {
                     slaReached = false;
-                
+                    final GridServiceAgent unusedManagementAgent = findUnusedManagementMachine(sla);    
+                    if (unusedManagementAgent != null) {
                     
-                    this.getFutureAgents().add(
-                        sla.getMachineProvisioning().startMachinesAsync(
-                            new CapacityRequirements(
-                                    new MemoryCapacityRequirment(shortageMemory),
-                                    new CpuCapacityRequirement(shortageCpu)),
-                            START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
-                    slaReached = false;
-                    logger.info(
-                            "One or more new machine(s) is started in order to "+
-                            "increase memory by " +shortageMemory + "MB "+
-                            "and increase number of cpu cores by " + shortageCpu + ". " +
-                            "Approved machine agents are: " + MachinesSlaUtils.machinesToString(getAgentsStarted()) +
-                            "Pending machine(s) start requests " + getFutureAgents().size());
+                        getAgentsStarted().add(unusedManagementAgent);
+                        logger.info(
+                                "Existing management machine " + MachinesSlaUtils.machineToString(unusedManagementAgent.getMachine()) + " " +
+                                "is re-used to reach the minimum of " + 
+                                sla.getMinimumNumberOfMachines() + " machines. " +
+                                "Approved machine agents are: " + MachinesSlaUtils.machinesToString(getAgentsStarted()));
+                    }
+                    else {
+                        this.getFutureAgents().add(
+                            sla.getMachineProvisioning().startMachinesAsync(
+                                new CapacityRequirements(
+                                        new MemoryCapacityRequirment(shortageMemory),
+                                        new CpuCapacityRequirement(shortageCpu)),
+                                START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
+                        logger.info(
+                                "One or more new machine(s) is started in order to "+
+                                "increase memory by " +shortageMemory + "MB "+
+                                "and increase number of cpu cores by " + shortageCpu + ". " +
+                                "Approved machine agents are: " + MachinesSlaUtils.machinesToString(getAgentsStarted()) +
+                                "Pending machine(s) start requests " + getFutureAgents().size());
+                    }
                 }
             }
             else {
@@ -590,7 +576,44 @@ public class MachinesSlaEnforcement implements
             return slaReached;
         }
 
-        private Set<GridServiceAgent> getAllUnusedManagementMachines() {
+        private GridServiceAgent findUnusedManagementMachine(CapacityMachinesSlaPolicy sla) {
+            GridServiceAgent unusedManagementMachine = null;
+            final GridServiceAgent[] allUnusedManagementMachines = getAllUnusedManagementMachines();    
+            if (sla.getAllowDeploymentOnManagementMachine() && 
+                allUnusedManagementMachines.length > 0) {
+            
+                //special case where a management machine is already running and can be reused.
+                unusedManagementMachine = allUnusedManagementMachines[0];
+            }
+            return unusedManagementMachine;
+        }
+        
+        private void startMachines(CapacityMachinesSlaPolicy sla, int numberOfMachinesToStart) {
+            final GridServiceAgent unusedManagementAgent = findUnusedManagementMachine(sla);    
+            if (unusedManagementAgent != null) {
+            
+                getAgentsStarted().add(unusedManagementAgent);
+                logger.info(
+                        "Existing management machine " + MachinesSlaUtils.machineToString(unusedManagementAgent.getMachine()) + " " +
+                        "is re-used to reach the minimum of " + 
+                        sla.getMinimumNumberOfMachines() + " machines. " +
+                        "Approved machine agents are: " + MachinesSlaUtils.machinesToString(getAgentsStarted()));
+            }
+            else {    
+                // scale out to get to the minimum number of agents
+                this.getFutureAgents().add(
+                    sla.getMachineProvisioning().startMachinesAsync(
+                        new CapacityRequirements(
+                                new NumberOfMachinesCapacityRequirement(numberOfMachinesToStart)),
+                        START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS));
+                logger.info(
+                    numberOfMachinesToStart+ " new machine(s) is scheduled to be started in order to reach the minimum of " + 
+                    sla.getMinimumNumberOfMachines() + " machines. " +
+                    "Approved machine agents are: " + MachinesSlaUtils.machinesToString(getAgentsStarted()));
+            }
+        }
+
+        private GridServiceAgent[] getAllUnusedManagementMachines() {
             final Set<GridServiceAgent> agents = new HashSet<GridServiceAgent>();
             for (final GridServiceAgent agent : admin.getGridServiceAgents()) {
                 if (MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine())) {
@@ -599,7 +622,7 @@ public class MachinesSlaEnforcement implements
             }
             
             agents.removeAll(getAllUsedAgents());
-            return agents;
+            return agents.toArray(new GridServiceAgent[agents.size()]);
         }
         
         /**
@@ -900,7 +923,8 @@ public class MachinesSlaEnforcement implements
          */
         private GridServiceAgent findFreeAgent(Set<GridServiceAgent> usedAgents) {
             List<GridServiceAgent> agents = Arrays.asList(admin.getGridServiceAgents().getAgents());
-            for (GridServiceAgent agent : MachinesSlaUtils.sortManagementLast(agents)) {
+            
+            for (GridServiceAgent agent : MachinesSlaUtils.sortManagementFirst(agents)) {
                 if (!usedAgents.contains(agent) &&
                     (sla.getAllowDeploymentOnManagementMachine() || 
                      !MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine()))) {
