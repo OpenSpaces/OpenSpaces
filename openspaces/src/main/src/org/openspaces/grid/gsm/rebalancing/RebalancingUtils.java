@@ -572,7 +572,7 @@ public class RebalancingUtils {
     /**
      * 
      * @param container - the container for which planned min number of instances is requested
-     * @param containers - the containers approved for deployment for the specified pu
+     * @param approvedContainers - the containers approved for deployment for the specified pu
      * @param pu - the processing unit
      * @return the planned minimum number of instances for the specified container
      */

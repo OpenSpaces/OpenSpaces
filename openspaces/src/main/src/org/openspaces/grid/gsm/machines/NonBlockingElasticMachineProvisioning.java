@@ -21,7 +21,6 @@ public interface NonBlockingElasticMachineProvisioning {
 	 * 
 	 * This method is non blocking and returns a future object with the new grid service agent.
 	 * 
-	 * @param requirements - the capacity requirements that indicate how many machines to start.
 	 * @param duration - the maximum duration after which a TimeoutException is raised.
 	 * @param unit - the time unit for the duration
 	 * @return the grid service agent

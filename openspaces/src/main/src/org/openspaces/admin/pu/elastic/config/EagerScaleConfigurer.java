@@ -45,7 +45,6 @@ public class EagerScaleConfigurer implements ScaleStrategyConfigurer<EagerScaleC
     }
     
     /**
-     * @return 
      * @see ScaleStrategyConfig#setMaxConcurrentRelocationsPerMachine(int)
      */
     public EagerScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {

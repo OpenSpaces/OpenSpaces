@@ -35,7 +35,7 @@ import com.gigaspaces.grid.gsa.AgentProcessDetails;
 /**
  * Starts and shutdowns grid service container based on the requested {@link ContainersSlaPolicy}
  * 
- * Use {@link ContainersSlaEnforcement#createEndpoint()} to enforce an SLA for a specific container zone.
+ * Use {@link #createEndpoint()} to enforce an SLA for a specific container zone.
  * 
  * @see ContainersSlaEnforcementEndpoint
  * @see ContainersSlaPolicy

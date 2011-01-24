@@ -65,7 +65,6 @@ private final ManualCapacityScaleConfig config;
     }
     
     /**
-     * @return 
      * @see ScaleStrategyConfig#setMaxConcurrentRelocationsPerMachine(int)
      */
     public ManualCapacityScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
