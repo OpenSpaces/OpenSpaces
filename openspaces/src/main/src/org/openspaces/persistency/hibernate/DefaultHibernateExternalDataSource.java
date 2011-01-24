@@ -280,7 +280,7 @@ public class DefaultHibernateExternalDataSource extends AbstractHibernateExterna
     /**
      * Extracts and returns the hibernate object identifier
      * @param o
-     * @return
+     * @return serializable
      */
     protected Serializable getIdentifier(Object o) {
 
