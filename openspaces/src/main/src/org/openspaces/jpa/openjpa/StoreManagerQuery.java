@@ -59,17 +59,6 @@ public class StoreManagerQuery extends ExpressionStoreQuery {
     
     /**
      * Execute the given expression against the given candidate extent.
-     *
-     * @param ex current executor
-     * @param base the base type the query should match
-     * @param types the independent candidate types
-     * @param subclasses true if subclasses should be included in the results
-     * @param factories the expression factory used to build the query for
-     * each base type
-     * @param parsed the parsed query values
-     * @param parameters parameter values, or empty array
-     * @param range result range
-     * @return a provider for matching objects
      */
     protected ResultObjectProvider executeQuery(Executor ex, ClassMetaData classMetaData,
             ClassMetaData[] types, boolean subClasses,  ExpressionFactory[] factories,
@@ -86,17 +75,6 @@ public class StoreManagerQuery extends ExpressionStoreQuery {
     /**
      * Execute the given expression against the given candidate extent
      * and delete the instances.
-     *
-     * @param ex current executor
-     * @param base the base type the query should match
-     * @param types the independent candidate types
-     * @param subclasses true if subclasses should be included in the results
-     * @param facts the expression factory used to build the query for
-     * each base type
-     * @param parsed the parsed query values
-     * @param params parameter values, or empty array
-     * @return a number indicating the number of instances deleted,
-     * or null to execute the delete in memory
      */
     protected Number executeDelete(Executor ex, ClassMetaData classMetaData, ClassMetaData[] types, boolean subClasses,
             ExpressionFactory[] facts, QueryExpressions[] exps, Object[] params)
@@ -121,17 +99,6 @@ public class StoreManagerQuery extends ExpressionStoreQuery {
     /**
      * Execute the given expression against the given candidate extent
      * and updates the instances.
-     *
-     * @param ex current executor
-     * @param base the base type the query should match
-     * @param types the independent candidate types
-     * @param subclasses true if subclasses should be included in the results
-     * @param facts the expression factory used to build the query for
-     * each base type
-     * @param parsed the parsed query values
-     * @param params parameter values, or empty array
-     * @return a number indicating the number of instances updated,
-     * or null to execute the update in memory.
      */
     protected Number executeUpdate(Executor ex, ClassMetaData classMetaData, ClassMetaData[] types, boolean subClasses,
             ExpressionFactory[] facts, QueryExpressions[] expressions, Object[] params)

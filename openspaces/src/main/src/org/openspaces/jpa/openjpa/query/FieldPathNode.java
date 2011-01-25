@@ -14,7 +14,7 @@ import org.apache.openjpa.meta.XMLMetaData;
 
 /**
  * Represents a field path in the expression tree.
- * The {@link #FieldPathNode.get(FieldMetaData, boolean)} is called when passing through each ClassMetaData
+ * The {@link #get(FieldMetaData, boolean)} method is called when passing through each ClassMetaData
  * so this method saves the entire path to the given column so it can be later converted to a string.
  * 
  * @author idan
