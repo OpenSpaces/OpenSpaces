@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
+import javax.persistence.spi.ProviderUtil;
 
 import org.apache.openjpa.persistence.OpenJPAEntityManagerFactorySPI;
 import org.apache.openjpa.persistence.PersistenceProviderImpl;
@@ -76,6 +77,10 @@ public class OpenSpacesPersistenceProvider implements PersistenceProvider {
      */
     public void setSpace(IJSpace space) {
         _space = space;        
+    }
+
+    public ProviderUtil getProviderUtil() {
+        return _persistenceProvider.getProviderUtil();
     }
     
 }
