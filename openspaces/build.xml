@@ -10,7 +10,11 @@
         <fileset dir="${basedir}/deploy">
             <include name="**/*.jar"/>
         </fileset>
-
+		<!-- OpenJPA jars must come prior to ejb jars in classpath list, otherwise jpa classes 
+		will not compile due to interface PersistenceProvider conflict -->
+    	<fileset dir="${lib.dir}">
+            <include name="**/openjpa/*.jar"/>
+        </fileset>
         <fileset dir="${lib.dir}">
             <include name="**/*.jar"/>
             <exclude name="required/gs-openspaces.jar"/>
