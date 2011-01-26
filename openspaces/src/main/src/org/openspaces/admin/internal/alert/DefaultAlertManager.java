@@ -108,7 +108,7 @@ public class DefaultAlertManager implements InternalAlertManager {
         }
     }
     
-    public void configure(AlertConfiguration[] configurations) throws AlertConfigurationException {
+    public void configure(AlertConfiguration... configurations) throws AlertConfigurationException {
         for (AlertConfiguration configuration : configurations) {
             setConfig(configuration);
             if (configuration.isEnabled()) {
