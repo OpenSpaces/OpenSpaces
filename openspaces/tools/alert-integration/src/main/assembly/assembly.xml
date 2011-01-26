@@ -1,0 +1,47 @@
+<assembly>
+  <id>assemble-pu</id>
+  <formats>
+    <format>jar</format>
+    <format>dir</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+	 <files>
+	    <file>
+	      <source>src/commons-logging.properties</source>
+	      <outputDirectory>/</outputDirectory>
+	      <filtered>true</filtered>
+	    </file>
+	    <file>
+	      <source>src/log4j.properties</source>
+	      <outputDirectory>/</outputDirectory>
+	      <filtered>true</filtered>
+	    </file>
+	    <file>
+	      <source>src/config/alerts/notify-alerts.xml</source>
+	      <outputDirectory>/config/alerts</outputDirectory>
+	      <filtered>true</filtered>
+	    </file>
+	  </files>  
+  <fileSets>
+    <fileSet>
+      <directory>target/classes</directory>
+      <lineEnding>keep</lineEnding>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>**/**</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+ <dependencySets>
+
+ <dependencySet>
+       <outputDirectory>/lib</outputDirectory>
+       <includes>
+             <include>snmptrapappender:snmpTrapAppender</include>
+             <include>log4j:log4j</include>
+             <include>dist.release.org.snmp4j:snmp4j</include>
+       </includes>
+    </dependencySet>
+  </dependencySets>
+  
+</assembly>
