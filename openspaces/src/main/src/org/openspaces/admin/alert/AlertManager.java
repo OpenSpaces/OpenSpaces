@@ -62,12 +62,12 @@ public interface AlertManager extends AdminAware {
      * An exception is raised if an alert is already enabled.
      * 
      * @param configurations
-     *            the alert configurations.
+     *            the alert configurations (as varargs).
      * @throws AlertConfigurationException
      *             if the alert is already enabled (need to disable it first).
      * @see AlertConfigurationParser
      */
-    void configure(AlertConfiguration[] configurations) throws AlertConfigurationException;
+    void configure(AlertConfiguration... configurations) throws AlertConfigurationException;
 
     /**
      * Defines an alert configuration. Overrides all previously set properties for this alert.
