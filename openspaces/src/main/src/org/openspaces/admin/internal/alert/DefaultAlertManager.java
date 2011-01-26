@@ -110,11 +110,17 @@ public class DefaultAlertManager implements InternalAlertManager {
     
     public void configure(AlertConfiguration... configurations) throws AlertConfigurationException {
         for (AlertConfiguration configuration : configurations) {
+            try {
+                disableAlert(configuration.getClass());
+            }catch(AlertConfigurationException e) {
+                //silently ignore if called to enable/disable a bean with no configuration
+                if (!(e.getCause() instanceof BeanConfigNotFoundException)) {
+                    throw e;
+                }
+            }
             setConfig(configuration);
             if (configuration.isEnabled()) {
                 enableAlert(configuration.getClass());
-            } else {
-                disableAlert(configuration.getClass());
             }
         }
     }

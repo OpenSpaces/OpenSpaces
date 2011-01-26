@@ -55,11 +55,13 @@ public interface AlertManager extends AdminAware {
      * <tt>alerts.xml</tt> configuration file located under <tt>config/alerts</tt>.
      * <p>
      * If {@link AlertConfiguration#isEnabled()} returns <code>true</code> it is equivalent to
-     * calling {@link #setConfig(AlertConfiguration)} followed by {@link #enableAlert(Class)}. If it
-     * returns <code>false</code> it is equivalent to calling {@link #setConfig(AlertConfiguration)}
-     * followed by {@link #disableAlert(Class)}.
+     * calling (for a predefined alert) {@link #disableAlert(Class)}, followed by
+     * {@link #setConfig(AlertConfiguration)} followed by {@link #enableAlert(Class)}.
      * <p>
-     * An exception is raised if an alert is already enabled.
+     * If it returns <code>false</code> it is equivalent to calling (for a predefined alert)
+     * {@link #disableAlert(Class)} followed by {@link #setConfig(AlertConfiguration)}.
+     * <p>
+     * if an alert configuration was not previously set, the current setting will be used.
      * 
      * @param configurations
      *            the alert configurations (as varargs).

@@ -2,6 +2,8 @@ package org.openspaces.utest.admin.internal.admin;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import net.jini.core.discovery.LookupLocator;
@@ -18,6 +20,14 @@ import org.openspaces.admin.esm.ElasticServiceManagers;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.gsc.GridServiceContainers;
 import org.openspaces.admin.gsm.GridServiceManagers;
+import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.esm.InternalElasticServiceManager;
+import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
+import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
+import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
+import org.openspaces.admin.internal.lus.InternalLookupService;
+import org.openspaces.admin.internal.pu.InternalProcessingUnitInstance;
+import org.openspaces.admin.internal.space.InternalSpaceInstance;
 import org.openspaces.admin.lus.LookupServices;
 import org.openspaces.admin.machine.Machines;
 import org.openspaces.admin.os.OperatingSystems;
@@ -27,7 +37,12 @@ import org.openspaces.admin.transport.Transports;
 import org.openspaces.admin.vm.VirtualMachines;
 import org.openspaces.admin.zone.Zones;
 
-public class NullMockAdmin implements Admin {
+import com.gigaspaces.internal.jvm.JVMDetails;
+import com.gigaspaces.internal.os.OSDetails;
+import com.gigaspaces.lrmi.nio.info.NIODetails;
+import com.gigaspaces.security.directory.UserDetails;
+
+public class NullMockAdmin implements Admin, InternalAdmin {
 
     public void addEventListener(AdminEventListener eventListener) {
         // TODO Auto-generated method stub
@@ -189,6 +204,149 @@ public class NullMockAdmin implements Admin {
             throws AdminException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    public void addElasticServiceManager(InternalElasticServiceManager elasticServiceManager, NIODetails nioDetails,
+            OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void addGridServiceAgent(InternalGridServiceAgent gridServiceAgent, NIODetails nioDetails,
+            OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void addGridServiceContainer(InternalGridServiceContainer gridServiceContainer, NIODetails nioDetails,
+            OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void addGridServiceManager(InternalGridServiceManager gridServiceManager, NIODetails nioDetails,
+            OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void addLookupService(InternalLookupService lookupService, NIODetails nioDetails, OSDetails osDetails,
+            JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void addProcessingUnitInstance(InternalProcessingUnitInstance processingUnitInstance, NIODetails nioDetails,
+            OSDetails osDetails, JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void addSpaceInstance(InternalSpaceInstance spaceInstance, NIODetails nioDetails, OSDetails osDetails,
+            JVMDetails jvmDetails, String jmxUrl, String[] zones) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void assertStateChangesPermitted() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public long getDefaultTimeout() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public TimeUnit getDefaultTimeoutTimeUnit() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public long getScheduledSpaceMonitorInterval() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public ScheduledThreadPoolExecutor getScheduler() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public UserDetails getUserDetails() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void pushEvent(Object listener, Runnable notifier) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void pushEventAsFirst(Object listener, Runnable notifier) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void raiseEvent(Object listener, Runnable notifier) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void removeElasticServiceManager(String uid) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void removeGridServiceAgent(String uid) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void removeGridServiceContainer(String uid) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void removeGridServiceManager(String uid) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void removeLookupService(String uid) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void removeProcessingUnitInstance(String uid, boolean removeEmbeddedSpaces) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void removeSpaceInstance(String uid) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void scheduleAdminOperation(Runnable runnable) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void scheduleNonBlockingStateChange(Runnable runnable) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public ScheduledFuture<?> scheduleWithFixedDelayNonBlockingStateChange(Runnable command, long initialDelay,
+            long delay, TimeUnit unit) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void singleThreadedEventListeners() {
+        // TODO Auto-generated method stub
+        
     }
 
 }
