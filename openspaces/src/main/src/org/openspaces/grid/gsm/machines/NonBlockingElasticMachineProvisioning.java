@@ -7,9 +7,14 @@ import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 
 /**
+ * An Elastic Service Manager plugin that enables automatic Virtual Machine provisioning.
+ * The plugin must be stateless, and is expected to delegate calls to a remove service (such as a cloud).
  * 
  * Calls to this class are guaranteed to be called from the same thread.
  * 
+ * @see ElasticMachineProvisioning
+ * @see NonBlockingElasticMachineProvisioningAdapter
+ * @see org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig
  * @author itaif
  *
  */

@@ -19,6 +19,9 @@ import com.j_spaces.kernel.GSThread;
 /**
  * An adapter that wraps an {@link ElasticMachineProvisioning} and exposes a {@link NonBlockingElasticMachineProvisioning}
  *
+ * @see NonBlockingElasticMachineProvisioning
+ * @see ElasticMachineProvisioning
+ * 
  * @author itaif
  */
 public class NonBlockingElasticMachineProvisioningAdapter implements NonBlockingElasticMachineProvisioning {
