@@ -5,23 +5,6 @@
     <format>dir</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
-	 <files>
-	    <file>
-	      <source>src/commons-logging.properties</source>
-	      <outputDirectory>/</outputDirectory>
-	      <filtered>true</filtered>
-	    </file>
-	    <file>
-	      <source>src/log4j.properties</source>
-	      <outputDirectory>/</outputDirectory>
-	      <filtered>true</filtered>
-	    </file>
-	    <file>
-	      <source>src/config/alerts/notify-alerts.xml</source>
-	      <outputDirectory>/config/alerts</outputDirectory>
-	      <filtered>true</filtered>
-	    </file>
-	  </files>  
   <fileSets>
     <fileSet>
       <directory>target/classes</directory>
