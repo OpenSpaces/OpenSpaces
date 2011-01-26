@@ -43,15 +43,13 @@ layers:
 
 public class SnmpTrapSender implements SnmpTrapSenderFacade {
 	
-				
-	@Override
 	public void addTrapMessageVariable(String trapOID, String trapValue) {
 		trapQueue.add(trapValue);
 		loadRunParams();
 	}
 
-	@Override
-	public void initialize(SNMPTrapAppender arg0) {
+	public void initialize(String arg0, int arg1, String arg2, String arg3,
+			int arg4, int arg5, int arg6, String arg7, long arg8){
 		trapQueue.clear();
 	} 
 		
@@ -87,8 +85,6 @@ public class SnmpTrapSender implements SnmpTrapSenderFacade {
     	return null;
 	}
 
-	
-	@Override
 	public void sendTrap() {
 		String trapVal = trapQueue.removeFirst();
 		
@@ -147,5 +143,5 @@ public class SnmpTrapSender implements SnmpTrapSenderFacade {
 	private static IpAddress localAddr;
 
 	private LinkedList<String> trapQueue = new LinkedList<String>();
-		
+	
 }
