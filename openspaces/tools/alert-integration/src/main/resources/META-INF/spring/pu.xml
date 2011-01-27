@@ -14,7 +14,7 @@
 	<bean id="SnmpTrapTransmitter" class="org.openspaces.example.alert.logging.snmp.SnmpTrapTransmitter" >
         <property name="alertFileFilter" value="notify-alerts.xml" />
         <property name="loggerName" value="org.openspaces.example.alert.logging.AlertLoggingGateway" />
-        <property name="group" value="gilad" />
+        <property name="group" value="group-name-here" />
 	 </bean>
 	 
 	<context:annotation-config />
