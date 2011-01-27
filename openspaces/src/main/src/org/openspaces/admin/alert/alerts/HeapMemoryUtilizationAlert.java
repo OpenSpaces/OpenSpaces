@@ -30,6 +30,10 @@ public class HeapMemoryUtilizationAlert extends AbstractAlert {
     public static final String COMPONENT_NAME = "component-name";
     public static final String HEAP_UTILIZATION = "heap-utilization";
     public static final String MAX_HEAP_IN_BYTES = "max-heap-in-bytes";
+
+    /** required by java.io.Externalizable */
+    public HeapMemoryUtilizationAlert() {
+    }
     
     public HeapMemoryUtilizationAlert(Alert alert) {
         super(alert);

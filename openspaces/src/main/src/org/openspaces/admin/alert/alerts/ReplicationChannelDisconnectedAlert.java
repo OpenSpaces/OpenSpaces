@@ -38,6 +38,10 @@ public class ReplicationChannelDisconnectedAlert extends AbstractAlert {
     public static final String REPLICATION_STATUS = "replication-status";
     public static final String SOURCE_UID = "source-uid";
     public static final String TARGET_UID = "target-uid";
+
+    /** required by java.io.Externalizable */
+    public ReplicationChannelDisconnectedAlert() {
+    }
     
     public ReplicationChannelDisconnectedAlert(Alert alert) {
         super(alert);

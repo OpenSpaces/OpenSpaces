@@ -35,6 +35,10 @@ public class ReplicationRedoLogSizeAlert extends AbstractAlert {
     public static final String REDO_LOG_SIZE = "redo-log-size";
     public static final String REDO_LOG_MEMORY_SIZE = "redo-log-memory-size";
     public static final String REDO_LOG_SWAP_SIZE = "redo-log-swap-size";
+
+    /** required by java.io.Externalizable */
+    public ReplicationRedoLogSizeAlert() {
+    }
     
     public ReplicationRedoLogSizeAlert(Alert alert) {
         super(alert);

@@ -25,6 +25,10 @@ public class CpuUtilizationAlert extends AbstractAlert {
     public static final String HOST_ADDRESS = "host-address";
     public static final String HOST_NAME = "host-name";
     public static final String CPU_UTILIZATION = "cpu-utilization";
+
+    /** required by java.io.Externalizable */
+    public CpuUtilizationAlert() {
+    }
     
     public CpuUtilizationAlert(Alert alert) {
         super(alert);

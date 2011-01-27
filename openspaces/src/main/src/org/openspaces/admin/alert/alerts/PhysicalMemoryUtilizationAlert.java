@@ -26,6 +26,10 @@ public class PhysicalMemoryUtilizationAlert extends AbstractAlert {
     public static final String HOST_NAME = "host-name";
     public static final String CPU_UTILIZATION = "cpu-utilization";
     public static final String MEMORY_UTILIZATION = "memory-utilization";
+
+    /** required by java.io.Externalizable */
+    public PhysicalMemoryUtilizationAlert() {
+    }
     
     public PhysicalMemoryUtilizationAlert(Alert alert) {
         super(alert);

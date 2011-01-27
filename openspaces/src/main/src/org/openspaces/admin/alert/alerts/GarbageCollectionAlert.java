@@ -31,6 +31,10 @@ public class GarbageCollectionAlert extends AbstractAlert {
     public static final String GC_DURATION_MILLISECONDS = "gc-duration-milliseconds";
     public static final String HEAP_UTILIZATION = "heap-utilization";
     public static final String NON_HEAP_UTILIZATION = "non-heap-utilization";
+
+    /** required by java.io.Externalizable */
+    public GarbageCollectionAlert() {
+    }
     
     public GarbageCollectionAlert(Alert alert) {
         super(alert);

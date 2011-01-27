@@ -32,6 +32,10 @@ public class MirrorPersistenceFailureAlert extends AbstractAlert {
     public static final String IN_PROGRESS_OPERATION_COUNT = "in-progress-operation-count";
     public static final String DISCARDED_OPERATION_COUNT = "discarded-operation-count";
     
+    /** required by java.io.Externalizable */
+    public MirrorPersistenceFailureAlert() {
+    }
+    
     public MirrorPersistenceFailureAlert(Alert alert) {
         super(alert);
     }

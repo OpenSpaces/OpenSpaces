@@ -22,6 +22,10 @@ public class AbstractAlert implements Alert {
     private static final long serialVersionUID = 1L;
     private Alert alert;
 
+    /** required by java.io.Externalizable */
+    public AbstractAlert() {
+    }
+    
     public AbstractAlert(Alert alert) {
         this.alert = alert;
     }
