@@ -13,6 +13,8 @@ import java.io.ObjectOutput;
  */
 public class WebRequestsServiceMonitors extends PlainServiceMonitors {
 
+    private static final long serialVersionUID = 1345686383755041069L;
+    
     public static class Attributes {
         public static final String TOTAL = "total";
         public static final String ACTIVE = "active";

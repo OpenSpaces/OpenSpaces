@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class PlainServiceMonitors implements ServiceMonitors, Externalizable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -2530051320077906919L;
     
     protected String id;
 
