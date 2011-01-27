@@ -25,8 +25,6 @@ import org.snmp4j.smi.VariableBinding;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.snmp4j.util.DefaultPDUFactory;
 
-
-
 public class SnmpTrapSender implements SnmpTrapSenderFacade {
 			
 	public void addTrapMessageVariable(String trapOID, String trapValue) {
