@@ -4,7 +4,8 @@
     <format>jar</format>
     <format>dir</format>
   </formats>
-  <includeBaseDirectory>false</includeBaseDirectory>
+  
+  <includeBaseDirectory>false</includeBaseDirectory>	    
   <fileSets>
     <fileSet>
       <directory>target/classes</directory>
@@ -14,13 +15,21 @@
         <include>**/**</include>
       </includes>
     </fileSet>
+    
+ 	<fileSet>
+      <directory>lib</directory>
+      <outputDirectory>/lib</outputDirectory>
+      <includes>
+        <include>*.jar</include>
+      </includes>
+    </fileSet>
+        
   </fileSets>
  <dependencySets>
 
  <dependencySet>
        <outputDirectory>/lib</outputDirectory>
        <includes>
-             <include>snmptrapappender:snmpTrapAppender</include>
              <include>log4j:log4j</include>
              <include>dist.release.org.snmp4j:snmp4j</include>
        </includes>
