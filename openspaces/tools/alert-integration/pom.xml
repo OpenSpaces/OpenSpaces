@@ -10,55 +10,62 @@
     <properties>
         <gsType>PU</gsType>
         <gsVersion>8.0.0</gsVersion>
-	    <springVersion>3.0.5.RELEASE</springVersion>
+        <springVersion>3.0.5.RELEASE</springVersion>
     </properties>
+ 
+    <repositories>
+       <repository>
+           <id>snmp4j</id>
+           <url>https://server.oosnmp.net</url>
+       </repository>
+     </repositories>
 
-	<repositories>
-		<repository>
-			<id>snmp4j</id>
-			<url>https://server.oosnmp.net</url>
-		</repository>
-		<repository>
-			<id>snmptrapappender</id>
-			<url>http://repository.jboss.org/maven2</url>
-		</repository>
-	</repositories>
 
-	<dependencies>
-		<dependency>
+      <dependencies>
+          <dependency>
             <groupId>com.gigaspaces</groupId>
             <artifactId>gs-openspaces</artifactId>
             <version>${gsVersion}</version>
             <scope>provided</scope>
         </dependency>
+
+		<dependency>
+		    <groupId>snmpTrapAppender</groupId>
+		    <artifactId>snmpTrapAppender</artifactId>
+		    <version>1.2.9</version>
+		    <scope>system</scope>
+		    <systemPath>${basedir}/lib/snmpTrapAppender_1_2_9.jar</systemPath>
+		</dependency>
+		
+	
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
+            <artifactId>spring-core</artifactId>
             <version>${springVersion}</version>
             <scope>test</scope>
-        </dependency>        	
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.14</version>
-		</dependency>
-		<dependency>
-			<groupId>dist.release.org.snmp4j</groupId>
-			<artifactId>snmp4j</artifactId>
-			<version>1.11.2</version>
-		</dependency>
-		<dependency>
-			<groupId>snmptrapappender</groupId>
-			<artifactId>snmpTrapAppender</artifactId>
-			<version>1.2.8</version>
-		</dependency>
-	</dependencies>
+        </dependency>        
 
-	<build>
-	    <defaultGoal>package</defaultGoal>
+            <dependency>
+                  <groupId>log4j</groupId>
+                  <artifactId>log4j</artifactId>
+                  <version>1.2.14</version>
+            </dependency>
+
+            <dependency>
+                  <groupId>dist.release.org.snmp4j</groupId>
+                  <artifactId>snmp4j</artifactId>
+                  <version>1.11.2</version>
+            </dependency>
+
+      </dependencies>
+
+ 
+
+      <build>
+        <defaultGoal>package</defaultGoal>
         <finalName>SnmpTrapTransmitter</finalName>
-        <plugins>        
-   		   <plugin>
+        <plugins>
+             <plugin>                
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
@@ -67,6 +74,8 @@
                 </configuration>
                 <version>2.3.2</version>
             </plugin>
+                        
+
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
@@ -77,6 +86,7 @@
                         <descriptor>src/main/assembly/assembly.xml</descriptor>
                     </descriptors>
                 </configuration>
+                
                 <executions>
                     <execution>
                         <id>assembly</id>
@@ -87,13 +97,13 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-openspaces-plugin</artifactId>
                 <version>${gsVersion}</version>
-            </plugin>        
+            </plugin>                      
         </plugins>
     </build>
-    
+  
 </project>
