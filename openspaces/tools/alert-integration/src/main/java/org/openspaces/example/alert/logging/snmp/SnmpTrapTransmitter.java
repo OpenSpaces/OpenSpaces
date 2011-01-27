@@ -12,7 +12,6 @@ import org.openspaces.admin.alert.AlertManager;
 import org.openspaces.admin.alert.config.parser.XmlAlertConfigurationParser;
 import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
 
-
 /**
  *  SnmpAlertAgent: A stateless PU which intercepts XAP alerts to transmit them 
  *   to an SNMP software as asynchronous agent-generated messages ("traps")
@@ -21,11 +20,9 @@ import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
  */
 
 public class SnmpTrapTransmitter {
-	
-	
-    @PostConstruct
+		
+    @PostConstruct 
     public void construct() throws Exception {
-    	//loadRunParams();
     	registerAlertTrapper();    	
     }
 
@@ -56,7 +53,7 @@ public class SnmpTrapTransmitter {
 		this.group = group;
 	}
 
-	private String alertFileFilter; //"notify-alerts.xml" 
+	private String alertFileFilter; 
     private String loggerName; 
     private String group; 
 	
@@ -91,9 +88,9 @@ public class SnmpTrapTransmitter {
         alertManager.getAlertTriggered().add(atListener);        		
 	}
 
+	
 	private AlertManager alertManager;
 	private Log logger; 
-	private AlertTriggeredEventListener atListener;
-	
+	private AlertTriggeredEventListener atListener;	
 }
 

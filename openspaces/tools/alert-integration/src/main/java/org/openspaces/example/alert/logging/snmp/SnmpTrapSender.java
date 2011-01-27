@@ -26,33 +26,18 @@ import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.snmp4j.util.DefaultPDUFactory;
 
 
-/*
-layers:
-     fix alerts.xml
-     
-     connect to CommomLogging rather than log4j (anc configure common to work w log4j)
-     
-	  layer1: AlertInterceptor
-	  layer2: Common-logging	  
-	  	  
-	  use maven to set log4J for CommonLogging 
-	  
-	  checl whether each pu in jvm may have its own log configuration - 
-	    i.e. if there si demarcation
-*/
 
 public class SnmpTrapSender implements SnmpTrapSenderFacade {
-	
+			
 	public void addTrapMessageVariable(String trapOID, String trapValue) {
 		trapQueue.add(trapValue);
 		loadRunParams();
 	}
 
-	public void initialize(String arg0, int arg1, String arg2, String arg3,
-			int arg4, int arg5, int arg6, String arg7, long arg8){
+	public void initialize(SNMPTrapAppender arg0) {
 		trapQueue.clear();
-	} 
-		
+	}
+	
 	private static final String SNMP_XAP_COMMUNITY = "XAP-Events";	
 	private static final String SNMP_XAP_ALERT_MSG_OID = "1.2.3.3.25.29.3";
 	
@@ -85,6 +70,7 @@ public class SnmpTrapSender implements SnmpTrapSenderFacade {
     	return null;
 	}
 
+	
 	public void sendTrap() {
 		String trapVal = trapQueue.removeFirst();
 		
@@ -143,5 +129,5 @@ public class SnmpTrapSender implements SnmpTrapSenderFacade {
 	private static IpAddress localAddr;
 
 	private LinkedList<String> trapQueue = new LinkedList<String>();
-	
+		
 }
