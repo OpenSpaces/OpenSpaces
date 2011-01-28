@@ -1,3 +1,18 @@
+/*
+ * Copyright 2011 GigaSpaces Technologies Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at *
+ *     
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License."
+ */
 package org.openspaces.example.alert.logging.snmp;
 
 import java.io.File;
@@ -25,8 +40,21 @@ import org.snmp4j.smi.VariableBinding;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.snmp4j.util.DefaultPDUFactory;
 
+/**
+ * 
+ * @author giladh
+ * @since 8.0
+ */
 public class SnmpTrapSender implements SnmpTrapSenderFacade {
-			
+	
+	private static final String SNMP_XAP_COMMUNITY = "XAP-Events";	
+	private static final String SNMP_XAP_ALERT_MSG_OID = "1.2.3.3.25.29.3";
+	
+	private static IpAddress localAddr;
+	private final LinkedList<String> trapQueue = new LinkedList<String>();
+	private String snmpServerIP;
+	private int snmpServerPort;
+	
 	public void addTrapMessageVariable(String trapOID, String trapValue) {
 		trapQueue.add(trapValue);
 		loadRunParams();
@@ -35,13 +63,6 @@ public class SnmpTrapSender implements SnmpTrapSenderFacade {
 	public void initialize(SNMPTrapAppender arg0) {
 		trapQueue.clear();
 	}
-	
-	private static final String SNMP_XAP_COMMUNITY = "XAP-Events";	
-	private static final String SNMP_XAP_ALERT_MSG_OID = "1.2.3.3.25.29.3";
-	
-	private String snmpServerIP;
-	private int snmpServerPort;
-
 
     private void loadRunParams() {
         Properties prop;
@@ -123,9 +144,4 @@ public class SnmpTrapSender implements SnmpTrapSenderFacade {
 		}
 		return localAddr;
 	}
-	
-	private static IpAddress localAddr;
-
-	private LinkedList<String> trapQueue = new LinkedList<String>();
-		
 }
