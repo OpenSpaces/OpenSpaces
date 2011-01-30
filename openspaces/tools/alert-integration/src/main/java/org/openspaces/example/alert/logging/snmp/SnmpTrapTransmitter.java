@@ -44,6 +44,10 @@ public class SnmpTrapTransmitter {
 	private Log logger; 
 	private AlertTriggeredEventListener atListener;	
 
+	/**
+	 * Construct SnmpTrapTransmitter bean object 
+	 * @throws Exception
+	 */
 	@PostConstruct 
 	public void construct() throws Exception {
 		registerAlertTrapper();    	
@@ -75,6 +79,10 @@ public class SnmpTrapTransmitter {
 		this.group = group;
 	}
 
+	/**
+	 * Destroy SnmpTrapTransmitter bean object
+	 * @throws Exception
+	 */
 	@PreDestroy 
 	public void destroy() throws Exception {
 		if (alertManager != null && atListener != null) {
@@ -85,6 +93,10 @@ public class SnmpTrapTransmitter {
 		logger = null;
 	}     
 
+	/**
+	 * Register bean as an alert listener, using 
+	 * alert filter file: alertFileFilter
+	 */
 	private void registerAlertTrapper() { 
 		Admin admin = new AdminFactory().addGroup(group).create();         
 		LogFactory.releaseAll(); 

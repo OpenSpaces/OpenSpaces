@@ -41,9 +41,15 @@ import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.snmp4j.util.DefaultPDUFactory;
 
 /**
- * 
+ * An SnmpTrapSenderFacade implementation class. 
+ *
+ * <p>Activated by the snmpTrapAppender package to create and 
+ * transmit a trap message to the SNMP server.
+ *
+ * <p>The server details, mainly IP and port are configured in
+ * log4j.properties.
+ *
  * @author giladh
- * @since 8.0
  */
 public class SnmpTrapSender implements SnmpTrapSenderFacade {
 	
@@ -55,15 +61,30 @@ public class SnmpTrapSender implements SnmpTrapSenderFacade {
 	private String snmpServerIP;
 	private int snmpServerPort;
 	
+	/**
+	 * Called by the snmpTrapAppender to handle a new trap - 
+	 * created in response to a new detected alert.
+	 * 
+	 * Writes the trap data to the trapQueue and immediately 
+	 * releases the calling thread
+	 */
 	public void addTrapMessageVariable(String trapOID, String trapValue) {
 		trapQueue.add(trapValue);
+	}
+
+	
+	/**
+	 * Called once to initialize an instance of the SnmpTrapSender  
+	 */
+	public void initialize(SNMPTrapAppender arg0) {
+		trapQueue.clear();
 		loadRunParams();
 	}
 
-	public void initialize(SNMPTrapAppender arg0) {
-		trapQueue.clear();
-	}
-
+	/**
+	 * Loads runnig parameters - namely SNMP server's IP and port - 
+	 * from the log4j.properties configuration file
+	 */
     private void loadRunParams() {
         Properties prop;
         try {
@@ -89,18 +110,17 @@ public class SnmpTrapSender implements SnmpTrapSenderFacade {
     	return null;
 	}
 
-	
+
+    /**
+     * Send next-in-line trap from queue to to SNMP server
+     */
 	public void sendTrap() {
 		String trapVal = trapQueue.removeFirst();
 		
 		String XapCommunity = SNMP_XAP_COMMUNITY;
 		
 		try {
-			// send a XAP trap to SNMP manager
-	    	System.out.println("About to send trap data: " + trapVal);
-	    	    	    
-	    	PDUv1 trapPdu = createTrapPDU(trapVal);
-	    	
+	    	PDUv1 trapPdu = createTrapPDU(trapVal);	    	
 			DefaultUdpTransportMapping tm = new DefaultUdpTransportMapping();
 			Snmp snmp = new Snmp(tm);
 			tm.listen();
@@ -131,7 +151,10 @@ public class SnmpTrapSender implements SnmpTrapSenderFacade {
     	return trapPdu;
 	}
 	
-		
+
+	/**
+	 * Cache local address 
+	 */
 	private static IpAddress getLocalAddress() {
 		if (localAddr == null) {
 	    	try {
