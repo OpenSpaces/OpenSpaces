@@ -71,9 +71,9 @@
     </os-core:space>
 
     <!--
-        Defines a local Jini transaction manager.
+        Defines a distributed transaction manager.
     -->
-    <os-core:local-tx-manager id="transactionManager" space="space"/>
+     <os-core:distributed-tx-manager id="transactionManager"/>
 
     <!--
         OpenSpaces simplified space API built on top of IJSpace/JavaSpace.
