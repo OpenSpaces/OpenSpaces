@@ -69,7 +69,9 @@ public class SnmpTrapSender implements SnmpTrapSenderFacade {
 	 * releases the calling thread
 	 */
 	public void addTrapMessageVariable(String trapOID, String trapValue) {
-		trapQueue.add(trapValue);
+		synchronized (trapQueue) {
+			trapQueue.add(trapValue);
+		}
 	}
 
 	
@@ -77,7 +79,9 @@ public class SnmpTrapSender implements SnmpTrapSenderFacade {
 	 * Called once to initialize an instance of the SnmpTrapSender  
 	 */
 	public void initialize(SNMPTrapAppender arg0) {
-		trapQueue.clear();
+		synchronized (trapQueue) {
+			trapQueue.clear();
+		}
 		loadRunParams();
 	}
 
@@ -115,7 +119,14 @@ public class SnmpTrapSender implements SnmpTrapSenderFacade {
      * Send next-in-line trap from queue to to SNMP server
      */
 	public void sendTrap() {
-		String trapVal = trapQueue.removeFirst();
+		String trapVal = null;
+		synchronized (trapQueue) {
+			trapVal = trapQueue.removeFirst();
+		}
+		
+		if (trapVal == null) {
+			return;
+		}
 		
 		String XapCommunity = SNMP_XAP_COMMUNITY;
 		
