@@ -2,6 +2,7 @@ package org.openspaces.grid.gsm.rebalancing;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,9 +15,12 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsc.GridServiceContainer;
+import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.machine.Machine;
+import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
@@ -41,6 +45,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
 
     // tracing used for component testing expected result validation
     private final List<FutureStatefulProcessingUnitInstance> doneFutureStatefulDeployments;
+    private final List<FutureStatelessProcessingUnitInstance> doneFutureStatelessDeployments;
     private boolean tracingEnabled = false;
     public void enableTracing() {
         tracingEnabled = true;
@@ -55,16 +60,24 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
     private static final int DEPLOYMENT_TIMEOUT_FAILURE_FORGET_SECONDS = 3600; // one hour
 
     private final Map<ProcessingUnit, List<FutureStatefulProcessingUnitInstance>> futureStatefulDeploymentPerProcessingUnit;
+    private final Map<ProcessingUnit, List<FutureStatelessProcessingUnitInstance>> futureStatelessDeploymentPerProcessingUnit;
     private final List<FutureStatefulProcessingUnitInstance> failedStatefulDeployments;
-
+    private final List<FutureStatelessProcessingUnitInstance> failedStatelessDeployments;
+    private final List<ProcessingUnitInstance> removedStatelessProcessingUnitInstances;
+    
     private final HashMap<ProcessingUnit, RebalancingSlaEnforcementEndpoint> endpoints;
 
     public RebalancingSlaEnforcement() {
         futureStatefulDeploymentPerProcessingUnit = new HashMap<ProcessingUnit, List<FutureStatefulProcessingUnitInstance>>();
+        futureStatelessDeploymentPerProcessingUnit = new HashMap<ProcessingUnit, List<FutureStatelessProcessingUnitInstance>>();
         failedStatefulDeployments = new ArrayList<FutureStatefulProcessingUnitInstance>();
+        failedStatelessDeployments = new ArrayList<FutureStatelessProcessingUnitInstance>();
+        removedStatelessProcessingUnitInstances = new ArrayList<ProcessingUnitInstance>();
+        
         this.endpoints = new HashMap<ProcessingUnit, RebalancingSlaEnforcementEndpoint>();
         
         doneFutureStatefulDeployments = new ArrayList<FutureStatefulProcessingUnitInstance>();
+        doneFutureStatelessDeployments = new ArrayList<FutureStatelessProcessingUnitInstance>();
     }
 
     public void destroy() {
@@ -102,6 +115,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
 
         endpoints.put(pu, endpoint);
         futureStatefulDeploymentPerProcessingUnit.put(pu, new ArrayList<FutureStatefulProcessingUnitInstance>());
+        futureStatelessDeploymentPerProcessingUnit.put(pu, new ArrayList<FutureStatelessProcessingUnitInstance>());
         return endpoint;
     }
 
@@ -125,10 +139,22 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
         }
 
         futures.addAll(this.failedStatefulDeployments);
-
+        
         return futures;
     }
 
+    private List<FutureStatelessProcessingUnitInstance> getAllFutureStatelessProcessingUnitInstances() {
+        final List<FutureStatelessProcessingUnitInstance> futures = new ArrayList<FutureStatelessProcessingUnitInstance>();
+
+        for (final ProcessingUnit pu : this.futureStatefulDeploymentPerProcessingUnit.keySet()) {
+            futures.addAll(this.futureStatelessDeploymentPerProcessingUnit.get(pu));
+        }
+        futures.addAll(this.failedStatelessDeployments);
+        
+        return futures;
+    }
+
+    
     private boolean isConflictingDeploymentInProgress(
             GridServiceContainer container,
             int maximumNumberOfConcurrentRelocationsPerMachine) {
@@ -155,6 +181,16 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                 concurrentRelocationsInContainer++;
             }
         }
+        
+        for (FutureStatelessProcessingUnitInstance future : getAllFutureStatelessProcessingUnitInstances()) {
+
+            GridServiceContainer targetContainer = future.getTargetContainer();
+
+            if (targetContainer.equals(container)) { // deployment already in progress
+                  concurrentRelocationsInContainer++;
+            }
+        }
+
 
         return concurrentRelocationsInContainer > 0 ||
 
@@ -188,12 +224,25 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                 concurrentRelocationsInMachine++;
             }
         }
+        
+        for (FutureStatelessProcessingUnitInstance future : getAllFutureStatelessProcessingUnitInstances()) {
+
+            GridServiceContainer targetContainer = future.getTargetContainer();
+            Machine targetMachine = targetContainer.getMachine();
+            
+            if (targetMachine.equals(machine)) { // target machine is busy with deployment
+
+                concurrentRelocationsInMachine++;
+            }
+        }
+
 
         return concurrentRelocationsInMachine >= maximumNumberOfConcurrentRelocationsPerMachine;
     }
 
     public void destroyEndpoint(ProcessingUnit pu) {
         futureStatefulDeploymentPerProcessingUnit.remove(pu);
+        futureStatelessDeploymentPerProcessingUnit.remove(pu);
         endpoints.remove(pu);
     }
 
@@ -215,7 +264,9 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
         if (pu == null) {
             throw new IllegalArgumentException("pu cannot be null");
         }
-        return !endpoints.containsKey(pu) || futureStatefulDeploymentPerProcessingUnit.get(pu) == null;
+        return !endpoints.containsKey(pu) || 
+               futureStatefulDeploymentPerProcessingUnit.get(pu) == null || 
+               futureStatelessDeploymentPerProcessingUnit.get(pu) == null;
     }
 
     private ProcessingUnit getEndpointsWithSameContainersZoneAs(ProcessingUnit pu) {
@@ -301,10 +352,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
             }
 
             try {
-                enforceSlaInternal(sla);
-                logger.debug("Number of relocations in progress is " + futureStatefulDeploymentPerProcessingUnit.get(pu).size());
-                return isBalanced(sla);
-
+                return enforceSlaInternal(sla);
             } catch (ConflictingOperationInProgressException e) {
                 logger.debug(
                         "Cannot enforce Rebalancing SLA since a conflicting operation is in progress. Try again later.",
@@ -325,10 +373,115 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                             RebalancingUtils.getMachinesHostingContainers(sla.getContainers()));
         }
 
-        private void enforceSlaInternal(RebalancingSlaPolicy sla) throws ConflictingOperationInProgressException {
+        private boolean enforceSlaInternal(RebalancingSlaPolicy sla) throws ConflictingOperationInProgressException {
 
             cleanFutureStatefulDeployments();
+            cleanFutureStatelessDeployments();
+            cleanRemovedStatelessProcessingUnitInstances();
+            
+            if (sla.getSchemaConfig().isPartitionedSync2BackupSchema()) {
+                enfroceSlaStatefulProcessingUnit(sla);
+                logger.debug("Number of deployments in progress is " + futureStatefulDeploymentPerProcessingUnit.get(pu).size());
+                return isBalanced(sla);
+            }
+            else if (sla.getSchemaConfig().isDefaultSchema()) {
+                enforceSlaStatelessProcessingUnit(sla);
+                logger.debug("Number of deployments in progress is " + futureStatelessDeploymentPerProcessingUnit.get(pu).size());
+                return isDeployedOnContainers(sla.getContainers(),pu); 
+            }
+            else {
+                throw new IllegalStateException(pu.getName() + " schema " + sla.getSchemaConfig().getSchema() + " is not supported." );
+            }
+            
+        }
 
+        private void enforceSlaStatelessProcessingUnit(RebalancingSlaPolicy sla) throws ConflictingOperationInProgressException {
+            
+            int maximumNumberOfConcurrentRelocationsPerMachine = sla.getMaximumNumberOfConcurrentRelocationsPerMachine();
+            
+            for (GridServiceContainer container : sla.getContainers()) {
+                if (container.getProcessingUnitInstances(pu.getName()).length == 0 &&
+                    isConflictingDeploymentInProgress(container, maximumNumberOfConcurrentRelocationsPerMachine)) {
+                    throw new ConflictingOperationInProgressException();
+                }
+            }
+            
+            Collection<FutureStatelessProcessingUnitInstance> futureInstances = 
+                RebalancingUtils.incrementNumberOfStatelessInstancesAsync(
+                        pu, 
+                        DEPLOYMENT_TIMEOUT_FAILURE_SECONDS , TimeUnit.SECONDS);
+            futureStatelessDeploymentPerProcessingUnit.get(pu).addAll(futureInstances);
+            
+            if (futureInstances.isEmpty()) {
+                // find all containers with instances that are not in the approved containers
+                Set<GridServiceContainer> approvedContainers = new HashSet<GridServiceContainer>(Arrays.asList(sla.getContainers()));
+                List<ProcessingUnitInstance> instancesToRemove = new ArrayList<ProcessingUnitInstance>();
+               
+                for (GridServiceContainer container : pu.getAdmin().getGridServiceContainers()) {
+                    if (!approvedContainers.contains(container)) {
+                        
+                        for (ProcessingUnitInstance instance : container.getProcessingUnitInstances(pu.getName())) {
+                            instancesToRemove.add(instance);
+                        }
+                    }
+                }
+                
+                if (instancesToRemove.size() > 0) {
+
+                    for (ProcessingUnitInstance instanceToRemove : instancesToRemove) {
+                        logger.info(
+                                "removing pu instance " + RebalancingUtils.puInstanceToString(instanceToRemove) + " "+
+                                "since not deployed on approved container");
+                        removeInstance(instanceToRemove);
+                    }
+                    
+                }
+                
+                else if (sla.getContainers().length < pu.getNumberOfInstances() &&
+                         pu.getInstances().length > 1) {
+                    // the number of instances is more than the sla.
+                    // there has been an sla changed that leaved us with too many instances.
+                    // the problem is that our current API does not allow to decrement spare instances
+                    // so we need to decrement a deployed instance, just to watch it redeployed again.
+                    ProcessingUnitInstance victimInstance = pu.getInstances()[0];
+                    logger.info(
+                            "Number of instances is " + pu.getNumberOfInstances() + " "+
+                            "instead of " + sla.getContainers().length +". "+
+                            "removing victim pu instance " + RebalancingUtils.puInstanceToString(victimInstance));
+                    removeInstance(victimInstance);
+                }
+            }           
+        }
+        
+        private void removeInstance(final ProcessingUnitInstance instance) {
+            
+            if (instance.isDiscovered() &&
+                !removedStatelessProcessingUnitInstances.contains(instance)) {
+                
+                // this makes sure we try to decrement it only once
+                removedStatelessProcessingUnitInstances.add(instance);
+                
+                ((InternalAdmin)pu.getAdmin()).scheduleAdminOperation(new Runnable() {
+    
+                    public void run() {
+                        try {
+                            if (instance.isDiscovered()) {
+                                instance.decrement();
+                            }
+                        }
+                        catch (AdminException e) {
+                            logger.info(
+                                    "Failed to remove instance " + RebalancingUtils.puInstanceToString(instance),e);
+                        }
+                        catch (Exception e) {
+                            logger.warn("Unexpected exception when removing "+ RebalancingUtils.puInstanceToString(instance));
+                        }
+                    }});
+            }
+        }
+        
+        private void enfroceSlaStatefulProcessingUnit(RebalancingSlaPolicy sla)
+                throws ConflictingOperationInProgressException {
             GridServiceContainer[] containers = sla.getContainers();
             if (pu.getNumberOfBackups() == 1) {
                 // stage 1 : relocate backups so number of instances per container is balanced
@@ -377,7 +530,6 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
             // balanced
             boolean relocateOnlyBackups = false;
             rebalanceNumberOfInstancesPerContainer(containers, sla, relocateOnlyBackups);
-
         }
 
         /**
@@ -386,8 +538,6 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
          * @param containers
          * @param onlyBackups
          *            - perform only backup relocations.
-         * 
-         * @return future if performed relocation. null if no action needs to be performed.
          * 
          * @throws ConflictingOperationInProgressException
          *             - cannot determine what next to relocate since another conflicting operation
@@ -898,8 +1048,8 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
             final Iterator<FutureStatefulProcessingUnitInstance> iterator = list.iterator();
             while (iterator.hasNext()) {
                 FutureStatefulProcessingUnitInstance future = iterator.next();
-
-                if (future.isDone()) {
+                if (future.getProcessingUnit().equals(pu) &&
+                    future.isDone()) {
 
                     if (tracingEnabled) {
                         doneFutureStatefulDeployments.add(future);
@@ -945,25 +1095,139 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
             final Iterator<FutureStatefulProcessingUnitInstance> iterator = list.iterator();
             while (iterator.hasNext()) {
                 FutureStatefulProcessingUnitInstance future = iterator.next();
-                int passedSeconds = (int) ((System.currentTimeMillis() - future.getTimestamp().getTime()) / 1000);
-
-                if (future.getException() != null
-                        && future.getException().getCause() instanceof WrongContainerRelocationException
-                        && future.getTargetContainer().isDiscovered()
-                        && passedSeconds < DEPLOYMENT_TIMEOUT_FAILURE_FORGET_SECONDS) {
-
-                    // do not remove future from list since the target container did not have enough
-                    // memory
-                    // meaning something is very wrong with our assumptions on the target container.
-                    // We leave this future in the list so it will cause conflicting exceptions.
-                    // Once RELOCATION_TIMEOUT_FAILURE_FORGET_SECONDS passes it is removed from the
-                    // list.
-                } else {
-                    logger.info("Forgetting relocation error " + future.getFailureMessage());
-                    iterator.remove();
+                if (future.getProcessingUnit().equals(pu)) {
+                    int passedSeconds = (int) ((System.currentTimeMillis() - future.getTimestamp().getTime()) / 1000);
+    
+                    if (future.getException() != null
+                            && future.getException().getCause() instanceof WrongContainerRelocationException
+                            && future.getTargetContainer().isDiscovered()
+                            && passedSeconds < DEPLOYMENT_TIMEOUT_FAILURE_FORGET_SECONDS) {
+    
+                        // do not remove future from list since the target container did not have enough
+                        // memory
+                        // meaning something is very wrong with our assumptions on the target container.
+                        // We leave this future in the list so it will cause conflicting exceptions.
+                        // Once RELOCATION_TIMEOUT_FAILURE_FORGET_SECONDS passes it is removed from the
+                        // list.
+                    } else {
+                        logger.info("Forgetting relocation error " + future.getFailureMessage());
+                        iterator.remove();
+                    }
                 }
             }
         }
+        
+        private void cleanRemovedStatelessProcessingUnitInstances() {
+            Iterator<ProcessingUnitInstance> iterator = removedStatelessProcessingUnitInstances.iterator();
+            while (iterator.hasNext()) {
+                ProcessingUnitInstance instance = iterator.next();
+                if (instance.getProcessingUnit().equals(pu) &&
+                    !instance.isDiscovered()) {
+                    
+                    iterator.remove();
+                    logger.info("Processing Unit Instance " + RebalancingUtils.puInstanceToString(instance) + " removed succesfully.");
+                }
+            }
+        }
+        
+        private void cleanFutureStatelessDeployments() {
+
+            List<FutureStatelessProcessingUnitInstance> list = futureStatelessDeploymentPerProcessingUnit.get(pu);
+
+            if (list == null) {
+                throw new IllegalStateException("endpoint for pu " + pu.getName() + " has already been destroyed.");
+            }
+
+            final Iterator<FutureStatelessProcessingUnitInstance> iterator = list.iterator();
+            while (iterator.hasNext()) {
+                FutureStatelessProcessingUnitInstance future = iterator.next();
+                
+                if (future.getProcessingUnit().equals(pu) &&
+                    future.isDone()) {
+
+                    if (tracingEnabled) {
+                        doneFutureStatelessDeployments.add(future);
+                    }
+                    
+                    iterator.remove();
+                    
+                    Exception exception = null;
+
+                    try {
+                        ProcessingUnitInstance puInstance = future.get();
+                        logger.info("Processing unit instance deployment completed successfully "
+                                + RebalancingUtils.puInstanceToString(puInstance));
+
+                    } catch (ExecutionException e) {
+                        if (e.getCause() instanceof AdminException) {
+                            exception = (AdminException) e.getCause();
+                        } else {
+                            throw new IllegalStateException("Unexpected runtime exception", e);
+                        }
+                    } catch (TimeoutException e) {
+                        exception = e;
+                    }
+
+                    if (exception != null) {
+                        logger.info(future.getFailureMessage(), exception);
+                        failedStatelessDeployments.add(future);
+                    }
+                }
+            }
+
+            cleanFailedFutureStatelessDeployments();
+        }
+        
+        /**
+         * This method removes failed relocations from the list allowing a retry attempt to take place.
+         * Some failures are removed immediately, while others stay in the list for
+         * RELOCATION_TIMEOUT_FAILURE_IGNORE_SECONDS.
+         */
+        private void cleanFailedFutureStatelessDeployments() {
+            List<FutureStatelessProcessingUnitInstance> list = failedStatelessDeployments;
+            final Iterator<FutureStatelessProcessingUnitInstance> iterator = list.iterator();
+            while (iterator.hasNext()) {
+                FutureStatelessProcessingUnitInstance future = iterator.next();
+                if (future.getProcessingUnit().equals(pu)) {
+                    int passedSeconds = (int) ((System.currentTimeMillis() - future.getTimestamp().getTime()) / 1000);
+    
+                    if (future.getException() != null
+                        && future.getTargetContainer().isDiscovered()
+                        && passedSeconds < DEPLOYMENT_TIMEOUT_FAILURE_FORGET_SECONDS) {
+    
+                        // do not remove future from list until timeout failure forget
+                        // since something is very wrong with target container.
+                        
+                    } else {
+                        logger.info("Forgetting relocation error " + future.getFailureMessage());
+                        iterator.remove();
+                    }
+                }
+            }
+        }
+    }
+
+    public boolean isDeployedOnContainers(GridServiceContainer[] containers, ProcessingUnit pu) {
+        
+        boolean deployed = false;
+        
+        if (pu.getStatus() == DeploymentStatus.INTACT) {
+            
+            Set<GridServiceContainer> target = new HashSet<GridServiceContainer>(Arrays.asList(containers));
+            Set<GridServiceContainer> actual = new HashSet<GridServiceContainer>();
+            
+            Admin admin = pu.getAdmin();
+            for (GridServiceContainer container : admin.getGridServiceContainers()) {
+                if (container.getProcessingUnitInstances(pu.getName()).length > 0) {
+                    actual.add(container);
+                }
+            }
+            deployed = 
+                actual.equals(target) && 
+                actual.size() == pu.getNumberOfInstances();
+        }
+        
+        return deployed;
     }
     
 }

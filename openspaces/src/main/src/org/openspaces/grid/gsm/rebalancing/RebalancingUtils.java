@@ -2,16 +2,20 @@ package org.openspaces.grid.gsm.rebalancing;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.openspaces.admin.Admin;
@@ -29,6 +33,167 @@ import com.gigaspaces.cluster.activeelection.SpaceMode;
 
 public class RebalancingUtils {
 
+   static Collection<FutureStatelessProcessingUnitInstance> incrementNumberOfStatelessInstancesAsync(
+       final ProcessingUnit pu, 
+       final long duration, final TimeUnit timeUnit) {
+       
+       if (pu.getMaxInstancesPerVM() != 1) {
+           throw new IllegalArgumentException("Only one instance per VM is allowed");
+       }
+       
+       List<GridServiceContainer> unusedContainers = getUnusedContainers(pu);
+       
+       final Admin admin = pu.getAdmin();
+       final Map<GridServiceContainer,FutureStatelessProcessingUnitInstance> futureInstances = new HashMap<GridServiceContainer, FutureStatelessProcessingUnitInstance>();
+       final AtomicInteger targetNumberOfInstances = new AtomicInteger(pu.getNumberOfInstances());
+       
+       final long start = System.currentTimeMillis();
+       final long end = start + timeUnit.toMillis(duration);
+       
+       for (GridServiceContainer container : unusedContainers) {
+           final GridServiceContainer targetContainer = container;
+           futureInstances.put(container, new FutureStatelessProcessingUnitInstance() {
+
+               AtomicReference<ExecutionException> executionException = new AtomicReference<ExecutionException>();
+               ProcessingUnitInstance newInstance;
+               
+               public boolean isTimedOut() {
+                   return System.currentTimeMillis() > end;
+               }
+
+               public boolean isDone() {
+                   
+                   end();
+                   
+                   return isTimedOut() ||
+                          executionException.get() != null || 
+                          newInstance != null;
+               }
+               
+               public ProcessingUnitInstance get() throws ExecutionException, IllegalStateException, TimeoutException {
+
+                   if (isTimedOut()) {
+                       throw new TimeoutException("Relocation timeout");
+                   }
+
+                   end();
+                   
+                   if (executionException.get() != null) {
+                       throw executionException.get();
+                   }
+                   if (newInstance == null) {
+                       throw new IllegalStateException("Async operation is not done yet.");
+                   }
+                   
+                   return newInstance;
+               }
+               
+               public Date getTimestamp() {
+                   return new Date(start);
+               }
+
+               public ExecutionException getException() {
+
+                   end();
+                   return executionException.get();
+               }
+
+            
+            public GridServiceContainer getTargetContainer() {
+                return targetContainer;
+            }
+                        
+            public ProcessingUnit getProcessingUnit() {
+                return pu;
+            }
+            
+            public String getFailureMessage() throws IllegalStateException {
+                if (isTimedOut()) {
+                    return "deployment timeout of processing unit " + pu.getName() + " on " + 
+                            gscToString(targetContainer);
+                   }
+                   
+                   if (executionException.get() != null && executionException.get().getCause() != null) {
+                       return executionException.get().getCause().getMessage();
+                   }
+                   
+                   throw new IllegalStateException("Relocation has not encountered any failure.");
+            }
+            
+            private void end() {
+                
+                if (!targetContainer.isDiscovered()) {
+                    executionException.set(
+                            new ExecutionException(new ProcessingUnitInstanceDeploymentException(
+                                    "Deployment of processing unit " + pu.getName()+ " on container " + 
+                                    gscToString(targetContainer) + " "+
+                                    "failed since container no longer exists.")));
+                }
+                
+                else if (executionException.get() != null || newInstance != null) {
+                    //do nothing. idempotent method
+                }
+                
+                else {
+                    incrementInstance();
+                    
+                    ProcessingUnitInstance[] instances = targetContainer.getProcessingUnitInstances(pu.getName());
+                
+                    if (instances.length > 0) {
+                        newInstance = instances[0];
+                    }
+                }
+            }
+            
+            private void incrementInstance() {
+                int numberOfInstances = pu.getNumberOfInstances();
+                int maxNumberOfInstances = getContainers(pu).length;
+                if (numberOfInstances < maxNumberOfInstances) {
+                   if (targetNumberOfInstances.get() != numberOfInstances+1) {
+                       targetNumberOfInstances.set(numberOfInstances+1);
+                       
+                       ((InternalAdmin) admin).scheduleAdminOperation(new Runnable() {
+                           public void run() {
+                               try {
+                                   // this is an async operation 
+                                   // pu.getNumberOfInstances() still shows the old value.
+                                   pu.incrementInstance();
+                               } catch (Exception e) {
+                                   executionException.set(new ExecutionException(e));
+                               }
+                           }
+                       });
+                       
+                       
+                   }
+               }
+            }
+        });
+            
+       }
+       
+       return futureInstances.values();
+       
+   }
+
+private static List<GridServiceContainer> getUnusedContainers(final ProcessingUnit pu) {
+       // look for free containers
+       List<GridServiceContainer> unusedContainers = new ArrayList<GridServiceContainer>();
+       for (GridServiceContainer container : getContainers(pu)) {
+           if (container.getProcessingUnitInstances(pu.getName()).length == 0) {
+               unusedContainers.add(container);
+           }
+       }
+    return unusedContainers;
+}
+
+private static GridServiceContainer[] getContainers(final ProcessingUnit pu) {
+    // find all containers with the correct zone
+       Machine[] machines = pu.getAdmin().getMachines().getMachines();
+       GridServiceContainer[] containers = getContainersOnMachines(pu, machines);
+    return containers;
+}
+   
    static FutureStatefulProcessingUnitInstance relocateProcessingUnitInstanceAsync(
            final GridServiceContainer targetContainer,
            final ProcessingUnitInstance puInstance, 
@@ -485,7 +650,7 @@ public class RebalancingUtils {
     private static boolean isProcessingUnitIntact(ProcessingUnit pu, Machine[] machines) {
         return isProcessingUnitIntact(pu, getContainersOnMachines(pu,machines));
     }
-
+    
     private static GridServiceContainer[] getContainersOnMachines(ProcessingUnit pu, Machine[] machines) {
         if (pu.getRequiredZones().length != 1) {
             throw new IllegalStateException("Processing Unit must have exactly one container zone defined.");
