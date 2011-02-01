@@ -37,6 +37,7 @@ import org.openspaces.admin.pu.ProcessingUnitAlreadyDeployedException;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
+import org.openspaces.admin.pu.elastic.ElasticStatelessProcessingUnitDeployment;
 import org.openspaces.admin.pu.events.ProcessingUnitAddedEventListener;
 import org.openspaces.admin.space.ElasticSpaceDeployment;
 import org.openspaces.admin.space.SpaceDeployment;
@@ -408,6 +409,18 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
         return deploy(deployment.toProcessingUnitDeployment(admin),timeout,timeUnit);
     }
 
+    public ProcessingUnit deploy(ElasticStatelessProcessingUnitDeployment deployment)
+        throws ProcessingUnitAlreadyDeployedException {
+    
+        return deploy(deployment,admin.getDefaultTimeout(),admin.getDefaultTimeoutTimeUnit());
+    }
+    
+    public ProcessingUnit deploy(ElasticStatelessProcessingUnitDeployment deployment, long timeout, TimeUnit timeUnit)
+        throws ProcessingUnitAlreadyDeployedException {
+
+        return deploy(deployment.toProcessingUnitDeployment(admin),timeout,timeUnit);
+    }
+    
     public void setProcessingUnitElasticProperties(ProcessingUnit pu, Map<String,String> properties) {
         
         //TODO: Store the data in the gsm server.

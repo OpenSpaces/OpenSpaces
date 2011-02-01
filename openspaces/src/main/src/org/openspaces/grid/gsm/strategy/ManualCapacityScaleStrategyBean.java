@@ -125,8 +125,12 @@ public class ManualCapacityScaleStrategyBean
         
         logger.info("sla properties: "+slaConfig.toString());
         
-        if (!schemaConfig.isPartitionedSync2BackupSchema()) {
-            throw new BeanConfigurationException("Processing Unit " + pu.getName() + " cannot scale by memory capacity, since it is not stateful and not a datagrid (it is " + schemaConfig.getSchema() +" . Choose a different scale algorithm.");
+        if (!schemaConfig.isPartitionedSync2BackupSchema() &&
+            !schemaConfig.isDefaultSchema()) {
+            throw new BeanConfigurationException(
+                    "Processing Unit " + pu.getName() + " cannot scale by memory capacity, "+
+                    "since it is not stateless, not stateful and not a datagrid (it is " + schemaConfig.getSchema() +") . "+
+                    "Choose a different scale algorithm.");
         }
 
         // calculate minimum number of machines
@@ -405,7 +409,7 @@ public class ManualCapacityScaleStrategyBean
         RebalancingSlaPolicy sla = new RebalancingSlaPolicy();
         sla.setContainers(containers);
         sla.setMaximumNumberOfConcurrentRelocationsPerMachine(slaConfig.getMaxConcurrentRelocationsPerMachine());
-        
+        sla.setSchemaConfig(schemaConfig);
         boolean slaEnforced = rebalancingEndpoint.enforceSla(sla);
         
         if (slaEnforced) {
