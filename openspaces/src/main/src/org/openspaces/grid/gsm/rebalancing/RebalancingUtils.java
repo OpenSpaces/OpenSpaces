@@ -29,7 +29,7 @@ import com.gigaspaces.cluster.activeelection.SpaceMode;
 
 public class RebalancingUtils {
 
-   static FutureProcessingUnitInstance relocateProcessingUnitInstanceAsync(
+   static FutureStatefulProcessingUnitInstance relocateProcessingUnitInstanceAsync(
            final GridServiceContainer targetContainer,
            final ProcessingUnitInstance puInstance, 
            final long duration, final TimeUnit timeUnit) {
@@ -71,7 +71,7 @@ public class RebalancingUtils {
             }
         });
 
-        FutureProcessingUnitInstance future = new FutureProcessingUnitInstance() {
+        FutureStatefulProcessingUnitInstance future = new FutureStatefulProcessingUnitInstance() {
 
             ExecutionException executionException;
             ProcessingUnitInstance newInstance;
@@ -140,7 +140,7 @@ public class RebalancingUtils {
                 }
                 
                 else if (!targetContainer.isDiscovered()) {
-                    executionException = new ExecutionException(new RelocationException(
+                    executionException = new ExecutionException(new ProcessingUnitInstanceDeploymentException(
                                     "Relocation of processing unit instance to container " + 
                                     gscToString(targetContainer) + " "+
                                     "failed since container no longer exists."));
@@ -152,7 +152,7 @@ public class RebalancingUtils {
                         for (ProcessingUnitInstance instanceFromSamePartition : puInstancesFromSamePartition) {
                             errorMessage += " " + puInstanceToString(instanceFromSamePartition);
                         }
-                        executionException = new ExecutionException(new RelocationException(errorMessage));
+                        executionException = new ExecutionException(new ProcessingUnitInstanceDeploymentException(errorMessage));
                 } 
                 else {
                     
@@ -671,7 +671,7 @@ public class RebalancingUtils {
         return numberOfPrimaryInstances;
     }    
 
-    public static FutureProcessingUnitInstance restartProcessingUnitInstanceAsync(
+    public static FutureStatefulProcessingUnitInstance restartProcessingUnitInstanceAsync(
             ProcessingUnitInstance candidateInstance, int relocationTimeoutFailureSeconds, TimeUnit seconds) {
         
         return relocateProcessingUnitInstanceAsync(

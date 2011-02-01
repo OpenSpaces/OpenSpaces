@@ -5,7 +5,7 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.core.PollingFuture;
 
-public interface FutureProcessingUnitInstance extends PollingFuture<ProcessingUnitInstance> {
+public interface FutureStatefulProcessingUnitInstance extends PollingFuture<ProcessingUnitInstance> {
 
     /**
      * @return the exception or timeout error message.

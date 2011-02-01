@@ -40,31 +40,31 @@ public class RebalancingSlaEnforcement implements
 ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, RebalancingSlaEnforcementEndpoint> {
 
     // tracing used for component testing expected result validation
-    private final List<FutureProcessingUnitInstance> doneFutureRelocations;
+    private final List<FutureStatefulProcessingUnitInstance> doneFutureStatefulDeployments;
     private boolean tracingEnabled = false;
     public void enableTracing() {
         tracingEnabled = true;
     }
-    public List<FutureProcessingUnitInstance> getTrace() {
-        return doneFutureRelocations;
+    public List<FutureStatefulProcessingUnitInstance> getTrace() {
+        return doneFutureStatefulDeployments;
     }
     
     private static final Log logger = LogFactory.getLog(RebalancingSlaEnforcement.class);
 
-    private static final int RELOCATION_TIMEOUT_FAILURE_SECONDS = 3600; // one hour
-    private static final int RELOCATION_TIMEOUT_FAILURE_FORGET_SECONDS = 3600; // one hour
+    private static final int DEPLOYMENT_TIMEOUT_FAILURE_SECONDS = 3600; // one hour
+    private static final int DEPLOYMENT_TIMEOUT_FAILURE_FORGET_SECONDS = 3600; // one hour
 
-    private final Map<ProcessingUnit, List<FutureProcessingUnitInstance>> futureRelocationPerProcessingUnit;
-    private final List<FutureProcessingUnitInstance> failedRelocations;
+    private final Map<ProcessingUnit, List<FutureStatefulProcessingUnitInstance>> futureStatefulDeploymentPerProcessingUnit;
+    private final List<FutureStatefulProcessingUnitInstance> failedStatefulDeployments;
 
     private final HashMap<ProcessingUnit, RebalancingSlaEnforcementEndpoint> endpoints;
 
     public RebalancingSlaEnforcement() {
-        futureRelocationPerProcessingUnit = new HashMap<ProcessingUnit, List<FutureProcessingUnitInstance>>();
-        failedRelocations = new ArrayList<FutureProcessingUnitInstance>();
+        futureStatefulDeploymentPerProcessingUnit = new HashMap<ProcessingUnit, List<FutureStatefulProcessingUnitInstance>>();
+        failedStatefulDeployments = new ArrayList<FutureStatefulProcessingUnitInstance>();
         this.endpoints = new HashMap<ProcessingUnit, RebalancingSlaEnforcementEndpoint>();
         
-        doneFutureRelocations = new ArrayList<FutureProcessingUnitInstance>();
+        doneFutureStatefulDeployments = new ArrayList<FutureStatefulProcessingUnitInstance>();
     }
 
     public void destroy() {
@@ -101,13 +101,13 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
         RebalancingSlaEnforcementEndpoint endpoint = new DefaultRebalancingSlaEnforcementEndpoint(pu);
 
         endpoints.put(pu, endpoint);
-        futureRelocationPerProcessingUnit.put(pu, new ArrayList<FutureProcessingUnitInstance>());
+        futureStatefulDeploymentPerProcessingUnit.put(pu, new ArrayList<FutureStatefulProcessingUnitInstance>());
         return endpoint;
     }
 
-    private boolean isConflictingOperationInProgress(ProcessingUnitInstance candidateInstance) {
+    private boolean isConflictingStatefulDeploymentInProgress(ProcessingUnitInstance candidateInstance) {
 
-        for (FutureProcessingUnitInstance future : getAllFutureProcessingUnitInstances()) {
+        for (FutureStatefulProcessingUnitInstance future : getAllFutureStatefulProcessingUnitInstances()) {
             if (future.getProcessingUnit().equals(candidateInstance.getProcessingUnit())
                     && future.getInstanceId() == candidateInstance.getInstanceId()) {
                 return true;
@@ -117,22 +117,20 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
         return false;
     }
 
-    private List<FutureProcessingUnitInstance> getAllFutureProcessingUnitInstances() {
-        final List<FutureProcessingUnitInstance> futures = new ArrayList<FutureProcessingUnitInstance>();
+    private List<FutureStatefulProcessingUnitInstance> getAllFutureStatefulProcessingUnitInstances() {
+        final List<FutureStatefulProcessingUnitInstance> futures = new ArrayList<FutureStatefulProcessingUnitInstance>();
 
-        for (final ProcessingUnit pu : this.futureRelocationPerProcessingUnit.keySet()) {
-            for (final FutureProcessingUnitInstance future : this.futureRelocationPerProcessingUnit.get(pu)) {
-                futures.add(future);
-            }
+        for (final ProcessingUnit pu : this.futureStatefulDeploymentPerProcessingUnit.keySet()) {
+            futures.addAll(this.futureStatefulDeploymentPerProcessingUnit.get(pu));
         }
 
-        for (final FutureProcessingUnitInstance future : this.failedRelocations) {
-            futures.add(future);
-        }
+        futures.addAll(this.failedStatefulDeployments);
+
         return futures;
     }
 
-    private boolean isConflictingOperationInProgress(GridServiceContainer container,
+    private boolean isConflictingDeploymentInProgress(
+            GridServiceContainer container,
             int maximumNumberOfConcurrentRelocationsPerMachine) {
 
         if (maximumNumberOfConcurrentRelocationsPerMachine <= 0) {
@@ -142,7 +140,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
 
         int concurrentRelocationsInContainer = 0;
 
-        for (FutureProcessingUnitInstance future : getAllFutureProcessingUnitInstances()) {
+        for (FutureStatefulProcessingUnitInstance future : getAllFutureStatefulProcessingUnitInstances()) {
 
             GridServiceContainer targetContainer = future.getTargetContainer();
             GridServiceContainer sourceContainer = future.getSourceContainer();
@@ -172,7 +170,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
 
         int concurrentRelocationsInMachine = 0;
 
-        for (FutureProcessingUnitInstance future : getAllFutureProcessingUnitInstances()) {
+        for (FutureStatefulProcessingUnitInstance future : getAllFutureStatefulProcessingUnitInstances()) {
 
             GridServiceContainer targetContainer = future.getTargetContainer();
             List<GridServiceContainer> replicationSourceContainers = Arrays.asList(future.getReplicaitonSourceContainers());
@@ -195,7 +193,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
     }
 
     public void destroyEndpoint(ProcessingUnit pu) {
-        futureRelocationPerProcessingUnit.remove(pu);
+        futureStatefulDeploymentPerProcessingUnit.remove(pu);
         endpoints.remove(pu);
     }
 
@@ -217,7 +215,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
         if (pu == null) {
             throw new IllegalArgumentException("pu cannot be null");
         }
-        return !endpoints.containsKey(pu) || futureRelocationPerProcessingUnit.get(pu) == null;
+        return !endpoints.containsKey(pu) || futureStatefulDeploymentPerProcessingUnit.get(pu) == null;
     }
 
     private ProcessingUnit getEndpointsWithSameContainersZoneAs(ProcessingUnit pu) {
@@ -304,7 +302,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
 
             try {
                 enforceSlaInternal(sla);
-                logger.debug("Number of relocations in progress is " + futureRelocationPerProcessingUnit.get(pu).size());
+                logger.debug("Number of relocations in progress is " + futureStatefulDeploymentPerProcessingUnit.get(pu).size());
                 return isBalanced(sla);
 
             } catch (ConflictingOperationInProgressException e) {
@@ -329,7 +327,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
 
         private void enforceSlaInternal(RebalancingSlaPolicy sla) throws ConflictingOperationInProgressException {
 
-            cleanFutureRelocation();
+            cleanFutureStatefulDeployments();
 
             GridServiceContainer[] containers = sla.getContainers();
             if (pu.getNumberOfBackups() == 1) {
@@ -337,7 +335,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                 boolean relocateOnlyBackups = true;
                 rebalanceNumberOfInstancesPerContainer(containers, sla, relocateOnlyBackups);
 
-                if (!futureRelocationPerProcessingUnit.get(pu).isEmpty()) {
+                if (!futureStatefulDeploymentPerProcessingUnit.get(pu).isEmpty()) {
                     logger.debug("Rebalancing of backup instances is in progress after Stage 1. Try again later.");
                     return;
                 }
@@ -358,7 +356,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                     // stage 2: restart primaries so number of cpu cores per primary is balanced
                     rebalanceNumberOfPrimaryInstancesPerMachine(containers, sla);
 
-                    if (!futureRelocationPerProcessingUnit.get(pu).isEmpty()) {
+                    if (!futureStatefulDeploymentPerProcessingUnit.get(pu).isEmpty()) {
                         logger.debug("Restarting of primary instances is in progress after Stage 2. Try again later.");
                         return;
                     }
@@ -399,14 +397,14 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                 RebalancingSlaPolicy sla, boolean relocateOnlyBackups) throws ConflictingOperationInProgressException {
 
             while (true) {
-                final FutureProcessingUnitInstance newInstance = rebalanceNumberOfInstancesPerContainerStep(
+                final FutureStatefulProcessingUnitInstance newInstance = rebalanceNumberOfInstancesPerContainerStep(
                         containers, relocateOnlyBackups, sla.getMaximumNumberOfConcurrentRelocationsPerMachine());
 
                 if (newInstance == null) {
                     break;
                 }
 
-                futureRelocationPerProcessingUnit.get(pu).add(newInstance);
+                futureStatefulDeploymentPerProcessingUnit.get(pu).add(newInstance);
             }
         }
 
@@ -424,7 +422,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
          *             - cannot determine what to relocate since another conflicting operation is in
          *             progress.
          */
-        private FutureProcessingUnitInstance rebalanceNumberOfInstancesPerContainerStep(
+        private FutureStatefulProcessingUnitInstance rebalanceNumberOfInstancesPerContainerStep(
                 final GridServiceContainer[] containers, boolean onlyBackups, int maximumNumberOfRelocationsPerMachine)
                 throws ConflictingOperationInProgressException {
 
@@ -442,7 +440,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
 
                 GridServiceContainer target = sortedContainers.get(targetIndex);
 
-                if (isConflictingOperationInProgress(target, maximumNumberOfRelocationsPerMachine)) {
+                if (isConflictingDeploymentInProgress(target, maximumNumberOfRelocationsPerMachine)) {
                     conflict = true;
                     logger.debug("Cannot relocate instances to " + RebalancingUtils.gscToString(target)
                             + " since a conflicting relocation is already in progress.");
@@ -461,7 +459,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
 
                     GridServiceContainer source = sortedContainers.get(sourceIndex);
 
-                    if (isConflictingOperationInProgress(source, maximumNumberOfRelocationsPerMachine)) {
+                    if (isConflictingDeploymentInProgress(source, maximumNumberOfRelocationsPerMachine)) {
                         conflict = true;
                         logger.debug("Cannot relocate instances from " + RebalancingUtils.gscToString(source)
                                 + " since a conflicting relocation is already in progress.");
@@ -509,7 +507,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                             continue;
                         }
 
-                        if (isConflictingOperationInProgress(candidateInstance)) {
+                        if (isConflictingStatefulDeploymentInProgress(candidateInstance)) {
                             logger.debug("Cannot relocate " + RebalancingUtils.puInstanceToString(candidateInstance)
                                     + " " + "since another instance from the same partition is being relocated");
                             conflict = true;
@@ -565,7 +563,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                                 + "from " + RebalancingUtils.gscToString(source) + " " + "to "
                                 + RebalancingUtils.gscToString(target));
                         return RebalancingUtils.relocateProcessingUnitInstanceAsync(target, candidateInstance,
-                                RELOCATION_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
+                                DEPLOYMENT_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
 
                     }// for pu instance
                 }// for source container
@@ -578,7 +576,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                 pu.getNumberOfBackups() > 0 &&
                 
                 // no future operations that may conflict
-                futureRelocationPerProcessingUnit.get(pu).size() == 0 &&
+                futureStatefulDeploymentPerProcessingUnit.get(pu).size() == 0 &&
                 
                 // all instances are deployed
                 RebalancingUtils.isProcessingUnitIntact(pu) &&
@@ -655,7 +653,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                                 + "from " + RebalancingUtils.gscToString(source)
                                 + " " + "to " + RebalancingUtils.gscToString(target));
                         return RebalancingUtils.relocateProcessingUnitInstanceAsync(target, candidateInstance,
-                                RELOCATION_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
+                                DEPLOYMENT_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
 
                     }
                 }
@@ -686,14 +684,14 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                 RebalancingSlaPolicy sla) throws ConflictingOperationInProgressException {
 
             while (true) {
-                final FutureProcessingUnitInstance newInstance = rebalanceNumberOfPrimaryInstancesPerCpuCoreStep(
+                final FutureStatefulProcessingUnitInstance newInstance = rebalanceNumberOfPrimaryInstancesPerCpuCoreStep(
                         containers, sla.getMaximumNumberOfConcurrentRelocationsPerMachine());
 
                 if (newInstance == null) {
                     break;
                 }
 
-                futureRelocationPerProcessingUnit.get(pu).add(newInstance);
+                futureStatefulDeploymentPerProcessingUnit.get(pu).add(newInstance);
             }
         }
 
@@ -703,7 +701,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
          * @param sla
          * @throws ConflictingOperationInProgressException
          */
-        private FutureProcessingUnitInstance rebalanceNumberOfPrimaryInstancesPerCpuCoreStep(
+        private FutureStatefulProcessingUnitInstance rebalanceNumberOfPrimaryInstancesPerCpuCoreStep(
                 GridServiceContainer[] containers, int maximumNumberOfRelocationsPerMachine)
                 throws ConflictingOperationInProgressException {
 
@@ -778,7 +776,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                             continue;
                         }
 
-                        if (isConflictingOperationInProgress(candidateInstance)) {
+                        if (isConflictingStatefulDeploymentInProgress(candidateInstance)) {
                             logger.debug("Cannot relocate " + RebalancingUtils.puInstanceToString(candidateInstance)
                                     + " " + "since another instance from the same partition is being relocated");
                             conflict = true;
@@ -817,12 +815,12 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                         }
                         
                         return RebalancingUtils.restartProcessingUnitInstanceAsync(candidateInstance,
-                                RELOCATION_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
+                                DEPLOYMENT_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
                     }
                 }
             }
 
-            if (futureRelocationPerProcessingUnit.get(pu).size() == 0 &&
+            if (futureStatefulDeploymentPerProcessingUnit.get(pu).size() == 0 &&
                 RebalancingUtils.isProcessingUnitIntact(pu) &&
                 RebalancingUtils.isEvenlyDistributedAcrossContainers(pu, containers) &&
                 !RebalancingUtils.isEvenlyDistributedAcrossMachines(pu, machines)) {
@@ -871,7 +869,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
                             }
                             
                             return RebalancingUtils.restartProcessingUnitInstanceAsync(candidateInstance,
-                                    RELOCATION_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
+                                    DEPLOYMENT_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS);
                         }
                     }
                     // we haven't found any partition to restart, probably the instance that requires restart
@@ -889,22 +887,22 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
             return null;
         }
 
-        private void cleanFutureRelocation() {
+        private void cleanFutureStatefulDeployments() {
 
-            List<FutureProcessingUnitInstance> list = futureRelocationPerProcessingUnit.get(pu);
+            List<FutureStatefulProcessingUnitInstance> list = futureStatefulDeploymentPerProcessingUnit.get(pu);
 
             if (list == null) {
                 throw new IllegalStateException("endpoint for pu " + pu.getName() + " has already been destroyed.");
             }
 
-            final Iterator<FutureProcessingUnitInstance> iterator = list.iterator();
+            final Iterator<FutureStatefulProcessingUnitInstance> iterator = list.iterator();
             while (iterator.hasNext()) {
-                FutureProcessingUnitInstance future = iterator.next();
+                FutureStatefulProcessingUnitInstance future = iterator.next();
 
                 if (future.isDone()) {
 
                     if (tracingEnabled) {
-                        doneFutureRelocations.add(future);
+                        doneFutureStatefulDeployments.add(future);
                     }
                     
                     iterator.remove();
@@ -913,7 +911,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
 
                     try {
                         ProcessingUnitInstance puInstance = future.get();
-                        logger.info("Processing unit relocation completed successfully "
+                        logger.info("Processing unit instance deployment completed successfully "
                                 + RebalancingUtils.puInstanceToString(puInstance));
 
                     } catch (ExecutionException e) {
@@ -928,12 +926,12 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
 
                     if (exception != null) {
                         logger.info(future.getFailureMessage(), exception);
-                        failedRelocations.add(future);
+                        failedStatefulDeployments.add(future);
                     }
                 }
             }
 
-            cleanFailedFutureRelocations();
+            cleanFailedFutureStatefulDeployments();
         }
         
         /**
@@ -941,18 +939,18 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
          * Some failures are removed immediately, while others stay in the list for
          * RELOCATION_TIMEOUT_FAILURE_IGNORE_SECONDS.
          */
-        private void cleanFailedFutureRelocations() {
+        private void cleanFailedFutureStatefulDeployments() {
 
-            List<FutureProcessingUnitInstance> list = failedRelocations;
-            final Iterator<FutureProcessingUnitInstance> iterator = list.iterator();
+            List<FutureStatefulProcessingUnitInstance> list = failedStatefulDeployments;
+            final Iterator<FutureStatefulProcessingUnitInstance> iterator = list.iterator();
             while (iterator.hasNext()) {
-                FutureProcessingUnitInstance future = iterator.next();
+                FutureStatefulProcessingUnitInstance future = iterator.next();
                 int passedSeconds = (int) ((System.currentTimeMillis() - future.getTimestamp().getTime()) / 1000);
 
                 if (future.getException() != null
                         && future.getException().getCause() instanceof WrongContainerRelocationException
                         && future.getTargetContainer().isDiscovered()
-                        && passedSeconds < RELOCATION_TIMEOUT_FAILURE_FORGET_SECONDS) {
+                        && passedSeconds < DEPLOYMENT_TIMEOUT_FAILURE_FORGET_SECONDS) {
 
                     // do not remove future from list since the target container did not have enough
                     // memory

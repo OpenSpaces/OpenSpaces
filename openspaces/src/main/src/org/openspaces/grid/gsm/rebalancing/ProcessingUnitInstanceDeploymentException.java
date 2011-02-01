@@ -3,9 +3,9 @@ package org.openspaces.grid.gsm.rebalancing;
 import org.openspaces.admin.AdminException;
 
 @SuppressWarnings("serial")
-class RelocationException extends AdminException {
+class ProcessingUnitInstanceDeploymentException extends AdminException {
 
-    public RelocationException(String message) {
+    public ProcessingUnitInstanceDeploymentException(String message) {
         super(message);
     }
 
