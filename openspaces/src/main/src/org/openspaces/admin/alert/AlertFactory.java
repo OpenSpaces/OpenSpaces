@@ -172,6 +172,16 @@ public class AlertFactory {
      *             {@link #severity(AlertSeverity)}, {@link #status(AlertStatus)})
      */
     public Alert toAlert() {
+        return create();
+    }
+    
+    /**
+     * @return the constructed alert
+     * @throws AdminException
+     *             if required configurations were not set properly ({@link #groupUid(String)},
+     *             {@link #severity(AlertSeverity)}, {@link #status(AlertStatus)})
+     */
+    public Alert create() {
         if (alert.getGroupUid() == null) {
             throw new AdminException("Alert should be configured with a unique group id");
         }

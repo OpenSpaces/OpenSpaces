@@ -162,10 +162,18 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     }
 
     public ElasticStatefulProcessingUnitDeployment commandLineArgument(String vmInputArgument) {
+        return addCommandLineArgument(vmInputArgument);
+    }
+    
+    public ElasticStatefulProcessingUnitDeployment addCommandLineArgument(String vmInputArgument) {
         return (ElasticStatefulProcessingUnitDeployment) super.commandLineArgument(vmInputArgument);
     }
 
     public ElasticStatefulProcessingUnitDeployment environmentVariable(String name, String value) {
+        return addEnvironmentVariable(name, value);
+    }
+    
+    public ElasticStatefulProcessingUnitDeployment addEnvironmentVariable(String name, String value) {
         return (ElasticStatefulProcessingUnitDeployment) super.environmentVariable(name, value);
     }
     

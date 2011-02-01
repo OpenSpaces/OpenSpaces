@@ -128,11 +128,19 @@ public class ElasticSpaceDeployment
     }
 
     public ElasticSpaceDeployment commandLineArgument(String commandLineArgument) {
+        return addCommandLineArgument(commandLineArgument);
+    }
+    
+    public ElasticSpaceDeployment addCommandLineArgument(String commandLineArgument) {
         deployment.commandLineArgument(commandLineArgument);
         return this;
     }
 
     public ElasticSpaceDeployment environmentVariable(String name, String value) {
+        return addEnvironmentVariable(name, value);
+    }
+    
+    public ElasticSpaceDeployment addEnvironmentVariable(String name, String value) {
         deployment.environmentVariable(name, value);
         return this;
     }

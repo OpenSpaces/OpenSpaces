@@ -51,13 +51,30 @@ public interface ElasticDeploymentTopology {
     /**
      * Will add a JVM level argument when the process is executed using pure JVM. For example, the memory
      * can be controlled using <code>-Xmx512m</code>.
+     * 
+     * This method does not conform to the fluent API naming conventions. Use addCommandLineArgument instead.
      */
     ElasticDeploymentTopology commandLineArgument(String vmInputArgument);
+    
+    /**
+     * Will add a JVM level argument when the process is executed using pure JVM. For example, the memory
+     * can be controlled using <code>-Xmx512m</code>.
+     *  
+     */
+    ElasticDeploymentTopology addCommandLineArgument(String vmInputArgument);
 
     /**
-     * Sets an environment variable that will be passed to forked process.
+     * Defines an environment variable that will be passed to forked process.
+     * 
+     * This method does not conform to the fluent API naming conventions. Use addEnvironmnetVariable instead.
      */
     ElasticDeploymentTopology environmentVariable(String name, String value);
+    
+    /**
+     * Defines an environment variable that will be passed to forked process.
+     * 
+     */
+    ElasticDeploymentTopology addEnvironmentVariable(String name, String value);
     
     /**
      * Enables the server side bean that starts and stops machines automatically.
