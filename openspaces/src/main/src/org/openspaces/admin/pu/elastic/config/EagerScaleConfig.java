@@ -61,6 +61,14 @@ public class EagerScaleConfig
         ScaleStrategyConfigUtils.setDedicatedManagementMachines(properties, dedicatedManagementMachines);
     }
     
+    public void setMachineZones(String[] zones) {
+        ScaleStrategyConfigUtils.setMachineZones(properties, zones);
+    }
+
+    public String[] getMachineZones() {
+        return ScaleStrategyConfigUtils.getMachineZones(properties);
+    }
+
     public void setProperties(Map<String, String> properties) {
         this.properties = new StringProperties(properties);
     }

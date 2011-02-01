@@ -91,6 +91,14 @@ public class ManualCapacityScaleConfig
     public void setDedicatedManagementMachines(boolean dedicatedManagementMachines) {
         ScaleStrategyConfigUtils.setDedicatedManagementMachines(properties, dedicatedManagementMachines);
     }
+
+    public void setMachineZones(String[] zones) {
+        ScaleStrategyConfigUtils.setMachineZones(properties, zones);
+    }
+
+    public String[] getMachineZones() {
+        return ScaleStrategyConfigUtils.getMachineZones(properties);
+    }
     
     public Map<String,String> getProperties() {
         return properties.getProperties();

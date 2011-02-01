@@ -2,6 +2,7 @@ package org.openspaces.grid.gsm.strategy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -335,7 +336,7 @@ public class ManualCapacityScaleStrategyBean
         sla.setMinimumNumberOfMachines(minimumNumberOfMachines);
         sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
-        
+        sla.setMachineZones(new HashSet<String>(Arrays.asList(slaConfig.getMachineZones())));
         boolean reachedSla = machinesEndpoint.enforceSla(sla);
         
         if (reachedSla) {

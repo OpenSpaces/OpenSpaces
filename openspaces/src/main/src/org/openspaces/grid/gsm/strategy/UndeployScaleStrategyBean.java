@@ -1,5 +1,6 @@
 package org.openspaces.grid.gsm.strategy;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +32,8 @@ import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
+
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class UndeployScaleStrategyBean 
 
@@ -180,7 +183,7 @@ public class UndeployScaleStrategyBean
         sla.setAllowDeploymentOnManagementMachine(!slaConfig.getDedicatedManagementMachines());
         sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
-        
+        sla.setMachineZones(new HashSet<String>(Arrays.asList(slaConfig.getMachineZones())));
         boolean reachedSla = machinesEndpoint.enforceSla(sla);
         
         if (reachedSla) {

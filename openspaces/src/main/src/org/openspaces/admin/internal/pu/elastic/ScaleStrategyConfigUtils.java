@@ -20,6 +20,8 @@ public class ScaleStrategyConfigUtils {
     private static final int RESERVED_MEMORY_CAPACITY_PER_MACHINE_MEGABYTES_DEFAULT = 1024; // reserved for GSA/LUS/GSM/ESM and 3rd party daemons
     private static final String DEDICATED_MANAGEMENT_MACHINES_KEY = "dedicated-management-machines";
     private static final boolean DEDICATED_MANAGEMENT_MACHINES_DEFAULT = false;
+    private static final String MACHINE_ZONES_KEY = "machine-zones";
+    private static final String[] MACHINE_ZONES_DEFAULT = new String[]{};
     
     public static void setMaxNumberOfContainersPerMachine(
             StringProperties properties,
@@ -103,5 +105,13 @@ public class ScaleStrategyConfigUtils {
 
     public static void setDedicatedManagementMachines(StringProperties properties, boolean allowDeploymentOnManagementMachine) {
         properties.putBoolean(DEDICATED_MANAGEMENT_MACHINES_KEY, allowDeploymentOnManagementMachine);
+    }
+
+    public static void setMachineZones(StringProperties properties, String[] zones) {
+        properties.putArray(MACHINE_ZONES_KEY, zones, ",");
+    }
+    
+    public static String[] getMachineZones(StringProperties properties) {
+        return properties.getArray(MACHINE_ZONES_KEY, ",", MACHINE_ZONES_DEFAULT);
     }
 }

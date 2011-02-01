@@ -1,5 +1,7 @@
 package org.openspaces.grid.gsm.strategy;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -341,12 +343,13 @@ public class EagerScaleStrategyBean
     }
 
     private EagerMachinesSlaPolicy getEagerMachinesSlaPolicy() {
-        final EagerMachinesSlaPolicy machinesSla = new EagerMachinesSlaPolicy();
-        machinesSla.setAllowDeploymentOnManagementMachine(!slaConfig.getDedicatedManagementMachines());
-        machinesSla.setMinimumNumberOfMachines(minimumNumberOfMachines);
-        machinesSla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
-        machinesSla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
-        return machinesSla;
+        final EagerMachinesSlaPolicy sla = new EagerMachinesSlaPolicy();
+        sla.setAllowDeploymentOnManagementMachine(!slaConfig.getDedicatedManagementMachines());
+        sla.setMinimumNumberOfMachines(minimumNumberOfMachines);
+        sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
+        sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
+        sla.setMachineZones(new HashSet<String>(Arrays.asList(slaConfig.getMachineZones())));
+        return sla;
     }
 
 }

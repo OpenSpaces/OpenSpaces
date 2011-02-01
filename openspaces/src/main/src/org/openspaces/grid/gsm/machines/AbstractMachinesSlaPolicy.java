@@ -1,5 +1,8 @@
 package org.openspaces.grid.gsm.machines;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementPolicy;
 
 abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPolicy{
@@ -8,6 +11,7 @@ abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPolicy{
     private long reservedMemoryCapacityPerMachineInMB;
     private long containerMemoryCapacityInMB;
     private boolean allowDeploymentOnManagementMachine;
+    private Set<String> machineZones = new HashSet<String>();
     
     public boolean getAllowDeploymentOnManagementMachine() {
         return this.allowDeploymentOnManagementMachine;
@@ -41,13 +45,21 @@ abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPolicy{
         return this.containerMemoryCapacityInMB;
     }
 
+    public void setMachineZones(Set<String> machineZones) {
+        this.machineZones = machineZones;
+    }
+    
+    public Set<String> getMachineZones() {
+        return this.machineZones;
+    }
+    
     @Override
     public boolean equals(Object other) {
         return other instanceof AbstractMachinesSlaPolicy &&
         ((AbstractMachinesSlaPolicy)other).reservedMemoryCapacityPerMachineInMB == this.reservedMemoryCapacityPerMachineInMB &&
         ((AbstractMachinesSlaPolicy)other).containerMemoryCapacityInMB == this.containerMemoryCapacityInMB &&
         ((AbstractMachinesSlaPolicy)other).minimumNumberOfMachines == this.minimumNumberOfMachines &&
-        ((AbstractMachinesSlaPolicy)other).allowDeploymentOnManagementMachine == this.allowDeploymentOnManagementMachine;
+        ((AbstractMachinesSlaPolicy)other).allowDeploymentOnManagementMachine == this.allowDeploymentOnManagementMachine &&
+        ((AbstractMachinesSlaPolicy)other).machineZones.equals(machineZones);
     }
-
 }

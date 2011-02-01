@@ -1,5 +1,8 @@
 package org.openspaces.admin.pu.elastic.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.openspaces.core.util.MemoryUnit;
 
 /**
@@ -13,7 +16,8 @@ import org.openspaces.core.util.MemoryUnit;
  */
 public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<ManualCapacityScaleConfig>{
 
-private final ManualCapacityScaleConfig config;
+    private final ManualCapacityScaleConfig config;
+    private final List<String> machineZones;
     
     /**
      * Provides fluent API for creating a new {@link ManualCapacityScaleConfig} object.
@@ -22,10 +26,11 @@ private final ManualCapacityScaleConfig config;
      */
     public ManualCapacityScaleConfigurer() {
         this.config = new ManualCapacityScaleConfig();
+        this.machineZones = new ArrayList<String>();
     }
     
     /**
-     * @see ManualCapacityScaleConfig#setMemoryCapacityInMB(long)
+     * @see ManualCapacityScaleConfig#setMemoryCapacityInMB(int)
      */
     public ManualCapacityScaleConfigurer memoryCapacity(String memory) {
         config.setMemoryCapacityInMB(MemoryUnit.toMegaBytes(memory));
@@ -33,7 +38,7 @@ private final ManualCapacityScaleConfig config;
     }
 
     /**
-     * @see ManualCapacityScaleConfig#setMemoryCapacityInMB(long)
+     * @see ManualCapacityScaleConfig#setMemoryCapacityInMB(int)
      */
     public ManualCapacityScaleConfigurer memoryCapacity(int memory, MemoryUnit unit) {
         config.setMemoryCapacityInMB(unit.toMegaBytes(memory));
@@ -48,34 +53,28 @@ private final ManualCapacityScaleConfig config;
         return this;
     }
    
-    /**
-     * @see ScaleStrategyConfig#setReservedMemoryCapacityPerMachineInMB(int)
-     */
     public ManualCapacityScaleConfigurer reservedMemoryCapacityPerMachine(long memory, MemoryUnit unit) {
         config.setReservedMemoryCapacityPerMachineInMB((int) unit.toMegaBytes(memory));
         return this;
     }
     
-    /**
-     * @see ScaleStrategyConfig#setDedicatedManagementMachines(boolean)
-     */
     public ManualCapacityScaleConfigurer dedicatedManagementMachines() {
         config.setDedicatedManagementMachines(true);
         return this;
     }
     
-    /**
-     * @see ScaleStrategyConfig#setMaxConcurrentRelocationsPerMachine(int)
-     */
     public ManualCapacityScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         config.setMaxConcurrentRelocationsPerMachine(maxNumberOfConcurrentRelocationsPerMachine);
         return this;
+    }
+    
+    public ManualCapacityScaleConfigurer addMachineZone(String machineZone) {
+        machineZones.add(machineZone);
+        return this;
      }
     
-    /**
-     * @see ScaleStrategyConfigurer#create()
-     */
     public ManualCapacityScaleConfig create() {
+        config.setMachineZones(this.machineZones.toArray(new String[machineZones.size()]));
         return config;
     }
 }

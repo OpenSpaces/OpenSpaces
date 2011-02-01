@@ -1,5 +1,8 @@
 package org.openspaces.admin.pu.elastic.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.openspaces.core.util.MemoryUnit;
 
 
@@ -18,7 +21,8 @@ import org.openspaces.core.util.MemoryUnit;
 public class EagerScaleConfigurer implements ScaleStrategyConfigurer<EagerScaleConfig> {
 
     private final EagerScaleConfig config;
-
+    private final List<String> machineZones;
+    
     /**
      * Provides fluent API for creating a new {@link EagerScaleConfig} object.
      * For example {@code new EagerScaleStrategyConfigurer().maxNumberOfContainers(10).create()}
@@ -26,36 +30,31 @@ public class EagerScaleConfigurer implements ScaleStrategyConfigurer<EagerScaleC
      */
     public EagerScaleConfigurer() {
         this.config = new EagerScaleConfig();
+        this.machineZones = new ArrayList<String>();
     }
     
-    /**
-     * @see ScaleStrategyConfig#setReservedMemoryCapacityPerMachineInMB(int)
-     */
     public EagerScaleConfigurer reservedMemoryCapacityPerMachine(long memory, MemoryUnit unit) {
         config.setReservedMemoryCapacityPerMachineInMB((int) unit.toMegaBytes(memory));
         return this;
     }
     
-    /**
-     * @see ScaleStrategyConfig#setDedicatedManagementMachines(boolean)
-     */
     public EagerScaleConfigurer dedicatedManagementMachines() {
         config.setDedicatedManagementMachines(true);
         return this;
     }
     
-    /**
-     * @see ScaleStrategyConfig#setMaxConcurrentRelocationsPerMachine(int)
-     */
     public EagerScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         config.setMaxConcurrentRelocationsPerMachine(maxNumberOfConcurrentRelocationsPerMachine);
         return this;
+    }
+    
+    public EagerScaleConfigurer addMachineZone(String machineZone) {
+        machineZones.add(machineZone);
+        return this;
      }
     
-    /**
-     * @see ScaleStrategyConfigurer#create()
-     */
     public EagerScaleConfig create() {
+        config.setMachineZones(machineZones.toArray(new String[machineZones.size()]));
         return config;
     }
 }

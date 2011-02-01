@@ -254,7 +254,7 @@ public class MachinesSlaEnforcement implements
 
         private boolean enforceSlaInternal(EagerMachinesSlaPolicy sla, DefaultMachineProvisioning defaultMachineProvisioning) {
 
-            cleanFutureAgents();
+            cleanFutureAgents(sla);
             cleanFailedMachines();
             cleanAgentsMarkedForShutdown(defaultMachineProvisioning);
 
@@ -352,7 +352,7 @@ public class MachinesSlaEnforcement implements
         private boolean enforceSlaInternal(CapacityMachinesSlaPolicy sla)
                 throws ConflictingOperationInProgressException {
 
-            cleanFutureAgents();
+            cleanFutureAgents(sla);
             cleanFailedMachines();
             cleanAgentsMarkedForShutdown(sla.getMachineProvisioning());
             
@@ -668,7 +668,7 @@ public class MachinesSlaEnforcement implements
         /**
          * Move future agents that completed startup, from the futureAgents list to the agentsStarted list. 
          */
-        private void cleanFutureAgents() {
+        private void cleanFutureAgents(AbstractMachinesSlaPolicy sla) {
             final Iterator<FutureGridServiceAgents> iterator = getFutureAgents().iterator();
             while (iterator.hasNext()) {
                 FutureGridServiceAgents future = iterator.next();
@@ -706,8 +706,26 @@ public class MachinesSlaEnforcement implements
                                         "Machine provisioning for " + pu.getName() + " "+
                                         "has provided the following machines, which are already in use: "+
                                         Arrays.toString(usedMachines.toArray(new String[usedMachines.size()])) +
-                                        "This violating machines have been ignored, "+
+                                        "These violating machines have been ignored, "+
                                         "but it should not have happened in the first place.");
+                            }
+                        }
+                        
+                        List<String> machinesWrongZone = new ArrayList<String>();
+                        for (GridServiceAgent agent : newAgents) {
+                            if (!matchesMachineZones(sla, agent)) {
+                                machinesWrongZone.add(agent.getMachine().getHostAddress());
+                            }
+                        }
+                        if (!machinesWrongZone.isEmpty()) {
+                            
+                            if (logger.isWarnEnabled()) {
+                                logger.warn(
+                                    "Machine provisioning for " + pu.getName() + " "+
+                                    "has provided the following machines, which have the wrong zone: "+
+                                    Arrays.toString(machinesWrongZone.toArray(new String[machinesWrongZone.size()])) +
+                                    "These violating machines are will be used, "+
+                                    "but it should not have happened in the first place.");
                             }
                         }
                         
@@ -776,16 +794,15 @@ public class MachinesSlaEnforcement implements
         }
         
         /**
-         * finds a grid service agent that is not in the specified list and not used by GSM/LUS
-         * @param usedAgents
-         * @param allowDeploymentOnManagementMachine 
-         * @return agent if found, or null if no free machines exist.
+         * Counts unused grid service agents.
+         * If management machines are not allowed they are excluded from the count. 
          */
         public int countFreeAgents() {
             int count = 0;
             Set<GridServiceAgent> usedAgents = getAllUsedAgents();
             for (GridServiceAgent agent : admin.getGridServiceAgents().getAgents()) {
-                if (!usedAgents.contains(agent) &&
+                if (matchesMachineZones(sla, agent) &&
+                    !usedAgents.contains(agent) &&
                     (sla.getAllowDeploymentOnManagementMachine() || 
                      !MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine()))) {
                     count++;
@@ -925,7 +942,9 @@ public class MachinesSlaEnforcement implements
             List<GridServiceAgent> agents = Arrays.asList(admin.getGridServiceAgents().getAgents());
             
             for (GridServiceAgent agent : MachinesSlaUtils.sortManagementFirst(agents)) {
-                if (!usedAgents.contains(agent) &&
+                
+                if (matchesMachineZones(sla,agent) &&
+                    !usedAgents.contains(agent) &&
                     (sla.getAllowDeploymentOnManagementMachine() || 
                      !MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine()))) {
                     return agent;
@@ -935,4 +954,15 @@ public class MachinesSlaEnforcement implements
         }
     }
 
+    public static boolean matchesMachineZones(AbstractMachinesSlaPolicy sla, GridServiceAgent agent) {
+        final Set<String> agentZones = new HashSet<String>(agent.getZones().keySet());
+        final Set<String> puZones = sla.getMachineZones();
+        boolean zoneMatches = agentZones.isEmpty() || puZones.isEmpty();
+        agentZones.retainAll(puZones);
+        zoneMatches = zoneMatches || !agentZones.isEmpty();
+        if (zoneMatches && logger.isDebugEnabled()) {
+            logger.debug("Machine " + MachinesSlaUtils.machineToString(agent.getMachine()) + " with zones " + agent.getZones().keySet() + " satisfies required zones " + sla.getMachineZones()); 
+        }
+        return zoneMatches;
+}
 }

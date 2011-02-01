@@ -61,4 +61,18 @@ public interface ScaleStrategyConfig extends BeanConfig {
      * @param maxNumberOfConcurrentRelocationsPerMachine
      */
     void setMaxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine);
+    
+    /**
+     * Specifies a list of machine zones that the processing unit requires for deployment.
+     * The processing unit can deploy only on machines with an agent with one or more of the specified zones, 
+     * or an agent without any zones at all. 
+     * 
+     * In case the specified zones is empty, then the processing unit can deploy on any machine agent.
+     * 
+     * In case the management machine is started by an agent without any zones defined use set {@link #setDedicatedManagementMachines(boolean)} to true.
+     * Otherwise the processing unit would deploy on the zone-less agent. 
+     */
+    void setMachineZones(String[] zones);
+    
+    String[] getMachineZones();
 }
