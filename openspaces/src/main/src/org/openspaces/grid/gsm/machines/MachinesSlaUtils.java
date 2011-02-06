@@ -2,6 +2,7 @@ package org.openspaces.grid.gsm.machines;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -11,6 +12,8 @@ import java.util.Set;
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.machine.Machine;
+import org.openspaces.core.internal.commons.math.ConvergenceException;
+import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirment;
@@ -50,8 +53,10 @@ public class MachinesSlaUtils {
         return total;
     }
     
-    public static double getCpu(Machine machine) {
-        return machine.getOperatingSystem().getDetails().getAvailableProcessors();
+    public static Fraction getCpu(Machine machine) {
+        int availableProcessors = machine.getOperatingSystem().getDetails().getAvailableProcessors();
+        return new Fraction(availableProcessors,1);
+        
     }
 
     public static boolean isCapacityRequirementsMet(
@@ -78,7 +83,7 @@ public class MachinesSlaUtils {
         for (Machine machine: machines) {
             machineShortage -= 1;
             memoryShortageInMB -= getMemoryInMB(machine, sla);
-            cpuShortage -= getCpu(machine);
+            cpuShortage -= getCpu(machine).doubleValue();
         }
         
         return machineShortage<=0 && memoryShortageInMB<=0 && cpuShortage<=0;
@@ -94,11 +99,11 @@ public class MachinesSlaUtils {
     /**
      * Sort all agents, place management machines last.
      */
-    public static List<GridServiceAgent> sortManagementLast(List<GridServiceAgent> agents) {
+    public static List<GridServiceAgent> sortManagementLast(Collection<GridServiceAgent> agents) {
             return sortByManagement(agents, false);
     }
     
-    public static List<GridServiceAgent> sortByManagement(List<GridServiceAgent> agents, final boolean managementFirst) {
+    public static List<GridServiceAgent> sortByManagement(Collection<GridServiceAgent> agents, final boolean managementFirst) {
         List<GridServiceAgent> sortedAgents = new ArrayList<GridServiceAgent>(agents);
         Collections.sort(sortedAgents,new Comparator<GridServiceAgent>() {
 
@@ -124,11 +129,52 @@ public class MachinesSlaUtils {
         return "pid["+container.getVirtualMachine().getDetails().getPid()+"] host["+machineToString(container.getMachine())+"]";
     }
 
-    public static String machinesToString(List<GridServiceAgent> agents) {
+    public static String machinesToString(Collection<GridServiceAgent> agents) {
         String[] machinesToString = new String[agents.size()];
-        for (int i = 0 ; i < machinesToString.length ; i++) {
-            machinesToString[i] = machineToString(agents.get(i).getMachine());
+        int i =0;
+        for (GridServiceAgent agent: agents) {
+            machinesToString[i] = machineToString(agent.getMachine());
+            i++;
         }
         return Arrays.toString(machinesToString);
+    }
+    
+
+    
+    public static boolean matchesMachineZones(AbstractMachinesSlaPolicy sla, GridServiceAgent agent) {
+        final Set<String> agentZones = new HashSet<String>(agent.getZones().keySet());
+        final Set<String> puZones = sla.getMachineZones();
+        boolean zoneMatches = agentZones.isEmpty() || puZones.isEmpty();
+        agentZones.retainAll(puZones);
+        zoneMatches = zoneMatches || !agentZones.isEmpty();
+        return zoneMatches;
+    }
+
+    public static AllocatedCapacity convertCapacityRequirementsToAllocatedCapacity(
+            CapacityRequirements capacityRequirements) {
+        
+        Fraction cpuCores = convertCpuCoresFromDoubleToFraction(
+                capacityRequirements.getRequirement(CpuCapacityRequirement.class).getCpu());
+        long memoryInMB = capacityRequirements.getRequirement(MemoryCapacityRequirment.class).getMemoryInMB();
+        return new AllocatedCapacity(cpuCores,memoryInMB);
+    }
+
+    public static AllocatedCapacity getMaxAllocatedCapacity(
+            GridServiceAgent agent,
+            AbstractMachinesSlaPolicy sla) {
+
+            return new AllocatedCapacity(
+                    getCpu(agent.getMachine()),
+                    getMemoryInMB(agent.getMachine(), sla));
+    }
+
+    public static Fraction convertCpuCoresFromDoubleToFraction(double cpu) {
+        Fraction targetCpuCores;
+        try {
+            targetCpuCores = new Fraction(cpu);
+        } catch (ConvergenceException e) {
+            targetCpuCores = new Fraction((int)Math.ceil(cpu*2),2);
+        }
+        return targetCpuCores;
     }
 }
