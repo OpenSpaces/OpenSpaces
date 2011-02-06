@@ -1,10 +1,10 @@
 package org.openspaces.grid.gsm.rebalancing;
 
+import java.util.Arrays;
+
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementPolicy;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class RebalancingSlaPolicy extends ServiceLevelAgreementPolicy {
 

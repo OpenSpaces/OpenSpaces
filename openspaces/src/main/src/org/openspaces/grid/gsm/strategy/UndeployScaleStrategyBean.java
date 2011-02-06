@@ -1,5 +1,6 @@
 package org.openspaces.grid.gsm.strategy;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -32,8 +33,6 @@ import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class UndeployScaleStrategyBean 
 
@@ -101,7 +100,7 @@ public class UndeployScaleStrategyBean
         
         logger = new LogPerProcessingUnit(
                     new SingleThreadedPollingLog(
-                            LogFactory.getLog(EagerScaleStrategyBean.class)),
+                            LogFactory.getLog(UndeployScaleStrategyBean.class)),
                     pu);
         logger.info("sla properties: "+slaConfig.toString());
         
@@ -117,7 +116,7 @@ public class UndeployScaleStrategyBean
     }
 
     public void destroy() {
-        
+        logger.debug("destroying " + this.getClass().getName());
         if (scheduledTask != null) {
             scheduledTask.cancel(false);
             scheduledTask = null;
@@ -142,14 +141,14 @@ public class UndeployScaleStrategyBean
         
         try {
             
-            logger.debug("Undeploying containers");
+            logger.debug("Undeploying containers for " + pu.getName());
             boolean containersSlaEnforced = enforceContainersSla();
             if (logger.isDebugEnabled()) {
                 if (!containersSlaEnforced) {
                     logger.debug("Containers undeploy is incomplete.");
                 }
             }
-            
+            logger.debug("Undeploying machines for " + pu.getName());
             boolean machinesSlaEnforced = enforceMachinesSla();
             if (logger.isDebugEnabled()) {
                 if (!machinesSlaEnforced) {
@@ -158,6 +157,7 @@ public class UndeployScaleStrategyBean
             }
             
             if (containersSlaEnforced && machinesSlaEnforced) {
+                logger.info(pu.getName() + " undeploy is complete.");
                 // self destruct since all machines and containers are undeployed
                 destroy();
             }
