@@ -206,7 +206,9 @@ public class QueryExpressionFactory implements ExpressionFactory {
      * @param escape the escape token that escapes the matching tokens
      */
     public Expression matches(Value str, Value regexp, String single, String multi, String escape) {
-        throw new RuntimeException("Unsupported operation.");
+        if (escape != null)
+            throw new IllegalArgumentException("JPQL ESCAPE keyword is not supported.");
+        return new MatchesExpression(str, regexp);
     }
 
     /**
@@ -219,7 +221,9 @@ public class QueryExpressionFactory implements ExpressionFactory {
      * @param escape the escape token that escapes the matching tokens
      */
     public Expression notMatches(Value str, Value regexp, String single, String multi, String escape) {
-        throw new RuntimeException("Unsupported operation.");
+        if (escape != null)
+            throw new IllegalArgumentException("JPQL ESCAPE keyword is not supported.");
+        return new NotMatchesExpression(str, regexp);
     }
 
     /**
@@ -681,5 +685,6 @@ public class QueryExpressionFactory implements ExpressionFactory {
     public boolean isVerticalType(Value val) {
         throw new RuntimeException("Unsupported operation.");
     }
+
     
 }
