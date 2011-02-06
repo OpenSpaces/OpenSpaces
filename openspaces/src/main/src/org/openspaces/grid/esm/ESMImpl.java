@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,6 +60,7 @@ import com.sun.jini.start.LifeCycle;
 public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRemovedEventListener, ProcessingUnitAddedEventListener,MachineLifecycleEventListener
 		/*, RemoteSecuredService*//*, ServiceDiscoveryListener*/ {
 
+    private static final long CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS=60;
 	private static final String CONFIG_COMPONENT = "org.openspaces.grid.esm";
 	private static final Logger logger = Logger.getLogger(CONFIG_COMPONENT);
 	private final Admin admin;
@@ -82,7 +84,25 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         admin = new InternalAdminFactory().singleThreadedEventListeners().createAdmin();
         admin.getProcessingUnits().getProcessingUnitAdded().add(this);
         admin.getProcessingUnits().getProcessingUnitRemoved().add(this);
-        
+        final long delay = CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS*1000/2;
+        final long delayError = delay; 
+        ((InternalAdmin)admin).scheduleWithFixedDelayNonBlockingStateChange(
+                new Runnable() {
+                    long timestamp = 0;
+                    public void run() {
+                        long now = System.currentTimeMillis();
+                        if (timestamp == 0 || 
+                            now-timestamp - delay < delayError) {
+                        }
+                        else {
+                            logger.warning(
+                                    "Single threaded admin keep alive event has been delayed by " + 
+                                    (now-timestamp-delay)/1000 + " seconds.");
+                        }
+                        timestamp = now;
+                    }
+                }
+                , 0, delay, TimeUnit.MILLISECONDS);
         machinesSlaEnforcement = new MachinesSlaEnforcement(admin);
         containersSlaEnforcement = new ContainersSlaEnforcement(admin);
         rebalancingSlaEnforcement = new RebalancingSlaEnforcement();
