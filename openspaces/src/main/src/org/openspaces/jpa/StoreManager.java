@@ -91,13 +91,7 @@ public class StoreManager extends AbstractStoreManager {
             if (result == null)
                 return false;
             // Populate fields
-            FieldMetaData[] fms = sm.getMetaData().getFields();
-            for (int i = 0; i < fms.length; i++) {
-                // Skip primary keys and non-persistent keys
-                if (fms[i].isPrimaryKey())
-                    continue;                
-                sm.store(i, result.getFieldValue(i));
-            }            
+            loadFields(sm, result, sm.getMetaData().getFields());
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -187,30 +181,124 @@ public class StoreManager extends AbstractStoreManager {
 
         final ClassMetaData cm = sm.getMetaData();
         try {
-            IEntryPacket result = null;
-            // If we already have the result and only need to initialize.. (relevant for JPQL)
-            if (edata != null) {
-                result = (IEntryPacket) edata;
-            } else {
-                result = readObjectFromSpace(sm);                
-                if (result == null)
-                    return false;            
-            }
-            // TODO: Handle sub-classes etc...
-            sm.initialize(cm.getDescribedType(), state);                        
+            // If we already have the result and only need to initialize.. (relevant for nested objects & JPQL)
+            IEntryPacket result =
+                (edata == null) ? readObjectFromSpace(sm) : (IEntryPacket) edata;
+            if (result == null)
+                return false;  
             
-            FieldMetaData[] fms = cm.getFields();
-            for (int i = 0; i < fms.length; i++) {
-                // Skip primary keys and non-persistent keys
-                if (fms[i].isPrimaryKey() || sm.getLoaded().get(fms[i].getIndex()))
-                    continue;                
-                sm.store(i, result.getFieldValue(i));
-            }            
+            // Initialize
+            sm.initialize(cm.getDescribedType(), state);
+            loadFields(sm, result, cm.getFields());            
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
         
         return true;        
+    }
+
+    /**
+     * Loads the provided IEntryPacket field values to the provided StateManager.
+     * @param sm The state manager.
+     * @param entry The IEntryPacket containing the field values.
+     * @param fms The fields meta data.
+     */
+    private void loadFields(OpenJPAStateManager sm, IEntryPacket entry, FieldMetaData[] fms) {
+        for (int i = 0; i < fms.length; i++) {
+            // Skip primary keys and non-persistent keys
+            if (fms[i].isPrimaryKey() || sm.getLoaded().get(fms[i].getIndex()))
+                continue;
+            Integer associationType = _classesRelationStatus.get(fms[i].getElement().getDeclaredType());
+            if (associationType != null)
+                fms[i].setAssociationType(associationType);
+
+            // Handle one-to-one
+            if (fms[i].getAssociationType() == FieldMetaData.ONE_TO_ONE) {
+                loadOneToOneObject(fms[i], sm, entry.getFieldValue(i));
+                
+            // Handle one-to-many
+            } else if (fms[i].getAssociationType() == FieldMetaData.ONE_TO_MANY) {
+                loadOneToManyObjects(fms[i], sm, entry.getFieldValue(i));
+                
+            // Handle embedded property
+            } else if (fms[i].isEmbeddedPC()) {
+                loadEmbeddedObject(fms[i], sm, entry.getFieldValue(i));
+                
+            // Otherwise, store the value as is
+            } else {
+                sm.store(i, entry.getFieldValue(i));
+            }
+        }
+    }
+
+    /**
+     * Loads a One-to-one relationship object to the provided owner's state manager.
+     * @param fmd The owner's field meta data.
+     * @param sm The owner's state manager.
+     * @param fieldValue The One-to-one field value to load into the owner's state manager.
+     */
+    private void loadOneToOneObject(FieldMetaData fmd, OpenJPAStateManager sm, Object fieldValue) {
+        if (fieldValue == null) {
+            sm.storeObject(fmd.getIndex(), null);
+        } else {
+            final ISpaceProxy proxy = (ISpaceProxy) getConfiguration().getSpace();
+            final IEntryPacket entry = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(
+                    fieldValue, ObjectType.POJO, proxy);
+            final ClassMetaData cmd = fmd.getDeclaredTypeMetaData();
+            final Object oid = ApplicationIds.fromPKValues(new Object[] { entry.getID() }, cmd);
+            final BitSet exclude = new BitSet(cmd.getFields().length);                               
+            final Object managedObject = getContext().find(oid, null, exclude, entry, 0);
+            sm.storeObject(fmd.getIndex(), managedObject);
+        }
+    }
+
+    /**
+     * 
+     * @param fmd
+     * @param sm
+     * @param fieldValue
+     */
+    private void loadEmbeddedObject(FieldMetaData fmd, OpenJPAStateManager sm, Object fieldValue) {
+        if (fieldValue == null) {
+            sm.storeObject(fmd.getIndex(), null);
+        } else {
+            if (fieldValue != null) {                
+                final OpenJPAStateManager em = ctx.embed(null, null, sm, fmd);
+                sm.storeObject(fmd.getIndex(), em.getManagedInstance());
+                final ISpaceProxy proxy = (ISpaceProxy) getConfiguration().getSpace();                      
+                final IEntryPacket entry = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(
+                        fieldValue, ObjectType.POJO, proxy);
+                loadFields(em, entry, fmd.getDeclaredTypeMetaData().getFields());
+            }
+        }
+    }
+
+    /**
+     * Loads One-to-many relationship objects to the owner's state manager.
+     * 
+     * @param fmd The One-to-many field's meta data. 
+     * @param sm The owner's state manager.
+     * @param fieldValue The value to be stored for the current field.
+     */
+    private void loadOneToManyObjects(FieldMetaData fmd, OpenJPAStateManager sm, Object fieldValue) {
+        final Object collection = sm.newProxy(fmd.getIndex());
+
+        if (fieldValue != null) {
+            final ISpaceProxy proxy = (ISpaceProxy) getConfiguration().getSpace();
+            final ClassMetaData cmd = fmd.getElement().getDeclaredTypeMetaData();
+            final BitSet exclude = new BitSet(cmd.getFields().length);
+
+            // Initialize each of the collection's items
+            for (Object item : (Collection<?>) fieldValue) {
+                final IEntryPacket entry = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(
+                        item, ObjectType.POJO, proxy);
+                final Object oid = ApplicationIds.fromPKValues(new Object[] { entry.getID() }, cmd);
+                // Initialize a state manager for the current item
+                final Object managedObject = getContext().find(oid, null, exclude, entry, 0);
+                ((Collection<Object>) collection).add(managedObject);
+            }
+        }
+        sm.storeObject(fmd.getIndex(), collection);
     }
 
     /**
@@ -239,11 +327,15 @@ public class StoreManager extends AbstractStoreManager {
 
     /**
      * This method loads specific fields from the data store for updating them.
+     * Note: The state manager's fields are cleared.
      */
     @Override
     public boolean load(OpenJPAStateManager sm, BitSet fields, FetchConfiguration fetch, int lockLevel, Object context) {
-        ClassMetaData cm = (ClassMetaData)sm.getMetaData();
-        Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);        
+        final ClassMetaData cm = (ClassMetaData) sm.getMetaData();
+        if (_classesRelationStatus.containsKey(cm.getDescribedType()))
+                throw new UnsupportedOperationException("Updating an owned Entity in a relationship is not supported.");
+        
+        final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);        
         final IJSpace space = getConfiguration().getSpace();
         final ITypeDesc typeDescriptor = ((ISpaceProxy) space).getDirectProxy().getTypeManager().getTypeDescByName(cm.getDescribedType().getName());
         ITemplatePacket template;
@@ -257,10 +349,7 @@ public class StoreManager extends AbstractStoreManager {
             if (result == null)
                 return false;
             // Process result - store only the relevant fields in the state manager
-            for (int i = 0; i < cm.getFields().length; i++) {
-                if (fields.get(i))                
-                    sm.store(i, result.getFieldValue(i));                
-            }                                    
+            loadFields(sm, result, cm.getFields());
             return true;            
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -332,15 +421,19 @@ public class StoreManager extends AbstractStoreManager {
         // Generate a template for each state manager and use partial update for updating..         
         for (OpenJPAStateManager sm : sms) {
             ClassMetaData cm = sm.getMetaData();
-            if (_classesRelationStatus.containsKey(cm.getDescribedType()))
-                throw new RuntimeException("Updating an instance which is a part of a relation is not supported.");
+            // Throw an exception if attempting to update an owned entity in a relationship.             
+            if (_classesRelationStatus.containsKey(cm.getDescribedType())) {
+                throw new UnsupportedOperationException("Updating an owned Entity in a relationship is not supported.");
+            }
             try {
-                // Create an entry packet from the updated pojo and set all the fields but the updated & primary key to null.
+                // Create an entry packet from the updated POJO and set all the fields
+                // but the updated & primary key to null.
                 final ISpaceProxy proxy = (ISpaceProxy) space;
                 final IEntryPacket entry = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(
                         sm.getManagedInstance(), ObjectType.POJO, proxy);                                                
-                for (int i = 0; i < cm.getDeclaredFields().length; i++) {
-                    if (!sm.getDirty().get(i) && !cm.getFields()[i].isPrimaryKey()) {
+                FieldMetaData[] fmds = cm.getFields();
+                for (int i = 0; i < fmds.length; i++) {
+                    if (!sm.getDirty().get(i) && !fmds[i].isPrimaryKey()) {
                         entry.setFieldValue(i, null);
                     }
                 }
