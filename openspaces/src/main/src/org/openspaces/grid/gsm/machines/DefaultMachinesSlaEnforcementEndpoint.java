@@ -515,7 +515,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
         
         for(String agentUid: state.getCapacityMarkedForDeallocation(pu).getAgentUids()) {
-            AllocatedCapacity agentCapacity = state.getAllocatedCapacity(pu).getAgentCapacity(agentUid);
+            AllocatedCapacity agentCapacity = state.getCapacityMarkedForDeallocation(pu).getAgentCapacity(agentUid);
             if (pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid) == null) {
                 state.deallocateCapacity(pu, agentUid, agentCapacity);
             }
