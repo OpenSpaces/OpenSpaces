@@ -20,6 +20,7 @@ import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.DeploymentStatus;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
+import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
@@ -66,6 +67,23 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
             throw new IllegalArgumentException("sla cannot be null");
         }
    
+        
+        Set<String> agentUidsFromContainers = new HashSet<String>();
+        for (GridServiceContainer container : sla.getContainers()) {
+            if (container.getGridServiceAgent() == null) {
+                throw new IllegalStateException("container " + RebalancingUtils.gscToString(container) + " has no agent.");
+            }
+            agentUidsFromContainers.add(container.getGridServiceAgent().getUid());
+        }
+        Collection<String> agentUids = sla.getAggregatedAllocatedCapacity().getAgentUids();
+        if (!agentUids.equals(agentUidsFromContainers)) {           
+            throw new IllegalArgumentException(
+                    "List of agents and list of agents from containers do not match, "+
+                    "agentUids="+agentUids.toString()+" "+
+                    "agentUidsFromContainers="+agentUidsFromContainers.toString());
+        }
+        
+        
         if (state.isDestroyedProcessingUnit(pu)) {
             throw new ServiceLevelAgreementEnforcementEndpointDestroyedException();
         }
@@ -104,8 +122,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                 RebalancingUtils.isEvenlyDistributedAcrossContainers(pu, sla.getContainers())
                 &&
 
-                RebalancingUtils.isEvenlyDistributedAcrossMachines(pu,
-                        RebalancingUtils.getMachinesHostingContainers(sla.getContainers()));
+                RebalancingUtils.isEvenlyDistributedAcrossMachines(pu, sla.getAggregatedAllocatedCapacity());
     }
 
     private boolean enforceSlaInternal(RebalancingSlaPolicy sla) throws ConflictingOperationInProgressException {
@@ -571,8 +588,8 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
             RebalancingSlaPolicy sla) throws ConflictingOperationInProgressException {
 
         while (true) {
-            final FutureStatefulProcessingUnitInstance futureInstance = rebalanceNumberOfPrimaryInstancesPerCpuCoreStep(
-                    containers, sla.getMaximumNumberOfConcurrentRelocationsPerMachine());
+            final FutureStatefulProcessingUnitInstance futureInstance = 
+                rebalanceNumberOfPrimaryInstancesPerCpuCoreStep(containers, sla);
 
             if (futureInstance == null) {
                 break;
@@ -589,20 +606,22 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
      * @throws ConflictingOperationInProgressException
      */
     private FutureStatefulProcessingUnitInstance rebalanceNumberOfPrimaryInstancesPerCpuCoreStep(
-            GridServiceContainer[] containers, int maximumNumberOfRelocationsPerMachine)
+            GridServiceContainer[] containers, 
+            RebalancingSlaPolicy sla)
             throws ConflictingOperationInProgressException {
 
-        // sort all machines (including those not in the specified containers)
+        // sort all machines (including those not in the allocated containers)
         // by (numberOfPrimaryInstancesPerMachine - minNumberOfPrimaryInstances)
         // meaning machines that need primaries the most are first.
         Machine[] machines = RebalancingUtils.getMachinesHostingContainers(containers);
         final List<Machine> sortedMachines = 
             RebalancingUtils.sortMachinesByNumberOfPrimaryInstancesPerCpuCore(
                 pu, 
-                machines);
+                machines,
+                sla.getAggregatedAllocatedCapacity());
 
-        double optimalCpuCoresPerPrimary = 
-            RebalancingUtils.getAverageCpuCoresPerPrimary(pu,containers);
+        Fraction optimalCpuCoresPerPrimary = 
+            RebalancingUtils.getAverageCpuCoresPerPrimary(pu,sla.getAggregatedAllocatedCapacity());
         boolean conflict = false;
         // the source machine is the machine where the primary is restarted (high primaries per core)
         // the target machine is the machine where a new primary is elected (low primaries per core)
@@ -615,7 +634,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
 
                 Machine source = sortedMachines.get(sourceIndex);
 
-                if (!RebalancingUtils.isRestartRecommended(pu, source, target, optimalCpuCoresPerPrimary)) {
+                if (!RebalancingUtils.isRestartRecommended(pu, source, target, optimalCpuCoresPerPrimary, sla.getAggregatedAllocatedCapacity())) {
                     // source cannot give up any primary instances
                     // since the array is sorted there is no point in continuing the search
                     break;
@@ -687,9 +706,9 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                         String sourceToString = RebalancingUtils.machineToString(source);
                         String targetToString = RebalancingUtils.machineToString(target);
                         int numberOfPrimaryInstancesOnTarget = RebalancingUtils.getNumberOfPrimaryInstancesOnMachine(pu, target);
-                        int numberOfCpuCoresOnTarget = RebalancingUtils.getNumberOfCpuCores(target);
+                        Fraction numberOfCpuCoresOnTarget = RebalancingUtils.getNumberOfCpuCores(target, sla.getAggregatedAllocatedCapacity());
                         int numberOfPrimaryInstancesOnSource = RebalancingUtils.getNumberOfPrimaryInstancesOnMachine(pu, source);
-                        int numberOfCpuCoresOnSource = RebalancingUtils.getNumberOfCpuCores(source);
+                        Fraction numberOfCpuCoresOnSource = RebalancingUtils.getNumberOfCpuCores(source, sla.getAggregatedAllocatedCapacity());
                         logger.info(
                             "Restarting " + RebalancingUtils.puInstanceToString(candidateInstance) + " "
                             + "instance on machine " + sourceToString + " so that machine "
@@ -710,7 +729,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         if (state.getNumberOfFutureDeployments(pu) == 0 &&
             RebalancingUtils.isProcessingUnitIntact(pu) &&
             RebalancingUtils.isEvenlyDistributedAcrossContainers(pu, containers) &&
-            !RebalancingUtils.isEvenlyDistributedAcrossMachines(pu, machines)) {
+            !RebalancingUtils.isEvenlyDistributedAcrossMachines(pu, sla.getAggregatedAllocatedCapacity())) {
                 
                 logger.debug("Optimal primary rebalancing hueristics failed balancing primaries in this deployment. "+
                              "Performing non-optimal restart heuristics. Starting with partition " + lastResortPartitionRestart);
@@ -739,14 +758,21 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                         continue;
                     }
                 
-                    if (RebalancingUtils.getNumberOfCpuCores(source) <=
-                            RebalancingUtils.getNumberOfPrimaryInstancesOnMachine(pu, source) * optimalCpuCoresPerPrimary) {
+                    
+                    Fraction numberOfCpuCoresOnSource = 
+                        RebalancingUtils.getNumberOfCpuCores(source, sla.getAggregatedAllocatedCapacity());
+                    
+                    Fraction optimalCpuCores = 
+                        new Fraction(RebalancingUtils.getNumberOfPrimaryInstancesOnMachine(pu, source))
+                        .multiply(optimalCpuCoresPerPrimary);
+                    
+                    if (numberOfCpuCoresOnSource.compareTo(optimalCpuCores) <= 0) {
                         
-                        // number of cores is below optimal, or put it another way there are too many primaries on the machine                        
+                        // number of cores is below optimal, 
+                        // which means there are too many primaries on the machine                        
                         if (logger.isInfoEnabled()) {
                             String sourceToString = RebalancingUtils.machineToString(source);
                             int numberOfPrimaryInstancesOnSource = RebalancingUtils.getNumberOfPrimaryInstancesOnMachine(pu, source);
-                            int numberOfCpuCoresOnSource = RebalancingUtils.getNumberOfCpuCores(source);
                             logger.info(
                                 "Restarting " + RebalancingUtils.puInstanceToString(candidateInstance) + " "
                                 + "instance on machine " + sourceToString + " so that machine "

@@ -20,9 +20,13 @@ import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
+import org.openspaces.grid.gsm.capacity.AggregatedAllocatedCapacity;
+import org.openspaces.grid.gsm.capacity.AllocatedCapacity;
+import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
 import com.gigaspaces.grid.gsa.AgentProcessDetails;
@@ -56,11 +60,10 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         return approvedContainers.toArray(new GridServiceContainer[approvedContainers.size()]);
     }
 
-    public GridServiceContainer[] getContainersPendingShutdown()
+    public boolean isContainersPendingDeallocation()
             throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
         validateEndpointNotDestroyed(pu);
-        Collection<GridServiceContainer> containers = state.getContainersMarkedForShutdown(pu);
-        return containers.toArray(new GridServiceContainer[containers.size()]);
+        return !state.getContainersMarkedForShutdown(pu).isEmpty();
     }
 
     public boolean enforceSla(ContainersSlaPolicy sla)
@@ -78,7 +81,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                     + " and instead it should be " + zone);
         }
 
-        if (sla.getGridServiceAgents().length < sla.getMinimumNumberOfMachines()) {
+        if (sla.getAllocatedCapacity().getAgentUids().size() < sla.getMinimumNumberOfMachines()) {
             throw new IllegalArgumentException(
                     "Number of grid service agents must be at least minimum number of machines.");
         }
@@ -125,13 +128,12 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         cleanContainersMarkedForShutdown(pu);
         cleanFutureContainers();
 
-
-        // mark for shutdown all containers that are not managed by an approved agent
+        // mark for deallocation all containers that are not managed by an allocated agent
         String zone = ContainersSlaUtils.getContainerZone(pu);
-        List<GridServiceAgent> approvedAgents = Arrays.asList(sla.getGridServiceAgents());
+        Collection<String> allocatedAgentUids = sla.getAllocatedCapacity().getAgentUids();
         for (GridServiceContainer container : ContainersSlaUtils.getContainersByZone(zone, pu.getAdmin())) {
-            if (!approvedAgents.contains(container.getGridServiceAgent())) {
-                state.markForShutdownContainer(pu, container);
+            if (!allocatedAgentUids.contains(container.getGridServiceAgent().getUid())) {
+                state.markForContainerForDeallocation(pu, container);
             }
         }
 
@@ -150,7 +152,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                     }
                     logger.info("Marking container " + ContainersSlaUtils.gscToString(containerToRemove)
                             + " for shutdown.");
-                    state.markForShutdownContainer(pu, containerToRemove); 
+                    state.markForContainerForDeallocation(pu, containerToRemove); 
                     approvedContainers.remove(containerToRemove);
                 }
             }
@@ -202,7 +204,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                             &&
 
                             // unmark only containers that are managed by an approved agent
-                            approvedAgents.contains(containerMarkedForShutdown.getGridServiceAgent())) {
+                            allocatedAgentUids.contains(containerMarkedForShutdown.getGridServiceAgent().getUid())) {
 
                         unmarkContainer = containerMarkedForShutdown;
                         break;
@@ -307,42 +309,66 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         long requiredFreeMemoryInMB = sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB();
         final List<GridServiceContainer> containersByZone = ContainersSlaUtils.getContainersByZone(
                 ContainersSlaUtils.getContainerZone(pu), pu.getAdmin());
+        
+        Collection<GridServiceAgent> allocatedAgents = 
+            MachinesSlaUtils.getGridServiceAgentsFromUids(
+                    sla.getAllocatedCapacity().getAgentUids(), 
+                    pu.getAdmin());
+        
+        // calculate the allocated capacity that has not been used yet on all machines.
+        AggregatedAllocatedCapacity allocatedCapacity = sla.getAllocatedCapacity();
+        
+        AllocatedCapacity capacityOfOneContainer = 
+            new AllocatedCapacity( 
+                    Fraction.ZERO /* 0 CPU Cores*/,
+                    sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB() /* JVM Xmx settings */
+                    );
+  
+        AggregatedAllocatedCapacity freeCapacity = 
+            calculateRemainingFreeCapacity(
+                    allocatedCapacity,containersByZone, capacityOfOneContainer);
+        
         final List<GridServiceAgent> agentsSortedByNumberOfContainers = ContainersSlaUtils.sortAgentsByNumberOfContainers(
-                sla.getGridServiceAgents(), containersByZone);
+                allocatedAgents, containersByZone);
         logger.debug("Considering " + agentsSortedByNumberOfContainers.size() + " agents to start a container on.");
-        for (final GridServiceAgent gsa : agentsSortedByNumberOfContainers) {
+        for (final GridServiceAgent agent : agentsSortedByNumberOfContainers) {
 
-            final Machine machine = gsa.getMachine();
+            final Machine machine = agent.getMachine();
             if (state.isFutureGridServiceContainerOnMachine(machine)) {
                 // the reason we don't keep looking is that this machine might still have the least
                 // number of containers, even though a container is being started on it.
                 // so we'll just have to wait until the container is ready.
                 throw new ConflictingOperationInProgressException();
             }
-
-            final OperatingSystemStatistics operatingSystemStatistics = machine.getOperatingSystem().getStatistics();
-
-            // get total free system memory + cached (without sigar returns -1)
-            long freeBytes = operatingSystemStatistics.getActualFreePhysicalMemorySizeInBytes();
-            if (freeBytes <= 0) {
-                // fallback - no sigar. Provides a pessimistic number since does not take into
-                // account OS cache that can be allocated.
-                freeBytes = operatingSystemStatistics.getFreePhysicalMemorySizeInBytes();
+            
+            if (freeCapacity.getAgentCapacity(agent.getUid()).satisfies(capacityOfOneContainer)) {
+                
+                final OperatingSystemStatistics operatingSystemStatistics = 
+                    machine.getOperatingSystem().getStatistics();
+    
+                // get total free system memory + cached (without sigar returns -1)
+                long freeBytes = operatingSystemStatistics.getActualFreePhysicalMemorySizeInBytes();
                 if (freeBytes <= 0) {
-                    // machine is probably going down. Blow everything up.
-                    throw new ConflictingOperationInProgressException();
+                    // fallback - no sigar. Provides a pessimistic number since does not take into
+                    // account OS cache that can be allocated.
+                    freeBytes = operatingSystemStatistics.getFreePhysicalMemorySizeInBytes();
+                    if (freeBytes <= 0) {
+                        // machine is probably going down. Blow everything up.
+                        throw new ConflictingOperationInProgressException();
+                    }
                 }
-            }
-
-            final long freeInMB = MemoryUnit.MEGABYTES.convert(freeBytes, MemoryUnit.BYTES);
-
-            if (freeInMB > requiredFreeMemoryInMB + sla.getReservedMemoryCapacityPerMachineInMB()) {
-                recommendedAgents.add(gsa);
-            } else {
-                logger.debug(ContainersSlaUtils.machineToString(gsa.getMachine())
-                        + " does not have enough free memory. It has only " + freeInMB + "MB free and required is "
-                        + requiredFreeMemoryInMB + "MB plus reserved is "
-                        + sla.getReservedMemoryCapacityPerMachineInMB() + "MB");
+    
+                final long freeInMB = MemoryUnit.MEGABYTES.convert(freeBytes, MemoryUnit.BYTES);
+    
+                if (freeInMB > requiredFreeMemoryInMB + sla.getReservedMemoryCapacityPerMachineInMB()) {
+                    recommendedAgents.add(agent);
+                } else {
+                    logger.debug(ContainersSlaUtils.machineToString(agent.getMachine())
+                            + " does not have enough free memory. "
+                            + "It has only " + freeInMB + "MB free and required is "
+                            + requiredFreeMemoryInMB + "MB plus reserved is "
+                            + sla.getReservedMemoryCapacityPerMachineInMB() + "MB");
+                }
             }
         }
 
@@ -354,6 +380,31 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
         }
 
         return recommendedAgents;
+    }
+
+    /**
+     * This method subtracts the memory used by existing containers from the total allocated capacity
+     * for this processing unit.
+     * @return the remaining free capacity for new containers allocation.  
+     */
+    private AggregatedAllocatedCapacity calculateRemainingFreeCapacity(
+            AggregatedAllocatedCapacity allocatedCapacity,
+            Collection<GridServiceContainer> containers,
+            AllocatedCapacity capacityOfOneContainer) {
+        
+        AggregatedAllocatedCapacity freeCapacity = allocatedCapacity ;
+        for (GridServiceContainer container : containers) {
+            
+            GridServiceAgent agent = container.getGridServiceAgent();
+            // check that this container is on an allocated machine, and is not a candidate for deallocation
+            if (allocatedCapacity.getAgentUids().contains(agent.getUid())) {
+                
+                //subtract the container memory capacity from the total allocated memory on this machine. 
+                freeCapacity = AggregatedAllocatedCapacity.subtract(
+                        freeCapacity, agent.getUid(), capacityOfOneContainer);
+            }
+        }
+        return freeCapacity;
     }
 
     /**

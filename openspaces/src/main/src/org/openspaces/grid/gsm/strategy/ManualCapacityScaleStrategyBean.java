@@ -210,27 +210,30 @@ public class ManualCapacityScaleStrategyBean
             boolean machinesSlaEnforced = enforceMachinesSla();
             if (logger.isDebugEnabled()) {
             
-                if (machinesEndpoint.getGridServiceAgentsPendingShutdown().length > 0) {
+                if (machinesEndpoint.isGridServiceAgentsPendingDeallocation()) {
                     logger.debug(
                             "Machines SLA cannot be reached until containers are removed before scale in. "+
-                            "Approved Machines:" + toString(machinesEndpoint.getGridServiceAgents()) +" " +
-                            "Machines to remove:" + toString(machinesEndpoint.getGridServiceAgentsPendingShutdown()));
+                            "Allocated Capacity:" + machinesEndpoint.getAllocatedCapacity() +
+                            "Machines: " + 
+                                MachinesSlaUtils.machinesToString(
+                                        MachinesSlaUtils.getGridServiceAgentsFromUids(
+                                                machinesEndpoint.getAllocatedCapacity().getAgentUids(), 
+                                                pu.getAdmin())));
                 }
                 else if (!machinesSlaEnforced) {
                     logger.debug("Machines SLA has not been reached");
                 }
             }
             if (machinesSlaEnforced || 
-                machinesEndpoint.getGridServiceAgentsPendingShutdown().length >0) {
+                machinesEndpoint.isGridServiceAgentsPendingDeallocation()) {
 
                 logger.debug("Enforcing containers SLA.");
                 boolean containersSlaEnforced = enforceContainersSla();
                 if (logger.isDebugEnabled()) {
-                    if (machinesEndpoint.getGridServiceAgentsPendingShutdown().length > 0) {
+                    if (containersEndpoint.isContainersPendingDeallocation()) {
                         logger.debug(
                                 "Containers SLA cannot be reached until processingunit is relocated before scale in. "+
-                                "Approved Containers: " + toString(containersEndpoint.getContainers())+ " " +
-                                "Contaniers to remove:" + toString(containersEndpoint.getContainersPendingShutdown()));
+                                "Approved Containers: " + toString(containersEndpoint.getContainers()));
                     }
                     else if (!containersSlaEnforced) {
                         logger.debug("Containers SLA has not been reached");
@@ -238,7 +241,7 @@ public class ManualCapacityScaleStrategyBean
                 }
                 
                 if (containersSlaEnforced || 
-                    containersEndpoint.getContainersPendingShutdown().length > 0) {
+                    containersEndpoint.isContainersPendingDeallocation()) {
                     
                     logger.debug("Enforcing rebalancing SLA.");
                     boolean rebalancingSlaEnforced = enforceRebalancingSla(containersEndpoint.getContainers());
@@ -370,7 +373,7 @@ public class ManualCapacityScaleStrategyBean
         
         final ContainersSlaPolicy sla = new ContainersSlaPolicy();
         sla.setNewContainerConfig(containersConfig);
-        sla.setGridServiceAgents(machinesEndpoint.getGridServiceAgents());
+        sla.setAllocatedCapacity(machinesEndpoint.getAllocatedCapacity());
         sla.setMinimumNumberOfMachines(minimumNumberOfMachines);
         sla.setCpuCapacity(slaConfig.getNumberOfCpuCores());
         sla.setMemoryCapacityInMB(memoryInMB);

@@ -22,11 +22,11 @@ public interface ContainersSlaEnforcementEndpoint
     GridServiceContainer[] getContainers() throws ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
     /**
-     * @return a list of containers managed by this service that need to be cleared of processing units. 
+     * @return true if there are one or more containers managed that need to be cleared of processing units. 
      * 
      * Unless all PU instances are relocated the sla would not be reached.
      * @throws ServiceLevelAgreementEnforcementEndpointDestroyedException 
      * 
      */
-    GridServiceContainer[] getContainersPendingShutdown() throws ServiceLevelAgreementEnforcementEndpointDestroyedException;
+    boolean isContainersPendingDeallocation() throws ServiceLevelAgreementEnforcementEndpointDestroyedException;
 }

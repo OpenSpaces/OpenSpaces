@@ -9,15 +9,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.openspaces.admin.Admin;
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.machine.Machine;
+import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.core.internal.commons.math.ConvergenceException;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
+import org.openspaces.grid.gsm.capacity.AllocatedCapacity;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirment;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
+import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 
 public class MachinesSlaUtils {
 
@@ -176,5 +181,33 @@ public class MachinesSlaUtils {
             targetCpuCores = new Fraction((int)Math.ceil(cpu*2),2);
         }
         return targetCpuCores;
+    }
+
+    public static int getNumberOfChildContainersForProcessingUnit(GridServiceAgent agent, ProcessingUnit pu) {
+        // the reason we are looking at the machine and not on the agent is that a container 
+        // could be orphan for a short period (meaning it was discovered before the agent that started it).
+        return ContainersSlaUtils.getContainersByZoneOnMachine(
+                    ContainersSlaUtils.getContainerZone(pu), 
+                    agent.getMachine())
+               .size();
+    }
+
+    /**
+     * Converts the specified agent UUIDs into GridServiceAgent objects.
+     * @throws IllegalStateException - if Agent with the specified uid has been removed
+     */
+    public static Collection<GridServiceAgent> getGridServiceAgentsFromUids(
+            Iterable<String> agentUids, 
+            Admin admin) {
+        final Collection<GridServiceAgent> agents = new ArrayList<GridServiceAgent>();
+        final GridServiceAgents gridServiceAgents = admin.getGridServiceAgents();
+        for (final String agentUid : agentUids) {
+            final GridServiceAgent agent = gridServiceAgents.getAgentByUID(agentUid);
+            if (agent == null) {
+                throw new IllegalStateException("At this point agent " + agentUid + " must be discovered.");
+            }
+            agents.add(agent);
+        }
+        return agents;
     }
 }

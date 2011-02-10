@@ -15,6 +15,8 @@ import java.util.concurrent.TimeoutException;
 
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.grid.gsm.capacity.AggregatedAllocatedCapacity;
+import org.openspaces.grid.gsm.capacity.AllocatedCapacity;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
 
@@ -94,7 +96,7 @@ class MachinesSlaEnforcementState {
         this.futureAgentsPerProcessingUnit.get(pu).add(futureMachine);
     }
     
-    public void allocateCapacity(ProcessingUnit pu, GridServiceAgent agent, AllocatedCapacity capacity) {
+    public void allocateCapacity(ProcessingUnit pu, String agentUid, AllocatedCapacity capacity) {
         
         AggregatedAllocatedCapacity allocatedCapacity = allocatedCapacityPerProcessingUnit.get(pu);
         if (allocatedCapacity == null) {
@@ -102,11 +104,11 @@ class MachinesSlaEnforcementState {
         }
         
         allocatedCapacityPerProcessingUnit.put(pu,
-                AggregatedAllocatedCapacity.add(allocatedCapacity,agent,capacity));
+                AggregatedAllocatedCapacity.add(allocatedCapacity,agentUid,capacity));
         
     }
 
-    public void markCapacityForDeallocation(ProcessingUnit pu, GridServiceAgent agent, AllocatedCapacity capacity) {
+    public void markCapacityForDeallocation(ProcessingUnit pu, String agentUid, AllocatedCapacity capacity) {
         
         AggregatedAllocatedCapacity allocatedCapacity = 
             allocatedCapacityPerProcessingUnit.get(pu);
@@ -123,13 +125,13 @@ class MachinesSlaEnforcementState {
         }
             
         allocatedCapacityPerProcessingUnit.put(pu,
-                AggregatedAllocatedCapacity.subtract(allocatedCapacity,agent,capacity));
+                AggregatedAllocatedCapacity.subtract(allocatedCapacity,agentUid,capacity));
         
         markedForDeallocationCapacityPerProcessingUnit.put(pu,
-                    AggregatedAllocatedCapacity.add(deallocatedCapacity, agent, capacity));
+                    AggregatedAllocatedCapacity.add(deallocatedCapacity, agentUid, capacity));
     }
     
-    public void unmarkCapacityForDeallocation(ProcessingUnit pu, GridServiceAgent agent, AllocatedCapacity capacity) {
+    public void unmarkCapacityForDeallocation(ProcessingUnit pu, String agentUid, AllocatedCapacity capacity) {
         AggregatedAllocatedCapacity allocatedCapacity = 
             allocatedCapacityPerProcessingUnit.get(pu);
         
@@ -145,15 +147,15 @@ class MachinesSlaEnforcementState {
         }
         
         markedForDeallocationCapacityPerProcessingUnit.put(pu,
-                AggregatedAllocatedCapacity.subtract(deallocatedCapacity, agent, capacity));
+                AggregatedAllocatedCapacity.subtract(deallocatedCapacity, agentUid, capacity));
         
         allocatedCapacityPerProcessingUnit.put(pu,
-                AggregatedAllocatedCapacity.add(allocatedCapacity,agent,capacity));
+                AggregatedAllocatedCapacity.add(allocatedCapacity,agentUid,capacity));
         
     }
 
     
-    public void deallocateCapacity(ProcessingUnit pu, GridServiceAgent agent, AllocatedCapacity capacity) {
+    public void deallocateCapacity(ProcessingUnit pu, String agentUid, AllocatedCapacity capacity) {
         
         AggregatedAllocatedCapacity deallocatedCapacity = 
             markedForDeallocationCapacityPerProcessingUnit.get(pu);
@@ -163,14 +165,14 @@ class MachinesSlaEnforcementState {
         }
         
         markedForDeallocationCapacityPerProcessingUnit.put(pu,
-                AggregatedAllocatedCapacity.subtract(deallocatedCapacity, agent, capacity));
+                AggregatedAllocatedCapacity.subtract(deallocatedCapacity, agentUid, capacity));
     }
 
     public AggregatedAllocatedCapacity getCapacityMarkedForDeallocation(ProcessingUnit pu) {
        return markedForDeallocationCapacityPerProcessingUnit.get(pu);
     }
 
-    public AggregatedAllocatedCapacity getCapacityAllocated(ProcessingUnit pu) {
+    public AggregatedAllocatedCapacity getAllocatedCapacity(ProcessingUnit pu) {
         return allocatedCapacityPerProcessingUnit.get(pu);
     }
     
@@ -205,18 +207,18 @@ class MachinesSlaEnforcementState {
      * Lists all grid service agents from all processing units including those that are pending shutdown.
      * This method is unique since it reads state from all endpoints.
      */
-    public Set<GridServiceAgent> getAllUsedAgents() {
+    public Set<String> getAllUsedAgentUids() {
         
-        Set<GridServiceAgent> agents = new HashSet<GridServiceAgent>();
+        Set<String> agentUids = new HashSet<String>();
         
         for (AggregatedAllocatedCapacity allocatedCapacity : this.allocatedCapacityPerProcessingUnit.values()) {
-            agents.addAll(allocatedCapacity.getAgents());
+            agentUids.addAll(allocatedCapacity.getAgentUids());
         }
         
         for (AggregatedAllocatedCapacity markedForDeallocationCapacity : this.markedForDeallocationCapacityPerProcessingUnit.values()) {
-            agents.addAll(markedForDeallocationCapacity.getAgents());
+            agentUids.addAll(markedForDeallocationCapacity.getAgentUids());
         }
         
-        return agents;
+        return agentUids;
     }
 }

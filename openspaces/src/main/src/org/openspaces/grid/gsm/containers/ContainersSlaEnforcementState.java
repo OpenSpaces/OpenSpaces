@@ -108,7 +108,7 @@ class ContainersSlaEnforcementState {
         containersMarkedForShutdownPerProcessingUnit.get(pu).remove(container);
     }
     
-    public void markForShutdownContainer(ProcessingUnit pu, GridServiceContainer container) {
+    public void markForContainerForDeallocation(ProcessingUnit pu, GridServiceContainer container) {
         List<GridServiceContainer> containersMarkedForShutdown = containersMarkedForShutdownPerProcessingUnit.get(pu);
         if (!containersMarkedForShutdown.contains(container)) {
             containersMarkedForShutdown.add(container);

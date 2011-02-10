@@ -16,6 +16,7 @@ import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
+import org.openspaces.grid.gsm.capacity.AllocatedCapacity;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 
 class DefaultMachineProvisioning implements NonBlockingElasticMachineProvisioning {
@@ -40,10 +41,10 @@ class DefaultMachineProvisioning implements NonBlockingElasticMachineProvisionin
      */
     public int countFreeAgents() {
         int count = 0;
-        Set<GridServiceAgent> usedAgents = state.getAllUsedAgents();
+        Set<String> usedAgents = state.getAllUsedAgentUids();
         for (GridServiceAgent agent : pu.getAdmin().getGridServiceAgents().getAgents()) {
             if (MachinesSlaUtils.matchesMachineZones(sla, agent) &&
-                !usedAgents.contains(agent) &&
+                !usedAgents.contains(agent.getUid()) &&
                 (sla.getAllowDeploymentOnManagementMachine() || 
                  !MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine()))) {
                 count++;
@@ -115,24 +116,27 @@ class DefaultMachineProvisioning implements NonBlockingElasticMachineProvisionin
                 }
                 
                 Set<GridServiceAgent> newAgents = new HashSet<GridServiceAgent>();
-                Set<GridServiceAgent> agentsUsedByPus = state.getAllUsedAgents();
+                Set<String> usedAgentsUids = state.getAllUsedAgentUids();
                 
                 // add one machine at a time until the sla is met or until there are no more machines left. 
                 while (!MachinesSlaUtils.isCapacityRequirementsMet(newAgents, capacityRequirements, sla)) {
                     
-                    GridServiceAgent agent = findFreeAgent(agentsUsedByPus);
+                    GridServiceAgent agent = findFreeAgent(usedAgentsUids);
                     if (agent == null) {
                         break;
                     }
                     newAgents.add(agent);
-                    agentsUsedByPus.add(agent); // so we wont allocate this machine again. 
+                    usedAgentsUids.add(agent.getUid()); // so we wont allocate this machine again. 
                 }
                 
                 if (exception == null && newAgents.isEmpty()) {
                     StringBuilder usedMachines = new StringBuilder();
-                    for (GridServiceAgent agent : agentsUsedByPus) {
-                        Machine machine = agent.getMachine();
-                        usedMachines.append(machine.getHostAddress()+" has "+ MachinesSlaUtils.getCpu(machine).doubleValue()+ " cpu cores " + MachinesSlaUtils.getPhysicalMemoryInMB(machine)+"MB running " + machine.getGridServiceContainers().getSize() +" containers. ");
+                    for (String agentUid : usedAgentsUids) {
+                        GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
+                        if (agent != null) {
+                            Machine machine = agent.getMachine();
+                            usedMachines.append(machine.getHostAddress()+" has "+ MachinesSlaUtils.getCpu(machine).doubleValue()+ " cpu cores " + MachinesSlaUtils.getPhysicalMemoryInMB(machine)+"MB running " + machine.getGridServiceContainers().getSize() +" containers. ");
+                        }
                     }
                     exception = new ExecutionException(
                             new AdminException(
@@ -164,10 +168,10 @@ class DefaultMachineProvisioning implements NonBlockingElasticMachineProvisionin
         logger.info(
                 "Agent machine " + 
                 agent.getMachine().getHostAddress() + " " +
-                "is not actually killed, instead it is moved back to the free machines pool.");
+                "has been deallocated. It was not actually shutdown.");
         AllocatedCapacity agentCapacity = MachinesSlaUtils.getMaxAllocatedCapacity(agent, sla);
-        state.markCapacityForDeallocation(pu, agent, agentCapacity);
-        state.deallocateCapacity(pu, agent, agentCapacity);
+        state.markCapacityForDeallocation(pu, agent.getUid(), agentCapacity);
+        state.deallocateCapacity(pu, agent.getUid(), agentCapacity);
     }
  
     /**
@@ -176,13 +180,13 @@ class DefaultMachineProvisioning implements NonBlockingElasticMachineProvisionin
      * @param allowDeploymentOnManagementMachine 
      * @return agent if found, or null if no free machines exist.
      */
-    private GridServiceAgent findFreeAgent(Set<GridServiceAgent> usedAgents) {
+    private GridServiceAgent findFreeAgent(Set<String> usedAgentUids) {
         List<GridServiceAgent> agents = Arrays.asList(pu.getAdmin().getGridServiceAgents().getAgents());
         
         for (GridServiceAgent agent : MachinesSlaUtils.sortManagementFirst(agents)) {
             
             if (MachinesSlaUtils.matchesMachineZones(sla,agent) &&
-                !usedAgents.contains(agent) &&
+                !usedAgentUids.contains(agent.getUid()) &&
                 (sla.getAllowDeploymentOnManagementMachine() || 
                  !MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine()))) {
                 return agent;

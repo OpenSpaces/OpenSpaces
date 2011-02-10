@@ -1,7 +1,7 @@
 package org.openspaces.grid.gsm.containers;
 
-import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
+import org.openspaces.grid.gsm.capacity.AggregatedAllocatedCapacity;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementPolicy;
 
 public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
@@ -10,13 +10,9 @@ public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
     
     GridServiceContainerConfig newContainerConfig;
 
-    //private MachineIsolation machineIsolation;
-
-    //private String machineZone;
-
     private int reservedMemoryPerMachineInMB;
 
-    private GridServiceAgent[] gridServiceAgents;
+    private AggregatedAllocatedCapacity aggregatedAllocatedCapacity;
   
     private long memoryInMB;
     
@@ -56,14 +52,14 @@ public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
         this.reservedMemoryPerMachineInMB =reservedInMB ; 
     }
     
-    public GridServiceAgent[] getGridServiceAgents() {
-        return this.gridServiceAgents;
+    public AggregatedAllocatedCapacity getAllocatedCapacity() {
+        return this.aggregatedAllocatedCapacity;
     }
     
-    public void setGridServiceAgents(GridServiceAgent[] gridServiceAgents) {
-        this.gridServiceAgents = gridServiceAgents;
+    public void setAllocatedCapacity(AggregatedAllocatedCapacity aggregatedAllocatedCapacity) {
+        this.aggregatedAllocatedCapacity = aggregatedAllocatedCapacity;
     }
-    
+         
     public int getMinimumNumberOfMachines() {
         return minimumNumberOfMachines;
     }
@@ -76,8 +72,7 @@ public class ContainersSlaPolicy extends ServiceLevelAgreementPolicy {
         return other instanceof ContainersSlaPolicy &&
                ((ContainersSlaPolicy)other).containers == this.containers &&
                ((ContainersSlaPolicy)other).newContainerConfig.equals(this.newContainerConfig) &&
-               //((ContainersAdminServiceLevelAgreement)other).machineZone.equals(this.machineZone) &&
-               //((ContainersAdminServiceLevelAgreement)other).machineIsolation.equals(this.machineIsolation) &&
+               ((ContainersSlaPolicy)other).aggregatedAllocatedCapacity.equals(this.aggregatedAllocatedCapacity) &&
                ((ContainersSlaPolicy)other).reservedMemoryPerMachineInMB == this.reservedMemoryPerMachineInMB &&
                ((ContainersSlaPolicy)other).minimumNumberOfMachines == this.minimumNumberOfMachines &&
                ((ContainersSlaPolicy)other).memoryInMB == this.memoryInMB &&

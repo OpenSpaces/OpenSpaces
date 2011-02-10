@@ -2,6 +2,7 @@ package org.openspaces.grid.gsm.containers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -145,17 +146,17 @@ public class ContainersSlaUtils {
         return future;
     }
     
-    static List<GridServiceContainer> getContainersByZone(String zone, Admin admin) {
+    public static List<GridServiceContainer> getContainersByZone(String zone, Admin admin) {
         List<GridServiceContainer> containers = new ArrayList<GridServiceContainer>();
         for (GridServiceContainer container : admin.getGridServiceContainers()) {
-            if (isContainerMatchesZone(container,zone)) {
+            if (isContainerMatchesZone(container,zone) && container.getGridServiceAgent() != null) {
                 containers.add(container);
             }
         }
         return containers;
     }
 
-    static List<GridServiceContainer> getContainersByZoneOnMachine(String zone, Machine machine) {
+    public static List<GridServiceContainer> getContainersByZoneOnMachine(String zone, Machine machine) {
         List<GridServiceContainer> containers = new ArrayList<GridServiceContainer>();
         for (GridServiceContainer container : machine.getGridServiceContainers()) {
             if (isContainerMatchesZone(container,zone)) {
@@ -286,8 +287,8 @@ public class ContainersSlaUtils {
      * @return the sorted agents list
      */
     public static List<GridServiceAgent> sortAgentsByNumberOfContainers(
-            GridServiceAgent[] agents, 
-            List<GridServiceContainer> containers) {
+            Collection<GridServiceAgent> agents, 
+            Collection<GridServiceContainer> containers) {
 
         final Map<GridServiceAgent,Integer> numberOfContainersPerAgent = new HashMap<GridServiceAgent,Integer>();
         for (GridServiceAgent agent: agents) {
@@ -301,7 +302,7 @@ public class ContainersSlaUtils {
             }
         }
         
-        List<GridServiceAgent> sortedAgents = new ArrayList<GridServiceAgent>(Arrays.asList(agents));
+        List<GridServiceAgent> sortedAgents = new ArrayList<GridServiceAgent>(agents);
         Collections.sort(sortedAgents,new Comparator<GridServiceAgent>() {
 
             public int compare(GridServiceAgent agent1, GridServiceAgent agent2) {

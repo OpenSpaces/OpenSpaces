@@ -1,11 +1,12 @@
-package org.openspaces.grid.gsm.machines;
+package org.openspaces.grid.gsm.capacity;
 
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
-import org.openspaces.grid.gsm.capacity.CapacityRequirements;
-import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
-import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirment;
 
-
+/**
+ * Capacity requirements used by the internal implementation of the Elastic Processing Unit management.
+ * @author itaif
+ *
+ */
 public class AllocatedCapacity {
 
     private final Fraction cpuCores;
@@ -63,6 +64,11 @@ public class AllocatedCapacity {
         return new AllocatedCapacity(cpuCores,memoryInMB);
     }
     
+    public boolean equals(Object other) {
+        return other instanceof AllocatedCapacity &&
+               ((AllocatedCapacity)other).cpuCores.equals(cpuCores) &&
+               ((AllocatedCapacity)other).memoryInMB == memoryInMB;
+    }
     public boolean equalsZero() {
         // negative values are not allowed. Considered as zero.
         return isCpuCoresEqualsZero() && 
@@ -78,11 +84,6 @@ public class AllocatedCapacity {
         return memoryInMB == 0;
     }
     
-    public boolean dividesBy(AllocatedCapacity allocation) {
-        return (memoryInMB % allocation.memoryInMB) == 0 &&
-                cpuCores.divide(allocation.cpuCores).getDenominator() == 1;
-    }
-    
     public String toString() {
         return 
             cpuCores + " cores and "  + 
@@ -90,7 +91,7 @@ public class AllocatedCapacity {
     }
 
 
-    public boolean equalsOrBiggerThan(AllocatedCapacity capacity) {
+    public boolean satisfies(AllocatedCapacity capacity) {
         
         if (capacity == null) {
             throw new NullPointerException("capacity");
@@ -101,7 +102,7 @@ public class AllocatedCapacity {
     }
 
 
-    public boolean biggerThan(AllocatedCapacity capacity) {
+    public boolean moreThanSatisfies(AllocatedCapacity capacity) {
         return cpuCores.compareTo(capacity.cpuCores) > 0 &&
         memoryInMB > capacity.memoryInMB;
     }
@@ -112,6 +113,16 @@ public class AllocatedCapacity {
             new CapacityRequirements(
                 new MemoryCapacityRequirment(memoryInMB),
                 new CpuCapacityRequirement(cpuCores.doubleValue()));
+    }
+
+
+    public Fraction getCpuCores() {
+        return cpuCores;
+    }
+
+
+    public long getMemoryInMB() {
+        return memoryInMB;
     }
 
 

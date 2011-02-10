@@ -1,6 +1,6 @@
 package org.openspaces.grid.gsm.machines;
 
-import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.grid.gsm.capacity.AggregatedAllocatedCapacity;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
 public interface EagerMachinesSlaEnforcementEndpoint {
@@ -18,8 +18,8 @@ public interface EagerMachinesSlaEnforcementEndpoint {
     boolean enforceSla(EagerMachinesSlaPolicy sla) throws ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
     /**
-     * @return a list of agents for this pu that are not pending shutdown, without blocking the calling thread.
+     * @return a list of agents for this pu including memory/cpu for each.
      */
-    GridServiceAgent[] getGridServiceAgents() throws ServiceLevelAgreementEnforcementEndpointDestroyedException;
+    AggregatedAllocatedCapacity getAllocatedCapacity() throws ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
 }

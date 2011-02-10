@@ -2,6 +2,7 @@ package org.openspaces.grid.gsm.machines;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -63,16 +64,11 @@ public class MachinesSlaEnforcement implements
            }
         }
 
-        for (MachinesSlaEnforcementEndpoint endpoint : endpoints.values()) {
-            
-            for (GridServiceAgent gsa : endpoint.getGridServiceAgents()) {
-                // some other pu's agent - remove
-                agents.remove(gsa);
-            }
-            
-            for (GridServiceAgent gsa : endpoint.getGridServiceAgentsPendingShutdown()) {
-                // some other pu's agent - remove
-                agents.remove(gsa);
+        Set<String> allUsedAgentUids = state.getAllUsedAgentUids();
+        Iterator<GridServiceAgent> iterator = agents.iterator(); 
+        while(iterator.hasNext()) {
+            if (allUsedAgentUids.contains(iterator.next().getUid())) {
+                iterator.remove();
             }
         }
         

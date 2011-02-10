@@ -14,7 +14,6 @@ import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.bean.BeanConfigurationException;
-import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
@@ -25,13 +24,13 @@ import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.ProcessingUnitAware;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
+import org.openspaces.grid.gsm.capacity.AggregatedAllocatedCapacity;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.containers.ContainersSlaPolicy;
 import org.openspaces.grid.gsm.machines.EagerMachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.EagerMachinesSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.machines.EagerMachinesSlaPolicy;
-import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaPolicy;
@@ -50,6 +49,7 @@ public class EagerScaleStrategyBean
     private static final String rebalancingAlertGroupUidPrefix = "4499C1ED-1584-4387-90CF-34C5EC236644";
     private static final String containersAlertGroupUidPrefix = "47A94111-5665-4214-9F7A-2962D998DD12";
     private static final String machinesAlertGroupUidPrefix = "3BA87E89-449A-4abc-A632-4732246A9EE4";
+    private static final int MAX_NUMBER_OF_MACHINES = 1000; // a very large number representing max number of machines per pu
 
     // injected 
     private InternalAdmin admin;
@@ -64,7 +64,6 @@ public class EagerScaleStrategyBean
     // created by afterPropertiesSet()
     private Log logger;
     private ScheduledFuture<?> scheduledTask;
-    private int minimumNumberOfMachines;
     
     public Map<String, String> getProperties() {
         return slaConfig.getProperties();
@@ -116,10 +115,7 @@ public class EagerScaleStrategyBean
                         "since it is not stateless, not stateful and not a datagrid (it is " + schemaConfig.getSchema() +") . "+
                         "Choose a different scale algorithm.");
             }
-               
-        // calculate minimum number of machines
-        minimumNumberOfMachines = calcMinNumberOfMachines(pu);
-        
+
         scheduledTask = 
         (admin).scheduleWithFixedDelayNonBlockingStateChange(
                 this, 
@@ -169,7 +165,7 @@ public class EagerScaleStrategyBean
                 }
                 
                 if (containersSlaEnforced || 
-                    containersEndpoint.getContainersPendingShutdown().length > 0) {
+                    containersEndpoint.isContainersPendingDeallocation()) {
                     logger.debug("Enforcing rebalancing SLA.");
                     boolean rebalancingSlaEnforced = enforceRebalancingSla(containersEndpoint.getContainers());
                     if (logger.isDebugEnabled()) {
@@ -204,7 +200,8 @@ public class EagerScaleStrategyBean
                 AlertStatus.RESOLVED,
                 machinesAlertGroupUidPrefix,
                 "Machines Capacity SLA",
-                "Machines Eager SLA has been reached. Using " + machinesEndpoint.getGridServiceAgents().length + " machines");
+                "Machines Eager SLA has been reached. Using " + 
+                machinesEndpoint.getAllocatedCapacity().getAgentUids().size() + " machines");
         }
         else {
             triggerAlert(
@@ -220,11 +217,12 @@ public class EagerScaleStrategyBean
     }
 
     private boolean enforceContainersSla() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
-        GridServiceAgent[] agents = machinesEndpoint.getGridServiceAgents();
+        
+        AggregatedAllocatedCapacity allocatedCapacity = machinesEndpoint.getAllocatedCapacity();
         
         final ContainersSlaPolicy sla = new ContainersSlaPolicy();
         sla.setNewContainerConfig(containersConfig);
-        sla.setGridServiceAgents(agents);
+        sla.setAllocatedCapacity(allocatedCapacity);
         sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
         
         // eager CPU
@@ -234,7 +232,7 @@ public class EagerScaleStrategyBean
         // this check is not necessary since machinesEndpoint 
         // is already limiting number of machines by total number of instances.
         // but we do it anyway due to separation of concerns.
-        int numberOfMachines = Math.min(pu.getTotalNumberOfInstances(),agents.length);
+        int numberOfMachines = Math.min(pu.getTotalNumberOfInstances(),allocatedCapacity.getAgentUids().size());
         sla.setMinimumNumberOfMachines(numberOfMachines); 
 
         //eager memory
@@ -242,13 +240,13 @@ public class EagerScaleStrategyBean
         //We ask for all available machines' memory.
         //If there are too many machines, we ask to spread out to the maximum number of containers (primaries+backups) 
         long memory = Math.min(
-                calcMemoryCapacityInMB(), 
+                machinesEndpoint.getAllocatedCapacity().getTotalAllocatedCapacity().getMemoryInMB(), 
                 sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB() * pu.getTotalNumberOfInstances());
         sla.setMemoryCapacityInMB(memory);
 
         if (logger.isDebugEnabled()) {
             logger.debug("Containers Eager SLA Policy: "+
-                    "#gridServiceAgents=" + sla.getGridServiceAgents().length + " "+
+                    "#gridServiceAgents=" + sla.getAllocatedCapacity().getAgentUids().size() + " "+
                     "#minimumNumberOfMachines="+sla.getMinimumNumberOfMachines()+" "+
                     "memoryCapacityInMB="+sla.getMemoryCapacityInMB()+" " +
                     "reservedMemoryCapacityPerMachineInMB="+sla.getReservedMemoryCapacityPerMachineInMB() + " "+
@@ -318,7 +316,7 @@ public class EagerScaleStrategyBean
         logger.debug(alertDescription);
     }
     
-    private int calcMinNumberOfMachines(ProcessingUnit pu) {
+    private int calcMinNumberOfMachinesForPartitionedDeployment(ProcessingUnit pu) {
         int minNumberOfMachines;
         if (pu.getMaxInstancesPerMachine() == 0) {
             minNumberOfMachines = 1;
@@ -327,9 +325,9 @@ public class EagerScaleStrategyBean
         
         else {
             minNumberOfMachines = (int)Math.ceil(
-                    (1 + pu.getNumberOfBackups())/1.0*pu.getMaxInstancesPerMachine());
+                    (1 + pu.getNumberOfBackups())/(1.0*pu.getMaxInstancesPerMachine()));
             logger.info("minNumberOfMachines= " +
-                    "ceil((1+backupsPerPartition)/maxInstancesPerMachine)= "+
+                    "ceil((1+backupsPerPartition)/maxInstancesPerPartitionPerMachine)= "+
                     "ceil("+(1+pu.getNumberOfBackups())+"/"+pu.getMaxInstancesPerMachine() + ")= " +
                     minNumberOfMachines);
         }
@@ -337,19 +335,20 @@ public class EagerScaleStrategyBean
         return minNumberOfMachines;
     }
     
-    private long calcMemoryCapacityInMB() {
-        
-        long memoryInMB = 0;
-        for (GridServiceAgent agent : machinesEndpoint.getGridServiceAgents()) {
-            memoryInMB += MachinesSlaUtils.getMemoryInMB(agent.getMachine(), getEagerMachinesSlaPolicy());
-        }
-        return memoryInMB;
-    }
-
     private EagerMachinesSlaPolicy getEagerMachinesSlaPolicy() {
         final EagerMachinesSlaPolicy sla = new EagerMachinesSlaPolicy();
         sla.setAllowDeploymentOnManagementMachine(!slaConfig.getDedicatedManagementMachines());
-        sla.setMinimumNumberOfMachines(minimumNumberOfMachines);
+        
+        // calculate minimum number of machines
+        
+        if (schemaConfig.isPartitionedSync2BackupSchema()) {
+            sla.setMaximumNumberOfMachines(pu.getTotalNumberOfInstances());
+            sla.setMinimumNumberOfMachines(calcMinNumberOfMachinesForPartitionedDeployment(pu));
+        }
+        else {
+            sla.setMinimumNumberOfMachines(1);
+            sla.setMaximumNumberOfMachines(MAX_NUMBER_OF_MACHINES);
+        }
         sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
         sla.setMachineZones(new HashSet<String>(Arrays.asList(slaConfig.getMachineZones())));

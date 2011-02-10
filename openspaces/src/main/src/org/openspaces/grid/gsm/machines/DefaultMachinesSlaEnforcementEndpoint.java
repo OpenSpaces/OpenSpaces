@@ -1,10 +1,9 @@
 package org.openspaces.grid.gsm.machines;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +15,8 @@ import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
+import org.openspaces.grid.gsm.capacity.AggregatedAllocatedCapacity;
+import org.openspaces.grid.gsm.capacity.AllocatedCapacity;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
@@ -57,20 +58,16 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
     }
     
-    public GridServiceAgent[] getGridServiceAgents() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
-        validateEndpointNotDestroyed(pu);
-       
-        Collection<GridServiceAgent> agentsStarted = state.getCapacityAllocated(pu).getAgents();
-        return agentsStarted.toArray(new GridServiceAgent[agentsStarted.size()]);
+    public AggregatedAllocatedCapacity getAllocatedCapacity() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+       validateEndpointNotDestroyed(pu);
+       return state.getAllocatedCapacity(pu);
     }
 
      
-    public GridServiceAgent[] getGridServiceAgentsPendingShutdown() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+    public boolean isGridServiceAgentsPendingDeallocation() throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
         validateEndpointNotDestroyed(pu);
         
-        Collection<GridServiceAgent> agentsPendingShutdown = state.getCapacityMarkedForDeallocation(pu).getAgents();
-        return agentsPendingShutdown.toArray(new GridServiceAgent[agentsPendingShutdown.size()]);
-        
+        return !state.getCapacityMarkedForDeallocation(pu).equalsZero();
     }
 
     public boolean enforceSla(CapacityMachinesSlaPolicy sla) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
@@ -114,6 +111,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         if (sla.getContainerMemoryCapacityInMB() <= 0) {
             throw new IllegalArgumentException("Container memory capacity must be defined.");
         }
+        if (sla.getMinimumNumberOfMachines() > sla.getMaximumNumberOfMachines()) {
+            throw new IllegalArgumentException("Minimum number of machines cannot be more than maximum number of machines.");
+        }
         DefaultMachineProvisioning defaultMachineProvisioning = getDefaultMachineProvisioningForProcessingUnit(pu,sla);
         return enforceSlaInternal(sla, defaultMachineProvisioning);
     }
@@ -122,126 +122,74 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 
         cleanFutureAgents(pu, sla);
         cleanFailedMachines();
-        cleanAgentsMarkedForShutdown(defaultMachineProvisioning);
+        cleanAgentsMarkedForDeallocation(defaultMachineProvisioning);
 
         AggregatedAllocatedCapacity capacityMarkedForDeallocation = state.getCapacityMarkedForDeallocation(pu);
-        AggregatedAllocatedCapacity capacityAllocated = state.getCapacityAllocated(pu);
-        
-        AggregatedAllocatedCapacity capacityAllocatedAndMarked = AggregatedAllocatedCapacity.add(capacityMarkedForDeallocation, capacityAllocated);
-        
+        AggregatedAllocatedCapacity capacityAllocated = state.getAllocatedCapacity(pu);
+                
         if (state.getNumberOfFutureAgents(pu)>0 && 
             !capacityMarkedForDeallocation.equalsZero()) {
-            throw new IllegalStateException("Cannot have both agents pending to be started and agents pending shutdown.");
+            throw new IllegalStateException("Cannot have both agents pending to be started and agents pending deallocation.");
         }
         
-        boolean slaReached = 
-            state.getNumberOfFutureAgents(pu)==0 &&
-            capacityMarkedForDeallocation.equalsZero();
-        
-        // Eager more: we ask for all available machines.
-        int maxNumberOfMachines = Math.max(sla.getMinimumNumberOfMachines(), pu.getTotalNumberOfInstances());
-
-        if (capacityAllocatedAndMarked.getAgents().size() > maxNumberOfMachines) {
-                
-            logger.info("Considering scale in: "+
-                    "max #machines is " + maxNumberOfMachines + ", " +
-                    "existing #machines started " + capacityAllocated + ", " + 
-                    "existing #machines pending shutdown " + capacityMarkedForDeallocation);
-            
-            // scale in
-            int surplusMachines = 
-                capacityAllocatedAndMarked.getAgents().size()  - maxNumberOfMachines;
-            
-            // adjust surplusMachines based on agents marked for shutdown
-            for (GridServiceAgent agent : capacityMarkedForDeallocation.getAgents()) {
-
-                if (surplusMachines > 0) {
-                    // this machine is already marked for shutdown, so surplus
-                    // is adjusted to reflect that
-                    surplusMachines--;
-                } else {
-                    // cancel scale in
-                    state.unmarkCapacityForDeallocation(
-                            pu, 
-                            agent, 
-                            capacityMarkedForDeallocation.getAgentCapacity(agent));
-                    
-                    logger.info(
-                            "machine agent " + agent.getMachine().getHostAddress() + " " +
-                            "is no longer marked for shutdown in order to maintain capacity. "+
-                            "Approved machine agents are: " + state.getCapacityAllocated(pu));
-                }
-            }
-
-            // mark agents for shutdown if there are enough of them (scale in)
-            // give priority to agents that do not host a GSM/LUS since we want to evacuate those last.
-            for (GridServiceAgent agent : MachinesSlaUtils.sortManagementLast(capacityAllocated.getAgents())) {
-                if (surplusMachines > 0) {
-                    // mark machine for shutdown
-                    state.markCapacityForDeallocation(pu, agent, capacityAllocated.getAgentCapacity(agent));
-                    surplusMachines --;
-                    slaReached = false;
-                    logger.info(
-                            "Machine agent " + agent.getMachine().getHostAddress() + " is marked for shutdown in order to reduce capacity. "+
-                            "Approved machine agents are: " + state.getCapacityAllocated(pu));
-                }
-            }
+        boolean slaReached = true;
+        if (state.getNumberOfFutureAgents(pu)!=0 ||
+            capacityMarkedForDeallocation.equalsZero()) {
+            // operations are in progress. do not perform more operations in parallel
+            slaReached = false;
         }
-        else if (state.getNumberOfFutureAgents(pu)==0 && 
-                 capacityMarkedForDeallocation.getAgents().isEmpty() &&
-                 capacityAllocated.getAgents().size() < maxNumberOfMachines){
-            
+        else {
+            // Eager scale out: ask for all available machines.
             int freeAgents = defaultMachineProvisioning.countFreeAgents();
             if (freeAgents > 0) {
-                int machineShortage = Math.min(freeAgents, maxNumberOfMachines-capacityAllocated.getAgents().size());
-                FutureGridServiceAgents futureAgent = defaultMachineProvisioning.startMachinesAsync(
-                    new CapacityRequirements(
-                            new NumberOfMachinesCapacityRequirement(machineShortage)),
-                    START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                state.futureAgent(pu,futureAgent);
-                slaReached = false;
-                if (logger.isInfoEnabled()) {
-                logger.info(
-                        machineShortage+ " new machine(s) is scheduled to be started "+
-                        "in order to reach a total of " + maxNumberOfMachines + " machines." +
-                        "Approved machine agents are: " + state.getCapacityAllocated(pu));
+                
+                int numberOfMachines = capacityAllocated.getAgentUids().size();
+                int machineShortage = Math.min(freeAgents, sla.getMaximumNumberOfMachines()-numberOfMachines);
+                if (machineShortage > 0) {
+                    FutureGridServiceAgents futureAgent = defaultMachineProvisioning.startMachinesAsync(
+                        new CapacityRequirements(
+                                new NumberOfMachinesCapacityRequirement(machineShortage)),
+                        START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                    state.futureAgent(pu,futureAgent);
+                    
+                    if (logger.isInfoEnabled()) {
+                    logger.info(
+                            machineShortage+ " new machine(s) is scheduled to be started "+
+                            "in order to reach a total of " + (machineShortage+numberOfMachines) + " machines." +
+                            "Allocated machine agents are: " + state.getAllocatedCapacity(pu));
+                    }
+                    
+                    // sla not reached until machine shortage is resolved.
+                    slaReached = false;
                 }
             }
         }
         
-        if (getGridServiceAgents().length < sla.getMinimumNumberOfMachines()) {
+        if (state.getAllocatedCapacity(pu).getAgentUids().size() < sla.getMinimumNumberOfMachines()) {
+            // number of agents does not meet SLA
             slaReached = false;
         }
         
         return slaReached;
     }
     
-    public long getMemoryCapacityInMB(EagerMachinesSlaPolicy sla) {
-        long memoryInMB = 0;
-        for (GridServiceAgent agent : getGridServiceAgents()) {
-            memoryInMB += MachinesSlaUtils.getMemoryInMB(agent.getMachine(), sla);
-        }
-        return memoryInMB;
-    }
-
     public ProcessingUnit getId() {
         return pu;
     }
-
             
     private boolean enforceSlaInternal(CapacityMachinesSlaPolicy sla)
             throws ConflictingOperationInProgressException {
 
         cleanFutureAgents(pu, sla);
         cleanFailedMachines();
-        cleanAgentsMarkedForShutdown(sla.getMachineProvisioning());
+        cleanAgentsMarkedForDeallocation(sla.getMachineProvisioning());
         
         AggregatedAllocatedCapacity capacityMarkedForDeallocation = state.getCapacityMarkedForDeallocation(pu);
-        AggregatedAllocatedCapacity capacityAllocated = state.getCapacityAllocated(pu);
+        AggregatedAllocatedCapacity capacityAllocated = state.getAllocatedCapacity(pu);
         
         if (state.getNumberOfFutureAgents(pu) > 0 && 
             !capacityMarkedForDeallocation.equalsZero()) {
-            throw new IllegalStateException("Cannot have both agents pending to be started and agents pending shutdown.");
+            throw new IllegalStateException("Cannot have both agents pending to be started and agents pending deallocation.");
         }
         
         boolean slaReached = 
@@ -259,86 +207,92 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             AggregatedAllocatedCapacity.add(
                     capacityMarkedForDeallocation ,capacityAllocated);
         
-        if (capacityAllocatedAndMarked.getTotalAllocatedCapacity().biggerThan(target) &&
-            capacityAllocatedAndMarked.getAgents().size() > sla.getMinimumNumberOfMachines()) {
+        if (capacityAllocatedAndMarked.getTotalAllocatedCapacity().moreThanSatisfies(target) &&
+            capacityAllocatedAndMarked.getAgentUids().size() > sla.getMinimumNumberOfMachines()) {
             
             logger.debug("Considering scale in: "+
                     "target is "+ target + " " +
                     "minimum #machines is " + sla.getMinimumNumberOfMachines() + ", " +
-                    "machines started " + state.getCapacityAllocated(pu) + ", " + 
-                    "machines pending shutdown " + state.getCapacityMarkedForDeallocation(pu));
+                    "machines started " + state.getAllocatedCapacity(pu) + ", " + 
+                    "machines pending deallocation " + state.getCapacityMarkedForDeallocation(pu));
             
             // scale in
             AllocatedCapacity surplusCapacity = AllocatedCapacity.subtract(
                     capacityAllocatedAndMarked.getTotalAllocatedCapacity(), target);           
-            int surplusMachines = capacityAllocatedAndMarked.getAgents().size() - sla.getMinimumNumberOfMachines();
+            int surplusMachines = capacityAllocatedAndMarked.getAgentUids().size() - sla.getMinimumNumberOfMachines();
             
-            // adjust surplusMemory based on agents marked for shutdown
+            // adjust surplusMemory based on agents marked for deallocation
             // remove mark if it would cause surplus to be below zero
             // remove mark if it would reduce the number of machines below the sla minimum.
-            for (GridServiceAgent agent : capacityMarkedForDeallocation.getAgents()) {
+            for (String agentUid : capacityMarkedForDeallocation.getAgentUids()) {
 
-                AllocatedCapacity agentCapacity = capacityMarkedForDeallocation.getAgentCapacity(agent);
-                if (surplusCapacity.equalsOrBiggerThan(agentCapacity) &&
+                AllocatedCapacity agentCapacity = capacityMarkedForDeallocation.getAgentCapacity(agentUid);
+                if (surplusCapacity.satisfies(agentCapacity) &&
                     surplusMachines > 0) {
-                    // this machine is already marked for shutdown, so surplus
+                    // this machine is already marked for deallocation, so surplus
                     // is adjusted to reflect that
                     surplusCapacity = AllocatedCapacity.subtract(surplusCapacity, agentCapacity);
                     surplusMachines--;
                 } else {
                     // cancel scale in
-                    state.unmarkCapacityForDeallocation(pu, agent, agentCapacity);
-                    logger.info(
-                            "machine agent " + agent.getMachine().getHostAddress() + " " +
-                            "is no longer marked for shutdown in order to maintain capacity. "+
-                            "Approved machine agents are: " + state.getCapacityAllocated(pu));
+                    state.unmarkCapacityForDeallocation(pu, agentUid, agentCapacity);
+                    if (logger.isInfoEnabled()) {
+                        GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
+                        if (agent != null) {
+                        logger.info(
+                                "machine agent " + agent.getMachine().getHostAddress() + " " +
+                                "is no longer marked for deallocation in order to maintain capacity. "+
+                                "Allocated machine agents are: " + state.getAllocatedCapacity(pu));
+                        }
+                    }
                 }
             }
 
-            // mark agents for shutdown if there are not enough of them (scale in)
-            // give priority to agents that do not host a GSM/LUS since we want to evacuate those last.
-            for (GridServiceAgent agent : MachinesSlaUtils.sortManagementLast(capacityAllocated.getAgents())) {
-                AllocatedCapacity agentCapacity = capacityAllocated.getAgentCapacity(agent);
+            for (GridServiceAgent agent : sortManagementLast(capacityAllocated.getAgentUids())) {
+                AllocatedCapacity agentCapacity = capacityAllocated.getAgentCapacity(agent.getUid());
                 
-                if (surplusCapacity.equalsOrBiggerThan(agentCapacity) &&
+                if (surplusCapacity.satisfies(agentCapacity) &&
                     surplusMachines > 0) {
 
                     // scale in machine
-                    state.markCapacityForDeallocation(pu, agent, agentCapacity);
+                    state.markCapacityForDeallocation(pu, agent.getUid(), agentCapacity);
                     surplusCapacity = AllocatedCapacity.subtract(surplusCapacity, agentCapacity);
                     surplusMachines --;
                     slaReached = false;
                     logger.info(
-                            "Machine agent " + agent.getMachine().getHostAddress() + " is marked for shutdown in order to reduce capacity. "+
-                            "Approved machine agents are: " + state.getCapacityAllocated(pu));
+                            "Machine agent " + agent.getMachine().getHostAddress() + " is marked for deallocation in order to reduce capacity. "+
+                            "Allocated machine agents are: " + state.getAllocatedCapacity(pu));
                 }
             }
         }
 
-        else if (capacityAllocated.getAgents().size() <  sla.getMinimumNumberOfMachines()) {
+        else if (capacityAllocated.getAgentUids().size() <  sla.getMinimumNumberOfMachines()) {
             
             logger.info("Considering to start more machines to reach required minimum number of machines: " + 
                     capacityAllocated + " started, " +
-                    capacityMarkedForDeallocation + " marked for shutdown, " +
+                    capacityMarkedForDeallocation + " marked for deallocation, " +
                     sla.getMinimumNumberOfMachines() + " is the required minimum number of machines."
             );
             
-            int machineShortage = sla.getMinimumNumberOfMachines() - capacityAllocated.getAgents().size();
+            int machineShortage = sla.getMinimumNumberOfMachines() - capacityAllocated.getAgentUids().size();
             
             if (state.getNumberOfFutureAgents(pu)==0) {
                 // unmark machines pending deallocation and take into account with shortage calculation
-                for (GridServiceAgent agent : capacityMarkedForDeallocation.getAgents()) {
+                for (String agentUid : capacityMarkedForDeallocation.getAgentUids()) {
                     if (machineShortage > 0) {
                     
-                        AllocatedCapacity agentCapacity = capacityMarkedForDeallocation.getAgentCapacity(agent);
-                        state.unmarkCapacityForDeallocation(pu, agent, agentCapacity);
+                        AllocatedCapacity agentCapacity = capacityMarkedForDeallocation.getAgentCapacity(agentUid);
+                        state.unmarkCapacityForDeallocation(pu, agentUid, agentCapacity);
                         machineShortage--;
                     
                         if (logger.isInfoEnabled()) {
-                            logger.info(
-                                    "machine " + MachinesSlaUtils.machineToString(agent.getMachine()) + " "+
-                                    "is no longer marked for shutdown in order to reach the minimum of " + 
-                                    sla.getMinimumNumberOfMachines() + " machines.");
+                            GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
+                            if (agent != null) {
+                                logger.info(
+                                        "machine " + MachinesSlaUtils.machineToString(agent.getMachine()) + " "+
+                                        "is no longer marked for deallocation in order to reach the minimum of " + 
+                                        sla.getMinimumNumberOfMachines() + " machines.");
+                            }
                         }
                     }
                 }
@@ -367,22 +321,27 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             }
         }
         
-        else if (!capacityAllocatedAndMarked.getTotalAllocatedCapacity().equalsOrBiggerThan(target)) {
+        else if (!capacityAllocatedAndMarked.getTotalAllocatedCapacity().satisfies(target)) {
             
             // scale out
 
             if (logger.isInfoEnabled()) {
             logger.info("Considering to start more machines inorder to reach target capacity:" + 
                     "target is "+ target +
-                    "machines started " + state.getCapacityAllocated(pu) + ", " + 
-                    "machines pending shutdown " + state.getCapacityMarkedForDeallocation(pu));
+                    "machines started " + state.getAllocatedCapacity(pu) + ", " + 
+                    "machines pending deallocation " + state.getCapacityMarkedForDeallocation(pu));
             }
             
-            // unmark all machines pending shutdown              
-            for (GridServiceAgent agent : capacityMarkedForDeallocation.getAgents()) {
-                AllocatedCapacity agentCapacity =  capacityMarkedForDeallocation.getAgentCapacity(agent);
-                logger.info("machine agent " + agent.getMachine().getHostAddress() + " is no longer marked for shutdown in order to maintain capacity.");
-                state.unmarkCapacityForDeallocation(pu, agent, agentCapacity);
+            // unmark all machines pending deallocation              
+            for (String agentUid : capacityMarkedForDeallocation.getAgentUids()) {
+                AllocatedCapacity agentCapacity =  capacityMarkedForDeallocation.getAgentCapacity(agentUid);
+                if (logger.isInfoEnabled()) {
+                    GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
+                    if (agent != null) {
+                        logger.info("machine agent " + agent.getMachine().getHostAddress() + " is no longer marked for deallocation in order to maintain capacity.");
+                    }
+                }
+                state.unmarkCapacityForDeallocation(pu, agentUid, agentCapacity);
             }
             
             AllocatedCapacity shortageCapacity = 
@@ -417,12 +376,18 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             logger.debug("No action required in order to enforce machines sla. "+
                     "target="+target + ", " + 
                     "started="+capacityAllocated + ", " +
-                    "marked for shutdown="+capacityMarkedForDeallocation + ", " +
+                    "marked for deallocation="+capacityMarkedForDeallocation + ", " +
                     "#futures="+state.getNumberOfFutureAgents(pu) + " " +
                     "#minimumMachines="+sla.getMinimumNumberOfMachines());        
         }
         return slaReached;
     }
+
+    private Collection<GridServiceAgent> sortManagementLast(Iterable<String> agentUids) {
+        
+        return MachinesSlaUtils.sortManagementLast(MachinesSlaUtils.getGridServiceAgentsFromUids(agentUids, pu.getAdmin()));
+    }
+
 
     private void startMachines(CapacityMachinesSlaPolicy sla, AllocatedCapacity shortageCapacity) {
         
@@ -430,11 +395,11 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         if (unusedManagementAgent != null) {
         
             AllocatedCapacity agentCapacity = MachinesSlaUtils.getMaxAllocatedCapacity(unusedManagementAgent,sla);
-            state.allocateCapacity(pu, unusedManagementAgent, agentCapacity);
+            state.allocateCapacity(pu, unusedManagementAgent.getUid(), agentCapacity);
             logger.info(
                     "Existing management machine " + MachinesSlaUtils.machineToString(unusedManagementAgent.getMachine()) + " " +
                     "is re-used to fill capacity shortage " + shortageCapacity + ", " + 
-                    "Approved machine agents are: " + state.getCapacityAllocated(pu));
+                    "Allocated machine agents are: " + state.getAllocatedCapacity(pu));
         }
         else {
             
@@ -446,7 +411,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             logger.info(
                     "One or more new machine(s) is started in order to "+
                     "fill capacity shortage " + shortageCapacity + 
-                    "Approved machine agents are: " + state.getCapacityAllocated(pu) +" "+
+                    "Allocated machine agents are: " + state.getAllocatedCapacity(pu) +" "+
                     "Pending future machine(s) requests " + state.getNumberOfFutureAgents(pu));
         }
         
@@ -469,12 +434,12 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         if (unusedManagementAgent != null) {
         
             AllocatedCapacity agentCapacity = MachinesSlaUtils.getMaxAllocatedCapacity(unusedManagementAgent,sla);
-            state.allocateCapacity(pu, unusedManagementAgent, agentCapacity);
+            state.allocateCapacity(pu, unusedManagementAgent.getUid(), agentCapacity);
             logger.info(
                     "Existing management machine " + MachinesSlaUtils.machineToString(unusedManagementAgent.getMachine()) + " " +
                     "is re-used to reach the minimum of " + 
                     sla.getMinimumNumberOfMachines() + " machines. " +
-                    "Approved machine agents are: " + state.getCapacityAllocated(pu));
+                    "Allocated machine agents are: " + state.getAllocatedCapacity(pu));
         }
         else {    
             // scale out to get to the minimum number of agents
@@ -486,7 +451,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             logger.info(
                 numberOfMachinesToStart+ " new machine(s) is scheduled to be started in order to reach the minimum of " + 
                 sla.getMinimumNumberOfMachines() + " machines. " +
-                "Approved machine agents are: " + state.getCapacityAllocated(pu));
+                "Allocated machine agents are: " + state.getAllocatedCapacity(pu));
         }
     }
 
@@ -498,52 +463,61 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             }
         }
         
-        agents.removeAll(state.getAllUsedAgents());
+        agents.removeAll(state.getAllUsedAgentUids());
         return agents.toArray(new GridServiceAgent[agents.size()]);
     }
     
     /**
-     * Kill agents marked for shutdown that no longer manage containers. 
+     * Kill agents marked for deallocation that no longer manage containers. 
      * @param machineProvisioning
      */
-    private void cleanAgentsMarkedForShutdown(NonBlockingElasticMachineProvisioning machineProvisioning) {
+    private void cleanAgentsMarkedForDeallocation(NonBlockingElasticMachineProvisioning machineProvisioning) {
         
         AggregatedAllocatedCapacity capacityMarkedForDeallocation = state.getCapacityMarkedForDeallocation(pu);
-        for (GridServiceAgent agent : capacityMarkedForDeallocation.getAgents()) {
+        for (String agentUid : capacityMarkedForDeallocation.getAgentUids()) {
             
-            AllocatedCapacity agentCapacity = capacityMarkedForDeallocation.getAgentCapacity(agent);
+            AllocatedCapacity agentCapacity = capacityMarkedForDeallocation.getAgentCapacity(agentUid);
             
-            int numberOfChildProcesses = MachinesSlaUtils.getNumberOfChildProcesses(agent);
-            
-            if (!agent.isDiscovered()) {
+            GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
+            if (agent == null) {
                 logger.info("Agent machine " + agent.getMachine().getHostAddress() + " is confirmed to be shutdown.");
-                state.deallocateCapacity(pu, agent, agentCapacity);
-            } 
-            else if (MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine())) {
-                logger.info("Agent machine " + agent.getMachine().getHostAddress() + " is running management processes but is not needed for pu " + pu.getName());
-                state.deallocateCapacity(pu, agent, agentCapacity);
+                state.deallocateCapacity(pu, agentUid, agentCapacity);
             }
-            else if (numberOfChildProcesses == 0) {
-               // nothing running on this agent (not even GSM/LUS). Get rid of it.
-               logger.info(
-                       "Stopping agent machine " + 
-                       agent.getMachine().getHostAddress());
-               
-               machineProvisioning.stopMachineAsync(
-                       agent, 
-                       STOP_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            else if (MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine())) {
+                logger.info("Agent machine " + agent.getMachine().getHostAddress() + " is running management processes but is considered deallocated for pu " + pu.getName());
+                state.deallocateCapacity(pu, agentUid, agentCapacity);
+            } 
+            else {
+                if (MachinesSlaUtils.getNumberOfChildProcesses(agent) == 0) {
+                   // nothing running on this agent (not even GSM/LUS). Get rid of it.
+                   logger.info(
+                           "Stopping agent machine " + 
+                           agent.getMachine().getHostAddress());
+                   
+                   machineProvisioning.stopMachineAsync(
+                           agent, 
+                           STOP_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                }
+                else if (MachinesSlaUtils.getNumberOfChildContainersForProcessingUnit(agent,pu) == 0) {
+                    logger.info("Agent machine " + agent.getMachine().getHostAddress() + " is no longer runnign containers for pu " + pu.getName() + " and is deallocated for that pu.");
+                    state.deallocateCapacity(pu, agentUid, agentCapacity);    
+                }
             }
         }
     }
 
     private void cleanFailedMachines() {
-        AggregatedAllocatedCapacity capacityAllocated = state.getCapacityAllocated(pu);
+        for(String agentUid: state.getAllocatedCapacity(pu).getAgentUids()) {
+            AllocatedCapacity agentCapacity = state.getAllocatedCapacity(pu).getAgentCapacity(agentUid);
+            if (pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid) == null) {
+                state.markCapacityForDeallocation(pu, agentUid, agentCapacity);
+            }
+        }
         
-        for(GridServiceAgent agent : capacityAllocated.getAgents()) {
-            AllocatedCapacity agentCapacity = capacityAllocated.getAgentCapacity(agent);
-            if (!agent.isDiscovered()) {
-                state.markCapacityForDeallocation(pu, agent, agentCapacity);
-                state.deallocateCapacity(pu, agent, agentCapacity);
+        for(String agentUid: state.getCapacityMarkedForDeallocation(pu).getAgentUids()) {
+            AllocatedCapacity agentCapacity = state.getAllocatedCapacity(pu).getAgentCapacity(agentUid);
+            if (pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid) == null) {
+                state.deallocateCapacity(pu, agentUid, agentCapacity);
             }
         }
     }
@@ -560,56 +534,13 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             
                 // create a set of new agents
                 // throws an exception if anything went wrong.
-                Set<GridServiceAgent> newAgents = new HashSet<GridServiceAgent>(Arrays.asList(
-                                    future.get()));
-                
-                // create a set of agents that are both in the new and already started agents.
-                Set<GridServiceAgent> duplicateAgents = state.getAllUsedAgents();
-                duplicateAgents.retainAll(newAgents);
-                
-                // the duplicate list should be empty.
-                if (!duplicateAgents.isEmpty()) {
-                    
-                    // remove all new agents that are duplicate
-                    newAgents.remove(duplicateAgents);
-                    
-                    if (logger.isWarnEnabled()) {
-                        List<String> usedMachines = new ArrayList<String>();
-                        for (GridServiceAgent usedAgent : duplicateAgents) {
-                            usedMachines.add(usedAgent.getMachine().getHostAddress());
-                        }
-                        
-                        logger.warn(
-                                "Machine provisioning for " + pu.getName() + " "+
-                                "has provided the following machines, which are already in use: "+
-                                Arrays.toString(usedMachines.toArray(new String[usedMachines.size()])) +
-                                "These violating machines have been ignored, "+
-                                "but it should not have happened in the first place.");
-                    }
-                }
-                
-                List<String> machinesWrongZone = new ArrayList<String>();
-                for (GridServiceAgent agent : newAgents) {
-                    if (!MachinesSlaUtils.matchesMachineZones(sla, agent)) {
-                        machinesWrongZone.add(agent.getMachine().getHostAddress());
-                    }
-                }
-                if (!machinesWrongZone.isEmpty()) {
-                    
-                    if (logger.isWarnEnabled()) {
-                        logger.warn(
-                            "Machine provisioning for " + pu.getName() + " "+
-                            "has provided the following machines, which have the wrong zone: "+
-                            Arrays.toString(machinesWrongZone.toArray(new String[machinesWrongZone.size()])) +
-                            "These violating machines are will be used, "+
-                            "but it should not have happened in the first place.");
-                    }
-                }
-                
+                GridServiceAgent[] newAgents = filterNewAgentsIfAlreadyInUse(future.get());
+                warnAboutAgentsWithWrongMachineZone(sla, newAgents);
                 //update started agents list with the list of new agents
                 for (GridServiceAgent agent : newAgents) {
+                    //TODO: If pu isolation is public or shared then need to allocate only part of the machine's capacity. And not the maximum capacity.
                     AllocatedCapacity agentCapacity = MachinesSlaUtils.getMaxAllocatedCapacity(agent,sla);
-                    state.allocateCapacity(pu, agent, agentCapacity);
+                    state.allocateCapacity(pu, agent.getUid(), agentCapacity);
                     if (logger.isInfoEnabled()) {
                         logger.info("Agent started succesfully on a new machine " + agent.getMachine().getHostAddress());
                     }
@@ -631,6 +562,46 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         
     }
     
+
+    private GridServiceAgent[] filterNewAgentsIfAlreadyInUse(GridServiceAgent[] newAgents) {
+        
+        Set<GridServiceAgent> agents = new HashSet<GridServiceAgent>(Arrays.asList(newAgents));
+        
+        final Set<String> usedAgentUids = state.getAllUsedAgentUids();
+        final Iterator<GridServiceAgent> iterator = agents.iterator();
+        while(iterator.hasNext()) {
+
+            GridServiceAgent agent = iterator.next();
+            if (usedAgentUids.contains(agent.getUid())) {
+                // remove the new agent since it is already being used
+                iterator.remove();
+                
+                if (logger.isWarnEnabled()) {
+                        logger.warn(
+                            "Machine provisioning for " + pu.getName() + " "+
+                            "has provided the machine " + agent.getMachine().getHostAddress() +
+                            " which is already in use."+
+                            "This violating machine has been ignored");
+                }
+            }
+        }
+        
+        return agents.toArray(new GridServiceAgent[agents.size()]);
+    }
+    
+    private void warnAboutAgentsWithWrongMachineZone(AbstractMachinesSlaPolicy sla, GridServiceAgent[] agents) {
+        if (logger.isWarnEnabled()) {
+            for (GridServiceAgent agent : agents) {
+                if (!MachinesSlaUtils.matchesMachineZones(sla, agent)) {
+                    logger.warn(
+                        "Machine provisioning for " + pu.getName() + " "+
+                        "has provided the machine " + agent.getMachine().getHostAddress() + ", which has a wrong zone."+
+                        "This violation is ignored, and the machine will be used.");
+                }
+            }
+        }
+
+    }
 
     /**
      * This is the default machine provisioning implementation which is tightly coupled

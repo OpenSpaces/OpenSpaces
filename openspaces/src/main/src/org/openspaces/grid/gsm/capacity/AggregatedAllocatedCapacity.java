@@ -1,27 +1,25 @@
-package org.openspaces.grid.gsm.machines;
+package org.openspaces.grid.gsm.capacity;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
 
 public class AggregatedAllocatedCapacity {
 
-    private final Map<GridServiceAgent,AllocatedCapacity> capacityPerAgent;
+    // allocated capacity per grid service agent (UUID)
+    private final Map<String,AllocatedCapacity> capacityPerAgent;
     
     
     public AggregatedAllocatedCapacity() {
-        this.capacityPerAgent = new HashMap<GridServiceAgent, AllocatedCapacity>();
+        this.capacityPerAgent = new ConcurrentHashMap<String, AllocatedCapacity>();
     }
         
     public AllocatedCapacity getTotalAllocatedCapacity() {
         AllocatedCapacity total = new AllocatedCapacity(Fraction.ZERO, 0);
-        for (GridServiceAgent agent : capacityPerAgent.keySet()) {
-            AllocatedCapacity capacity = capacityPerAgent.get(agent);
+        for (String agentUid : capacityPerAgent.keySet()) {
+            AllocatedCapacity capacity = capacityPerAgent.get(agentUid);
             total = AllocatedCapacity.add(total,capacity);
         }
         return total;
@@ -31,93 +29,99 @@ public class AggregatedAllocatedCapacity {
         return capacityPerAgent.isEmpty();
     }
 
+    public boolean equals(Object other) {
+        return 
+            other instanceof AggregatedAllocatedCapacity &&
+            ((AggregatedAllocatedCapacity)other).capacityPerAgent.equals(capacityPerAgent);
+    }
 
-    public Collection<GridServiceAgent> getAgents() {
-        return Collections.unmodifiableCollection(
-                new ArrayList<GridServiceAgent>(capacityPerAgent.keySet()));
+    public Collection<String> getAgentUids() {
+        return capacityPerAgent.keySet();
     }
     
     public String toString() {
         return capacityPerAgent.size() + " machines with total capacity of " + getTotalAllocatedCapacity();
     }
+    
     public static AggregatedAllocatedCapacity add(
             AggregatedAllocatedCapacity aggregatedCapacity1,
             AggregatedAllocatedCapacity aggregatedCapacity2) {
 
         AggregatedAllocatedCapacity sum = new AggregatedAllocatedCapacity();
+        sum.addAll(aggregatedCapacity1);
         sum.addAll(aggregatedCapacity2);
         return sum;
     }
     
     public static AggregatedAllocatedCapacity add(
             AggregatedAllocatedCapacity aggregatedCapacity, 
-            GridServiceAgent agent, 
+            String agentUid, 
             AllocatedCapacity capacity) {
         
         AggregatedAllocatedCapacity sum = new AggregatedAllocatedCapacity();
         sum.addAll(aggregatedCapacity);
-        sum.add(agent,capacity);
+        sum.add(agentUid,capacity);
         return sum;
         
     }
     
     public static AggregatedAllocatedCapacity subtract(
             AggregatedAllocatedCapacity aggregatedCapacity, 
-            GridServiceAgent agent, 
+            String agentUid, 
             AllocatedCapacity capacity) {
         
         AggregatedAllocatedCapacity remaining = new AggregatedAllocatedCapacity();
         remaining.addAll(aggregatedCapacity);
-        remaining.subtract(agent,capacity);
+        remaining.subtract(agentUid,capacity);
         return remaining;
     }
 
-    public AllocatedCapacity getAgentCapacity(GridServiceAgent agent) {
-        if (!capacityPerAgent.containsKey(agent)) {
+    public AllocatedCapacity getAgentCapacity(String agentUid) {
+        if (!capacityPerAgent.containsKey(agentUid)) {
             throw new IllegalArgumentException("agent");
         }
-        return this.capacityPerAgent.get(agent);
+        return this.capacityPerAgent.get(agentUid);
     }
     
     private void addAll(AggregatedAllocatedCapacity aggregatedCapacity) {
-        for (GridServiceAgent agent: aggregatedCapacity.capacityPerAgent.keySet()) {
-            AllocatedCapacity capacity = aggregatedCapacity.capacityPerAgent.get(agent);
-            add(agent,capacity);
+        for (String agentUid : aggregatedCapacity.capacityPerAgent.keySet()) {
+            AllocatedCapacity capacity = aggregatedCapacity.capacityPerAgent.get(agentUid);
+            add(agentUid,capacity);
         }
     }
     
-    private void add(GridServiceAgent agent, AllocatedCapacity capacity) {
+    private void add(String agentUid, AllocatedCapacity capacity) {
         
         validateAllocation(capacity);
         
-        if (capacityPerAgent.containsKey(agent)) {
+        if (capacityPerAgent.containsKey(agentUid)) {
             
             capacity = 
                 AllocatedCapacity.add(
-                        capacityPerAgent.get(agent),
+                        capacityPerAgent.get(agentUid),
                         capacity);
         }
         
-        capacityPerAgent.put(agent,capacity);
+        capacityPerAgent.put(agentUid,capacity);
     }
 
   
-    private void subtract(GridServiceAgent agent, AllocatedCapacity capacity) {
+    private void subtract(String agentUid, AllocatedCapacity capacity) {
         
         validateAllocation(capacity);
         
-        if (!capacityPerAgent.containsKey(agent)) {
-            throw new IllegalArgumentException(agent.getMachine().getHostAddress() + " no found");
+        if (!capacityPerAgent.containsKey(agentUid)) {
+            throw new IllegalArgumentException("Agent UID " + agentUid + " no found");
         }
         
         AllocatedCapacity newAllocation = 
-            AllocatedCapacity.subtract(capacityPerAgent.get(agent), capacity);
+            AllocatedCapacity.subtract(capacityPerAgent.get(agentUid), capacity);
         
         if (newAllocation.equalsZero()) {
-            capacityPerAgent.remove(agent);
+            capacityPerAgent.remove(agentUid);
         }
         else {
-            capacityPerAgent.put(agent,newAllocation);
+            capacityPerAgent.put(agentUid,newAllocation);
         }        
     }
     
