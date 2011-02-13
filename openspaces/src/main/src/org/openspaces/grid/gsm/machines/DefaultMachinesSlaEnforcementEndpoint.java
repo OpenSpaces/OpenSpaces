@@ -480,7 +480,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             
             GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
             if (agent == null) {
-                logger.info("Agent machine " + agent.getMachine().getHostAddress() + " is confirmed to be shutdown.");
+                logger.info("Agent is confirmed to be shutdown (UUID="+agentUid+")");
                 state.deallocateCapacity(pu, agentUid, agentCapacity);
             }
             else if (MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine())) {
