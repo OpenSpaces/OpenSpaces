@@ -97,7 +97,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         try {
             return enforceSlaInternal(sla);
         } catch (ConflictingOperationInProgressException e) {
-            logger.info("Cannot enforce Machines SLA since a conflicting operation is in progress. Try again later.", e);
+            logger.info("Cannot enforce Capacity Machines SLA since a conflicting operation is in progress. Try again later.", e);
             return false; // try again next time
         }
     }
@@ -115,10 +115,15 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             throw new IllegalArgumentException("Minimum number of machines cannot be more than maximum number of machines.");
         }
         DefaultMachineProvisioning defaultMachineProvisioning = getDefaultMachineProvisioningForProcessingUnit(pu,sla);
-        return enforceSlaInternal(sla, defaultMachineProvisioning);
+        try {
+            return enforceSlaInternal(sla, defaultMachineProvisioning);
+        } catch (ConflictingOperationInProgressException e) {
+            logger.info("Cannot enforce Eager Machines SLA since a conflicting operation is in progress. Try again later.", e);
+            return false;
+        }
     }
 
-    private boolean enforceSlaInternal(EagerMachinesSlaPolicy sla, DefaultMachineProvisioning defaultMachineProvisioning) {
+    private boolean enforceSlaInternal(EagerMachinesSlaPolicy sla, DefaultMachineProvisioning defaultMachineProvisioning) throws ConflictingOperationInProgressException {
 
         cleanFutureAgents(pu, sla);
         cleanFailedMachines();
@@ -132,36 +137,40 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             throw new IllegalStateException("Cannot have both agents pending to be started and agents pending deallocation.");
         }
         
-        boolean slaReached = true;
-        if (state.getNumberOfFutureAgents(pu)!=0 ||
-            capacityMarkedForDeallocation.equalsZero()) {
+        if (state.getNumberOfFutureAgents(pu)!=0) {
             // operations are in progress. do not perform more operations in parallel
-            slaReached = false;
+            throw new ConflictingOperationInProgressException();
         }
-        else {
-            // Eager scale out: ask for all available machines.
-            int freeAgents = defaultMachineProvisioning.countFreeAgents();
-            if (freeAgents > 0) {
+        
+        if (!capacityMarkedForDeallocation.equalsZero()) {
+            // operations are in progress. do not perform more operations in parallel
+            throw new ConflictingOperationInProgressException();
+        }
+        
+        boolean slaReached = true;
+        
+        // Eager scale out: ask for all available machines.
+        int freeAgents = defaultMachineProvisioning.countFreeAgents();
+        if (freeAgents > 0) {
+            
+            int numberOfMachines = capacityAllocated.getAgentUids().size();
+            int machineShortage = Math.min(freeAgents, sla.getMaximumNumberOfMachines()-numberOfMachines);
+            if (machineShortage > 0) {
+                FutureGridServiceAgents futureAgent = defaultMachineProvisioning.startMachinesAsync(
+                    new CapacityRequirements(
+                            new NumberOfMachinesCapacityRequirement(machineShortage)),
+                    START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                state.futureAgent(pu,futureAgent);
                 
-                int numberOfMachines = capacityAllocated.getAgentUids().size();
-                int machineShortage = Math.min(freeAgents, sla.getMaximumNumberOfMachines()-numberOfMachines);
-                if (machineShortage > 0) {
-                    FutureGridServiceAgents futureAgent = defaultMachineProvisioning.startMachinesAsync(
-                        new CapacityRequirements(
-                                new NumberOfMachinesCapacityRequirement(machineShortage)),
-                        START_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                    state.futureAgent(pu,futureAgent);
-                    
-                    if (logger.isInfoEnabled()) {
-                    logger.info(
-                            machineShortage+ " new machine(s) is scheduled to be started "+
-                            "in order to reach a total of " + (machineShortage+numberOfMachines) + " machines." +
-                            "Allocated machine agents are: " + state.getAllocatedCapacity(pu));
-                    }
-                    
-                    // sla not reached until machine shortage is resolved.
-                    slaReached = false;
+                if (logger.isInfoEnabled()) {
+                logger.info(
+                        machineShortage+ " new machine(s) is scheduled to be started "+
+                        "in order to reach a total of " + (machineShortage+numberOfMachines) + " machines." +
+                        "Allocated machine agents are: " + state.getAllocatedCapacity(pu));
                 }
+                
+                // sla not reached until machine shortage is resolved.
+                slaReached = false;
             }
         }
         
@@ -418,13 +427,20 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     }
 
     private GridServiceAgent findUnusedManagementMachine(CapacityMachinesSlaPolicy sla) {
-        GridServiceAgent unusedManagementMachine = null;
-        final GridServiceAgent[] allUnusedManagementMachines = getAllUnusedManagementMachines();    
-        if (sla.getAllowDeploymentOnManagementMachine() && 
-            allUnusedManagementMachines.length > 0) {
         
-            //special case where a management machine is already running and can be reused.
-            unusedManagementMachine = allUnusedManagementMachines[0];
+        GridServiceAgent unusedManagementMachine = null;
+        if (sla.getAllowDeploymentOnManagementMachine()) {
+            Set<String> allUnusedManagementMachines = getAllUnusedManagementMachines();    
+            if (!allUnusedManagementMachines.isEmpty()) {
+        
+                //special case where a management machine is already running and can be reused.
+                String agentUid = allUnusedManagementMachines.iterator().next();
+                unusedManagementMachine = 
+                    pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
+                if (unusedManagementMachine == null) {
+                    throw new IllegalStateException("Cannot find agent UID" + agentUid);
+                }
+            }
         }
         return unusedManagementMachine;
     }
@@ -455,16 +471,16 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
     }
 
-    private GridServiceAgent[] getAllUnusedManagementMachines() {
-        final Set<GridServiceAgent> agents = new HashSet<GridServiceAgent>();
+    private Set<String> getAllUnusedManagementMachines() {
+        final Set<String> agentUids = new HashSet<String>();
         for (final GridServiceAgent agent : pu.getAdmin().getGridServiceAgents()) {
             if (MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine())) {
-                agents.add(agent);
+                agentUids.add(agent.getUid());
             }
         }
         
-        agents.removeAll(state.getAllUsedAgentUids());
-        return agents.toArray(new GridServiceAgent[agents.size()]);
+        agentUids.removeAll(state.getAllUsedAgentUids());
+        return agentUids;
     }
     
     /**
