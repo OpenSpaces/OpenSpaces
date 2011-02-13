@@ -1,4 +1,4 @@
-package org.openspaces.itest.remoting.methodannotations.executor;
+package org.openspaces.itest.remoting.methodannotations;
 
 import org.openspaces.remoting.ExecutorRemotingMethod;
 
@@ -7,7 +7,7 @@ import java.util.concurrent.Future;
 /**
  * @author uri
  */
-public interface SimpleService {
+public interface SimpleExecutorRemotingService {
 
     @ExecutorRemotingMethod(broadcast = true, remoteResultReducer = "sumResultReducer")
     int sumWithInjectedReducer(int value);

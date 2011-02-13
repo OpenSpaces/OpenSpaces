@@ -1,4 +1,4 @@
-package org.openspaces.itest.remoting.methodannotations.executor;
+package org.openspaces.itest.remoting.methodannotations;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.openspaces.remoting.RemoteInvocationAspect;

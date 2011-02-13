@@ -43,6 +43,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static org.openspaces.remoting.RemotingUtils.*;
+
 /**
  * A space <b>executor</b> remoting proxy that forward the service execution to a remote service with the space as
  * the transport layer. Services are remotely exported in the "server side" using the
@@ -193,7 +195,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
         Assert.notNull(getServiceInterface(), "serviceInterface property is required");
         Assert.notNull(gigaSpace, "gigaSpace property is required");
         this.serviceProxy = ProxyFactory.getProxy(getServiceInterface(), this);
-        this.methodHashLookup = RemotingUtils.buildMethodToHashLookupForInterface(getServiceInterface(), asyncMethodPrefix);
+        this.methodHashLookup = buildMethodToHashLookupForInterface(getServiceInterface(), asyncMethodPrefix);
     }
 
     public Object getObject() {
@@ -214,8 +216,8 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
         for (Annotation methodAnnotation : methodAnnotations) {
             if (methodAnnotation instanceof ExecutorRemotingMethod) {
                 ExecutorRemotingMethod remotingMethodAnnotation = (ExecutorRemotingMethod) methodAnnotation;
-                localRemoteInvocationAspect = (RemoteInvocationAspect) createByClassOrFindByName(remotingMethodAnnotation.remoteInvocationAspect(),
-                                                                                                 remotingMethodAnnotation.remoteInvocationAspectType());
+                localRemoteInvocationAspect = (RemoteInvocationAspect) createByClassOrFindByName(applicationContext, remotingMethodAnnotation.remoteInvocationAspect(),
+                                                                                                               remotingMethodAnnotation.remoteInvocationAspectType());
             }
         }
         if (localRemoteInvocationAspect == null) {
@@ -262,17 +264,17 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
                     ExecutorRemotingMethod remotingMethodAnnotation = (ExecutorRemotingMethod) methodAnnotation;
                     if (remotingMethodAnnotation.broadcast()) {
                         localShouldBroadcast = true;
-                        localRemoteResultReducer = (RemoteResultReducer) createByClassOrFindByName(remotingMethodAnnotation.remoteResultReducer(),
+                        localRemoteResultReducer = (RemoteResultReducer) createByClassOrFindByName(applicationContext, remotingMethodAnnotation.remoteResultReducer(),
                                                                                                    remotingMethodAnnotation.remoteResultReducerType());
                     } else {
                         localShouldBroadcast = false;
-                        RemoteRoutingHandler methodRoutingHandler = (RemoteRoutingHandler) createByClassOrFindByName(remotingMethodAnnotation.remoteRoutingHandler(),
+                        RemoteRoutingHandler methodRoutingHandler = (RemoteRoutingHandler) createByClassOrFindByName(applicationContext, remotingMethodAnnotation.remoteRoutingHandler(),
                                                                                                                      remotingMethodAnnotation.remoteRoutingHandlerType());
                         if (methodRoutingHandler != null) {
                             localRoutingHandler = methodRoutingHandler;
                         }
                     }
-                    localMetaArgumentsHandler = (MetaArgumentsHandler) createByClassOrFindByName(remotingMethodAnnotation.metaArgumentsHandler(),
+                    localMetaArgumentsHandler = (MetaArgumentsHandler) createByClassOrFindByName(applicationContext, remotingMethodAnnotation.metaArgumentsHandler(),
                                                                                                  remotingMethodAnnotation.metaArgumentsHandlerType());
 
                 }
@@ -319,22 +321,6 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
             throw new RemoteTimeoutException("Timeout waiting for result for [" + lookupName +
                     "] and method [" + methodName + "]", timeout);
         }
-    }
-
-
-    protected Object createByClassOrFindByName(String name, Class clazz) throws NoSuchBeanDefinitionException {
-        if (StringUtils.hasLength(name)) {
-            return applicationContext.getBean(name);
-        }
-
-        if (!Object.class.equals(clazz)) {
-            try {
-                return clazz.newInstance();
-            } catch (Exception e) {
-                throw new NoSuchBeanDefinitionException("Failed to create class [" + clazz + "]");
-            }
-        }
-        return null;
     }
 
     private class DistributedExecutorAsyncFuture implements AsyncFuture {

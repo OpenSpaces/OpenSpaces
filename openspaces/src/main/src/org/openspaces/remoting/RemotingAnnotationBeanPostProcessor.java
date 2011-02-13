@@ -16,6 +16,9 @@ import org.springframework.core.Ordered;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
+import static org.openspaces.remoting.RemotingUtils.*;
+
+
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -121,9 +124,9 @@ public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanP
                     factoryBean.setFifo(eventDrivenProxy.fifo());
                     factoryBean.setGigaSpace(findGigaSpaceByName(eventDrivenProxy.gigaSpace()));
                     factoryBean.setAsyncMethodPrefix(eventDrivenProxy.asyncMethodPrefix());
-                    factoryBean.setMetaArgumentsHandler((MetaArgumentsHandler) createByClassOrFindByName(eventDrivenProxy.metaArgumentsHandler(), eventDrivenProxy.metaArgumentsHandlerType()));
-                    factoryBean.setRemoteInvocationAspect((RemoteInvocationAspect) createByClassOrFindByName(eventDrivenProxy.remoteInvocationAspect(), eventDrivenProxy.remoteInvocationAspectType()));
-                    factoryBean.setRemoteRoutingHandler((RemoteRoutingHandler) createByClassOrFindByName(eventDrivenProxy.remoteRoutingHandler(), eventDrivenProxy.remoteRoutingHandlerType()));
+                    factoryBean.setMetaArgumentsHandler((MetaArgumentsHandler) createByClassOrFindByName(applicationContext, eventDrivenProxy.metaArgumentsHandler(), eventDrivenProxy.metaArgumentsHandlerType()));
+                    factoryBean.setRemoteInvocationAspect((RemoteInvocationAspect) createByClassOrFindByName(applicationContext, eventDrivenProxy.remoteInvocationAspect(), eventDrivenProxy.remoteInvocationAspectType()));
+                    factoryBean.setRemoteRoutingHandler((RemoteRoutingHandler) createByClassOrFindByName(applicationContext, eventDrivenProxy.remoteRoutingHandler(), eventDrivenProxy.remoteRoutingHandlerType()));
                     factoryBean.setServiceInterface(field.getType());
                     factoryBean.afterPropertiesSet();
                     field.setAccessible(true);
@@ -135,10 +138,10 @@ public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanP
                     factoryBean.setGigaSpace(findGigaSpaceByName(executorProxy.gigaSpace()));
                     factoryBean.setTimeout(executorProxy.timeout());
                     factoryBean.setBroadcast(executorProxy.broadcast());
-                    factoryBean.setMetaArgumentsHandler((MetaArgumentsHandler) createByClassOrFindByName(executorProxy.metaArgumentsHandler(), executorProxy.metaArgumentsHandlerType()));
-                    factoryBean.setRemoteInvocationAspect((RemoteInvocationAspect) createByClassOrFindByName(executorProxy.remoteInvocationAspect(), executorProxy.remoteInvocationAspectType()));
-                    factoryBean.setRemoteRoutingHandler((RemoteRoutingHandler) createByClassOrFindByName(executorProxy.remoteRoutingHandler(), executorProxy.remoteRoutingHandlerType()));
-                    factoryBean.setRemoteResultReducer((RemoteResultReducer) createByClassOrFindByName(executorProxy.remoteResultReducer(), executorProxy.remoteResultReducerType()));
+                    factoryBean.setMetaArgumentsHandler((MetaArgumentsHandler) createByClassOrFindByName(applicationContext, executorProxy.metaArgumentsHandler(), executorProxy.metaArgumentsHandlerType()));
+                    factoryBean.setRemoteInvocationAspect((RemoteInvocationAspect) createByClassOrFindByName(applicationContext, executorProxy.remoteInvocationAspect(), executorProxy.remoteInvocationAspectType()));
+                    factoryBean.setRemoteRoutingHandler((RemoteRoutingHandler) createByClassOrFindByName(applicationContext, executorProxy.remoteRoutingHandler(), executorProxy.remoteRoutingHandlerType()));
+                    factoryBean.setRemoteResultReducer((RemoteResultReducer) createByClassOrFindByName(applicationContext, executorProxy.remoteResultReducer(), executorProxy.remoteResultReducerType()));
                     factoryBean.setReturnFirstResult(executorProxy.returnFirstResult());
                     factoryBean.setServiceInterface(field.getType());
                     factoryBean.afterPropertiesSet();
@@ -149,21 +152,6 @@ public class RemotingAnnotationBeanPostProcessor extends InstantiationAwareBeanP
         });
 
         return true;
-    }
-
-    protected Object createByClassOrFindByName(String name, Class clazz) throws NoSuchBeanDefinitionException {
-        if (StringUtils.hasLength(name)) {
-            return applicationContext.getBean(name);
-        }
-
-        if (!Object.class.equals(clazz)) {
-            try {
-                return clazz.newInstance();
-            } catch (Exception e) {
-                throw new NoSuchBeanDefinitionException("Failed to create class [" + clazz + "]");
-            }
-        }
-        return null;
     }
 
     protected GigaSpace findGigaSpaceByName(String gsName) throws NoSuchBeanDefinitionException {

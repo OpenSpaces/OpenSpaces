@@ -20,15 +20,21 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.openspaces.core.GigaSpace;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.remoting.support.RemoteAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.Future;
+
+import static org.openspaces.remoting.RemotingUtils.createByClassOrFindByName;
 
 /**
  * A space <b>event driven</b> remoting proxy that forward the service execution to a remote service with the space as
@@ -70,11 +76,15 @@ import java.util.concurrent.Future;
  * which can be set using {@link #setRemoteInvocationAspect(RemoteInvocationAspect)}. It is up the aspect to then
  * call the actual remote invocation.
  *
+ * <p>Note that it is also possible to configure method level fifo behavior, one way behavior, {@link RemoteResultReducer},
+ * {@link RemoteRoutingHandler}, {@link RemoteInvocationAspect} and {@link MetaArgumentsHandler} using the
+ * {@link EventDrivenRemotingMethod} annotation.
+ *
  * @author kimchy
  * @see SpaceRemotingServiceExporter
  */
 public class EventDrivenSpaceRemotingProxyFactoryBean extends RemoteAccessor implements FactoryBean, InitializingBean,
-        MethodInterceptor, RemotingInvoker {
+        MethodInterceptor, RemotingInvoker, ApplicationContextAware {
 
     public static final String DEFAULT_ASYNC_METHOD_PREFIX = "async";
 
@@ -83,7 +93,7 @@ public class EventDrivenSpaceRemotingProxyFactoryBean extends RemoteAccessor imp
     private long timeout = 60000;
 
     private final SpaceRemotingEntryFactory remotingEntryFactory = new SpaceRemotingEntryMetadataFactory();
-    
+
     private RemoteRoutingHandler remoteRoutingHandler;
 
     private MetaArgumentsHandler metaArgumentsHandler;
@@ -101,6 +111,12 @@ public class EventDrivenSpaceRemotingProxyFactoryBean extends RemoteAccessor imp
     private Object serviceProxy;
 
     private Map<Method, RemotingUtils.MethodHash> methodHashLookup;
+
+    private ApplicationContext applicationContext;
+
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
 
     /**
      * Sets the GigaSpace interface that will be used to work with the space as the transport layer
@@ -202,8 +218,21 @@ public class EventDrivenSpaceRemotingProxyFactoryBean extends RemoteAccessor imp
 
     @SuppressWarnings("unchecked")
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-        if (remoteInvocationAspect != null) {
-            return remoteInvocationAspect.invoke(methodInvocation, this);
+        RemoteInvocationAspect localRemoteInvocationAspect = null;
+        Annotation[] methodAnnotations = methodInvocation.getMethod().getAnnotations();
+        for (Annotation methodAnnotation : methodAnnotations) {
+            if (methodAnnotation instanceof EventDrivenRemotingMethod) {
+                EventDrivenRemotingMethod remotingMethodAnnotation = (EventDrivenRemotingMethod) methodAnnotation;
+                localRemoteInvocationAspect = (RemoteInvocationAspect) createByClassOrFindByName(applicationContext, remotingMethodAnnotation.remoteInvocationAspect(),
+                        remotingMethodAnnotation.remoteInvocationAspectType());
+            }
+        }
+        if (localRemoteInvocationAspect == null) {
+            localRemoteInvocationAspect = remoteInvocationAspect;
+        }
+
+        if (localRemoteInvocationAspect != null) {
+            return localRemoteInvocationAspect.invoke(methodInvocation, this);
         }
         return invokeRemote(methodInvocation);
     }
@@ -211,6 +240,42 @@ public class EventDrivenSpaceRemotingProxyFactoryBean extends RemoteAccessor imp
     public Object invokeRemote(MethodInvocation methodInvocation) throws Throwable {
         String lookupName = getServiceInterface().getName();
         String methodName = methodInvocation.getMethod().getName();
+
+        boolean localFifo = false;
+        boolean localVoidOneWay = false;
+        boolean localGlobalOneWay = false;
+        RemoteRoutingHandler localRoutingHandler = null;
+        MetaArgumentsHandler localMetaArgumentsHandler = null;
+        long localTimeout = -1;
+
+        Annotation[] methodAnnotations = methodInvocation.getMethod().getAnnotations();
+        boolean hasMethodLevelRemotingAnnotation = false;
+        for (Annotation methodAnnotation : methodAnnotations) {
+            if (methodAnnotation instanceof EventDrivenRemotingMethod) {
+                hasMethodLevelRemotingAnnotation = true;
+                EventDrivenRemotingMethod remotingMethodAnnotation = (EventDrivenRemotingMethod) methodAnnotation;
+                localFifo= remotingMethodAnnotation.fifo();
+                localGlobalOneWay = remotingMethodAnnotation.globalOneWay();
+                localVoidOneWay = remotingMethodAnnotation.voidOneWay();
+                localMetaArgumentsHandler = (MetaArgumentsHandler) createByClassOrFindByName(applicationContext, remotingMethodAnnotation.metaArgumentsHandler(),
+                                                                                             remotingMethodAnnotation.metaArgumentsHandlerType());
+                localTimeout = remotingMethodAnnotation.timeout();
+                localRoutingHandler = (RemoteRoutingHandler) createByClassOrFindByName(applicationContext, remotingMethodAnnotation.remoteRoutingHandler(),
+                                                                                       remotingMethodAnnotation.remoteRoutingHandlerType());
+            }
+        }
+
+        if (!hasMethodLevelRemotingAnnotation) {
+            localFifo = fifo;
+            localVoidOneWay = voidOneWay;
+            localGlobalOneWay = globalOneWay;
+            localRoutingHandler = remoteRoutingHandler;
+            localMetaArgumentsHandler = metaArgumentsHandler;
+            localTimeout = timeout;
+        }
+
+
+
 
         boolean asyncExecution = false;
         if (Future.class.isAssignableFrom(methodInvocation.getMethod().getReturnType())) {
@@ -223,21 +288,21 @@ public class EventDrivenSpaceRemotingProxyFactoryBean extends RemoteAccessor imp
         SpaceRemotingEntry remotingEntry = remotingEntryFactory.createHashEntry().buildInvocation(lookupName, methodName,
                 methodHashLookup.get(methodInvocation.getMethod()), methodInvocation.getArguments());
 
-        remotingEntry.setRouting(RemotingProxyUtils.computeRouting(remotingEntry, remoteRoutingHandler, methodInvocation));
+        remotingEntry.setRouting(RemotingProxyUtils.computeRouting(remotingEntry, localRoutingHandler, methodInvocation));
 
-        if (metaArgumentsHandler != null) {
-            remotingEntry.setMetaArguments(metaArgumentsHandler.obtainMetaArguments(remotingEntry));
+        if (localMetaArgumentsHandler != null) {
+            remotingEntry.setMetaArguments(localMetaArgumentsHandler.obtainMetaArguments(remotingEntry));
         }
 
         // check if this invocation will be a one way invocation
-        if (globalOneWay) {
+        if (localGlobalOneWay) {
             remotingEntry.setOneWay(Boolean.TRUE);
         } else {
-            if (voidOneWay && methodInvocation.getMethod().getReturnType() == void.class) {
+            if (localVoidOneWay && methodInvocation.getMethod().getReturnType() == void.class) {
                 remotingEntry.setOneWay(Boolean.TRUE);
             }
         }
-        remotingEntry.setFifo(fifo);
+        remotingEntry.setFifo(localFifo);
 
         gigaSpace.write(remotingEntry);
 
@@ -251,10 +316,10 @@ public class EventDrivenSpaceRemotingProxyFactoryBean extends RemoteAccessor imp
             return new EventDrivenRemoteFuture(gigaSpace, remotingEntry);
         }
 
-        SpaceRemotingEntry invokeResult = gigaSpace.take(remotingEntry.buildResultTemplate(), timeout);
+        SpaceRemotingEntry invokeResult = gigaSpace.take(remotingEntry.buildResultTemplate(), localTimeout);
         if (invokeResult == null) {
             throw new RemoteTimeoutException("Timeout waiting for result for [" + lookupName +
-                    "] and method [" + methodName + "]", timeout);
+                    "] and method [" + methodName + "]", localTimeout);
         }
         if (invokeResult.getException() != null) {
             throw invokeResult.getException();

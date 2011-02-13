@@ -1,4 +1,4 @@
-package org.openspaces.itest.remoting.methodannotations.executor;
+package org.openspaces.itest.remoting.methodannotations;
 
 import org.openspaces.remoting.MetaArgumentsHandler;
 import org.openspaces.remoting.SpaceRemotingInvocation;

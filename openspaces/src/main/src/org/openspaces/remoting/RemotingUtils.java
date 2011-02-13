@@ -3,6 +3,8 @@ package org.openspaces.remoting;
 import com.gigaspaces.internal.reflection.IMethod;
 import com.gigaspaces.internal.reflection.ReflectionUtil;
 import com.gigaspaces.internal.reflection.standard.StandardMethod;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
 
 import java.io.*;
@@ -57,6 +59,21 @@ public class RemotingUtils {
         public int hashCode() {
             return hash != null ? Arrays.hashCode(hash) : 0;
         }
+    }
+
+    public static Object createByClassOrFindByName(ApplicationContext applicationContext, String name, Class clazz) throws NoSuchBeanDefinitionException {
+        if (StringUtils.hasLength(name)) {
+            return applicationContext.getBean(name);
+        }
+
+        if (!Object.class.equals(clazz)) {
+            try {
+                return clazz.newInstance();
+            } catch (Exception e) {
+                throw new NoSuchBeanDefinitionException("Failed to create class [" + clazz + "]");
+            }
+        }
+        return null;
     }
 
     public static Map<MethodHash, IMethod> buildHashToMethodLookupForInterface(Class service, boolean useFastReflection) {

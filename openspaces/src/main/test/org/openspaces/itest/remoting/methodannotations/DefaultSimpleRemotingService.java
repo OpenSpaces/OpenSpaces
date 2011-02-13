@@ -1,11 +1,11 @@
-package org.openspaces.itest.remoting.methodannotations.executor;
+package org.openspaces.itest.remoting.methodannotations;
 
 import java.util.concurrent.Future;
 
 /**
  * @author uri
  */
-public class DefaultSimpleService implements SimpleService {
+public class DefaultSimpleRemotingService implements SimpleExecutorRemotingService, SimpleEventDrivenRemotingService {
 
     public int sumWithInjectedReducer(int value) {
         return value;

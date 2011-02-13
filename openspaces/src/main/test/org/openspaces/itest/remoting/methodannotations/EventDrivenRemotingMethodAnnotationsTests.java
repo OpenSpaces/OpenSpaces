@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openspaces.itest.remoting.methodannotations.executor;
+package org.openspaces.itest.remoting.methodannotations;
 
 import com.gigaspaces.annotation.pojo.SpaceClass;
 import com.gigaspaces.annotation.pojo.SpaceRouting;
@@ -27,20 +27,21 @@ import java.util.concurrent.Future;
 /**
  * @author uri
  */
-public class MethodAnnotationsRemotingTests extends AbstractDependencyInjectionSpringContextTests {
+public class EventDrivenRemotingMethodAnnotationsTests extends AbstractDependencyInjectionSpringContextTests {
 
-    protected SimpleService executorProxy;
+    protected SimpleEventDrivenRemotingService eventDrivenProxy;
 
     protected GigaSpace gigaSpace;
 
-    public MethodAnnotationsRemotingTests() {
+    public EventDrivenRemotingMethodAnnotationsTests() {
         setPopulateProtectedVariables(true);
+        setAutowireMode(AUTOWIRE_BY_NAME);
     }
 
 
     @Override
     protected String[] getConfigLocations() {
-        return new String[] {"/org/openspaces/itest/remoting/methodannotations/executor/method-annotations-remoting.xml"};
+        return new String[] {"/org/openspaces/itest/remoting/methodannotations/method-annotations-remoting.xml"};
     }
 
 
@@ -53,74 +54,54 @@ public class MethodAnnotationsRemotingTests extends AbstractDependencyInjectionS
         gigaSpace.clear(new Message());
     }
 
-    public void testExecutorBroadcastWithInjectedReducer() {
-        int value = executorProxy.sumWithInjectedReducer(2);
-        assertEquals(4, value);
-    }
-
-    public void testExecutorAsyncBroadcastWithInjectedReducer() throws ExecutionException, InterruptedException {
-        Future<Integer> result = executorProxy.asyncSumWithInjectedReducer(2);
-        assertEquals(new Integer(4), result.get());
-    }
-
-    public void testExecutorBroadcastWithReducerType() {
-        int value = executorProxy.sumWithReducerType(2);
-        assertEquals(4, value);
-    }
-
-    public void testAsyncExecutorBroadcastWithReducerType() throws ExecutionException, InterruptedException {
-        Future<Integer> result = executorProxy.asyncSumWithReducerType(2);
-        assertEquals(new Integer(4), result.get());
-    }
-
     public void testInjectedRoutingHandler() {
-        int value = executorProxy.testInjectedRoutingHandler(1);
+        int value = eventDrivenProxy.testInjectedRoutingHandler(1);
         assertEquals(value, 1);
     }
 
     public void testAsyncInjectedRoutingHandler() throws ExecutionException, InterruptedException {
-        Future<Integer> result = executorProxy.asyncTestInjectedRoutingHandler(1);
+        Future<Integer> result = eventDrivenProxy.asyncTestInjectedRoutingHandler(1);
         assertEquals(result.get(), new Integer(1));
     }
 
     public void testRoutingHandlerType() {
-        int value = executorProxy.testRoutingHandlerType(1);
+        int value = eventDrivenProxy.testRoutingHandlerType(1);
         assertEquals(value, 1);
     }
 
     public void testAsyncRoutingHandlerType() throws ExecutionException, InterruptedException {
-        Future<Integer> result = executorProxy.asyncTestRoutingHandlerType(1);
+        Future<Integer> result = eventDrivenProxy.asyncTestRoutingHandlerType(1);
         assertEquals(result.get(), new Integer(1));
     }
 
     public void testInjectedInvocationAspect() {
-        boolean value = executorProxy.testInjectedInvocationAspect();
+        boolean value = eventDrivenProxy.testInjectedInvocationAspect();
         assertTrue(value);
     }
 
     public void testInvocationAspectType() {
-        boolean value = executorProxy.testInvocationAspectType();
+        boolean value = eventDrivenProxy.testInvocationAspectType();
         assertTrue(value);
     }
 
     public void testInjectedMetaArgumentsHandler() {
-        boolean value = executorProxy.testInjectedMetaArgumentsHandler();
+        boolean value = eventDrivenProxy.testInjectedMetaArgumentsHandler();
         assertTrue(value);
     }
 
     public void testAsyncInjectedMetaArgumentsHandler() throws ExecutionException, InterruptedException {
-        Future<Boolean> result = executorProxy.asyncTestInjectedMetaArgumentsHandler();
+        Future<Boolean> result = eventDrivenProxy.asyncTestInjectedMetaArgumentsHandler();
         assertEquals(result.get(), Boolean.TRUE);
     }
 
 
     public void testMetaArgumentsHandlerType() {
-        boolean value = executorProxy.testMetaArgumentsHandlerType();
+        boolean value = eventDrivenProxy.testMetaArgumentsHandlerType();
         assertTrue(value);
     }
 
     public void testAsyncMetaArgumentsHandlerType() throws ExecutionException, InterruptedException {
-        Future<Boolean> result = executorProxy.asyncTestMetaArgumentsHandlerType();
+        Future<Boolean> result = eventDrivenProxy.asyncTestMetaArgumentsHandlerType();
         assertEquals(result.get(), Boolean.TRUE);
     }
 
