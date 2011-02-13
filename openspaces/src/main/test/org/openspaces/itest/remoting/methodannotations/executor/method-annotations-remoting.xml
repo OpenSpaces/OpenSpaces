@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:os-core="http://www.openspaces.org/schema/core"
+       xmlns:os-events="http://www.openspaces.org/schema/events"
+       xmlns:os-remoting="http://www.openspaces.org/schema/remoting"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
+       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
+       http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/remoting/openspaces-remoting.xsd">
+
+    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
+
+    <bean id="singleValueMetaArgumentsHandler"
+          class="org.openspaces.itest.remoting.methodannotations.executor.SingleValueMetaArgumentsHandler"/>
+    <bean id="returnTrueRemoteInvocationAspect"
+          class="org.openspaces.itest.remoting.methodannotations.executor.ReturnTrueRemoteInvocationAspect"/>
+    <bean id="constantRoutingHandler"
+          class="org.openspaces.itest.remoting.methodannotations.executor.ConstantRoutingHandler"/>
+    <bean id="sumResultReducer" class="org.openspaces.itest.remoting.methodannotations.executor.SumResultReducer"/>
+
+    <context:component-scan base-package="org.openspaces.itest.remoting.broadcast"/>
+
+    <os-core:space id="space1" url="/./spaceBroadcastRemoting?cluster_schema=partitioned&amp;total_members=2&amp;id=1"
+                   lookup-groups="${user.name}"/>
+
+    <os-core:space id="space2" url="/./spaceBroadcastRemoting?cluster_schema=partitioned&amp;total_members=2&amp;id=2"
+                   lookup-groups="${user.name}"/>
+
+    <os-remoting:annotation-support/>
+
+    <bean id="defaultService" class="org.openspaces.itest.remoting.methodannotations.executor.DefaultSimpleService"/>
+
+    <os-core:giga-space id="gigaSpace" space="space1" clustered="true"/>
+
+    <os-remoting:service-exporter id="serviceExporter">
+        <os-remoting:aspect>
+            <bean class="org.openspaces.itest.remoting.methodannotations.executor.ReturnFirstMetaArgumentExecutionAspect"/>
+        </os-remoting:aspect>
+        <os-remoting:service ref="defaultService"/>
+    </os-remoting:service-exporter>
+
+    <bean id="reducer" class="org.openspaces.itest.remoting.methodannotations.executor.SimpleServiceReducer"/>
+
+    <os-remoting:executor-proxy id="executorProxy" giga-space="gigaSpace"
+                                interface="org.openspaces.itest.remoting.methodannotations.executor.SimpleService"
+                                broadcast="true">
+        <os-remoting:result-reducer ref="reducer"/>
+    </os-remoting:executor-proxy>
+</beans>

@@ -23,13 +23,18 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.openspaces.core.GigaSpace;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.remoting.support.RemoteAccessor;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -45,13 +50,13 @@ import java.util.concurrent.TimeoutException;
  * mechanism to perform the actual method invocation, allowing to perform async invocations (invocations that
  * return {@link java.util.concurrent.Future} (which is better than the sync remoting option). In general, the
  * executor based remoting should be used over the sync remoting option.
- *
+ * <p/>
  * <p>The proxy requires a {@link #setGigaSpace(org.openspaces.core.GigaSpace)} interface to be set in
  * order to write execute.
- *
+ * <p/>
  * <p>A timeout which controls how long the proxy will wait for the response can be set using
  * {@link #setTimeout(long)}. The timeout value if in <b>milliseconds</b>.
- *
+ * <p/>
  * <p>The space remote proxy supports a future based invocation. This means that if, on the client side,
  * one of the service interface methods returns {@link java.util.concurrent.Future}, it
  * can be used for async execution. Note, this means that in terms of interfaces there will have to
@@ -61,26 +66,30 @@ import java.util.concurrent.TimeoutException;
  * the same interface with async methods (returning <code>Future</code>). The async methods should start
  * with a specified prefix (defaults to <code>async</code>) and should have no implementation on the server
  * side (simply return <code>null</code>).
- *
+ * <p/>
  * <p>In case of remote invocation over a partitioned space the default partitioned routing index will
  * be random (the hashCode of the newly created {@link org.openspaces.remoting.ExecutorRemotingTask} class).
  * The proxy allows for a pluggable routing handler implementation by setting
  * {@link #setRemoteRoutingHandler(org.openspaces.remoting.RemoteRoutingHandler)}.
- *
+ * <p/>
  * <p>The proxy allows to perform broadcast the remote invocation to all different cluster members (partitions
  * for example) by setting the {@link #setBroadcast(boolean) broadcast} flag to <code>true</code>. In such cases,
  * a custom {@link #setRemoteResultReducer(org.openspaces.remoting.RemoteResultReducer)}  can be plugged to reduce the results of
  * all different services into a single response (assuming that the service has a return value).
- *
+ * <p/>
  * <p>The actual remote invocation can be replaced with an aspect implementing {@link RemoteInvocationAspect}
  * which can be set using {@link #setRemoteInvocationAspect(org.openspaces.remoting.RemoteInvocationAspect)}. It is up the aspect to then
- * call the actual remote invocation.
+ * call the actual remote invocation.</p>
+ * <p>Note that it is also possible to configure method level broadcasting, {@link RemoteResultReducer},
+ * {@link RemoteRoutingHandler}, {@link RemoteInvocationAspect} and {@link MetaArgumentsHandler} using the
+ * {@link ExecutorRemotingMethod} annotation.
+ *
  *
  * @author kimchy
  * @see SpaceRemotingServiceExporter
  */
 public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implements FactoryBean, InitializingBean,
-        MethodInterceptor, RemotingInvoker {
+        MethodInterceptor, RemotingInvoker, ApplicationContextAware {
 
     public static final String DEFAULT_ASYNC_METHOD_PREFIX = "async";
 
@@ -107,11 +116,17 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
 
     private Map<Method, RemotingUtils.MethodHash> methodHashLookup;
 
+    private ApplicationContext applicationContext;
+
     /**
      * Sets the GigaSpace interface that will be used to work with the space as the transport layer.
      */
     public void setGigaSpace(GigaSpace gigaSpace) {
         this.gigaSpace = gigaSpace;
+    }
+
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
     /**
@@ -158,7 +173,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
     /**
      * When set to <code>true</code> (defaults to <code>true</code>) will return the first result
      * when using broadcast. If set to <code>false</code>, an array of results will be retuned.
-     *
+     * <p/>
      * <p>Note, this only applies if no reducer is provided.
      */
     public void setReturnFirstResult(boolean returnFirstResult) {
@@ -194,8 +209,21 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
     }
 
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
-        if (remoteInvocationAspect != null) {
-            return remoteInvocationAspect.invoke(methodInvocation, this);
+        RemoteInvocationAspect localRemoteInvocationAspect = null;
+        Annotation[] methodAnnotations = methodInvocation.getMethod().getAnnotations();
+        for (Annotation methodAnnotation : methodAnnotations) {
+            if (methodAnnotation instanceof ExecutorRemotingMethod) {
+                ExecutorRemotingMethod remotingMethodAnnotation = (ExecutorRemotingMethod) methodAnnotation;
+                localRemoteInvocationAspect = (RemoteInvocationAspect) createByClassOrFindByName(remotingMethodAnnotation.remoteInvocationAspect(),
+                                                                                                 remotingMethodAnnotation.remoteInvocationAspectType());
+            }
+        }
+        if (localRemoteInvocationAspect == null) {
+            localRemoteInvocationAspect = remoteInvocationAspect;
+        }
+
+        if (localRemoteInvocationAspect != null) {
+            return localRemoteInvocationAspect.invoke(methodInvocation, this);
         }
         return invokeRemote(methodInvocation);
     }
@@ -215,33 +243,60 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
         ExecutorRemotingTask task = new ExecutorRemotingTask(lookupName, methodName, methodHashLookup.get(methodInvocation.getMethod()), methodInvocation.getArguments());
 
         BroadcastIndicator broadcastIndicator = null;
-        boolean shouldBroadcast = broadcast;
-        if (methodInvocation.getArguments() != null && methodInvocation.getArguments().length > 0) {
-            if (methodInvocation.getArguments()[0] instanceof BroadcastIndicator) {
-                broadcastIndicator = (BroadcastIndicator) methodInvocation.getArguments()[0];
-                if (broadcastIndicator.shouldBroadcast() != null) {
-                    shouldBroadcast = broadcastIndicator.shouldBroadcast();
+        RemoteResultReducer localRemoteResultReducer = null;
+        RemoteRoutingHandler localRoutingHandler = null;
+        MetaArgumentsHandler localMetaArgumentsHandler = null;
+        Boolean localShouldBroadcast = null;
+
+        //compute broadcast related meta data
+        if (methodInvocation.getArguments() != null && methodInvocation.getArguments().length > 0 && methodInvocation.getArguments()[0] instanceof BroadcastIndicator) {
+            broadcastIndicator = (BroadcastIndicator) methodInvocation.getArguments()[0];
+            if (broadcastIndicator.shouldBroadcast() != null) {
+                localShouldBroadcast = broadcastIndicator.shouldBroadcast();
+                localRemoteResultReducer = broadcastIndicator.getReducer();
+            }
+        } else {
+            Annotation[] methodAnnotations = methodInvocation.getMethod().getAnnotations();
+            for (Annotation methodAnnotation : methodAnnotations) {
+                if (methodAnnotation instanceof ExecutorRemotingMethod) {
+                    ExecutorRemotingMethod remotingMethodAnnotation = (ExecutorRemotingMethod) methodAnnotation;
+                    if (remotingMethodAnnotation.broadcast()) {
+                        localShouldBroadcast = true;
+                        localRemoteResultReducer = (RemoteResultReducer) createByClassOrFindByName(remotingMethodAnnotation.remoteResultReducer(),
+                                                                                                   remotingMethodAnnotation.remoteResultReducerType());
+                    } else {
+                        localShouldBroadcast = false;
+                        RemoteRoutingHandler methodRoutingHandler = (RemoteRoutingHandler) createByClassOrFindByName(remotingMethodAnnotation.remoteRoutingHandler(),
+                                                                                                                     remotingMethodAnnotation.remoteRoutingHandlerType());
+                        if (methodRoutingHandler != null) {
+                            localRoutingHandler = methodRoutingHandler;
+                        }
+                    }
+                    localMetaArgumentsHandler = (MetaArgumentsHandler) createByClassOrFindByName(remotingMethodAnnotation.metaArgumentsHandler(),
+                                                                                                 remotingMethodAnnotation.metaArgumentsHandlerType());
+
                 }
             }
         }
-        if (!shouldBroadcast) {
-            task.setRouting(RemotingProxyUtils.computeRouting(task, remoteRoutingHandler, methodInvocation));
+
+
+        if (localRemoteResultReducer == null) { localRemoteResultReducer = remoteResultReducer;}
+        if (localRoutingHandler == null) {localRoutingHandler = remoteRoutingHandler;}
+        if (localMetaArgumentsHandler == null) { localMetaArgumentsHandler = metaArgumentsHandler;}
+        if (localShouldBroadcast == null) { localShouldBroadcast = broadcast;}
+
+        if (!localShouldBroadcast) {
+            task.setRouting(RemotingProxyUtils.computeRouting(task, localRoutingHandler, methodInvocation));
         }
 
-        if (metaArgumentsHandler != null) {
-            task.setMetaArguments(metaArgumentsHandler.obtainMetaArguments(task));
+        if (localMetaArgumentsHandler != null) {
+            task.setMetaArguments(localMetaArgumentsHandler.obtainMetaArguments(task));
         }
 
-        RemoteResultReducer internalRemoteResultReducer = remoteResultReducer;
-        if (broadcastIndicator != null) {
-            internalRemoteResultReducer = broadcastIndicator.getReducer();
-        }
-
-        if (shouldBroadcast) {
-            DistributedExecutorAsyncFuture future = new DistributedExecutorAsyncFuture(gigaSpace.execute(task), internalRemoteResultReducer, task);
-            if (asyncExecution) 
+        if (localShouldBroadcast) {
+            DistributedExecutorAsyncFuture future = new DistributedExecutorAsyncFuture(gigaSpace.execute(task), localRemoteResultReducer, task);
+            if (asyncExecution)
                 return future;
-
             try {
                 return future.get(timeout, TimeUnit.MILLISECONDS);
             } catch (ExecutionException e) {
@@ -250,10 +305,10 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
                 throw new RemoteTimeoutException("Timeout waiting for result for [" + lookupName +
                         "] and method [" + methodName + "]", timeout);
             }
-        } 
-        
+        }
+
         ExecutorAsyncFuture future = new ExecutorAsyncFuture(gigaSpace.execute(task, task.getRouting()), task);
-        if (asyncExecution) 
+        if (asyncExecution)
             return future;
 
         try {
@@ -264,6 +319,22 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
             throw new RemoteTimeoutException("Timeout waiting for result for [" + lookupName +
                     "] and method [" + methodName + "]", timeout);
         }
+    }
+
+
+    protected Object createByClassOrFindByName(String name, Class clazz) throws NoSuchBeanDefinitionException {
+        if (StringUtils.hasLength(name)) {
+            return applicationContext.getBean(name);
+        }
+
+        if (!Object.class.equals(clazz)) {
+            try {
+                return clazz.newInstance();
+            } catch (Exception e) {
+                throw new NoSuchBeanDefinitionException("Failed to create class [" + clazz + "]");
+            }
+        }
+        return null;
     }
 
     private class DistributedExecutorAsyncFuture implements AsyncFuture {
@@ -432,7 +503,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
     private static class ExecutorAsyncResult implements AsyncResult {
 
         private final Object result;
-        
+
         private final Exception exception;
 
         public ExecutorAsyncResult(Object result) {
@@ -442,7 +513,8 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
         public ExecutorAsyncResult(Exception exception) {
             this(exception, null);
         }
-        private ExecutorAsyncResult( Exception exception, Object result){
+
+        private ExecutorAsyncResult(Exception exception, Object result) {
             this.exception = exception;
             this.result = result;
         }
@@ -482,7 +554,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
             if (asyncResult.getException() != null) {
                 if (asyncResult.getException() instanceof ExecutorRemotingTask.InternalExecutorException) {
                     return ((ExecutorRemotingTask.InternalExecutorException) asyncResult.getException()).getException();
-                } 
+                }
                 return asyncResult.getException();
             }
             return null;
@@ -494,7 +566,7 @@ public class ExecutorSpaceRemotingProxyFactoryBean extends RemoteAccessor implem
                     return ((ExecutorRemotingTask.InternalExecutorException) asyncResult.getException()).getInstanceId();
                 }
                 return null;
-            } 
+            }
             return asyncResult.getResult().getInstanceId();
         }
     }
