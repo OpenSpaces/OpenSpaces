@@ -24,12 +24,18 @@ import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirment;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
 import org.openspaces.grid.gsm.containers.ContainersSlaUtils;
 
+import com.gigaspaces.grid.gsa.AgentProcessDetails;
+
 public class MachinesSlaUtils {
 
-    public static int getNumberOfChildProcesses(final GridServiceAgent agent) {
-        int numberOfChildProcesses = agent.getProcessesDetails().getProcessDetails().length;
-        return numberOfChildProcesses;
+    public static Set<Long> getChildProcessesIds(final GridServiceAgent agent) {
+        Set<Long> pids = new HashSet<Long>();
+        for (AgentProcessDetails details : agent.getProcessesDetails().getProcessDetails()) {
+            pids.add(details.getProcessId());
+        }
+        return pids;
     }
+
 
     public static boolean isManagementRunningOnMachine(Machine machine) {
         return 

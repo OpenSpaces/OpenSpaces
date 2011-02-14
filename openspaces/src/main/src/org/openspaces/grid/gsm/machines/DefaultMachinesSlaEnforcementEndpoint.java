@@ -503,20 +503,23 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 logger.info("Agent machine " + agent.getMachine().getHostAddress() + " is running management processes but is considered deallocated for pu " + pu.getName());
                 state.deallocateCapacity(pu, agentUid, agentCapacity);
             } 
-            else {
-                if (MachinesSlaUtils.getNumberOfChildProcesses(agent) == 0) {
-                   // nothing running on this agent (not even GSM/LUS). Get rid of it.
-                   logger.info(
-                           "Stopping agent machine " + 
+            else if (MachinesSlaUtils.getNumberOfChildContainersForProcessingUnit(agent,pu) == 0) {
+
+                // double check that agent is not used
+                Set<Long> childProcessesIds = MachinesSlaUtils.getChildProcessesIds(agent);
+                if (!childProcessesIds.isEmpty()) {
+                    // this is unexpected. We already checked for management processes and other PU processes.
+                    logger.warn("Agent " + agent.getMachine().getHostAddress() + " cannot be be killed due to the following child processes: " + childProcessesIds);
+                }
+                else {
+                    // nothing running on this agent (not even GSM/LUS). Get rid of it.
+                    logger.info(
+                           "Stopping machine agent " + 
                            agent.getMachine().getHostAddress());
                    
-                   machineProvisioning.stopMachineAsync(
+                    machineProvisioning.stopMachineAsync(
                            agent, 
                            STOP_AGENT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                }
-                else if (MachinesSlaUtils.getNumberOfChildContainersForProcessingUnit(agent,pu) == 0) {
-                    logger.info("Agent machine " + agent.getMachine().getHostAddress() + " is no longer runnign containers for pu " + pu.getName() + " and is deallocated for that pu.");
-                    state.deallocateCapacity(pu, agentUid, agentCapacity);    
                 }
             }
         }
