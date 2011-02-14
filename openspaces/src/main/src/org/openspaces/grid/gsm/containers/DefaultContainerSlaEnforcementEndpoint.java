@@ -329,7 +329,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                     allocatedCapacity,containersByZone, capacityOfOneContainer);
         
         final List<GridServiceAgent> agentsSortedByNumberOfContainers = ContainersSlaUtils.sortAgentsByNumberOfContainers(
-                allocatedAgents, containersByZone);
+                allocatedAgents, containersByZone, state.getFutureContainers(pu));
         logger.debug("Considering " + agentsSortedByNumberOfContainers.size() + " agents to start a container on.");
         for (final GridServiceAgent agent : agentsSortedByNumberOfContainers) {
 
@@ -341,35 +341,42 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                 throw new ConflictingOperationInProgressException();
             }
             
-            if (freeCapacity.getAgentCapacity(agent.getUid()).satisfies(capacityOfOneContainer)) {
+            if (!freeCapacity.getAgentCapacity(agent.getUid()).satisfies(capacityOfOneContainer)) {
+                logger.debug(ContainersSlaUtils.machineToString(agent.getMachine())
+                        + " does not have enough unallocated capacity. "
+                        + "It has " + freeCapacity.getAgentCapacity(agent.getUid()) + " unallocated capacity. "
+                        + "And a new container requires allocation of " + capacityOfOneContainer);
+                continue;
+            }
+            
                 
-                final OperatingSystemStatistics operatingSystemStatistics = 
-                    machine.getOperatingSystem().getStatistics();
-    
-                // get total free system memory + cached (without sigar returns -1)
-                long freeBytes = operatingSystemStatistics.getActualFreePhysicalMemorySizeInBytes();
+            final OperatingSystemStatistics operatingSystemStatistics = 
+                machine.getOperatingSystem().getStatistics();
+
+            // get total free system memory + cached (without sigar returns -1)
+            long freeBytes = operatingSystemStatistics.getActualFreePhysicalMemorySizeInBytes();
+            if (freeBytes <= 0) {
+                // fallback - no sigar. Provides a pessimistic number since does not take into
+                // account OS cache that can be allocated.
+                freeBytes = operatingSystemStatistics.getFreePhysicalMemorySizeInBytes();
                 if (freeBytes <= 0) {
-                    // fallback - no sigar. Provides a pessimistic number since does not take into
-                    // account OS cache that can be allocated.
-                    freeBytes = operatingSystemStatistics.getFreePhysicalMemorySizeInBytes();
-                    if (freeBytes <= 0) {
-                        // machine is probably going down. Blow everything up.
-                        throw new ConflictingOperationInProgressException();
-                    }
-                }
-    
-                final long freeInMB = MemoryUnit.MEGABYTES.convert(freeBytes, MemoryUnit.BYTES);
-    
-                if (freeInMB > requiredFreeMemoryInMB + sla.getReservedMemoryCapacityPerMachineInMB()) {
-                    recommendedAgents.add(agent);
-                } else {
-                    logger.debug(ContainersSlaUtils.machineToString(agent.getMachine())
-                            + " does not have enough free memory. "
-                            + "It has only " + freeInMB + "MB free and required is "
-                            + requiredFreeMemoryInMB + "MB plus reserved is "
-                            + sla.getReservedMemoryCapacityPerMachineInMB() + "MB");
+                    // machine is probably going down. Blow everything up.
+                    throw new ConflictingOperationInProgressException();
                 }
             }
+
+            final long freeInMB = MemoryUnit.MEGABYTES.convert(freeBytes, MemoryUnit.BYTES);
+
+            if (freeInMB > requiredFreeMemoryInMB + sla.getReservedMemoryCapacityPerMachineInMB()) {
+                recommendedAgents.add(agent);
+            } else {
+                logger.debug(ContainersSlaUtils.machineToString(agent.getMachine())
+                        + " does not have enough free memory. "
+                        + "It has only " + freeInMB + "MB free and required is "
+                        + requiredFreeMemoryInMB + "MB plus reserved is "
+                        + sla.getReservedMemoryCapacityPerMachineInMB() + "MB");
+            }
+        
         }
 
         if (recommendedAgents.size() == 0) {
