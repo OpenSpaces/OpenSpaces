@@ -221,30 +221,37 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                 // deploy a new container on an approved machine that
                 // has the least number of containers.
                 final GridServiceAgent gsa = findAgentForNewContainer(pu, sla);
-                if (
-                // more memory is needed
-                memoryShortageInMB > 0 ||
+                if (memoryShortageInMB > 0) {
 
-                // more cpu cores (or a new machine) is needed
-                // and this is an unused machine
-                        !futureMachinesHostingContainers.contains(gsa.getMachine())) {
-
+                    //  more memory is needed
+                 
                     if (logger.isInfoEnabled()) {
                         logger.info("Starting a new Grid Service Container on "
                                 + ContainersSlaUtils.machineToString(gsa.getMachine())
-                                + " "
-                                + "which is currently running "
+                                + " due to memory shortage of " + memoryShortageInMB + "MB."
+                                + "Machine is currently running "
                                 + ContainersSlaUtils.gscsToString(gsa.getMachine()
                                     .getGridServiceContainers()
                                     .getContainers()));
                     }
 
-                    state.addFutureContainer(pu,
-                            ContainersSlaUtils.startGridServiceContainerAsync(
-                                (InternalAdmin) pu.getAdmin(),
-                                (InternalGridServiceAgent) gsa, 
-                                sla.getNewContainerConfig(),
-                                START_CONTAINER_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS));
+                    addFutureContainer(sla, gsa);
+                }
+                else if (!futureMachinesHostingContainers.contains(gsa.getMachine())) {
+                    // more cpu cores (or a new machine) is needed
+                    // and this is an unused machine
+                    
+                    if (logger.isInfoEnabled()) {
+                        logger.info("Starting a new Grid Service Container on "
+                                + ContainersSlaUtils.machineToString(gsa.getMachine())
+                                + " since more machines are needed for pu " + pu.getName() + " "
+                                + "Machine is currently running "
+                                + ContainersSlaUtils.gscsToString(gsa.getMachine()
+                                    .getGridServiceContainers()
+                                    .getContainers()));
+                    }
+
+                    addFutureContainer(sla, gsa);
                 } else if (cpuCoresShortage > 0) {
                     throw new NeedMoreCpuException(cpuCoresShortage);
                 } else if (machineShortage > 0) {
@@ -252,6 +259,15 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                 }
             }
         }
+    }
+
+    private void addFutureContainer(final ContainersSlaPolicy sla, final GridServiceAgent gsa) {
+        state.addFutureContainer(pu,
+                ContainersSlaUtils.startGridServiceContainerAsync(
+                    (InternalAdmin) pu.getAdmin(),
+                    (InternalGridServiceAgent) gsa, 
+                    sla.getNewContainerConfig(),
+                    START_CONTAINER_TIMEOUT_FAILURE_SECONDS, TimeUnit.SECONDS));
     }
 
     private GridServiceContainer findContainerForRemoval(ContainersSlaPolicy sla, List<GridServiceContainer> containers) {
