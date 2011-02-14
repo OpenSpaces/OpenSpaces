@@ -67,6 +67,9 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
             throw new IllegalArgumentException("sla cannot be null");
         }
    
+        if (state.isDestroyedProcessingUnit(pu)) {
+            throw new ServiceLevelAgreementEnforcementEndpointDestroyedException();
+        }
         
         Set<String> agentUidsFromContainers = new HashSet<String>();
         for (GridServiceContainer container : sla.getContainers()) {
@@ -83,11 +86,6 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                     "agentUidsFromContainers="+agentUidsFromContainers.toString());
         }
         
-        
-        if (state.isDestroyedProcessingUnit(pu)) {
-            throw new ServiceLevelAgreementEnforcementEndpointDestroyedException();
-        }
-
         String zone = pu.getRequiredZones()[0];
 
         for (GridServiceContainer container : sla.getContainers()) {
