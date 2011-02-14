@@ -13,7 +13,7 @@ public class RebalancingSlaPolicy extends ServiceLevelAgreementPolicy {
     private GridServiceContainer[] containers;
     private int maxNumberOfConcurrentRelocationsPerMachine;
     private ProcessingUnitSchemaConfig schema;
-    private AggregatedAllocatedCapacity aggregatedAllocatedCapacity;
+    private AggregatedAllocatedCapacity allocatedCapacity;
     
     public void setContainers(GridServiceContainer[] containers) {
         this.containers = containers;
@@ -39,17 +39,17 @@ public class RebalancingSlaPolicy extends ServiceLevelAgreementPolicy {
         this.schema = schemaConfig;
     }
     
-    public AggregatedAllocatedCapacity getAggregatedAllocatedCapacity() {
-        return aggregatedAllocatedCapacity;
+    public AggregatedAllocatedCapacity getAllocatedCapacity() {
+        return allocatedCapacity;
     }
     
-    public void setAggregatedAllocatedCapacity(AggregatedAllocatedCapacity aggregatedAllocatedCapacity) {
-        this.aggregatedAllocatedCapacity = aggregatedAllocatedCapacity;
+    public void setAllocatedCapacity(AggregatedAllocatedCapacity allocatedCapacity) {
+        this.allocatedCapacity = allocatedCapacity;
     }
     
     public boolean equals(Object other) {
         return other instanceof RebalancingSlaPolicy &&
-        ((RebalancingSlaPolicy)other).aggregatedAllocatedCapacity.equals(this.aggregatedAllocatedCapacity) &&
+        ((RebalancingSlaPolicy)other).allocatedCapacity.equals(this.allocatedCapacity) &&
         ((RebalancingSlaPolicy)other).maxNumberOfConcurrentRelocationsPerMachine == maxNumberOfConcurrentRelocationsPerMachine &&
         ((RebalancingSlaPolicy)other).schema == schema &&
         Arrays.asList(((RebalancingSlaPolicy)other).containers).equals(Arrays.asList(containers));

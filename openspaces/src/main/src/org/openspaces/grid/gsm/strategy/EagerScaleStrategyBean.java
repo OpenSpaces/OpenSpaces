@@ -282,6 +282,7 @@ public class EagerScaleStrategyBean
         sla.setContainers(containers);
         sla.setMaximumNumberOfConcurrentRelocationsPerMachine(slaConfig.getMaxConcurrentRelocationsPerMachine());
         sla.setSchemaConfig(schemaConfig);
+        sla.setAllocatedCapacity(machinesEndpoint.getAllocatedCapacity());
         boolean slaEnforced = rebalancingEndpoint.enforceSla(sla);
         
         if (slaEnforced) {
