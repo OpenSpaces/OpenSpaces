@@ -92,6 +92,11 @@ public class ScaleBeanServer {
         MachineProvisioningBeanPropertiesManager machineProvisioningPropertiesManager = 
                 new MachineProvisioningBeanPropertiesManager(elasticProperties);
         String enabledMachineProvisioningClassName = getEnabledBeanClassName(machineProvisioningPropertiesManager);
+        if (isDefaultMachineProvisioningClassName(enabledMachineProvisioningClassName)) {
+         // this is a special machine provisioning that is not a bean
+            enabledMachineProvisioningClassName = null;
+        }
+        
         if (enabledMachineProvisioningClassName != null) {
             beanServer.setBeanConfig(
                     enabledMachineProvisioningClassName, 
@@ -185,7 +190,7 @@ public class ScaleBeanServer {
         
         String enabledBeanClassName = getEnabledBeanClassName(propertiesManager);
 
-        if (enabledBeanClassName != null && enabledBeanClassName.equals(DefaultMachineProvisioning.class.getName())) {
+        if (isDefaultMachineProvisioningClassName(enabledBeanClassName)) {
             // this is a special machine provisioning that is not a bean
             enabledBeanClassName = null;
         }
@@ -213,6 +218,10 @@ public class ScaleBeanServer {
                     enabledBeanClassName,
                     beanProperties);
         }
+    }
+
+    private boolean isDefaultMachineProvisioningClassName(String enabledBeanClassName) {
+        return enabledBeanClassName != null && enabledBeanClassName.equals(DefaultMachineProvisioning.class.getName());
     }
     
     private String getEnabledBeanClassName(BeanConfigPropertiesManager propertiesManager) {
