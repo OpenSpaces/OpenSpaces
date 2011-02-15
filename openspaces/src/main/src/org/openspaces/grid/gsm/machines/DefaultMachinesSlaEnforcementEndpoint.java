@@ -554,7 +554,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 // create a set of new agents
                 // throws an exception if anything went wrong.
                 GridServiceAgent[] newAgents = filterNewAgentsIfAlreadyInUse(future.get());
-                warnAboutAgentsWithWrongMachineZone(sla, newAgents);
                 //update started agents list with the list of new agents
                 for (GridServiceAgent agent : newAgents) {
                     //TODO: If pu isolation is public or shared then need to allocate only part of the machine's capacity. And not the maximum capacity.
@@ -608,20 +607,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         return agents.toArray(new GridServiceAgent[agents.size()]);
     }
     
-    private void warnAboutAgentsWithWrongMachineZone(AbstractMachinesSlaPolicy sla, GridServiceAgent[] agents) {
-        if (logger.isWarnEnabled()) {
-            for (GridServiceAgent agent : agents) {
-                if (!MachinesSlaUtils.matchesMachineZones(sla, agent)) {
-                    logger.warn(
-                        "Machine provisioning for " + pu.getName() + " "+
-                        "has provided the machine " + agent.getMachine().getHostAddress() + ", which has a wrong zone."+
-                        "This violation is ignored, and the machine will be used.");
-                }
-            }
-        }
-
-    }
-
     /**
      * This is the default machine provisioning implementation which is tightly coupled
      * with the state hold by the various endpoints. It reads and modifies the shared state used by all endpoints.

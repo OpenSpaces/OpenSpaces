@@ -14,15 +14,10 @@ public interface ScaleStrategyConfigurer<T extends ScaleStrategyConfig> extends 
      * @see ScaleStrategyConfig#setDedicatedManagementMachines(boolean)
      */
     ScaleStrategyConfigurer<T> dedicatedManagementMachines();
-
     
     /**
      * @see ScaleStrategyConfig#setMaxConcurrentRelocationsPerMachine(int)
      */
     ScaleStrategyConfigurer<T> maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine);
     
-    /**
-     * @see ScaleStrategyConfig#setMachineZones(String[])
-     */
-    ScaleStrategyConfigurer<T> addMachineZone(String machineZone);
 }

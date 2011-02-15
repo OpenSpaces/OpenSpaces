@@ -11,7 +11,7 @@ abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPolicy{
     private long reservedMemoryCapacityPerMachineInMB;
     private long containerMemoryCapacityInMB;
     private boolean allowDeploymentOnManagementMachine;
-    private Set<String> machineZones = new HashSet<String>();
+    private Set<String> discoveredMachineZones = new HashSet<String>();
     
     public boolean getAllowDeploymentOnManagementMachine() {
         return this.allowDeploymentOnManagementMachine;
@@ -45,12 +45,12 @@ abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPolicy{
         return this.containerMemoryCapacityInMB;
     }
 
-    public void setMachineZones(Set<String> machineZones) {
-        this.machineZones = machineZones;
+    public void setDiscoveredMachineZones(Set<String> machineZones) {
+        this.discoveredMachineZones = machineZones;
     }
     
-    public Set<String> getMachineZones() {
-        return this.machineZones;
+    public Set<String> getDiscoveredMachineZones() {
+        return this.discoveredMachineZones;
     }
     
     @Override
@@ -60,6 +60,6 @@ abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPolicy{
         ((AbstractMachinesSlaPolicy)other).containerMemoryCapacityInMB == this.containerMemoryCapacityInMB &&
         ((AbstractMachinesSlaPolicy)other).minimumNumberOfMachines == this.minimumNumberOfMachines &&
         ((AbstractMachinesSlaPolicy)other).allowDeploymentOnManagementMachine == this.allowDeploymentOnManagementMachine &&
-        ((AbstractMachinesSlaPolicy)other).machineZones.equals(machineZones);
+        ((AbstractMachinesSlaPolicy)other).discoveredMachineZones.equals(discoveredMachineZones);
     }
 }

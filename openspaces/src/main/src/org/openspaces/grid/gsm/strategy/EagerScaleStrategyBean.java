@@ -19,7 +19,9 @@ import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
+import org.openspaces.grid.gsm.DiscoveredMachineProvisioningConfigAware;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.ProcessingUnitAware;
@@ -42,6 +44,7 @@ public class EagerScaleStrategyBean
                RebalancingSlaEnforcementEndpointAware , 
                ContainersSlaEnforcementEndpointAware, 
                EagerMachinesSlaEnforcementEndpointAware,
+               DiscoveredMachineProvisioningConfigAware,
                ProcessingUnitAware,
                GridServiceContainerConfigAware,
                Runnable {
@@ -60,7 +63,8 @@ public class EagerScaleStrategyBean
     private ProcessingUnit pu;
     private GridServiceContainerConfig containersConfig;
     private ProcessingUnitSchemaConfig schemaConfig;
-
+    private DiscoveredMachineProvisioningConfig discoveredMachineProvisioningConfig;
+    
     // created by afterPropertiesSet()
     private Log logger;
     private ScheduledFuture<?> scheduledTask;
@@ -96,7 +100,11 @@ public class EagerScaleStrategyBean
     public void setGridServiceContainerConfig(GridServiceContainerConfig containersConfig) {
          this.containersConfig = containersConfig;
     }
-         
+    
+    public void setDiscoveredMachineProvisioningConfig(DiscoveredMachineProvisioningConfig discoveredMachineProvisioningConfig) {
+        this.discoveredMachineProvisioningConfig = discoveredMachineProvisioningConfig;
+    }
+    
     public void afterPropertiesSet() {
         if (slaConfig == null) {
             throw new IllegalStateException("slaConfig cannot be null.");
@@ -345,7 +353,7 @@ public class EagerScaleStrategyBean
         sla.setMinimumNumberOfMachines(getMinimumNumberOfMachines());
         sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
-        sla.setMachineZones(new HashSet<String>(Arrays.asList(slaConfig.getMachineZones())));
+        sla.setDiscoveredMachineZones(new HashSet<String>(Arrays.asList(discoveredMachineProvisioningConfig.getGridServiceAgentZones())));
         return sla;
     }
     

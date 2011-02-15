@@ -149,17 +149,6 @@ public class MachinesSlaUtils {
         }
         return Arrays.toString(machinesToString);
     }
-    
-
-    
-    public static boolean matchesMachineZones(AbstractMachinesSlaPolicy sla, GridServiceAgent agent) {
-        final Set<String> agentZones = new HashSet<String>(agent.getZones().keySet());
-        final Set<String> puZones = sla.getMachineZones();
-        boolean zoneMatches = agentZones.isEmpty() || puZones.isEmpty();
-        agentZones.retainAll(puZones);
-        zoneMatches = zoneMatches || !agentZones.isEmpty();
-        return zoneMatches;
-    }
 
     public static AllocatedCapacity convertCapacityRequirementsToAllocatedCapacity(
             CapacityRequirements capacityRequirements) {

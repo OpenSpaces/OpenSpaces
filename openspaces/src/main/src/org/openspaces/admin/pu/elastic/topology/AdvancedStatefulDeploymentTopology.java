@@ -51,6 +51,7 @@ public interface AdvancedStatefulDeploymentTopology extends ElasticStatefulDeplo
      * 
      * @since 8.0
      */
+    @Deprecated
     public AdvancedStatefulDeploymentTopology minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine);
     
 }

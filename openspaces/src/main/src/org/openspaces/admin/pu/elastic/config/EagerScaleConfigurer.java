@@ -1,8 +1,5 @@
 package org.openspaces.admin.pu.elastic.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.openspaces.core.util.MemoryUnit;
 
 
@@ -21,7 +18,6 @@ import org.openspaces.core.util.MemoryUnit;
 public class EagerScaleConfigurer implements ScaleStrategyConfigurer<EagerScaleConfig> {
 
     private final EagerScaleConfig config;
-    private final List<String> machineZones;
     
     /**
      * Provides fluent API for creating a new {@link EagerScaleConfig} object.
@@ -30,7 +26,6 @@ public class EagerScaleConfigurer implements ScaleStrategyConfigurer<EagerScaleC
      */
     public EagerScaleConfigurer() {
         this.config = new EagerScaleConfig();
-        this.machineZones = new ArrayList<String>();
     }
     
     public EagerScaleConfigurer reservedMemoryCapacityPerMachine(long memory, MemoryUnit unit) {
@@ -48,13 +43,7 @@ public class EagerScaleConfigurer implements ScaleStrategyConfigurer<EagerScaleC
         return this;
     }
     
-    public EagerScaleConfigurer addMachineZone(String machineZone) {
-        machineZones.add(machineZone);
-        return this;
-     }
-    
     public EagerScaleConfig create() {
-        config.setMachineZones(machineZones.toArray(new String[machineZones.size()]));
         return config;
     }
 }

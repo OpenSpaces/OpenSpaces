@@ -1,8 +1,5 @@
 package org.openspaces.admin.pu.elastic.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.openspaces.core.util.MemoryUnit;
 
 /**
@@ -17,7 +14,6 @@ import org.openspaces.core.util.MemoryUnit;
 public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<ManualCapacityScaleConfig>{
 
     private final ManualCapacityScaleConfig config;
-    private final List<String> machineZones;
     
     /**
      * Provides fluent API for creating a new {@link ManualCapacityScaleConfig} object.
@@ -26,7 +22,6 @@ public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<Ma
      */
     public ManualCapacityScaleConfigurer() {
         this.config = new ManualCapacityScaleConfig();
-        this.machineZones = new ArrayList<String>();
     }
     
     /**
@@ -67,14 +62,8 @@ public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<Ma
         config.setMaxConcurrentRelocationsPerMachine(maxNumberOfConcurrentRelocationsPerMachine);
         return this;
     }
-    
-    public ManualCapacityScaleConfigurer addMachineZone(String machineZone) {
-        machineZones.add(machineZone);
-        return this;
-     }
-    
+        
     public ManualCapacityScaleConfig create() {
-        config.setMachineZones(this.machineZones.toArray(new String[machineZones.size()]));
         return config;
     }
 }

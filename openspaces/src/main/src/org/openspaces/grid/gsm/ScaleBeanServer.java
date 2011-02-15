@@ -17,6 +17,7 @@ import org.openspaces.core.bean.BeanServer;
 import org.openspaces.core.bean.DefaultBeanServer;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcement;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
+import org.openspaces.grid.gsm.machines.DefaultMachineProvisioning;
 import org.openspaces.grid.gsm.machines.ElasticMachineProvisioning;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
@@ -86,7 +87,7 @@ public class ScaleBeanServer {
                         machinesSlaEnforcementEndpoint));
         
         // order of beans is important due to implicit dependency inject order
-        setGridServiceContainerConfig(elasticProperties);
+        setElasticConfig(elasticProperties);
         
         MachineProvisioningBeanPropertiesManager machineProvisioningPropertiesManager = 
                 new MachineProvisioningBeanPropertiesManager(elasticProperties);
@@ -146,12 +147,12 @@ public class ScaleBeanServer {
     public void setElasticProperties(Map<String,String> elasticProperties) throws BeanConfigException {
         // order of beans is important due to implicit dependency inject order
         // see ScaleBeanFactory
-        setGridServiceContainerConfig(elasticProperties);
+        setElasticConfig(elasticProperties);
         setElasticMachineProvisioning(elasticProperties);
         setElasticScaleStrategy(elasticProperties);
     }
 
-    private void setGridServiceContainerConfig(Map<String, String> elasticProperties) {
+    private void setElasticConfig(Map<String, String> elasticProperties) {
         beanServer.replaceBeanAssignableTo(
                 new Class[]{ElasticConfigBean.class}, 
                 ElasticConfigBean.class.getName(),
@@ -184,6 +185,11 @@ public class ScaleBeanServer {
         
         String enabledBeanClassName = getEnabledBeanClassName(propertiesManager);
 
+        if (enabledBeanClassName != null && enabledBeanClassName.equals(DefaultMachineProvisioning.class.getName())) {
+            // this is a special machine provisioning that is not a bean
+            enabledBeanClassName = null;
+        }
+        
         List<Bean> existingEnabledBeans = beanServer.getEnabledBeanAssignableTo(
                 new Class[]{
                         ElasticMachineProvisioning.class,

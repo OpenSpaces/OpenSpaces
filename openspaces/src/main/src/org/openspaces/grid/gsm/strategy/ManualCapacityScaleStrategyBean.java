@@ -16,13 +16,14 @@ import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.bean.BeanConfigurationException;
-import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.internal.admin.InternalAdmin;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
+import org.openspaces.grid.gsm.DiscoveredMachineProvisioningConfigAware;
 import org.openspaces.grid.gsm.ElasticMachineProvisioningAware;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
@@ -49,6 +50,7 @@ public class ManualCapacityScaleStrategyBean
                ProcessingUnitAware,
                ElasticMachineProvisioningAware,
                GridServiceContainerConfigAware,
+               DiscoveredMachineProvisioningConfigAware,
                Runnable {
 
     private static final String rebalancingAlertGroupUidPrefix = "4499C1ED-1584-4387-90CF-34C5EC236644";
@@ -64,6 +66,7 @@ public class ManualCapacityScaleStrategyBean
     private ProcessingUnit pu;
     private GridServiceContainerConfig containersConfig;
     private ProcessingUnitSchemaConfig schemaConfig;
+    private DiscoveredMachineProvisioningConfig discoveredMachineProvisioningConfig;
     
     // created by afterPropertiesSet()
     private Log logger;
@@ -71,6 +74,7 @@ public class ManualCapacityScaleStrategyBean
     
     private long memoryInMB;
     private NonBlockingElasticMachineProvisioning machineProvisioning;
+    
     
 
     public Map<String, String> getProperties() {
@@ -109,6 +113,10 @@ public class ManualCapacityScaleStrategyBean
          this.containersConfig = containersConfig;
     }
          
+    public void setDiscoveredMachineProvisioningConfig(DiscoveredMachineProvisioningConfig discoveredMachineProvisioningConfig) {
+        this.discoveredMachineProvisioningConfig = discoveredMachineProvisioningConfig;
+    }
+    
     public void afterPropertiesSet() {
         if (slaConfig == null) {
             throw new IllegalStateException("slaConfig cannot be null.");
@@ -278,14 +286,7 @@ public class ManualCapacityScaleStrategyBean
         return Arrays.toString(containersToString.toArray(new String[containersToString.size()]));
     }
 
-    private static String toString(GridServiceAgent[] approvedAgents) {
-        final List<String> approvedHostAddresses = new ArrayList<String>();
-        for (final GridServiceAgent approvedAgent : approvedAgents) {
-            approvedHostAddresses.add(MachinesSlaUtils.machineToString(approvedAgent.getMachine()));
-        }
-        return Arrays.toString(approvedHostAddresses.toArray(new String[approvedHostAddresses.size()]));
-    }
-
+    
     private int calcTargetNumberOfContainers() {
         
         double totalNumberOfInstances = pu.getTotalNumberOfInstances();
@@ -348,7 +349,7 @@ public class ManualCapacityScaleStrategyBean
         sla.setMinimumNumberOfMachines(getMinimumNumberOfMachines());
         sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
-        sla.setMachineZones(new HashSet<String>(Arrays.asList(slaConfig.getMachineZones())));
+        sla.setDiscoveredMachineZones(new HashSet<String>(Arrays.asList(discoveredMachineProvisioningConfig.getGridServiceAgentZones())));
         boolean reachedSla = machinesEndpoint.enforceSla(sla);
         
         if (reachedSla) {

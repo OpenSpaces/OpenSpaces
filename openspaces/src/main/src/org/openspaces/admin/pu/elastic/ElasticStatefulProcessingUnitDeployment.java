@@ -5,12 +5,11 @@ import java.util.Map;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
-import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDeployment;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
-import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.topology.AdvancedStatefulDeploymentTopology;
@@ -104,6 +103,10 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return this;
     }
 
+    /**
+     * @see ElasticMachineProvisioningConfig#getMinimumNumberOfCpuCoresPerMachine()
+     */
+    @Deprecated
     public ElasticStatefulProcessingUnitDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
         this.minNumberOfCpuCoresPerMachine = minNumberOfCpuCoresPerMachine;
         return this;
@@ -178,10 +181,16 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     }
     
     public ElasticStatefulProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+        if (config == null) {
+            throw new IllegalArgumentException("config");
+        }
+        
         if (minNumberOfCpuCoresPerMachine <= 0) {
-            // if not overrided, try to figure out from machine provisioning
+            // try to figure out from machine provisioning
             minNumberOfCpuCoresPerMachine = config.getMinimumNumberOfCpuCoresPerMachine();
-            if (minNumberOfCpuCoresPerMachine <= 0) {
+            if (minNumberOfCpuCoresPerMachine <= 0 &&
+                !(config instanceof DiscoveredMachineProvisioningConfig)) {
+                
                 throw new AdminException("Elastic Machine Provisioning configuration must supply the expected minimum number of CPU cores per machine.");
             }
         }
@@ -248,35 +257,12 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         if (maxNumberOfCpuCores > 0) {
             
             if (minNumberOfCpuCoresPerMachine <= 0) {
-                minNumberOfCpuCoresPerMachine = findMinimumNumberOfCpuCoresPerMachine(admin);
+                minNumberOfCpuCoresPerMachine = DiscoveredMachineProvisioningConfig.detectMinimumNumberOfCpuCoresPerMachine(admin);
             }
-
+            
             maximumNumberOfPrimaryInstances =(int) Math.ceil(this.maxNumberOfCpuCores / minNumberOfCpuCoresPerMachine);
         }
         return maximumNumberOfPrimaryInstances; 
     }
-
-    private double findMinimumNumberOfCpuCoresPerMachine(Admin admin) {
-        // No machineProvisioning is defined means that the server will use whatever machine it could find.
-        // so we just go over all machines and calculate the minimum number of cpu cores per machine.
-        final GridServiceAgent[] agents = admin.getGridServiceAgents().getAgents();
-        if (agents.length == 0) {
-            throw new AdminException("Cannot determine minimum number of cpu cores per machine. Please use new AdvancedElasticStatefulProcessingUnit().minNumberOfCpuCoresPerMachine() to specify this figure.");
-        }
-        double minCoresPerMachine = getNumberOfCpuCores(agents[0].getMachine());
-        for (final GridServiceAgent agent : agents) {
-            final double cores = getNumberOfCpuCores(agent.getMachine());
-            if (cores <= 0) {
-                throw new AdminException("Cannot determine number of cpu cores on machine " + agent.getMachine().getHostAddress());
-            }
-            if (minCoresPerMachine < cores) {
-                minCoresPerMachine = cores; 
-            }
-        }
-        return minCoresPerMachine;
-    }
-
-    private double getNumberOfCpuCores(Machine machine) {
-        return machine.getOperatingSystem().getDetails().getAvailableProcessors();
-    }    
+    
 }

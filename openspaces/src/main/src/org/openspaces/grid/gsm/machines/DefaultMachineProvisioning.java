@@ -19,7 +19,7 @@ import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.capacity.AllocatedCapacity;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 
-class DefaultMachineProvisioning implements NonBlockingElasticMachineProvisioning {
+public class DefaultMachineProvisioning implements NonBlockingElasticMachineProvisioning {
 
     private final ProcessingUnit pu;
     private final AbstractMachinesSlaPolicy sla;
@@ -43,7 +43,7 @@ class DefaultMachineProvisioning implements NonBlockingElasticMachineProvisionin
         int count = 0;
         Set<String> usedAgents = state.getAllUsedAgentUids();
         for (GridServiceAgent agent : pu.getAdmin().getGridServiceAgents().getAgents()) {
-            if (MachinesSlaUtils.matchesMachineZones(sla, agent) &&
+            if (matchesMachineZones(agent) &&
                 !usedAgents.contains(agent.getUid()) &&
                 (sla.getAllowDeploymentOnManagementMachine() || 
                  !MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine()))) {
@@ -185,7 +185,7 @@ class DefaultMachineProvisioning implements NonBlockingElasticMachineProvisionin
         
         for (GridServiceAgent agent : MachinesSlaUtils.sortManagementFirst(agents)) {
             
-            if (MachinesSlaUtils.matchesMachineZones(sla,agent) &&
+            if (matchesMachineZones(agent) &&
                 !usedAgentUids.contains(agent.getUid()) &&
                 (sla.getAllowDeploymentOnManagementMachine() || 
                  !MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine()))) {
@@ -194,4 +194,14 @@ class DefaultMachineProvisioning implements NonBlockingElasticMachineProvisionin
         }
         return null;
     }
+   
+    private boolean matchesMachineZones(GridServiceAgent agent) {
+        final Set<String> agentZones = new HashSet<String>(agent.getZones().keySet());
+        final Set<String> puZones = sla.getDiscoveredMachineZones();
+        boolean zoneMatches = agentZones.isEmpty() || puZones.isEmpty();
+        agentZones.retainAll(puZones);
+        zoneMatches = zoneMatches || !agentZones.isEmpty();
+        return zoneMatches;
+    }
+
 }
