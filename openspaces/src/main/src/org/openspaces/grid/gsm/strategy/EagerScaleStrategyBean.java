@@ -232,7 +232,9 @@ public class EagerScaleStrategyBean
         // this check is not necessary since machinesEndpoint 
         // is already limiting number of machines by total number of instances.
         // but we do it anyway due to separation of concerns.
-        int numberOfMachines = Math.min(pu.getTotalNumberOfInstances(),allocatedCapacity.getAgentUids().size());
+        int numberOfMachines = Math.min(
+                getMaximumNumberOfInstances(),
+                allocatedCapacity.getAgentUids().size());
         sla.setMinimumNumberOfMachines(numberOfMachines); 
 
         //eager memory
@@ -241,7 +243,7 @@ public class EagerScaleStrategyBean
         //If there are too many machines, we ask to spread out to the maximum number of containers (primaries+backups) 
         long memory = Math.min(
                 machinesEndpoint.getAllocatedCapacity().getTotalAllocatedCapacity().getMemoryInMB(), 
-                sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB() * pu.getTotalNumberOfInstances());
+                sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB() * getMaximumNumberOfInstances());
         sla.setMemoryCapacityInMB(memory);
 
         if (logger.isDebugEnabled()) {
@@ -338,22 +340,31 @@ public class EagerScaleStrategyBean
     
     private EagerMachinesSlaPolicy getEagerMachinesSlaPolicy() {
         final EagerMachinesSlaPolicy sla = new EagerMachinesSlaPolicy();
-        sla.setAllowDeploymentOnManagementMachine(!slaConfig.getDedicatedManagementMachines());
-        
-        // calculate minimum number of machines
-        
-        if (schemaConfig.isPartitionedSync2BackupSchema()) {
-            sla.setMaximumNumberOfMachines(pu.getTotalNumberOfInstances());
-            sla.setMinimumNumberOfMachines(calcMinNumberOfMachinesForPartitionedDeployment(pu));
-        }
-        else {
-            sla.setMinimumNumberOfMachines(1);
-            sla.setMaximumNumberOfMachines(MAX_NUMBER_OF_MACHINES);
-        }
+        sla.setAllowDeploymentOnManagementMachine(!slaConfig.getDedicatedManagementMachines());       
+        sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
+        sla.setMinimumNumberOfMachines(getMinimumNumberOfMachines());
         sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
         sla.setMachineZones(new HashSet<String>(Arrays.asList(slaConfig.getMachineZones())));
         return sla;
+    }
+    
+    private int getMinimumNumberOfMachines() {
+        if (schemaConfig.isPartitionedSync2BackupSchema()) {
+            return calcMinNumberOfMachinesForPartitionedDeployment(pu);
+        }
+        else {
+            return 1;
+        }
+    }
+    
+    private int getMaximumNumberOfInstances() {
+        if (schemaConfig.isPartitionedSync2BackupSchema()) {
+            return pu.getTotalNumberOfInstances();
+        }
+        else {
+            return MAX_NUMBER_OF_MACHINES;
+        }
     }
 
 }
