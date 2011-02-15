@@ -42,7 +42,7 @@ public class BinaryExpression implements Expression, ExpressionNode {
     public String toString() {
         switch (_expressionType) {
         case EQUAL:
-            return " = ";
+            return (_node2.getNodeType() == NodeType.NULL_VALUE)? " IS " :" = ";
         case NOT_EQUAL:
             return (_node2.getNodeType() == NodeType.NULL_VALUE)? " IS NOT " : " <> ";
         case GREATER_THAN:
