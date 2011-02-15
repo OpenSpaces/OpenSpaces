@@ -117,6 +117,7 @@
             <fileset dir="${target.classes.dir}">
                 <include name="META-INF/**"/>
                 <include name="org/openspaces/**"/>
+            	<include name="org/apache/openjpa/**"/>
                 <exclude name="org/mule/**"/>
                 <exclude name="org/openspaces/esb/mule/**"/>
                 <exclude name="org/openspaces/pu/container/jee/jetty/holder/**"/>
