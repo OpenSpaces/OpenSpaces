@@ -3,6 +3,7 @@ package org.openspaces.jpa.openjpa;
 import net.jini.core.transaction.server.TransactionManager;
 
 import org.apache.openjpa.conf.OpenJPAConfigurationImpl;
+import org.apache.openjpa.kernel.BrokerImpl;
 import org.apache.openjpa.lib.conf.Value;
 import org.openspaces.core.space.UrlSpaceConfigurer;
 
@@ -77,5 +78,14 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
     public void setConnectionFactory(Object space) {
         _space = (IJSpace) space;
     }
-        
+
+    /**
+     * Create a new broker instance.
+     */
+    @Override
+    public BrokerImpl newBrokerInstance(String user, String pass) {
+        return new Broker();
+    }
+    
+    
 }
