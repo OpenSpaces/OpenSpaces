@@ -52,6 +52,16 @@ public class AggregatedAllocatedCapacity {
         sum.addAll(aggregatedCapacity2);
         return sum;
     }
+
+    public static AggregatedAllocatedCapacity subtract(
+            AggregatedAllocatedCapacity aggregatedCapacity1,
+            AggregatedAllocatedCapacity aggregatedCapacity2) {
+
+        AggregatedAllocatedCapacity diff = new AggregatedAllocatedCapacity();
+        diff.addAll(aggregatedCapacity1);
+        diff.subtractAll(aggregatedCapacity2);
+        return diff;
+    }
     
     public static AggregatedAllocatedCapacity add(
             AggregatedAllocatedCapacity aggregatedCapacity, 
@@ -87,6 +97,13 @@ public class AggregatedAllocatedCapacity {
         for (String agentUid : aggregatedCapacity.capacityPerAgent.keySet()) {
             AllocatedCapacity capacity = aggregatedCapacity.capacityPerAgent.get(agentUid);
             add(agentUid,capacity);
+        }
+    }
+    
+    private void subtractAll(AggregatedAllocatedCapacity aggregatedCapacity) {
+        for (String agentUid : aggregatedCapacity.capacityPerAgent.keySet()) {
+            AllocatedCapacity capacity = aggregatedCapacity.capacityPerAgent.get(agentUid);
+            subtract(agentUid,capacity);
         }
     }
     
