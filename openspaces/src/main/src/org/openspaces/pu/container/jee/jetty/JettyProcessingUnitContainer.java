@@ -36,7 +36,7 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 /**
- * The actual contianer simply holding the jetty web application context, the application context,
+ * The actual container simply holding the jetty web application context, the application context,
  * and the {@link org.openspaces.pu.container.jee.jetty.holder.JettyHolder}. They are used when closing
  * this container.
  *

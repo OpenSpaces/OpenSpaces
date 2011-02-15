@@ -151,8 +151,8 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
     }
 
     /**
-     * Internal used to set the applicationn context loaded from the <code>pu.xml</code> on a thread local
-     * so components within the web container (such as session storge) will be able to access it during
+     * Internal used to set the application context loaded from the <code>pu.xml</code> on a thread local
+     * so components within the web container (such as session storage) will be able to access it during
      * startup time of the web application using {@link #getCurrentApplicationContext()}.
      */
     private static void setCurrentApplicationContext(ApplicationContext applicationContext) {
