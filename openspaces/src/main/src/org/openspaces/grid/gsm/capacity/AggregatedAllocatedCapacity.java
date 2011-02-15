@@ -86,6 +86,18 @@ public class AggregatedAllocatedCapacity {
         return remaining;
     }
 
+    public static AggregatedAllocatedCapacity subtractOrZero(
+            AggregatedAllocatedCapacity aggregatedCapacity, 
+            String agentUid, 
+            AllocatedCapacity capacity) {
+        
+        AggregatedAllocatedCapacity remaining = new AggregatedAllocatedCapacity();
+        remaining.addAll(aggregatedCapacity);
+        remaining.subtractOrZero(agentUid,capacity);
+        return remaining;
+    }
+
+
     public AllocatedCapacity getAgentCapacity(String agentUid) {
         if (!capacityPerAgent.containsKey(agentUid)) {
             throw new IllegalArgumentException("agent");
@@ -134,12 +146,31 @@ public class AggregatedAllocatedCapacity {
         AllocatedCapacity newAllocation = 
             AllocatedCapacity.subtract(capacityPerAgent.get(agentUid), capacity);
         
+        updateAgentCapacity(agentUid, newAllocation);        
+    }
+    
+
+    private void subtractOrZero(String agentUid, AllocatedCapacity capacity) {
+   validateAllocation(capacity);
+        
+        if (!capacityPerAgent.containsKey(agentUid)) {
+            throw new IllegalArgumentException("Agent UID " + agentUid + " no found");
+        }
+        
+        AllocatedCapacity newAllocation = 
+            AllocatedCapacity.subtractOrZero(capacityPerAgent.get(agentUid), capacity);
+        
+        updateAgentCapacity(agentUid, newAllocation);
+        
+    }
+
+    private void updateAgentCapacity(String agentUid, AllocatedCapacity newAllocation) {
         if (newAllocation.equalsZero()) {
             capacityPerAgent.remove(agentUid);
         }
         else {
             capacityPerAgent.put(agentUid,newAllocation);
-        }        
+        }
     }
     
     private void validateAllocation(AllocatedCapacity allocation) {

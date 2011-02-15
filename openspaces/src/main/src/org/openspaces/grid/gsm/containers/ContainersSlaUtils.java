@@ -283,20 +283,20 @@ public class ContainersSlaUtils {
     /**
      * Sorts the specified agents by the number of containers (from the specified containers) on each agent.
      * @param agents
-     * @param gridServiceContainers
+     * @param containersByZone
      * @param futureContainers 
      * @return the sorted agents list
      */
     public static List<GridServiceAgent> sortAgentsByNumberOfContainers(
             Collection<GridServiceAgent> agents, 
-            GridServiceContainer[] gridServiceContainers, 
+            List<GridServiceContainer> containersByZone, 
             Collection<FutureGridServiceContainer> futureContainers) {
 
         final Map<GridServiceAgent,Integer> numberOfContainersPerAgent = new HashMap<GridServiceAgent,Integer>();
         for (GridServiceAgent agent: agents) {
             numberOfContainersPerAgent.put(agent, 0);
         }
-        for (GridServiceContainer container : gridServiceContainers) {
+        for (GridServiceContainer container : containersByZone) {
             GridServiceAgent agent = container.getGridServiceAgent();
             if (numberOfContainersPerAgent.containsKey(agent)) {
                 int count = numberOfContainersPerAgent.get(agent);

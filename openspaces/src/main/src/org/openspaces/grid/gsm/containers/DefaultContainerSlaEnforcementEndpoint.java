@@ -325,7 +325,8 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
 
         boolean conflictingOperationInProgress = false;
         long requiredFreeMemoryInMB = sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB();
-        
+        final List<GridServiceContainer> containersByZone = ContainersSlaUtils.getContainersByZone(
+                ContainersSlaUtils.getContainerZone(pu), pu.getAdmin());
         
         Collection<GridServiceAgent> allocatedAgents = 
             MachinesSlaUtils.getGridServiceAgentsFromUids(
@@ -343,10 +344,10 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
   
         AggregatedAllocatedCapacity freeCapacity = 
             calculateRemainingFreeCapacity(
-                    allocatedCapacity,getContainers(), capacityOfOneContainer);
+                    allocatedCapacity,containersByZone, capacityOfOneContainer);
         
         final List<GridServiceAgent> agentsSortedByNumberOfContainers = ContainersSlaUtils.sortAgentsByNumberOfContainers(
-                allocatedAgents, getContainers(), state.getFutureContainers(pu));
+                allocatedAgents, containersByZone, state.getFutureContainers(pu));
         logger.debug("Considering " + agentsSortedByNumberOfContainers.size() + " agents to start a container on.");
         for (final GridServiceAgent agent : agentsSortedByNumberOfContainers) {
 
@@ -413,18 +414,21 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
      */
     private AggregatedAllocatedCapacity calculateRemainingFreeCapacity(
             AggregatedAllocatedCapacity allocatedCapacity,
-            GridServiceContainer[] gridServiceContainers,
+            List<GridServiceContainer> containersByZone,
             AllocatedCapacity capacityOfOneContainer) {
         
         AggregatedAllocatedCapacity freeCapacity = allocatedCapacity ;
-        for (GridServiceContainer container : gridServiceContainers) {
+        for (GridServiceContainer container : containersByZone) {
             
             GridServiceAgent agent = container.getGridServiceAgent();
             // check that this container is on an allocated machine, and is not a candidate for deallocation
             if (allocatedCapacity.getAgentUids().contains(agent.getUid())) {
                 
                 //subtract the container memory capacity from the total allocated memory on this machine. 
-                freeCapacity = AggregatedAllocatedCapacity.subtract(
+                
+                //we use subtractOrZero since GSA may start extra GSC due to false failure detection.
+                //or if containers are marked for shutdown and have not been killed yet.
+                freeCapacity = AggregatedAllocatedCapacity.subtractOrZero(
                         freeCapacity, agent.getUid(), capacityOfOneContainer);
             }
         }
