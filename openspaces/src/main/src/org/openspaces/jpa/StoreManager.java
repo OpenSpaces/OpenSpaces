@@ -30,6 +30,7 @@ import org.apache.openjpa.kernel.FetchConfiguration;
 import org.apache.openjpa.kernel.OpenJPAStateManager;
 import org.apache.openjpa.kernel.PCState;
 import org.apache.openjpa.kernel.QueryLanguages;
+import org.apache.openjpa.kernel.StateManager;
 import org.apache.openjpa.kernel.StoreQuery;
 import org.apache.openjpa.kernel.exps.ExpressionParser;
 import org.apache.openjpa.lib.rop.ResultObjectProvider;
@@ -69,6 +70,11 @@ public class StoreManager extends AbstractStoreManager {
     private static final Map<Class<?>, Integer> _classesRelationStatus = new HashMap<Class<?>, Integer>();
     private static final HashSet<Class<?>> _processedClasses = new HashSet<Class<?>>();
     private GConnection _connection;
+    private RelationsManager _relationsManager;
+    
+    public StoreManager() {
+        _relationsManager = new RelationsManager();
+    }
     
     @Override
     protected void open() {
@@ -248,6 +254,7 @@ public class StoreManager extends AbstractStoreManager {
             final Object oid = ApplicationIds.fromPKValues(new Object[] { entry.getID() }, cmd);
             final BitSet exclude = new BitSet(cmd.getFields().length);                               
             final Object managedObject = getContext().find(oid, null, exclude, entry, 0);
+            _relationsManager.setOwnerStateManagerForPersistentInstance(managedObject, sm);
             sm.storeObject(fmd.getIndex(), managedObject);
         }
     }
@@ -295,6 +302,7 @@ public class StoreManager extends AbstractStoreManager {
                 final Object oid = ApplicationIds.fromPKValues(new Object[] { entry.getID() }, cmd);
                 // Initialize a state manager for the current item
                 final Object managedObject = getContext().find(oid, null, exclude, entry, 0);
+                _relationsManager.setOwnerStateManagerForPersistentInstance(managedObject, sm);
                 ((Collection<Object>) collection).add(managedObject);
             }
         }
@@ -333,7 +341,7 @@ public class StoreManager extends AbstractStoreManager {
     public boolean load(OpenJPAStateManager sm, BitSet fields, FetchConfiguration fetch, int lockLevel, Object context) {
         final ClassMetaData cm = (ClassMetaData) sm.getMetaData();
         if (_classesRelationStatus.containsKey(cm.getDescribedType()))
-                throw new UnsupportedOperationException("Updating an owned Entity in a relationship is not supported.");
+            return true;
         
         final Object[] ids = ApplicationIds.toPKValues(sm.getObjectId(), cm);        
         final IJSpace space = getConfiguration().getSpace();
@@ -375,12 +383,17 @@ public class StoreManager extends AbstractStoreManager {
                 
         ArrayList<Exception> exceptions = new ArrayList<Exception>();
 
-        if (shouldInitializeClassesRelationStatus())
-            initializeClassesRelationStatus();
+        if (_relationsManager.shouldInitializeClassesRelationStatus())
+            _relationsManager.initializeClassesRelationStatus();
         
-        handleNewObjects(pNew, space);
-        handleUpdatedObjects(pDirty, exceptions, space);
-        handleDeletedObjects(pDeleted, exceptions, space);                     
+        if (pNew.size() > 0)
+            handleNewObjects(pNew, space);
+        
+        if (pDirty.size() > 0)
+            handleUpdatedObjects(pDirty, exceptions, space);
+        
+        if (pDeleted.size() > 0)
+            handleDeletedObjects(pDeleted, exceptions, space);                     
         
         return exceptions;                   
     }
@@ -418,30 +431,45 @@ public class StoreManager extends AbstractStoreManager {
      * Partially updates dirty fields to the space.
      */    
     private void handleUpdatedObjects(Collection<OpenJPAStateManager> sms, ArrayList<Exception> exceptions, IJSpace space) {
-        // Generate a template for each state manager and use partial update for updating..         
+        // Generate a template for each state manager and use partial update for updating..
         for (OpenJPAStateManager sm : sms) {
-            ClassMetaData cm = sm.getMetaData();
-            // Throw an exception if attempting to update an owned entity in a relationship.             
-            if (_classesRelationStatus.containsKey(cm.getDescribedType())) {
-                throw new UnsupportedOperationException("Updating an owned Entity in a relationship is not supported.");
-            }
+            final ClassMetaData cm = sm.getMetaData();
             try {
-                // Create an entry packet from the updated POJO and set all the fields
-                // but the updated & primary key to null.
-                final ISpaceProxy proxy = (ISpaceProxy) space;
-                final IEntryPacket entry = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(
-                        sm.getManagedInstance(), ObjectType.POJO, proxy);                                                
-                FieldMetaData[] fmds = cm.getFields();
-                for (int i = 0; i < fmds.length; i++) {
-                    if (!sm.getDirty().get(i) && !fmds[i].isPrimaryKey()) {
-                        entry.setFieldValue(i, null);
+                // Find relationship owner and flush it to space
+                if (_classesRelationStatus.containsKey(cm.getDescribedType())) {
+                    final StateManager stateManagerToUpdate = _relationsManager.getStateManagerToUpdate((StateManager) sm);
+                    if (sms.contains(stateManagerToUpdate))
+                        continue;
+                    
+                    final ISpaceProxy proxy = (ISpaceProxy) space;
+                    final IEntryPacket entry = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(
+                            stateManagerToUpdate.getManagedInstance(), ObjectType.POJO, proxy);                                                
+                    // Write changes to the space
+                    for (FieldMetaData fmd : cm.getFields()) {
+                        _relationsManager.initializeOwnerReferencesForField((StateManager) sm, fmd);
                     }
+                    space.write(entry, _transaction, Lease.FOREVER, 0, UpdateModifiers.UPDATE_ONLY);
+                    
+                } else {
+                    // Create an entry packet from the updated POJO and set all the fields
+                    // but the updated & primary key to null.
+                    final ISpaceProxy proxy = (ISpaceProxy) space;
+                    final IEntryPacket entry = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(
+                            sm.getManagedInstance(), ObjectType.POJO, proxy);                                                
+                    FieldMetaData[] fmds = cm.getFields();
+                    for (int i = 0; i < fmds.length; i++) {
+                        if (!sm.getDirty().get(i) && !fmds[i].isPrimaryKey()) {
+                            entry.setFieldValue(i, null);
+                        } else {
+                            _relationsManager.initializeOwnerReferencesForField((StateManager) sm, fmds[i]);
+                        }
+                    }
+                    // Write changes to the space
+                    space.write(entry, _transaction, Lease.FOREVER, 0, UpdateModifiers.PARTIAL_UPDATE);
                 }
-                // Write changes to the space
-                space.write(entry, _transaction, Lease.FOREVER, 0, UpdateModifiers.PARTIAL_UPDATE);                                
             } catch (Exception e) { 
                 exceptions.add(e);
-            }                       
+            }
         }
     }
 
@@ -456,28 +484,14 @@ public class StoreManager extends AbstractStoreManager {
         for (OpenJPAStateManager sm : sms) {
             // If the current object is in a relation skip it
             if (_classesRelationStatus.containsKey(sm.getMetaData().getDescribedType())) {
-                // Remove the state manager from objects in relation for making their serialization not
-                // handled by OpenJPA which can cause a deadlock when writing to space.
-                // The deadlock is caused because when serializing a monitored instance, OpenJPA takes over
-                // and attempts to access an already locked layer in OpenJPA's hierarchy which causes
-                // a deadlock.
-                sm.getPersistenceCapable().pcReplaceStateManager(null);
-                stateManagersToRestore.add(sm);
                 continue;
             }
-            // If the object has embedded relations we need to remove the state manager from these instances
-            // since they are also serialized when written to space.
-            for (FieldMetaData fmd : sm.getMetaData().getFields()) {
-                if (fmd.isEmbeddedPC()) {
-                    Object value = sm.fetch(fmd.getDeclaredIndex());
-                    if (value != null) {
-                        PersistenceCapable pc = (PersistenceCapable) value;
-                        OpenJPAStateManager stateManager = (OpenJPAStateManager) pc.pcGetStateManager();
-                        pc.pcReplaceStateManager(null);
-                        stateManagersToRestore.add(stateManager);
-                    }
-                }
-            }
+            // If the object has managed instances in its fields we need to remove the state manager from these instances
+            // since they are serialized when written to space and can cause a deadlock when written
+            // by writeMultiple.
+            _relationsManager.removeOwnedEntitiesStateManagers(stateManagersToRestore, sm);            
+            
+            // In order to use writeMultiple we need to gather each type's instances to its own list
             if (!sm.getMetaData().getDescribedType().equals(previousType)) {
                 currentList = objectsToWriteByType.get(sm.getMetaData().getDescribedType());
                 if (currentList == null) {
@@ -486,6 +500,7 @@ public class StoreManager extends AbstractStoreManager {
                 }
                 previousType = sm.getMetaData().getDescribedType();
             }
+            
             // Each persisted class should have its state manager removed
             // before being written to space since gigaspaces reflection conflicts with
             // OpenJPA's class monitoring.
@@ -502,43 +517,7 @@ public class StoreManager extends AbstractStoreManager {
             throw new RuntimeException(e.getMessage(), e);
         } finally {
             // Restore the removed state managers.
-            for (OpenJPAStateManager sm : stateManagersToRestore) {
-                sm.getPersistenceCapable().pcReplaceStateManager(sm);
-            }
-        }
-    }
-
-    /**
-     * Collects information on current OpenJPA listed class meta data list.
-     * On every call to flush() the method is called & checks if there are new classes to initialize.
-     */
-    private synchronized void initializeClassesRelationStatus() {
-        if (!shouldInitializeClassesRelationStatus())
-            return;
-        // Collect information regarding relationships.
-        // Eventually classes which are in a relation should not be saved to the space
-        // since we only support owned relationships and these instances will be saved as nested instances
-        // of their owning instance.
-        ClassMetaData[] cms = getConfiguration().getMetaDataRepositoryInstance().getMetaDatas();
-        for (ClassMetaData cm : cms) {
-            // Process class
-            if (!_processedClasses.contains(cm.getDescribedType())) {
-                for (FieldMetaData fmd : cm.getFields()) {
-                    if (fmd.getAssociationType() == FieldMetaData.ONE_TO_ONE) {
-                        if (!_classesRelationStatus.containsKey(fmd.getDeclaredType())) {
-                            _classesRelationStatus.put(fmd.getDeclaredType(), FieldMetaData.ONE_TO_ONE);
-                        }
-                    } else if (fmd.getAssociationType() == FieldMetaData.ONE_TO_MANY) {
-                        if (!_classesRelationStatus.containsKey(fmd.getDeclaredType())) {
-                            _classesRelationStatus.put(fmd.getElement().getDeclaredType(), FieldMetaData.ONE_TO_MANY);
-                        }
-                    } else if (fmd.getAssociationType() == FieldMetaData.MANY_TO_MANY) {
-                        throw new IllegalArgumentException("Many-to-many is not supported.");
-                    }
-                }
-                validateClassAnnotations(cm.getDescribedType());
-                _processedClasses.add(cm.getDescribedType());
-            }
+            _relationsManager.restoreRemovedStateManagers(stateManagersToRestore);
         }
     }
 
@@ -592,15 +571,6 @@ public class StoreManager extends AbstractStoreManager {
     }    
     
     /**
-     * Gets whether classes relations status is not complete and should be synchronized.
-     * OpenJPA creates class meta data only after an entity is persisted for the first time.
-     */
-    private boolean shouldInitializeClassesRelationStatus() {
-        return getConfiguration().getMetaDataRepositoryInstance().getMetaDatas().length != _processedClasses.size();
- 
-    }
-
-    /**
      * Gets a JDBC connection using the configuration's space instance.
      * Each store manager has its own Connection for Multithreaded reasons. 
      */
@@ -623,10 +593,200 @@ public class StoreManager extends AbstractStoreManager {
      */
     public synchronized int getClassRelationStatus(Class<?> type) {
         // In case relations status was not initialized already..
-        initializeClassesRelationStatus();
+        if (_relationsManager.shouldInitializeClassesRelationStatus())
+            _relationsManager.initializeClassesRelationStatus();
         // Get relation status..
         Integer relationStatus = _classesRelationStatus.get(type);
         return (relationStatus == null) ? FieldMetaData.MANAGE_NONE : relationStatus;
+    }
+
+    
+    /**
+     * StoreManager's relationships manager.
+     * Provides methods for handling relationships in GigaSpaces owned relationships model. 
+     */
+    private class RelationsManager {
+
+        public RelationsManager() {
+        }
+        
+        /**
+         * Removes owned entities state managers (before writing them to space due to serialization deadlock problem).
+         * The removed state managers are kept in the provided collection for restoring them later.
+         * 
+         * @param stateManagersToRestore The collection for storing the removed state managers.
+         * @param sm The owning entity's state manager.
+         */
+        public void removeOwnedEntitiesStateManagers(Collection<OpenJPAStateManager> stateManagersToRestore,
+                OpenJPAStateManager sm) {
+            // Remove the state manager from objects in relation for making their serialization not
+            // handled by OpenJPA which can cause a deadlock when writing to space.
+            // The deadlock is caused because when serializing a monitored instance, OpenJPA takes over
+            // and attempts to access an already locked layer in OpenJPA's hierarchy which causes
+            // a deadlock.
+            for (FieldMetaData fmd : sm.getMetaData().getFields()) {
+                if (fmd.isEmbeddedPC()) {
+                    Object value = sm.fetch(fmd.getDeclaredIndex());
+                    if (value != null) {
+                        PersistenceCapable pc = (PersistenceCapable) value;
+                        OpenJPAStateManager stateManager = (OpenJPAStateManager) pc.pcGetStateManager();
+                        removeOwnedEntitiesStateManagers(stateManagersToRestore, stateManager);
+                        pc.pcReplaceStateManager(null);
+                        stateManagersToRestore.add(stateManager);
+                    }
+                } else if (fmd.getAssociationType() == FieldMetaData.ONE_TO_MANY) {
+                    Collection<?> collection = (Collection<?>) sm.fetch(fmd.getIndex());
+                    if (collection != null) {
+                        for (Object item : collection) {
+                            // Set relationship owner
+                            setOwnerStateManagerForPersistentInstance(item, sm);
+                            PersistenceCapable pc = (PersistenceCapable) item;
+                            OpenJPAStateManager stateManager = (OpenJPAStateManager) pc.pcGetStateManager();
+                            removeOwnedEntitiesStateManagers(stateManagersToRestore, stateManager);
+                            stateManagersToRestore.add(stateManager);
+                            pc.pcReplaceStateManager(null);
+                        }
+                    }
+                } else if (fmd.getAssociationType() == FieldMetaData.ONE_TO_ONE) {
+                    Object value = sm.fetch(fmd.getIndex());
+                    if (value != null) {
+                        setOwnerStateManagerForPersistentInstance(value, sm);
+                        PersistenceCapable pc = (PersistenceCapable) value;
+                        OpenJPAStateManager stateManager = (OpenJPAStateManager) pc.pcGetStateManager();
+                        removeOwnedEntitiesStateManagers(stateManagersToRestore, stateManager);
+                        stateManagersToRestore.add(stateManager);
+                        pc.pcReplaceStateManager(null);
+                    }
+                }
+            }
+        }
+        
+        /**
+         * Sets the provided state manager as the managed object's owner.
+         * @param managedObject The managed object to set the owner for.
+         * @param sm The owner's state manager.
+         */
+        public void setOwnerStateManagerForPersistentInstance(Object managedObject, OpenJPAStateManager sm) {
+            StateManager stateManager = (StateManager)((PersistenceCapable) managedObject).pcGetStateManager();
+            stateManager.setOwnerStateManager((StateManager) sm);
+        }
+        
+        /**
+         * Sets the provided state manager as the owner for the provided field value.
+         * @param sm The owner's state manager.
+         * @param fmd The field's value the owner will be set for.
+         */
+        public void initializeOwnerReferencesForField(StateManager sm, FieldMetaData fmd) {
+            if (fmd.getAssociationType() == FieldMetaData.ONE_TO_MANY) {
+                Collection<?> collection = (Collection<?>) sm.fetch(fmd.getIndex());
+                if (collection != null) {
+                    for (Object item : collection) {
+                        if (item != null) {
+                            _relationsManager.setOwnerStateManagerForPersistentInstance(item, sm);
+                        }
+                    }
+                }
+            } else if (fmd.getAssociationType() == FieldMetaData.ONE_TO_ONE) {
+                Object value = sm.fetch(fmd.getIndex());
+                if (value != null) {
+                    _relationsManager.setOwnerStateManagerForPersistentInstance(value, sm);
+                }
+            }
+        }
+        
+        /**
+         * Attempts to find the super-owner of the provided state manager in a relationship to update.
+         * Throws an exception if such a state manager doesn't exist.
+         * @param sm The owned relationship state manager.
+         * @return The super-owner state manager of the relationship.
+         */
+        public StateManager getStateManagerToUpdate(StateManager sm) {
+            final Integer associationType = _classesRelationStatus.get(sm.getMetaData().getDescribedType());
+            if (associationType == null)
+                throw new IllegalStateException("Error updating: " + sm.getMetaData().getClass().getName()
+                        + " with id: " + sm.getId());
+            final StateManager ownerStateManager = sm.getOwnerStateManager();
+            if (ownerStateManager != null) {
+                if (associationType == FieldMetaData.ONE_TO_MANY) {
+                    for (FieldMetaData fmd : ownerStateManager.getMetaData().getFields()) {
+                        if (fmd.getElement().getDeclaredType().equals(sm.getMetaData().getDescribedType())) {
+                            Collection<?> collection = (Collection<?>) ownerStateManager.fetch(fmd.getIndex());
+                            if (collection == null || !collection.contains(sm.getManagedInstance()))
+                                break;
+                            if (ownerStateManager.getOwnerStateManager() != null)
+                                return getStateManagerToUpdate(ownerStateManager);
+                            return ownerStateManager;
+                        }
+                    }
+                } else if (associationType == FieldMetaData.ONE_TO_ONE) {
+                    for (FieldMetaData fmd : ownerStateManager.getMetaData().getFields()) {
+                        if (fmd.getDeclaredType().equals(sm.getMetaData().getDescribedType())) {
+                            Object value = ownerStateManager.fetch(fmd.getIndex());
+                            if (value == null || !value.equals(sm.getManagedInstance()))
+                                break;
+                            if (ownerStateManager.getOwnerStateManager() != null)
+                                return getStateManagerToUpdate(ownerStateManager);
+                            return ownerStateManager;
+                        }
+                    }            
+                }
+            }
+            throw new IllegalStateException("Attempted to update an owned entity: "
+                    + sm.getMetaData().getClass().getName() + " with Id: " + sm.getId() + " which has no owner.");
+        }
+        
+        /**
+         * Restores state managers for the provided collection of state managers.
+         * @param stateManagersToRestore State managers collection to restore.
+         */
+        public void restoreRemovedStateManagers(Collection<OpenJPAStateManager> stateManagersToRestore) {
+            for (OpenJPAStateManager sm : stateManagersToRestore) {
+                sm.getPersistenceCapable().pcReplaceStateManager(sm);
+            }
+        }
+        
+        /**
+         * Collects information on current OpenJPA listed class meta data list.
+         * On every call to flush() the method is called & checks if there are new classes to initialize.
+         */
+        public synchronized void initializeClassesRelationStatus() {
+            if (!shouldInitializeClassesRelationStatus())
+                return;
+            // Collect information regarding relationships.
+            // Eventually classes which are in a relation should not be saved to the space
+            // since we only support owned relationships and these instances will be saved as nested instances
+            // of their owning instance.
+            ClassMetaData[] cms = getConfiguration().getMetaDataRepositoryInstance().getMetaDatas();
+            for (ClassMetaData cm : cms) {
+                // Process class
+                if (!_processedClasses.contains(cm.getDescribedType())) {
+                    for (FieldMetaData fmd : cm.getFields()) {
+                        if (fmd.getAssociationType() == FieldMetaData.ONE_TO_ONE) {
+                            if (!_classesRelationStatus.containsKey(fmd.getDeclaredType())) {
+                                _classesRelationStatus.put(fmd.getDeclaredType(), FieldMetaData.ONE_TO_ONE);
+                            }
+                        } else if (fmd.getAssociationType() == FieldMetaData.ONE_TO_MANY) {
+                            if (!_classesRelationStatus.containsKey(fmd.getDeclaredType())) {
+                                _classesRelationStatus.put(fmd.getElement().getDeclaredType(), FieldMetaData.ONE_TO_MANY);
+                            }
+                        } else if (fmd.getAssociationType() == FieldMetaData.MANY_TO_MANY) {
+                            throw new IllegalArgumentException("Many-to-many is not supported.");
+                        }
+                    }
+                    validateClassAnnotations(cm.getDescribedType());
+                    _processedClasses.add(cm.getDescribedType());
+                }
+            }
+        }
+
+        /**
+         * Gets whether classes relations status is not complete and should be synchronized.
+         * OpenJPA creates class meta data only after an entity is persisted for the first time.
+         */
+        public boolean shouldInitializeClassesRelationStatus() {            
+            return getConfiguration().getMetaDataRepositoryInstance().getMetaDatas().length != _processedClasses.size();
+        }
+        
     }
     
 }
