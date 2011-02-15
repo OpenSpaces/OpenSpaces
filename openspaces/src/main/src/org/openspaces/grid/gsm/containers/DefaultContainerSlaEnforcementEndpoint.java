@@ -325,8 +325,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
 
         boolean conflictingOperationInProgress = false;
         long requiredFreeMemoryInMB = sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB();
-        final List<GridServiceContainer> containersByZone = ContainersSlaUtils.getContainersByZone(
-                ContainersSlaUtils.getContainerZone(pu), pu.getAdmin());
+        
         
         Collection<GridServiceAgent> allocatedAgents = 
             MachinesSlaUtils.getGridServiceAgentsFromUids(
@@ -344,10 +343,10 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
   
         AggregatedAllocatedCapacity freeCapacity = 
             calculateRemainingFreeCapacity(
-                    allocatedCapacity,containersByZone, capacityOfOneContainer);
+                    allocatedCapacity,getContainers(), capacityOfOneContainer);
         
         final List<GridServiceAgent> agentsSortedByNumberOfContainers = ContainersSlaUtils.sortAgentsByNumberOfContainers(
-                allocatedAgents, containersByZone, state.getFutureContainers(pu));
+                allocatedAgents, getContainers(), state.getFutureContainers(pu));
         logger.debug("Considering " + agentsSortedByNumberOfContainers.size() + " agents to start a container on.");
         for (final GridServiceAgent agent : agentsSortedByNumberOfContainers) {
 
@@ -414,11 +413,11 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
      */
     private AggregatedAllocatedCapacity calculateRemainingFreeCapacity(
             AggregatedAllocatedCapacity allocatedCapacity,
-            Collection<GridServiceContainer> containers,
+            GridServiceContainer[] gridServiceContainers,
             AllocatedCapacity capacityOfOneContainer) {
         
         AggregatedAllocatedCapacity freeCapacity = allocatedCapacity ;
-        for (GridServiceContainer container : containers) {
+        for (GridServiceContainer container : gridServiceContainers) {
             
             GridServiceAgent agent = container.getGridServiceAgent();
             // check that this container is on an allocated machine, and is not a candidate for deallocation
