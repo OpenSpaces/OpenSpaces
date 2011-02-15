@@ -50,6 +50,7 @@ import org.snmp4j.util.DefaultPDUFactory;
  * log4j.properties.
  *
  * @author giladh
+ * @since 8.0
  */
 public class SnmpTrapSender implements SnmpTrapSenderFacade {
 	
@@ -70,8 +71,8 @@ public class SnmpTrapSender implements SnmpTrapSenderFacade {
 	 */
 	public void addTrapMessageVariable(String trapOID, String trapValue) {
 		synchronized (trapQueue) {
-			trapQueue.add(trapValue);
-		}
+		trapQueue.add(trapValue);
+	}
 	}
 
 	
@@ -80,13 +81,13 @@ public class SnmpTrapSender implements SnmpTrapSenderFacade {
 	 */
 	public void initialize(SNMPTrapAppender arg0) {
 		synchronized (trapQueue) {
-			trapQueue.clear();
+		trapQueue.clear();
 		}
 		loadRunParams();
 	}
 
 	/**
-	 * Loads runnig parameters - namely SNMP server's IP and port - 
+	 * Loads running parameters - namely SNMP server's IP and port - 
 	 * from the log4j.properties configuration file
 	 */
     private void loadRunParams() {
