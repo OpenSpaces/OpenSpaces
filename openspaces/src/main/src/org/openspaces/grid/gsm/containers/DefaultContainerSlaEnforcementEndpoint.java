@@ -150,8 +150,10 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                     if (containerToRemove == null) {
                         break;
                     }
-                    logger.info("Marking container " + ContainersSlaUtils.gscToString(containerToRemove)
-                            + " for shutdown.");
+                    logger.info("Marking container " + ContainersSlaUtils.gscToString(containerToRemove) + " for shutdown. "+
+                            "Containers="+Arrays.toString(getContainers())+ " "+
+                            "#FutureContainers="+state.getFutureContainers(pu).size());
+                    
                     state.markForContainerForDeallocation(pu, containerToRemove); 
                     approvedContainers.remove(containerToRemove);
                 }
