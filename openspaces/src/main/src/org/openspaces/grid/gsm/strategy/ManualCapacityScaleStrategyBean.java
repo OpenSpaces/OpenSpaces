@@ -70,7 +70,6 @@ public class ManualCapacityScaleStrategyBean
     private ScheduledFuture<?> scheduledTask;
     
     private long memoryInMB;
-    private int minimumNumberOfMachines;
     private NonBlockingElasticMachineProvisioning machineProvisioning;
     
 
@@ -133,9 +132,6 @@ public class ManualCapacityScaleStrategyBean
                     "Choose a different scale algorithm.");
         }
 
-        // calculate minimum number of machines
-        minimumNumberOfMachines = calcMinNumberOfMachines(pu);
-
         int targetNumberOfContainers = 
             slaConfig.getMemoryCapacityInMB() > 0?
                     calcTargetNumberOfContainers() :
@@ -152,18 +148,19 @@ public class ManualCapacityScaleStrategyBean
 
     private int calcDefaultTargetNumberOfContainers() {
         
-        int targetNumberOfContainers = Math.max(minimumNumberOfMachines,
+        int targetNumberOfContainers = Math.max(
+                 getMinimumNumberOfMachines(),
                  pu.getNumberOfBackups()+1);
         logger.info(
                 "targetNumberOfContainers= "+
                 "max(minimumNumberOfMachines, numberOfBackupsPerParition+1)= "+
-                "max("+ minimumNumberOfMachines +","+1+ "+"+pu.getNumberOfBackups()+")= "+
+                "max("+ getMinimumNumberOfMachines() +","+1+ "+"+pu.getNumberOfBackups()+")= "+
                 targetNumberOfContainers);
         
         return targetNumberOfContainers;
     }
 
-    private int calcMinNumberOfMachines(ProcessingUnit pu) {
+    private int calcMinNumberOfMachinesForPartitionedDeployment(ProcessingUnit pu) {
         int minNumberOfMachines;
         if (pu.getMaxInstancesPerMachine() == 0) {
             minNumberOfMachines = 1;
@@ -182,6 +179,14 @@ public class ManualCapacityScaleStrategyBean
         return minNumberOfMachines;
     }
 
+    private int getMinimumNumberOfMachines() {
+        if (schemaConfig.isPartitionedSync2BackupSchema()) {
+            return calcMinNumberOfMachinesForPartitionedDeployment(pu);
+        }
+        else {
+            return 1;
+        }
+    }
     public void destroy() {
         
         if (scheduledTask != null) {
@@ -340,7 +345,7 @@ public class ManualCapacityScaleStrategyBean
         sla.setCpuCapacity(slaConfig.getNumberOfCpuCores());
         sla.setAllowDeploymentOnManagementMachine(!slaConfig.getDedicatedManagementMachines());
         sla.setMemoryCapacityInMB(memoryInMB);
-        sla.setMinimumNumberOfMachines(minimumNumberOfMachines);
+        sla.setMinimumNumberOfMachines(getMinimumNumberOfMachines());
         sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
         sla.setMachineZones(new HashSet<String>(Arrays.asList(slaConfig.getMachineZones())));
@@ -374,7 +379,7 @@ public class ManualCapacityScaleStrategyBean
         final ContainersSlaPolicy sla = new ContainersSlaPolicy();
         sla.setNewContainerConfig(containersConfig);
         sla.setAllocatedCapacity(machinesEndpoint.getAllocatedCapacity());
-        sla.setMinimumNumberOfMachines(minimumNumberOfMachines);
+        sla.setMinimumNumberOfMachines(getMinimumNumberOfMachines());
         sla.setCpuCapacity(slaConfig.getNumberOfCpuCores());
         sla.setMemoryCapacityInMB(memoryInMB);
         sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
