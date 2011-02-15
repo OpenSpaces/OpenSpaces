@@ -47,8 +47,9 @@ public class AggregatedAllocatedCapacityTest {
                 AggregatedAllocatedCapacity.subtract(ac, "UUID1", new AllocatedCapacity(Fraction.ONE,1))
                 .equalsZero());
         
+        Assert.assertTrue(AggregatedAllocatedCapacity.subtract(ac,ac).equalsZero());
     }
-    
+
     @Test(expected=IllegalArgumentException.class)
     public void testSubtractWrongUuid() {
         AggregatedAllocatedCapacity ac = 
