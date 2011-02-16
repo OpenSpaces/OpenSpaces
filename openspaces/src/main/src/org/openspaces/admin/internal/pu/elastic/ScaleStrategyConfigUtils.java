@@ -86,6 +86,9 @@ public class ScaleStrategyConfigUtils {
     }
     
     public static void setMaxConcurrentRelocationsPerMachine(StringProperties properties, int maxNumberOfConcurrentRelocationsPerMachine) {
+        if (maxNumberOfConcurrentRelocationsPerMachine <= 0) {
+            throw new IllegalArgumentException("maxNumberOfConcurrentRelocationsPerMachine must be 1 or higher.");
+        }
         properties.putInteger(MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_KEY,maxNumberOfConcurrentRelocationsPerMachine);        
     }
 

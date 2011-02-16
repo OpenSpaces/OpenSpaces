@@ -303,6 +303,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     }
 
     public void setScaleStrategy(final String puName, final String strategyClassName, final Map<String,String> strategyProperties) {
+        logger.fine("Queuing scale strategy for " + puName);
         ((InternalAdmin)admin).scheduleNonBlockingStateChange(
                 new Runnable() {
 
@@ -319,7 +320,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     }
     
     public void setProcessingUnitElasticProperties(final String puName, final Map<String, String> properties) throws RemoteException {
-        
+        logger.fine("Queuing elastic properties for " + puName);
         ((InternalAdmin)admin).scheduleNonBlockingStateChange(
                  new Runnable() {
 

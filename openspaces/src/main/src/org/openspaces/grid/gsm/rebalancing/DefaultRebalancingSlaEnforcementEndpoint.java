@@ -926,8 +926,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
             int maximumNumberOfConcurrentRelocationsPerMachine) {
 
         if (maximumNumberOfConcurrentRelocationsPerMachine <= 0) {
-            // maximumNumberOfConcurrentRelocationsPerMachine is disabled
-            maximumNumberOfConcurrentRelocationsPerMachine = Integer.MAX_VALUE;
+            throw new IllegalStateException("maximumNumberOfConcurrentRelocationsPerMachine must be 1 or higher");
         }
 
         int concurrentRelocationsInContainer = 0;
