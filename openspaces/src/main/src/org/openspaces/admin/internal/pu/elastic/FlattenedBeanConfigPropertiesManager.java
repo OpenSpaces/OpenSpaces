@@ -35,7 +35,7 @@ public class FlattenedBeanConfigPropertiesManager implements BeanConfigPropertie
     }
 
    public void enableBean(String beanClassName) throws BeanConfigNotFoundException {
-        if (!containsBeanInternal(beanClassName)) {
+        if (!isBeanConfigExists(beanClassName)) {
             throw new BeanConfigNotFoundException("Failed to enable bean [" + beanClassName + "] since it does not exist.");
         }
         properties.putArray(enabledClassnameKey,
@@ -44,7 +44,7 @@ public class FlattenedBeanConfigPropertiesManager implements BeanConfigPropertie
 
     public void disableBean(String beanClassName) throws BeanConfigNotFoundException {
 
-        if (!containsBeanInternal(beanClassName)) {
+        if (!isBeanConfigExists(beanClassName)) {
             throw new BeanConfigNotFoundException("Failed to disable bean [" + beanClassName + "] since it does not exist.");
         }
         
@@ -79,7 +79,7 @@ public class FlattenedBeanConfigPropertiesManager implements BeanConfigPropertie
 
     public Map<String, String> getBeanConfig(String beanClassName) throws BeanConfigNotFoundException {
         
-        if (!containsBeanInternal(beanClassName)) {
+        if (!isBeanConfigExists(beanClassName)) {
             throw new BeanConfigNotFoundException("Failed to get bean [" + beanClassName + "] since it does not exist.");
         }
         return properties.getMap(getKeyPrefix(beanClassName), new HashMap<String, String>());
@@ -120,6 +120,10 @@ public class FlattenedBeanConfigPropertiesManager implements BeanConfigPropertie
 
     private boolean containsBeanInternal(String beanClassName) {
         return Arrays.asList(getEnabledBeansClassNames()).contains(beanClassName);
+    }
+    
+    public boolean isBeanConfigExists(String beanClassName) {
+        return Arrays.asList(getBeansClassNames()).contains(beanClassName);
     }
 
 }

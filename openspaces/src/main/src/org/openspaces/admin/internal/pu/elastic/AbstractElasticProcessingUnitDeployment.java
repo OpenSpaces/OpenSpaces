@@ -7,6 +7,8 @@ import org.openspaces.admin.bean.BeanConfig;
 import org.openspaces.admin.bean.BeanConfigPropertiesManager;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
+import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
+import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.core.util.StringProperties;
 
@@ -133,12 +135,12 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         return this;
     }
     
-    protected AbstractElasticProcessingUnitDeployment machineProvisioning(BeanConfig config) {
+    protected AbstractElasticProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
         enableBean(machineProvisioningPropertiesManager, config);
         return this;
     }    
 
-    protected AbstractElasticProcessingUnitDeployment scale(BeanConfig config) {
+    protected AbstractElasticProcessingUnitDeployment scale(ScaleStrategyConfig config) {
         enableBean(scaleStrategyPropertiesManager, config);
         return this;
     }

@@ -1,5 +1,6 @@
 package org.openspaces.grid.gsm;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.openspaces.admin.Admin;
@@ -8,6 +9,8 @@ import org.openspaces.admin.internal.pu.elastic.MachineProvisioningBeanPropertie
 import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
 import org.openspaces.core.bean.Bean;
 import org.openspaces.grid.gsm.machines.DefaultMachineProvisioning;
+
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class ElasticConfigBean implements Bean {
 
@@ -23,9 +26,14 @@ public class ElasticConfigBean implements Bean {
         final MachineProvisioningBeanPropertiesManager propertiesManager = 
             new MachineProvisioningBeanPropertiesManager(properties);
         
-        propertiesManager.getBeanConfig(DefaultMachineProvisioning.class.getName());
+        Map<String, String> beanConfig = new HashMap<String,String>();
+        String beanClassName = DefaultMachineProvisioning.class.getName();
         
-        return new DiscoveredMachineProvisioningConfig(properties);
+        if (propertiesManager.isBeanConfigExists(beanClassName)) {
+            beanConfig = propertiesManager.getBeanConfig(beanClassName);
+        }
+        
+        return new DiscoveredMachineProvisioningConfig(beanConfig);
     }
     
     public void afterPropertiesSet() throws Exception {

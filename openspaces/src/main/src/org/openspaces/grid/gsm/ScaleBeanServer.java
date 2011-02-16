@@ -89,6 +89,7 @@ public class ScaleBeanServer {
         // order of beans is important due to implicit dependency inject order
         setElasticConfig(elasticProperties);
         
+        {
         MachineProvisioningBeanPropertiesManager machineProvisioningPropertiesManager = 
                 new MachineProvisioningBeanPropertiesManager(elasticProperties);
         String enabledMachineProvisioningClassName = getEnabledBeanClassName(machineProvisioningPropertiesManager);
@@ -103,8 +104,9 @@ public class ScaleBeanServer {
                     machineProvisioningPropertiesManager.getBeanConfig(enabledMachineProvisioningClassName));
             beanServer.enableBean(enabledMachineProvisioningClassName);
         }
+        }
         
-
+        {
         String scaleStrategyClassName = DEFAULT_SCALE_STRATEGY_BEAN_CLASSNAME;
         Map<String,String> scaleStrategyProperties = DEFAULT_SCALE_STRATEGY_BEAN_PROPERTIES;
         ScaleStrategyBeanPropertiesManager scaleStrategyPropertiesManager = 
@@ -118,6 +120,7 @@ public class ScaleBeanServer {
         
         beanServer.setBeanConfig(scaleStrategyClassName, scaleStrategyProperties);
         beanServer.enableBean(scaleStrategyClassName);
+        }
     }
 
     /**
