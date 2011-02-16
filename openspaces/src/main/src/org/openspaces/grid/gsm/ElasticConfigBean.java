@@ -1,6 +1,5 @@
 package org.openspaces.grid.gsm;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.openspaces.admin.Admin;
@@ -24,12 +23,8 @@ public class ElasticConfigBean implements Bean {
         final MachineProvisioningBeanPropertiesManager propertiesManager = 
             new MachineProvisioningBeanPropertiesManager(properties);
         
-        Map<String, String> beanConfig = new HashMap<String,String>();
         String beanClassName = DefaultMachineProvisioning.class.getName();
-        
-        if (propertiesManager.isBeanConfigExists(beanClassName)) {
-            beanConfig = propertiesManager.getBeanConfig(beanClassName);
-        }
+        Map<String, String> beanConfig = propertiesManager.getBeanConfig(beanClassName);
         
         return new DiscoveredMachineProvisioningConfig(beanConfig);
     }
