@@ -10,8 +10,6 @@ import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfi
 import org.openspaces.core.bean.Bean;
 import org.openspaces.grid.gsm.machines.DefaultMachineProvisioning;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
-
 public class ElasticConfigBean implements Bean {
 
     Map<String,String> properties;
