@@ -34,6 +34,8 @@
     <bean id="defaultService" class="org.openspaces.itest.remoting.methodannotations.DefaultSimpleRemotingService"/>
 
     <os-core:giga-space id="gigaSpace" space="space1" clustered="true"/>
+    <os-core:giga-space id="gigaSpace1" space="space1" />
+    <os-core:giga-space id="gigaSpace2" space="space2" />
 
     <os-remoting:service-exporter id="serviceExporter">
         <os-remoting:aspect>
@@ -42,7 +44,11 @@
         <os-remoting:service ref="defaultService"/>
     </os-remoting:service-exporter>
 
-    <os-events:polling-container id="remotingContainer" giga-space="gigaSpace">
+    <os-events:polling-container id="remotingContainer1" giga-space="gigaSpace1">
+        <os-events:listener ref="serviceExporter"/>
+    </os-events:polling-container>
+
+    <os-events:polling-container id="remotingContainer2" giga-space="gigaSpace2">
         <os-events:listener ref="serviceExporter"/>
     </os-events:polling-container>
 
