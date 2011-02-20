@@ -109,7 +109,6 @@
 	<classpathentry kind="lib" path="lib/platform/jetty/jetty-xml-7.1.6.v20100715.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jetty/servlet-api-2.5.jar"/>
 	<classpathentry kind="lib" path="lib/optional/security/spring-security-core-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="deploy/templates/memcached/lib/netty-3.2.3.Final.jar"/>
 	<classpathentry kind="lib" path="lib/external/spymemcached/memcached-2.5.jar"/>
 	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0/lib/maven-artifact-3.0.jar"/>
 	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0/lib/maven-core-3.0.jar"/>
@@ -122,5 +121,6 @@
 	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0/lib/maven-model-3.0.jar"/>
 	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0/lib/maven-model-builder-3.0.jar"/>
 	<classpathentry kind="lib" path="tools/maven/apache-maven-3.0/lib/maven-repository-metadata-3.0.jar"/>
+	<classpathentry kind="lib" path="deploy/templates/memcached/lib/netty-3.2.4.Final.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
