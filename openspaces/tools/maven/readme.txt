@@ -12,7 +12,7 @@ ENVIRONMENT
 M2_HOME should be added as an environment variable and point to the home installation of
 Maven. M2_HOME/bin should be added to the PATH.
 
-GigaSpaces comes with a maven installation which is located under tools/maven/apache-maven-3.0.
+GigaSpaces comes with a maven installation which is located under tools/maven/apache-maven-3.0.2
 
 
 INSTALLING GIGASPACES INTO MAVEN REPOSITORY
