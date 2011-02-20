@@ -61,7 +61,7 @@ goto end
 
 :default_JAVA_EXE
 set JAVA_EXE=java.exe
-goto check_GS_GROOVY_HOME
+goto check_GROOVY_HOME
 
 :valid_JAVA_HOME_DIR
 set JAVA_EXE=%JAVA_HOME%\bin\java.exe
@@ -200,7 +200,7 @@ set CMD_LINE_ARGS=%$
 
 :execute
 @rem Setup the command line
-set STARTER_CLASSPATH=%GS_GROOVY_HOME%\lib\groovy-1.7.5.jar
+set STARTER_CLASSPATH=%GS_GROOVY_HOME%\lib\groovy-1.7.8.jar
 
 if exist "%USERPROFILE%/.groovy/init.bat" call "%USERPROFILE%/.groovy/init.bat"
 
