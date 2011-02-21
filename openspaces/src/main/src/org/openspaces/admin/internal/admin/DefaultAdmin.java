@@ -476,6 +476,14 @@ public class DefaultAdmin implements InternalAdmin {
     }
 
     public synchronized void flushEvents() {
+        if (closed) {
+            //clear all pending events in queue that may have arrived just before closing of the admin.
+            for (LinkedList<Runnable> l : eventsQueue) {
+                l.clear();
+            }
+            return;
+        }
+        
         for (int i = 0; i < eventsExecutorServices.length; i++) {
             for (Runnable notifier : eventsQueue[i]) {
                 eventsExecutorServices[i].submit(notifier);
