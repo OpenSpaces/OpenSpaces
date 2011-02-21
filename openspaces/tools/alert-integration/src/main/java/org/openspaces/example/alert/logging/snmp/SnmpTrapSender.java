@@ -98,7 +98,7 @@ public class SnmpTrapSender implements SnmpTrapSenderFacade {
         	snmpServerPort = Integer.parseInt(prop.getProperty("log4j.appender.TRAP_LOG.ManagementHostTrapListenPort"));
         } 
         catch (IOException e) {
-        	throw new RuntimeException("Failed to load SnmpTrapTransmitter execution params. Error: " + e);
+        	throw new RuntimeException("Failed to load AlertLoggingGateway execution params. Error: " + e);
         }             	
 	}
     

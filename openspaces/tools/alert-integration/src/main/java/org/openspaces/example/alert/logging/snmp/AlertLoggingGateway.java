@@ -34,7 +34,7 @@ import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
  * @author giladh
  * @since 8.0
  */
-public class SnmpTrapTransmitter {
+public class AlertLoggingGateway {
 
 	private String alertFileFilter; 
 	private String loggerName; 
@@ -45,7 +45,7 @@ public class SnmpTrapTransmitter {
 	private AlertTriggeredEventListener atListener;	
 
 	/**
-	 * Construct SnmpTrapTransmitter bean object 
+	 * Construct AlertLoggingGateway bean object 
 	 * @throws Exception
 	 */
 	@PostConstruct 
@@ -80,7 +80,7 @@ public class SnmpTrapTransmitter {
 	}
 
 	/**
-	 * Destroy SnmpTrapTransmitter bean object
+	 * Destroy AlertLoggingGateway bean object
 	 * @throws Exception
 	 */
 	@PreDestroy 
