@@ -432,13 +432,17 @@ public class StoreManager extends AbstractStoreManager {
      */    
     private void handleUpdatedObjects(Collection<OpenJPAStateManager> sms, ArrayList<Exception> exceptions, IJSpace space) {
         // Generate a template for each state manager and use partial update for updating..
+        HashSet<OpenJPAStateManager> stateManagersToRestore = new HashSet<OpenJPAStateManager>();
+        HashSet<OpenJPAStateManager> flushedStateManagers = new HashSet<OpenJPAStateManager>();
         for (OpenJPAStateManager sm : sms) {
             final ClassMetaData cm = sm.getMetaData();
             try {
                 // Find relationship owner and flush it to space
                 if (_classesRelationStatus.containsKey(cm.getDescribedType())) {
                     final StateManager stateManagerToUpdate = _relationsManager.getStateManagerToUpdate((StateManager) sm);
-                    if (sms.contains(stateManagerToUpdate))
+                    
+                    // If we already flushed the state manager, skip
+                    if (flushedStateManagers.contains(stateManagerToUpdate))
                         continue;
                     
                     final ISpaceProxy proxy = (ISpaceProxy) space;
@@ -448,9 +452,13 @@ public class StoreManager extends AbstractStoreManager {
                     for (FieldMetaData fmd : cm.getFields()) {
                         _relationsManager.initializeOwnerReferencesForField((StateManager) sm, fmd);
                     }
+                    _relationsManager.removeOwnedEntitiesStateManagers(stateManagersToRestore, stateManagerToUpdate);
                     space.write(entry, _transaction, Lease.FOREVER, 0, UpdateModifiers.UPDATE_ONLY);
                     
-                } else {
+                    // Keep track of flushed state managers so we don't flush them twice
+                    flushedStateManagers.add(stateManagerToUpdate);
+                    
+                } else if (!flushedStateManagers.contains(sm)) {
                     // Create an entry packet from the updated POJO and set all the fields
                     // but the updated & primary key to null.
                     final ISpaceProxy proxy = (ISpaceProxy) space;
@@ -469,6 +477,8 @@ public class StoreManager extends AbstractStoreManager {
                 }
             } catch (Exception e) { 
                 exceptions.add(e);
+            } finally {
+                _relationsManager.restoreRemovedStateManagers(stateManagersToRestore);
             }
         }
     }
@@ -668,6 +678,9 @@ public class StoreManager extends AbstractStoreManager {
          */
         public void setOwnerStateManagerForPersistentInstance(Object managedObject, OpenJPAStateManager sm) {
             StateManager stateManager = (StateManager)((PersistenceCapable) managedObject).pcGetStateManager();
+            if (stateManager == null)
+                throw new IllegalStateException("Attempted to set an Owner back-reference for an unmanaged instance: "
+                        + managedObject.toString() + " of type: " + managedObject.getClass().getName());
             stateManager.setOwnerStateManager((StateManager) sm);
         }
         
