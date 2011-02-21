@@ -8,7 +8,7 @@ import java.util.Map;
  */
 public class ElasticMachineIsolationConfig {
     
-    private static final String ELASTIC_MACHINE_ISOLATION_SHARING_ID_KEY = "elastic-machine-provisioning-isolation-sharing-id";
+    private static final String ELASTIC_MACHINE_ISOLATION_SHARING_ID_KEY = "elastic-machine-isolation-sharing-id";
     private final Map<String, String> properties;
 
     public ElasticMachineIsolationConfig(Map<String, String> properties) {
