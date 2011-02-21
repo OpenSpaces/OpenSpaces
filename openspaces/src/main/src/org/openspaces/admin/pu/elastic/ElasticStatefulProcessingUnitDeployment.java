@@ -13,6 +13,7 @@ import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfi
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.topology.AdvancedStatefulDeploymentTopology;
+import org.openspaces.admin.pu.elastic.topology.ElasticDeploymentTopology;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatefulDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
@@ -112,11 +113,13 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return this;
     }
     
+    @Override
     public ElasticStatefulProcessingUnitDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
         super.memoryCapacityPerContainer(memoryCapacityPerContainer,unit);
         return this;
     }
 
+    @Override
     public ElasticStatefulProcessingUnitDeployment memoryCapacityPerContainer(String memoryCapacityPerContainer) {
         super.memoryCapacityPerContainer(memoryCapacityPerContainer);
         return this;
@@ -136,34 +139,42 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return (ElasticStatefulProcessingUnitDeployment) super.scale(strategy);
     }
     
+    @Override
     public ElasticStatefulProcessingUnitDeployment name(String name) {
         return (ElasticStatefulProcessingUnitDeployment) super.name(name);
     }
    
+    @Override
     public ElasticStatefulProcessingUnitDeployment addContextProperty(String key, String value) {
         return (ElasticStatefulProcessingUnitDeployment) super.addContextProperty(key, value);
     }
 
+    @Override
     public ElasticStatefulProcessingUnitDeployment secured(boolean secured) {
         return (ElasticStatefulProcessingUnitDeployment) super.secured(secured);
     }
 
+    @Override
     public ElasticStatefulProcessingUnitDeployment userDetails(UserDetails userDetails) {
         return (ElasticStatefulProcessingUnitDeployment) super.userDetails(userDetails);
     }
 
+    @Override
     public ElasticStatefulProcessingUnitDeployment userDetails(String userName, String password) {
         return (ElasticStatefulProcessingUnitDeployment) super.userDetails(userName, password);
     }
     
+    @Override
     public ElasticStatefulProcessingUnitDeployment useScriptToStartContainer() {
         return (ElasticStatefulProcessingUnitDeployment) super.useScriptToStartContainer();
     }
 
+    @Override
     public ElasticStatefulProcessingUnitDeployment overrideCommandLineArguments() {
         return (ElasticStatefulProcessingUnitDeployment) super.overrideCommandLineArguments();
     }
 
+    @Override
     public ElasticStatefulProcessingUnitDeployment commandLineArgument(String vmInputArgument) {
         return addCommandLineArgument(vmInputArgument);
     }
@@ -172,6 +183,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return (ElasticStatefulProcessingUnitDeployment) super.commandLineArgument(vmInputArgument);
     }
 
+    @Override
     public ElasticStatefulProcessingUnitDeployment environmentVariable(String name, String value) {
         return addEnvironmentVariable(name, value);
     }
@@ -180,7 +192,8 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return (ElasticStatefulProcessingUnitDeployment) super.environmentVariable(name, value);
     }
     
-    public ElasticStatefulProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+    @Override
+    protected ElasticStatefulProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config, String sharingId) {
         if (config == null) {
             throw new IllegalArgumentException("config");
         }
@@ -194,7 +207,22 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
                 throw new AdminException("Elastic Machine Provisioning configuration must supply the expected minimum number of CPU cores per machine.");
             }
         }
-        return (ElasticStatefulProcessingUnitDeployment) super.machineProvisioning(config);
+        return (ElasticStatefulProcessingUnitDeployment) super.machineProvisioning(config, sharingId);
+    }
+    
+    public ElasticDeploymentTopology machineProvisioning(ElasticMachineProvisioningConfig config) {
+        throw new IllegalStateException("deprecated call route - should not have been reached.");
+    }
+    
+    public ElasticDeploymentTopology dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
+        return machineProvisioning(config, null);
+    }
+    
+    public ElasticDeploymentTopology sharedMachineProvisioning(String sharingId, ElasticMachineProvisioningConfig config) {
+        if (sharingId == null) {
+            throw new IllegalArgumentException("sharingId can't be null");
+        }
+        return machineProvisioning(config, sharingId);
     }
     
     public ProcessingUnitDeployment toProcessingUnitDeployment(Admin admin) {

@@ -14,5 +14,4 @@ public class MachineProvisioningBeanPropertiesManager
               ELASTIC_MACHINE_PROVISIONING_ENABLED_CLASSNAME_KEY, 
               properties);
     }
-
 }

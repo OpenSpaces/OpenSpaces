@@ -15,6 +15,7 @@ import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.pu.elastic.ElasticMachineIsolationConfig;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
@@ -64,6 +65,7 @@ public class UndeployScaleStrategyBean
     private Log logger;
     private ScheduledFuture<?> scheduledTask;
     private NonBlockingElasticMachineProvisioning machineProvisioning;
+    private ElasticMachineIsolationConfig isolationConfig;
     
     public Map<String, String> getProperties() {
         return slaConfig.getProperties();
@@ -91,6 +93,10 @@ public class UndeployScaleStrategyBean
     
     public void setElasticMachineProvisioning(NonBlockingElasticMachineProvisioning elasticMachineProvisioning) {
         this.machineProvisioning = elasticMachineProvisioning;
+    }
+    
+    public void setElasticMachineIsolation(ElasticMachineIsolationConfig isolationConfig) {
+        this.isolationConfig = isolationConfig;
     }
     
     public void setGridServiceContainerConfig(GridServiceContainerConfig containersConfig) {

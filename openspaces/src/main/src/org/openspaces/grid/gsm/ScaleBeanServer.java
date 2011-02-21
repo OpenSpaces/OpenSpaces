@@ -8,6 +8,7 @@ import java.util.Map;
 import org.openspaces.admin.bean.BeanConfigException;
 import org.openspaces.admin.bean.BeanConfigPropertiesManager;
 import org.openspaces.admin.bean.BeanConfigurationException;
+import org.openspaces.admin.internal.pu.elastic.ElasticMachineIsolationConfig;
 import org.openspaces.admin.internal.pu.elastic.MachineProvisioningBeanPropertiesManager;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyBeanPropertiesManager;
@@ -77,6 +78,8 @@ public class ScaleBeanServer {
             }
         }
         
+        ElasticMachineIsolationConfig isolationConfig = new ElasticMachineIsolationConfig(elasticProperties);
+        
         this.beanServer = new DefaultBeanServer<Bean>(
                 
                 new ScaleBeanFactory(
@@ -84,7 +87,8 @@ public class ScaleBeanServer {
                         new ProcessingUnitSchemaConfig(elasticProperties),
                         rebalancingSlaEnforcementEndpoint, 
                         containersSlaEnforcementEndpoint,
-                        machinesSlaEnforcementEndpoint));
+                        machinesSlaEnforcementEndpoint,
+                        isolationConfig));
         
         // order of beans is important due to implicit dependency inject order
         setElasticConfig(elasticProperties);

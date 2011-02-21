@@ -111,4 +111,8 @@ public class FlattenedBeanConfigPropertiesManager implements BeanConfigPropertie
     private boolean containsBeanInternal(String beanClassName) {
         return Arrays.asList(getEnabledBeansClassNames()).contains(beanClassName);
     }
+    
+    protected StringProperties getProperties() {
+        return properties;
+    }
 }

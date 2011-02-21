@@ -5,6 +5,7 @@ import org.openspaces.admin.pu.elastic.ElasticStatefulProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.topology.AdvancedStatefulDeploymentTopology;
+import org.openspaces.admin.pu.elastic.topology.ElasticDeploymentTopology;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatefulDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
@@ -151,7 +152,17 @@ public class ElasticSpaceDeployment
     }
 
     public ElasticSpaceDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
-        deployment.machineProvisioning(config);
+        dedicatedMachineProvisioning(config);
+        return this;
+    }
+    
+    public ElasticDeploymentTopology dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
+        deployment.dedicatedMachineProvisioning(config);
+        return this;
+    }
+    
+    public ElasticDeploymentTopology sharedMachineProvisioning(String sharingId, ElasticMachineProvisioningConfig config) {
+        deployment.sharedMachineProvisioning(sharingId, config);
         return this;
     }
 

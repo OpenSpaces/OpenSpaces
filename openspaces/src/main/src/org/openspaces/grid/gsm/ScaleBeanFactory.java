@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.bean.BeanInitializationException;
+import org.openspaces.admin.internal.pu.elastic.ElasticMachineIsolationConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.core.bean.Bean;
@@ -34,13 +35,15 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
     private final ServiceLevelAgreementEnforcementEndpoint machinesSlaEnforcementEndpoint;
     private final ProcessingUnit pu;
     private final ProcessingUnitSchemaConfig schemaConfig;
+    private final ElasticMachineIsolationConfig isolationConfig;
     
     ScaleBeanFactory(
             ProcessingUnit pu,
             ProcessingUnitSchemaConfig schemaConfig,
             RebalancingSlaEnforcementEndpoint rebalancingSlaEnforcementEndpoint, 
             ContainersSlaEnforcementEndpoint containersSlaEnforcementEndpoint,
-            ServiceLevelAgreementEnforcementEndpoint machinesSlaEnforcementEndpoint) {
+            ServiceLevelAgreementEnforcementEndpoint machinesSlaEnforcementEndpoint, 
+            ElasticMachineIsolationConfig isolationConfig) {
         
         super(pu.getAdmin());
         this.schemaConfig = schemaConfig;
@@ -48,6 +51,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         this.containersSlaEnforcementEndpoint = containersSlaEnforcementEndpoint;
         this.machinesSlaEnforcementEndpoint = machinesSlaEnforcementEndpoint;
         this.pu = pu;
+        this.isolationConfig = isolationConfig;
         
     }
     
@@ -105,6 +109,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
             
            if (machineProvisioning != null) {
                ((ElasticMachineProvisioningAware)instance).setElasticMachineProvisioning(machineProvisioning);
+               ((ElasticMachineProvisioningAware)instance).setElasticMachineIsolation(isolationConfig);
            }
         }
         

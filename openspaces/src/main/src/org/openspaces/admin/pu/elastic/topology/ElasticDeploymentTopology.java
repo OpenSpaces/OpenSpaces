@@ -1,6 +1,7 @@
 package org.openspaces.admin.pu.elastic.topology;
 
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
+import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
 import org.openspaces.core.util.MemoryUnit;
 
 import com.gigaspaces.security.directory.UserDetails;
@@ -78,9 +79,40 @@ public interface ElasticDeploymentTopology {
     
     /**
      * Enables the server side bean that starts and stops machines automatically.
-     * For example, the bean could delegate the request to a cloud provider.  
+     * For example, the bean could delegate the request to a cloud provider.
+     * @deprecated as of 8.0.1 - use {@link #dedicatedMachineProvisioning(ElasticMachineProvisioningConfig)} instead.  
      */
+    @Deprecated
     ElasticDeploymentTopology machineProvisioning(ElasticMachineProvisioningConfig config);
+
+    /**
+     * Configure the server side bean that starts and stops machines automatically. For example, the
+     * bean could delegate the request to a cloud provider.
+     * <p>
+     * The machines returned by the 'machine provisioner' will be <b>dedicated</b> to the instances
+     * of this processing unit. In other words, this processing unit will <u>not share</u> the
+     * machines with other processing units.
+     * <p>
+     * See also {@link DiscoveredMachineProvisioningConfig} for configuring deployment on a non-virtualized environment. Machines are discovered
+     * if 'Grid Service Agents' are running on them.
+     * @see #sharedMachineProvisioning(String, ElasticMachineProvisioningConfig)
+     */
+    ElasticDeploymentTopology dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config);
+
+    /**
+     * Configure the server side bean that starts and stops machines automatically. For example, the
+     * bean could delegate the request to a cloud provider.
+     * <p>
+     * The machines returned by the 'machine provisioner' will be <b>shared</b> by other processing
+     * unit instances with the <u>same</u> <b>sharingId</b>.
+     * <p>
+     * See also {@link DiscoveredMachineProvisioningConfig} for configuring deployment on a
+     * non-virtualized environment. Machines are discovered if 'Grid Service Agents' are running on
+     * them.
+     * 
+     * @see #dedicatedMachineProvisioning(ElasticMachineProvisioningConfig)
+     */
+    ElasticDeploymentTopology sharedMachineProvisioning(String sharingId, ElasticMachineProvisioningConfig config);
     
     /**
      * Specifies the the heap size per container (operating system process)

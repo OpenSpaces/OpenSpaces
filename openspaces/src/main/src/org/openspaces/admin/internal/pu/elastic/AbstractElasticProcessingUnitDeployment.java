@@ -25,14 +25,16 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     private boolean secured;
     private final Map<String,String> elasticProperties;
 
-    private GridServiceContainerConfig containerConfig;
-    private MachineProvisioningBeanPropertiesManager machineProvisioningPropertiesManager;
-    private ScaleStrategyBeanPropertiesManager scaleStrategyPropertiesManager;
+    private final GridServiceContainerConfig containerConfig;
+    private final ElasticMachineIsolationConfig isolationConfig;
+    private final MachineProvisioningBeanPropertiesManager machineProvisioningPropertiesManager;
+    private final ScaleStrategyBeanPropertiesManager scaleStrategyPropertiesManager;
     
     public AbstractElasticProcessingUnitDeployment(String processingUnit) {
         this.processingUnit = processingUnit;
         elasticProperties = new HashMap<String,String>();
         containerConfig = new GridServiceContainerConfig(elasticProperties);
+        isolationConfig = new ElasticMachineIsolationConfig(elasticProperties);
         machineProvisioningPropertiesManager = new MachineProvisioningBeanPropertiesManager(elasticProperties);
         scaleStrategyPropertiesManager = new ScaleStrategyBeanPropertiesManager(elasticProperties);
     }
@@ -135,7 +137,8 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         return this;
     }
     
-    protected AbstractElasticProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
+    protected AbstractElasticProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config, String sharingId) {
+        isolationConfig.setSharingId(sharingId);
         enableBean(machineProvisioningPropertiesManager, config);
         return this;
     }    

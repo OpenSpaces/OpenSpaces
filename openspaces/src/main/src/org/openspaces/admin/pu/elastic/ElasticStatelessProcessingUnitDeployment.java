@@ -9,6 +9,7 @@ import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.topology.AdvancedStatelessDeploymentTopology;
+import org.openspaces.admin.pu.elastic.topology.ElasticDeploymentTopology;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatelessDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
@@ -49,6 +50,7 @@ public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticPro
         return (ElasticStatelessProcessingUnitDeployment) super.scale(strategy);
     }
     
+    @Override
     public ElasticStatelessProcessingUnitDeployment name(String name) {
         return (ElasticStatelessProcessingUnitDeployment) super.name(name);
     }
@@ -58,30 +60,37 @@ public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticPro
     }
 
 
+    @Override
     public ElasticStatelessProcessingUnitDeployment secured(boolean secured) {
         return (ElasticStatelessProcessingUnitDeployment) super.secured(secured);
     }
 
+    @Override
     public ElasticStatelessProcessingUnitDeployment userDetails(UserDetails userDetails) {
         return (ElasticStatelessProcessingUnitDeployment) super.userDetails(userDetails);
     }
 
+    @Override
     public ElasticStatelessProcessingUnitDeployment userDetails(String userName, String password) {
         return (ElasticStatelessProcessingUnitDeployment) super.userDetails(userName, password);
     }
 
+    @Override
     public ElasticStatelessProcessingUnitDeployment useScriptToStartContainer() {
         return (ElasticStatelessProcessingUnitDeployment) super.useScriptToStartContainer();
     }
 
+    @Override
     public ElasticStatelessProcessingUnitDeployment overrideCommandLineArguments() {
         return (ElasticStatelessProcessingUnitDeployment) super.overrideCommandLineArguments();
     }
 
+    @Override
     public ElasticStatelessProcessingUnitDeployment commandLineArgument(String vmInputArgument) {
         return addCommandLineArgument(vmInputArgument);
     }
 
+    @Override
     public ElasticStatelessProcessingUnitDeployment environmentVariable(String name, String value) {
         return addEnvironmentVariable(name, value);
     }
@@ -94,19 +103,33 @@ public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticPro
         return (ElasticStatelessProcessingUnitDeployment) super.environmentVariable(name, value);
     }
  
+    @Override
     public ElasticStatefulProcessingUnitDeployment addContextProperty(String key, String value) {
         return (ElasticStatefulProcessingUnitDeployment) super.addContextProperty(key, value);
     }
     
     public ElasticStatelessProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
-        return (ElasticStatelessProcessingUnitDeployment) super.machineProvisioning(config);
+        return (ElasticStatelessProcessingUnitDeployment) dedicatedMachineProvisioning(config);
+    }
+    
+    public ElasticDeploymentTopology dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
+        return (ElasticStatelessProcessingUnitDeployment) super.machineProvisioning(config, null);
+    }
+    
+    public ElasticDeploymentTopology sharedMachineProvisioning(String sharingId, ElasticMachineProvisioningConfig config) {
+        if (sharingId == null) {
+            throw new IllegalArgumentException("sharingId can't be null");
+        }
+        return (ElasticStatelessProcessingUnitDeployment) super.machineProvisioning(config, sharingId);
     }
 
+    @Override
     public ElasticStatelessProcessingUnitDeployment memoryCapacityPerContainer(int memoryCapacityPerContainer, MemoryUnit unit) {
         super.memoryCapacityPerContainer(memoryCapacityPerContainer,unit);
         return this;
     }
 
+    @Override
     public ElasticStatelessProcessingUnitDeployment memoryCapacityPerContainer(String memoryCapacityPerContainer) {
         super.memoryCapacityPerContainer(memoryCapacityPerContainer);
         return this;
