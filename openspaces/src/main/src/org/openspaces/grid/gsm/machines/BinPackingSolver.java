@@ -132,7 +132,7 @@ public class BinPackingSolver {
         boolean retry;
         do {
             retry = false;
-            AllocatedCapacity excessAllocatedCapacity = AllocatedCapacity.subtractOrZero(allocatedCapacityForPu.getTotalAllocatedCapacity(), goalCapacity);
+            AllocatedCapacity excessAllocatedCapacity = allocatedCapacityForPu.getTotalAllocatedCapacity().subtractOrZero(goalCapacity);
             for (String sourceAgentUid : allocatedCapacityForPu.getAgentUids()) {               
                 while (removeExcessContainer(sourceAgentUid, excessAllocatedCapacity)) {
                     retry = true;
@@ -189,7 +189,7 @@ public class BinPackingSolver {
             boolean retry;
             do {
                 retry = false;
-                AllocatedCapacity excessAllocatedCapacity = AllocatedCapacity.subtractOrZero(allocatedCapacityForPu.getTotalAllocatedCapacity(), goalCapacity);
+                AllocatedCapacity excessAllocatedCapacity = allocatedCapacityForPu.getTotalAllocatedCapacity().subtractOrZero(goalCapacity);
                 for (String sourceAgentUid : allocatedCapacityForPu.getAgentUids()) {
                     if (removeExcessMachineStep(excessAllocatedCapacity, sourceAgentUid)) {
                         //retry another machine again
@@ -207,7 +207,7 @@ public class BinPackingSolver {
         
         boolean retry = false;
         AllocatedCapacity allocatedCapacityOnSourceMachine = allocatedCapacityForPu.getAgentCapacity(sourceAgentUid);
-        AllocatedCapacity remainingCapacityToRelocate = AllocatedCapacity.subtract(allocatedCapacityOnSourceMachine, excessAllocatedCapacity); 
+        AllocatedCapacity remainingCapacityToRelocate = allocatedCapacityOnSourceMachine.subtract(excessAllocatedCapacity); 
         
         if (relocateCapacityToOtherMachines(sourceAgentUid, remainingCapacityToRelocate)) {
 
@@ -242,7 +242,7 @@ public class BinPackingSolver {
             AllocatedCapacity unallocatedCapacityOnTarget = unallocatedCapacity.getAgentCapacityOrZero(targetAgentUid);
             AllocatedCapacity capacityToRelocate = lowestCommonGoal(unallocatedCapacityOnTarget, remainingCapacityToRelocate);
             if (!capacityToRelocate.equalsZero()) {
-                remainingCapacityToRelocate = AllocatedCapacity.subtract(remainingCapacityToRelocate, capacityToRelocate);
+                remainingCapacityToRelocate = remainingCapacityToRelocate.subtract(capacityToRelocate);
                 capacityToRelocatePerTargetMachine.put(targetAgentUid, capacityToRelocate);
             }
         }
@@ -371,7 +371,7 @@ public class BinPackingSolver {
         }
         
         int numberOfContainers = (int) (allocatedMemory / containerMemoryCapacityInMB);
-        int numberOfMachines = AggregatedAllocatedCapacity.add(allocatedCapacityForPu, unallocatedCapacity).getAgentUids().size();
+        int numberOfMachines = allocatedCapacityForPu.add(unallocatedCapacity).getAgentUids().size();
         
         int minNumberOfContainersPerMachine = (int) Math.floor(1.0*numberOfContainers/numberOfMachines);
         int maxNumberOfContainersPerMachine = (int) Math.ceil(1.0*numberOfContainers/numberOfMachines);
@@ -542,15 +542,15 @@ public class BinPackingSolver {
         // un-deallocate capacity first before allocating
         AllocatedCapacity deallocated = lowestCommonGoal(capacityToAllocateOnAgent,deallocatedCapacityResult.getAgentCapacityOrZero(agentUid));
         if (!deallocated.equalsZero()) {
-            deallocatedCapacityResult = AggregatedAllocatedCapacity.subtract(deallocatedCapacityResult, agentUid, deallocated);
-            capacityToAllocateOnAgent = AllocatedCapacity.subtract(capacityToAllocateOnAgent, deallocated);
+            deallocatedCapacityResult = deallocatedCapacityResult.subtract(agentUid, deallocated);
+            capacityToAllocateOnAgent = capacityToAllocateOnAgent.subtract(deallocated);
         }
         
         // allocate capacity
         if (!capacityToAllocateOnAgent.equalsZero()) {
-            allocatedCapacityResult = AggregatedAllocatedCapacity.add(allocatedCapacityResult, agentUid, capacityToAllocateOnAgent);
-            unallocatedCapacity = AggregatedAllocatedCapacity.subtract(unallocatedCapacity, agentUid, capacityToAllocateOnAgent);
-            allocatedCapacityForPu = AggregatedAllocatedCapacity.add(allocatedCapacityForPu, agentUid, capacityToAllocateOnAgent);
+            allocatedCapacityResult = allocatedCapacityResult.add(agentUid, capacityToAllocateOnAgent);
+            unallocatedCapacity = unallocatedCapacity.subtract(agentUid, capacityToAllocateOnAgent);
+            allocatedCapacityForPu = allocatedCapacityForPu.add(agentUid, capacityToAllocateOnAgent);
         }
     }
     
@@ -559,17 +559,17 @@ public class BinPackingSolver {
         // un-allocate capacity first before deallocating
         AllocatedCapacity allocated = lowestCommonGoal(capacityToDeallocateOnAgent,allocatedCapacityResult.getAgentCapacityOrZero(agentUid));
         if (!allocated.equalsZero()) {
-            allocatedCapacityResult = AggregatedAllocatedCapacity.subtract(allocatedCapacityResult, agentUid, allocated);
-            unallocatedCapacity = AggregatedAllocatedCapacity.add(unallocatedCapacity, agentUid, allocated);
-            allocatedCapacityForPu = AggregatedAllocatedCapacity.subtract(allocatedCapacityForPu, agentUid, allocated);
-            capacityToDeallocateOnAgent = AllocatedCapacity.subtract(capacityToDeallocateOnAgent, allocated);
+            allocatedCapacityResult = allocatedCapacityResult.subtract(agentUid, allocated);
+            unallocatedCapacity = unallocatedCapacity.add(agentUid, allocated);
+            allocatedCapacityForPu = allocatedCapacityForPu.subtract(agentUid, allocated);
+            capacityToDeallocateOnAgent = capacityToDeallocateOnAgent.subtract(allocated);
         }
         
         // deallocate capacity
         if (!capacityToDeallocateOnAgent.equalsZero()) {
-            deallocatedCapacityResult = AggregatedAllocatedCapacity.add(deallocatedCapacityResult, agentUid, capacityToDeallocateOnAgent);
-            unallocatedCapacity = AggregatedAllocatedCapacity.add(unallocatedCapacity, agentUid, capacityToDeallocateOnAgent);
-            allocatedCapacityForPu = AggregatedAllocatedCapacity.subtract(allocatedCapacityForPu, agentUid, capacityToDeallocateOnAgent);
+            deallocatedCapacityResult = deallocatedCapacityResult.add(agentUid, capacityToDeallocateOnAgent);
+            unallocatedCapacity = unallocatedCapacity.add(agentUid, capacityToDeallocateOnAgent);
+            allocatedCapacityForPu = allocatedCapacityForPu.subtract(agentUid, capacityToDeallocateOnAgent);
         }
     }
     
@@ -597,7 +597,7 @@ public class BinPackingSolver {
         if (!agentUidsOfPu.isEmpty()) {
             for (String agentUid : unallocatedCapacity.getAgentUids()) {
                 if (agentUidsOfPu.contains(agentUid)) {
-                    unallocatedCapacity = AggregatedAllocatedCapacity.subtractAgent(unallocatedCapacity, agentUid);
+                    unallocatedCapacity = unallocatedCapacity.subtractAgent(agentUid);
                 }
             }
         }
@@ -625,10 +625,10 @@ public class BinPackingSolver {
             if (!deallocatedCapacityResult.getAgentCapacityOrZero(agentUid).equalsZero()) {
                 throw new IllegalStateException("Impossible to allocate and deallocate from the same agent " + agentUid);
             }
-            allocatedCapacityResult = AggregatedAllocatedCapacity.add(allocatedCapacityResult, agentUid, capacityToAllocateOnAgent);
-            allocatedCapacityForPu = AggregatedAllocatedCapacity.add(allocatedCapacityForPu, agentUid, capacityToAllocateOnAgent);
+            allocatedCapacityResult = allocatedCapacityResult.add(agentUid, capacityToAllocateOnAgent);
+            allocatedCapacityForPu = allocatedCapacityForPu.add(agentUid, capacityToAllocateOnAgent);
             //leave unallocated capacity for this agent deleted so it wont be allocated
-            unallocatedCapacity = AggregatedAllocatedCapacity.subtractAgent(unallocatedCapacity, agentUid);
+            unallocatedCapacity = unallocatedCapacity.subtractAgent(agentUid);
             
         }
     }
@@ -651,8 +651,8 @@ public class BinPackingSolver {
             if (!allocatedCapacityResult.getAgentCapacity(agentUidToRemoveContainer).equalsZero()) {
                 throw new IllegalStateException("Impossible to allocate and deallocate from the same agent " + agentUidToRemoveContainer);
             }
-            deallocatedCapacityResult = AggregatedAllocatedCapacity.add(deallocatedCapacityResult, agentUidToRemoveContainer, capacityToRemove);
-            allocatedCapacityForPu = AggregatedAllocatedCapacity.subtract(allocatedCapacityForPu, agentUidToRemoveContainer, capacityToRemove);
+            deallocatedCapacityResult = deallocatedCapacityResult.add(agentUidToRemoveContainer, capacityToRemove);
+            allocatedCapacityForPu = allocatedCapacityForPu.subtract(agentUidToRemoveContainer, capacityToRemove);
             //leave unallocated capacity for this agent deleted so it wont be allocated
         }
         

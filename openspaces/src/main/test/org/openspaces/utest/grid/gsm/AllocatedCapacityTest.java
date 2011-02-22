@@ -14,7 +14,7 @@ public class AllocatedCapacityTest {
         AllocatedCapacity c2 = new AllocatedCapacity(Fraction.ONE,0);
         Assert.assertEquals(
                 new AllocatedCapacity(Fraction.ONE,1), 
-                AllocatedCapacity.add(c1, c2));
+                c1.add(c2));
     }
     
     @Test
@@ -34,39 +34,39 @@ public class AllocatedCapacityTest {
     public void testNegativeCpuException() {
         AllocatedCapacity c1 = new AllocatedCapacity(Fraction.ZERO,1);
         AllocatedCapacity c2 = new AllocatedCapacity(Fraction.ONE,0);
-        AllocatedCapacity.subtract(c1, c2);
+        c1.subtract(c2);
     }
     
     @Test(expected=IllegalArgumentException.class)
     public void testNegativeMemoryException() {
         AllocatedCapacity c1 = new AllocatedCapacity(Fraction.ZERO,1);
         AllocatedCapacity c2 = new AllocatedCapacity(Fraction.ONE,0);
-        AllocatedCapacity.subtract(c2, c1);
+        c2.subtract( c1);
     }
     
     @Test
     public void testSubtractCpu() {
         AllocatedCapacity c1 = new AllocatedCapacity(Fraction.ONE,1);
         AllocatedCapacity c2 = new AllocatedCapacity(Fraction.ONE,0);
-        Assert.assertEquals(new AllocatedCapacity(Fraction.ZERO,1), AllocatedCapacity.subtract(c1, c2));
+        Assert.assertEquals(new AllocatedCapacity(Fraction.ZERO,1), c1.subtract(c2));
     }
     
     @Test
     public void testSubtractMemory() {
         AllocatedCapacity c1 = new AllocatedCapacity(Fraction.ONE,1);
         AllocatedCapacity c2 = new AllocatedCapacity(Fraction.ZERO,1);
-        Assert.assertEquals(new AllocatedCapacity(Fraction.ONE,0), AllocatedCapacity.subtract(c1, c2));
+        Assert.assertEquals(new AllocatedCapacity(Fraction.ONE,0), c1.subtract(c2));
     }
     
     @Test
     public void testSubtractOrZero() {
         AllocatedCapacity c1 = new AllocatedCapacity(Fraction.ONE,1);
         AllocatedCapacity c2 = new AllocatedCapacity(Fraction.ONE,1);
-        Assert.assertTrue(AllocatedCapacity.subtractOrZero(c1, c2).equalsZero());
+        Assert.assertTrue(c1.subtractOrZero(c2).equalsZero());
         
         AllocatedCapacity c3 = new AllocatedCapacity(Fraction.ZERO,0);
         AllocatedCapacity c4 = new AllocatedCapacity(Fraction.ONE,1);
-        Assert.assertTrue(AllocatedCapacity.subtractOrZero(c3, c4).equalsZero());
+        Assert.assertTrue(c3.subtractOrZero(c4).equalsZero());
     }
     
     @Test

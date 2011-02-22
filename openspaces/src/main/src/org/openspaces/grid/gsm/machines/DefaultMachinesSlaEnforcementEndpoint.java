@@ -213,8 +213,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     sla.getMemoryCapacityInMB());
         
         AggregatedAllocatedCapacity capacityAllocatedAndMarked = 
-            AggregatedAllocatedCapacity.add(
-                    capacityMarkedForDeallocation ,capacityAllocated);
+            capacityMarkedForDeallocation.add(capacityAllocated);
         
         if (capacityAllocatedAndMarked.getTotalAllocatedCapacity().moreThanSatisfies(target) &&
             capacityAllocatedAndMarked.getAgentUids().size() > sla.getMinimumNumberOfMachines()) {
@@ -226,8 +225,8 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     "machines pending deallocation " + state.getCapacityMarkedForDeallocation(pu));
             
             // scale in
-            AllocatedCapacity surplusCapacity = AllocatedCapacity.subtract(
-                    capacityAllocatedAndMarked.getTotalAllocatedCapacity(), target);           
+            AllocatedCapacity surplusCapacity = 
+                capacityAllocatedAndMarked.getTotalAllocatedCapacity().subtract(target);           
             int surplusMachines = capacityAllocatedAndMarked.getAgentUids().size() - sla.getMinimumNumberOfMachines();
             
             // adjust surplusMemory based on agents marked for deallocation
@@ -240,7 +239,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     surplusMachines > 0) {
                     // this machine is already marked for deallocation, so surplus
                     // is adjusted to reflect that
-                    surplusCapacity = AllocatedCapacity.subtract(surplusCapacity, agentCapacity);
+                    surplusCapacity = surplusCapacity.subtract(agentCapacity);
                     surplusMachines--;
                 } else {
                     // cancel scale in
@@ -265,7 +264,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 
                     // scale in machine
                     state.markCapacityForDeallocation(pu, agent.getUid(), agentCapacity);
-                    surplusCapacity = AllocatedCapacity.subtract(surplusCapacity, agentCapacity);
+                    surplusCapacity = surplusCapacity.subtract(agentCapacity);
                     surplusMachines --;
                     slaReached = false;
                     logger.info(
@@ -354,8 +353,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             }
             
             AllocatedCapacity shortageCapacity = 
-                AllocatedCapacity.subtractOrZero(target,
-                        capacityAllocatedAndMarked.getTotalAllocatedCapacity());
+                target.subtractOrZero(capacityAllocatedAndMarked.getTotalAllocatedCapacity());
             
             // take into account expected machines into shortage calculate
             for (FutureGridServiceAgents future : state.getFutureAgents(pu)) {
@@ -373,7 +371,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 }
                 
                 shortageCapacity = 
-                    AllocatedCapacity.subtractOrZero(shortageCapacity, expectedCapacity);
+                    shortageCapacity.subtractOrZero(expectedCapacity);
             }
 
            if (!shortageCapacity.equalsZero()) {

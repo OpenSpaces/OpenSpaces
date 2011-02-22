@@ -27,36 +27,36 @@ public class AllocatedCapacity {
     }
        
     
-    public static AllocatedCapacity add(AllocatedCapacity allocation1, AllocatedCapacity allocation2) {
+    public AllocatedCapacity add(AllocatedCapacity other) {
         
         return new AllocatedCapacity(
-                allocation1.cpuCores.add(allocation2.cpuCores),
-                allocation1.memoryInMB + allocation2.memoryInMB);
+                this.cpuCores.add(other.cpuCores),
+                this.memoryInMB + other.memoryInMB);
     }
     
-    public static AllocatedCapacity subtract(AllocatedCapacity allocation1, AllocatedCapacity allocation2) {
+    public AllocatedCapacity subtract(AllocatedCapacity other) {
         
-        if (allocation1.memoryInMB - allocation2.memoryInMB < 0) {
-            throw new IllegalArgumentException(allocation1 + " has less memory than existing " + allocation2);
+        if (this.memoryInMB - other.memoryInMB < 0) {
+            throw new IllegalArgumentException(this + " has less memory than existing " + other);
         }
         
-        if (allocation1.cpuCores.compareTo(allocation2.cpuCores) < 0) {
-            throw new IllegalArgumentException(allocation1 + " has less cpu cores than existing " + allocation2);
+        if (this.cpuCores.compareTo(other.cpuCores) < 0) {
+            throw new IllegalArgumentException(this + " has less cpu cores than existing " + other);
         }
         
         return new AllocatedCapacity(
-                allocation1.cpuCores.subtract(allocation2.cpuCores),
-                allocation1.memoryInMB - allocation2.memoryInMB);
+                this.cpuCores.subtract(other.cpuCores),
+                this.memoryInMB - other.memoryInMB);
     }
     
-    public static AllocatedCapacity subtractOrZero(AllocatedCapacity allocation1, AllocatedCapacity allocation2) {
-        long memoryInMB = allocation1.memoryInMB - allocation2.memoryInMB;
+    public AllocatedCapacity subtractOrZero(AllocatedCapacity other) {
+        long memoryInMB = this.memoryInMB - other.memoryInMB;
         
         if (memoryInMB < 0) {
             memoryInMB = 0;
         }
         
-        Fraction cpuCores = allocation1.cpuCores.subtract(allocation2.cpuCores);
+        Fraction cpuCores = this.cpuCores.subtract(other.cpuCores);
         if (cpuCores.compareTo(Fraction.ZERO) < 0) {
             cpuCores = Fraction.ZERO;
         }

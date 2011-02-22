@@ -428,8 +428,7 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
                 
                 //we use subtractOrZero since GSA may start extra GSC due to false failure detection.
                 //or if containers are marked for shutdown and have not been killed yet.
-                freeCapacity = AggregatedAllocatedCapacity.subtractOrZero(
-                        freeCapacity, agent.getUid(), capacityOfOneContainer);
+                freeCapacity = freeCapacity.subtractOrZero(agent.getUid(), capacityOfOneContainer);
             }
         }
         return freeCapacity;

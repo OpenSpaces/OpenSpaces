@@ -103,8 +103,9 @@ class MachinesSlaEnforcementState {
             throw new IllegalArgumentException("pu");
         }
         
-        allocatedCapacityPerProcessingUnit.put(pu,
-                AggregatedAllocatedCapacity.add(allocatedCapacity,agentUid,capacity));
+        allocatedCapacityPerProcessingUnit.put(
+                pu,
+                allocatedCapacity.add(agentUid,capacity));
         
     }
 
@@ -125,10 +126,10 @@ class MachinesSlaEnforcementState {
         }
             
         allocatedCapacityPerProcessingUnit.put(pu,
-                AggregatedAllocatedCapacity.subtract(allocatedCapacity,agentUid,capacity));
+                allocatedCapacity.subtract(agentUid,capacity));
         
         markedForDeallocationCapacityPerProcessingUnit.put(pu,
-                    AggregatedAllocatedCapacity.add(deallocatedCapacity, agentUid, capacity));
+                deallocatedCapacity.add(agentUid, capacity));
     }
     
     public void unmarkCapacityForDeallocation(ProcessingUnit pu, String agentUid, AllocatedCapacity capacity) {
@@ -147,10 +148,10 @@ class MachinesSlaEnforcementState {
         }
         
         markedForDeallocationCapacityPerProcessingUnit.put(pu,
-                AggregatedAllocatedCapacity.subtract(deallocatedCapacity, agentUid, capacity));
+                deallocatedCapacity.subtract(agentUid, capacity));
         
         allocatedCapacityPerProcessingUnit.put(pu,
-                AggregatedAllocatedCapacity.add(allocatedCapacity,agentUid,capacity));
+                allocatedCapacity.add(agentUid,capacity));
         
     }
 
@@ -165,7 +166,7 @@ class MachinesSlaEnforcementState {
         }
         
         markedForDeallocationCapacityPerProcessingUnit.put(pu,
-                AggregatedAllocatedCapacity.subtract(deallocatedCapacity, agentUid, capacity));
+                deallocatedCapacity.subtract(agentUid, capacity));
     }
 
     public AggregatedAllocatedCapacity getCapacityMarkedForDeallocation(ProcessingUnit pu) {
