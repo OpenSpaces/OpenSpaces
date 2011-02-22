@@ -29,10 +29,10 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
     private int _readModifier;
     
     public SpaceConfiguration() {
-        super();        
+        super();       
+        supportedOptions().add(OPTION_OPTIMISTIC);
         // Default transaction timeout
         setLockTimeout(0);
-        setOptimistic(false);
         setLockManager("none");
         setDynamicEnhancementAgent(false);
         _readModifier = ReadModifiers.REPEATABLE_READ;
@@ -47,6 +47,10 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
                 _space = (IJSpace) configurationValue.get();
             else            
                 _space = new UrlSpaceConfigurer(getConnectionURL()).space();
+            
+            //if configured to use optimistic locking - set it on the space proxy
+            if(getOptimistic())
+                _space.setOptimisticLocking(true);
         }
         
         // Create a transaction manager

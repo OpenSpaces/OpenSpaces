@@ -86,6 +86,7 @@ public class StoreManager extends AbstractStoreManager {
     protected Collection<String> getUnsupportedOptions() {
         Collection<String> unsupportedOptions = (Collection<String>) super.getUnsupportedOptions();
         unsupportedOptions.remove(OpenJPAConfiguration.OPTION_ID_DATASTORE);        
+        unsupportedOptions.remove(OpenJPAConfiguration.OPTION_OPTIMISTIC);        
         return unsupportedOptions;
     }
 
@@ -210,31 +211,43 @@ public class StoreManager extends AbstractStoreManager {
      * @param fms The fields meta data.
      */
     private void loadFields(OpenJPAStateManager sm, IEntryPacket entry, FieldMetaData[] fms) {
+        int spacePropertyIndex = -1;
+        
         for (int i = 0; i < fms.length; i++) {
+            //ignore version which is not part of the entry packet
+            if(fms[i].isVersion())
+                continue;
+            
+            spacePropertyIndex++;
+            
             // Skip primary keys and non-persistent keys
             if (fms[i].isPrimaryKey() || sm.getLoaded().get(fms[i].getIndex()))
                 continue;
+        
             Integer associationType = _classesRelationStatus.get(fms[i].getElement().getDeclaredType());
             if (associationType != null)
                 fms[i].setAssociationType(associationType);
 
             // Handle one-to-one
             if (fms[i].getAssociationType() == FieldMetaData.ONE_TO_ONE) {
-                loadOneToOneObject(fms[i], sm, entry.getFieldValue(i));
+                loadOneToOneObject(fms[i], sm, entry.getFieldValue(spacePropertyIndex));
                 
             // Handle one-to-many
             } else if (fms[i].getAssociationType() == FieldMetaData.ONE_TO_MANY) {
-                loadOneToManyObjects(fms[i], sm, entry.getFieldValue(i));
+                loadOneToManyObjects(fms[i], sm, entry.getFieldValue(spacePropertyIndex));
                 
             // Handle embedded property
             } else if (fms[i].isEmbeddedPC()) {
-                loadEmbeddedObject(fms[i], sm, entry.getFieldValue(i));
+                loadEmbeddedObject(fms[i], sm, entry.getFieldValue(spacePropertyIndex));
                 
             // Otherwise, store the value as is
             } else {
-                sm.store(i, entry.getFieldValue(i));
+                sm.store(i, entry.getFieldValue(spacePropertyIndex));
             }
         }
+        
+        sm.setVersion(entry.getVersion());
+
     }
 
     /**
@@ -453,7 +466,14 @@ public class StoreManager extends AbstractStoreManager {
                         _relationsManager.initializeOwnerReferencesForField((StateManager) sm, fmd);
                     }
                     _relationsManager.removeOwnedEntitiesStateManagers(stateManagersToRestore, stateManagerToUpdate);
+                    
+                    if(stateManagerToUpdate.getVersion() != null)
+                        entry.setVersion((Integer) stateManagerToUpdate.getVersion());
+                    
                     space.write(entry, _transaction, Lease.FOREVER, 0, UpdateModifiers.UPDATE_ONLY);
+                    
+                    //update the version
+                    stateManagerToUpdate.setVersion(entry.getVersion());
                     
                     // Keep track of flushed state managers so we don't flush them twice
                     flushedStateManagers.add(stateManagerToUpdate);
@@ -465,15 +485,29 @@ public class StoreManager extends AbstractStoreManager {
                     final IEntryPacket entry = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(
                             sm.getManagedInstance(), ObjectType.POJO, proxy);                                                
                     FieldMetaData[] fmds = cm.getFields();
+                    
+                    int spacePropertyIndex = -1;
+                    
                     for (int i = 0; i < fmds.length; i++) {
+                        //ignore version which is not part of the entry packet
+                        if(fmds[i].isVersion())
+                            continue;
+                        spacePropertyIndex++;
                         if (!sm.getDirty().get(i) && !fmds[i].isPrimaryKey()) {
-                            entry.setFieldValue(i, null);
+                            entry.setFieldValue(spacePropertyIndex, null);
                         } else {
                             _relationsManager.initializeOwnerReferencesForField((StateManager) sm, fmds[i]);
                         }
                     }
+                    
+                    if(sm.getVersion() != null)
+                        entry.setVersion((Integer) sm.getVersion());
                     // Write changes to the space
                     space.write(entry, _transaction, Lease.FOREVER, 0, UpdateModifiers.PARTIAL_UPDATE);
+
+                    //update the version
+                    sm.setVersion(entry.getVersion());
+                   
                 }
             } catch (Exception e) { 
                 exceptions.add(e);
