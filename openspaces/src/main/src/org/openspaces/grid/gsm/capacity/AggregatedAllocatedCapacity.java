@@ -10,19 +10,15 @@ public class AggregatedAllocatedCapacity {
 
     // allocated capacity per grid service agent (UUID)
     private final Map<String,AllocatedCapacity> capacityPerAgent;
-    
+    private AllocatedCapacity totalCapacity;
     
     public AggregatedAllocatedCapacity() {
         this.capacityPerAgent = new ConcurrentHashMap<String, AllocatedCapacity>();
+        totalCapacity = new AllocatedCapacity(Fraction.ZERO, 0);
     }
         
     public AllocatedCapacity getTotalAllocatedCapacity() {
-        AllocatedCapacity total = new AllocatedCapacity(Fraction.ZERO, 0);
-        for (String agentUid : capacityPerAgent.keySet()) {
-            AllocatedCapacity capacity = capacityPerAgent.get(agentUid);
-            total = AllocatedCapacity.add(total,capacity);
-        }
-        return total;
+        return totalCapacity;
     }
     
     public boolean equalsZero() {
@@ -86,6 +82,14 @@ public class AggregatedAllocatedCapacity {
         return remaining;
     }
 
+
+
+    public static AggregatedAllocatedCapacity subtractAgent(
+            AggregatedAllocatedCapacity aggregatedCapacity,
+            String agentUid) {
+        return subtract(aggregatedCapacity, agentUid, aggregatedCapacity.getAgentCapacity(agentUid));
+    }
+    
     public static AggregatedAllocatedCapacity subtractOrZero(
             AggregatedAllocatedCapacity aggregatedCapacity, 
             String agentUid, 
@@ -105,6 +109,16 @@ public class AggregatedAllocatedCapacity {
         return this.capacityPerAgent.get(agentUid);
     }
     
+    public AllocatedCapacity getAgentCapacityOrZero(String agentUid) {
+        
+        if (capacityPerAgent.containsKey(agentUid)) {
+            return this.capacityPerAgent.get(agentUid);
+        }
+        else {
+            return new AllocatedCapacity(Fraction.ZERO, 0);
+        }
+    }
+    
     private void addAll(AggregatedAllocatedCapacity aggregatedCapacity) {
         for (String agentUid : aggregatedCapacity.capacityPerAgent.keySet()) {
             AllocatedCapacity capacity = aggregatedCapacity.capacityPerAgent.get(agentUid);
@@ -119,19 +133,19 @@ public class AggregatedAllocatedCapacity {
         }
     }
     
-    private void add(String agentUid, AllocatedCapacity capacity) {
+    private void add(String agentUid, AllocatedCapacity capacityToAdd) {
         
-        validateAllocation(capacity);
-        
+        validateAllocation(capacityToAdd);
+        AllocatedCapacity sumCapacity = capacityToAdd;
         if (capacityPerAgent.containsKey(agentUid)) {
             
-            capacity = 
-                AllocatedCapacity.add(
-                        capacityPerAgent.get(agentUid),
-                        capacity);
+            sumCapacity = AllocatedCapacity.add(
+                    capacityPerAgent.get(agentUid),
+                    sumCapacity);
         }
         
-        capacityPerAgent.put(agentUid,capacity);
+        capacityPerAgent.put(agentUid,sumCapacity);
+        totalCapacity = AllocatedCapacity.add(totalCapacity, capacityToAdd);
     }
 
   
@@ -146,7 +160,9 @@ public class AggregatedAllocatedCapacity {
         AllocatedCapacity newAllocation = 
             AllocatedCapacity.subtract(capacityPerAgent.get(agentUid), capacity);
         
-        updateAgentCapacity(agentUid, newAllocation);        
+        updateAgentCapacity(agentUid, newAllocation);
+        
+        totalCapacity = AllocatedCapacity.subtract(totalCapacity, capacity);
     }
     
 
@@ -161,6 +177,7 @@ public class AggregatedAllocatedCapacity {
             AllocatedCapacity.subtractOrZero(capacityPerAgent.get(agentUid), capacity);
         
         updateAgentCapacity(agentUid, newAllocation);
+        totalCapacity = AllocatedCapacity.subtract(totalCapacity, capacity);
         
     }
 
