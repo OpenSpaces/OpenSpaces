@@ -446,7 +446,7 @@ public class JettyJeeProcessingUnitContainerProvider implements JeeProcessingUni
             setCurrentBeanLevelProperties(beanLevelProperties);
             setCurrentClusterInfo(clusterInfo);
 
-            // we disable the smart getUrl in the common class loader so the JSP classpath will be built correclty
+            // we disable the smart getUrl in the common class loader so the JSP classpath will be built correctly
             CommonClassLoader.getInstance().setDisableSmartGetUrl(true);
 
             WebAppContext webAppContext = (WebAppContext) applicationContext.getBean("webAppContext");
