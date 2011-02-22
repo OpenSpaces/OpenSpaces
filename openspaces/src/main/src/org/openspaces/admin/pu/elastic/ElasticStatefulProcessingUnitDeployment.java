@@ -13,7 +13,6 @@ import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfi
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.topology.AdvancedStatefulDeploymentTopology;
-import org.openspaces.admin.pu.elastic.topology.ElasticDeploymentTopology;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatefulDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
@@ -210,15 +209,15 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
         return (ElasticStatefulProcessingUnitDeployment) super.machineProvisioning(config, sharingId);
     }
     
-    public ElasticDeploymentTopology machineProvisioning(ElasticMachineProvisioningConfig config) {
+    public ElasticStatefulProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
         throw new IllegalStateException("deprecated call route - should not have been reached.");
     }
     
-    public ElasticDeploymentTopology dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
+    public ElasticStatefulProcessingUnitDeployment dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
         return machineProvisioning(config, null);
     }
     
-    public ElasticDeploymentTopology sharedMachineProvisioning(String sharingId, ElasticMachineProvisioningConfig config) {
+    public ElasticStatefulProcessingUnitDeployment sharedMachineProvisioning(String sharingId, ElasticMachineProvisioningConfig config) {
         if (sharingId == null) {
             throw new IllegalArgumentException("sharingId can't be null");
         }

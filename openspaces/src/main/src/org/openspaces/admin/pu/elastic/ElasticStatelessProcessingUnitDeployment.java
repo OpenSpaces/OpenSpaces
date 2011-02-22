@@ -9,7 +9,6 @@ import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.topology.AdvancedStatelessDeploymentTopology;
-import org.openspaces.admin.pu.elastic.topology.ElasticDeploymentTopology;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatelessDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
@@ -112,11 +111,11 @@ public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticPro
         return (ElasticStatelessProcessingUnitDeployment) dedicatedMachineProvisioning(config);
     }
     
-    public ElasticDeploymentTopology dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
+    public ElasticStatelessProcessingUnitDeployment dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
         return (ElasticStatelessProcessingUnitDeployment) super.machineProvisioning(config, null);
     }
     
-    public ElasticDeploymentTopology sharedMachineProvisioning(String sharingId, ElasticMachineProvisioningConfig config) {
+    public ElasticStatelessProcessingUnitDeployment sharedMachineProvisioning(String sharingId, ElasticMachineProvisioningConfig config) {
         if (sharingId == null) {
             throw new IllegalArgumentException("sharingId can't be null");
         }
