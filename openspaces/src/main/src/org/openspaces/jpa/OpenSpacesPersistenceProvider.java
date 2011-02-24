@@ -9,7 +9,9 @@ import javax.persistence.spi.ProviderUtil;
 
 import org.apache.openjpa.persistence.OpenJPAEntityManagerFactorySPI;
 import org.apache.openjpa.persistence.PersistenceProviderImpl;
+import org.openspaces.core.util.SpaceUtils;
 
+import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.j_spaces.core.IJSpace;
 
 /**
@@ -76,7 +78,11 @@ public class OpenSpacesPersistenceProvider implements PersistenceProvider {
      * @param space The space instance to inject.
      */
     public void setSpace(IJSpace space) {
-        _space = space;        
+        ISpaceProxy proxy = (ISpaceProxy) space;
+        if (proxy.isClustered() && !SpaceUtils.isRemoteProtocol(space))
+            this._space = SpaceUtils.getClusterMemberSpace(space);
+        else
+            this._space = space;
     }
 
     public ProviderUtil getProviderUtil() {
