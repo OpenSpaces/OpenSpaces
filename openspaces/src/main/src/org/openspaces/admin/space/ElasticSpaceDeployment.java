@@ -149,11 +149,6 @@ public class ElasticSpaceDeployment
         deployment.highlyAvailable(highlyAvailable);
         return this;
     }
-
-    public ElasticSpaceDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
-        dedicatedMachineProvisioning(config);
-        return this;
-    }
     
     public ElasticSpaceDeployment dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
         deployment.dedicatedMachineProvisioning(config);

@@ -76,14 +76,6 @@ public interface ElasticDeploymentTopology {
      * 
      */
     ElasticDeploymentTopology addEnvironmentVariable(String name, String value);
-    
-    /**
-     * Enables the server side bean that starts and stops machines automatically.
-     * For example, the bean could delegate the request to a cloud provider.
-     * @deprecated as of 8.0.1 - use {@link #dedicatedMachineProvisioning(ElasticMachineProvisioningConfig)} instead.  
-     */
-    @Deprecated
-    ElasticDeploymentTopology machineProvisioning(ElasticMachineProvisioningConfig config);
 
     /**
      * Configure the server side bean that starts and stops machines automatically. For example, the

@@ -104,20 +104,16 @@ public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticPro
     public ElasticStatefulProcessingUnitDeployment addContextProperty(String key, String value) {
         return (ElasticStatefulProcessingUnitDeployment) super.addContextProperty(key, value);
     }
-    
-    public ElasticStatelessProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config) {
-        return (ElasticStatelessProcessingUnitDeployment) dedicatedMachineProvisioning(config);
-    }
-    
+       
     public ElasticStatelessProcessingUnitDeployment dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
-        return (ElasticStatelessProcessingUnitDeployment) super.machineProvisioning(config, null);
+        return (ElasticStatelessProcessingUnitDeployment) super.dedicatedMachineProvisioning(config, null);
     }
     
     public ElasticStatelessProcessingUnitDeployment sharedMachineProvisioning(String sharingId, ElasticMachineProvisioningConfig config) {
         if (sharingId == null) {
             throw new IllegalArgumentException("sharingId can't be null");
         }
-        return (ElasticStatelessProcessingUnitDeployment) super.machineProvisioning(config, sharingId);
+        return (ElasticStatelessProcessingUnitDeployment) super.dedicatedMachineProvisioning(config, sharingId);
     }
 
     @Override

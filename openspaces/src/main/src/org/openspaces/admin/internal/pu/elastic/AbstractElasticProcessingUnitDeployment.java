@@ -142,7 +142,7 @@ public abstract class AbstractElasticProcessingUnitDeployment {
         return this;
     }
     
-    protected AbstractElasticProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config, String sharingId) {
+    protected AbstractElasticProcessingUnitDeployment dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config, String sharingId) {
         isolationConfig.setSharingId(sharingId);
         if ((config.getGridServiceAgentZones() == null || config.getGridServiceAgentZones().length == 0) && config.isGridServiceAgentZoneMandatory()) {
             throw new IllegalArgumentException("isGridServiceAgentZoneMandatory returns true, but no Grid Service Agent zone is specified.");
