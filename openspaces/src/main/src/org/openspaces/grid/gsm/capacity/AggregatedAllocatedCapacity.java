@@ -25,6 +25,7 @@ public class AggregatedAllocatedCapacity {
         return capacityPerAgent.isEmpty();
     }
 
+    @Override
     public boolean equals(Object other) {
         return 
             other instanceof AggregatedAllocatedCapacity &&
@@ -35,6 +36,7 @@ public class AggregatedAllocatedCapacity {
         return capacityPerAgent.keySet();
     }
     
+    @Override
     public String toString() {
         return capacityPerAgent.size() + " machines with total capacity of " + getTotalAllocatedCapacity();
     }
@@ -96,7 +98,7 @@ public class AggregatedAllocatedCapacity {
 
     public AllocatedCapacity getAgentCapacity(String agentUid) {
         if (!capacityPerAgent.containsKey(agentUid)) {
-            throw new IllegalArgumentException("agent");
+            throw new IllegalArgumentException(agentUid);
         }
         return this.capacityPerAgent.get(agentUid);
     }
