@@ -80,19 +80,6 @@ public class BinPackingSolver {
         this.maxMemoryCapacityInMB = maxMemoryInMB;
     }
 
-    /**
-     * Allocated all of the unallocated memory (or as much as possible)
-     * For non-paritioned get as much as cpu as possible.
-     * For partitioned allocates for half of the containers the same amount of CPU (that is possible).
-     * 
-     * @param partitioned
-     */
-    public void solveEagerCapacity(boolean partitioned) {
-    
-        //allocate as much memory as possible
-        solveManualCapacity(unallocatedCapacity.getTotalAllocatedCapacity());
-    }
-
     public void solveManualCapacity(AllocatedCapacity capacityToAllocate) {
     
         validate();

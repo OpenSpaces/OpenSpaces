@@ -1,26 +1,25 @@
 package org.openspaces.grid.gsm.machines;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Arrays;
 
+import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
+import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementPolicy;
 
-abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPolicy{
+public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPolicy{
 
+    private int maxNumberOfMachines;
     private int minimumNumberOfMachines;
     private long reservedMemoryCapacityPerMachineInMB;
     private long containerMemoryCapacityInMB;
-    private boolean allowDeploymentOnManagementMachine;
-    private Set<String> discoveredMachineZones = new HashSet<String>();
+    private NonBlockingElasticMachineProvisioning machineProvisioning;
+    private ElasticProcessingUnitMachineIsolation machineIsolation;
     
-    public boolean getAllowDeploymentOnManagementMachine() {
-        return this.allowDeploymentOnManagementMachine;
-    }
+    //private Fraction numberOfCpuCoresPerPrimaryInstance;
     
-    public void setAllowDeploymentOnManagementMachine(boolean allowDeploymentOnManagementMachine) {
-        this.allowDeploymentOnManagementMachine = allowDeploymentOnManagementMachine;
-    }
-
+    private GridServiceAgent[] agents;
+    
     public int getMinimumNumberOfMachines() {
         return minimumNumberOfMachines;
     }
@@ -33,7 +32,7 @@ abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPolicy{
         return reservedMemoryCapacityPerMachineInMB;
     }
     
-    public void setReservedMemoryCapacityPerMachineInMB(int reservedInMB) {
+    public void setReservedMemoryCapacityPerMachineInMB(long reservedInMB) {
         this.reservedMemoryCapacityPerMachineInMB =reservedInMB ; 
     }
 
@@ -45,12 +44,38 @@ abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPolicy{
         return this.containerMemoryCapacityInMB;
     }
 
-    public void setDiscoveredMachineZones(Set<String> machineZones) {
-        this.discoveredMachineZones = machineZones;
+    public GridServiceAgent[] getProvisionedAgents() {
+        return this.agents;
     }
     
-    public Set<String> getDiscoveredMachineZones() {
-        return this.discoveredMachineZones;
+    public void setProvisionedAgents(GridServiceAgent[] agents) {
+        this.agents = agents;
+    }
+    
+
+    /* Optional Argument */
+    public NonBlockingElasticMachineProvisioning getMachineProvisioning() {
+        return this.machineProvisioning;
+    }
+    
+    public void setMachineProvisioning(NonBlockingElasticMachineProvisioning machineProvisioning) {
+        this.machineProvisioning = machineProvisioning;
+    }
+
+    public void setMaximumNumberOfMachines(int maxNumberOfMachines) {
+        this.maxNumberOfMachines = maxNumberOfMachines;
+    }
+    
+    public int getMaximumNumberOfMachines() {
+        return this.maxNumberOfMachines;
+    }
+
+    public ElasticProcessingUnitMachineIsolation getMachineIsolation() {
+        return machineIsolation;
+    }
+    
+    public void setMachineIsolation(ElasticProcessingUnitMachineIsolation isolation) {
+        this.machineIsolation = isolation;
     }
     
     @Override
@@ -59,7 +84,11 @@ abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPolicy{
         ((AbstractMachinesSlaPolicy)other).reservedMemoryCapacityPerMachineInMB == this.reservedMemoryCapacityPerMachineInMB &&
         ((AbstractMachinesSlaPolicy)other).containerMemoryCapacityInMB == this.containerMemoryCapacityInMB &&
         ((AbstractMachinesSlaPolicy)other).minimumNumberOfMachines == this.minimumNumberOfMachines &&
-        ((AbstractMachinesSlaPolicy)other).allowDeploymentOnManagementMachine == this.allowDeploymentOnManagementMachine &&
-        ((AbstractMachinesSlaPolicy)other).discoveredMachineZones.equals(discoveredMachineZones);
+        ((AbstractMachinesSlaPolicy)other).machineIsolation.equals(this.machineIsolation) &&
+        ((AbstractMachinesSlaPolicy)other).maxNumberOfMachines == maxNumberOfMachines &&
+        ((AbstractMachinesSlaPolicy)other).isStopMachineSupported() == isStopMachineSupported() &&
+        Arrays.equals(((AbstractMachinesSlaPolicy)other).agents,agents);
     }
+
+    public abstract boolean isStopMachineSupported();
 }

@@ -1,6 +1,5 @@
 package org.openspaces.admin.pu.elastic.config;
 
-import org.openspaces.core.util.MemoryUnit;
 
 
 /**
@@ -26,16 +25,6 @@ public class EagerScaleConfigurer implements ScaleStrategyConfigurer<EagerScaleC
      */
     public EagerScaleConfigurer() {
         this.config = new EagerScaleConfig();
-    }
-    
-    public EagerScaleConfigurer reservedMemoryCapacityPerMachine(long memory, MemoryUnit unit) {
-        config.setReservedMemoryCapacityPerMachineInMB((int) unit.toMegaBytes(memory));
-        return this;
-    }
-    
-    public EagerScaleConfigurer dedicatedManagementMachines() {
-        config.setDedicatedManagementMachines(true);
-        return this;
     }
     
     public EagerScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {

@@ -11,38 +11,7 @@ public interface ScaleStrategyConfig extends BeanConfig {
     void setPollingIntervalSeconds(int seconds);
     
     int getPollingIntervalSeconds();
-    
-    int getReservedMemoryCapacityPerMachineInMB();
-
-    /**
-     * Sets the expected amount of memory per machine that is reserved for processes other than grid containers.
-     * These include Grid Service Manager, Lookup Service or any other daemon running on the system.
-     * 
-     * Default value is 1024 MB. 
-     * 
-     * For example, by default, a 16GB server  
-     * can run 3 containers 5GB each, since it approximately leaves 1024MB memory free.
-     * 
-     * This is an advanced property setting.
-     * 
-     * @param reservedInMB - amount of reserved memory in MB
-     */
-    void setReservedMemoryCapacityPerMachineInMB(int reservedInMB);
-    
-    boolean getDedicatedManagementMachines();
-    
-    /**
-     * If specified restricts the {@link org.openspaces.admin.gsc.GridServiceContainer} 
-     * from being started on the same machine as the {@link org.openspaces.admin.gsm.GridServiceManager} , {@link org.openspaces.admin.lus.LookupService}
-     * 
-     * Default value is false
-     * 
-     * This is an advanced property setting.
-     * 
-     * @param dedicatedManagementMachines - set to false for a dedicated management machine
-     */
-    void setDedicatedManagementMachines(boolean dedicatedManagementMachines);
-    
+      
     int getMaxConcurrentRelocationsPerMachine();
     
     /**

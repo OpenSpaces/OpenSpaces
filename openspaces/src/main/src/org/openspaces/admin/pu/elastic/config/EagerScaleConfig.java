@@ -36,29 +36,13 @@ public class EagerScaleConfig
     public void setPollingIntervalSeconds(int pollingIntervalSeconds) {
         ScaleStrategyConfigUtils.setPollingIntervalSeconds(properties, pollingIntervalSeconds);
     }
-    
-    public int getReservedMemoryCapacityPerMachineInMB() {
-        return ScaleStrategyConfigUtils.getReservedMemoryCapacityPerMachineInMB(properties); 
-    }
-    
-    public void setReservedMemoryCapacityPerMachineInMB(int reservedInMB) {
-        ScaleStrategyConfigUtils.setReservedMemoryCapacityPerMachineInMB(properties, reservedInMB); 
-    }
-    
+        
     public int getMaxConcurrentRelocationsPerMachine() {
         return ScaleStrategyConfigUtils.getMaxConcurrentRelocationsPerMachine(properties);
     }
     
     public void setMaxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         ScaleStrategyConfigUtils.setMaxConcurrentRelocationsPerMachine(properties, maxNumberOfConcurrentRelocationsPerMachine);
-    }
-    
-    public boolean getDedicatedManagementMachines() {
-        return ScaleStrategyConfigUtils.getDedicatedManagementMachines(properties);
-    }
-
-    public void setDedicatedManagementMachines(boolean dedicatedManagementMachines) {
-        ScaleStrategyConfigUtils.setDedicatedManagementMachines(properties, dedicatedManagementMachines);
     }
     
     public void setProperties(Map<String, String> properties) {

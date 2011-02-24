@@ -75,23 +75,7 @@ public class ManualCapacityScaleConfig
     public void setMaxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         ScaleStrategyConfigUtils.setMaxConcurrentRelocationsPerMachine(properties, maxNumberOfConcurrentRelocationsPerMachine);
     }
-    
-    public int getReservedMemoryCapacityPerMachineInMB() {
-        return ScaleStrategyConfigUtils.getReservedMemoryCapacityPerMachineInMB(properties); 
-    }
-    
-    public void setReservedMemoryCapacityPerMachineInMB(int reservedInMB) {
-        ScaleStrategyConfigUtils.setReservedMemoryCapacityPerMachineInMB(properties, reservedInMB); 
-    }
-    
-    public boolean getDedicatedManagementMachines() {
-        return ScaleStrategyConfigUtils.getDedicatedManagementMachines(properties);
-    }
-
-    public void setDedicatedManagementMachines(boolean dedicatedManagementMachines) {
-        ScaleStrategyConfigUtils.setDedicatedManagementMachines(properties, dedicatedManagementMachines);
-    }
-    
+        
     public Map<String,String> getProperties() {
         return properties.getProperties();
     }

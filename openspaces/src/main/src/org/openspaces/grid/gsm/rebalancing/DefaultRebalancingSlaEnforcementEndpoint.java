@@ -56,7 +56,7 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
                     pu);
     }
 
-    public ProcessingUnit getId() {
+    public ProcessingUnit getProcessingUnit() {
         return pu;
     }
 

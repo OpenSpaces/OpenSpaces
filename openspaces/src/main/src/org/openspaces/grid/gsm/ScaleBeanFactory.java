@@ -17,11 +17,11 @@ import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.machines.EagerMachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.EagerMachinesSlaEnforcementEndpointAware;
-import org.openspaces.grid.gsm.machines.ElasticMachineProvisioning;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
-import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioning;
-import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioningAdapter;
+import org.openspaces.grid.gsm.machines.plugins.ElasticMachineProvisioning;
+import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
+import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapterFactory;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpoint;
@@ -32,9 +32,10 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
     
     private final RebalancingSlaEnforcementEndpoint rebalancingSlaEnforcementEndpoint;
     private final ContainersSlaEnforcementEndpoint containersSlaEnforcementEndpoint;
-    private final ServiceLevelAgreementEnforcementEndpoint machinesSlaEnforcementEndpoint;
+    private final ServiceLevelAgreementEnforcementEndpoint<?> machinesSlaEnforcementEndpoint;
     private final ProcessingUnit pu;
     private final ProcessingUnitSchemaConfig schemaConfig;
+    private final NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory;
     private final ElasticMachineIsolationConfig isolationConfig;
     
     ScaleBeanFactory(
@@ -42,7 +43,8 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
             ProcessingUnitSchemaConfig schemaConfig,
             RebalancingSlaEnforcementEndpoint rebalancingSlaEnforcementEndpoint, 
             ContainersSlaEnforcementEndpoint containersSlaEnforcementEndpoint,
-            ServiceLevelAgreementEnforcementEndpoint machinesSlaEnforcementEndpoint, 
+            ServiceLevelAgreementEnforcementEndpoint<?> machinesSlaEnforcementEndpoint,
+            NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory,
             ElasticMachineIsolationConfig isolationConfig) {
         
         super(pu.getAdmin());
@@ -50,6 +52,7 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
         this.rebalancingSlaEnforcementEndpoint = rebalancingSlaEnforcementEndpoint;
         this.containersSlaEnforcementEndpoint = containersSlaEnforcementEndpoint;
         this.machinesSlaEnforcementEndpoint = machinesSlaEnforcementEndpoint;
+        this.nonBlockingAdapterFactory = nonBlockingAdapterFactory;
         this.pu = pu;
         this.isolationConfig = isolationConfig;
         
@@ -85,20 +88,18 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
             ((ProcessingUnitAware)instance).setProcessingUnit(pu);
             ((ProcessingUnitAware)instance).setProcessingUnitSchema(schemaConfig);
         }
-        
+                
         if (instance instanceof ElasticMachineProvisioningAware) {
             List<Bean> injectedInstances = beanServer.getEnabledBeanAssignableTo(
                     new Class[]{
                             ElasticMachineProvisioning.class,
                             NonBlockingElasticMachineProvisioning.class});
            
-            
             NonBlockingElasticMachineProvisioning machineProvisioning = null;
-           
+            
             for (Bean injectedInstance : injectedInstances) {
                 if (injectedInstance instanceof ElasticMachineProvisioning) {
-                    machineProvisioning = 
-                        new NonBlockingElasticMachineProvisioningAdapter((ElasticMachineProvisioning)injectedInstance);
+                    machineProvisioning = nonBlockingAdapterFactory.create((ElasticMachineProvisioning)injectedInstance);
                     break;
                 }
                 else if (injectedInstance instanceof NonBlockingElasticMachineProvisioning){
@@ -106,8 +107,8 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
                     break;
                 }
            }
-            
-           if (machineProvisioning != null) {
+
+            if (machineProvisioning != null) {
                ((ElasticMachineProvisioningAware)instance).setElasticMachineProvisioning(machineProvisioning);
                ((ElasticMachineProvisioningAware)instance).setElasticMachineIsolation(isolationConfig);
            }
@@ -118,11 +119,6 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
             if (instance instanceof GridServiceContainerConfigAware) {
                 ((GridServiceContainerConfigAware)instance)
                     .setGridServiceContainerConfig((elasticConfigBean.getGridServiceContainerConfig()));
-            }
-            
-            if (instance instanceof DiscoveredMachineProvisioningConfigAware) {
-                ((DiscoveredMachineProvisioningConfigAware)instance)
-                .setDiscoveredMachineProvisioningConfig((elasticConfigBean.getDiscoveredMachineProvisioningConfig()));
             }
         }
         return instance;

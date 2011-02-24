@@ -18,14 +18,13 @@ import org.openspaces.core.bean.BeanServer;
 import org.openspaces.core.bean.DefaultBeanServer;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcement;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
-import org.openspaces.grid.gsm.machines.DefaultMachineProvisioning;
-import org.openspaces.grid.gsm.machines.ElasticMachineProvisioning;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
-import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioning;
+import org.openspaces.grid.gsm.machines.plugins.ElasticMachineProvisioning;
+import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
+import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapterFactory;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
-import org.openspaces.grid.gsm.strategy.ManualCapacityScaleStrategyBean;
 import org.openspaces.grid.gsm.strategy.ScaleStrategyBean;
 import org.openspaces.grid.gsm.strategy.UndeployScaleStrategyBean;
 /**
@@ -37,9 +36,6 @@ import org.openspaces.grid.gsm.strategy.UndeployScaleStrategyBean;
  */
 public class ScaleBeanServer {
 
-    private static final HashMap<String, String> DEFAULT_SCALE_STRATEGY_BEAN_PROPERTIES = new HashMap<String,String>();
-    private static final String DEFAULT_SCALE_STRATEGY_BEAN_CLASSNAME = ManualCapacityScaleStrategyBean.class.getName();
-    
     private final BeanServer<Bean> beanServer;
     private final ProcessingUnit pu ;
     private final RebalancingSlaEnforcement rebalancingSlaEnforcement;
@@ -48,18 +44,20 @@ public class ScaleBeanServer {
     
     public ScaleBeanServer(
             ProcessingUnit pu,
+            ProcessingUnitSchemaConfig schemaConfig,
             RebalancingSlaEnforcement rebalancingSlaEnforcement, 
             ContainersSlaEnforcement containersSlaEnforcement,
             MachinesSlaEnforcement machinesSlaEnforcement,
-            Map<String,String> elasticProperties) {
+            NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory,
+            ElasticMachineIsolationConfig isolationConfig) {
 
         this.pu = pu;
         this.rebalancingSlaEnforcement = rebalancingSlaEnforcement;
         this.containersSlaEnforcement = containersSlaEnforcement;
         this.machinesSlaEnforcement = machinesSlaEnforcement;
         
-        ContainersSlaEnforcementEndpoint containersSlaEnforcementEndpoint = null;
         MachinesSlaEnforcementEndpoint machinesSlaEnforcementEndpoint = null;
+        ContainersSlaEnforcementEndpoint containersSlaEnforcementEndpoint = null;
         RebalancingSlaEnforcementEndpoint rebalancingSlaEnforcementEndpoint = null;
         try {
             containersSlaEnforcementEndpoint = containersSlaEnforcement.createEndpoint(pu);
@@ -78,55 +76,19 @@ public class ScaleBeanServer {
             }
         }
         
-        ElasticMachineIsolationConfig isolationConfig = new ElasticMachineIsolationConfig(elasticProperties);
-        
         this.beanServer = new DefaultBeanServer<Bean>(
                 
                 new ScaleBeanFactory(
                         pu,
-                        new ProcessingUnitSchemaConfig(elasticProperties),
+                        schemaConfig,
                         rebalancingSlaEnforcementEndpoint, 
                         containersSlaEnforcementEndpoint,
                         machinesSlaEnforcementEndpoint,
+                        nonBlockingAdapterFactory,
                         isolationConfig));
         
-        // order of beans is important due to implicit dependency inject order
-        setElasticConfig(elasticProperties);
-        
-        {
-        MachineProvisioningBeanPropertiesManager machineProvisioningPropertiesManager = 
-                new MachineProvisioningBeanPropertiesManager(elasticProperties);
-        String enabledMachineProvisioningClassName = getEnabledBeanClassName(machineProvisioningPropertiesManager);
-        if (isDefaultMachineProvisioningClassName(enabledMachineProvisioningClassName)) {
-         // this is a special machine provisioning that is not a bean
-            enabledMachineProvisioningClassName = null;
-        }
-        
-        if (enabledMachineProvisioningClassName != null) {
-            beanServer.setBeanConfig(
-                    enabledMachineProvisioningClassName, 
-                    machineProvisioningPropertiesManager.getBeanConfig(enabledMachineProvisioningClassName));
-            beanServer.enableBean(enabledMachineProvisioningClassName);
-        }
-        }
-        
-        {
-        String scaleStrategyClassName = DEFAULT_SCALE_STRATEGY_BEAN_CLASSNAME;
-        Map<String,String> scaleStrategyProperties = DEFAULT_SCALE_STRATEGY_BEAN_PROPERTIES;
-        ScaleStrategyBeanPropertiesManager scaleStrategyPropertiesManager = 
-            new ScaleStrategyBeanPropertiesManager(elasticProperties);
-        String enabledScaleStrategyClassName = getEnabledBeanClassName(scaleStrategyPropertiesManager);
-        
-        if (enabledScaleStrategyClassName != null) {
-            scaleStrategyClassName = enabledScaleStrategyClassName;
-            scaleStrategyProperties = scaleStrategyPropertiesManager.getBeanConfig(scaleStrategyClassName);
-        }
-        
-        beanServer.setBeanConfig(scaleStrategyClassName, scaleStrategyProperties);
-        beanServer.enableBean(scaleStrategyClassName);
-        }
     }
-
+     
     /**
      * Changes scale strategy to undeployed processing unit strategy (remove Containers/Machines)
      */
@@ -149,13 +111,31 @@ public class ScaleBeanServer {
         }
     }
     
+    public boolean isUndeployStarted() {
+        boolean undeployStarted = false;
+        List<Bean> enabledBeanAssignableTo = beanServer.getEnabledBeanAssignableTo(new Class[] {UndeployScaleStrategyBean.class});
+        if (!enabledBeanAssignableTo.isEmpty()) {
+            undeployStarted = true;
+        }
+        return undeployStarted;
+    }
+    
+    public boolean isUndeployComplete() {
+        boolean undeployComplete = false;
+        List<Bean> enabledBeanAssignableTo = beanServer.getEnabledBeanAssignableTo(new Class[] {UndeployScaleStrategyBean.class});
+        if (!enabledBeanAssignableTo.isEmpty()) {
+            undeployComplete = ((UndeployScaleStrategyBean)enabledBeanAssignableTo.get(0)).isUndeployComplete();
+        }
+        return undeployComplete;
+    }
+    
     public void destroy() {
         this.beanServer.destroy();
         this.rebalancingSlaEnforcement.destroyEndpoint(pu);
         this.containersSlaEnforcement.destroyEndpoint(pu);
         this.machinesSlaEnforcement.destroyEndpoint(pu);
     }
-
+    
     public void setElasticProperties(Map<String,String> elasticProperties) throws BeanConfigException {
         // order of beans is important due to implicit dependency inject order
         // see ScaleBeanFactory
@@ -173,23 +153,23 @@ public class ScaleBeanServer {
 
     private void setElasticScaleStrategy(Map<String, String> elasticProperties) {
         
-        ScaleStrategyBeanPropertiesManager scaleStrategyBeanPropertiesManager = new ScaleStrategyBeanPropertiesManager(elasticProperties);
+        ScaleStrategyBeanPropertiesManager scaleStrategyBeanPropertiesManager = 
+            new ScaleStrategyBeanPropertiesManager(elasticProperties);
         String enabledBeanClassName = getEnabledBeanClassName(scaleStrategyBeanPropertiesManager);
         
         //replace scale strategy bean if necessary
         if (enabledBeanClassName == null) {
-            beanServer.disableAllBeansAssignableTo(ScaleStrategyBean.class);
+            throw new BeanConfigurationException("scale strategy is not defined");
         }
-        else {
-
-            Map<String, String> beanProperties = new HashMap<String,String>(scaleStrategyBeanPropertiesManager.getBeanConfig(enabledBeanClassName));
-            beanServer.replaceBeanAssignableTo(
-                    new Class[]{ScaleStrategyBean.class}, 
-                    enabledBeanClassName,
-                    beanProperties); 
-        }
-    }
     
+        Map<String, String> beanProperties = new HashMap<String,String>(scaleStrategyBeanPropertiesManager.getBeanConfig(enabledBeanClassName));
+        beanServer.replaceBeanAssignableTo(
+                new Class[]{ScaleStrategyBean.class}, 
+                enabledBeanClassName,
+                beanProperties); 
+    
+    }
+        
     private void setElasticMachineProvisioning(Map<String, String> elasticProperties) {
         
         final MachineProvisioningBeanPropertiesManager propertiesManager = 
@@ -197,38 +177,17 @@ public class ScaleBeanServer {
         
         String enabledBeanClassName = getEnabledBeanClassName(propertiesManager);
 
-        if (isDefaultMachineProvisioningClassName(enabledBeanClassName)) {
-            // this is a special machine provisioning that is not a bean
-            enabledBeanClassName = null;
-        }
-        
-        List<Bean> existingEnabledBeans = beanServer.getEnabledBeanAssignableTo(
-                new Class[]{
-                        ElasticMachineProvisioning.class,
-                        NonBlockingElasticMachineProvisioning.class});
-
-        if (enabledBeanClassName == null && !existingEnabledBeans.isEmpty()) {
-            throw new BeanConfigurationException("Cannot disable " + existingEnabledBeans.get(0).getClass() + " at runtime.");
-        }
-        
-        if (enabledBeanClassName != null && existingEnabledBeans.isEmpty()) {
-            throw new BeanConfigurationException("Cannot enable " + enabledBeanClassName + " at runtime.");
-        }
-        
-        // replace machine provisioning bean if possible    
-        if (enabledBeanClassName != null && !existingEnabledBeans.isEmpty()) {
-                       
-            Map<String, String> beanProperties = propertiesManager.getBeanConfig(enabledBeanClassName);
-            beanServer.replaceBeanAssignableTo(
-                    new Class[]{ElasticMachineProvisioning.class,
-                                NonBlockingElasticMachineProvisioning.class}, 
-                    enabledBeanClassName,
-                    beanProperties);
-        }
-    }
-
-    private boolean isDefaultMachineProvisioningClassName(String enabledBeanClassName) {
-        return enabledBeanClassName != null && enabledBeanClassName.equals(DefaultMachineProvisioning.class.getName());
+        if (enabledBeanClassName == null) {
+            throw new BeanConfigurationException("machine provisioning is not defined");
+        }       
+                   
+        Map<String, String> beanProperties = new HashMap<String,String>(propertiesManager.getBeanConfig(enabledBeanClassName));
+        beanServer.replaceBeanAssignableTo(
+                new Class[]{ElasticMachineProvisioning.class,
+                            NonBlockingElasticMachineProvisioning.class}, 
+                enabledBeanClassName,
+                beanProperties);
+    
     }
     
     private String getEnabledBeanClassName(BeanConfigPropertiesManager propertiesManager) {

@@ -22,4 +22,6 @@ public interface EagerMachinesSlaEnforcementEndpoint {
      */
     AggregatedAllocatedCapacity getAllocatedCapacity() throws ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
+    boolean isGridServiceAgentsPendingDeallocation();
+
 }

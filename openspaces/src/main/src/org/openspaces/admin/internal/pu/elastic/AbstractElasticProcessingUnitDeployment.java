@@ -8,6 +8,9 @@ import org.openspaces.admin.bean.BeanConfigPropertiesManager;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
+import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
+import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
+import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ScaleStrategyConfig;
 import org.openspaces.core.util.MemoryUnit;
 import org.openspaces.core.util.StringProperties;
@@ -29,6 +32,8 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     private final ElasticMachineIsolationConfig isolationConfig;
     private final MachineProvisioningBeanPropertiesManager machineProvisioningPropertiesManager;
     private final ScaleStrategyBeanPropertiesManager scaleStrategyPropertiesManager;
+    private ElasticMachineProvisioningConfig machineProvisioning;
+    private ScaleStrategyConfig scaleStrategy;
     
     public AbstractElasticProcessingUnitDeployment(String processingUnit) {
         this.processingUnit = processingUnit;
@@ -139,12 +144,15 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     
     protected AbstractElasticProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config, String sharingId) {
         isolationConfig.setSharingId(sharingId);
-        enableBean(machineProvisioningPropertiesManager, config);
+        if ((config.getGridServiceAgentZones() == null || config.getGridServiceAgentZones().length == 0) && config.isGridServiceAgentZoneMandatory()) {
+            throw new IllegalArgumentException("isGridServiceAgentZoneMandatory returns true, but no Grid Service Agent zone is specified.");
+        }
+        machineProvisioning = config;
         return this;
     }    
 
     protected AbstractElasticProcessingUnitDeployment scale(ScaleStrategyConfig config) {
-        enableBean(scaleStrategyPropertiesManager, config);
+        scaleStrategy = config;
         return this;
     }
     
@@ -178,6 +186,23 @@ public abstract class AbstractElasticProcessingUnitDeployment {
     
     protected ProcessingUnitDeployment toProcessingUnitDeployment() {
         
+        if (machineProvisioning == null) {
+            machineProvisioning = new DiscoveredMachineProvisioningConfig();
+        }
+        
+        if (scaleStrategy == null) {
+            scaleStrategy = new ManualCapacityScaleConfig();
+        }
+        
+        if (machineProvisioning instanceof EagerScaleConfig && 
+            !(scaleStrategy instanceof DiscoveredMachineProvisioningConfig)) {
+            
+            throw new IllegalArgumentException("Eager scale does not support " + machineProvisioning.getClass() + " machine provisioning. Remove machineProvisioning or use DiscoveredMachineProvisioningConfig() instead.");
+         }
+
+        enableBean(machineProvisioningPropertiesManager, machineProvisioning);
+        enableBean(scaleStrategyPropertiesManager, scaleStrategy);
+            
         ProcessingUnitDeployment deployment = 
             new ProcessingUnitDeployment(this.processingUnit);
         

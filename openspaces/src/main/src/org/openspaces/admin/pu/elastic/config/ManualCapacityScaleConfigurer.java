@@ -47,17 +47,7 @@ public class ManualCapacityScaleConfigurer implements ScaleStrategyConfigurer<Ma
         config.setNumberOfCpuCores(cpuCores);
         return this;
     }
-   
-    public ManualCapacityScaleConfigurer reservedMemoryCapacityPerMachine(long memory, MemoryUnit unit) {
-        config.setReservedMemoryCapacityPerMachineInMB((int) unit.toMegaBytes(memory));
-        return this;
-    }
-    
-    public ManualCapacityScaleConfigurer dedicatedManagementMachines() {
-        config.setDedicatedManagementMachines(true);
-        return this;
-    }
-    
+       
     public ManualCapacityScaleConfigurer maxConcurrentRelocationsPerMachine(int maxNumberOfConcurrentRelocationsPerMachine) {
         config.setMaxConcurrentRelocationsPerMachine(maxNumberOfConcurrentRelocationsPerMachine);
         return this;

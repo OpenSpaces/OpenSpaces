@@ -1,32 +1,12 @@
 package org.openspaces.grid.gsm.strategy;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
-import org.openspaces.admin.bean.BeanConfigurationException;
-import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.pu.elastic.ElasticMachineIsolationConfig;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
-import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
-import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
-import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
-import org.openspaces.grid.gsm.DiscoveredMachineProvisioningConfigAware;
-import org.openspaces.grid.gsm.ElasticMachineProvisioningAware;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
-import org.openspaces.grid.gsm.LogPerProcessingUnit;
-import org.openspaces.grid.gsm.ProcessingUnitAware;
-import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.AggregatedAllocatedCapacity;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
@@ -34,55 +14,27 @@ import org.openspaces.grid.gsm.containers.ContainersSlaPolicy;
 import org.openspaces.grid.gsm.machines.CapacityMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
-import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioning;
+import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
-public class UndeployScaleStrategyBean 
+public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
 
-    implements ScaleStrategyBean, 
-               ContainersSlaEnforcementEndpointAware, 
+    implements ContainersSlaEnforcementEndpointAware, 
                MachinesSlaEnforcementEndpointAware,
-               ProcessingUnitAware,
-               ElasticMachineProvisioningAware,
-               GridServiceContainerConfigAware,
-               DiscoveredMachineProvisioningConfigAware,
-               Runnable {
+               GridServiceContainerConfigAware {
 
     private static final String containersAlertGroupUidPrefix = "47A94111-5665-4214-9F7A-2962D998DD12";
     private static final String machinesAlertGroupUidPrefix = "3BA87E89-449A-4abc-A632-4732246A9EE4";
 
     // injected 
-    private InternalAdmin admin;
-    private EagerScaleConfig slaConfig;
     private MachinesSlaEnforcementEndpoint machinesEndpoint;
     private ContainersSlaEnforcementEndpoint containersEndpoint;
-    private ProcessingUnit pu;
     private GridServiceContainerConfig containersConfig;
-    private ProcessingUnitSchemaConfig schemaConfig;
-    private DiscoveredMachineProvisioningConfig discoveredMachineProvisioningConfig;
 
     // created by afterPropertiesSet()
     private Log logger;
-    private ScheduledFuture<?> scheduledTask;
-    private NonBlockingElasticMachineProvisioning machineProvisioning;
-    private ElasticMachineIsolationConfig isolationConfig;
+    private boolean undeployComplete;
     
-    public Map<String, String> getProperties() {
-        return slaConfig.getProperties();
-    }
-
-    public void setProcessingUnit(ProcessingUnit pu) {
-        this.pu = pu;
-    }
-
-    public void setProcessingUnitSchema(ProcessingUnitSchemaConfig schemaConfig) {
-        this.schemaConfig = schemaConfig;
-    }
-    
-    public void setAdmin(Admin admin) {
-        this.admin = (InternalAdmin) admin;
-    }
-
     public void setMachinesSlaEnforcementEndpoint(MachinesSlaEnforcementEndpoint endpoint) {
         this.machinesEndpoint = endpoint;
     }
@@ -91,78 +43,43 @@ public class UndeployScaleStrategyBean
         this.containersEndpoint = containersService;
     }
     
-    public void setElasticMachineProvisioning(NonBlockingElasticMachineProvisioning elasticMachineProvisioning) {
-        this.machineProvisioning = elasticMachineProvisioning;
-    }
-    
-    public void setElasticMachineIsolation(ElasticMachineIsolationConfig isolationConfig) {
-        this.isolationConfig = isolationConfig;
-    }
-    
     public void setGridServiceContainerConfig(GridServiceContainerConfig containersConfig) {
          this.containersConfig = containersConfig;
     }
-
-    public void setDiscoveredMachineProvisioningConfig(DiscoveredMachineProvisioningConfig config) {
-        this.discoveredMachineProvisioningConfig = config;
-    }
-        
+    
+    @Override
     public void afterPropertiesSet() {
-        if (slaConfig == null) {
-            throw new IllegalStateException("slaConfig cannot be null.");
+        super.afterPropertiesSet();
+    
+        if (machinesEndpoint == null) {
+            throw new IllegalStateException("machines endpoint cannot be null.");
         }
         
-        logger = new LogPerProcessingUnit(
-                    new SingleThreadedPollingLog(
-                            LogFactory.getLog(UndeployScaleStrategyBean.class)),
-                    pu);
-        logger.info("sla properties: "+slaConfig.toString());
-        
-        if (!schemaConfig.isPartitionedSync2BackupSchema()) {
-            throw new BeanConfigurationException("Processing Unit " + pu.getName() + " cannot scale by memory capacity, since it is not stateful and not a datagrid (it is " + schemaConfig.getSchema() +" . Choose a different scale algorithm.");
+        if (containersEndpoint == null) {
+            throw new IllegalStateException("containers endpoint cannot be null");
         }
-        
-        scheduledTask = 
-        (admin).scheduleWithFixedDelayNonBlockingStateChange(
-                this, 
-       0L, slaConfig.getPollingIntervalSeconds(), TimeUnit.SECONDS);
-       logger.debug(pu.getName() + " is being monitored for SLA violations every " + slaConfig.getPollingIntervalSeconds() + " seconds");
-    }
-
-    public void destroy() {
-        logger.debug("destroying " + this.getClass().getName());
-        if (scheduledTask != null) {
-            scheduledTask.cancel(false);
-            scheduledTask = null;
-        }
-    }
-
-    public void setProperties(Map<String, String> properties) {
-        slaConfig = new EagerScaleConfig(properties);       
     }
 
     public void run() {
         
-        logger.debug("Undeploying processing unit " + pu.getName());
-
-        //TODO: Move this check to EsmImpl, this component should not be aware it is running in an ESM
-        //TODO: Raise an alert
-        int numberOfEsms = admin.getElasticServiceManagers().getSize();
-        if (numberOfEsms != 1) {
-            logger.error("Number of ESMs must be 1. Currently " + numberOfEsms + " running.");
+        if (undeployComplete) {
             return;
         }
         
+        super.run();
+        
+        logger.debug("Undeploying processing unit " + getProcessingUnit().getName());
+        
         try {
             
-            logger.debug("Undeploying containers for " + pu.getName());
+            logger.debug("Undeploying containers for " + getProcessingUnit().getName());
             boolean containersSlaEnforced = enforceContainersSla();
             if (logger.isDebugEnabled()) {
                 if (!containersSlaEnforced) {
                     logger.debug("Containers undeploy is incomplete.");
                 }
             }
-            logger.debug("Undeploying machines for " + pu.getName());
+            logger.debug("Undeploying machines for " + getProcessingUnit().getName());
             boolean machinesSlaEnforced = enforceMachinesSla();
             if (logger.isDebugEnabled()) {
                 if (!machinesSlaEnforced) {
@@ -171,9 +88,8 @@ public class UndeployScaleStrategyBean
             }
             
             if (containersSlaEnforced && machinesSlaEnforced) {
-                logger.info(pu.getName() + " undeploy is complete.");
-                // self destruct since all machines and containers are undeployed
-                destroy();
+                logger.info(getProcessingUnit().getName() + " undeploy is complete.");
+                undeployComplete = true;
             }
         }        
         catch (ServiceLevelAgreementEnforcementEndpointDestroyedException e) {
@@ -188,16 +104,21 @@ public class UndeployScaleStrategyBean
         
     }
 
+    public boolean isUndeployComplete() {
+        return undeployComplete;
+    }
+    
     private boolean enforceMachinesSla() {
         final CapacityMachinesSlaPolicy sla = new CapacityMachinesSlaPolicy();
+        NonBlockingElasticMachineProvisioning machineProvisioning = super.getMachineProvisioning();
         sla.setMachineProvisioning(machineProvisioning);
         sla.setCpuCapacity(0);
         sla.setMemoryCapacityInMB(0);
         sla.setMinimumNumberOfMachines(0);
-        sla.setAllowDeploymentOnManagementMachine(!slaConfig.getDedicatedManagementMachines());
-        sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
+        sla.setReservedMemoryCapacityPerMachineInMB(super.getReservedMemoryCapacityPerMachineInMB());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
-        sla.setDiscoveredMachineZones(new HashSet<String>(Arrays.asList(discoveredMachineProvisioningConfig.getGridServiceAgentZones())));
+        sla.setProvisionedAgents(getDiscoveredAgents());
+        sla.setMachineIsolation(getIsolation());
         boolean reachedSla = machinesEndpoint.enforceSla(sla);
         
         if (reachedSla) {
@@ -206,7 +127,7 @@ public class UndeployScaleStrategyBean
                 AlertStatus.RESOLVED,
                 machinesAlertGroupUidPrefix,
                 "Machines Capacity SLA",
-                "Machines for " + pu.getName() + " have been terminated.");
+                "Machines for " + getProcessingUnit().getName() + " have been terminated.");
         }
         else {
             triggerAlert(
@@ -214,7 +135,7 @@ public class UndeployScaleStrategyBean
                 AlertStatus.RAISED,
                 containersAlertGroupUidPrefix,
                 "Machines Capacity SLA",
-                "Machines for " + pu.getName() + " are being terminated.");
+                "Machines for " + getProcessingUnit().getName() + " are being terminated.");
         }
         
         return reachedSla;
@@ -225,11 +146,7 @@ public class UndeployScaleStrategyBean
         
         final ContainersSlaPolicy sla = new ContainersSlaPolicy();
         sla.setNewContainerConfig(containersConfig);
-        sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
         sla.setAllocatedCapacity(new AggregatedAllocatedCapacity());
-        sla.setMemoryCapacityInMB(0);
-        sla.setCpuCapacity(0);
-        sla.setMinimumNumberOfMachines(0);
         
         boolean reachedSla = containersEndpoint.enforceSla(sla);
         
@@ -239,7 +156,7 @@ public class UndeployScaleStrategyBean
                 AlertStatus.RESOLVED,
                 containersAlertGroupUidPrefix,
                 "Containers Capacity SLA",
-                "Containers for " + pu.getName() + " have been terminated.");
+                "Containers for " + getProcessingUnit().getName() + " have been terminated.");
         }
         else {
             triggerAlert(
@@ -247,8 +164,8 @@ public class UndeployScaleStrategyBean
                 AlertStatus.RAISED,
                 containersAlertGroupUidPrefix,
                 "Containers Capacity SLA",
-                "Contains capacity for " + pu.getName() + " " + 
-                "Containers for " + pu.getName() + " are being terminated.");
+                "Contains capacity for " + getProcessingUnit().getName() + " " + 
+                "Containers for " + getProcessingUnit().getName() + " are being terminated.");
         }
         
         return reachedSla;
@@ -261,9 +178,9 @@ public class UndeployScaleStrategyBean
         alertFactory.description(alertDescription);
         alertFactory.severity(severity);    
         alertFactory.status(status);
-        alertFactory.componentUid(pu.getName());
-        alertFactory.groupUid(alertGroupUidPrefix + "-" + pu.getName());
-        admin.getAlertManager().triggerAlert(alertFactory.toAlert());
+        alertFactory.componentUid(getProcessingUnit().getName());
+        alertFactory.groupUid(alertGroupUidPrefix + "-" + getProcessingUnit().getName());
+        getAdmin().getAlertManager().triggerAlert(alertFactory.toAlert());
         logger.debug(alertDescription);
     }
 

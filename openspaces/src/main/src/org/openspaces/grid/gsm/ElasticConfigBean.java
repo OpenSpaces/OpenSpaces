@@ -4,10 +4,7 @@ import java.util.Map;
 
 import org.openspaces.admin.Admin;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
-import org.openspaces.admin.internal.pu.elastic.MachineProvisioningBeanPropertiesManager;
-import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
 import org.openspaces.core.bean.Bean;
-import org.openspaces.grid.gsm.machines.DefaultMachineProvisioning;
 
 public class ElasticConfigBean implements Bean {
 
@@ -17,18 +14,6 @@ public class ElasticConfigBean implements Bean {
         return new GridServiceContainerConfig(properties);
     }
 
-
-    public DiscoveredMachineProvisioningConfig getDiscoveredMachineProvisioningConfig() {
-        
-        final MachineProvisioningBeanPropertiesManager propertiesManager = 
-            new MachineProvisioningBeanPropertiesManager(properties);
-        
-        String beanClassName = DefaultMachineProvisioning.class.getName();
-        Map<String, String> beanConfig = propertiesManager.getBeanConfig(beanClassName);
-        
-        return new DiscoveredMachineProvisioningConfig(beanConfig);
-    }
-    
     public void afterPropertiesSet() throws Exception {
         // TODO Auto-generated method stub
         

@@ -21,6 +21,8 @@ import org.openspaces.admin.bean.BeanConfigException;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.InternalAdminFactory;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.pu.elastic.ElasticMachineIsolationConfig;
+import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyBeanPropertiesManager;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.machine.events.MachineLifecycleEventListener;
@@ -30,6 +32,7 @@ import org.openspaces.admin.pu.events.ProcessingUnitRemovedEventListener;
 import org.openspaces.grid.gsm.ScaleBeanServer;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcement;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcement;
+import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioningAdapterFactory;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcement;
 
 import com.gigaspaces.grid.gsa.AgentHelper;
@@ -71,13 +74,14 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
 	private final Map<String,Map<String,String>> elasticPropertiesPerProcessingUnit;
     private LifeCycle lifeCycle;
     private String[] configArgs;
+    private final NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory;
 	
     /**
      * Create an ESM
      */
     public ESMImpl() throws Exception {
         super();
-        
+        nonBlockingAdapterFactory = new NonBlockingElasticMachineProvisioningAdapterFactory();        
         scaleBeanServerPerProcessingUnit = new HashMap<ProcessingUnit,ScaleBeanServer>();
         elasticPropertiesPerProcessingUnit = new ConcurrentHashMap<String, Map<String,String>>();
         
@@ -368,14 +372,15 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
             ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.get(pu);
 
             if (beanServer == null) {
-                beanServer = new ScaleBeanServer(pu,rebalancingSlaEnforcement,containersSlaEnforcement,machinesSlaEnforcement,elasticProperties);
+                ProcessingUnitSchemaConfig schemaConfig = new ProcessingUnitSchemaConfig(elasticProperties);
+                ElasticMachineIsolationConfig isolationConfig = new ElasticMachineIsolationConfig(elasticProperties);
+                beanServer = new ScaleBeanServer(pu,schemaConfig, rebalancingSlaEnforcement,containersSlaEnforcement,machinesSlaEnforcement,nonBlockingAdapterFactory, isolationConfig);
                 scaleBeanServerPerProcessingUnit.put(pu, beanServer);
-                logger.info("Elastic properties for pu " + pu.getName() + " are being enforced.");
             }
-            else {
-                beanServer.setElasticProperties(elasticProperties);
-                logger.info("Elastic properties for pu " + pu.getName() + " are being refreshed.");
-            }
+            //TODO: Move this to a separate thread since bean#afterPropertiesSet() might block. This is very tricky since the PU can deploy/undeploy while we are in that thread, which changes the bean server.
+            beanServer.setElasticProperties(elasticProperties);
+            //don't log properties since it may contain passwords
+            logger.info("Elastic properties for pu " + pu.getName() + " are being enforced.");
         }
         catch (BeanConfigException e) {
             logger.log(Level.SEVERE,"Error configuring elasitc scale bean.",e);

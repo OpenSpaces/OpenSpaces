@@ -349,4 +349,9 @@ public class NullMockAdmin implements Admin, InternalAdmin {
         
     }
 
+    public ScheduledFuture<?> scheduleOneTimeWithDelayNonBlockingStateChange(Runnable command, long delay, TimeUnit unit) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

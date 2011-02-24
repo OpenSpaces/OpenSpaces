@@ -78,7 +78,7 @@ class ContainersSlaEnforcementState {
     }
 
 
-    public Collection<GridServiceContainer> getContainersMarkedForShutdown(ProcessingUnit pu) {
+    public Collection<GridServiceContainer> getContainersMarkedForDeallocation(ProcessingUnit pu) {
         return Collections.unmodifiableCollection(
                     new ArrayList<GridServiceContainer>(containersMarkedForShutdownPerProcessingUnit.get(pu)));
     }
@@ -108,7 +108,7 @@ class ContainersSlaEnforcementState {
         containersMarkedForShutdownPerProcessingUnit.get(pu).remove(container);
     }
     
-    public void markForContainerForDeallocation(ProcessingUnit pu, GridServiceContainer container) {
+    public void markContainerForDeallocation(ProcessingUnit pu, GridServiceContainer container) {
         List<GridServiceContainer> containersMarkedForShutdown = containersMarkedForShutdownPerProcessingUnit.get(pu);
         if (!containersMarkedForShutdown.contains(container)) {
             containersMarkedForShutdown.add(container);

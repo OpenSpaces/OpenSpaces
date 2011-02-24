@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcement;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlreadyExistsException;
@@ -20,7 +18,7 @@ import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlrea
  * 
  */
 public class RebalancingSlaEnforcement implements
-ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, RebalancingSlaEnforcementEndpoint> {
+ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, RebalancingSlaEnforcementEndpoint> {
 
     
     public void enableTracing() {
@@ -30,9 +28,7 @@ ServiceLevelAgreementEnforcement<RebalancingSlaPolicy, ProcessingUnit, Rebalanci
         return state.getDoneFutureStatefulDeployments();
     }
     
-    private static final Log logger = LogFactory.getLog(RebalancingSlaEnforcement.class);
-
-   private final RebalancingSlaEnforcementState state;
+    private final RebalancingSlaEnforcementState state;
     
     private final HashMap<ProcessingUnit, RebalancingSlaEnforcementEndpoint> endpoints;
 

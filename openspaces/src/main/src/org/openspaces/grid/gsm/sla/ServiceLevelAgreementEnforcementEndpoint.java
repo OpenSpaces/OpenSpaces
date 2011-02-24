@@ -1,5 +1,8 @@
 package org.openspaces.grid.gsm.sla;
 
+import org.openspaces.admin.pu.ProcessingUnit;
+
+
 
 
 /**
@@ -10,9 +13,9 @@ package org.openspaces.grid.gsm.sla;
  *
  * @param <POLICY> - service level agreement
  */
-public interface ServiceLevelAgreementEnforcementEndpoint<ID,POLICY extends ServiceLevelAgreementPolicy> {
+public interface ServiceLevelAgreementEnforcementEndpoint<POLICY extends ServiceLevelAgreementPolicy> {
 
-    ID getId();
+    ProcessingUnit getProcessingUnit();
     
     /**
      * 

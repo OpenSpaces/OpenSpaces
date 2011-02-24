@@ -1277,5 +1277,16 @@ public class DefaultAdmin implements InternalAdmin {
             
             initialDelay, delay, unit);
     }
-   
+
+    public ScheduledFuture<?> scheduleOneTimeWithDelayNonBlockingStateChange(
+            final Runnable command, 
+            long delay, TimeUnit unit) {
+        return this.getScheduler().schedule(new Runnable() {
+
+            public void run() {
+                scheduleNonBlockingStateChange(command);
+            }}, 
+            
+            delay, unit);
+    }
 }

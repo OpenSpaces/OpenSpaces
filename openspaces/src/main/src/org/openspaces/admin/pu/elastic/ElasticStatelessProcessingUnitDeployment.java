@@ -8,7 +8,6 @@ import org.openspaces.admin.internal.pu.elastic.AbstractElasticProcessingUnitDep
 import org.openspaces.admin.pu.ProcessingUnitDeployment;
 import org.openspaces.admin.pu.elastic.config.EagerScaleConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
-import org.openspaces.admin.pu.elastic.topology.AdvancedStatelessDeploymentTopology;
 import org.openspaces.admin.pu.elastic.topology.ElasticStatelessDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
@@ -20,10 +19,9 @@ import com.gigaspaces.security.directory.UserDetails;
  * @author itaif
  */
 public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticProcessingUnitDeployment
-    implements ElasticStatelessDeploymentTopology, AdvancedStatelessDeploymentTopology {
+    implements ElasticStatelessDeploymentTopology {
 
     Map<String,String> scaleStrategy;
-    private double minNumberOfCpuCoresPerMachine;
     
     /**
      * Constructs a stateless processing unit deployment based on the specified processing unit name 
@@ -134,13 +132,8 @@ public class ElasticStatelessProcessingUnitDeployment extends AbstractElasticPro
         return this;
     }
 
-    public ElasticStatelessProcessingUnitDeployment minNumberOfCpuCoresPerMachine(double minNumberOfCpuCoresPerMachine) {
-        this.minNumberOfCpuCoresPerMachine = minNumberOfCpuCoresPerMachine;
-        return this;
-    }
-    
     public ProcessingUnitDeployment toProcessingUnitDeployment(Admin admin) {
-        
+
         ProcessingUnitDeployment deployment = super.toProcessingUnitDeployment();
                 
         // disallow two instances to deploy on same Container

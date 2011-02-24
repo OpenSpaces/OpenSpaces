@@ -77,16 +77,15 @@ public class RebalancingUtils {
                
                public ProcessingUnitInstance get() throws ExecutionException, IllegalStateException, TimeoutException {
 
-                   if (isTimedOut()) {
-                       throw new TimeoutException("Relocation timeout");
-                   }
-
                    end();
                    
                    if (executionException.get() != null) {
                        throw executionException.get();
                    }
                    if (newInstance == null) {
+                       if (isTimedOut()) {
+                           throw new TimeoutException("Relocation timeout");
+                       }
                        throw new IllegalStateException("Async operation is not done yet.");
                    }
                    
@@ -261,16 +260,15 @@ private static GridServiceContainer[] getContainers(final ProcessingUnit pu) {
             
             public ProcessingUnitInstance get() throws ExecutionException, IllegalStateException, TimeoutException {
 
-                if (isTimedOut()) {
-                    throw new TimeoutException("Relocation timeout");
-                }
-
                 endRelocation();
                 
                 if (executionException != null) {
                     throw executionException;
                 }
                 if (newInstance == null) {
+                    if (isTimedOut()) {
+                        throw new TimeoutException("Relocation timeout");
+                    }
                     throw new IllegalStateException("Async operation is not done yet.");
                 }
                 

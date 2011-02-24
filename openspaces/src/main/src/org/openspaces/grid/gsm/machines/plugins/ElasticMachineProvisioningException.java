@@ -1,4 +1,4 @@
-package org.openspaces.grid.gsm.machines;
+package org.openspaces.grid.gsm.machines.plugins;
 
 
 /**

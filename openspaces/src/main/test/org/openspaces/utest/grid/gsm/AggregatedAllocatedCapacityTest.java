@@ -35,6 +35,9 @@ public class AggregatedAllocatedCapacityTest {
         AggregatedAllocatedCapacity ac5 = ac3.add( "UUID2", new AllocatedCapacity(Fraction.TWO,2));
         Assert.assertEquals(new AllocatedCapacity(Fraction.ONE,1),ac5.getAgentCapacity("UUID1"));
         Assert.assertEquals(new AllocatedCapacity(Fraction.TWO,2),ac5.getAgentCapacity("UUID2"));
+        Assert.assertEquals(new AllocatedCapacity(Fraction.ONE,1),ac5.getAgentCapacityOrZero("UUID1"));
+        Assert.assertEquals(new AllocatedCapacity(Fraction.TWO,2),ac5.getAgentCapacityOrZero("UUID2"));
+        Assert.assertEquals(new AllocatedCapacity(Fraction.ZERO,0),ac5.getAgentCapacityOrZero("UUID3"));
         
         Assert.assertEquals(new AllocatedCapacity(new Fraction(3),3),ac5.getTotalAllocatedCapacity());
     }

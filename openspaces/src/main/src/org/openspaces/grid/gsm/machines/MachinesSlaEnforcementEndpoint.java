@@ -1,6 +1,5 @@
 package org.openspaces.grid.gsm.machines;
 
-import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.capacity.AggregatedAllocatedCapacity;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpoint;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
@@ -14,7 +13,7 @@ import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestr
  * @see CapacityMachinesSlaPolicy
  */
 public interface MachinesSlaEnforcementEndpoint 
-    extends ServiceLevelAgreementEnforcementEndpoint<ProcessingUnit,CapacityMachinesSlaPolicy> {
+    extends ServiceLevelAgreementEnforcementEndpoint<CapacityMachinesSlaPolicy> {
     
     /**
      * @return a list of agents for this pu including memory/cpu for each.

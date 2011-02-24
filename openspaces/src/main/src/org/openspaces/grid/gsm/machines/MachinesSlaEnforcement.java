@@ -1,5 +1,6 @@
 package org.openspaces.grid.gsm.machines;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -20,7 +21,7 @@ import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointAlrea
  *
  */
 public class MachinesSlaEnforcement implements
-        ServiceLevelAgreementEnforcement<CapacityMachinesSlaPolicy, ProcessingUnit, MachinesSlaEnforcementEndpoint> {
+        ServiceLevelAgreementEnforcement<CapacityMachinesSlaPolicy, MachinesSlaEnforcementEndpoint> {
 
     private final MachinesSlaEnforcementState state;
     private final Map<ProcessingUnit, MachinesSlaEnforcementEndpoint> endpoints;
@@ -29,9 +30,8 @@ public class MachinesSlaEnforcement implements
 
     public MachinesSlaEnforcement(Admin admin) {
 
-        endpoints = new HashMap<ProcessingUnit, MachinesSlaEnforcementEndpoint>();
-        state = new MachinesSlaEnforcementState();
-        
+        this.endpoints = new HashMap<ProcessingUnit, MachinesSlaEnforcementEndpoint>();
+        this.state = new MachinesSlaEnforcementState();;
         this.admin = admin;
     }
 
@@ -64,7 +64,7 @@ public class MachinesSlaEnforcement implements
            }
         }
 
-        Set<String> allUsedAgentUids = state.getAllUsedAgentUids();
+        Collection<String> allUsedAgentUids = state.getAllUsedAgentUids();
         Iterator<GridServiceAgent> iterator = agents.iterator(); 
         while(iterator.hasNext()) {
             if (allUsedAgentUids.contains(iterator.next().getUid())) {
@@ -72,6 +72,7 @@ public class MachinesSlaEnforcement implements
             }
         }
         
+        //TODO: Inject the correct PU machine isolation.
         state.initProcessingUnit(pu, agents.toArray(new GridServiceAgent[agents.size()]));
         
         MachinesSlaEnforcementEndpoint endpoint = new DefaultMachinesSlaEnforcementEndpoint(pu, state);
@@ -97,5 +98,6 @@ public class MachinesSlaEnforcement implements
             endpoints.get(pu) == null ||
             state.isProcessingUnitDestroyed(pu);
     }
-    
+
+   
 }

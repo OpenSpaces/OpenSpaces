@@ -2,34 +2,18 @@ package org.openspaces.grid.gsm.strategy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.openspaces.admin.Admin;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.internal.admin.InternalAdmin;
-import org.openspaces.admin.internal.pu.elastic.ElasticMachineIsolationConfig;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
-import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
-import org.openspaces.admin.pu.ProcessingUnit;
-import org.openspaces.admin.pu.elastic.config.DiscoveredMachineProvisioningConfig;
 import org.openspaces.admin.pu.elastic.config.ManualCapacityScaleConfig;
-import org.openspaces.grid.gsm.DiscoveredMachineProvisioningConfigAware;
-import org.openspaces.grid.gsm.ElasticMachineProvisioningAware;
 import org.openspaces.grid.gsm.GridServiceContainerConfigAware;
-import org.openspaces.grid.gsm.LogPerProcessingUnit;
-import org.openspaces.grid.gsm.ProcessingUnitAware;
-import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.containers.ContainersSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.containers.ContainersSlaPolicy;
@@ -37,64 +21,32 @@ import org.openspaces.grid.gsm.machines.CapacityMachinesSlaPolicy;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.machines.MachinesSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
-import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioning;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpoint;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaEnforcementEndpointAware;
 import org.openspaces.grid.gsm.rebalancing.RebalancingSlaPolicy;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
-public class ManualCapacityScaleStrategyBean 
-    implements ScaleStrategyBean, 
-               RebalancingSlaEnforcementEndpointAware , 
+public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean 
+    implements RebalancingSlaEnforcementEndpointAware , 
                ContainersSlaEnforcementEndpointAware, 
                MachinesSlaEnforcementEndpointAware,
-               ProcessingUnitAware,
-               ElasticMachineProvisioningAware,
-               GridServiceContainerConfigAware,
-               DiscoveredMachineProvisioningConfigAware,
-               Runnable {
+               GridServiceContainerConfigAware {
 
     private static final String rebalancingAlertGroupUidPrefix = "4499C1ED-1584-4387-90CF-34C5EC236644";
     private static final String containersAlertGroupUidPrefix = "47A94111-5665-4214-9F7A-2962D998DD12";
     private static final String machinesAlertGroupUidPrefix = "3BA87E89-449A-4abc-A632-4732246A9EE4";
 
     // injected 
-    private InternalAdmin admin;
     private ManualCapacityScaleConfig slaConfig;
     private MachinesSlaEnforcementEndpoint machinesEndpoint;
     private ContainersSlaEnforcementEndpoint containersEndpoint;
     private RebalancingSlaEnforcementEndpoint rebalancingEndpoint;
-    private ProcessingUnit pu;
     private GridServiceContainerConfig containersConfig;
-    private ProcessingUnitSchemaConfig schemaConfig;
-    private DiscoveredMachineProvisioningConfig discoveredMachineProvisioningConfig;
     
     // created by afterPropertiesSet()
-    private Log logger;
-    private ScheduledFuture<?> scheduledTask;
-    
     private long memoryInMB;
-    private NonBlockingElasticMachineProvisioning machineProvisioning;
-    private ElasticMachineIsolationConfig isolationConfig;
     
     
-
-    public Map<String, String> getProperties() {
-        return slaConfig.getProperties();
-    }
-
-    public void setProcessingUnit(ProcessingUnit pu) {
-        this.pu = pu;
-    }
-
-    public void setProcessingUnitSchema(ProcessingUnitSchemaConfig schemaConfig) {
-        this.schemaConfig = schemaConfig;
-    }
-    
-    public void setAdmin(Admin admin) {
-        this.admin = (InternalAdmin) admin;
-    }
-
     public void setMachinesSlaEnforcementEndpoint(MachinesSlaEnforcementEndpoint machinesService) {
         this.machinesEndpoint = machinesService;
     }
@@ -107,179 +59,116 @@ public class ManualCapacityScaleStrategyBean
         this.rebalancingEndpoint = relocationService;
     }
 
-    public void setElasticMachineProvisioning(NonBlockingElasticMachineProvisioning elasticMachineProvisioning) {
-        this.machineProvisioning = elasticMachineProvisioning;
-    }
-    
-    public void setElasticMachineIsolation(ElasticMachineIsolationConfig isolationConfig) {
-        this.isolationConfig = isolationConfig;
-    }
-
     public void setGridServiceContainerConfig(GridServiceContainerConfig containersConfig) {
          this.containersConfig = containersConfig;
     }
-         
-    public void setDiscoveredMachineProvisioningConfig(DiscoveredMachineProvisioningConfig discoveredMachineProvisioningConfig) {
-        this.discoveredMachineProvisioningConfig = discoveredMachineProvisioningConfig;
-    }
-    
+        
+    @Override
     public void afterPropertiesSet() {
-        if (slaConfig == null) {
-            throw new IllegalStateException("slaConfig cannot be null.");
+        
+        super.afterPropertiesSet();
+        
+        if (machinesEndpoint == null) {
+            throw new IllegalStateException("machines endpoint cannot be null.");
         }
         
-        if (pu == null) {
-            throw new IllegalStateException("pu cannot be null.");
+        if (containersEndpoint == null) {
+            throw new IllegalStateException("containers endpoint cannot be null");
         }
-        logger = new LogPerProcessingUnit(
-                    new SingleThreadedPollingLog(
-                            LogFactory.getLog(ManualCapacityScaleStrategyBean.class)),
-                    pu);
         
-        logger.info("sla properties: "+slaConfig.toString());
-        
-        if (!schemaConfig.isPartitionedSync2BackupSchema() &&
-            !schemaConfig.isDefaultSchema()) {
-            throw new BeanConfigurationException(
-                    "Processing Unit " + pu.getName() + " cannot scale by memory capacity, "+
-                    "since it is not stateless, not stateful and not a datagrid (it is " + schemaConfig.getSchema() +") . "+
-                    "Choose a different scale algorithm.");
+        if (rebalancingEndpoint == null) {
+            throw new IllegalStateException("rebalancing endpoint cannot be null.");
         }
-
+        
+        slaConfig = new ManualCapacityScaleConfig(super.getProperties());
+                
         int targetNumberOfContainers = 
             slaConfig.getMemoryCapacityInMB() > 0?
                     calcTargetNumberOfContainers() :
                     calcDefaultTargetNumberOfContainers();
         
         memoryInMB = targetNumberOfContainers * containersConfig.getMaximumJavaHeapSizeInMB();
-        
-        scheduledTask = 
-        (admin).scheduleWithFixedDelayNonBlockingStateChange(
-                this, 
-       0L, slaConfig.getPollingIntervalSeconds(), TimeUnit.SECONDS);
-       logger.debug(pu.getName() + " is being monitored for SLA violations every " + slaConfig.getPollingIntervalSeconds() + " seconds");
     }
 
     private int calcDefaultTargetNumberOfContainers() {
         
         int targetNumberOfContainers = Math.max(
                  getMinimumNumberOfMachines(),
-                 pu.getNumberOfBackups()+1);
-        logger.info(
+                 getProcessingUnit().getNumberOfBackups()+1);
+        getLogger().info(
                 "targetNumberOfContainers= "+
                 "max(minimumNumberOfMachines, numberOfBackupsPerParition+1)= "+
-                "max("+ getMinimumNumberOfMachines() +","+1+ "+"+pu.getNumberOfBackups()+")= "+
+                "max("+ getMinimumNumberOfMachines() +","+1+ "+"+getProcessingUnit().getNumberOfBackups()+")= "+
                 targetNumberOfContainers);
         
         return targetNumberOfContainers;
-    }
-
-    private int calcMinNumberOfMachinesForPartitionedDeployment(ProcessingUnit pu) {
-        int minNumberOfMachines;
-        if (pu.getMaxInstancesPerMachine() == 0) {
-            minNumberOfMachines = 1;
-            logger.info("minNumberOfMachines=1 (since max instances from same partition per machine is not defined)");
-        }
-        
-        else {
-            minNumberOfMachines = (int)Math.ceil(
-                    (1 + pu.getNumberOfBackups())/1.0*pu.getMaxInstancesPerMachine());
-            logger.info("minNumberOfMachines= " +
-                    "ceil((1+backupsPerPartition)/maxInstancesPerMachine)= "+
-                    "ceil("+(1+pu.getNumberOfBackups())+"/"+pu.getMaxInstancesPerMachine() + ")= " +
-                    minNumberOfMachines);
-        }
-        
-        return minNumberOfMachines;
-    }
-
-    private int getMinimumNumberOfMachines() {
-        if (schemaConfig.isPartitionedSync2BackupSchema()) {
-            return calcMinNumberOfMachinesForPartitionedDeployment(pu);
-        }
-        else {
-            return 1;
-        }
-    }
-    public void destroy() {
-        
-        if (scheduledTask != null) {
-            scheduledTask.cancel(false);
-            scheduledTask = null;
-        }
     }
 
     public void setProperties(Map<String, String> properties) {
         slaConfig = new ManualCapacityScaleConfig(properties);       
     }
 
+    @Override
     public void run() {
         
-        logger.debug("Enforcing sla for processing unit " + pu.getName());
-        //TODO: Move this check to EsmImpl, this component should not be aware it is running in an ESM
-        //TODO: Raise an alert
-        int numberOfEsms = admin.getElasticServiceManagers().getSize();
-        if (numberOfEsms != 1) {
-            logger.error("Number of ESMs must be 1. Currently " + numberOfEsms + " running.");
-            return;
-        }
+        super.run();
         
         try {
-            logger.debug("Enforcing machines SLA.");
+            getLogger().debug("Enforcing machines SLA.");
             boolean machinesSlaEnforced = enforceMachinesSla();
-            if (logger.isDebugEnabled()) {
+            if (getLogger().isDebugEnabled()) {
             
                 if (machinesEndpoint.isGridServiceAgentsPendingDeallocation()) {
-                    logger.debug(
+                    getLogger().debug(
                             "Machines SLA cannot be reached until containers are removed before scale in. "+
                             "Allocated Capacity:" + machinesEndpoint.getAllocatedCapacity() +
                             "Machines: " + 
                                 MachinesSlaUtils.machinesToString(
-                                        MachinesSlaUtils.getGridServiceAgentsFromUids(
+                                        MachinesSlaUtils.convertAgentUidsToAgents(
                                                 machinesEndpoint.getAllocatedCapacity().getAgentUids(), 
-                                                pu.getAdmin())));
+                                                getAdmin())));
                 }
                 else if (!machinesSlaEnforced) {
-                    logger.debug("Machines SLA has not been reached");
+                    getLogger().debug("Machines SLA has not been reached");
                 }
             }
             if (machinesSlaEnforced || 
                 machinesEndpoint.isGridServiceAgentsPendingDeallocation()) {
 
-                logger.debug("Enforcing containers SLA.");
+                getLogger().debug("Enforcing containers SLA.");
                 boolean containersSlaEnforced = enforceContainersSla();
-                if (logger.isDebugEnabled()) {
+                if (getLogger().isDebugEnabled()) {
                     if (containersEndpoint.isContainersPendingDeallocation()) {
-                        logger.debug(
+                        getLogger().debug(
                                 "Containers SLA cannot be reached until processingunit is relocated before scale in. "+
                                 "Approved Containers: " + toString(containersEndpoint.getContainers()));
                     }
                     else if (!containersSlaEnforced) {
-                        logger.debug("Containers SLA has not been reached");
+                        getLogger().debug("Containers SLA has not been reached");
                     }
                 }
                 
                 if (containersSlaEnforced || 
                     containersEndpoint.isContainersPendingDeallocation()) {
                     
-                    logger.debug("Enforcing rebalancing SLA.");
+                    getLogger().debug("Enforcing rebalancing SLA.");
                     boolean rebalancingSlaEnforced = enforceRebalancingSla(containersEndpoint.getContainers());
-                    if (logger.isDebugEnabled()) {
+                    if (getLogger().isDebugEnabled()) {
                         if (!rebalancingSlaEnforced) {
-                            logger.debug("Rebalancing SLA has not been reached");
+                            getLogger().debug("Rebalancing SLA has not been reached");
                         }
                     }
                 }
             }
         }
         catch (ServiceLevelAgreementEnforcementEndpointDestroyedException e) {
-            logger.debug("AdminService was destroyed",e);
+            getLogger().debug("AdminService was destroyed",e);
         }
         catch (AdminException e) {
-            logger.warn("Unhandled AdminException",e);
+            getLogger().warn("Unhandled AdminException",e);
         }
         catch (Exception e) {
-            logger.error("Unhandled Exception",e);
+            getLogger().error("Unhandled Exception",e);
         }
         
     }
@@ -295,9 +184,9 @@ public class ManualCapacityScaleStrategyBean
     
     private int calcTargetNumberOfContainers() {
         
-        double totalNumberOfInstances = pu.getTotalNumberOfInstances();
+        double totalNumberOfInstances = getProcessingUnit().getTotalNumberOfInstances();
         double instanceCapacityInMB = slaConfig.getMemoryCapacityInMB()/totalNumberOfInstances;
-        logger.info(
+        getLogger().info(
                 "instanceCapacityInMB= "+
                 "memoryCapacityInMB/(numberOfInstances*(1+numberOfBackups))= "+
                 slaConfig.getMemoryCapacityInMB()+"/"+totalNumberOfInstances+"= " +
@@ -314,7 +203,7 @@ public class ManualCapacityScaleStrategyBean
                     "Reduce total capacity from " + slaConfig.getMemoryCapacityInMB() +"MB to " + containerCapacityInMB*totalNumberOfInstances+"MB."); 
         }
         double maxNumberOfInstancesPerContainer = Math.floor(containerCapacityInMB / instanceCapacityInMB); 
-        logger.info(
+        getLogger().info(
                 "maxNumberOfInstancesPerContainer= "+
                 "floor(containerCapacityInMB/instanceCapacityInMB)= "+
                 "floor("+containerCapacityInMB+"/"+instanceCapacityInMB+") =" +
@@ -323,13 +212,13 @@ public class ManualCapacityScaleStrategyBean
         int targetNumberOfContainers = (int) 
                 Math.ceil(totalNumberOfInstances/ maxNumberOfInstancesPerContainer);
                 
-        logger.info(
+        getLogger().info(
                 "targetNumberOfContainers= "+
                 "ceil(totalNumberOfInstances/maxNumberOfInstancesPerContainer)= "+
                 "ceil("+totalNumberOfInstances+"/"+maxNumberOfInstancesPerContainer+") =" +
                 targetNumberOfContainers);
                 
-        int numberOfBackups = pu.getNumberOfBackups();
+        int numberOfBackups = getProcessingUnit().getNumberOfBackups();
         if (targetNumberOfContainers < numberOfBackups +1) {
          // raise exception if min number of containers conflicts with the specified memory capacity.
             int recommendedMemoryCapacityInMB = (int)((numberOfBackups +1) * containerCapacityInMB);
@@ -348,14 +237,15 @@ public class ManualCapacityScaleStrategyBean
 
     private boolean enforceMachinesSla() {
         final CapacityMachinesSlaPolicy sla = new CapacityMachinesSlaPolicy();
-        sla.setMachineProvisioning(machineProvisioning);
+        sla.setMachineProvisioning(super.getMachineProvisioning());
         sla.setCpuCapacity(slaConfig.getNumberOfCpuCores());
-        sla.setAllowDeploymentOnManagementMachine(!slaConfig.getDedicatedManagementMachines());
         sla.setMemoryCapacityInMB(memoryInMB);
         sla.setMinimumNumberOfMachines(getMinimumNumberOfMachines());
-        sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
+        sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
+        sla.setReservedMemoryCapacityPerMachineInMB(super.getReservedMemoryCapacityPerMachineInMB());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
-        sla.setDiscoveredMachineZones(new HashSet<String>(Arrays.asList(discoveredMachineProvisioningConfig.getGridServiceAgentZones())));
+        sla.setProvisionedAgents(getDiscoveredAgents());
+        sla.setMachineIsolation(getIsolation());
         boolean reachedSla = machinesEndpoint.enforceSla(sla);
         
         if (reachedSla) {
@@ -364,7 +254,7 @@ public class ManualCapacityScaleStrategyBean
                 AlertStatus.RESOLVED,
                 machinesAlertGroupUidPrefix,
                 "Machines Capacity SLA",
-                "Total machines memory for " + pu.getName() + " " + 
+                "Total machines memory for " + getProcessingUnit().getName() + " " + 
                 "has reached its target of " + memoryInMB + "MB");
         }
         else {
@@ -373,7 +263,7 @@ public class ManualCapacityScaleStrategyBean
                 AlertStatus.RAISED,
                 containersAlertGroupUidPrefix,
                 "Machines Capacity SLA",
-                "Total machines memory for " + pu.getName() + " " + 
+                "Total machines memory for " + getProcessingUnit().getName() + " " + 
                 "is below the target "+ memoryInMB + "MB");
         }
         
@@ -386,10 +276,11 @@ public class ManualCapacityScaleStrategyBean
         final ContainersSlaPolicy sla = new ContainersSlaPolicy();
         sla.setNewContainerConfig(containersConfig);
         sla.setAllocatedCapacity(machinesEndpoint.getAllocatedCapacity());
-        sla.setMinimumNumberOfMachines(getMinimumNumberOfMachines());
-        sla.setCpuCapacity(slaConfig.getNumberOfCpuCores());
-        sla.setMemoryCapacityInMB(memoryInMB);
-        sla.setReservedMemoryCapacityPerMachineInMB(slaConfig.getReservedMemoryCapacityPerMachineInMB());
+        if (getLogger().isDebugEnabled()) {
+            getLogger().debug("Containers Eager SLA Policy: "+
+                    "#gridServiceAgents=" + sla.getAllocatedCapacity().getAgentUids().size() + " "+
+                    "newContainerConfig.maximumJavaHeapSizeInMB="+sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB());
+        }
         boolean reachedSla = containersEndpoint.enforceSla(sla);
         
         if (reachedSla) {
@@ -398,7 +289,7 @@ public class ManualCapacityScaleStrategyBean
                 AlertStatus.RESOLVED,
                 containersAlertGroupUidPrefix,
                 "Containers Capacity SLA",
-                "Contains capacity for " + pu.getName() + " " + 
+                "Contains capacity for " + getProcessingUnit().getName() + " " + 
                 "has been reached: " +
                 memoryInMB +" MB memory" +
                 (slaConfig.getNumberOfCpuCores()>0 ? " and " + slaConfig.getNumberOfCpuCores() +" cpu cores " : "" ));
@@ -409,7 +300,7 @@ public class ManualCapacityScaleStrategyBean
                 AlertStatus.RAISED,
                 containersAlertGroupUidPrefix,
                 "Containers Capacity SLA",
-                "Contains capacity for " + pu.getName() + " " + 
+                "Contains capacity for " + getProcessingUnit().getName() + " " + 
                 "has not reached its sla. The sla is " + 
                 memoryInMB +" MB memory" +
                 (slaConfig.getNumberOfCpuCores()>0 ? " and " + slaConfig.getNumberOfCpuCores() +" cpu cores " : ""));
@@ -424,7 +315,7 @@ public class ManualCapacityScaleStrategyBean
         RebalancingSlaPolicy sla = new RebalancingSlaPolicy();
         sla.setContainers(containers);
         sla.setMaximumNumberOfConcurrentRelocationsPerMachine(slaConfig.getMaxConcurrentRelocationsPerMachine());
-        sla.setSchemaConfig(schemaConfig);
+        sla.setSchemaConfig(getSchemaConfig());
         sla.setAllocatedCapacity(machinesEndpoint.getAllocatedCapacity());
         boolean slaEnforced = rebalancingEndpoint.enforceSla(sla);
         
@@ -434,7 +325,7 @@ public class ManualCapacityScaleStrategyBean
                 AlertStatus.RESOLVED,
                 rebalancingAlertGroupUidPrefix,
                 "Processing Unit Rebalancing SLA",
-                "Rebalancing of " + pu.getName() + " is complete.");
+                "Rebalancing of " + getProcessingUnit().getName() + " is complete.");
         }
         else {
             triggerAlert(
@@ -442,7 +333,7 @@ public class ManualCapacityScaleStrategyBean
                 AlertStatus.RAISED,
                 rebalancingAlertGroupUidPrefix,
                 "Processing Unit Rebalancing SLA",
-                "Rebalancing of " + pu.getName() + " is in progress.");
+                "Rebalancing of " + getProcessingUnit().getName() + " is in progress.");
         }
         
         return slaEnforced;
@@ -454,9 +345,9 @@ public class ManualCapacityScaleStrategyBean
         alertFactory.description(alertDescription);
         alertFactory.severity(severity);    
         alertFactory.status(status);
-        alertFactory.componentUid(pu.getName());
-        alertFactory.groupUid(alertGroupUidPrefix + "-" + pu.getName());
-        admin.getAlertManager().triggerAlert(alertFactory.toAlert());
-        logger.debug(alertDescription);
+        alertFactory.componentUid(getProcessingUnit().getName());
+        alertFactory.groupUid(alertGroupUidPrefix + "-" + getProcessingUnit().getName());
+        getAdmin().getAlertManager().triggerAlert(alertFactory.toAlert());
+        getLogger().debug(alertDescription);
     }
 }

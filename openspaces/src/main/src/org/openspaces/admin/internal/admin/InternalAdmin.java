@@ -91,7 +91,19 @@ public interface InternalAdmin extends Admin {
             long initialDelay,  
             long delay, 
             TimeUnit unit);
-        
+
+    /**
+     * Any internal delayed admin objects state change based on polling must be scheduled using this method.
+     * In case there is a single event loop thread (non blocking event listeners), 
+     * the specified command is added to the event loop queue.
+     * Otherwise it is executed on the admin scheduler thread pool.
+     * @param runnable
+     */
+
+    ScheduledFuture<?> scheduleOneTimeWithDelayNonBlockingStateChange(
+            final Runnable command, 
+            long delay, TimeUnit unit);
+
     /**
      * A generic thread pool for network based operations such as creating a new grid service container.
      * @param runnable

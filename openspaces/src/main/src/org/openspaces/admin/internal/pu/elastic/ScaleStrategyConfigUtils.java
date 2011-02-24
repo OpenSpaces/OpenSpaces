@@ -16,10 +16,6 @@ public class ScaleStrategyConfigUtils {
     private static final String POLLING_INTERVAL_SECONDS_KEY = "polling-interval-seconds";
     private static final String MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_KEY = "max-number-of-concurrent-relocations-per-machine";
     private static final int MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_DEFAULT = 1;
-    private static final String RESERVED_MEMORY_CAPACITY_PER_MACHINE_MEGABYTES_KEY = "reserved-memory-capacity-per-machine-megabytes";
-    private static final int RESERVED_MEMORY_CAPACITY_PER_MACHINE_MEGABYTES_DEFAULT = 1024; // reserved for GSA/LUS/GSM/ESM and 3rd party daemons
-    private static final String DEDICATED_MANAGEMENT_MACHINES_KEY = "dedicated-management-machines";
-    private static final boolean DEDICATED_MANAGEMENT_MACHINES_DEFAULT = false;
     
     public static void setMaxNumberOfContainersPerMachine(
             StringProperties properties,
@@ -92,19 +88,4 @@ public class ScaleStrategyConfigUtils {
         properties.putInteger(MAX_NUMBER_OF_CONCURRENT_RELOCATIONS_PER_MACHINE_KEY,maxNumberOfConcurrentRelocationsPerMachine);        
     }
 
-    public static int getReservedMemoryCapacityPerMachineInMB(StringProperties properties) {
-        return properties.getInteger(RESERVED_MEMORY_CAPACITY_PER_MACHINE_MEGABYTES_KEY, RESERVED_MEMORY_CAPACITY_PER_MACHINE_MEGABYTES_DEFAULT);
-    }
-
-    public static void setReservedMemoryCapacityPerMachineInMB(StringProperties properties, int reservedInMB) {
-        properties.putInteger(RESERVED_MEMORY_CAPACITY_PER_MACHINE_MEGABYTES_KEY, reservedInMB);
-    }
-
-    public static boolean getDedicatedManagementMachines(StringProperties properties) {
-        return properties.getBoolean(DEDICATED_MANAGEMENT_MACHINES_KEY, DEDICATED_MANAGEMENT_MACHINES_DEFAULT);
-    }
-
-    public static void setDedicatedManagementMachines(StringProperties properties, boolean allowDeploymentOnManagementMachine) {
-        properties.putBoolean(DEDICATED_MANAGEMENT_MACHINES_KEY, allowDeploymentOnManagementMachine);
-    }
 }

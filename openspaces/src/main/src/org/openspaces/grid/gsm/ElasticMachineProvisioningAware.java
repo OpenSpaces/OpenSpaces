@@ -1,7 +1,7 @@
 package org.openspaces.grid.gsm;
 
 import org.openspaces.admin.internal.pu.elastic.ElasticMachineIsolationConfig;
-import org.openspaces.grid.gsm.machines.NonBlockingElasticMachineProvisioning;
+import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 
 public interface ElasticMachineProvisioningAware {
 

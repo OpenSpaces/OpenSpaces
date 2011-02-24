@@ -1,7 +1,6 @@
 package org.openspaces.grid.gsm.containers;
 
 import org.openspaces.admin.gsc.GridServiceContainer;
-import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpoint;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
@@ -13,7 +12,7 @@ import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestr
  * @see ContainersSlaPolicy
  */
 public interface ContainersSlaEnforcementEndpoint 
-    extends ServiceLevelAgreementEnforcementEndpoint<ProcessingUnit, ContainersSlaPolicy> {
+    extends ServiceLevelAgreementEnforcementEndpoint<ContainersSlaPolicy> {
     
     /**
      * @return the list of containers managed by this service.
