@@ -72,7 +72,6 @@ public class MachinesSlaEnforcement implements
             }
         }
         
-        //TODO: Inject the correct PU machine isolation.
         state.initProcessingUnit(pu, agents.toArray(new GridServiceAgent[agents.size()]));
         
         MachinesSlaEnforcementEndpoint endpoint = new DefaultMachinesSlaEnforcementEndpoint(pu, state);

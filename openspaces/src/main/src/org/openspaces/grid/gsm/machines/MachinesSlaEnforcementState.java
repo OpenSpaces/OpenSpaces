@@ -65,7 +65,6 @@ public class MachinesSlaEnforcementState {
 
     public boolean isProcessingUnitDestroyed(ProcessingUnit pu) {
         return 
-            machineIsolationPerProcessingUnit.get(pu) == null ||
             allocatedCapacityPerProcessingUnit.get(pu) == null ||
             futureAgentsPerProcessingUnit.get(pu) == null ||
             markedForDeallocationCapacityPerProcessingUnit.get(pu) == null;
