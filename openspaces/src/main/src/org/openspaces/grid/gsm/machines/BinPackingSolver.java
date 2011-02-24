@@ -735,4 +735,8 @@ public class BinPackingSolver {
     public AggregatedAllocatedCapacity getDeallocatedCapacityResult() {
         return deallocatedCapacityResult;
     }
+
+    public AggregatedAllocatedCapacity getAllocatedCapacityForPu() {
+        return allocatedCapacityForPu;
+    }
 }
