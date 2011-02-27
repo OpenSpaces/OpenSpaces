@@ -83,8 +83,8 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
         slaConfig = new ManualCapacityScaleConfig(super.getProperties());
                 
         int targetNumberOfContainers = 
-            slaConfig.getMemoryCapacityInMB() > 0?
-                    calcTargetNumberOfContainers() :
+            slaConfig.getMemoryCapacityInMB() > 0 && getSchemaConfig().isPartitionedSync2BackupSchema() ?
+                    calcTargetNumberOfContainersForPartitionedSchema() :
                     calcDefaultTargetNumberOfContainers();
         
         memoryInMB = targetNumberOfContainers * containersConfig.getMaximumJavaHeapSizeInMB();
@@ -182,7 +182,7 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
     }
 
     
-    private int calcTargetNumberOfContainers() {
+    private int calcTargetNumberOfContainersForPartitionedSchema() {
         
         double totalNumberOfInstances = getProcessingUnit().getTotalNumberOfInstances();
         double instanceCapacityInMB = slaConfig.getMemoryCapacityInMB()/totalNumberOfInstances;
