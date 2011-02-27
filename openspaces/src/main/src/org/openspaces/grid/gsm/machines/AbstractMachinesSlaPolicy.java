@@ -1,6 +1,6 @@
 package org.openspaces.grid.gsm.machines;
 
-import java.util.Arrays;
+import java.util.Collection;
 
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
@@ -16,9 +16,7 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
     private NonBlockingElasticMachineProvisioning machineProvisioning;
     private ElasticProcessingUnitMachineIsolation machineIsolation;
     
-    //private Fraction numberOfCpuCoresPerPrimaryInstance;
-    
-    private GridServiceAgent[] agents;
+    private Collection<GridServiceAgent> agents;
     
     public int getMinimumNumberOfMachines() {
         return minimumNumberOfMachines;
@@ -44,11 +42,11 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
         return this.containerMemoryCapacityInMB;
     }
 
-    public GridServiceAgent[] getProvisionedAgents() {
+    public Collection<GridServiceAgent> getProvisionedAgents() {
         return this.agents;
     }
     
-    public void setProvisionedAgents(GridServiceAgent[] agents) {
+    public void setProvisionedAgents(Collection<GridServiceAgent> agents) {
         this.agents = agents;
     }
     
@@ -87,8 +85,10 @@ public abstract class AbstractMachinesSlaPolicy extends ServiceLevelAgreementPol
         ((AbstractMachinesSlaPolicy)other).machineIsolation.equals(this.machineIsolation) &&
         ((AbstractMachinesSlaPolicy)other).maxNumberOfMachines == maxNumberOfMachines &&
         ((AbstractMachinesSlaPolicy)other).isStopMachineSupported() == isStopMachineSupported() &&
-        Arrays.equals(((AbstractMachinesSlaPolicy)other).agents,agents);
+        ((AbstractMachinesSlaPolicy)other).agents.equals(agents);
     }
 
     public abstract boolean isStopMachineSupported();
+
+    public abstract String getScaleStrategyName();
 }

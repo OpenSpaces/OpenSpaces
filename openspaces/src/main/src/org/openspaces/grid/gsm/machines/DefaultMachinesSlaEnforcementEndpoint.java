@@ -1,6 +1,5 @@
 package org.openspaces.grid.gsm.machines;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -76,9 +75,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     public boolean enforceSla(CapacityMachinesSlaPolicy sla) throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
         validateEndpointNotDestroyed(pu);
         
-        if (sla == null) {
-            throw new IllegalArgumentException("SLA cannot be null");
-        }
+        validateSla(sla);
         
         if (sla.getCpu() < 0 ) {
             throw new IllegalArgumentException("CPU cannot be negative");
@@ -87,20 +84,22 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         if (sla.getMemoryCapacityInMB() < 0) {
             throw new IllegalArgumentException("Memory capacity cannot be negative");
         }
-                
-        if (sla.getContainerMemoryCapacityInMB() <= 0) {
-            throw new IllegalArgumentException("Container memory capacity must be defined.");
+        
+        if (sla.getMemoryCapacityInMB() < sla.getMinimumNumberOfMachines()*sla.getContainerMemoryCapacityInMB()) {
+            throw new IllegalArgumentException(
+                    "Memory capacity " + sla.getMemoryCapacityInMB() + "MB "+
+                    "is less than the minimum of " + sla.getMinimumNumberOfMachines() + " "+
+                    "containers with " + sla.getContainerMemoryCapacityInMB() + "MB each.");
         }
         
-        if (sla.getMachineProvisioning() == null) {
-            throw new IllegalArgumentException("machine provisioning cannot be null");
+        if (sla.getMemoryCapacityInMB() > sla.getMaximumNumberOfMachines()*sla.getContainerMemoryCapacityInMB()) {
+            throw new IllegalArgumentException(
+                    "Memory capacity " + sla.getMemoryCapacityInMB() + "MB "+
+                    "is more than the maximum of " + sla.getMaximumNumberOfMachines() + " "+
+                    "containers with " + sla.getContainerMemoryCapacityInMB() + "MB each.");
         }
         
-        if (sla.getMachineIsolation() == null) {
-            throw new IllegalArgumentException("machine isolation cannot be null");
-        }
         state.setMachineIsolation(pu, sla.getMachineIsolation());
-        
         
         try {
             enforceSlaInternal(sla);
@@ -119,9 +118,8 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             return false; // try again next time
         }
     }
-    
-    public boolean enforceSla(EagerMachinesSlaPolicy sla)
-            throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+
+    private void validateSla(AbstractMachinesSlaPolicy sla) {
         
         if (sla == null) {
             throw new IllegalArgumentException("SLA cannot be null");
@@ -131,10 +129,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             throw new IllegalArgumentException("Container memory capacity must be defined.");
         }
         
-        if (sla.getMinimumNumberOfMachines() > sla.getMaximumNumberOfMachines()) {
-            throw new IllegalArgumentException("Minimum number of machines cannot be more than maximum number of machines.");
-        }
-        
         if (sla.getMachineProvisioning() == null) {
             throw new IllegalArgumentException("machine provisioning cannot be null");
         }
@@ -142,6 +136,29 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         if (sla.getMachineIsolation() == null) {
             throw new IllegalArgumentException("machine isolation cannot be null");
         }
+        
+        if (sla.getMaximumNumberOfMachines() < 0) {
+            throw new IllegalArgumentException("maximum number of machines cannot be " + sla.getMaximumNumberOfMachines());
+        }
+        
+        if (sla.getMinimumNumberOfMachines() < 0) {
+            throw new IllegalArgumentException("minimum number of machines cannot be " + sla.getMinimumNumberOfMachines());
+        }
+        
+        if (sla.getMinimumNumberOfMachines() > sla.getMaximumNumberOfMachines()) {
+            throw new IllegalArgumentException(
+                    "minimum number of machines ("+sla.getMinimumNumberOfMachines()+
+                    ") cannot be bigger than maximum number of machines ("+
+                    sla.getMaximumNumberOfMachines()+")");
+        }
+    }
+    
+    public boolean enforceSla(EagerMachinesSlaPolicy sla)
+            throws ServiceLevelAgreementEnforcementEndpointDestroyedException {
+        
+        validateEndpointNotDestroyed(pu);
+        validateSla(sla);
+        
         state.setMachineIsolation(pu, sla.getMachineIsolation());
         
         try {
@@ -200,7 +217,8 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         AggregatedAllocatedCapacity capacityAllocatedAndMarked = 
             capacityMarkedForDeallocation.add(capacityAllocated);
         
-        if (capacityAllocatedAndMarked.getTotalAllocatedCapacity().moreThanSatisfies(target) &&
+        if (!capacityAllocatedAndMarked.getTotalAllocatedCapacity().equals(target) &&
+            capacityAllocatedAndMarked.getTotalAllocatedCapacity().satisfies(target) &&
             capacityAllocatedAndMarked.getAgentUids().size() > sla.getMinimumNumberOfMachines()) {
             
             logger.debug("Considering scale in: "+
@@ -363,7 +381,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 
                 logger.info(
                         "One or more new machine(s) is started in order to "+
-                        "fill capacity shortage " + shortageCapacity + 
+                        "fill capacity shortage " + shortageCapacity + " " + 
                         "Allocated machine agents are: " + state.getAllocatedCapacity(pu) +" "+
                         "Pending future machine(s) requests " + state.getNumberOfFutureAgents(pu));
                 
@@ -480,31 +498,59 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     
                 state.deallocateCapacity(pu, agentUid, agentCapacity);
 
-                logger.info("pu " + pu.getName() + " deallocated " + agentCapacity + " from machine " + agent.getMachine().getHostAddress());
+                logger.info("pu " + pu.getName() + " deallocated " + agentCapacity + " from machine "
+                        + agent.getMachine().getHostAddress());
             
             
-                // If agent is not used, then shut it down.
-                // This is a bit like reference counting, the last pu to leave stops the machine
-                if (sla.isStopMachineSupported() &&
-                    state.getAgentsStartedByMachineProvisioning().contains(agent) &&
-                    machineProvisioning.isStartMachineSupported() &&
-                    !MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine()) &&
-                    !state.isAgentSharedWithOtherProcessingUnits(pu,agent.getUid())) {
-                     
-                    // double check that agent is not used
-                    Set<Long> childProcessesIds = MachinesSlaUtils.getChildProcessesIds(agent);
-                    if (!childProcessesIds.isEmpty()) {
-                        // this is unexpected. We already checked for management processes and other PU processes.
-                        logger.warn("Agent " + agent.getUid() + " on machine " + MachinesSlaUtils.machineToString(agent.getMachine())+ " cannot be shutdown due to the following child processes: " + childProcessesIds);
-                    }
-                    else {
-                        logger.info(
-                               "Agent " + agent.getUid() + " on machine " + MachinesSlaUtils.machineToString(agent.getMachine())+ " is no longer in use by any processing unit. "+
-                               "It is going down!");
-
-                       stopMachine(machineProvisioning, agent);
-                    }
+                if (!sla.isStopMachineSupported()) {
+                    logger.info("Agent running on machine " + agent.getMachine().getHostAddress()
+                            + " is not stopped since scale strategy " + sla.getScaleStrategyName()
+                            + " does not support automatic start/stop of machines");
+                    continue;
                 }
+                
+                if (!state.getAgentsStartedByMachineProvisioning().contains(agent)) {
+                    logger.info("Agent running on machine " + agent.getMachine().getHostAddress()
+                            + " is not stopped since it was not started automatically");
+                    continue;
+                }
+                
+                if (!machineProvisioning.isStartMachineSupported()) {
+                    logger.info("Agent running on machine " + agent.getMachine().getHostAddress()
+                            + " is not stopped since machine provisioning " + sla.getMachineProvisioning().getClass()
+                            + "does not support automatic start/stop of machines");
+                    continue;
+                }
+                
+                if (MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine())) {
+                    logger.info("Agent running on machine " + agent.getMachine().getHostAddress()
+                            + " is not stopped since it is running management processes.");
+                    continue;
+                }
+                
+                if (state.isAgentSharedWithOtherProcessingUnits(pu,agent.getUid())) {
+                 // This is a bit like reference counting, the last pu to leave stops the machine
+                    logger.info("Agent running on machine " + agent.getMachine().getHostAddress()
+                            + " is not stopped since it is shared with other processing units.");
+                    continue;
+                }
+                
+            
+                // double check that agent is not used
+                Set<Long> childProcessesIds = MachinesSlaUtils.getChildProcessesIds(agent);
+                if (!childProcessesIds.isEmpty()) {
+                    // this is unexpected. We already checked for management processes and other PU processes.
+                    logger.warn("Agent " + agent.getUid() + " on machine " + MachinesSlaUtils.machineToString(agent.getMachine())+ " cannot be shutdown due to the following child processes: " + childProcessesIds);
+                    continue;
+                }
+                
+                logger.info(
+                       "Agent " + agent.getUid() + " on machine " + MachinesSlaUtils.machineToString(agent.getMachine())+ " is no longer in use by any processing unit. "+
+                       "It is going down!");
+
+               stopMachine(machineProvisioning, agent);
+            
+                
             }
         }
         
@@ -553,7 +599,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         */
         
         // mark for deallocation machines that are no longer in the SLA provisioned agents
-        Set<GridServiceAgent> discoveredAgents = new HashSet<GridServiceAgent>(Arrays.asList(sla.getProvisionedAgents()));
+        Collection<GridServiceAgent> discoveredAgents =sla.getProvisionedAgents();
         for(GridServiceAgent agent : MachinesSlaUtils.convertAgentUidsToAgents(state.getAllocatedCapacity(pu).getAgentUids(),pu.getAdmin())) {
             if (!discoveredAgents.contains(agent)) {
                 logger.info("Machine " + MachinesSlaUtils.machineToString(agent.getMachine())+ " is no longer provisioned for pu " + pu.getName());
@@ -611,46 +657,60 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
      */
     private void updateFutureAgentsState(AbstractMachinesSlaPolicy sla) {
        
-        for (GridServiceAgentFutures futureAgents : state.getAllDoneFutureAgents(pu)) {
+        // each futureAgents object contains an array of FutureGridServiceAgent
+        // only when all future in the array is done, the futureAgents object is done.
+        Collection<GridServiceAgentFutures> doneFutureAgentss = state.getAllDoneFutureAgents(pu);
+        
+        for (GridServiceAgentFutures doneFutureAgents : doneFutureAgentss) {
        
-            //TODO: Split this into two method calls.
-            boolean isAllMachinesAreProvisioned = removeFailedFutureAgents(
-                    sla.getProvisionedAgents(), 
-                    sla.getMachineProvisioning(), 
-                    futureAgents);
+            Collection<GridServiceAgent> healthyAgents = null;
+            try {
+                // returns only futures that are healthy.
+                healthyAgents = filterOnlyHealthyAgents(
+                        sla.getProvisionedAgents(), 
+                        sla.getMachineProvisioning(), 
+                        doneFutureAgents);
+            } catch (NewGridServiceAgentNotProvisionedYetException e) {
+                // Better luck next time. We cannot accept an agent that has been started but not in sla.getProvisionedAgents()
+                continue;
+            }
             
-            if (isAllMachinesAreProvisioned) {
-                
-                AggregatedAllocatedCapacity unallocatedCapacity = 
-                    getUnallocatedCapacityIncludeNewMachines(
-                        sla,
-                        futureAgents.getGridServiceAgents());
-                            
-                //allocate capacity
-                if (futureAgents.getExpectedNumberOfMachines() > 0) {
-                    allocateNumberOfMachines(futureAgents.getExpectedNumberOfMachines(), sla, unallocatedCapacity);
-                }
-                else if (!futureAgents.getExpectedCapacity().equalsZero()) {
-                    allocateManualCapacity(sla, futureAgents.getExpectedCapacity(), unallocatedCapacity); 
-                }
-                else {
-                    throw new IllegalStateException("futureAgents expected capacity malformed");
-                }
-                
-                state.removeFutureAgents(pu, futureAgents);
-                
-                // mark for shutdown new machines that are not marked by any processing unit
-                // these are all future agents that should have been used by the solver. The fact that they have not been used
-                // suggests that the number of started machines is too big.
-                for (GridServiceAgent newAgent : futureAgents.getGridServiceAgents()) {
-                    if (state.getAllocatedCapacity(pu).getAgentCapacityOrZero(newAgent.getUid()).equalsZero()) {
-                        logger.warn(
-                                "Stopping machine " + MachinesSlaUtils.machineToString(newAgent.getMachine()) + " "+
-                                "since it is not really needed by the PU that asked for it (processing unit " + pu.getName()+")");
-                        stopMachine(sla.getMachineProvisioning(), newAgent);
-                    }
+            AggregatedAllocatedCapacity unallocatedCapacity = 
+                getUnallocatedCapacityIncludeNewMachines(sla, healthyAgents);
+                        
+            //update state 1: allocate capacity
+            if (doneFutureAgents.getExpectedNumberOfMachines() > 0) {
+                allocateNumberOfMachines(doneFutureAgents.getExpectedNumberOfMachines(), sla, unallocatedCapacity);
+            }
+            else if (!doneFutureAgents.getExpectedCapacity().equalsZero()) {
+                allocateManualCapacity(sla, doneFutureAgents.getExpectedCapacity(), unallocatedCapacity); 
+            }
+            else {
+                throw new IllegalStateException("futureAgents expected capacity malformed");
+            }
+            
+            //update state 2: remove futures from list
+            state.removeFutureAgents(pu, doneFutureAgents);
+            for (GridServiceAgent newAgent : healthyAgents) {
+                state.addIndicationThatAgentStartedByMachineProvisioning(newAgent);
+            }
+            
+            // update state 3:
+            // mark for shutdown new machines that are not marked by any processing unit
+            // these are all future agents that should have been used by the binpacking solver. 
+            // The fact that they have not been used suggests that the number of started 
+            // machines by machineProvisioning is more than we asked for.
+            for (GridServiceAgent newAgent : healthyAgents) {
+                String agentUid = newAgent.getUid();
+                AllocatedCapacity agentCapacity = state.getAllocatedCapacity(pu).getAgentCapacityOrZero(agentUid);
+                if (agentCapacity.equalsZero()) {
+                    logger.warn(
+                            "Stopping machine " + MachinesSlaUtils.machineToString(newAgent.getMachine()) + " "+
+                            "since it is not really needed by the PU that asked for it (processing unit " + pu.getName()+")");
+                    stopMachine(sla.getMachineProvisioning(), newAgent);
                 }
             }
+        
         }
         
     }
@@ -664,10 +724,18 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             if (logger.isInfoEnabled()) {
                 logger.info("Agent started and provisioned succesfully on a new machine " + MachinesSlaUtils.machineToString(newAgent.getMachine()));
             }
+            AllocatedCapacity newAgentCapacity = MachinesSlaUtils.getMachineTotalCapacity(newAgent,sla);
+            if (newAgentCapacity.getMemoryInMB() < sla.getContainerMemoryCapacityInMB()) {
+                logger.warn("New agent " + MachinesSlaUtils.machineToString(newAgent.getMachine()) + " has only "
+                        + newAgentCapacity
+                        + " unreserved free resources, which is not enough for even one container that requires "
+                        + sla.getContainerMemoryCapacityInMB() + "MB");
+            }
             unallocatedCapacity = 
                 unallocatedCapacity.add(
                     newAgent.getUid(), 
-                    MachinesSlaUtils.getMachineTotalCapacity(newAgent,sla));
+                    newAgentCapacity);
+            
         }
         return unallocatedCapacity;
     }
@@ -675,17 +743,15 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     /**
      * @return true - if removed future agent from the state
      */
-    private boolean removeFailedFutureAgents(
-            GridServiceAgent[] provisionedAgents2, 
+    private Collection<GridServiceAgent> filterOnlyHealthyAgents(
+            Collection<GridServiceAgent> provisionedAgents, 
             NonBlockingElasticMachineProvisioning machineProvisioning,
-            GridServiceAgentFutures futureAgents) {
+            GridServiceAgentFutures futureAgents) throws NewGridServiceAgentNotProvisionedYetException {
         
+        final Collection<GridServiceAgent> healthyAgents = new HashSet<GridServiceAgent>();
         final Collection<String> usedAgentUids = state.getAllUsedAgentUids();
         final Collection<String> usedAgentUidsForPu = state.getAllUsedAgentUidsForPu(pu);
-        Set<GridServiceAgent> provisionedAgents = new HashSet<GridServiceAgent>(Arrays.asList(provisionedAgents2));
-        
-        boolean updateFutureAgentsState = true;
-        
+                
         for (FutureGridServiceAgent futureAgent : futureAgents.getFutureGridServiceAgents()) {
             
             Throwable exception = null;
@@ -703,7 +769,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 if (logger.isWarnEnabled()) {
                     logger.warn(errorMessage , exception);
                 }
-                futureAgents.removeFutureAgent(futureAgent);
             }
             else if (newAgent == null) {
                 throw new IllegalStateException("Future is done without exception, but returned a null agent");
@@ -716,7 +781,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                             " but it seems to shutdown unexpectedly."+
                             "The machine is ignored");
                 }
-                futureAgents.removeFutureAgent(futureAgent);
             }
             else if (usedAgentUidsForPu.contains(newAgent.getUid())) {
                 if (logger.isWarnEnabled()) {
@@ -726,7 +790,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                             " which is already in use by this PU."+
                             "The machine is ignored");
                 }
-                futureAgents.removeFutureAgent(futureAgent);
            }
            else if (usedAgentUids.contains(newAgent.getUid())) {
                     
@@ -737,7 +800,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                             " which is already in use by another PU."+
                             "This machine is ignored");
                 }
-                futureAgents.removeFutureAgent(futureAgent);
            }
            else if (!provisionedAgents.contains(newAgent)) {
    
@@ -759,32 +821,32 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                
                // providing a grace period for provisionedAgents to update.
                if (!futureAgent.isTimedOut()) {
-                   updateFutureAgentsState = false;
                    if (logger.isDebugEnabled()) {
                        logger.info(
                            "New machine " + MachinesSlaUtils.machineToString(newAgent.getMachine()) +
                            " started, but still not confirmed to be provisioned.");
                    }
-                   break;
+                   throw new NewGridServiceAgentNotProvisionedYetException(newAgent);
                }
                
                // check for machine provisioning changes
-               else if (!machineProvisioning.isStartMachineSupported()) {
-                   futureAgents.removeFutureAgent(futureAgent);
+               if (!machineProvisioning.isStartMachineSupported()) {
                    // someone changed the configuration, and we got a machine that was started by the previous configuration.
                    logger.error("Cannot stop machine  " + MachinesSlaUtils.machineToString(newAgent.getMachine()) + " shut down the machine or the agent on the machine manually.");
                }
                
                else if (oldMachineProvisioning != machineProvisioning) {
-                   futureAgents.removeFutureAgent(futureAgent);
                    // someone changed the configuration, and we got a machine that was started by the previous configuration.
                    logger.info("Stopping machine " + MachinesSlaUtils.machineToString(newAgent.getMachine()) + " since it was started by the previous configuration.");
                    stopMachine(machineProvisioning, newAgent);
                }
-
            }
+           else {
+               healthyAgents.add(newAgent);
+           }
+
         }
-        return updateFutureAgentsState;
+        return healthyAgents;
     }
 
     /**
@@ -874,7 +936,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         solver.setUnallocatedCapacity(unallocatedCapacity);
         solver.setAllocatedCapacityForPu(state.getAllocatedCapacity(pu));
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(sla.getMaximumNumberOfMachines()*sla.getContainerMemoryCapacityInMB());
-        sla.setMinimumNumberOfMachines(sla.getMinimumNumberOfMachines());
+        solver.setMinimumNumberOfMachines(sla.getMinimumNumberOfMachines());
         return solver;
     }
     
@@ -980,6 +1042,14 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
     }
 
+    private static class NewGridServiceAgentNotProvisionedYetException extends MachinesSlaEnforcementException {
+        
+        private static final long serialVersionUID = 1L;
+
+        NewGridServiceAgentNotProvisionedYetException(GridServiceAgent agent) {
+            super("Grid Service Agent " + MachinesSlaUtils.machineToString(agent.getMachine())  + " has been started but not discovered yet by the machine provisioning.");
+        }
+    }
 }
 
 

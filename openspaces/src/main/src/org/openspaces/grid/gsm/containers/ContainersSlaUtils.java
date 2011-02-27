@@ -12,6 +12,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.openspaces.admin.Admin;
+import org.openspaces.admin.AdminException;
 import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
@@ -20,6 +21,7 @@ import org.openspaces.admin.internal.gsa.InternalGridServiceAgent;
 import org.openspaces.admin.internal.gsc.InternalGridServiceContainer;
 import org.openspaces.admin.internal.pu.elastic.GridServiceContainerConfig;
 import org.openspaces.admin.machine.Machine;
+import org.openspaces.admin.os.OperatingSystemStatistics;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.core.util.MemoryUnit;
 
@@ -38,7 +40,28 @@ public class ContainersSlaUtils {
         admin.scheduleAdminOperation(new Runnable() {
             public void run() {
                 try {
-                    ref.set(gsa.internalStartGridService(config));
+                    final OperatingSystemStatistics operatingSystemStatistics = 
+                        gsa.getMachine().getOperatingSystem().getStatistics();
+
+                    // get total free system memory + cached (without sigar returns -1)
+                    long freeBytes = operatingSystemStatistics.getActualFreePhysicalMemorySizeInBytes();
+                    if (freeBytes <= 0) {
+                        // fallback - no sigar. Provides a pessimistic number since does not take into
+                        // account OS cache that can be allocated.
+                        freeBytes = operatingSystemStatistics.getFreePhysicalMemorySizeInBytes();
+                        if (freeBytes <= 0) {
+                            // machine is probably going down.
+                            ref.set(new AdminException("Cannot determine machine " + machineToString(gsa.getMachine()) + " free memory."));
+                        }
+                    }
+
+                    final long freeInMB = MemoryUnit.MEGABYTES.convert(freeBytes, MemoryUnit.BYTES);
+                    if (freeInMB < config.getMaximumJavaHeapSizeInMB()) {
+                        ref.set(new AdminException("Machine " + machineToString(gsa.getMachine()) + " free memory " + freeInMB +"MB is not enough to start a container with " + config.getMaximumJavaHeapSizeInMB() + "MB. Free machine memory or increase machine provisioning reservedMemoryPerMachine property."));
+                    }
+                    else {
+                        ref.set(gsa.internalStartGridService(config));
+                    }
                     
                 } catch (Exception e) {
                     ref.set(e);

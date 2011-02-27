@@ -87,23 +87,5 @@ public class AllocatedCapacityTest {
         Assert.assertTrue(c5.satisfies(c1));
         Assert.assertFalse(c1.satisfies(c5));
     }
-    
-    @Test
-    public void testMoreThanSatisfies() {
-        AllocatedCapacity c1 = new AllocatedCapacity(Fraction.ONE,1);
-        AllocatedCapacity c2 = new AllocatedCapacity(Fraction.ONE,1);
-        Assert.assertFalse(c1.moreThanSatisfies(c2));
-        Assert.assertFalse(c2.moreThanSatisfies(c1));
-        
-        AllocatedCapacity c3 = new AllocatedCapacity(Fraction.TWO,1);
-        AllocatedCapacity c4 = new AllocatedCapacity(Fraction.ONE,2);
-        Assert.assertFalse(c3.moreThanSatisfies(c1));
-        Assert.assertFalse(c4.moreThanSatisfies(c1));
-        Assert.assertFalse(c1.moreThanSatisfies(c3));
-        Assert.assertFalse(c1.moreThanSatisfies(c4));
-        
-        AllocatedCapacity c5 = new AllocatedCapacity(Fraction.TWO,2);
-        Assert.assertTrue(c5.moreThanSatisfies(c1));
-        Assert.assertFalse(c1.moreThanSatisfies(c5));
-    }
+  
 }

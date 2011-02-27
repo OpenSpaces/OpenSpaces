@@ -112,9 +112,13 @@ public class MachinesSlaUtils {
             GridServiceAgent agent,
             AbstractMachinesSlaPolicy sla) {
 
+            long memoryInMB = getPhysicalMemoryInMB(agent.getMachine()) - sla.getReservedMemoryCapacityPerMachineInMB();
+            if (memoryInMB < 0 ) {
+                memoryInMB = 0;
+            }
             return new AllocatedCapacity(
                     getCpu(agent.getMachine()),
-                    getPhysicalMemoryInMB(agent.getMachine())-sla.getReservedMemoryCapacityPerMachineInMB());
+                    memoryInMB);
     }
 
     public static Fraction convertCpuCoresFromDoubleToFraction(double cpu) {
@@ -170,7 +174,7 @@ public class MachinesSlaUtils {
      * and if configuration allows management machines, place them first
      * @param usedAgents
      * @param allowDeploymentOnManagementMachine 
-     * @return agent if found, or null if no free machines exist.
+     * @return true if agent meets the sla filter, or false if not (and should be excluded)
      */   
     public static boolean isAgentConformsToMachineProvisioningConfig(GridServiceAgent agent, ElasticMachineProvisioningConfig machineProvisioningConfig) {
         return zoneFilter(agent, machineProvisioningConfig) &&  

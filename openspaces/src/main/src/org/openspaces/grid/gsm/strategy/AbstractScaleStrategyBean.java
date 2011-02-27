@@ -1,5 +1,6 @@
 package org.openspaces.grid.gsm.strategy;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,7 @@ public abstract class AbstractScaleStrategyBean implements
     // state
     private boolean syncAgents;
     private FutureGridServiceAgents futureAgents;
-    private GridServiceAgent[] agents;
+    private Collection<GridServiceAgent> agents;
     
     protected InternalAdmin getAdmin() {
         return this.admin;
@@ -158,7 +159,7 @@ public abstract class AbstractScaleStrategyBean implements
         admin.getGridServiceAgents().getGridServiceAgentAdded().add(this);
         admin.getGridServiceAgents().getGridServiceAgentRemoved().add(this);
         
-        agents = new GridServiceAgent[]{};
+        agents = new HashSet<GridServiceAgent>();
 
         minimumNumberOfMachines = calcMinimumNumberOfMachines();
         int pollingIntervalSeconds = ScaleStrategyConfigUtils.getPollingIntervalSeconds(properties);
@@ -189,7 +190,7 @@ public abstract class AbstractScaleStrategyBean implements
         this.properties = new StringProperties(properties);
     }
 
-    protected GridServiceAgent[] getDiscoveredAgents() {
+    protected Collection<GridServiceAgent> getDiscoveredAgents() {
         return this.agents;
     }
     
@@ -251,7 +252,7 @@ public abstract class AbstractScaleStrategyBean implements
                 }
                 else {
                     List<GridServiceAgent> sortedFilteredAgents = MachinesSlaUtils.sortManagementFirst(filteredAgents);
-                    agents = sortedFilteredAgents.toArray(new GridServiceAgent[sortedFilteredAgents.size()]);
+                    agents = sortedFilteredAgents;
                 }
             }
         

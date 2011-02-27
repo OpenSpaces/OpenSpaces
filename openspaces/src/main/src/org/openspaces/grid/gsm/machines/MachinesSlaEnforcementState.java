@@ -260,7 +260,7 @@ public class MachinesSlaEnforcementState {
     }
 
     public void deallocateAgentCapacity(ProcessingUnit pu, String agentUid) {
-        AllocatedCapacity agentCapacity = getAllocatedCapacity(pu).getAgentCapacity(agentUid);
+        AllocatedCapacity agentCapacity = getCapacityMarkedForDeallocation(pu).getAgentCapacity(agentUid);
         deallocateCapacity(pu, agentUid , agentCapacity);
         
     }
@@ -306,8 +306,9 @@ public class MachinesSlaEnforcementState {
 
     public void removeFutureAgents(ProcessingUnit pu, GridServiceAgentFutures futureAgents) {
         futureAgentsPerProcessingUnit.get(pu).remove(futureAgents);
-        agentsStartedByMachineProvisioning.addAll(futureAgents.getGridServiceAgents());
     }
+    
+    
 
     public Collection<String> getAllUsedAgentUidsForPu(ProcessingUnit pu) {
         return allocatedCapacityPerProcessingUnit.get(pu).add(markedForDeallocationCapacityPerProcessingUnit.get(pu)).getAgentUids();
@@ -353,6 +354,10 @@ public class MachinesSlaEnforcementState {
         this.agentsStartedByMachineProvisioning.remove(agent);
     }
 
+    public void addIndicationThatAgentStartedByMachineProvisioning(GridServiceAgent agent) {
+        agentsStartedByMachineProvisioning.add(agent);
+    }
+    
     public Collection<GridServiceAgent> getAgentsStartedByMachineProvisioning() {
         return Collections.unmodifiableCollection(new ArrayList<GridServiceAgent>(this.agentsStartedByMachineProvisioning));
     }

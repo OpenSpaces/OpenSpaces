@@ -42,7 +42,10 @@ public class AggregatedAllocatedCapacity {
     }
     
     public AggregatedAllocatedCapacity add(AggregatedAllocatedCapacity other) {
-
+        if (other.equalsZero()) {
+            return this;
+        }
+        
         AggregatedAllocatedCapacity sum = new AggregatedAllocatedCapacity();
         sum.addAllInternal(this);
         sum.addAllInternal(other);

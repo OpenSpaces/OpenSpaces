@@ -15,11 +15,11 @@ public class AllocatedCapacity {
     public AllocatedCapacity(Fraction cpuCores, long memoryInMB) {
         
         if (cpuCores.compareTo(Fraction.ZERO) < 0) {
-            throw new IllegalArgumentException("cpuCores");
+            throw new IllegalArgumentException("cpuCores cannot be " + cpuCores.doubleValue());
         }
         
         if (memoryInMB < 0) {
-            throw new IllegalArgumentException("memoryInMB");
+            throw new IllegalArgumentException("memoryInMB cannot be " + memoryInMB);
         }
         
         this.cpuCores =cpuCores;
@@ -99,12 +99,6 @@ public class AllocatedCapacity {
         
         return cpuCores.compareTo(capacity.cpuCores) >= 0 &&
                memoryInMB >= capacity.memoryInMB;
-    }
-
-
-    public boolean moreThanSatisfies(AllocatedCapacity capacity) {
-        return cpuCores.compareTo(capacity.cpuCores) > 0 &&
-        memoryInMB > capacity.memoryInMB;
     }
 
 

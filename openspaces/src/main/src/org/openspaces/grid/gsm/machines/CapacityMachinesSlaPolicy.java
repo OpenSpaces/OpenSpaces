@@ -36,4 +36,9 @@ public class CapacityMachinesSlaPolicy extends AbstractMachinesSlaPolicy {
         return true;
     }
 
+    @Override
+    public String getScaleStrategyName() {
+        return "Manual Capacity Scale Strategy";
+    }
+
 }
