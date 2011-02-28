@@ -236,6 +236,7 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
         sla.setProvisionedAgents(getDiscoveredAgents());
         sla.setMachineIsolation(getIsolation());
+        sla.setMachineProvisioning(super.getMachineProvisioning());
         return sla;
     }
 

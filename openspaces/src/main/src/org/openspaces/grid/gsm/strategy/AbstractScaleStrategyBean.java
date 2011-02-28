@@ -28,6 +28,7 @@ import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.core.util.StringProperties;
 import org.openspaces.grid.gsm.ElasticMachineProvisioningAware;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
+import org.openspaces.grid.gsm.ProcessingUnitAware;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
 import org.openspaces.grid.gsm.machines.MachinesSlaUtils;
@@ -41,6 +42,7 @@ public abstract class AbstractScaleStrategyBean implements
     GridServiceAgentAddedEventListener, 
     GridServiceAgentRemovedEventListener , 
     ElasticMachineProvisioningAware ,
+    ProcessingUnitAware,
     ScaleStrategyBean,
     Bean,
     Runnable{
