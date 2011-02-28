@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsa.GridServiceAgents;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.AggregatedAllocatedCapacity;
@@ -841,7 +842,21 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
      */
     private void allocateEagerCapacity(AbstractMachinesSlaPolicy sla) {
         AggregatedAllocatedCapacity unallocatedCapacity = getUnallocatedCapacity(sla);
-        allocateManualCapacity(sla,unallocatedCapacity.getTotalAllocatedCapacity(), unallocatedCapacity);
+        
+        // limit the memory to the maximum possible by this PU
+        long maxAllocatedMemoryForPu = sla.getMaximumNumberOfMachines()*sla.getContainerMemoryCapacityInMB();
+        long allocatedMemoryForPu = state.getAllocatedCapacity(pu).getTotalAllocatedCapacity().getMemoryInMB();
+        long unallocatedMemory = unallocatedCapacity.getTotalAllocatedCapacity().getMemoryInMB();
+        long additionalMemoryToAllocateForPu = Math.min( maxAllocatedMemoryForPu - allocatedMemoryForPu, unallocatedMemory);
+        Fraction additionalCpuToAllocateForPu = unallocatedCapacity.getTotalAllocatedCapacity().getCpuCores();
+        
+        // allocate memory and CPU eagerly
+        if (additionalMemoryToAllocateForPu > 0 || 
+            additionalCpuToAllocateForPu.compareTo(Fraction.ZERO) > 0) {
+            
+            AllocatedCapacity capacityToAllocate = new AllocatedCapacity(additionalCpuToAllocateForPu,additionalMemoryToAllocateForPu);
+            allocateManualCapacity(sla, capacityToAllocate, unallocatedCapacity);
+        }
     }
     
     /**
