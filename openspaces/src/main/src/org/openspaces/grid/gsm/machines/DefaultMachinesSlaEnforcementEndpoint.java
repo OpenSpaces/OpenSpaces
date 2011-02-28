@@ -582,21 +582,8 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             if (agents.getAgentByUID(agentUid) == null) {
                 logger.warn("Agent " + agentUid + " was killed unexpectedly.");
                 state.markAgentCapacityForDeallocation(pu, agentUid);
-                //state.deallocateAgentCapacity(pu, agentUid);
             }
         }
-        
-        /*
-        // deallocate all failed machines
-        // we can deallocate machines only if they are empty (no containers)
-        // we know they are empty since they are not discovered
-        for(String agentUid: state.getCapacityMarkedForDeallocation(pu).getAgentUids()) {
-            if (agents.getAgentByUID(agentUid) == null) {
-                logger.warn("Agent " + agentUid + " was killed unexpectedly.");
-                state.deallocateAgentCapacity(pu, agentUid);
-            }
-        }
-        */
         
         // mark for deallocation machines that are no longer in the SLA provisioned agents
         Collection<GridServiceAgent> discoveredAgents =sla.getProvisionedAgents();
