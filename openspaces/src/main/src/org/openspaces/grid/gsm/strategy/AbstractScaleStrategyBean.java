@@ -300,10 +300,6 @@ public abstract class AbstractScaleStrategyBean implements
         }
     }
 
-    public long getReservedMemoryCapacityPerMachineInMB() {
-        return getMachineProvisioning().getConfig().getReservedMemoryCapacityPerMachineInMB();
-    }
-
     public Fraction getContainerNumberOfCpuCores(ManualCapacityScaleConfig slaConfig) {
         if (getSchemaConfig().isPartitionedSync2BackupSchema()) {
             Fraction cpuCores = MachinesSlaUtils.convertCpuCoresFromDoubleToFraction(slaConfig.getNumberOfCpuCores());

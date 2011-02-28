@@ -242,7 +242,6 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
         sla.setMemoryCapacityInMB(memoryInMB);
         sla.setMinimumNumberOfMachines(getMinimumNumberOfMachines());
         sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
-        sla.setReservedMemoryCapacityPerMachineInMB(super.getReservedMemoryCapacityPerMachineInMB());
         sla.setContainerMemoryCapacityInMB(containersConfig.getMaximumJavaHeapSizeInMB());
         sla.setProvisionedAgents(getDiscoveredAgents());
         sla.setMachineIsolation(getIsolation());
