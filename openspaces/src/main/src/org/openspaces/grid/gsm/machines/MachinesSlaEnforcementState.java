@@ -1,6 +1,7 @@
 package org.openspaces.grid.gsm.machines;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -14,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.openspaces.admin.gsa.GridServiceAgent;
+import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.capacity.AggregatedAllocatedCapacity;
 import org.openspaces.grid.gsm.capacity.AllocatedCapacity;
@@ -294,6 +296,22 @@ public class MachinesSlaEnforcementState {
             restrictedAgentUids.addAll(timeoutTimestampPerAgentUidGoingDownPerProcessingUnit.get(pu).keySet());
         }
         
+        // add all agents that started containers that are for restricted processing units
+        Set<String> restrictedContainerZones = new HashSet<String>();
+        for (ProcessingUnit otherPu : pusWithDifferentIsolation) {
+            restrictedContainerZones.addAll(Arrays.asList(otherPu.getRequiredZones()));
+        }
+        for (GridServiceContainer container : pu.getAdmin().getGridServiceContainers()) {
+            
+            Set<String> containerZones = container.getZones().keySet();
+            
+            if (!disjoint(containerZones,restrictedContainerZones) && 
+                container.getGridServiceAgent() != null) {
+                
+                restrictedAgentUids.add(container.getGridServiceAgent().getUid());
+            }
+        }
+        
         // add all future grid service agents that have been started but not allocated yet
         for (List<GridServiceAgentFutures> futureAgentss : this.futureAgentsPerProcessingUnit.values()) {
             for (GridServiceAgentFutures futureAgents: futureAgentss) {
@@ -305,6 +323,18 @@ public class MachinesSlaEnforcementState {
         
         return restrictedAgentUids;
    }
+
+    /**
+     * @return false only if a disjoints b (a and b have nothing in common) 
+     * @param keySet
+     * @param restrictedContainerZones
+     * @return
+     */
+    private boolean disjoint(Set<String> a, Set<String> b) {
+        Set<String> common = new HashSet<String>(a);
+        common.removeAll(b);
+        return common.size() == 0;
+    }
 
     public void removeFutureAgents(ProcessingUnit pu, GridServiceAgentFutures futureAgents) {
         futureAgentsPerProcessingUnit.get(pu).remove(futureAgents);
