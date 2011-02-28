@@ -51,6 +51,22 @@ public class ScaleBeanServer {
             NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory,
             ElasticMachineIsolationConfig isolationConfig) {
 
+        if (pu == null) {
+            throw new IllegalArgumentException("pu cannot be null");
+        }
+        
+        if (rebalancingSlaEnforcement == null) {
+            throw new IllegalArgumentException("rebalancingSlaEnforcement cannot be null");
+        }
+        
+        if (containersSlaEnforcement == null) {
+            throw new IllegalArgumentException("containersSlaEnforcement cannot be null");
+        }
+        
+        if (machinesSlaEnforcement == null) {
+            throw new IllegalArgumentException("machinesSlaEnforcement cannot be null");
+        }
+        
         this.pu = pu;
         this.rebalancingSlaEnforcement = rebalancingSlaEnforcement;
         this.containersSlaEnforcement = containersSlaEnforcement;

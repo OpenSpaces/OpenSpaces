@@ -58,17 +58,19 @@ public abstract class AbstractScaleStrategyBean implements
     private ProcessingUnitSchemaConfig schemaConfig;
     private NonBlockingElasticMachineProvisioning machineProvisioning;
     private StringProperties properties;
-    private ElasticProcessingUnitMachineIsolation isolation;
+    private ElasticMachineIsolationConfig isolationConfig;
     
     // created by afterPropertiesSet()
     private Log logger;
     private ScheduledFuture<?> scheduledTask;
     private int minimumNumberOfMachines;    
-
+    private ElasticProcessingUnitMachineIsolation isolation;
+    
     // state
     private boolean syncAgents;
     private FutureGridServiceAgents futureAgents;
     private Collection<GridServiceAgent> agents;
+    
     
     protected InternalAdmin getAdmin() {
         return this.admin;
@@ -96,15 +98,7 @@ public abstract class AbstractScaleStrategyBean implements
     }
 
     public void setElasticMachineIsolation(ElasticMachineIsolationConfig isolationConfig) {
-        if (isolationConfig.isDedicatedIsolation()) {
-            isolation = new DedicatedMachineIsolation(pu.getName());
-        }
-        else if (isolationConfig.isSharedIsolation()) {
-            isolation = new SharedMachineIsolation(isolationConfig.getSharingId());
-        }
-        else {
-            throw new IllegalStateException("unsupported PU isolation");
-        }
+        this.isolationConfig = isolationConfig;
     }
     
     public ElasticProcessingUnitMachineIsolation getIsolation() {
@@ -133,6 +127,11 @@ public abstract class AbstractScaleStrategyBean implements
     }
     
     public void afterPropertiesSet() {
+        
+        if (pu == null) {
+            throw new IllegalStateException("pu cannot be null");
+        }
+        
         if (properties == null) {
             throw new IllegalStateException("properties cannot be null.");
         }
@@ -149,6 +148,20 @@ public abstract class AbstractScaleStrategyBean implements
             throw new IllegalStateException("schemaConfig cannot be null.");
         }
     
+        if (isolationConfig == null) {
+            throw new IllegalStateException("isolationConfig cannot be null");
+        }
+        
+        if (isolationConfig.isDedicatedIsolation()) {
+            isolation = new DedicatedMachineIsolation(pu.getName());
+        }
+        else if (isolationConfig.isSharedIsolation()) {
+            isolation = new SharedMachineIsolation(isolationConfig.getSharingId());
+        }
+        else {
+            throw new IllegalStateException("unsupported PU isolation");
+        }
+        
         logger = new LogPerProcessingUnit(
                     new SingleThreadedPollingLog(
                             LogFactory.getLog(this.getClass())),
