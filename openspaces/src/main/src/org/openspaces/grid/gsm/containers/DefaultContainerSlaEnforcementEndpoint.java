@@ -225,30 +225,31 @@ class DefaultContainersSlaEnforcementEndpoint implements ContainersSlaEnforcemen
 
         for (FutureGridServiceContainer future : futureContainers) {
 
-            Exception exception = null;
-
-            try {
-
-                GridServiceContainer container = future.get();
-                if (container.isDiscovered()) {
-                    logger.info("Container started succesfully " + ContainersSlaUtils.gscToString(container));
+            if (future.isDone()) {
+                Exception exception = null;
+    
+                try {
+                    GridServiceContainer container = future.get();
+                    if (container.isDiscovered()) {
+                        logger.info("Container started succesfully " + ContainersSlaUtils.gscToString(container));
+                    }
+    
+                } catch (ExecutionException e) {
+                    if (e.getCause() instanceof AdminException) {
+                        exception = (AdminException) e.getCause();
+                    } else {
+                        throw new IllegalStateException("Unexpected runtime exception", e);
+                    }
+                } catch (TimeoutException e) {
+                    exception = e;
                 }
-
-            } catch (ExecutionException e) {
-                if (e.getCause() instanceof AdminException) {
-                    exception = (AdminException) e.getCause();
-                } else {
-                    throw new IllegalStateException("Unexpected runtime exception", e);
+    
+                if (exception != null) {
+                    final String errorMessage = "Failed to start container on machine "
+                            + ContainersSlaUtils.machineToString(future.getGridServiceAgent().getMachine());
+                    logger.warn(errorMessage, exception);
+                    state.failedFutureContainer(future);
                 }
-            } catch (TimeoutException e) {
-                exception = e;
-            }
-
-            if (exception != null) {
-                final String errorMessage = "Failed to start container on machine "
-                        + ContainersSlaUtils.machineToString(future.getGridServiceAgent().getMachine());
-                logger.warn(errorMessage, exception);
-                state.failedFutureContainer(future);
             }
         }
 
