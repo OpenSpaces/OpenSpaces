@@ -592,7 +592,7 @@ public class BinPackingSolverTest extends TestCase {
     }
     
     /**
-     * Tests allocation of a two machines given three unallocated machines.
+     * Tests allocation of a fourth machine taking from one of the first three due to max memory limit
      */
     @Test
     public void testThreeMachinesScaleOutCpuToFourMachines() {
@@ -622,4 +622,37 @@ public class BinPackingSolverTest extends TestCase {
         Assert.assertEquals(new AllocatedCapacity(new Fraction(0),250),solver.getDeallocatedCapacityResult().getTotalAllocatedCapacity());
         
    }
+    
+    /**
+     * Tests no allocation of a fourth machine due to max memory limit
+     */
+    @Test
+    public void testThreeMachinesNoScaleOutCpuToFourMachines() {
+        BinPackingSolver solver = new BinPackingSolver();
+        solver.setAllocatedCapacityForPu(
+                new AggregatedAllocatedCapacity()
+                .add(AGENT1_UID,new AllocatedCapacity(new Fraction(2), 250))
+                .add(AGENT2_UID,new AllocatedCapacity(new Fraction(2), 250))
+                .add(AGENT3_UID,new AllocatedCapacity(new Fraction(2), 250))        
+        );
+        solver.setContainerMemoryCapacityInMB(250);
+        solver.setMaxAllocatedMemoryCapacityOfPuInMB(3*250);
+        solver.setLogger(logger);
+
+        AggregatedAllocatedCapacity unallocatedCapacity = 
+            new AggregatedAllocatedCapacity()
+            .add(AGENT1_UID,new AllocatedCapacity(new Fraction(0), 250))
+            .add(AGENT2_UID,new AllocatedCapacity(new Fraction(0), 250))
+            .add(AGENT3_UID,new AllocatedCapacity(new Fraction(0), 250))
+            .add(AGENT4_UID,new AllocatedCapacity(new Fraction(2), 500));
+
+        solver.setUnallocatedCapacity(unallocatedCapacity);
+        solver.setMinimumNumberOfMachines(2);
+        solver.solveManualCapacity(new AllocatedCapacity(new Fraction(2),0));
+        
+        Assert.assertEquals(new AllocatedCapacity(new Fraction(0),0),solver.getAllocatedCapacityResult().getTotalAllocatedCapacity());
+        Assert.assertEquals(new AllocatedCapacity(new Fraction(0),0),solver.getDeallocatedCapacityResult().getTotalAllocatedCapacity());
+        
+   }
+
 }

@@ -92,8 +92,13 @@ public class BinPackingSolver {
         // but it does allocate cpu on machines with existing containers.
         allocateNewCapacityForPu(goalCapacity, startExcessContainersToSatisfyCpuShortage);
         
-        // not enough cpu. try again, this time start containers for cpu purposes.
-        if (allocatedCapacityForPu.getTotalAllocatedCapacity().getCpuCores().compareTo(goalCapacity.getCpuCores()) < 0) {
+        // not enough cpu. 
+        if (allocatedCapacityForPu.getTotalAllocatedCapacity().getCpuCores().compareTo(goalCapacity.getCpuCores()) < 0 &&
+            
+            // less then maximum number of machines
+            allocatedCapacityForPu.getAgentUids().size() < maxMemoryCapacityInMB/containerMemoryCapacityInMB) {
+            
+            //try again, this time start containers for cpu purposes.
             startExcessContainersToSatisfyCpuShortage = true;
             allocateNewCapacityForPu(goalCapacity, startExcessContainersToSatisfyCpuShortage);
         }
