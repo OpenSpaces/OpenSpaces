@@ -19,11 +19,14 @@ public class BinPackingSolverTest extends TestCase {
     private static final String AGENT1_UID = "AGENT1";
     private static final String AGENT2_UID = "AGENT2";
     private static final String AGENT3_UID = "AGENT3";
-
+    private static final String AGENT4_UID = "AGENT4";
+    
     private static final AllocatedCapacity SIX_PRIMARY_CONTAINER_CAPACITY = new AllocatedCapacity(
             new Fraction(2 * 6, 1), 512 * 6);
 
     private static final long MAX_MEMORY_MEGABYTES = new AllocatedCapacity(Fraction.TWO, 512).getMemoryInMB() * 100;
+
+    
 
     /**
      * Tests allocation of a single container on a single machine using number of machines solver.
@@ -587,4 +590,36 @@ public class BinPackingSolverTest extends TestCase {
         Assert.assertEquals(new Fraction(7).divide(5), solver.getAllocatedCapacityResult().getTotalAllocatedCapacity().getCpuCores());
         Assert.assertEquals(128, solver.getAllocatedCapacityResult().getTotalAllocatedCapacity().getMemoryInMB());
     }
+    
+    /**
+     * Tests allocation of a two machines given three unallocated machines.
+     */
+    @Test
+    public void testThreeMachinesScaleOutCpuToFourMachines() {
+        BinPackingSolver solver = new BinPackingSolver();
+        solver.setAllocatedCapacityForPu(
+                new AggregatedAllocatedCapacity()
+                .add(AGENT1_UID,new AllocatedCapacity(new Fraction(2), 500))
+                .add(AGENT2_UID,new AllocatedCapacity(new Fraction(2), 500))
+                .add(AGENT3_UID,new AllocatedCapacity(new Fraction(2), 500))        
+        );
+        solver.setContainerMemoryCapacityInMB(250);
+        solver.setMaxAllocatedMemoryCapacityOfPuInMB(6*250);
+        solver.setLogger(logger);
+
+        AggregatedAllocatedCapacity unallocatedCapacity = 
+            new AggregatedAllocatedCapacity()
+            .add(AGENT1_UID,new AllocatedCapacity(new Fraction(0), 500))
+            .add(AGENT2_UID,new AllocatedCapacity(new Fraction(0), 500))
+            .add(AGENT3_UID,new AllocatedCapacity(new Fraction(0), 500))
+            .add(AGENT4_UID,new AllocatedCapacity(new Fraction(2), 1000));
+
+        solver.setUnallocatedCapacity(unallocatedCapacity);
+        solver.setMinimumNumberOfMachines(2);
+        solver.solveManualCapacity(new AllocatedCapacity(new Fraction(2),0));
+        
+        Assert.assertEquals(new AllocatedCapacity(new Fraction(2),250),solver.getAllocatedCapacityResult().getTotalAllocatedCapacity());
+        Assert.assertEquals(new AllocatedCapacity(new Fraction(0),250),solver.getDeallocatedCapacityResult().getTotalAllocatedCapacity());
+        
+   }
 }

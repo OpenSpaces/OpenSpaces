@@ -105,6 +105,7 @@ public class BinPackingSolver {
         // try to remove complete machines then try to remove part of machines (containers)
         removeExcessMachines(goalCapacity);
         removeExcessContainers(goalCapacity);
+        removeOverMaximumContainers();    
         
         // rebalance containers between machines (without adding/removing containers)
         rebalanceExistingContainers();
@@ -119,10 +120,9 @@ public class BinPackingSolver {
         boolean retry;
         do {
             retry = false;
-            final long excessMemory = calcExcessMemory(goalCapacity);
             for (String sourceAgentUid : allocatedCapacityForPu.getAgentUids()) {               
                 
-                while (removeExcessContainer(sourceAgentUid, excessMemory)) {
+                while (removeExcessContainer(sourceAgentUid, calcExcessMemory(goalCapacity), false)) {
                     retry = true;
                     success = true;
                 }
@@ -137,6 +137,36 @@ public class BinPackingSolver {
         return success;
     }
 
+    /**
+     * Removes excess containers that are not needed. Remaining cpu capacity is spread accross other machines.
+     * No machines are removed (never remove the last container on the machine)
+     */
+    private boolean removeOverMaximumContainers() {
+        boolean success = false;
+        boolean retry;
+        do {
+            retry = false;
+            for (String sourceAgentUid : allocatedCapacityForPu.getAgentUids()) {               
+                
+                while (removeExcessContainer(sourceAgentUid, calcOverMaximumMemory(), true)) {
+                    retry = true;
+                    success = true;
+                }
+                
+                if (retry) {
+                    //retry another machine again
+                    break;
+                }
+            }
+        } while (retry);
+        
+        return success;
+    }
+    
+    private long calcOverMaximumMemory() {
+        return allocatedCapacityForPu.getTotalAllocatedCapacity().getMemoryInMB() - maxMemoryCapacityInMB;
+    }
+
     private long calcExcessMemory(AllocatedCapacity goalCapacity) {
         final AllocatedCapacity excessAllocatedCapacity = allocatedCapacityForPu.getTotalAllocatedCapacity().subtractOrZero(goalCapacity);
         if (!excessAllocatedCapacity.getCpuCores().equals(Fraction.ZERO)) {
@@ -145,7 +175,7 @@ public class BinPackingSolver {
         return excessAllocatedCapacity.getMemoryInMB();
     }
 
-    private boolean removeExcessContainer(String sourceAgentUid, long excessMemory) {
+    private boolean removeExcessContainer(String sourceAgentUid, long excessMemory, boolean forceRemove) {
         
         boolean success = false;
         
@@ -155,23 +185,32 @@ public class BinPackingSolver {
         
         int numberOfContainersOnSourceMachine = (int) (allocatedCapacityOnSourceMachine.getMemoryInMB()/containerMemoryCapacityInMB);
         
-        if (numberOfContainersOnSourceMachine >= 2 &&
-            excessMemory >= containerMemoryCapacityInMB) {
         
-            Fraction goalCpuCoresPerContainerAfterRemovingOneContainer = getCpuCoresPerContainer(1);
-            Fraction cpuCoresToLeaveOnSourceMachine = goalCpuCoresPerContainerAfterRemovingOneContainer.multiply(numberOfContainersOnSourceMachine-1);
-            Fraction cpuCoresToRelocate =  allocatedCapacityOnSourceMachine.getCpuCores().subtract(cpuCoresToLeaveOnSourceMachine);
+        if (excessMemory > 0 && numberOfContainersOnSourceMachine >= 2){
             
-            if (relocateCapacityToOtherMachines(sourceAgentUid, new AllocatedCapacity(cpuCoresToRelocate, 0))) {
-    
-                //deallocate remaining excess container memory from machine
+            if (forceRemove) {
                 deallocateCapacityOnMachine(sourceAgentUid, new AllocatedCapacity(Fraction.ZERO, containerMemoryCapacityInMB));
-                
                 success = true;
             }
+            else if (excessMemory >= containerMemoryCapacityInMB) {
+        
+                Fraction goalCpuCoresPerContainerAfterRemovingOneContainer = getCpuCoresPerContainer(1);
+                Fraction cpuCoresToLeaveOnSourceMachine = goalCpuCoresPerContainerAfterRemovingOneContainer.multiply(numberOfContainersOnSourceMachine-1);
+                Fraction cpuCoresToRelocate =  allocatedCapacityOnSourceMachine.getCpuCores().subtract(cpuCoresToLeaveOnSourceMachine);
+                
+                if (relocateCapacityToOtherMachines(sourceAgentUid, new AllocatedCapacity(cpuCoresToRelocate, 0))) {
+        
+                    //deallocate remaining excess container memory from machine
+                    deallocateCapacityOnMachine(sourceAgentUid, new AllocatedCapacity(Fraction.ZERO, containerMemoryCapacityInMB));
+                    success = true;
+                }
+            }    
+            
         }
+        
         return success;
     }
+    
 
 
     private boolean removeExcessMachines(AllocatedCapacity goalCapacity) {
