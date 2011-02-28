@@ -431,10 +431,6 @@ public class BinPackingSolver {
             }
             
             long memoryOnTargetMachine = allocatedCapacityForPu.getAgentCapacityOrZero(targetAgentUid).getMemoryInMB();
-            if (memoryOnTargetMachine >= minMemoryForTargetMachine) {
-                // the target machine has the maximum number of containers, not good for relocating containers from source
-                continue;
-            }
             
             if (memoryOnTargetMachine + containerMemoryCapacityInMB > memoryOnSourceMachine -containerMemoryCapacityInMB) {
                 // the target machine after the relocation will have more memory than the source machine.
@@ -443,8 +439,16 @@ public class BinPackingSolver {
             }
                             
             long memoryToRelocateToTarget = 
-                Math.min( memoryToRelocateFromSource, 
-                          minMemoryForTargetMachine - memoryOnTargetMachine);
+                min( memoryToRelocateFromSource, 
+                     minMemoryForTargetMachine - memoryOnTargetMachine,
+                     unallocatedCapacity.getAgentCapacity(targetAgentUid).getMemoryInMB());
+            
+            if (memoryToRelocateToTarget <= 0) { 
+                // the target machine has the maximum number of containers, 
+                // or not enough unallocated space
+                // not good to relocating containers from source to target
+                    continue;
+            }
             
             deallocateCapacityOnMachine(sourceAgentUid, new AllocatedCapacity(Fraction.ZERO, memoryToRelocateToTarget));
             allocateCapacityOnMachine(targetAgentUid, new AllocatedCapacity(Fraction.ZERO, memoryToRelocateToTarget));
@@ -480,19 +484,22 @@ public class BinPackingSolver {
                 continue;
             }
             
-            long memoryOnTargetMachine = allocatedCapacityForPu.getAgentCapacity(targetAgentUid).getMemoryInMB();
+            AllocatedCapacity capacityOnTargetMachine = allocatedCapacityForPu.getAgentCapacityOrZero(targetAgentUid);
+            long memoryOnTargetMachine = capacityOnTargetMachine.getMemoryInMB();
             int numberOfContainersOnTargetMachine = (int) (memoryOnTargetMachine / containerMemoryCapacityInMB);
             Fraction goalCpuCoresOnTargetMachine = goalCpuCoresPerContainer.multiply(numberOfContainersOnTargetMachine);
             
-            Fraction cpuCoresOnTargetMachine = allocatedCapacityForPu.getAgentCapacityOrZero(targetAgentUid).getCpuCores();
-            if (cpuCoresOnTargetMachine.compareTo(goalCpuCoresOnTargetMachine) >= 0) {
-                // the target machine has the maximum number of cpu cores, not good for relocating cpu cores from source
-                continue;
-            }
-            
             Fraction cpuCoresToRelocateToTarget = 
                 min( cpuCoresToRelocateFromSource, 
-                     goalCpuCoresOnTargetMachine.subtract(cpuCoresOnTargetMachine));
+                     goalCpuCoresOnTargetMachine.subtract(capacityOnTargetMachine.getCpuCores()),
+                     unallocatedCapacity.getAgentCapacity(targetAgentUid).getCpuCores());
+            
+            if (cpuCoresToRelocateToTarget.compareTo(Fraction.ZERO) <= 0) {
+                // the target machine has the maximum number of cpu cores
+                // or not enough unallocated cpu cores
+                // do not relocate cpu cores from source to target
+                continue;
+            }
             
             deallocateCapacityOnMachine(sourceAgentUid, new AllocatedCapacity(cpuCoresToRelocateToTarget, 0));
             allocateCapacityOnMachine(targetAgentUid, new AllocatedCapacity(cpuCoresToRelocateToTarget,0));
@@ -501,6 +508,10 @@ public class BinPackingSolver {
         }
         
         return success;
+    }
+
+    private Fraction min(Fraction a, Fraction b, Fraction c) {
+        return min(min(a,b),c);
     }
 
     private long min(long a, long b, long c) {
