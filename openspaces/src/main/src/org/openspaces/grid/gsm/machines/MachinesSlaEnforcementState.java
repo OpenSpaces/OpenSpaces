@@ -275,14 +275,18 @@ public class MachinesSlaEnforcementState {
      */
     public Collection<String> getRestrictedAgentUidsForPu(ProcessingUnit pu) {
         
-        //find all PUs with conflicting machine isolation
+        //find all PUs with different machine isolation, and same machine isolation
         Collection<ProcessingUnit> pusWithDifferentIsolation = new HashSet<ProcessingUnit>();
+        Collection<ProcessingUnit> pusWithSameIsolation = new HashSet<ProcessingUnit>();
         ElasticProcessingUnitMachineIsolation puIsolation = machineIsolationPerProcessingUnit.get(pu);
         
         for (ProcessingUnit otherPu : machineIsolationPerProcessingUnit.keySet()) {
             
             ElasticProcessingUnitMachineIsolation otherPuIsolation = machineIsolationPerProcessingUnit.get(otherPu);
-            if (!otherPuIsolation.equals(puIsolation)) {
+            if (otherPuIsolation.equals(puIsolation)) {
+                pusWithSameIsolation.add(otherPu);
+            }
+            else {
                 pusWithDifferentIsolation.add(otherPu);
             }
         }
@@ -296,16 +300,16 @@ public class MachinesSlaEnforcementState {
             restrictedAgentUids.addAll(timeoutTimestampPerAgentUidGoingDownPerProcessingUnit.get(pu).keySet());
         }
         
-        // add all agents that started containers that are for restricted processing units
-        Set<String> restrictedContainerZones = new HashSet<String>();
-        for (ProcessingUnit otherPu : pusWithDifferentIsolation) {
-            restrictedContainerZones.addAll(Arrays.asList(otherPu.getRequiredZones()));
+        // add all agents that started containers that are not with the same isolation
+        Set<String> allowedContainerZones = new HashSet<String>();
+        for (ProcessingUnit otherPu : pusWithSameIsolation) {
+            allowedContainerZones.addAll(Arrays.asList(otherPu.getRequiredZones()));
         }
         for (GridServiceContainer container : pu.getAdmin().getGridServiceContainers()) {
             
             Set<String> containerZones = container.getZones().keySet();
             
-            if (!disjoint(containerZones,restrictedContainerZones) && 
+            if (disjoint(containerZones,allowedContainerZones) && 
                 container.getGridServiceAgent() != null) {
                 
                 restrictedAgentUids.add(container.getGridServiceAgent().getUid());
@@ -332,7 +336,7 @@ public class MachinesSlaEnforcementState {
      */
     private boolean disjoint(Set<String> a, Set<String> b) {
         Set<String> common = new HashSet<String>(a);
-        common.removeAll(b);
+        common.retainAll(b);
         return common.size() == 0;
     }
 
