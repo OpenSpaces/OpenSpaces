@@ -65,9 +65,9 @@ public interface ElasticMachineProvisioning {
 	throws ElasticMachineProvisioningException, InterruptedException , TimeoutException ;
 	
 	/**
-	 * @return the number of machines to start in order to satisfy the specified capacity requirements 
+	 * @return the capacity requirements that represent a single machine 
 	 */
-    int calcNumberOfMachines(CapacityRequirements capacityRequirements);
+	CapacityRequirements getCapacityOfSingleMachine();
 
 	/**
 	 * Shuts down the grid service agent and the machine.

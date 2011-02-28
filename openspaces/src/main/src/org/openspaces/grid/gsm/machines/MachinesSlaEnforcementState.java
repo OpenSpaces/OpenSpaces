@@ -18,6 +18,8 @@ import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.grid.gsm.capacity.AggregatedAllocatedCapacity;
 import org.openspaces.grid.gsm.capacity.AllocatedCapacity;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
+import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirment;
 import org.openspaces.grid.gsm.machines.isolation.ElasticProcessingUnitMachineIsolation;
 import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 
@@ -344,6 +346,12 @@ public class MachinesSlaEnforcementState {
        
                 public NonBlockingElasticMachineProvisioning getMachineProvisioning() {
                     return null;
+                }
+
+                public CapacityRequirements getFutureCapacity() {
+                    return new CapacityRequirements(
+                            new CpuCapacityRequirement(MachinesSlaUtils.getCpu(agent.getMachine()).doubleValue()),
+                            new MemoryCapacityRequirment(MachinesSlaUtils.getPhysicalMemoryInMB(agent.getMachine())));
                 }
             };
         }

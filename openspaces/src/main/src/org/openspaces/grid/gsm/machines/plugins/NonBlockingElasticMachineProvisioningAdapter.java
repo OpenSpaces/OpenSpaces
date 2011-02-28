@@ -13,6 +13,9 @@ import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
+import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
+import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirment;
+import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgent;
 import org.openspaces.grid.gsm.machines.FutureGridServiceAgents;
 
@@ -51,7 +54,8 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
             throw new UnsupportedOperationException();
         }
 	    
-	    int numberOfMachines = machineProvisioning.calcNumberOfMachines(capacityRequirements);
+	    final CapacityRequirements singleMachineCapacity = machineProvisioning.getCapacityOfSingleMachine();
+	    int numberOfMachines = calcNumberOfMachines(capacityRequirements, machineProvisioning);
 	    FutureGridServiceAgent[] futureAgents = new FutureGridServiceAgent[numberOfMachines];
 	    
 	    for (int i = 0 ; i < futureAgents.length ; i++) {
@@ -133,6 +137,10 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
     			
                 public NonBlockingElasticMachineProvisioning getMachineProvisioning() {
                     return NonBlockingElasticMachineProvisioningAdapter.this;
+                }
+
+                public CapacityRequirements getFutureCapacity() {
+                    return singleMachineCapacity;
                 }
     		};
 	    }
@@ -261,4 +269,51 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
     public boolean isStartMachineSupported() {
         return machineProvisioning.isStartMachineSupported();
     }
+    
+
+    private static int calcNumberOfMachines(
+            CapacityRequirements capacityRequirements, 
+            ElasticMachineProvisioning machineProvisioning) {
+        
+        int numberOfMachines = capacityRequirements.getRequirement(NumberOfMachinesCapacityRequirement.class).getNumberOfMahines();
+        long memoryInMB = capacityRequirements.getRequirement(MemoryCapacityRequirment.class).getMemoryInMB();
+        double cpu = capacityRequirements.getRequirement(CpuCapacityRequirement.class).getCpu();
+        
+        CapacityRequirements singleMachineCapacity = machineProvisioning.getCapacityOfSingleMachine();
+        
+        long memoryPerMachineInMB = 
+            singleMachineCapacity.getRequirement(MemoryCapacityRequirment.class).getMemoryInMB() - 
+            machineProvisioning.getConfig().getReservedMemoryCapacityPerMachineInMB();
+        
+        double cpuPerMachine = singleMachineCapacity.getRequirement(CpuCapacityRequirement.class).getCpu();
+        
+        if (numberOfMachines < 1) {
+            numberOfMachines = 1;
+        }
+        
+        if (memoryPerMachineInMB > 0 && memoryInMB > 0) {
+            int machinesNeeded =  
+                (int) Math.ceil(1.0* memoryInMB / memoryPerMachineInMB);
+            if (numberOfMachines < machinesNeeded) {
+                numberOfMachines = machinesNeeded;
+            }
+        }
+        
+        if (cpuPerMachine > 0 && cpu > 0) {
+            int machinesNeeded = (int)Math.ceil(1.0* cpu / cpuPerMachine);
+            if (numberOfMachines < machinesNeeded) {
+                numberOfMachines = machinesNeeded;
+            }
+        }
+        
+    
+        logger.info(numberOfMachines + " "+
+                "machines are required in order to satisfy capacity requirements: " + 
+                numberOfMachines + " machines, " + 
+                memoryInMB + "MB memory, " + 
+                cpu + " cpu cores.");
+        
+        return numberOfMachines;
+    }
+
 }
