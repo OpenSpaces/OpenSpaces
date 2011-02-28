@@ -93,10 +93,7 @@ public class BinPackingSolver {
         allocateNewCapacityForPu(goalCapacity, startExcessContainersToSatisfyCpuShortage);
         
         // not enough cpu. 
-        if (allocatedCapacityForPu.getTotalAllocatedCapacity().getCpuCores().compareTo(goalCapacity.getCpuCores()) < 0 &&
-            
-            // less then maximum number of machines
-            allocatedCapacityForPu.getAgentUids().size() < maxMemoryCapacityInMB/containerMemoryCapacityInMB) {
+        if (allocatedCapacityForPu.getTotalAllocatedCapacity().getCpuCores().compareTo(goalCapacity.getCpuCores()) < 0) {
             
             //try again, this time start containers for cpu purposes.
             startExcessContainersToSatisfyCpuShortage = true;
@@ -349,10 +346,19 @@ public class BinPackingSolver {
             if (cpuToAllocateOnMachine.compareTo(Fraction.ZERO) > 0 &&
                 memoryToAllocateOnMachine + allocatedMemoryForPuOnMachine == 0) { 
                 
-                if (unallocatedMemoryOnMachine < containerMemoryCapacityInMB || 
-                    maxMemoryPerMachine - allocatedMemoryForPuOnMachine < containerMemoryCapacityInMB ||
-                    !startExtraContainersToSatisfyCpuShortage) {
-                    // not enough memory, cancel cpu allocation request
+                if (    //if not enough free memory to allocate container
+                        unallocatedMemoryOnMachine < containerMemoryCapacityInMB || 
+                        
+                        //or if too much already allocated on machine for this pu
+                        maxMemoryPerMachine - allocatedMemoryForPuOnMachine < containerMemoryCapacityInMB ||
+                        
+                        //or if cannot start a container on a new machine
+                        !startExtraContainersToSatisfyCpuShortage ||
+                        
+                        //or if pu is already stretched out to max number of machines
+                        allocatedCapacityForPu.getAgentUids().size() >= maxMemoryCapacityInMB/containerMemoryCapacityInMB) {
+                    
+                    // cancel cpu allocation request
                     cpuToAllocateOnMachine = Fraction.ZERO;
                 }
                 else {
