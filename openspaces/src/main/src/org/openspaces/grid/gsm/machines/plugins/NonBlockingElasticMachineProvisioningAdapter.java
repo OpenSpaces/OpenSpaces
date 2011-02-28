@@ -57,7 +57,7 @@ public class NonBlockingElasticMachineProvisioningAdapter implements NonBlocking
 	    for (int i = 0 ; i < futureAgents.length ; i++) {
     		final AtomicReference<Object> ref = new AtomicReference<Object>(null);
     		
-    		final int throttlingDelay = i*THROTTLING_DELAY_SECONDS*1000;
+    		final int throttlingDelay = i*THROTTLING_DELAY_SECONDS;
     		final long start = System.currentTimeMillis();
     		final long end = start+ throttlingDelay+unit.toMillis(duration);
     		submit(new Runnable() {
