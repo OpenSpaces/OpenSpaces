@@ -89,7 +89,7 @@ public class ContainersSlaUtils {
                 
                 Object result = ref.get();
                 GridServiceContainer container = null;
-                if (result == null) {
+                if (result != null) {
                     container = getGridServiceContainerInternal((Integer)result);
                 }
                 
