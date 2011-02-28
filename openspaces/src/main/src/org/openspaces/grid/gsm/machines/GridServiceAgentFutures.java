@@ -15,6 +15,7 @@ import org.openspaces.grid.gsm.capacity.CapacityRequirements;
 import org.openspaces.grid.gsm.capacity.CpuCapacityRequirement;
 import org.openspaces.grid.gsm.capacity.MemoryCapacityRequirment;
 import org.openspaces.grid.gsm.capacity.NumberOfMachinesCapacityRequirement;
+import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisioning;
 
 
 class GridServiceAgentFutures {
@@ -24,16 +25,19 @@ class GridServiceAgentFutures {
     int expectedNumberOfMachines = 0;
     
     GridServiceAgentFutures(FutureGridServiceAgent[] futureAgents, int numberOfMachines) {
+        validate(futureAgents);
         this.expectedNumberOfMachines = numberOfMachines;
         this.futureAgents = new ArrayList<FutureGridServiceAgent>(Arrays.asList(futureAgents));
     }
 
     GridServiceAgentFutures(FutureGridServiceAgent[] futureAgents, AllocatedCapacity capacity) {
+        validate(futureAgents);
         expectedCapacity = capacity;
         this.futureAgents = new ArrayList<FutureGridServiceAgent>(Arrays.asList(futureAgents));
     }
     
     GridServiceAgentFutures(FutureGridServiceAgent[] futureAgents, CapacityRequirements capacityRequirements) {
+        validate(futureAgents);
         this.futureAgents = new ArrayList<FutureGridServiceAgent>(Arrays.asList(futureAgents));
         expectedNumberOfMachines = convertCapacityRequirementsToNumberOfMachines(capacityRequirements);
         if (expectedNumberOfMachines == 0) {
@@ -103,5 +107,29 @@ class GridServiceAgentFutures {
     }
    
     
-
+    private static void validate(FutureGridServiceAgent[] futureAgents) {
+        
+        if (futureAgents == null) {
+            throw new IllegalArgumentException("future agents cannot be null");
+        }
+        
+        if (futureAgents.length == 0) {
+            throw new IllegalArgumentException("future agents cannot be empty");
+        }
+        
+        NonBlockingElasticMachineProvisioning machineProvisioning = null;
+        for (FutureGridServiceAgent futureAgent : futureAgents) {
+            if (machineProvisioning == null) {
+                machineProvisioning = futureAgent.getMachineProvisioning();
+            }
+            if (futureAgent.getMachineProvisioning() != machineProvisioning) {
+                throw new IllegalArgumentException("All future agents must origin from the same machine provisioning object");
+            }
+        }
+        
+    }
+    
+    public NonBlockingElasticMachineProvisioning getMachineProvisioning() {
+        return futureAgents.iterator().next().getMachineProvisioning();
+    }
 }

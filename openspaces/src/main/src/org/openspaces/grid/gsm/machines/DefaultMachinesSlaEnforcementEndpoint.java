@@ -152,6 +152,10 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     ") cannot be bigger than maximum number of machines ("+
                     sla.getMaximumNumberOfMachines()+")");
         }
+        
+        if (sla.getProvisionedAgents() == null) {
+            throw new IllegalArgumentException("Provisioned agents cannot be null");
+        }
     }
     
     public boolean enforceSla(EagerMachinesSlaPolicy sla)
@@ -679,8 +683,14 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             
             //update state 2: remove futures from list
             state.removeFutureAgents(pu, doneFutureAgents);
-            for (GridServiceAgent newAgent : healthyAgents) {
-                state.addIndicationThatAgentStartedByMachineProvisioning(newAgent);
+            if (doneFutureAgents.getMachineProvisioning() != null &&
+                doneFutureAgents.getMachineProvisioning().isStartMachineSupported()) {
+                
+                // this is not a mock future of existing machines. 
+                // we really started this machine.
+                for (GridServiceAgent newAgent : healthyAgents) {
+                    state.addIndicationThatAgentStartedByMachineProvisioning(newAgent);
+                }
             }
             
             // update state 3:
