@@ -697,7 +697,7 @@ public class BinPackingSolver {
         }
         
         if (logger.isDebugEnabled()) {
-            logger.debug("BinPackingSolver: number of machines " + numberOfMachines + " allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() + " deallocatedCapacityResult="+this.getDeallocatedCapacityResult());
+            logger.debug("BinPackingSolver: number of machines " + numberOfMachines + " unallocatedCapacity="+unallocatedCapacity.toDetailedString() + " allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() + " deallocatedCapacityResult="+this.getDeallocatedCapacityResult());
         }
 
     }
