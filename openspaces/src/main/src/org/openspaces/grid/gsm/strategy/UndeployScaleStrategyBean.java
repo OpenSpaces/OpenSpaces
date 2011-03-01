@@ -1,6 +1,5 @@
 package org.openspaces.grid.gsm.strategy;
 
-import org.apache.commons.logging.Log;
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
@@ -32,7 +31,6 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
     private GridServiceContainerConfig containersConfig;
 
     // created by afterPropertiesSet()
-    private Log logger;
     private boolean undeployComplete;
     
     public void setMachinesSlaEnforcementEndpoint(MachinesSlaEnforcementEndpoint endpoint) {
@@ -68,38 +66,38 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         
         super.run();
         
-        logger.debug("Undeploying processing unit " + getProcessingUnit().getName());
+        getLogger().debug("Undeploying processing unit " + getProcessingUnit().getName());
         
         try {
             
-            logger.debug("Undeploying containers for " + getProcessingUnit().getName());
+            getLogger().debug("Undeploying containers for " + getProcessingUnit().getName());
             boolean containersSlaEnforced = enforceContainersSla();
-            if (logger.isDebugEnabled()) {
+            if (getLogger().isDebugEnabled()) {
                 if (!containersSlaEnforced) {
-                    logger.debug("Containers undeploy is incomplete.");
+                    getLogger().debug("Containers undeploy is incomplete.");
                 }
             }
-            logger.debug("Undeploying machines for " + getProcessingUnit().getName());
+            getLogger().debug("Undeploying machines for " + getProcessingUnit().getName());
             boolean machinesSlaEnforced = enforceMachinesSla();
-            if (logger.isDebugEnabled()) {
+            if (getLogger().isDebugEnabled()) {
                 if (!machinesSlaEnforced) {
-                    logger.debug("Machines undeploy incomplete.");
+                    getLogger().debug("Machines undeploy incomplete.");
                 }
             }
             
             if (containersSlaEnforced && machinesSlaEnforced) {
-                logger.info(getProcessingUnit().getName() + " undeploy is complete.");
+                getLogger().info(getProcessingUnit().getName() + " undeploy is complete.");
                 undeployComplete = true;
             }
         }        
         catch (ServiceLevelAgreementEnforcementEndpointDestroyedException e) {
-            logger.debug("AdminService was destroyed",e);
+            getLogger().debug("AdminService was destroyed",e);
         }
         catch (AdminException e) {
-            logger.warn("Unhandled AdminException",e);
+            getLogger().warn("Unhandled AdminException",e);
         }
         catch (Exception e) {
-            logger.error("Unhandled Exception",e);
+            getLogger().error("Unhandled Exception",e);
         }
         
     }
@@ -180,7 +178,7 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         alertFactory.componentUid(getProcessingUnit().getName());
         alertFactory.groupUid(alertGroupUidPrefix + "-" + getProcessingUnit().getName());
         getAdmin().getAlertManager().triggerAlert(alertFactory.toAlert());
-        logger.debug(alertDescription);
+        getLogger().debug(alertDescription);
     }
 
 }
