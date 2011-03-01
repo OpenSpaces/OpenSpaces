@@ -566,7 +566,7 @@ public class BinPackingSolverTest extends TestCase {
     @Test
     public void testRelocateCpuFromSourceMachine() {
         BinPackingSolver solver = new BinPackingSolver();
-        
+        solver.setLogger(logger);
         solver.setAllocatedCapacityForPu(new AggregatedAllocatedCapacity()
                                 .add("AGENT_1", new AllocatedCapacity(new Fraction(4), 512))
                                 .add("AGENT_2", new AllocatedCapacity(new Fraction(1), 128)));
@@ -654,4 +654,29 @@ public class BinPackingSolverTest extends TestCase {
         
    }
 
+    
+    /**
+     * Tests no allocation of a fourth machine due to max memory limit
+     */
+    @Test
+    public void testTwoMachinesZeroBackupCpuCapacity() {
+        BinPackingSolver solver = new BinPackingSolver();
+        solver.setAllocatedCapacityForPu(new AggregatedAllocatedCapacity());
+        solver.setContainerMemoryCapacityInMB(250);
+        solver.setMaxAllocatedMemoryCapacityOfPuInMB(12*250);
+        solver.setLogger(logger);
+
+        AggregatedAllocatedCapacity unallocatedCapacity = 
+            new AggregatedAllocatedCapacity()
+            .add(AGENT1_UID,new AllocatedCapacity(new Fraction(2), 12*250));
+            
+
+        solver.setUnallocatedCapacity(unallocatedCapacity);
+        solver.setMinimumNumberOfMachines(1);
+        solver.solveManualCapacity(new AllocatedCapacity(new Fraction(4),12*250));
+        
+        Assert.assertEquals(new AllocatedCapacity(new Fraction(2),12*250),solver.getAllocatedCapacityResult().getTotalAllocatedCapacity());
+        Assert.assertEquals(new AllocatedCapacity(new Fraction(0),0),solver.getDeallocatedCapacityResult().getTotalAllocatedCapacity());
+        
+   }
 }
