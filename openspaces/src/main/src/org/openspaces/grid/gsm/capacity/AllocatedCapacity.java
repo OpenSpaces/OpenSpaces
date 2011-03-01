@@ -37,11 +37,11 @@ public class AllocatedCapacity {
     public AllocatedCapacity subtract(AllocatedCapacity other) {
         
         if (this.memoryInMB - other.memoryInMB < 0) {
-            throw new IllegalArgumentException(this + " has less memory than existing " + other);
+            throw new IllegalArgumentException(this + " has less memory than " + other);
         }
         
         if (this.cpuCores.compareTo(other.cpuCores) < 0) {
-            throw new IllegalArgumentException(this + " has less cpu cores than existing " + other);
+            throw new IllegalArgumentException(this + " has less cpu cores than " + other);
         }
         
         return new AllocatedCapacity(
