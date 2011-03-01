@@ -39,6 +39,7 @@ import org.apache.openjpa.meta.FieldMetaData;
 import org.apache.openjpa.util.ApplicationIds;
 import org.openspaces.jpa.openjpa.SpaceConfiguration;
 import org.openspaces.jpa.openjpa.StoreManagerQuery;
+import org.openspaces.jpa.openjpa.StoreManagerSQLQuery;
 
 import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.internal.client.QueryResultTypeInternal;
@@ -144,7 +145,15 @@ public class StoreManager extends AbstractStoreManager {
     @Override
     public StoreQuery newQuery(String language) {        
         ExpressionParser ep = QueryLanguages.parserForLanguage(language);
-        return new StoreManagerQuery(ep, this);
+        
+        if(ep != null)
+            return new StoreManagerQuery(ep, this);
+        
+        if (QueryLanguages.LANG_SQL.equals(language)) {
+            return new StoreManagerSQLQuery(this);
+        }
+       
+        return null;
     }
 
     @Override
