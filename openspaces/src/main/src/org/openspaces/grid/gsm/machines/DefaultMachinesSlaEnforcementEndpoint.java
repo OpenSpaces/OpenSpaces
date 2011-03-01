@@ -398,10 +398,10 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
         else {
             logger.debug("No action required in order to enforce machines sla. "+
-                    "target="+target + ", " + 
-                    "started="+capacityAllocated + ", " +
-                    "marked for deallocation="+capacityMarkedForDeallocation + ", " +
-                    "#futures="+state.getNumberOfFutureAgents(pu) + " " +
+                    "target="+target + "| " + 
+                    "started="+capacityAllocated.toDetailedString() + "| " +
+                    "marked for deallocation="+capacityMarkedForDeallocation.toDetailedString() + "| " +
+                    "#futures="+state.getNumberOfFutureAgents(pu) + " |" +
                     "#minimumMachines="+sla.getMinimumNumberOfMachines());        
         }
         
