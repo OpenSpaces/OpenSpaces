@@ -726,6 +726,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 logger.info("Agent started and provisioned succesfully on a new machine " + MachinesSlaUtils.machineToString(newAgent.getMachine()));
             }
             AllocatedCapacity newAgentCapacity = MachinesSlaUtils.getMachineTotalCapacity(newAgent,sla);
+            if (logger.isDebugEnabled()) {
+                logger.debug("New agent " + MachinesSlaUtils.machineToString(newAgent.getMachine()) + " has "+ newAgentCapacity);
+            }
             if (newAgentCapacity.getMemoryInMB() < sla.getContainerMemoryCapacityInMB()) {
                 logger.warn("New agent " + MachinesSlaUtils.machineToString(newAgent.getMachine()) + " has only "
                         + newAgentCapacity
