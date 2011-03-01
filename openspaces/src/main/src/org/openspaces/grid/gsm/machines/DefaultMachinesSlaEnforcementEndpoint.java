@@ -264,6 +264,8 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 }
             }
 
+            // this is the old scale in algorithm
+            // it handles well the case of removing a complete machine and prefers machines that are management machines.
             for (GridServiceAgent agent : sortManagementLast(capacityAllocated.getAgentUids())) {
                 AllocatedCapacity agentCapacity = capacityAllocated.getAgentCapacity(agent.getUid());
                 
@@ -279,6 +281,11 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                             "Allocated machine agents are: " + state.getAllocatedCapacity(pu));
                 }
             }
+            
+            // this is the new scale in algorithm
+            // it handles well the case of removing part of the machine capacity (containers)
+            deallocateManualCapacity(sla,surplusCapacity);
+            
         }
 
         else if (capacityAllocated.getAgentUids().size() <  sla.getMinimumNumberOfMachines()) {
@@ -898,7 +905,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         
         final BinPackingSolver solver = createBinPackingSolver(sla , unallocatedCapacity);
         
-        solver.solveManualCapacity(capacityToAllocate);
+        solver.solveManualCapacityScaleOut(capacityToAllocate);
 
         allocateCapacity(solver.getAllocatedCapacityResult());
         markCapacityForDeallocation(solver.getDeallocatedCapacityResult());
@@ -912,6 +919,16 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         
         return remainingCapacityToAllocate;
                     
+    }
+
+    private void deallocateManualCapacity(AbstractMachinesSlaPolicy sla, AllocatedCapacity capacityToDeallocate) {
+        AggregatedAllocatedCapacity unallocatedCapacity = getUnallocatedCapacity(sla);
+        final BinPackingSolver solver = createBinPackingSolver(sla , unallocatedCapacity);
+        
+        solver.solveManualCapacityScaleIn(capacityToDeallocate);
+
+        allocateCapacity(solver.getAllocatedCapacityResult());
+        markCapacityForDeallocation(solver.getDeallocatedCapacityResult());                    
     }
 
     private void allocateCapacity(AggregatedAllocatedCapacity capacityToAllocate) {
@@ -992,7 +1009,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         }
         
         if (logger.isDebugEnabled()) {
-            logger.debug("physicalCapacity"+physicalCapacity.toDetailedString()+" usedCapacity="+usedCapacity.toDetailedString()+" restrictedAgentUids="+restrictedAgentUids+" unallocatedCapacity="+unallocatedCapacity.toDetailedString());
+            logger.debug("physicalCapacity="+physicalCapacity.toDetailedString()+" usedCapacity="+usedCapacity.toDetailedString()+" restrictedAgentUids="+restrictedAgentUids+" unallocatedCapacity="+unallocatedCapacity.toDetailedString());
         }
         
         return unallocatedCapacity;
