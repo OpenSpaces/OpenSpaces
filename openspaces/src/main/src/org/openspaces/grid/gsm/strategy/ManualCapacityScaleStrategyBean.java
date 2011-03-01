@@ -274,7 +274,7 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
         sla.setNewContainerConfig(containersConfig);
         sla.setAllocatedCapacity(machinesEndpoint.getAllocatedCapacity());
         if (getLogger().isDebugEnabled()) {
-            getLogger().debug("Containers Eager SLA Policy: "+
+            getLogger().debug("Containers Manual SLA Policy: "+
                     "#gridServiceAgents=" + sla.getAllocatedCapacity().getAgentUids().size() + " "+
                     "newContainerConfig.maximumJavaHeapSizeInMB="+sla.getNewContainerConfig().getMaximumJavaHeapSizeInMB());
         }
