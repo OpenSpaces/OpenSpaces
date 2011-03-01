@@ -358,29 +358,11 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 state.unmarkCapacityForDeallocation(pu, agentUid, agentCapacity);
             }
             
-            AllocatedCapacity shortageCapacity = 
-                target.subtractOrZero(capacityAllocatedAndMarked.getTotalAllocatedCapacity());
-            
-            // take into account expected machines into shortage calculate
-            for (GridServiceAgentFutures futureAgents : state.getFutureAgents(pu)) {
-                                
-                AllocatedCapacity expectedCapacity = futureAgents.getExpectedCapacity(); 
-                if (!shortageCapacity.isMemoryEqualsZero() && expectedCapacity.isMemoryEqualsZero()) {
-                    // cannot determine expected memory, it could be enough to satisfy shortage
-                    throw new OperationInProgressException();
-                }
-
-                if (!shortageCapacity.isCpuCoresEqualsZero() && expectedCapacity.isCpuCoresEqualsZero()) {
-                 // cannot determine expected cpu cores, it could be enough to satisfy shortage
-                    throw new OperationInProgressException();
-                }
-                
-                shortageCapacity = 
-                    shortageCapacity.subtractOrZero(expectedCapacity);
-            }
+            AllocatedCapacity shortageCapacity = getCapacityShortage(target);
 
            if (!shortageCapacity.equalsZero()) {
-               shortageCapacity = allocateManualCapacity(shortageCapacity, sla);
+               allocateManualCapacity(shortageCapacity, sla);
+               shortageCapacity = getCapacityShortage(target);               
            }
            
            if (!shortageCapacity.equalsZero()) {
@@ -427,6 +409,30 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             // old machines need to complete shutdown
             throw new OperationInProgressException();
         }
+    }
+
+    private AllocatedCapacity getCapacityShortage(AllocatedCapacity target) throws OperationInProgressException {
+        AllocatedCapacity shortageCapacity = 
+            target.subtractOrZero(state.getAllocatedCapacity(pu).getTotalAllocatedCapacity());
+        
+        // take into account expected machines into shortage calculate
+        for (GridServiceAgentFutures futureAgents : state.getFutureAgents(pu)) {
+                            
+            AllocatedCapacity expectedCapacity = futureAgents.getExpectedCapacity(); 
+            if (!shortageCapacity.isMemoryEqualsZero() && expectedCapacity.isMemoryEqualsZero()) {
+                // cannot determine expected memory, it could be enough to satisfy shortage
+                throw new OperationInProgressException();
+            }
+
+            if (!shortageCapacity.isCpuCoresEqualsZero() && expectedCapacity.isCpuCoresEqualsZero()) {
+             // cannot determine expected cpu cores, it could be enough to satisfy shortage
+                throw new OperationInProgressException();
+            }
+            
+            shortageCapacity = 
+                shortageCapacity.subtractOrZero(expectedCapacity);
+        }
+        return shortageCapacity;
     }
 
     /**
@@ -887,9 +893,9 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     /**
      * Allocates the specified capacity on unallocated capacity that match the specified SLA
      */
-    private AllocatedCapacity allocateManualCapacity(AllocatedCapacity capacityToAllocate, AbstractMachinesSlaPolicy sla) {
+    private void allocateManualCapacity(AllocatedCapacity capacityToAllocate, AbstractMachinesSlaPolicy sla) {
         AggregatedAllocatedCapacity unallocatedCapacity = getUnallocatedCapacity(sla);
-        return allocateManualCapacity(sla, capacityToAllocate, unallocatedCapacity);
+        allocateManualCapacity(sla, capacityToAllocate, unallocatedCapacity);
     }
     
     /**
@@ -901,24 +907,14 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
      * @param capacityToAllocate - the missing capacity that requires allocation on shared machines.
      * @return the remaining capacity left for allocation(the rest has been allocated already)
      */
-    private AllocatedCapacity allocateManualCapacity(AbstractMachinesSlaPolicy sla, AllocatedCapacity capacityToAllocate, AggregatedAllocatedCapacity unallocatedCapacity) {
+    private void allocateManualCapacity(AbstractMachinesSlaPolicy sla, AllocatedCapacity capacityToAllocate, AggregatedAllocatedCapacity unallocatedCapacity) {
         
         final BinPackingSolver solver = createBinPackingSolver(sla , unallocatedCapacity);
         
         solver.solveManualCapacityScaleOut(capacityToAllocate);
 
         allocateCapacity(solver.getAllocatedCapacityResult());
-        markCapacityForDeallocation(solver.getDeallocatedCapacityResult());
-        
-        // When a container is relocated, its memory capacity is both deallocated and allocated, which compensates to zero
-        // Remember that AllocatedCapacity cannot be negative, so first we add only then subtract.
-        AllocatedCapacity remainingCapacityToAllocate = 
-            capacityToAllocate
-            .add(solver.getDeallocatedCapacityResult().getTotalAllocatedCapacity())
-            .subtract(solver.getAllocatedCapacityResult().getTotalAllocatedCapacity());
-        
-        return remainingCapacityToAllocate;
-                    
+        markCapacityForDeallocation(solver.getDeallocatedCapacityResult());                    
     }
 
     private void deallocateManualCapacity(AbstractMachinesSlaPolicy sla, AllocatedCapacity capacityToDeallocate) {
