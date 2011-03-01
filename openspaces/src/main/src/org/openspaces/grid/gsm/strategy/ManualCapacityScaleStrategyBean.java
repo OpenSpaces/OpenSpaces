@@ -252,7 +252,7 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
                 machinesAlertGroupUidPrefix,
                 "Machines Capacity SLA",
                 "Total machines memory for " + getProcessingUnit().getName() + " " + 
-                "has reached its target of " + memoryInMB + "MB");
+                "has reached its target of " + memoryInMB + "MB  and " + slaConfig.getNumberOfCpuCores() + " CPU cores");
         }
         else {
             triggerAlert(
