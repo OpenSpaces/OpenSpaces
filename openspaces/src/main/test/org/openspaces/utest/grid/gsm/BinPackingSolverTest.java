@@ -24,7 +24,7 @@ public class BinPackingSolverTest extends TestCase {
     private static final AllocatedCapacity SIX_PRIMARY_CONTAINER_CAPACITY = new AllocatedCapacity(
             new Fraction(2 * 6, 1), 512 * 6);
 
-    private static final long MAX_MEMORY_MEGABYTES = new AllocatedCapacity(Fraction.TWO, 512).getMemoryInMB() * 100;
+    private static final long MAX_MEMORY_MEGABYTES = 512 * 100;
 
     
 
@@ -35,7 +35,7 @@ public class BinPackingSolverTest extends TestCase {
     public void testOneMachine() {
         BinPackingSolver solver = new BinPackingSolver();
         solver.setAllocatedCapacityForPu(new AggregatedAllocatedCapacity());
-        solver.setContainerMemoryCapacityInMB(new AllocatedCapacity(Fraction.TWO, 512).getMemoryInMB());
+        solver.setContainerMemoryCapacityInMB(512);
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(MAX_MEMORY_MEGABYTES);
         solver.setLogger(logger);
         solver.setMinimumNumberOfMachines(1);
@@ -60,7 +60,7 @@ public class BinPackingSolverTest extends TestCase {
     public void testTwoMachinesOverflow() {
         BinPackingSolver solver = new BinPackingSolver();
         solver.setAllocatedCapacityForPu(new AggregatedAllocatedCapacity());
-        solver.setContainerMemoryCapacityInMB(new AllocatedCapacity(Fraction.TWO, 512).getMemoryInMB());
+        solver.setContainerMemoryCapacityInMB(512);
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(MAX_MEMORY_MEGABYTES);
         solver.setLogger(logger);
         solver.setMinimumNumberOfMachines(2);
@@ -86,7 +86,7 @@ public class BinPackingSolverTest extends TestCase {
     public void testTwoMachines() {
         BinPackingSolver solver = new BinPackingSolver();
         solver.setAllocatedCapacityForPu(new AggregatedAllocatedCapacity());
-        solver.setContainerMemoryCapacityInMB(new AllocatedCapacity(Fraction.TWO, 512).getMemoryInMB());
+        solver.setContainerMemoryCapacityInMB(512);
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(MAX_MEMORY_MEGABYTES);
         solver.setLogger(logger);
 
@@ -120,7 +120,7 @@ public class BinPackingSolverTest extends TestCase {
         solver.setAllocatedCapacityForPu(new AggregatedAllocatedCapacity().add(AGENT1_UID,
                 new AllocatedCapacity(Fraction.TWO, 512)).add(AGENT2_UID, new AllocatedCapacity(Fraction.TWO, 512)));
 
-        solver.setContainerMemoryCapacityInMB(new AllocatedCapacity(Fraction.TWO, 512).getMemoryInMB());
+        solver.setContainerMemoryCapacityInMB(512);
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(MAX_MEMORY_MEGABYTES);
         solver.setLogger(logger);
 
@@ -152,7 +152,7 @@ public class BinPackingSolverTest extends TestCase {
     public void testThreeMachines() {
         BinPackingSolver solver = new BinPackingSolver();
         solver.setAllocatedCapacityForPu(new AggregatedAllocatedCapacity());
-        solver.setContainerMemoryCapacityInMB(new AllocatedCapacity(Fraction.TWO, 512).getMemoryInMB());
+        solver.setContainerMemoryCapacityInMB(512);
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(MAX_MEMORY_MEGABYTES);
         solver.setLogger(logger);
 
@@ -186,7 +186,7 @@ public class BinPackingSolverTest extends TestCase {
     public void testCapacity() {
         BinPackingSolver solver = new BinPackingSolver();
         solver.setAllocatedCapacityForPu(new AggregatedAllocatedCapacity());
-        solver.setContainerMemoryCapacityInMB(new AllocatedCapacity(Fraction.TWO, 512).getMemoryInMB());
+        solver.setContainerMemoryCapacityInMB(512);
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(MAX_MEMORY_MEGABYTES);
         solver.setLogger(logger);
 
@@ -194,7 +194,7 @@ public class BinPackingSolverTest extends TestCase {
                 new AllocatedCapacity(new Fraction(2 * 3, 1), 512 * 3));
         solver.setUnallocatedCapacity(unallocatedCapacity);
         solver.setMinimumNumberOfMachines(1);
-        solver.solveManualCapacity(new AllocatedCapacity(Fraction.TWO, 512));
+        solver.solveManualCapacityScaleOut(new AllocatedCapacity(Fraction.TWO, 512));
         Assert.assertTrue(solver.getDeallocatedCapacityResult().equalsZero());
         AggregatedAllocatedCapacity allocatedCapacity = solver.getAllocatedCapacityResult();
         Assert.assertTrue(allocatedCapacity.getAgentUids().contains(AGENT1_UID));
@@ -210,7 +210,7 @@ public class BinPackingSolverTest extends TestCase {
     public void testCapacityOverflow() {
         BinPackingSolver solver = new BinPackingSolver();
         solver.setAllocatedCapacityForPu(new AggregatedAllocatedCapacity());
-        solver.setContainerMemoryCapacityInMB(new AllocatedCapacity(Fraction.TWO, 512).getMemoryInMB());
+        solver.setContainerMemoryCapacityInMB(512);
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(MAX_MEMORY_MEGABYTES);
         solver.setLogger(logger);
 
@@ -218,7 +218,7 @@ public class BinPackingSolverTest extends TestCase {
                 new AllocatedCapacity(Fraction.TWO, 512));
         solver.setUnallocatedCapacity(unallocatedCapacity);
         solver.setMinimumNumberOfMachines(1);
-        solver.solveManualCapacity(new AllocatedCapacity(new Fraction(2 * 2, 1), 512 * 2));
+        solver.solveManualCapacityScaleOut(new AllocatedCapacity(new Fraction(2 * 2, 1), 512 * 2));
         Assert.assertTrue(solver.getDeallocatedCapacityResult().equalsZero());
         AggregatedAllocatedCapacity allocatedCapacity = solver.getAllocatedCapacityResult();
         Assert.assertTrue(allocatedCapacity.getAgentUids().contains(AGENT1_UID));
@@ -235,7 +235,7 @@ public class BinPackingSolverTest extends TestCase {
         BinPackingSolver solver = new BinPackingSolver();
         solver.setAllocatedCapacityForPu(new AggregatedAllocatedCapacity().add(AGENT1_UID, new AllocatedCapacity(
                 new Fraction(2 * 2, 1), 512 * 2)));
-        solver.setContainerMemoryCapacityInMB(new AllocatedCapacity(Fraction.TWO, 512).getMemoryInMB());
+        solver.setContainerMemoryCapacityInMB(512);
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(MAX_MEMORY_MEGABYTES);
         solver.setLogger(logger);
 
@@ -243,7 +243,7 @@ public class BinPackingSolverTest extends TestCase {
                 new AllocatedCapacity(Fraction.TWO, 512));
         solver.setUnallocatedCapacity(unallocatedCapacity);
         solver.setMinimumNumberOfMachines(1);
-        solver.solveManualCapacity(new AllocatedCapacity(Fraction.ZERO, 512));
+        solver.solveManualCapacityScaleOut(new AllocatedCapacity(Fraction.ZERO, 512));
         Assert.assertTrue(solver.getDeallocatedCapacityResult().equalsZero());
         AggregatedAllocatedCapacity allocatedCapacity = solver.getAllocatedCapacityResult();
         Assert.assertTrue(allocatedCapacity.getAgentUids().contains(AGENT1_UID));
@@ -260,7 +260,7 @@ public class BinPackingSolverTest extends TestCase {
         BinPackingSolver solver = new BinPackingSolver();
         solver.setAllocatedCapacityForPu(new AggregatedAllocatedCapacity().add(AGENT1_UID, new AllocatedCapacity(
                 new Fraction(2 * 2, 1), 512 * 2)));
-        solver.setContainerMemoryCapacityInMB(new AllocatedCapacity(Fraction.TWO, 512).getMemoryInMB());
+        solver.setContainerMemoryCapacityInMB(512);
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(MAX_MEMORY_MEGABYTES);
         solver.setLogger(logger);
 
@@ -268,7 +268,7 @@ public class BinPackingSolverTest extends TestCase {
                 new AllocatedCapacity(Fraction.TWO, 0));
         solver.setUnallocatedCapacity(unallocatedCapacity);
         solver.setMinimumNumberOfMachines(1);
-        solver.solveManualCapacity(new AllocatedCapacity(Fraction.ZERO, 512));
+        solver.solveManualCapacityScaleOut(new AllocatedCapacity(Fraction.ZERO, 512));
         Assert.assertTrue(solver.getDeallocatedCapacityResult().equalsZero());
         AggregatedAllocatedCapacity allocatedCapacity = solver.getAllocatedCapacityResult();
         Assert.assertFalse(allocatedCapacity.getAgentUids().contains(AGENT1_UID));
@@ -282,7 +282,7 @@ public class BinPackingSolverTest extends TestCase {
         BinPackingSolver solver = new BinPackingSolver();
         solver.setAllocatedCapacityForPu(new AggregatedAllocatedCapacity().add(AGENT1_UID, new AllocatedCapacity(
                 Fraction.TWO, 512)));
-        solver.setContainerMemoryCapacityInMB(new AllocatedCapacity(Fraction.TWO, 512).getMemoryInMB());
+        solver.setContainerMemoryCapacityInMB(512);
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(MAX_MEMORY_MEGABYTES);
         solver.setLogger(logger);
 
@@ -293,7 +293,7 @@ public class BinPackingSolverTest extends TestCase {
         AllocatedCapacity capacityToAllocate = new AllocatedCapacity(
                 new AllocatedCapacity(Fraction.TWO, 512).getCpuCores(), 0);
         solver.setMinimumNumberOfMachines(1);
-        solver.solveManualCapacity(capacityToAllocate);
+        solver.solveManualCapacityScaleOut(capacityToAllocate);
         Assert.assertTrue(solver.getDeallocatedCapacityResult().equalsZero());
         AggregatedAllocatedCapacity allocatedCapacity = solver.getAllocatedCapacityResult();
         Assert.assertTrue(allocatedCapacity.getAgentUids().contains(AGENT1_UID));
@@ -307,10 +307,12 @@ public class BinPackingSolverTest extends TestCase {
     @Test
     public void testIncrementalCpuCoreCapacityWithDeallocation() {
         BinPackingSolver solver = new BinPackingSolver();
-        solver.setAllocatedCapacityForPu(new AggregatedAllocatedCapacity().add(AGENT1_UID,
-                new AllocatedCapacity(Fraction.TWO, 512)).add(AGENT2_UID, new AllocatedCapacity(new Fraction(4), 1024)));
+        solver.setAllocatedCapacityForPu(
+                new AggregatedAllocatedCapacity()
+                .add(AGENT1_UID,new AllocatedCapacity(Fraction.TWO, 512))
+                .add(AGENT2_UID, new AllocatedCapacity(new Fraction(4), 1024)));
 
-        solver.setContainerMemoryCapacityInMB(new AllocatedCapacity(Fraction.TWO, 512).getMemoryInMB());
+        solver.setContainerMemoryCapacityInMB(512);
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(512 * 100);
         solver.setLogger(logger);
 
@@ -320,10 +322,10 @@ public class BinPackingSolverTest extends TestCase {
 
         AllocatedCapacity capacityToAllocate = new AllocatedCapacity(new Fraction(6), 0);
         solver.setMinimumNumberOfMachines(1);
-        solver.solveManualCapacity(capacityToAllocate);
+        solver.solveManualCapacityScaleOut(capacityToAllocate);
         AggregatedAllocatedCapacity deallocatedCapacity = solver.getDeallocatedCapacityResult();
-        Assert.assertTrue(deallocatedCapacity.getAgentUids().contains(AGENT2_UID));
         Assert.assertEquals(1, deallocatedCapacity.getAgentUids().size());
+        Assert.assertTrue(deallocatedCapacity.getAgentUids().contains(AGENT2_UID));
         Assert.assertEquals(new AllocatedCapacity(Fraction.ZERO, 512), deallocatedCapacity.getAgentCapacity(AGENT2_UID));
 
         AggregatedAllocatedCapacity allocatedCapacity = solver.getAllocatedCapacityResult();
@@ -352,7 +354,7 @@ public class BinPackingSolverTest extends TestCase {
 
         AllocatedCapacity capacityToAllocate = new AllocatedCapacity(new Fraction(4), 1024);
         solver.setMinimumNumberOfMachines(1);
-        solver.solveManualCapacity(capacityToAllocate);
+        solver.solveManualCapacityScaleOut(capacityToAllocate);
         AggregatedAllocatedCapacity deallocatedCapacity = solver.getDeallocatedCapacityResult();
         Assert.assertTrue(deallocatedCapacity.equalsZero());
 
@@ -380,7 +382,7 @@ public class BinPackingSolverTest extends TestCase {
 
         AllocatedCapacity capacityToAllocate = new AllocatedCapacity(new Fraction(2 * 3), 512 * 3);
         solver.setMinimumNumberOfMachines(2);
-        solver.solveManualCapacity(capacityToAllocate);
+        solver.solveManualCapacityScaleOut(capacityToAllocate);
         AggregatedAllocatedCapacity deallocatedCapacity = solver.getDeallocatedCapacityResult();
         Assert.assertTrue(deallocatedCapacity.equalsZero());
 
@@ -396,7 +398,7 @@ public class BinPackingSolverTest extends TestCase {
     public void testCapacitySixContainersThreeMachines() {
         BinPackingSolver solver = new BinPackingSolver();
         solver.setAllocatedCapacityForPu(new AggregatedAllocatedCapacity());
-        solver.setContainerMemoryCapacityInMB(new AllocatedCapacity(Fraction.TWO, 512).getMemoryInMB());
+        solver.setContainerMemoryCapacityInMB(512);
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(MAX_MEMORY_MEGABYTES);
         solver.setLogger(logger);
 
@@ -407,7 +409,7 @@ public class BinPackingSolverTest extends TestCase {
 
         solver.setUnallocatedCapacity(unallocatedCapacity);
         solver.setMinimumNumberOfMachines(2);
-        solver.solveManualCapacity(new AllocatedCapacity(new Fraction(2 * 6), 512 * 6));
+        solver.solveManualCapacityScaleOut(new AllocatedCapacity(new Fraction(2 * 6), 512 * 6));
         AggregatedAllocatedCapacity allocatedCapacity = solver.getAllocatedCapacityResult();
         Assert.assertTrue(solver.getDeallocatedCapacityResult().equalsZero());
         Assert.assertEquals(2, allocatedCapacity.getAgentUids().size());
@@ -425,7 +427,7 @@ public class BinPackingSolverTest extends TestCase {
     public void testCapacitySixContainersThreeMachinesThatCanHoldTwoEach() {
         BinPackingSolver solver = new BinPackingSolver();
         solver.setAllocatedCapacityForPu(new AggregatedAllocatedCapacity());
-        solver.setContainerMemoryCapacityInMB(new AllocatedCapacity(Fraction.TWO, 512).getMemoryInMB());
+        solver.setContainerMemoryCapacityInMB(512);
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(MAX_MEMORY_MEGABYTES);
         solver.setLogger(logger);
 
@@ -436,7 +438,7 @@ public class BinPackingSolverTest extends TestCase {
                 twoPrimariesOneBackupCapacity);
         solver.setUnallocatedCapacity(unallocatedCapacity);
         solver.setMinimumNumberOfMachines(2);
-        solver.solveManualCapacity(SIX_PRIMARY_CONTAINER_CAPACITY);
+        solver.solveManualCapacityScaleOut(SIX_PRIMARY_CONTAINER_CAPACITY);
         Assert.assertTrue(solver.getDeallocatedCapacityResult().equalsZero());
         solver.getAllocatedCapacityResult();
         AggregatedAllocatedCapacity allocatedCapacity = solver.getAllocatedCapacityResult();
@@ -456,7 +458,7 @@ public class BinPackingSolverTest extends TestCase {
 
         BinPackingSolver solver = new BinPackingSolver();
         solver.setAllocatedCapacityForPu(new AggregatedAllocatedCapacity());
-        solver.setContainerMemoryCapacityInMB(new AllocatedCapacity(Fraction.TWO, 512).getMemoryInMB());
+        solver.setContainerMemoryCapacityInMB(512);
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(MAX_MEMORY_MEGABYTES);
         solver.setLogger(logger);
 
@@ -492,8 +494,8 @@ public class BinPackingSolverTest extends TestCase {
                 .add(AGENT1_UID, new AllocatedCapacity(new Fraction(500), 512 * 500))
                 .add(AGENT2_UID, new AllocatedCapacity(new Fraction(500), 512 * 500)));
 
-        solver.setContainerMemoryCapacityInMB(new AllocatedCapacity(Fraction.ONE, 512).getMemoryInMB());
-        solver.setMaxAllocatedMemoryCapacityOfPuInMB(new AllocatedCapacity(new Fraction(nMACHINES), 512 * nMACHINES).getMemoryInMB() * 100);
+        solver.setContainerMemoryCapacityInMB(512);
+        solver.setMaxAllocatedMemoryCapacityOfPuInMB(512 * nMACHINES * 100); // max = infinity
         solver.setLogger(logger);
 
         AggregatedAllocatedCapacity unallocatedCapacity = new AggregatedAllocatedCapacity();
@@ -505,9 +507,9 @@ public class BinPackingSolverTest extends TestCase {
         solver.setUnallocatedCapacity(unallocatedCapacity);
         solver.setMinimumNumberOfMachines(2);
         // goal - scale to nMACHINES machines.
-        // result should be that the solver will move 998 containers from the two machines into the 998 free machines
+        // result should be that the solver will add 998 containers in the 998 free machines
         // occupying 1 container per machine.
-        solver.solveManualCapacity(new AllocatedCapacity(new Fraction(nMACHINES), 0));
+        solver.solveManualCapacityScaleOut(new AllocatedCapacity(new Fraction(nMACHINES), 0));
         Assert.assertEquals(0, solver.getDeallocatedCapacityResult().getAgentUids().size());
         Assert.assertEquals(Fraction.ZERO, solver.getDeallocatedCapacityResult().getTotalAllocatedCapacity().getCpuCores());
         Assert.assertEquals(0, solver.getDeallocatedCapacityResult().getTotalAllocatedCapacity().getMemoryInMB());
@@ -535,7 +537,7 @@ public class BinPackingSolverTest extends TestCase {
         //allocate nMACHINES machines each with - 1 containers. Each container with 512 MB needing 1 CPU
         solver.setAllocatedCapacityForPu(allocatedCapacity);
 
-        solver.setContainerMemoryCapacityInMB(new AllocatedCapacity(Fraction.ONE, 512).getMemoryInMB());
+        solver.setContainerMemoryCapacityInMB(512);
         
         //twice as much as we currently have allocated
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(new AllocatedCapacity(new Fraction(2000), 2 * 512 * nMACHINES).getMemoryInMB() * 100);
@@ -551,7 +553,7 @@ public class BinPackingSolverTest extends TestCase {
         solver.setMinimumNumberOfMachines(2);
         // goal - scale by 512 MB.
         // result should be that the solver will not be able to move any containers
-        solver.solveManualCapacity(new AllocatedCapacity(Fraction.ZERO, 512));
+        solver.solveManualCapacityScaleOut(new AllocatedCapacity(Fraction.ZERO, 512));
         
         Assert.assertEquals(0, solver.getDeallocatedCapacityResult().getAgentUids().size());
         Assert.assertEquals(Fraction.ZERO, solver.getDeallocatedCapacityResult().getTotalAllocatedCapacity().getCpuCores());
@@ -578,7 +580,7 @@ public class BinPackingSolverTest extends TestCase {
         
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(new AllocatedCapacity(new Fraction(100), 1024).getMemoryInMB() * 100);
         solver.setMinimumNumberOfMachines(2);
-        solver.solveManualCapacity(new AllocatedCapacity(new Fraction(1), 0));
+        solver.solveManualCapacityScaleOut(new AllocatedCapacity(new Fraction(1), 0));
         
         Assert.assertEquals(new Fraction(6), solver.getAllocatedCapacityForPu().getTotalAllocatedCapacity().getCpuCores());
         Assert.assertEquals(640, solver.getAllocatedCapacityForPu().getTotalAllocatedCapacity().getMemoryInMB());
@@ -616,7 +618,7 @@ public class BinPackingSolverTest extends TestCase {
 
         solver.setUnallocatedCapacity(unallocatedCapacity);
         solver.setMinimumNumberOfMachines(2);
-        solver.solveManualCapacity(new AllocatedCapacity(new Fraction(2),0));
+        solver.solveManualCapacityScaleOut(new AllocatedCapacity(new Fraction(2),0));
         
         Assert.assertEquals(new AllocatedCapacity(new Fraction(2),250),solver.getAllocatedCapacityResult().getTotalAllocatedCapacity());
         Assert.assertEquals(new AllocatedCapacity(new Fraction(0),250),solver.getDeallocatedCapacityResult().getTotalAllocatedCapacity());
@@ -647,7 +649,7 @@ public class BinPackingSolverTest extends TestCase {
 
         solver.setUnallocatedCapacity(unallocatedCapacity);
         solver.setMinimumNumberOfMachines(2);
-        solver.solveManualCapacity(new AllocatedCapacity(new Fraction(4),0));
+        solver.solveManualCapacityScaleOut(new AllocatedCapacity(new Fraction(4),0));
         
         Assert.assertEquals(new AllocatedCapacity(new Fraction(2),250),solver.getAllocatedCapacityResult().getTotalAllocatedCapacity());
         Assert.assertEquals(new AllocatedCapacity(new Fraction(0),0),solver.getDeallocatedCapacityResult().getTotalAllocatedCapacity());
@@ -673,10 +675,76 @@ public class BinPackingSolverTest extends TestCase {
 
         solver.setUnallocatedCapacity(unallocatedCapacity);
         solver.setMinimumNumberOfMachines(1);
-        solver.solveManualCapacity(new AllocatedCapacity(new Fraction(4),12*250));
+        solver.solveManualCapacityScaleOut(new AllocatedCapacity(new Fraction(4),12*250));
         
         Assert.assertEquals(new AllocatedCapacity(new Fraction(2),12*250),solver.getAllocatedCapacityResult().getTotalAllocatedCapacity());
         Assert.assertEquals(new AllocatedCapacity(new Fraction(0),0),solver.getDeallocatedCapacityResult().getTotalAllocatedCapacity());
         
    }
+    
+
+    /**
+     * Tests no allocation of a fourth machine due to max memory limit
+     */
+    @Test
+    public void testFourMachinesCpuScaleIn() {
+        BinPackingSolver solver = new BinPackingSolver();
+        solver.setAllocatedCapacityForPu(
+                new AggregatedAllocatedCapacity()
+                .add(AGENT1_UID,new AllocatedCapacity(new Fraction(2), 250))
+                .add(AGENT2_UID,new AllocatedCapacity(new Fraction(2), 250))
+                .add(AGENT3_UID,new AllocatedCapacity(new Fraction(2), 500))
+                .add(AGENT4_UID,new AllocatedCapacity(new Fraction(2), 500)));
+        
+        solver.setContainerMemoryCapacityInMB(250);
+        solver.setMaxAllocatedMemoryCapacityOfPuInMB(8*250);
+        solver.setLogger(logger);
+
+        AggregatedAllocatedCapacity unallocatedCapacity = 
+            new AggregatedAllocatedCapacity()
+            .add(AGENT1_UID,new AllocatedCapacity(new Fraction(0), 250))
+            .add(AGENT2_UID,new AllocatedCapacity(new Fraction(0), 250));
+            
+
+        solver.setUnallocatedCapacity(unallocatedCapacity);
+        solver.setMinimumNumberOfMachines(1);
+        solver.solveManualCapacityScaleIn(new AllocatedCapacity(new Fraction(0),500));
+        
+        Assert.assertEquals(new AllocatedCapacity(new Fraction(0),0),solver.getAllocatedCapacityResult().getTotalAllocatedCapacity());
+        Assert.assertEquals(new AllocatedCapacity(new Fraction(0),500),solver.getDeallocatedCapacityResult().getTotalAllocatedCapacity());
+   }
+    
+    /**
+     * Tests deallocation of one container accross all machines
+     */
+    @Test
+    public void testScaleInAccrossAllMachines() {
+        BinPackingSolver solver = new BinPackingSolver();
+        solver.setAllocatedCapacityForPu(
+                new AggregatedAllocatedCapacity()
+                .add(AGENT1_UID, new AllocatedCapacity(new Fraction(4), 1024))
+                .add(AGENT2_UID, new AllocatedCapacity(new Fraction(8), 2048))
+                .add(AGENT3_UID, new AllocatedCapacity(new Fraction(4), 1024)));
+
+        solver.setContainerMemoryCapacityInMB(512);
+        solver.setMaxAllocatedMemoryCapacityOfPuInMB(512 * 100);
+        solver.setLogger(logger);
+        solver.setUnallocatedCapacity(new AggregatedAllocatedCapacity());
+        solver.setMinimumNumberOfMachines(1);
+        
+        AllocatedCapacity capacityToDeallocate = new AllocatedCapacity(new Fraction(0), 512+1024+512);
+        solver.solveManualCapacityScaleIn(capacityToDeallocate);
+        
+        AggregatedAllocatedCapacity allocatedCapacity = solver.getAllocatedCapacityResult();
+        Assert.assertEquals(0, allocatedCapacity.getAgentUids().size());
+        
+        AggregatedAllocatedCapacity deallocatedCapacity = solver.getDeallocatedCapacityResult();
+        Assert.assertEquals(3, deallocatedCapacity.getAgentUids().size());
+        Assert.assertEquals(new AllocatedCapacity(Fraction.ZERO, 512), deallocatedCapacity.getAgentCapacity(AGENT1_UID));
+        Assert.assertEquals(new AllocatedCapacity(Fraction.ZERO, 1024), deallocatedCapacity.getAgentCapacity(AGENT2_UID));
+        Assert.assertEquals(new AllocatedCapacity(Fraction.ZERO, 512), deallocatedCapacity.getAgentCapacity(AGENT3_UID));
+
+        
+        
+    }
 }
