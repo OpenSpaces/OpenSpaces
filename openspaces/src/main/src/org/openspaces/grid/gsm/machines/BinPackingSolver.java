@@ -697,7 +697,7 @@ public class BinPackingSolver {
         }
         
         if (logger.isDebugEnabled()) {
-            logger.debug("BinPackingSolver: number of machines " + numberOfMachines + " unallocatedCapacity="+unallocatedCapacity.toDetailedString() + " allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() + " deallocatedCapacityResult="+this.getDeallocatedCapacityResult());
+            logger.debug("BinPackingSolver: number of machines " + numberOfMachines + " allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() + " deallocatedCapacityResult="+this.getDeallocatedCapacityResult());
         }
 
     }
@@ -761,7 +761,7 @@ public class BinPackingSolver {
         
 
         if (logger.isDebugEnabled()) {
-            logger.debug("BinPackingSolver: containerMemoryCapacityInMB=" + containerMemoryCapacityInMB+ " maxMemoryCapacityInMB="+maxMemoryCapacityInMB + " allocatedCapacityForPu="+allocatedCapacityForPu.toDetailedString() + " minimumNumberOfMachines="+minimumNumberOfMachines);
+            logger.debug("BinPackingSolver: containerMemoryCapacityInMB=" + containerMemoryCapacityInMB+ " maxMemoryCapacityInMB="+maxMemoryCapacityInMB + " unallocatedCapacity="+unallocatedCapacity.toDetailedString() + " allocatedCapacityForPu="+allocatedCapacityForPu.toDetailedString() + " minimumNumberOfMachines="+minimumNumberOfMachines);
         }
         
     }
