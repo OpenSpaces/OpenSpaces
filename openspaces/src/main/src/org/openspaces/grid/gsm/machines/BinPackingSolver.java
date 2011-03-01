@@ -698,7 +698,7 @@ public class BinPackingSolver {
         String agentUidToRemoveContainer = null;
         
         for (String agentUid : allocatedCapacityForPu.getAgentUids()) {
-            long unallocated = unallocatedCapacity.getAgentCapacity(agentUid).getMemoryInMB();
+            long unallocated = unallocatedCapacity.getAgentCapacityOrZero(agentUid).getMemoryInMB();
             long allocatedByPu = allocatedCapacityForPu.getAgentCapacity(agentUid).getMemoryInMB();
             if (allocatedByPu >= containerMemoryCapacityInMB*2 && maxUnallocatedMemoryInMB < unallocated) {
                 maxUnallocatedMemoryInMB = unallocated;
@@ -763,7 +763,7 @@ public class BinPackingSolver {
             
             if (capacityToAllocateOnAgent.isMemoryEqualsZero() &&
                 (!allocatedCapacityForPu.getAgentUids().contains(agentUid) ||
-                 allocatedCapacityForPu.getAgentCapacity(agentUid).isMemoryEqualsZero())) {
+                 allocatedCapacityForPu.getAgentCapacityOrZero(agentUid).isMemoryEqualsZero())) {
                     logger.debug("Cannot allocate on agent " + agentUid + " without memory, since it does not already have any memory allocated");
                     continue;
             }
