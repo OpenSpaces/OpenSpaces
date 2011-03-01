@@ -82,6 +82,9 @@ public class BinPackingSolver {
 
     public void solveManualCapacity(AllocatedCapacity capacityToAllocate) {
     
+        if (logger.isDebugEnabled()) {
+            logger.debug("Solving manual capacity " + capacityToAllocate);
+        }
         validate();
                 
         AllocatedCapacity goalCapacity = getGoalCapacity(capacityToAllocate); // allocatedForPu + capacityToAllocate
@@ -650,6 +653,10 @@ public class BinPackingSolver {
 
     public void solveNumberOfMachines(int numberOfMachines) {
         
+        if (logger.isDebugEnabled()) {
+            logger.debug("Solving number of machines " + numberOfMachines);
+        }
+        
         validate();
         
         //remove all agents that already have a pu allocation, since we are looking only for new machines
@@ -748,6 +755,11 @@ public class BinPackingSolver {
         
         if (minimumNumberOfMachines == 0) {
             throw new IllegalArgumentException("minimumNumberOfMachines");
+        }
+        
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Solver containerMemoryCapacityInMB=" + containerMemoryCapacityInMB+ " maxMemoryCapacityInMB="+maxMemoryCapacityInMB + " allocatedCapacityForPu="+allocatedCapacityForPu.toDetailedString() + " minimumNumberOfMachines="+minimumNumberOfMachines);
         }
         
     }
