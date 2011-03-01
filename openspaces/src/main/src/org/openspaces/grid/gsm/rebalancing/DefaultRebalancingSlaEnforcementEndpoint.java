@@ -71,19 +71,19 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
             throw new ServiceLevelAgreementEnforcementEndpointDestroyedException();
         }
         
-        Set<String> agentUidsFromContainers = new HashSet<String>();
+        
+        Collection<String> agentUids = sla.getAllocatedCapacity().getAgentUids();
         for (GridServiceContainer container : sla.getContainers()) {
             if (container.getGridServiceAgent() == null) {
                 throw new IllegalStateException("container " + RebalancingUtils.gscToString(container) + " has no agent.");
             }
-            agentUidsFromContainers.add(container.getGridServiceAgent().getUid());
-        }
-        Collection<String> agentUids = sla.getAllocatedCapacity().getAgentUids();
-        if (!agentUids.equals(agentUidsFromContainers)) {           
-            throw new IllegalArgumentException(
-                    "List of agents and list of agents from containers do not match, "+
-                    "agentUids="+agentUids.toString()+" "+
-                    "agentUidsFromContainers="+agentUidsFromContainers.toString());
+            
+            if (!agentUids.contains(container.getGridServiceAgent().getUid())) {
+                throw new IllegalArgumentException(
+                        "List of agents must be a superset of agents that started the containers, "+
+                        "agentUids="+agentUids.toString()+" "+
+                        "does not include agent " + container.getGridServiceAgent().getUid());
+            }
         }
         
         String zone = pu.getRequiredZones()[0];
