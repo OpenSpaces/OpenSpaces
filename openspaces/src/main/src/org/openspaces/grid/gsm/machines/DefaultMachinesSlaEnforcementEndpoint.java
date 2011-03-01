@@ -909,17 +909,26 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
     private void allocateCapacity(AggregatedAllocatedCapacity capacityToAllocate) {
         for (String agentUid : capacityToAllocate.getAgentUids()) {
             state.allocateCapacity(pu, agentUid, capacityToAllocate.getAgentCapacity(agentUid));
+            if (logger.isDebugEnabled()) {
+                logger.debug("allocating capacity "+capacityToAllocate.getAgentCapacity(agentUid) + " on agent uid " + agentUid);
+            }
         }
     }
     
     private void markCapacityForDeallocation(AggregatedAllocatedCapacity capacityToMarkForDeallocation) {
         for (String agentUid : capacityToMarkForDeallocation.getAgentUids()) {
             state.markCapacityForDeallocation(pu, agentUid, capacityToMarkForDeallocation.getAgentCapacity(agentUid));
+            if (logger.isDebugEnabled()) {
+                logger.debug("marking capacity for deallocation "+capacityToMarkForDeallocation.getAgentCapacity(agentUid) + " on agent uid " + agentUid);
+            }
         }
     }
 
     private void allocateNumberOfMachines(int numberOfFreeAgents, AbstractMachinesSlaPolicy sla) {
         AggregatedAllocatedCapacity unallocatedCapacity = getUnallocatedCapacity(sla);
+        if (logger.isDebugEnabled()) {
+            logger.debug("unallocated capacity="+unallocatedCapacity);
+        }
         allocateNumberOfMachines(numberOfFreeAgents, sla, unallocatedCapacity);
     }
 
