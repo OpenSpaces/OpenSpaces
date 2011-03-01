@@ -833,6 +833,23 @@ private static GridServiceContainer[] getContainers(final ProcessingUnit pu) {
                 new Comparator<Machine>() {
 
                 public int compare(final Machine m1, final Machine m2) {
+                    
+                    if (getNumberOfCpuCores(m1,allocatedCapacity).equals(Fraction.ZERO) &&
+                        getNumberOfCpuCores(m2,allocatedCapacity).equals(Fraction.ZERO)) {
+                        // no cpu cores allocated on neither m1 nor m2
+                        // return the machine that has the most number of primaries
+                        return getNumberOfPrimaryInstancesOnMachine(pu, m1) - getNumberOfPrimaryInstancesOnMachine(pu, m2);
+                    }
+                    else if (getNumberOfCpuCores(m2,allocatedCapacity).equals(Fraction.ZERO)) {
+                        // primaries per cpu cores in machine2 is infinity (divide by zero cpu)
+                        // machine2 is bigger
+                        return -1;
+                    }
+                    else if (getNumberOfCpuCores(m1,allocatedCapacity).equals(Fraction.ZERO)) {
+                        // primaries per cpu cores in machine1 is infinity (divide by zero cpu)
+                        // machine1 is bigger
+                        return 1;
+                    }
                     return 
                         getNumberOfPrimaryInstancesPerCpuCore(pu,m1,allocatedCapacity)
                         .compareTo(
