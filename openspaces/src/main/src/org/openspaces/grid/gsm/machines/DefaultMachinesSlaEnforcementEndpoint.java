@@ -1050,7 +1050,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         private static final long serialVersionUID = 1L;
 
         NeedMoreMachinesException(int machineShortage) {
-            super("Cannot enforce Containers SLA since there are not enough machines available. "+
+            super("Cannot enforce Machines SLA since there are not enough machines available. "+
                   "Need " + machineShortage + " more machines");
         }
     }
@@ -1060,7 +1060,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         private static final long serialVersionUID = 1L;
 
         ScaleInObstructedException() {
-            super("Cannot enforce Containers SLA since there are agents that need to be scaled in, but they are still running containers");
+            super("Cannot enforce Machines SLA since there are agents that need to be scaled in, but they are still running containers");
         }
     }
 
