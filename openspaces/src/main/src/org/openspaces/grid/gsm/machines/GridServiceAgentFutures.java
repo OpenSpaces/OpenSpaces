@@ -74,7 +74,7 @@ class GridServiceAgentFutures {
         // add all future grid service agents
         for (FutureGridServiceAgent futureAgent: futureAgents) {
             
-            if (futureAgent.isDone() && futureAgent.getException() != null) {
+            if (futureAgent.isDone() && futureAgent.getException() == null) {
                 
                 try {
                     agents.add(futureAgent.get());
