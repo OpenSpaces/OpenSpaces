@@ -41,6 +41,16 @@ public class AggregatedAllocatedCapacity {
         return capacityPerAgent.size() + " machines with total capacity of " + getTotalAllocatedCapacity();
     }
     
+    public String toDetailedString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("numberOfMachines:" + capacityPerAgent.size() + " , totalCapacity:" + getTotalAllocatedCapacity()+", details:{");
+        for (String agentUid : capacityPerAgent.keySet()) {
+            builder.append(agentUid + ":" + capacityPerAgent.get(agentUid)+" , ");
+        }
+        builder.append("}");
+        return builder.toString();
+    }
+    
     public AggregatedAllocatedCapacity add(AggregatedAllocatedCapacity other) {
         if (other.equalsZero()) {
             return this;

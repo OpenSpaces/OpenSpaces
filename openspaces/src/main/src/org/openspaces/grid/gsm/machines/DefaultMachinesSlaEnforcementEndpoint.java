@@ -926,9 +926,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
 
     private void allocateNumberOfMachines(int numberOfFreeAgents, AbstractMachinesSlaPolicy sla) {
         AggregatedAllocatedCapacity unallocatedCapacity = getUnallocatedCapacity(sla);
-        if (logger.isDebugEnabled()) {
-            logger.debug("unallocated capacity="+unallocatedCapacity);
-        }
         allocateNumberOfMachines(numberOfFreeAgents, sla, unallocatedCapacity);
     }
 
@@ -984,6 +981,10 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 unallocatedCapacity = 
                     unallocatedCapacity.add(agentUid, unallocatedCapacityOnAgent);
             }
+        }
+        
+        if (logger.isDebugEnabled()) {
+            logger.debug("physicalCapacity"+physicalCapacity.toDetailedString()+" usedCapacity="+usedCapacity.toDetailedString()+" restrictedAgentUids="+restrictedAgentUids+" unallocatedCapacity="+unallocatedCapacity.toDetailedString());
         }
         
         return unallocatedCapacity;
