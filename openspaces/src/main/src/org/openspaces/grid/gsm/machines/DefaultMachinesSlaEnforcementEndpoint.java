@@ -321,8 +321,11 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                         sla.getMinimumNumberOfMachines() + " machines. " +
                         "Allocated machine agents are: " + state.getAllocatedCapacity(pu));
                 
-                throw new OperationInProgressException();
             }
+            
+            // even if machineShortage is 0, we still need to come back to this method 
+            // to check the capacity is satisfied (scale out)
+            throw new OperationInProgressException();
         }
         
         else if (!capacityAllocatedAndMarked.getTotalAllocatedCapacity().satisfies(target)) {
