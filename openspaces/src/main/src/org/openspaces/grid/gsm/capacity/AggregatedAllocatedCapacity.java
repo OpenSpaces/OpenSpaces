@@ -43,7 +43,7 @@ public class AggregatedAllocatedCapacity {
     
     public String toDetailedString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("numberOfMachines:" + capacityPerAgent.size() + " , totalCapacity:" + getTotalAllocatedCapacity()+", details:{");
+        builder.append("totalNumberOfMachines:" + capacityPerAgent.size() + " , totalCapacity:" + getTotalAllocatedCapacity()+", details:{");
         for (String agentUid : capacityPerAgent.keySet()) {
             builder.append(agentUid + ":" + capacityPerAgent.get(agentUid)+" , ");
         }
