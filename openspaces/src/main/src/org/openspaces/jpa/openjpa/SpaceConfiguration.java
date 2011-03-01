@@ -62,8 +62,18 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
         }
         
         // Set read lock level (modifier)
-        _readModifier = getReadLockLevel().equals("write") ? ReadModifiers.EXCLUSIVE_READ_LOCK
-                : ReadModifiers.REPEATABLE_READ;        
+        if(getReadLockLevel().equals("write"))
+        {
+            _readModifier = ReadModifiers.EXCLUSIVE_READ_LOCK;
+        }else if(getOptimistic())
+        {
+            //use read committed isolation level for optimistic locking - to avoid object locking on read operation
+            _readModifier = ReadModifiers.READ_COMMITTED;
+        }
+        else
+        {
+            _readModifier =  ReadModifiers.REPEATABLE_READ;
+        }
     }
         
     public IJSpace getSpace() {
