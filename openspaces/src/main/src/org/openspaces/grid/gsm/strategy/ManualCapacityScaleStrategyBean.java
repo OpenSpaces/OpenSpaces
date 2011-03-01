@@ -3,7 +3,6 @@ package org.openspaces.grid.gsm.strategy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.openspaces.admin.AdminException;
 import org.openspaces.admin.alert.AlertFactory;
@@ -102,10 +101,6 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
                 targetNumberOfContainers);
         
         return targetNumberOfContainers;
-    }
-
-    public void setProperties(Map<String, String> properties) {
-        slaConfig = new ManualCapacityScaleConfig(properties);       
     }
 
     @Override
