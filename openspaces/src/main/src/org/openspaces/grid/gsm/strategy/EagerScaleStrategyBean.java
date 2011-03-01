@@ -109,6 +109,9 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
                 }
             }
         }
+        catch (AgentsNotYetDiscoveredException e) {
+            getLogger().debug("Existing agents not discovered yet",e);
+        }
         catch (ServiceLevelAgreementEnforcementEndpointDestroyedException e) {
             getLogger().debug("AdminService was destroyed",e);
         }
@@ -121,7 +124,7 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
         
     }
 
-    private boolean enforceMachinesSla() {
+    private boolean enforceMachinesSla() throws AgentsNotYetDiscoveredException {
         
         final EagerMachinesSlaPolicy sla = getEagerMachinesSlaPolicy();
 
@@ -229,7 +232,7 @@ public class EagerScaleStrategyBean extends AbstractScaleStrategyBean
     
 
     
-    private EagerMachinesSlaPolicy getEagerMachinesSlaPolicy() {
+    private EagerMachinesSlaPolicy getEagerMachinesSlaPolicy() throws AgentsNotYetDiscoveredException {
         final EagerMachinesSlaPolicy sla = new EagerMachinesSlaPolicy();      
         sla.setMaximumNumberOfMachines(getMaximumNumberOfInstances());
         sla.setMinimumNumberOfMachines(getMinimumNumberOfMachines());

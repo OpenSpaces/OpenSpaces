@@ -72,6 +72,7 @@ public abstract class AbstractScaleStrategyBean implements
     private boolean syncAgents;
     private FutureGridServiceAgents futureAgents;
     private Collection<GridServiceAgent> agents;
+    private boolean agentsRefreshed;
     
     
     protected InternalAdmin getAdmin() {
@@ -175,6 +176,7 @@ public abstract class AbstractScaleStrategyBean implements
         admin.getGridServiceAgents().getGridServiceAgentRemoved().add(this);
         
         agents = new HashSet<GridServiceAgent>();
+        agentsRefreshed = false;
 
         minimumNumberOfMachines = calcMinimumNumberOfMachines();
         int pollingIntervalSeconds = ScaleStrategyConfigUtils.getPollingIntervalSeconds(properties);
@@ -205,7 +207,10 @@ public abstract class AbstractScaleStrategyBean implements
         this.properties = new StringProperties(properties);
     }
 
-    protected Collection<GridServiceAgent> getDiscoveredAgents() {
+    protected Collection<GridServiceAgent> getDiscoveredAgents() throws AgentsNotYetDiscoveredException {
+        if (!agentsRefreshed) {
+            throw new AgentsNotYetDiscoveredException();
+        }
         return this.agents;
     }
     
@@ -280,10 +285,9 @@ public abstract class AbstractScaleStrategyBean implements
                         logger.debug("Provisioned Agents: " + MachinesSlaUtils.machinesToString(sortedFilteredAgents));
                     }
                     agents = sortedFilteredAgents;
+                    agentsRefreshed=true;
                 }
             }
-        
-
         }
     }
     
@@ -335,5 +339,18 @@ public abstract class AbstractScaleStrategyBean implements
         else {
             return Fraction.ONE;
         }
+    }
+    
+    class AgentsNotYetDiscoveredException extends Exception {
+        private static final long serialVersionUID = 1L; 
+        /**
+         * Override the method to avoid expensive stack build and synchronization,
+         * since no one uses it anyway.
+         */
+        @Override
+        public Throwable fillInStackTrace()
+        {
+            return null;
+        }    
     }
 }

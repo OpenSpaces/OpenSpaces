@@ -156,6 +156,9 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
                 }
             }
         }
+        catch (AgentsNotYetDiscoveredException e) {
+            getLogger().debug("Existing agents not discovered yet",e);
+        }
         catch (ServiceLevelAgreementEnforcementEndpointDestroyedException e) {
             getLogger().debug("AdminService was destroyed",e);
         }
@@ -230,7 +233,7 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
     }
 
 
-    private boolean enforceMachinesSla() {
+    private boolean enforceMachinesSla() throws AgentsNotYetDiscoveredException {
         final CapacityMachinesSlaPolicy sla = new CapacityMachinesSlaPolicy();
         sla.setMachineProvisioning(super.getMachineProvisioning());
         sla.setCpuCapacity(slaConfig.getNumberOfCpuCores());

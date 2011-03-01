@@ -90,6 +90,9 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
                 undeployComplete = true;
             }
         }        
+        catch (AgentsNotYetDiscoveredException e) {
+            getLogger().debug("Existing agents not discovered yet",e);
+        }
         catch (ServiceLevelAgreementEnforcementEndpointDestroyedException e) {
             getLogger().debug("AdminService was destroyed",e);
         }
@@ -106,7 +109,7 @@ public class UndeployScaleStrategyBean extends AbstractScaleStrategyBean
         return undeployComplete;
     }
     
-    private boolean enforceMachinesSla() {
+    private boolean enforceMachinesSla() throws AgentsNotYetDiscoveredException {
         final CapacityMachinesSlaPolicy sla = new CapacityMachinesSlaPolicy();
         NonBlockingElasticMachineProvisioning machineProvisioning = super.getMachineProvisioning();
         sla.setMachineProvisioning(machineProvisioning);
