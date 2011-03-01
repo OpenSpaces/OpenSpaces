@@ -243,8 +243,17 @@ public abstract class AbstractScaleStrategyBean implements
             try {
                 GridServiceAgent[] agents = futureAgents.get();
                 for (GridServiceAgent agent : agents) {
-                    if (agent.isDiscovered() && 
-                        MachinesSlaUtils.isAgentConformsToMachineProvisioningConfig(agent, machineProvisioning.getConfig())) {
+                    if (!agent.isDiscovered()) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Agent " + MachinesSlaUtils.machineToString(agent.getMachine()) + " has shutdown.");
+                        }
+                    }
+                    else if (!MachinesSlaUtils.isAgentConformsToMachineProvisioningConfig(agent, machineProvisioning.getConfig())) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Agent " + MachinesSlaUtils.machineToString(agent.getMachine()) + " does not conform to machine provisioning SLA.");
+                        }
+                    }
+                    else {
                         filteredAgents.add(agent);
                     }
                 }
@@ -267,6 +276,9 @@ public abstract class AbstractScaleStrategyBean implements
                 }
                 else {
                     List<GridServiceAgent> sortedFilteredAgents = MachinesSlaUtils.sortManagementFirst(filteredAgents);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Provisioned Agents: " + MachinesSlaUtils.machinesToString(sortedFilteredAgents));
+                    }
                     agents = sortedFilteredAgents;
                 }
             }
