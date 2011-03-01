@@ -507,32 +507,26 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         AggregatedAllocatedCapacity capacityMarkedForDeallocation = state.getCapacityMarkedForDeallocation(pu);
         for (String agentUid : capacityMarkedForDeallocation.getAgentUids()) {
             
-            AllocatedCapacity agentCapacity = capacityMarkedForDeallocation.getAgentCapacity(agentUid);
-            
             GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
 
             if (agent == null) {
                 state.deallocateAgentCapacity(pu, agentUid);
-                logger.info("pu " + pu.getName() + " deallocated " + agentCapacity + " from agent " + agentUid + " since it has shutdown.");
+                logger.info("pu " + pu.getName() + " agent " + agentUid + " has shutdown.");
             }
             else if (MachinesSlaUtils.getNumberOfChildContainersForProcessingUnit(agent,pu) == 0) {
                     
-                state.deallocateCapacity(pu, agentUid, agentCapacity);
-
-                logger.info("pu " + pu.getName() + " deallocated " + agentCapacity + " from machine "
-                        + agent.getMachine().getHostAddress());
-            
-            
                 if (!sla.isStopMachineSupported()) {
                     logger.info("Agent running on machine " + agent.getMachine().getHostAddress()
                             + " is not stopped since scale strategy " + sla.getScaleStrategyName()
                             + " does not support automatic start/stop of machines");
+                    state.deallocateAgentCapacity(pu, agentUid);
                     continue;
                 }
                 
                 if (!state.getAgentsStartedByMachineProvisioning().contains(agent)) {
                     logger.info("Agent running on machine " + agent.getMachine().getHostAddress()
                             + " is not stopped since it was not started automatically");
+                    state.deallocateAgentCapacity(pu, agentUid);
                     continue;
                 }
                 
@@ -540,12 +534,14 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     logger.info("Agent running on machine " + agent.getMachine().getHostAddress()
                             + " is not stopped since machine provisioning " + sla.getMachineProvisioning().getClass()
                             + "does not support automatic start/stop of machines");
+                    state.deallocateAgentCapacity(pu, agentUid);
                     continue;
                 }
                 
                 if (MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine())) {
                     logger.info("Agent running on machine " + agent.getMachine().getHostAddress()
                             + " is not stopped since it is running management processes.");
+                    state.deallocateAgentCapacity(pu, agentUid);
                     continue;
                 }
                 
@@ -553,6 +549,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                  // This is a bit like reference counting, the last pu to leave stops the machine
                     logger.info("Agent running on machine " + agent.getMachine().getHostAddress()
                             + " is not stopped since it is shared with other processing units.");
+                    state.deallocateAgentCapacity(pu, agentUid);
                     continue;
                 }
                 
