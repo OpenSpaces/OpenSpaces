@@ -199,13 +199,16 @@ public class BinPackingSolver {
                 Fraction goalCpuCoresPerContainerAfterRemovingOneContainer = getCpuCoresPerContainer(1);
                 Fraction cpuCoresToLeaveOnSourceMachine = goalCpuCoresPerContainerAfterRemovingOneContainer.multiply(numberOfContainersOnSourceMachine-1);
                 Fraction cpuCoresToRelocate =  allocatedCapacityOnSourceMachine.getCpuCores().subtract(cpuCoresToLeaveOnSourceMachine);
-                
+                if (cpuCoresToRelocate.compareTo(Fraction.ZERO)<0) {
+                    cpuCoresToRelocate = Fraction.ZERO;
+                }
                 if (relocateCapacityToOtherMachines(sourceAgentUid, new AllocatedCapacity(cpuCoresToRelocate, 0))) {
         
                     //deallocate remaining excess container memory from machine
                     deallocateCapacityOnMachine(sourceAgentUid, new AllocatedCapacity(Fraction.ZERO, containerMemoryCapacityInMB));
                     success = true;
                 }
+            
             }    
             
         }
