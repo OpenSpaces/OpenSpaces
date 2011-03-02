@@ -81,12 +81,37 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
         
         slaConfig = new ManualCapacityScaleConfig(super.getProperties());
                 
-        int targetNumberOfContainers = 
-            slaConfig.getMemoryCapacityInMB() > 0 && getSchemaConfig().isPartitionedSync2BackupSchema() ?
-                    calcTargetNumberOfContainersForPartitionedSchema() :
-                    calcDefaultTargetNumberOfContainers();
+        int targetNumberOfContainers = calcTargetNumberOfContainers();
         
         memoryInMB = targetNumberOfContainers * containersConfig.getMaximumJavaHeapSizeInMB();
+    }
+
+    private int calcTargetNumberOfContainers() {
+        if (slaConfig.getMemoryCapacityInMB() > 0) {
+            if (getSchemaConfig().isPartitionedSync2BackupSchema()) {
+                return calcTargetNumberOfContainersForPartitionedSchema();
+            } else {
+                return calcTargetNumberOfContainersForStateless();
+            }
+        } else {
+            return calcDefaultTargetNumberOfContainers();
+        }
+    }
+
+    private int calcTargetNumberOfContainersForStateless() {
+        int requiredNumberOfContainers = (int)Math.ceil(1.0 * slaConfig.getMemoryCapacityInMB() / containersConfig.getMaximumJavaHeapSizeInMB());
+        int targetNumberOfContainers = Math.max(
+                getMinimumNumberOfMachines(),
+                requiredNumberOfContainers);
+        
+        getLogger().info(
+                "targetNumberOfContainers= "+
+                "max(minimumNumberOfMachines, memory/jvm-size)= "+
+                "max("+ getMinimumNumberOfMachines() +","+
+                requiredNumberOfContainers+")= "+
+                targetNumberOfContainers);
+        
+        return targetNumberOfContainers;
     }
 
     private int calcDefaultTargetNumberOfContainers() {
