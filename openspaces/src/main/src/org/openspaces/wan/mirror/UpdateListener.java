@@ -3,7 +3,6 @@ package org.openspaces.wan.mirror;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 
-import net.jini.core.entry.UnusableEntryException;
 import net.jini.core.lease.Lease;
 
 import org.openspaces.core.GigaSpace;
@@ -205,26 +204,23 @@ public class UpdateListener implements AsyncFutureListener<WanEntry> {
             logger.fine("Message: " + solfe.getMessage());
         }
 
-        if (this.collisionHandler != null) {
-            try {
-                Object obj = packet.getObject();
-                if (obj == null) {
-                    logger.severe("Optimistic Locking failure was detected, " +
-                            "but the entry of class " + packet.getClassName() +
-                            " could not be deseriazlied. " +
-                            "Make sure that the all classes written to the space are available " +
-                            "in the classpath of the GSC. ");
+        if (this.collisionHandler != null)
+        {
+            Object obj = packet.getObject();
+            if (obj == null)
+            {
+                logger.severe("Optimistic Locking failure was detected, " +
+                        "but the entry of class " + packet.getClassName() +
+                        " could not be deseriazlied. " +
+                        "Make sure that the all classes written to the space are available " +
+                        "in the classpath of the GSC. ");
 
-                } else {
-                    this.collisionHandler.handleCollision(obj, entry.getSiteIndex(), this.mySiteId,
-                            solfe, localClusterSpace);
-                }
-            } catch (UnusableEntryException e) {
-                logger.log(Level.SEVERE, "Optimistic Locking failure was detected, " +
-                            "but the entry of class " + packet.getClassName() +
-                            " could not be deseriazlied. ", e);
+            } 
+            else
+            {
+                this.collisionHandler.handleCollision(obj, entry.getSiteIndex(), this.mySiteId,
+                        solfe, localClusterSpace);
             }
-
         }
     }
 
