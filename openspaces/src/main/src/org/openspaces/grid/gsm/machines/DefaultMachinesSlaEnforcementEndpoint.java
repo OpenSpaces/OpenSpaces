@@ -518,7 +518,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 state.deallocateAgentCapacity(pu, agentUid);
                 logger.info("pu " + pu.getName() + " agent " + agentUid + " has shutdown.");
             }
-            else if (state.getAllocatedCapacity(pu).getTotalAllocatedCapacity().getMemoryInMB()>=sla.getContainerMemoryCapacityInMB()) {
+            else if (state.getAllocatedCapacity(pu).getAgentCapacityOrZero(agentUid).getMemoryInMB()>=sla.getContainerMemoryCapacityInMB()) {
                 state.deallocateAgentCapacity(pu, agentUid);
                 logger.info("pu " + pu.getName() +" is still allocated on agent " + agentUid);
             }
