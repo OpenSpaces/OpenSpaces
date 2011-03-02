@@ -224,7 +224,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         
         if (!capacityAllocatedAndMarked.getTotalAllocatedCapacity().equals(target) &&
             capacityAllocatedAndMarked.getTotalAllocatedCapacity().satisfies(target) &&
-            capacityAllocatedAndMarked.getAgentUids().size() > sla.getMinimumNumberOfMachines()) {
+            capacityAllocatedAndMarked.getAgentUids().size() >= sla.getMinimumNumberOfMachines()) {
             
             logger.debug("Considering scale in: "+
                     "target is "+ target + " " +
@@ -513,6 +513,10 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 state.deallocateAgentCapacity(pu, agentUid);
                 logger.info("pu " + pu.getName() + " agent " + agentUid + " has shutdown.");
             }
+            else if (state.getAllocatedCapacity(pu).getTotalAllocatedCapacity().getMemoryInMB()>=sla.getContainerMemoryCapacityInMB()) {
+                state.deallocateAgentCapacity(pu, agentUid);
+                logger.info("pu " + pu.getName() +" is still allocated on agent " + agentUid);
+            }
             else if (MachinesSlaUtils.getNumberOfChildContainersForProcessingUnit(agent,pu) == 0) {
                     
                 if (!sla.isStopMachineSupported()) {
@@ -567,8 +571,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                        "It is going down!");
 
                stopMachine(machineProvisioning, agent);
-            
-                
             }
         }
         
