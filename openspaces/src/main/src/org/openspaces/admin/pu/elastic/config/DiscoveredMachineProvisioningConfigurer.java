@@ -4,8 +4,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.openspaces.admin.pu.elastic.topology.ElasticDeploymentTopology;
 import org.openspaces.core.util.MemoryUnit;
 
+/**
+ * Allows to configure an Elastic Processing Unit machine provisioning that discovers existing machines.
+ * @author itaif
+ * @since 8.0.1
+ * @see DiscoveredMachineProvisioningConfig
+ * @see ElasticDeploymentTopology#dedicatedMachineProvisioning(org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig)
+ * @see ElasticDeploymentTopology#sharedMachineProvisioning(String, org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig)
+  */
 public class DiscoveredMachineProvisioningConfigurer {
 
     private DiscoveredMachineProvisioningConfig config;

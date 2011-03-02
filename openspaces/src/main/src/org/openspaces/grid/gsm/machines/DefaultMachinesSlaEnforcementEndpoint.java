@@ -264,28 +264,33 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 }
             }
 
-            // this is the old scale in algorithm
-            // it handles well the case of removing a complete machine and prefers machines that are management machines.
-            for (GridServiceAgent agent : sortManagementLast(capacityAllocated.getAgentUids())) {
-                AllocatedCapacity agentCapacity = capacityAllocated.getAgentCapacity(agent.getUid());
-                
-                if (surplusCapacity.satisfies(agentCapacity) &&
-                    surplusMachines > 0) {
-
-                    // scale in machine
-                    state.markCapacityForDeallocation(pu, agent.getUid(), agentCapacity);
-                    surplusCapacity = surplusCapacity.subtract(agentCapacity);
-                    surplusMachines --;
-                    logger.info(
-                            "Machine agent " + agent.getMachine().getHostAddress() + " is marked for deallocation in order to reduce capacity. "+
-                            "Allocated machine agents are: " + state.getAllocatedCapacity(pu));
+            if (!surplusCapacity.equalsZero()) {
+                // this is the old scale in algorithm
+                // it handles well the case of removing a complete machine and prefers to deallocate capacity on 
+                // machines that are not management machines (since management machines cannot be shutdown anyway)
+                // TODO: Also prioritize machines that were not started by the ESM since those cannot be shutdown too.
+                for (GridServiceAgent agent : sortManagementLast(capacityAllocated.getAgentUids())) {
+                    AllocatedCapacity agentCapacity = capacityAllocated.getAgentCapacity(agent.getUid());
+                    
+                    if (surplusCapacity.satisfies(agentCapacity) &&
+                        surplusMachines > 0) {
+    
+                        // scale in machine
+                        state.markCapacityForDeallocation(pu, agent.getUid(), agentCapacity);
+                        surplusCapacity = surplusCapacity.subtract(agentCapacity);
+                        surplusMachines --;
+                        logger.info(
+                                "Machine agent " + agent.getMachine().getHostAddress() + " is marked for deallocation in order to reduce capacity. "+
+                                "Allocated machine agents are: " + state.getAllocatedCapacity(pu));
+                    }
                 }
             }
             
-            // this is the new scale in algorithm
-            // it handles well the case of removing part of the machine capacity (containers)
-            deallocateManualCapacity(sla,surplusCapacity);
-            
+            if (!surplusCapacity.equalsZero()) {
+                // this is the new scale in algorithm
+                // it handles well the case of removing part of the machine capacity (containers)
+                deallocateManualCapacity(sla,surplusCapacity);
+            }
         }
 
         else if (capacityAllocated.getAgentUids().size() <  sla.getMinimumNumberOfMachines()) {

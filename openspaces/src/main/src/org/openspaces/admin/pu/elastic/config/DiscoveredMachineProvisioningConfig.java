@@ -7,9 +7,18 @@ import org.openspaces.admin.AdminException;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig;
+import org.openspaces.admin.pu.elastic.topology.ElasticDeploymentTopology;
 import org.openspaces.core.util.StringProperties;
 import org.openspaces.grid.gsm.machines.plugins.discovered.DiscoveredMachineProvisioningBean;
 
+/**
+ * Allows to configure an Elastic Processing Unit machine provisioning that discovers existing machines.
+ * @author itaif
+ * @since 8.0.1
+ * @see DiscoveredMachineProvisioningConfigurer
+ * @see ElasticDeploymentTopology#dedicatedMachineProvisioning(org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig)
+ * @see ElasticDeploymentTopology#sharedMachineProvisioning(String, org.openspaces.admin.pu.elastic.ElasticMachineProvisioningConfig)
+  */
 public class DiscoveredMachineProvisioningConfig implements ElasticMachineProvisioningConfig {
 
     private static final String MINIMUM_NUMBER_OF_CPU_CORES_PER_MACHINE_KEY = "minimum-number-of-cpu-cores-per-machine";
