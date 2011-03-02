@@ -23,12 +23,15 @@ import org.openspaces.admin.pu.ProcessingUnitInstance;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.grid.gsm.LogPerProcessingUnit;
 import org.openspaces.grid.gsm.SingleThreadedPollingLog;
+import org.openspaces.grid.gsm.capacity.AllocatedCapacity;
 import org.openspaces.grid.gsm.sla.ServiceLevelAgreementEnforcementEndpointDestroyedException;
 
 import com.gigaspaces.cluster.activeelection.SpaceMode;
 
 class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcementEndpoint {
 
+    //0.01 minimum cpu cores per machine
+    private static final Fraction MIN_CPU_CORES_PER_MACHINE_FOR_REBALANCING = new Fraction(1,100); 
     private static final int DEPLOYMENT_TIMEOUT_FAILURE_SECONDS = 3600; // one hour
     private static final int DEPLOYMENT_TIMEOUT_FAILURE_FORGET_SECONDS = 3600; // one hour
 
@@ -72,17 +75,22 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         }
         
         
-        Collection<String> agentUids = sla.getAllocatedCapacity().getAgentUids();
         for (GridServiceContainer container : sla.getContainers()) {
             if (container.getGridServiceAgent() == null) {
                 throw new IllegalStateException("container " + RebalancingUtils.gscToString(container) + " has no agent.");
             }
             
-            if (!agentUids.contains(container.getGridServiceAgent().getUid())) {
+            String agentUid = container.getGridServiceAgent().getUid();
+            if (!sla.getAllocatedCapacity().getAgentUids().contains(agentUid)) {
                 throw new IllegalArgumentException(
                         "List of agents must be a superset of agents that started the containers, "+
-                        "agentUids="+agentUids.toString()+" "+
-                        "does not include agent " + container.getGridServiceAgent().getUid());
+                        "agentUids="+sla.getAllocatedCapacity().getAgentUids().toString()+" "+
+                        "does not include agent " + agentUid);
+            }
+            
+            if (sla.getAllocatedCapacity().getAgentCapacity(agentUid).getCpuCores().equals(Fraction.ZERO)) {
+                // number of cpu cores per machine cannot be zero (requirement of the primary rebalancing algorithm)
+                sla.setAllocatedCapacity(sla.getAllocatedCapacity().add(agentUid, new AllocatedCapacity(MIN_CPU_CORES_PER_MACHINE_FOR_REBALANCING,0)));
             }
         }
         
