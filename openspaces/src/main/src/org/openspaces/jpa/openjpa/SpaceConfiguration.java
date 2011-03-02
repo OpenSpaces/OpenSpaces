@@ -13,6 +13,7 @@ import com.gigaspaces.client.transaction.ITransactionManagerProvider;
 import com.gigaspaces.client.transaction.ITransactionManagerProvider.TransactionManagerType;
 import com.gigaspaces.client.transaction.TransactionManagerConfiguration;
 import com.gigaspaces.client.transaction.TransactionManagerProviderFactory;
+import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.ReadModifiers;
 
@@ -55,7 +56,7 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
             //if configured to use optimistic locking - set it on the space proxy
             if(getOptimistic())
                 space.setOptimisticLocking(true);
-            _gigaSpace = new GigaSpaceConfigurer(space).gigaSpace();
+            _gigaSpace = new GigaSpaceConfigurer(space).clustered(((ISpaceProxy)space).isClustered()).gigaSpace();
         }
         
         // Create a transaction manager
