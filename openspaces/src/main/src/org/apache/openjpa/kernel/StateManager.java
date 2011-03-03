@@ -25,6 +25,7 @@ public class StateManager extends StateManagerImpl {
     //
     private static final long serialVersionUID = 1L;
     private StateManager _ownerStateManager;
+    private boolean _cleared = false;
     
     public StateManager(Object id, ClassMetaData meta, BrokerImpl broker) {
         super(id, meta, broker);
@@ -97,5 +98,28 @@ public class StateManager extends StateManagerImpl {
                 break;
         }
     }
-            
+    
+    @Override
+    void clearFields() {
+        super.clearFields();
+        _cleared = true;
+    }
+
+    /**
+     * Gets whether the fields of this state manager have been cleared.
+     * @return true if fields were cleared, otherwise false.
+     */
+    public boolean isCleared() {
+        return _cleared;
+    }
+
+    /**
+     * Resets the cleared fields states to false.
+     */
+    public void resetClearedState() {
+        this._cleared = false;
+    }
+
+    
+    
 }
