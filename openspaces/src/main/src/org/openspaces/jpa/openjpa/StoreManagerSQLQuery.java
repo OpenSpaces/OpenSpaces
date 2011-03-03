@@ -17,10 +17,15 @@ import org.apache.openjpa.lib.rop.ResultObjectProvider;
 import org.apache.openjpa.meta.ClassMetaData;
 import org.apache.openjpa.util.GeneralException;
 import org.apache.openjpa.util.UserException;
+import org.openspaces.core.executor.DistributedTask;
 import org.openspaces.core.executor.Task;
+import org.openspaces.core.executor.internal.InternalDistributedSpaceTaskWrapper;
+import org.openspaces.core.executor.internal.InternalSpaceTaskWrapper;
 import org.openspaces.jpa.StoreManager;
 
 import com.gigaspaces.async.AsyncFuture;
+import com.gigaspaces.executor.SpaceTask;
+import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 
 /**
  * Executes native SQLQueries and task
@@ -70,10 +75,8 @@ public class StoreManagerSQLQuery extends AbstractStoreQuery {
     protected static class SQLExecutor extends AbstractExecutor {
 
         private final boolean _execute; // native call task execution
-        private final StoreManagerSQLQuery _query;
 
         public SQLExecutor(StoreManagerSQLQuery q) {
-            _query = q;
             QueryContext ctx = q.getContext();
 
             String sql = StringUtils.trimToNull(ctx.getQueryString());
@@ -103,11 +106,21 @@ public class StoreManagerSQLQuery extends AbstractStoreQuery {
                 if (!(params[0] instanceof Task))
                     throw new UserException("Illegal task execution parameter type - " + params[0].getClass().getName()
                             + " . " + Task.class.getName() + " is expected.");
+                
                 Task<?> task = (Task<?>) params[0];
-                AsyncFuture<?> future = _query.getStore().getConfiguration().getGigaSpace().execute(task);
-                Object taskResult;
+                
+                StoreManagerSQLQuery query = (StoreManagerSQLQuery)q;
+                ISpaceProxy space = (ISpaceProxy)query.getStore().getConfiguration().getSpace();
+               
                 try {
-                    taskResult = future.get();
+                    SpaceTask<?> spaceTask;
+                    if(task instanceof DistributedTask)
+                        spaceTask = new InternalDistributedSpaceTaskWrapper((DistributedTask) task);
+                    else
+                        spaceTask = new InternalSpaceTaskWrapper(task, null);
+                    
+                    AsyncFuture<?> future = space.execute(spaceTask, query.getStore().getCurrentTransaction(), null);
+                    Object taskResult = future.get();
                     List resultList = new LinkedList();
                     resultList.add(taskResult);
                     return new ListResultObjectProvider(resultList);

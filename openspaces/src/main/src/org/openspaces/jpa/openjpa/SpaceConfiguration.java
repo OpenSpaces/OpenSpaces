@@ -5,15 +5,12 @@ import net.jini.core.transaction.server.TransactionManager;
 import org.apache.openjpa.conf.OpenJPAConfigurationImpl;
 import org.apache.openjpa.kernel.BrokerImpl;
 import org.apache.openjpa.lib.conf.Value;
-import org.openspaces.core.GigaSpace;
-import org.openspaces.core.GigaSpaceConfigurer;
 import org.openspaces.core.space.UrlSpaceConfigurer;
 
 import com.gigaspaces.client.transaction.ITransactionManagerProvider;
 import com.gigaspaces.client.transaction.ITransactionManagerProvider.TransactionManagerType;
 import com.gigaspaces.client.transaction.TransactionManagerConfiguration;
 import com.gigaspaces.client.transaction.TransactionManagerProviderFactory;
-import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.ReadModifiers;
 
@@ -27,13 +24,14 @@ import com.j_spaces.core.client.ReadModifiers;
  */
 public class SpaceConfiguration extends OpenJPAConfigurationImpl {
 
-    private GigaSpace _gigaSpace;
+    private IJSpace _space;
     private ITransactionManagerProvider _transactionManagerProvider;
     private int _readModifier;
     
     public SpaceConfiguration() {
         super();       
         supportedOptions().add(OPTION_OPTIMISTIC);
+        supportedOptions().add(OPTION_INC_FLUSH);
         // Default transaction timeout
         setLockTimeout(0);
         setLockManager("none");
@@ -44,25 +42,22 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
     public void initialize() {
         // Set a space proxy using the provided connection url
     	// if the space was injected - do nothing.
-        if (_gigaSpace == null) {
+        if (_space == null) {
             Value configurationValue = getValue("ConnectionFactory");
-            
-            IJSpace space;
             if (configurationValue != null && configurationValue.get() != null)
-                space = (IJSpace) configurationValue.get();
+                _space = (IJSpace) configurationValue.get();
             else            
-                space = new UrlSpaceConfigurer(getConnectionURL()).space();
+                _space = new UrlSpaceConfigurer(getConnectionURL()).space();
             
             //if configured to use optimistic locking - set it on the space proxy
             if(getOptimistic())
-                space.setOptimisticLocking(true);
-            _gigaSpace = new GigaSpaceConfigurer(space).clustered(((ISpaceProxy)space).isClustered()).gigaSpace();
+                _space.setOptimisticLocking(true);
         }
         
         // Create a transaction manager
         TransactionManagerConfiguration configuration = new TransactionManagerConfiguration(TransactionManagerType.DISTRIBUTED);
         try {
-            _transactionManagerProvider = TransactionManagerProviderFactory.newInstance(getSpace(), configuration);
+            _transactionManagerProvider = TransactionManagerProviderFactory.newInstance(_space, configuration);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -82,12 +77,8 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
         }
     }
         
-    public GigaSpace getGigaSpace() {
-        return _gigaSpace;
-    }
-
     public IJSpace getSpace() {
-        return _gigaSpace.getSpace();
+        return _space;
     }
     
     public TransactionManager getTransactionManager() {
@@ -100,7 +91,7 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
     
     @Override
     public void setConnectionFactory(Object space) {
-        _gigaSpace = new GigaSpaceConfigurer((IJSpace) space).gigaSpace();
+        _space = (IJSpace) space;
     }
 
     /**

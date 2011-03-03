@@ -91,6 +91,7 @@ public class StoreManager extends AbstractStoreManager {
         Collection<String> unsupportedOptions = (Collection<String>) super.getUnsupportedOptions();
         unsupportedOptions.remove(OpenJPAConfiguration.OPTION_ID_DATASTORE);        
         unsupportedOptions.remove(OpenJPAConfiguration.OPTION_OPTIMISTIC);        
+        unsupportedOptions.remove(OpenJPAConfiguration.OPTION_INC_FLUSH);        
         return unsupportedOptions;
     }
 
@@ -113,7 +114,11 @@ public class StoreManager extends AbstractStoreManager {
     public void begin() {
         try {
             if (_transaction != null)
+            {
+                if(getConfiguration().getOptimistic())
+                    return;
                 throw new TransactionException("Attempted to start a new transaction when there's already an active transaction.");
+            }
             long timeout = (getConfiguration().getLockTimeout() == 0)?
                     Lease.FOREVER : getConfiguration().getLockTimeout();
             _transaction = (TransactionFactory.create(getConfiguration().getTransactionManager(),
@@ -145,6 +150,16 @@ public class StoreManager extends AbstractStoreManager {
         }
     }    
     
+    @Override
+    public void beginOptimistic() {
+        begin();
+    }
+
+    @Override
+    public void rollbackOptimistic() {
+        rollback();
+    }
+
     @Override
     public StoreQuery newQuery(String language) {        
         ExpressionParser ep = QueryLanguages.parserForLanguage(language);
