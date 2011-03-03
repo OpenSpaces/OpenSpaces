@@ -206,7 +206,7 @@ public class UpdateListener implements AsyncFutureListener<WanEntry> {
 
         if (this.collisionHandler != null)
         {
-            Object obj = packet.getObject();
+            Object obj = packet.toObject(packet.getEntryType());
             if (obj == null)
             {
                 logger.severe("Optimistic Locking failure was detected, " +
