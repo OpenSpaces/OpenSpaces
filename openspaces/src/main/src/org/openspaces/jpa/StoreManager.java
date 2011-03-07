@@ -28,7 +28,6 @@ import org.apache.openjpa.abstractstore.AbstractStoreManager;
 import org.apache.openjpa.conf.OpenJPAConfiguration;
 import org.apache.openjpa.enhance.PersistenceCapable;
 import org.apache.openjpa.kernel.FetchConfiguration;
-import org.apache.openjpa.kernel.LockManager;
 import org.apache.openjpa.kernel.OpenJPAStateManager;
 import org.apache.openjpa.kernel.PCState;
 import org.apache.openjpa.kernel.QueryLanguages;
@@ -98,26 +97,16 @@ public class StoreManager extends AbstractStoreManager {
     @Override
     public boolean syncVersion(OpenJPAStateManager sm, Object edata) {
         try {
-            // If there's no version field return false
-            // Object will be loaded from space by OpenJPA
-            if (!getConfiguration().getOptimistic() || sm.getMetaData().getVersionField() == null)
-                return false;
-            
-            // Verify version
+            // Read object from space
             IEntryPacket result = readObjectFromSpace(sm);
             if (result == null)
                 return false;
-
-            Object spaceVersion = result.getVersion();
-            if (spaceVersion == null)
-                throw new IllegalStateException("Entity of type: " + result.getClassName() + " with Id: " + result.getID()
-                        + " expected to have a value in its version property.");
-            
-            return sm.getVersion().equals(spaceVersion);
-            
+            // Populate fields
+            loadFields(sm, result, sm.getMetaData().getFields());
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+        return true;
     }
 
     @Override
@@ -216,15 +205,8 @@ public class StoreManager extends AbstractStoreManager {
     @SuppressWarnings({ "rawtypes" })
     @Override
     public Collection loadAll(Collection sms, PCState state, int load, FetchConfiguration fetch, Object edata) {
-        final List<Object> failedIds = new ArrayList<Object>();
-        for (OpenJPAStateManager sm : (Collection<OpenJPAStateManager>) sms) {
-            BitSet fields = new BitSet(sm.getMetaData().getFields().length);
-            LockManager lm = sm.getContext().getLockManager();
-            if (!load(sm, fields, fetch, lm.getLockLevel(sm), edata))
-                failedIds.add(sm.getId());            
+            return super.loadAll(sms, state, load, fetch, edata);
         }
-        return failedIds;
-    }
 
     @Override
     public boolean initialize(OpenJPAStateManager sm, PCState state,
@@ -277,12 +259,12 @@ public class StoreManager extends AbstractStoreManager {
 
             // Handle one-to-one
             if (fms[i].getAssociationType() == FieldMetaData.ONE_TO_ONE) {
-                sm.store(i, entry.getFieldValue(spacePropertyIndex));
+                sm.store(i, entry.getFieldValue(fms[i].getIndex()));
                 sm.getLoaded().set(fms[i].getIndex(), false);
                 
             // Handle one-to-many
             } else if (fms[i].getAssociationType() == FieldMetaData.ONE_TO_MANY) {
-                sm.store(i, entry.getFieldValue(spacePropertyIndex));
+                sm.store(i, entry.getFieldValue(fms[i].getIndex()));
                 sm.getLoaded().set(fms[i].getIndex(), false);
                 
             // Handle embedded property
@@ -389,9 +371,9 @@ public class StoreManager extends AbstractStoreManager {
 
         ITemplatePacket template;
         if (typeDescriptor.isAutoGenerateId())
-            template = TemplatePacketFactory.createUidPacket((String) ids[0], null, 0, QueryResultTypeInternal.OBJECT);
+            template = TemplatePacketFactory.createUidPacket((String) ids[0], null, 0, TransportPacketType.ENTRY_PACKET);
         else
-            template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, QueryResultTypeInternal.OBJECT);
+            template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);
         result = (IEntryPacket) proxy.read(template, _transaction, 0, readModifier);
         return result;
     }
@@ -528,9 +510,9 @@ public class StoreManager extends AbstractStoreManager {
                 final Object routing = sm.fetch(typeDescriptor.getRoutingPropertyId());                             
                 ITemplatePacket template;
                 if (typeDescriptor.isAutoGenerateId())
-                    template = TemplatePacketFactory.createUidPacket((String) ids[0], routing, 0, QueryResultTypeInternal.OBJECT);
+                    template = TemplatePacketFactory.createUidPacket((String) ids[0], routing, 0, TransportPacketType.ENTRY_PACKET);
                 else
-                    template = TemplatePacketFactory.createIdPacket(ids[0], routing, 0, typeDescriptor, QueryResultTypeInternal.OBJECT);
+                    template = TemplatePacketFactory.createIdPacket(ids[0], routing, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);
                 
                 int result = proxy.clear(template, _transaction, 0);
                 if (result != 1)
@@ -656,7 +638,7 @@ public class StoreManager extends AbstractStoreManager {
         IEntryPacket entry;
         
         if (pc.pcGetStateManager() != null) {
-            OpenJPAStateManager sm = (OpenJPAStateManager) pc.pcGetStateManager();
+            StateManager sm = (StateManager) pc.pcGetStateManager();
             try {
                 pc.pcReplaceStateManager(null);
                 entry = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(
@@ -678,8 +660,7 @@ public class StoreManager extends AbstractStoreManager {
         final HashMap<Class<?>, ArrayList<Object>> objectsToWriteByType = new HashMap<Class<?>, ArrayList<Object>>();
         final ArrayList<OpenJPAStateManager> stateManagersToRestore = new ArrayList<OpenJPAStateManager>();
         Class<?> previousType = null;
-        ArrayList<Object> currentList = null;
-        boolean exception = false;
+        ArrayList<Object> currentList = null;               
         for (OpenJPAStateManager sm : sms) {
             // If the current object is in a relation skip it
             if (_classesRelationStatus.containsKey(sm.getMetaData().getDescribedType())) {
@@ -713,27 +694,10 @@ public class StoreManager extends AbstractStoreManager {
                 space.writeMultiple(entry.getValue().toArray(), _transaction, Lease.FOREVER, UpdateModifiers.WRITE_ONLY);
             }
         } catch (Exception e) {
-            exception = true;
-            throw new RuntimeException(e.getMessage(), e);            
+            throw new RuntimeException(e.getMessage(), e);
         } finally {
             // Restore the removed state managers.
             _relationsManager.restoreRemovedStateManagers(stateManagersToRestore);
-
-            // If optimistic locking is enabled, set version for written states 
-            // (The version is already saved in its property but not in the states version field)
-            if (!exception && getConfiguration().getOptimistic()) {
-                for (Map.Entry<Class<?>, ArrayList<Object>> entry : objectsToWriteByType.entrySet()) {
-                    for (Object obj : entry.getValue()) {
-                        PersistenceCapable pc = (PersistenceCapable) obj;
-                        OpenJPAStateManager sm = (OpenJPAStateManager) pc.pcGetStateManager();
-                        if (sm.getMetaData().getVersionField() == null)
-                            break;
-
-                        Object version = sm.fetch(sm.getMetaData().getVersionField().getIndex());
-                        sm.setVersion(version);
-                    }
-                }
-            }
         }
     }
 
@@ -1045,6 +1009,7 @@ public class StoreManager extends AbstractStoreManager {
         public IEntryPacket findObjectInEntry(StateManager sm, IEntryPacket entry, Stack<StateManager> sms) {
             if (!sms.isEmpty()) {
                 final StateManager tempStateManager = sms.pop();
+                int ownerIndex = tempStateManager.getOwnerIndex();
                 final SpaceTypeInfo ownerTypeInfo = SpaceTypeInfoRepository.getTypeInfo(sm.getMetaData().getDescribedType());
                 final SpaceTypeInfo ownedTypeInfo = SpaceTypeInfoRepository.getTypeInfo(tempStateManager.getMetaData().getDescribedType());
                 FieldMetaData[] fms = sm.getMetaData().getFields();
