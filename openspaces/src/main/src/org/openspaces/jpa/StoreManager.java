@@ -53,7 +53,6 @@ import com.gigaspaces.internal.metadata.SpaceTypeInfoRepository;
 import com.gigaspaces.internal.transport.IEntryPacket;
 import com.gigaspaces.internal.transport.ITemplatePacket;
 import com.gigaspaces.internal.transport.TemplatePacketFactory;
-import com.gigaspaces.internal.transport.TransportPacketType;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.ReadModifiers;
 import com.j_spaces.core.client.UpdateModifiers;
@@ -390,9 +389,9 @@ public class StoreManager extends AbstractStoreManager {
 
         ITemplatePacket template;
         if (typeDescriptor.isAutoGenerateId())
-            template = TemplatePacketFactory.createUidPacket((String) ids[0], null, 0, TransportPacketType.ENTRY_PACKET);
+            template = TemplatePacketFactory.createUidPacket((String) ids[0], null, 0, QueryResultTypeInternal.OBJECT);
         else
-            template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);
+            template = TemplatePacketFactory.createIdPacket(ids[0], null, 0, typeDescriptor, QueryResultTypeInternal.OBJECT);
         result = (IEntryPacket) proxy.read(template, _transaction, 0, readModifier);
         return result;
     }
@@ -529,9 +528,9 @@ public class StoreManager extends AbstractStoreManager {
                 final Object routing = sm.fetch(typeDescriptor.getRoutingPropertyId());                             
                 ITemplatePacket template;
                 if (typeDescriptor.isAutoGenerateId())
-                    template = TemplatePacketFactory.createUidPacket((String) ids[0], routing, 0, TransportPacketType.ENTRY_PACKET);
+                    template = TemplatePacketFactory.createUidPacket((String) ids[0], routing, 0, QueryResultTypeInternal.OBJECT);
                 else
-                    template = TemplatePacketFactory.createIdPacket(ids[0], routing, 0, typeDescriptor, TransportPacketType.ENTRY_PACKET);
+                    template = TemplatePacketFactory.createIdPacket(ids[0], routing, 0, typeDescriptor, QueryResultTypeInternal.OBJECT);
                 
                 int result = proxy.clear(template, _transaction, 0);
                 if (result != 1)

@@ -214,7 +214,7 @@ public class Utils {
             if (artifact.getFile() == null) {
                 try {
                     // if file is not found an exception is thrown
-                    artifactResolver.resolve(artifact, remoteRepositories, localRepository);
+                    //artifactResolver.resolve(artifact, remoteRepositories, localRepository);
                 }
                 catch (Exception e) {
                     if (includeProjects) {
