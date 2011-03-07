@@ -52,6 +52,7 @@ import com.gigaspaces.internal.metadata.SpaceTypeInfoRepository;
 import com.gigaspaces.internal.transport.IEntryPacket;
 import com.gigaspaces.internal.transport.ITemplatePacket;
 import com.gigaspaces.internal.transport.TemplatePacketFactory;
+import com.gigaspaces.internal.transport.TransportPacketType;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.ReadModifiers;
 import com.j_spaces.core.client.UpdateModifiers;
