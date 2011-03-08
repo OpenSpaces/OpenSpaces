@@ -16,7 +16,10 @@
 
 package org.openspaces.esb.mule.pu;
 
-import org.mule.MuleServer;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.mule.api.MuleContext;
 import org.mule.api.context.MuleContextFactory;
 import org.mule.config.ConfigResource;
@@ -24,8 +27,8 @@ import org.mule.config.spring.SpringXmlConfigurationBuilder;
 import org.mule.context.DefaultMuleContextFactory;
 import org.openspaces.pu.service.ServiceDetails;
 import org.openspaces.pu.service.ServiceDetailsProvider;
-import org.openspaces.pu.service.ServiceMonitorsProvider;
 import org.openspaces.pu.service.ServiceMonitors;
+import org.openspaces.pu.service.ServiceMonitorsProvider;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -35,10 +38,6 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.AbstractApplicationContext;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * <code> OpenSpacesMuleContextLoader</code> used for loading Mule configuration that refrenced from PU configuration
@@ -117,7 +116,9 @@ public class OpenSpacesMuleContextLoader implements ApplicationContextAware, Ini
             } finally {
                 muleContext = null;
                 muleApplicationContext = null;
-                MuleServer.setMuleContext(null);
+                
+                //Haven't found a route for this in new api
+                //MuleServer.setMuleContext(null);
             }
         }
     }
