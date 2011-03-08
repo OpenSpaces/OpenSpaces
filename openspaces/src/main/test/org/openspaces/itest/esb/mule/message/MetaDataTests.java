@@ -17,7 +17,7 @@
 package org.openspaces.itest.esb.mule.message;
 
 import org.mule.api.config.ConfigurationException;
-import org.openspaces.itest.esb.mule.AbstractMuleTests;
+import org.openspaces.itest.esb.mule.AbstractMuleTests2;
 import org.openspaces.itest.esb.mule.SimpleMessage;
 
 /**
@@ -29,11 +29,7 @@ import org.openspaces.itest.esb.mule.SimpleMessage;
  *
  * @author yitzhaki
  */
-public class MetaDataTests extends AbstractMuleTests {
-
-    protected String[] getConfigLocations() {
-        return new String[]{"org/openspaces/itest/esb/mule/message/metadata.xml"};
-    }
+public class MetaDataTests extends AbstractMuleTests2 {
 
     public void testTakeSingleFromSpace() throws ConfigurationException {
         int numberOfMsgs = 10;
@@ -50,5 +46,10 @@ public class MetaDataTests extends AbstractMuleTests {
         }
         assertEquals(0, gigaSpace.count(new ProcessedMessage()));
         assertEquals(0, gigaSpace.count(new SimpleMessage()));
+    }
+
+    @Override
+    protected String getConfigResources() {
+        return "org/openspaces/itest/esb/mule/message/metadata.xml";
     }
 }

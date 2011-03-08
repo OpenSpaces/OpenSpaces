@@ -16,15 +16,18 @@
 
 package org.openspaces.esb.mule.seda;
 
-import com.j_spaces.core.exception.SpaceUnavailableException;
+import javax.resource.spi.work.Work;
+import javax.resource.spi.work.WorkEvent;
+import javax.resource.spi.work.WorkListener;
+
+import org.mule.api.MuleContext;
 import org.mule.api.MuleEvent;
 import org.mule.api.lifecycle.InitialisationException;
 import org.mule.config.i18n.CoreMessages;
 import org.openspaces.core.SpaceClosedException;
 import org.openspaces.core.SpaceInterruptedException;
 
-import javax.resource.spi.work.Work;
-import javax.resource.spi.work.WorkListener;
+import com.j_spaces.core.exception.SpaceUnavailableException;
 
 /**
  * A SEDA component using the Space as the queue.  The queue is a virtualized queue represented
@@ -40,10 +43,10 @@ public class OpenSpacesSedaService extends SpaceAwareSedaService implements Work
     /**
      * For Spring only
      */
-    public OpenSpacesSedaService() {
-        super();
+    public OpenSpacesSedaService(MuleContext muleContext) {
+        super(muleContext);
     }
-
+    
     public synchronized void doInitialise() throws InitialisationException {
         super.doInitialise();
 
@@ -100,5 +103,35 @@ public class OpenSpacesSedaService extends SpaceAwareSedaService implements Work
 
     public int getQueueSize() {
         return gigaSpace.count(template);
+    }
+
+    public void run() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void workAccepted(WorkEvent arg0) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void workCompleted(WorkEvent arg0) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void workRejected(WorkEvent arg0) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void workStarted(WorkEvent arg0) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void release() {
+        // TODO Auto-generated method stub
+        
     }
 }

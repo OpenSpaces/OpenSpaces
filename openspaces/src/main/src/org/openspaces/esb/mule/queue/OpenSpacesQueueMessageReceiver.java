@@ -77,8 +77,8 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
 
     public Object onCall(MuleMessage message, boolean synchronous) throws MuleException {
         // Rewrite the message to treat it as a new message
-        MuleMessage newMessage = new DefaultMuleMessage(message.getPayload(), message);
-        return routeMessage(newMessage, synchronous);
+        MuleMessage newMessage = new DefaultMuleMessage(message);
+        return routeMessage(newMessage);
     }
 
     protected List getMessages() throws Exception {
@@ -127,7 +127,7 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
         MuleMessage message = (MuleMessage) msg;
 
         // Rewrite the message to treat it as a new message
-        MuleMessage newMessage = new DefaultMuleMessage(message.getPayload(), message);
+        MuleMessage newMessage = new DefaultMuleMessage(message, this.connector.getMuleContext());
         routeMessage(newMessage);
     }
 

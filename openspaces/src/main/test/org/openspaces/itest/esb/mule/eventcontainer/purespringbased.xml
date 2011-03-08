@@ -9,8 +9,8 @@
 
        xsi:schemaLocation="http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
        http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
-       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-       http://www.mulesource.org/schema/mule/core/2.2 http://www.mulesource.org/schema/mule/core/2.2/mule.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.0/mule.xsd
        http://www.openspaces.org/schema/mule/os-eventcontainer http://www.openspaces.org/schema/mule/mule-os-eventcontainer.xsd">
 
     <description>Test that check the ability to run mule using spring base configuration.</description>
@@ -48,10 +48,9 @@
         </os-core:template>
     </os-events:polling-container>
 
-    <mule:mule>
-        <os-eventcontainer:connector name="gigaSpacesConnector"/>
-    </mule:mule>
-
+	<mule:mule>
+    	<os-eventcontainer:connector name="gigaSpacesConnector"/>
+	</mule:mule>
     <!--
         The Mule model initialises and manages your UMO components
     -->

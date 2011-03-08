@@ -16,6 +16,7 @@
 
 package org.openspaces.esb.mule.eventcontainer;
 
+import org.mule.api.MuleContext;
 import org.mule.api.MuleException;
 import org.mule.api.lifecycle.InitialisationException;
 import org.mule.transport.AbstractConnector;
@@ -36,10 +37,14 @@ import org.springframework.context.ApplicationContextAware;
  */
 public class OpenSpacesConnector extends AbstractConnector implements ApplicationContextAware {
 
+
     public static final String OS_EVENT_CONTAINER = "os-eventcontainer";
     
     private ApplicationContext applicationContext;
 
+    public OpenSpacesConnector(MuleContext context) {
+        super(context);
+    }
 
     /**
      * @return the openspaces protocol name.

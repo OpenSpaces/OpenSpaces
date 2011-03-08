@@ -22,47 +22,30 @@ import org.openspaces.core.GigaSpaceConfigurer;
 import org.openspaces.core.space.UrlSpaceConfigurer;
 
 /**
- * Convenient superclass for tests depending on a Mule context.
+ * Superclass for mule functional tests
  *
- * @author yitzhaki
+ * @author Rafi
  */
-public abstract class AbstractMuleTests extends FunctionalTestCase {
+public abstract class AbstractMuleTests2 extends FunctionalTestCase {
 
     protected static final int TIMEOUT = 5000;
-
-    //protected MuleContext muleContext;
-
-    //protected SpringXmlConfigurationBuilder builder;
 
     protected GigaSpace gigaSpace;
 
     protected MuleClient muleClient;
     
-    protected abstract String[] getConfigLocations();
-    
-    protected String getConfigResources(){
-        throw new UnsupportedOperationException();
-    }
+    @Override
+    protected abstract String getConfigResources();
     
     @Override
     protected void doSetUp() throws Exception {
         super.doSetUp();
         muleClient = new MuleClient(muleContext);
         gigaSpace = new GigaSpaceConfigurer(new UrlSpaceConfigurer("jini://*/*/" + getSpaceName()).lookupGroups(System.getProperty("user.name")).space()).gigaSpace();
-        muleContext.start();
     }
     
     protected String getSpaceName() {
         return "space";
     }
 
-    protected void createApplicationContext() throws Exception {
-        //MuleContextFactory muleContextFactory = new DefaultMuleContextFactory();
-        //SpringXmlConfigurationBuilder builder = new SpringXmlConfigurationBuilder(locations);
-        //muleContext = muleContextFactory.createMuleContext(builder);
-    }
-
-   /* protected void tearDown() throws Exception {
-        muleContext.dispose();
-    }*/
 }

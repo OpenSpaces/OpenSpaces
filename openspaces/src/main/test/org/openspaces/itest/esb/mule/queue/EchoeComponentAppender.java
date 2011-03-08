@@ -28,6 +28,6 @@ import org.mule.api.lifecycle.Callable;
 public class EchoeComponentAppender implements Callable {
 
     public Object onCall(MuleEventContext eventContext) throws Exception {
-        return eventContext.getMessage().getPayload() + eventContext.getService().getName();
+        return eventContext.getMessage().getPayload() + eventContext.getFlowConstruct().getName();
     }
 }

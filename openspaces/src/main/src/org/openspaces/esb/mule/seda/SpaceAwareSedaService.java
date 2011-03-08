@@ -16,6 +16,7 @@
 
 package org.openspaces.esb.mule.seda;
 
+import org.mule.api.MuleContext;
 import org.mule.api.MuleException;
 import org.mule.api.lifecycle.InitialisationException;
 import org.mule.model.seda.SedaService;
@@ -38,6 +39,11 @@ public class SpaceAwareSedaService extends SedaService implements ApplicationLis
 
     protected GigaSpace gigaSpace;
 
+    
+    public SpaceAwareSedaService(MuleContext muleContext) {
+        super(muleContext);
+    }
+    
     public synchronized void doInitialise() throws InitialisationException {
         super.doInitialise();
         this.sedaModel = (OpenSpacesSedaModel) model;
@@ -56,7 +62,7 @@ public class SpaceAwareSedaService extends SedaService implements ApplicationLis
         try {
             // we need to stop here if was not stopped since during dispose it needs
             // to be stopped and we override stop to do nothing
-            if (!stopped.get()) {
+            if (!isStopped()) {
                 super.stop();
             }
         }

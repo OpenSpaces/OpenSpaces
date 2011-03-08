@@ -16,6 +16,7 @@
 
 package org.openspaces.esb.mule.queue;
 
+import org.mule.api.MuleContext;
 import org.mule.api.MuleException;
 import org.mule.api.endpoint.EndpointException;
 import org.mule.api.endpoint.EndpointURI;
@@ -64,7 +65,11 @@ public class OpenSpacesQueueConnector extends AbstractConnector implements Appli
 
     private GigaSpace gigaSpace;
 
-
+    
+    public OpenSpacesQueueConnector(MuleContext context) {
+        super(context);
+    }
+    
     /**
      * @return the openspaces protocol name.
      */

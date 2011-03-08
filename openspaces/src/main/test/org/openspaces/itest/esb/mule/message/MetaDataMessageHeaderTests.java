@@ -16,11 +16,11 @@
 
 package org.openspaces.itest.esb.mule.message;
 
-import org.mule.api.config.ConfigurationException;
-import org.openspaces.itest.esb.mule.AbstractMuleTests;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.mule.api.config.ConfigurationException;
+import org.openspaces.itest.esb.mule.AbstractMuleTests2;
 
 /**
  * Tests mule connector, receive and process single object at a time.
@@ -32,11 +32,7 @@ import java.util.List;
  *
  * @author yitzhaki
  */
-public class MetaDataMessageHeaderTests extends AbstractMuleTests {
-
-    protected String[] getConfigLocations() {
-        return new String[]{"org/openspaces/itest/esb/mule/message/metadatamessageheader.xml"};
-    }
+public class MetaDataMessageHeaderTests extends AbstractMuleTests2 {
 
     public void testTakeSingleFromSpace() throws ConfigurationException {
         int numberOfMsgs = 10;
@@ -66,5 +62,10 @@ public class MetaDataMessageHeaderTests extends AbstractMuleTests {
             assertEquals("new name " + i, message.getProperty("name"));
         }
         assertEquals(0, gigaSpace.count(new MessageWithMessageHeader()));
+    }
+
+    @Override
+    protected String getConfigResources() {
+        return "org/openspaces/itest/esb/mule/message/metadatamessageheader.xml";
     }
 }

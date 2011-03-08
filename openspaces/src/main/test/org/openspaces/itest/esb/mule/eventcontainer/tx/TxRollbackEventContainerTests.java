@@ -17,18 +17,13 @@
 package org.openspaces.itest.esb.mule.eventcontainer.tx;
 
 import org.mule.api.config.ConfigurationException;
-import org.openspaces.itest.esb.mule.AbstractMuleTests;
+import org.openspaces.itest.esb.mule.AbstractMuleTests2;
 import org.openspaces.itest.esb.mule.SimpleMessage;
 
 /**
  * @author kimchy
  */
-public class TxRollbackEventContainerTests extends AbstractMuleTests {
-
-    @Override
-    protected String[] getConfigLocations() {
-        return new String[]{"org/openspaces/itest/esb/mule/eventcontainer/tx/local-tx.xml"};
-    }
+public class TxRollbackEventContainerTests extends AbstractMuleTests2 {
 
     public void testTxRollbackLocalTransaction() throws ConfigurationException {
         int numberOfMsgs = 1;
@@ -45,5 +40,10 @@ public class TxRollbackEventContainerTests extends AbstractMuleTests {
             assertEquals("rolledback", message.getMessage());
         }
         assertEquals(0, gigaSpace.count(new SimpleMessage()));
+    }
+
+    @Override
+    protected String getConfigResources() {
+        return "org/openspaces/itest/esb/mule/eventcontainer/tx/local-tx.xml";
     }
 }

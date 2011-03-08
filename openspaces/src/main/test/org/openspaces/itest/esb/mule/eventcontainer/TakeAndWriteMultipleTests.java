@@ -17,7 +17,7 @@
 package org.openspaces.itest.esb.mule.eventcontainer;
 
 import org.mule.api.config.ConfigurationException;
-import org.openspaces.itest.esb.mule.AbstractMuleTests;
+import org.openspaces.itest.esb.mule.AbstractMuleTests2;
 import org.openspaces.itest.esb.mule.SimpleMessage;
 
 /**
@@ -25,13 +25,7 @@ import org.openspaces.itest.esb.mule.SimpleMessage;
  *
  * @author yitzhaki
  */
-public class TakeAndWriteMultipleTests extends AbstractMuleTests {
-
-
-    protected String[] getConfigLocations() {
-        return new String[]{"org/openspaces/itest/esb/mule/eventcontainer/takeandwritemultiple.xml"};
-    }
-
+public class TakeAndWriteMultipleTests extends AbstractMuleTests2 {
 
     public void testTakeMultipleFromSpace() throws ConfigurationException {
         int numberOfMsgs = 100;
@@ -48,5 +42,10 @@ public class TakeAndWriteMultipleTests extends AbstractMuleTests {
             assertEquals(template, message);
         }
         assertEquals(0, gigaSpace.count(new SimpleMessage()));
+    }
+
+    @Override
+    protected String getConfigResources() {
+        return "org/openspaces/itest/esb/mule/eventcontainer/takeandwritemultiple.xml";
     }
 }

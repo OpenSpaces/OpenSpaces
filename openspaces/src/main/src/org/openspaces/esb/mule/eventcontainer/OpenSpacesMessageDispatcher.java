@@ -109,7 +109,8 @@ public class OpenSpacesMessageDispatcher extends AbstractMessageDispatcher {
     }
 
     protected MuleMessage doSend(MuleEvent event) throws Exception {
-        Object payload = event.transformMessage();
+        
+        Object payload = event.getMessage().getPayload();
 
         if (payload != null) {
             if (payload instanceof Object[]) {

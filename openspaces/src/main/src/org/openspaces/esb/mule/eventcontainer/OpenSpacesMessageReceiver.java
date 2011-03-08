@@ -16,7 +16,10 @@
 
 package org.openspaces.esb.mule.eventcontainer;
 
-import org.mule.DefaultMuleMessage;
+import java.util.ArrayList;
+import java.util.Properties;
+
+import org.mule.api.MuleEvent;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
 import org.mule.api.MuleRuntimeException;
@@ -28,7 +31,7 @@ import org.mule.api.transaction.Transaction;
 import org.mule.api.transaction.TransactionCallback;
 import org.mule.api.transaction.TransactionException;
 import org.mule.api.transport.Connector;
-import org.mule.api.transport.MessageAdapter;
+import org.mule.api.transport.MuleMessageFactory;
 import org.mule.config.i18n.CoreMessages;
 import org.mule.transaction.TransactionTemplate;
 import org.mule.transport.AbstractMessageReceiver;
@@ -38,9 +41,6 @@ import org.openspaces.events.AbstractEventListenerContainer;
 import org.openspaces.events.SpaceDataEventListener;
 import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.TransactionStatus;
-
-import java.util.ArrayList;
-import java.util.Properties;
 
 /**
  * <code>OpenSpacesMessageReceiver</code> is used to receive data from an GigaSpaces's space.
@@ -123,7 +123,7 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
 
         if (txStatus != null) {
             TransactionTemplate tt = new TransactionTemplate(endpoint.getTransactionConfig(),
-                    connector.getExceptionListener(), connector.getMuleContext());
+                    connector.getMuleContext());
             try {
                 if (disposed) {
                     txStatus.setRollbackOnly();
@@ -145,7 +145,8 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
             try {
                 doReceiveEvent(data, gigaSpace, txStatus, source);
             } catch (Exception e) {
-                handleException(e);
+                //handleException(e);
+                //TODO handle exception here, maybe add custom exception strategy
             }
         }
     }
@@ -154,10 +155,13 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
         if (workManager) {
             getWorkManager().scheduleWork(new GigaSpaceWorker(data, this));
         } else {
-            MessageAdapter adapter = connector.getMessageAdapter(data);
-            MuleMessage message = new DefaultMuleMessage(adapter);
+            MuleMessageFactory factory = connector.getMuleMessageFactory();
+            //MessageAdapter adapter = connector.getMessageAdapter(data);
+            //TODO which encoding?? utf-8??
+            MuleMessage message = factory.create(data, "UTF-8");
             // nothing to do with the result
-            MuleMessage routedMessage = routeMessage(message);
+            MuleEvent muleEvent = routeMessage(message);
+            MuleMessage routedMessage = muleEvent.getMessage(); 
         }
     }
 

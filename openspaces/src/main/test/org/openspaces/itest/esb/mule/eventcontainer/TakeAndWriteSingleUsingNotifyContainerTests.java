@@ -17,7 +17,7 @@
 package org.openspaces.itest.esb.mule.eventcontainer;
 
 import org.mule.api.config.ConfigurationException;
-import org.openspaces.itest.esb.mule.AbstractMuleTests;
+import org.openspaces.itest.esb.mule.AbstractMuleTests2;
 import org.openspaces.itest.esb.mule.SimpleMessage;
 
 /**
@@ -26,11 +26,7 @@ import org.openspaces.itest.esb.mule.SimpleMessage;
  *
  * @author yitzhaki
  */
-public class TakeAndWriteSingleUsingNotifyContainerTests extends AbstractMuleTests {
-
-    protected String[] getConfigLocations() {
-        return new String[]{"org/openspaces/itest/esb/mule/eventcontainer/takeandwritesingleusingnotifycontainer.xml"};
-    }
+public class TakeAndWriteSingleUsingNotifyContainerTests extends AbstractMuleTests2 {
 
     public void testTakeSingleFromSpace() throws ConfigurationException {
         int numberOfMsgs = 10;
@@ -47,6 +43,11 @@ public class TakeAndWriteSingleUsingNotifyContainerTests extends AbstractMuleTes
         }
         assertEquals(numberOfMsgs, gigaSpace.count(new SimpleMessage(null, false)));
         assertEquals(0, gigaSpace.count(new SimpleMessage(null, true)));
+    }
+
+    @Override
+    protected String getConfigResources() {
+        return "org/openspaces/itest/esb/mule/eventcontainer/takeandwritesingleusingnotifycontainer.xml";
     }
 
 }

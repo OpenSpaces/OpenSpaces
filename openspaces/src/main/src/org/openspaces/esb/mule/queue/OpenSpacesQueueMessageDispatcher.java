@@ -18,13 +18,15 @@ package org.openspaces.esb.mule.queue;
 
 import org.mule.api.MuleEvent;
 import org.mule.api.MuleMessage;
-import org.mule.api.transaction.TransactionCallback;
 import org.mule.api.endpoint.EndpointURI;
 import org.mule.api.endpoint.OutboundEndpoint;
+import org.mule.api.processor.MessageProcessor;
+import org.mule.api.transaction.TransactionCallback;
 import org.mule.api.transport.DispatchException;
 import org.mule.config.i18n.CoreMessages;
-import org.mule.transport.AbstractMessageDispatcher;
+import org.mule.config.i18n.Message;
 import org.mule.transaction.TransactionTemplate;
+import org.mule.transport.AbstractMessageDispatcher;
 import org.openspaces.core.util.SpaceUtils;
 
 /**
@@ -48,21 +50,23 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
 
     protected void doDispatch(final MuleEvent event) throws Exception {
         final EndpointURI endpointUri = event.getEndpoint().getEndpointURI();
-        //Apply any outbound transformers on this event before we dispatch
-        event.transformMessage();
 
         if (endpointUri == null) {
-            throw new DispatchException(
-                    CoreMessages.objectIsNull("Endpoint"), event.getMessage(), event.getEndpoint());
+            Message objectIsNull = CoreMessages.objectIsNull("Endpoint");
+            DispatchException ex = null;
+            if (event.getEndpoint() instanceof MessageProcessor) {
+                ex = new DispatchException(objectIsNull, event, (MessageProcessor) event.getEndpoint(), new Exception());
+            } else {
+                ex = new DispatchException(objectIsNull, event, null, new Exception());
+            }
+            throw ex;
         }
         final OpenSpacesQueueMessageReceiver receiver = connector.getReceiver(endpointUri);
         TransactionTemplate tt;
         if (receiver == null) {
-            tt = new TransactionTemplate(event.getEndpoint().getTransactionConfig(),
-                connector.getExceptionListener(), event.getMuleContext());
+            tt = new TransactionTemplate(event.getEndpoint().getTransactionConfig(), event.getMuleContext());
         } else {
-            tt = new TransactionTemplate(receiver.getEndpoint().getTransactionConfig(),
-                connector.getExceptionListener(), event.getMuleContext());
+            tt = new TransactionTemplate(receiver.getEndpoint().getTransactionConfig(), event.getMuleContext());
         }
 
         TransactionCallback cb = new TransactionCallback()
@@ -94,8 +98,6 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
         MuleMessage retMessage;
         EndpointURI endpointUri = event.getEndpoint().getEndpointURI();
         final OpenSpacesQueueMessageReceiver receiver = connector.getReceiver(endpointUri);
-        //Apply any outbound transformers on this event before we dispatch
-        event.transformMessage();
         if (receiver == null) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Writing to queue as there is no receiver on connector: "
@@ -110,7 +112,7 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
         connector.getSessionHandler().storeSessionInfoToMessage(event.getSession(), message);
 
         TransactionTemplate tt = new TransactionTemplate(receiver.getEndpoint().getTransactionConfig(),
-            connector.getExceptionListener(), event.getMuleContext());
+                event.getMuleContext());
         TransactionCallback cb = new TransactionCallback()
         {
             public Object doInTransaction() throws Exception
@@ -118,7 +120,8 @@ public class OpenSpacesQueueMessageDispatcher extends AbstractMessageDispatcher 
                 return receiver.onCall(event.getMessage(), true);
             }
         };
-        retMessage = (MuleMessage) tt.execute(cb);
+        MuleEvent muleEvent = (MuleEvent) tt.execute(cb); 
+        retMessage = (MuleMessage) muleEvent.getMessage();
 
         if (logger.isDebugEnabled()) {
             logger.debug("sent event on endpointUri: " + event.getEndpoint().getEndpointURI());

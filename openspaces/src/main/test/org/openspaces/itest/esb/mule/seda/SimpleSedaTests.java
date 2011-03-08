@@ -1,16 +1,12 @@
 package org.openspaces.itest.esb.mule.seda;
 
 import org.mule.api.MuleMessage;
-import org.openspaces.itest.esb.mule.AbstractMuleTests;
+import org.openspaces.itest.esb.mule.AbstractMuleTests2;
 
 /**
  * @author kimchy
  */
-public class SimpleSedaTests extends AbstractMuleTests {
-
-    protected String[] getConfigLocations() {
-        return new String[]{"org/openspaces/itest/esb/mule/seda/simple.xml"};
-    }
+public class SimpleSedaTests extends AbstractMuleTests2 {
 
     public void testSimpleSedaHandling() throws Exception {
         muleClient.dispatch("vm://test1", "testme", null);
@@ -18,4 +14,10 @@ public class SimpleSedaTests extends AbstractMuleTests {
         MuleMessage message = muleClient.request("vm://test3", 5000000);
         assertEquals("testme", message.getPayload());
     }
+
+    @Override
+    protected String getConfigResources() {
+        return "org/openspaces/itest/esb/mule/seda/simple.xml";
+    }
+    
 }

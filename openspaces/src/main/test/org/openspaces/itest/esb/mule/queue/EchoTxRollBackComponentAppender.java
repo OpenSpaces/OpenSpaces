@@ -32,7 +32,7 @@ public class EchoTxRollBackComponentAppender implements Callable {
 
     public Object onCall(MuleEventContext eventContext) throws Exception {
         if (alreadyRollbacked) {
-            return eventContext.getMessage().getPayload() + eventContext.getService().getName();
+            return eventContext.getMessage().getPayload() + eventContext.getFlowConstruct().getName();
         } else {
             alreadyRollbacked = true;
             throw new Error("Rolling back (-:");
