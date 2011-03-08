@@ -1,7 +1,7 @@
 package org.openspaces.itest.esb.mule.queue;
 
 import org.mule.api.MuleMessage;
-import org.openspaces.itest.esb.mule.AbstractMuleTests2;
+import org.openspaces.itest.esb.mule.AbstractMuleTests;
 
 /**
  * Testing runing os-queue within trnasaction within local OpenSapce transaction.
@@ -9,7 +9,7 @@ import org.openspaces.itest.esb.mule.AbstractMuleTests2;
  *
  * @author yitzhaki
  */
-public class TxSimpleQueueTests extends AbstractMuleTests2 {
+public class TxSimpleQueueTests extends AbstractMuleTests {
 
     public void testSimpleQueueHandling() throws Exception {
         muleClient.dispatch("os-queue://test1", "testme", null);

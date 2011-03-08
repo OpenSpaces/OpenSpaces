@@ -17,13 +17,13 @@
 package org.openspaces.itest.esb.mule.eventcontainer.tx;
 
 import org.mule.api.config.ConfigurationException;
-import org.openspaces.itest.esb.mule.AbstractMuleTests2;
+import org.openspaces.itest.esb.mule.AbstractMuleTests;
 import org.openspaces.itest.esb.mule.SimpleMessage;
 
 /**
  * @author kimchy
  */
-public class TxRollbackEventContainerTests extends AbstractMuleTests2 {
+public class TxRollbackEventContainerTests extends AbstractMuleTests {
 
     public void testTxRollbackLocalTransaction() throws ConfigurationException {
         int numberOfMsgs = 1;

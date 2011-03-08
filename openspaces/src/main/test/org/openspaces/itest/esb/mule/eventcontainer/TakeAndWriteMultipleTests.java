@@ -17,7 +17,7 @@
 package org.openspaces.itest.esb.mule.eventcontainer;
 
 import org.mule.api.config.ConfigurationException;
-import org.openspaces.itest.esb.mule.AbstractMuleTests2;
+import org.openspaces.itest.esb.mule.AbstractMuleTests;
 import org.openspaces.itest.esb.mule.SimpleMessage;
 
 /**
@@ -25,7 +25,7 @@ import org.openspaces.itest.esb.mule.SimpleMessage;
  *
  * @author yitzhaki
  */
-public class TakeAndWriteMultipleTests extends AbstractMuleTests2 {
+public class TakeAndWriteMultipleTests extends AbstractMuleTests {
 
     public void testTakeMultipleFromSpace() throws ConfigurationException {
         int numberOfMsgs = 100;

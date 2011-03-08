@@ -1,12 +1,12 @@
 package org.openspaces.itest.esb.mule.queue;
 
 import org.mule.api.MuleMessage;
-import org.openspaces.itest.esb.mule.AbstractMuleTests2;
+import org.openspaces.itest.esb.mule.AbstractMuleTests;
 
 /**
  * @author kimchy
  */
-public class SimpleQueueTests extends AbstractMuleTests2 {
+public class SimpleQueueTests extends AbstractMuleTests {
 
     public void testSimpleQueueHandling() throws Exception {
         muleClient.dispatch("os-queue://test1", "testme", null);

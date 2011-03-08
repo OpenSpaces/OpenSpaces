@@ -17,7 +17,7 @@
 package org.openspaces.itest.esb.mule.message;
 
 import org.mule.api.config.ConfigurationException;
-import org.openspaces.itest.esb.mule.AbstractMuleTests2;
+import org.openspaces.itest.esb.mule.AbstractMuleTests;
 import org.openspaces.itest.esb.mule.SimpleMessage;
 
 /**
@@ -29,7 +29,7 @@ import org.openspaces.itest.esb.mule.SimpleMessage;
  *
  * @author yitzhaki
  */
-public class MetaDataTests extends AbstractMuleTests2 {
+public class MetaDataTests extends AbstractMuleTests {
 
     public void testTakeSingleFromSpace() throws ConfigurationException {
         int numberOfMsgs = 10;

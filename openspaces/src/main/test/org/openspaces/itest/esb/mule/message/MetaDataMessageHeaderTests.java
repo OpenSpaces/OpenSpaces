@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.mule.api.config.ConfigurationException;
-import org.openspaces.itest.esb.mule.AbstractMuleTests2;
+import org.openspaces.itest.esb.mule.AbstractMuleTests;
 
 /**
  * Tests mule connector, receive and process single object at a time.
@@ -32,7 +32,7 @@ import org.openspaces.itest.esb.mule.AbstractMuleTests2;
  *
  * @author yitzhaki
  */
-public class MetaDataMessageHeaderTests extends AbstractMuleTests2 {
+public class MetaDataMessageHeaderTests extends AbstractMuleTests {
 
     public void testTakeSingleFromSpace() throws ConfigurationException {
         int numberOfMsgs = 10;

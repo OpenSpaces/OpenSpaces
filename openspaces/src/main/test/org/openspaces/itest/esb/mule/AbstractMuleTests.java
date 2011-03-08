@@ -26,7 +26,7 @@ import org.openspaces.core.space.UrlSpaceConfigurer;
  *
  * @author Rafi
  */
-public abstract class AbstractMuleTests2 extends FunctionalTestCase {
+public abstract class AbstractMuleTests extends FunctionalTestCase {
 
     protected static final int TIMEOUT = 5000;
 

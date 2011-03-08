@@ -1,12 +1,12 @@
 package org.openspaces.itest.esb.mule.seda;
 
 import org.mule.api.MuleMessage;
-import org.openspaces.itest.esb.mule.AbstractMuleTests2;
+import org.openspaces.itest.esb.mule.AbstractMuleTests;
 
 /**
  * @author yitzhaki
  */
-public class PersistentSedaTests extends AbstractMuleTests2 {
+public class PersistentSedaTests extends AbstractMuleTests {
 
     protected String getSpaceName() {
         return "muleSedaPersistent";
