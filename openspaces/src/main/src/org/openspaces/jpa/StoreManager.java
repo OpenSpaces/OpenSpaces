@@ -259,12 +259,12 @@ public class StoreManager extends AbstractStoreManager {
 
             // Handle one-to-one
             if (fms[i].getAssociationType() == FieldMetaData.ONE_TO_ONE) {
-                sm.store(i, entry.getFieldValue(fms[i].getIndex()));
+                sm.store(i, entry.getFieldValue(spacePropertyIndex));
                 sm.getLoaded().set(fms[i].getIndex(), false);
                 
             // Handle one-to-many
             } else if (fms[i].getAssociationType() == FieldMetaData.ONE_TO_MANY) {
-                sm.store(i, entry.getFieldValue(fms[i].getIndex()));
+                sm.store(i, entry.getFieldValue(spacePropertyIndex));
                 sm.getLoaded().set(fms[i].getIndex(), false);
                 
             // Handle embedded property
