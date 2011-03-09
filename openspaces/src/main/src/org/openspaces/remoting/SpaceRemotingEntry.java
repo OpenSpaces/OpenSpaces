@@ -18,11 +18,14 @@ public interface SpaceRemotingEntry extends SpaceRemotingInvocation, SpaceRemoti
     void setMetaArguments(Object[] metaArguments);
 
     Boolean getOneWay();
+    
     void setOneWay(Boolean oneWay);
         
     void setFifo(boolean isfifo);
     
     SpaceRemotingEntry buildResult(Object obj);
+    
+    SpaceRemotingEntry buildResult(Throwable e);
     
     SpaceRemotingEntry buildResultTemplate();
     
