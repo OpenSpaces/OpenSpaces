@@ -7,9 +7,9 @@
        xmlns:os-remoting="http://www.openspaces.org/schema/remoting"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-       http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
-       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
-       http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/remoting/openspaces-remoting.xsd">
+       http://www.openspaces.org/schema/core http://www.openspaces.org/schema/8.0/core/openspaces-core.xsd
+       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/8.0/events/openspaces-events.xsd
+       http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/8.0/remoting/openspaces-remoting.xsd">
                                           
 	<bean id="AlertLoggingGateway" class="org.openspaces.example.alert.logging.snmp.AlertLoggingGateway" >
         <property name="alertFileFilter" value="notify-alerts.xml" />
