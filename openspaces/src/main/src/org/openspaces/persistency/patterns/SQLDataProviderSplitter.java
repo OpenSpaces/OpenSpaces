@@ -24,6 +24,6 @@ public class SQLDataProviderSplitter extends BulkDataPersisterSplitter implement
     }
 
     public DataIterator iterator(SQLQuery sqlQuery) throws DataSourceException {
-        return ((SQLDataProvider) getDataSource(sqlQuery.getClassName())).iterator(sqlQuery);
+        return ((SQLDataProvider) getDataSource(sqlQuery.getTypeName())).iterator(sqlQuery);
     }
 }

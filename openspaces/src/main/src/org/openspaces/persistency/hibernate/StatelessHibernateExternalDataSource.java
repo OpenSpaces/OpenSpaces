@@ -235,7 +235,7 @@ public class StatelessHibernateExternalDataSource extends AbstractHibernateExter
      * query.
      */
     public DataIterator iterator(SQLQuery sqlQuery) throws DataSourceException {
-        if (!isManagedEntry(sqlQuery.getClassName())) {
+        if (!isManagedEntry(sqlQuery.getTypeName())) {
             if (logger.isTraceEnabled()) {
                 logger.trace("Ignoring query (no mapping in hibernate) [" + sqlQuery + "]");
             }
