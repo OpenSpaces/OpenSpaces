@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:os-events="http://www.openspaces.org/schema/events"
+      xmlns:os-core="http://www.openspaces.org/schema/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:spring="http://www.springframework.org/schema/beans"
+      xmlns:os-eventcontainer="http://www.openspaces.org/schema/mule/os-eventcontainer"
+
+      xsi:schemaLocation="http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
+       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.0/mule.xsd
+       http://www.openspaces.org/schema/mule/os-eventcontainer http://www.openspaces.org/schema/mule/mule-os-eventcontainer.xsd">
+
+    <description>Test the ability of mule connector to receive and process bulk of objects.</description>
+
+
+    <!--
+        Spring property configurer which allows us to use system properties (such as user.name).
+    -->
+    <spring:bean id="propertiesConfigurer"
+                 class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
+
+
+    <spring:bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
+        <spring:property name="lookupGroups" value="${user.name}"/>
+        <spring:property name="url" value="/./space"/>
+    </spring:bean>
+
+    <spring:bean id="gigaSpace" class="org.openspaces.core.GigaSpaceFactoryBean">
+        <spring:property name="space" ref="space"/>
+    </spring:bean>
+
+
+    <spring:bean id="helloPollingEventContainer"
+                 class="org.openspaces.events.polling.SimplePollingEventListenerContainer">
+
+        <spring:property name="gigaSpace" ref="gigaSpace"/>
+        <spring:property name="passArrayAsIs" value="true"/>
+        <spring:property name="receiveOperationHandler">
+            <spring:bean class="org.openspaces.events.polling.receive.MultiTakeReceiveOperationHandler"/>
+        </spring:property>
+
+
+        <spring:property name="template">
+            <spring:bean class="org.openspaces.itest.esb.mule.SimpleMessage">
+                <spring:property name="read" value="false"/>
+            </spring:bean>
+        </spring:property>
+    </spring:bean>
+
+
+    <!-- this connector must be declared ,in order to inject the  Spring appliction context -->
+    <os-eventcontainer:connector name="gigaSpacesConnector"/>
+    
+    <flow name="helloSample">
+        <inbound-endpoint address="os-eventcontainer://helloPollingEventContainer?workManager=true" exchange-pattern="request-response"/>
+        <component class="org.openspaces.itest.esb.mule.MessageReader"/>
+        <outbound-endpoint address="os-eventcontainer://gigaSpace?writeLease=2000&amp;updateOrWrite=false&amp;updateTimeout=1" />
+    </flow>
+
+</mule>

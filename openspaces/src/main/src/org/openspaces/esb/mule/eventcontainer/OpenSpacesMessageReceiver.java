@@ -23,6 +23,7 @@ import org.mule.api.MuleEvent;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
 import org.mule.api.MuleRuntimeException;
+import org.mule.api.construct.FlowConstruct;
 import org.mule.api.endpoint.ImmutableEndpoint;
 import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.api.lifecycle.CreateException;
@@ -71,12 +72,23 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
      * @param endpoint  the provider contains the endpointUri on which the receiver
      *                  will listen on. The URI structure must be declared as the following
      *                  os://<Polling/Notify container id>
+     * @throws CreateException 
      * @see Service
      * @see ImmutableEndpoint
      */
+    
+    public OpenSpacesMessageReceiver(Connector connector, FlowConstruct flowConstruct, InboundEndpoint endpoint) throws CreateException {
+        super(connector, flowConstruct, endpoint);
+        init(connector, endpoint);
+    }
 
     public OpenSpacesMessageReceiver(Connector connector, Service service, InboundEndpoint endpoint) throws CreateException {
         super(connector, service, endpoint);
+        init(connector, endpoint);
+
+    }
+
+    private void init(Connector connector, InboundEndpoint endpoint) throws CreateException {
         ApplicationContext applicationContext = ((OpenSpacesConnector) connector).getApplicationContext();
         if (applicationContext == null) {
             throw new CreateException(CoreMessages.connectorWithProtocolNotRegistered(connector.getProtocol()), this);
@@ -87,7 +99,6 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
         eventListenerContainer = (AbstractEventListenerContainer) applicationContext.getBean(eventListenerContainerName);
         eventListenerContainer.setEventListener(this);
         eventListenerContainer.start();
-
     }
 
     /**

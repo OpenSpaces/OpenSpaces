@@ -21,6 +21,7 @@ import com.j_spaces.core.exception.SpaceUnavailableException;
 import org.mule.DefaultMuleMessage;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
+import org.mule.api.construct.FlowConstruct;
 import org.mule.api.endpoint.InboundEndpoint;
 import org.mule.api.lifecycle.CreateException;
 import org.mule.api.service.Service;
@@ -46,11 +47,20 @@ public class OpenSpacesQueueMessageReceiver extends TransactedPollingMessageRece
 
 
     private Object template;
+    
+    public OpenSpacesQueueMessageReceiver(Connector connector, FlowConstruct flowConstruct, InboundEndpoint endpoint) throws CreateException {
+        super(connector, flowConstruct, endpoint);
+        init(connector, endpoint);
+    }
 
     public OpenSpacesQueueMessageReceiver(Connector connector,
                                           Service service,
                                           final InboundEndpoint endpoint) throws CreateException {
         super(connector, service, endpoint);
+        init(connector, endpoint);
+    }
+
+    private void init(Connector connector, final InboundEndpoint endpoint) {
         this.setReceiveMessagesInTransaction(endpoint.getTransactionConfig().isTransacted());
         this.connector = (OpenSpacesQueueConnector) connector;
     }
