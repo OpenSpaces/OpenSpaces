@@ -102,7 +102,7 @@ public class StoreManager extends AbstractStoreManager {
             // Object will be loaded from space by OpenJPA
             if (!getConfiguration().getOptimistic() || sm.getMetaData().getVersionField() == null)
                 return false;
-
+            
             // Verify version
             IEntryPacket result = readObjectFromSpace(sm);
             if (result == null)
@@ -112,14 +112,14 @@ public class StoreManager extends AbstractStoreManager {
             if (spaceVersion == null)
                 throw new IllegalStateException("Entity of type: " + result.getClassName() + " with Id: " + result.getID()
                         + " expected to have a value in its version property.");
-
+            
             return sm.getVersion().equals(spaceVersion);
-
+            
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
-    
+
     @Override
     public void begin() {
         try {
@@ -213,6 +213,7 @@ public class StoreManager extends AbstractStoreManager {
         return false;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Collection loadAll(Collection sms, PCState state, int load, FetchConfiguration fetch, Object edata) {
         final List<Object> failedIds = new ArrayList<Object>();
@@ -315,7 +316,7 @@ public class StoreManager extends AbstractStoreManager {
             final Object oid = ApplicationIds.fromPKValues(new Object[] { entry.getID() }, cmd);
             final BitSet exclude = new BitSet(cmd.getFields().length);                               
             final Object managedObject = getContext().find(oid, null, exclude, entry, 0);
-            _relationsManager.setOwnerStateManagerForPersistentInstance(managedObject, sm);
+            _relationsManager.setOwnerStateManagerForPersistentInstance(managedObject, sm, fmd);
             sm.storeObject(fmd.getIndex(), managedObject);
         }
     }
@@ -332,7 +333,7 @@ public class StoreManager extends AbstractStoreManager {
         } else {
             if (fieldValue != null) {                
                 final OpenJPAStateManager em = ctx.embed(null, null, sm, fmd);
-                ((StateManager) em).setOwnerStateManager((StateManager) sm);
+                ((StateManager) em).setOwnerInformation((StateManager) sm, fmd);
                 sm.storeObject(fmd.getIndex(), em.getManagedInstance());
                 final ISpaceProxy proxy = (ISpaceProxy) getConfiguration().getSpace();                      
                 final IEntryPacket entry = proxy.getDirectProxy().getTypeManager().getEntryPacketFromObject(
@@ -364,7 +365,7 @@ public class StoreManager extends AbstractStoreManager {
                 final Object oid = ApplicationIds.fromPKValues(new Object[] { entry.getID() }, cmd);
                 // Initialize a state manager for the current item
                 final Object managedObject = getContext().find(oid, null, exclude, entry, 0);
-                _relationsManager.setOwnerStateManagerForPersistentInstance(managedObject, sm);
+                _relationsManager.setOwnerStateManagerForPersistentInstance(managedObject, sm, fmd);
                 ((Collection<Object>) collection).add(managedObject);
             }
         }
@@ -711,28 +712,28 @@ public class StoreManager extends AbstractStoreManager {
                 space.writeMultiple(entry.getValue().toArray(), _transaction, Lease.FOREVER, UpdateModifiers.WRITE_ONLY);
             }
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);            
         } finally {
             // Restore the removed state managers.
             _relationsManager.restoreRemovedStateManagers(stateManagersToRestore);
         }
 
-        // If optimistic locking is enabled, set version for written states 
-        // (The version is already saved in its property but not in the states version field)
+            // If optimistic locking is enabled, set version for written states 
+            // (The version is already saved in its property but not in the states version field)
         if (getConfiguration().getOptimistic()) {
-            for (Map.Entry<Class<?>, ArrayList<Object>> entry : objectsToWriteByType.entrySet()) {                    
-                for (Object obj : entry.getValue()) {
-                    PersistenceCapable pc = (PersistenceCapable) obj;
-                    OpenJPAStateManager sm = (OpenJPAStateManager) pc.pcGetStateManager();
-                    if (sm.getMetaData().getVersionField() == null)
-                        break;
+                for (Map.Entry<Class<?>, ArrayList<Object>> entry : objectsToWriteByType.entrySet()) {
+                    for (Object obj : entry.getValue()) {
+                        PersistenceCapable pc = (PersistenceCapable) obj;
+                        OpenJPAStateManager sm = (OpenJPAStateManager) pc.pcGetStateManager();
+                        if (sm.getMetaData().getVersionField() == null)
+                            break;
 
-                    Object version = sm.fetch(sm.getMetaData().getVersionField().getIndex());
-                    sm.setVersion(version);
+                        Object version = sm.fetch(sm.getMetaData().getVersionField().getIndex());
+                        sm.setVersion(version);
+                    }
                 }
             }
         }
-    }
 
     /**
      * Validates the provided class' annotations.
@@ -821,8 +822,6 @@ public class StoreManager extends AbstractStoreManager {
         private StateManager stateManager;
         private FieldMetaData metaData;
 
-        public FieldOwnerInformation() {
-        }
         public FieldOwnerInformation(StateManager stateManager, FieldMetaData metaData) {
             this.stateManager = stateManager;
             this.metaData = metaData;
@@ -830,14 +829,8 @@ public class StoreManager extends AbstractStoreManager {
         public StateManager getStateManager() {
             return stateManager;
         }
-        public void setStateManager(StateManager stateManager) {
-            this.stateManager = stateManager;
-        }
         public FieldMetaData getMetaData() {
             return metaData;
-        }
-        public void setMetaData(FieldMetaData metaData) {
-            this.metaData = metaData;
         }
     }
     
@@ -881,7 +874,7 @@ public class StoreManager extends AbstractStoreManager {
                     if (collection != null) {
                         for (Object item : collection) {
                             // Set relationship owner
-                            setOwnerStateManagerForPersistentInstance(item, sm);
+                            setOwnerStateManagerForPersistentInstance(item, sm, fmd);
                             PersistenceCapable pc = (PersistenceCapable) item;
                             OpenJPAStateManager stateManager = (OpenJPAStateManager) pc.pcGetStateManager();
                             removeOwnedEntitiesStateManagers(stateManagersToRestore, stateManager);
@@ -892,7 +885,7 @@ public class StoreManager extends AbstractStoreManager {
                 } else if (fmd.getAssociationType() == FieldMetaData.ONE_TO_ONE) {
                     Object value = sm.fetch(fmd.getIndex());
                     if (value != null) {
-                        setOwnerStateManagerForPersistentInstance(value, sm);
+                        setOwnerStateManagerForPersistentInstance(value, sm, fmd);
                         PersistenceCapable pc = (PersistenceCapable) value;
                         OpenJPAStateManager stateManager = (OpenJPAStateManager) pc.pcGetStateManager();
                         removeOwnedEntitiesStateManagers(stateManagersToRestore, stateManager);
@@ -908,12 +901,12 @@ public class StoreManager extends AbstractStoreManager {
          * @param managedObject The managed object to set the owner for.
          * @param sm The owner's state manager.
          */
-        public void setOwnerStateManagerForPersistentInstance(Object managedObject, OpenJPAStateManager sm) {
+        public void setOwnerStateManagerForPersistentInstance(Object managedObject, OpenJPAStateManager sm, FieldMetaData fmd) {
             StateManager stateManager = (StateManager)((PersistenceCapable) managedObject).pcGetStateManager();
             if (stateManager == null)
                 throw new IllegalStateException("Attempted to set an Owner back-reference for an unmanaged instance: "
                         + managedObject.toString() + " of type: " + managedObject.getClass().getName());
-            stateManager.setOwnerStateManager((StateManager) sm);
+            stateManager.setOwnerInformation((StateManager) sm, fmd);
         }
         
         /**
@@ -927,14 +920,14 @@ public class StoreManager extends AbstractStoreManager {
                 if (collection != null) {
                     for (Object item : collection) {
                         if (item != null) {
-                            _relationsManager.setOwnerStateManagerForPersistentInstance(item, sm);
+                            _relationsManager.setOwnerStateManagerForPersistentInstance(item, sm, fmd);
                         }
                     }
                 }
             } else if (fmd.getAssociationType() == FieldMetaData.ONE_TO_ONE || fmd.isEmbeddedPC()) {
                 Object value = sm.fetch(fmd.getIndex());
                 if (value != null) {
-                    _relationsManager.setOwnerStateManagerForPersistentInstance(value, sm);
+                    _relationsManager.setOwnerStateManagerForPersistentInstance(value, sm, fmd);
                 }
             }
         }
@@ -1040,60 +1033,57 @@ public class StoreManager extends AbstractStoreManager {
          * @return The found instance, otherwise null.
          */
         public IEntryPacket findObjectInEntry(StateManager sm, IEntryPacket entry, Stack<StateManager> sms) {
-            if (!sms.isEmpty()) {
-                final StateManager tempStateManager = sms.pop();
-                int ownerIndex = tempStateManager.getOwnerIndex();
-                final SpaceTypeInfo ownerTypeInfo = SpaceTypeInfoRepository.getTypeInfo(sm.getMetaData().getDescribedType());
-                final SpaceTypeInfo ownedTypeInfo = SpaceTypeInfoRepository.getTypeInfo(tempStateManager.getMetaData().getDescribedType());
-                FieldMetaData[] fms = sm.getMetaData().getFields();
-                Integer associationType = getClassRelationStatus(tempStateManager.getMetaData().getDescribedType());
-                int spacePropertyIndex = -1;
-                for (int i = 0; i < fms.length; i++) {
-                    if (fms[i].isVersion())
-                        continue;
-                    
-                    spacePropertyIndex++;
-                    
-                    if (fms[i].getAssociationType() == associationType) {
-                        // One-to-many
-                        if (associationType == FieldMetaData.ONE_TO_MANY
-                                && fms[i].getElement().getDeclaredType().equals(tempStateManager.getMetaData().getDescribedType())) {                            
-                            final Object id = ApplicationIds.toPKValues(tempStateManager.getId(), tempStateManager.getMetaData())[0];
-                            final Collection<?> values = (Collection<?>) entry.getFieldValue(spacePropertyIndex);
-                            if (values != null) {
-                                for (Object item : values) {
-                                    Object itemId = ownedTypeInfo.getIdProperty().getValue(item);
-                                    if (id.equals(itemId)) {
-                                        final IEntryPacket entryPacket = getEntryPacketFromEntity(item);
-                                        return (sms.isEmpty()) ? entryPacket : findObjectInEntry(tempStateManager, entryPacket, sms);
-                                    }
-                                }
-                            }
+            final StateManager tempStateManager = sms.pop();
+            final SpaceTypeInfo ownedTypeInfo = SpaceTypeInfoRepository.getTypeInfo(tempStateManager.getMetaData().getDescribedType());
+            final FieldMetaData[] fms = sm.getMetaData().getFields();
+            final FieldMetaData fmd = tempStateManager.getOwnerMetaData();
+            
+            if (fmd == null)
+                throw new IllegalStateException("Owner field meta data is not set for entity of type: "
+                        + tempStateManager.getMetaData().getDescribedType().getName() + " with Id: "
+                        + tempStateManager.getId());
 
-                        // One-to-one
-                        } else if (associationType == FieldMetaData.ONE_TO_ONE
-                                && fms[i].getDeclaredType().equals(tempStateManager.getMetaData().getDescribedType())) {
-                            final Object id = ApplicationIds.toPKValues(tempStateManager.getId(), tempStateManager.getMetaData())[0];
-                            final Object value = entry.getFieldValue(spacePropertyIndex);
-                            if (value != null) {
-                                Object objectId = ownedTypeInfo.getIdProperty().getValue(value);
-                                if (id.equals(objectId)) {
-                                    final IEntryPacket entryPacket = getEntryPacketFromEntity(value);
-                                    return (sms.isEmpty()) ? entryPacket : findObjectInEntry(tempStateManager, entryPacket, sms);
-                                }
-                            }
-                           
-                        // Embedded
-                        } else if (fms[i].isEmbeddedPC()
-                                && fms[i].getDeclaredType().equals(tempStateManager.getMetaData().getDescribedType())) {
-                            final Object value = entry.getFieldValue(spacePropertyIndex);
-                            final IEntryPacket entryPacket = getEntryPacketFromEntity(value);
+            // Find space property index (skip version fields..)
+            int spacePropertyIndex = -1;
+            for (int i = 0; i <= fmd.getIndex(); i++) {
+                if (fms[i].isVersion())
+                    continue;
+                spacePropertyIndex++;
+            }
+
+            // One-to-many
+            if (fmd.getAssociationType() == FieldMetaData.ONE_TO_MANY) {
+                final Object id = ApplicationIds.toPKValues(tempStateManager.getId(), tempStateManager.getMetaData())[0];
+                final Collection<?> values = (Collection<?>) entry.getFieldValue(spacePropertyIndex);
+                if (values != null) {
+                    for (Object item : values) {
+                        Object itemId = ownedTypeInfo.getIdProperty().getValue(item);
+                        if (id.equals(itemId)) {
+                            final IEntryPacket entryPacket = getEntryPacketFromEntity(item);
                             return (sms.isEmpty()) ? entryPacket : findObjectInEntry(tempStateManager, entryPacket, sms);
                         }
-                        
                     }
                 }
+
+            // One-to-one
+            } else if (fmd.getAssociationType() == FieldMetaData.ONE_TO_ONE) {
+                final Object id = ApplicationIds.toPKValues(tempStateManager.getId(), tempStateManager.getMetaData())[0];
+                final Object value = entry.getFieldValue(spacePropertyIndex);
+                if (value != null) {
+                    Object objectId = ownedTypeInfo.getIdProperty().getValue(value);
+                    if (id.equals(objectId)) {
+                        final IEntryPacket entryPacket = getEntryPacketFromEntity(value);
+                        return (sms.isEmpty()) ? entryPacket : findObjectInEntry(tempStateManager, entryPacket, sms);
+                    }
+                }
+
+            // Embedded
+            } else if (fmd.isEmbeddedPC()) {
+                final Object value = entry.getFieldValue(spacePropertyIndex);
+                final IEntryPacket entryPacket = getEntryPacketFromEntity(value);
+                return (sms.isEmpty()) ? entryPacket : findObjectInEntry(tempStateManager, entryPacket, sms);
             }
+
             // Object not found..
             return null;
         }

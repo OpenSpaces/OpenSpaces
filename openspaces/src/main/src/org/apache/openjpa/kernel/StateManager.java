@@ -24,19 +24,43 @@ import org.openspaces.jpa.openjpa.Broker;
 public class StateManager extends StateManagerImpl {
     //
     private static final long serialVersionUID = 1L;
+    
+    /**
+     * Used for storing the relationship's owner state manager. If the state manager
+     * is the root of the relationship & therefore has no owner, the value is null.
+     */
     private StateManager _ownerStateManager;
+
+    private FieldMetaData _ownerMetaData;
     private boolean _cleared = false;
     
     public StateManager(Object id, ClassMetaData meta, BrokerImpl broker) {
         super(id, meta, broker);
     }
 
-    public void setOwnerStateManager(StateManager ownerStateManager) {
+    /**
+     * Sets the state manager's owner information (state manager & field meta data) 
+     * @param ownerStateManager The owner's state manager.
+     * @param ownerMetaData The owner's field meta data.
+     */
+    public void setOwnerInformation(StateManager ownerStateManager, FieldMetaData ownerMetaData) {
         this._ownerStateManager = ownerStateManager;
+        this._ownerMetaData = ownerMetaData;
+        
     }
 
+    /**
+     * @return The state manager's Owner state manager.
+     */
     public StateManager getOwnerStateManager() {
         return _ownerStateManager;
+    }
+    
+    /**
+     * @return The state manager Owner's field meta data.
+     */
+    public FieldMetaData getOwnerMetaData() {
+        return _ownerMetaData;
     }
     
     /**
@@ -80,21 +104,21 @@ public class StateManager extends StateManagerImpl {
                 StateManager stateManager = (StateManager) broker.persist(value, null, true, call);
                 // Set owner reference for one-to-one relationship only
                 if (fmd.getAssociationType() == FieldMetaData.ONE_TO_ONE)
-                    stateManager.setOwnerStateManager(this);
+                    stateManager.setOwnerInformation(this, fmd);
                 break;
             case JavaTypes.ARRAY:
-                broker.persistCollection((Collection<?>) Arrays.asList((Object[]) value), true, call, this);
+                broker.persistCollection((Collection<?>) Arrays.asList((Object[]) value), true, call, this, fmd);
                 break;
             case JavaTypes.COLLECTION:
-                broker.persistCollection((Collection<?>) value, true, call, this);
+                broker.persistCollection((Collection<?>) value, true, call, this, fmd);
                 break;
             case JavaTypes.MAP:
                 if (fmd.getKey().getCascadePersist()
                     == ValueMetaData.CASCADE_IMMEDIATE)
-                    broker.persistCollection(((Map<?, ?>) value).keySet(), true, call, this);
+                    broker.persistCollection(((Map<?, ?>) value).keySet(), true, call, this, fmd);
                 if (fmd.getElement().getCascadePersist()
                     == ValueMetaData.CASCADE_IMMEDIATE)
-                    broker.persistCollection(((Map<?, ?>) value).values(), true, call, this);
+                    broker.persistCollection(((Map<?, ?>) value).values(), true, call, this, fmd);
                 break;
         }
     }

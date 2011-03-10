@@ -10,6 +10,7 @@ import org.apache.openjpa.kernel.StateManager;
 import org.apache.openjpa.kernel.StateManagerImpl;
 import org.apache.openjpa.lib.util.Localizer;
 import org.apache.openjpa.meta.ClassMetaData;
+import org.apache.openjpa.meta.FieldMetaData;
 import org.apache.openjpa.util.OpenJPAException;
 import org.apache.openjpa.util.UserException;
 
@@ -26,6 +27,7 @@ public class Broker extends BrokerImpl {
 
     public Broker() {
         super();
+        
     }
    
     /**
@@ -39,7 +41,8 @@ public class Broker extends BrokerImpl {
     /**
      * Persist the provided Collection elements.
      */
-    public void persistCollection(Collection<?> collection, boolean explicit, OpCallbacks call, StateManager ownerStateManager) {
+    public void persistCollection(Collection<?> collection, boolean explicit, OpCallbacks call,
+            StateManager ownerStateManager, FieldMetaData fieldMetaData) {
         
         if (collection.isEmpty())
             return;
@@ -52,7 +55,7 @@ public class Broker extends BrokerImpl {
             for (Object object : collection) {
                 try {
                     StateManager stateManager = (StateManager) persist(object, null, explicit, call);
-                    stateManager.setOwnerStateManager(ownerStateManager);
+                    stateManager.setOwnerInformation(ownerStateManager, fieldMetaData);
                 } catch (UserException e) {
                     if (exceps == null)
                         exceps = new ArrayList<Exception>();
