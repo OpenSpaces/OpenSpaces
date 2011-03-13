@@ -184,6 +184,44 @@ public class DefaultAlertRepositoryTest extends TestCase {
         }
     }
     
+    /** 
+     * adding an {@link AlertStatus#RAISED} alert should open an entry in the repository.
+     * adding an {@link AlertStatus#RESOLVED} alert should resolve the alert group.
+     * repeat, should always add the new raised alert belonging to the same group.
+     */
+    public void test55() {
+        
+        for (int repeat=0; repeat<2; ++repeat) {
+            for (int i=0; i<3; ++i) {
+                Alert alert = new AlertFactory()
+                .severity(AlertSeverity.WARNING)
+                .status(AlertStatus.RAISED)
+                .groupUid("group55")
+                .description("alert#"+i)
+                .toAlert();
+
+                assertTrue(repository.addAlert(alert));
+            }
+
+            Alert alert = new AlertFactory()
+            .severity(AlertSeverity.WARNING)
+            .status(AlertStatus.RESOLVED)
+            .groupUid("group55")
+            .description("alert#4")
+            .toAlert();
+
+            assertTrue(repository.addAlert(alert));
+            assertNotNull(repository.getAlertByUid(alert.getAlertUid()));
+            AlertHistory alertHistoryByGroupUid = repository.getAlertHistoryByGroupUid(alert.getGroupUid());
+            assertNotNull(alertHistoryByGroupUid);
+            assertNotNull(alertHistoryByGroupUid.getDetails());
+            assertTrue(alertHistoryByGroupUid.getDetails().getLastAlertStatus().isResolved());
+            assertNotNull(alertHistoryByGroupUid.getAlerts());
+            assertEquals(4, alertHistoryByGroupUid.getAlerts().length);
+        }
+        
+    }
+    
     /** resolved history size */
     public void test6() {
 
