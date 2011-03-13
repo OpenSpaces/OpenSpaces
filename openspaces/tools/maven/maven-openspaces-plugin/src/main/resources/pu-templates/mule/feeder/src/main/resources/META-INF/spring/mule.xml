@@ -26,9 +26,13 @@
             OpenSpaces simplified space API built on top of IJSpace/JavaSpace.
         -->
         <os-core:giga-space id="gigaSpace" space="space"/>
-
+        
+        <spring:bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+			<spring:property name="mGroupdId" value="${puGroupId}.feeder.Feeder"/>
+		</spring:bean>
+        
     </spring:beans>
-
+    
     <os-eventcontainer:connector name="gigaSpacesConnector" />
     
     <model name="feeder">
@@ -39,7 +43,7 @@
                 </quartz:inbound-endpoint>
             </inbound>
 
-            <component class="${puGroupId}.feeder.Feeder"/>
+            <component class="${mGroupdId}"/>
             
             <outbound>
                 <pass-through-router>

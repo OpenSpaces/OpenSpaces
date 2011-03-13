@@ -41,9 +41,14 @@
                 </spring:bean>
             </os-core:template>
         </os-events:polling-container>
-
+        
+        <spring:bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+			<spring:property name="verifiedGroupdId" value="${puGroupId}.processor.Verifier"/>
+			<spring:property name="approverGroupdId" value="${puGroupId}.processor.Approver"/>
+			<spring:property name="processorGroupdId" value="${puGroupId}.processor.Processor"/>
+		</spring:bean>
     </spring:beans>
-
+    
     <os-eventcontainer:connector name="gigaSpacesConnector"/>
     
      <!-- this connector must be declared ,in order to inject the  Spring appliction context -->
@@ -55,7 +60,7 @@
             <inbound>
                 <os-eventcontainer:inbound-endpoint address="os-eventcontainer://dataProcessorPollingEventContainer"/>
             </inbound>
-            <component class="${puGroupId}.processor.Verifier"/>
+            <component class="${verifiedGroupdId}"/>
             <outbound>
                 <pass-through-router>
                     <os-queue:outbound-endpoint path="queue1"/>
@@ -67,7 +72,7 @@
             <inbound>
                 <os-queue:inbound-endpoint path="queue1"/>
             </inbound>
-            <component class="${puGroupId}.processor.Approver"/>
+            <component class="${approverGroupdId}"/>
             <outbound>
                 <pass-through-router>
                     <os-queue:outbound-endpoint path="queue2"/>
@@ -79,7 +84,7 @@
             <inbound>
                 <os-queue:inbound-endpoint path="queue2"/>
             </inbound>
-            <component class="${puGroupId}.processor.Processor"/>
+            <component class="${processorGroupId}"/>
             <outbound>
                 <pass-through-router>
                     <os-eventcontainer:outbound-endpoint giga-space="gigaSpace"/>
