@@ -14,7 +14,7 @@
 	<bean id="AlertLoggingGateway" class="org.openspaces.example.alert.logging.snmp.AlertLoggingGateway" >
         <property name="alertFileFilter" value="notify-alerts.xml" />
         <property name="loggerName" value="org.openspaces.example.alert.logging.AlertLoggingGateway" />
-        <property name="group" value="gilad3" />
+        <property name="group" value="set XAP group here" />
 	 </bean>
 	 
 	<context:annotation-config />
