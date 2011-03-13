@@ -10,17 +10,17 @@
 	<alert
 		class="org.openspaces.admin.alert.config.PhysicalMemoryUtilizationAlertConfiguration"
 		enabled="true">
-		<property key="high-threshold-perc" value="80" />
-		<property key="low-threshold-perc" value="60" />
+		<property key="high-threshold-perc" value="30" />
+		<property key="low-threshold-perc" value="20" />
 		<property key="measurement-period-milliseconds" value="60000" />
 	</alert>
 
 	<alert
 		class="org.openspaces.admin.alert.config.HeapMemoryUtilizationAlertConfiguration"
 		enabled="true">
-		<property key="high-threshold-perc" value="80" />
-		<property key="low-threshold-perc" value="60" />
-		<property key="measurement-period-milliseconds" value="60000" />
+		<property key="high-threshold-perc" value="20" />
+		<property key="low-threshold-perc" value="10" />
+		<property key="measurement-period-milliseconds" value="5100" />
 	</alert>
 
 	<alert

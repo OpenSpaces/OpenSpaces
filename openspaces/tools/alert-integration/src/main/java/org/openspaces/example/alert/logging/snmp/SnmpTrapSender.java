@@ -15,11 +15,9 @@
  */
 package org.openspaces.example.alert.logging.snmp;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Properties;
@@ -106,10 +104,12 @@ public class SnmpTrapSender implements SnmpTrapSenderFacade {
     private Properties loadProps(String fileName) throws IOException {
     	ClassLoader cl = this.getClass().getClassLoader();
     	Properties prop = new Properties();
-    	URL log4jprops = cl.getResource(fileName);
-    	if (log4jprops != null) {
-    		String _path = log4jprops.getFile();
-    		prop.load(new FileInputStream(new File(_path)));
+    	InputStream resourceAsStream = cl.getResourceAsStream(fileName);
+    	//URL log4jprops = cl.getResource(fileName);
+    	if (resourceAsStream != null) {
+    		//String _path = log4jprops.getFile();
+    		//prop.load(new FileInputStream(new File(_path)));
+    		prop.load(resourceAsStream); 
     		return prop;
     	}
     	return null;
