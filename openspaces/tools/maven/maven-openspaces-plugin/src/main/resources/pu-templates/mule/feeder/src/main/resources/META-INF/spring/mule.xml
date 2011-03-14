@@ -27,10 +27,14 @@
         -->
         <os-core:giga-space id="gigaSpace" space="space"/>
         
-        <spring:bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-			<spring:property name="mGroupdId" value="${puGroupId}.feeder.Feeder"/>
+        <spring:bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+			<spring:property name="properties">
+				<spring:props>
+					<spring:prop key="mGroupId">${puGroupId}.feeder.Feeder</spring:prop>
+				</spring:props>
+			</spring:property>
 		</spring:bean>
-        
+		
     </spring:beans>
     
     <os-eventcontainer:connector name="gigaSpacesConnector" />
@@ -43,7 +47,7 @@
                 </quartz:inbound-endpoint>
             </inbound>
 
-            <component class="${mGroupdId}"/>
+            <component class="${mGroupId}"/>
             
             <outbound>
                 <pass-through-router>

@@ -42,11 +42,16 @@
             </os-core:template>
         </os-events:polling-container>
         
-        <spring:bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-			<spring:property name="verifiedGroupdId" value="${puGroupId}.processor.Verifier"/>
-			<spring:property name="approverGroupdId" value="${puGroupId}.processor.Approver"/>
-			<spring:property name="processorGroupdId" value="${puGroupId}.processor.Processor"/>
+        <spring:bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+			<spring:property name="properties">
+				<spring:props>
+					<spring:prop key="verifiedGroupId">${puGroupId}.processor.Verifier</spring:prop>
+					<spring:prop key="approverGroupId">${puGroupId}.processor.Approver</spring:prop>
+					<spring:prop key="processorGroupId">${puGroupId}.processor.Processor</spring:prop>
+				</spring:props>
+			</spring:property>
 		</spring:bean>
+
     </spring:beans>
     
     <os-eventcontainer:connector name="gigaSpacesConnector"/>
@@ -60,7 +65,7 @@
             <inbound>
                 <os-eventcontainer:inbound-endpoint address="os-eventcontainer://dataProcessorPollingEventContainer"/>
             </inbound>
-            <component class="${verifiedGroupdId}"/>
+            <component class="${verifiedGroupId}"/>
             <outbound>
                 <pass-through-router>
                     <os-queue:outbound-endpoint path="queue1"/>
@@ -72,7 +77,7 @@
             <inbound>
                 <os-queue:inbound-endpoint path="queue1"/>
             </inbound>
-            <component class="${approverGroupdId}"/>
+            <component class="${approverGroupId}"/>
             <outbound>
                 <pass-through-router>
                     <os-queue:outbound-endpoint path="queue2"/>
