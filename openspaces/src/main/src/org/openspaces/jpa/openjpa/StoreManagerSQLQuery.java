@@ -11,6 +11,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.openjpa.kernel.AbstractStoreQuery;
 import org.apache.openjpa.kernel.QueryContext;
+import org.apache.openjpa.kernel.StoreContext;
 import org.apache.openjpa.kernel.StoreQuery;
 import org.apache.openjpa.lib.rop.ListResultObjectProvider;
 import org.apache.openjpa.lib.rop.ResultObjectProvider;
@@ -41,8 +42,7 @@ public class StoreManagerSQLQuery extends AbstractStoreQuery {
     private StoreManager _store;
 
     public StoreManagerSQLQuery(StoreManager store) {
-
-        _store = store;
+        this._store = store;
     }
 
     public StoreManager getStore() {
@@ -68,16 +68,18 @@ public class StoreManagerSQLQuery extends AbstractStoreQuery {
     public boolean requiresParameterDeclarations() {
         return false;
     }
-
+    
     /**
      * Executes the filter as a SQL query.
      */
     protected static class SQLExecutor extends AbstractExecutor {
 
         private final boolean _execute; // native call task execution
+        private final StoreManagerSQLQuery _query;
 
-        public SQLExecutor(StoreManagerSQLQuery q) {
-            QueryContext ctx = q.getContext();
+        public SQLExecutor(StoreManagerSQLQuery query) {
+            this._query = query;
+            QueryContext ctx = query.getContext();
 
             String sql = StringUtils.trimToNull(ctx.getQueryString());
 
@@ -98,6 +100,11 @@ public class StoreManagerSQLQuery extends AbstractStoreQuery {
 
             if (_execute) 
             {
+                // Make sure there's an active store transaction
+                StoreContext context = _query.getStore().getContext();
+                context.getBroker().assertActiveTransaction();
+                context.beginStore();
+                
                 if (params == null)
                     throw new UserException("Execute task is not supported for non-parameterized query.");
                 if (params.length != 1)

@@ -94,7 +94,7 @@ public class StoreManager extends AbstractStoreManager {
         unsupportedOptions.remove(OpenJPAConfiguration.OPTION_INC_FLUSH);        
         return unsupportedOptions;
     }
-
+    
     @Override
     public boolean syncVersion(OpenJPAStateManager sm, Object edata) {
         try {
@@ -162,12 +162,13 @@ public class StoreManager extends AbstractStoreManager {
     
     @Override
     public void beginOptimistic() {
-        begin();
+        // Do nothing... (a transaction for rollback purpose will be started on flush)
     }
 
     @Override
     public void rollbackOptimistic() {
-        rollback();
+        if (_transaction != null)
+            rollback();
     }
 
     @Override
@@ -492,6 +493,9 @@ public class StoreManager extends AbstractStoreManager {
     @Override
     protected Collection flush(Collection pNew, Collection pNewUpdated, Collection pNewFlushedDeleted,
             Collection pDirty, Collection pDeleted) {
+        
+        if (getContext().getBroker().getOptimistic() && _transaction == null)
+            begin();
         
         IJSpace space = getConfiguration().getSpace();
                 
