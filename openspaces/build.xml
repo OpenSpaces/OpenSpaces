@@ -226,7 +226,7 @@
                  source="1.5" access="protected" author="true" version="true" use="true"
                  useexternalfile="yes"
                  defaultexcludes="true"
-                 header='&lt;a href=\"http://www.gigaspaces.com/docs/JavaDoc8.0/\" target=\"_top\"&gt;GigaSpaces XAP 8.0 API&lt;/a&gt;'
+                 header='&lt;a href="index.html" target=\"_top\"&gt;GigaSpaces XAP 8.0 API&lt;/a&gt;'
         		packagenames="org.openspaces.**.*"
         		excludepackagenames="org.openspaces.admin.internal.**.*, org.openspaces.core.executor.internal.**.*, org.openspaces.core.internal.**.*, org.openspaces.core.transaction.internal.**.*">
             <arg value="-breakiterator"/>
