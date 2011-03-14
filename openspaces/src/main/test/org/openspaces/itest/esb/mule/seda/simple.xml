@@ -15,8 +15,8 @@
        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.0/mule.xsd
        http://www.mulesoft.org/schema/mule/stdio http://www.mulesoft.org/schema/mule/stdio/3.0/mule-stdio.xsd
         http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/3.0/mule-vm.xsd
-       http://www.openspaces.org/schema/mule/os-eventcontainer http://www.openspaces.org/schema/mule/mule-os-eventcontainer.xsd
-       http://www.openspaces.org/schema/mule/os-seda http://www.openspaces.org/schema/mule/mule-os-seda.xsd">
+       http://www.openspaces.org/schema/mule/os-eventcontainer http://www.openspaces.org/schema/8.0/mule/3.1/mule-os-eventcontainer.xsd
+       http://www.openspaces.org/schema/mule/os-seda http://www.openspaces.org/schema/8.0/mule/3.1/mule-os-seda.xsd">
 
     <spring:beans>
         <os-core:space id="space" url="/./space" lookup-groups="${user.name}"/>

@@ -185,7 +185,7 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
         }
 
         protected void bindTransaction(Transaction tx) throws TransactionException {
-            //todo:support transaction
+            //TODO support transaction
         }
     }
 

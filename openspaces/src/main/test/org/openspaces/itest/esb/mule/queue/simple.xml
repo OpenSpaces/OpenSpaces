@@ -12,7 +12,7 @@
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.0/mule.xsd
        http://www.mulesoft.org/schema/mule/stdio ttp://www.mulesoft.org/schema/mule/stdio/3.0/mule-stdio.xsd
-       http://www.openspaces.org/schema/mule/os-queue http://www.openspaces.org/schema/mule/mule-os-queue.xsd">
+       http://www.openspaces.org/schema/mule/os-queue http://www.openspaces.org/schema/8.0/mule/3.1/mule-os-queue.xsd">
 
     <spring:beans>
         <os-core:space id="space" url="/./space" lookup-groups="${user.name}"/>
