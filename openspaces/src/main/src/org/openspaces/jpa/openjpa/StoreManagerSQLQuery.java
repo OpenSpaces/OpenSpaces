@@ -27,6 +27,8 @@ import org.openspaces.jpa.StoreManager;
 import com.gigaspaces.async.AsyncFuture;
 import com.gigaspaces.executor.SpaceTask;
 import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
+import com.gigaspaces.internal.utils.CollectionUtils;
+import com.j_spaces.core.client.SQLQuery;
 
 /**
  * Executes native SQLQueries and task
@@ -58,7 +60,7 @@ public class StoreManagerSQLQuery extends AbstractStoreQuery {
     }
 
     public Executor newDataStoreExecutor(ClassMetaData meta, boolean subclasses) {
-        return new SQLExecutor(this);
+        return new SQLExecutor();
     }
 
     public boolean requiresCandidateType() {
@@ -74,21 +76,9 @@ public class StoreManagerSQLQuery extends AbstractStoreQuery {
      */
     protected static class SQLExecutor extends AbstractExecutor {
 
-        private final boolean _execute; // native call task execution
-        private final StoreManagerSQLQuery _query;
-
-        public SQLExecutor(StoreManagerSQLQuery query) {
-            this._query = query;
-            QueryContext ctx = query.getContext();
-
-            String sql = StringUtils.trimToNull(ctx.getQueryString());
-
-            String executeCommand = "execute";
-            _execute = sql.length() > executeCommand.length()
-                    && sql.substring(0, executeCommand.length()).equalsIgnoreCase(executeCommand);
-
-            if (!_execute)
-                throw new UserException("Unsupported native query syntax - " + sql);
+        private final String _executeCommand = "execute ?";
+        
+        public SQLExecutor() {
         }
 
         public int getOperation(StoreQuery q) {
@@ -96,47 +86,94 @@ public class StoreManagerSQLQuery extends AbstractStoreQuery {
                     || q.getContext().getResultMappingName() != null || q.getContext().getResultMappingScope() != null) ? OP_SELECT : OP_UPDATE;
         }
 
-        public ResultObjectProvider executeQuery(StoreQuery q, Object[] params, Range range) {
-
-            if (_execute) 
-            {
-                // Make sure there's an active store transaction
-                StoreContext context = _query.getStore().getContext();
-                context.getBroker().assertActiveTransaction();
-                context.beginStore();
+        public ResultObjectProvider executeQuery(StoreQuery storeQuery, Object[] params, Range range) {
+            // If candidate type was not set => task execution
+            if (storeQuery.getContext().getCandidateType() == null) { 
+                return executeTask(storeQuery, params);
                 
-                if (params == null)
-                    throw new UserException("Execute task is not supported for non-parameterized query.");
-                if (params.length != 1)
-                    throw new UserException("Illegal number of arguments <" + params.length + "> should be <1>.");
-
-                if (!(params[0] instanceof Task))
-                    throw new UserException("Illegal task execution parameter type - " + params[0].getClass().getName()
-                            + " . " + Task.class.getName() + " is expected.");
-                
-                Task<?> task = (Task<?>) params[0];
-                
-                StoreManagerSQLQuery query = (StoreManagerSQLQuery)q;
-                ISpaceProxy space = (ISpaceProxy)query.getStore().getConfiguration().getSpace();
-               
-                try {
-                    SpaceTask<?> spaceTask;
-                    if(task instanceof DistributedTask)
-                        spaceTask = new InternalDistributedSpaceTaskWrapper((DistributedTask) task);
-                    else
-                        spaceTask = new InternalSpaceTaskWrapper(task, null);
-                    
-                    AsyncFuture<?> future = space.execute(spaceTask, query.getStore().getCurrentTransaction(), null);
-                    Object taskResult = future.get();
-                    List resultList = new LinkedList();
-                    resultList.add(taskResult);
-                    return new ListResultObjectProvider(resultList);
-                } catch (Exception e) {
-                    throw new GeneralException(e);
-                }
+            // Otherwise, SQLQuery execution
+            } else {
+                return executeSqlQuery(storeQuery, params);
             }
+        }
 
-            return null;
+        @SuppressWarnings({ "rawtypes", "deprecation", "unchecked" })
+        private ResultObjectProvider executeSqlQuery(StoreQuery storeQuery, Object[] params) {
+            try {
+                
+                // Throw an exception for a maybe common user mistake
+                final String sql = StringUtils.trimToNull(storeQuery.getContext().getQueryString());
+                if (_executeCommand.equalsIgnoreCase(sql))
+                    throw new UserException(
+                            "When specifying a candidate type - SQLQuery syntax should be used. " +
+                            "For task execution use the entityManager.createNativeQuery(String sql) method.");
+                
+                final QueryContext context = storeQuery.getContext();
+                final Class<?> type = context.getCandidateType();
+                final SQLQuery sqlQuery = new SQLQuery(type, context.getQueryString());
+                if (params != null) {
+                    for (int i = 0; i < params.length; i++) {
+                        sqlQuery.setParameter(i + 1, params[i]);
+                    }
+                }
+                final StoreManagerSQLQuery query = (StoreManagerSQLQuery) storeQuery;
+                final StoreManager store = (StoreManager) query.getStore();                
+                final Object[] result = store.getConfiguration().getSpace().readMultiple(
+                        sqlQuery, store.getCurrentTransaction(), Integer.MAX_VALUE, store.getConfiguration().getReadModifier());
+                
+                return new ListResultObjectProvider(CollectionUtils.toList(result));                
+            
+            } catch (Exception e) {
+                throw new GeneralException(e);
+            }
+            
+        }
+
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        private ResultObjectProvider executeTask(StoreQuery storeQuery, Object[] params) {
+            QueryContext ctx = storeQuery.getContext();
+            String sql = StringUtils.trimToNull(ctx.getQueryString());
+
+            // Task execution SQL string must be: "execute ?"
+            if (!_executeCommand.equalsIgnoreCase(sql))
+                throw new UserException("Unsupported native query task execution syntax - " + sql);
+            
+            final StoreManagerSQLQuery query = (StoreManagerSQLQuery) storeQuery;
+            
+            // Make sure there's an active store transaction
+            // since we assume the task is changing data within the space
+            StoreContext context = query.getStore().getContext();
+            context.getBroker().assertActiveTransaction();
+            context.beginStore();
+            
+            if (params == null)
+                throw new UserException("Execute task is not supported for non-parameterized query.");
+            if (params.length != 1)
+                throw new UserException("Illegal number of arguments <" + params.length + "> should be <1>.");
+
+            if (!(params[0] instanceof Task))
+                throw new UserException("Illegal task execution parameter type - " + params[0].getClass().getName()
+                        + " . " + Task.class.getName() + " is expected.");
+            
+            Task<?> task = (Task<?>) params[0];
+                        
+            ISpaceProxy space = (ISpaceProxy) query.getStore().getConfiguration().getSpace();
+            
+            try {
+                SpaceTask<?> spaceTask;
+                if(task instanceof DistributedTask)
+                    spaceTask = new InternalDistributedSpaceTaskWrapper((DistributedTask) task);
+                else
+                    spaceTask = new InternalSpaceTaskWrapper(task, null);
+                
+                AsyncFuture<?> future = space.execute(spaceTask, query.getStore().getCurrentTransaction(), null);
+                Object taskResult = future.get();
+                List resultList = new LinkedList();
+                resultList.add(taskResult);
+                return new ListResultObjectProvider(resultList);
+            } catch (Exception e) {
+                throw new GeneralException(e);
+            }
         }
 
         public String[] getDataStoreActions(StoreQuery q, Object[] params, Range range) {
