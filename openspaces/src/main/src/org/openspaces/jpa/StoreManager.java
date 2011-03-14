@@ -110,7 +110,7 @@ public class StoreManager extends AbstractStoreManager {
 
             Object spaceVersion = result.getVersion();
             if (spaceVersion == null)
-                throw new IllegalStateException("Entity of type: " + result.getClassName() + " with Id: " + result.getID()
+                throw new IllegalStateException("Entity of type: " + result.getTypeName() + " with Id: " + result.getID()
                         + " expected to have a value in its version property.");
             
             return sm.getVersion().equals(spaceVersion);
