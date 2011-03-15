@@ -133,14 +133,14 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
     public void onEvent(final Object data, final GigaSpace gigaSpace, final TransactionStatus txStatus, final Object source) {
 
         if (txStatus != null) {
-            TransactionTemplate tt = new TransactionTemplate(endpoint.getTransactionConfig(),
+            TransactionTemplate<Object> tt = new TransactionTemplate<Object>(endpoint.getTransactionConfig(),
                     connector.getMuleContext());
             try {
                 if (disposed) {
                     txStatus.setRollbackOnly();
                     return;
                 }
-                tt.execute(new TransactionCallback() {
+                tt.execute(new TransactionCallback<Object>() {
                     public Object doInTransaction() throws Exception {
                         doReceiveEvent(data, gigaSpace, txStatus, source);
                         return null;
@@ -156,23 +156,21 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
             try {
                 doReceiveEvent(data, gigaSpace, txStatus, source);
             } catch (Exception e) {
-                //handleException(e);
-                //TODO handle exception here, maybe add custom exception strategy
+                endpoint.getConnector().handleException(e);
             }
         }
     }
 
-    protected void doReceiveEvent(Object data, GigaSpace gigaSpace, TransactionStatus txStatus, Object source) throws Exception {
+    protected void doReceiveEvent(Object data, GigaSpace gigaSpace, TransactionStatus txStatus, Object source) throws Exception{
         if (workManager) {
             getWorkManager().scheduleWork(new GigaSpaceWorker(data, this));
         } else {
             MuleMessageFactory factory = connector.getMuleMessageFactory();
-            //MessageAdapter adapter = connector.getMessageAdapter(data);
-            //TODO which encoding?? utf-8??
-            MuleMessage message = factory.create(data, "UTF-8");
-            // nothing to do with the result
+            MuleMessage message = factory.create(data, endpoint.getEncoding());
             MuleEvent muleEvent = routeMessage(message);
-            MuleMessage routedMessage = muleEvent.getMessage(); 
+            
+            // nothing to do with the result
+            //MuleMessage routedMessage = muleEvent.getMessage(); 
         }
     }
 
@@ -180,7 +178,7 @@ public class OpenSpacesMessageReceiver extends AbstractMessageReceiver implement
     protected static class GigaSpaceWorker extends AbstractReceiverWorker {
 
         public GigaSpaceWorker(Object message, AbstractMessageReceiver receiver) {
-            super(new ArrayList(1), receiver);
+            super(new ArrayList<Object>(1), receiver);
             messages.add(message);
         }
 

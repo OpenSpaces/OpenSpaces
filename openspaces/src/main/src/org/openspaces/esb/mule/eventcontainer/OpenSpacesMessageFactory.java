@@ -26,7 +26,6 @@ public class OpenSpacesMessageFactory extends AbstractMuleMessageFactory{
 
     @Override
     protected Class<?>[] getSupportedTransportMessageTypes() {
-        // TODO check for supported classes
         return new Class[] { Object.class };
     }
     
