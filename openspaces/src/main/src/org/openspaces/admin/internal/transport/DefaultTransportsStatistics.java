@@ -99,7 +99,7 @@ public class DefaultTransportsStatistics implements TransportsStatistics {
         double total = 0;
         int size = 0;
         for (TransportStatistics stat : stats) {
-            double perc = stat.getActiveThreadsPerc();
+            double perc = stat.isNA() ? -1 : stat.getActiveThreadsPerc();
             if (perc != -1) {
                 total += perc;
                 size++;
