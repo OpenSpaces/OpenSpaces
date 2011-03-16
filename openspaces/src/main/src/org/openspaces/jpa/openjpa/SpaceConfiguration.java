@@ -5,12 +5,17 @@ import net.jini.core.transaction.server.TransactionManager;
 import org.apache.openjpa.conf.OpenJPAConfigurationImpl;
 import org.apache.openjpa.kernel.BrokerImpl;
 import org.apache.openjpa.lib.conf.Value;
+import org.openspaces.core.GigaSpace;
+import org.openspaces.core.GigaSpaceConfigurer;
 import org.openspaces.core.space.UrlSpaceConfigurer;
+import org.openspaces.remoting.ExecutorRemotingProxyConfigurer;
+import org.openspaces.remoting.scripting.ScriptingExecutor;
 
 import com.gigaspaces.client.transaction.ITransactionManagerProvider;
 import com.gigaspaces.client.transaction.ITransactionManagerProvider.TransactionManagerType;
 import com.gigaspaces.client.transaction.TransactionManagerConfiguration;
 import com.gigaspaces.client.transaction.TransactionManagerProviderFactory;
+import com.gigaspaces.internal.client.spaceproxy.ISpaceProxy;
 import com.j_spaces.core.IJSpace;
 import com.j_spaces.core.client.ReadModifiers;
 
@@ -27,6 +32,7 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
     private IJSpace _space;
     private ITransactionManagerProvider _transactionManagerProvider;
     private int _readModifier;
+    private ScriptingExecutor<?> _scriptingExecutor;
     
     public SpaceConfiguration() {
         super();       
@@ -100,6 +106,26 @@ public class SpaceConfiguration extends OpenJPAConfigurationImpl {
     @Override
     public BrokerImpl newBrokerInstance(String user, String pass) {
         return new Broker();
+    }
+
+    /**
+     * Gets GigaSpaces {@link ScriptingExecutor} proxy used for executing a dynamic {@link org.openspaces.remoting.scripting.Script}.
+     * @return {@link ScriptingExecutor} proxy.
+     */
+    public ScriptingExecutor<?> getScriptingExecutorProxy() {
+        if (_scriptingExecutor == null) {
+            initializeScriptingExecutorProxy();
+        }
+        return _scriptingExecutor;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private synchronized void initializeScriptingExecutorProxy() {
+        if (_scriptingExecutor == null) {
+            boolean clustered = ((ISpaceProxy) getSpace()).isClustered();
+            GigaSpace gigaSpace = new GigaSpaceConfigurer(getSpace()).clustered(clustered).gigaSpace();
+            _scriptingExecutor =  new ExecutorRemotingProxyConfigurer<ScriptingExecutor>(gigaSpace, ScriptingExecutor.class).proxy();
+        }        
     }
     
     

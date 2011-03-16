@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:os-core="http://www.openspaces.org/schema/core"
+       xmlns:os-events="http://www.openspaces.org/schema/events"
+       xmlns:os-remoting="http://www.openspaces.org/schema/remoting"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.openspaces.org/schema/core http://www.openspaces.org/schema/core/openspaces-core.xsd
+       http://www.openspaces.org/schema/events http://www.openspaces.org/schema/events/openspaces-events.xsd
+       http://www.openspaces.org/schema/remoting http://www.openspaces.org/schema/remoting/openspaces-remoting.xsd">
+
+    <bean id="propertiesConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
+
+    <os-core:space id="space" url="/./jpaScripting" lookup-groups="${user.name}" />
+
+    <os-core:giga-space id="gigaSpace" space="space"/>
+
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="persistenceUnitName" value="gigaspaces"/>
+		<property name="persistenceXmlLocation" value="/org/openspaces/itest/jpa/persistence.xml"/>
+		<property name="jpaVendorAdapter">
+			<bean class="org.openspaces.jpa.OpenSpacesJpaVendorAdapter">
+				<property name="space" value="#{gigaSpace.space}"/>
+			</bean>
+		</property>
+	</bean>	
+
+    <bean id="scriptingExecutorImpl" class="org.openspaces.remoting.scripting.DefaultScriptingExecutor" />
+
+    <os-remoting:service-exporter id="serviceExporter" template-lookup-name="org.openspaces.remoting.scripting.ScriptingExecutor">
+        <os-remoting:service ref="scriptingExecutorImpl"/>
+    </os-remoting:service-exporter>
+ 
+    <os-remoting:annotation-support />
+    
+</beans>

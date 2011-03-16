@@ -23,6 +23,8 @@ import org.openspaces.core.executor.Task;
 import org.openspaces.core.executor.internal.InternalDistributedSpaceTaskWrapper;
 import org.openspaces.core.executor.internal.InternalSpaceTaskWrapper;
 import org.openspaces.jpa.StoreManager;
+import org.openspaces.remoting.scripting.Script;
+import org.openspaces.remoting.scripting.ScriptingExecutor;
 
 import com.gigaspaces.async.AsyncFuture;
 import com.gigaspaces.executor.SpaceTask;
@@ -89,7 +91,7 @@ public class StoreManagerSQLQuery extends AbstractStoreQuery {
         public ResultObjectProvider executeQuery(StoreQuery storeQuery, Object[] params, Range range) {
             // If candidate type was not set => task execution
             if (storeQuery.getContext().getCandidateType() == null) { 
-                return executeTask(storeQuery, params);
+                return executeTaskOrScript(storeQuery, params);
                 
             // Otherwise, SQLQuery execution
             } else {
@@ -97,6 +99,13 @@ public class StoreManagerSQLQuery extends AbstractStoreQuery {
             }
         }
 
+        /**
+         * Executes a GigaSpaces {@link SQLQuery} syntax query.
+         * 
+         * @param storeQuery The query execute was called for.
+         * @param params The query's parameters.
+         * @return Query execution result as a list.
+         */
         @SuppressWarnings({ "rawtypes", "deprecation", "unchecked" })
         private ResultObjectProvider executeSqlQuery(StoreQuery storeQuery, Object[] params) {
             try {
@@ -129,39 +138,85 @@ public class StoreManagerSQLQuery extends AbstractStoreQuery {
             
         }
 
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        private ResultObjectProvider executeTask(StoreQuery storeQuery, Object[] params) {
+        /**
+         * Executes a GigaSpaces {@link Task} or {@link Script}.
+         * Decision is made based on the provided first parameter's instance.
+         * 
+         * @param storeQuery The query which execute was called for.
+         * @param params Query execution parameters.
+         * @return {@link Task} or {@link Script} execution result.
+         */
+        @SuppressWarnings({ "rawtypes" })
+        private ResultObjectProvider executeTaskOrScript(StoreQuery storeQuery, Object[] params) {
             QueryContext ctx = storeQuery.getContext();
             String sql = StringUtils.trimToNull(ctx.getQueryString());
 
             // Task execution SQL string must be: "execute ?"
             if (!_executeCommand.equalsIgnoreCase(sql))
-                throw new UserException("Unsupported native query task execution syntax - " + sql);
+                throw new UserException("Unsupported native query task/script execution syntax - " + sql);
             
             final StoreManagerSQLQuery query = (StoreManagerSQLQuery) storeQuery;
-            
-            // Make sure there's an active store transaction
-            // since we assume the task is changing data within the space
-            StoreContext context = query.getStore().getContext();
-            context.getBroker().assertActiveTransaction();
-            context.beginStore();
-            
+                        
             if (params == null)
-                throw new UserException("Execute task is not supported for non-parameterized query.");
+                throw new UserException("Execute task/script is not supported for non-parameterized query.");
             if (params.length != 1)
                 throw new UserException("Illegal number of arguments <" + params.length + "> should be <1>.");
 
-            if (!(params[0] instanceof Task))
-                throw new UserException("Illegal task execution parameter type - " + params[0].getClass().getName()
-                        + " . " + Task.class.getName() + " is expected.");
+            if (params[0] instanceof Task)
+                return executeTask((Task) params[0], query);
             
-            Task<?> task = (Task<?>) params[0];
-                        
-            ISpaceProxy space = (ISpaceProxy) query.getStore().getConfiguration().getSpace();
+            if (params[0] instanceof Script)
+                return executeScript((Script) params[0], query);
+            
+            throw new UserException("Illegal task/script execution parameter type - " + params[0].getClass().getName()
+                    + ". " + Task.class.getName() + " or " + Script.class.getName() + " is expected.");
+            
+        }
+
+        /**
+         * Executes the provided GigaSpaces dynamic {@link Script}.
+         * Execution shouldn't be transactional and if it is, the transaction isn't passed to the script.
+         * 
+         * @param script The {@link Script} to execute. 
+         * @param query The query which execute was called for.
+         * @return {@link Script} execution returned value.
+         */
+        private ResultObjectProvider executeScript(Script script, StoreManagerSQLQuery query) {
+            try {                
+                final ScriptingExecutor<?> executor = query.getStore().getConfiguration().getScriptingExecutorProxy();
+
+                Object result = executor.execute(script);
+
+                List<Object> resultList = new LinkedList<Object>();
+                resultList.add(result);
+
+                return new ListResultObjectProvider(resultList);
+            } catch (Exception e) {
+                throw new GeneralException(e);
+            }
+        }
+
+        /**
+         * Executes the provided GigaSpaces {@link Task}.
+         * This operation must be under a {@link StoreManager} transaction.
+         * 
+         * @param task The {@link Task} to execute.
+         * @param query The query which execute was called for.
+         * @return {@link Task} execution returned value.
+         */
+        private ResultObjectProvider executeTask(Task<?> task, final StoreManagerSQLQuery query) {
+
+            // Make sure there's an active store transaction
+            // since we assume the task is changing data within the space
+            final StoreContext context = query.getStore().getContext();
+            context.getBroker().assertActiveTransaction();
+            context.beginStore();
+            
+            final ISpaceProxy space = (ISpaceProxy) query.getStore().getConfiguration().getSpace();
             
             try {
                 SpaceTask<?> spaceTask;
-                if(task instanceof DistributedTask)
+                if( task instanceof DistributedTask)
                     spaceTask = new InternalDistributedSpaceTaskWrapper((DistributedTask) task);
                 else
                     spaceTask = new InternalSpaceTaskWrapper(task, null);
