@@ -722,6 +722,14 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                 String agentUid = newAgent.getUid();
                 AllocatedCapacity agentCapacity = state.getAllocatedCapacity(pu).getAgentCapacityOrZero(agentUid);
                 if (agentCapacity.equalsZero()) {
+                    
+                    if (!sla.getMachineProvisioning().isStartMachineSupported()) {
+                        logger.info("Agent running on machine " + newAgent.getMachine().getHostAddress()
+                                + " is not stopped since machine provisioning " + sla.getMachineProvisioning().getClass()
+                                + "does not support automatic start/stop of machines");
+                        continue;
+                    }
+                    
                     logger.warn(
                             "Stopping machine " + MachinesSlaUtils.machineToString(newAgent.getMachine()) + " "+
                             "since it is not really needed by the PU that asked for it (processing unit " + pu.getName()+")");
