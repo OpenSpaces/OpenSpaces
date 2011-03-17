@@ -961,4 +961,8 @@ public class BinPackingSolver {
     public AggregatedAllocatedCapacity getAllocatedCapacityForPu() {
         return allocatedCapacityForPu;
     }
+    
+    public AggregatedAllocatedCapacity getUnallocatedCapacity() {
+        return unallocatedCapacity;
+    }
 }
