@@ -87,6 +87,11 @@ public class ContainersSlaUtils {
             public GridServiceContainer get() throws ExecutionException, IllegalStateException,
                     TimeoutException {
                 
+                ExecutionException exception = getException();
+                if (exception != null) {
+                    throw exception;
+                }
+
                 Object result = ref.get();
                 GridServiceContainer container = null;
                 if (result != null) {
@@ -95,11 +100,6 @@ public class ContainersSlaUtils {
                 
                 if (isTimedOut() && container == null) {
                     throw new TimeoutException("Starting a new container on machine "+ gsa.getMachine().getHostAddress() + " took more than " + timeoutUnit.toSeconds(timeoutDuration) + " seconds to complete.");
-                }
-                
-                ExecutionException exception = getException();
-                if (exception != null) {
-                    throw exception;
                 }
                
                 if (container == null) {
