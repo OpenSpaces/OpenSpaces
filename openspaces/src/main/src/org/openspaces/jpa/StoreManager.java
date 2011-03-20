@@ -569,13 +569,14 @@ public class StoreManager extends AbstractStoreManager {
 
                     final FieldMetaData[] fmds = ownerInformation.getStateManager().getMetaData().getFields();
                     int spacePropertyIndex = -1;
+                    int routingPropertyIndex = entry.getTypeDescriptor().getRoutingPropertyId();
                     
                     for (int i = 0; i < fmds.length; i++) {
                         //ignore version which is not part of the entry packet
                         if(fmds[i].isVersion())
                             continue;
                         spacePropertyIndex++;
-                        if (i != ownerInformation.getMetaData().getIndex() && !fmds[i].isPrimaryKey()) {
+                        if (i != ownerInformation.getMetaData().getIndex() && !fmds[i].isPrimaryKey() && spacePropertyIndex != routingPropertyIndex) {
                             entry.setFieldValue(spacePropertyIndex, null);
                         }
                     }
@@ -592,6 +593,7 @@ public class StoreManager extends AbstractStoreManager {
                     final FieldMetaData[] fmds = cm.getFields();
                     
                     int spacePropertyIndex = -1;
+                    int routingPropertyIndex = entry.getTypeDescriptor().getRoutingPropertyId();
                     
                     for (int i = 0; i < fmds.length; i++) {
                         //ignore version which is not part of the entry packet
@@ -599,7 +601,7 @@ public class StoreManager extends AbstractStoreManager {
                             continue;
                         
                         spacePropertyIndex++;
-                        if (!sm.getDirty().get(i) && !fmds[i].isPrimaryKey()) {
+                        if (!sm.getDirty().get(i) && !fmds[i].isPrimaryKey() && spacePropertyIndex != routingPropertyIndex) {
                             entry.setFieldValue(spacePropertyIndex, null);
                         } else {
                             _relationsManager.initializeOwnerReferencesForField((StateManager) sm, fmds[i]);
