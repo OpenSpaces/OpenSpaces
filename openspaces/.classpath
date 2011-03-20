@@ -13,7 +13,7 @@
 	<classpathentry kind="lib" path="lib/platform/ant/ant-launcher.jar"/>
 	<classpathentry kind="lib" path="lib/platform/ant/ant-trax.jar"/>
 	<classpathentry kind="lib" path="lib/platform/ant/ant.jar"/>
-	<classpathentry kind="lib" path="lib/platform/jpa/openjpa-all-2.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/platform/jpa/openjpa-all-2.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/platform/glassfish/glassfish-embedded-all-v3-prelude-23677.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jdbc/hsqldb.jar"/>
 	<classpathentry kind="lib" path="lib/platform/jee/activation.jar"/>
