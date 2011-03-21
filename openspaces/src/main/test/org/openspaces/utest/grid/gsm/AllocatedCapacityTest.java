@@ -1,12 +1,13 @@
 package org.openspaces.utest.grid.gsm;
 
 import junit.framework.Assert;
+import junit.framework.TestCase;
 
 import org.junit.Test;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.grid.gsm.capacity.AllocatedCapacity;
 
-public class AllocatedCapacityTest {
+public class AllocatedCapacityTest extends TestCase {
 
     @Test
     public void testAdd() {
@@ -30,18 +31,28 @@ public class AllocatedCapacityTest {
         Assert.assertFalse(new AllocatedCapacity(Fraction.ZERO,1).isMemoryEqualsZero());
     }
     
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public void testNegativeCpuException() {
         AllocatedCapacity c1 = new AllocatedCapacity(Fraction.ZERO,1);
         AllocatedCapacity c2 = new AllocatedCapacity(Fraction.ONE,0);
-        c1.subtract(c2);
+        try {
+            c1.subtract(c2);
+            Assert.fail("expected exception");
+        } catch (IllegalArgumentException e) {
+
+        }
     }
     
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public void testNegativeMemoryException() {
         AllocatedCapacity c1 = new AllocatedCapacity(Fraction.ZERO,1);
         AllocatedCapacity c2 = new AllocatedCapacity(Fraction.ONE,0);
-        c2.subtract( c1);
+        try {
+            c2.subtract(c1);
+            Assert.fail("expected exception");
+        } catch (IllegalArgumentException e) {
+
+        }
     }
     
     @Test

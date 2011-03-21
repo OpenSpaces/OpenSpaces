@@ -261,14 +261,6 @@ public class BinPackingSolver {
         return allocatedCapacityForPu.getTotalAllocatedCapacity().getMemoryInMB() - maxMemoryCapacityInMB;
     }
 
-    private long calcExcessMemory(AllocatedCapacity goalCapacity) {
-        final AllocatedCapacity excessAllocatedCapacity = allocatedCapacityForPu.getTotalAllocatedCapacity().subtractOrZero(goalCapacity);
-        if (!excessAllocatedCapacity.getCpuCores().equals(Fraction.ZERO)) {
-            throw new IllegalStateException("Descrepency between goal capacity and allocated capacity.");
-        }
-        return excessAllocatedCapacity.getMemoryInMB();
-    }
-
     private boolean removeExcessContainer(String sourceAgentUid, long excessMemory, boolean forceRemove) {
         
         boolean success = false;
@@ -317,9 +309,11 @@ public class BinPackingSolver {
             boolean retry;
             do {
                 retry = false;
-                final long excessMemory = calcExcessMemory(goalCapacity);
+                final AllocatedCapacity excessCapacity = 
+                    allocatedCapacityForPu.getTotalAllocatedCapacity().subtractOrZero(goalCapacity);
+                
                 for (String sourceAgentUid : allocatedCapacityForPu.getAgentUids()) {
-                    if (removeExcessMachineStep(sourceAgentUid, excessMemory)) {
+                    if (removeExcessMachineStep(sourceAgentUid, excessCapacity)) {
                         //retry another machine again
                         retry = true;
                         success = true;
@@ -331,21 +325,32 @@ public class BinPackingSolver {
         return success;
     }
 
-    private boolean removeExcessMachineStep(String sourceAgentUid, long excessMemory) {
+    private boolean removeExcessMachineStep(String sourceAgentUid, AllocatedCapacity excessCapacity) {
         
         boolean retry = false;
         AllocatedCapacity allocatedCapacityOnSourceMachine = allocatedCapacityForPu.getAgentCapacity(sourceAgentUid);
-        AllocatedCapacity remainingCapacityToRelocate = 
-            allocatedCapacityOnSourceMachine.subtractOrZero(new AllocatedCapacity(Fraction.ZERO,excessMemory)); 
         
+        AllocatedCapacity remainingCapacityToRelocate = 
+            allocatedCapacityOnSourceMachine.subtractOrZero(excessCapacity); 
+        
+        //check that we can relocate all non excess containers to other machines
         if (relocateCapacityToOtherMachines(sourceAgentUid, remainingCapacityToRelocate)) {
 
+            AllocatedCapacity remaminingCapacityOnSourceMachine = allocatedCapacityForPu.getAgentCapacity(sourceAgentUid);
+            
+            if (!excessCapacity.satisfies(remaminingCapacityOnSourceMachine)) {
+                throw new IllegalStateException(
+                        "Cannot remove machine since it has " + remaminingCapacityOnSourceMachine + " "+
+                        "and excess capacity is " + excessCapacity);
+            }
+            
             //deallocate remaining excess capacity on source machine
-            deallocateCapacityOnMachine(sourceAgentUid, new AllocatedCapacity(Fraction.ZERO,excessMemory));
+            deallocateCapacityOnMachine(
+                    sourceAgentUid, 
+                    remaminingCapacityOnSourceMachine);
             
             retry = true;
         }
-        
         return retry;
     }
 
@@ -964,5 +969,14 @@ public class BinPackingSolver {
     
     public AggregatedAllocatedCapacity getUnallocatedCapacity() {
         return unallocatedCapacity;
+    }
+
+    /**
+     * cleans AllocatedResult and DeallocatedResult
+     * Used for unit testing
+     */
+    public void reset() {
+        this.deallocatedCapacityResult = new AggregatedAllocatedCapacity();
+        this.allocatedCapacityResult = new AggregatedAllocatedCapacity();
     }
 }
