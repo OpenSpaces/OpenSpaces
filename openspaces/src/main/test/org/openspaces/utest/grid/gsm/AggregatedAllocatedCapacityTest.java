@@ -1,13 +1,14 @@
 package org.openspaces.utest.grid.gsm;
 
 import junit.framework.Assert;
+import junit.framework.TestCase;
 
 import org.junit.Test;
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
 import org.openspaces.grid.gsm.capacity.AggregatedAllocatedCapacity;
 import org.openspaces.grid.gsm.capacity.AllocatedCapacity;
 
-public class AggregatedAllocatedCapacityTest {
+public class AggregatedAllocatedCapacityTest extends TestCase {
 
     @Test
     public void testEqualsZero() {

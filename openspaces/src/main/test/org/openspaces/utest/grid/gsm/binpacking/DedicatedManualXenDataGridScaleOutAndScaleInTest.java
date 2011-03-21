@@ -46,26 +46,31 @@ public class DedicatedManualXenDataGridScaleOutAndScaleInTest extends TestCase {
         //scale-out to use 4 cores, 768 MB
         //result: 2 machines with total capacity of 4 cores and 768MB
         //{AGENT2=2 cores and 384MB, AGENT3=2 cores and 384MB}
-        solver.solveManualCapacityScaleOut(new AllocatedCapacity(new Fraction(4), 768));
+        solver.solveManualCapacityScaleOut(new AllocatedCapacity(Fraction.ZERO, _192_MB_* 4));
         Assert.assertEquals(2, solver.getAllocatedCapacityResult().getAgentUids().size());
-        Assert.assertEquals(new AllocatedCapacity(new Fraction(4),_192_MB_*4),solver.getAllocatedCapacityResult().getTotalAllocatedCapacity());
+        Assert.assertEquals(new AllocatedCapacity(Fraction.ZERO,_192_MB_*4),solver.getAllocatedCapacityResult().getTotalAllocatedCapacity());
+        Assert.assertEquals(0, solver.getDeallocatedCapacityResult().getAgentUids().size());
         assertContainersPerAgent(solver, 0, 2);
         
+        solver.reset();
         
         //scale-out to maximum capacity
         //result: 3 machines with total capacity of 6 cores and 3072MB
         //{AGENT3=2 cores and 1152MB, AGENT2=2 cores and 1152MB, AGENT1=2 cores and 768MB}
-        solver.solveManualCapacityScaleOut(new AllocatedCapacity(new Fraction(6), _3072_MB_));
+        //solver.solveManualCapacityScaleOut(new AllocatedCapacity(new Fraction(2), _3072_MB_));
+        solver.solveManualCapacityScaleOut(new AllocatedCapacity(Fraction.ZERO, _192_MB_ *12));
         Assert.assertEquals(3, solver.getAllocatedCapacityResult().getAgentUids().size());
-        Assert.assertEquals(new AllocatedCapacity(new Fraction(6),_192_MB_*16),solver.getAllocatedCapacityResult().getTotalAllocatedCapacity());
-        assertContainersPerAgent(solver, 5, 6); //TODO ------- ask Itai: why is the rebalancing not taking an extra step to rebalance by the minNumberOfContainersPerMachine,
-        //resulting in: {AGENT3=2 cores and 960MB, AGENT2=2 cores and 1152MB, AGENT1=2 cores and 960MB}
-        //5 containers, 6 containers, 5 container --- instead of 6 containers, 6 containers, 4 containers
+        Assert.assertEquals(_192_MB_*12,solver.getAllocatedCapacityResult().getTotalAllocatedCapacity().getMemoryInMB());
+        Assert.assertEquals(0,solver.getDeallocatedCapacityResult().getAgentUids().size());
+        assertContainersPerAgent(solver, 5, 6);
+        
+        solver.reset();
         
         //scale-in to 1536 MB = 2 machines, 4 cores with 1536 MB
-        solver.solveManualCapacityScaleIn(new AllocatedCapacity(new Fraction(2), _192_MB_*8));
-        Assert.assertEquals(2, solver.getAllocatedCapacityResult().getAgentUids().size());
-        Assert.assertEquals(new AllocatedCapacity(new Fraction(4),_192_MB_*8),solver.getAllocatedCapacityResult().getTotalAllocatedCapacity());
+        solver.solveManualCapacityScaleIn(new AllocatedCapacity(Fraction.ZERO, _192_MB_*8));
+        Assert.assertEquals(0, solver.getAllocatedCapacityResult().getAgentUids().size());
+        Assert.assertEquals(2, solver.getAllocatedCapacityForPu().getAgentUids().size());
+        Assert.assertEquals(new AllocatedCapacity(Fraction.ZERO,_192_MB_*8),solver.getDeallocatedCapacityResult().getTotalAllocatedCapacity());
         assertContainersPerAgent(solver, 4, 4);
     }
     

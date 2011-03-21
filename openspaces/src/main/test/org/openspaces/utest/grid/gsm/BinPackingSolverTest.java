@@ -743,8 +743,86 @@ public class BinPackingSolverTest extends TestCase {
         Assert.assertEquals(new AllocatedCapacity(Fraction.ZERO, 512), deallocatedCapacity.getAgentCapacity(AGENT1_UID));
         Assert.assertEquals(new AllocatedCapacity(Fraction.ZERO, 1024), deallocatedCapacity.getAgentCapacity(AGENT2_UID));
         Assert.assertEquals(new AllocatedCapacity(Fraction.ZERO, 512), deallocatedCapacity.getAgentCapacity(AGENT3_UID));
-
-        
-        
     }
+    
+    @Test
+    // 5 , 2 , 2 ==> 3, ,3 , 3
+    public void testRebalancingFromOverMaxToUnderMin() {
+        BinPackingSolver solver = new BinPackingSolver();
+        solver.setAllocatedCapacityForPu(
+                new AggregatedAllocatedCapacity()
+                .add(AGENT1_UID, new AllocatedCapacity(Fraction.ZERO, 500))
+                .add(AGENT2_UID, new AllocatedCapacity(Fraction.ZERO, 200))
+                .add(AGENT3_UID, new AllocatedCapacity(Fraction.ZERO, 200)));
+
+        solver.setContainerMemoryCapacityInMB(100);
+        solver.setMaxAllocatedMemoryCapacityOfPuInMB(512 * 100);
+        solver.setLogger(logger);
+        solver.setUnallocatedCapacity(
+            new AggregatedAllocatedCapacity()
+            .add(AGENT2_UID, new AllocatedCapacity(Fraction.ZERO, 100))
+            .add(AGENT3_UID, new AllocatedCapacity(Fraction.ZERO, 100)));
+        solver.setMinimumNumberOfMachines(1);
+        
+        solver.solveManualCapacityScaleOut(new AllocatedCapacity(Fraction.ZERO, 0));
+        for (String agentUid : solver.getAllocatedCapacityForPu().getAgentUids()) {
+            long memory = solver.getAllocatedCapacityForPu().getAgentCapacity(agentUid).getMemoryInMB();
+            Assert.assertTrue(memory == 300);
+        }
+    }
+    
+    @Test
+    // 5 , 3 , 3 ==> 4, 4 , 3
+    public void testRebalancingFromOverMaxToMin() {
+        BinPackingSolver solver = new BinPackingSolver();
+        solver.setAllocatedCapacityForPu(
+                new AggregatedAllocatedCapacity()
+                .add(AGENT1_UID, new AllocatedCapacity(Fraction.ZERO, 500))
+                .add(AGENT2_UID, new AllocatedCapacity(Fraction.ZERO, 300))
+                .add(AGENT3_UID, new AllocatedCapacity(Fraction.ZERO, 300)));
+
+        solver.setContainerMemoryCapacityInMB(100);
+        solver.setMaxAllocatedMemoryCapacityOfPuInMB(512 * 100);
+        solver.setLogger(logger);
+        solver.setUnallocatedCapacity(
+            new AggregatedAllocatedCapacity()
+            .add(AGENT1_UID, new AllocatedCapacity(Fraction.ZERO, 100))
+            .add(AGENT2_UID, new AllocatedCapacity(Fraction.ZERO, 100))
+            .add(AGENT3_UID, new AllocatedCapacity(Fraction.ZERO, 100)));
+        solver.setMinimumNumberOfMachines(1);
+        
+        solver.solveManualCapacityScaleOut(new AllocatedCapacity(Fraction.ZERO, 0));
+        for (String agentUid : solver.getAllocatedCapacityForPu().getAgentUids()) {
+            long memory = solver.getAllocatedCapacityForPu().getAgentCapacity(agentUid).getMemoryInMB();
+            Assert.assertTrue("memory cannot be below 300", memory >= 300);
+            Assert.assertTrue("memory cannot be above 400", memory <= 400);
+        }
+    }
+
+    @Test
+    // 4 , 4 , 2 ==> 4, 3 , 3
+    public void testRebalancingToUnderMin() {
+        BinPackingSolver solver = new BinPackingSolver();
+        solver.setAllocatedCapacityForPu(
+                new AggregatedAllocatedCapacity()
+                .add(AGENT1_UID, new AllocatedCapacity(Fraction.ZERO, 400))
+                .add(AGENT2_UID, new AllocatedCapacity(Fraction.ZERO, 400))
+                .add(AGENT3_UID, new AllocatedCapacity(Fraction.ZERO, 200)));
+
+        solver.setContainerMemoryCapacityInMB(100);
+        solver.setMaxAllocatedMemoryCapacityOfPuInMB(512 * 100);
+        solver.setLogger(logger);
+        solver.setUnallocatedCapacity(
+            new AggregatedAllocatedCapacity()
+            .add(AGENT3_UID, new AllocatedCapacity(Fraction.ZERO, 100)));
+        solver.setMinimumNumberOfMachines(1);
+        
+        solver.solveManualCapacityScaleOut(new AllocatedCapacity(Fraction.ZERO, 0));
+        for (String agentUid : solver.getAllocatedCapacityForPu().getAgentUids()) {
+            long memory = solver.getAllocatedCapacityForPu().getAgentCapacity(agentUid).getMemoryInMB();
+            Assert.assertTrue(agentUid + " memory is " + memory + " which is below " + 300,memory >= 300);
+            Assert.assertTrue(agentUid + " memory is " + memory + " which is above " + 300,memory <= 400);
+        }
+    }
+
 }
