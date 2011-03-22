@@ -16,6 +16,7 @@ import java.util.Stack;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 import net.jini.core.entry.UnusableEntryException;
@@ -763,8 +764,9 @@ public class StoreManager extends AbstractStoreManager {
                     throw new IllegalArgumentException("SpaceId and Id annotations must both be declared on the same property in JPA entities in type: " + type.getName());
                 if (spaceId.autoGenerate()) {
                     GeneratedValue generatedValue = getter.getAnnotation(GeneratedValue.class);
-                    if (generatedValue == null)
-                        throw new IllegalArgumentException("SpaceId with autoGenerate=true annotated property should also have a JPA GeneratedValue annotation.");
+                    if (generatedValue == null || generatedValue.strategy() != GenerationType.IDENTITY)
+                        throw new IllegalArgumentException(
+                                "SpaceId with autoGenerate=true annotated property should also have a JPA GeneratedValue annotation with strategy = GenerationType.IDENTITY.");
                 }
                 break;
             }
