@@ -5,6 +5,5 @@ package org.openspaces.pu.container.jee;
  */
 public enum JeeType {
     JETTY,
-    GLASSFISH,
     CUSTOM
 }

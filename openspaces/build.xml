@@ -33,7 +33,6 @@
         <fileset dir="${lib.dir}">
             <include name="**/*.jar"/>
             <exclude name="platform/ant/*.jar"/>
-            <exclude name="platform/glassfish/*.jar"/>
             <exclude name="platform/jetty/*.jar"/>
             <exclude name="required/gs-openspaces.jar"/>
             <exclude name="optional/openspaces/**"/>
@@ -122,8 +121,6 @@
                 <exclude name="org/openspaces/esb/mule/**"/>
                 <exclude name="org/openspaces/pu/container/jee/jetty/holder/**"/>
                 <exclude name="org/openspaces/pu/container/jee/jetty/support/**"/>
-                <exclude name="org/openspaces/pu/container/jee/glassfish/holder/**"/>
-                <exclude name="org/glassfish/**"/>
                 <exclude name="org/apache/catalina/**"/>
                 <exclude name="com/sun/**"/>
                 <exclude name="META-INF/services/org/mule/**"/>
@@ -170,21 +167,6 @@
             <fileset dir="${target.classes.dir}">
                 <include name="org/openspaces/pu/container/jee/jetty/holder/**"/>
                 <include name="org/openspaces/pu/container/jee/jetty/support/**"/>
-            </fileset>
-            <manifest>
-                <attribute name="Implementation-Title" value="${openspaces-title}"/>
-                <attribute name="Implementation-Version" value="${openspaces-version}"/>
-                <attribute name="OpenSpaces-Version" value="${openspaces-version}"/>
-            </manifest>
-        </jar>
-
-        <delete file="${lib.dir}/platform/openspaces/gs-openspaces-glassfish.jar"/>
-        <jar jarfile="${lib.dir}/platform/openspaces/gs-openspaces-glassfish.jar">
-            <fileset dir="${target.classes.dir}">
-                <include name="org/openspaces/pu/container/jee/glassfish/holder/**"/>
-                <include name="org/glassfish/**" />
-                <include name="com/sun/**" />
-                <include name="org/apache/catalina/**"/>
             </fileset>
             <manifest>
                 <attribute name="Implementation-Title" value="${openspaces-title}"/>
@@ -297,7 +279,6 @@
                 <include name="lib/platform/jee/jta.jar" />
                 <include name="lib/platform/jee/connector.jar" />
                 <include name="lib/platform/jetty/**" />
-                <!--<include name="lib/glassfish/**" />-->
                 <include name="lib/platform/velocity/**" />
             	<include name="lib/platform/jpa/**" />
             </zipfileset>

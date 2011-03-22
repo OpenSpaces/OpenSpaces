@@ -38,7 +38,6 @@
     <orderEntry type="library" exported="" name="antlr" level="project" />
     <orderEntry type="library" name="jetty" level="project" />
     <orderEntry type="library" name="Velocity" level="project" />
-    <orderEntry type="library" name="Glassfish" level="project" />
   </component>
   <component name="copyright">
     <Base>

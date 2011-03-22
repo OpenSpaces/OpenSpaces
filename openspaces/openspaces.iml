@@ -237,14 +237,6 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="glassfish">
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/lib/platform/glassfish" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-        <jarDirectory url="file://$MODULE_DIR$/lib/platform/glassfish" recursive="false" />
-      </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library name="jdbc">
