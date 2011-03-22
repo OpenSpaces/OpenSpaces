@@ -24,7 +24,6 @@ mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-runtime -Dvers
 mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=gs-openspaces -Dversion=$VERSION -DpomFile=$TMPDIR/gs-openspaces-pom.xml -Dpackaging=jar -Dfile=${JSHOMEDIR}/lib/required/gs-openspaces.jar
 mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=mule-os -Dversion=$VERSION -Dpackaging=jar -DpomFile=$TMPDIR/mule-os-pom.xml -Dfile=${JSHOMEDIR}/lib/optional/openspaces/mule-os.jar
 mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=jetty-os -Dversion=$VERSION -Dpackaging=jar -DpomFile=$TMPDIR/jetty-os-pom.xml -Dfile=${JSHOMEDIR}/lib/platform/openspaces/gs-openspaces-jetty.jar
-mvn install:install-file -DgroupId=com.gigaspaces -DartifactId=glassfish-os -Dversion=$VERSION -Dpackaging=jar -DpomFile=$TMPDIR/glassfish-os-pom.xml -Dfile=${JSHOMEDIR}/lib/platform/openspaces/gs-openspaces-glassfish.jar
 
 # Build and install OpenSpaces Maven Plugin
 mvn -f maven-openspaces-plugin/pom.xml install
@@ -37,4 +36,3 @@ rm $TMPDIR/gs-runtime-pom.xml
 rm $TMPDIR/gs-openspaces-pom.xml
 rm $TMPDIR/mule-os-pom.xml
 rm $TMPDIR/jetty-os-pom.xml
-rm $TMPDIR/glassfish-os-pom.xml

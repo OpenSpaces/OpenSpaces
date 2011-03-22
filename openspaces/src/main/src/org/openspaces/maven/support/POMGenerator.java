@@ -69,11 +69,6 @@ public class POMGenerator {
         printFooter(writer);
         writer.close();
         
-        writer = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(dir, "glassfish-os-pom.xml")))));
-        printHeader(writer, version, POMGenerator.GS_GROUP, "glassfish-os");
-        printFooter(writer);
-        writer.close();
-
         if (args.length > 2) {
             String directory = args[2];
             replaceVersionInPluginPom(version, directory);
