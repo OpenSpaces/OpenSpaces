@@ -86,6 +86,21 @@ public interface Alert extends Externalizable {
     public String getComponentUid();
     
     /**
+     * Description of the component:
+     * <ul>
+     * <li>host - [Host IP]</li>
+     * <li>GSC - [GSC Name] on [Host IP]</li>
+     * <li>LUS - LUS on [Host IP]</li>
+     * <li>GSM - GSM on [Host IP]</li>
+     * <li>PU instance - [PU name] [Partition number] [Primary or backup] on [Host IP]</li>
+     * <li>Mirror - Mirror on [Host IP]</li>
+     * <li>EDS - EDS on [Host IP]</li>
+     * </ul>
+     * @return Component Description - the description of the component specified by the {@link #getComponentUid()}.
+     */
+    public String getComponentDescription();
+    
+    /**
      * @return A map of String key-value property pairs of the configuration properties used to configure the alert bean.
      */
     public Map<String, String> getConfig();

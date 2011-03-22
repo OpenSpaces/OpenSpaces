@@ -13,6 +13,7 @@ import org.openspaces.admin.alert.config.MirrorPersistenceFailureAlertConfigurat
 import org.openspaces.admin.internal.alert.AlertHistory;
 import org.openspaces.admin.internal.alert.AlertHistoryDetails;
 import org.openspaces.admin.internal.alert.InternalAlertManager;
+import org.openspaces.admin.internal.alert.bean.util.AlertBeanUtils;
 import org.openspaces.admin.space.ReplicationStatus;
 import org.openspaces.admin.space.ReplicationTarget;
 import org.openspaces.admin.space.SpaceInstance;
@@ -78,6 +79,7 @@ public class MirrorPersistenceFailureAlertBean implements AlertBean, SpaceInstan
         factory.severity(AlertSeverity.SEVERE);
         factory.status(AlertStatus.NA);
         factory.componentUid(spaceInstance.getUid());
+        factory.componentDescription(AlertBeanUtils.getSpaceInstanceDescription(spaceInstance));
         factory.config(config.getProperties());
 
         Alert alert = factory.toAlert();
@@ -126,7 +128,8 @@ public class MirrorPersistenceFailureAlertBean implements AlertBean, SpaceInstan
             factory.description("Mirror failed to persist data sent from " + getSpaceName(source) + " - " + getRootCauseMessage(reason));
             factory.severity(AlertSeverity.SEVERE);
             factory.status(AlertStatus.RAISED);
-            factory.componentUid(source.getUid());
+            factory.componentUid(mirrorInstance.getUid());
+            factory.componentDescription(AlertBeanUtils.getSpaceInstanceDescription(mirrorInstance));
             factory.config(config.getProperties());
             
             factory.putProperty(MirrorPersistenceFailureAlert.INCONSISTENCY_REASON, reason);
@@ -157,7 +160,8 @@ public class MirrorPersistenceFailureAlertBean implements AlertBean, SpaceInstan
                 factory.description("Mirror managed to persist data sent from  " + getSpaceName(source));
                 factory.severity(AlertSeverity.SEVERE);
                 factory.status(AlertStatus.RESOLVED);
-                factory.componentUid(event.getSpaceInstance().getUid());
+                factory.componentUid(mirrorInstance.getUid());
+                factory.componentDescription(AlertBeanUtils.getSpaceInstanceDescription(mirrorInstance));
                 factory.config(config.getProperties());
                 
                 factory.putProperty(MirrorPersistenceFailureAlert.REPLICATION_STATUS, getReplicationStatus(source));

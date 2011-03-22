@@ -114,6 +114,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
         factory.severity(AlertSeverity.WARNING);
         factory.status(AlertStatus.NA);
         factory.componentUid(virtualMachine.getUid());
+        factory.componentDescription(AlertBeanUtils.getGridComponentDescription(virtualMachine));
         factory.config(config.getProperties());
 
         Alert alert = factory.toAlert();
@@ -139,6 +140,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
             factory.severity(AlertSeverity.WARNING);
             factory.status(AlertStatus.RAISED);
             factory.componentUid(event.getVirtualMachine().getUid());
+            factory.componentDescription(AlertBeanUtils.getGridComponentDescription(event.getVirtualMachine()));
             factory.config(config.getProperties());
             
             factory.putProperty(HeapMemoryUtilizationAlert.HOST_ADDRESS, event.getVirtualMachine().getMachine().getHostAddress());
@@ -167,6 +169,7 @@ public class HeapMemoryUtilizationAlertBean implements AlertBean, VirtualMachine
                 factory.severity(AlertSeverity.WARNING);
                 factory.status(AlertStatus.RESOLVED);
                 factory.componentUid(event.getVirtualMachine().getUid());
+                factory.componentDescription(AlertBeanUtils.getGridComponentDescription(event.getVirtualMachine()));
                 factory.config(config.getProperties());
                 
                 factory.putProperty(HeapMemoryUtilizationAlert.HOST_ADDRESS, event.getVirtualMachine().getMachine().getHostAddress());

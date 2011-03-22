@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.UUID;
 
 import org.openspaces.admin.internal.alert.bean.AlertBean;
+import org.openspaces.admin.machine.Machine;
+import org.openspaces.admin.os.OperatingSystemDetails;
+import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.vm.VirtualMachine;
 
 public class AlertBeanUtils {
@@ -78,5 +81,51 @@ public class AlertBeanUtils {
         } else if (virtualMachine.getLookupService() != null) {
             return "Lookup Service";
         } else return "n/a";
+    }
+    
+    /**
+     * @return Returns the description of this virtual machine: "[short name] [pid] on [host name]/[host address]"
+     */
+    public static String getGridComponentDescription(VirtualMachine virtualMachine) {
+        return getGridComponentShortName(virtualMachine) + virtualMachine.getDetails().getPid() + " on "
+                + getMachineDescription(virtualMachine.getMachine());
+    }
+    
+    /**
+     * @return Returns the description of the machine: "[host name]/[host address]"
+     */
+    public static String getMachineDescription(Machine machine) {
+        return machine.getHostName() + "/" + machine.getHostAddress();
+    }
+    
+    /**
+     * @return Returns the description of the machine: "[host name]/[host address]"
+     */
+    public static String getMachineDescription(OperatingSystemDetails details) {
+        return details.getHostName() + "/" + details.getHostAddress();
+    }
+
+    /**
+     * @return "[name].[partition] [primary/backup] on [host name]/[host address]"
+     */
+    public static String getSpaceInstanceDescription(SpaceInstance spaceInstance) {
+        StringBuilder sb = new StringBuilder();
+        if (spaceInstance.getSpaceUrl().getSchema().equals("mirror")) {
+            sb.append("Mirror ").append(spaceInstance.getSpace().getName()).append(" on ").append(
+                    getMachineDescription(spaceInstance.getMachine()));
+       }else if (spaceInstance.getSpaceUrl().getSchema().equals("default")) {
+           sb.append("Space ").append(spaceInstance.getSpace().getName()).append(" on ").append(
+                   getMachineDescription(spaceInstance.getMachine()));
+       }else {
+            sb.append(spaceInstance.getSpace().getName())
+            .append('.')
+            .append(spaceInstance.getInstanceId())
+            .append(" ["+(spaceInstance.getBackupId()+1)+"] ")
+            .append(spaceInstance.getMode())
+            .append(" on ")
+            .append(getMachineDescription(spaceInstance.getMachine()));
+        }
+        
+        return sb.toString();
     }
 }

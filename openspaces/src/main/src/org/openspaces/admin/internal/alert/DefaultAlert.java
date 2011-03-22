@@ -26,6 +26,8 @@ import org.openspaces.admin.alert.AlertFactory;
 import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 
+import com.gigaspaces.internal.version.PlatformLogicalVersion;
+
 /**
  * A plain java object representing an alert issued by an alert bean or an alert provider.
  * 
@@ -44,8 +46,10 @@ public class DefaultAlert implements InternalAlert {
     private String alertUid;
     private String groupUid;
     private String componentUid;
+    private String componentDescription;
     private Map<String, String> config;
 	private Map<String, String> properties;
+
 
 	/**
 	 * @see AlertFactory
@@ -143,6 +147,18 @@ public class DefaultAlert implements InternalAlert {
     }
 	
 	/*
+	 * (non-Javadoc)
+	 * @see org.openspaces.admin.alert.Alert#getComponentDescription()
+	 */
+	public String getComponentDescription() {
+	    return componentDescription;
+	}
+	
+	public void setComponentDescription(String componentDescription) {
+        this.componentDescription = componentDescription;
+    }
+	
+	/*
 	 * @see org.openspaces.admin.alert.Alert#getConfig()
 	 */
 	public Map<String, String> getConfig() {
@@ -166,7 +182,7 @@ public class DefaultAlert implements InternalAlert {
 
 	@Override
 	public String toString() {
-	    return new Date(getTimestamp()) + " | " + getStatus() + " | " + getSeverity()+" | " + getName() + " |" + getDescription() + " | " + getProperties();
+	    return getStatus() + " | " + getSeverity() + " | " + getName() + " |" + getDescription() + " | " + getComponentDescription() + " | " + new Date(getTimestamp());
 	}
 	
     @SuppressWarnings("unchecked")
@@ -181,6 +197,10 @@ public class DefaultAlert implements InternalAlert {
         status = (AlertStatus)in.readObject();
         config = (HashMap<String, String>)in.readObject();
         properties = (HashMap<String, String>)in.readObject();
+        
+        if(PlatformLogicalVersion.getLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v8_0_1)) {
+            componentDescription = in.readUTF();
+        }
     }
 
     public void writeExternal(ObjectOutput out) throws IOException {
@@ -194,6 +214,10 @@ public class DefaultAlert implements InternalAlert {
         out.writeObject(status);
         out.writeObject(config);
         out.writeObject(properties);
+        
+        if(PlatformLogicalVersion.getLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v8_0_1)) {
+            out.writeUTF(componentDescription);
+        }
     }
 
 }

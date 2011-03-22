@@ -114,6 +114,7 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
         factory.severity(AlertSeverity.WARNING);
         factory.status(AlertStatus.NA);
         factory.componentUid(machine.getOperatingSystem().getUid());
+        factory.componentDescription(AlertBeanUtils.getMachineDescription(machine));
         factory.config(config.getProperties());
 
         Alert alert = factory.toAlert();
@@ -138,6 +139,7 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
             factory.severity(AlertSeverity.WARNING);
             factory.status(AlertStatus.RAISED);
             factory.componentUid(event.getOperatingSystem().getUid());
+            factory.componentDescription(AlertBeanUtils.getMachineDescription(event.getStatistics().getDetails()));
             factory.config(config.getProperties());
             
             factory.putProperty(PhysicalMemoryUtilizationAlert.HOST_ADDRESS, event.getStatistics().getDetails().getHostAddress());
@@ -161,6 +163,7 @@ public class PhysicalMemoryUtilizationAlertBean implements AlertBean,
                 factory.severity(AlertSeverity.WARNING);
                 factory.status(AlertStatus.RESOLVED);
                 factory.componentUid(event.getOperatingSystem().getUid());
+                factory.componentDescription(AlertBeanUtils.getMachineDescription(event.getStatistics().getDetails()));
                 factory.config(config.getProperties());
                 
                 factory.putProperty(PhysicalMemoryUtilizationAlert.HOST_ADDRESS, event.getStatistics().getDetails().getHostAddress());

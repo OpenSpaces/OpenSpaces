@@ -12,6 +12,7 @@ import org.openspaces.admin.alert.config.ReplicationChannelDisconnectedAlertConf
 import org.openspaces.admin.internal.alert.AlertHistory;
 import org.openspaces.admin.internal.alert.AlertHistoryDetails;
 import org.openspaces.admin.internal.alert.InternalAlertManager;
+import org.openspaces.admin.internal.alert.bean.util.AlertBeanUtils;
 import org.openspaces.admin.space.ReplicationStatus;
 import org.openspaces.admin.space.SpaceInstance;
 import org.openspaces.admin.space.events.ReplicationStatusChangedEvent;
@@ -67,6 +68,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
         factory.severity(AlertSeverity.SEVERE);
         factory.status(AlertStatus.NA);
         factory.componentUid(spaceInstance.getUid());
+        factory.componentDescription(AlertBeanUtils.getSpaceInstanceDescription(spaceInstance));
         factory.config(config.getProperties());
 
         Alert alert = factory.toAlert();
@@ -90,6 +92,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                 factory.severity(AlertSeverity.SEVERE);
                 factory.status(AlertStatus.RAISED);
                 factory.componentUid(source.getUid());
+                factory.componentDescription(AlertBeanUtils.getSpaceInstanceDescription(source));
                 factory.config(config.getProperties());
                 
                 factory.putProperty(ReplicationChannelDisconnectedAlert.SOURCE_HOST_ADDRESS, source.getMachine().getHostAddress());
@@ -123,6 +126,7 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                     factory.severity(AlertSeverity.SEVERE);
                     factory.status(AlertStatus.RESOLVED);
                     factory.componentUid(source.getUid());
+                    factory.componentDescription(AlertBeanUtils.getSpaceInstanceDescription(source));
                     factory.config(config.getProperties());
                     
                     factory.putProperty(ReplicationChannelDisconnectedAlert.SOURCE_HOST_ADDRESS, source.getMachine().getHostAddress());

@@ -13,6 +13,7 @@ import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.alert.AlertHistory;
 import org.openspaces.admin.internal.alert.AlertHistoryDetails;
 import org.openspaces.admin.internal.alert.InternalAlertManager;
+import org.openspaces.admin.internal.alert.bean.util.AlertBeanUtils;
 import org.openspaces.admin.space.ReplicationStatus;
 import org.openspaces.admin.space.ReplicationTarget;
 import org.openspaces.admin.space.SpaceInstance;
@@ -95,6 +96,7 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
         factory.severity(AlertSeverity.WARNING);
         factory.status(AlertStatus.NA);
         factory.componentUid(spaceInstance.getUid());
+        factory.componentDescription(AlertBeanUtils.getSpaceInstanceDescription(spaceInstance));
         factory.config(config.getProperties());
 
         Alert alert = factory.toAlert();
@@ -122,6 +124,7 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
             factory.severity(AlertSeverity.WARNING);
             factory.status(AlertStatus.RAISED);
             factory.componentUid(source.getUid());
+            factory.componentDescription(AlertBeanUtils.getSpaceInstanceDescription(source));
             factory.config(config.getProperties());
             
             factory.putProperty(ReplicationRedoLogSizeAlert.HOST_ADDRESS, source.getMachine().getHostAddress());
@@ -151,6 +154,7 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
                 factory.severity(AlertSeverity.WARNING);
                 factory.status(AlertStatus.RESOLVED);
                 factory.componentUid(event.getSpaceInstance().getUid());
+                factory.componentDescription(AlertBeanUtils.getSpaceInstanceDescription(source));
                 factory.config(config.getProperties());
                 
                 factory.putProperty(ReplicationRedoLogSizeAlert.HOST_ADDRESS, source.getMachine().getHostAddress());

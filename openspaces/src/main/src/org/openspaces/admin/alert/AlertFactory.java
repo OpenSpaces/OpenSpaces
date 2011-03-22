@@ -95,6 +95,12 @@ public class AlertFactory {
         alert.setComponentUid(componentUid);
         return this;
     }
+    
+    /** Component Description - the description of the component specified by the {@link #componentUid(String)}. */
+    public AlertFactory componentDescription(String componentDescription) {
+        alert.setComponentDescription(componentDescription);
+        return this;
+    }
 
     /**
      * Set the configuration properties used to configure the alert bean.

@@ -42,6 +42,10 @@ public class AbstractAlert implements Alert {
     public String getComponentUid() {
         return alert.getComponentUid();
     }
+    
+    public String getComponentDescription() {
+        return alert.getComponentDescription();
+    }
 
     public String getDescription() {
         return alert.getDescription();
