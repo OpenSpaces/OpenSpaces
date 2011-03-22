@@ -1,5 +1,7 @@
 package org.openspaces.admin.internal.pu;
 
+import java.util.Map;
+
 import org.openspaces.admin.gsm.GridServiceManager;
 import org.openspaces.admin.pu.ProcessingUnit;
 import org.openspaces.admin.pu.ProcessingUnitInstance;
@@ -27,4 +29,6 @@ public interface InternalProcessingUnit extends ProcessingUnit, InternalProcessi
     void removeProcessingUnitInstance(String uid);
 
     void addEmbeddedSpace(Space space);
+    
+    Map<String, String> getElasticProperties();
 }

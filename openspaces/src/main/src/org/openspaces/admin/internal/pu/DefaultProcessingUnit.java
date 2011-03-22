@@ -78,6 +78,8 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
     private final BeanLevelProperties beanLevelProperties;
 
     private final SLA sla;
+    
+    private final Map<String, String> elasticProperties;
 
     private volatile DeploymentStatus deploymentStatus = DeploymentStatus.NA;
 
@@ -112,12 +114,14 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
 
     private volatile boolean scheduledStatisticsMonitor = false;
 
+
     public DefaultProcessingUnit(InternalAdmin admin, InternalProcessingUnits processingUnits, PUDetails details) {
         this.admin = admin;
         this.processingUnits = processingUnits;
         this.name = details.getName();
         this.numberOfInstances = details.getNumberOfInstances();
         this.numberOfBackups = details.getNumberOfBackups();
+        this.elasticProperties = details.getElasticProperties();
         try {
             this.beanLevelProperties = (BeanLevelProperties) details.getBeanLevelProperties().get();
         } catch (Exception e) {
@@ -190,6 +194,10 @@ public class DefaultProcessingUnit implements InternalProcessingUnit {
         if (existingSpace == null) {
             spaceCorrelatedEventManager.processingUnitSpaceCorrelated(new ProcessingUnitSpaceCorrelatedEvent(space, this));
         }
+    }
+    
+    public Map<String, String> getElasticProperties() {
+        return this.elasticProperties;
     }
 
     public ProcessingUnitStatusChangedEventManager getProcessingUnitStatusChanged() {

@@ -21,6 +21,8 @@ import org.openspaces.admin.bean.BeanConfigException;
 import org.openspaces.admin.bean.BeanConfigurationException;
 import org.openspaces.admin.internal.InternalAdminFactory;
 import org.openspaces.admin.internal.admin.InternalAdmin;
+import org.openspaces.admin.internal.gsm.InternalGridServiceManager;
+import org.openspaces.admin.internal.pu.InternalProcessingUnit;
 import org.openspaces.admin.internal.pu.elastic.ElasticMachineIsolationConfig;
 import org.openspaces.admin.internal.pu.elastic.ProcessingUnitSchemaConfig;
 import org.openspaces.admin.internal.pu.elastic.ScaleStrategyBeanPropertiesManager;
@@ -63,6 +65,7 @@ import com.sun.jini.start.LifeCycle;
 public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRemovedEventListener, ProcessingUnitAddedEventListener,MachineLifecycleEventListener
 		/*, RemoteSecuredService*//*, ServiceDiscoveryListener*/ {
 
+
     private static final long CHECK_SINGLE_THREAD_EVENT_PUMP_EVERY_SECONDS=60;
 	private static final String CONFIG_COMPONENT = "org.openspaces.grid.esm";
 	private static final Logger logger = Logger.getLogger(CONFIG_COMPONENT);
@@ -72,6 +75,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
 	private final RebalancingSlaEnforcement rebalancingSlaEnforcement;
 	private final Map<ProcessingUnit,ScaleBeanServer> scaleBeanServerPerProcessingUnit;
 	private final Map<String,Map<String,String>> elasticPropertiesPerProcessingUnit;
+	private final Map<String, PendingElasticPropertiesUpdate> pendingElasticPropertiesUpdatePerProcessingUnit;
     private LifeCycle lifeCycle;
     private String[] configArgs;
     private final NonBlockingElasticMachineProvisioningAdapterFactory nonBlockingAdapterFactory;
@@ -84,6 +88,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         nonBlockingAdapterFactory = new NonBlockingElasticMachineProvisioningAdapterFactory();        
         scaleBeanServerPerProcessingUnit = new HashMap<ProcessingUnit,ScaleBeanServer>();
         elasticPropertiesPerProcessingUnit = new ConcurrentHashMap<String, Map<String,String>>();
+        pendingElasticPropertiesUpdatePerProcessingUnit = new ConcurrentHashMap<String, PendingElasticPropertiesUpdate>();
         
         admin = new InternalAdminFactory().singleThreadedEventListeners().createAdmin();
         admin.getProcessingUnits().getProcessingUnitAdded().add(this);
@@ -313,14 +318,28 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
 
                    public void run() {
                        Map<String, String> properties = elasticPropertiesPerProcessingUnit.get(puName);
-                       ScaleStrategyBeanPropertiesManager propertiesManager = new ScaleStrategyBeanPropertiesManager(properties);
-                       propertiesManager.disableAllBeans();
-                       propertiesManager.setBeanConfig(strategyClassName, strategyProperties);
-                       propertiesManager.enableBean(strategyClassName);
-                       ESMImpl.this.processingUnitElasticPropertiesChanged(puName,properties);
+                       if (properties == null)
+                       {
+                           //If there are no properties yet, this is a race condition. We received scale command before the ProcessingUnitAdded
+                           //event, keep the scale command for later merge
+                           pendingElasticPropertiesUpdatePerProcessingUnit.put(puName, new PendingElasticPropertiesUpdate(strategyClassName, strategyProperties));
+                       }
+                       else
+                       {
+                           mergeScaleProperties(strategyClassName, strategyProperties, properties);
+                           ESMImpl.this.processingUnitElasticPropertiesChanged(puName,properties);
+                       }
                    }
                 }
        );
+    }
+    
+    private void mergeScaleProperties(final String strategyClassName, final Map<String, String> strategyProperties,
+            Map<String, String> properties) {
+        ScaleStrategyBeanPropertiesManager propertiesManager = new ScaleStrategyBeanPropertiesManager(properties);
+        propertiesManager.disableAllBeans();
+        propertiesManager.setBeanConfig(strategyClassName, strategyProperties);
+        propertiesManager.enableBean(strategyClassName);
     }
     
     public void setProcessingUnitElasticProperties(final String puName, final Map<String, String> properties) throws RemoteException {
@@ -329,7 +348,17 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
                  new Runnable() {
 
                     public void run() {
-                        ESMImpl.this.processingUnitElasticPropertiesChanged(puName,properties);
+                        Map<String, String> properties = elasticPropertiesPerProcessingUnit.get(puName);
+                        if (properties == null)
+                        {
+                            //If there are no properties yet, this is a race condition. We received set elastic properties command before the ProcessingUnitAdded
+                            //event, keep the set command for later override
+                            pendingElasticPropertiesUpdatePerProcessingUnit.put(puName, new PendingElasticPropertiesUpdate(properties));
+                        }
+                        else
+                        {
+                            ESMImpl.this.processingUnitElasticPropertiesChanged(puName,properties);
+                        }
                     }
                  }
         );
@@ -337,7 +366,8 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     
     public void processingUnitRemoved(final ProcessingUnit pu) {
 
-        final ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.get(pu);
+        pendingElasticPropertiesUpdatePerProcessingUnit.remove(pu.getName());
+        final ScaleBeanServer beanServer = scaleBeanServerPerProcessingUnit.get(pu);        
         if (beanServer != null) {
             logger.info("Processing Unit " + pu.getName() + " was removed. Cleaning up machines."); 
             beanServer.undeploy();
@@ -352,12 +382,23 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
             undeployedBeanServer.destroy();
         }
         
-        Map<String,String> puConfig = this.elasticPropertiesPerProcessingUnit.get(pu.getName());
-        if (puConfig != null) {
-            refreshProcessingUnitElasticConfig(pu, puConfig);
-        }
-        else {
-            logger.info("Processing Unit " + pu.getName() + " was detected, but elastic properties for that pu was not set yet.");
+        InternalProcessingUnit internalPu = (InternalProcessingUnit) pu;
+        Map<String, String> elasticProperties = internalPu.getElasticProperties();
+        if (elasticProperties != null && !elasticProperties.isEmpty())
+        {
+            //If we have a pending update elastic properties command due to race condition
+            if (pendingElasticPropertiesUpdatePerProcessingUnit.containsKey(pu.getName()))
+            {
+                PendingElasticPropertiesUpdate pendingPropsUpdate = pendingElasticPropertiesUpdatePerProcessingUnit.remove(pu.getName());
+                //Pending operation is scale command, merge changes
+                if (pendingPropsUpdate.isScaleCommand())
+                    mergeScaleProperties(pendingPropsUpdate.getStrategyClassName(), pendingPropsUpdate.getElasticProperties(), elasticProperties);
+                //Pending operation is override command (setElasticProperties), override with pending state.
+                else
+                    elasticProperties = pendingPropsUpdate.getElasticProperties();
+            }
+            elasticPropertiesPerProcessingUnit.put(pu.getName(), elasticProperties);        
+            refreshProcessingUnitElasticConfig(pu, elasticProperties);
         }
     }
 
@@ -391,6 +432,8 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         elasticPropertiesPerProcessingUnit.put(puName,elasticProperties);
         ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(puName);
         if (pu != null) {
+            InternalGridServiceManager managinGsm = (InternalGridServiceManager)pu.getManagingGridServiceManager();
+            managinGsm.updateProcessingUnitElasticPropertiesOnGsm(pu, elasticProperties);
             refreshProcessingUnitElasticConfig(pu,elasticProperties);
         }
         else {
@@ -405,4 +448,38 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
     public void machineRemoved(Machine machine) {
         machine.getOperatingSystem().stopStatisticsMonitor();
     }
+    
+    public static class PendingElasticPropertiesUpdate 
+    {
+
+        private final String _strategyClassName;
+        private final Map<String, String> _elasticProperties;
+        private final boolean _scaleCommand;
+
+        public PendingElasticPropertiesUpdate(String strategyClassName, Map<String, String> strategyProperties) {
+            _strategyClassName = strategyClassName;
+            _elasticProperties = strategyProperties;
+            _scaleCommand = true;
+        }
+
+        public PendingElasticPropertiesUpdate(Map<String, String> properties) {
+            _strategyClassName = null;
+            _elasticProperties = properties;
+            _scaleCommand = false;
+        }
+
+        public String getStrategyClassName() {
+            return _strategyClassName;
+        }
+
+        public Map<String, String> getElasticProperties() {
+            return _elasticProperties;
+        }
+
+        public boolean isScaleCommand() {
+            return _scaleCommand;
+        }
+
+    }
+
 }

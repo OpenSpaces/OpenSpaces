@@ -137,15 +137,6 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
                 throw new ProcessingUnitAlreadyDeployedException(operationalString.getName());
             }
         } 
-        catch (ProcessingUnitAlreadyDeployedException e) {
-            // re-set dynamic properties (ESM)
-            Map<String,String> elasticConfig = deployment.getElasticProperties();
-            ProcessingUnit pu = admin.getProcessingUnits().getProcessingUnit(operationalString.getName());
-            if (pu != null && elasticConfig.size() > 0) {
-                setProcessingUnitElasticProperties(pu, elasticConfig);
-            }
-            throw e;
-        }
         catch (Exception e) {
             throw new AdminException("Failed to check if processing unit [" + operationalString.getName() + "] is deployed", e);
         }
@@ -179,13 +170,7 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             Deploy.setDisableInfoLogging(false);
             getAdmin().getProcessingUnits().getProcessingUnitAdded().remove(added);
         }
-        
-        // set dynamic properties
-        Map<String,String> elasticConfig = deployment.getElasticProperties();
-        if (elasticConfig.size() > 0) {
-            setProcessingUnitElasticProperties(pu, elasticConfig);
-        }
-        
+              
         return pu;
     }
 
@@ -422,15 +407,20 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
     }
     
     public void setProcessingUnitElasticProperties(ProcessingUnit pu, Map<String,String> properties) {
-        
-        //TODO: Store the data in the gsm server.
         getElasticServiceManager().setProcessingUnitElasticProperties(pu, properties);
     }
     
     public void setScaleStrategy(ProcessingUnit pu, String strategyClassName, Map<String,String> strategyProperties) {
-        
-        //TODO: Store the data in the gsm server.
         getElasticServiceManager().setScaleStrategy(pu, strategyClassName, strategyProperties);
+    }
+    
+    public void updateProcessingUnitElasticPropertiesOnGsm(ProcessingUnit pu, Map<String, String> elasticProperties) {
+        try {
+            gsm.updateElasticProperties(pu.getName(), elasticProperties);
+        } catch (Exception e) {
+            throw new AdminException("Failed to update processing unit [" + pu.getName() + "] elastic properties state at the gsm", e);
+        }
+        
     }
 
 

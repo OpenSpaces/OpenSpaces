@@ -333,6 +333,12 @@ public class ProcessingUnitDeployment {
                 deployOptions.add(requiredZone);
             }
         }
+        if (!elasticProperties.isEmpty()){
+            deployOptions.add("-elastic-properties");
+            for (Map.Entry<String, String> elasticProp : elasticProperties.entrySet()){
+                deployOptions.add(elasticProp.getKey() + "=" + elasticProp.getValue());
+            }
+        }
         for (Map.Entry entry : contextProperties.entrySet()) {
             deployOptions.add("-properties");
             deployOptions.add("embed://" + entry.getKey() + "=" + entry.getValue());

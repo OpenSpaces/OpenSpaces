@@ -451,7 +451,7 @@ public class Deploy {
                 }
             }
         }
-
+        
         for (CommandLineParser.Parameter param : params) {
             if (param.getName().equalsIgnoreCase("max-instances-per-vm")) {
                 String maxInstancePerVm = param.getArguments()[0];
@@ -517,10 +517,22 @@ public class Deploy {
         } else if (secured != null && secured) {
             beanLevelProperties.getContextProperties().setProperty(SpaceURL.SECURED, "true");
         }
-
+        
+        //Get elastic properties
+        Map<String, String> elasticProperties = new HashMap<String, String>();
+        for (CommandLineParser.Parameter param : params) {
+            if (param.getName().equalsIgnoreCase("elastic-properties")) {
+                for (String argument : param.getArguments()) {
+                    int indexOfEqual = argument.indexOf("=");                    
+                    String name = argument.substring(0, indexOfEqual);
+                    String value = argument.substring(indexOfEqual + 1);
+                    elasticProperties.put(name, value);
+                }
+            }
+        }
 
         //deploy to sg
-        return loadDeployment(puString, codeserver, sla, puPath, overridePuName, beanLevelProperties);
+        return loadDeployment(puString, codeserver, sla, puPath, overridePuName, beanLevelProperties, elasticProperties);
     }
 
     //copied from opstringloader
@@ -586,7 +598,7 @@ public class Deploy {
     }
 
     private OperationalString loadDeployment(String puString, String codeserver, SLA sla, String puPath,
-            String puName, BeanLevelProperties beanLevelProperties) throws Exception {
+            String puName, BeanLevelProperties beanLevelProperties, Map<String, String> elasticProperties) throws Exception {
         InputStream opstringURL = Deploy.class.getResourceAsStream("/org/openspaces/pu/container/servicegrid/puservicebean.xml");
         OperationalString opString;
 
@@ -658,6 +670,8 @@ public class Deploy {
             element.setMaxPerPhysicalMachine(sla.getMaxInstancesPerMachine());
         }
         element.setMaxPerZone(sla.getMaxInstancesPerZone());
+        
+        element.setElasticProperties(elasticProperties);
 
         element.setTotalNumberOfServices(sla.getNumberOfInstances());
 

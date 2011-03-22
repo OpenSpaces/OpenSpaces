@@ -39,4 +39,7 @@ public interface InternalGridServiceManager extends GridServiceManager, Internal
     void setProcessingUnitElasticProperties(ProcessingUnit pu, Map<String,String> properties);
     
     void setScaleStrategy(ProcessingUnit pu, String scaleBeanClassName, Map<String,String> scaleProperties);
+
+    /** Used as a call back by the esm to update the store of records of elastic properties on the actual gsm*/
+    void updateProcessingUnitElasticPropertiesOnGsm(ProcessingUnit pu, Map<String, String> elasticProperties);
 }
