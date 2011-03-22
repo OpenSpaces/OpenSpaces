@@ -570,27 +570,27 @@ public class BinPackingSolverTest extends TestCase {
         BinPackingSolver solver = new BinPackingSolver();
         solver.setLogger(logger);
         solver.setAllocatedCapacityForPu(new AggregatedAllocatedCapacity()
-                                .add("AGENT_1", new AllocatedCapacity(new Fraction(4), 512))
-                                .add("AGENT_2", new AllocatedCapacity(new Fraction(1), 128)));
+                                .add(AGENT1_UID, new AllocatedCapacity(new Fraction(4), 128))
+                                .add(AGENT2_UID, new AllocatedCapacity(new Fraction(1), 128)));
         
-        solver.setContainerMemoryCapacityInMB(new AllocatedCapacity(new Fraction(1), 128).getMemoryInMB());
+        solver.setContainerMemoryCapacityInMB(128);
         
         solver.setUnallocatedCapacity(new AggregatedAllocatedCapacity()
-                                .add("AGENT_2", new AllocatedCapacity(new Fraction(5), 128*5)));
+                                .add(AGENT2_UID, new AllocatedCapacity(new Fraction(5), 128*5)));
         
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(new AllocatedCapacity(new Fraction(100), 1024).getMemoryInMB() * 100);
         solver.setMinimumNumberOfMachines(2);
         solver.solveManualCapacityScaleOut(new AllocatedCapacity(new Fraction(1), 0));
         
         Assert.assertEquals(new Fraction(6), solver.getAllocatedCapacityForPu().getTotalAllocatedCapacity().getCpuCores());
-        Assert.assertEquals(640, solver.getAllocatedCapacityForPu().getTotalAllocatedCapacity().getMemoryInMB());
+        Assert.assertEquals(256, solver.getAllocatedCapacityForPu().getTotalAllocatedCapacity().getMemoryInMB());
         
         Assert.assertEquals(1, solver.getDeallocatedCapacityResult().getAgentUids().size());
-        Assert.assertEquals(new Fraction(2).divide(5), solver.getDeallocatedCapacityResult().getTotalAllocatedCapacity().getCpuCores());
+        Assert.assertEquals(new AllocatedCapacity(new Fraction(1),0), solver.getDeallocatedCapacityResult().getAgentCapacity(AGENT1_UID));
         
         Assert.assertEquals(1, solver.getAllocatedCapacityResult().getAgentUids().size());
-        Assert.assertEquals(new Fraction(7).divide(5), solver.getAllocatedCapacityResult().getTotalAllocatedCapacity().getCpuCores());
-        Assert.assertEquals(128, solver.getAllocatedCapacityResult().getTotalAllocatedCapacity().getMemoryInMB());
+        Assert.assertEquals(new AllocatedCapacity(new Fraction(2),0), solver.getAllocatedCapacityResult().getAgentCapacity(AGENT2_UID));
+        
     }
     
     /**

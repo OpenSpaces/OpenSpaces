@@ -85,7 +85,7 @@ public class BinPackingSolver {
 
 
     public void solveManualCapacityScaleIn(AllocatedCapacity capacityToDeallocate) {
-        validate();
+        validateInput();
         
         AllocatedCapacity goalCapacity = getGoalCapacityScaleIn(capacityToDeallocate); // allocatedForPu - capacityToAllocate
         
@@ -98,12 +98,34 @@ public class BinPackingSolver {
         
         if (logger.isDebugEnabled()) {
             logger.debug("BinPackingSolver: manual capacity scale in" + capacityToDeallocate + " allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() + " deallocatedCapacityResult="+this.getDeallocatedCapacityResult());
-        }        
+        }
+        
+        validateResult();
+        
     }
     
+    private void validateResult() {
+        validateAllocatedCapacity();
+    }
+
+    private void validateAllocatedCapacity() {
+        if (allocatedCapacityForPu.getAgentUids().size() >= minimumNumberOfMachines) {
+            long totalMemory = allocatedCapacityForPu.getTotalAllocatedCapacity().getMemoryInMB();
+            long maxMemoryPerMachine = (long) Math.ceil(totalMemory/(1.0*minimumNumberOfMachines));
+        
+            for (String agentUid : allocatedCapacityForPu.getAgentUids()) {
+                long agentMemory = allocatedCapacityForPu.getAgentCapacity(agentUid).getMemoryInMB();
+                if (agentMemory > maxMemoryPerMachine) {
+                    throw new IllegalStateException("Agent " + agentUid + " bin packing solver results in " + agentMemory
+                            + "MB which is more than the maximum allowed "+maxMemoryPerMachine+"MB.");
+                }
+            }
+        }
+    }
+
     public void solveManualCapacityScaleOut(AllocatedCapacity capacityToAllocate) {
     
-        validate();
+        validateInput();
                 
         AllocatedCapacity goalCapacity = getGoalCapacityScaleOut(capacityToAllocate); // allocatedForPu + capacityToAllocate
         
@@ -136,6 +158,8 @@ public class BinPackingSolver {
         if (logger.isDebugEnabled()) {
             logger.debug("BinPackingSolver: manual capacity scale out" + capacityToAllocate + " allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() + " deallocatedCapacityResult="+this.getDeallocatedCapacityResult());
         }
+        
+        validateResult();
     }
 
     /**
@@ -801,7 +825,7 @@ public class BinPackingSolver {
 
     public void solveNumberOfMachines(int numberOfMachines) {
                 
-        validate();
+        validateInput();
         
         //remove all agents that already have a pu allocation, since we are looking only for new machines
         Collection<String> agentUidsOfPu = allocatedCapacityForPu.getAgentUids();
@@ -847,6 +871,7 @@ public class BinPackingSolver {
             logger.debug("BinPackingSolver: number of machines " + numberOfMachines + " allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() + " deallocatedCapacityResult="+this.getDeallocatedCapacityResult());
         }
 
+        validateResult();
     }
 
     private void removeContainerFromMachineWithMoreThanOneContainerAndMaxUnallocatedMemory() {
@@ -878,7 +903,7 @@ public class BinPackingSolver {
         return allocatedCapacityForPu.getTotalAllocatedCapacity().getMemoryInMB() + containerMemoryCapacityInMB > maxMemoryCapacityInMB;
     }
 
-    private void validate() {
+    private void validateInput() {
         if (containerMemoryCapacityInMB == 0) {
             throw new IllegalArgumentException("containerMemoryCapacityInMB");
         }
@@ -911,6 +936,7 @@ public class BinPackingSolver {
             logger.debug("BinPackingSolver: containerMemoryCapacityInMB=" + containerMemoryCapacityInMB+ " maxMemoryCapacityInMB="+maxMemoryCapacityInMB + " unallocatedCapacity="+unallocatedCapacity.toDetailedString() + " allocatedCapacityForPu="+allocatedCapacityForPu.toDetailedString() + " minimumNumberOfMachines="+minimumNumberOfMachines);
         }
         
+        validateAllocatedCapacity();
     }
     
     private String findFreeAgentUid(AllocatedCapacity capacityToAllocateOnAgent) {
