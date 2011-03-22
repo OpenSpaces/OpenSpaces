@@ -525,12 +525,16 @@ public class BinPackingSolver {
         rebalanceCpuCores();
     }
 
+    /**
+     * Balance memory between allocated machines.
+     * Do not allocate memory on a new machine!
+     */
     private void rebalanceMemory() {
         
         long allocatedMemory = allocatedCapacityForPu.getTotalAllocatedCapacity().getMemoryInMB();
         
         int numberOfContainers = (int) (allocatedMemory / containerMemoryCapacityInMB);
-        int numberOfMachines = allocatedCapacityForPu.add(unallocatedCapacity).getAgentUids().size();
+        int numberOfMachines = allocatedCapacityForPu.getAgentUids().size();
         
         int minNumberOfContainersPerMachine = (int) Math.floor(1.0*numberOfContainers/numberOfMachines);
         int maxNumberOfContainersPerMachine = (int) Math.ceil(1.0*numberOfContainers/numberOfMachines);
