@@ -139,13 +139,15 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
         
         if (sla.getSchemaConfig().isPartitionedSync2BackupSchema()) {
             enfroceSlaStatefulProcessingUnit(sla);
-            logger.debug("Number of deployments in progress is " + state.getNumberOfFutureDeployments(pu));
-            return isBalanced(sla);
+            boolean balanced = isBalanced(sla);
+            logger.debug("Number of deployments in progress is " + state.getNumberOfFutureDeployments(pu) + " balanced = " + balanced);
+            return balanced;
         }
         else if (sla.getSchemaConfig().isDefaultSchema()) {
             enforceSlaStatelessProcessingUnit(sla);
-            logger.debug("Number of deployments in progress is " + state.getNumberOfFutureDeployments(pu));
-            return isDeployedOnContainers(sla.getContainers(),pu); 
+            boolean deployed = isDeployedOnContainers(sla.getContainers(),pu);
+            logger.debug("Number of deployments in progress is " + state.getNumberOfFutureDeployments(pu) + " deployed = " + deployed);
+            return deployed; 
         }
         else {
             throw new IllegalStateException(pu.getName() + " schema " + sla.getSchemaConfig().getSchema() + " is not supported." );
