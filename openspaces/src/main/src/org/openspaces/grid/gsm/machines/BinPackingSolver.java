@@ -97,7 +97,9 @@ public class BinPackingSolver {
         rebalanceExistingContainers();
         
         if (logger.isDebugEnabled()) {
-            logger.debug("BinPackingSolver: manual capacity scale in" + capacityToDeallocate + " allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() + " deallocatedCapacityResult="+this.getDeallocatedCapacityResult());
+            logger.debug("BinPackingSolver: manual capacity scale in " + capacityToDeallocate + " "+
+                    "allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() + " "+
+                    "deallocatedCapacityResult="+this.getDeallocatedCapacityResult().toDetailedString());
         }
         
         validateResult();
@@ -156,7 +158,9 @@ public class BinPackingSolver {
         rebalanceExistingContainers();
         
         if (logger.isDebugEnabled()) {
-            logger.debug("BinPackingSolver: manual capacity scale out" + capacityToAllocate + " allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() + " deallocatedCapacityResult="+this.getDeallocatedCapacityResult());
+            logger.debug("BinPackingSolver: manual capacity scale out" + capacityToAllocate + " "+
+                    "allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() + " "+
+                    "deallocatedCapacityResult="+this.getDeallocatedCapacityResult().toDetailedString());
         }
         
         validateResult();
@@ -868,7 +872,9 @@ public class BinPackingSolver {
         }
         
         if (logger.isDebugEnabled()) {
-            logger.debug("BinPackingSolver: number of machines " + numberOfMachines + " allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() + " deallocatedCapacityResult="+this.getDeallocatedCapacityResult());
+            logger.debug("BinPackingSolver: number of machines " + numberOfMachines + " "+
+                    "allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() + " "+
+                    "deallocatedCapacityResult="+this.getDeallocatedCapacityResult().toDetailedString());
         }
 
         validateResult();
