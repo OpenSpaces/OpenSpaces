@@ -56,11 +56,17 @@ public class AggregatedAllocatedCapacityTest extends TestCase {
         Assert.assertTrue(ac.subtract(ac).equalsZero());
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public void testSubtractWrongUuid() {
-        AggregatedAllocatedCapacity ac = 
-            new AggregatedAllocatedCapacity().add("UUID1", new AllocatedCapacity(Fraction.ONE,1));
-
-        ac.subtract("UUID2", new AllocatedCapacity(Fraction.ONE,1));
+        try {
+            AggregatedAllocatedCapacity ac = 
+                new AggregatedAllocatedCapacity().add("UUID1", new AllocatedCapacity(Fraction.ONE,1));
+    
+            ac.subtract("UUID2", new AllocatedCapacity(Fraction.ONE,1));
+            Assert.fail("expected IllegalArgumentException");
+        }
+        catch (IllegalArgumentException e) {
+            
+        }
     }
 }

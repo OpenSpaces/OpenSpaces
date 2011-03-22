@@ -2,7 +2,7 @@ package org.openspaces.grid.gsm.capacity;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.TreeMap;
 
 import org.openspaces.core.internal.commons.math.fraction.Fraction;
 
@@ -13,7 +13,8 @@ public class AggregatedAllocatedCapacity {
     private AllocatedCapacity totalCapacity;
     
     public AggregatedAllocatedCapacity() {
-        this.capacityPerAgent = new ConcurrentHashMap<String, AllocatedCapacity>();
+        // use consistent ordering of machines so unit tests and bugs will have consistent iterator behavior.
+        this.capacityPerAgent = new TreeMap<String, AllocatedCapacity>();
         totalCapacity = new AllocatedCapacity(Fraction.ZERO, 0);
     }
         
