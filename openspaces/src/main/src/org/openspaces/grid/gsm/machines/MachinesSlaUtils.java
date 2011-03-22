@@ -60,27 +60,14 @@ public class MachinesSlaUtils {
      * Sort all agents, place management machines first.
      */
     public static List<GridServiceAgent> sortManagementFirst(Collection<GridServiceAgent> agents) {
-        return sortByManagement(agents, true);
-    }
-
-    /**
-     * Sort all agents, place management machines last.
-     */
-    public static List<GridServiceAgent> sortManagementLast(Collection<GridServiceAgent> agents) {
-            return sortByManagement(agents, false);
-    }
-    
-    public static List<GridServiceAgent> sortByManagement(Collection<GridServiceAgent> agents, final boolean managementFirst) {
         List<GridServiceAgent> sortedAgents = new ArrayList<GridServiceAgent>(agents);
         Collections.sort(sortedAgents,new Comparator<GridServiceAgent>() {
-
+        
             public int compare(GridServiceAgent agent1, GridServiceAgent agent2) {
                 boolean management1 = isManagementRunningOnMachine(agent1.getMachine());
                 boolean management2 = isManagementRunningOnMachine(agent2.getMachine());
-                if (management1 && !management2 && !managementFirst) return  1; // agent2 is smaller since no management
-                if (management2 && !management1 && !managementFirst) return -1; // agent1 is smaller since no management
-                if (management1 && !management2 && managementFirst)  return -1; // agent1 is smaller since management
-                if (management2 && !management1 && managementFirst)  return  1; // agent2 is smaller since management
+                if (management1 && !management2)  return -1; // agent1 is smaller since management
+                if (management2 && !management1)  return  1; // agent2 is smaller since management
                 return 0;
             }
         });

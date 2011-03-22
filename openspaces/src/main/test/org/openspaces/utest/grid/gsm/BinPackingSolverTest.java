@@ -1,5 +1,8 @@
 package org.openspaces.utest.grid.gsm;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
@@ -825,4 +828,44 @@ public class BinPackingSolverTest extends TestCase {
         }
     }
 
+    public void testScaleInWithManagementMachine() {
+        
+        BinPackingSolver solver = new BinPackingSolver();
+        solver.setAllocatedCapacityForPu(
+                new AggregatedAllocatedCapacity()
+                .add(AGENT1_UID,new AllocatedCapacity(new Fraction(2), 250))
+                .add(AGENT2_UID,new AllocatedCapacity(new Fraction(2), 250))
+                .add(AGENT3_UID,new AllocatedCapacity(new Fraction(2), 250)));
+        
+        solver.setContainerMemoryCapacityInMB(250);
+        solver.setMaxAllocatedMemoryCapacityOfPuInMB(8*250);
+        solver.setLogger(logger);
+
+        AggregatedAllocatedCapacity unallocatedCapacity = 
+            new AggregatedAllocatedCapacity()
+            .add(AGENT1_UID,new AllocatedCapacity(new Fraction(0), 250))
+            .add(AGENT2_UID,new AllocatedCapacity(new Fraction(0), 250))
+            .add(AGENT3_UID,new AllocatedCapacity(new Fraction(0), 250));
+            
+        solver.setUnallocatedCapacity(unallocatedCapacity);
+        solver.setMinimumNumberOfMachines(1);
+        Map<String, Integer> agentPriority = new HashMap<String,Integer>();
+        agentPriority.put(AGENT1_UID,100);
+        agentPriority.put(AGENT2_UID,20);
+        agentPriority.put(AGENT3_UID,3);
+        solver.setAgentAllocationPriority(agentPriority);
+        
+        solver.solveManualCapacityScaleIn(new AllocatedCapacity(new Fraction(2),250));
+        
+        
+        Assert.assertEquals(new AllocatedCapacity(new Fraction(0),0),solver.getAllocatedCapacityResult().getTotalAllocatedCapacity());
+        Assert.assertEquals(new AllocatedCapacity(new Fraction(2),250),solver.getDeallocatedCapacityResult().getTotalAllocatedCapacity());
+        String agentUidToRemove = solver.getDeallocatedCapacityResult().getAgentUids().iterator().next();
+        Assert.assertTrue("should not remove management machine if not necessary",AGENT1_UID != agentUidToRemove);
+        Assert.assertTrue("should not remove management machine if not necessary",AGENT2_UID != agentUidToRemove);
+        
+        solver.reset();
+        solver.solveManualCapacityScaleIn(new AllocatedCapacity(new Fraction(2),250));
+        Assert.assertTrue("should not remove management machine if not necessary",AGENT1_UID != agentUidToRemove);
+    }
 }

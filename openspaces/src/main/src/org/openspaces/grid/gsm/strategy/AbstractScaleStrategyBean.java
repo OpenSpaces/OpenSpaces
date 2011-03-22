@@ -280,6 +280,8 @@ public abstract class AbstractScaleStrategyBean implements
                         GET_DISCOVERED_MACHINES_RETRY_SECONDS, TimeUnit.SECONDS);
                 }
                 else {
+                    //TODO: Move this sort into the bin packing solver. It already has the priority of each machine
+                    // so it can sort it by itself.
                     List<GridServiceAgent> sortedFilteredAgents = MachinesSlaUtils.sortManagementFirst(filteredAgents);
                     if (logger.isDebugEnabled()) {
                         logger.debug("Provisioned Agents: " + MachinesSlaUtils.machinesToString(sortedFilteredAgents));

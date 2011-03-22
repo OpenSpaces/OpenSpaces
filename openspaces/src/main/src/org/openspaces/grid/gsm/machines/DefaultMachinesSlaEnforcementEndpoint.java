@@ -1,7 +1,9 @@
 package org.openspaces.grid.gsm.machines;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -265,30 +267,7 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
             }
 
             if (!surplusCapacity.equalsZero()) {
-                // this is the old scale in algorithm
-                // it handles well the case of removing a complete machine and prefers to deallocate capacity on 
-                // machines that are not management machines (since management machines cannot be shutdown anyway)
-                // TODO: Also prioritize machines that were not started by the ESM since those cannot be shutdown too.
-                for (GridServiceAgent agent : sortManagementLast(capacityAllocated.getAgentUids())) {
-                    AllocatedCapacity agentCapacity = capacityAllocated.getAgentCapacity(agent.getUid());
-                    
-                    if (surplusCapacity.satisfies(agentCapacity) &&
-                        surplusMachines > 0) {
-    
-                        // scale in machine
-                        state.markCapacityForDeallocation(pu, agent.getUid(), agentCapacity);
-                        surplusCapacity = surplusCapacity.subtract(agentCapacity);
-                        surplusMachines --;
-                        logger.info(
-                                "Machine agent " + agent.getMachine().getHostAddress() + " is marked for deallocation in order to reduce capacity. "+
-                                "Allocated machine agents are: " + state.getAllocatedCapacity(pu));
-                    }
-                }
-            }
-            
-            if (!surplusCapacity.equalsZero()) {
-                // this is the new scale in algorithm
-                // it handles well the case of removing part of the machine capacity (containers)
+                // scale in now
                 deallocateManualCapacity(sla,surplusCapacity);
             }
         }
@@ -497,11 +476,6 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         return machineShortage;
     }
 
-    private Collection<GridServiceAgent> sortManagementLast(Iterable<String> agentUids) {
-        
-        return MachinesSlaUtils.sortManagementLast(MachinesSlaUtils.convertAgentUidsToAgents(agentUids, pu.getAdmin()));
-    }
-    
     /**
      * Kill agents marked for deallocation that no longer manage containers. 
      * @param sla 
@@ -988,6 +962,34 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
         solver.setAllocatedCapacityForPu(state.getAllocatedCapacity(pu));
         solver.setMaxAllocatedMemoryCapacityOfPuInMB(sla.getMaximumNumberOfMachines()*sla.getContainerMemoryCapacityInMB());
         solver.setMinimumNumberOfMachines(sla.getMinimumNumberOfMachines());
+        
+        // the higher the priority the less likely the machine to be scaled in.
+        Map<String,Integer> scaleInPriorityPerAgentUid = new HashMap<String,Integer>();
+        GridServiceAgents agents = pu.getAdmin().getGridServiceAgents();
+        for (String agentUid : state.getAllocatedCapacity(pu).getAgentUids()) {
+            int agentPriority = 0;
+            GridServiceAgent agent = agents.getAgentByUID(agentUid);
+            if (agent != null) {
+                if (MachinesSlaUtils.isManagementRunningOnMachine(agent.getMachine())) {
+                    // machine has management on it. It will not shutdown anyway, so try to scale in other
+                    // machines first.
+                    agentPriority = 3;
+                }
+                else if (state.isAgentSharedWithOtherProcessingUnits(pu, agentUid)) {
+                    // machine has other PUs on it. 
+                    // try to scale in other machines first.
+                    agentPriority = 2;
+                }
+                else if (!state.getAgentsStartedByMachineProvisioning().contains(agent)) {
+                    // machine was not started by ESM, so it cannot be shutdown by ESM
+                    // try scaling in machines that we can shutdown first.
+                    agentPriority = 1;
+                }
+            }
+            scaleInPriorityPerAgentUid.put(agentUid, agentPriority);
+        }
+        solver.setAgentAllocationPriority(scaleInPriorityPerAgentUid);
+        
         return solver;
     }
     

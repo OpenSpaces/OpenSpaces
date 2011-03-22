@@ -32,8 +32,10 @@ public class BinPackingSolver {
     
     private long maxMemoryCapacityInMB;
     private int minimumNumberOfMachines;
+    private HashMap<String, Integer> agentPriority;
 
     public BinPackingSolver() {
+        agentPriority = new HashMap<String,Integer>();
         allocatedCapacityResult = new AggregatedAllocatedCapacity();
         deallocatedCapacityResult = new AggregatedAllocatedCapacity();
     }
@@ -66,6 +68,14 @@ public class BinPackingSolver {
      */
     public void setUnallocatedCapacity(AggregatedAllocatedCapacity unallocatedCapacity) {
         this.unallocatedCapacity = unallocatedCapacity;
+    }
+    
+    /**
+     * The higher the priority the less likely for the machine to be scaled in
+     * @param agentPriority - a map between agent UID and its priority
+     */
+    public void setAgentAllocationPriority(Map<String, Integer> agentPriority) {
+        this.agentPriority = new HashMap<String,Integer>(agentPriority);
     }
     
     /**
@@ -344,7 +354,25 @@ public class BinPackingSolver {
                 final AllocatedCapacity excessCapacity = 
                     allocatedCapacityForPu.getTotalAllocatedCapacity().subtractOrZero(goalCapacity);
                 
-                for (String sourceAgentUid : allocatedCapacityForPu.getAgentUids()) {
+                // try to evacuate first, machines that are in lower priority
+                // sort agents by priority
+                List<String> sortedAgentUids = new ArrayList<String>(allocatedCapacityForPu.getAgentUids());
+                Collections.sort(sortedAgentUids, new Comparator<String>() {
+
+                    public int compare(String agentUid1, String agentUid2) {
+                        return getAgentPriority(agentUid1) - getAgentPriority(agentUid2);
+                    }
+
+                    private int getAgentPriority(String agentUid) {
+                        int priority = 0;
+                        if (agentPriority.containsKey(agentUid)) {
+                            priority = agentPriority.get(agentUid);
+                        }
+                        return priority;
+                    }
+                });
+                
+                for (String sourceAgentUid : sortedAgentUids) {
                     if (removeExcessMachineStep(sourceAgentUid, excessCapacity)) {
                         //retry another machine again
                         retry = true;
