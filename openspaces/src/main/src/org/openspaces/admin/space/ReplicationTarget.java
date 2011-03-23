@@ -48,10 +48,13 @@ public class ReplicationTarget {
     
     private final String memberName;
 
-    public ReplicationTarget(InternalSpaceInstance spaceInstance, ReplicationStatus replicationStatus, String memberName) {
+    private final boolean isMirror;
+
+    public ReplicationTarget(InternalSpaceInstance spaceInstance, ReplicationStatus replicationStatus, String memberName, boolean isMirror) {
         this.spaceInstance = spaceInstance;
         this.replicationStatus = replicationStatus;
         this.memberName = memberName;
+        this.isMirror = isMirror;
     }
 
     /**
@@ -74,5 +77,12 @@ public class ReplicationTarget {
      */
     public String getMemberName() {
         return memberName;
+    }
+    
+    /**
+     * @return true if target is a Mirror Space.
+     */
+    public boolean isMirror() {
+        return isMirror;
     }
 }

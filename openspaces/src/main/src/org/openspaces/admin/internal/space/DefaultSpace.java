@@ -532,11 +532,11 @@ public class DefaultSpace implements InternalSpace {
                         if (memberNames[i] == null) {
                             continue;
                         }
-                        
                         SpaceInstance targetSpaceInstance = spaceInstancesByMemberName.get(memberNames[i]);
                         /*
                          * If mirror-service is one of the replication target names, find its SpaceInstance.
                          */
+                        boolean isMirrorService = false;
                         if (targetSpaceInstance == null) {
                             //we don't know the name of the mirror-service space (since 8.0 it can be any name that is different from the cluster name)
                             if (!((String)memberNames[i]).endsWith(":"+name)) {
@@ -547,6 +547,7 @@ public class DefaultSpace implements InternalSpace {
                                     if (mirrorInstance != null && mirrorInstance.getSpaceUrl().getSchema().equals("mirror")) {
                                         //note: don't cache it in spaceInstanceByMemberName map since we don't get a removal event on this instance
                                         targetSpaceInstance = mirrorInstance;
+                                        isMirrorService = true;
                                     }
                                 }
                             }
@@ -563,7 +564,7 @@ public class DefaultSpace implements InternalSpace {
                                 replStatus = ReplicationStatus.DISABLED;
                                 break;
                         }
-                        replicationTargets[i] = new ReplicationTarget((InternalSpaceInstance) targetSpaceInstance, replStatus, (String)memberNames[i]);
+                        replicationTargets[i] = new ReplicationTarget((InternalSpaceInstance) targetSpaceInstance, replStatus, (String)memberNames[i], isMirrorService);
                     }
                     spaceInstance.setReplicationTargets(replicationTargets);
                 }
