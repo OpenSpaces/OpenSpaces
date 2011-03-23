@@ -102,6 +102,8 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                 
                 factory.putProperty(ReplicationChannelDisconnectedAlert.REPLICATION_STATUS, replicationStatus.name());
                 factory.putProperty(ReplicationChannelDisconnectedAlert.SOURCE_UID, source.getUid());
+                
+                factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_IS_MIRROR, Boolean.toString(event.getReplicationTarget().isMirror()));
                 if (target != null) {
                     factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_UID, target.getUid());
                     factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_HOST_ADDRESS, target.getMachine().getHostAddress());
@@ -136,6 +138,8 @@ public class ReplicationChannelDisconnectedAlertBean implements AlertBean, Repli
                     
                     factory.putProperty(ReplicationChannelDisconnectedAlert.REPLICATION_STATUS, replicationStatus.name());
                     factory.putProperty(ReplicationChannelDisconnectedAlert.SOURCE_UID, source.getUid());
+                    
+                    factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_IS_MIRROR, Boolean.toString(event.getReplicationTarget().isMirror()));
                     if (target != null) {
                         factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_UID, target.getUid());
                         factory.putProperty(ReplicationChannelDisconnectedAlert.TARGET_HOST_ADDRESS, target.getMachine().getHostAddress());

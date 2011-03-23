@@ -38,6 +38,7 @@ public class ReplicationChannelDisconnectedAlert extends AbstractAlert {
     public static final String REPLICATION_STATUS = "replication-status";
     public static final String SOURCE_UID = "source-uid";
     public static final String TARGET_UID = "target-uid";
+    public static final String TARGET_IS_MIRROR = "target-is-mirror";
 
     /** required by java.io.Externalizable */
     public ReplicationChannelDisconnectedAlert() {
@@ -141,5 +142,16 @@ public class ReplicationChannelDisconnectedAlert extends AbstractAlert {
      */
     public String getTargetUid() {
         return getProperties().get(TARGET_UID);
+    }
+    
+    /**
+     * An indication if the target Space is a Mirror-Service.
+     * @return <code>true</code> if its a Mirror; <code>false</code> if regular Space; may be
+     *         <code>null</code>.
+     */
+    public Boolean getTargetIsMirror() {
+        String value = getProperties().get(TARGET_IS_MIRROR);
+        if (value == null) return null;
+        return Boolean.valueOf(value);
     }
 }
