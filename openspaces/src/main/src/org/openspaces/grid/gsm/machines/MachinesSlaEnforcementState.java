@@ -14,9 +14,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openspaces.admin.gsa.GridServiceAgent;
 import org.openspaces.admin.gsc.GridServiceContainer;
 import org.openspaces.admin.pu.ProcessingUnit;
+import org.openspaces.grid.gsm.SingleThreadedPollingLog;
 import org.openspaces.grid.gsm.capacity.AggregatedAllocatedCapacity;
 import org.openspaces.grid.gsm.capacity.AllocatedCapacity;
 import org.openspaces.grid.gsm.capacity.CapacityRequirements;
@@ -27,6 +30,8 @@ import org.openspaces.grid.gsm.machines.plugins.NonBlockingElasticMachineProvisi
 
 public class MachinesSlaEnforcementState {
     
+    private final Log logger;
+    
     // state that tracks managed grid service agents, agents to be started and agents marked for shutdown.
     private final Map<ProcessingUnit,AggregatedAllocatedCapacity> allocatedCapacityPerProcessingUnit;
     private final Map<ProcessingUnit,List<GridServiceAgentFutures>> futureAgentsPerProcessingUnit;
@@ -36,6 +41,10 @@ public class MachinesSlaEnforcementState {
     private final Set<GridServiceAgent> agentsStartedByMachineProvisioning;
     
     public MachinesSlaEnforcementState() {
+        this.logger = 
+                new SingleThreadedPollingLog( 
+                        LogFactory.getLog(DefaultMachinesSlaEnforcementEndpoint.class));
+                        
         allocatedCapacityPerProcessingUnit = new HashMap<ProcessingUnit, AggregatedAllocatedCapacity>();
         futureAgentsPerProcessingUnit = new HashMap<ProcessingUnit, List<GridServiceAgentFutures>>();
         markedForDeallocationCapacityPerProcessingUnit = new HashMap<ProcessingUnit, AggregatedAllocatedCapacity>();
@@ -291,6 +300,20 @@ public class MachinesSlaEnforcementState {
             }
         }
 
+        if (logger.isDebugEnabled()) {
+            List<String> puNamesWithDifferentIsolation = new ArrayList<String>();
+            for (ProcessingUnit puDifferentIsolation : pusWithDifferentIsolation) {
+                puNamesWithDifferentIsolation.add(puDifferentIsolation.getName());
+            }
+            logger.debug("PUs with different isolation than pu " + pu.getName() +": "+ puNamesWithDifferentIsolation);
+            
+            List<String> puNamesWithSameIsolation = new ArrayList<String>();
+            for (ProcessingUnit puSameIsolation : pusWithSameIsolation) {
+                puNamesWithSameIsolation.add(puSameIsolation.getName());
+            }
+            logger.debug("PUs with same isolation of pu " + pu.getName() + ": " + puNamesWithSameIsolation);
+        }
+        
         // add all agent uids used by conflicting pus
         Set<String> restrictedAgentUids = new HashSet<String>();
         
@@ -405,6 +428,11 @@ public class MachinesSlaEnforcementState {
     }
     
     public void setMachineIsolation(ProcessingUnit pu, ElasticProcessingUnitMachineIsolation isolation) {
+        
+        if (logger.isDebugEnabled()) {
+            logger.debug("PU " + pu.getName() + " machine isolation is " + isolation);
+        }
+        
         this.machineIsolationPerProcessingUnit.put(pu,isolation);
     }
     

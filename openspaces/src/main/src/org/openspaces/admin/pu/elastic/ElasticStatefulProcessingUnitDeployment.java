@@ -192,7 +192,7 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
     }
     
     @Override
-    protected ElasticStatefulProcessingUnitDeployment dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config, String sharingId) {
+    protected ElasticStatefulProcessingUnitDeployment machineProvisioning(ElasticMachineProvisioningConfig config, String sharingId) {
         if (config == null) {
             throw new IllegalArgumentException("config");
         }
@@ -206,18 +206,18 @@ public class ElasticStatefulProcessingUnitDeployment extends AbstractElasticProc
                 throw new AdminException("Elastic Machine Provisioning configuration must supply the expected minimum number of CPU cores per machine.");
             }
         }
-        return (ElasticStatefulProcessingUnitDeployment) super.dedicatedMachineProvisioning(config, sharingId);
+        return (ElasticStatefulProcessingUnitDeployment) super.machineProvisioning(config, sharingId);
     }
     
     public ElasticStatefulProcessingUnitDeployment dedicatedMachineProvisioning(ElasticMachineProvisioningConfig config) {
-        return dedicatedMachineProvisioning(config, null);
+        return machineProvisioning(config, null);
     }
     
     public ElasticStatefulProcessingUnitDeployment sharedMachineProvisioning(String sharingId, ElasticMachineProvisioningConfig config) {
         if (sharingId == null) {
             throw new IllegalArgumentException("sharingId can't be null");
         }
-        return dedicatedMachineProvisioning(config, sharingId);
+        return machineProvisioning(config, sharingId);
     }
     
     public ProcessingUnitDeployment toProcessingUnitDeployment(Admin admin) {

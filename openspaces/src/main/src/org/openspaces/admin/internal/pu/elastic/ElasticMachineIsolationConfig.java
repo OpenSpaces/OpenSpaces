@@ -28,6 +28,13 @@ public class ElasticMachineIsolationConfig {
     }
 
     public void setSharingId(String sharingId) {
+        if (sharingId == null) {
+            throw new IllegalArgumentException("sharingId cannot be null");
+        }
         properties.put(ELASTIC_MACHINE_ISOLATION_SHARING_ID_KEY, sharingId);
+    }
+
+    public void setDedicated() {
+        properties.remove(ELASTIC_MACHINE_ISOLATION_SHARING_ID_KEY);
     }
 }
