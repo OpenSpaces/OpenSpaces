@@ -296,8 +296,8 @@ public class MachinesSlaEnforcementState {
         
         for (ProcessingUnit otherPu : pusWithDifferentIsolation) {
             restrictedAgentUids.addAll(allocatedCapacityPerProcessingUnit.get(otherPu).getAgentUids());
-            restrictedAgentUids.addAll(markedForDeallocationCapacityPerProcessingUnit.get(pu).getAgentUids());
-            restrictedAgentUids.addAll(timeoutTimestampPerAgentUidGoingDownPerProcessingUnit.get(pu).keySet());
+            restrictedAgentUids.addAll(markedForDeallocationCapacityPerProcessingUnit.get(otherPu).getAgentUids());
+            restrictedAgentUids.addAll(timeoutTimestampPerAgentUidGoingDownPerProcessingUnit.get(otherPu).keySet());
         }
         
         // add all agents that started containers that are not with the same isolation
