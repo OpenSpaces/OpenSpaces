@@ -698,7 +698,10 @@ public class BinPackingSolver {
         
         int numberOfContainers = (int) (allocatedMemory / containerMemoryCapacityInMB) - numberOfContainerToRemove;
         Fraction allocatedCpuCores = allocatedCapacityForPu.getTotalAllocatedCapacity().getCpuCores();
-        Fraction goalCpuCoresPerContainer = allocatedCpuCores.divide(numberOfContainers);
+        Fraction goalCpuCoresPerContainer = Fraction.ZERO;
+        if (numberOfContainers > 0) {
+            goalCpuCoresPerContainer = allocatedCpuCores.divide(numberOfContainers);
+        }
         return goalCpuCoresPerContainer;
     }
     
@@ -941,6 +944,14 @@ public class BinPackingSolver {
     }
 
     private void validateInput() {
+        if (allocatedCapacityForPu == null) {
+            throw new IllegalArgumentException("allocatedCapacityForPu");
+        }
+        
+        if (unallocatedCapacity == null) {
+            throw new IllegalArgumentException("unallocatedCapacity");
+        }
+        
         if (containerMemoryCapacityInMB == 0) {
             throw new IllegalArgumentException("containerMemoryCapacityInMB");
         }
@@ -964,7 +975,7 @@ public class BinPackingSolver {
            }
        }
         
-        if (minimumNumberOfMachines == 0) {
+        if (minimumNumberOfMachines < 0) {
             throw new IllegalArgumentException("minimumNumberOfMachines");
         }
         

@@ -861,11 +861,32 @@ public class BinPackingSolverTest extends TestCase {
         Assert.assertEquals(new AllocatedCapacity(new Fraction(0),0),solver.getAllocatedCapacityResult().getTotalAllocatedCapacity());
         Assert.assertEquals(new AllocatedCapacity(new Fraction(2),250),solver.getDeallocatedCapacityResult().getTotalAllocatedCapacity());
         String agentUidToRemove = solver.getDeallocatedCapacityResult().getAgentUids().iterator().next();
-        Assert.assertTrue("should not remove management machine if not necessary",AGENT1_UID != agentUidToRemove);
-        Assert.assertTrue("should not remove management machine if not necessary",AGENT2_UID != agentUidToRemove);
+        Assert.assertEquals(AGENT3_UID,agentUidToRemove);
         
         solver.reset();
         solver.solveManualCapacityScaleIn(new AllocatedCapacity(new Fraction(2),250));
-        Assert.assertTrue("should not remove management machine if not necessary",AGENT1_UID != agentUidToRemove);
+        agentUidToRemove = solver.getDeallocatedCapacityResult().getAgentUids().iterator().next();
+        Assert.assertEquals(AGENT2_UID,agentUidToRemove);
+        
+    }
+    
+    public void testUndeploy() {
+
+        BinPackingSolver solver = new BinPackingSolver();
+        solver.setAllocatedCapacityForPu(
+                new AggregatedAllocatedCapacity()
+                .add(AGENT1_UID,new AllocatedCapacity(new Fraction(2), 250)));
+        solver.setUnallocatedCapacity(new AggregatedAllocatedCapacity());
+        solver.setContainerMemoryCapacityInMB(250);
+        solver.setMaxAllocatedMemoryCapacityOfPuInMB(8*250);
+        solver.setLogger(logger);
+        solver.setMinimumNumberOfMachines(0);
+        
+        solver.solveManualCapacityScaleIn(new AllocatedCapacity(new Fraction(2),250));
+        
+        Assert.assertEquals(new AllocatedCapacity(new Fraction(0),0),solver.getAllocatedCapacityResult().getTotalAllocatedCapacity());
+        Assert.assertEquals(new AllocatedCapacity(new Fraction(2),250),solver.getDeallocatedCapacityResult().getTotalAllocatedCapacity());
+        String agentUidToRemove = solver.getDeallocatedCapacityResult().getAgentUids().iterator().next();
+        Assert.assertEquals(AGENT1_UID,agentUidToRemove);
     }
 }
