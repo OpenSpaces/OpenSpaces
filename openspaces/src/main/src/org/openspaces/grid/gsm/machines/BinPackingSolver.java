@@ -29,12 +29,14 @@ public class BinPackingSolver {
     private AggregatedAllocatedCapacity allocatedCapacityForPu;
     private AggregatedAllocatedCapacity allocatedCapacityResult;
     private AggregatedAllocatedCapacity deallocatedCapacityResult;
+    private String debugTrace = "";
     
     private long maxMemoryCapacityInMB;
     private int minimumNumberOfMachines;
     private HashMap<String, Integer> agentPriority;
 
     public BinPackingSolver() {
+        debugTrace ="";
         agentPriority = new HashMap<String,Integer>();
         allocatedCapacityResult = new AggregatedAllocatedCapacity();
         deallocatedCapacityResult = new AggregatedAllocatedCapacity();
@@ -95,28 +97,42 @@ public class BinPackingSolver {
 
 
     public void solveManualCapacityScaleIn(AllocatedCapacity capacityToDeallocate) {
-        validateInput();
+        boolean success = false;
+        try {
+            debugTrace = "BinPackingSolver: manual capacity scale in " + capacityToDeallocate;
+            validateInput();
         
-        AllocatedCapacity goalCapacity = getGoalCapacityScaleIn(capacityToDeallocate); // allocatedForPu - capacityToAllocate
-        
-        // try to remove complete machines then try to remove part of machines (containers)
-        removeExcessMachines(goalCapacity);
-        removeExcessContainers(goalCapacity);   
-        
-        // rebalance containers between machines (without adding/removing containers)
-        rebalanceExistingContainers();
-        
-        if (logger.isDebugEnabled()) {
-            logger.debug("BinPackingSolver: manual capacity scale in " + capacityToDeallocate + " "+
-                    "allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() + " "+
-                    "deallocatedCapacityResult="+this.getDeallocatedCapacityResult().toDetailedString());
+            AllocatedCapacity goalCapacity = getGoalCapacityScaleIn(capacityToDeallocate); // allocatedForPu - capacityToAllocate
+            
+            // try to remove complete machines then try to remove part of machines (containers)
+            removeExcessMachines(goalCapacity);
+            removeExcessContainers(goalCapacity);   
+            
+            // rebalance containers between machines (without adding/removing containers)
+            rebalanceExistingContainers();
+            
+            debugTrace += 
+                " allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() +
+                " deallocatedCapacityResult="+this.getDeallocatedCapacityResult().toDetailedString();
+            
+            validateResult();
+            success = true;
         }
-        
-        validateResult();
-        
+        finally {
+            if (logger.isDebugEnabled()) {
+                logger.debug(debugTrace);
+            }
+            else if (!success && logger.isInfoEnabled()) {
+                logger.info(debugTrace);
+            }
+        }
     }
     
     private void validateResult() {
+        
+        if (allocatedCapacityForPu.getTotalAllocatedCapacity().getMemoryInMB() > maxMemoryCapacityInMB) {
+            throw new IllegalStateException("Allocated memory is more than maximum " + maxMemoryCapacityInMB + "MB: " + allocatedCapacityForPu.toDetailedString());
+        }
         
         if (allocatedCapacityForPu.getAgentUids().size() >= minimumNumberOfMachines) {
             long totalMemory = allocatedCapacityForPu.getTotalAllocatedCapacity().getMemoryInMB();
@@ -133,47 +149,57 @@ public class BinPackingSolver {
     }
 
     public void solveManualCapacityScaleOut(AllocatedCapacity capacityToAllocate) {
-    
-        validateInput();
-                
-        AllocatedCapacity goalCapacity = getGoalCapacityScaleOut(capacityToAllocate); // allocatedForPu + capacityToAllocate
-        
-        // do whatever we can to reach the target capacity.
-        boolean startExcessContainersToSatisfyCpuShortage = false;
-        // does not allocate a container just to satisfy cpu shortage, only to satisfy memory shortage.
-        // but it does allocate cpu on machines with existing containers.
-        allocateNewCapacityForPu(goalCapacity, startExcessContainersToSatisfyCpuShortage);
-        
-        // not enough cpu. 
-        if (allocatedCapacityForPu.getTotalAllocatedCapacity().getCpuCores().compareTo(goalCapacity.getCpuCores()) < 0) {
+        boolean success = false;
+        try {
+            debugTrace = "BinPackingSolver: manual capacity scale out " + capacityToAllocate;
+            validateInput();
+                    
+            AllocatedCapacity goalCapacity = getGoalCapacityScaleOut(capacityToAllocate); // allocatedForPu + capacityToAllocate
             
-            //try again, this time start containers for cpu purposes.
-            startExcessContainersToSatisfyCpuShortage = true;
+            // do whatever we can to reach the target capacity.
+            boolean startExcessContainersToSatisfyCpuShortage = false;
+            // does not allocate a container just to satisfy cpu shortage, only to satisfy memory shortage.
+            // but it does allocate cpu on machines with existing containers.
             allocateNewCapacityForPu(goalCapacity, startExcessContainersToSatisfyCpuShortage);
+            
+            // not enough cpu. 
+            if (allocatedCapacityForPu.getTotalAllocatedCapacity().getCpuCores().compareTo(goalCapacity.getCpuCores()) < 0) {
+                
+                //try again, this time start containers for cpu purposes.
+                startExcessContainersToSatisfyCpuShortage = true;
+                allocateNewCapacityForPu(goalCapacity, startExcessContainersToSatisfyCpuShortage);
+            }
+    
+            // accept the fact that we might not have enough capacity to reach the target
+            // rebalance what we have now
+            AllocatedCapacity newGoalCapacity = AllocatedCapacity.lowestCommon(goalCapacity,allocatedCapacityForPu.getTotalAllocatedCapacity());
+            
+            // try to remove complete machines then try to remove part of machines (containers)
+            removeExcessMachines(newGoalCapacity);
+            removeExcessContainers(newGoalCapacity);
+            removeOverMaximumContainers(newGoalCapacity);    
+            
+            // rebalance containers between machines (without adding/removing containers)
+            rebalanceExistingContainers();
+            
+            debugTrace += 
+                " allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() + 
+                " deallocatedCapacityResult="+this.getDeallocatedCapacityResult().toDetailedString();
+            
+            if (allocatedCapacityForPu.getTotalAllocatedCapacity().equals(goalCapacity)) {
+                // we completed the allocation of all the capacity requested (no lack of resources)
+                // make sure it does not violate basic allocation restrictions
+                validateResult();
+            }
+            success = true;
         }
-
-        // accept the fact that we might not have enough capacity to reach the target
-        // rebalance what we have now
-        AllocatedCapacity newGoalCapacity = lowestCommonGoal(goalCapacity,allocatedCapacityForPu.getTotalAllocatedCapacity());
-        
-        // try to remove complete machines then try to remove part of machines (containers)
-        removeExcessMachines(newGoalCapacity);
-        removeExcessContainers(newGoalCapacity);
-        removeOverMaximumContainers();    
-        
-        // rebalance containers between machines (without adding/removing containers)
-        rebalanceExistingContainers();
-        
-        if (logger.isDebugEnabled()) {
-            logger.debug("BinPackingSolver: manual capacity scale out" + capacityToAllocate + " "+
-                    "allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() + " "+
-                    "deallocatedCapacityResult="+this.getDeallocatedCapacityResult().toDetailedString());
-        }
-        
-        if (allocatedCapacityForPu.getTotalAllocatedCapacity().equals(goalCapacity)) {
-            // we completed the allocation of all the capacity requested (no lack of resources)
-            // make sure it does not violate basic allocation restrictions
-            validateResult();
+        finally {
+            if (logger.isDebugEnabled()) {
+                logger.debug(debugTrace);
+            }
+            else if (!success && logger.isInfoEnabled()) {
+                logger.info(debugTrace);
+            }
         }
     }
 
@@ -274,17 +300,17 @@ public class BinPackingSolver {
     }
 
     /**
-     * Removes excess containers that are not needed. Remaining cpu capacity is spread accross other machines.
+     * Removes excess containers that are not needed. Remaining cpu capacity is spread across other machines.
      * No machines are removed (never remove the last container on the machine)
      */
-    private boolean removeOverMaximumContainers() {
+    private boolean removeOverMaximumContainers(AllocatedCapacity goalCapacity) {
         boolean success = false;
         boolean retry;
         do {
             retry = false;
             for (String sourceAgentUid : allocatedCapacityForPu.getAgentUids()) {               
                 
-                while (removeExcessContainer(sourceAgentUid, calcOverMaximumMemory(), true)) {
+                while (removeExcessContainer(sourceAgentUid, calcOverMaximumMemory(), goalCapacity)) {
                     retry = true;
                     success = true;
                 }
@@ -303,40 +329,18 @@ public class BinPackingSolver {
         return allocatedCapacityForPu.getTotalAllocatedCapacity().getMemoryInMB() - maxMemoryCapacityInMB;
     }
 
-    private boolean removeExcessContainer(String sourceAgentUid, long excessMemory, boolean forceRemove) {
-        
+    private boolean removeExcessContainer(String sourceAgentUid, long excessMemory, AllocatedCapacity goalCapacity) {
+
         boolean success = false;
-        
         
         //remove excess capacity that is on this source machine
         AllocatedCapacity allocatedCapacityOnSourceMachine = allocatedCapacityForPu.getAgentCapacity(sourceAgentUid);
         
         int numberOfContainersOnSourceMachine = (int) (allocatedCapacityOnSourceMachine.getMemoryInMB()/containerMemoryCapacityInMB);
         
-        
         if (excessMemory > 0 && numberOfContainersOnSourceMachine >= 2){
-            
-            if (forceRemove) {
-                deallocateCapacityOnMachine(sourceAgentUid, new AllocatedCapacity(Fraction.ZERO, containerMemoryCapacityInMB));
-                success = true;
-            }
-            else if (excessMemory >= containerMemoryCapacityInMB) {
-        
-                Fraction goalCpuCoresPerContainerAfterRemovingOneContainer = getMaximumCpuCoresPerContainer();
-                Fraction cpuCoresToLeaveOnSourceMachine = goalCpuCoresPerContainerAfterRemovingOneContainer.multiply(numberOfContainersOnSourceMachine-1);
-                Fraction cpuCoresToRelocate =  allocatedCapacityOnSourceMachine.getCpuCores().subtract(cpuCoresToLeaveOnSourceMachine);
-                if (cpuCoresToRelocate.compareTo(Fraction.ZERO)<0) {
-                    cpuCoresToRelocate = Fraction.ZERO;
-                }
-                if (relocateCapacityToOtherMachines(sourceAgentUid, new AllocatedCapacity(cpuCoresToRelocate, 0))) {
-        
-                    //deallocate remaining excess container memory from machine
-                    deallocateCapacityOnMachine(sourceAgentUid, new AllocatedCapacity(Fraction.ZERO, containerMemoryCapacityInMB));
-                    success = true;
-                }
-            
-            }    
-            
+            deallocateCapacityOnMachine(sourceAgentUid, new AllocatedCapacity(Fraction.ZERO, containerMemoryCapacityInMB));
+            success = true;
         }
         
         return success;
@@ -373,7 +377,7 @@ public class BinPackingSolver {
                 });
                 
                 for (String sourceAgentUid : sortedAgentUids) {
-                    if (removeExcessMachineStep(sourceAgentUid, excessCapacity)) {
+                    if (removeExcessMachineStep(sourceAgentUid, excessCapacity, goalCapacity)) {
                         //retry another machine again
                         retry = true;
                         success = true;
@@ -385,7 +389,7 @@ public class BinPackingSolver {
         return success;
     }
 
-    private boolean removeExcessMachineStep(String sourceAgentUid, AllocatedCapacity excessCapacity) {
+    private boolean removeExcessMachineStep(String sourceAgentUid, AllocatedCapacity excessCapacity, AllocatedCapacity goalCapacity) {
         
         boolean retry = false;
         AllocatedCapacity allocatedCapacityOnSourceMachine = allocatedCapacityForPu.getAgentCapacity(sourceAgentUid);
@@ -394,7 +398,7 @@ public class BinPackingSolver {
             allocatedCapacityOnSourceMachine.subtractOrZero(excessCapacity); 
         
         //check that we can relocate all non excess containers to other machines
-        if (relocateCapacityToOtherMachines(sourceAgentUid, remainingCapacityToRelocate)) {
+        if (relocateCapacityToOtherMachines(sourceAgentUid, remainingCapacityToRelocate, goalCapacity)) {
 
             AllocatedCapacity remaminingCapacityOnSourceMachine = allocatedCapacityForPu.getAgentCapacityOrZero(sourceAgentUid);
             
@@ -420,7 +424,7 @@ public class BinPackingSolver {
  * @return true if relocation completed successfully, 
  * false if not enough capacity found on target containers and no capacity was relocated at all.
  */
-    private boolean relocateCapacityToOtherMachines(String sourceAgentUid, AllocatedCapacity remainingCapacityToRelocate) {
+    private boolean relocateCapacityToOtherMachines(String sourceAgentUid, AllocatedCapacity remainingCapacityToRelocate, AllocatedCapacity goalCapacity) {
         boolean retry = false;
         
         Map<String,AllocatedCapacity> capacityToRelocatePerTargetMachine = new HashMap<String,AllocatedCapacity>();
@@ -431,9 +435,17 @@ public class BinPackingSolver {
             if (targetAgentUid.equals(sourceAgentUid)) {
                 continue;
             }
-            // remember to relocate capacity from source to target
+            // calc how much can be relocated from source to target based on 
+            // unallocated capacity and maxMemoryPerMachine restriction on target.
             AllocatedCapacity unallocatedCapacityOnTarget = unallocatedCapacity.getAgentCapacityOrZero(targetAgentUid);
-            AllocatedCapacity capacityToRelocate = lowestCommonGoal(unallocatedCapacityOnTarget, remainingCapacityToRelocate);
+            long maxMemoryPerMachine = (long) Math.ceil(goalCapacity.getMemoryInMB()/(1.0*minimumNumberOfMachines));
+            long maxUnallocatedMemoryOnTarget = maxMemoryPerMachine - allocatedCapacityForPu.getAgentCapacityOrZero(targetAgentUid).getMemoryInMB();
+            if (unallocatedCapacityOnTarget.getMemoryInMB() > maxUnallocatedMemoryOnTarget) {
+                unallocatedCapacityOnTarget = new AllocatedCapacity(unallocatedCapacityOnTarget.getCpuCores(),maxUnallocatedMemoryOnTarget);
+            }
+            
+            // remember to relocate capacity from source to target
+            AllocatedCapacity capacityToRelocate = AllocatedCapacity.lowestCommon(unallocatedCapacityOnTarget, remainingCapacityToRelocate);
             capacityToRelocate = capacityToRelocate.subtract(new AllocatedCapacity(Fraction.ZERO,capacityToRelocate.getMemoryInMB() % containerMemoryCapacityInMB));
             if (!capacityToRelocate.equalsZero()) {
                 remainingCapacityToRelocate = remainingCapacityToRelocate.subtract(capacityToRelocate);
@@ -643,14 +655,36 @@ public class BinPackingSolver {
         }
     }
 
-    private long calcMemoryExcessAboveAverage(long maxMemoryPerMachine, String agent) {
-        return Math.max(allocatedCapacityForPu.getAgentCapacityOrZero(agent).getMemoryInMB() - maxMemoryPerMachine , 0);
+    private long calcMemoryExcessAboveAverage(long average, String agent) {
+        
+        if (average % containerMemoryCapacityInMB != 0) {
+            throw new IllegalArgumentException("average does not divide by " + containerMemoryCapacityInMB);
+        }
+        
+        long allocated = allocatedCapacityForPu.getAgentCapacityOrZero(agent).getMemoryInMB();
+        
+        return Math.max(
+                allocated - average , 
+                0);
+
     }
 
-    private long calcMemoryShortageBelowAverage(final long minMemoryPerMachine, String agent) {
+    private long calcMemoryShortageBelowAverage(final long average, String agent) {
+        
+        if (average % containerMemoryCapacityInMB != 0) {
+            throw new IllegalArgumentException("average does not divide by " + containerMemoryCapacityInMB);
+        }
+        
+        long shortage = Math.max( 
+                average - allocatedCapacityForPu.getAgentCapacityOrZero(agent).getMemoryInMB(), 
+                0);
+        
+        long unallocated = unallocatedCapacity.getAgentCapacityOrZero(agent).getMemoryInMB();
+        unallocated = unallocated - unallocated % containerMemoryCapacityInMB;
+        
         return Math.min(
-            Math.max( minMemoryPerMachine - allocatedCapacityForPu.getAgentCapacityOrZero(agent).getMemoryInMB(), 0) ,
-            unallocatedCapacity.getAgentCapacityOrZero(agent).getMemoryInMB());
+                 shortage,
+                 unallocated);
     }
     
     private void rebalanceCpuCores() {
@@ -811,7 +845,7 @@ public class BinPackingSolver {
         }
         
         // un-deallocate capacity first before allocating
-        AllocatedCapacity deallocated = lowestCommonGoal(capacityToAllocateOnAgent,deallocatedCapacityResult.getAgentCapacityOrZero(agentUid));
+        AllocatedCapacity deallocated = AllocatedCapacity.lowestCommon(capacityToAllocateOnAgent,deallocatedCapacityResult.getAgentCapacityOrZero(agentUid));
         if (!deallocated.equalsZero()) {
             deallocatedCapacityResult = deallocatedCapacityResult.subtract(agentUid, deallocated);
             capacityToAllocateOnAgent = capacityToAllocateOnAgent.subtract(deallocated);
@@ -832,7 +866,7 @@ public class BinPackingSolver {
         }
         
         // un-allocate capacity first before deallocating
-        AllocatedCapacity allocated = lowestCommonGoal(capacityToDeallocateOnAgent,allocatedCapacityResult.getAgentCapacityOrZero(agentUid));
+        AllocatedCapacity allocated = AllocatedCapacity.lowestCommon(capacityToDeallocateOnAgent,allocatedCapacityResult.getAgentCapacityOrZero(agentUid));
         if (!allocated.equalsZero()) {
             allocatedCapacityResult = allocatedCapacityResult.subtract(agentUid, allocated);
             unallocatedCapacity = unallocatedCapacity.add(agentUid, allocated);
@@ -848,12 +882,6 @@ public class BinPackingSolver {
         }
     }
     
-    private static AllocatedCapacity lowestCommonGoal(AllocatedCapacity allocatedCapacity1, AllocatedCapacity allocatedCapacity2) {
-        return new AllocatedCapacity(
-                min(allocatedCapacity1.getCpuCores(),allocatedCapacity2.getCpuCores()), 
-                Math.min(allocatedCapacity1.getMemoryInMB(), allocatedCapacity2.getMemoryInMB()));
-    }
-
     private static Fraction min(Fraction fraction1, Fraction fraction2) {
         if (fraction1.compareTo(fraction2) <= 0) {
             return fraction1;
@@ -864,53 +892,64 @@ public class BinPackingSolver {
     }
 
     public void solveNumberOfMachines(int numberOfMachines) {
-                
-        validateInput();
-        
-        //remove all agents that already have a pu allocation, since we are looking only for new machines
-        Collection<String> agentUidsOfPu = allocatedCapacityForPu.getAgentUids();
-        if (!agentUidsOfPu.isEmpty()) {
-            for (String agentUid : unallocatedCapacity.getAgentUids()) {
-                if (agentUidsOfPu.contains(agentUid)) {
-                    unallocatedCapacity = unallocatedCapacity.subtractAgent(agentUid);
+        boolean success = false;
+        try {
+            debugTrace = "BinPackingSolver: number of machines " + numberOfMachines;
+            validateInput();
+            
+            //remove all agents that already have a pu allocation, since we are looking only for new machines
+            Collection<String> agentUidsOfPu = allocatedCapacityForPu.getAgentUids();
+            if (!agentUidsOfPu.isEmpty()) {
+                for (String agentUid : unallocatedCapacity.getAgentUids()) {
+                    if (agentUidsOfPu.contains(agentUid)) {
+                        unallocatedCapacity = unallocatedCapacity.subtractAgent(agentUid);
+                    }
                 }
             }
-        }
+            
         
     
-
-        while (allocatedCapacityResult.getAgentUids().size() < numberOfMachines) {
-            // try allocate only memory on a new machine
-            AllocatedCapacity capacityToAllocateOnAgent = new AllocatedCapacity(Fraction.ZERO,containerMemoryCapacityInMB);
-            String agentUid = findFreeAgentUid(capacityToAllocateOnAgent);
+            while (allocatedCapacityResult.getAgentUids().size() < numberOfMachines) {
+                // try allocate only memory on a new machine
+                AllocatedCapacity capacityToAllocateOnAgent = new AllocatedCapacity(Fraction.ZERO,containerMemoryCapacityInMB);
+                String agentUid = findFreeAgentUid(capacityToAllocateOnAgent);
+                
+                if (agentUid == null) {
+                    //allocation failed.
+                    break;
+                }
+                
+                if (isNewContainerWillBreachMaximumMemory()) {
+                    removeContainerFromMachineWithMoreThanOneContainerAndMaxUnallocatedMemory();
+                }
+                
+                if (isNewContainerWillBreachMaximumMemory()) {
+                    break;
+                }
             
-            if (agentUid == null) {
-                //allocation failed.
-                break;
+                if (!deallocatedCapacityResult.getAgentCapacityOrZero(agentUid).equalsZero()) {
+                    throw new IllegalStateException("Impossible to allocate and deallocate from the same agent " + agentUid);
+                }
+                allocatedCapacityResult = allocatedCapacityResult.add(agentUid, capacityToAllocateOnAgent);
+                allocatedCapacityForPu = allocatedCapacityForPu.add(agentUid, capacityToAllocateOnAgent);
+                //leave unallocated capacity for this agent deleted so it wont be allocated
+                unallocatedCapacity = unallocatedCapacity.subtractAgent(agentUid);
+                
             }
             
-            if (isNewContainerWillBreachMaximumMemory()) {
-                removeContainerFromMachineWithMoreThanOneContainerAndMaxUnallocatedMemory();
-            }
+            debugTrace += 
+                " allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() + 
+                " deallocatedCapacityResult="+this.getDeallocatedCapacityResult().toDetailedString();
             
-            if (isNewContainerWillBreachMaximumMemory()) {
-                break;
-            }
-        
-            if (!deallocatedCapacityResult.getAgentCapacityOrZero(agentUid).equalsZero()) {
-                throw new IllegalStateException("Impossible to allocate and deallocate from the same agent " + agentUid);
-            }
-            allocatedCapacityResult = allocatedCapacityResult.add(agentUid, capacityToAllocateOnAgent);
-            allocatedCapacityForPu = allocatedCapacityForPu.add(agentUid, capacityToAllocateOnAgent);
-            //leave unallocated capacity for this agent deleted so it wont be allocated
-            unallocatedCapacity = unallocatedCapacity.subtractAgent(agentUid);
-            
+            success = true;
         }
-        
-        if (logger.isDebugEnabled()) {
-            logger.debug("BinPackingSolver: number of machines " + numberOfMachines + " "+
-                    "allocatedCapacityResult=" + this.getAllocatedCapacityResult().toDetailedString() + " "+
-                    "deallocatedCapacityResult="+this.getDeallocatedCapacityResult().toDetailedString());
+        finally {
+            if (logger.isDebugEnabled()) {
+                logger.debug(debugTrace);
+            }
+            else if (!success && logger.isInfoEnabled()) {
+                logger.info(debugTrace);
+            }
         }
     }
 
@@ -979,9 +1018,15 @@ public class BinPackingSolver {
             throw new IllegalArgumentException("minimumNumberOfMachines");
         }
         
-
+        debugTrace += 
+            " containerMemoryCapacityInMB=" + containerMemoryCapacityInMB + 
+            " maxMemoryCapacityInMB=" + maxMemoryCapacityInMB + 
+            " unallocatedCapacity=" + unallocatedCapacity.toDetailedString() +
+            " allocatedCapacityForPu=" + allocatedCapacityForPu.toDetailedString() + 
+            " minimumNumberOfMachines=" + + minimumNumberOfMachines;
+        
         if (logger.isDebugEnabled()) {
-            logger.debug("BinPackingSolver: containerMemoryCapacityInMB=" + containerMemoryCapacityInMB+ " maxMemoryCapacityInMB="+maxMemoryCapacityInMB + " unallocatedCapacity="+unallocatedCapacity.toDetailedString() + " allocatedCapacityForPu="+allocatedCapacityForPu.toDetailedString() + " minimumNumberOfMachines="+minimumNumberOfMachines);
+            logger.debug(debugTrace);
         }
     }
     
@@ -1046,6 +1091,7 @@ public class BinPackingSolver {
      * Used for unit testing
      */
     public void reset() {
+        debugTrace = "";
         this.deallocatedCapacityResult = new AggregatedAllocatedCapacity();
         this.allocatedCapacityResult = new AggregatedAllocatedCapacity();
     }

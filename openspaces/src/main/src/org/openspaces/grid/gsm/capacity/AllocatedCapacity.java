@@ -120,5 +120,21 @@ public class AllocatedCapacity {
     }
 
 
+    public static AllocatedCapacity lowestCommon(AllocatedCapacity a, AllocatedCapacity b) {
+        return new AllocatedCapacity(
+                min(a.getCpuCores(),b.getCpuCores()), 
+                Math.min(a.getMemoryInMB(), b.getMemoryInMB()));
+    }
+
+    private static Fraction min(Fraction fraction1, Fraction fraction2) {
+    if (fraction1.compareTo(fraction2) <= 0) {
+        return fraction1;
+    }
+    else {
+        return fraction2;
+    }
+}
+
+
 }
 

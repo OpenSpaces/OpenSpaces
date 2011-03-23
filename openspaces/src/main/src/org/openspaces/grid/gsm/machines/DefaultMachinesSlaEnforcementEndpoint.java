@@ -330,20 +330,25 @@ class DefaultMachinesSlaEnforcementEndpoint implements MachinesSlaEnforcementEnd
                     "machines pending deallocation " + state.getCapacityMarkedForDeallocation(pu));
             }
             
+            AllocatedCapacity shortageCapacity = getCapacityShortage(target);
+            
             // unmark all machines pending deallocation              
             for (String agentUid : capacityMarkedForDeallocation.getAgentUids()) {
-                AllocatedCapacity agentCapacity =  capacityMarkedForDeallocation.getAgentCapacity(agentUid);
+                if (shortageCapacity.getMemoryInMB() == 0) {
+                    break;
+                }
+            	AllocatedCapacity agentCapacity =  capacityMarkedForDeallocation.getAgentCapacity(agentUid);
+                AllocatedCapacity requiredCapacity = AllocatedCapacity.lowestCommon(agentCapacity,shortageCapacity);
                 if (logger.isInfoEnabled()) {
                     GridServiceAgent agent = pu.getAdmin().getGridServiceAgents().getAgentByUID(agentUid);
                     if (agent != null) {
                         logger.info("machine agent " + agent.getMachine().getHostAddress() + " is no longer marked for deallocation in order to maintain capacity.");
                     }
                 }
-                state.unmarkCapacityForDeallocation(pu, agentUid, agentCapacity);
+                state.unmarkCapacityForDeallocation(pu, agentUid, requiredCapacity);
+                shortageCapacity = shortageCapacity.subtract(requiredCapacity);
             }
             
-            AllocatedCapacity shortageCapacity = getCapacityShortage(target);
-
            if (!shortageCapacity.equalsZero()) {
                allocateManualCapacity(shortageCapacity, sla);
                shortageCapacity = getCapacityShortage(target);               

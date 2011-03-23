@@ -889,4 +889,31 @@ public class BinPackingSolverTest extends TestCase {
         String agentUidToRemove = solver.getDeallocatedCapacityResult().getAgentUids().iterator().next();
         Assert.assertEquals(AGENT1_UID,agentUidToRemove);
     }
+    
+    public void testScaleOutMaximumMemoryPerMachineConstraint() {
+        
+        BinPackingSolver solver = new BinPackingSolver();
+        
+        solver.setAllocatedCapacityForPu(
+                new AggregatedAllocatedCapacity()
+                .add(AGENT1_UID,new AllocatedCapacity(new Fraction(0), 750))
+                .add(AGENT2_UID,new AllocatedCapacity(new Fraction(0), 750)));
+        
+        solver.setUnallocatedCapacity(
+                new AggregatedAllocatedCapacity()
+                .add(AGENT1_UID,new AllocatedCapacity(new Fraction(2), 122))
+                .add(AGENT2_UID,new AllocatedCapacity(new Fraction(2), 122))
+                .add(AGENT3_UID,new AllocatedCapacity(new Fraction(2), 1372)));
+        
+        solver.setContainerMemoryCapacityInMB(250);
+        solver.setMaxAllocatedMemoryCapacityOfPuInMB(5000);
+        solver.setLogger(logger);
+        solver.setMinimumNumberOfMachines(2);
+        
+        solver.solveManualCapacityScaleOut(new AllocatedCapacity(new Fraction(0),500));
+        
+        Assert.assertEquals(1,solver.getAllocatedCapacityResult().getAgentUids().size());
+        Assert.assertEquals(new AllocatedCapacity(new Fraction(0),500),solver.getAllocatedCapacityResult().getAgentCapacity(AGENT3_UID));
+        Assert.assertEquals(0,solver.getDeallocatedCapacityResult().getAgentUids().size());
+    }
 }
