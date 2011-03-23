@@ -92,7 +92,7 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
         factory.name(ALERT_NAME);
         factory.groupUid(groupUid);
         factory.description(AlertBeanUtils.getGridComponentShortName(virtualMachine)
-                + "GC reading is unavailable; JVM has been removed");
+                + " GC reading is unavailable; JVM has been removed");
         factory.severity(AlertSeverity.WARNING);
         factory.status(AlertStatus.NA);
         factory.componentUid(virtualMachine.getUid());
@@ -128,7 +128,7 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
             factory.name(ALERT_NAME);
             factory.groupUid(groupUid);
             factory.description(AlertBeanUtils.getGridComponentShortName(event.getVirtualMachine())
-                    + "JVM garbage cycle collection time took " + TimeUtil.format(gcPauseTime));
+                    + " JVM garbage cycle collection time took " + TimeUtil.format(gcPauseTime));
             factory.severity(AlertSeverity.WARNING);
             factory.status(AlertStatus.RAISED);
             factory.componentUid(event.getVirtualMachine().getUid());
@@ -157,7 +157,7 @@ public class GarbageCollectionAlertBean implements AlertBean, VirtualMachineStat
                 factory.name(ALERT_NAME);
                 factory.groupUid(groupUid);
                 factory.description(AlertBeanUtils.getGridComponentShortName(event.getVirtualMachine())
-                        + "JVM garbage cycle collection time took " + TimeUtil.format(gcPauseTime));
+                        + " JVM garbage cycle collection time took " + TimeUtil.format(gcPauseTime));
                 factory.severity(AlertSeverity.WARNING);
                 factory.status(AlertStatus.RESOLVED);
                 factory.componentUid(event.getVirtualMachine().getUid());

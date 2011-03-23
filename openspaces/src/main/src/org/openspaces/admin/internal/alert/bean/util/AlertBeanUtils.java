@@ -3,7 +3,9 @@ package org.openspaces.admin.internal.alert.bean.util;
 import java.util.List;
 import java.util.UUID;
 
+import org.openspaces.admin.GridComponent;
 import org.openspaces.admin.internal.alert.bean.AlertBean;
+import org.openspaces.admin.internal.support.AbstractAgentGridComponent;
 import org.openspaces.admin.machine.Machine;
 import org.openspaces.admin.os.OperatingSystemDetails;
 import org.openspaces.admin.space.SpaceInstance;
@@ -50,15 +52,15 @@ public class AlertBeanUtils {
      */
     public static String getGridComponentShortName(VirtualMachine virtualMachine) {
         if (virtualMachine.getElasticServiceManager() != null) {
-            return "ESM ";
+            return "ESM";
         } else if (virtualMachine.getGridServiceManager() != null) {
-            return "GSM ";
+            return "GSM";
         } else if (virtualMachine.getGridServiceContainer() != null) {
-            return "GSC ";
+            return "GSC";
         } else if (virtualMachine.getGridServiceAgent() != null) {
-            return "GSA ";
+            return "GSA";
         } else if (virtualMachine.getLookupService() != null) {
-            return "LUS ";
+            return "LUS";
         } else return "";
     }
 
@@ -71,7 +73,7 @@ public class AlertBeanUtils {
      */
     public static String getGridComponentFullName(VirtualMachine virtualMachine) {
         if (virtualMachine.getElasticServiceManager() != null) {
-            return "Elastic Service Manager ";
+            return "Elastic Service Manager";
         } else if (virtualMachine.getGridServiceManager() != null) {
             return "Grid Service Manager";
         } else if (virtualMachine.getGridServiceContainer() != null) {
@@ -87,22 +89,51 @@ public class AlertBeanUtils {
      * @return Returns the description of this virtual machine: "[short name] [pid] on [host name]/[host address]"
      */
     public static String getGridComponentDescription(VirtualMachine virtualMachine) {
-        return getGridComponentShortName(virtualMachine) + virtualMachine.getDetails().getPid() + " on "
+        return getGridComponentShortName(virtualMachine)+ getGridComponentAgentId(virtualMachine) + virtualMachine.getDetails().getPid() + " on "
                 + getMachineDescription(virtualMachine.getMachine());
     }
     
+    private static String getGridComponentAgentId(VirtualMachine virtualMachine) {
+        GridComponent gridComponent = virtualMachine.getElasticServiceManager();
+        if (gridComponent == null) {
+            gridComponent = virtualMachine.getGridServiceManager();
+        }
+        if (gridComponent == null) {
+            gridComponent = virtualMachine.getGridServiceContainer();
+        }
+        if (gridComponent == null) {
+            gridComponent = virtualMachine.getGridServiceContainer();
+        }
+        if (gridComponent == null) {
+            gridComponent = virtualMachine.getGridServiceAgent();
+        }
+        if (gridComponent == null) {
+            gridComponent = virtualMachine.getLookupService();
+        }
+        
+        String agentId;
+        if (gridComponent instanceof AbstractAgentGridComponent) {
+            AbstractAgentGridComponent agentGridComponent = (AbstractAgentGridComponent) gridComponent;
+            agentId = "-" + agentGridComponent.getAgentId();
+        }else {
+            agentId = "";
+        }
+
+        return agentId + " ";
+    }
+
     /**
      * @return Returns the description of the machine: "[host name]/[host address]"
      */
     public static String getMachineDescription(Machine machine) {
-        return machine.getHostName() + "/" + machine.getHostAddress();
+        return machine.getHostName() + " (" + machine.getHostAddress()+")";
     }
     
     /**
      * @return Returns the description of the machine: "[host name]/[host address]"
      */
     public static String getMachineDescription(OperatingSystemDetails details) {
-        return details.getHostName() + "/" + details.getHostAddress();
+        return details.getHostName() + " (" + details.getHostAddress()+")";
     }
 
     /**
