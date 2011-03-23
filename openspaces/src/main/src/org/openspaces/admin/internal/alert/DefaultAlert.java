@@ -27,6 +27,7 @@ import org.openspaces.admin.alert.AlertSeverity;
 import org.openspaces.admin.alert.AlertStatus;
 
 import com.gigaspaces.internal.version.PlatformLogicalVersion;
+import com.gigaspaces.lrmi.LRMIInvocationContext;
 
 /**
  * A plain java object representing an alert issued by an alert bean or an alert provider.
@@ -198,7 +199,7 @@ public class DefaultAlert implements InternalAlert {
         config = (HashMap<String, String>)in.readObject();
         properties = (HashMap<String, String>)in.readObject();
         
-        if(PlatformLogicalVersion.getLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v8_0_1)) {
+        if (LRMIInvocationContext.getEndpointLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v8_0_1)) {
             componentDescription = in.readUTF();
         }
     }
@@ -215,7 +216,7 @@ public class DefaultAlert implements InternalAlert {
         out.writeObject(config);
         out.writeObject(properties);
         
-        if(PlatformLogicalVersion.getLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v8_0_1)) {
+        if (LRMIInvocationContext.getEndpointLogicalVersion().greaterOrEquals(PlatformLogicalVersion.v8_0_1)) {
             out.writeUTF(componentDescription);
         }
     }
