@@ -549,7 +549,13 @@ public class DefaultSpace implements InternalSpace {
                                         targetSpaceInstance = mirrorInstance;
                                         isMirrorService = true;
                                     }
+                                } else {
+                                    isMirrorService = true; //we guess this is a mirror (since 8.0.1)
                                 }
+                            }
+                        }else {
+                            if (targetSpaceInstance != null && targetSpaceInstance.getSpaceUrl().getSchema().equals("mirror")) {
+                                isMirrorService = true;
                             }
                         }
                         ReplicationStatus replStatus = null;
