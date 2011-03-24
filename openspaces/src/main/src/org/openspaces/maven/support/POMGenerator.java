@@ -52,6 +52,7 @@ public class POMGenerator {
         printDependency(writer, "org.springframework", "spring-expression", "3.0.5.RELEASE");
         printDependency(writer, "org.springframework", "spring-tx", "3.0.5.RELEASE");
         printDependency(writer, "commons-logging", "commons-logging", "1.1.1");
+        printDependency(writer, "org.apache.openjpa", "openjpa-all", "2.0.1");
         // add javax.annotations (@PostConstruct) for JDK 1.5 (no need for 1.6 since it is there)
         if (!JdkVersion.isAtLeastJava16() && JdkVersion.isAtLeastJava15()) {
             printDependency(writer, "org.apache.geronimo.specs", "geronimo-annotation_1.0_spec", "1.1.1");
