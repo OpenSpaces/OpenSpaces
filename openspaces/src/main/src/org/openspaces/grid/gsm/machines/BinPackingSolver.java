@@ -990,6 +990,13 @@ public class BinPackingSolver {
         if (unallocatedCapacity == null) {
             throw new IllegalArgumentException("unallocatedCapacity");
         }
+
+        debugTrace += 
+            " containerMemoryCapacityInMB=" + containerMemoryCapacityInMB + 
+            " maxMemoryCapacityInMB=" + maxMemoryCapacityInMB + 
+            " unallocatedCapacity=" + unallocatedCapacity.toDetailedString() +
+            " allocatedCapacityForPu=" + allocatedCapacityForPu.toDetailedString() + 
+            " minimumNumberOfMachines=" + + minimumNumberOfMachines;
         
         if (containerMemoryCapacityInMB == 0) {
             throw new IllegalArgumentException("containerMemoryCapacityInMB");
@@ -1016,17 +1023,6 @@ public class BinPackingSolver {
         
         if (minimumNumberOfMachines < 0) {
             throw new IllegalArgumentException("minimumNumberOfMachines");
-        }
-        
-        debugTrace += 
-            " containerMemoryCapacityInMB=" + containerMemoryCapacityInMB + 
-            " maxMemoryCapacityInMB=" + maxMemoryCapacityInMB + 
-            " unallocatedCapacity=" + unallocatedCapacity.toDetailedString() +
-            " allocatedCapacityForPu=" + allocatedCapacityForPu.toDetailedString() + 
-            " minimumNumberOfMachines=" + + minimumNumberOfMachines;
-        
-        if (logger.isDebugEnabled()) {
-            logger.debug(debugTrace);
         }
     }
     
