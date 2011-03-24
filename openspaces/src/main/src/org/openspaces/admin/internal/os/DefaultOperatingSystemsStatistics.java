@@ -152,7 +152,7 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
     
     public double getMinCpuPerc() {
 
-        double min = 0;
+        double min = stats.length > 0 ? stats[ 0 ].getCpuPerc() : 0;
         for (OperatingSystemStatistics stat : stats) {
             if (stat.getCpuPerc() != -1) {
                 min = Math.min( min, stat.getCpuPerc() );
@@ -167,7 +167,7 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
     
     public double getMaxCpuPerc() {
 
-        double max = 0;
+        double max = stats.length > 0 ? stats[ 0 ].getCpuPerc() : 0;
         for (OperatingSystemStatistics stat : stats) {
             if (stat.getCpuPerc() != -1) {
                 max = Math.max( max, stat.getCpuPerc() );
