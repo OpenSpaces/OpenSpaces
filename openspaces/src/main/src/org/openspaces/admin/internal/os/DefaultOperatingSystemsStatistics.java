@@ -128,6 +128,8 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
     public double getActualFreePhysicalMemorySizeInGB() {
         return StatisticsUtils.convertToGB(getActualFreePhysicalMemorySizeInBytes());
     }
+    
+    
 
     public double getCpuPerc() {
         int count = 0;
@@ -146,5 +148,35 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
 
     public String getCpuPercFormatted() {
         return StatisticsUtils.formatPerc(getCpuPerc());
+    }
+    
+    public double getMinCpuPerc() {
+
+        double min = 0;
+        for (OperatingSystemStatistics stat : stats) {
+            if (stat.getCpuPerc() != -1) {
+                min = Math.min( min, stat.getCpuPerc() );
+            }
+        }
+        return min;
+    }
+
+    public String getMinCpuPercFormatted() {
+        return StatisticsUtils.formatPerc(getMinCpuPerc());
+    }
+    
+    public double getMaxCpuPerc() {
+
+        double max = 0;
+        for (OperatingSystemStatistics stat : stats) {
+            if (stat.getCpuPerc() != -1) {
+                max = Math.max( max, stat.getCpuPerc() );
+            }
+        }
+        return max;
+    }
+
+    public String getMaxCpuPercFormatted() {
+        return StatisticsUtils.formatPerc(getMaxCpuPerc());
     }
 }

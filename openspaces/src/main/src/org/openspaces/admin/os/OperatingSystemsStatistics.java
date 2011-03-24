@@ -81,4 +81,12 @@ public interface OperatingSystemsStatistics {
     double getCpuPerc();
 
     String getCpuPercFormatted();
+    
+    double getMinCpuPerc();
+    
+    String getMinCpuPercFormatted();
+    
+    double getMaxCpuPerc();
+
+    String getMaxCpuPercFormatted();        
 }
