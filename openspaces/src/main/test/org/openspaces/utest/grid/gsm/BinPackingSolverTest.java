@@ -916,4 +916,29 @@ public class BinPackingSolverTest extends TestCase {
         Assert.assertEquals(new AllocatedCapacity(new Fraction(0),500),solver.getAllocatedCapacityResult().getAgentCapacity(AGENT3_UID));
         Assert.assertEquals(0,solver.getDeallocatedCapacityResult().getAgentUids().size());
     }
+
+    public void testScaleInWithAllocatedCapacityAboveHalfOfNewCapacityOnOneMachine() {
+    BinPackingSolver solver = new BinPackingSolver();
+        
+        solver.setUnallocatedCapacity(
+                new AggregatedAllocatedCapacity()
+                .add(AGENT1_UID,new AllocatedCapacity(new Fraction(2), 220))
+                .add(AGENT2_UID,new AllocatedCapacity(new Fraction(2), 412))
+                .add(AGENT3_UID,new AllocatedCapacity(new Fraction(2), 412)));
+        
+        solver.setAllocatedCapacityForPu(
+                new AggregatedAllocatedCapacity()
+                .add(AGENT1_UID,new AllocatedCapacity(new Fraction(0), 1152))
+                .add(AGENT2_UID,new AllocatedCapacity(new Fraction(0), 960))
+                .add(AGENT3_UID,new AllocatedCapacity(new Fraction(0), 960)));
+        
+        solver.setContainerMemoryCapacityInMB(192);
+        solver.setMaxAllocatedMemoryCapacityOfPuInMB(3072);
+        solver.setLogger(logger);
+        solver.setMinimumNumberOfMachines(2);
+        
+        solver.solveManualCapacityScaleIn(new AllocatedCapacity(new Fraction(0),1536));
+        Assert.assertEquals(1152+960+960-1536, solver.getAllocatedCapacityForPu().getTotalAllocatedCapacity().getMemoryInMB());
+        Assert.assertEquals(2, solver.getAllocatedCapacityForPu().getAgentUids().size());
+    }
 }

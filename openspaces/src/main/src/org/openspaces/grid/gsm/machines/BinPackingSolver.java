@@ -439,7 +439,10 @@ public class BinPackingSolver {
             // unallocated capacity and maxMemoryPerMachine restriction on target.
             AllocatedCapacity unallocatedCapacityOnTarget = unallocatedCapacity.getAgentCapacityOrZero(targetAgentUid);
             long maxMemoryPerMachine = (long) Math.ceil(goalCapacity.getMemoryInMB()/(1.0*minimumNumberOfMachines));
-            long maxUnallocatedMemoryOnTarget = maxMemoryPerMachine - allocatedCapacityForPu.getAgentCapacityOrZero(targetAgentUid).getMemoryInMB();
+            long maxUnallocatedMemoryOnTarget = 
+                Math.max(
+                        0,
+                        maxMemoryPerMachine - allocatedCapacityForPu.getAgentCapacityOrZero(targetAgentUid).getMemoryInMB());
             if (unallocatedCapacityOnTarget.getMemoryInMB() > maxUnallocatedMemoryOnTarget) {
                 unallocatedCapacityOnTarget = new AllocatedCapacity(unallocatedCapacityOnTarget.getCpuCores(),maxUnallocatedMemoryOnTarget);
             }
