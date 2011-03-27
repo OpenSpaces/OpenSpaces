@@ -97,6 +97,7 @@ public interface Alert extends Externalizable {
      * <li>EDS - EDS on [Host IP]</li>
      * </ul>
      * @return Component Description - the description of the component specified by the {@link #getComponentUid()}.
+     * @since 8.0.1
      */
     public String getComponentDescription();
     
