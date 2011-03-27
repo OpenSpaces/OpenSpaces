@@ -179,4 +179,65 @@ public class DefaultOperatingSystemsStatistics implements OperatingSystemsStatis
     public String getMaxCpuPercFormatted() {
         return StatisticsUtils.formatPerc(getMaxCpuPerc());
     }
+    
+    public double getMemoryUsedPerc(){
+        int count = 0;
+        double total = 0;
+        for (OperatingSystemStatistics stat : stats) {
+            count++;
+            total += calculateOSUsedMemoryPerc( stat );
+        }
+        if (count == 0) {
+            return -1;
+        }
+        return total / count;
+        
+    }
+    
+    public double getMinMemoryUsedPerc(){
+        //minimum should have 1 ( maximal possible ) value if there are elements in statistics
+        double min = stats.length == 0 ? 0 : 1;
+        for (OperatingSystemStatistics stat : stats) {
+            double usedMemoryPerc = calculateOSUsedMemoryPerc( stat );            
+            min = Math.min( min, usedMemoryPerc );
+        }
+        
+        return min;
+    }
+    
+    public double getMaxMemoryUsedPerc(){
+        double max = 0;
+        for (OperatingSystemStatistics stat : stats) {
+            double usedMemoryPerc = calculateOSUsedMemoryPerc( stat );
+            max = Math.max( max, usedMemoryPerc );
+        }
+        
+        return max;
+    }
+
+    public String getMemoryUsedPercFormatted() {
+        
+        return StatisticsUtils.formatPerc(getMemoryUsedPerc());
+    }
+
+    public String getMinMemoryUsedPercFormatted() {
+ 
+        return StatisticsUtils.formatPerc(getMaxMemoryUsedPerc());
+    }
+
+    public String getMaxMemoryUsedPercFormatted() {
+ 
+        return StatisticsUtils.formatPerc(getMaxMemoryUsedPerc());
+    }
+    
+    
+    
+    private double calculateOSUsedMemoryPerc( OperatingSystemStatistics stat ) {
+        long totalPhysicalMemorySize = 
+            stat.getDetails().getTotalPhysicalMemorySizeInBytes();
+        double usedMemory = totalPhysicalMemorySize - 
+            stat.getFreePhysicalMemorySizeInBytes();
+        return usedMemory/totalPhysicalMemorySize;            
+    }
+
 }
