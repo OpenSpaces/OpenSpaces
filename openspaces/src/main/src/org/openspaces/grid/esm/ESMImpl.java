@@ -353,7 +353,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
                         {
                             //If there are no properties yet, this is a race condition. We received set elastic properties command before the ProcessingUnitAdded
                             //event, keep the set command for later override
-                            pendingElasticPropertiesUpdatePerProcessingUnit.put(puName, new PendingElasticPropertiesUpdate(properties));
+                            pendingElasticPropertiesUpdatePerProcessingUnit.put(puName, new PendingElasticPropertiesUpdate(new HashMap<String, String>(0)));
                         }
                         else
                         {
