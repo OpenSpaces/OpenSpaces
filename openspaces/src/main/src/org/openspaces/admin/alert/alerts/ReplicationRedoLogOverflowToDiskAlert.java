@@ -5,7 +5,6 @@ import org.openspaces.admin.alert.Alert;
 import org.openspaces.admin.alert.config.ReplicationRedoLogOverflowToDiskAlertConfigurer;
 import org.openspaces.admin.alert.events.AlertTriggeredEventListener;
 import org.openspaces.admin.space.ReplicationStatus;
-import org.openspaces.admin.space.SpaceInstance;
 
 /**
  * A replication redo-log overflow to disk alert, fired when the redo-log exceeds the defined
@@ -30,7 +29,6 @@ public class ReplicationRedoLogOverflowToDiskAlert extends AbstractAlert {
     public static final String HEAP_UTILIZATION = "heap-utilization";
     
     public static final String REPLICATION_STATUS = "replication-status";
-    public static final String SOURCE_UID = "source-uid";
     public static final String REDO_LOG_SIZE = "redo-log-size";
     public static final String REDO_LOG_MEMORY_SIZE = "redo-log-memory-size";
     public static final String REDO_LOG_SWAP_SIZE = "redo-log-swap-size";
@@ -85,14 +83,6 @@ public class ReplicationRedoLogOverflowToDiskAlert extends AbstractAlert {
      */
     public String getReplicationStatus() {
         return getProperties().get(REPLICATION_STATUS);
-    }
-    
-    /**
-     * The {@link SpaceInstance#getUid() source Space unique id}.
-     * @return the source uid; may be <code>null</code>.
-     */
-    public String getSourceUid() {
-        return getProperties().get(SOURCE_UID);
     }
     
     /**

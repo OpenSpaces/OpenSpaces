@@ -133,8 +133,6 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
             factory.putProperty(ReplicationRedoLogSizeAlert.HEAP_UTILIZATION, String.valueOf(source.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc()));
             
             factory.putProperty(ReplicationRedoLogSizeAlert.REPLICATION_STATUS, getReplicationStatus(source));
-            factory.putProperty(ReplicationRedoLogSizeAlert.SOURCE_UID, source.getUid());
-            
             factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_SIZE, String.valueOf(redoLogSize));
             factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_MEMORY_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogMemoryPacketCount()));
             factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_SWAP_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogExternalStoragePacketCount()));
@@ -163,8 +161,6 @@ public class ReplicationRedoLogSizeAlertBean implements AlertBean, SpaceInstance
                 factory.putProperty(ReplicationRedoLogSizeAlert.HEAP_UTILIZATION, String.valueOf(source.getVirtualMachine().getStatistics().getMemoryHeapUsedPerc()));
                 
                 factory.putProperty(ReplicationRedoLogSizeAlert.REPLICATION_STATUS, getReplicationStatus(source));
-                factory.putProperty(ReplicationRedoLogSizeAlert.SOURCE_UID, source.getUid());
-                
                 factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_SIZE, String.valueOf(redoLogSize));
                 factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_MEMORY_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogMemoryPacketCount()));
                 factory.putProperty(ReplicationRedoLogSizeAlert.REDO_LOG_SWAP_SIZE, String.valueOf(replicationStatistics.getOutgoingReplication().getRedoLogExternalStoragePacketCount()));
