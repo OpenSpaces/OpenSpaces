@@ -48,8 +48,8 @@ public abstract class AbstractScaleStrategyBean implements
     Runnable{
     
 
-    private final long GET_DISCOVERED_MACHINES_TIMEOUT_SECONDS = 60;
-    private final long GET_DISCOVERED_MACHINES_RETRY_SECONDS = 60;
+    private static final long GET_DISCOVERED_MACHINES_TIMEOUT_SECONDS = 60;
+    private static final long GET_DISCOVERED_MACHINES_RETRY_SECONDS = 60;
     
     private static final int MAX_NUMBER_OF_MACHINES = 1000; // a very large number representing max number of machines per pu, but that would not overflow when multiplied by container capacity in MB
 
