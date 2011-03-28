@@ -371,7 +371,7 @@ public class ESMImpl extends ServiceBeanAdapter implements ESM, ProcessingUnitRe
         if (beanServer != null) {
             logger.info("Processing Unit " + pu.getName() + " was removed. Cleaning up machines."); 
             beanServer.undeploy();
-            elasticPropertiesPerProcessingUnit.remove(pu);
+            elasticPropertiesPerProcessingUnit.remove(pu.getName());
         }
     }
 
