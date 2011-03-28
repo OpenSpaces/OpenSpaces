@@ -51,8 +51,9 @@ public class OpenSpacesPersistenceProvider implements PersistenceProvider {
      * @param space The space instance to inject.
      * @return {@link EntityManagerFactory} instance.
      */
+    @SuppressWarnings("rawtypes")
     public EntityManagerFactory createEntityManagerFactory(String persistenceUnitName, IJSpace space) {
-        return createEntityManagerFactory(persistenceUnitName, space, null);
+        return createEntityManagerFactory(persistenceUnitName, space, (Map) null);
     }
     
     @SuppressWarnings("rawtypes")
