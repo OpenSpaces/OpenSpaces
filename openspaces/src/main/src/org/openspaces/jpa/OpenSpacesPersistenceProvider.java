@@ -52,7 +52,7 @@ public class OpenSpacesPersistenceProvider implements PersistenceProvider {
      * @return {@link EntityManagerFactory} instance.
      */
     public EntityManagerFactory createEntityManagerFactory(String persistenceUnitName, IJSpace space) {
-        return createEntityManagerFactory(persistenceUnitName, space);
+        return createEntityManagerFactory(persistenceUnitName, space, null);
     }
     
     @SuppressWarnings("rawtypes")
