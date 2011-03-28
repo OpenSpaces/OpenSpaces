@@ -159,15 +159,15 @@ public class AlertStatus implements java.io.Serializable {
      * @throws IllegalArgumentException if an unknown status was requested.
      */
     public static AlertStatus parse(String name) {
-        if (name == ESCALATED.name) {
+        if (ESCALATED.name.equals(name)) {
             return ESCALATED;
-        } else if (name == RAISED.name) {
+        } else if (RAISED.name.equals(name)) {
             return RAISED;
-        } else if (name == SUPPRESSED.name) {
+        } else if (SUPPRESSED.name.equals(name)) {
             return SUPPRESSED;
-        } else if (name == RESOLVED.name) {
+        } else if (RESOLVED.name.equals(name)) {
             return RESOLVED;
-        } else if (name == NA.name) {
+        } else if (NA.name.equals(name)) {
             return NA;
         }else {
             throw new IllegalArgumentException("Could not match an AlertStatus with a name of " + name);

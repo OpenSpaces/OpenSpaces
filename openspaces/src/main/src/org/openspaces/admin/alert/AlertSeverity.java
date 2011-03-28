@@ -138,11 +138,11 @@ public class AlertSeverity implements java.io.Serializable {
      * @throws IllegalArgumentException if an unknown severity was requested.
      */
     public static AlertSeverity parse(String name) {
-        if (name == SEVERE.name) {
+        if (SEVERE.name.equals(name)) {
             return SEVERE;
-        } else if (name == WARNING.name) {
+        } else if (WARNING.name.equals(name)) {
             return WARNING;
-        } else if (name == INFO.name) {
+        } else if (INFO.name.equals(name)) {
             return INFO;
         } else {
             throw new IllegalArgumentException("Could not match an AlertSeverity with a name of " + name);
