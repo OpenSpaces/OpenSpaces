@@ -343,7 +343,7 @@ public abstract class AbstractScaleStrategyBean implements
         }
     }
     
-    private static class AgentsNotYetDiscoveredException extends Exception {
+    static class AgentsNotYetDiscoveredException extends Exception {
         private static final long serialVersionUID = 1L; 
         /**
          * Override the method to avoid expensive stack build and synchronization,
