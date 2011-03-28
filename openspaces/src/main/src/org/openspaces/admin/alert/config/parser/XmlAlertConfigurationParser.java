@@ -172,7 +172,7 @@ public class XmlAlertConfigurationParser implements AlertConfigurationParser {
         return alertConfigurations.toArray(new AlertConfiguration[alertConfigurations.size()]);
     }
     
-    private class SimpleSaxErrorHandler implements ErrorHandler {
+    private static class SimpleSaxErrorHandler implements ErrorHandler {
 
         public void warning(SAXParseException ex) throws SAXException {
             logger.warn("Ignored XML validation warning [" + ex.getMessage() + "]", ex);
