@@ -1052,6 +1052,6 @@ class DefaultRebalancingSlaEnforcementEndpoint implements RebalancingSlaEnforcem
     
 
     @SuppressWarnings("serial")
-    class ConflictingOperationInProgressException extends Exception {
+    private static class ConflictingOperationInProgressException extends Exception {
     }
 }
