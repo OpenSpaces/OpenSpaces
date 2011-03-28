@@ -53,6 +53,9 @@ public class RemotingUtilsTests extends TestCase {
         
         Map<MethodHash, IMethod> mapC = RemotingUtils.buildHashToMethodLookupForInterface(C.class, fastReflection);
         assertEquals(2 +1, mapC.values().size());
+        
+        Map<MethodHash, IMethod> mapD = RemotingUtils.buildHashToMethodLookupForInterface(D.class, fastReflection);
+        assertEquals(2 +1, mapD.values().size());
     }
     
     public void testBuildMethodToHashLookupForInterface() {
@@ -64,6 +67,9 @@ public class RemotingUtilsTests extends TestCase {
         
         Map<Method, MethodHash> mapC = RemotingUtils.buildMethodToHashLookupForInterface(C.class, "asyncPrefix");
         assertEquals(2 +1, mapC.values().size());
+        
+        Map<Method, MethodHash> mapD = RemotingUtils.buildMethodToHashLookupForInterface(C.class, "asyncPrefix");
+        assertEquals(2 +1, mapD.values().size());
     }
     
     public interface A {
@@ -75,5 +81,10 @@ public class RemotingUtilsTests extends TestCase {
     }
     
     public interface C extends B {
+    }
+    
+    public interface D extends C {
+        @Override
+        public String toString();
     }
 }

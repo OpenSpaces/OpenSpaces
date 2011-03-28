@@ -83,6 +83,7 @@ public class RemotingUtils {
             DigestOutputStream dos = new DigestOutputStream(bos, digest);
             DataOutput out = new DataOutputStream(dos);
 
+            HashSet<Method> methodSet = new HashSet<Method>();
             Map<MethodHash, IMethod> map = new HashMap<MethodHash, IMethod>();
             Class[] interfaces = getAllInterfacesForInterface(service);
             for (Class inf : interfaces) {
@@ -98,12 +99,13 @@ public class RemotingUtils {
                     bos.reset();
                     serializeMethod(method, out);
                     map.put(new MethodHash(digest.digest()), imethod);
+                    methodSet.add(method);
                 }
             }
             //add Object.toString method to map
             //if toString exists in service interface it will be invoked instead
             Method toStringMethod = Object.class.getMethod("toString");
-            if (!map.containsKey(toStringMethod)) {
+            if (!methodSet.contains(toStringMethod)) {
                 digest.reset();
                 bos.reset();
                 serializeMethod(toStringMethod, out);
