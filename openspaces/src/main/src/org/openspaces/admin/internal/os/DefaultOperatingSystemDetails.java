@@ -92,11 +92,11 @@ public class DefaultOperatingSystemDetails implements OperatingSystemDetails {
         return Collections.unmodifiableMap(networkDetailsMap);
     }
     
-    private class DefaultNetworkDetails implements NetworkDetails {
+    private static class DefaultNetworkDetails implements NetworkDetails {
 
-        private String name;
-        private String description;
-        private String address; 
+        private final String name;
+        private final String description;
+        private final String address; 
         
         private DefaultNetworkDetails( 
                 OSDetails.OSNetInterfaceDetails networkInterfaceDetails ){
