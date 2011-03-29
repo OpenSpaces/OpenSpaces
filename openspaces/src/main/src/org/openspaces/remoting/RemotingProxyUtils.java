@@ -4,6 +4,8 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.util.MethodInvoker;
 import org.springframework.util.StringUtils;
 
+import com.gigaspaces.document.SpaceDocument;
+
 import java.lang.annotation.Annotation;
 
 /**
@@ -34,11 +36,16 @@ public abstract class RemotingProxyUtils {
                     if (parameterAnnotation instanceof Routing) {
                         Routing routingAnnotation = (Routing) parameterAnnotation;
                         if (StringUtils.hasLength(routingAnnotation.value())) {
-                            MethodInvoker methodInvoker = new MethodInvoker();
-                            methodInvoker.setTargetObject(methodInvocation.getArguments()[i]);
-                            methodInvoker.setTargetMethod(routingAnnotation.value());
-                            methodInvoker.prepare();
-                            routing = methodInvoker.invoke();
+                            Object parameter = methodInvocation.getArguments()[i];
+                            if (parameter instanceof SpaceDocument){
+                                routing = ((SpaceDocument)parameter).getProperty(routingAnnotation.value());
+                            } else {
+                                MethodInvoker methodInvoker = new MethodInvoker();
+                                methodInvoker.setTargetObject(parameter);
+                                methodInvoker.setTargetMethod(routingAnnotation.value());
+                                methodInvoker.prepare();
+                                routing = methodInvoker.invoke();
+                            }
                         } else {
                             routing = methodInvocation.getArguments()[i];
                         }
