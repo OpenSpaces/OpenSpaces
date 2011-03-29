@@ -46,7 +46,7 @@ import java.util.concurrent.Future;
  * if it exists within the classpath. Will also automatically register <code>ruby</code>
  * ({@link org.openspaces.remoting.scripting.JRubyLocalScriptExecutor}) if the jruby jars exists within the classpath.
  *
- * <p>If working under Java 6, or adding JSR 223 jars into the classpath, will use its scripting support as a fallback
+ * <p>If working under Java 6, or adding JSR 223 jars into the classpath, will use its scripting support as a fall-back
  * if no local script executors are found for a given type. The JSR allows for a unified API on top of different scripting
  * libraries with pluggable types.
  *
@@ -58,7 +58,7 @@ import java.util.concurrent.Future;
  * <p>Another parameter that will be passed to the script is the {@link org.openspaces.core.cluster.ClusterInfo} allowing
  * the script to be "aware" of which cluster instance it is executed on, and the cluster size.
  *
- * <p>This executor also supports caching of compiled scipts using the {@link org.openspaces.remoting.scripting.cache.CompiledScriptCache}
+ * <p>This executor also supports caching of compiled scripts using the {@link org.openspaces.remoting.scripting.cache.CompiledScriptCache}
  * abstraction. There are two special caches, one for compiled scripts that are thread safe (the same compiled script
  * can be executed by several threads) and one for compiled scripts that are not thread safe (the same compiled scripts
  * can only be executed by a single thread). Note, caching is done based on the script name ({@link Script#getName()},
