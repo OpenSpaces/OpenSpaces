@@ -121,9 +121,15 @@ public class ScaleBeanFactory extends DefaultBeanFactory<Bean> {
                     .setGridServiceContainerConfig((elasticConfigBean.getGridServiceContainerConfig()));
             }
         }
+        
+        /*
+         * Shared machine provisioning is only allowed for licensed customers
+         */
+        ElasticMultiTenancyLicenseVerifier.verify();
+        
         return instance;
     }
-    
+
     ElasticConfigBean findElasticConfigBean(BeanServer<Bean> beanServer) {
         
         List<Bean> injectedInstances = beanServer.getEnabledBeanAssignableTo(
