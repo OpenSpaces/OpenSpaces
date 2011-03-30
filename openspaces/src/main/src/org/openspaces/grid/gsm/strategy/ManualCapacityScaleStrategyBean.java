@@ -232,13 +232,20 @@ public class ManualCapacityScaleStrategyBean extends AbstractScaleStrategyBean
                 "floor("+containerCapacityInMB+"/"+instanceCapacityInMB+") =" +
                 maxNumberOfInstancesPerContainer);
         
-        int targetNumberOfContainers = (int) 
+        int estTargetNumberOfContainers = (int) 
                 Math.ceil(totalNumberOfInstances/ maxNumberOfInstancesPerContainer);
                 
         getLogger().info(
-                "targetNumberOfContainers= "+
+                "estTargetNumberOfContainers= "+
                 "ceil(totalNumberOfInstances/maxNumberOfInstancesPerContainer)= "+
                 "ceil("+totalNumberOfInstances+"/"+maxNumberOfInstancesPerContainer+") =" +
+                estTargetNumberOfContainers);
+        
+        int targetNumberOfContainers = Math.min(estTargetNumberOfContainers, (int)Math.ceil(1.0 *slaConfig.getMemoryCapacityInMB() / containerCapacityInMB));
+        getLogger().info(
+                "targetNumberOfContainers= "+
+                "min(estTargetNumberOfContainers, ceil(memoryCapacityInMB/containerCapacityInMB))= "+
+                "min("+estTargetNumberOfContainers+",ceil("+slaConfig.getMemoryCapacityInMB()+"/"+containerCapacityInMB+")) =" +
                 targetNumberOfContainers);
                 
         int numberOfBackups = getProcessingUnit().getNumberOfBackups();
