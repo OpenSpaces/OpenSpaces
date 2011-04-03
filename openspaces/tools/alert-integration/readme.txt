@@ -24,5 +24,5 @@ to be consumed by third party products.
 WIKI PAGE
 ---------------------------------
 
-  For more information about the Alert Logging Gateway Example please refer to:
-http://www.gigaspaces.com/wiki/display/XAP8/Alert+Logging+Gateway
+For more information about the Alert Logging Gateway Example please refer to:
+http://www.gigaspaces.com/wiki/display/XAP8/SNMP+Connectivity+via+Alert+Logging+Gateway
