@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
@@ -1115,8 +1116,8 @@ public class DefaultAdmin implements InternalAdmin {
         }
         
         private void updateState(Map<InternalGridServiceAgent, AgentProcessesDetails> newdetails) {
-            for (InternalGridServiceAgent gridServiceAgent : newdetails.keySet()) {
-                gridServiceAgent.setProcessesDetails(newdetails.get(gridServiceAgent));
+            for (Entry<InternalGridServiceAgent, AgentProcessesDetails> entry : newdetails.entrySet()) {
+                entry.getKey().setProcessesDetails(entry.getValue());
             }
         }
     }
