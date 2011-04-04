@@ -132,14 +132,17 @@ public class DefaultGridServiceManager extends AbstractAgentGridComponent implem
             throw new AdminException("Failed to deploy [" + deployment.getProcessingUnit() + "]", e);
         }
 
+        boolean alreadyDeployed = false;
         try {
-            if (getGSMAdmin().hasDeployed(operationalString.getName())) {
-                throw new ProcessingUnitAlreadyDeployedException(operationalString.getName());
-            }
-        } 
+            alreadyDeployed = getGSMAdmin().hasDeployed(operationalString.getName());
+        }
         catch (Exception e) {
             throw new AdminException("Failed to check if processing unit [" + operationalString.getName() + "] is deployed", e);
         }
+        
+        if (alreadyDeployed) {
+            throw new ProcessingUnitAlreadyDeployedException(operationalString.getName());
+        } 
 
         final AtomicReference<ProcessingUnit> ref = new AtomicReference<ProcessingUnit>();
         ref.set(getAdmin().getProcessingUnits().getProcessingUnit(operationalString.getName()));
