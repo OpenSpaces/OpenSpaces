@@ -74,7 +74,7 @@ public class DefaultSpaceStatistics implements SpaceStatistics {
     public long getReadCount() {
         long total = 0;
         for (SpaceInstanceStatistics stat : stats) {
-            if (stat.isNA()) {
+            if (!stat.isNA()) {
                 total += stat.getReadCount();
             }
         }
